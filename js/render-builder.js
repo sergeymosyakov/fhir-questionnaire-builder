@@ -254,6 +254,7 @@ function renderNode(node) {
         addMenu.style.display = 'none';
         const newNode = factory();
         node.children.push(newNode);
+        _formTick.value++;
         _collapsed.set(node.id, false);
         renderTree();
         requestAnimationFrame(() => {

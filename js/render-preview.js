@@ -342,7 +342,7 @@ effect(() => {
     finalEl.style.display = 'none';
     finalEl.className = 'final-result';
   } else {
-    finalEl.style.display = '';
+    finalEl.style.display = 'block';
     finalEl.textContent = (finalOk ? '✓ PASS' : '✗ FAIL') + ' — ' + (finalOk ? 'All required fields complete' : 'Required fields incomplete');
     finalEl.className = 'final-result ' + (finalOk ? 'pass' : 'fail');
   }
