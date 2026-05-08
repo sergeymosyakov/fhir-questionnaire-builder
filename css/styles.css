@@ -282,6 +282,49 @@ body {
 .node-title { display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap; flex: 1 1 0; min-width: 0; }
 
 /* Collapse toggle button */
+.node-drag-handle {
+  font-size: 14px;
+  color: #ccc;
+  cursor: grab;
+  padding: 0 3px;
+  flex-shrink: 0;
+  user-select: none;
+  line-height: 1;
+}
+.node-drag-handle:hover { color: #999; }
+.node-drag-handle:active { cursor: grabbing; }
+.node-dragging { opacity: 0.4; }
+
+.drop-zone {
+  height: 4px;
+  border-radius: 2px;
+  transition: background .1s, height .1s;
+}
+.drop-zone-inside {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #bbb;
+  border: 1px dashed #ddd;
+  border-radius: var(--r-sm);
+  margin: 4px 0;
+  opacity: 0;
+  transition: opacity .15s, border-color .15s;
+}
+.node-drop-target.drop-zone-above,
+.node-drop-target.drop-zone-below {
+  background: var(--c-primary);
+  height: 4px;
+}
+.node-drop-target.drop-zone-inside {
+  opacity: 1;
+  border-color: var(--c-primary);
+  color: var(--c-primary);
+  background: var(--c-primary-lt);
+}
+
 .node-collapse-btn {
   background: none;
   border: none;
