@@ -328,12 +328,16 @@ body {
 
 .node-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 6px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 3px;
 }
-.node-title { display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap; flex: 1 1 0; min-width: 0; }
+.node-header-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.node-title { display: flex; align-items: center; gap: 6px; flex: 1 1 0; min-width: 0; flex-wrap: nowrap; overflow: hidden; }
 
 /* Collapse toggle button */
 .node-drag-handle {
@@ -422,12 +426,12 @@ body {
 .node-linkid-input:hover { border-color: var(--c-primary); }
 .node-linkid-input:focus { outline: none; border-color: var(--c-primary); }
 
-/* Title input — main label */
+/* Title row — full-width second line in node-header */
 .node-title-row {
   display: block;
   width: 100%;
-  margin-top: 3px;
-  flex-basis: 100%;
+  margin-top: 0;
+  padding: 0 4px;
 }
 .node-title-display {
   display: block;
@@ -495,7 +499,7 @@ body {
 }
 
 /* Action chips */
-.node-actions { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.node-actions { display: flex; gap: 4px; flex-wrap: nowrap; align-items: center; flex-shrink: 0; }
 .node-actions a {
   display: inline-block;
   padding: 2px 8px;

@@ -98,20 +98,26 @@ document.addEventListener('click', () => {
     startX = e.clientX;
     startW = leftPanel.getBoundingClientRect().width;
     resizer.classList.add('resizing');
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  });
-  document.addEventListener('mousemove', e => {
-    if (!resizer.classList.contains('resizing')) return;
-    const w = Math.min(MAX(), Math.max(MIN, startW + e.clientX - startX));
-    leftPanel.style.width = w + 'px';
-  });
-  document.addEventListener('mouseup', () => {
-    if (!resizer.classList.contains('resizing')) return;
-    resizer.classList.remove('resizing');
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-    localStorage.setItem(STORAGE_KEY, parseInt(leftPanel.style.width));
+
+    // Overlay captures all pointer events and prevents text selection during drag
+    const overlay = document.createElement('div');
+    overlay.id = 'resize-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;cursor:col-resize;';
+    document.body.appendChild(overlay);
+
+    const onMove = e => {
+      const w = Math.min(MAX(), Math.max(MIN, startW + e.clientX - startX));
+      leftPanel.style.width = w + 'px';
+    };
+    const onUp = () => {
+      resizer.classList.remove('resizing');
+      overlay.remove();
+      localStorage.setItem(STORAGE_KEY, parseInt(leftPanel.style.width));
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
   });
 }
 

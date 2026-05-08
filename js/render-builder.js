@@ -347,7 +347,8 @@ function renderNode(node) {
 
   titleRow.appendChild(titleDisplay);
   titleRow.appendChild(titleTextarea);
-  titleWrap.appendChild(titleRow);
+  // titleRow goes directly into header (full-width, below controls row)
+  // titleWrap does NOT contain titleRow anymore
 
   // Left → Right navigation: click header → scroll to preview row
   titleWrap.style.cursor = 'pointer';
@@ -361,7 +362,13 @@ function renderNode(node) {
     setTimeout(() => target.classList.remove('preview-flash'), 1000);
   });
 
-  header.appendChild(titleWrap);
+  // node-header-top: drag + collapse + type label + linkId + actions (all inline)
+  // titleRow goes below as full-width second line
+  const headerTop = document.createElement('div');
+  headerTop.className = 'node-header-top';
+  headerTop.appendChild(titleWrap);
+  header.appendChild(headerTop);
+  header.appendChild(titleRow);
 
   const actions = document.createElement('div');
   actions.className = 'node-actions';
@@ -446,7 +453,7 @@ function renderNode(node) {
     actions.appendChild(addWrap);
   }
 
-  header.appendChild(actions);
+  headerTop.appendChild(actions);
   div.appendChild(header);
 
   const btnDel = document.createElement('button');
