@@ -628,7 +628,7 @@ function renderNode(node) {
       typeRow.textContent = 'Type: ';
       const typeSelect = document.createElement('select');
       typeSelect.style.width = 'auto';
-      for (const t of ['text', 'number', 'date', 'url', 'checkbox', 'select', 'display']) {
+      for (const t of ['text', 'number', 'date', 'url', 'attachment', 'checkbox', 'select', 'display']) {
         const opt = document.createElement('option');
         opt.value = t; opt.textContent = t;
         if (node.itemType === t) opt.selected = true;

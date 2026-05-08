@@ -36,7 +36,8 @@ export function fhirTypeToItemType(t) {
   if (t === 'display')                                        return 'display';
   if (t === 'date' || t === 'dateTime' || t === 'time')       return 'date';
   if (t === 'url')                                            return 'url';
-  return 'text'; // string, text, reference, attachment
+  if (t === 'attachment')                                     return 'attachment';
+  return 'text'; // string, text, reference
 }
 
 // answerOption[] → comma-separated display/code string for our options field

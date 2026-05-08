@@ -6,8 +6,9 @@ function itemTypeToFHIRType(t) {
   if (t === 'number')   return 'decimal';
   if (t === 'select')   return 'choice';
   if (t === 'display')  return 'display';
-  if (t === 'date')     return 'date';
-  if (t === 'url')      return 'url';
+  if (t === 'date')       return 'date';
+  if (t === 'url')        return 'url';
+  if (t === 'attachment') return 'attachment';
   return 'string';
 }
 

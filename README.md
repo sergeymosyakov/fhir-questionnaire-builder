@@ -114,7 +114,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `display` | `display` | ✅ label only | — | No control, no pass/fail |
 | `group` | `group` | ✅ section header | — | |
 | `group` (no children) | `group` | ✅ info text `[Info]` | — | |
-| `attachment` | `text` | ⚠️ text fallback | — | No file-upload control |
+| `attachment` | `attachment` | ✅ file input | ✅ required = file chosen | |
 | `reference` | `text` | ⚠️ text fallback | — | No FHIR resource search |
 | `quantity` | `number` | ⚠️ number only | — | Unit field not shown |
 

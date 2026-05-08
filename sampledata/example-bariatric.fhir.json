@@ -371,6 +371,18 @@
           "type": "url",
           "text": "Clinical Guidelines Reference URL",
           "required": true
+        },
+        {
+          "linkId": "q-referral-doc",
+          "type": "attachment",
+          "text": "Upload Referral Document (PDF)",
+          "required": true
+        },
+        {
+          "linkId": "q-lab-results",
+          "type": "attachment",
+          "text": "Upload Lab Results",
+          "required": false
         }
       ]
     }

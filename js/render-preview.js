@@ -93,6 +93,22 @@ function buildControl(node, iconEl, onAfterChange, isAuto) {
     wrap.appendChild(el);
     wrap.appendChild(errMsg);
 
+  } else if (node.itemType === 'attachment') {
+    const el = document.createElement('input');
+    el.type = 'file';
+    el.style.fontSize = '11px';
+    const nameTag = document.createElement('span');
+    nameTag.style.cssText = 'font-size:11px;color:var(--c-text-2);margin-left:6px;';
+    if (values[node.id]) nameTag.textContent = values[node.id].name;
+    el.onchange = () => {
+      const file = el.files[0] || null;
+      values[node.id] = file ? { name: file.name, size: file.size, type: file.type } : null;
+      nameTag.textContent = file ? file.name : '';
+      onChange();
+    };
+    wrap.appendChild(el);
+    wrap.appendChild(nameTag);
+
   } else if (node.itemType === 'select') {
     const el = document.createElement('select');
     let firstOpt = null;
@@ -160,7 +176,8 @@ effect(() => {
     isMandatory(r.node) && (
       r.node.successValue !== '' ||
       r.node.itemType === 'text' || r.node.itemType === 'number' ||
-      r.node.itemType === 'date' || r.node.itemType === 'url'
+      r.node.itemType === 'date' || r.node.itemType === 'url' ||
+      r.node.itemType === 'attachment'
     )
   );
   const hasMandatory = mandatoryItems.length > 0;
@@ -253,7 +270,7 @@ effect(() => {
       // Only count items that actually have a checkable condition right now
       const relevantItems = descendantItems.filter(r =>
         (isMandatory(r.node) && r.node.successValue !== '') ||
-        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number' || r.node.itemType === 'date' || r.node.itemType === 'url')) ||
+        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number' || r.node.itemType === 'date' || r.node.itemType === 'url' || r.node.itemType === 'attachment')) ||
         (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
       );
       if (relevantItems.length === 0) {
@@ -273,7 +290,7 @@ effect(() => {
       // - is a readOnly boolean calc node after Test
       hasCondition = res.node.itemType !== 'display' && (
         (isMandatory(res.node) && res.node.successValue !== '') ||
-        (isMandatory(res.node) && (res.node.itemType === 'text' || res.node.itemType === 'number' || res.node.itemType === 'date')) ||
+        (isMandatory(res.node) && (res.node.itemType === 'text' || res.node.itemType === 'number' || res.node.itemType === 'date' || res.node.itemType === 'url' || res.node.itemType === 'attachment')) ||
         res.node.itemType === 'url' ||
         (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox' && calcTested.value)
       );
@@ -444,7 +461,7 @@ effect(() => {
     for (const [, { icon, descendants, node }] of groupIconMap.entries()) {
       const relevant = descendants.filter(r =>
         (isMandatory(r.node) && r.node.successValue !== '') ||
-        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number' || r.node.itemType === 'date' || r.node.itemType === 'url')) ||
+        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number' || r.node.itemType === 'date' || r.node.itemType === 'url' || r.node.itemType === 'attachment')) ||
         (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
       );
       if (relevant.length === 0) {

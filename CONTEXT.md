@@ -124,7 +124,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `display` | `display` | ✅ label | — | No control, no pass/fail |
 | `group` | `group` | ✅ | — | |
 | `group` (no children) | `group` | ✅ `[Info]` | — | |
-| `attachment` | `text` | ⚠️ fallback | — | No file-upload |
+| `attachment` | `attachment` | ✅ file input | ✅ required = file chosen | |
 | `reference` | `text` | ⚠️ fallback | — | No resource search |
 
 ---

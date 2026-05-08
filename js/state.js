@@ -102,6 +102,12 @@ export const calcFormOk = node => {
     if (!val || val === '') return !isMandatory(node);
     return _isValidUrl(val);
   }
+  // attachment: required means a file must be chosen
+  if (node.itemType === 'attachment') {
+    if (!isMandatory(node)) return true;
+    const val = values[node.id];
+    return val != null;
+  }
   if (node.mandatory === false) return true;
   // No successValue but mandatory → text/number/date must be non-empty
   if (isMandatory(node) && (node.itemType === 'text' || node.itemType === 'number' || node.itemType === 'date')) {
