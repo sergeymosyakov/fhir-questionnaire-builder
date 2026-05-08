@@ -134,6 +134,29 @@ body {
 }
 .btn-test:hover { background: #00695c; }
 
+.top-github-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-text-2);
+  text-decoration: none;
+  padding: 4px 8px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  background: var(--c-surface);
+  margin-left: 4px;
+  white-space: nowrap;
+  transition: color .15s, background .15s;
+}
+.top-github-link:hover { color: var(--c-text); background: #e8eaed; }
+.top-copyright {
+  font-size: 10px;
+  color: var(--c-text-2);
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
 /* === Two-column layout ======================================================= */
 .layout {
   display: grid;
