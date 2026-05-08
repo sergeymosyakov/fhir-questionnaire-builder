@@ -7,6 +7,17 @@ import {
   rawFhir, calcTested
 } from './state.js';
 import { evaluateNode } from './eval.js';
+import { buildQR } from './fhir/qr-builder.js';
+import { evalCalcNodes } from './fhir/calc.js';
+
+const fhirpath = window.fhirpath;
+
+function _reCalc() {
+  if (calcTested.value && rawFhir.value && fhirpath) {
+    const qr = buildQR(JSON.parse(JSON.stringify(rawFhir.value)), values);
+    evalCalcNodes(tree, qr, fhirpath, values);
+  }
+}
 
 // ── Interactive control for preview ──────────────────────────────────────────
 function buildControl(node, iconEl, onAfterChange, isAuto) {
@@ -41,8 +52,8 @@ function buildControl(node, iconEl, onAfterChange, isAuto) {
     el.onchange = () => {
       values[node.id] = el.checked;
       autoFilledIds.delete(node.id);
-      calcTested.value = false;
       if (badge) { badge.style.opacity = '0.35'; badge.title = 'Was pre-filled, now manually set.'; }
+      _reCalc();
       onChange();
       _formTick.value++;
     };
@@ -68,7 +79,7 @@ function buildControl(node, iconEl, onAfterChange, isAuto) {
     }
     if (values[node.id] !== undefined) el.value = values[node.id];
     else if (firstOpt) { values[node.id] = firstOpt; }
-    el.onchange = () => { values[node.id] = el.value; onChange(); calcTested.value = false; _formTick.value++; };
+    el.onchange = () => { values[node.id] = el.value; _reCalc(); onChange(); _formTick.value++; };
     wrap.appendChild(el);
 
   } else {
@@ -122,10 +133,16 @@ effect(() => {
   const mandatoryItems = visible.filter(r => !r.disabled && r.node.type === 'item' && isMandatory(r.node) && r.node.successValue !== '');
   const hasMandatory = mandatoryItems.length > 0;
 
-  let finalOk = hasMandatory && visible.filter(r => !r.disabled).every(res => {
+  // calc nodes: visible, non-disabled items with a calculatedExpression
+  const calcItems = visible.filter(r => !r.disabled && r.node.type === 'item' && r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox');
+  const hasCalc = calcTested.value && calcItems.length > 0;
+  const calcAllOk = calcItems.every(r => values[r.node.id] === true);
+
+  const formItemsOk = visible.filter(r => !r.disabled).every(res => {
     if (res.node.type === 'item') return res.ok && calcFormOk(res.node);
     return res.ok;
   });
+  let finalOk = (hasMandatory ? formItemsOk : true) && (hasCalc ? calcAllOk : true) && (hasMandatory || hasCalc);
 
   const groupIconMap = new Map();
 
@@ -201,25 +218,40 @@ effect(() => {
       const descendantItems = visible.filter(r =>
         r.node.type === 'item' && !r.disabled && isDescendant(r.node.id, res.node)
       );
-      if (descendantItems.length === 0) {
+      // Only count items that actually have a checkable condition right now
+      const relevantItems = descendantItems.filter(r =>
+        (isMandatory(r.node) && r.node.successValue !== '') ||
+        (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
+      );
+      if (relevantItems.length === 0) {
         hasCondition = false;
         displayOk    = true;
       } else {
         hasCondition = true;
         const itemOk = k => k.ok && calcFormOk(k.node);
         displayOk = res.node.logicWithParent === 'OR'
-          ? descendantItems.some(itemOk)
-          : descendantItems.every(itemOk);
+          ? relevantItems.some(itemOk)
+          : relevantItems.every(itemOk);
       }
     } else {
-      hasCondition = res.node.itemType !== 'display' && isMandatory(res.node) && res.node.successValue !== '';
+      // Item has a condition if it's a readOnly boolean calc node (after Test) or has successValue
+      hasCondition = res.node.itemType !== 'display' && (
+        (isMandatory(res.node) && res.node.successValue !== '') ||
+        (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox' && calcTested.value)
+      );
       displayOk    = res.ok && calcFormOk(res.node);
     }
 
     const row = document.createElement('div');
     row.className = 'lform-item';
     row.dataset.previewId = res.node.id;
-    if (tMode) row.classList.add(displayOk ? 'success' : 'error');
+    if (tMode) {
+      if (res.node.type === 'group') {
+        row.classList.add(displayOk ? 'success' : 'error');
+      } else if (!displayOk) {
+        row.classList.add('error');
+      }
+    }
     row.title = 'Click to navigate to builder node';
     row.style.cursor = 'pointer';
     row.addEventListener('click', () => {
@@ -290,20 +322,29 @@ effect(() => {
           autoFilledIds.add(res.node.id);
         }
       }
-      if (res.node.itemType !== 'display') {
+      if (res.node.itemType !== 'display' && !(res.node._readOnly && res.node._calculatedExpr)) {
         const isAuto = autoFilledIds.has(res.node.id);
         row.appendChild(buildControl(res.node, iconEl, () => updateGroupIcons(), isAuto));
       }
       // calc-badge: show for readOnly nodes with calculatedExpression
-      if (res.node._readOnly && res.node._calculatedExpr) {
+      if (res.node._calculatedExpr && res.node._readOnly) {
         const badge = document.createElement('span');
-        if (!calcTested.value) {
-          badge.className = 'calc-badge';
-          badge.textContent = '\u26A1 pending';
+        if (res.node.itemType === 'checkbox') {
+          // Boolean calc: show ⚡/✓/✗
+          if (!calcTested.value) {
+            badge.className = 'calc-badge';
+            badge.textContent = '\u26A1 pending';
+          } else {
+            const calcVal = values[res.node.id];
+            badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false');
+            badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
+          }
         } else {
-          const calcVal = values[res.node.id];
-          badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false');
-          badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
+          // String calc: show the computed value
+          badge.className = 'calc-badge';
+          const strVal = calcTested.value ? (values[res.node.id] || '—') : '\u26A1 pending';
+          badge.textContent = strVal;
+          if (calcTested.value && values[res.node.id]) badge.className = 'calc-badge calc-true';
         }
         row.appendChild(badge);
       }
@@ -345,11 +386,19 @@ effect(() => {
 
   function updateGroupIcons() {
     for (const [, { icon, descendants, node }] of groupIconMap.entries()) {
-      if (descendants.length === 0) continue;
+      const relevant = descendants.filter(r =>
+        (isMandatory(r.node) && r.node.successValue !== '') ||
+        (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
+      );
+      if (relevant.length === 0) {
+        icon.className   = 'icon-ok';
+        icon.textContent = '\u2714';
+        continue;
+      }
       const itemOk = k => k.ok && calcFormOk(k.node);
       const ok = node.logicWithParent === 'OR'
-        ? descendants.some(itemOk)
-        : descendants.every(itemOk);
+        ? relevant.some(itemOk)
+        : relevant.every(itemOk);
       icon.className   = ok ? 'icon-ok' : 'icon-fail';
       icon.textContent = ok ? '\u2714' : '\u2718';
     }
@@ -359,13 +408,13 @@ effect(() => {
   if (!anyVisible) {
     finalEl.style.display = 'none';
     finalEl.className = 'final-result';
-  } else if (!hasMandatory) {
+  } else if (!hasMandatory && !hasCalc) {
     finalEl.style.display = 'block';
     finalEl.textContent = '— No required fields defined';
     finalEl.className = 'final-result';
   } else {
     finalEl.style.display = 'block';
-    finalEl.textContent = (finalOk ? '✓ PASS' : '✗ FAIL') + ' — ' + (finalOk ? 'All required fields complete' : 'Required fields incomplete');
+    finalEl.textContent = (finalOk ? '✓ PASS' : '✗ FAIL') + ' — ' + (finalOk ? 'All criteria met' : 'Criteria not met');
     finalEl.className = 'final-result ' + (finalOk ? 'pass' : 'fail');
   }
 });

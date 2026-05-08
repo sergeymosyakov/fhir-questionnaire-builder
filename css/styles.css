@@ -24,12 +24,18 @@
 
 /* === Base ==================================================================== */
 *, *::before, *::after { box-sizing: border-box; }
-body {
+html, body {
   margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+body {
   font-family: 'Segoe UI', Arial, sans-serif;
   background: var(--c-bg);
   color: var(--c-text);
   font-size: 14px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* === Top panel =============================================================== */
@@ -38,12 +44,15 @@ body {
   color: #fff;
   padding: 0 16px;
   height: 56px;
+  min-height: 56px;
   display: flex;
   align-items: center;
   gap: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,.25);
   flex-wrap: nowrap;
   overflow-x: auto;
+  flex-shrink: 0;
+  z-index: 100;
 }
 .top-panel-title {
   font-size: 15px;
@@ -129,18 +138,42 @@ body {
 .layout {
   display: grid;
   grid-template-columns: 470px 1fr;
-  height: calc(100vh - 56px);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 .left-panel {
   background: var(--c-surface);
   border-right: 1px solid var(--c-border);
-  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.left-panel-header {
+  padding: 14px 14px 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--c-border);
+}
+.left-panel-body {
+  flex: 1;
   overflow-y: auto;
+  padding: 10px 14px 14px;
 }
 .right-panel {
   background: var(--c-bg);
-  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.right-panel-header {
+  padding: 14px 14px 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--c-border);
+}
+.right-panel-body {
+  flex: 1;
   overflow-y: auto;
+  padding: 10px 14px 14px;
 }
 
 /* === Section titles ========================================================== */
@@ -664,9 +697,6 @@ body {
 
 /* Final result banner */
 .final-result {
-  position: sticky;
-  top: 0;
-  z-index: 10;
   margin-bottom: 8px;
   padding: 6px 12px;
   border-radius: var(--r-sm);

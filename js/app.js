@@ -8,6 +8,7 @@ import { exportFHIR } from './fhir/export.js';
 import { renderTree, collapseAll, expandAll, renumberAll } from './render-builder.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 import { buildQR } from './fhir/qr-builder.js';
+import { evalCalcNodes } from './fhir/calc.js';
 
 // fhirpath.js v4 browser bundle loaded as global via lib/fhirpath.min.js
 const fhirpath = window.fhirpath;
@@ -42,7 +43,7 @@ document.getElementById('testBtn').onclick = () => {
   if (rawFhir.value && fhirpath) {
     const plainFhir = JSON.parse(JSON.stringify(rawFhir.value));
     const qr = buildQR(plainFhir, values);
-    _evalCalcNodes(tree, qr, fhirpath);
+    evalCalcNodes(tree, qr, fhirpath, values);
     calcTested.value = true;
   }
   testMode.value = true;
@@ -66,23 +67,6 @@ document.getElementById('fhirFileInput').onchange  = e => {
   reader.readAsText(file);
   e.target.value = '';
 };
-
-// Evaluate FHIRPath calculatedExpression on all nodes that have one.
-// Writes result (boolean) back to values[node.id].
-function _evalCalcNodes(nodes, qr, fp) {
-  const env = { resource: qr };
-  for (const node of nodes) {
-    if (node._calculatedExpr) {
-      try {
-        const result = fp.evaluate(qr, node._calculatedExpr, env);
-        values[node.id] = result[0] === true || result[0] === 'true';
-      } catch (e) {
-        // silently skip nodes whose expression fails (e.g. missing linkId)
-      }
-    }
-    if (node.type === 'group') _evalCalcNodes(node.children, qr, fp);
-  }
-}
 
 // Load built-in example via fetch (requires HTTP server or GitHub Pages)
 function loadExampleFile(onLoaded) {

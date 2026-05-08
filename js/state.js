@@ -86,6 +86,12 @@ export const evalRule = (rule, ctx) => {
 
 // ── Form-value success check ──────────────────────────────────────────────────
 export const calcFormOk = node => {
+  // ReadOnly calc node: if Test was run, the result is the evaluated FHIRPath value
+  // Only boolean (checkbox) calc nodes participate in pass/fail
+  if (node._calculatedExpr && node._readOnly && calcTested.value) {
+    if (node.itemType !== 'checkbox') return true;
+    return values[node.id] === true;
+  }
   if (node.mandatory === false || node.successValue === '') return true;
   const val = values[node.id];
   if (node.itemType === 'checkbox') return String(!!val) === node.successValue;
