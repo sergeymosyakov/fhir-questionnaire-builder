@@ -4,7 +4,7 @@ import {
   age, gender, bmi, pregnant, smoker, proc, comorb,
   testMode, tree, values, autoFilledIds, _formTick,
   evalRule, calcFormOk, isDescendant, isMandatory,
-  rawFhir, calcTested
+  rawFhir, calcTested, CHECKABLE_TYPES
 } from './state.js';
 import { evaluateNode } from './eval.js';
 import { buildQR } from './fhir/qr-builder.js';
@@ -175,9 +175,7 @@ effect(() => {
   const mandatoryItems = visible.filter(r => !r.disabled && r.node.type === 'item' &&
     isMandatory(r.node) && (
       r.node.successValue !== '' ||
-      r.node.itemType === 'text' || r.node.itemType === 'number' ||
-      r.node.itemType === 'date' || r.node.itemType === 'url' ||
-      r.node.itemType === 'attachment'
+      CHECKABLE_TYPES.has(r.node.itemType)
     )
   );
   const hasMandatory = mandatoryItems.length > 0;
@@ -270,7 +268,7 @@ effect(() => {
       // Only count items that actually have a checkable condition right now
       const relevantItems = descendantItems.filter(r =>
         (isMandatory(r.node) && r.node.successValue !== '') ||
-        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number' || r.node.itemType === 'date' || r.node.itemType === 'url' || r.node.itemType === 'attachment')) ||
+        (isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)) ||
         (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
       );
       if (relevantItems.length === 0) {
@@ -286,12 +284,12 @@ effect(() => {
     } else {
       // Item has a condition if:
       // - has explicit successValue, OR
-      // - is mandatory text/number (must be non-empty), OR
+      // - is mandatory checkable type (must be filled/valid), OR
+      // - is optional URL (format validation always applies), OR
       // - is a readOnly boolean calc node after Test
       hasCondition = res.node.itemType !== 'display' && (
         (isMandatory(res.node) && res.node.successValue !== '') ||
-        (isMandatory(res.node) && (res.node.itemType === 'text' || res.node.itemType === 'number' || res.node.itemType === 'date' || res.node.itemType === 'url' || res.node.itemType === 'attachment')) ||
-        res.node.itemType === 'url' ||
+        (CHECKABLE_TYPES.has(res.node.itemType) && (isMandatory(res.node) || res.node.itemType === 'url')) ||
         (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox' && calcTested.value)
       );
       displayOk    = res.ok && calcFormOk(res.node);
@@ -461,7 +459,7 @@ effect(() => {
     for (const [, { icon, descendants, node }] of groupIconMap.entries()) {
       const relevant = descendants.filter(r =>
         (isMandatory(r.node) && r.node.successValue !== '') ||
-        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number' || r.node.itemType === 'date' || r.node.itemType === 'url' || r.node.itemType === 'attachment')) ||
+        (isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)) ||
         (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
       );
       if (relevant.length === 0) {

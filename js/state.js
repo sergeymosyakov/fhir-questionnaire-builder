@@ -31,6 +31,12 @@ export const rawFhir = ref(null);
 // True after Test button clicked, reset on any form value change.
 export const calcTested = ref(false);
 
+// Item types that have form-value validation logic in the preview.
+// CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
+// NONEMPTY_TYPES: mandatory → value must be non-empty (subset, excludes url/attachment).
+export const CHECKABLE_TYPES = new Set(['text', 'number', 'date', 'url', 'attachment']);
+export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date']);
+
 // ── ID factory ────────────────────────────────────────────────────────────────
 let _seq = 1;
 export const nextId   = () => 'n' + (_seq++);
@@ -110,7 +116,7 @@ export const calcFormOk = node => {
   }
   if (node.mandatory === false) return true;
   // No successValue but mandatory → text/number/date must be non-empty
-  if (isMandatory(node) && (node.itemType === 'text' || node.itemType === 'number' || node.itemType === 'date')) {
+  if (isMandatory(node) && NONEMPTY_TYPES.has(node.itemType)) {
     const val = values[node.id];
     return val !== undefined && val !== '' && val !== null;
   }
