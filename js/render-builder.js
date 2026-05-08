@@ -224,11 +224,11 @@ function renderNode(node) {
 
   addToggle('Visibility', 'vis');
   addToggle('Required',  'mand');
-  addToggle('Style',      'style');
+  addToggle('Appearance', 'style');
 
   if (node.type === 'item') {
     addToggle('Condition', 'cond');
-    addToggle('Type', 'type');
+    addToggle('Answer Type', 'type');
   } else {
     addToggle('Condition', 'cond');
     const aSub = document.createElement('a');
