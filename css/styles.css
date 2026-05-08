@@ -514,8 +514,10 @@ body {
   transition: background .12s;
   white-space: nowrap;
 }
-.action-edit   { background: #ede7f6; color: #4527a0; }
+.action-edit         { background: #ede7f6; color: #4527a0; }
 .action-edit:hover   { background: #d1c4e9; }
+.action-edit--active { background: #4527a0; color: #fff; font-weight: 600; }
+.action-edit--active:hover { background: #311b92; }
 .action-add    { background: var(--c-primary-lt); color: var(--c-primary); }
 .action-add:hover    { background: #bbdefb; }
 .action-delete { background: #ffebee; color: #c62828; }

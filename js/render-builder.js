@@ -386,21 +386,26 @@ function renderNode(node) {
         panels[k].style.display = openKey === k ? 'block' : 'none';
     };
     actions.appendChild(a);
+    return a;
   };
+
+  const setActive = (el, active) => el.classList.toggle('action-edit--active', active);
+
+  let visLink, condLink, exprLink, styleLink, mandLink;
 
   if (node.type === 'item') {
     addToggle('Answer Type', 'type');
-    addToggle('Required',  'mand');
-    addToggle('Show When', 'vis');
-    addToggle('Applicability', 'cond');
-    addToggle('Expression', 'expr');
-    addToggle('Appearance', 'style');
+    mandLink  = addToggle('Required',      'mand');
+    visLink   = addToggle('Show When',     'vis');
+    condLink  = addToggle('Applicability', 'cond');
+    exprLink  = addToggle('Expression',    'expr');
+    styleLink = addToggle('Appearance',    'style');
   } else {
-    addToggle('Required',  'mand');
-    addToggle('Show When', 'vis');
-    addToggle('Applicability', 'cond');
-    addToggle('Expression', 'expr');
-    addToggle('Appearance', 'style');
+    mandLink  = addToggle('Required',      'mand');
+    visLink   = addToggle('Show When',     'vis');
+    condLink  = addToggle('Applicability', 'cond');
+    exprLink  = addToggle('Expression',    'expr');
+    styleLink = addToggle('Appearance', 'style');
 
     // ⊕ Add ▾ dropdown
     const addWrap = document.createElement('div');
@@ -568,6 +573,7 @@ function renderNode(node) {
       applyBtn.onclick = () => {
         node.visibilityRule = expr;
         rawInp.value = expr;
+        setActive(visLink, !!expr);
       };
     };
 
@@ -599,6 +605,7 @@ function renderNode(node) {
       node.visibilityRule = rawInp.value;
       if (!rawInp.value) node._enableWhenText = '';
       updateFriendly();
+      setActive(visLink, !!rawInp.value);
     };
     p.appendChild(rawInp);
   });
@@ -618,6 +625,7 @@ function renderNode(node) {
     });
     sel.onchange = () => {
       node.mandatory = sel.value === 'null' ? null : sel.value === 'true';
+      setActive(mandLink, node.mandatory === true);
     };
     label.appendChild(sel);
     p.appendChild(label);
@@ -627,7 +635,7 @@ function renderNode(node) {
     addPanel('cond', p => {
       p.innerHTML = 'Condition rule (age, bmi, proc, comorb):<br>'
         + '<input type="text" value="' + escAttr(node.conditionRule) + '">';
-      p.querySelector('input').oninput = function () { node.conditionRule = this.value; };
+      p.querySelector('input').oninput = function () { node.conditionRule = this.value; setActive(condLink, !!this.value); };
     });
 
     addPanel('type', p => {
@@ -678,6 +686,7 @@ function renderNode(node) {
     ta.placeholder = '%resource.item.where(linkId=\'...\')';
     ta.oninput = () => {
       node._calculatedExpr = ta.value.trim() || undefined;
+      setActive(exprLink, !!ta.value.trim());
       _triggerCalcRecalc();
     };
     p.appendChild(ta);
@@ -760,9 +769,10 @@ function renderNode(node) {
       _formTick.value++;
     };
 
-    boldCb.onchange   = sync;
-    italicCb.onchange = sync;
-    colorInp.oninput  = () => { current.color = colorInp.value; colorClear._cleared = false; sync(); };
+    const syncAndMark = () => { sync(); setActive(styleLink, !!node._renderStyle); };
+    boldCb.onchange   = syncAndMark;
+    italicCb.onchange = syncAndMark;
+    colorInp.oninput  = () => { current.color = colorInp.value; colorClear._cleared = false; syncAndMark(); };
     colorClear.onclick = () => {
       colorClear._cleared = true;
       current.color = '';
@@ -776,6 +786,7 @@ function renderNode(node) {
       boldCb.checked   = p2.bold;
       italicCb.checked = p2.italic;
       if (p2.color && p2.color.startsWith('#')) colorInp.value = p2.color;
+      setActive(styleLink, !!rawInp.value);
       _formTick.value++;
     };
 
@@ -798,12 +809,19 @@ function renderNode(node) {
     p.appendChild(rawInp);
   });
 
+  // Initialise active indicators after all panels are built
+  setActive(visLink,   !!node.visibilityRule);
+  setActive(condLink,  !!node.conditionRule);
+  setActive(exprLink,  !!node._calculatedExpr);
+  setActive(styleLink, !!node._renderStyle);
+  setActive(mandLink,  node.mandatory === true);
+
   if (node.type === 'group') {
     addPanel('cond', p => {
       p.innerHTML = 'Condition rule — if false, group is N/A (disabled, not FAIL):<br>'
         + '<small style="color:#aaa;font-size:10px">Variables: age, gender, bmi, pregnant, smoker, proc, comorb</small>'
         + '<input type="text" value="' + escAttr(node.conditionRule) + '">';
-      p.querySelector('input').oninput = function () { node.conditionRule = this.value; };
+      p.querySelector('input').oninput = function () { node.conditionRule = this.value; setActive(condLink, !!this.value); };
     });
 
     const body = document.createElement('div');
