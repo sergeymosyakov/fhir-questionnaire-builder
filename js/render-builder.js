@@ -49,15 +49,59 @@ function toLetter(n) {
   return r;
 }
 export function renumberAll(format, nodes = tree, prefix = '') {
+  // First pass (top-level only): build oldId → newId map for the entire tree
+  const idMap = prefix ? null : new Map();
+  if (idMap) _collectIds(tree, idMap);
+
+  _applyNumbers(format, nodes, prefix);
+
+  if (!prefix) {
+    // Second pass: update oldId references in all visibilityRules
+    _patchRules(tree, idMap);
+    renderTree();
+  }
+}
+
+function _collectIds(nodes, map) {
+  for (const n of nodes) {
+    map.set(n.id, null); // placeholder — new id filled in _applyNumbers
+    if (n.type === 'group') _collectIds(n.children, map);
+  }
+}
+
+function _applyNumbers(format, nodes, prefix) {
   nodes.forEach((node, i) => {
     const idx = i + 1;
     const seg = format === 'roman'   ? toRoman(idx)
               : format === 'letters' ? toLetter(idx)
               : String(idx);
-    node.id = prefix ? prefix + '.' + seg : seg;
-    if (node.type === 'group' && node.children.length) renumberAll(format, node.children, node.id);
+    const newId = prefix ? prefix + '.' + seg : seg;
+    // Store mapping old → new in node temporarily
+    node._oldId = node.id;
+    node.id = newId;
+    if (node.type === 'group' && node.children.length) _applyNumbers(format, node.children, newId);
   });
-  if (!prefix) renderTree();
+}
+
+function _patchRules(nodes, idMap) {
+  for (const n of nodes) {
+    // Build real map from _oldId stored during _applyNumbers
+    if (n._oldId !== undefined) { idMap.set(n._oldId, n.id); delete n._oldId; }
+    if (n.type === 'group') _patchRules(n.children, idMap);
+  }
+  // Replace values['oldId'] → values['newId'] in all visibilityRules
+  if (nodes === tree) _rewriteRules(tree, idMap);
+}
+
+function _rewriteRules(nodes, idMap) {
+  for (const n of nodes) {
+    if (n.visibilityRule) {
+      idMap.forEach((newId, oldId) => {
+        n.visibilityRule = n.visibilityRule.split(`'${oldId}'`).join(`'${newId}'`);
+      });
+    }
+    if (n.type === 'group') _rewriteRules(n.children, idMap);
+  }
 }
 
 // ── Success-value UI (rebuilt when itemType changes, stays inside open panel) ─
