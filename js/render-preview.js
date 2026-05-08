@@ -117,7 +117,10 @@ effect(() => {
     lform.appendChild(msg);
   }
 
-  let finalOk = visible.filter(r => !r.disabled).every(res => {
+  const mandatoryItems = visible.filter(r => !r.disabled && r.node.type === 'item' && r.node.mandatory && r.node.successValue !== '');
+  const hasMandatory = mandatoryItems.length > 0;
+
+  let finalOk = hasMandatory && visible.filter(r => !r.disabled).every(res => {
     if (res.node.type === 'item') return res.ok && calcFormOk(res.node);
     return res.ok;
   });
@@ -340,6 +343,10 @@ effect(() => {
   const finalEl = document.getElementById('finalResult');
   if (!anyVisible) {
     finalEl.style.display = 'none';
+    finalEl.className = 'final-result';
+  } else if (!hasMandatory) {
+    finalEl.style.display = 'block';
+    finalEl.textContent = '— No required fields defined';
     finalEl.className = 'final-result';
   } else {
     finalEl.style.display = 'block';
