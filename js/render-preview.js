@@ -246,9 +246,9 @@ effect(() => {
     row.className = 'lform-item';
     row.dataset.previewId = res.node.id;
     if (tMode) {
-      if (res.node.type === 'group') {
+      if (res.node.type === 'group' && hasCondition) {
         row.classList.add(displayOk ? 'success' : 'error');
-      } else if (!displayOk) {
+      } else if (res.node.type === 'item' && !displayOk) {
         row.classList.add('error');
       }
     }

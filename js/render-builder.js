@@ -1,5 +1,17 @@
 // ── Left panel: builder tree ──────────────────────────────────────────────────
-import { tree, makeGroup, makeItem, findAndRemove, escAttr, _formTick } from './state.js';
+import { tree, makeGroup, makeItem, findAndRemove, escAttr, _formTick, rawFhir, calcTested, values } from './state.js';
+import { buildQR } from './fhir/qr-builder.js';
+import { evalCalcNodes } from './fhir/calc.js';
+
+const fhirpath = window.fhirpath;
+
+function _triggerCalcRecalc() {
+  if (calcTested.value && rawFhir.value && fhirpath) {
+    const qr = buildQR(JSON.parse(JSON.stringify(rawFhir.value)), values);
+    evalCalcNodes(tree, qr, fhirpath, values);
+  }
+  _formTick.value++;
+}
 
 // Tracks collapse state per node id (UI-only, not part of FHIR data)
 const _collapsed = new Map();
@@ -55,11 +67,16 @@ export function renumberAll(format) {
   _walkNodes(tree, n => {
     if (n._oldId !== undefined) { idMap.set(n._oldId, n.id); delete n._oldId; }
   });
-  // Pass 2: rewrite all visibilityRules
+  // Pass 2: rewrite all visibilityRules and _calculatedExpr
   _walkNodes(tree, n => {
     if (n.visibilityRule) {
       idMap.forEach((newId, oldId) => {
         if (newId) n.visibilityRule = n.visibilityRule.split(`'${oldId}'`).join(`'${newId}'`);
+      });
+    }
+    if (n._calculatedExpr) {
+      idMap.forEach((newId, oldId) => {
+        if (newId) n._calculatedExpr = n._calculatedExpr.split(`'${oldId}'`).join(`'${newId}'`);
       });
     }
   });
@@ -209,11 +226,13 @@ function renderNode(node) {
     addToggle('Required',  'mand');
     addToggle('Show When', 'vis');
     addToggle('Applicability', 'cond');
+    addToggle('Expression', 'expr');
     addToggle('Appearance', 'style');
   } else {
     addToggle('Required',  'mand');
     addToggle('Show When', 'vis');
     addToggle('Applicability', 'cond');
+    addToggle('Expression', 'expr');
     addToggle('Appearance', 'style');
 
     // ⊕ Add ▾ dropdown
@@ -288,12 +307,18 @@ function renderNode(node) {
   };
 
   addPanel('vis', p => {
-    if (node._enableWhenText) {
-      const friendly = document.createElement('div');
-      friendly.style.cssText = 'margin-bottom:6px; padding:4px 8px; background:#fff8e1; border:1px solid #ffe082; border-radius:4px; font-size:11px; color:#5d4037;';
-      friendly.innerHTML = '\uD83D\uDD12 <b>Shown when:</b> ' + escAttr(node._enableWhenText);
-      p.appendChild(friendly);
-    }
+    const friendly = document.createElement('div');
+    friendly.style.cssText = 'margin-bottom:6px; padding:4px 8px; background:#fff8e1; border:1px solid #ffe082; border-radius:4px; font-size:11px; color:#5d4037;';
+    const updateFriendly = () => {
+      if (node._enableWhenText && node.visibilityRule) {
+        friendly.innerHTML = '\uD83D\uDD12 <b>Shown when:</b> ' + escAttr(node._enableWhenText);
+        friendly.style.display = 'block';
+      } else {
+        friendly.style.display = 'none';
+      }
+    };
+    updateFriendly();
+    p.appendChild(friendly);
 
     // ── Visual condition builder ──────────────────────────────────────
     const builderWrap = document.createElement('div');
@@ -403,7 +428,11 @@ function renderNode(node) {
     p.appendChild(rawLbl);
     const rawInp = document.createElement('input');
     rawInp.type = 'text'; rawInp.value = node.visibilityRule || '';
-    rawInp.oninput = () => { node.visibilityRule = rawInp.value; };
+    rawInp.oninput = () => {
+      node.visibilityRule = rawInp.value;
+      if (!rawInp.value) node._enableWhenText = '';
+      updateFriendly();
+    };
     p.appendChild(rawInp);
   });
 
@@ -469,6 +498,34 @@ function renderNode(node) {
   }
 
   // Style panel (both group and item)
+  addPanel('expr', p => {
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:11px;color:#666;margin-bottom:4px;';
+    lbl.textContent = 'FHIRPath calculatedExpression:';
+    p.appendChild(lbl);
+
+    const ta = document.createElement('textarea');
+    ta.rows = 4;
+    ta.style.cssText = 'width:100%;font-size:11px;font-family:monospace;resize:vertical;border:1px solid var(--c-border);border-radius:4px;padding:4px 6px;box-sizing:border-box;';
+    ta.value = node._calculatedExpr || '';
+    ta.placeholder = '%resource.item.where(linkId=\'...\')';
+    ta.oninput = () => {
+      node._calculatedExpr = ta.value.trim() || undefined;
+      _triggerCalcRecalc();
+    };
+    p.appendChild(ta);
+
+    const roRow = document.createElement('label');
+    roRow.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:11px;margin-top:6px;cursor:pointer;';
+    const roCb = document.createElement('input');
+    roCb.type = 'checkbox';
+    roCb.checked = !!node._readOnly;
+    roCb.onchange = () => { node._readOnly = roCb.checked; _triggerCalcRecalc(); };
+    roRow.appendChild(roCb);
+    roRow.appendChild(document.createTextNode('readOnly (computed by expression, not user-editable)'));
+    p.appendChild(roRow);
+  });
+
   addPanel('style', p => {
     const styleRow = (label, fn) => {
       const row = document.createElement('div');
