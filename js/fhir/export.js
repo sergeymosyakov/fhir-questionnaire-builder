@@ -4,7 +4,7 @@ import { tree } from '../state.js';
 function itemTypeToFHIRType(t) {
   if (t === 'checkbox') return 'boolean';
   if (t === 'number')   return 'decimal';
-  if (t === 'select')   return 'choice';
+  if (t === 'select' || t === 'radio') return 'choice';
   if (t === 'display')  return 'display';
   if (t === 'date')       return 'date';
   if (t === 'url')        return 'url';
@@ -79,10 +79,18 @@ function nodeToFHIRItem(node) {
   if (node.type === 'group') {
     if (node.logicWithParent === 'OR') fhirItem.enableBehavior = 'any';
     fhirItem.item = node.children.map(nodeToFHIRItem);
-  } else if (node.itemType === 'select' && node.options) {
+  } else if ((node.itemType === 'select' || node.itemType === 'radio') && node.options) {
     fhirItem.answerOption = node.options.split(',')
       .map(o => o.trim()).filter(Boolean)
       .map(o => ({ valueCoding: { code: o, display: o } }));
+    if (node.itemType === 'radio') {
+      fhirItem.extension = (fhirItem.extension || []).concat({
+        url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl',
+        valueCodeableConcept: {
+          coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'radio-button' }]
+        }
+      });
+    }
   }
   return fhirItem;
 }

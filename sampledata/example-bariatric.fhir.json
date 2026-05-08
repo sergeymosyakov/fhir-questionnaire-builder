@@ -385,6 +385,130 @@
           "required": false
         }
       ]
+    },
+    {
+      "linkId": "g-patient-prefs",
+      "type": "group",
+      "text": "Patient Preferences",
+      "item": [
+        {
+          "linkId": "q-diet-type",
+          "type": "choice",
+          "text": "Preferred diet program",
+          "required": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "low-carb",
+                "display": "Low Carb"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "low-fat",
+                "display": "Low Fat"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "mediterranean",
+                "display": "Mediterranean"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "q-support-group",
+          "type": "choice",
+          "text": "Willing to join support group?",
+          "required": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "Yes",
+                "display": "Yes"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "No",
+                "display": "No"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "Maybe",
+                "display": "Maybe"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "q-contact-method",
+          "type": "choice",
+          "text": "Preferred contact method",
+          "required": false,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "Phone",
+                "display": "Phone"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "Email",
+                "display": "Email"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "Text",
+                "display": "Text"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

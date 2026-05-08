@@ -84,6 +84,16 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   node.visibilityRule = extractExtension(fhirItem, 'visibilityRule') || enableWhenToExpr(fhirItem.enableWhen);
   node.conditionRule  = extractExtension(fhirItem, 'conditionRule')  || '';
   node.itemType       = fhirTypeToItemType(fhirItem.type || 'string');
+  // questionnaire-itemControl: radio-button → use 'radio' instead of 'select'
+  if (node.itemType === 'select') {
+    const itemCtrl = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl'
+    );
+    const ctrlCode = itemCtrl && itemCtrl.valueCodeableConcept &&
+      itemCtrl.valueCodeableConcept.coding && itemCtrl.valueCodeableConcept.coding[0] &&
+      itemCtrl.valueCodeableConcept.coding[0].code;
+    if (ctrlCode === 'radio-button') node.itemType = 'radio';
+  }
   node.options        = fhirOptsToStr(fhirItem.answerOption);
   const sv = extractExtension(fhirItem, 'successValue');
   if (sv) node.successValue = sv;

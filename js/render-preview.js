@@ -124,6 +124,29 @@ function buildControl(node, iconEl, onAfterChange, isAuto) {
     el.onchange = () => { values[node.id] = el.value; _reCalc(); onChange(); _formTick.value++; };
     wrap.appendChild(el);
 
+  } else if (node.itemType === 'radio') {
+    const opts = (node.options || '').split(',').map(o => o.trim()).filter(Boolean);
+    if (!opts.length) {
+      const msg = document.createElement('span');
+      msg.style.cssText = 'font-size:11px;color:var(--c-text-2)';
+      msg.textContent = '(no options)';
+      wrap.appendChild(msg);
+    } else {
+      const rbName = 'radio_' + node.id;
+      if (values[node.id] === undefined) values[node.id] = opts[0];
+      for (const opt of opts) {
+        const lbl = document.createElement('label');
+        lbl.style.cssText = 'display:inline-flex;align-items:center;gap:3px;margin-right:10px;font-size:13px;cursor:pointer;';
+        const rb = document.createElement('input');
+        rb.type = 'radio'; rb.name = rbName; rb.value = opt;
+        rb.checked = values[node.id] === opt;
+        rb.onchange = () => { if (rb.checked) { values[node.id] = opt; _reCalc(); onChange(); _formTick.value++; } };
+        lbl.appendChild(rb);
+        lbl.appendChild(document.createTextNode(opt));
+        wrap.appendChild(lbl);
+      }
+    }
+
   } else {
     const el = document.createElement('input');
     el.type = 'text'; el.style.width = '120px';
