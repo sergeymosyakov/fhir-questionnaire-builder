@@ -150,7 +150,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 ## Key UX Features
 
 - **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
-- **Collapse groups (builder)** — `▼/▶` toggle on each group in the builder; collapse state persists through re-renders
+- **Drag & drop reorder** — ⠿ handle on every node; drag to reorder, drop between nodes (blue line), drop into group (dashed zone), drop at root level; ancestor→descendant drop blocked
 - **Collapse sections (preview)** — `▼/▶` toggle on each group row in the preview; `⊟`/`⊞` buttons in the preview toolbar collapse/expand all (appear after FHIR load)
 - **Disabled groups clickable** — N/A (grayed `—`) groups in preview are still clickable to navigate to builder node
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`

@@ -155,7 +155,7 @@ Custom extensions (URL prefix `http://logicbuilder.example.org/extension/`):
 ## UX Features
 
 - **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
-- **Collapse groups (builder)** — `▼/▶` toggle on each group; state persists through re-renders
+- **Drag & drop reorder** — ⠿ handle on every node; drag to reorder within the tree, drop between nodes (blue line), drop into a group (dashed zone), or drop at root level
 - **Collapse sections (preview)** — `▼/▶` toggle on each group row; `⊟`/`⊞` All buttons in toolbar (visible after FHIR load)
 - **Disabled groups clickable** — N/A groups in preview still navigate to builder on click
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`
