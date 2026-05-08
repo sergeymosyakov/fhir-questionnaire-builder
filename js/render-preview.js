@@ -2,7 +2,7 @@
 import {
   effect,
   age, gender, bmi, pregnant, smoker, proc, comorb,
-  testMode, tree, values, autoFilledIds, _formTick,
+  tree, values, autoFilledIds, _formTick,
   evalRule, calcFormOk, isDescendant, isMandatory,
   rawFhir, calcTested, CHECKABLE_TYPES
 } from './state.js';
@@ -173,8 +173,6 @@ effect(() => {
     proc:     proc.value,
     comorb:   comorb.value.toLowerCase()
   };
-  const tMode = testMode.value;
-
   const lform = document.getElementById('lform');
   lform.innerHTML = '';
 
@@ -321,13 +319,6 @@ effect(() => {
     const row = document.createElement('div');
     row.className = 'lform-item';
     row.dataset.previewId = res.node.id;
-    if (tMode) {
-      if (res.node.type === 'group' && hasCondition) {
-        row.classList.add(displayOk ? 'success' : 'error');
-      } else if (res.node.type === 'item' && !displayOk) {
-        row.classList.add('error');
-      }
-    }
     row.title = 'Click to navigate to builder node';
     row.style.cursor = 'pointer';
     row.addEventListener('click', () => {

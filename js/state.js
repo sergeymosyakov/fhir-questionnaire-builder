@@ -12,7 +12,6 @@ export const pregnant = ref(false);        // boolean (Extension: pregnancyStatu
 export const smoker   = ref(false);        // boolean (Observation: tobacco-use)
 export const proc     = ref('43644');      // procedure code (Claim.procedure)
 export const comorb   = ref('');           // comma-separated condition codes / display names
-export const testMode = ref(false);
 export const tree     = reactive([]);
 
 // Plain (non-reactive) store for current form values in preview.

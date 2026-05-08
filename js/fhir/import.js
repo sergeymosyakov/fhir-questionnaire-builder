@@ -1,5 +1,5 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
-import { tree, values, testMode, makeGroup, makeItem, resetSeq, rawFhir, calcTested } from '../state.js';
+import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, calcTested } from '../state.js';
 import { renderTree } from '../render-builder.js';
 
 // Read our custom extension value from a FHIR item
@@ -173,7 +173,6 @@ export function importFHIR(fhirJson) {
   }
   tree.splice(0);
   Object.keys(values).forEach(k => delete values[k]);
-  testMode.value = false;
   rawFhir.value = q;
   calcTested.value = false;
   resetSeq();

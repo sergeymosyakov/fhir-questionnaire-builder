@@ -1,6 +1,6 @@
 ﻿// Entry point: wires patient inputs, toolbar buttons, and loads the built-in example.
 import {
-  age, gender, bmi, pregnant, smoker, proc, comorb, testMode, tree, makeGroup,
+  age, gender, bmi, pregnant, smoker, proc, comorb, tree, makeGroup,
   values, rawFhir, calcTested, _formTick
 } from './state.js';
 import { importFHIR } from './fhir/import.js';
@@ -23,11 +23,10 @@ const fhirpath = window.fhirpath;
 ].forEach(([id, r, parse]) => {
   document.getElementById(id).addEventListener('input', e => {
     r.value = parse(e.target.value);
-    testMode.value = false;
   });
 });
-document.getElementById('inp-pregnant').addEventListener('change', e => { pregnant.value = e.target.checked; testMode.value = false; });
-document.getElementById('inp-smoker').addEventListener('change',   e => { smoker.value   = e.target.checked; testMode.value = false; });
+document.getElementById('inp-pregnant').addEventListener('change', e => { pregnant.value = e.target.checked; });
+document.getElementById('inp-smoker').addEventListener('change',   e => { smoker.value   = e.target.checked; });
 
 // Buttons
 document.getElementById('addRootGroupBtn').onclick = () => {
@@ -46,7 +45,6 @@ document.getElementById('testBtn').onclick = () => {
     evalCalcNodes(tree, qr, fhirpath, values);
     calcTested.value = true;
   }
-  testMode.value = true;
   _formTick.value++;
 };
 document.getElementById('collapseAllBtn').onclick  = collapseAll;
