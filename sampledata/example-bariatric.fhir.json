@@ -30,7 +30,7 @@
           "text": "Primary comorbidity",
           "type": "choice",
           "required": true,
-          "enableWhen": [{ "question": "q-bmi35", "operator": "=", "answerBoolean": true }],
+          "enableWhen": [{ "question": "q-bmi-criterion", "operator": "=", "answerCoding": { "code": "bmi35" } }],
           "answerOption": [
             { "valueCoding": { "code": "T2DM",  "display": "Type 2 Diabetes" } },
             { "valueCoding": { "code": "HTN",   "display": "Hypertension" } },
