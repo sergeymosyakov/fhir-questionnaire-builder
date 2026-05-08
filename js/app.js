@@ -47,17 +47,12 @@ document.getElementById('fhirFileInput').onchange  = e => {
   e.target.value = '';
 };
 
-// Load built-in example (window.EXAMPLE_FHIR_Q set by example-bariatric.fhir.js,
-// or falls back to fetch() when running under HTTP server / GitHub Pages).
+// Load built-in example via fetch (requires HTTP server or GitHub Pages)
 function loadExampleFile(onLoaded) {
-  if (window.EXAMPLE_FHIR_Q) {
-    onLoaded(window.EXAMPLE_FHIR_Q);
-  } else {
-    fetch('sampledata/example-bariatric.fhir.json')
-      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(onLoaded)
-      .catch(err => alert('Could not load example: ' + err.message));
-  }
+  fetch('sampledata/example-bariatric.fhir.json')
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(onLoaded)
+    .catch(err => alert('Could not load example: ' + err.message));
 }
 
 // Start with the built-in example loaded
