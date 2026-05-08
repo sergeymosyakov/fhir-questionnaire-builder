@@ -119,7 +119,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `string`, `text` | `text` | ✅ | — | |
 | `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three → `date` |
 | `url` | `url` | ✅ | ✅ `new URL()` | Invalid format → ✘ even if optional |
-| `choice` | `select` | ✅ | — | |
+| `choice` | `select` / `radio` | ✅ | — | `questionnaire-itemControl: radio-button` → `radio` |
 | `open-choice` | `select` | ⚠️ | — | Free-text option not rendered |
 | `display` | `display` | ✅ label | — | No control, no pass/fail |
 | `group` | `group` | ✅ | — | |
@@ -133,7 +133,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 
 - `enableWhen` → `visibilityRule` JS expression + `_enableWhenText` (human label)
 - `type:group` → group node; `enableBehavior:any` → `logicWithParent:'OR'`
-- `type:boolean` → `itemType:'checkbox'`; `type:choice` → `itemType:'select'`
+- `type:boolean` → `itemType:'checkbox'`; `type:choice` → `itemType:'select'` or `'radio'` (if `questionnaire-itemControl: radio-button`)
 - Custom extensions at URL `http://logicbuilder.example.org/extension/...`: `conditionRule`, `visibilityRule`, `successValue`
 - `_text.extension[rendering-style]` → `_renderStyle` (applied as inline CSS in preview)
 - `linkIdMap` built before parsing → used for human-readable condition text
@@ -143,6 +143,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - Simple `visibilityRule` patterns (`values['id'] OP value`) → standard FHIR `enableWhen`
 - Complex JS → stored as extension (round-trip safe)
 - `conditionRule`, `successValue` → always as extensions
+- `itemType:'radio'` → exports `type:'choice'` + standard `questionnaire-itemControl: radio-button` extension (round-trip safe)
 - Downloads as `questionnaire.fhir.json`
 
 ---

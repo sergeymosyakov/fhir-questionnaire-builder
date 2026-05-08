@@ -109,7 +109,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `string`, `text` | `text` | ✅ text input | — | |
 | `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three map to `date` |
 | `url` | `url` | ✅ url input | ✅ `new URL()` format check | Invalid URL → ✘ even if not required |
-| `choice` | `select` | ✅ dropdown | — | |
+| `choice` | `select` or `radio` | ✅ dropdown / radio-buttons | — | Determined by `questionnaire-itemControl` extension |
 | `open-choice` | `select` | ⚠️ dropdown | — | Free-text option not shown |
 | `display` | `display` | ✅ label only | — | No control, no pass/fail |
 | `group` | `group` | ✅ section header | — | |
@@ -130,7 +130,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `type:'group'` with no children | Rendered as informational display text (`[Info]` in builder) |
 | `type:'boolean'` | `itemType:'checkbox'` |
 | `type:'integer'` / `type:'decimal'` | `itemType:'number'` |
-| `type:'choice'` | `itemType:'select'` |
+| `type:'choice'` | `itemType:'select'` or `itemType:'radio'` (if `questionnaire-itemControl: radio-button`) |
 | `type:'string'` / `type:'text'` / etc. | `itemType:'text'` |
 | `item.required` | `mandatory` |
 | `item.linkId` | `id` (editable in builder) |
@@ -143,6 +143,9 @@ Custom extensions (URL prefix `http://logicbuilder.example.org/extension/`):
 - `conditionRule` — applicability condition
 - `visibilityRule` — complex JS expression (when not convertible to enableWhen)
 - `successValue` — expected answer for pass/fail evaluation
+
+Standard extensions preserved on export:
+- `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` — `radio-button` code for `radio` itemType
 
 ### Export
 
