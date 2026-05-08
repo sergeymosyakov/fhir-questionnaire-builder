@@ -172,15 +172,31 @@ body {
 
 /* === Two-column layout ======================================================= */
 .layout {
-  display: grid;
-  grid-template-columns: 470px 1fr;
+  display: flex;
+  flex-direction: row;
   flex: 1;
   min-height: 0;
   overflow: hidden;
 }
+.panel-resizer {
+  width: 5px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: var(--c-border);
+  transition: background 0.15s;
+  position: relative;
+  z-index: 10;
+}
+.panel-resizer:hover,
+.panel-resizer.resizing {
+  background: var(--c-primary);
+}
 .left-panel {
+  width: 470px;
+  min-width: 200px;
+  max-width: 70vw;
+  flex-shrink: 0;
   background: var(--c-surface);
-  border-right: 1px solid var(--c-border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -196,6 +212,8 @@ body {
   padding: 10px 14px 14px;
 }
 .right-panel {
+  flex: 1;
+  min-width: 0;
   background: var(--c-bg);
   display: flex;
   flex-direction: column;

@@ -81,4 +81,38 @@ document.addEventListener('click', () => {
   document.querySelectorAll('.action-add-menu').forEach(m => { m.style.display = 'none'; });
 });
 
+// ── Panel resize drag ─────────────────────────────────────────────────────────
+{
+  const resizer   = document.getElementById('panelResizer');
+  const leftPanel = document.querySelector('.left-panel');
+  const STORAGE_KEY = 'leftPanelWidth';
+  const MIN = 200, MAX = () => window.innerWidth * 0.7;
+
+  // Restore saved width
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) leftPanel.style.width = saved + 'px';
+
+  let startX, startW;
+  resizer.addEventListener('mousedown', e => {
+    e.preventDefault();
+    startX = e.clientX;
+    startW = leftPanel.getBoundingClientRect().width;
+    resizer.classList.add('resizing');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!resizer.classList.contains('resizing')) return;
+    const w = Math.min(MAX(), Math.max(MIN, startW + e.clientX - startX));
+    leftPanel.style.width = w + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    if (!resizer.classList.contains('resizing')) return;
+    resizer.classList.remove('resizing');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    localStorage.setItem(STORAGE_KEY, parseInt(leftPanel.style.width));
+  });
+}
+
 // Start empty — use Example button or Load FHIR JSON to load data
