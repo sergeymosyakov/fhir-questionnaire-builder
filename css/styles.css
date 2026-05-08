@@ -200,6 +200,19 @@ body {
   transition: background .15s;
 }
 .btn-add-root:hover { background: #bbdefb; }
+.tree-toolbar { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.tree-toolbar .btn-add-root { margin-bottom: 0; }
+.btn-tree-ctrl {
+  padding: 5px 10px;
+  background: #f5f5f5;
+  color: #555;
+  border: 1px solid #ddd;
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-tree-ctrl:hover { background: #e8e8e8; }
 
 /* === Node cards ============================================================== */
 .node {

@@ -4,7 +4,7 @@ import {
 } from './state.js';
 import { importFHIR } from './fhir/import.js';
 import { exportFHIR } from './fhir/export.js';
-import { renderTree } from './render-builder.js';
+import { renderTree, collapseAll, expandAll } from './render-builder.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 
 // Wire patient-data inputs to reactive refs
@@ -34,6 +34,8 @@ document.getElementById('addRootGroupBtn').onclick = () => {
   });
 };
 document.getElementById('testBtn').onclick         = () => { testMode.value = true; };
+document.getElementById('collapseAllBtn').onclick  = collapseAll;
+document.getElementById('expandAllBtn').onclick    = expandAll;
 document.getElementById('loadExampleBtn').onclick  = () => loadExampleFile(importFHIR);
 document.getElementById('exportFhirBtn').onclick   = exportFHIR;
 document.getElementById('loadFhirBtn').onclick     = () => document.getElementById('fhirFileInput').click();

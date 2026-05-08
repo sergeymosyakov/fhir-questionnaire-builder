@@ -22,6 +22,19 @@ export function renderTree() {
   for (const node of tree) container.appendChild(renderNode(node));
 }
 
+// Collapse/expand all groups in a subtree recursively
+function setCollapsedAll(nodes, value) {
+  for (const n of nodes) {
+    if (n.type === 'group') {
+      _collapsed.set(n.id, value);
+      setCollapsedAll(n.children, value);
+    }
+  }
+}
+
+export function collapseAll() { setCollapsedAll(tree, true);  renderTree(); }
+export function expandAll()   { setCollapsedAll(tree, false); renderTree(); }
+
 // ── Success-value UI (rebuilt when itemType changes, stays inside open panel) ─
 function buildSuccessValueUI(node, container) {
   container.innerHTML = '';
@@ -146,7 +159,7 @@ function renderNode(node) {
 
   if (node.type === 'item') {
     addToggle('Condition', 'cond');
-    addToggle('Item type', 'type');
+    addToggle('Type', 'type');
   } else {
     addToggle('Condition', 'cond');
     const aSub = document.createElement('a');
@@ -335,7 +348,7 @@ function renderNode(node) {
 
     addPanel('type', p => {
       const typeRow = document.createElement('div');
-      typeRow.textContent = 'Item type: ';
+      typeRow.textContent = 'Type: ';
       const typeSelect = document.createElement('select');
       typeSelect.style.width = 'auto';
       for (const t of ['text', 'number', 'checkbox', 'select', 'display']) {
