@@ -182,18 +182,46 @@ function renderNode(node) {
   linkIdInput.oninput = () => { node.id = linkIdInput.value.trim() || node.id; };
   titleWrap.appendChild(linkIdInput);
 
-  const titleInput = document.createElement('input');
-  titleInput.type  = 'text';
-  titleInput.value = node.title;
-  titleInput.className = 'node-title-input';
-  titleInput.oninput = () => { node.title = titleInput.value; };
-  titleWrap.appendChild(titleInput);
+  // Title: shown as a read-only span, expands to textarea on click
+  const titleRow = document.createElement('div');
+  titleRow.className = 'node-title-row';
+
+  const titleDisplay = document.createElement('span');
+  titleDisplay.className = 'node-title-display';
+  titleDisplay.textContent = node.title || '(no title)';
+
+  const titleTextarea = document.createElement('textarea');
+  titleTextarea.className = 'node-title-textarea';
+  titleTextarea.value = node.title;
+  titleTextarea.style.display = 'none';
+  titleTextarea.oninput = () => {
+    node.title = titleTextarea.value;
+    titleDisplay.textContent = titleTextarea.value || '(no title)';
+  };
+  titleTextarea.onblur = () => {
+    titleTextarea.style.display = 'none';
+    titleDisplay.style.display = '';
+  };
+
+  titleDisplay.addEventListener('click', e => {
+    e.stopPropagation();
+    const h = titleDisplay.offsetHeight;
+    titleDisplay.style.display = 'none';
+    titleTextarea.style.display = '';
+    titleTextarea.style.height = Math.max(h, 48) + 'px';
+    titleTextarea.focus();
+    titleTextarea.setSelectionRange(titleTextarea.value.length, titleTextarea.value.length);
+  });
+
+  titleRow.appendChild(titleDisplay);
+  titleRow.appendChild(titleTextarea);
+  titleWrap.appendChild(titleRow);
 
   // Left → Right navigation: click header → scroll to preview row
   titleWrap.style.cursor = 'pointer';
   titleWrap.title = 'Click to navigate to preview row';
   titleWrap.addEventListener('click', e => {
-    if (e.target === titleInput || e.target === linkIdInput) return;
+    if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput) return;
     const target = document.querySelector('[data-preview-id="' + node.id + '"]');
     if (!target) return;
     target.scrollIntoView({ behavior: 'smooth', block: 'center' });

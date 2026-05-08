@@ -12,6 +12,9 @@ import { evalCalcNodes } from './fhir/calc.js';
 
 const fhirpath = window.fhirpath;
 
+// Persists across re-renders (not reactive)
+const collapsedGroups = new Set();
+
 function _reCalc() {
   if (calcTested.value && rawFhir.value && fhirpath) {
     const qr = buildQR(JSON.parse(JSON.stringify(rawFhir.value)), values);
@@ -130,7 +133,12 @@ effect(() => {
     lform.appendChild(msg);
   }
 
-  const mandatoryItems = visible.filter(r => !r.disabled && r.node.type === 'item' && isMandatory(r.node) && r.node.successValue !== '');
+  const mandatoryItems = visible.filter(r => !r.disabled && r.node.type === 'item' &&
+    isMandatory(r.node) && (
+      r.node.successValue !== '' ||
+      r.node.itemType === 'text' || r.node.itemType === 'number'
+    )
+  );
   const hasMandatory = mandatoryItems.length > 0;
 
   // calc nodes: visible, non-disabled items with a calculatedExpression
@@ -221,6 +229,7 @@ effect(() => {
       // Only count items that actually have a checkable condition right now
       const relevantItems = descendantItems.filter(r =>
         (isMandatory(r.node) && r.node.successValue !== '') ||
+        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number')) ||
         (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
       );
       if (relevantItems.length === 0) {
@@ -234,9 +243,13 @@ effect(() => {
           : relevantItems.every(itemOk);
       }
     } else {
-      // Item has a condition if it's a readOnly boolean calc node (after Test) or has successValue
+      // Item has a condition if:
+      // - has explicit successValue, OR
+      // - is mandatory text/number (must be non-empty), OR
+      // - is a readOnly boolean calc node after Test
       hasCondition = res.node.itemType !== 'display' && (
         (isMandatory(res.node) && res.node.successValue !== '') ||
+        (isMandatory(res.node) && (res.node.itemType === 'text' || res.node.itemType === 'number')) ||
         (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox' && calcTested.value)
       );
       displayOk    = res.ok && calcFormOk(res.node);
@@ -350,32 +363,50 @@ effect(() => {
       }
     }
 
+    // Add collapse toggle for groups with children
+    if (res.node.type === 'group' && res.node.children.length > 0) {
+      const collapsed = collapsedGroups.has(res.node.id);
+      const toggle = document.createElement('span');
+      toggle.className = 'preview-collapse-toggle';
+      toggle.textContent = collapsed ? '\u25B6' : '\u25BC';
+      toggle.title = collapsed ? 'Expand section' : 'Collapse section';
+      toggle.addEventListener('click', e => {
+        e.stopPropagation();
+        if (collapsedGroups.has(res.node.id)) collapsedGroups.delete(res.node.id);
+        else collapsedGroups.add(res.node.id);
+        _formTick.value++;
+      });
+      row.insertBefore(toggle, row.firstChild);
+    }
+
     container.appendChild(row);
 
     if (res.node.type === 'group' && res.node.children.length > 0) {
-      const nested = document.createElement('div');
-      nested.className = 'preview-nested';
-      const logic = res.node.logicWithParent || 'AND';
-      let firstVisible = true;
-      for (const ch of res.node.children) {
-        const childRes = resultMap.get(ch.id);
-        if (childRes && (childRes.visible || childRes.showDimmed)) {
-          if (!firstVisible && childRes.visible) {
-            const sep = document.createElement('div');
-            sep.className = 'logic-separator logic-separator-' + logic.toLowerCase();
-            sep.textContent = logic;
-            nested.appendChild(sep);
-          }
-          renderPreviewNode(childRes, nested);
-          if (childRes.visible) firstVisible = false;
-        }
-      }
-      if (nested.childElementCount > 0) container.appendChild(nested);
-
       const descendants = visible.filter(r =>
         r.node.type === 'item' && !r.disabled && isDescendant(r.node.id, res.node)
       );
       if (iconEl) groupIconMap.set(res.node.id, { icon: iconEl, descendants, node: res.node });
+
+      if (!collapsedGroups.has(res.node.id)) {
+        const nested = document.createElement('div');
+        nested.className = 'preview-nested';
+        const logic = res.node.logicWithParent || 'AND';
+        let firstVisible = true;
+        for (const ch of res.node.children) {
+          const childRes = resultMap.get(ch.id);
+          if (childRes && (childRes.visible || childRes.showDimmed)) {
+            if (!firstVisible && childRes.visible) {
+              const sep = document.createElement('div');
+              sep.className = 'logic-separator logic-separator-' + logic.toLowerCase();
+              sep.textContent = logic;
+              nested.appendChild(sep);
+            }
+            renderPreviewNode(childRes, nested);
+            if (childRes.visible) firstVisible = false;
+          }
+        }
+        if (nested.childElementCount > 0) container.appendChild(nested);
+      }
     }
   }
 
@@ -388,6 +419,7 @@ effect(() => {
     for (const [, { icon, descendants, node }] of groupIconMap.entries()) {
       const relevant = descendants.filter(r =>
         (isMandatory(r.node) && r.node.successValue !== '') ||
+        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number')) ||
         (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
       );
       if (relevant.length === 0) {
@@ -417,4 +449,32 @@ effect(() => {
     finalEl.textContent = (finalOk ? '✓ PASS' : '✗ FAIL') + ' — ' + (finalOk ? 'All criteria met' : 'Criteria not met');
     finalEl.className = 'final-result ' + (finalOk ? 'pass' : 'fail');
   }
+});
+
+// ── Collapse / Expand all ─────────────────────────────────────────────────────
+function _collectGroupIds(nodes, out = []) {
+  for (const n of nodes) {
+    if (n.type === 'group') {
+      out.push(n.id);
+      if (n.children) _collectGroupIds(n.children, out);
+    }
+  }
+  return out;
+}
+
+document.getElementById('previewCollapseAllBtn').addEventListener('click', () => {
+  for (const id of _collectGroupIds(tree)) collapsedGroups.add(id);
+  _formTick.value++;
+});
+
+document.getElementById('previewExpandAllBtn').addEventListener('click', () => {
+  collapsedGroups.clear();
+  _formTick.value++;
+});
+
+// Dedicated effect: show collapse/expand buttons only when FHIR is loaded
+effect(() => {
+  const d = rawFhir.value ? '' : 'none';
+  document.getElementById('previewCollapseAllBtn').style.display = d;
+  document.getElementById('previewExpandAllBtn').style.display = d;
 });

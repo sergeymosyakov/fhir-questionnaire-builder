@@ -135,8 +135,11 @@ Custom extensions (URL prefix `http://logicbuilder.example.org/extension/`):
 ## UX Features
 
 - **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
-- **Collapse groups** — `▼/▶` toggle on each group in the builder; state persists through re-renders
+- **Collapse groups (builder)** — `▼/▶` toggle on each group; state persists through re-renders
+- **Collapse sections (preview)** — `▼/▶` toggle on each group row; `⊟`/`⊞` All buttons in toolbar (visible after FHIR load)
+- **Disabled groups clickable** — N/A groups in preview still navigate to builder on click
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`
+- **Expandable title** — node title shown as read-only span; click → expands to full-width textarea, collapses on blur
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Changes apply live in the preview
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
 - **Visual condition builder** — in the Visibility panel: pick a question by title to generate JS
@@ -145,6 +148,7 @@ Custom extensions (URL prefix `http://logicbuilder.example.org/extension/`):
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed out (🔒) when their condition is not met; animate to active when met
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
+- **required text/number** — `required:true` on text/number items requires a non-empty value; shows ✔/✘ and affects PASS/FAIL
 
 ---
 

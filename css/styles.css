@@ -279,7 +279,7 @@ body {
   gap: 6px;
   flex-wrap: wrap;
 }
-.node-title { display: flex; align-items: center; gap: 6px; }
+.node-title { display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap; flex: 1 1 0; min-width: 0; }
 
 /* Collapse toggle button */
 .node-collapse-btn {
@@ -326,6 +326,45 @@ body {
 .node-linkid-input:focus { outline: none; border-color: var(--c-primary); }
 
 /* Title input — main label */
+.node-title-row {
+  display: block;
+  width: 100%;
+  margin-top: 3px;
+  flex-basis: 100%;
+}
+.node-title-display {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 3px 6px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  color: var(--c-text);
+  cursor: text;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 24px;
+  transition: border-color .15s, background .15s;
+}
+.node-title-display:hover {
+  border-color: var(--c-border);
+  background: var(--c-surface);
+}
+.node-title-textarea {
+  display: block;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 3px 6px;
+  border: 1px solid var(--c-primary);
+  border-radius: var(--r-sm);
+  background: var(--c-primary-lt);
+  color: var(--c-text);
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+/* Keep old .node-title-input rule for any remaining references */
 .node-title-input {
   font-size: 13px;
   font-weight: 500;
@@ -522,6 +561,19 @@ body {
 .display-info-label { font-style: italic; color: var(--c-text-muted, #555); font-size: 12px; }
 
 /* AND/OR badge next to group title */
+.preview-collapse-toggle {
+  font-size: 10px;
+  color: #999;
+  width: 16px;
+  flex-shrink: 0;
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  margin-right: 2px;
+}
+.preview-collapse-toggle:hover { color: #444; }
+
 .preview-logic-badge {
   display: inline-block;
   font-size: 10px;
@@ -594,6 +646,12 @@ body {
 /* Disabled group: grayed out, non-interactive */
 .lform-disabled {
   opacity: 0.40;
+  cursor: pointer;
+}
+.lform-disabled input,
+.lform-disabled select,
+.lform-disabled textarea,
+.lform-disabled button {
   pointer-events: none;
 }
 /* Waiting: enableWhen condition not yet met, shown dimmed with lock icon */

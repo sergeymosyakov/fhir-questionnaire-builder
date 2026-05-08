@@ -92,10 +92,19 @@ export const calcFormOk = node => {
     if (node.itemType !== 'checkbox') return true;
     return values[node.id] === true;
   }
-  if (node.mandatory === false || node.successValue === '') return true;
-  const val = values[node.id];
-  if (node.itemType === 'checkbox') return String(!!val) === node.successValue;
-  return String(val !== undefined ? val : '') === String(node.successValue);
+  if (node.mandatory === false) return true;
+  // successValue set → must match exactly
+  if (node.successValue !== '') {
+    const val = values[node.id];
+    if (node.itemType === 'checkbox') return String(!!val) === node.successValue;
+    return String(val !== undefined ? val : '') === String(node.successValue);
+  }
+  // No successValue but mandatory → text/number must be non-empty
+  if (isMandatory(node) && (node.itemType === 'text' || node.itemType === 'number')) {
+    const val = values[node.id];
+    return val !== undefined && val !== '' && val !== null;
+  }
+  return true;
 };
 
 // ── Pure utilities ────────────────────────────────────────────────────────────

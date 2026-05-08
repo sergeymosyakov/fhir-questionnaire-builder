@@ -131,8 +131,11 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 ## Key UX Features
 
 - **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
-- **Collapse groups** — `▼/▶` toggle on each group in the builder; collapse state persists through re-renders
+- **Collapse groups (builder)** — `▼/▶` toggle on each group in the builder; collapse state persists through re-renders
+- **Collapse sections (preview)** — `▼/▶` toggle on each group row in the preview; `⊟`/`⊞` buttons in the preview toolbar collapse/expand all (appear after FHIR load)
+- **Disabled groups clickable** — N/A (grayed `—`) groups in preview are still clickable to navigate to builder node
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`
+- **Expandable title** — node title shown as a read-only span; click → expands to a full-width textarea (auto-height), collapses on blur
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
 - **Visual condition builder** — in the Visibility panel: pick a question by title to generate JS
@@ -141,6 +144,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed (🔒) when condition not met; animate to active when met
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
+- **required text/number** — `required:true` on text/number items means non-empty; shows ✔/✘ icon and affects PASS/FAIL
 
 ---
 
