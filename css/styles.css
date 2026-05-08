@@ -150,12 +150,25 @@ body {
   transition: color .15s, background .15s;
 }
 .top-github-link:hover { color: var(--c-text); background: #e8eaed; }
-.top-copyright {
+
+.right-panel-header-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.right-panel-header-top .section-title { margin-bottom: 0; }
+.preview-copyright {
   font-size: 10px;
   color: var(--c-text-2);
+  opacity: 0.65;
   white-space: nowrap;
-  opacity: 0.7;
 }
+.preview-copyright a {
+  color: inherit;
+  text-decoration: none;
+}
+.preview-copyright a:hover { text-decoration: underline; }
 
 /* === Two-column layout ======================================================= */
 .layout {
