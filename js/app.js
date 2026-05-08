@@ -34,8 +34,17 @@ document.getElementById('addRootGroupBtn').onclick = () => {
   });
 };
 document.getElementById('testBtn').onclick         = () => { testMode.value = true; };
-document.getElementById('collapseAllBtn').onclick  = collapseAll;
-document.getElementById('expandAllBtn').onclick    = expandAll;
+let _allCollapsed = false;
+document.getElementById('collapseAllBtn').onclick = () => {
+  _allCollapsed = !_allCollapsed;
+  if (_allCollapsed) {
+    collapseAll();
+    document.getElementById('collapseAllBtn').innerHTML = '&#x25BC; Expand all';
+  } else {
+    expandAll();
+    document.getElementById('collapseAllBtn').innerHTML = '&#x25B6; Collapse all';
+  }
+};
 document.getElementById('loadExampleBtn').onclick  = () => loadExampleFile(importFHIR);
 document.getElementById('exportFhirBtn').onclick   = exportFHIR;
 document.getElementById('loadFhirBtn').onclick     = () => document.getElementById('fhirFileInput').click();

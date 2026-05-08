@@ -154,7 +154,7 @@ function renderNode(node) {
   };
 
   addToggle('Visibility', 'vis');
-  addToggle('Mandatory',  'mand');
+  addToggle('Required',  'mand');
   addToggle('Style',      'style');
 
   if (node.type === 'item') {
@@ -335,7 +335,7 @@ function renderNode(node) {
   });
 
   addPanel('mand', p => {
-    p.innerHTML = 'Mandatory: <input type="checkbox"' + (node.mandatory ? ' checked' : '') + '>';
+    p.innerHTML = 'Required: <input type="checkbox"' + (node.mandatory ? ' checked' : '') + '>';
     p.querySelector('input').onchange = function () { node.mandatory = this.checked; };
   });
 
