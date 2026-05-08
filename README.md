@@ -23,8 +23,27 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/render-preview.js` | Right panel — reactive preview + controls |
 | `js/fhir/import.js` | FHIR R4 → internal model |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
-| `sampledata/example-bariatric.fhir.json` | Built-in example (bariatric surgery pre-authorization) |
-| `sampledata/1776102565767-...json` | Real-world questionnaire for testing |
+| `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup (bariatric surgery pre-auth, compact) |
+| `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all item types |
+| `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History — 49 items, depth 5 |
+| `sampledata/prowl-ss.fhir.json` | PROWL-SS Post-Operative pain assessment — 44 items |
+| `sampledata/phq-9.fhir.json` | PHQ-9 Patient Health Questionnaire (depression screening) — 11 items |
+| `sampledata/1776102565767-...json` | Real-world questionnaire snapshot for regression testing |
+
+---
+
+## Sample Questionnaires
+
+All samples live in `sampledata/` and can be loaded via the **Load** button.
+
+| File | Items | enableWhen | What to look for |
+|---|---|---|---|
+| `example-bariatric.fhir.json` | ~25 | ~8 | Built-in default — loads on startup. Covers most item types. BMI calculated field, radio buttons, attachments. |
+| `bariatric-extended.fhir.json` | 87 | 32 | **Stress-test.** Synthetic bariatric pre-authorization. All item types: text, number, date, url, attachment, checkbox, select, radio, display. Sub-questions for diabetes (HbA1c, medications, type), hypertension, sleep apnea (CPAP, severity), prior surgery (date, complications), psych eval (eating disorder, substance history), cardiac clearance, GERD warning display. BMI `calculatedExpression`. |
+| `ussg-fht.fhir.json` | 49 | 0 | Deep nesting (depth 5). US Surgeon General Family Health History Tool. Good for testing tree collapse/expand and navigation. No enableWhen — purely structural. |
+| `prowl-ss.fhir.json` | 44 | 0 | Flat structure (depth 1). PROWL-SS post-operative pain assessment. Likert-scale radio groups and display items. |
+| `phq-9.fhir.json` | 11 | 0 | Minimal — PHQ-9 depression screening. Fast to load; good baseline smoke-test. |
+| `1776102565767-...json` | — | — | Real-world production snapshot. Use for regression testing after refactors. |
 
 ---
 
