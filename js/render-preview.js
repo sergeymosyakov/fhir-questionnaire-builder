@@ -339,10 +339,11 @@ effect(() => {
 
   const finalEl = document.getElementById('finalResult');
   if (!anyVisible) {
-    finalEl.textContent = 'Final Result: No visible groups/items.';
+    finalEl.style.display = 'none';
     finalEl.className = 'final-result';
   } else {
-    finalEl.textContent = 'Final Result: ' + (finalOk ? 'PASS' : 'FAIL');
+    finalEl.style.display = '';
+    finalEl.textContent = (finalOk ? '✓ PASS' : '✗ FAIL') + ' — ' + (finalOk ? 'All required fields complete' : 'Required fields incomplete');
     finalEl.className = 'final-result ' + (finalOk ? 'pass' : 'fail');
   }
 });

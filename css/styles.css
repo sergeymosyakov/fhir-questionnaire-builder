@@ -664,16 +664,19 @@ body {
 
 /* Final result banner */
 .final-result {
-  margin-top: 12px;
-  padding: 12px 16px;
-  border-radius: var(--r);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin-bottom: 8px;
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   background: var(--c-surface);
   border: 1px solid var(--c-border);
-  box-shadow: var(--shadow-sm);
   color: var(--c-text-2);
   transition: background .2s, color .2s;
+  display: none;
 }
 .final-result.pass {
   background: var(--c-ok-bg);
