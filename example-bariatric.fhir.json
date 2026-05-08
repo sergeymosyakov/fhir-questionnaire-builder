@@ -1,0 +1,157 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "bariatric-pre-auth",
+  "title": "Bariatric Surgery Pre-Authorization Screening",
+  "status": "active",
+  "subjectType": ["Patient"],
+  "date": "2024-01-01",
+  "item": [
+    {
+      "linkId": "g-eligibility",
+      "text": "Patient Eligibility Criteria",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "q-bmi-criterion",
+          "text": "BMI eligibility criterion",
+          "type": "choice",
+          "required": true,
+          "extension": [
+            { "url": "http://logicbuilder.example.org/extension/successValue", "valueString": "BMI \u2265 40 kg/m\u00b2" }
+          ],
+          "answerOption": [
+            { "valueCoding": { "code": "bmi40",    "display": "BMI \u2265 40 kg/m\u00b2" } },
+            { "valueCoding": { "code": "bmi35",    "display": "BMI 35\u201339.9 with serious comorbidity" } },
+            { "valueCoding": { "code": "neither",  "display": "Neither \u2014 does not meet BMI criteria" } }
+          ]
+        },
+        {
+          "linkId": "q-comorb-type",
+          "text": "Primary comorbidity",
+          "type": "choice",
+          "required": true,
+          "enableWhen": [{ "question": "q-bmi35", "operator": "=", "answerBoolean": true }],
+          "answerOption": [
+            { "valueCoding": { "code": "T2DM",  "display": "Type 2 Diabetes" } },
+            { "valueCoding": { "code": "HTN",   "display": "Hypertension" } },
+            { "valueCoding": { "code": "OSA",   "display": "Obstructive Sleep Apnea" } },
+            { "valueCoding": { "code": "NAFLD", "display": "NAFLD / NASH" } },
+            { "valueCoding": { "code": "GERD",  "display": "GERD" } }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "g-diet",
+      "text": "Diet & Weight-Loss History",
+      "type": "group",
+      "item": [
+        { "linkId": "q-diet-months",   "text": "Months of documented supervised diet", "type": "integer", "required": true },
+        { "linkId": "q-diet-program",  "text": "Participated in a formal weight-loss program?", "type": "boolean", "required": true },
+        {
+          "linkId": "q-program-name",
+          "text": "Program name",
+          "type": "string",
+          "enableWhen": [{ "question": "q-diet-program", "operator": "=", "answerBoolean": true }]
+        },
+        { "linkId": "q-diet-meds",     "text": "Anti-obesity medications tried?", "type": "boolean" },
+        {
+          "linkId": "q-diet-meds-lst",
+          "text": "Medications (comma-separated)",
+          "type": "string",
+          "enableWhen": [{ "question": "q-diet-meds", "operator": "=", "answerBoolean": true }]
+        }
+      ]
+    },
+    {
+      "linkId": "g-psych",
+      "text": "Psychological Evaluation",
+      "type": "group",
+      "item": [
+        { "linkId": "q-psych-done",    "text": "Psychiatric evaluation completed?", "type": "boolean", "required": true },
+        {
+          "linkId": "q-phq9",
+          "text": "PHQ-9 score (0\u201327)",
+          "type": "integer",
+          "enableWhen": [{ "question": "q-psych-done", "operator": "=", "answerBoolean": true }]
+        },
+        {
+          "linkId": "q-psych-cleared",
+          "text": "Cleared for surgery by psychiatrist?",
+          "type": "boolean",
+          "required": true,
+          "enableWhen": [{ "question": "q-psych-done", "operator": "=", "answerBoolean": true }]
+        },
+        { "linkId": "q-substance",     "text": "History of substance use disorder?", "type": "boolean", "required": true },
+        {
+          "linkId": "q-substance-dtl",
+          "text": "Details / current status",
+          "type": "string",
+          "enableWhen": [{ "question": "q-substance", "operator": "=", "answerBoolean": true }]
+        }
+      ]
+    },
+    {
+      "linkId": "g-nutrition",
+      "text": "Nutritional Assessment",
+      "type": "group",
+      "item": [
+        { "linkId": "q-rd-done",  "text": "Registered Dietitian consultation completed?", "type": "boolean", "required": true },
+        { "linkId": "q-vit-def",  "text": "Pre-operative vitamin deficiency detected?", "type": "boolean" },
+        {
+          "linkId": "q-vit-type",
+          "text": "Deficiency type",
+          "type": "choice",
+          "enableWhen": [{ "question": "q-vit-def", "operator": "=", "answerBoolean": true }],
+          "answerOption": [
+            { "valueCoding": { "code": "vitD",   "display": "Vitamin D" } },
+            { "valueCoding": { "code": "B12",    "display": "Vitamin B12" } },
+            { "valueCoding": { "code": "iron",   "display": "Iron" } },
+            { "valueCoding": { "code": "folate", "display": "Folate" } }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "g-female",
+      "text": "Female-Specific Requirements",
+      "type": "group",
+      "extension": [{
+        "url": "http://logicbuilder.example.org/extension/conditionRule",
+        "valueString": "gender === 'female'"
+      }],
+      "item": [
+        { "linkId": "q-preg-test", "text": "Pregnancy test performed within 7 days?", "type": "boolean", "required": true },
+        {
+          "linkId": "q-preg-neg",
+          "text": "Result: negative?",
+          "type": "boolean",
+          "required": true,
+          "enableWhen": [{ "question": "q-preg-test", "operator": "=", "answerBoolean": true }]
+        },
+        { "linkId": "q-ocp", "text": "Contraception counseling provided (12-month post-op)?", "type": "boolean", "required": true }
+      ]
+    },
+    {
+      "linkId": "g-surgical",
+      "text": "Surgical Procedure Selection",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "q-proc-type",
+          "text": "Proposed procedure",
+          "type": "choice",
+          "required": true,
+          "answerOption": [
+            { "valueCoding": { "code": "43644", "display": "Laparoscopic Roux-en-Y Gastric Bypass" } },
+            { "valueCoding": { "code": "43775", "display": "Laparoscopic Sleeve Gastrectomy" } },
+            { "valueCoding": { "code": "43770", "display": "Laparoscopic Adjustable Gastric Band" } },
+            { "valueCoding": { "code": "43845", "display": "Biliopancreatic Diversion with DS" } }
+          ]
+        },
+        { "linkId": "q-surgeon-cert", "text": "Surgeon board-certified in bariatric surgery?", "type": "boolean", "required": true },
+        { "linkId": "q-facility",     "text": "Facility MBSAQIP accredited?", "type": "boolean", "required": true }
+      ]
+    }
+  ]
+}
