@@ -35,11 +35,11 @@ export const resetSeq = () => { _seq = 1; };
 export const makeGroup = title => ({
   id: nextId(), type: 'group',
   title: title || 'New Group',
-  visibilityRule: '', conditionRule: '', mandatory: false,
+  visibilityRule: '', conditionRule: '', mandatory: null,
   logicWithParent: 'AND', children: []
 });
 
-// Items are mandatory by default.
+// mandatory: null = not set (acts as required), true = required, false = optional.
 // If template is provided, copies all settings from it (except id and title).
 export const makeItem = (title, template) => {
   if (template) {
@@ -57,11 +57,14 @@ export const makeItem = (title, template) => {
   return {
     id: nextId(), type: 'item',
     title: title || 'New Item',
-    visibilityRule: '', mandatory: true,
+    visibilityRule: '', mandatory: null,
     conditionRule: '', itemType: 'text',
     options: '', successValue: ''
   };
 };
+
+// Helper: null mandatory behaves as true (required unless explicitly set false)
+export const isMandatory = node => node.mandatory !== false;
 
 // ── Rule evaluation ───────────────────────────────────────────────────────────
 // Exposed variables (FHIR Patient R4 context):
@@ -78,7 +81,7 @@ export const evalRule = (rule, ctx) => {
 
 // ── Form-value success check ──────────────────────────────────────────────────
 export const calcFormOk = node => {
-  if (!node.mandatory || node.successValue === '') return true;
+  if (node.mandatory === false || node.successValue === '') return true;
   const val = values[node.id];
   if (node.itemType === 'checkbox') return String(!!val) === node.successValue;
   return String(val !== undefined ? val : '') === String(node.successValue);

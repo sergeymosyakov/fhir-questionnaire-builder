@@ -22,11 +22,11 @@ export function evaluateNode(node, ctx, results) {
     if (showDimmed && node.type === 'group') {
       markAllDisabled(node.children, results);
     }
-    return { ok: !node.mandatory, visible: false, showDimmed };
+    return { ok: node.mandatory === false, visible: false, showDimmed };
   }
 
   if (node.type === 'item') {
-    const ok = !node.mandatory || evalRule(node.conditionRule, ctx);
+    const ok = node.mandatory === false || evalRule(node.conditionRule, ctx);
     results.push({ node, visible: true, ok });
     return { ok, visible: true };
   }

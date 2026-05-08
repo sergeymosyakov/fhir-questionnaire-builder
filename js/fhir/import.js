@@ -77,7 +77,7 @@ function humanEnableWhen(enableWhen, linkIdMap) {
 function fhirQuestionToItem(fhirItem, linkIdMap) {
   const node = makeItem(fhirItem.text || fhirItem.linkId || 'Item');
   node.id             = fhirItem.linkId || node.id;
-  node.mandatory      = !!fhirItem.required;
+  node.mandatory      = fhirItem.required === undefined ? null : !!fhirItem.required;
   node.visibilityRule = extractExtension(fhirItem, 'visibilityRule') || enableWhenToExpr(fhirItem.enableWhen);
   node.conditionRule  = extractExtension(fhirItem, 'conditionRule')  || '';
   node.itemType       = fhirTypeToItemType(fhirItem.type || 'string');
@@ -102,7 +102,7 @@ function fhirItemToNode(fhirItem, linkIdMap) {
   if (t === 'group') {
     const node = makeGroup(fhirItem.text || fhirItem.linkId || 'Group');
     node.id              = fhirItem.linkId || node.id;
-    node.mandatory       = !!fhirItem.required;
+    node.mandatory       = fhirItem.required === undefined ? null : !!fhirItem.required;
     node.logicWithParent = fhirItem.enableBehavior === 'any' ? 'OR' : 'AND';
     node.visibilityRule  = extractExtension(fhirItem, 'visibilityRule') || enableWhenToExpr(fhirItem.enableWhen);
     node.conditionRule   = extractExtension(fhirItem, 'conditionRule')  || '';
@@ -123,7 +123,7 @@ function fhirItemToNode(fhirItem, linkIdMap) {
   if ((fhirItem.item || []).length > 0) {
     const wrapper = makeGroup(fhirItem.text || fhirItem.linkId || 'Group');
     wrapper.id             = (fhirItem.linkId || wrapper.id) + '-grp';
-    wrapper.mandatory      = !!fhirItem.required;
+    wrapper.mandatory      = fhirItem.required === undefined ? null : !!fhirItem.required;
     wrapper.visibilityRule = extractExtension(fhirItem, 'visibilityRule') || enableWhenToExpr(fhirItem.enableWhen);
     wrapper.conditionRule  = extractExtension(fhirItem, 'conditionRule')  || '';
     if (fhirItem.enableWhen && fhirItem.enableWhen.length && linkIdMap) {

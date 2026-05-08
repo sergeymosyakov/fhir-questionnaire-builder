@@ -3,7 +3,7 @@ import {
   effect,
   age, gender, bmi, pregnant, smoker, proc, comorb,
   testMode, tree, values, autoFilledIds, _formTick,
-  evalRule, calcFormOk, isDescendant
+  evalRule, calcFormOk, isDescendant, isMandatory
 } from './state.js';
 import { evaluateNode } from './eval.js';
 
@@ -117,7 +117,7 @@ effect(() => {
     lform.appendChild(msg);
   }
 
-  const mandatoryItems = visible.filter(r => !r.disabled && r.node.type === 'item' && r.node.mandatory && r.node.successValue !== '');
+  const mandatoryItems = visible.filter(r => !r.disabled && r.node.type === 'item' && isMandatory(r.node) && r.node.successValue !== '');
   const hasMandatory = mandatoryItems.length > 0;
 
   let finalOk = hasMandatory && visible.filter(r => !r.disabled).every(res => {
@@ -210,7 +210,7 @@ effect(() => {
           : descendantItems.every(itemOk);
       }
     } else {
-      hasCondition = res.node.itemType !== 'display' && res.node.mandatory && res.node.successValue !== '';
+      hasCondition = res.node.itemType !== 'display' && isMandatory(res.node) && res.node.successValue !== '';
       displayOk    = res.ok && calcFormOk(res.node);
     }
 

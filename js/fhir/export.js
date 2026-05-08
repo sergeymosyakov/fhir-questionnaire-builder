@@ -39,7 +39,9 @@ function nodeToFHIRItem(node) {
     text:   node.title,
     type:   node.type === 'group' ? 'group' : itemTypeToFHIRType(node.itemType)
   };
-  if (node.mandatory) fhirItem.required = true;
+  if (node.mandatory === true) fhirItem.required = true;
+  else if (node.mandatory === false) fhirItem.required = false;
+  // null = not set, omit from FHIR
 
   // visibilityRule → enableWhen if possible, else custom extension
   if (node.visibilityRule) {

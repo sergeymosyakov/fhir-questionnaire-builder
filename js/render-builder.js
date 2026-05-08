@@ -408,8 +408,23 @@ function renderNode(node) {
   });
 
   addPanel('mand', p => {
-    p.innerHTML = 'Required: <input type="checkbox"' + (node.mandatory ? ' checked' : '') + '>';
-    p.querySelector('input').onchange = function () { node.mandatory = this.checked; };
+    const label = document.createElement('label');
+    label.style.cssText = 'font-size:12px; display:flex; align-items:center; gap:6px;';
+    label.textContent = 'Required:';
+    const sel = document.createElement('select');
+    sel.style.cssText = 'font-size:11px; padding:2px 4px; border-radius:4px; border:1px solid var(--c-border);';
+    [['null', 'Not set (acts as required)'], ['true', 'Yes — required'], ['false', 'No — optional']].forEach(([val, text]) => {
+      const o = document.createElement('option');
+      o.value = val;
+      o.textContent = text;
+      if (String(node.mandatory) === val) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.onchange = () => {
+      node.mandatory = sel.value === 'null' ? null : sel.value === 'true';
+    };
+    label.appendChild(sel);
+    p.appendChild(label);
   });
 
   if (node.type === 'item') {
