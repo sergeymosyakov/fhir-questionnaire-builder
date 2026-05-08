@@ -651,23 +651,6 @@ function renderNode(node) {
       });
     };
     actions.appendChild(aItem);
-
-    const aLabel = document.createElement('a');
-    aLabel.textContent = '+ Label';
-    aLabel.className = 'action-add';
-    aLabel.onclick = () => {
-      const newNode = makeItem('New Label');
-      newNode.itemType = 'display';
-      newNode.mandatory = false;
-      node.children.push(newNode);
-      _collapsed.set(node.id, false);
-      renderTree();
-      requestAnimationFrame(() => {
-        const el = document.querySelector('[data-node-id="' + newNode.id + '"]');
-        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('node-flash'); setTimeout(() => el.classList.remove('node-flash'), 1000); }
-      });
-    };
-    actions.appendChild(aLabel);
   }
 
   const aDel = document.createElement('a');
