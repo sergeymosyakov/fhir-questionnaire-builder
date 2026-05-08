@@ -159,12 +159,13 @@ body {
   display: flex;
   gap: 5px;
   flex-wrap: wrap;
+  align-items: center;
   margin-bottom: 6px;
 }
+.fhir-toolbar-sep { flex: 1; }
 .btn-fhir {
-  flex: 1;
-  min-width: 0;
-  padding: 5px 8px;
+  flex: none;
+  padding: 5px 10px;
   border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
   background: var(--c-primary-lt);
@@ -173,8 +174,6 @@ body {
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   transition: background .15s;
 }
 .btn-fhir:hover { background: #bbdefb; }
