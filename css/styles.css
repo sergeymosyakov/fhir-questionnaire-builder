@@ -213,6 +213,19 @@ body {
   transition: background .15s;
 }
 .btn-tree-ctrl:hover { background: #e8e8e8; }
+.btn-icon-ctrl {
+  padding: 4px 7px;
+  background: #f5f5f5;
+  color: #555;
+  border: 1px solid #ddd;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-icon-ctrl:hover { background: #e0e0e0; }
+.tree-toolbar-sep { flex: 1; }
 
 /* === Node cards ============================================================== */
 .node {

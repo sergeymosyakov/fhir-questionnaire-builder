@@ -35,6 +35,31 @@ function setCollapsedAll(nodes, value) {
 export function collapseAll() { setCollapsedAll(tree, true);  renderTree(); }
 export function expandAll()   { setCollapsedAll(tree, false); renderTree(); }
 
+// ── Renumber all nodes with hierarchical IDs ──────────────────────────────────
+function toRoman(n) {
+  const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let r = '';
+  for (let i = 0; i < vals.length; i++) { while (n >= vals[i]) { r += syms[i]; n -= vals[i]; } }
+  return r;
+}
+function toLetter(n) {
+  let r = '';
+  while (n > 0) { r = String.fromCharCode(64 + ((n - 1) % 26 + 1)) + r; n = Math.floor((n - 1) / 26); }
+  return r;
+}
+export function renumberAll(format, nodes = tree, prefix = '') {
+  nodes.forEach((node, i) => {
+    const idx = i + 1;
+    const seg = !prefix
+      ? (format === 'roman' ? toRoman(idx) : format === 'letters' ? toLetter(idx) : String(idx))
+      : String(idx);
+    node.id = prefix ? prefix + '.' + seg : seg;
+    if (node.type === 'group' && node.children.length) renumberAll(format, node.children, node.id);
+  });
+  if (!prefix) renderTree();
+}
+
 // ── Success-value UI (rebuilt when itemType changes, stays inside open panel) ─
 function buildSuccessValueUI(node, container) {
   container.innerHTML = '';

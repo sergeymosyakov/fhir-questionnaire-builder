@@ -58,20 +58,28 @@
 <div class="layout">
   <div class="left-panel">
     <span class="section-title">Logic Builder</span>
+    <div class="tree-toolbar">
+      <button id="addRootGroupBtn" type="button" class="btn-add-root">+ Add Root Group</button>
+      <button id="collapseAllBtn" type="button" class="btn-icon-ctrl" title="Collapse all">&#x229F;</button>
+      <button id="expandAllBtn"   type="button" class="btn-icon-ctrl" title="Expand all">&#x229E;</button>
+      <span class="tree-toolbar-sep"></span>
+      <select id="renumberFormat" class="btn-tree-ctrl">
+        <option value="numbers">1.1.1</option>
+        <option value="roman">I.1.1</option>
+        <option value="letters">A.1.1</option>
+      </select>
+      <button id="renumberBtn" type="button" class="btn-tree-ctrl">&#x21BA; Renumber</button>
+    </div>
+    <div id="treeContainer"></div>
+  </div>
+  <div class="right-panel">
+    <span class="section-title">Questionnaire Preview</span>
     <div class="fhir-toolbar">
       <button id="loadFhirBtn" type="button" class="btn-fhir">&#x2B06; Load FHIR JSON</button>
       <input type="file" id="fhirFileInput" accept=".json,application/json" style="display:none">
       <button id="loadExampleBtn" type="button" class="btn-fhir">&#x2605; Example</button>
       <button id="exportFhirBtn" type="button" class="btn-fhir btn-fhir-export">&#x2B07; Export</button>
     </div>
-    <div class="tree-toolbar">
-      <button id="addRootGroupBtn" type="button" class="btn-add-root">+ Add Root Group</button>
-      <button id="collapseAllBtn" type="button" class="btn-tree-ctrl">&#x25B6; Collapse all</button>
-    </div>
-    <div id="treeContainer"></div>
-  </div>
-  <div class="right-panel">
-    <span class="section-title">Questionnaire Preview</span>
     <div class="preview-card" id="lform"></div>
     <div class="final-result" id="finalResult"></div>
   </div>

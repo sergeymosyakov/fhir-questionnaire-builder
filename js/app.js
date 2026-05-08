@@ -4,7 +4,7 @@ import {
 } from './state.js';
 import { importFHIR } from './fhir/import.js';
 import { exportFHIR } from './fhir/export.js';
-import { renderTree, collapseAll, expandAll } from './render-builder.js';
+import { renderTree, collapseAll, expandAll, renumberAll } from './render-builder.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 
 // Wire patient-data inputs to reactive refs
@@ -34,16 +34,11 @@ document.getElementById('addRootGroupBtn').onclick = () => {
   });
 };
 document.getElementById('testBtn').onclick         = () => { testMode.value = true; };
-let _allCollapsed = false;
-document.getElementById('collapseAllBtn').onclick = () => {
-  _allCollapsed = !_allCollapsed;
-  if (_allCollapsed) {
-    collapseAll();
-    document.getElementById('collapseAllBtn').innerHTML = '&#x25BC; Expand all';
-  } else {
-    expandAll();
-    document.getElementById('collapseAllBtn').innerHTML = '&#x25B6; Collapse all';
-  }
+document.getElementById('collapseAllBtn').onclick  = collapseAll;
+document.getElementById('expandAllBtn').onclick    = expandAll;
+document.getElementById('renumberBtn').onclick     = () => {
+  const format = document.getElementById('renumberFormat').value;
+  renumberAll(format);
 };
 document.getElementById('loadExampleBtn').onclick  = () => loadExampleFile(importFHIR);
 document.getElementById('exportFhirBtn').onclick   = exportFHIR;
@@ -66,5 +61,4 @@ function loadExampleFile(onLoaded) {
     .catch(err => alert('Could not load example: ' + err.message));
 }
 
-// Start with the built-in example loaded
-loadExampleFile(importFHIR);
+// Start empty — use Example button or Load FHIR JSON to load data
