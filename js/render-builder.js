@@ -51,9 +51,9 @@ function toLetter(n) {
 export function renumberAll(format, nodes = tree, prefix = '') {
   nodes.forEach((node, i) => {
     const idx = i + 1;
-    const seg = !prefix
-      ? (format === 'roman' ? toRoman(idx) : format === 'letters' ? toLetter(idx) : String(idx))
-      : String(idx);
+    const seg = format === 'roman'   ? toRoman(idx)
+              : format === 'letters' ? toLetter(idx)
+              : String(idx);
     node.id = prefix ? prefix + '.' + seg : seg;
     if (node.type === 'group' && node.children.length) renumberAll(format, node.children, node.id);
   });
