@@ -99,8 +99,8 @@ export const calcFormOk = node => {
     if (node.itemType === 'checkbox') return String(!!val) === node.successValue;
     return String(val !== undefined ? val : '') === String(node.successValue);
   }
-  // No successValue but mandatory → text/number must be non-empty
-  if (isMandatory(node) && (node.itemType === 'text' || node.itemType === 'number')) {
+  // No successValue but mandatory → text/number/date/url must be non-empty
+  if (isMandatory(node) && (node.itemType === 'text' || node.itemType === 'number' || node.itemType === 'date' || node.itemType === 'url')) {
     const val = values[node.id];
     return val !== undefined && val !== '' && val !== null;
   }

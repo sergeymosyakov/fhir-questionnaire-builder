@@ -70,6 +70,29 @@ function buildControl(node, iconEl, onAfterChange, isAuto) {
     el.oninput = () => { values[node.id] = el.value; onChange(); };
     wrap.appendChild(el);
 
+  } else if (node.itemType === 'date') {
+    const el = document.createElement('input');
+    el.type = 'date'; el.style.width = '150px';
+    el.value = values[node.id] !== undefined ? values[node.id] : '';
+    el.oninput = () => { values[node.id] = el.value; onChange(); };
+    wrap.appendChild(el);
+
+  } else if (node.itemType === 'url') {
+    const el = document.createElement('input');
+    el.type = 'url'; el.style.width = '200px';
+    el.placeholder = 'https://';
+    el.value = values[node.id] !== undefined ? values[node.id] : '';
+    el.oninput = () => { values[node.id] = el.value; onChange(); };
+    const errMsg = document.createElement('span');
+    errMsg.style.cssText = 'font-size:10px;color:var(--c-err);margin-left:4px;display:none';
+    errMsg.textContent = 'Invalid URL';
+    el.addEventListener('blur', () => {
+      const valid = el.value === '' || el.checkValidity();
+      errMsg.style.display = valid ? 'none' : '';
+    });
+    wrap.appendChild(el);
+    wrap.appendChild(errMsg);
+
   } else if (node.itemType === 'select') {
     const el = document.createElement('select');
     let firstOpt = null;
@@ -136,7 +159,8 @@ effect(() => {
   const mandatoryItems = visible.filter(r => !r.disabled && r.node.type === 'item' &&
     isMandatory(r.node) && (
       r.node.successValue !== '' ||
-      r.node.itemType === 'text' || r.node.itemType === 'number'
+      r.node.itemType === 'text' || r.node.itemType === 'number' ||
+      r.node.itemType === 'date' || r.node.itemType === 'url'
     )
   );
   const hasMandatory = mandatoryItems.length > 0;
@@ -229,7 +253,7 @@ effect(() => {
       // Only count items that actually have a checkable condition right now
       const relevantItems = descendantItems.filter(r =>
         (isMandatory(r.node) && r.node.successValue !== '') ||
-        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number')) ||
+        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number' || r.node.itemType === 'date' || r.node.itemType === 'url')) ||
         (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
       );
       if (relevantItems.length === 0) {
@@ -249,7 +273,7 @@ effect(() => {
       // - is a readOnly boolean calc node after Test
       hasCondition = res.node.itemType !== 'display' && (
         (isMandatory(res.node) && res.node.successValue !== '') ||
-        (isMandatory(res.node) && (res.node.itemType === 'text' || res.node.itemType === 'number')) ||
+        (isMandatory(res.node) && (res.node.itemType === 'text' || res.node.itemType === 'number' || res.node.itemType === 'date' || res.node.itemType === 'url')) ||
         (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox' && calcTested.value)
       );
       displayOk    = res.ok && calcFormOk(res.node);
@@ -419,7 +443,7 @@ effect(() => {
     for (const [, { icon, descendants, node }] of groupIconMap.entries()) {
       const relevant = descendants.filter(r =>
         (isMandatory(r.node) && r.node.successValue !== '') ||
-        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number')) ||
+        (isMandatory(r.node) && (r.node.itemType === 'text' || r.node.itemType === 'number' || r.node.itemType === 'date' || r.node.itemType === 'url')) ||
         (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
       );
       if (relevant.length === 0) {

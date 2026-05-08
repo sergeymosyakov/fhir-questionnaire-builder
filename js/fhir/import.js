@@ -34,7 +34,9 @@ export function fhirTypeToItemType(t) {
   if (t === 'integer' || t === 'decimal' || t === 'quantity') return 'number';
   if (t === 'choice'  || t === 'open-choice')                 return 'select';
   if (t === 'display')                                        return 'display';
-  return 'text'; // string, text, date, dateTime, url, reference, attachment
+  if (t === 'date' || t === 'dateTime' || t === 'time')       return 'date';
+  if (t === 'url')                                            return 'url';
+  return 'text'; // string, text, reference, attachment
 }
 
 // answerOption[] → comma-separated display/code string for our options field
