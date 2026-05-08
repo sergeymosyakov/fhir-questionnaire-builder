@@ -228,6 +228,7 @@ body {
 
 /* === Node cards ============================================================== */
 .node {
+  position: relative;
   background: var(--c-surface);
   border: 1px solid var(--c-border);
   border-radius: var(--r);
@@ -343,6 +344,20 @@ body {
 .action-add:hover    { background: #bbdefb; }
 .action-delete { background: #ffebee; color: #c62828; }
 .action-delete:hover { background: #ffcdd2; }
+.btn-node-delete {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+  transition: color .15s;
+}
+.btn-node-delete:hover { color: #c62828; }
 
 /* === Collapsible panels ====================================================== */
 .node-body {

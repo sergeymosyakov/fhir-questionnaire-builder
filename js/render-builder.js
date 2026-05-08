@@ -222,15 +222,17 @@ function renderNode(node) {
     actions.appendChild(a);
   };
 
-  addToggle('Show When', 'vis');
-  addToggle('Required',  'mand');
-  addToggle('Appearance', 'style');
-
   if (node.type === 'item') {
-    addToggle('Applicability', 'cond');
     addToggle('Answer Type', 'type');
-  } else {
+    addToggle('Required',  'mand');
+    addToggle('Show When', 'vis');
     addToggle('Applicability', 'cond');
+    addToggle('Appearance', 'style');
+  } else {
+    addToggle('Required',  'mand');
+    addToggle('Show When', 'vis');
+    addToggle('Applicability', 'cond');
+    addToggle('Appearance', 'style');
     const aSub = document.createElement('a');
     aSub.textContent = '+ Group';
     aSub.className = 'action-add';
@@ -264,14 +266,15 @@ function renderNode(node) {
     actions.appendChild(aItem);
   }
 
-  const aDel = document.createElement('a');
-  aDel.textContent = 'Delete';
-  aDel.className = 'action-delete';
-  aDel.onclick = () => { findAndRemove(node.id, tree); renderTree(); };
-  actions.appendChild(aDel);
-
   header.appendChild(actions);
   div.appendChild(header);
+
+  const btnDel = document.createElement('button');
+  btnDel.textContent = '\u2715';
+  btnDel.className = 'btn-node-delete';
+  btnDel.title = 'Delete';
+  btnDel.onclick = () => { findAndRemove(node.id, tree); renderTree(); };
+  div.appendChild(btnDel);
 
   // Collapsible panels
   const addPanel = (key, buildFn) => {
