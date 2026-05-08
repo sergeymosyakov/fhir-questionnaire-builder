@@ -46,7 +46,7 @@ export const makeItem = (title, template) => {
     return {
       id: nextId(), type: 'item',
       title: title || 'New Item',
-      visibilityRule: template.visibilityRule,
+      visibilityRule: '',                    // do not inherit: specific to source item
       mandatory:      template.mandatory,
       conditionRule:  template.conditionRule,
       itemType:       template.itemType,
