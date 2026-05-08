@@ -48,24 +48,28 @@ function toLetter(n) {
   while (n > 0) { r = String.fromCharCode(64 + ((n - 1) % 26 + 1)) + r; n = Math.floor((n - 1) / 26); }
   return r;
 }
-export function renumberAll(format, nodes = tree, prefix = '') {
-  // First pass (top-level only): build oldId → newId map for the entire tree
-  const idMap = prefix ? null : new Map();
-  if (idMap) _collectIds(tree, idMap);
-
-  _applyNumbers(format, nodes, prefix);
-
-  if (!prefix) {
-    // Second pass: update oldId references in all visibilityRules
-    _patchRules(tree, idMap);
-    renderTree();
-  }
+export function renumberAll(format) {
+  const idMap = new Map();
+  _applyNumbers(format, tree, '');
+  // Pass 1: collect oldId→newId from _oldId markers set by _applyNumbers
+  _walkNodes(tree, n => {
+    if (n._oldId !== undefined) { idMap.set(n._oldId, n.id); delete n._oldId; }
+  });
+  // Pass 2: rewrite all visibilityRules
+  _walkNodes(tree, n => {
+    if (n.visibilityRule) {
+      idMap.forEach((newId, oldId) => {
+        if (newId) n.visibilityRule = n.visibilityRule.split(`'${oldId}'`).join(`'${newId}'`);
+      });
+    }
+  });
+  renderTree();
 }
 
-function _collectIds(nodes, map) {
+function _walkNodes(nodes, fn) {
   for (const n of nodes) {
-    map.set(n.id, null); // placeholder — new id filled in _applyNumbers
-    if (n.type === 'group') _collectIds(n.children, map);
+    fn(n);
+    if (n.type === 'group') _walkNodes(n.children, fn);
   }
 }
 
@@ -76,32 +80,10 @@ function _applyNumbers(format, nodes, prefix) {
               : format === 'letters' ? toLetter(idx)
               : String(idx);
     const newId = prefix ? prefix + '.' + seg : seg;
-    // Store mapping old → new in node temporarily
     node._oldId = node.id;
     node.id = newId;
     if (node.type === 'group' && node.children.length) _applyNumbers(format, node.children, newId);
   });
-}
-
-function _patchRules(nodes, idMap) {
-  for (const n of nodes) {
-    // Build real map from _oldId stored during _applyNumbers
-    if (n._oldId !== undefined) { idMap.set(n._oldId, n.id); delete n._oldId; }
-    if (n.type === 'group') _patchRules(n.children, idMap);
-  }
-  // Replace values['oldId'] → values['newId'] in all visibilityRules
-  if (nodes === tree) _rewriteRules(tree, idMap);
-}
-
-function _rewriteRules(nodes, idMap) {
-  for (const n of nodes) {
-    if (n.visibilityRule) {
-      idMap.forEach((newId, oldId) => {
-        n.visibilityRule = n.visibilityRule.split(`'${oldId}'`).join(`'${newId}'`);
-      });
-    }
-    if (n.type === 'group') _rewriteRules(n.children, idMap);
-  }
 }
 
 // ── Success-value UI (rebuilt when itemType changes, stays inside open panel) ─
