@@ -233,37 +233,55 @@ function renderNode(node) {
     addToggle('Show When', 'vis');
     addToggle('Applicability', 'cond');
     addToggle('Appearance', 'style');
-    const aSub = document.createElement('a');
-    aSub.textContent = '+ Group';
-    aSub.className = 'action-add';
-    aSub.onclick = () => {
-      const newNode = makeGroup('New Group');
-      node.children.push(newNode);
-      _collapsed.set(node.id, false);
-      renderTree();
-      requestAnimationFrame(() => {
-        const el = document.querySelector('[data-node-id="' + newNode.id + '"]');
-        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('node-flash'); setTimeout(() => el.classList.remove('node-flash'), 1000); }
-      });
-    };
-    actions.appendChild(aSub);
 
-    const aItem = document.createElement('a');
-    aItem.textContent = '+ Item';
-    aItem.className = 'action-add';
-    aItem.onclick = () => {
+    // ⊕ Add ▾ dropdown
+    const addWrap = document.createElement('div');
+    addWrap.className = 'action-add-wrap';
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'action-add-btn';
+    addBtn.innerHTML = '&#x2295; Add &#x25BE;';
+
+    const addMenu = document.createElement('div');
+    addMenu.className = 'action-add-menu';
+    addMenu.style.display = 'none';
+
+    const addChild = (label, factory) => {
+      const mi = document.createElement('div');
+      mi.className = 'action-add-menu-item';
+      mi.textContent = label;
+      mi.onclick = () => {
+        addMenu.style.display = 'none';
+        const newNode = factory();
+        node.children.push(newNode);
+        _collapsed.set(node.id, false);
+        renderTree();
+        requestAnimationFrame(() => {
+          const el = document.querySelector('[data-node-id="' + newNode.id + '"]');
+          if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('node-flash'); setTimeout(() => el.classList.remove('node-flash'), 1000); }
+        });
+      };
+      addMenu.appendChild(mi);
+    };
+
+    addChild('Group', () => makeGroup('New Group'));
+    addChild('Item', () => {
       const siblings = node.children.filter(c => c.type === 'item');
       const template = siblings.length > 0 ? siblings[siblings.length - 1] : null;
-      const newNode = makeItem('New Item', template);
-      node.children.push(newNode);
-      _collapsed.set(node.id, false);
-      renderTree();
-      requestAnimationFrame(() => {
-        const el = document.querySelector('[data-node-id="' + newNode.id + '"]');
-        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('node-flash'); setTimeout(() => el.classList.remove('node-flash'), 1000); }
-      });
+      return makeItem('New Item', template);
+    });
+
+    addBtn.onclick = (e) => {
+      e.stopPropagation();
+      const open = addMenu.style.display !== 'none';
+      // close all other open menus
+      document.querySelectorAll('.action-add-menu').forEach(m => { m.style.display = 'none'; });
+      addMenu.style.display = open ? 'none' : 'block';
     };
-    actions.appendChild(aItem);
+
+    addWrap.appendChild(addBtn);
+    addWrap.appendChild(addMenu);
+    actions.appendChild(addWrap);
   }
 
   header.appendChild(actions);

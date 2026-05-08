@@ -344,6 +344,41 @@ body {
 .action-add:hover    { background: #bbdefb; }
 .action-delete { background: #ffebee; color: #c62828; }
 .action-delete:hover { background: #ffcdd2; }
+.action-add-wrap { position: relative; display: inline-flex; }
+.action-add-btn {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: var(--c-primary-lt);
+  color: var(--c-primary);
+  transition: background .12s;
+  white-space: nowrap;
+}
+.action-add-btn:hover { background: #bbdefb; }
+.action-add-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  box-shadow: 0 4px 12px rgba(0,0,0,.12);
+  min-width: 110px;
+  overflow: hidden;
+}
+.action-add-menu-item {
+  padding: 7px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--c-primary);
+  transition: background .1s;
+}
+.action-add-menu-item:hover { background: var(--c-primary-lt); }
 .btn-node-delete {
   position: absolute;
   top: 6px;

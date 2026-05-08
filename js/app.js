@@ -61,4 +61,9 @@ function loadExampleFile(onLoaded) {
     .catch(err => alert('Could not load example: ' + err.message));
 }
 
+// Close any open ⊕ Add dropdown when clicking outside
+document.addEventListener('click', () => {
+  document.querySelectorAll('.action-add-menu').forEach(m => { m.style.display = 'none'; });
+});
+
 // Start empty — use Example button or Load FHIR JSON to load data
