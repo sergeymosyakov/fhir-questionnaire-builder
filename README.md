@@ -4,6 +4,8 @@ A prototype **visual logic builder** for medical prior authorization questionnai
 
 Lets you build questionnaire logic visually, test it against patient data, and import/export valid FHIR R4 JSON.
 
+> © 2026 [Sergey Mosyakov](https://github.com/sergeymosyakov). Free to use with attribution.
+
 ---
 
 ## Files
