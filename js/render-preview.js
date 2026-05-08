@@ -273,7 +273,8 @@ effect(() => {
       // - is a readOnly boolean calc node after Test
       hasCondition = res.node.itemType !== 'display' && (
         (isMandatory(res.node) && res.node.successValue !== '') ||
-        (isMandatory(res.node) && (res.node.itemType === 'text' || res.node.itemType === 'number' || res.node.itemType === 'date' || res.node.itemType === 'url')) ||
+        (isMandatory(res.node) && (res.node.itemType === 'text' || res.node.itemType === 'number' || res.node.itemType === 'date')) ||
+        res.node.itemType === 'url' ||
         (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox' && calcTested.value)
       );
       displayOk    = res.ok && calcFormOk(res.node);

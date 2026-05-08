@@ -100,6 +100,26 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 
 ---
 
+## FHIR Item Type Support
+
+| FHIR R4 type | Internal `itemType` | Control in preview | Validation | Notes |
+|---|---|---|---|---|
+| `boolean` | `checkbox` | ✅ checkbox | — | |
+| `integer`, `decimal` | `number` | ✅ number input | — | `quantity` → number (unit ignored) |
+| `string`, `text` | `text` | ✅ text input | — | |
+| `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three map to `date` |
+| `url` | `url` | ✅ url input | ✅ `new URL()` format check | Invalid URL → ✘ even if not required |
+| `choice` | `select` | ✅ dropdown | — | |
+| `open-choice` | `select` | ⚠️ dropdown | — | Free-text option not shown |
+| `display` | `display` | ✅ label only | — | No control, no pass/fail |
+| `group` | `group` | ✅ section header | — | |
+| `group` (no children) | `group` | ✅ info text `[Info]` | — | |
+| `attachment` | `text` | ⚠️ text fallback | — | No file-upload control |
+| `reference` | `text` | ⚠️ text fallback | — | No FHIR resource search |
+| `quantity` | `number` | ⚠️ number only | — | Unit field not shown |
+
+---
+
 ## FHIR Import / Export
 
 ### Import mapping

@@ -85,6 +85,10 @@ export const evalRule = (rule, ctx) => {
 };
 
 // ── Form-value success check ──────────────────────────────────────────────────
+function _isValidUrl(s) {
+  try { new URL(s); return true; } catch { return false; }
+}
+
 export const calcFormOk = node => {
   // ReadOnly calc node: if Test was run, the result is the evaluated FHIRPath value
   // Only boolean (checkbox) calc nodes participate in pass/fail
@@ -92,15 +96,15 @@ export const calcFormOk = node => {
     if (node.itemType !== 'checkbox') return true;
     return values[node.id] === true;
   }
-  if (node.mandatory === false) return true;
-  // successValue set → must match exactly
-  if (node.successValue !== '') {
+  // url: validate format regardless of required (must come before mandatory===false early return)
+  if (node.itemType === 'url') {
     const val = values[node.id];
-    if (node.itemType === 'checkbox') return String(!!val) === node.successValue;
-    return String(val !== undefined ? val : '') === String(node.successValue);
+    if (!val || val === '') return !isMandatory(node);
+    return _isValidUrl(val);
   }
-  // No successValue but mandatory → text/number/date/url must be non-empty
-  if (isMandatory(node) && (node.itemType === 'text' || node.itemType === 'number' || node.itemType === 'date' || node.itemType === 'url')) {
+  if (node.mandatory === false) return true;
+  // No successValue but mandatory → text/number/date must be non-empty
+  if (isMandatory(node) && (node.itemType === 'text' || node.itemType === 'number' || node.itemType === 'date')) {
     const val = values[node.id];
     return val !== undefined && val !== '' && val !== null;
   }

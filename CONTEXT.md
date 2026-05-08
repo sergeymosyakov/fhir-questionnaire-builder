@@ -110,6 +110,25 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 
 ---
 
+## FHIR Item Type Support
+
+| FHIR R4 type | `itemType` | Control | Validation | Notes |
+|---|---|---|---|---|
+| `boolean` | `checkbox` | ✅ | — | |
+| `integer`, `decimal` | `number` | ✅ | — | `quantity` → number, unit ignored |
+| `string`, `text` | `text` | ✅ | — | |
+| `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three → `date` |
+| `url` | `url` | ✅ | ✅ `new URL()` | Invalid format → ✘ even if optional |
+| `choice` | `select` | ✅ | — | |
+| `open-choice` | `select` | ⚠️ | — | Free-text option not rendered |
+| `display` | `display` | ✅ label | — | No control, no pass/fail |
+| `group` | `group` | ✅ | — | |
+| `group` (no children) | `group` | ✅ `[Info]` | — | |
+| `attachment` | `text` | ⚠️ fallback | — | No file-upload |
+| `reference` | `text` | ⚠️ fallback | — | No resource search |
+
+---
+
 ## FHIR Import (importFHIR)
 
 - `enableWhen` → `visibilityRule` JS expression + `_enableWhenText` (human label)
