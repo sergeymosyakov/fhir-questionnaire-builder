@@ -53,7 +53,7 @@ function loadExampleFile(onLoaded) {
   if (window.EXAMPLE_FHIR_Q) {
     onLoaded(window.EXAMPLE_FHIR_Q);
   } else {
-    fetch('example-bariatric.fhir.json')
+    fetch('sampledata/example-bariatric.fhir.json')
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(onLoaded)
       .catch(err => alert('Could not load example: ' + err.message));
