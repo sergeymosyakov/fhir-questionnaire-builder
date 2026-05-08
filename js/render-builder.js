@@ -222,15 +222,15 @@ function renderNode(node) {
     actions.appendChild(a);
   };
 
-  addToggle('Visibility', 'vis');
+  addToggle('Show When', 'vis');
   addToggle('Required',  'mand');
   addToggle('Appearance', 'style');
 
   if (node.type === 'item') {
-    addToggle('Condition', 'cond');
+    addToggle('Applicability', 'cond');
     addToggle('Answer Type', 'type');
   } else {
-    addToggle('Condition', 'cond');
+    addToggle('Applicability', 'cond');
     const aSub = document.createElement('a');
     aSub.textContent = '+ Group';
     aSub.className = 'action-add';
