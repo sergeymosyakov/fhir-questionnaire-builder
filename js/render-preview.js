@@ -3,7 +3,8 @@ import {
   effect,
   age, gender, bmi, pregnant, smoker, proc, comorb,
   testMode, tree, values, autoFilledIds, _formTick,
-  evalRule, calcFormOk, isDescendant, isMandatory
+  evalRule, calcFormOk, isDescendant, isMandatory,
+  rawFhir, calcTested
 } from './state.js';
 import { evaluateNode } from './eval.js';
 
@@ -40,6 +41,7 @@ function buildControl(node, iconEl, onAfterChange, isAuto) {
     el.onchange = () => {
       values[node.id] = el.checked;
       autoFilledIds.delete(node.id);
+      calcTested.value = false;
       if (badge) { badge.style.opacity = '0.35'; badge.title = 'Was pre-filled, now manually set.'; }
       onChange();
       _formTick.value++;
@@ -66,7 +68,7 @@ function buildControl(node, iconEl, onAfterChange, isAuto) {
     }
     if (values[node.id] !== undefined) el.value = values[node.id];
     else if (firstOpt) { values[node.id] = firstOpt; }
-    el.onchange = () => { values[node.id] = el.value; onChange(); _formTick.value++; };
+    el.onchange = () => { values[node.id] = el.value; onChange(); calcTested.value = false; _formTick.value++; };
     wrap.appendChild(el);
 
   } else {
@@ -291,6 +293,19 @@ effect(() => {
       if (res.node.itemType !== 'display') {
         const isAuto = autoFilledIds.has(res.node.id);
         row.appendChild(buildControl(res.node, iconEl, () => updateGroupIcons(), isAuto));
+      }
+      // calc-badge: show for readOnly nodes with calculatedExpression
+      if (res.node._readOnly && res.node._calculatedExpr) {
+        const badge = document.createElement('span');
+        if (!calcTested.value) {
+          badge.className = 'calc-badge';
+          badge.textContent = '\u26A1 pending';
+        } else {
+          const calcVal = values[res.node.id];
+          badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false');
+          badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
+        }
+        row.appendChild(badge);
       }
     }
 

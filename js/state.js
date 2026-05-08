@@ -26,6 +26,11 @@ export const autoFilledIds = new Set();
 // Causes effect() to re-run → re-evaluates enableWhen visibility conditions.
 export const _formTick = ref(0);
 
+// FHIRPath: original FHIR Questionnaire JSON after import; null if not loaded.
+export const rawFhir = ref(null);
+// True after Test button clicked, reset on any form value change.
+export const calcTested = ref(false);
+
 // ── ID factory ────────────────────────────────────────────────────────────────
 let _seq = 1;
 export const nextId   = () => 'n' + (_seq++);

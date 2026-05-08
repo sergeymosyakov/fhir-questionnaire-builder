@@ -1,5 +1,5 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
-import { tree, values, testMode, makeGroup, makeItem, resetSeq } from '../state.js';
+import { tree, values, testMode, makeGroup, makeItem, resetSeq, rawFhir, calcTested } from '../state.js';
 import { renderTree } from '../render-builder.js';
 
 // Read our custom extension value from a FHIR item
@@ -90,6 +90,14 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   const rs = fhirItem._text && fhirItem._text.extension
     && fhirItem._text.extension.find(x => x.url && x.url.includes('rendering-style'));
   if (rs) node._renderStyle = rs.valueString || '';
+  // SDC calculatedExpression
+  const calcExpr = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression'
+  );
+  if (calcExpr && calcExpr.valueExpression) {
+    node._calculatedExpr = calcExpr.valueExpression.expression || '';
+  }
+  node._readOnly = !!fhirItem.readOnly;
   return node;
 }
 
@@ -153,6 +161,8 @@ export function importFHIR(fhirJson) {
   tree.splice(0);
   Object.keys(values).forEach(k => delete values[k]);
   testMode.value = false;
+  rawFhir.value = q;
+  calcTested.value = false;
   resetSeq();
   const linkIdMap = buildLinkIdMap(q.item);
   for (const item of q.item || []) {

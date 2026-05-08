@@ -706,3 +706,17 @@ body {
   font-size: 12px;
   color: var(--c-text);
 }
+
+/* FHIRPath calculatedExpression badge */
+.calc-badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  background: #f0f0f0;
+  color: #888;
+  border: 1px solid #ccc;
+}
+.calc-badge.calc-true  { background: var(--c-ok-bg);  color: var(--c-ok);  border-color: var(--c-ok-border); }
+.calc-badge.calc-false { background: var(--c-err-bg); color: var(--c-err); border-color: var(--c-err-border); }
