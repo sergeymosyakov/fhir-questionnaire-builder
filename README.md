@@ -11,16 +11,25 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | File | Purpose |
 |---|---|
 | `index.html` | Entry point — markup and script imports |
-| `styles.css` | All styles and CSS design tokens |
-| `app.js` | All logic — reactivity, builder, preview, FHIR import/export |
-| `example-bariatric.fhir.json` | FHIR R4 example (bariatric surgery pre-authorization) |
-| `example-bariatric.fhir.js` | JS wrapper around the example JSON for `file://` compatibility |
+| `favicon.svg` | Browser tab icon |
+| `start.ps1` | Local dev server shortcut: `npx serve .` |
+| `css/styles.css` | All styles and CSS design tokens |
+| `js/app.js` | Entry point — wires inputs, buttons, loads example |
+| `js/state.js` | Reactive state, data factories, shared utilities |
+| `js/eval.js` | Tree evaluation (visibility / condition rules) |
+| `js/render-builder.js` | Left panel — builder tree DOM |
+| `js/render-preview.js` | Right panel — reactive preview + controls |
+| `js/fhir/import.js` | FHIR R4 → internal model |
+| `js/fhir/export.js` | Internal model → FHIR R4 |
+| `sampledata/example-bariatric.fhir.json` | Built-in example (bariatric surgery pre-authorization) |
+| `sampledata/1776102565767-...json` | Real-world questionnaire for testing |
 
 ---
 
 ## Tech Stack
 
-- **`@vue/reactivity`** (CDN) — only `ref`, `reactive`, `effect`. No Vue components.
+- **`@vue/reactivity`** (ESM CDN) — only `ref`, `reactive`, `effect`. No Vue components.
+- **ES Modules** — `import/export` between files; requires HTTP server
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
 - **`new Function()`** — sandboxed rule evaluation (`evalRule`)
@@ -48,7 +57,7 @@ autoFilledIds // Set — IDs of items auto-filled from conditionRule
 
 // Item
 { id, type:'item', title, visibilityRule, conditionRule, mandatory,
-  itemType:'text'|'number'|'checkbox'|'select', options, successValue }
+  itemType:'text'|'number'|'checkbox'|'select'|'display', options, successValue }
 
 // FHIR-imported nodes also carry:
 _enableWhenText  // human-readable visibility condition label
@@ -139,26 +148,21 @@ Custom extensions (URL prefix `http://logicbuilder.example.org/extension/`):
 
 ## Running
 
-### Via `file://`
-Just open `index.html` in a browser — everything works without a server.
+> **Requires an HTTP server** — ES modules do not work over `file://`.
 
-### Via HTTP
+### Locally
 ```powershell
-cd "d:\Work\Projects\ItilityHealth\QuestionaryPrototype"
-npx serve .
-# then open http://localhost:3000
+.\start.ps1
+# or: npx serve .
+# open http://localhost:3000
 ```
 
-### Rebuild the JS example wrapper (after editing the JSON)
-```powershell
-$json = Get-Content "example-bariatric.fhir.json" -Raw
-"window.EXAMPLE_FHIR_Q = $json;" | Set-Content "example-bariatric.fhir.js" -Encoding UTF8
-```
+### GitHub Pages
+https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---
 
 ## Known Limitations / TODO
 
-- Multi-condition visibility (`&&`, `||`) is not supported in the visual builder — must be written manually as JS
-- `conditionRule` on items is not exported to FHIR (it's a prototype-specific concept with no direct R4 equivalent)
-- The example button loads via `window.EXAMPLE_FHIR_Q` (JS wrapper) rather than `fetch`, to keep `file://` compatibility
+- Multi-condition visibility (`&&`, `||`) not supported in the visual builder — must be written manually as JS
+- `conditionRule` on items is not exported to standard FHIR (prototype-specific concept with no direct R4 equivalent)

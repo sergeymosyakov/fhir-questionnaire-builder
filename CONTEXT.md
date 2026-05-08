@@ -12,19 +12,29 @@ Allows visually building questionnaire logic, testing it against patient data, a
 | File | Purpose |
 |---|---|
 | `index.html` | Entry point — markup, script imports |
-| `styles.css` | All styles, CSS design tokens |
-| `app.js` | All logic — reactivity, builder, preview, FHIR |
-| `example-bariatric.fhir.json` | FHIR R4 example (bariatric pre-authorization) |
-| `example-bariatric.fhir.js` | JS wrapper for the example, required for `file://` protocol |
+| `favicon.svg` | Browser tab icon |
+| `start.ps1` | Local dev server: `npx serve .` |
+| `css/styles.css` | All styles and CSS design tokens |
+| `js/app.js` | Entry point — wires inputs, buttons, loads example |
+| `js/state.js` | Reactive state, data factories, shared utilities |
+| `js/eval.js` | Tree evaluation (visibility / condition rules) |
+| `js/render-builder.js` | Left panel — builder tree DOM |
+| `js/render-preview.js` | Right panel — reactive preview |
+| `js/fhir/import.js` | FHIR R4 → internal model |
+| `js/fhir/export.js` | Internal model → FHIR R4 |
+| `sampledata/example-bariatric.fhir.json` | FHIR R4 example (bariatric pre-authorization) |
+| `sampledata/1776102565767-...json` | Real-world questionnaire for testing |
 
 ---
 
 ## Tech Stack
 
-- **`@vue/reactivity`** (CDN) — only `ref`, `reactive`, `effect`. No Vue components.
+- **`@vue/reactivity`** (ESM CDN) — only `ref`, `reactive`, `effect`. No Vue components.
+- **ES Modules** — `import/export` between files; requires HTTP server (`npx serve .` or GitHub Pages)
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
 - **`new Function()`** — sandboxed rule evaluation (`evalRule`)
+- **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---
 
@@ -49,7 +59,7 @@ autoFilledIds // Set — IDs of items auto-filled from conditionRule
 
 // Item
 { id, type:'item', title, visibilityRule, conditionRule, mandatory,
-  itemType:'text'|'number'|'checkbox'|'select', options, successValue }
+  itemType:'text'|'number'|'checkbox'|'select'|'display', options, successValue }
 
 // FHIR-imported nodes also carry:
 _enableWhenText  // human-readable visibility condition label
@@ -136,21 +146,17 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 
 ## Running
 
-### Via `file://`
-Open `index.html` directly in a browser — works without a server.
+> **Requires HTTP server** — ES modules do not work over `file://`.
 
-### Via HTTP
+### Locally
 ```powershell
-cd "d:\Work\Projects\ItilityHealth\QuestionaryPrototype"
-npx serve .
+.\start.ps1
+# or: npx serve .
 # open http://localhost:3000
 ```
 
-### Rebuild JS example wrapper (after editing the JSON)
-```powershell
-$json = Get-Content "example-bariatric.fhir.json" -Raw
-"window.EXAMPLE_FHIR_Q = $json;" | Set-Content "example-bariatric.fhir.js" -Encoding UTF8
-```
+### GitHub Pages
+https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---
 
