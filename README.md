@@ -6,8 +6,6 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 
 > © 2026 [Sergey Mosyakov](https://github.com/sergeymosyakov). Free to use with attribution.
 
-> For internal architecture and codebase notes see [docs/CONTEXT.md](docs/CONTEXT.md).
-
 ---
 
 ## Files
