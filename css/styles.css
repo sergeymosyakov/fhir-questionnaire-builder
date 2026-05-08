@@ -334,10 +334,11 @@ body {
 .node-header-top {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  flex-wrap: wrap;
   min-width: 0;
 }
-.node-title { display: flex; align-items: center; gap: 6px; flex: 1 1 0; min-width: 0; flex-wrap: nowrap; overflow: hidden; }
+.node-title { display: contents; }
 
 /* Collapse toggle button */
 .node-drag-handle {
@@ -499,7 +500,9 @@ body {
 }
 
 /* Action chips */
-.node-actions { display: flex; gap: 4px; flex-wrap: nowrap; align-items: center; flex-shrink: 0; }
+.node-actions { display: contents; }
+.node-actions > a:first-child,
+.node-actions > div:first-child { margin-left: 10px; }
 .node-actions a {
   display: inline-block;
   padding: 2px 8px;
