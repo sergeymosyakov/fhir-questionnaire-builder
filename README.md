@@ -6,6 +6,8 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 
 > © 2026 [Sergey Mosyakov](https://github.com/sergeymosyakov). Free to use with attribution.
 
+> For internal architecture and codebase notes see [docs/CONTEXT.md](docs/CONTEXT.md).
+
 ---
 
 ## Files
@@ -159,6 +161,7 @@ Standard extensions preserved on export:
 
 - **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
 - **Drag & drop reorder** — ⠿ handle on every node; drag to reorder within the tree, drop between nodes (blue line), drop into a group (dashed zone), or drop at root level
+- **Resizable panels** — drag the divider between Logic Builder and Preview to resize; width persisted in `localStorage`
 - **Collapse sections (preview)** — `▼/▶` toggle on each group row; `⊟`/`⊞` All buttons in toolbar (visible after FHIR load)
 - **Disabled groups clickable** — N/A groups in preview still navigate to builder on click
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`
@@ -172,6 +175,9 @@ Standard extensions preserved on export:
 - **Dimmed rows** — conditional items shown grayed out (🔒) when their condition is not met; animate to active when met
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
 - **required text/number** — `required:true` on text/number items requires a non-empty value; shows ✔/✘ and affects PASS/FAIL
+- **Radio buttons** — `radio` item type renders as inline radio-group; exports as `choice` + `questionnaire-itemControl: radio-button`
+- **File attachments** — `attachment` item type renders as file input; `required:true` requires a file to be chosen
+- **Date picker / URL input** — `date` renders as native date-picker; `url` validates format with `new URL()`
 
 ---
 

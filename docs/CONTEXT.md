@@ -1,5 +1,7 @@
 ﻿# QuestionaryPrototype — Build Context
 
+> Internal architecture and codebase notes. See [README.md](../README.md) for user-facing docs.
+
 ## What It Is
 
 A prototype **Logic Builder** for medical questionnaires (FHIR R4 Questionnaire).  
