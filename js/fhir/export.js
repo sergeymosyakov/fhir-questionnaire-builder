@@ -4,6 +4,7 @@ import { tree } from '../state.js';
 function itemTypeToFHIRType(t) {
   if (t === 'checkbox')    return 'boolean';
   if (t === 'number')      return 'decimal';
+  if (t === 'quantity')    return 'quantity';
   if (t === 'select' || t === 'radio') return 'choice';
   if (t === 'open-choice') return 'open-choice';
   if (t === 'display')     return 'display';
@@ -68,6 +69,8 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://logicbuilder.example.org/extension/successValue', valueString: node.successValue });
   if (node.itemType === 'reference' && node.referenceResource)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource', valueCode: node.referenceResource });
+  if (node.itemType === 'quantity' && node.quantityUnit)
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit', valueCoding: { system: 'http://unitsofmeasure.org', code: node.quantityUnit } });
   if (ext.length) fhirItem.extension = ext;
 
   // _renderStyle → _text.extension[rendering-style] (round-trip)

@@ -570,6 +570,22 @@
           ]
         },
         {
+          "linkId": "q-body-temp",
+          "type": "quantity",
+          "text": "Body temperature",
+          "required": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "Cel",
+                "display": "°C"
+              }
+            }
+          ]
+        },
+        {
           "linkId": "q-info-display",
           "type": "display",
           "text": "ℹ️ All documents must be uploaded before submission. Incomplete applications will not be processed."

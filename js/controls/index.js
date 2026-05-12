@@ -11,6 +11,7 @@ import { build as radio       } from './radio.js';
 import { build as openChoice  } from './open-choice.js';
 import { build as text        } from './text.js';
 import { build as reference   } from './reference.js';
+import { build as quantity    } from './quantity.js';
 
 const registry = new Map([
   ['checkbox',    checkbox],
@@ -23,6 +24,7 @@ const registry = new Map([
   ['open-choice', openChoice],
   ['text',        text],
   ['reference',   reference],
+  ['quantity',    quantity],
 ]);
 
 // Returns the built wrapper element, or null for unknown / display types.

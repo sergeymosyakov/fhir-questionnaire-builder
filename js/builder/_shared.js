@@ -48,6 +48,8 @@ export function getAllItems(nodes, result = [], prefix = '') {
 // Build or rebuild the success-value sub-UI inside a container div
 export function buildSuccessValueUI(node, container) {
   container.innerHTML = '';
+  // reference and quantity types have no meaningful success value
+  if (node.itemType === 'reference' || node.itemType === 'quantity' || node.itemType === 'display') return;
   const header = document.createElement('div');
   header.style.marginTop = '6px';
 

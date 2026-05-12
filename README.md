@@ -141,7 +141,8 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | FHIR R4 type | Internal `itemType` | Control in preview | Validation | Notes |
 |---|---|---|---|---|
 | `boolean` | `checkbox` | ✅ checkbox | — | |
-| `integer`, `decimal` | `number` | ✅ number input | — | `quantity` → number (unit ignored) |
+| `integer`, `decimal` | `number` | ✅ number input | — | |
+| `quantity` | `quantity` | ✅ number + unit dropdown (UCUM) | ✅ required = value+unit filled | Builder: Default unit; import/export `questionnaire-unit` extension |
 | `string`, `text` | `text` | ✅ text input | — | |
 | `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three map to `date` |
 | `url` | `url` | ✅ url input | ✅ `new URL()` format check | Invalid URL → ✘ even if not required |
@@ -152,7 +153,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `group` (no children) | `group` | ✅ info text `[Info]` | — | |
 | `attachment` | `attachment` | ✅ file input | ✅ required = file chosen | |
 | `reference` | `reference` | ✅ dropdown (resource type) + `/` + id input | ✅ required = type+id filled | `questionnaire-referenceResource` locks dropdown to that type; otherwise all 96 FHIR R4 types |
-| `quantity` | `number` | ⚠️ number only | — | Unit field not shown |
+| `quantity` | `quantity` | ✅ number + unit dropdown (UCUM) | ✅ required = value+unit filled | Builder: Default unit; import/export `questionnaire-unit` extension |
 
 ---
 

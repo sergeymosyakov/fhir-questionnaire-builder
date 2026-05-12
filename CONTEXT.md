@@ -137,7 +137,8 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | FHIR R4 type | `itemType` | Control | Validation | Notes |
 |---|---|---|---|---|
 | `boolean` | `checkbox` | ✅ | ✅ required = must be checked | |
-| `integer`, `decimal` | `number` | ✅ | — | `quantity` → number, unit ignored |
+| `integer`, `decimal` | `number` | ✅ | — | |
+| `quantity` | `quantity` | ✅ number + unit dropdown (UCUM) | ✅ required = value+unit filled | Builder: Default unit dropdown; import/export `questionnaire-unit` extension |
 | `string`, `text` | `text` | ✅ | — | |
 | `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three → `date` |
 | `url` | `url` | ✅ | ✅ `new URL()` | Invalid format → ✘ even if optional |

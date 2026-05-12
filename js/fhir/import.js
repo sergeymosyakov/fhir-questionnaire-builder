@@ -31,7 +31,8 @@ function enableWhenToExpr(enableWhen) {
 // FHIR item.type → our itemType
 export function fhirTypeToItemType(t) {
   if (t === 'boolean')                                        return 'checkbox';
-  if (t === 'integer' || t === 'decimal' || t === 'quantity') return 'number';
+  if (t === 'integer' || t === 'decimal') return 'number';
+  if (t === 'quantity') return 'quantity';
   if (t === 'choice')                                         return 'select';
   if (t === 'open-choice')                                    return 'open-choice';
   if (t === 'display')                                        return 'display';
@@ -105,6 +106,15 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource'
     );
     if (refResExt && refResExt.valueCode) node.referenceResource = refResExt.valueCode;
+  }
+  // quantity: default unit from standard extension (questionnaire-unit)
+  if (node.itemType === 'quantity') {
+    const unitExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit'
+    );
+    if (unitExt && unitExt.valueCoding && unitExt.valueCoding.code) {
+      node.quantityUnit = unitExt.valueCoding.code;
+    }
   }
   if (fhirItem.enableWhen && fhirItem.enableWhen.length && linkIdMap) {
     node._enableWhenText = humanEnableWhen(fhirItem.enableWhen, linkIdMap);
