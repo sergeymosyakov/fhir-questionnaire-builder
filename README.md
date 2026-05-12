@@ -219,7 +219,7 @@ Standard extensions preserved on export:
 - **required checkbox** — `required:true` on boolean items requires the box to be checked; shows ✔/✘ and affects PASS/FAIL
 - **Required star** — mandatory items show a red `*` in the label in preview
 - **Optional badge** — non-mandatory items show a small `optional` badge in the preview
-- **Search in preview** — 🔍 search box in the preview toolbar; type to highlight matching rows (yellow), `↑`/`↓` buttons (or keyboard arrows) to navigate between matches; shows `2 / 5` counter; red border + "No results" when nothing found; Escape clears
+- **Search in preview** — 🔍 search box in the preview toolbar; type to highlight matching rows (yellow), `↑`/`↓` buttons or keyboard arrows or **Enter** to navigate between matches; shows `2 / 5` counter; red border + "No results" when nothing found; Escape clears
 - **File attachments** — `attachment` item type renders as styled **Choose file** button; `required:true` requires a file to be chosen
 - **Export validation** — on Export: `validateTree()` runs; modal lists errors/warnings with ↗ navigate-to-node per issue; "Fix first" / "Export anyway"
 - **Import validation** — same modal shown after loading a file/sample (OK-only mode)
