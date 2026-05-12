@@ -76,7 +76,7 @@ function _applyNumbers(format, nodes, prefix) {
     if (node.type === 'group' && node.children.length) _applyNumbers(format, node.children, newId);
   });
 }
-export function renumberAll(format) {
+export async function renumberAll(format) {
   const idMap = new Map();
   _applyNumbers(format, tree, '');
   _walkNodes(tree, n => { if (n._oldId !== undefined) { idMap.set(n._oldId, n.id); delete n._oldId; } });
@@ -88,7 +88,18 @@ export function renumberAll(format) {
       }
     });
   });
-  renderTree();
+  // Incremental DOM render: yield between root nodes so the browser can paint progress
+  const container = document.getElementById('treeContainer');
+  container.innerHTML = '';
+  const total = tree.length;
+  const raf = () => new Promise(r => requestAnimationFrame(r));
+  for (let i = 0; i < tree.length; i++) {
+    container.appendChild(renderNode(tree[i]));
+    document.dispatchEvent(new CustomEvent('renumber-progress', { detail: { done: i + 1, total } }));
+    await raf();
+  }
+  container.appendChild(makeRootDropZone());
+  document.dispatchEvent(new CustomEvent('renumber-done'));
 }
 
 // ── Root-level add buttons (wired in app.js via these exports) ────────────────

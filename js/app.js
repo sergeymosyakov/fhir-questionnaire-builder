@@ -43,9 +43,23 @@ document.getElementById('testBtn').onclick = () => {
 };
 document.getElementById('collapseAllBtn').onclick  = collapseAll;
 document.getElementById('expandAllBtn').onclick    = expandAll;
-document.getElementById('renumberBtn').onclick     = () => {
+document.getElementById('renumberBtn').onclick = async () => {
+  const btn  = document.getElementById('renumberBtn');
+  const prog = document.getElementById('renumberProgress');
+  btn.disabled = true;
+  prog.textContent = '0 / ' + (document.querySelectorAll('#treeContainer .node').length || '…');
+  prog.style.display = 'inline';
+  const onProgress = e => { prog.textContent = e.detail.done + ' / ' + e.detail.total; };
+  const onDone = () => {
+    prog.style.display = 'none';
+    btn.disabled = false;
+    document.removeEventListener('renumber-progress', onProgress);
+    document.removeEventListener('renumber-done', onDone);
+  };
+  document.addEventListener('renumber-progress', onProgress);
+  document.addEventListener('renumber-done', onDone);
   const format = document.getElementById('renumberFormat').value;
-  renumberAll(format);
+  await renumberAll(format);
 };
 // ── Validate modal init ───────────────────────────────────────────────────
 const _modal = document.getElementById('validateModal');
