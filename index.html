@@ -117,16 +117,15 @@
         </div>
         <input type="file" id="fhirFileInput" accept=".json,application/json" style="display:none">
         <button id="exportFhirBtn" type="button" class="btn-fhir btn-fhir-export">&#x2B07; Export</button>
-        <span class="fhir-toolbar-sep"></span>
-        <button id="previewCollapseAllBtn" type="button" class="btn-fhir" title="Collapse all sections" style="display:none">&#x229F;</button>
-        <button id="previewExpandAllBtn" type="button" class="btn-fhir" title="Expand all sections" style="display:none">&#x229E;</button>
-        <span class="fhir-toolbar-sep"></span>
-        <div class="search-wrap">
+        <div class="search-wrap" id="searchWrap" style="display:none">
           <input type="search" id="searchInput" class="search-input" placeholder="&#x1F50D; Search&hellip;" autocomplete="off">
           <button id="searchPrevBtn" type="button" class="search-nav-btn" title="Previous match (&#x2191;)">&#x2191;</button>
           <button id="searchNextBtn" type="button" class="search-nav-btn" title="Next match (&#x2193;)">&#x2193;</button>
           <span id="searchCounter" class="search-counter"></span>
         </div>
+        <span class="fhir-toolbar-sep"></span>
+        <button id="previewCollapseAllBtn" type="button" class="btn-fhir" title="Collapse all sections" style="display:none">&#x229F;</button>
+        <button id="previewExpandAllBtn" type="button" class="btn-fhir" title="Expand all sections" style="display:none">&#x229E;</button>
       </div>
     </div>
     <div class="right-panel-body">

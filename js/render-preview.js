@@ -437,9 +437,10 @@ document.getElementById('previewExpandAllBtn').addEventListener('click', () => {
   _formTick.value++;
 });
 
-// Dedicated effect: show collapse/expand buttons only when FHIR is loaded
+// Dedicated effect: show collapse/expand and search only when tree has content
 effect(() => {
-  const d = rawFhir.value ? '' : 'none';
+  const d = tree.length > 0 ? '' : 'none';
   document.getElementById('previewCollapseAllBtn').style.display = d;
   document.getElementById('previewExpandAllBtn').style.display = d;
+  document.getElementById('searchWrap').style.display = d;
 });
