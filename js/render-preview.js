@@ -267,12 +267,20 @@ effect(() => {
       row.appendChild(lb);
     }
 
-    if (res.node.type === 'item' && res.node.mandatory === false && res.node.itemType !== 'display' && !(res.node._readOnly && res.node._calculatedExpr)) {
-      const badge = document.createElement('span');
-      badge.className = 'preview-optional-badge';
-      badge.textContent = 'optional';
-      badge.title = 'This field is not required';
-      row.appendChild(badge);
+    if (res.node.type === 'item' && res.node.itemType !== 'display' && !(res.node._readOnly && res.node._calculatedExpr)) {
+      if (res.node.mandatory === false) {
+        const badge = document.createElement('span');
+        badge.className = 'preview-optional-badge';
+        badge.textContent = 'optional';
+        badge.title = 'This field is not required';
+        row.appendChild(badge);
+      } else {
+        const star = document.createElement('span');
+        star.className = 'preview-required-star';
+        star.textContent = '*';
+        star.title = 'Required field';
+        label.appendChild(star);
+      }
     }
 
     if (res.node._enableWhenText) {

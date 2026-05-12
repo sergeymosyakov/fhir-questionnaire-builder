@@ -77,7 +77,7 @@ progress.init({
 });
 
 document.getElementById('exportFhirBtn').onclick = () => {
-  const issues = validateTree(tree);
+  const issues = validateTree(tree, values);
   if (issues.length === 0) { exportFHIR(); return; }
   validateModal.show('Export — Validation Report', issues, 'export', { onExport: exportFHIR, onNavigate: _navigateToNode });
 };
@@ -87,7 +87,7 @@ const _fileNameEl = document.getElementById('loadedFileName');
 async function _importAndValidate(data, fileName) {
   // importFHIR is sync (parses tree); skip its internal renderTree, do async render instead
   importFHIR(data, () => {}); // pass no-op renderFn — we render below
-  const issues = validateTree(tree);
+  const issues = validateTree(tree, values);
   progress.show('Rendering ' + tree.length + ' nodes…');
   await renderTreeAsync((done, total) => progress.update(done, total));
   expandAll();

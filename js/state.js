@@ -31,8 +31,8 @@ export const calcTested = ref(false);
 // Item types that have form-value validation logic in the preview.
 // CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
 // NONEMPTY_TYPES: mandatory → value must be non-empty (subset, excludes url/attachment).
-export const CHECKABLE_TYPES = new Set(['checkbox', 'text', 'number', 'date', 'url', 'attachment', 'open-choice']);
-export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date', 'open-choice']);
+export const CHECKABLE_TYPES = new Set(['checkbox', 'text', 'number', 'date', 'url', 'attachment', 'open-choice', 'decimal', 'integer', 'quantity', 'reference']);
+export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date', 'open-choice', 'decimal', 'integer', 'quantity', 'reference']);
 
 // ── ID factory ────────────────────────────────────────────────────────────────
 let _seq = 1;
@@ -115,6 +115,12 @@ export const calcFormOk = node => {
     return val != null;
   }
   if (node.mandatory === false) return true;
+  // reference: mandatory → { reference: "Type/id" } must be present
+  if (node.itemType === 'reference') {
+    if (!isMandatory(node)) return true;
+    const val = values[node.id];
+    return val != null && typeof val === 'object' && !!val.reference;
+  }
   // No successValue but mandatory → text/number/date must be non-empty
   if (isMandatory(node) && NONEMPTY_TYPES.has(node.itemType)) {
     const val = values[node.id];

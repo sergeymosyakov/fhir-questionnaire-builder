@@ -277,7 +277,9 @@ body {
 
 /* === Section titles ========================================================== */
 .section-title {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -294,12 +296,12 @@ body {
 }
 
 .loaded-file-name {
-  display: block;
+  display: inline;
   font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--c-accent);
-  margin-bottom: 6px;
-  min-height: 0;
 }
 
 /* === Builder buttons ========================================================= */
@@ -755,6 +757,14 @@ body {
 .preview-logic-or  { background: #fff3e0; color: #e65100; }
 
 /* Optional field badge */
+.preview-required-star {
+  color: var(--c-err, #e53e3e);
+  font-size: 13px;
+  line-height: 1;
+  margin-left: 2px;
+  font-weight: 700;
+}
+
 .preview-optional-badge {
   font-size: 10px;
   color: #999;

@@ -147,7 +147,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `group` | `group` | ✅ section header | — | |
 | `group` (no children) | `group` | ✅ info text `[Info]` | — | |
 | `attachment` | `attachment` | ✅ file input | ✅ required = file chosen | |
-| `reference` | `reference` | ✅ text input (`ResourceType/id`) | — | `questionnaire-referenceResource` extension imported/exported |
+| `reference` | `reference` | ✅ dropdown (resource type) + `/` + id input | ✅ required = type+id filled | `questionnaire-referenceResource` locks dropdown to that type; otherwise all 96 FHIR R4 types |
 | `quantity` | `number` | ⚠️ number only | — | Unit field not shown |
 
 ---
@@ -204,8 +204,9 @@ Standard extensions preserved on export:
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed out (🔒) when their condition is not met; animate to active when met
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
-- **required text/number** — `required:true` on text/number items requires a non-empty value; shows ✔/✘ and affects PASS/FAIL
+- **required text/number/decimal/reference** — `required:true` on text, number, decimal, integer, quantity, reference items requires a non-empty value; shows ✔/✘ and affects PASS/FAIL
 - **required checkbox** — `required:true` on boolean items requires the box to be checked; shows ✔/✘ and affects PASS/FAIL
+- **Required star** — mandatory items show a red `*` in the label in preview
 - **Optional badge** — non-mandatory items show a small `optional` badge in the preview
 - **Radio buttons** — `radio` item type renders as inline radio-group; exports as `choice` + `questionnaire-itemControl: radio-button`
 - **File attachments** — `attachment` item type renders as styled **Choose file** button; `required:true` requires a file to be chosen
