@@ -171,7 +171,7 @@ function fhirItemToNode(fhirItem, linkIdMap) {
 }
 
 // Main import entry point
-export function importFHIR(fhirJson) {
+export function importFHIR(fhirJson, renderFn) {
   let q = fhirJson;
   if (typeof q === 'string') {
     try { q = JSON.parse(q); } catch (e) { alert('Invalid JSON:\n' + e.message); return; }
