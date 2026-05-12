@@ -1,0 +1,259 @@
+/* === Preview card ============================================================ */
+.preview-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.lform-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  transition: background .12s;
+}
+.lform-item:last-child { border-bottom: none; }
+.lform-item:hover { background: #f5f8fc; }
+.lform-item.success {
+  background: var(--c-ok-bg);
+  border-left: 3px solid var(--c-ok-border);
+}
+.lform-item.error {
+  background: var(--c-err-bg);
+  border-left: 3px solid var(--c-err-border);
+}
+
+/* === Nested group children =================================================== */
+.preview-nested {
+  border-left: 3px solid var(--c-primary-lt);
+  margin-left: 45px;
+  background: #f7f9fc;
+}
+.preview-nested .lform-item {
+  padding-left: 14px;
+  font-size: 13px;
+}
+.preview-nested .preview-nested {
+  margin-left: 35px;
+  border-left-color: var(--c-border);
+}
+.group-label       { font-weight: 600; color: var(--c-primary); font-size: 13px; }
+.display-info-label { font-style: italic; color: var(--c-text-2); font-size: 12px; }
+
+/* === Collapse toggle in preview ============================================== */
+.preview-collapse-toggle {
+  font-size: 10px;
+  color: #999;
+  width: 16px;
+  flex-shrink: 0;
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  margin-right: 2px;
+}
+.preview-collapse-toggle:hover { color: #444; }
+
+/* === AND/OR badge ============================================================ */
+.preview-logic-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  cursor: help;
+}
+.preview-logic-and { background: #e3edfc; color: var(--c-primary); }
+.preview-logic-or  { background: #fff3e0; color: #e65100; }
+
+/* === Required star / optional badge ========================================= */
+.preview-required-star {
+  color: var(--c-err);
+  font-size: 13px;
+  line-height: 1;
+  margin-left: 2px;
+  font-weight: 700;
+}
+.preview-optional-badge {
+  font-size: 10px;
+  color: #999;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1px 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-style: italic;
+}
+
+/* === enableWhen condition hint =============================================== */
+.preview-condition-hint {
+  font-size: 11px;
+  color: var(--c-text-2);
+  background: #f5f5f5;
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
+  padding: 1px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+  flex-shrink: 1;
+}
+.preview-condition-waiting {
+  background: #fff8e1 !important;
+  border-color: #ffe082 !important;
+  color: #795548 !important;
+}
+
+/* === AND/OR separator between sibling items ================================== */
+.logic-separator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: #aaa;
+  margin: 2px 14px;
+}
+.logic-separator::before,
+.logic-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--c-border);
+}
+.logic-separator-and { color: var(--c-primary); }
+.logic-separator-and::before,
+.logic-separator-and::after { background: #c5d8f6; }
+.logic-separator-or  { color: #e65100; }
+.logic-separator-or::before,
+.logic-separator-or::after { background: #ffe0b2; }
+
+/* === Status icons ============================================================ */
+.icon-ok, .icon-fail, .icon-na {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.icon-ok   { background: var(--c-ok);  color: #fff; }
+.icon-fail { background: var(--c-err); color: #fff; }
+.icon-na   { background: #9e9e9e; }
+.icon-na::before {
+  content: '';
+  display: block;
+  width: 10px; height: 2px;
+  background: #fff;
+  border-radius: 1px;
+}
+
+/* === Disabled / waiting states ============================================== */
+.lform-disabled { opacity: 0.40; cursor: pointer; }
+.lform-disabled input,
+.lform-disabled select,
+.lform-disabled textarea,
+.lform-disabled button { pointer-events: none; }
+.lform-waiting { opacity: 0.55; background: #fafafa; }
+.lform-waiting:hover { background: #f0f4f8 !important; }
+
+/* === Auto-fill badge ========================================================= */
+.auto-badge {
+  font-size: 13px;
+  cursor: help;
+  transition: opacity .2s;
+  flex-shrink: 0;
+}
+
+/* === linkId tag in preview =================================================== */
+.preview-linkid {
+  font-family: monospace;
+  font-size: 10px;
+  color: #999;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  padding: 0 6px 0 0;
+  flex-shrink: 0;
+  cursor: help;
+  transition: color .15s;
+  white-space: nowrap;
+  min-width: 36px;
+}
+.lform-item:hover .preview-linkid { color: var(--c-primary); }
+
+/* === Preview helpers ========================================================= */
+.preview-no-visible   { color: #999; font-size: 13px; padding: 12px; }
+.preview-icon-ph      { width: 20px; flex-shrink: 0; display: inline-block; }
+.preview-row--pointer { cursor: pointer; }
+.preview-label--dim   { color: #aaa; }
+
+/* === Preview card inputs ===================================================== */
+.preview-card input[type=text],
+.preview-card input[type=number] {
+  padding: 3px 6px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  color: var(--c-text);
+}
+.preview-card input[type=checkbox] { accent-color: var(--c-primary); }
+.preview-card select {
+  padding: 3px 6px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  color: var(--c-text);
+}
+
+/* === Final result banner ===================================================== */
+.final-result {
+  margin-bottom: 8px;
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  font-weight: 700;
+  font-size: 12px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  color: var(--c-text-2);
+  transition: background .2s, color .2s;
+  display: none;
+}
+.final-result.pass {
+  background: var(--c-ok-bg);
+  border-color: var(--c-ok-border);
+  color: var(--c-ok);
+}
+.final-result.fail {
+  background: var(--c-err-bg);
+  border-color: var(--c-err-border);
+  color: var(--c-err);
+}
+
+/* === Flash animations ======================================================== */
+@keyframes preview-flash {
+  0%   { box-shadow: 0 0 0 2px var(--c-primary); background: #e3f2fd; }
+  70%  { box-shadow: 0 0 0 2px var(--c-primary); background: #e3f2fd; }
+  100% { box-shadow: none; background: transparent; }
+}
+.preview-flash { animation: preview-flash .9s ease-out; }
+
+/* === FHIRPath calculatedExpression badge ==================================== */
+.calc-badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  background: #f0f0f0;
+  color: #888;
+  border: 1px solid #ccc;
+}
+.calc-badge.calc-true  { background: var(--c-ok-bg);  color: var(--c-ok);  border-color: var(--c-ok-border); }
+.calc-badge.calc-false { background: var(--c-err-bg); color: var(--c-err); border-color: var(--c-err-border); }

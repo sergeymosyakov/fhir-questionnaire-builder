@@ -248,38 +248,20 @@ The same applies to all builder submodules: dependencies injected via `init(deps
 
 ## CSS Architecture
 
-All UI styles live in `css/styles.css` using CSS custom properties (`--c-border`, `--c-text`, `--c-err`, `--c-surface`, `--c-accent`, `--r-sm`, `--r-md`).
+Styles are split into modules — `css/styles.css` contains only design tokens + base reset + global utilities. All component styles live in dedicated files:
 
-**Control classes** (added during inline → CSS refactor):
+| File | Lines | Content |
+|---|---|---|
+| `css/styles.css` | ~85 | CSS custom properties (`:root`), base reset, progress bar, `.resize-overlay` |
+| `css/layout.css` | ~236 | Top panel, 2-column layout, section titles, loaded file name, clear button |
+| `css/builder.css` | ~481 | Toolbar, node cards, drag/drop zones, action chips, collapsible panels, vis-builder, flash animation |
+| `css/preview.css` | ~244 | Preview card, lform-item, status icons, AND/OR badges, final result, calc-badge, flash |
+| `css/controls.css` | ~106 | `.ctrl-wrap`, `.ctrl-err`, `.ref-*`, `.qty-*`, open-choice, file input, radio, shared-success |
+| `css/modals.css` | ~105 | Clear-confirm modal, validate modal, preview placeholder |
 
-| Class | Purpose |
-|---|---|
-| `.ctrl-wrap` | `inline-flex` wrapper for all control primitives |
-| `.ctrl-err` | Error message span (hidden by default, `display:none`) |
-| `.ctrl-err--ml` | Adds `margin-left:6px` to `.ctrl-err` |
-| `.ctrl-input--text` | Text input width (120px) |
-| `.ctrl-input--number` | Number input width (80px) |
-| `.ctrl-input--date` | Date input width (150px) |
-| `.ctrl-input--url` | URL input width (200px) |
-| `.ref-type-sel` | Reference control: resource-type `<select>` (left half, no right border) |
-| `.ref-sep` | Reference control: `/` separator span |
-| `.ref-id-input` | Reference control: id `<input>` (right half, no left border) |
-| `.qty-num-input` | Quantity control: numeric `<input>` |
-| `.qty-unit-sel` | Quantity control: UCUM unit `<select>` |
-| `.preview-no-visible` | "No visible groups/items" placeholder text |
-| `.preview-icon-ph` | Empty 20px spacer span (aligns label when no icon) |
-| `.preview-row--pointer` | Adds `cursor:pointer` to clickable preview rows |
-| `.preview-label--dim` | Dims label color (`#aaa`) for hidden/disabled rows |
-| `.preview-required-star` | Red `*` after label for mandatory items |
-| `.preview-optional-badge` | Italic `optional` badge for optional items |
-| `.clear-confirm-backdrop` / `.clear-confirm-box` / etc. | "Clear form" confirmation modal |
-| `.clear-form-btn` | `×` clear button next to loaded file name |
-| `.loaded-file-name-wrap` | Wrapper for filename + clear button |
-
-**Inline styles remaining** (not yet converted — tracked for future refactor):
-- `js/builder/node-group.js` — `titleWrap.style.cursor` (dead code, `display:contents` parent), `titleTextarea.style.height` (dynamic)
-- `js/builder/node-item.js` — same as above
-- `js/app.js` — `leftPanel.style.width` (resizer, dynamic); `label.style.cssText = _renderStyle` (user CSS, intentional)
+**Inline styles remaining** (genuinely dynamic — not convertible):
+- `js/builder/node-group.js` / `node-item.js` — `titleTextarea.style.height` (auto-resize)
+- `js/app.js` — `leftPanel.style.width` (resizer); `label.style.cssText = _renderStyle` (user CSS)
 
 ---
 

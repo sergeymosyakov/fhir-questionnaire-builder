@@ -1,0 +1,240 @@
+/* === Top panel =============================================================== */
+.top-panel {
+  background: var(--c-primary-dk);
+  color: #fff;
+  padding: 0 16px;
+  height: 56px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  flex-shrink: 0;
+  z-index: 100;
+}
+.top-panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  white-space: nowrap;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.top-panel-sep {
+  width: 1px;
+  height: 24px;
+  background: rgba(255,255,255,.2);
+  flex-shrink: 0;
+}
+.top-panel label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: rgba(255,255,255,.75);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.top-panel input {
+  width: 100px;
+  height: 28px;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: var(--r-sm);
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  padding: 0 7px;
+  font-size: 12px;
+}
+.top-panel input::placeholder { color: rgba(255,255,255,.45); }
+.top-panel input:focus {
+  outline: none;
+  border-color: rgba(255,255,255,.65);
+  background: rgba(255,255,255,.20);
+}
+.top-sel {
+  height: 28px;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: var(--r-sm);
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  padding: 0 6px;
+  font-size: 12px;
+}
+.top-sel:focus { outline: none; border-color: rgba(255,255,255,.65); }
+.top-sel option { background: var(--c-primary-dk); color: #fff; }
+.top-check {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: rgba(255,255,255,.85);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.top-check input[type=checkbox] {
+  width: 14px; height: 14px;
+  accent-color: var(--c-teal);
+  cursor: pointer;
+}
+.btn-test {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 6px 20px;
+  background: var(--c-teal);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .4px;
+  transition: background .15s;
+}
+.btn-test:hover { background: #00695c; }
+
+.top-github-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-text-2);
+  text-decoration: none;
+  padding: 4px 8px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  background: var(--c-surface);
+  margin-left: 4px;
+  white-space: nowrap;
+  transition: color .15s, background .15s;
+}
+.top-github-link:hover { color: var(--c-text); background: #e8eaed; }
+
+.right-panel-header-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.right-panel-header-top .section-title { margin-bottom: 0; }
+.preview-copyright {
+  font-size: 10px;
+  color: var(--c-text-2);
+  opacity: 0.65;
+  white-space: nowrap;
+}
+.preview-copyright a { color: inherit; text-decoration: none; }
+.preview-copyright a:hover { text-decoration: underline; }
+
+/* === Two-column layout ======================================================= */
+.layout {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.panel-resizer {
+  width: 5px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: var(--c-border);
+  transition: background 0.15s;
+  position: relative;
+  z-index: 10;
+}
+.panel-resizer:hover,
+.panel-resizer.resizing { background: var(--c-primary); }
+.left-panel {
+  width: 470px;
+  min-width: 200px;
+  max-width: 70vw;
+  flex-shrink: 0;
+  background: var(--c-surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.left-panel-header {
+  padding: 14px 14px 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--c-border);
+}
+.left-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px 14px;
+}
+.right-panel {
+  flex: 1;
+  min-width: 0;
+  background: var(--c-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.right-panel-header {
+  padding: 14px 14px 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--c-border);
+}
+.right-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px 14px;
+}
+
+/* === Section titles ========================================================== */
+.section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--c-text-2);
+  margin-bottom: 10px;
+}
+.left-panel-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.loaded-file-name-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.loaded-file-name {
+  display: inline;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--c-accent);
+}
+.clear-form-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--c-text-2);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity 0.15s, background 0.15s;
+}
+.clear-form-btn:hover {
+  opacity: 1;
+  background: var(--c-err);
+  color: #fff;
+}

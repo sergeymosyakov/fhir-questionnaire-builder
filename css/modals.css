@@ -1,0 +1,107 @@
+/* === Clear form confirmation modal ========================================== */
+.clear-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.clear-confirm-box {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r);
+  padding: 24px 28px 20px;
+  min-width: 340px;
+  max-width: 440px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.clear-confirm-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--c-text);
+  margin-bottom: 8px;
+}
+.clear-confirm-msg {
+  font-size: 13px;
+  color: var(--c-text-2);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.clear-confirm-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* === Export validation modal ================================================= */
+.validate-modal-backdrop {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+}
+.validate-modal {
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.28);
+  width: 560px; max-width: 94vw;
+  display: flex; flex-direction: column;
+  max-height: 80vh;
+}
+.validate-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--c-border);
+  font-weight: 600; font-size: 14px;
+}
+.validate-modal-close {
+  background: none; border: none; cursor: pointer;
+  font-size: 15px; color: #888; padding: 2px 6px; border-radius: 3px;
+}
+.validate-modal-close:hover { background: #f0f0f0; color: #333; }
+.validate-modal-body {
+  overflow-y: auto; padding: 12px 16px; flex: 1; min-height: 60px;
+}
+.validate-modal-summary { font-size: 13px; color: #555; margin-bottom: 10px; }
+.validate-issue {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 7px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px;
+}
+.validate-issue:last-child { border-bottom: none; }
+.validate-issue-badge {
+  flex-shrink: 0; font-size: 11px; font-weight: 700;
+  padding: 2px 6px; border-radius: 3px; margin-top: 1px; text-transform: uppercase;
+}
+.validate-badge-error   { background: #ffebee; color: #c62828; }
+.validate-badge-warning { background: #fff8e1; color: #e65100; }
+.validate-issue-content { flex: 1; }
+.validate-issue-id {
+  font-family: monospace; font-size: 12px; color: var(--c-primary);
+  background: var(--c-primary-lt); padding: 0 4px; border-radius: 2px;
+  margin-right: 4px;
+}
+.validate-modal-footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--c-border);
+}
+.validate-nav-btn {
+  flex-shrink: 0;
+  background: none; border: none; cursor: pointer;
+  font-size: 13px; color: var(--c-primary);
+  padding: 1px 5px; border-radius: 3px;
+  opacity: 0.7; transition: opacity .1s;
+}
+.validate-nav-btn:hover { opacity: 1; background: var(--c-primary-lt); }
+
+/* === Preview placeholder (empty state) ====================================== */
+.preview-placeholder {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; min-height: 260px;
+  text-align: center; padding: 32px 24px; color: #999;
+  user-select: none;
+}
+.preview-placeholder-icon  { font-size: 40px; margin-bottom: 12px; opacity: .5; }
+.preview-placeholder-title { font-size: 16px; font-weight: 600; color: #bbb; margin-bottom: 8px; }
+.preview-placeholder-hint  { font-size: 13px; line-height: 1.6; color: #bbb; }
