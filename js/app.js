@@ -60,14 +60,22 @@ validateModal.init({
 document.getElementById('exportFhirBtn').onclick = () => {
   const issues = validateTree(tree);
   if (issues.length === 0) { exportFHIR(); return; }
-  validateModal.show('Export — Validation Report', issues, 'export', exportFHIR);
+  validateModal.show('Export — Validation Report', issues, 'export', { onExport: exportFHIR, onNavigate: _navigateToNode });
 };
 
 // Wrapper: run import then show validation report if needed
 function _importAndValidate(data) {
   importFHIR(data);
   const issues = validateTree(tree);
-  if (issues.length > 0) validateModal.show('Import — Validation Report', issues, 'import');
+  if (issues.length > 0) validateModal.show('Import — Validation Report', issues, 'import', { onNavigate: _navigateToNode });
+}
+
+function _navigateToNode(nodeId) {
+  const target = document.querySelector(`[data-node-id="${nodeId}"]`);
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  target.classList.add('node-flash');
+  setTimeout(() => target.classList.remove('node-flash'), 1000);
 }
 
 // ── Load dropdown ─────────────────────────────────────────────────────────────
@@ -98,12 +106,6 @@ document.getElementById('fhirFileInput').onchange  = e => {
   reader.readAsText(file);
   e.target.value = '';
 };
-
-// Load built-in example on startup
-fetch('sampledata/example-bariatric.fhir.json')
-  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-  .then(importFHIR)  // startup: skip validation report on built-in example
-  .catch(err => alert('Could not load example: ' + err.message));
 
 // Close any open ⊕ Add dropdown when clicking outside
 document.addEventListener('click', () => {

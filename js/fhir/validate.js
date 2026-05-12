@@ -22,13 +22,13 @@ function _checkJsExpr(rule) {
   }
 }
 
-// Attempt to parse a FHIRPath expression. Returns error message or null.
+// Attempt to parse a FHIRPath expression (syntax check only). Returns error message or null.
 function _checkFhirPath(expr) {
   if (!expr || !expr.trim()) return null;
   const fp = window.fhirpath;
-  if (!fp) return null; // fhirpath not loaded yet — skip
+  if (!fp || typeof fp.compile !== 'function') return null;
   try {
-    fp.evaluate({}, expr);
+    fp.compile(expr);
     return null;
   } catch (e) {
     return e.message;

@@ -57,6 +57,18 @@ effect(() => {
   const lform = document.getElementById('lform');
   lform.innerHTML = '';
 
+  if (tree.length === 0) {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'preview-placeholder';
+    placeholder.innerHTML =
+      '<div class="preview-placeholder-icon">📋</div>' +
+      '<div class="preview-placeholder-title">No questionnaire loaded</div>' +
+      '<div class="preview-placeholder-hint">Use <strong>⬆ Load ▾</strong> to open a sample or upload your own FHIR R4 Questionnaire JSON,<br>or build one from scratch using <strong>+ Add Root Group</strong> in the left panel.</div>';
+    lform.appendChild(placeholder);
+    document.getElementById('finalResult').innerHTML = '';
+    return;
+  }
+
   const results = [];
   let anyVisible = false;
   for (const node of tree) {

@@ -1,10 +1,11 @@
 // ── Validation Modal UI ───────────────────────────────────────────────────────
 // init(elements) — wire DOM nodes once at startup (no string IDs inside this module)
-// show(title, issues, mode, onExport?) — render and open the modal
+// show(title, issues, mode, { onExport?, onNavigate? }) — render and open the modal
 //   mode: 'export' → "Fix first" + "Export anyway" (calls onExport)
 //         'import' → "OK" only
+//   onNavigate(nodeId) — called when user clicks the ↗ link next to an issue
 
-let _el = null; // { backdrop, headerTitle, body, footer, closeBtn }
+let _el = null;
 
 export function init(elements) {
   _el = elements;
@@ -12,9 +13,9 @@ export function init(elements) {
   _el.backdrop.addEventListener('click', e => { if (e.target === _el.backdrop) _close(); });
 }
 
-export function show(title, issues, mode, onExport) {
+export function show(title, issues, mode, { onExport, onNavigate } = {}) {
   _el.headerTitle.textContent = title;
-  _renderBody(issues);
+  _renderBody(issues, onNavigate);
   _renderFooter(mode, onExport);
   _el.backdrop.style.display = 'flex';
 }
@@ -23,7 +24,7 @@ function _close() {
   _el.backdrop.style.display = 'none';
 }
 
-function _renderBody(issues) {
+function _renderBody(issues, onNavigate) {
   _el.body.innerHTML = '';
 
   const errors   = issues.filter(i => i.severity === 'error');
@@ -48,12 +49,27 @@ function _renderBody(issues) {
 
     const content = document.createElement('span');
     content.className = 'validate-issue-content';
+
     const idTag = document.createElement('span');
     idTag.className = 'validate-issue-id';
     idTag.textContent = issue.nodeId;
     content.appendChild(idTag);
     content.appendChild(document.createTextNode(issue.message));
     row.appendChild(content);
+
+    // Navigate button — only when nodeId is a real linkId and onNavigate provided
+    if (onNavigate && issue.nodeId && issue.nodeId !== '(empty)') {
+      const navBtn = document.createElement('button');
+      navBtn.type = 'button';
+      navBtn.className = 'validate-nav-btn';
+      navBtn.title = 'Go to node in builder';
+      navBtn.textContent = '↗';
+      navBtn.addEventListener('click', () => {
+        _close();
+        onNavigate(issue.nodeId);
+      });
+      row.appendChild(navBtn);
+    }
 
     _el.body.appendChild(row);
   }
@@ -86,3 +102,4 @@ function _renderFooter(mode, onExport) {
     _el.footer.appendChild(okBtn);
   }
 }
+
