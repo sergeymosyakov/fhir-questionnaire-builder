@@ -254,7 +254,7 @@ Styles are split into modules — `css/styles.css` contains only design tokens +
 |---|---|---|
 | `css/styles.css` | ~85 | CSS custom properties (`:root`), base reset, progress bar, `.resize-overlay` |
 | `css/layout.css` | ~236 | Top panel, 2-column layout, section titles, loaded file name, clear button |
-| `css/builder.css` | ~481 | Toolbar, node cards, drag/drop zones, action chips, collapsible panels, vis-builder, flash animation |
+| `css/builder.css` | ~485 | Toolbar, node cards, drag/drop zones, action chips, collapsible panels, vis-builder, flash animation, `.panel-color-inp/clear`, `.panel-hint` |
 | `css/preview.css` | ~244 | Preview card, lform-item, status icons, AND/OR badges, final result, calc-badge, flash |
 | `css/controls.css` | ~106 | `.ctrl-wrap`, `.ctrl-err`, `.ref-*`, `.qty-*`, open-choice, file input, radio, shared-success |
 | `css/modals.css` | ~105 | Clear-confirm modal, validate modal, preview placeholder |
