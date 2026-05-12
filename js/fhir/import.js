@@ -32,7 +32,8 @@ function enableWhenToExpr(enableWhen) {
 export function fhirTypeToItemType(t) {
   if (t === 'boolean')                                        return 'checkbox';
   if (t === 'integer' || t === 'decimal' || t === 'quantity') return 'number';
-  if (t === 'choice'  || t === 'open-choice')                 return 'select';
+  if (t === 'choice')                                         return 'select';
+  if (t === 'open-choice')                                    return 'open-choice';
   if (t === 'display')                                        return 'display';
   if (t === 'date' || t === 'dateTime' || t === 'time')       return 'date';
   if (t === 'url')                                            return 'url';
@@ -85,7 +86,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   node.conditionRule  = extractExtension(fhirItem, 'conditionRule')  || '';
   node.itemType       = fhirTypeToItemType(fhirItem.type || 'string');
   // questionnaire-itemControl: radio-button → use 'radio' instead of 'select'
-  if (node.itemType === 'select') {
+  if (node.itemType === 'select' || node.itemType === 'open-choice') {
     const itemCtrl = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl'
     );

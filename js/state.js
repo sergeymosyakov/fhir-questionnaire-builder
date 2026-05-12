@@ -33,8 +33,8 @@ export const calcTested = ref(false);
 // Item types that have form-value validation logic in the preview.
 // CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
 // NONEMPTY_TYPES: mandatory → value must be non-empty (subset, excludes url/attachment).
-export const CHECKABLE_TYPES = new Set(['checkbox', 'text', 'number', 'date', 'url', 'attachment']);
-export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date']);
+export const CHECKABLE_TYPES = new Set(['checkbox', 'text', 'number', 'date', 'url', 'attachment', 'open-choice']);
+export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date', 'open-choice']);
 
 // ── ID factory ────────────────────────────────────────────────────────────────
 let _seq = 1;

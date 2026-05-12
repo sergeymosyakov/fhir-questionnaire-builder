@@ -643,7 +643,7 @@ function renderNode(node) {
       typeRow.textContent = 'Type: ';
       const typeSelect = document.createElement('select');
       typeSelect.style.width = 'auto';
-      for (const t of ['text', 'number', 'date', 'url', 'attachment', 'checkbox', 'select', 'radio', 'display']) {
+      for (const t of ['text', 'number', 'date', 'url', 'attachment', 'checkbox', 'select', 'open-choice', 'radio', 'display']) {
         const opt = document.createElement('option');
         opt.value = t; opt.textContent = t;
         if (node.itemType === t) opt.selected = true;
@@ -654,7 +654,7 @@ function renderNode(node) {
 
       const optionsDiv = document.createElement('div');
       optionsDiv.style.marginTop = '4px';
-      optionsDiv.style.display = node.itemType === 'select' ? 'block' : 'none';
+      optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice') ? 'block' : 'none';
       optionsDiv.innerHTML = 'Options (comma-separated):<br>'
         + '<input type="text" value="' + escAttr(node.options) + '">';
       optionsDiv.querySelector('input').oninput = function () { node.options = this.value; };
@@ -666,7 +666,7 @@ function renderNode(node) {
 
       typeSelect.onchange = () => {
         node.itemType = typeSelect.value;
-        optionsDiv.style.display = node.itemType === 'select' ? 'block' : 'none';
+        optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice') ? 'block' : 'none';
         buildSuccessValueUI(node, successDiv);
       };
     });

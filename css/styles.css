@@ -758,6 +758,23 @@ body {
 }
 .icon-ok   { background: var(--c-ok);  color: #fff; }
 .icon-fail { background: var(--c-err); color: #fff; }
+/* Open-choice: native datalist combobox */
+.open-choice-input {
+  width: 180px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  color: var(--c-text);
+  background: var(--c-surface);
+}
+.open-choice-input:focus {
+  outline: none;
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 2px var(--c-primary-lt);
+}
+
 /* File input */
 .file-input-hidden { display: none; }
 .btn-file {

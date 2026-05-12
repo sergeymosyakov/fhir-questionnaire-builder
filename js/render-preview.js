@@ -9,6 +9,7 @@ import {
 import { evaluateNode } from './eval.js';
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes } from './fhir/calc.js';
+import { buildControl as _buildControl } from './controls/index.js';
 
 const fhirpath = window.fhirpath;
 
@@ -23,145 +24,18 @@ function _reCalc() {
 }
 
 // ── Interactive control for preview ──────────────────────────────────────────
-function buildControl(node, iconEl, onAfterChange, isAuto) {
+// Thin wrapper: resolves onChange/icon update, delegates DOM construction to
+// the control registry in js/controls/index.js
+function buildControl(node, iconEl, onAfterChange) {
   const updateOwnIcon = () => {
     if (!iconEl) return;
     const ok = calcFormOk(node);
     iconEl.className   = ok ? 'icon-ok' : 'icon-fail';
     iconEl.textContent = ok ? '\u2714' : '\u2718';
   };
+  const onChange = () => { updateOwnIcon(); if (onAfterChange) onAfterChange(); };
 
-  const onChange = () => {
-    updateOwnIcon();
-    if (onAfterChange) onAfterChange();
-  };
-
-  const wrap = document.createElement('span');
-  wrap.style.cssText = 'display:inline-flex;align-items:center;gap:5px;';
-
-  if (node.itemType === 'checkbox') {
-    const el = document.createElement('input');
-    el.type    = 'checkbox';
-    el.checked = !!values[node.id];
-
-    let badge = null;
-    if (isAuto) {
-      badge = document.createElement('span');
-      badge.className = 'auto-badge';
-      badge.title = 'Pre-filled from patient data. You can override.';
-      badge.textContent = '\uD83E\uDD16';
-    }
-
-    el.onchange = () => {
-      values[node.id] = el.checked;
-      autoFilledIds.delete(node.id);
-      if (badge) { badge.style.opacity = '0.35'; badge.title = 'Was pre-filled, now manually set.'; }
-      _reCalc();
-      onChange();
-      _formTick.value++;
-    };
-    wrap.appendChild(el);
-    if (badge) wrap.appendChild(badge);
-
-  } else if (node.itemType === 'number') {
-    const el = document.createElement('input');
-    el.type = 'number'; el.style.width = '80px';
-    el.value = values[node.id] !== undefined ? values[node.id] : '';
-    el.oninput = () => { values[node.id] = el.value; onChange(); };
-    wrap.appendChild(el);
-
-  } else if (node.itemType === 'date') {
-    const el = document.createElement('input');
-    el.type = 'date'; el.style.width = '150px';
-    el.value = values[node.id] !== undefined ? values[node.id] : '';
-    el.oninput = () => { values[node.id] = el.value; onChange(); };
-    wrap.appendChild(el);
-
-  } else if (node.itemType === 'url') {
-    const el = document.createElement('input');
-    el.type = 'url'; el.style.width = '200px';
-    el.placeholder = 'https://';
-    el.value = values[node.id] !== undefined ? values[node.id] : '';
-    el.oninput = () => { values[node.id] = el.value; onChange(); };
-    const errMsg = document.createElement('span');
-    errMsg.style.cssText = 'font-size:10px;color:var(--c-err);margin-left:4px;display:none';
-    errMsg.textContent = 'Invalid URL';
-    el.addEventListener('blur', () => {
-      const valid = el.value === '' || el.checkValidity();
-      errMsg.style.display = valid ? 'none' : '';
-    });
-    wrap.appendChild(el);
-    wrap.appendChild(errMsg);
-
-  } else if (node.itemType === 'attachment') {
-    const el = document.createElement('input');
-    el.type = 'file';
-    el.className = 'file-input-hidden';
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'btn-file';
-    btn.textContent = 'Choose file';
-    btn.onclick = () => el.click();
-    const nameTag = document.createElement('span');
-    nameTag.className = 'file-name-tag';
-    nameTag.textContent = values[node.id] ? values[node.id].name : 'No file chosen';
-    el.onchange = () => {
-      const file = el.files[0] || null;
-      values[node.id] = file ? { name: file.name, size: file.size, type: file.type } : null;
-      nameTag.textContent = file ? file.name : 'No file chosen';
-      onChange();
-    };
-    wrap.appendChild(el);
-    wrap.appendChild(btn);
-    wrap.appendChild(nameTag);
-
-  } else if (node.itemType === 'select') {
-    const el = document.createElement('select');
-    let firstOpt = null;
-    for (const o of (node.options || '').split(',')) {
-      const t = o.trim(); if (!t) continue;
-      const opt = document.createElement('option');
-      opt.value = t; opt.textContent = t;
-      if (!firstOpt) firstOpt = t;
-      el.appendChild(opt);
-    }
-    if (values[node.id] !== undefined) el.value = values[node.id];
-    else if (firstOpt) { values[node.id] = firstOpt; }
-    el.onchange = () => { values[node.id] = el.value; _reCalc(); onChange(); _formTick.value++; };
-    wrap.appendChild(el);
-
-  } else if (node.itemType === 'radio') {
-    const opts = (node.options || '').split(',').map(o => o.trim()).filter(Boolean);
-    if (!opts.length) {
-      const msg = document.createElement('span');
-      msg.style.cssText = 'font-size:11px;color:var(--c-text-2)';
-      msg.textContent = '(no options)';
-      wrap.appendChild(msg);
-    } else {
-      const rbName = 'radio_' + node.id;
-      if (values[node.id] === undefined) values[node.id] = opts[0];
-      for (const opt of opts) {
-        const lbl = document.createElement('label');
-        lbl.style.cssText = 'display:inline-flex;align-items:center;gap:3px;margin-right:10px;font-size:13px;cursor:pointer;';
-        const rb = document.createElement('input');
-        rb.type = 'radio'; rb.name = rbName; rb.value = opt;
-        rb.checked = values[node.id] === opt;
-        rb.onchange = () => { if (rb.checked) { values[node.id] = opt; _reCalc(); onChange(); _formTick.value++; } };
-        lbl.appendChild(rb);
-        lbl.appendChild(document.createTextNode(opt));
-        wrap.appendChild(lbl);
-      }
-    }
-
-  } else {
-    const el = document.createElement('input');
-    el.type = 'text'; el.style.width = '120px';
-    el.value = values[node.id] !== undefined ? values[node.id] : '';
-    el.oninput = () => { values[node.id] = el.value; onChange(); };
-    wrap.appendChild(el);
-  }
-
-  return wrap;
+  return _buildControl(node, { values, autoFilledIds, onChange, _reCalc, _formTick });
 }
 
 // ── Reactive preview effect ───────────────────────────────────────────────────

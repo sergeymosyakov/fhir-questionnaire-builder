@@ -2,13 +2,14 @@
 import { tree } from '../state.js';
 
 function itemTypeToFHIRType(t) {
-  if (t === 'checkbox') return 'boolean';
-  if (t === 'number')   return 'decimal';
+  if (t === 'checkbox')    return 'boolean';
+  if (t === 'number')      return 'decimal';
   if (t === 'select' || t === 'radio') return 'choice';
-  if (t === 'display')  return 'display';
-  if (t === 'date')       return 'date';
-  if (t === 'url')        return 'url';
-  if (t === 'attachment') return 'attachment';
+  if (t === 'open-choice') return 'open-choice';
+  if (t === 'display')     return 'display';
+  if (t === 'date')        return 'date';
+  if (t === 'url')         return 'url';
+  if (t === 'attachment')  return 'attachment';
   return 'string';
 }
 
