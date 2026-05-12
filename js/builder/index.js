@@ -1,5 +1,5 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
-import { tree, makeGroup, makeItem, _formTick, rawFhir, calcTested, values, pauseTracking, resetTracking } from '../state.js';
+import { tree, makeGroup, makeItem, _formTick, rawFhir, calcTested, values, _bulkUpdate } from '../state.js';
 import { init as sharedInit, formatSeg } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { renderItem } from './node-item.js';
@@ -96,7 +96,10 @@ export async function renumberAll(format) {
   await raf();
 
   // Pause Vue tracking so bulk node.id mutations don't trigger preview re-renders
-  pauseTracking();
+  // Suppress preview effect() during bulk mutations — set flag before, clear after.
+  // When flag is set: effect reads _bulkUpdate and returns early (stops tracking tree).
+  // When flag is cleared: effect re-runs once and rebuilds the preview fully.
+  _bulkUpdate.value = true;
   try {
     const idMap = new Map();
     _applyNumbers(format, tree, '');
@@ -114,7 +117,7 @@ export async function renumberAll(format) {
       });
     }
   } finally {
-    resetTracking();
+    _bulkUpdate.value = false;
   }
 
   // Incremental DOM render: yield between root nodes so the browser paints progress

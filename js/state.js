@@ -1,7 +1,8 @@
 // ── Reactive state, factories, and pure utilities ────────────────────────────
 // Re-export effect so other modules don't need to know the CDN URL.
-export { ref, reactive, effect, pauseTracking, resetTracking } from 'https://unpkg.com/@vue/reactivity@3/dist/reactivity.esm-browser.js';
-import { ref, reactive } from 'https://unpkg.com/@vue/reactivity@3/dist/reactivity.esm-browser.js';
+import { ref, reactive, effect as _effect } from 'https://unpkg.com/@vue/reactivity@3/dist/reactivity.esm-browser.js';
+export { _effect as effect };
+export { ref, reactive };
 
 // ── Reactive state ────────────────────────────────────────────────────────────
 // FHIR Patient R4 fields relevant for Questionnaire logic
@@ -24,6 +25,10 @@ export const autoFilledIds = new Set();
 // Reactive tick: incremented when a checkbox/select changes in the preview.
 // Causes effect() to re-run → re-evaluates enableWhen visibility conditions.
 export const _formTick = ref(0);
+
+// Bulk-update guard: set to true before mass tree mutations (renumber, import).
+// The preview effect() returns early while true, then re-runs once on reset.
+export const _bulkUpdate = ref(false);
 
 // FHIRPath: original FHIR Questionnaire JSON after import; null if not loaded.
 export const rawFhir = ref(null);

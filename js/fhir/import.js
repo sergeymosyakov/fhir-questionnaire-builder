@@ -1,5 +1,5 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
-import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, calcTested, pauseTracking, resetTracking } from '../state.js';
+import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, calcTested, _bulkUpdate } from '../state.js';
 import { renderTree } from '../render-builder.js';
 
 // Read our custom extension value from a FHIR item
@@ -187,7 +187,7 @@ export function importFHIR(fhirJson, renderFn) {
   resetSeq();
   // Pause Vue tracking: pushing plain nodes into reactive tree would otherwise
   // trigger the preview effect() once per push (O(n) full preview re-renders).
-  pauseTracking();
+  _bulkUpdate.value = true;
   try {
     const linkIdMap = buildLinkIdMap(q.item);
     for (const item of q.item || []) {
@@ -195,7 +195,7 @@ export function importFHIR(fhirJson, renderFn) {
       if (n) tree.push(n);
     }
   } finally {
-    resetTracking();
+    _bulkUpdate.value = false;
   }
   if (renderFn) renderFn(); else renderTree();
 }

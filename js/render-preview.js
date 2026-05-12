@@ -2,7 +2,7 @@
 import {
   effect,
   age, gender, bmi, pregnant, smoker, proc, comorb,
-  tree, values, autoFilledIds, _formTick,
+  tree, values, autoFilledIds, _formTick, _bulkUpdate,
   evalRule, calcFormOk, isMandatory,
   rawFhir, calcTested, CHECKABLE_TYPES
 } from './state.js';
@@ -45,6 +45,7 @@ function buildControl(node, iconEl, onAfterChange) {
 // inside buildControl — no effect re-run needed.
 effect(() => {
   void _formTick.value; // subscribe: re-run when checkbox/select changes
+  if (_bulkUpdate.value) return; // mass mutation in progress — skip full render
   const ctx = {
     age:      age.value,
     gender:   gender.value,
