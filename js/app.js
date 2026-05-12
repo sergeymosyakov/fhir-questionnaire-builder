@@ -5,6 +5,7 @@ import {
 } from './state.js';
 import { importFHIR } from './fhir/import.js';
 import { exportFHIR } from './fhir/export.js';
+import { validateTree } from './fhir/validate.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './render-builder.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 import { buildQR } from './fhir/qr-builder.js';
@@ -45,7 +46,61 @@ document.getElementById('renumberBtn').onclick     = () => {
   const format = document.getElementById('renumberFormat').value;
   renumberAll(format);
 };
-document.getElementById('exportFhirBtn').onclick   = exportFHIR;
+document.getElementById('exportFhirBtn').onclick = () => {
+  const issues = validateTree(tree);
+  if (issues.length === 0) { exportFHIR(); return; }
+  _showValidateModal(issues);
+};
+
+function _showValidateModal(issues) {
+  const errors   = issues.filter(i => i.severity === 'error');
+  const warnings = issues.filter(i => i.severity === 'warning');
+
+  const body = document.getElementById('validateModalBody');
+  body.innerHTML = '';
+
+  const summary = document.createElement('div');
+  summary.className = 'validate-modal-summary';
+  const parts = [];
+  if (errors.length)   parts.push(`${errors.length} error${errors.length > 1 ? 's' : ''}`);
+  if (warnings.length) parts.push(`${warnings.length} warning${warnings.length > 1 ? 's' : ''}`);
+  summary.textContent = `Found ${parts.join(' and ')} in the questionnaire tree.`;
+  body.appendChild(summary);
+
+  for (const issue of issues) {
+    const row = document.createElement('div');
+    row.className = 'validate-issue';
+
+    const badge = document.createElement('span');
+    badge.className = `validate-issue-badge validate-badge-${issue.severity}`;
+    badge.textContent = issue.severity;
+    row.appendChild(badge);
+
+    const content = document.createElement('span');
+    content.className = 'validate-issue-content';
+    const idTag = document.createElement('span');
+    idTag.className = 'validate-issue-id';
+    idTag.textContent = issue.nodeId;
+    content.appendChild(idTag);
+    content.appendChild(document.createTextNode(issue.message));
+    row.appendChild(content);
+
+    body.appendChild(row);
+  }
+
+  document.getElementById('validateModal').style.display = 'flex';
+}
+
+document.getElementById('validateModalClose').onclick = () => {
+  document.getElementById('validateModal').style.display = 'none';
+};
+document.getElementById('validateFixBtn').onclick = () => {
+  document.getElementById('validateModal').style.display = 'none';
+};
+document.getElementById('validateExportBtn').onclick = () => {
+  document.getElementById('validateModal').style.display = 'none';
+  exportFHIR();
+};
 
 // ── Load dropdown ─────────────────────────────────────────────────────────────
 const loadMenu = document.getElementById('loadMenu');
