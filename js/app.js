@@ -72,9 +72,10 @@ validateModal.init({
 
 // ── Global progress bar init ──────────────────────────────────────────────
 progress.init({
-  wrap:  document.getElementById('progressWrap'),
-  bar:   document.getElementById('progressBar'),
-  label: document.getElementById('progressLabel'),
+  wrap:    document.getElementById('progressWrap'),
+  bar:     document.getElementById('progressBar'),
+  label:   document.getElementById('progressLabel'),
+  blocker: document.getElementById('uiBlocker'),
 });
 
 document.getElementById('exportFhirBtn').onclick = () => {

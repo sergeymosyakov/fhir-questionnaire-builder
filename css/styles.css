@@ -74,6 +74,13 @@ body {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
+.ui-blocker {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9998; /* below progress bar (9999) */
+  cursor: wait;
+}
 
 /* === Top panel =============================================================== */
 .top-panel {

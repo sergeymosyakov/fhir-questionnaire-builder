@@ -11,7 +11,8 @@ let _op  = '';
 
 export function init(elements) {
   _el = elements;
-  _el.wrap.style.display = 'none';
+  _el.wrap.style.display    = 'none';
+  _el.blocker.style.display = 'none';
 }
 
 export function show(label) {
@@ -20,7 +21,8 @@ export function show(label) {
   _el.label.textContent = label;
   _el.bar.style.width = '0%';
   _el.bar.classList.add('progress-bar--indeterminate');
-  _el.wrap.style.display = 'flex';
+  _el.wrap.style.display    = 'flex';
+  _el.blocker.style.display = 'block';
 }
 
 export function update(done, total) {
@@ -33,7 +35,8 @@ export function update(done, total) {
 
 export function hide() {
   if (!_el) return;
-  _el.wrap.style.display = 'none';
+  _el.wrap.style.display    = 'none';
+  _el.blocker.style.display = 'none';
   _el.bar.style.width = '0%';
   _el.bar.classList.remove('progress-bar--indeterminate');
   _op = '';
