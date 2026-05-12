@@ -6,13 +6,13 @@ export function build(node, ctx) {
 
   const el = document.createElement('input');
   el.type = 'url';
-  el.style.width = '200px';
+  el.className = 'ctrl-input--url';
   el.placeholder = 'https://';
   el.value = values[node.id] !== undefined ? values[node.id] : '';
   el.oninput = () => { values[node.id] = el.value; onChange(); };
 
   const errMsg = document.createElement('span');
-  errMsg.style.cssText = 'font-size:10px;color:var(--c-err);margin-left:4px;display:none';
+  errMsg.className = 'ctrl-err ctrl-err--ml';
   errMsg.textContent = 'Invalid URL';
   el.addEventListener('blur', () => {
     const valid = el.value === '' || el.checkValidity();

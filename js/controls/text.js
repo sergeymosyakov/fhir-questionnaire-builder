@@ -6,7 +6,7 @@ export function build(node, ctx) {
 
   const el = document.createElement('input');
   el.type = 'text';
-  el.style.width = '120px';
+  el.className = 'ctrl-input--text';
   el.value = values[node.id] !== undefined ? values[node.id] : '';
   el.oninput = () => { values[node.id] = el.value; onChange(); };
 

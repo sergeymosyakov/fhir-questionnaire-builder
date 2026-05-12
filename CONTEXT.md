@@ -246,6 +246,45 @@ The same applies to all builder submodules: dependencies injected via `init(deps
 
 ---
 
+## CSS Architecture
+
+All UI styles live in `css/styles.css` using CSS custom properties (`--c-border`, `--c-text`, `--c-err`, `--c-surface`, `--c-accent`, `--r-sm`, `--r-md`).
+
+**Control classes** (added during inline → CSS refactor):
+
+| Class | Purpose |
+|---|---|
+| `.ctrl-wrap` | `inline-flex` wrapper for all control primitives |
+| `.ctrl-err` | Error message span (hidden by default, `display:none`) |
+| `.ctrl-err--ml` | Adds `margin-left:6px` to `.ctrl-err` |
+| `.ctrl-input--text` | Text input width (120px) |
+| `.ctrl-input--number` | Number input width (80px) |
+| `.ctrl-input--date` | Date input width (150px) |
+| `.ctrl-input--url` | URL input width (200px) |
+| `.ref-type-sel` | Reference control: resource-type `<select>` (left half, no right border) |
+| `.ref-sep` | Reference control: `/` separator span |
+| `.ref-id-input` | Reference control: id `<input>` (right half, no left border) |
+| `.qty-num-input` | Quantity control: numeric `<input>` |
+| `.qty-unit-sel` | Quantity control: UCUM unit `<select>` |
+| `.preview-no-visible` | "No visible groups/items" placeholder text |
+| `.preview-icon-ph` | Empty 20px spacer span (aligns label when no icon) |
+| `.preview-row--pointer` | Adds `cursor:pointer` to clickable preview rows |
+| `.preview-label--dim` | Dims label color (`#aaa`) for hidden/disabled rows |
+| `.preview-required-star` | Red `*` after label for mandatory items |
+| `.preview-optional-badge` | Italic `optional` badge for optional items |
+| `.clear-confirm-backdrop` / `.clear-confirm-box` / etc. | "Clear form" confirmation modal |
+| `.clear-form-btn` | `×` clear button next to loaded file name |
+| `.loaded-file-name-wrap` | Wrapper for filename + clear button |
+
+**Inline styles remaining** (not yet converted — tracked for future refactor):
+- `js/builder/panels.js` — ~34 occurrences (layout helpers in builder panels)
+- `js/builder/node-group.js` — ~13 occurrences
+- `js/app.js` — ~14 occurrences
+- `finalEl.style.display` in `render-preview.js` — intentionally dynamic (show/hide logic)
+- `label.style.cssText = res.node._renderStyle` in `render-preview.js` — intentionally inline (user-defined CSS)
+
+---
+
 ## Known Limitations / TODO
 
 - Multi-condition visibility (`&&`, `||`) not supported in the visual builder — must be typed as JS manually

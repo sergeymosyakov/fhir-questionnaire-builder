@@ -85,7 +85,7 @@ effect(() => {
 
   if (visible.length === 0) {
     const msg = document.createElement('div');
-    msg.style.cssText = 'color:#999; font-size:13px; padding:12px;';
+    msg.className = 'preview-no-visible';
     msg.textContent = 'No visible groups/items.';
     lform.appendChild(msg);
   }
@@ -118,10 +118,9 @@ effect(() => {
     // Dimmed: enableWhen condition not yet met
     if (!res.visible && res.showDimmed) {
       const row = document.createElement('div');
-      row.className = 'lform-item lform-waiting';
+      row.className = 'lform-item lform-waiting preview-row--pointer';
       row.dataset.previewId = res.node.id;
       row.title = 'Click to navigate to builder node';
-      row.style.cursor = 'pointer';
       row.addEventListener('click', () => {
         const target = document.querySelector('[data-node-id="' + res.node.id + '"]');
         if (!target) return;
@@ -130,10 +129,10 @@ effect(() => {
         setTimeout(() => target.classList.remove('node-flash'), 1000);
       });
       const ph = document.createElement('span');
-      ph.style.cssText = 'width:20px;flex-shrink:0;display:inline-block;';
+      ph.className = 'preview-icon-ph';
       row.appendChild(ph);
       const label = document.createElement('span');
-      label.style.color = '#aaa';
+      label.className = 'preview-label--dim';
       label.textContent = (res.node.type === 'group' ? 'Group: ' : 'Item: ') + res.node.title;
       row.appendChild(label);
       const hint = document.createElement('span');
@@ -147,9 +146,8 @@ effect(() => {
     // Disabled: group conditionRule not met → N/A
     if (res.disabled) {
       const row = document.createElement('div');
-      row.className = 'lform-item lform-disabled';
+      row.className = 'lform-item lform-disabled preview-row--pointer';
       row.dataset.previewId = res.node.id;
-      row.style.cursor = 'pointer';
       row.addEventListener('click', () => {
         const target = document.querySelector('[data-node-id="' + res.node.id + '"]');
         if (!target) return;
@@ -213,10 +211,9 @@ effect(() => {
     }
 
     const row = document.createElement('div');
-    row.className = 'lform-item';
+    row.className = 'lform-item preview-row--pointer';
     row.dataset.previewId = res.node.id;
     row.title = 'Click to navigate to builder node';
-    row.style.cursor = 'pointer';
     row.addEventListener('click', () => {
       const target = document.querySelector('[data-node-id="' + res.node.id + '"]');
       if (!target) return;
@@ -233,7 +230,7 @@ effect(() => {
       row.appendChild(iconEl);
     } else {
       const ph = document.createElement('span');
-      ph.style.cssText = 'width:20px; flex-shrink:0; display:inline-block;';
+      ph.className = 'preview-icon-ph';
       row.appendChild(ph);
     }
     res._iconEl = iconEl;

@@ -37,9 +37,7 @@ const FHIR_R4_RESOURCES = [
 export function build(node, ctx) {
   const { values, onChange } = ctx;
   const wrap = createWrap();
-  wrap.style.flexDirection = 'row';
-  wrap.style.alignItems    = 'center';
-  wrap.style.gap           = '0';
+  wrap.style.gap = '0';
 
   // Parse existing value
   const current = values[node.id];
@@ -50,7 +48,7 @@ export function build(node, ctx) {
 
   // Resource type dropdown
   const sel = document.createElement('select');
-  sel.style.cssText = 'height:28px;padding:0 4px;border:1px solid var(--c-border);border-right:none;border-radius:var(--r-sm) 0 0 var(--r-sm);font-size:12px;color:var(--c-text);background:var(--c-surface);max-width:160px;';
+  sel.className = 'ref-type-sel';
 
   // If referenceResource is set, show only that type; otherwise show all
   const options = node.referenceResource ? [node.referenceResource] : FHIR_R4_RESOURCES;
@@ -74,19 +72,19 @@ export function build(node, ctx) {
   // Separator label
   const sep = document.createElement('span');
   sep.textContent = '/';
-  sep.style.cssText = 'padding:0 2px;height:28px;line-height:28px;border-top:1px solid var(--c-border);border-bottom:1px solid var(--c-border);background:var(--c-surface);font-size:13px;color:var(--c-text-2);flex-shrink:0;';
+  sep.className = 'ref-sep';
 
   // ID input
   const idInput = document.createElement('input');
   idInput.type        = 'text';
   idInput.placeholder = 'id';
   idInput.value       = initId;
-  idInput.style.cssText = 'height:28px;width:110px;padding:0 6px;border:1px solid var(--c-border);border-left:none;border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:12px;color:var(--c-text);';
+  idInput.className   = 'ref-id-input';
 
   // Required-id error
   const errMsg = document.createElement('span');
-  errMsg.style.cssText = 'font-size:10px;color:var(--c-err);margin-left:6px;display:none;';
-  errMsg.textContent = 'id is required';
+  errMsg.className    = 'ctrl-err ctrl-err--ml';
+  errMsg.textContent  = 'id is required';
 
   const update = () => {
     const type = sel.value;

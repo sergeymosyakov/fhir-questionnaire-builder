@@ -21,6 +21,6 @@
 
 export function createWrap() {
   const wrap = document.createElement('span');
-  wrap.style.cssText = 'display:inline-flex;align-items:center;gap:5px;';
+  wrap.className = 'ctrl-wrap';
   return wrap;
 }

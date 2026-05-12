@@ -6,7 +6,7 @@ export function build(node, ctx) {
 
   const el = document.createElement('input');
   el.type = 'date';
-  el.style.width = '150px';
+  el.className = 'ctrl-input--date';
   el.value = values[node.id] !== undefined ? values[node.id] : '';
   el.oninput = () => { values[node.id] = el.value; onChange(); };
 

@@ -67,6 +67,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **`new Function()`** — sandboxed rule evaluation (`evalRule`)
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
+- **CSS custom properties** — `--c-border`, `--c-text`, `--c-err`, `--c-surface`, `--c-accent`, `--r-sm`, `--r-md`; all control primitives use CSS classes (`.ctrl-wrap`, `.ctrl-err`, `.ref-*`, `.qty-*`, `.preview-*`)
 
 ---
 

@@ -63,9 +63,7 @@ const QUANTITY_UNITS = [
 export function build(node, ctx) {
   const { values, onChange } = ctx;
   const wrap = createWrap();
-  wrap.style.flexDirection = 'row';
-  wrap.style.alignItems    = 'center';
-  wrap.style.gap           = '4px';
+  wrap.style.gap = '4px';
 
   // Restore previous value
   const current = values[node.id];
@@ -78,11 +76,11 @@ export function build(node, ctx) {
   numInput.step        = 'any';
   numInput.placeholder = '0';
   numInput.value       = initVal;
-  numInput.style.cssText = 'width:80px;height:28px;padding:0 6px;border:1px solid var(--c-border);border-radius:var(--r-sm);font-size:12px;color:var(--c-text);';
+  numInput.className   = 'qty-num-input';
 
   // Unit dropdown
   const unitSel = document.createElement('select');
-  unitSel.style.cssText = 'height:28px;padding:0 4px;border:1px solid var(--c-border);border-radius:var(--r-sm);font-size:12px;color:var(--c-text);background:var(--c-surface);';
+  unitSel.className = 'qty-unit-sel';
 
   // Blank "— unit —" option
   const blankOpt = document.createElement('option');
@@ -106,7 +104,7 @@ export function build(node, ctx) {
 
   // Required: value AND unit must both be filled
   const errMsg = document.createElement('span');
-  errMsg.style.cssText = 'font-size:10px;color:var(--c-err);display:none;';
+  errMsg.className = 'ctrl-err';
 
   const update = () => {
     const v = numInput.value.trim();

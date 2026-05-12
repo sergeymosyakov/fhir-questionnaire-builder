@@ -1179,6 +1179,89 @@ body {
   color: var(--c-err);
 }
 
+/* ── Control primitives ────────────────────────────────────────────────────── */
+
+/* Base wrap for all inline controls */
+.ctrl-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Inline error message (shown/hidden via JS .style.display) */
+.ctrl-err {
+  font-size: 10px;
+  color: var(--c-err);
+  display: none;
+}
+.ctrl-err--ml { margin-left: 6px; }
+
+/* Input width variants */
+.ctrl-input--text   { width: 120px; }
+.ctrl-input--number { width: 80px; }
+.ctrl-input--date   { width: 150px; }
+.ctrl-input--url    { width: 200px; }
+
+/* Reference control: [resource-type-dropdown] / [id-input] */
+.ref-type-sel {
+  height: 28px;
+  padding: 0 4px;
+  border: 1px solid var(--c-border);
+  border-right: none;
+  border-radius: var(--r-sm) 0 0 var(--r-sm);
+  font-size: 12px;
+  color: var(--c-text);
+  background: var(--c-surface);
+  max-width: 160px;
+}
+.ref-sep {
+  padding: 0 2px;
+  height: 28px;
+  line-height: 28px;
+  border-top: 1px solid var(--c-border);
+  border-bottom: 1px solid var(--c-border);
+  background: var(--c-surface);
+  font-size: 13px;
+  color: var(--c-text-2);
+  flex-shrink: 0;
+}
+.ref-id-input {
+  height: 28px;
+  width: 110px;
+  padding: 0 6px;
+  border: 1px solid var(--c-border);
+  border-left: none;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  font-size: 12px;
+  color: var(--c-text);
+}
+
+/* Quantity control: [number-input] [unit-dropdown] */
+.qty-num-input {
+  width: 80px;
+  height: 28px;
+  padding: 0 6px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  color: var(--c-text);
+}
+.qty-unit-sel {
+  height: 28px;
+  padding: 0 4px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  color: var(--c-text);
+  background: var(--c-surface);
+}
+
+/* Preview helpers */
+.preview-no-visible   { color: #999; font-size: 13px; padding: 12px; }
+.preview-icon-ph      { width: 20px; flex-shrink: 0; display: inline-block; }
+.preview-row--pointer { cursor: pointer; }
+.preview-label--dim   { color: #aaa; }
+
 /* Preview inputs */
 .preview-card input[type=text],
 .preview-card input[type=number] {
