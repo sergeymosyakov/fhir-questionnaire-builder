@@ -190,5 +190,6 @@ export function importFHIR(fhirJson) {
     const n = fhirItemToNode(item, linkIdMap);
     if (n) tree.push(n);
   }
-  renderTree();
+  if (renderFn) renderFn(); else renderTree();
 }
+

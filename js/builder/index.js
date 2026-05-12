@@ -35,6 +35,20 @@ export function renderTree() {
   container.appendChild(makeRootDropZone());
 }
 
+export async function renderTreeAsync(onProgress) {
+  const raf = () => new Promise(r => requestAnimationFrame(r));
+  await raf(); // yield so caller's progress UI can paint
+  const container = document.getElementById('treeContainer');
+  container.innerHTML = '';
+  const total = tree.length;
+  for (let i = 0; i < tree.length; i++) {
+    container.appendChild(renderNode(tree[i]));
+    if (onProgress) onProgress(i + 1, total);
+    await raf();
+  }
+  container.appendChild(makeRootDropZone());
+}
+
 // Wire DnD re-render callback once
 dndInit(renderTree, tree, _formTick);
 

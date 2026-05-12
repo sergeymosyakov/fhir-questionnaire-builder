@@ -8,7 +8,7 @@ import { exportFHIR } from './fhir/export.js';
 import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/validate-modal.js';
 import * as progress from './ui/progress.js';
-import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './render-builder.js';
+import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes } from './fhir/calc.js';
@@ -84,9 +84,13 @@ document.getElementById('exportFhirBtn').onclick = () => {
 };
 
 // Wrapper: run import then show validation report if needed
-function _importAndValidate(data) {
-  importFHIR(data);
+async function _importAndValidate(data) {
+  // importFHIR is sync (parses tree); skip its internal renderTree, do async render instead
+  importFHIR(data, () => {}); // pass no-op renderFn — we render below
   const issues = validateTree(tree);
+  progress.show('Rendering ' + tree.length + ' nodes…');
+  await renderTreeAsync((done, total) => progress.update(done, total));
+  progress.hide();
   if (issues.length > 0) validateModal.show('Import — Validation Report', issues, 'import', { onNavigate: _navigateToNode });
 }
 
@@ -115,7 +119,7 @@ document.querySelectorAll('#loadMenu [data-sample]').forEach(item => {
     progress.show('Loading ' + name + '…');
     fetch('sampledata/' + item.dataset.sample)
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(data => { progress.hide(); _importAndValidate(data); })
+      .then(data => { progress.update(0, 1); _importAndValidate(data); })
       .catch(err => { progress.hide(); alert('Could not load sample: ' + err.message); });
   };
 });
@@ -124,7 +128,7 @@ document.getElementById('fhirFileInput').onchange  = e => {
   if (!file) return;
   progress.show('Loading ' + file.name + '…');
   const reader = new FileReader();
-  reader.onload  = ev => { try { progress.hide(); _importAndValidate(JSON.parse(ev.target.result)); } catch (err) { progress.hide(); alert('Parse error: ' + err.message); } };
+  reader.onload  = ev => { try { progress.update(0, 1); _importAndValidate(JSON.parse(ev.target.result)); } catch (err) { progress.hide(); alert('Parse error: ' + err.message); } };
   reader.onerror = () => { progress.hide(); alert('Error reading file.'); };
   reader.readAsText(file);
   e.target.value = '';
