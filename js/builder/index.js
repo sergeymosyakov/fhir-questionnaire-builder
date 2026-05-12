@@ -127,7 +127,6 @@ export async function renumberAll(format) {
   // Build into a DocumentFragment off-screen so RAF yields update the progress bar
   // without touching the live DOM — no layout thrash or visual jitter in the left panel.
   // Swap into the container in one operation at the end.
-  const raf = () => new Promise(r => requestAnimationFrame(r));
   const frag = document.createDocumentFragment();
   const total = tree.length;
   for (let i = 0; i < tree.length; i++) {
