@@ -190,10 +190,12 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Optional badge** — `mandatory===false` items show a small italic `optional` badge in preview
 - **Styled file input** — `attachment` renders as a custom **Choose file** button (blue, themed) + file name; native input hidden
 - **Active action buttons** — action panel buttons (Show When, Applicability, Expression, Appearance, Required) turn **dark purple** when they have content set; initialised on load, updated in real-time on edit
-- **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; replaces separate Load/Example buttons; startup auto-loads `example-bariatric.fhir.json` via `fetch`
+- **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; replaces separate Load/Example buttons; no startup auto-load (empty-state placeholder shown instead)
 - **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)
+- **Export validation** — on Export: `validateTree()` runs; if issues found → modal with error/warning list, ↗ navigate-to-node button per issue, "Fix first" / "Export anyway" actions
+- **Import validation** — same modal shown after loading a file/sample (mode: OK only)
+- **Empty-state placeholder** — right panel shows hint text when tree is empty
 - **Resizable panels** — drag the divider between left/right panels; width persisted in `localStorage`
-- **Panel resize overlay** — transparent fixed overlay created during drag prevents text selection
 
 ---
 

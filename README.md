@@ -208,8 +208,11 @@ Standard extensions preserved on export:
 - **Optional badge** — non-mandatory items show a small `optional` badge in the preview
 - **Radio buttons** — `radio` item type renders as inline radio-group; exports as `choice` + `questionnaire-itemControl: radio-button`
 - **File attachments** — `attachment` item type renders as styled **Choose file** button; `required:true` requires a file to be chosen
+- **Export validation** — on Export: `validateTree()` runs; modal lists errors/warnings with ↗ navigate-to-node per issue; "Fix first" / "Export anyway"
+- **Import validation** — same modal shown after loading a file/sample (OK-only mode)
+- **Empty-state placeholder** — right panel shows hint text when no questionnaire is loaded
 - **Date picker / URL input** — `date` renders as native date-picker; `url` validates format with `new URL()`
-- **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; startup auto-loads `example-bariatric.fhir.json` via `fetch`
+- **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; no startup auto-load (empty-state placeholder shown instead)
 - **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)
 
 ---
