@@ -215,6 +215,31 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---
 
+## Development Rules
+
+### Workflow — Before Every Push
+1. Update `CONTEXT.md` (file table, UX features, known limitations)
+2. Update `README.md` (same sections)
+3. `git add -A` → `git commit` → `git push`
+
+Never commit+push without updating both docs first.
+
+### Architecture — No Hardcoded DOM IDs in Submodules
+Submodules must **not** call `document.getElementById()` or `querySelector()` internally.
+DOM nodes are resolved **once** in `app.js` (the top-level entry point) and **passed in** via `init(elements)`.
+
+```js
+// ✅ correct — app.js resolves, module receives
+validateModal.init({ backdrop, closeBtn, body, footer });
+
+// ❌ wrong — submodule reaches into the DOM itself
+document.getElementById('validateModal')  // inside a submodule
+```
+
+The same applies to all builder submodules: dependencies injected via `init(deps)`, never pulled from globals or the DOM directly.
+
+---
+
 ## Known Limitations / TODO
 
 - Multi-condition visibility (`&&`, `||`) not supported in the visual builder — must be typed as JS manually
