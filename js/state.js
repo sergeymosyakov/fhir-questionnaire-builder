@@ -127,20 +127,5 @@ export const calcFormOk = node => {
 };
 
 // ── Pure utilities ────────────────────────────────────────────────────────────
-export const escAttr = s => (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-
-export function findAndRemove(id, nodes) {
-  for (let i = 0; i < nodes.length; i++) {
-    if (nodes[i].id === id) { nodes.splice(i, 1); return; }
-    if (nodes[i].type === 'group') findAndRemove(id, nodes[i].children);
-  }
-}
-
-// Returns true if nodeId is anywhere inside group's subtree (recursive).
-export function isDescendant(nodeId, group) {
-  for (const ch of group.children) {
-    if (ch.id === nodeId) return true;
-    if (ch.type === 'group' && isDescendant(nodeId, ch)) return true;
-  }
-  return false;
-}
+// Moved to js/utils.js — re-exported here for backwards compatibility.
+export { escAttr, findAndRemove, isDescendant } from './utils.js';

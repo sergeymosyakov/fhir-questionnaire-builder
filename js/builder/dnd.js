@@ -1,11 +1,11 @@
 // ── Drag & Drop for the builder tree ─────────────────────────────────────────
 // Self-contained: all DnD state and logic lives here.
 // Connects to the tree via callbacks passed in init().
-import { tree } from '../state.js';
-import { _formTick } from '../state.js';
 
 let _dragId = null;
 let _onDropCallback = null; // called after a successful drop to re-render
+let _tree = null;
+let _formTick = null;
 
 // ── Tree lookup ───────────────────────────────────────────────────────────────
 export function findNode(nodes, id, parent = null) {
@@ -20,7 +20,7 @@ export function findNode(nodes, id, parent = null) {
 }
 
 function _isAncestor(ancestorId, nodeId) {
-  const a = findNode(tree, ancestorId);
+  const a = findNode(_tree, ancestorId);
   if (!a || a.node.type !== 'group') return false;
   return !!findNode(a.node.children, nodeId);
 }
@@ -30,23 +30,23 @@ function _doDrop(targetId, position) {
   if (!_dragId || _dragId === targetId) return;
   if ((position === 'inside' || position === 'inside-last') && _isAncestor(_dragId, targetId)) return;
   if (position === 'inside' || position === 'inside-last') {
-    const t = findNode(tree, targetId);
+    const t = findNode(_tree, targetId);
     if (!t || t.node.type !== 'group') return;
   }
 
-  const src = findNode(tree, _dragId);
+  const src = findNode(_tree, _dragId);
   if (!src) return;
   src.arr.splice(src.idx, 1);
 
   if (position === 'inside') {
-    const dest = findNode(tree, targetId);
+    const dest = findNode(_tree, targetId);
     if (dest) dest.node.children.unshift(src.node);
   } else if (position === 'inside-last') {
-    const dest = findNode(tree, targetId);
+    const dest = findNode(_tree, targetId);
     if (dest) dest.node.children.push(src.node);
   } else {
-    const dest = findNode(tree, targetId);
-    if (!dest) { tree.push(src.node); }
+    const dest = findNode(_tree, targetId);
+    if (!dest) { _tree.push(src.node); }
     else {
       const insertIdx = position === 'before' ? dest.idx : dest.idx + 1;
       dest.arr.splice(insertIdx, 0, src.node);
@@ -77,9 +77,11 @@ function _onDragEnd() {
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
-// Register the re-render callback (called by builder/index.js after init)
-export function init(onDrop) {
+// Register the re-render callback, tree reference and formTick
+export function init(onDrop, tree, formTick) {
   _onDropCallback = onDrop;
+  _tree = tree;
+  _formTick = formTick;
 }
 
 // Returns a draggable ⠿ handle element wired to this node
@@ -135,10 +137,10 @@ export function makeRootDropZone() {
     e.preventDefault();
     rootDrop.style.opacity = '0';
     if (!_dragId) return;
-    const src = findNode(tree, _dragId);
+    const src = findNode(_tree, _dragId);
     if (!src) return;
     src.arr.splice(src.idx, 1);
-    tree.push(src.node);
+    _tree.push(src.node);
     if (_onDropCallback) _onDropCallback();
     _formTick.value++;
   });

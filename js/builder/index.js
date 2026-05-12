@@ -1,13 +1,19 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
-import { tree, makeGroup, makeItem, _formTick } from '../state.js';
-import { _collapsed } from './_shared.js';
+import { tree, makeGroup, makeItem, _formTick, rawFhir, calcTested, values } from '../state.js';
+import { init as sharedInit } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { renderItem } from './node-item.js';
 import { renderGroup } from './node-group.js';
 
+// UI-only collapse state per node.id — not part of FHIR data, owned here
+const collapsed = new Map();
+
+// Inject reactive state into _shared (triggerCalcRecalc needs them)
+sharedInit({ tree, formTick: _formTick, rawFhir, calcTested, values });
+
 // renderNode is passed as ctx so node-item / node-group don't import each other
 function renderNode(node) {
-  const ctx = { renderTree, renderNode };
+  const ctx = { renderTree, renderNode, tree, formTick: _formTick, collapsed };
   return node.type === 'group'
     ? renderGroup(node, ctx)
     : renderItem(node, ctx);
@@ -21,13 +27,13 @@ export function renderTree() {
 }
 
 // Wire DnD re-render callback once
-dndInit(renderTree);
+dndInit(renderTree, tree, _formTick);
 
 // ── Collapse / expand all ─────────────────────────────────────────────────────
 function setCollapsedAll(nodes, value) {
   for (const n of nodes) {
     if (n.type === 'group') {
-      _collapsed.set(n.id, value);
+      collapsed.set(n.id, value);
       setCollapsedAll(n.children, value);
     }
   }

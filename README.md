@@ -17,10 +17,19 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `start.ps1` | Local dev server shortcut: `npx serve .` |
 | `css/styles.css` | All styles and CSS design tokens |
 | `js/app.js` | Entry point — wires inputs, buttons, loads example |
-| `js/state.js` | Reactive state, data factories, shared utilities |
+| `js/state.js` | Reactive state, data factories, business logic |
+| `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`) |
 | `js/eval.js` | Tree evaluation (visibility / condition rules) |
-| `js/render-builder.js` | Left panel — builder tree DOM |
+| `js/render-builder.js` | Left panel — 3-line re-export shim → `js/builder/` |
+| `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, etc.) |
+| `js/builder/_shared.js` | Shared utilities injected via `init(deps)` |
+| `js/builder/dnd.js` | Self-contained drag & drop, injected via `init(onDrop, tree, formTick)` |
+| `js/builder/panels.js` | All action panel builders (vis, mand, cond, type, expr, style) |
+| `js/builder/node-item.js` | `renderItem(node, ctx)` — item node DOM |
+| `js/builder/node-group.js` | `renderGroup(node, ctx)` — group node DOM |
 | `js/render-preview.js` | Right panel — reactive preview + controls |
+| `js/controls/index.js` | Control registry — dispatches by `itemType` |
+| `js/controls/{type}.js` | Per-type control implementations |
 | `js/fhir/import.js` | FHIR R4 → internal model |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
 | `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup (bariatric surgery pre-auth, compact) |
@@ -54,6 +63,8 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
 - **`new Function()`** — sandboxed rule evaluation (`evalRule`)
+- **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
+- **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 
 ---
 

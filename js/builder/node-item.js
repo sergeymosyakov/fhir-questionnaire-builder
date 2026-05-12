@@ -2,8 +2,7 @@
 // renderItem(node, ctx) → HTMLElement
 //
 // ctx = { renderTree }  (same as node-group.js)
-import { findAndRemove, escAttr } from '../state.js';
-import { tree } from '../state.js';
+import { findAndRemove, escAttr } from '../utils.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { addPanel, buildVisPanel, buildMandPanel, buildCondPanel, buildTypePanel, buildExprPanel, buildStylePanel } from './panels.js';
 
@@ -114,7 +113,7 @@ export function renderItem(node, ctx) {
   btnDel.textContent = '\u2715';
   btnDel.className = 'btn-node-delete';
   btnDel.title = 'Delete';
-  btnDel.onclick = () => { findAndRemove(node.id, tree); renderTree(); };
+  btnDel.onclick = () => { findAndRemove(node.id, ctx.tree); renderTree(); };
 
   div.appendChild(header);
   div.appendChild(btnDel);
@@ -122,10 +121,10 @@ export function renderItem(node, ctx) {
   // ── Panels ────────────────────────────────────────────────────────────────
   addPanel('type', p => buildTypePanel(node, p), div, panels);
   addPanel('mand', p => buildMandPanel(node, p, mandLink, setActive), div, panels);
-  addPanel('vis',  p => buildVisPanel(node, p, visLink, setActive), div, panels);
+  addPanel('vis',  p => buildVisPanel(node, p, visLink, setActive, ctx), div, panels);
   addPanel('cond', p => buildCondPanel(node, p, condLink, setActive, false), div, panels);
   addPanel('expr', p => buildExprPanel(node, p, exprLink, setActive), div, panels);
-  addPanel('style',p => buildStylePanel(node, p, styleLink, setActive), div, panels);
+  addPanel('style',p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
   setActive(visLink,   !!node.visibilityRule);
   setActive(condLink,  !!node.conditionRule);

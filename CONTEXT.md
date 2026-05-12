@@ -16,10 +16,19 @@ Allows visually building questionnaire logic, testing it against patient data, a
 | `start.ps1` | Local dev server: `npx serve .` |
 | `css/styles.css` | All styles and CSS design tokens |
 | `js/app.js` | Entry point — wires inputs, buttons, loads example |
-| `js/state.js` | Reactive state, data factories, shared utilities |
+| `js/state.js` | Reactive state, data factories, business logic |
+| `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`) |
 | `js/eval.js` | Tree evaluation (visibility / condition rules) |
-| `js/render-builder.js` | Left panel — builder tree DOM |
+| `js/render-builder.js` | Left panel — 3-line re-export shim → `js/builder/` |
+| `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, etc.) |
+| `js/builder/_shared.js` | Shared utilities; injected deps via `init(deps)` |
+| `js/builder/dnd.js` | Self-contained drag & drop; all state via `init(onDrop, tree, formTick)` |
+| `js/builder/panels.js` | All action panel builders (vis, mand, cond, type, expr, style) |
+| `js/builder/node-item.js` | `renderItem(node, ctx)` |
+| `js/builder/node-group.js` | `renderGroup(node, ctx)` |
 | `js/render-preview.js` | Right panel — reactive preview |
+| `js/controls/index.js` | Control registry — dispatches by `itemType` |
+| `js/controls/{type}.js` | Per-type control implementations |
 | `js/fhir/import.js` | FHIR R4 → internal model |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
 | `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup |
@@ -38,6 +47,8 @@ Allows visually building questionnaire logic, testing it against patient data, a
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
 - **`new Function()`** — sandboxed rule evaluation (`evalRule`)
+- **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
+- **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---

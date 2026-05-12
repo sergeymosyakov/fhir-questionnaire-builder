@@ -1,10 +1,9 @@
 // ── Group node renderer ───────────────────────────────────────────────────────
 // renderGroup(node, ctx) → HTMLElement
 //
-// ctx = { renderTree, renderNode }
-import { findAndRemove, makeGroup, makeItem, escAttr, _formTick } from '../state.js';
-import { tree } from '../state.js';
-import { _collapsed } from './_shared.js';
+// ctx = { renderTree, renderNode, tree, formTick, collapsed }
+import { findAndRemove, escAttr } from '../utils.js';
+import { makeGroup, makeItem } from '../state.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { addPanel, buildVisPanel, buildMandPanel, buildCondPanel, buildExprPanel, buildStylePanel } from './panels.js';
 
@@ -29,7 +28,7 @@ export function renderGroup(node, ctx) {
   titleWrap.className = 'node-title';
 
   // Collapse toggle
-  const collapsed = _collapsed.get(node.id) || false;
+  const collapsed = ctx.collapsed.get(node.id) || false;
   const toggleBtn = document.createElement('button');
   toggleBtn.type = 'button';
   toggleBtn.className = 'node-collapse-btn';
@@ -37,8 +36,8 @@ export function renderGroup(node, ctx) {
   toggleBtn.title = collapsed ? 'Expand' : 'Collapse';
   toggleBtn.onclick = e => {
     e.stopPropagation();
-    const isNowCollapsed = !(_collapsed.get(node.id) || false);
-    _collapsed.set(node.id, isNowCollapsed);
+    const isNowCollapsed = !(ctx.collapsed.get(node.id) || false);
+    ctx.collapsed.set(node.id, isNowCollapsed);
     toggleBtn.textContent = isNowCollapsed ? '\u25B6' : '\u25BC';
     toggleBtn.title = isNowCollapsed ? 'Expand' : 'Collapse';
     const body = div.querySelector('.node-body');
@@ -140,8 +139,8 @@ export function renderGroup(node, ctx) {
       addMenu.style.display = 'none';
       const newNode = factory();
       node.children.push(newNode);
-      _formTick.value++;
-      _collapsed.set(node.id, false);
+      ctx.formTick.value++;
+      ctx.collapsed.set(node.id, false);
       renderTree();
       requestAnimationFrame(() => {
         const el = document.querySelector('[data-node-id="' + newNode.id + '"]');
@@ -183,17 +182,17 @@ export function renderGroup(node, ctx) {
   btnDel.textContent = '\u2715';
   btnDel.className = 'btn-node-delete';
   btnDel.title = 'Delete';
-  btnDel.onclick = () => { findAndRemove(node.id, tree); renderTree(); };
+  btnDel.onclick = () => { findAndRemove(node.id, ctx.tree); renderTree(); };
 
   div.appendChild(header);
   div.appendChild(btnDel);
 
   // ── Panels ────────────────────────────────────────────────────────────────
   addPanel('mand',  p => buildMandPanel(node, p, mandLink, setActive), div, panels);
-  addPanel('vis',   p => buildVisPanel(node, p, visLink, setActive), div, panels);
+  addPanel('vis',   p => buildVisPanel(node, p, visLink, setActive, ctx), div, panels);
   addPanel('cond',  p => buildCondPanel(node, p, condLink, setActive, true), div, panels);
   addPanel('expr',  p => buildExprPanel(node, p, exprLink, setActive), div, panels);
-  addPanel('style', p => buildStylePanel(node, p, styleLink, setActive), div, panels);
+  addPanel('style', p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
   setActive(visLink,   !!node.visibilityRule);
   setActive(condLink,  !!node.conditionRule);
@@ -204,7 +203,7 @@ export function renderGroup(node, ctx) {
   // ── Body: children + logic row ────────────────────────────────────────────
   const body = document.createElement('div');
   body.className = 'node-body';
-  if (_collapsed.get(node.id)) body.style.display = 'none';
+  if (ctx.collapsed.get(node.id)) body.style.display = 'none';
 
   const logicRow = document.createElement('div');
   logicRow.className = 'logic-row';

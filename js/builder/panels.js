@@ -1,13 +1,11 @@
 // ── Action panel builder ──────────────────────────────────────────────────────
 // buildPanels(node, div, ctx) appends all hidden action panels to `div`.
 //
-// ctx = { renderTree, setActive, panels, actions, visLink, condLink,
-//          exprLink, styleLink, mandLink }
+// ctx = { renderTree, tree, formTick } (passed through from index.js via node-item/group)
 //
 // Each panel is keyed and toggled by the action links defined in node-item/group.
-import { escAttr, _formTick, makeGroup, makeItem } from '../state.js';
-import { tree } from '../state.js';
-import { getAllItems, buildSuccessValueUI, triggerCalcRecalc, _collapsed } from './_shared.js';
+import { escAttr } from '../utils.js';
+import { getAllItems, buildSuccessValueUI, triggerCalcRecalc } from './_shared.js';
 
 // ── Panel factory helper ──────────────────────────────────────────────────────
 export function addPanel(key, buildFn, div, panels) {
@@ -20,7 +18,7 @@ export function addPanel(key, buildFn, div, panels) {
 }
 
 // ── Visibility panel ──────────────────────────────────────────────────────────
-export function buildVisPanel(node, p, visLink, setActive) {
+export function buildVisPanel(node, p, visLink, setActive, ctx) {
   const friendly = document.createElement('div');
   friendly.style.cssText = 'margin-bottom:6px;padding:4px 8px;background:#fff8e1;border:1px solid #ffe082;border-radius:4px;font-size:11px;color:#5d4037;';
   const updateFriendly = () => {
@@ -35,7 +33,7 @@ export function buildVisPanel(node, p, visLink, setActive) {
   // Visual condition builder
   const builderWrap = document.createElement('div');
   builderWrap.className = 'vis-builder';
-  const items = getAllItems(tree).filter(it => it.id !== node.id);
+  const items = getAllItems(ctx.tree).filter(it => it.id !== node.id);
 
   const qSel = document.createElement('select');
   qSel.className = 'vis-builder-sel';
@@ -249,7 +247,7 @@ export function buildExprPanel(node, p, exprLink, setActive) {
 }
 
 // ── Style / Appearance panel ──────────────────────────────────────────────────
-export function buildStylePanel(node, p, styleLink, setActive) {
+export function buildStylePanel(node, p, styleLink, setActive, ctx) {
   const styleRow = (label, fn) => {
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px;';
@@ -301,7 +299,7 @@ export function buildStylePanel(node, p, styleLink, setActive) {
     const s = buildStyle(boldCb.checked, italicCb.checked, color);
     node._renderStyle = s;
     rawInp.value = s;
-    _formTick.value++;
+    ctx.formTick.value++;
   };
   const syncAndMark = () => { sync(); setActive(styleLink, !!node._renderStyle); };
 
@@ -316,7 +314,7 @@ export function buildStylePanel(node, p, styleLink, setActive) {
     italicCb.checked = p2.italic;
     if (p2.color?.startsWith('#')) colorInp.value = p2.color;
     setActive(styleLink, !!rawInp.value);
-    _formTick.value++;
+    ctx.formTick.value++;
   };
 
   styleRow('Bold',   () => boldCb);

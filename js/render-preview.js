@@ -3,9 +3,10 @@ import {
   effect,
   age, gender, bmi, pregnant, smoker, proc, comorb,
   tree, values, autoFilledIds, _formTick,
-  evalRule, calcFormOk, isDescendant, isMandatory,
+  evalRule, calcFormOk, isMandatory,
   rawFhir, calcTested, CHECKABLE_TYPES
 } from './state.js';
+import { isDescendant } from './utils.js';
 import { evaluateNode } from './eval.js';
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes } from './fhir/calc.js';

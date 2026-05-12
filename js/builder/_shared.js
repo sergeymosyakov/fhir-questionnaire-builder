@@ -1,19 +1,22 @@
 // ── Builder shared state and utilities ───────────────────────────────────────
-import { tree, escAttr, _formTick, rawFhir, calcTested, values } from '../state.js';
 import { buildQR } from '../fhir/qr-builder.js';
 import { evalCalcNodes } from '../fhir/calc.js';
 
 const fhirpath = window.fhirpath;
 
-// UI-only collapse state per node.id — not part of FHIR data
-export const _collapsed = new Map();
+// Injected by index.js via init()
+let _deps = null;
+export function init(deps) { _deps = deps; }
+
+// UI-only collapse state is owned by index.js and passed via ctx.collapsed.
 
 export function triggerCalcRecalc() {
+  const { tree, formTick, rawFhir, calcTested, values } = _deps;
   if (calcTested.value && rawFhir.value && fhirpath) {
     const qr = buildQR(JSON.parse(JSON.stringify(rawFhir.value)), values);
     evalCalcNodes(tree, qr, fhirpath, values);
   }
-  _formTick.value++;
+  formTick.value++;
 }
 
 // Collect all item nodes as flat list with breadcrumb labels for dropdowns
