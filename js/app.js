@@ -6,6 +6,7 @@ import { exportFHIR } from './fhir/export.js';
 import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/validate-modal.js';
 import * as progress from './ui/progress.js';
+import * as search from './ui/search.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 import { buildQR } from './fhir/qr-builder.js';
@@ -78,6 +79,15 @@ progress.init({
   bar:     document.getElementById('progressBar'),
   label:   document.getElementById('progressLabel'),
   blocker: document.getElementById('uiBlocker'),
+});
+
+// ── Search init ───────────────────────────────────────────────────────────
+search.init({
+  input:   document.getElementById('searchInput'),
+  prevBtn: document.getElementById('searchPrevBtn'),
+  nextBtn: document.getElementById('searchNextBtn'),
+  counter: document.getElementById('searchCounter'),
+  lform:   document.getElementById('lform'),
 });
 
 // Prompt for filename then export

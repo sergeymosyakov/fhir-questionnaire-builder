@@ -11,6 +11,7 @@ import { evaluateNode } from './eval.js';
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes } from './fhir/calc.js';
 import { buildControl as _buildControl } from './controls/index.js';
+import * as search from './ui/search.js';
 
 const fhirpath = window.fhirpath;
 
@@ -412,6 +413,7 @@ effect(() => {
     finalEl.textContent = (finalOk ? '✓ PASS' : '✗ FAIL') + ' — ' + (finalOk ? 'All criteria met' : 'Criteria not met');
     finalEl.className = 'final-result ' + (finalOk ? 'pass' : 'fail');
   }
+  search.refresh();
 });
 
 // ── Collapse / Expand all ─────────────────────────────────────────────────────

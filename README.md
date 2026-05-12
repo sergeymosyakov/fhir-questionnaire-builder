@@ -33,6 +33,12 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/controls/{type}.js` | Per-type control implementations |
 | `js/fhir/import.js` | FHIR R4 → internal model |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
+| `js/fhir/calc.js` | `evalCalcNodes` — FHIRPath calculatedExpression evaluation |
+| `js/fhir/qr-builder.js` | QuestionnaireResponse builder for FHIRPath context |
+| `js/fhir/validate.js` | `validateTree` → `{severity, nodeId, message}[]` |
+| `js/ui/validate-modal.js` | Validate modal — `init(elements)`, `show(title, issues, mode, callbacks)` |
+| `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
+| `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + keyboard navigation |
 | `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup (bariatric surgery pre-auth, compact) |
 | `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all item types |
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History — 49 items, depth 5 |
@@ -213,7 +219,7 @@ Standard extensions preserved on export:
 - **required checkbox** — `required:true` on boolean items requires the box to be checked; shows ✔/✘ and affects PASS/FAIL
 - **Required star** — mandatory items show a red `*` in the label in preview
 - **Optional badge** — non-mandatory items show a small `optional` badge in the preview
-- **Radio buttons** — `radio` item type renders as inline radio-group; exports as `choice` + `questionnaire-itemControl: radio-button`
+- **Search in preview** — 🔍 search box in the preview toolbar; type to highlight matching rows (yellow), `↑`/`↓` buttons (or keyboard arrows) to navigate between matches; shows `2 / 5` counter; red border + "No results" when nothing found; Escape clears
 - **File attachments** — `attachment` item type renders as styled **Choose file** button; `required:true` requires a file to be chosen
 - **Export validation** — on Export: `validateTree()` runs; modal lists errors/warnings with ↗ navigate-to-node per issue; "Fix first" / "Export anyway"
 - **Import validation** — same modal shown after loading a file/sample (OK-only mode)
