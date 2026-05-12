@@ -7,6 +7,7 @@ import { importFHIR } from './fhir/import.js';
 import { exportFHIR } from './fhir/export.js';
 import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/validate-modal.js';
+import * as progress from './ui/progress.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './render-builder.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 import { buildQR } from './fhir/qr-builder.js';
@@ -44,14 +45,12 @@ document.getElementById('testBtn').onclick = () => {
 document.getElementById('collapseAllBtn').onclick  = collapseAll;
 document.getElementById('expandAllBtn').onclick    = expandAll;
 document.getElementById('renumberBtn').onclick = async () => {
-  const btn  = document.getElementById('renumberBtn');
-  const prog = document.getElementById('renumberProgress');
+  const btn = document.getElementById('renumberBtn');
   btn.disabled = true;
-  prog.textContent = '0 / ' + (document.querySelectorAll('#treeContainer .node').length || '…');
-  prog.style.display = 'inline';
-  const onProgress = e => { prog.textContent = e.detail.done + ' / ' + e.detail.total; };
+  progress.show('Renumbering…');
+  const onProgress = e => progress.update(e.detail.done, e.detail.total);
   const onDone = () => {
-    prog.style.display = 'none';
+    progress.hide();
     btn.disabled = false;
     document.removeEventListener('renumber-progress', onProgress);
     document.removeEventListener('renumber-done', onDone);
@@ -69,6 +68,13 @@ validateModal.init({
   body:        _modal.querySelector('.validate-modal-body'),
   footer:      _modal.querySelector('.validate-modal-footer'),
   closeBtn:    _modal.querySelector('.validate-modal-close'),
+});
+
+// ── Global progress bar init ──────────────────────────────────────────────
+progress.init({
+  wrap:  document.getElementById('progressWrap'),
+  bar:   document.getElementById('progressBar'),
+  label: document.getElementById('progressLabel'),
 });
 
 document.getElementById('exportFhirBtn').onclick = () => {
@@ -105,18 +111,21 @@ document.getElementById('loadFromFileItem').onclick = () => {
 document.querySelectorAll('#loadMenu [data-sample]').forEach(item => {
   item.onclick = () => {
     loadMenu.style.display = 'none';
+    const name = item.dataset.sample.replace(/\.fhir\.json$/, '').replace(/-/g, ' ');
+    progress.show('Loading ' + name + '…');
     fetch('sampledata/' + item.dataset.sample)
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(_importAndValidate)
-      .catch(err => alert('Could not load sample: ' + err.message));
+      .then(data => { progress.hide(); _importAndValidate(data); })
+      .catch(err => { progress.hide(); alert('Could not load sample: ' + err.message); });
   };
 });
 document.getElementById('fhirFileInput').onchange  = e => {
   const file = e.target.files[0];
   if (!file) return;
+  progress.show('Loading ' + file.name + '…');
   const reader = new FileReader();
-  reader.onload  = ev => { try { _importAndValidate(JSON.parse(ev.target.result)); } catch (err) { alert('Parse error: ' + err.message); } };
-  reader.onerror = () => alert('Error reading file.');
+  reader.onload  = ev => { try { progress.hide(); _importAndValidate(JSON.parse(ev.target.result)); } catch (err) { progress.hide(); alert('Parse error: ' + err.message); } };
+  reader.onerror = () => { progress.hide(); alert('Error reading file.'); };
   reader.readAsText(file);
   e.target.value = '';
 };

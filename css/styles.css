@@ -38,6 +38,43 @@ body {
   flex-direction: column;
 }
 
+/* === Global progress bar ==================================================== */
+.progress-wrap {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  height: 28px;
+  background: rgba(0,30,80,.82);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+}
+.progress-bar {
+  height: 6px;
+  width: 0%;
+  background: #42a5f5;
+  border-radius: 3px;
+  transition: width .15s linear;
+  flex-shrink: 0;
+  min-width: 120px;
+}
+.progress-bar--indeterminate {
+  width: 30% !important;
+  animation: progress-slide 1.1s ease-in-out infinite alternate;
+}
+@keyframes progress-slide {
+  from { margin-left: 0%;   width: 30%; }
+  to   { margin-left: 65%;  width: 30%; }
+}
+.progress-label {
+  font-size: 11px;
+  color: #cfe8ff;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
 /* === Top panel =============================================================== */
 .top-panel {
   background: var(--c-primary-dk);
@@ -300,12 +337,6 @@ body {
 }
 .btn-tree-ctrl:hover { background: #e8e8e8; }
 .btn-tree-ctrl:disabled { opacity: .5; cursor: default; }
-#renumberProgress {
-  font-size: 11px;
-  color: #888;
-  font-variant-numeric: tabular-nums;
-  margin-left: 4px;
-}
 .btn-icon-ctrl {
   padding: 4px 7px;
   background: #f5f5f5;
