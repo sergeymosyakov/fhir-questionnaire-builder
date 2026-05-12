@@ -58,18 +58,19 @@ Allows visually building questionnaire logic, testing it against patient data, a
 
 ## Architecture
 
-### Reactive State (FHIR Patient R4)
+### Reactive State
 
 ```js
+// Patient R4 context (js/patient.js)
 age, gender, bmi, pregnant, smoker, proc, comorb  // ref() — patient fields
-tree        // reactive([]) — questionnaire node tree
-values      // plain object — form answers (not reactive; avoids re-render on every keystroke)
-_formTick   // ref(0) — incremented on checkbox/select change to re-trigger effect()
-calcTested  // ref(false) — true after Test button clicked; enables calculatedExpression evaluation
+
+// App state (js/state.js)
+tree          // reactive([]) — questionnaire node tree
+values        // plain object — form answers (not reactive; avoids re-render on every keystroke)
+_formTick     // ref(0) — incremented on checkbox/select change to re-trigger effect()
+calcTested    // ref(false) — true after Test button clicked; enables calculatedExpression evaluation
 autoFilledIds // Set — IDs of items auto-filled from conditionRule
 ```
-
-> `testMode` was removed — ✔/✘ icons always reflect real-time state; no separate "test mode" row highlighting needed.
 
 ### Node Data Model
 
