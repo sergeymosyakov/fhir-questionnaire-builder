@@ -1,5 +1,14 @@
 ﻿# QuestionaryPrototype — Build Context
 
+## ⚠️ WORKFLOW RULES — MANDATORY
+
+1. **git commit/push только по явной команде пользователя** ("пушай"). Не делать автоматически.
+2. **Перед каждым пушем** — обновить CONTEXT.md и README.md (таблица файлов, UX features, Known Limitations).
+3. **Модульность** — новый UI виджет → `js/ui/<name>.js`; новый контрол → `js/controls/<name>.js`; новый CSS блок → `css/<name>.css` + `<link>` в index.html. Не добавлять в уже существующие файлы то, что логически принадлежит отдельному модулю.
+4. **DI** — DOM резолвится один раз в `app.js`, передаётся через `init(elements)`. Никаких `getElementById` внутри субмодулей.
+
+---
+
 ## What It Is
 
 A prototype **Logic Builder** for medical questionnaires (FHIR R4 Questionnaire).  
