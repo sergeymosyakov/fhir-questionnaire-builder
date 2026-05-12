@@ -295,6 +295,12 @@ body {
   margin-bottom: 10px;
 }
 
+.loaded-file-name-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
 .loaded-file-name {
   display: inline;
   font-size: 12px;
@@ -302,6 +308,66 @@ body {
   letter-spacing: 0;
   text-transform: none;
   color: var(--c-accent);
+}
+
+.clear-form-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--c-text-2);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity 0.15s, background 0.15s;
+}
+.clear-form-btn:hover {
+  opacity: 1;
+  background: var(--c-err, #e53e3e);
+  color: #fff;
+}
+
+/* Clear confirm modal */
+.clear-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.clear-confirm-box {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md, 8px);
+  padding: 24px 28px 20px;
+  min-width: 340px;
+  max-width: 440px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.clear-confirm-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--c-text);
+  margin-bottom: 8px;
+}
+.clear-confirm-msg {
+  font-size: 13px;
+  color: var(--c-text-2);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.clear-confirm-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 /* === Builder buttons ========================================================= */

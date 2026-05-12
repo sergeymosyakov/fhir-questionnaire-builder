@@ -99,7 +99,7 @@ function nodeToFHIRItem(node) {
   return fhirItem;
 }
 
-export function exportFHIR() {
+export function exportFHIR(fileName) {
   const q = {
     resourceType: 'Questionnaire',
     id:     'logic-builder-export',
@@ -112,7 +112,7 @@ export function exportFHIR() {
   const blob = new Blob([JSON.stringify(q, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'questionnaire.fhir.json';
+  a.download = fileName || 'questionnaire.json';
   a.click();
   URL.revokeObjectURL(a.href);
 }

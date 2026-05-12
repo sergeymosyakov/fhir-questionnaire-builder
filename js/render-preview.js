@@ -66,7 +66,10 @@ effect(() => {
       '<div class="preview-placeholder-title">No questionnaire loaded</div>' +
       '<div class="preview-placeholder-hint">Use <strong>⬆ Load ▾</strong> to open a sample or upload your own FHIR R4 Questionnaire JSON,<br>or build one from scratch using <strong>+ Add Root Group</strong> in the left panel.</div>';
     lform.appendChild(placeholder);
-    document.getElementById('finalResult').innerHTML = '';
+    const _fr = document.getElementById('finalResult');
+    _fr.innerHTML = '';
+    _fr.className = 'final-result';
+    _fr.style.display = 'none';
     return;
   }
 

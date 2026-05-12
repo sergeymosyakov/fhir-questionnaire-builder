@@ -165,12 +165,15 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - Complex JS → stored as extension (round-trip safe)
 - `conditionRule`, `successValue` → always as extensions
 - `itemType:'radio'` → exports `type:'choice'` + standard `questionnaire-itemControl: radio-button` extension (round-trip safe)
-- Downloads as `questionnaire.fhir.json`
+- Downloads as `<name>.json` (user prompted for filename before download)
 
 ---
 
 ## Key UX Features
 
+- **Clear questionnaire** — `×` button next to the loaded file name clears tree, values, rawFhir; if tree is non-empty shows a modal asking to export first (Export first / Clear anyway / Cancel)
+- **Loaded file name** — shown in right-panel header after import; also appears as `New Questionnaire` when building from scratch; `×` button always visible when tree is non-empty
+- **Export filename prompt** — `window.prompt` before every export; pre-filled with current file name; adds `.json` if not already present
 - **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
 - **Drag & drop reorder** — ⠿ handle on every node; drag to reorder, drop between nodes (blue line), drop into group (dashed zone), drop at root level; ancestor→descendant drop blocked
 - **Collapse sections (preview)** — `▼/▶` toggle on each group row in the preview; `⊟`/`⊞` buttons in the preview toolbar collapse/expand all (appear after FHIR load)
