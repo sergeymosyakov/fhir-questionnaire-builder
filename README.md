@@ -48,7 +48,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 
 | File | Items | enableWhen | What to look for |
 |---|---|---|---|
-| `example-bariatric.fhir.json` | ~25 | ~8 | Built-in default — loads on startup. Covers most item types. BMI calculated field, radio buttons, attachments. |
+| `example-bariatric.fhir.json` | ~25 | ~8 | Built-in default — loads on startup. Covers most item types. BMI calculated field, radio buttons, attachments, open-choice. |
 | `bariatric-extended.fhir.json` | 87 | 32 | **Stress-test.** Synthetic bariatric pre-authorization. All item types: text, number, date, url, attachment, checkbox, select, radio, display. Sub-questions for diabetes (HbA1c, medications, type), hypertension, sleep apnea (CPAP, severity), prior surgery (date, complications), psych eval (eating disorder, substance history), cardiac clearance, GERD warning display. BMI `calculatedExpression`. |
 | `ussg-fht.fhir.json` | 49 | 0 | Deep nesting (depth 5). US Surgeon General Family Health History Tool. Good for testing tree collapse/expand and navigation. No enableWhen — purely structural. |
 | `prowl-ss.fhir.json` | 44 | 0 | Flat structure (depth 1). PROWL-SS post-operative pain assessment. Likert-scale radio groups and display items. |
@@ -209,6 +209,8 @@ Standard extensions preserved on export:
 - **Radio buttons** — `radio` item type renders as inline radio-group; exports as `choice` + `questionnaire-itemControl: radio-button`
 - **File attachments** — `attachment` item type renders as styled **Choose file** button; `required:true` requires a file to be chosen
 - **Date picker / URL input** — `date` renders as native date-picker; `url` validates format with `new URL()`
+- **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; startup auto-loads `example-bariatric.fhir.json` via `fetch`
+- **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)
 
 ---
 

@@ -124,6 +124,17 @@
           ]
         },
         {
+          "linkId": "q-preferred-surgeon",
+          "text": "Preferred surgical facility (or enter your own)",
+          "type": "open-choice",
+          "required": false,
+          "answerOption": [
+            { "valueString": "University Medical Center" },
+            { "valueString": "Regional Bariatric Institute" },
+            { "valueString": "City General Hospital" }
+          ]
+        },
+        {
           "linkId": "q-diet-meds",
           "text": "Anti-obesity medications tried?",
           "type": "boolean"

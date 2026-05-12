@@ -808,6 +808,31 @@ body {
   border-radius: 1px;
 }
 
+/* Load dropdown */
+.load-wrap { position: relative; display: inline-flex; }
+.load-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 200;
+  background: #fff;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  box-shadow: 0 4px 16px rgba(0,0,0,.14);
+  min-width: 230px;
+  overflow: hidden;
+}
+.load-menu-item {
+  padding: 8px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--c-text);
+  transition: background .1s;
+  white-space: nowrap;
+}
+.load-menu-item:hover { background: var(--c-primary-lt); color: var(--c-primary); }
+.load-menu-sep { height: 1px; background: var(--c-border); margin: 2px 0; }
+
 /* Disabled group: grayed out, non-interactive */
 .lform-disabled {
   opacity: 0.40;

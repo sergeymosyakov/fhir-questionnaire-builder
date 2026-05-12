@@ -188,6 +188,8 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Optional badge** — `mandatory===false` items show a small italic `optional` badge in preview
 - **Styled file input** — `attachment` renders as a custom **Choose file** button (blue, themed) + file name; native input hidden
 - **Active action buttons** — action panel buttons (Show When, Applicability, Expression, Appearance, Required) turn **dark purple** when they have content set; initialised on load, updated in real-time on edit
+- **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; replaces separate Load/Example buttons; startup auto-loads `example-bariatric.fhir.json` via `fetch`
+- **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)
 - **Resizable panels** — drag the divider between left/right panels; width persisted in `localStorage`
 - **Panel resize overlay** — transparent fixed overlay created during drag prevents text selection
 
@@ -213,5 +215,4 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 - Multi-condition visibility (`&&`, `||`) not supported in the visual builder — must be typed as JS manually
 - `conditionRule` on items is not exported to FHIR (prototype-specific concept, no R4 equivalent)
-- Example loads via `window.EXAMPLE_FHIR_Q` (JS wrapper), not `fetch`, for `file://` compatibility
 

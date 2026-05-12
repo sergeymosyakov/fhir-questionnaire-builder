@@ -1,7 +1,7 @@
 ﻿// Entry point: wires patient inputs, toolbar buttons, and loads the built-in example.
 import {
   age, gender, bmi, pregnant, smoker, proc, comorb,
-  values, rawFhir, calcTested, _formTick
+  tree, values, rawFhir, calcTested, _formTick
 } from './state.js';
 import { importFHIR } from './fhir/import.js';
 import { exportFHIR } from './fhir/export.js';
@@ -45,9 +45,27 @@ document.getElementById('renumberBtn').onclick     = () => {
   const format = document.getElementById('renumberFormat').value;
   renumberAll(format);
 };
-document.getElementById('loadExampleBtn').onclick  = () => loadExampleFile(importFHIR);
 document.getElementById('exportFhirBtn').onclick   = exportFHIR;
-document.getElementById('loadFhirBtn').onclick     = () => document.getElementById('fhirFileInput').click();
+
+// ── Load dropdown ─────────────────────────────────────────────────────────────
+const loadMenu = document.getElementById('loadMenu');
+document.getElementById('loadFhirBtn').onclick = e => {
+  e.stopPropagation();
+  loadMenu.style.display = loadMenu.style.display === 'none' ? 'block' : 'none';
+};
+document.getElementById('loadFromFileItem').onclick = () => {
+  loadMenu.style.display = 'none';
+  document.getElementById('fhirFileInput').click();
+};
+document.querySelectorAll('#loadMenu [data-sample]').forEach(item => {
+  item.onclick = () => {
+    loadMenu.style.display = 'none';
+    fetch('sampledata/' + item.dataset.sample)
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(importFHIR)
+      .catch(err => alert('Could not load sample: ' + err.message));
+  };
+});
 document.getElementById('fhirFileInput').onchange  = e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -58,17 +76,16 @@ document.getElementById('fhirFileInput').onchange  = e => {
   e.target.value = '';
 };
 
-// Load built-in example via fetch (requires HTTP server or GitHub Pages)
-function loadExampleFile(onLoaded) {
-  fetch('sampledata/example-bariatric.fhir.json')
-    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(onLoaded)
-    .catch(err => alert('Could not load example: ' + err.message));
-}
+// Load built-in example on startup
+fetch('sampledata/example-bariatric.fhir.json')
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(importFHIR)
+  .catch(err => alert('Could not load example: ' + err.message));
 
 // Close any open ⊕ Add dropdown when clicking outside
 document.addEventListener('click', () => {
   document.querySelectorAll('.action-add-menu').forEach(m => { m.style.display = 'none'; });
+  loadMenu.style.display = 'none';
 });
 
 // ── Panel resize drag ─────────────────────────────────────────────────────────

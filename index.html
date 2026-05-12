@@ -86,13 +86,23 @@
       </div>
       <div class="final-result" id="finalResult"></div>
       <div class="fhir-toolbar">
-        <button id="loadFhirBtn" type="button" class="btn-fhir">&#x2B06; Load</button>
+        <div class="load-wrap">
+          <button id="loadFhirBtn" type="button" class="btn-fhir">&#x2B06; Load &#x25BE;</button>
+          <div class="load-menu" id="loadMenu" style="display:none">
+            <div class="load-menu-item" id="loadFromFileItem">&#x1F4C2; From file…</div>
+            <div class="load-menu-sep"></div>
+            <div class="load-menu-item" data-sample="example-bariatric.fhir.json">&#x2605; Bariatric (compact)</div>
+            <div class="load-menu-item" data-sample="bariatric-extended.fhir.json">&#x2605; Bariatric (extended, 87 items)</div>
+            <div class="load-menu-item" data-sample="ussg-fht.fhir.json">&#x2605; USSG Family Health History</div>
+            <div class="load-menu-item" data-sample="prowl-ss.fhir.json">&#x2605; PROWL-SS Pain Assessment</div>
+            <div class="load-menu-item" data-sample="phq-9.fhir.json">&#x2605; PHQ-9 Depression Screening</div>
+          </div>
+        </div>
         <input type="file" id="fhirFileInput" accept=".json,application/json" style="display:none">
         <button id="exportFhirBtn" type="button" class="btn-fhir btn-fhir-export">&#x2B07; Export</button>
         <span class="fhir-toolbar-sep"></span>
         <button id="previewCollapseAllBtn" type="button" class="btn-fhir" title="Collapse all sections" style="display:none">&#x229F;</button>
         <button id="previewExpandAllBtn" type="button" class="btn-fhir" title="Expand all sections" style="display:none">&#x229E;</button>
-        <button id="loadExampleBtn" type="button" class="btn-fhir">&#x2605; Example</button>
       </div>
     </div>
     <div class="right-panel-body">

@@ -2,6 +2,7 @@
 // renderGroup(node, ctx: BuilderCtx) → HTMLElement  — see ctx.js
 import { findAndRemove, escAttr } from '../utils.js';
 import { makeGroup, makeItem } from '../state.js';
+import { formatSeg } from './_shared.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { addPanel, buildVisPanel, buildMandPanel, buildCondPanel, buildExprPanel, buildStylePanel } from './panels.js';
 
@@ -152,11 +153,17 @@ export function renderGroup(node, ctx) {
     addMenu.appendChild(mi);
   };
 
-  addChild('Group', () => makeGroup('New Group'));
+  addChild('Group', () => {
+    const n = makeGroup('New Group');
+    n.id = node.id + '.' + formatSeg(node.children.length + 1);
+    return n;
+  });
   addChild('Item', () => {
     const siblings = node.children.filter(c => c.type === 'item');
     const template = siblings.length > 0 ? siblings[siblings.length - 1] : null;
-    return makeItem('New Item', template);
+    const n = makeItem('New Item', template);
+    n.id = node.id + '.' + formatSeg(node.children.length + 1);
+    return n;
   });
 
   addBtn.onclick = e => {

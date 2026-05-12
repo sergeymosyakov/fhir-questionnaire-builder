@@ -10,6 +10,20 @@ export function init(deps) { _deps = deps; }
 
 // UI-only collapse state is owned by index.js and passed via ctx.collapsed.
 
+// ── ID segment formatter ──────────────────────────────────────────────────────
+function _toRoman(n) {
+  const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let r = ''; for (let i = 0; i < vals.length; i++) while (n >= vals[i]) { r += syms[i]; n -= vals[i]; } return r;
+}
+function _toLetter(n) {
+  let r = ''; while (n > 0) { r = String.fromCharCode(64 + ((n-1)%26+1)) + r; n = Math.floor((n-1)/26); } return r;
+}
+export function formatSeg(n) {
+  const fmt = document.getElementById('renumberFormat')?.value || 'numeric';
+  return fmt === 'roman' ? _toRoman(n) : fmt === 'letters' ? _toLetter(n) : String(n);
+}
+
 export function triggerCalcRecalc() {
   const { tree, formTick, rawFhir, calcTested, values } = _deps;
   if (calcTested.value && rawFhir.value && fhirpath) {

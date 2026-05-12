@@ -1,6 +1,6 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
 import { tree, makeGroup, makeItem, _formTick, rawFhir, calcTested, values } from '../state.js';
-import { init as sharedInit } from './_shared.js';
+import { init as sharedInit, formatSeg } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { renderItem } from './node-item.js';
 import { renderGroup } from './node-group.js';
@@ -94,6 +94,7 @@ export function renumberAll(format) {
 // ── Root-level add buttons (wired in app.js via these exports) ────────────────
 export function addRootGroup() {
   const node = makeGroup('New Group');
+  node.id = formatSeg(tree.length + 1);
   tree.push(node);
   _formTick.value++;
   renderTree();
@@ -105,6 +106,7 @@ export function addRootGroup() {
 
 export function addRootItem() {
   const node = makeItem('New Item');
+  node.id = formatSeg(tree.length + 1);
   tree.push(node);
   _formTick.value++;
   renderTree();
