@@ -38,7 +38,8 @@ export function fhirTypeToItemType(t) {
   if (t === 'date' || t === 'dateTime' || t === 'time')       return 'date';
   if (t === 'url')                                            return 'url';
   if (t === 'attachment')                                     return 'attachment';
-  return 'text'; // string, text, reference
+  if (t === 'reference')                                      return 'reference';
+  return 'text'; // string, text
 }
 
 // answerOption[] → comma-separated display/code string for our options field
@@ -98,6 +99,13 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   node.options        = fhirOptsToStr(fhirItem.answerOption);
   const sv = extractExtension(fhirItem, 'successValue');
   if (sv) node.successValue = sv;
+  // reference: allowed resource type from standard extension
+  if (node.itemType === 'reference') {
+    const refResExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource'
+    );
+    if (refResExt && refResExt.valueCode) node.referenceResource = refResExt.valueCode;
+  }
   if (fhirItem.enableWhen && fhirItem.enableWhen.length && linkIdMap) {
     node._enableWhenText = humanEnableWhen(fhirItem.enableWhen, linkIdMap);
   }

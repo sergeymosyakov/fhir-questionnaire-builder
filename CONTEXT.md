@@ -146,7 +146,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `group` | `group` | ✅ | — | |
 | `group` (no children) | `group` | ✅ `[Info]` | — | |
 | `attachment` | `attachment` | ✅ styled button | ✅ required = file chosen | Custom **Choose file** button |
-| `reference` | `text` | ⚠️ fallback | — | No resource search |
+| `reference` | `reference` | ✅ text input (`ResourceType/id`) | — | Optional `referenceResource` extension limits type |
 
 ---
 

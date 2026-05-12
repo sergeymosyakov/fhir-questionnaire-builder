@@ -1,0 +1,49 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "reference-example",
+  "title": "Reference Type Demo",
+  "status": "draft",
+  "subjectType": ["Patient"],
+  "date": "2026-05-12",
+  "item": [
+    {
+      "linkId": "patient-ref",
+      "text": "Patient",
+      "type": "reference",
+      "required": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource",
+          "valueCode": "Patient"
+        }
+      ]
+    },
+    {
+      "linkId": "practitioner-ref",
+      "text": "Referring Practitioner",
+      "type": "reference",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource",
+          "valueCode": "Practitioner"
+        }
+      ]
+    },
+    {
+      "linkId": "encounter-ref",
+      "text": "Encounter",
+      "type": "reference",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource",
+          "valueCode": "Encounter"
+        }
+      ]
+    },
+    {
+      "linkId": "notes",
+      "text": "Additional notes",
+      "type": "string"
+    }
+  ]
+}

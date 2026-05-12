@@ -53,6 +53,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 | `ussg-fht.fhir.json` | 49 | 0 | Deep nesting (depth 5). US Surgeon General Family Health History Tool. Good for testing tree collapse/expand and navigation. No enableWhen — purely structural. |
 | `prowl-ss.fhir.json` | 44 | 0 | Flat structure (depth 1). PROWL-SS post-operative pain assessment. Likert-scale radio groups and display items. |
 | `phq-9.fhir.json` | 11 | 0 | Minimal — PHQ-9 depression screening. Fast to load; good baseline smoke-test. |
+| `reference-example.fhir.json` | 4 | 0 | Demonstrates the `reference` item type — Patient, Practitioner, Encounter references with `questionnaire-referenceResource` extension. |
 | `1776102565767-...json` | — | — | Real-world production snapshot. Use for regression testing after refactors. |
 
 ---
@@ -146,7 +147,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `group` | `group` | ✅ section header | — | |
 | `group` (no children) | `group` | ✅ info text `[Info]` | — | |
 | `attachment` | `attachment` | ✅ file input | ✅ required = file chosen | |
-| `reference` | `text` | ⚠️ text fallback | — | No FHIR resource search |
+| `reference` | `reference` | ✅ text input (`ResourceType/id`) | — | `questionnaire-referenceResource` extension imported/exported |
 | `quantity` | `number` | ⚠️ number only | — | Unit field not shown |
 
 ---

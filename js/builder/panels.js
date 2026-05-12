@@ -186,7 +186,7 @@ export function buildTypePanel(node, p) {
   typeRow.textContent = 'Type: ';
   const typeSelect = document.createElement('select');
   typeSelect.style.width = 'auto';
-  for (const t of ['text', 'number', 'date', 'url', 'attachment', 'checkbox', 'select', 'open-choice', 'radio', 'display']) {
+  for (const t of ['text', 'number', 'date', 'url', 'attachment', 'checkbox', 'select', 'open-choice', 'radio', 'reference', 'display']) {
     const opt = document.createElement('option');
     opt.value = t; opt.textContent = t;
     if (node.itemType === t) opt.selected = true;
@@ -203,6 +203,14 @@ export function buildTypePanel(node, p) {
   optionsDiv.querySelector('input').oninput = function () { node.options = this.value; };
   p.appendChild(optionsDiv);
 
+  const refResDiv = document.createElement('div');
+  refResDiv.style.marginTop = '4px';
+  refResDiv.style.display = node.itemType === 'reference' ? 'block' : 'none';
+  refResDiv.innerHTML = 'Allowed resource type (e.g. Patient):<br>'
+    + '<input type="text" placeholder="Patient" value="' + escAttr(node.referenceResource || '') + '">';
+  refResDiv.querySelector('input').oninput = function () { node.referenceResource = this.value.trim() || undefined; };
+  p.appendChild(refResDiv);
+
   const successDiv = document.createElement('div');
   p.appendChild(successDiv);
   buildSuccessValueUI(node, successDiv);
@@ -210,6 +218,7 @@ export function buildTypePanel(node, p) {
   typeSelect.onchange = () => {
     node.itemType = typeSelect.value;
     optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice') ? 'block' : 'none';
+    refResDiv.style.display  = node.itemType === 'reference' ? 'block' : 'none';
     buildSuccessValueUI(node, successDiv);
   };
 }

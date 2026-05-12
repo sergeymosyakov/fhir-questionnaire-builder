@@ -10,6 +10,7 @@ function itemTypeToFHIRType(t) {
   if (t === 'date')        return 'date';
   if (t === 'url')         return 'url';
   if (t === 'attachment')  return 'attachment';
+  if (t === 'reference')   return 'reference';
   return 'string';
 }
 
@@ -65,6 +66,8 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://logicbuilder.example.org/extension/conditionRule', valueString: node.conditionRule });
   if (node.type === 'item' && node.successValue)
     ext.push({ url: 'http://logicbuilder.example.org/extension/successValue', valueString: node.successValue });
+  if (node.itemType === 'reference' && node.referenceResource)
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource', valueCode: node.referenceResource });
   if (ext.length) fhirItem.extension = ext;
 
   // _renderStyle → _text.extension[rendering-style] (round-trip)
