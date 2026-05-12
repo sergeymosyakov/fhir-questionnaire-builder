@@ -196,7 +196,7 @@ Standard extensions preserved on export:
 ## UX Features
 
 - **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
-- **Drag & drop reorder** — ⠿ handle on every node; drag to reorder within the tree, drop between nodes (blue line), drop into a group (dashed zone), or drop at root level
+- **Drag & drop reorder** — ⠿ handle on every node; drag to reorder within the tree, drop between nodes, drop into a group (dashed zone), or drop at root level; drop zones appear only during drag — no layout shift
 - **Resizable panels** — drag the divider between Logic Builder and Preview to resize; width persisted in `localStorage`
 - **Clear questionnaire** — `×` button next to the loaded file name; if tree is non-empty shows a modal asking to export first (Export first / Clear anyway / Cancel)
 - **Loaded file name** — shown in right-panel header after import; appears as `New Questionnaire` when building from scratch; `×` always visible when tree is non-empty

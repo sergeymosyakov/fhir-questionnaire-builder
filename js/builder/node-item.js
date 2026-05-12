@@ -7,15 +7,18 @@ import { addPanel, buildVisPanel, buildMandPanel, buildCondPanel, buildTypePanel
 export function renderItem(node, ctx) {
   const { renderTree } = ctx;
 
+  const wrapper = document.createElement('div');
+  wrapper.className = 'node-wrap';
+
   const div = document.createElement('div');
   div.className = 'node node-item';
   div.dataset.nodeId = node.id;
 
-  // Drop zone above
+  // Drop zone above (outside the styled box)
   const dropAbove = document.createElement('div');
   dropAbove.className = 'drop-zone drop-zone-above';
   attachDropZone(dropAbove, node, 'before');
-  div.appendChild(dropAbove);
+  wrapper.appendChild(dropAbove);
 
   // ── Header ────────────────────────────────────────────────────────────────
   const header = document.createElement('div');
@@ -130,11 +133,7 @@ export function renderItem(node, ctx) {
   setActive(styleLink, !!node._renderStyle);
   setActive(mandLink,  node.mandatory === true);
 
-  // Drop zone below
-  const dropBelow = document.createElement('div');
-  dropBelow.className = 'drop-zone drop-zone-below';
-  attachDropZone(dropBelow, node, 'after');
-  div.appendChild(dropBelow);
+  wrapper.appendChild(div);
 
-  return div;
+  return wrapper;
 }

@@ -65,11 +65,13 @@ function _onDragStart(e, node) {
   setTimeout(() => {
     const el = document.querySelector('[data-node-id="' + node.id + '"]');
     if (el) el.classList.add('node-dragging');
+    document.body.classList.add('dragging');
   }, 0);
 }
 
 function _onDragEnd() {
   _dragId = null;
+  document.body.classList.remove('dragging');
   document.querySelectorAll('.node-dragging').forEach(el => el.classList.remove('node-dragging'));
   document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
   document.querySelectorAll('.node-drop-target').forEach(el => el.classList.remove('node-drop-target'));

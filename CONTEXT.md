@@ -177,7 +177,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Loaded file name** — shown in right-panel header after import; also appears as `New Questionnaire` when building from scratch; `×` button always visible when tree is non-empty
 - **Export filename prompt** — `window.prompt` before every export; pre-filled with current file name; adds `.json` if not already present
 - **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
-- **Drag & drop reorder** — ⠿ handle on every node; drag to reorder, drop between nodes (blue line), drop into group (dashed zone), drop at root level; ancestor→descendant drop blocked
+- **Drag & drop reorder** — ⠿ handle on every node; drag to reorder, drop between nodes, drop into group (dashed zone), drop at root level; ancestor→descendant drop blocked. Drop zones appear only during drag (`body.dragging` CSS class); no layout transitions to prevent flicker. Each node wrapped in `div.node-wrap` (display:contents) so drop zones sit outside the styled box.
 - **Collapse sections (preview)** — `▼/▶` toggle on each group row in the preview; `⊟`/`⊞` buttons in the preview toolbar collapse/expand all (appear after FHIR load)
 - **Disabled groups clickable** — N/A (grayed `—`) groups in preview are still clickable to navigate to builder node
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`
@@ -277,11 +277,9 @@ All UI styles live in `css/styles.css` using CSS custom properties (`--c-border`
 | `.loaded-file-name-wrap` | Wrapper for filename + clear button |
 
 **Inline styles remaining** (not yet converted — tracked for future refactor):
-- `js/builder/panels.js` — ~34 occurrences (layout helpers in builder panels)
-- `js/builder/node-group.js` — ~13 occurrences
-- `js/app.js` — ~14 occurrences
-- `finalEl.style.display` in `render-preview.js` — intentionally dynamic (show/hide logic)
-- `label.style.cssText = res.node._renderStyle` in `render-preview.js` — intentionally inline (user-defined CSS)
+- `js/builder/node-group.js` — `titleWrap.style.cursor` (dead code, `display:contents` parent), `titleTextarea.style.height` (dynamic)
+- `js/builder/node-item.js` — same as above
+- `js/app.js` — `leftPanel.style.width` (resizer, dynamic); `label.style.cssText = _renderStyle` (user CSS, intentional)
 
 ---
 
