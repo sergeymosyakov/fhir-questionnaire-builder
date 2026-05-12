@@ -2,7 +2,7 @@
 // buildXxxPanel(node, panelEl, linkEl, setActive, ctx: BuilderCtx)  — see ctx.js
 //
 // Each panel is keyed and toggled by the action links defined in node-item/group.
-import { escAttr } from '../utils.js';
+import { escAttr, parseOptions } from '../utils.js';
 import { getAllItems, buildSuccessValueUI, triggerCalcRecalc } from './_shared.js';
 
 // ── Panel factory helper ──────────────────────────────────────────────────────
@@ -74,8 +74,8 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
       if (itype === 'select' && opts) {
         const sel2 = document.createElement('select');
         sel2.className = 'vis-builder-sel';
-        opts.split(',').map(s => s.trim()).filter(Boolean).forEach(o => {
-          const opt = document.createElement('option'); opt.value = o; opt.textContent = o; sel2.appendChild(opt);
+        parseOptions(opts).forEach(({ code, display }) => {
+          const opt = document.createElement('option'); opt.value = code; opt.textContent = display; sel2.appendChild(opt);
         });
         valWrap.appendChild(sel2);
       } else {

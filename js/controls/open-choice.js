@@ -1,4 +1,5 @@
 import { createWrap } from './_base.js';
+import { parseOptions } from '../utils.js';
 
 export function build(node, ctx) {
   const { values, onChange, _reCalc, _formTick } = ctx;
@@ -7,10 +8,10 @@ export function build(node, ctx) {
   const listId = 'dl_' + node.id;
   const dl = document.createElement('datalist');
   dl.id = listId;
-  for (const o of (node.options || '').split(',')) {
-    const t = o.trim(); if (!t) continue;
+  // For open-choice, suggest display values (user types free text, stores display)
+  for (const { display } of parseOptions(node.options)) {
     const opt = document.createElement('option');
-    opt.value = t;
+    opt.value = display;
     dl.appendChild(opt);
   }
 

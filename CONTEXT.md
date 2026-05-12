@@ -26,7 +26,7 @@ Allows visually building questionnaire logic, testing it against patient data, a
 | `css/styles.css` | All styles and CSS design tokens |
 | `js/app.js` | Entry point — wires inputs, buttons, loads example |
 | `js/state.js` | Reactive state, data factories, business logic |
-| `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`) |
+| `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`, `parseOption`, `parseOptions`) |
 | `js/eval.js` | Tree evaluation (visibility / condition rules) |
 | `js/render-builder.js` | Left panel — 3-line re-export shim → `js/builder/` |
 | `js/builder/ctx.js` | `BuilderCtx` JSDoc typedef (no runtime exports) |

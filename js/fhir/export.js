@@ -1,5 +1,6 @@
 // ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
 import { tree } from '../state.js';
+import { parseOptions } from '../utils.js';
 
 function itemTypeToFHIRType(t) {
   if (t === 'checkbox')    return 'boolean';
@@ -87,9 +88,8 @@ function nodeToFHIRItem(node) {
     if (node.logicWithParent === 'OR') fhirItem.enableBehavior = 'any';
     fhirItem.item = node.children.map(nodeToFHIRItem);
   } else if ((node.itemType === 'select' || node.itemType === 'radio') && node.options) {
-    fhirItem.answerOption = node.options.split(',')
-      .map(o => o.trim()).filter(Boolean)
-      .map(o => ({ valueCoding: { code: o, display: o } }));
+    fhirItem.answerOption = parseOptions(node.options)
+      .map(({ code, display }) => ({ valueCoding: { code, display } }));
     if (node.itemType === 'radio') {
       fhirItem.extension = (fhirItem.extension || []).concat({
         url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl',

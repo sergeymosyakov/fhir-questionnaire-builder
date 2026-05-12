@@ -43,10 +43,17 @@ function fhirTypeToItemType(t) {
   return 'text'; // string, text
 }
 
-// answerOption[] → comma-separated display/code string for our options field
+// answerOption[] → comma-separated options string in "code=display" format.
+// If both code and display are present and differ: "code=display".
+// Otherwise just the value (backward compat).
 function fhirOptsToStr(opts) {
   return (opts || []).map(o => {
-    if (o.valueCoding) return o.valueCoding.display || o.valueCoding.code || '';
+    if (o.valueCoding) {
+      const code    = o.valueCoding.code    || '';
+      const display = o.valueCoding.display || '';
+      if (code && display && code !== display) return code + '=' + display;
+      return display || code;
+    }
     return o.valueString || (o.valueInteger !== undefined ? String(o.valueInteger) : '');
   }).filter(Boolean).join(', ');
 }

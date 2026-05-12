@@ -20,3 +20,16 @@ export function isDescendant(nodeId, group) {
   }
   return false;
 }
+
+// Parse a single option token: "code=display" → { code, display }
+// Backward compat: "value" (no =) → { code: value, display: value }
+export function parseOption(s) {
+  const eq = s.indexOf('=');
+  if (eq === -1) return { code: s, display: s };
+  return { code: s.slice(0, eq).trim(), display: s.slice(eq + 1).trim() };
+}
+
+// Parse comma-separated options string → [{ code, display }]
+export function parseOptions(str) {
+  return (str || '').split(',').map(s => s.trim()).filter(Boolean).map(parseOption);
+}

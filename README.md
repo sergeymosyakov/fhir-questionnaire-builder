@@ -18,7 +18,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `css/styles.css` | All styles and CSS design tokens |
 | `js/app.js` | Entry point — wires inputs, buttons, loads example |
 | `js/state.js` | Reactive state, data factories, business logic |
-| `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`) |
+| `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`, `parseOption`, `parseOptions`) |
 | `js/eval.js` | Tree evaluation (visibility / condition rules) |
 | `js/render-builder.js` | Left panel — 3-line re-export shim → `js/builder/` |
 | `js/builder/ctx.js` | `BuilderCtx` JSDoc typedef (no runtime exports) |
@@ -176,7 +176,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `item.linkId` | `id` (editable in builder) |
 | `item.enableWhen` | `visibilityRule` (JS expression) + `_enableWhenText` (human label) |
 | `item.enableBehavior:'any'` | `logicWithParent:'OR'` |
-| `item.answerOption` | `options` |
+| `item.answerOption` | `options` — stored as `code=display` per option (e.g. `bmi35=BMI 35–39.9 with comorbidity`); plain value if code==display |
 | `_text.extension[rendering-style]` | `_renderStyle` (applied as inline CSS in preview) |
 
 Custom extensions (URL prefix `http://logicbuilder.example.org/extension/`):
