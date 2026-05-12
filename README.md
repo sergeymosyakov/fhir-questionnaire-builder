@@ -141,7 +141,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three map to `date` |
 | `url` | `url` | ✅ url input | ✅ `new URL()` format check | Invalid URL → ✘ even if not required |
 | `choice` | `select` or `radio` | ✅ dropdown / radio-buttons | — | Determined by `questionnaire-itemControl` extension |
-| `open-choice` | `select` | ⚠️ dropdown | — | Free-text option not shown |
+| `open-choice` | `open-choice` | ✅ text + datalist | — | Dropdown suggestions + free-text via `<datalist>` |
 | `display` | `display` | ✅ label only | — | No control, no pass/fail |
 | `group` | `group` | ✅ section header | — | |
 | `group` (no children) | `group` | ✅ info text `[Info]` | — | |

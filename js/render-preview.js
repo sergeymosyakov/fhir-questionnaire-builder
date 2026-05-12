@@ -254,7 +254,7 @@ effect(() => {
       row.appendChild(lb);
     }
 
-    if (res.node.type === 'item' && res.node.mandatory === false && res.node.itemType !== 'display') {
+    if (res.node.type === 'item' && res.node.mandatory === false && res.node.itemType !== 'display' && !(res.node._readOnly && res.node._calculatedExpr)) {
       const badge = document.createElement('span');
       badge.className = 'preview-optional-badge';
       badge.textContent = 'optional';
