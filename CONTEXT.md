@@ -203,6 +203,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
 - **required text/number** — `required:true` on text/number items means non-empty; shows ✔/✘ icon and affects PASS/FAIL
 - **required checkbox** — `required:true` on boolean items requires the box to be checked; shows ✔/✘; affects PASS/FAIL
+- **required radio/select** — `required:true` on choice/radio items requires an option to be selected; shows ✔/✘ on item and group icon; affects PASS/FAIL
 - **Required star** — `mandatory===true` items (default) show a red `*` in the label in preview
 - **Optional badge** — `mandatory===false` items show a small italic `optional` badge in preview
 - **Styled file input** — `attachment` renders as a custom **Choose file** button (blue, themed) + file name; native input hidden

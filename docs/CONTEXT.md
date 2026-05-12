@@ -167,6 +167,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Dimmed rows** — conditional items shown grayed (🔒) when condition not met; animate to active when met
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
 - **required text/number** — `required:true` on text/number items means non-empty; shows ✔/✘ icon and affects PASS/FAIL
+- **required radio/select** — `required:true` on choice/radio items requires an option to be selected; shows ✔/✘ on item and group icon; affects PASS/FAIL
 
 ---
 
