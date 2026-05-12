@@ -374,6 +374,14 @@ effect(() => {
       row.appendChild(lb);
     }
 
+    if (res.node.type === 'item' && res.node.mandatory === false && res.node.itemType !== 'display') {
+      const badge = document.createElement('span');
+      badge.className = 'preview-optional-badge';
+      badge.textContent = 'optional';
+      badge.title = 'This field is not required';
+      row.appendChild(badge);
+    }
+
     if (res.node._enableWhenText) {
       const hint = document.createElement('span');
       hint.className = 'preview-condition-hint';

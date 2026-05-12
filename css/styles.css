@@ -692,6 +692,18 @@ body {
 .preview-logic-and { background: #e3edfc; color: var(--c-primary); }
 .preview-logic-or  { background: #fff3e0; color: #e65100; }
 
+/* Optional field badge */
+.preview-optional-badge {
+  font-size: 10px;
+  color: #999;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1px 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-style: italic;
+}
+
 /* Human-friendly enableWhen hint */
 .preview-condition-hint {
   font-size: 11px;
