@@ -19,6 +19,7 @@ export function renderGroup(node, ctx) {
   // Drop zone above (outside the styled box)
   const dropAbove = document.createElement('div');
   dropAbove.className = 'drop-zone drop-zone-above';
+  dropAbove.textContent = 'Drop here';
   attachDropZone(dropAbove, node, 'before');
   wrapper.appendChild(dropAbove);
 
@@ -226,7 +227,14 @@ export function renderGroup(node, ctx) {
   logicRow.appendChild(logicSel);
   body.appendChild(logicRow);
 
-  for (const ch of node.children) body.appendChild(renderNode(ch));
+  for (let i = 0; i < node.children.length; i++) {
+    const childWrap = renderNode(node.children[i]);
+    if (i === 0) {
+      const firstDrop = childWrap.querySelector('.drop-zone-above');
+      if (firstDrop) firstDrop.textContent = 'Drop here to add as first child';
+    }
+    body.appendChild(childWrap);
+  }
 
   const dropInside = document.createElement('div');
   dropInside.className = 'drop-zone drop-zone-inside';

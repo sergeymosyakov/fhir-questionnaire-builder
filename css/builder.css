@@ -139,14 +139,24 @@
 .node-dragging { opacity: 0.4; }
 
 .drop-zone {
-  height: 12px;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
   border-radius: 2px;
   border: 1px dashed transparent;
   pointer-events: none;
-  transition: border-color .1s, background .1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: transparent;
+  transition: height .1s, margin .1s, border-color .1s, color .1s, background .1s;
 }
 body.dragging .drop-zone-above {
+  height: 28px;
+  margin: 2px 0;
   border-color: #ddd;
+  color: #bbb;
   pointer-events: auto;
 }
 .node-drop-target.drop-zone-above {
@@ -154,7 +164,9 @@ body.dragging .drop-zone-above {
   border-color: var(--c-primary);
 }
 .drop-zone-inside {
-  height: 28px;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -162,11 +174,12 @@ body.dragging .drop-zone-above {
   color: transparent;
   border: 1px dashed transparent;
   border-radius: var(--r-sm);
-  margin: 4px 0;
   pointer-events: none;
-  transition: border-color .1s, color .1s, background .1s;
+  transition: height .1s, margin .1s, border-color .1s, color .1s, background .1s;
 }
 body.dragging .drop-zone-inside {
+  height: 28px;
+  margin: 4px 0;
   color: #bbb;
   border-color: #ddd;
   pointer-events: auto;

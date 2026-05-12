@@ -17,6 +17,7 @@ export function renderItem(node, ctx) {
   // Drop zone above (outside the styled box)
   const dropAbove = document.createElement('div');
   dropAbove.className = 'drop-zone drop-zone-above';
+  dropAbove.textContent = 'Drop here';
   attachDropZone(dropAbove, node, 'before');
   wrapper.appendChild(dropAbove);
 
