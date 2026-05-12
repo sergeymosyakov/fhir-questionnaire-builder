@@ -5,15 +5,8 @@ export { _effect as effect };
 export { ref, reactive };
 
 // ── Reactive state ────────────────────────────────────────────────────────────
-// FHIR Patient R4 fields relevant for Questionnaire logic
-export const age      = ref(30);
-export const gender   = ref('male');       // male | female | other | unknown
-export const bmi      = ref(42);
-export const pregnant = ref(false);        // boolean (Extension: pregnancyStatus)
-export const smoker   = ref(false);        // boolean (Observation: tobacco-use)
-export const proc     = ref('43644');      // procedure code (Claim.procedure)
-export const comorb   = ref('');           // comma-separated condition codes / display names
-export const tree     = reactive([]);
+// Patient R4 context lives in js/patient.js.
+export const tree = reactive([]);
 
 // Plain (non-reactive) store for current form values in preview.
 // Not reactive on purpose — avoids re-triggering effect() on every keystroke.
@@ -82,8 +75,7 @@ export const makeItem = (title, template) => {
 export const isMandatory = node => node.mandatory !== false;
 
 // ── Rule evaluation ───────────────────────────────────────────────────────────
-// Exposed variables (FHIR Patient R4 context):
-//   age, gender, bmi, pregnant, smoker, proc, comorb, values
+// Evaluates a JS rule string with patient R4 context (from patient.js) + values.
 export const evalRule = (rule, ctx) => {
   if (!rule || !rule.trim()) return true;
   try {

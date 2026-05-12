@@ -10,6 +10,7 @@
   --c-border:      #dde3ec;
   --c-text:        #1c2b3a;
   --c-text-2:      #637083;
+  --c-accent:      #1565c0;
   --c-ok:          #2e7d32;
   --c-ok-bg:       #e8f5e9;
   --c-ok-border:   #66bb6a;
@@ -282,7 +283,24 @@ body {
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--c-text-2);
+  margin-bottom: 0;
+}
+
+.left-panel-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   margin-bottom: 10px;
+}
+
+.loaded-file-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--c-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
 }
 
 /* === Builder buttons ========================================================= */

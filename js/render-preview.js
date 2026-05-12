@@ -1,7 +1,7 @@
 // ── Right panel: reactive preview ─────────────────────────────────────────────
+import { age, gender, bmi, pregnant, smoker, proc, comorb } from './patient.js';
 import {
   effect,
-  age, gender, bmi, pregnant, smoker, proc, comorb,
   tree, values, autoFilledIds, _formTick, _bulkUpdate,
   evalRule, calcFormOk, isMandatory,
   rawFhir, calcTested, CHECKABLE_TYPES

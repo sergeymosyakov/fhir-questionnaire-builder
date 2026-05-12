@@ -1,8 +1,6 @@
 ﻿// Entry point: wires patient inputs, toolbar buttons, and loads the built-in example.
-import {
-  age, gender, bmi, pregnant, smoker, proc, comorb,
-  tree, values, rawFhir, calcTested, _formTick
-} from './state.js';
+import { age, gender, bmi, pregnant, smoker, proc, comorb } from './patient.js';
+import { tree, values, rawFhir, calcTested, _formTick } from './state.js';
 import { importFHIR } from './fhir/import.js';
 import { exportFHIR } from './fhir/export.js';
 import { validateTree } from './fhir/validate.js';
@@ -85,13 +83,16 @@ document.getElementById('exportFhirBtn').onclick = () => {
 };
 
 // Wrapper: run import then show validation report if needed
-async function _importAndValidate(data) {
+const _fileNameEl = document.getElementById('loadedFileName');
+async function _importAndValidate(data, fileName) {
   // importFHIR is sync (parses tree); skip its internal renderTree, do async render instead
   importFHIR(data, () => {}); // pass no-op renderFn — we render below
   const issues = validateTree(tree);
   progress.show('Rendering ' + tree.length + ' nodes…');
   await renderTreeAsync((done, total) => progress.update(done, total));
+  expandAll();
   progress.hide();
+  _fileNameEl.textContent = fileName || '';
   if (issues.length > 0) validateModal.show('Import — Validation Report', issues, 'import', { onNavigate: _navigateToNode });
 }
 
@@ -120,7 +121,7 @@ document.querySelectorAll('#loadMenu [data-sample]').forEach(item => {
     progress.show('Loading ' + name + '…');
     fetch('sampledata/' + item.dataset.sample)
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(data => { progress.update(0, 1); _importAndValidate(data); })
+      .then(data => { progress.update(0, 1); _importAndValidate(data, item.dataset.sample.replace(/\.fhir\.json$/, '')); })
       .catch(err => { progress.hide(); alert('Could not load sample: ' + err.message); });
   };
 });
@@ -129,7 +130,7 @@ document.getElementById('fhirFileInput').onchange  = e => {
   if (!file) return;
   progress.show('Loading ' + file.name + '…');
   const reader = new FileReader();
-  reader.onload  = ev => { try { progress.update(0, 1); _importAndValidate(JSON.parse(ev.target.result)); } catch (err) { progress.hide(); alert('Parse error: ' + err.message); } };
+  reader.onload  = ev => { try { progress.update(0, 1); _importAndValidate(JSON.parse(ev.target.result), file.name); } catch (err) { progress.hide(); alert('Parse error: ' + err.message); } };
   reader.onerror = () => { progress.hide(); alert('Error reading file.'); };
   reader.readAsText(file);
   e.target.value = '';
