@@ -38,15 +38,19 @@ export function renderTree() {
 export async function renderTreeAsync(onProgress) {
   const raf = () => new Promise(r => requestAnimationFrame(r));
   await raf(); // yield so caller's progress UI can paint
-  const container = document.getElementById('treeContainer');
-  container.innerHTML = '';
+  // Build off-screen in a fragment — RAF yields keep progress bar updating
+  // without causing layout reflows in the live left panel.
+  const frag = document.createDocumentFragment();
   const total = tree.length;
   for (let i = 0; i < tree.length; i++) {
-    container.appendChild(renderNode(tree[i]));
+    frag.appendChild(renderNode(tree[i]));
     if (onProgress) onProgress(i + 1, total);
     await raf();
   }
-  container.appendChild(makeRootDropZone());
+  frag.appendChild(makeRootDropZone());
+  const container = document.getElementById('treeContainer');
+  container.innerHTML = '';
+  container.appendChild(frag);
 }
 
 // Wire DnD re-render callback once
@@ -120,16 +124,21 @@ export async function renumberAll(format) {
     _bulkUpdate.value = false;
   }
 
-  // Incremental DOM render: yield between root nodes so the browser paints progress
-  const container = document.getElementById('treeContainer');
-  container.innerHTML = '';
+  // Build into a DocumentFragment off-screen so RAF yields update the progress bar
+  // without touching the live DOM — no layout thrash or visual jitter in the left panel.
+  // Swap into the container in one operation at the end.
+  const raf = () => new Promise(r => requestAnimationFrame(r));
+  const frag = document.createDocumentFragment();
   const total = tree.length;
   for (let i = 0; i < tree.length; i++) {
-    container.appendChild(renderNode(tree[i]));
+    frag.appendChild(renderNode(tree[i]));
     document.dispatchEvent(new CustomEvent('renumber-progress', { detail: { done: i + 1, total } }));
     await raf();
   }
-  container.appendChild(makeRootDropZone());
+  frag.appendChild(makeRootDropZone());
+  const container = document.getElementById('treeContainer');
+  container.innerHTML = '';
+  container.appendChild(frag);
   document.dispatchEvent(new CustomEvent('renumber-done'));
 }
 
