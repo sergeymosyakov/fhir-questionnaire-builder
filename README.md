@@ -96,7 +96,8 @@ autoFilledIds // Set — IDs of items auto-filled from conditionRule
 
 // Item
 { id, type:'item', title, visibilityRule, conditionRule, mandatory,
-  itemType:'text'|'number'|'checkbox'|'select'|'display', options, successValue }
+  itemType:'text'|'number'|'checkbox'|'select'|'radio'|'open-choice'|'date'|'url'|'attachment'|'reference'|'quantity'|'display',
+  options, successValue }
 
 // FHIR-imported nodes also carry:
 _enableWhenText  // human-readable visibility condition label
@@ -143,7 +144,6 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 |---|---|---|---|---|
 | `boolean` | `checkbox` | ✅ checkbox | — | |
 | `integer`, `decimal` | `number` | ✅ number input | — | |
-| `quantity` | `quantity` | ✅ number + unit dropdown (UCUM) | ✅ required = value+unit filled | Builder: Default unit; import/export `questionnaire-unit` extension |
 | `string`, `text` | `text` | ✅ text input | — | |
 | `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three map to `date` |
 | `url` | `url` | ✅ url input | ✅ `new URL()` format check | Invalid URL → ✘ even if not required |
@@ -155,10 +155,6 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `attachment` | `attachment` | ✅ file input | ✅ required = file chosen | |
 | `reference` | `reference` | ✅ dropdown (resource type) + `/` + id input | ✅ required = type+id filled | `questionnaire-referenceResource` locks dropdown to that type; otherwise all 96 FHIR R4 types |
 | `quantity` | `quantity` | ✅ number + unit dropdown (UCUM) | ✅ required = value+unit filled | Builder: Default unit; import/export `questionnaire-unit` extension |
-
----
-
-## FHIR Import / Export
 
 ### Import mapping
 
