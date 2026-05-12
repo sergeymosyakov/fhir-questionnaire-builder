@@ -18,7 +18,7 @@ export function init(elements) {
 
   _el.input.addEventListener('input', _onInput);
   _el.input.addEventListener('keydown', e => {
-    if (e.key === 'ArrowDown') { e.preventDefault(); _navigate(+1); }
+    if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); _navigate(+1); }
     if (e.key === 'ArrowUp')   { e.preventDefault(); _navigate(-1); }
     if (e.key === 'Escape')    { _el.input.value = ''; _clear(); }
   });
