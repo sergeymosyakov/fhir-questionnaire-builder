@@ -1,11 +1,11 @@
 ﻿// Entry point: wires patient inputs, toolbar buttons, and loads the built-in example.
 import {
-  age, gender, bmi, pregnant, smoker, proc, comorb, tree, makeGroup,
+  age, gender, bmi, pregnant, smoker, proc, comorb,
   values, rawFhir, calcTested, _formTick
 } from './state.js';
 import { importFHIR } from './fhir/import.js';
 import { exportFHIR } from './fhir/export.js';
-import { renderTree, collapseAll, expandAll, renumberAll } from './render-builder.js';
+import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './render-builder.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes } from './fhir/calc.js';
@@ -29,15 +29,7 @@ document.getElementById('inp-pregnant').addEventListener('change', e => { pregna
 document.getElementById('inp-smoker').addEventListener('change',   e => { smoker.value   = e.target.checked; });
 
 // Buttons
-document.getElementById('addRootGroupBtn').onclick = () => {
-  const newNode = makeGroup('Root Group ' + tree.length);
-  tree.push(newNode);
-  renderTree();
-  requestAnimationFrame(() => {
-    const el = document.querySelector('[data-node-id="' + newNode.id + '"]');
-    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('node-flash'); setTimeout(() => el.classList.remove('node-flash'), 1000); }
-  });
-};
+document.getElementById('addRootGroupBtn').onclick = addRootGroup;
 document.getElementById('testBtn').onclick = () => {
   if (rawFhir.value && fhirpath) {
     const plainFhir = JSON.parse(JSON.stringify(rawFhir.value));
