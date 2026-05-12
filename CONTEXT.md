@@ -2,10 +2,12 @@
 
 ## ⚠️ WORKFLOW RULES — MANDATORY
 
-1. **git commit/push только по явной команде пользователя** ("пушай"). Не делать автоматически.
-2. **Перед каждым пушем** — обновить CONTEXT.md и README.md (таблица файлов, UX features, Known Limitations).
-3. **Модульность** — новый UI виджет → `js/ui/<name>.js`; новый контрол → `js/controls/<name>.js`; новый CSS блок → `css/<name>.css` + `<link>` в index.html. Не добавлять в уже существующие файлы то, что логически принадлежит отдельному модулю.
-4. **DI** — DOM резолвится один раз в `app.js`, передаётся через `init(elements)`. Никаких `getElementById` внутри субмодулей.
+1. **git commit/push only on explicit user instruction** ("push it", "пушай"). Never automatically.
+2. **Before every push** — update CONTEXT.md and README.md (file table, UX features, Known Limitations).
+3. **Modularity** — new UI widget → `js/ui/<name>.js`; new control → `js/controls/<name>.js`; new CSS concern → `css/<name>.css` + `<link>` in index.html. Do not add logically separate code into existing modules.
+4. **DI** — DOM resolved once in `app.js`, passed via `init(elements)`. No `getElementById` inside submodules.
+5. **No inline styles** — `style="..."` in HTML and `el.style.foo =` in JS are forbidden for static values. Allowed only for **runtime-dynamic** values: show/hide (`display`), computed dimensions, user-driven colors. All static appearance → CSS classes.
+6. **English only** — all code comments, doc strings, commit messages, CONTEXT.md, README.md, and any in-repo text must be in English.
 
 ---
 
