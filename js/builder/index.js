@@ -77,22 +77,30 @@ function _applyNumbers(format, nodes, prefix) {
   });
 }
 export async function renumberAll(format) {
+  const raf = () => new Promise(r => requestAnimationFrame(r));
+  // Yield first so progress.show() has a chance to paint before any sync work
+  await raf();
+
   const idMap = new Map();
   _applyNumbers(format, tree, '');
   _walkNodes(tree, n => { if (n._oldId !== undefined) { idMap.set(n._oldId, n.id); delete n._oldId; } });
-  _walkNodes(tree, n => {
-    idMap.forEach((newId, oldId) => {
-      if (newId) {
-        if (n.visibilityRule)  n.visibilityRule  = n.visibilityRule.split(`'${oldId}'`).join(`'${newId}'`);
-        if (n._calculatedExpr) n._calculatedExpr = n._calculatedExpr.split(`'${oldId}'`).join(`'${newId}'`);
-      }
+
+  // Build a single regex for all old IDs → O(n) replacement instead of O(n²)
+  const allOldIds = [...idMap.keys()];
+  if (allOldIds.length > 0) {
+    const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp("'(" + allOldIds.map(esc).join('|') + ")'", 'g');
+    const repl = s => s.replace(re, (_, id) => "'" + (idMap.get(id) ?? id) + "'");
+    _walkNodes(tree, n => {
+      if (n.visibilityRule)  n.visibilityRule  = repl(n.visibilityRule);
+      if (n._calculatedExpr) n._calculatedExpr = repl(n._calculatedExpr);
     });
-  });
-  // Incremental DOM render: yield between root nodes so the browser can paint progress
+  }
+
+  // Incremental DOM render: yield between root nodes so the browser paints progress
   const container = document.getElementById('treeContainer');
   container.innerHTML = '';
   const total = tree.length;
-  const raf = () => new Promise(r => requestAnimationFrame(r));
   for (let i = 0; i < tree.length; i++) {
     container.appendChild(renderNode(tree[i]));
     document.dispatchEvent(new CustomEvent('renumber-progress', { detail: { done: i + 1, total } }));
