@@ -154,7 +154,8 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 
 - **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
 - **Drag & drop reorder** — ⠿ handle on every node; drag to reorder, drop between nodes (blue line), drop into group (dashed zone), drop at root level; ancestor→descendant drop blocked
-- **Collapse sections (preview)** — `▼/▶` toggle on each group row in the preview; `⊟`/`⊞` buttons in the preview toolbar collapse/expand all (appear after FHIR load)
+- **Collapse sections (preview)** — `▼/▶` toggle on each group row in the preview; `⊟`/`⊞` buttons in the preview toolbar collapse/expand all (appear when tree is non-empty, right-aligned via flex spacer)
+- **Preview toolbar order** — `⬆ Load ▾` | `⬇ Export` | 🔍 Search | [flex spacer] | `⊟` `⊞`; search and collapse/expand shown only when tree has content
 - **Disabled groups clickable** — N/A (grayed `—`) groups in preview are still clickable to navigate to builder node
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`
 - **Expandable title** — node title shown as a read-only span; click → expands to a full-width textarea (auto-height), collapses on blur

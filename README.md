@@ -203,7 +203,7 @@ Standard extensions preserved on export:
 - **Clear questionnaire** — `×` button next to the loaded file name; if tree is non-empty shows a modal asking to export first (Export first / Clear anyway / Cancel)
 - **Loaded file name** — shown in right-panel header after import; appears as `New Questionnaire` when building from scratch; `×` always visible when tree is non-empty
 - **Export filename prompt** — `window.prompt` before every export; pre-filled with current file name; adds `.json` if not present
-- **Collapse sections (preview)** — `▼/▶` toggle on each group row; `⊟`/`⊞` All buttons in toolbar (visible after FHIR load)
+- **Collapse sections (preview)** — `▼/▶` toggle on each group row; `⊟`/`⊞` All buttons in toolbar right-aligned (visible when tree has content)
 - **Disabled groups clickable** — N/A groups in preview still navigate to builder on click
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`
 - **Expandable title** — node title shown as read-only span; click → expands to full-width textarea, collapses on blur
@@ -220,7 +220,7 @@ Standard extensions preserved on export:
 - **required radio/select** — `required:true` on choice/radio items requires an option to be selected; shows ✔/✘ on item and group icon; affects PASS/FAIL
 - **Required star** — mandatory items show a red `*` in the label in preview
 - **Optional badge** — non-mandatory items show a small `optional` badge in the preview
-- **Search in preview** — 🔍 search box in the preview toolbar; type to highlight matching rows (yellow), `↑`/`↓` buttons or keyboard arrows or **Enter** to navigate between matches; shows `2 / 5` counter; red border + "No results" when nothing found; Escape clears
+- **Search in preview** — 🔍 search box in the preview toolbar (after Export button); type to highlight matching rows (yellow), `↑`/`↓` buttons or keyboard arrows or **Enter** to navigate between matches; shows `2 / 5` counter; red border + "No results" when nothing found; Escape clears; hidden when tree is empty
 - **File attachments** — `attachment` item type renders as styled **Choose file** button; `required:true` requires a file to be chosen
 - **Export validation** — on Export: `validateTree()` runs; modal lists errors/warnings with ↗ navigate-to-node per issue; "Fix first" / "Export anyway"
 - **Import validation** — same modal shown after loading a file/sample (OK-only mode)

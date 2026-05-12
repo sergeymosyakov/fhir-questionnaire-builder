@@ -189,7 +189,8 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Export filename prompt** — `window.prompt` before every export; pre-filled with current file name; adds `.json` if not already present
 - **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
 - **Drag & drop reorder** — ⠿ handle on every node; drag to reorder, drop between nodes, drop into group, drop at root level; ancestor→descendant drop blocked. Drop zones appear only during drag (`body.dragging` CSS class, `height:0` → `28px`); labeled: "Drop here to add as first child" (top of group), "Drop here" (between siblings), "Drop here to add as last child" (bottom of group), "Drop here to move to end" (root zone). Each node wrapped in `div.node-wrap` (display:contents) so drop zones sit outside the styled box.
-- **Collapse sections (preview)** — `▼/▶` toggle on each group row in the preview; `⊟`/`⊞` buttons in the preview toolbar collapse/expand all (appear after FHIR load)
+- **Collapse sections (preview)** — `▼/▶` toggle on each group row in the preview; `⊟`/`⊞` buttons in the preview toolbar collapse/expand all (appear when tree is non-empty, right-aligned via flex spacer)
+- **Preview toolbar order** — `⬆ Load ▾` | `⬇ Export` | 🔍 Search | [flex spacer] | `⊟` `⊞`; search and collapse/expand shown only when tree has content
 - **Disabled groups clickable** — N/A (grayed `—`) groups in preview are still clickable to navigate to builder node
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`
 - **Expandable title** — node title shown as a read-only span; click → expands to a full-width textarea (auto-height), collapses on blur
