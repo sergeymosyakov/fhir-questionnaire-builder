@@ -119,23 +119,18 @@ export function attachDropZone(div, node, position) {
 export function makeRootDropZone() {
   const rootDrop = document.createElement('div');
   rootDrop.className = 'drop-zone drop-zone-root';
-  rootDrop.style.cssText = 'height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#bbb;border:1px dashed #ddd;border-radius:4px;margin-top:4px;opacity:0;transition:opacity .15s';
   rootDrop.textContent = 'Drop here to move to end';
   rootDrop.addEventListener('dragover', e => {
     if (!_dragId) return;
     e.preventDefault();
-    rootDrop.style.opacity = '1';
-    rootDrop.style.borderColor = 'var(--c-primary)';
-    rootDrop.style.color = 'var(--c-primary)';
+    rootDrop.classList.add('drop-zone-root--active');
   });
   rootDrop.addEventListener('dragleave', () => {
-    rootDrop.style.opacity = '0';
-    rootDrop.style.borderColor = '#ddd';
-    rootDrop.style.color = '#bbb';
+    rootDrop.classList.remove('drop-zone-root--active');
   });
   rootDrop.addEventListener('drop', e => {
     e.preventDefault();
-    rootDrop.style.opacity = '0';
+    rootDrop.classList.remove('drop-zone-root--active');
     if (!_dragId) return;
     const src = findNode(_tree, _dragId);
     if (!src) return;

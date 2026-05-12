@@ -270,7 +270,7 @@ document.addEventListener('click', () => {
     // Overlay captures all pointer events and prevents text selection during drag
     const overlay = document.createElement('div');
     overlay.id = 'resize-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;cursor:col-resize;';
+    overlay.className = 'resize-overlay';
     document.body.appendChild(overlay);
 
     const onMove = e => {

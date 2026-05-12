@@ -51,12 +51,12 @@ export function buildSuccessValueUI(node, container) {
   // reference and quantity types have no meaningful success value
   if (node.itemType === 'reference' || node.itemType === 'quantity' || node.itemType === 'display') return;
   const header = document.createElement('div');
-  header.style.marginTop = '6px';
+  header.className = 'shared-success-hdr';
 
   if (node.itemType === 'checkbox') {
     header.textContent = 'Success when: ';
     const sel = document.createElement('select');
-    sel.style.width = 'auto';
+    sel.className = 'panel-type-sel';
     [['true', 'checked'], ['false', 'unchecked']].forEach(([val, label]) => {
       const opt = document.createElement('option');
       opt.value = val; opt.textContent = label;
@@ -72,7 +72,7 @@ export function buildSuccessValueUI(node, container) {
     inp.type = 'text';
     inp.placeholder = node.itemType === 'number' ? 'e.g. 42' : 'e.g. yes';
     inp.value = node.successValue || '';
-    inp.style.marginTop = '2px';
+    inp.className = 'shared-success-inp';
     inp.oninput = () => { node.successValue = inp.value; };
     header.appendChild(inp);
   }

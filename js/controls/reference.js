@@ -37,7 +37,7 @@ const FHIR_R4_RESOURCES = [
 export function build(node, ctx) {
   const { values, onChange } = ctx;
   const wrap = createWrap();
-  wrap.style.gap = '0';
+  wrap.classList.add('ctrl-wrap--joined');
 
   // Parse existing value
   const current = values[node.id];

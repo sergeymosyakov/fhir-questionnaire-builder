@@ -7,7 +7,7 @@ export function build(node, ctx) {
   const opts = (node.options || '').split(',').map(o => o.trim()).filter(Boolean);
   if (!opts.length) {
     const msg = document.createElement('span');
-    msg.style.cssText = 'font-size:11px;color:var(--c-text-2)';
+    msg.className = 'radio-no-opts';
     msg.textContent = '(no options)';
     wrap.appendChild(msg);
     return wrap;
@@ -18,7 +18,7 @@ export function build(node, ctx) {
 
   for (const opt of opts) {
     const lbl = document.createElement('label');
-    lbl.style.cssText = 'display:inline-flex;align-items:center;gap:3px;margin-right:10px;font-size:13px;cursor:pointer;';
+    lbl.className = 'radio-label';
     const rb = document.createElement('input');
     rb.type = 'radio'; rb.name = rbName; rb.value = opt;
     rb.checked = values[node.id] === opt;

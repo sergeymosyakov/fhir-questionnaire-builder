@@ -63,7 +63,6 @@ const QUANTITY_UNITS = [
 export function build(node, ctx) {
   const { values, onChange } = ctx;
   const wrap = createWrap();
-  wrap.style.gap = '4px';
 
   // Restore previous value
   const current = values[node.id];

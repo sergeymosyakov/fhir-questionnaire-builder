@@ -18,7 +18,7 @@ export function addPanel(key, buildFn, div, panels) {
 // ── Visibility panel ──────────────────────────────────────────────────────────
 export function buildVisPanel(node, p, visLink, setActive, ctx) {
   const friendly = document.createElement('div');
-  friendly.style.cssText = 'margin-bottom:6px;padding:4px 8px;background:#fff8e1;border:1px solid #ffe082;border-radius:4px;font-size:11px;color:#5d4037;';
+  friendly.className = 'panel-vis-hint';
   const updateFriendly = () => {
     friendly.innerHTML = node._enableWhenText && node.visibilityRule
       ? '\uD83D\uDD12 <b>Shown when:</b> ' + escAttr(node._enableWhenText)
@@ -82,7 +82,7 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
         const inp2 = document.createElement('input');
         inp2.type = itype === 'number' ? 'number' : 'text';
         inp2.placeholder = 'value';
-        inp2.style.width = '70px';
+        inp2.className = 'panel-inp-sm';
         valWrap.appendChild(inp2);
       }
     }
@@ -129,7 +129,7 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
   p.appendChild(builderWrap);
 
   const rawLbl = document.createElement('div');
-  rawLbl.style.cssText = 'margin-top:8px;font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.05em;';
+  rawLbl.className = 'panel-raw-lbl';
   rawLbl.textContent = 'or type JS directly:';
   p.appendChild(rawLbl);
 
@@ -148,10 +148,10 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
 // ── Mandatory panel ───────────────────────────────────────────────────────────
 export function buildMandPanel(node, p, mandLink, setActive) {
   const label = document.createElement('label');
-  label.style.cssText = 'font-size:12px;display:flex;align-items:center;gap:6px;';
+  label.className = 'panel-mand-label';
   label.textContent = 'Required:';
   const sel = document.createElement('select');
-  sel.style.cssText = 'font-size:11px;padding:2px 4px;border-radius:4px;border:1px solid var(--c-border);';
+  sel.className = 'panel-mand-sel';
   [['null', 'Not set (acts as required)'], ['true', 'Yes \u2014 required'], ['false', 'No \u2014 optional']].forEach(([val, text]) => {
     const o = document.createElement('option');
     o.value = val; o.textContent = text;
@@ -185,7 +185,7 @@ export function buildTypePanel(node, p) {
   const typeRow = document.createElement('div');
   typeRow.textContent = 'Type: ';
   const typeSelect = document.createElement('select');
-  typeSelect.style.width = 'auto';
+  typeSelect.className = 'panel-type-sel';
   for (const t of ['text', 'number', 'date', 'url', 'attachment', 'checkbox', 'select', 'open-choice', 'radio', 'reference', 'quantity', 'display']) {
     const opt = document.createElement('option');
     opt.value = t; opt.textContent = t;
@@ -196,7 +196,7 @@ export function buildTypePanel(node, p) {
   p.appendChild(typeRow);
 
   const optionsDiv = document.createElement('div');
-  optionsDiv.style.marginTop = '4px';
+  optionsDiv.className = 'panel-sub-section';
   optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice') ? 'block' : 'none';
   optionsDiv.innerHTML = 'Options (comma-separated):<br>'
     + '<input type="text" value="' + escAttr(node.options) + '">';
@@ -204,13 +204,13 @@ export function buildTypePanel(node, p) {
   p.appendChild(optionsDiv);
 
   const refResDiv = document.createElement('div');
-  refResDiv.style.marginTop = '4px';
+  refResDiv.className = 'panel-sub-section';
   refResDiv.style.display = node.itemType === 'reference' ? 'block' : 'none';
   const refResLbl = document.createElement('div');
   refResLbl.textContent = 'Allowed resource type:';
-  refResLbl.style.cssText = 'font-size:11px;margin-bottom:3px;';
+  refResLbl.className = 'panel-sub-lbl';
   const refResSel = document.createElement('select');
-  refResSel.style.cssText = 'width:100%;font-size:12px;';
+  refResSel.className = 'panel-sub-sel';
   const FHIR_R4_TYPES = ['Patient','Practitioner','PractitionerRole','RelatedPerson','Organization',
     'Encounter','EpisodeOfCare','Condition','Observation','DiagnosticReport','Procedure',
     'MedicationRequest','MedicationStatement','Medication','AllergyIntolerance','Immunization',
@@ -267,13 +267,13 @@ export function buildTypePanel(node, p) {
     'mg/dL','mmol/L','g/dL','meq/L','U/L','[iU]',
   ];
   const qUnitDiv = document.createElement('div');
-  qUnitDiv.style.marginTop = '4px';
+  qUnitDiv.className = 'panel-sub-section';
   qUnitDiv.style.display = node.itemType === 'quantity' ? 'block' : 'none';
   const qUnitLbl = document.createElement('div');
   qUnitLbl.textContent = 'Default unit:';
-  qUnitLbl.style.cssText = 'font-size:11px;margin-bottom:3px;';
+  qUnitLbl.className = 'panel-sub-lbl';
   const qUnitSel = document.createElement('select');
-  qUnitSel.style.cssText = 'width:100%;font-size:12px;';
+  qUnitSel.className = 'panel-sub-sel';
   const qUnitBlank = document.createElement('option');
   qUnitBlank.value = ''; qUnitBlank.textContent = '— none —';
   if (!node.quantityUnit) qUnitBlank.selected = true;
@@ -305,13 +305,13 @@ export function buildTypePanel(node, p) {
 // ── Expression panel ──────────────────────────────────────────────────────────
 export function buildExprPanel(node, p, exprLink, setActive) {
   const lbl = document.createElement('div');
-  lbl.style.cssText = 'font-size:11px;color:#666;margin-bottom:4px;';
+  lbl.className = 'panel-expr-lbl';
   lbl.textContent = 'FHIRPath calculatedExpression:';
   p.appendChild(lbl);
 
   const ta = document.createElement('textarea');
   ta.rows = 4;
-  ta.style.cssText = 'width:100%;font-size:11px;font-family:monospace;resize:vertical;border:1px solid var(--c-border);border-radius:4px;padding:4px 6px;box-sizing:border-box;';
+  ta.className = 'panel-ta';
   ta.value = node._calculatedExpr || '';
   ta.placeholder = '%resource.item.where(linkId=\'...\')';
   ta.oninput = () => {
@@ -322,7 +322,7 @@ export function buildExprPanel(node, p, exprLink, setActive) {
   p.appendChild(ta);
 
   const roRow = document.createElement('label');
-  roRow.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:11px;margin-top:6px;cursor:pointer;';
+  roRow.className = 'panel-ro-row';
   const roCb = document.createElement('input');
   roCb.type = 'checkbox';
   roCb.checked = !!node._readOnly;
@@ -336,9 +336,9 @@ export function buildExprPanel(node, p, exprLink, setActive) {
 export function buildStylePanel(node, p, styleLink, setActive, ctx) {
   const styleRow = (label, fn) => {
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px;';
+    row.className = 'panel-style-row';
     const lbl = document.createElement('label');
-    lbl.style.cssText = 'min-width:48px;color:#666;';
+    lbl.className = 'panel-style-lbl';
     lbl.textContent = label;
     row.appendChild(lbl);
     row.appendChild(fn());
@@ -378,7 +378,7 @@ export function buildStylePanel(node, p, styleLink, setActive, ctx) {
   rawInp.type = 'text';
   rawInp.value = node._renderStyle || '';
   rawInp.placeholder = 'e.g. font-weight: bold; color: blue';
-  rawInp.style.cssText = 'width:100%;margin-top:4px;font-size:11px;';
+  rawInp.className = 'panel-raw-inp';
 
   const sync = () => {
     const color = colorClear._cleared ? '' : (cur.color || colorInp.value);
@@ -407,9 +407,9 @@ export function buildStylePanel(node, p, styleLink, setActive, ctx) {
   styleRow('Italic', () => italicCb);
 
   const colorRow = document.createElement('div');
-  colorRow.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px;';
+  colorRow.className = 'panel-style-row';
   const colorLbl = document.createElement('label');
-  colorLbl.style.cssText = 'min-width:48px;color:#666;';
+  colorLbl.className = 'panel-style-lbl';
   colorLbl.textContent = 'Color';
   colorRow.appendChild(colorLbl);
   colorRow.appendChild(colorInp);
@@ -417,7 +417,7 @@ export function buildStylePanel(node, p, styleLink, setActive, ctx) {
   p.appendChild(colorRow);
 
   const rawLbl = document.createElement('div');
-  rawLbl.style.cssText = 'margin-top:4px;font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.05em;';
+  rawLbl.className = 'panel-raw-lbl panel-raw-lbl--sm';
   rawLbl.textContent = 'raw CSS:';
   p.appendChild(rawLbl);
   p.appendChild(rawInp);
