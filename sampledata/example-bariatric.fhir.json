@@ -520,6 +520,61 @@
           ]
         }
       ]
+    },
+    {
+      "linkId": "g-field-types",
+      "type": "group",
+      "text": "Field Types Demo",
+      "item": [
+        {
+          "linkId": "q-notes",
+          "type": "text",
+          "text": "Additional clinical notes (multiline text)"
+        },
+        {
+          "linkId": "q-weight-kg",
+          "type": "decimal",
+          "text": "Current weight (kg)",
+          "required": true
+        },
+        {
+          "linkId": "q-height-cm",
+          "type": "decimal",
+          "text": "Height (cm)",
+          "required": true
+        },
+        {
+          "linkId": "q-bmi-calc",
+          "type": "decimal",
+          "text": "Calculated BMI",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "(%resource.item.where(linkId='q-weight-kg').answer.valueDecimal / ((%resource.item.where(linkId='q-height-cm').answer.valueDecimal / 100) * (%resource.item.where(linkId='q-height-cm').answer.valueDecimal / 100))).round(1)"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "q-info-display",
+          "type": "display",
+          "text": "ℹ️ All documents must be uploaded before submission. Incomplete applications will not be processed."
+        },
+        {
+          "linkId": "q-referring-provider",
+          "type": "reference",
+          "text": "Referring Provider",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource",
+              "valueCode": "Practitioner"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
