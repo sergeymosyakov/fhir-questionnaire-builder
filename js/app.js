@@ -6,6 +6,7 @@ import {
 import { importFHIR } from './fhir/import.js';
 import { exportFHIR } from './fhir/export.js';
 import { validateTree } from './fhir/validate.js';
+import * as validateModal from './ui/validate-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './render-builder.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 import { buildQR } from './fhir/qr-builder.js';
@@ -46,61 +47,28 @@ document.getElementById('renumberBtn').onclick     = () => {
   const format = document.getElementById('renumberFormat').value;
   renumberAll(format);
 };
+// ── Validate modal init ───────────────────────────────────────────────────
+const _modal = document.getElementById('validateModal');
+validateModal.init({
+  backdrop:    _modal,
+  headerTitle: _modal.querySelector('.validate-modal-header span'),
+  body:        _modal.querySelector('.validate-modal-body'),
+  footer:      _modal.querySelector('.validate-modal-footer'),
+  closeBtn:    _modal.querySelector('.validate-modal-close'),
+});
+
 document.getElementById('exportFhirBtn').onclick = () => {
   const issues = validateTree(tree);
   if (issues.length === 0) { exportFHIR(); return; }
-  _showValidateModal(issues);
+  validateModal.show('Export — Validation Report', issues, 'export', exportFHIR);
 };
 
-function _showValidateModal(issues) {
-  const errors   = issues.filter(i => i.severity === 'error');
-  const warnings = issues.filter(i => i.severity === 'warning');
-
-  const body = document.getElementById('validateModalBody');
-  body.innerHTML = '';
-
-  const summary = document.createElement('div');
-  summary.className = 'validate-modal-summary';
-  const parts = [];
-  if (errors.length)   parts.push(`${errors.length} error${errors.length > 1 ? 's' : ''}`);
-  if (warnings.length) parts.push(`${warnings.length} warning${warnings.length > 1 ? 's' : ''}`);
-  summary.textContent = `Found ${parts.join(' and ')} in the questionnaire tree.`;
-  body.appendChild(summary);
-
-  for (const issue of issues) {
-    const row = document.createElement('div');
-    row.className = 'validate-issue';
-
-    const badge = document.createElement('span');
-    badge.className = `validate-issue-badge validate-badge-${issue.severity}`;
-    badge.textContent = issue.severity;
-    row.appendChild(badge);
-
-    const content = document.createElement('span');
-    content.className = 'validate-issue-content';
-    const idTag = document.createElement('span');
-    idTag.className = 'validate-issue-id';
-    idTag.textContent = issue.nodeId;
-    content.appendChild(idTag);
-    content.appendChild(document.createTextNode(issue.message));
-    row.appendChild(content);
-
-    body.appendChild(row);
-  }
-
-  document.getElementById('validateModal').style.display = 'flex';
+// Wrapper: run import then show validation report if needed
+function _importAndValidate(data) {
+  importFHIR(data);
+  const issues = validateTree(tree);
+  if (issues.length > 0) validateModal.show('Import — Validation Report', issues, 'import');
 }
-
-document.getElementById('validateModalClose').onclick = () => {
-  document.getElementById('validateModal').style.display = 'none';
-};
-document.getElementById('validateFixBtn').onclick = () => {
-  document.getElementById('validateModal').style.display = 'none';
-};
-document.getElementById('validateExportBtn').onclick = () => {
-  document.getElementById('validateModal').style.display = 'none';
-  exportFHIR();
-};
 
 // ── Load dropdown ─────────────────────────────────────────────────────────────
 const loadMenu = document.getElementById('loadMenu');
@@ -117,7 +85,7 @@ document.querySelectorAll('#loadMenu [data-sample]').forEach(item => {
     loadMenu.style.display = 'none';
     fetch('sampledata/' + item.dataset.sample)
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(importFHIR)
+      .then(_importAndValidate)
       .catch(err => alert('Could not load sample: ' + err.message));
   };
 });
@@ -125,7 +93,7 @@ document.getElementById('fhirFileInput').onchange  = e => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload  = ev => { try { importFHIR(JSON.parse(ev.target.result)); } catch (err) { alert('Parse error: ' + err.message); } };
+  reader.onload  = ev => { try { _importAndValidate(JSON.parse(ev.target.result)); } catch (err) { alert('Parse error: ' + err.message); } };
   reader.onerror = () => alert('Error reading file.');
   reader.readAsText(file);
   e.target.value = '';
@@ -134,7 +102,7 @@ document.getElementById('fhirFileInput').onchange  = e => {
 // Load built-in example on startup
 fetch('sampledata/example-bariatric.fhir.json')
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-  .then(importFHIR)
+  .then(importFHIR)  // startup: skip validation report on built-in example
   .catch(err => alert('Could not load example: ' + err.message));
 
 // Close any open ⊕ Add dropdown when clicking outside
