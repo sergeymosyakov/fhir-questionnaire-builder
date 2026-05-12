@@ -1,5 +1,5 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
-import { tree, makeGroup, makeItem, _formTick, rawFhir, calcTested, values } from '../state.js';
+import { tree, makeGroup, makeItem, _formTick, rawFhir, calcTested, values, pauseTracking, resetTracking } from '../state.js';
 import { init as sharedInit, formatSeg } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { renderItem } from './node-item.js';
@@ -95,20 +95,26 @@ export async function renumberAll(format) {
   // Yield first so progress.show() has a chance to paint before any sync work
   await raf();
 
-  const idMap = new Map();
-  _applyNumbers(format, tree, '');
-  _walkNodes(tree, n => { if (n._oldId !== undefined) { idMap.set(n._oldId, n.id); delete n._oldId; } });
+  // Pause Vue tracking so bulk node.id mutations don't trigger preview re-renders
+  pauseTracking();
+  try {
+    const idMap = new Map();
+    _applyNumbers(format, tree, '');
+    _walkNodes(tree, n => { if (n._oldId !== undefined) { idMap.set(n._oldId, n.id); delete n._oldId; } });
 
-  // Build a single regex for all old IDs → O(n) replacement instead of O(n²)
-  const allOldIds = [...idMap.keys()];
-  if (allOldIds.length > 0) {
-    const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp("'(" + allOldIds.map(esc).join('|') + ")'", 'g');
-    const repl = s => s.replace(re, (_, id) => "'" + (idMap.get(id) ?? id) + "'");
-    _walkNodes(tree, n => {
-      if (n.visibilityRule)  n.visibilityRule  = repl(n.visibilityRule);
-      if (n._calculatedExpr) n._calculatedExpr = repl(n._calculatedExpr);
-    });
+    // Build a single regex for all old IDs → O(n) replacement instead of O(n²)
+    const allOldIds = [...idMap.keys()];
+    if (allOldIds.length > 0) {
+      const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp("'(" + allOldIds.map(esc).join('|') + ")'", 'g');
+      const repl = s => s.replace(re, (_, id) => "'" + (idMap.get(id) ?? id) + "'");
+      _walkNodes(tree, n => {
+        if (n.visibilityRule)  n.visibilityRule  = repl(n.visibilityRule);
+        if (n._calculatedExpr) n._calculatedExpr = repl(n._calculatedExpr);
+      });
+    }
+  } finally {
+    resetTracking();
   }
 
   // Incremental DOM render: yield between root nodes so the browser paints progress

@@ -1,6 +1,6 @@
 // ── Reactive state, factories, and pure utilities ────────────────────────────
 // Re-export effect so other modules don't need to know the CDN URL.
-export { ref, reactive, effect } from 'https://unpkg.com/@vue/reactivity@3/dist/reactivity.esm-browser.js';
+export { ref, reactive, effect, pauseTracking, resetTracking } from 'https://unpkg.com/@vue/reactivity@3/dist/reactivity.esm-browser.js';
 import { ref, reactive } from 'https://unpkg.com/@vue/reactivity@3/dist/reactivity.esm-browser.js';
 
 // ── Reactive state ────────────────────────────────────────────────────────────
