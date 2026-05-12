@@ -535,21 +535,6 @@
                   "text": "Age at Diagnosis",
                   "type": "coding",
                   "answerValueSet": "http://loinc.org/vs/LL619-8"
-                },
-                {
-                  "linkId": "2.1.2.3",
-                  "text": "Mock-up item: Height",
-                  "type": "decimal"
-                },
-                {
-                  "linkId": "2.1.2.4",
-                  "text": "Mock-up item: Weight",
-                  "type": "decimal"
-                },
-                {
-                  "linkId": "2.1.2.5",
-                  "text": "Mock-up item: BMI",
-                  "type": "decimal"
                 }
               ]
             }

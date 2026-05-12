@@ -713,7 +713,7 @@ body {
 /* Nested group children container */
 .preview-nested {
   border-left: 3px solid var(--c-primary-lt);
-  margin-left: 20px;
+  margin-left: 45px;
   background: #f7f9fc;
 }
 .preview-nested .lform-item {
@@ -721,7 +721,7 @@ body {
   font-size: 13px;
 }
 .preview-nested .preview-nested {
-  margin-left: 16px;
+  margin-left: 35px;
   border-left-color: var(--c-border);
 }
 .group-label { font-weight: 600; color: var(--c-primary); font-size: 13px; }
