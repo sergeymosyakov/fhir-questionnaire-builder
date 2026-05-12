@@ -96,17 +96,23 @@ function buildControl(node, iconEl, onAfterChange, isAuto) {
   } else if (node.itemType === 'attachment') {
     const el = document.createElement('input');
     el.type = 'file';
-    el.style.fontSize = '11px';
+    el.className = 'file-input-hidden';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-file';
+    btn.textContent = 'Choose file';
+    btn.onclick = () => el.click();
     const nameTag = document.createElement('span');
-    nameTag.style.cssText = 'font-size:11px;color:var(--c-text-2);margin-left:6px;';
-    if (values[node.id]) nameTag.textContent = values[node.id].name;
+    nameTag.className = 'file-name-tag';
+    nameTag.textContent = values[node.id] ? values[node.id].name : 'No file chosen';
     el.onchange = () => {
       const file = el.files[0] || null;
       values[node.id] = file ? { name: file.name, size: file.size, type: file.type } : null;
-      nameTag.textContent = file ? file.name : '';
+      nameTag.textContent = file ? file.name : 'No file chosen';
       onChange();
     };
     wrap.appendChild(el);
+    wrap.appendChild(btn);
     wrap.appendChild(nameTag);
 
   } else if (node.itemType === 'select') {
@@ -262,7 +268,6 @@ effect(() => {
       });
       const naIcon = document.createElement('span');
       naIcon.className = 'icon-na';
-      naIcon.textContent = '\u2014';
       row.appendChild(naIcon);
       const label = document.createElement('span');
       if (res.node.type === 'group') label.className = 'group-label';

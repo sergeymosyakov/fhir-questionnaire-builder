@@ -121,7 +121,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 
 | FHIR R4 type | `itemType` | Control | Validation | Notes |
 |---|---|---|---|---|
-| `boolean` | `checkbox` | ✅ | — | |
+| `boolean` | `checkbox` | ✅ | ✅ required = must be checked | |
 | `integer`, `decimal` | `number` | ✅ | — | `quantity` → number, unit ignored |
 | `string`, `text` | `text` | ✅ | — | |
 | `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three → `date` |
@@ -131,7 +131,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `display` | `display` | ✅ label | — | No control, no pass/fail |
 | `group` | `group` | ✅ | — | |
 | `group` (no children) | `group` | ✅ `[Info]` | — | |
-| `attachment` | `attachment` | ✅ file input | ✅ required = file chosen | |
+| `attachment` | `attachment` | ✅ styled button | ✅ required = file chosen | Custom **Choose file** button |
 | `reference` | `text` | ⚠️ fallback | — | No resource search |
 
 ---
@@ -172,6 +172,9 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Dimmed rows** — conditional items shown grayed (🔒) when condition not met; animate to active when met
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
 - **required text/number** — `required:true` on text/number items means non-empty; shows ✔/✘ icon and affects PASS/FAIL
+- **required checkbox** — `required:true` on boolean items requires the box to be checked; shows ✔/✘; affects PASS/FAIL
+- **Optional badge** — `mandatory===false` items show a small italic `optional` badge in preview
+- **Styled file input** — `attachment` renders as a custom **Choose file** button (blue, themed) + file name; native input hidden
 - **Active action buttons** — action panel buttons (Show When, Applicability, Expression, Appearance, Required) turn **dark purple** when they have content set; initialised on load, updated in real-time on edit
 - **Resizable panels** — drag the divider between left/right panels; width persisted in `localStorage`
 - **Panel resize overlay** — transparent fixed overlay created during drag prevents text selection

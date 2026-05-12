@@ -758,8 +758,38 @@ body {
 }
 .icon-ok   { background: var(--c-ok);  color: #fff; }
 .icon-fail { background: var(--c-err); color: #fff; }
+/* File input */
+.file-input-hidden { display: none; }
+.btn-file {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-primary);
+  background: var(--c-primary-lt);
+  border: 1px solid #90caf9;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.btn-file:hover { background: #bbdefb; }
+.file-name-tag {
+  font-size: 11px;
+  color: var(--c-text-2);
+  margin-left: 6px;
+  font-style: italic;
+}
+
 /* N/A icon: group conditionRule not met → group disabled, not counted as FAIL */
-.icon-na   { background: #9e9e9e; color: #fff; font-size: 14px; line-height: 1; }
+.icon-na { background: #9e9e9e; }
+.icon-na::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 2px;
+  background: #fff;
+  border-radius: 1px;
+}
 
 /* Disabled group: grayed out, non-interactive */
 .lform-disabled {

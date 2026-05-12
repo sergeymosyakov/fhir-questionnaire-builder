@@ -192,8 +192,10 @@ Standard extensions preserved on export:
 - **Dimmed rows** — conditional items shown grayed out (🔒) when their condition is not met; animate to active when met
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
 - **required text/number** — `required:true` on text/number items requires a non-empty value; shows ✔/✘ and affects PASS/FAIL
+- **required checkbox** — `required:true` on boolean items requires the box to be checked; shows ✔/✘ and affects PASS/FAIL
+- **Optional badge** — non-mandatory items show a small `optional` badge in the preview
 - **Radio buttons** — `radio` item type renders as inline radio-group; exports as `choice` + `questionnaire-itemControl: radio-button`
-- **File attachments** — `attachment` item type renders as file input; `required:true` requires a file to be chosen
+- **File attachments** — `attachment` item type renders as styled **Choose file** button; `required:true` requires a file to be chosen
 - **Date picker / URL input** — `date` renders as native date-picker; `url` validates format with `new URL()`
 
 ---
