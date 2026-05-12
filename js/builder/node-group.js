@@ -87,7 +87,6 @@ export function renderGroup(node, ctx) {
   titleRow.appendChild(titleTextarea);
 
   // Navigate to preview row on header click
-  titleWrap.style.cursor = 'pointer';
   titleWrap.title = 'Click to navigate to preview row';
   titleWrap.addEventListener('click', e => {
     if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput) return;

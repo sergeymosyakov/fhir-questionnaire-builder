@@ -73,7 +73,6 @@ function _onDragEnd() {
   _dragId = null;
   document.body.classList.remove('dragging');
   document.querySelectorAll('.node-dragging').forEach(el => el.classList.remove('node-dragging'));
-  document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
   document.querySelectorAll('.node-drop-target').forEach(el => el.classList.remove('node-drop-target'));
 }
 

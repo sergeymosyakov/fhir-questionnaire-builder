@@ -170,7 +170,7 @@ export function buildMandPanel(node, p, mandLink, setActive) {
 export function buildCondPanel(node, p, condLink, setActive, isGroup) {
   p.innerHTML = isGroup
     ? 'Condition rule \u2014 if false, group is N/A (disabled, not FAIL):<br>'
-      + '<small style="color:#aaa;font-size:10px">Variables: age, gender, bmi, pregnant, smoker, proc, comorb</small>'
+      + '<small class="panel-hint">Variables: age, gender, bmi, pregnant, smoker, proc, comorb</small>'
       + '<input type="text" value="' + escAttr(node.conditionRule) + '">'
     : 'Condition rule (age, bmi, proc, comorb):<br>'
       + '<input type="text" value="' + escAttr(node.conditionRule) + '">';
@@ -366,11 +366,11 @@ export function buildStylePanel(node, p, styleLink, setActive, ctx) {
   const colorInp = Object.assign(document.createElement('input'), {
     type: 'color',
     value: cur.color?.startsWith('#') ? cur.color : '#000000',
-    style: { cssText: 'width:36px;height:22px;padding:1px;border:1px solid #ccc;cursor:pointer;' },
+    className: 'panel-color-inp',
   });
   const colorClear = Object.assign(document.createElement('button'), {
     type: 'button', textContent: '\u2715',
-    style: { cssText: 'font-size:10px;padding:1px 5px;' },
+    className: 'panel-color-clear',
     title: 'Remove color',
   });
 

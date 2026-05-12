@@ -1,5 +1,5 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
-import { tree, makeGroup, makeItem, _formTick, rawFhir, calcTested, values, _bulkUpdate } from '../state.js';
+import { tree, makeGroup, _formTick, rawFhir, calcTested, values, _bulkUpdate } from '../state.js';
 import { init as sharedInit, formatSeg } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { renderItem } from './node-item.js';
@@ -69,32 +69,19 @@ export function collapseAll() { setCollapsedAll(tree, true);  renderTree(); }
 export function expandAll()   { setCollapsedAll(tree, false); renderTree(); }
 
 // ── Renumber ──────────────────────────────────────────────────────────────────
-function toRoman(n) {
-  const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
-  const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
-  let r = '';
-  for (let i = 0; i < vals.length; i++) while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
-  return r;
-}
-function toLetter(n) {
-  let r = '';
-  while (n > 0) { r = String.fromCharCode(64 + ((n - 1) % 26 + 1)) + r; n = Math.floor((n - 1) / 26); }
-  return r;
-}
 function _walkNodes(nodes, fn) {
   for (const n of nodes) { fn(n); if (n.type === 'group') _walkNodes(n.children, fn); }
 }
-function _applyNumbers(format, nodes, prefix) {
+function _applyNumbers(nodes, prefix) {
   nodes.forEach((node, i) => {
-    const idx = i + 1;
-    const seg = format === 'roman' ? toRoman(idx) : format === 'letters' ? toLetter(idx) : String(idx);
+    const seg = formatSeg(i + 1);
     const newId = prefix ? prefix + '.' + seg : seg;
     node._oldId = node.id;
     node.id = newId;
-    if (node.type === 'group' && node.children.length) _applyNumbers(format, node.children, newId);
+    if (node.type === 'group' && node.children.length) _applyNumbers(node.children, newId);
   });
 }
-export async function renumberAll(format) {
+export async function renumberAll() {
   const raf = () => new Promise(r => requestAnimationFrame(r));
   // Yield first so progress.show() has a chance to paint before any sync work
   await raf();
@@ -106,7 +93,7 @@ export async function renumberAll(format) {
   _bulkUpdate.value = true;
   try {
     const idMap = new Map();
-    _applyNumbers(format, tree, '');
+    _applyNumbers(tree, '');
     _walkNodes(tree, n => { if (n._oldId !== undefined) { idMap.set(n._oldId, n.id); delete n._oldId; } });
 
     // Build a single regex for all old IDs → O(n) replacement instead of O(n²)
@@ -154,14 +141,3 @@ export function addRootGroup() {
   });
 }
 
-export function addRootItem() {
-  const node = makeItem('New Item');
-  node.id = formatSeg(tree.length + 1);
-  tree.push(node);
-  _formTick.value++;
-  renderTree();
-  requestAnimationFrame(() => {
-    const el = document.querySelector('[data-node-id="' + node.id + '"]');
-    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('node-flash'); setTimeout(() => el.classList.remove('node-flash'), 1000); }
-  });
-}

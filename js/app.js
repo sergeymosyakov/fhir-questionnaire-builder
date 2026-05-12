@@ -60,8 +60,7 @@ document.getElementById('renumberBtn').onclick = async () => {
   };
   document.addEventListener('renumber-progress', onProgress);
   document.addEventListener('renumber-done', onDone);
-  const format = document.getElementById('renumberFormat').value;
-  await renumberAll(format);
+  await renumberAll();
 };
 // ── Validate modal init ───────────────────────────────────────────────────
 const _modal = document.getElementById('validateModal');

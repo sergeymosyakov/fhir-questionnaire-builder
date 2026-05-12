@@ -29,7 +29,7 @@ function enableWhenToExpr(enableWhen) {
 }
 
 // FHIR item.type → our itemType
-export function fhirTypeToItemType(t) {
+function fhirTypeToItemType(t) {
   if (t === 'boolean')                                        return 'checkbox';
   if (t === 'integer' || t === 'decimal') return 'number';
   if (t === 'quantity') return 'quantity';
