@@ -20,6 +20,7 @@ Allows visually building questionnaire logic, testing it against patient data, a
 | `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`) |
 | `js/eval.js` | Tree evaluation (visibility / condition rules) |
 | `js/render-builder.js` | Left panel — 3-line re-export shim → `js/builder/` |
+| `js/builder/ctx.js` | `BuilderCtx` JSDoc typedef (no runtime exports) |
 | `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, etc.) |
 | `js/builder/_shared.js` | Shared utilities; injected deps via `init(deps)` |
 | `js/builder/dnd.js` | Self-contained drag & drop; all state via `init(onDrop, tree, formTick)` |

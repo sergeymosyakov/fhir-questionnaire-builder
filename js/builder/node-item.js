@@ -1,7 +1,5 @@
 // ── Item node renderer ────────────────────────────────────────────────────────
-// renderItem(node, ctx) → HTMLElement
-//
-// ctx = { renderTree }  (same as node-group.js)
+// renderItem(node, ctx: BuilderCtx) → HTMLElement  — see ctx.js
 import { findAndRemove, escAttr } from '../utils.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { addPanel, buildVisPanel, buildMandPanel, buildCondPanel, buildTypePanel, buildExprPanel, buildStylePanel } from './panels.js';

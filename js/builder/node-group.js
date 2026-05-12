@@ -1,7 +1,5 @@
 // ── Group node renderer ───────────────────────────────────────────────────────
-// renderGroup(node, ctx) → HTMLElement
-//
-// ctx = { renderTree, renderNode, tree, formTick, collapsed }
+// renderGroup(node, ctx: BuilderCtx) → HTMLElement  — see ctx.js
 import { findAndRemove, escAttr } from '../utils.js';
 import { makeGroup, makeItem } from '../state.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';

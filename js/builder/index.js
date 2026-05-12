@@ -11,6 +11,15 @@ const collapsed = new Map();
 // Inject reactive state into _shared (triggerCalcRecalc needs them)
 sharedInit({ tree, formTick: _formTick, rawFhir, calcTested, values });
 
+/**
+ * @typedef {Object} BuilderCtx
+ * @property {Function} renderTree   - Re-renders the entire tree into #treeContainer
+ * @property {Function} renderNode   - Renders a single node (dispatches group/item)
+ * @property {Array}    tree         - The reactive root tree array (from state.js)
+ * @property {import('@vue/reactivity').Ref<number>} formTick - Reactive tick to trigger preview re-eval
+ * @property {Map<string,boolean>}   collapsed    - UI-only collapse state keyed by node.id
+ */
+
 // renderNode is passed as ctx so node-item / node-group don't import each other
 function renderNode(node) {
   const ctx = { renderTree, renderNode, tree, formTick: _formTick, collapsed };

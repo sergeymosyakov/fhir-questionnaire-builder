@@ -1,7 +1,5 @@
-// ── Action panel builder ──────────────────────────────────────────────────────
-// buildPanels(node, div, ctx) appends all hidden action panels to `div`.
-//
-// ctx = { renderTree, tree, formTick } (passed through from index.js via node-item/group)
+// ── Action panel builders ─────────────────────────────────────────────────────
+// buildXxxPanel(node, panelEl, linkEl, setActive, ctx: BuilderCtx)  — see ctx.js
 //
 // Each panel is keyed and toggled by the action links defined in node-item/group.
 import { escAttr } from '../utils.js';
