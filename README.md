@@ -37,6 +37,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/fhir/qr-builder.js` | QuestionnaireResponse builder for FHIRPath context |
 | `js/fhir/validate.js` | `validateTree` → `{severity, nodeId, message}[]` |
 | `js/ui/validate-modal.js` | Validate modal — `init(elements)`, `show(title, issues, mode, callbacks)` |
+| `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables)`, `refresh()` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + keyboard navigation |
 | `js/ui/tooltip.js` | Rich tooltip system — delegated `mouseover` on `[data-tip-title]`/`[data-tip-body]`; dark card with optional FHIR spec footer |
@@ -46,6 +47,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `sampledata/prowl-ss.fhir.json` | PROWL-SS Post-Operative pain assessment — 44 items |
 | `sampledata/phq-9.fhir.json` | PHQ-9 Patient Health Questionnaire (depression screening) — 11 items |
 | `sampledata/1776102565767-...json` | Real-world questionnaire snapshot for regression testing |
+| `sampledata/sdc-variables-demo.fhir.json` | SDC Variables demo — BMI calculator with `%weightKg`, `%heightM`, `%bmiCalc` variables |
 | `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
 | `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
 | `docs/CONTEXT.md` | Internal architecture notes (product direction, scenarios, data flow) |
@@ -236,6 +238,7 @@ Standard extensions preserved on export:
 - **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported into `node._prefix` and exported back (round-trip safe); amber pill badge in preview; editable in builder meta-row; **Renumber** assigns sequential prefixes (e.g. `1`, `1.1`) — writes `_prefix` only, never changes `node.id`
 - **linkId / prefix toggles** — `id` (blue) and `prefix` (amber) buttons in preview toolbar toggle the corresponding pill badges; state stored in `showLinkId` / `showPrefix` refs
 - **Rich tooltips** — toolbar buttons use `data-tip-*` attributes; `js/ui/tooltip.js` renders a dark card below (or above) the target with optional FHIR spec footer; no native `title=` flicker
+- **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire imported into `questVariables[]`; collapsible card above tree shows `%name` chips; Edit modal for add/edit/delete; passed as `%varName` env vars to FHIRPath `calculatedExpression` on Test; round-trip safe
 - **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)
 
 ---
@@ -260,4 +263,4 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 - Multi-condition visibility (`&&`, `||`) not supported in the visual builder — must be written manually as JS
 - `conditionRule` on items is not exported to standard FHIR (prototype-specific concept with no direct R4 equivalent)
-- Full list of unsupported FHIR features (repeating items, answerValueSet, initial values, SDC variables, etc.) → [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md#not-supported-out-of-scope)
+- Full list of unsupported FHIR features (repeating items, answerValueSet, initial values, etc.) → [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md#not-supported-out-of-scope)

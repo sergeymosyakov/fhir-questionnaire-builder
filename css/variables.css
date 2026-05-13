@@ -1,0 +1,255 @@
+/* === Variables card (above tree in left panel) =============================== */
+.variables-card {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--c-border);
+  background: var(--c-surface);
+  padding: 6px 14px 8px;
+}
+.variables-card-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.variables-card-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--c-text-2);
+  border-radius: var(--r-sm);
+  transition: background .12s;
+  flex-shrink: 0;
+}
+.variables-card-toggle:hover { background: var(--c-hover); }
+.variables-card-toggle svg { transition: transform .18s; }
+.variables-card-toggle--collapsed svg { transform: rotate(-90deg); }
+
+.variables-card-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  color: var(--c-text-2);
+}
+.variables-card-count {
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--c-primary);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0 5px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 16px;
+  height: 16px;
+  display: inline-block;
+}
+.variables-edit-btn {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 2px 8px;
+  background: none;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  color: var(--c-text-2);
+  transition: background .12s, color .12s, border-color .12s;
+}
+.variables-edit-btn:hover {
+  background: var(--c-primary);
+  color: #fff;
+  border-color: var(--c-primary);
+}
+.variables-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.variables-chip {
+  font-size: 11px;
+  font-family: var(--f-mono, monospace);
+  background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+  color: var(--c-primary);
+  border: 1px solid color-mix(in srgb, var(--c-primary) 30%, transparent);
+  border-radius: 4px;
+  padding: 1px 6px;
+  cursor: default;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* === Variables edit modal ==================================================== */
+.variables-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+.variables-modal {
+  background: var(--c-surface);
+  border-radius: var(--r-md);
+  box-shadow: 0 8px 32px rgba(0,0,0,.28);
+  width: min(600px, 94vw);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.variables-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--c-border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text-1);
+  flex-shrink: 0;
+}
+.variables-modal-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--c-text-2);
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  transition: background .12s;
+}
+.variables-modal-close:hover { background: var(--c-hover); }
+
+.variables-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.variables-modal-empty {
+  font-size: 12px;
+  color: var(--c-text-2);
+  margin: 0;
+  font-style: italic;
+}
+
+/* One variable row ----------------------------------------------------------- */
+.variables-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 26px;
+  gap: 6px;
+  align-items: start;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+}
+.variables-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  height: 28px;
+  background: var(--c-surface);
+}
+.variables-name-prefix {
+  font-family: var(--f-mono, monospace);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-primary);
+  padding: 0 4px 0 7px;
+  flex-shrink: 0;
+  line-height: 26px;
+}
+.variables-name-input {
+  flex: 1;
+  height: 26px;
+  border: none;
+  outline: none;
+  padding: 0 6px 0 2px;
+  font-family: var(--f-mono, monospace);
+  font-size: 12px;
+  background: transparent;
+  color: var(--c-text-1);
+  min-width: 0;
+}
+.variables-name-input::placeholder { color: var(--c-text-3, var(--c-text-2)); opacity: .6; }
+.variables-name-wrap:focus-within {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-primary) 20%, transparent);
+}
+
+.variables-expr-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 5px 8px;
+  font-family: var(--f-mono, monospace);
+  font-size: 11px;
+  color: var(--c-text-1);
+  background: var(--c-surface);
+  resize: vertical;
+  min-height: 44px;
+  transition: border-color .12s;
+}
+.variables-expr-input:focus {
+  outline: none;
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-primary) 20%, transparent);
+}
+
+.variables-delete-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--c-text-2);
+  padding: 0;
+  align-self: center;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.variables-delete-btn:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+/* Add variable button -------------------------------------------------------- */
+.variables-add-btn {
+  align-self: flex-start;
+  font-size: 12px;
+  padding: 5px 12px;
+  background: none;
+  border: 1px dashed var(--c-border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  color: var(--c-text-2);
+  transition: background .12s, color .12s, border-color .12s;
+  margin-top: 2px;
+}
+.variables-add-btn:hover {
+  background: color-mix(in srgb, var(--c-primary) 8%, transparent);
+  color: var(--c-primary);
+  border-color: var(--c-primary);
+  border-style: solid;
+}

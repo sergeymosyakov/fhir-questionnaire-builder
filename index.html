@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="css/preview.css">
 <link rel="stylesheet" href="css/controls.css">
 <link rel="stylesheet" href="css/tooltip.css">
+<link rel="stylesheet" href="css/variables.css">
 </head>
 <body>
 <div id="progressWrap" class="progress-wrap">
@@ -92,6 +93,18 @@
           data-tip-spec="R4 · optional">&#x21BA; Renumber</button>
       </div>
     </div>
+    <!-- Questionnaire-level SDC variables card (shown when tree has nodes) -->
+    <div id="variablesCard" class="variables-card" style="display:none">
+      <div class="variables-card-header">
+        <button id="variablesCardToggle" type="button" class="variables-card-toggle" aria-expanded="true" title="Collapse / expand">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
+        </button>
+        <span class="variables-card-title">Variables</span>
+        <span id="variablesCardCount" class="variables-card-count"></span>
+        <button id="variablesEditBtn" type="button" class="variables-edit-btn">Edit</button>
+      </div>
+      <div id="variablesCardChips" class="variables-card-chips"></div>
+    </div>
     <div class="left-panel-body">
       <div id="treeContainer"></div>
     </div>
@@ -122,6 +135,7 @@
             <div class="load-menu-item" data-sample="prowl-ss.fhir.json">&#x2605; PROWL-SS Pain Assessment</div>
             <div class="load-menu-item" data-sample="phq-9.fhir.json">&#x2605; PHQ-9 Depression Screening</div>
             <div class="load-menu-item" data-sample="reference-example.fhir.json">&#x2605; Reference Type Demo</div>
+            <div class="load-menu-item" data-sample="sdc-variables-demo.fhir.json">&#x2605; SDC Variables Demo</div>
           </div>
         </div>
         <input type="file" id="fhirFileInput" accept=".json,application/json" style="display:none">
@@ -158,6 +172,17 @@
     <div class="right-panel-body">
       <div class="preview-card" id="lform"></div>
     </div>
+  </div>
+</div>
+
+<!-- SDC Variables edit modal -->
+<div id="variablesModal" class="variables-modal-backdrop" style="display:none">
+  <div class="variables-modal">
+    <div class="variables-modal-header">
+      <span>Questionnaire Variables</span>
+      <button id="variablesModalClose" type="button" class="variables-modal-close" title="Close">&#x2715;</button>
+    </div>
+    <div class="variables-modal-body" id="variablesModalBody"></div>
   </div>
 </div>
 

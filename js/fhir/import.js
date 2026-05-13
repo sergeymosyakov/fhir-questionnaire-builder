@@ -1,5 +1,5 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
-import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, calcTested, _bulkUpdate } from '../state.js';
+import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, calcTested, _bulkUpdate, questVariables } from '../state.js';
 import { renderTree } from '../render-builder.js';
 
 // Read our custom extension value from a FHIR item
@@ -206,6 +206,17 @@ export function importFHIR(fhirJson, renderFn) {
   rawFhir.value = q;
   calcTested.value = false;
   resetSeq();
+  // Read questionnaire-level SDC variables
+  const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
+  questVariables.splice(0);
+  for (const ext of q.extension || []) {
+    if (ext.url === SDC_VAR_URL && ext.valueExpression) {
+      questVariables.push({
+        name:       ext.valueExpression.name       || '',
+        expression: ext.valueExpression.expression || ''
+      });
+    }
+  }
   // Pause Vue tracking: pushing plain nodes into reactive tree would otherwise
   // trigger the preview effect() once per push (O(n) full preview re-renders).
   _bulkUpdate.value = true;

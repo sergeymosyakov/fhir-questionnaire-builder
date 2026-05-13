@@ -31,6 +31,10 @@ export const showPrefix = ref(true);
 
 // FHIRPath: original FHIR Questionnaire JSON after import; null if not loaded.
 export const rawFhir = ref(null);
+
+// Questionnaire-level SDC variables: [{name, expression}]
+// Populated from sdc-questionnaire-variable extensions on import.
+export const questVariables = reactive([]);
 // True after Test button clicked, reset on any form value change.
 export const calcTested = ref(false);
 

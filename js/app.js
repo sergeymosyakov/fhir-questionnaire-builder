@@ -8,11 +8,12 @@ import * as validateModal from './ui/validate-modal.js';
 import * as progress from './ui/progress.js';
 import * as search from './ui/search.js';
 import * as tooltip from './ui/tooltip.js';
+import * as variablesPanel from './ui/variables-panel.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
-import { showLinkId, showPrefix } from './state.js';
+import { showLinkId, showPrefix, questVariables } from './state.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 import { buildQR } from './fhir/qr-builder.js';
-import { evalCalcNodes } from './fhir/calc.js';
+import { evalCalcNodes, buildVarEnv } from './fhir/calc.js';
 
 // fhirpath.js v4 browser bundle loaded as global via lib/fhirpath.min.js
 const fhirpath = window.fhirpath;
@@ -43,7 +44,8 @@ document.getElementById('testBtn').onclick = () => {
   if (rawFhir.value && fhirpath) {
     const plainFhir = JSON.parse(JSON.stringify(rawFhir.value));
     const qr = buildQR(plainFhir, values);
-    evalCalcNodes(tree, qr, fhirpath, values);
+    const envVars = buildVarEnv(questVariables, qr, fhirpath);
+    evalCalcNodes(tree, qr, fhirpath, values, envVars);
     calcTested.value = true;
   }
   _formTick.value++;
@@ -85,6 +87,18 @@ validateModal.init({
   footer:      _modal.querySelector('.validate-modal-footer'),
   closeBtn:    _modal.querySelector('.validate-modal-close'),
 });
+
+// ── Variables panel init ──────────────────────────────────────────────────
+variablesPanel.init({
+  card:      document.getElementById('variablesCard'),
+  toggle:    document.getElementById('variablesCardToggle'),
+  chipList:  document.getElementById('variablesCardChips'),
+  count:     document.getElementById('variablesCardCount'),
+  editBtn:   document.getElementById('variablesEditBtn'),
+  modal:     document.getElementById('variablesModal'),
+  modalBody: document.getElementById('variablesModalBody'),
+  closeBtn:  document.getElementById('variablesModalClose'),
+}, questVariables);
 
 // ── Global progress bar init ──────────────────────────────────────────────
 progress.init({
@@ -136,9 +150,10 @@ function _setFileName(name) {
   }
 }
 
-// Show × button whenever the tree has nodes (even when built manually, without a loaded file)
+// Show × button and variables card whenever the tree has nodes
 effect(() => {
   const hasNodes = tree.length > 0;
+  document.getElementById('variablesCard').style.display = hasNodes ? '' : 'none';
   if (hasNodes) {
     _fileNameWrap.style.display = 'inline-flex';
   } else {
@@ -178,6 +193,9 @@ function _doReset() {
   // Clear rawFhir
   rawFhir.value = null;
   calcTested.value = false;
+  // Clear questionnaire-level variables
+  questVariables.splice(0);
+  variablesPanel.refresh();
   // Explicitly reset finalResult (class carries pass/fail styling even when innerHTML empty)
   const finalEl = document.getElementById('finalResult');
   finalEl.innerHTML = '';
@@ -219,6 +237,7 @@ function _askBeforeClear() {
 async function _importAndValidate(data, fileName) {
   // importFHIR is sync (parses tree); skip its internal renderTree, do async render instead
   importFHIR(data, () => {}); // pass no-op renderFn — we render below
+  variablesPanel.refresh();
   const issues = validateTree(tree, values);
   progress.show('Rendering ' + tree.length + ' nodes…');
   await renderTreeAsync((done, total) => progress.update(done, total));

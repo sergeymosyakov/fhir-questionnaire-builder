@@ -1,7 +1,22 @@
 // ── FHIRPath calculatedExpression evaluation ──────────────────────────────────
 // Evaluates all readOnly calc nodes in the tree and writes results to values[].
-export function evalCalcNodes(nodes, qr, fp, values) {
-  const env = { resource: qr };
+
+// Pre-compute questionnaire-level SDC variables into an environment object.
+// Variables are evaluated in order; later ones may reference earlier ones via %name.
+export function buildVarEnv(variables, qr, fp) {
+  const env = {};
+  for (const v of variables) {
+    if (!v.name || !v.expression) continue;
+    try {
+      const result = fp.evaluate(qr, v.expression, { resource: qr, ...env });
+      env[v.name] = Array.isArray(result) && result.length === 1 ? result[0] : result;
+    } catch (e) { /* skip variables whose expression fails */ }
+  }
+  return env;
+}
+
+export function evalCalcNodes(nodes, qr, fp, values, envVars = {}) {
+  const env = { resource: qr, ...envVars };
   for (const node of nodes) {
     if (node._calculatedExpr && node._readOnly) {
       try {
@@ -16,6 +31,6 @@ export function evalCalcNodes(nodes, qr, fp, values) {
         // silently skip nodes whose expression fails
       }
     }
-    if (node.type === 'group') evalCalcNodes(node.children, qr, fp, values);
+    if (node.type === 'group') evalCalcNodes(node.children, qr, fp, values, envVars);
   }
 }

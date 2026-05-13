@@ -186,6 +186,7 @@ Always stored as custom extension:
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-style` | standard | `_renderStyle` | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression` | SDC | `_calculatedExpr` | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable` | SDC | `questVariables[]` on Questionnaire root | Yes (SDC) |
 
 ---
 
@@ -208,7 +209,7 @@ The following FHIR R4 / SDC features are currently not handled. Items marked ⚠
 | Repeating items | `item.repeats: true`, `item.maxOccurs` | ⚠️ ignored on import |
 | Answer value sets | `item.answerValueSet` | ⚠️ ignored; use `answerOption[]` |
 | Initial values | `item.initial[]` | ⚠️ ignored on import |
-| SDC variables | `sdc-questionnaire-variable` extension | ⚠️ ignored |
+| SDC variables | `sdc-questionnaire-variable` extension | ✅ round-trip safe; collapsible card in left panel; editable via modal; evaluated as `%varName` in FHIRPath calculatedExpression |
 | SDC initial expression | `sdc-questionnaire-initialExpression` | ⚠️ ignored |
 | Questionnaire constraints | `questionnaire-constraint` extension | ⚠️ ignored |
 | Item prefix | `item.prefix` (e.g. `"1.1"`) | ✅ round-trip safe |

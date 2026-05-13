@@ -66,6 +66,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/fhir/export.js` | Internal model → FHIR R4 |
 | `js/fhir/validate.js` | `validateTree(tree)` → `{severity,nodeId,message}[]`; linkId uniqueness, JS/FHIRPath syntax, empty titles, missing options |
 | `js/ui/validate-modal.js` | Validation modal UI — `init(elements)` + `show(title, issues, mode, onExport?)`; no hardcoded DOM IDs |
+| `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables)`, `refresh()`; collapsible chip list above tree; modal with name/expression rows |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + up/down/Enter navigation |
 | `js/ui/tooltip.js` | Rich tooltip system — delegated `mouseover` on `[data-tip-title]` / `[data-tip-body]`; positions card below (or above) target; supports `data-tip-fhir` + `data-tip-spec` FHIR footer |
@@ -240,7 +241,8 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; replaces separate Load/Example buttons; no startup auto-load (empty-state placeholder shown instead)
 - **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported from JSON into `node._prefix` and exported back; rendered as an amber pill badge before the item title in the preview; editable via the amber input in the builder node meta-row; **Renumber** button assigns sequential prefixes (e.g. `1`, `1.1`) using the selected format (numeric / roman / letters) — writes `_prefix` only, never changes `node.id`
 - **linkId / prefix toggle badges** — `id` (blue) and `prefix` (amber) toggle buttons in preview toolbar; show/hide the corresponding pill badges on every preview row; active state tracked via `showLinkId` / `showPrefix` refs in `state.js`
-- **Rich tooltips** — toolbar buttons and action controls use `data-tip-title` / `data-tip-body` / `data-tip-fhir` / `data-tip-spec` attributes instead of native `title=`; `js/ui/tooltip.js` renders a dark card tooltip with optional FHIR spec footer; auto-positioned below target (flips above if no room)
+- **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire; imported → `questVariables[]` in state; collapsible card above tree shows `%name` chips; Edit button opens modal; variables evaluated as `%varName` in FHIRPath `calculatedExpression` when Test is clicked; round-trip safe on export
+- **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire; imported → `questVariables[]` in state; collapsible card above tree shows `%name` chips; Edit button opens modal; variables evaluated as `%varName` in FHIRPath `calculatedExpression` when Test is clicked; round-trip safe on export
 - **Export validation** — on Export: `validateTree()` runs; if issues found → modal with error/warning list, ↗ navigate-to-node button per issue, "Fix first" / "Export anyway" actions
 - **Import validation** — same modal shown after loading a file/sample (mode: OK only)
 - **Empty-state placeholder** — right panel shows hint text when tree is empty

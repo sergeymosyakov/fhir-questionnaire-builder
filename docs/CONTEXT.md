@@ -56,6 +56,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/render-preview.js` | Right panel — reactive preview |
 | `js/fhir/import.js` | FHIR R4 → internal model |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
+| `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables)`, `refresh()` |
 | `sampledata/example-bariatric.fhir.json` | FHIR R4 example (bariatric pre-authorization) |
 | `sampledata/1776102565767-...json` | Real-world questionnaire for testing |
 
@@ -195,6 +196,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported into `node._prefix` and exported back (round-trip safe); amber pill badge in preview; editable in builder meta-row; **Renumber** assigns sequential prefixes (e.g. `1`, `1.1`) — writes `_prefix` only, never changes `node.id`
 - **linkId / prefix toggles** — `id` (blue) and `prefix` (amber) buttons in preview toolbar toggle the corresponding pill badges; state stored in `showLinkId` / `showPrefix` refs
 - **Rich tooltips** — toolbar buttons use `data-tip-*` attributes; `js/ui/tooltip.js` renders a dark card below (or above) the target with optional FHIR spec footer; no native `title=` flicker
+- **SDC Variables** — `sdc-questionnaire-variable` extensions on the root Questionnaire are imported into `questVariables[]`; a collapsible card above the tree shows `%name` chips; clicking Edit opens a modal to add/edit/delete variables (name + FHIRPath expression); variables are passed as `%varName` env vars when evaluating `calculatedExpression` on Test; round-trip safe on export
 - **Expandable title** — node title shown as a read-only span; click → expands to a full-width textarea (auto-height), collapses on blur
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands

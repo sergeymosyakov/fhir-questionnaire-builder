@@ -1,0 +1,79 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "sdc-variables-demo",
+  "title": "SDC Variables Demo — BMI Calculator",
+  "status": "draft",
+  "subjectType": ["Patient"],
+  "date": "2026-05-13",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "weightKg",
+        "language": "text/fhirpath",
+        "expression": "item.where(linkId='weight').answer.valueDecimal"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "heightM",
+        "language": "text/fhirpath",
+        "expression": "item.where(linkId='height').answer.valueDecimal / 100"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "bmiCalc",
+        "language": "text/fhirpath",
+        "expression": "(%weightKg / (%heightM * %heightM)).round(1)"
+      }
+    }
+  ],
+  "item": [
+    {
+      "linkId": "intro",
+      "text": "This questionnaire demonstrates SDC questionnaire-level variables. Three variables are defined at the top: %weightKg, %heightM, and %bmiCalc. The last item uses %bmiCalc in a calculatedExpression. Fill in weight and height, then click Test to compute BMI.",
+      "type": "display"
+    },
+    {
+      "linkId": "weight",
+      "text": "Weight (kg)",
+      "type": "decimal",
+      "required": true
+    },
+    {
+      "linkId": "height",
+      "text": "Height (cm)",
+      "type": "decimal",
+      "required": true
+    },
+    {
+      "linkId": "bmi",
+      "text": "BMI (calculated)",
+      "type": "decimal",
+      "readOnly": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%bmiCalc"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "bmi-category",
+      "text": "BMI category",
+      "type": "display",
+      "extension": [
+        {
+          "url": "http://logicbuilder.example.org/extension/visibilityRule",
+          "valueString": "values['bmi'] !== undefined && values['bmi'] !== ''"
+        }
+      ]
+    }
+  ]
+}
