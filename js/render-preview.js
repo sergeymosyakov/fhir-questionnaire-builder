@@ -2,7 +2,7 @@
 import { age, gender, bmi, pregnant, smoker, proc, comorb } from './patient.js';
 import {
   effect,
-  tree, values, autoFilledIds, _formTick, _bulkUpdate,
+  tree, values, autoFilledIds, _formTick, _bulkUpdate, showLinkId, showPrefix,
   evalRule, calcFormOk, isMandatory,
   rawFhir, calcTested, CHECKABLE_TYPES
 } from './state.js';
@@ -241,8 +241,15 @@ effect(() => {
     const idTag = document.createElement('span');
     idTag.className = 'preview-linkid';
     idTag.textContent = res.node.id;
-    idTag.title = 'FHIR linkId — use as: values[\'' + res.node.id + '\']';
-    row.appendChild(idTag);
+    idTag.title = 'FHIR linkId \u2014 use as: values[\'' + res.node.id + '\']';
+    if (showLinkId.value) row.appendChild(idTag);
+
+    if (res.node._prefix && showPrefix.value) {
+      const prefixEl = document.createElement('span');
+      prefixEl.className = 'preview-prefix';
+      prefixEl.textContent = res.node._prefix;
+      row.appendChild(prefixEl);
+    }
 
     const label = document.createElement('span');
     if (isEmptyGroup) {
@@ -437,9 +444,11 @@ document.getElementById('previewExpandAllBtn').addEventListener('click', () => {
   _formTick.value++;
 });
 
-// Dedicated effect: show collapse/expand and search only when tree has content
+// Dedicated effect: show collapse/expand, search, and badge toggles only when tree has content
 effect(() => {
   const d = tree.length > 0 ? '' : 'none';
+  document.getElementById('showLinkIdBtn').style.display = d;
+  document.getElementById('showPrefixBtn').style.display = d;
   document.getElementById('previewCollapseAllBtn').style.display = d;
   document.getElementById('previewExpandAllBtn').style.display = d;
   document.getElementById('searchWrap').style.display = d;

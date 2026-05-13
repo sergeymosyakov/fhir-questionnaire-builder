@@ -1,0 +1,89 @@
+/* === Rich tooltip ============================================================
+   Shown on elements with [data-tip-title] / [data-tip-body].
+   Dark card with optional FHIR field reference at the bottom.
+   =========================================================================== */
+.rich-tooltip {
+  position: fixed;
+  z-index: 9999;
+  display: none;
+  max-width: 280px;
+  min-width: 180px;
+  padding: 10px 13px 10px;
+  background: #1a2535;
+  color: #dce6f0;
+  border-radius: 7px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.35), 0 1px 4px rgba(0,0,0,.2);
+  pointer-events: none;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* arrow pointing up (default: tooltip below target) */
+.rich-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top: 0;
+  border-bottom-color: #1a2535;
+}
+
+/* arrow pointing down (tooltip above target) */
+.rich-tooltip--above::before {
+  top: auto;
+  bottom: -6px;
+  border-bottom: 0;
+  border-top-color: #1a2535;
+}
+
+.rich-tooltip__title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 5px;
+  letter-spacing: .2px;
+}
+
+.rich-tooltip__body {
+  font-size: 11.5px;
+  color: #b8c9db;
+  margin-bottom: 0;
+}
+
+/* FHIR reference row at the bottom */
+.rich-tooltip__fhir {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid #2e3f55;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.rich-tooltip__fhir-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 20px;
+  background: #1565c0;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.rich-tooltip__fhir code {
+  font-family: monospace;
+  font-size: 11px;
+  color: #90caf9;
+  word-break: break-all;
+}
+
+.rich-tooltip__spec {
+  font-size: 10px;
+  color: #607d8b;
+  margin-left: auto;
+}

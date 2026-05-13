@@ -7,7 +7,9 @@ import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/validate-modal.js';
 import * as progress from './ui/progress.js';
 import * as search from './ui/search.js';
+import * as tooltip from './ui/tooltip.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
+import { showLinkId, showPrefix } from './state.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes } from './fhir/calc.js';
@@ -47,6 +49,17 @@ document.getElementById('testBtn').onclick = () => {
   _formTick.value++;
 };
 document.getElementById('collapseAllBtn').onclick  = collapseAll;
+
+// Wire a toggle button: click flips stateRef.value and updates active class.
+function wireToggle(btnId, stateRef) {
+  const btn = document.getElementById(btnId);
+  btn.onclick = () => {
+    stateRef.value = !stateRef.value;
+    btn.classList.toggle('btn-fhir--active', stateRef.value);
+  };
+}
+wireToggle('showLinkIdBtn', showLinkId);
+wireToggle('showPrefixBtn', showPrefix);
 document.getElementById('expandAllBtn').onclick    = expandAll;
 document.getElementById('renumberBtn').onclick = async () => {
   const btn = document.getElementById('renumberBtn');
@@ -80,6 +93,9 @@ progress.init({
   label:   document.getElementById('progressLabel'),
   blocker: document.getElementById('uiBlocker'),
 });
+
+// ── Tooltip init ─────────────────────────────────────────────────────────
+tooltip.init();
 
 // ── Search init ───────────────────────────────────────────────────────────
 search.init({

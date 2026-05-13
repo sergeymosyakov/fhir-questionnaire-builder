@@ -23,6 +23,12 @@ export const _formTick = ref(0);
 // The preview effect() returns early while true, then re-runs once on reset.
 export const _bulkUpdate = ref(false);
 
+// Show/hide FHIR linkId badges in preview.
+export const showLinkId = ref(true);
+
+// Show/hide item.prefix badges in preview.
+export const showPrefix = ref(true);
+
 // FHIRPath: original FHIR Questionnaire JSON after import; null if not loaded.
 export const rawFhir = ref(null);
 // True after Test button clicked, reset on any form value change.

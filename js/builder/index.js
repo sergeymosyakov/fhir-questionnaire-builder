@@ -69,16 +69,14 @@ export function collapseAll() { setCollapsedAll(tree, true);  renderTree(); }
 export function expandAll()   { setCollapsedAll(tree, false); renderTree(); }
 
 // ── Renumber ──────────────────────────────────────────────────────────────────
-function _walkNodes(nodes, fn) {
-  for (const n of nodes) { fn(n); if (n.type === 'group') _walkNodes(n.children, fn); }
-}
-function _applyNumbers(nodes, prefix) {
+// Renumber writes only node._prefix — node.id (FHIR linkId) is never touched,
+// so all visibilityRule / conditionRule / calculatedExpression references stay valid.
+function _applyPrefixes(nodes, parentPrefix) {
   nodes.forEach((node, i) => {
     const seg = formatSeg(i + 1);
-    const newId = prefix ? prefix + '.' + seg : seg;
-    node._oldId = node.id;
-    node.id = newId;
-    if (node.type === 'group' && node.children.length) _applyNumbers(node.children, newId);
+    const prefix = parentPrefix ? parentPrefix + '.' + seg : seg;
+    node._prefix = prefix;
+    if (node.type === 'group' && node.children.length) _applyPrefixes(node.children, prefix);
   });
 }
 export async function renumberAll() {
@@ -86,27 +84,9 @@ export async function renumberAll() {
   // Yield first so progress.show() has a chance to paint before any sync work
   await raf();
 
-  // Pause Vue tracking so bulk node.id mutations don't trigger preview re-renders
-  // Suppress preview effect() during bulk mutations — set flag before, clear after.
-  // When flag is set: effect reads _bulkUpdate and returns early (stops tracking tree).
-  // When flag is cleared: effect re-runs once and rebuilds the preview fully.
   _bulkUpdate.value = true;
   try {
-    const idMap = new Map();
-    _applyNumbers(tree, '');
-    _walkNodes(tree, n => { if (n._oldId !== undefined) { idMap.set(n._oldId, n.id); delete n._oldId; } });
-
-    // Build a single regex for all old IDs → O(n) replacement instead of O(n²)
-    const allOldIds = [...idMap.keys()];
-    if (allOldIds.length > 0) {
-      const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const re = new RegExp("'(" + allOldIds.map(esc).join('|') + ")'", 'g');
-      const repl = s => s.replace(re, (_, id) => "'" + (idMap.get(id) ?? id) + "'");
-      _walkNodes(tree, n => {
-        if (n.visibilityRule)  n.visibilityRule  = repl(n.visibilityRule);
-        if (n._calculatedExpr) n._calculatedExpr = repl(n._calculatedExpr);
-      });
-    }
+    _applyPrefixes(tree, '');
   } finally {
     _bulkUpdate.value = false;
   }

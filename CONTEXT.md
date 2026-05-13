@@ -7,7 +7,7 @@
 3. **Modularity** — new UI widget → `js/ui/<name>.js`; new control → `js/controls/<name>.js`; new CSS concern → `css/<name>.css` + `<link>` in index.html. Do not add logically separate code into existing modules.
 4. **DI** — DOM resolved once in `app.js`, passed via `init(elements)`. No `getElementById` inside submodules.
 5. **No inline styles** — `style="..."` in HTML and `el.style.foo =` in JS are forbidden for static values. Allowed only for **runtime-dynamic** values: show/hide (`display`), computed dimensions, user-driven colors. All static appearance → CSS classes.
-6. **English only** — all code comments, doc strings, commit messages, CONTEXT.md, README.md, and any in-repo text must be in English.
+6. **English only** — all code comments, doc strings, commit messages, CONTEXT.md, README.md, any in-repo text, **and all UI labels, button text, and tooltip text in HTML and JS** must be in English. No Russian anywhere in the codebase.
 
 ---
 
@@ -68,6 +68,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/validate-modal.js` | Validation modal UI — `init(elements)` + `show(title, issues, mode, onExport?)`; no hardcoded DOM IDs |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + up/down/Enter navigation |
+| `js/ui/tooltip.js` | Rich tooltip system — delegated `mouseover` on `[data-tip-title]` / `[data-tip-body]`; positions card below (or above) target; supports `data-tip-fhir` + `data-tip-spec` FHIR footer |
 | `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup |
 | `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all types |
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History (49 items, depth 5) |
@@ -214,8 +215,8 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Export filename prompt** — `window.prompt` before every export; pre-filled with current file name; adds `.json` if not already present
 - **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
 - **Drag & drop reorder** — ⠿ handle on every node; drag to reorder, drop between nodes, drop into group, drop at root level; ancestor→descendant drop blocked. Drop zones appear only during drag (`body.dragging` CSS class, `height:0` → `28px`); labeled: "Drop here to add as first child" (top of group), "Drop here" (between siblings), "Drop here to add as last child" (bottom of group), "Drop here to move to end" (root zone). Each node wrapped in `div.node-wrap` (display:contents) so drop zones sit outside the styled box.
-- **Collapse sections (preview)** — `▼/▶` toggle on each group row in the preview; `⊟`/`⊞` buttons in the preview toolbar collapse/expand all (appear when tree is non-empty, right-aligned via flex spacer)
-- **Preview toolbar order** — `⬆ Load ▾` | `⬇ Export` | 🔍 Search | [flex spacer] | `⊟` `⊞`; search and collapse/expand shown only when tree has content
+- **Collapse sections (preview)** — `▼/▶` toggle on each group row in the preview; SVG corner-arrow icon buttons (⊖/⊕ style) in the preview toolbar collapse/expand all (appear when tree is non-empty, right-aligned via flex spacer)
+- **Preview toolbar order** — `⬆ Load ▾` | `⬇ Export` | 🔍 Search | [flex spacer] | `id` toggle | `prefix` toggle | collapse | expand; search and collapse/expand shown only when tree has content
 - **Disabled groups clickable** — N/A (grayed `—`) groups in preview are still clickable to navigate to builder node
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`
 - **Expandable title** — node title shown as a read-only span; click → expands to a full-width textarea (auto-height), collapses on blur
@@ -235,7 +236,9 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Styled file input** — `attachment` renders as a custom **Choose file** button (blue, themed) + file name; native input hidden
 - **Active action buttons** — action panel buttons (Show When, Applicability, Expression, Appearance, Required) turn **dark purple** when they have content set; initialised on load, updated in real-time on edit
 - **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; replaces separate Load/Example buttons; no startup auto-load (empty-state placeholder shown instead)
-- **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)
+- **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported from JSON into `node._prefix`; rendered as an amber pill badge before the item title in the preview; editable via the amber input in the builder node meta-row; **Renumber** button assigns sequential prefixes (e.g. `1`, `1.1`) using the selected format (numeric / roman / letters) — writes `_prefix` only, never changes `node.id`
+- **linkId / prefix toggle badges** — `id` (blue) and `prefix` (amber) toggle buttons in preview toolbar; show/hide the corresponding pill badges on every preview row; active state tracked via `showLinkId` / `showPrefix` refs in `state.js`
+- **Rich tooltips** — toolbar buttons and action controls use `data-tip-title` / `data-tip-body` / `data-tip-fhir` / `data-tip-spec` attributes instead of native `title=`; `js/ui/tooltip.js` renders a dark card tooltip with optional FHIR spec footer; auto-positioned below target (flips above if no room)
 - **Export validation** — on Export: `validateTree()` runs; if issues found → modal with error/warning list, ↗ navigate-to-node button per issue, "Fix first" / "Export anyway" actions
 - **Import validation** — same modal shown after loading a file/sample (mode: OK only)
 - **Empty-state placeholder** — right panel shows hint text when tree is empty
@@ -295,6 +298,7 @@ Styles are split into modules — `css/styles.css` contains only design tokens +
 | `css/builder.css` | ~485 | Toolbar, node cards, drag/drop zones, action chips, collapsible panels, vis-builder, flash animation, `.panel-color-inp/clear`, `.panel-hint` |
 | `css/preview.css` | ~244 | Preview card, lform-item, status icons, AND/OR badges, final result, calc-badge, flash |
 | `css/controls.css` | ~106 | `.ctrl-wrap`, `.ctrl-err`, `.ref-*`, `.qty-*`, open-choice, file input, radio, shared-success |
+| `css/tooltip.css` | ~60 | Dark card tooltip (`#1a2535`), CSS arrow, `.rich-tooltip__title`, `.rich-tooltip__body`, `.rich-tooltip__fhir` FHIR spec footer row |
 | `css/modals.css` | ~105 | Clear-confirm modal, validate modal, preview placeholder |
 
 **Inline styles remaining** (genuinely dynamic — not convertible):

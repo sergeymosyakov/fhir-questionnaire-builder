@@ -39,6 +39,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/ui/validate-modal.js` | Validate modal — `init(elements)`, `show(title, issues, mode, callbacks)` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + keyboard navigation |
+| `js/ui/tooltip.js` | Rich tooltip system — delegated `mouseover` on `[data-tip-title]`/`[data-tip-body]`; dark card with optional FHIR spec footer |
 | `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup (bariatric surgery pre-auth, compact) |
 | `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all item types |
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History — 49 items, depth 5 |
@@ -76,7 +77,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **`new Function()`** — sandboxed rule evaluation (`evalRule`)
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
-- **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`
+- **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
 
 ---
 
@@ -206,7 +207,7 @@ Standard extensions preserved on export:
 - **Clear questionnaire** — `×` button next to the loaded file name; if tree is non-empty shows a modal asking to export first (Export first / Clear anyway / Cancel)
 - **Loaded file name** — shown in right-panel header after import; appears as `New Questionnaire` when building from scratch; `×` always visible when tree is non-empty
 - **Export filename prompt** — `window.prompt` before every export; pre-filled with current file name; adds `.json` if not present
-- **Collapse sections (preview)** — `▼/▶` toggle on each group row; `⊟`/`⊞` All buttons in toolbar right-aligned (visible when tree has content)
+- **Collapse sections (preview)** — `▼/▶` toggle on each group row; SVG corner-arrow icon buttons in toolbar right-aligned (visible when tree has content)
 - **Disabled groups clickable** — N/A groups in preview still navigate to builder on click
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`
 - **Expandable title** — node title shown as read-only span; click → expands to full-width textarea, collapses on blur
@@ -230,6 +231,9 @@ Standard extensions preserved on export:
 - **Empty-state placeholder** — right panel shows hint text when no questionnaire is loaded
 - **Date picker / URL input** — `date` renders as native date-picker; `url` validates format with `new URL()`
 - **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; no startup auto-load (empty-state placeholder shown instead)
+- **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported into `node._prefix`; amber pill badge in preview; editable in builder meta-row; **Renumber** assigns sequential prefixes (e.g. `1`, `1.1`) — writes `_prefix` only, never changes `node.id`
+- **linkId / prefix toggles** — `id` (blue) and `prefix` (amber) buttons in preview toolbar toggle the corresponding pill badges; state stored in `showLinkId` / `showPrefix` refs
+- **Rich tooltips** — toolbar buttons use `data-tip-*` attributes; `js/ui/tooltip.js` renders a dark card below (or above) the target with optional FHIR spec footer; no native `title=` flicker
 - **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)
 
 ---

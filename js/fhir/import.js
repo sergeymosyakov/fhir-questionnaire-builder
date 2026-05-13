@@ -137,6 +137,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
     node._calculatedExpr = calcExpr.valueExpression.expression || '';
   }
   node._readOnly = !!fhirItem.readOnly;
+  if (fhirItem.prefix) node._prefix = fhirItem.prefix;
   return node;
 }
 
@@ -159,6 +160,7 @@ function fhirItemToNode(fhirItem, linkIdMap) {
     const rs = fhirItem._text && fhirItem._text.extension
       && fhirItem._text.extension.find(x => x.url && x.url.includes('rendering-style'));
     if (rs) node._renderStyle = rs.valueString || '';
+    if (fhirItem.prefix) node._prefix = fhirItem.prefix;
     for (const child of fhirItem.item || []) {
       const n = fhirItemToNode(child, linkIdMap);
       if (n) node.children.push(n);

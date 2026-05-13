@@ -10,11 +10,13 @@
   "item": [
     {
       "linkId": "g-eligibility",
+      "prefix": "1.",
       "text": "Patient Eligibility Criteria",
       "type": "group",
       "item": [
         {
           "linkId": "q-bmi-criterion",
+          "prefix": "1.1",
           "text": "BMI eligibility criterion",
           "type": "choice",
           "required": true,
@@ -47,6 +49,7 @@
         },
         {
           "linkId": "q-comorb-type",
+          "prefix": "1.2",
           "text": "Primary comorbidity",
           "type": "choice",
           "required": true,
@@ -96,23 +99,27 @@
     },
     {
       "linkId": "g-diet",
+      "prefix": "2.",
       "text": "Diet & Weight-Loss History",
       "type": "group",
       "item": [
         {
           "linkId": "q-diet-months",
+          "prefix": "2.1",
           "text": "Months of documented supervised diet",
           "type": "integer",
           "required": true
         },
         {
           "linkId": "q-diet-program",
+          "prefix": "2.2",
           "text": "Participated in a formal weight-loss program?",
           "type": "boolean",
           "required": true
         },
         {
           "linkId": "q-program-name",
+          "prefix": "2.3",
           "text": "Program name",
           "type": "string",
           "enableWhen": [
@@ -125,6 +132,7 @@
         },
         {
           "linkId": "q-preferred-surgeon",
+          "prefix": "2.4",
           "text": "Preferred surgical facility (or enter your own)",
           "type": "open-choice",
           "required": false,
@@ -136,11 +144,13 @@
         },
         {
           "linkId": "q-diet-meds",
+          "prefix": "2.5",
           "text": "Anti-obesity medications tried?",
           "type": "boolean"
         },
         {
           "linkId": "q-diet-meds-lst",
+          "prefix": "2.6",
           "text": "Medications (comma-separated)",
           "type": "string",
           "enableWhen": [
@@ -155,17 +165,20 @@
     },
     {
       "linkId": "g-psych",
+      "prefix": "3.",
       "text": "Psychological Evaluation",
       "type": "group",
       "item": [
         {
           "linkId": "q-psych-done",
+          "prefix": "3.1",
           "text": "Psychiatric evaluation completed?",
           "type": "boolean",
           "required": true
         },
         {
           "linkId": "q-phq9",
+          "prefix": "3.2",
           "text": "PHQ-9 score (0–27)",
           "type": "integer",
           "enableWhen": [
@@ -178,6 +191,7 @@
         },
         {
           "linkId": "q-psych-cleared",
+          "prefix": "3.3",
           "text": "Cleared for surgery by psychiatrist?",
           "type": "boolean",
           "required": true,
@@ -191,12 +205,14 @@
         },
         {
           "linkId": "q-substance",
+          "prefix": "3.4",
           "text": "History of substance use disorder?",
           "type": "boolean",
           "required": true
         },
         {
           "linkId": "q-substance-dtl",
+          "prefix": "3.5",
           "text": "Details / current status",
           "type": "string",
           "enableWhen": [
@@ -211,22 +227,26 @@
     },
     {
       "linkId": "g-nutrition",
+      "prefix": "4.",
       "text": "Nutritional Assessment",
       "type": "group",
       "item": [
         {
           "linkId": "q-rd-done",
+          "prefix": "4.1",
           "text": "Registered Dietitian consultation completed?",
           "type": "boolean",
           "required": true
         },
         {
           "linkId": "q-vit-def",
+          "prefix": "4.2",
           "text": "Pre-operative vitamin deficiency detected?",
           "type": "boolean"
         },
         {
           "linkId": "q-vit-type",
+          "prefix": "4.3",
           "text": "Deficiency type",
           "type": "choice",
           "enableWhen": [
@@ -267,6 +287,7 @@
     },
     {
       "linkId": "g-female",
+      "prefix": "5.",
       "text": "Female-Specific Requirements",
       "type": "group",
       "extension": [
@@ -278,12 +299,14 @@
       "item": [
         {
           "linkId": "q-preg-test",
+          "prefix": "5.1",
           "text": "Pregnancy test performed within 7 days?",
           "type": "boolean",
           "required": true
         },
         {
           "linkId": "q-preg-neg",
+          "prefix": "5.2",
           "text": "Result: negative?",
           "type": "boolean",
           "required": true,
@@ -297,6 +320,7 @@
         },
         {
           "linkId": "q-ocp",
+          "prefix": "5.3",
           "text": "Contraception counseling provided (12-month post-op)?",
           "type": "boolean",
           "required": true
@@ -305,11 +329,13 @@
     },
     {
       "linkId": "g-surgical",
+      "prefix": "6.",
       "text": "Surgical Procedure Selection",
       "type": "group",
       "item": [
         {
           "linkId": "q-proc-type",
+          "prefix": "6.1",
           "text": "Proposed procedure",
           "type": "choice",
           "required": true,
@@ -342,12 +368,14 @@
         },
         {
           "linkId": "q-surgeon-cert",
+          "prefix": "6.2",
           "text": "Surgeon board-certified in bariatric surgery?",
           "type": "boolean",
           "required": true
         },
         {
           "linkId": "q-facility",
+          "prefix": "6.3",
           "text": "Facility MBSAQIP accredited?",
           "type": "boolean",
           "required": true
@@ -356,41 +384,48 @@
     },
     {
       "linkId": "g-documents",
+      "prefix": "7.",
       "type": "group",
       "text": "Supporting Documents & Dates",
       "item": [
         {
           "linkId": "q-surgery-date",
+          "prefix": "7.1",
           "type": "date",
           "text": "Planned Surgery Date",
           "required": true
         },
         {
           "linkId": "q-last-visit-date",
+          "prefix": "7.2",
           "type": "date",
           "text": "Date of Last Clinical Visit",
           "required": true
         },
         {
           "linkId": "q-referral-url",
+          "prefix": "7.3",
           "type": "url",
           "text": "Referral Document URL",
           "required": false
         },
         {
           "linkId": "q-guidelines-url",
+          "prefix": "7.4",
           "type": "url",
           "text": "Clinical Guidelines Reference URL",
           "required": true
         },
         {
           "linkId": "q-referral-doc",
+          "prefix": "7.5",
           "type": "attachment",
           "text": "Upload Referral Document (PDF)",
           "required": true
         },
         {
           "linkId": "q-lab-results",
+          "prefix": "7.6",
           "type": "attachment",
           "text": "Upload Lab Results",
           "required": false
@@ -399,11 +434,13 @@
     },
     {
       "linkId": "g-patient-prefs",
+      "prefix": "8.",
       "type": "group",
       "text": "Patient Preferences",
       "item": [
         {
           "linkId": "q-diet-type",
+          "prefix": "8.1",
           "type": "choice",
           "text": "Preferred diet program",
           "required": true,
@@ -443,6 +480,7 @@
         },
         {
           "linkId": "q-support-group",
+          "prefix": "8.2",
           "type": "choice",
           "text": "Willing to join support group?",
           "required": true,
@@ -482,6 +520,7 @@
         },
         {
           "linkId": "q-contact-method",
+          "prefix": "8.3",
           "type": "choice",
           "text": "Preferred contact method",
           "required": false,
@@ -523,28 +562,33 @@
     },
     {
       "linkId": "g-field-types",
+      "prefix": "9.",
       "type": "group",
       "text": "Field Types Demo",
       "item": [
         {
           "linkId": "q-notes",
+          "prefix": "9.1",
           "type": "text",
           "text": "Additional clinical notes (multiline text)"
         },
         {
           "linkId": "q-weight-kg",
+          "prefix": "9.2",
           "type": "decimal",
           "text": "Current weight (kg)",
           "required": true
         },
         {
           "linkId": "q-height-cm",
+          "prefix": "9.3",
           "type": "decimal",
           "text": "Height (cm)",
           "required": true
         },
         {
           "linkId": "q-bmi-calc",
+          "prefix": "9.4",
           "type": "decimal",
           "text": "Calculated BMI",
           "readOnly": true,
@@ -560,6 +604,7 @@
         },
         {
           "linkId": "q-referring-provider",
+          "prefix": "9.5",
           "type": "reference",
           "text": "Referring Provider",
           "extension": [
@@ -571,6 +616,7 @@
         },
         {
           "linkId": "q-body-temp",
+          "prefix": "9.6",
           "type": "quantity",
           "text": "Body temperature",
           "required": true,
@@ -587,6 +633,7 @@
         },
         {
           "linkId": "q-info-display",
+          "prefix": "9.7",
           "type": "display",
           "text": "ℹ️ All documents must be uploaded before submission. Incomplete applications will not be processed."
         }

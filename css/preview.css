@@ -175,18 +175,30 @@
 .preview-linkid {
   font-family: monospace;
   font-size: 10px;
-  color: #999;
-  background: transparent;
-  border: none;
-  border-radius: 3px;
-  padding: 0 6px 0 0;
+  font-weight: 600;
+  color: var(--c-primary);
+  background: var(--c-primary-lt);
+  border-radius: 20px;
+  padding: 1px 8px;
   flex-shrink: 0;
   cursor: help;
-  transition: color .15s;
   white-space: nowrap;
-  min-width: 36px;
+  transition: background .15s;
 }
-.lform-item:hover .preview-linkid { color: var(--c-primary); }
+.lform-item:hover .preview-linkid { background: #c9e2f9; }
+
+/* === item.prefix badge ======================================================= */
+.preview-prefix {
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--c-amber);
+  background: var(--c-amber-lt);
+  border-radius: 20px;
+  padding: 1px 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
 
 /* === Preview helpers ========================================================= */
 .preview-no-visible   { color: #999; font-size: 13px; padding: 12px; }

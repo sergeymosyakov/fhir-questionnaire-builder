@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="css/builder.css">
 <link rel="stylesheet" href="css/preview.css">
 <link rel="stylesheet" href="css/controls.css">
+<link rel="stylesheet" href="css/tooltip.css">
 </head>
 <body>
 <div id="progressWrap" class="progress-wrap">
@@ -72,15 +73,23 @@
       <span class="section-title">Logic Builder</span>
       <div class="tree-toolbar">
         <button id="addRootGroupBtn" type="button" class="btn-add-root">+ Add Root Group</button>
-        <button id="collapseAllBtn" type="button" class="btn-icon-ctrl" title="Collapse all">&#x229F;</button>
-        <button id="expandAllBtn"   type="button" class="btn-icon-ctrl" title="Expand all">&#x229E;</button>
+        <button id="collapseAllBtn" type="button" class="btn-icon-ctrl"
+          data-tip-title="Collapse all"
+          data-tip-body="Hides children under every group in the builder tree. Useful for navigating large questionnaires."><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 L6 6 L2 6 M10 2 L10 6 L14 6 M14 10 L10 10 L10 14 M6 14 L6 10 L2 10"/></svg></button>
+        <button id="expandAllBtn"   type="button" class="btn-icon-ctrl"
+          data-tip-title="Expand all"
+          data-tip-body="Shows all children under every group in the builder tree."><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10"/></svg></button>
         <span class="tree-toolbar-sep"></span>
         <select id="renumberFormat" class="btn-tree-ctrl">
           <option value="numbers">1 · 2 · 3</option>
           <option value="roman">I · II · III</option>
           <option value="letters">A · B · C</option>
         </select>
-        <button id="renumberBtn" type="button" class="btn-tree-ctrl">&#x21BA; Renumber</button>
+        <button id="renumberBtn" type="button" class="btn-tree-ctrl"
+          data-tip-title="Renumber"
+          data-tip-body="Assigns sequential prefix values (e.g. 1, 1.1, 1.2) to every item based on the selected format. Writes to item.prefix only — linkId is never changed."
+          data-tip-fhir="Questionnaire.item.prefix"
+          data-tip-spec="R4 · optional">&#x21BA; Renumber</button>
       </div>
     </div>
     <div class="left-panel-body">
@@ -124,8 +133,26 @@
           <span id="searchCounter" class="search-counter"></span>
         </div>
         <span class="fhir-toolbar-sep"></span>
-        <button id="previewCollapseAllBtn" type="button" class="btn-fhir" title="Collapse all sections" style="display:none">&#x229F;</button>
-        <button id="previewExpandAllBtn" type="button" class="btn-fhir" title="Expand all sections" style="display:none">&#x229E;</button>
+        <button id="showLinkIdBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--active"
+          data-tip-title="FHIR linkId"
+          data-tip-body="Unique identifier for each item. Used in visibility rules as values['linkId'] and in enableWhen conditions. Every item must have a unique linkId within the questionnaire."
+          data-tip-fhir="Questionnaire.item.linkId"
+          data-tip-spec="R4 · required"
+          style="display:none">id</button>
+        <button id="showPrefixBtn" type="button" class="btn-fhir btn-fhir--amber btn-fhir--toggle btn-fhir--active"
+          data-tip-title="item.prefix"
+          data-tip-body="Optional display label shown before the item text (e.g. &quot;1.1&quot;, &quot;Q3.&quot;). Purely cosmetic — does not affect visibility rules, enableWhen, or any logic. Set manually or via Renumber."
+          data-tip-fhir="Questionnaire.item.prefix"
+          data-tip-spec="R4 · optional"
+          style="display:none">prefix</button>
+        <button id="previewCollapseAllBtn" type="button" class="btn-fhir btn-fhir--icon"
+          data-tip-title="Collapse all groups"
+          data-tip-body="Hides child items under every group header. Useful for a high-level overview of the questionnaire structure."
+          style="display:none"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 L6 6 L2 6 M10 2 L10 6 L14 6 M14 10 L10 10 L10 14 M6 14 L6 10 L2 10"/></svg></button>
+        <button id="previewExpandAllBtn" type="button" class="btn-fhir btn-fhir--icon"
+          data-tip-title="Expand all groups"
+          data-tip-body="Shows all child items under every group header."
+          style="display:none"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10"/></svg></button>
       </div>
     </div>
     <div class="right-panel-body">

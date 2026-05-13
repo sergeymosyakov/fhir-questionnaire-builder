@@ -33,7 +33,17 @@ export function renderItem(node, ctx) {
   typeLabel.className = 'node-type-label lbl-item';
   typeLabel.textContent = '[Item]';
   titleWrap.appendChild(typeLabel);
-
+  const prefixInput = document.createElement('input');
+  prefixInput.type = 'text';
+  prefixInput.value = node._prefix || '';
+  prefixInput.className = 'node-prefix-input';
+  prefixInput.placeholder = 'prefix';
+  prefixInput.title = 'Display prefix (e.g. 1.2) — cosmetic only, does not affect logic';
+  prefixInput.oninput = () => {
+    const v = prefixInput.value.trim();
+    node._prefix = v || undefined;
+  };
+  titleWrap.appendChild(prefixInput);
   const linkIdInput = document.createElement('input');
   linkIdInput.type = 'text';
   linkIdInput.value = node.id;
@@ -69,7 +79,7 @@ export function renderItem(node, ctx) {
   // Navigate to preview row on header click
   titleWrap.title = 'Click to navigate to preview row';
   titleWrap.addEventListener('click', e => {
-    if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput) return;
+    if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput || e.target === prefixInput) return;
     const target = document.querySelector('[data-preview-id="' + node.id + '"]');
     if (!target) return;
     target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -107,7 +117,22 @@ export function renderItem(node, ctx) {
   headerTop.className = 'node-header-top';
   headerTop.appendChild(titleWrap);
   headerTop.appendChild(actions);
+
+  const metaRow = document.createElement('div');
+  metaRow.className = 'node-meta-row';
+  const prefixLbl = document.createElement('span');
+  prefixLbl.className = 'node-meta-label node-meta-label--prefix';
+  prefixLbl.textContent = 'prefix:';
+  const idLbl = document.createElement('span');
+  idLbl.className = 'node-meta-label node-meta-label--id';
+  idLbl.textContent = 'id:';
+  metaRow.appendChild(idLbl);
+  metaRow.appendChild(linkIdInput);
+  metaRow.appendChild(prefixLbl);
+  metaRow.appendChild(prefixInput);
+
   header.appendChild(headerTop);
+  header.appendChild(metaRow);
   header.appendChild(titleRow);
 
   const btnDel = document.createElement('button');
