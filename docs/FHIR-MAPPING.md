@@ -212,6 +212,7 @@ The following FHIR R4 / SDC features are currently not handled. Items marked ⚠
 | SDC initial expression | `sdc-questionnaire-initialExpression` | ⚠️ ignored |
 | Questionnaire constraints | `questionnaire-constraint` extension | ⚠️ ignored |
 | Item prefix | `item.prefix` (e.g. `"1.1"`) | ✅ round-trip safe |
+| Item codes | `item.code[]` (coding array) | ✅ round-trip safe; stored as `_codes`, not displayed in UI |
 | `contained` resources | `Questionnaire.contained[]` | ⚠️ ignored |
 | Multiple `enableWhen` on items with `enableBehavior` | `item.enableBehavior` | Partial: imported as `&&`-joined JS; re-exported as extension |
 | Resource reference resolution | `type: 'reference'` | ⚠️ dropdown + id text field; no live resource search against a FHIR server |
