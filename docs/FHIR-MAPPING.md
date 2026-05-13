@@ -48,11 +48,13 @@ Every node in the tree is either a **group** or an **item**:
 | FHIR `item.type` | `itemType` | Notes |
 |---|---|---|
 | `boolean` | `checkbox` | |
-| `integer`, `decimal`, `quantity` | `number` | unit field ignored for `quantity` |
-| `string`, `text`, `reference` | `text` | |
+| `integer`, `decimal` | `number` | |
+| `quantity` | `quantity` | UCUM unit dropdown; `questionnaire-unit` extension read/written |
+| `string`, `text` | `text` | |
+| `reference` | `reference` | dropdown (resource type) + id input; `questionnaire-referenceResource` extension locks dropdown to one type |
 | `choice` | `select` | unless `questionnaire-itemControl: radio-button` → `radio` |
 | `choice` + itemControl `radio-button` | `radio` | see Extensions section |
-| `open-choice` | `select` | free-text option not rendered |
+| `open-choice` | `open-choice` | text input + `<datalist>` suggestions from `answerOption[]`; free-text allowed |
 | `display` | `display` | label only, no control, no pass/fail |
 | `date`, `dateTime`, `time` | `date` | all three map to native date-picker |
 | `url` | `url` | format validated with `new URL()` |
@@ -68,6 +70,9 @@ Every node in the tree is either a **group** or an **item**:
 | `text` | `string` | |
 | `select` | `choice` | + `answerOption[]` |
 | `radio` | `choice` | + `answerOption[]` + `questionnaire-itemControl: radio-button` extension |
+| `open-choice` | `open-choice` | + `answerOption[]` (used as datalist suggestions) |
+| `quantity` | `quantity` | + `questionnaire-unit` extension (default unit from builder) |
+| `reference` | `reference` | + `questionnaire-referenceResource` extension (if type is locked) |
 | `display` | `display` | |
 | `date` | `date` | |
 | `url` | `url` | |
@@ -188,8 +193,6 @@ Always stored as custom extension:
 |---|---|---|
 | `_enableWhenText` | Yes (intentional) | UI label, regenerated from `enableWhen` on import |
 | `autoFilledIds` | Yes (intentional) | Runtime UI state only |
-| FHIR `quantity` unit | Yes | Mapped to `number`, unit discarded |
-| `open-choice` free-text option | Yes | Rendered as plain `select` |
 | Multiple `enableWhen` conditions | Partial | Imported as `&&`-joined JS; re-exported as single `enableWhen` entry if simple, else as extension |
 
 ---
@@ -210,6 +213,5 @@ The following FHIR R4 / SDC features are currently not handled. Items marked ⚠
 | Item codes | `item.code[]` | ⚠️ ignored |
 | `contained` resources | `Questionnaire.contained[]` | ⚠️ ignored |
 | Multiple `enableWhen` on items with `enableBehavior` | `item.enableBehavior` | Partial: imported as `&&`-joined JS; re-exported as extension |
-| `open-choice` free-text input | `type: 'open-choice'` | ⚠️ rendered as plain `select`; free-text entry not supported |
-| Resource reference resolution | `type: 'reference'` | ⚠️ fallback to text input; no resource search |
+| Resource reference resolution | `type: 'reference'` | ⚠️ dropdown + id text field; no live resource search against a FHIR server |
 | FHIR versions other than R4 | STU3, R5 | Not tested; may partially work |
