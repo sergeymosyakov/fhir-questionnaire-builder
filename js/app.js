@@ -111,6 +111,19 @@ progress.init({
 // ── Tooltip init ─────────────────────────────────────────────────────────
 tooltip.init();
 
+const _tooltipToggleBtn  = document.getElementById('tooltipToggleBtn');
+const _tooltipsOffBadge  = document.getElementById('tooltipsOffBadge');
+const _syncTooltipState = (enabled) => {
+  _tooltipToggleBtn.classList.toggle('btn-fhir--active', enabled);
+  _tooltipsOffBadge.style.display = enabled ? 'none' : '';
+};
+_syncTooltipState(tooltip.isEnabled());
+_tooltipToggleBtn.addEventListener('click', () => {
+  const next = !tooltip.isEnabled();
+  tooltip.setEnabled(next);
+  _syncTooltipState(next);
+});
+
 // ── Search init ───────────────────────────────────────────────────────────
 search.init({
   input:   document.getElementById('searchInput'),

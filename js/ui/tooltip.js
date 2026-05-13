@@ -8,7 +8,19 @@
 // data-tip-fhir   — FHIR field path shown in the reference footer (optional)
 // data-tip-spec   — spec version label, e.g. "R4" (optional)
 
+const LS_KEY = 'tooltips-enabled';
+let _enabled = localStorage.getItem(LS_KEY) !== 'false';
 let _el = null;
+
+/** Returns current enabled state. */
+export function isEnabled() { return _enabled; }
+
+/** Enable or disable all rich tooltips; persists to localStorage. */
+export function setEnabled(val) {
+  _enabled = !!val;
+  localStorage.setItem(LS_KEY, _enabled ? 'true' : 'false');
+  if (!_enabled) _hide();
+}
 
 function _getEl() {
   if (!_el) {
@@ -89,6 +101,7 @@ function _position(target) {
 }
 
 function _show(target) {
+  if (!_enabled) return;
   if (!_build(target)) return;
   _getEl().style.display = 'block';
   // Position after display:block so offsetWidth/Height are available

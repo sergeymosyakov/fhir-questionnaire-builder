@@ -50,6 +50,38 @@
   border-color: #80cbc4;
 }
 .btn-fhir-export:hover { background: #b2dfdb; }
+
+/* Tooltip toggle button — distinct ON/OFF styling */
+.btn-fhir--tips-toggle {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #a5d6a7;
+  opacity: 1;
+}
+.btn-fhir--tips-toggle:hover { background: #c8e6c9; }
+.btn-fhir--tips-toggle.btn-fhir--active {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #a5d6a7;
+  opacity: 1;
+}
+.btn-fhir--tips-toggle:not(.btn-fhir--active) {
+  background: #fff3e0;
+  color: #e65100;
+  border-color: #ffcc80;
+  opacity: 1;
+}
+.btn-fhir--tips-toggle:not(.btn-fhir--active):hover { background: #ffe0b2; }
+
+/* "tooltips off" badge near Logic Builder title */
+.tips-off-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  color: #e65100;
+  vertical-align: middle;
+  margin-left: 4px;
+}
 .btn-add-root {
   display: inline-flex;
   align-items: center;

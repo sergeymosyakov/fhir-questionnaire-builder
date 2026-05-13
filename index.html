@@ -71,9 +71,13 @@
 <div class="layout" id="mainLayout">
   <div class="left-panel">
     <div class="left-panel-header">
-      <span class="section-title">Logic Builder</span>
+      <span class="section-title">Logic Builder<span id="tooltipsOffBadge" class="tips-off-badge" style="display:none">tooltips off</span></span>
       <div class="tree-toolbar">
-        <button id="addRootGroupBtn" type="button" class="btn-add-root">+ Add Root Group</button>
+        <button id="addRootGroupBtn" type="button" class="btn-add-root"
+          data-tip-title="Add Root Group"
+          data-tip-body="Creates a new top-level group at the end of the questionnaire. Groups can contain items and other nested groups."
+          data-tip-fhir="Questionnaire.item[type=group]"
+          data-tip-spec="R4 · required">+ Add Root Group</button>
         <button id="collapseAllBtn" type="button" class="btn-icon-ctrl"
           data-tip-title="Collapse all"
           data-tip-body="Hides children under every group in the builder tree. Useful for navigating large questionnaires."><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 L6 6 L2 6 M10 2 L10 6 L14 6 M14 10 L10 10 L10 14 M6 14 L6 10 L2 10"/></svg></button>
@@ -81,7 +85,11 @@
           data-tip-title="Expand all"
           data-tip-body="Shows all children under every group in the builder tree."><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10"/></svg></button>
         <span class="tree-toolbar-sep"></span>
-        <select id="renumberFormat" class="btn-tree-ctrl">
+        <select id="renumberFormat" class="btn-tree-ctrl"
+          data-tip-title="Prefix format"
+          data-tip-body="Format used by Renumber: numeric (1, 1.1), Roman numerals (I, I.I), or letters (A, A.A). Does not affect linkId — only item.prefix."
+          data-tip-fhir="Questionnaire.item.prefix"
+          data-tip-spec="R4 · optional">
           <option value="numbers">1 · 2 · 3</option>
           <option value="roman">I · II · III</option>
           <option value="letters">A · B · C</option>
@@ -129,7 +137,11 @@
       <div class="final-result" id="finalResult"></div>
       <div class="fhir-toolbar">
         <div class="load-wrap">
-          <button id="loadFhirBtn" type="button" class="btn-fhir">&#x2B06; Load &#x25BE;</button>
+          <button id="loadFhirBtn" type="button" class="btn-fhir"
+            data-tip-title="Load questionnaire"
+            data-tip-body="Open a FHIR R4 Questionnaire JSON from a file or pick one of the built-in samples. Replaces the current questionnaire (you will be asked to export first if unsaved changes exist)."
+            data-tip-fhir="Questionnaire (FHIR R4)"
+            data-tip-spec="R4">&#x2B06; Load &#x25BE;</button>
           <div class="load-menu" id="loadMenu" style="display:none">
             <div class="load-menu-item" id="loadFromFileItem">&#x1F4C2; From file…</div>
             <div class="load-menu-sep"></div>
@@ -143,7 +155,11 @@
           </div>
         </div>
         <input type="file" id="fhirFileInput" accept=".json,application/json" style="display:none">
-        <button id="exportFhirBtn" type="button" class="btn-fhir btn-fhir-export">&#x2B07; Export</button>
+        <button id="exportFhirBtn" type="button" class="btn-fhir btn-fhir-export"
+          data-tip-title="Export to FHIR JSON"
+          data-tip-body="Validates the questionnaire, then downloads a FHIR R4 Questionnaire JSON file. Simple enableWhen conditions are exported as standard FHIR; complex JS rules as custom extensions."
+          data-tip-fhir="Questionnaire (FHIR R4)"
+          data-tip-spec="R4">&#x2B07; Export</button>
         <div class="search-wrap" id="searchWrap" style="display:none">
           <input type="search" id="searchInput" class="search-input" placeholder="&#x1F50D; Search&hellip;" autocomplete="off">
           <button id="searchPrevBtn" type="button" class="search-nav-btn" title="Previous match (&#x2191;)">&#x2191;</button>
@@ -171,6 +187,11 @@
           data-tip-title="Expand all groups"
           data-tip-body="Shows all child items under every group header."
           style="display:none"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10"/></svg></button>
+        <button id="tooltipToggleBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--tips-toggle btn-fhir--active"
+          title="Toggle rich tooltips on / off"
+          data-tip-title="Rich Tooltips"
+          data-tip-body="Show contextual help cards on hover. Each button shows the corresponding FHIR field and spec reference. Click to disable."
+          data-tip-spec="on / off">tips</button>
       </div>
     </div>
     <div class="right-panel-body">
