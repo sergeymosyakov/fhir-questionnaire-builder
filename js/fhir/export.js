@@ -50,6 +50,19 @@ function nodeToFHIRItem(node) {
   if (node._codes && node._codes.length) fhirItem.code = node._codes;
   if (node.mandatory === true) fhirItem.required = true;
   else if (node.mandatory === false) fhirItem.required = false;
+  // item.initial[] — write back from _initialValue (items only, skip display/group)
+  if (node.type === 'item' && node._initialValue !== undefined && node._initialValue !== '') {
+    const t = itemTypeToFHIRType(node.itemType);
+    let initEntry;
+    if      (t === 'boolean')  initEntry = { valueBoolean:  typeof node._initialValue === 'boolean' ? node._initialValue : node._initialValue === 'true' };
+    else if (t === 'decimal')  initEntry = { valueDecimal:  parseFloat(node._initialValue) };
+    else if (t === 'integer')  initEntry = { valueInteger:  parseInt(node._initialValue, 10) };
+    else if (t === 'date')     initEntry = { valueDate:     String(node._initialValue) };
+    else if (t === 'url')      initEntry = { valueUri:      String(node._initialValue) };
+    else if (t === 'choice')   initEntry = { valueCoding:   { code: String(node._initialValue), display: String(node._initialValue) } };
+    else                       initEntry = { valueString:   String(node._initialValue) };
+    if (initEntry) fhirItem.initial = [initEntry];
+  }
   // null = not set, omit from FHIR
 
   // visibilityRule → enableWhen if possible, else custom extension

@@ -20,6 +20,7 @@
           "text": "BMI eligibility criterion",
           "type": "choice",
           "required": true,
+          "initial": [{ "valueCoding": { "code": "bmi40", "display": "BMI ≥ 40 kg/m²" } }],
           "extension": [
             {
               "url": "http://logicbuilder.example.org/extension/successValue",
@@ -108,14 +109,16 @@
           "prefix": "2.1",
           "text": "Months of documented supervised diet",
           "type": "integer",
-          "required": true
+          "required": true,
+          "initial": [{ "valueInteger": 6 }]
         },
         {
           "linkId": "q-diet-program",
           "prefix": "2.2",
           "text": "Participated in a formal weight-loss program?",
           "type": "boolean",
-          "required": true
+          "required": true,
+          "initial": [{ "valueBoolean": false }]
         },
         {
           "linkId": "q-program-name",
@@ -174,7 +177,8 @@
           "prefix": "3.1",
           "text": "Psychiatric evaluation completed?",
           "type": "boolean",
-          "required": true
+          "required": true,
+          "initial": [{ "valueBoolean": true }]
         },
         {
           "linkId": "q-phq9",

@@ -239,6 +239,7 @@ Standard extensions preserved on export:
 - **linkId / prefix toggles** — `id` (blue) and `prefix` (amber) buttons in preview toolbar toggle the corresponding pill badges; state stored in `showLinkId` / `showPrefix` refs
 - **Rich tooltips** — toolbar buttons use `data-tip-*` attributes; `js/ui/tooltip.js` renders a dark card below (or above) the target with optional FHIR spec footer; no native `title=` flicker
 - **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire imported into `questVariables[]`; collapsible card above tree shows `%name` chips; Edit modal for add/edit/delete; passed as `%varName` env vars to FHIRPath `calculatedExpression` on Test; round-trip safe
+- **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills preview on load; editable via **Default** action panel (type-aware: select/date/number/text); `× clear` link syncs preview; round-trip safe export
 - **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)
 
 ---

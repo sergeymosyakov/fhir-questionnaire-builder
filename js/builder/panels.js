@@ -4,6 +4,7 @@
 // Each panel is keyed and toggled by the action links defined in node-item/group.
 import { escAttr, parseOptions } from '../utils.js';
 import { getAllItems, buildSuccessValueUI, triggerCalcRecalc } from './_shared.js';
+import { values } from '../state.js';
 
 // ── Panel factory helper ──────────────────────────────────────────────────────
 export function addPanel(key, buildFn, div, panels) {
@@ -421,4 +422,134 @@ export function buildStylePanel(node, p, styleLink, setActive, ctx) {
   rawLbl.textContent = 'raw CSS:';
   p.appendChild(rawLbl);
   p.appendChild(rawInp);
+}
+
+// ── Default value (item.initial[]) panel ─────────────────────────────────────
+export function buildInitialPanel(node, p, initLink, setActive) {
+  const hint = document.createElement('div');
+  hint.className = 'panel-hint';
+  hint.textContent = 'Pre-filled when the form loads. User can edit unless readOnly.';
+  p.appendChild(hint);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'panel-sub-section';
+  p.appendChild(wrap);
+
+  const render = () => {
+    wrap.innerHTML = '';
+    const itype = node.itemType;
+
+    if (itype === 'display' || itype === 'attachment') {
+      const na = document.createElement('span');
+      na.className = 'panel-hint';
+      na.textContent = 'Not applicable for this item type.';
+      wrap.appendChild(na);
+      return;
+    }
+
+    // Header row: label + clear link on the right
+    const hdr = document.createElement('div');
+    hdr.className = 'panel-initial-hdr';
+    const hdrLbl = document.createElement('span');
+    hdrLbl.textContent = 'Default value:';
+    hdr.appendChild(hdrLbl);
+    const clearLink = document.createElement('a');
+    clearLink.href = '#';
+    clearLink.className = 'panel-initial-clear';
+    clearLink.textContent = '× clear';
+    clearLink.style.display = (node._initialValue !== undefined && node._initialValue !== '') ? '' : 'none';
+    clearLink.addEventListener('click', e => {
+      e.preventDefault();
+      delete node._initialValue;
+      delete values[node.id];
+      setActive(initLink, false);
+      triggerCalcRecalc();
+      render();
+    });
+    hdr.appendChild(clearLink);
+    wrap.appendChild(hdr);
+
+    let ctrl;
+    if (itype === 'checkbox') {
+      ctrl = document.createElement('select');
+      ctrl.className = 'panel-type-sel';
+      [['', '— none —'], ['true', 'Checked (Yes)'], ['false', 'Unchecked (No)']].forEach(([v, l]) => {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = l;
+        const cur = node._initialValue;
+        if ((v === '' && cur === undefined) || String(cur) === v) o.selected = true;
+        ctrl.appendChild(o);
+      });
+      ctrl.onchange = () => {
+        if (!ctrl.value) { delete node._initialValue; delete values[node.id]; }
+        else { node._initialValue = ctrl.value === 'true'; values[node.id] = node._initialValue; }
+        setActive(initLink, node._initialValue !== undefined && node._initialValue !== '');
+        clearLink.style.display = node._initialValue !== undefined ? '' : 'none';
+        triggerCalcRecalc();
+      };
+    } else if (itype === 'select' || itype === 'radio' || itype === 'open-choice') {
+      ctrl = document.createElement('select');
+      ctrl.className = 'panel-type-sel';
+      const blank = document.createElement('option'); blank.value = ''; blank.textContent = '— none —';
+      if (!node._initialValue) blank.selected = true;
+      ctrl.appendChild(blank);
+      parseOptions(node.options || '').forEach(({ code, display }) => {
+        const o = document.createElement('option'); o.value = code; o.textContent = display || code;
+        if (node._initialValue === code) o.selected = true;
+        ctrl.appendChild(o);
+      });
+      ctrl.onchange = () => {
+        node._initialValue = ctrl.value || undefined;
+        if (node._initialValue) values[node.id] = node._initialValue; else delete values[node.id];
+        setActive(initLink, !!node._initialValue);
+        clearLink.style.display = node._initialValue ? '' : 'none';
+        triggerCalcRecalc();
+      };
+    } else if (itype === 'date') {
+      ctrl = document.createElement('input');
+      ctrl.type = 'date';
+      ctrl.className = 'panel-inp-sm';
+      ctrl.value = node._initialValue || '';
+      ctrl.onchange = () => {
+        node._initialValue = ctrl.value || undefined;
+        if (node._initialValue) values[node.id] = node._initialValue; else delete values[node.id];
+        setActive(initLink, !!node._initialValue);
+        clearLink.style.display = node._initialValue ? '' : 'none';
+        triggerCalcRecalc();
+      };
+    } else if (itype === 'number' || itype === 'quantity') {
+      ctrl = document.createElement('input');
+      ctrl.type = 'number';
+      ctrl.className = 'panel-inp-sm';
+      ctrl.value = node._initialValue !== undefined ? node._initialValue : '';
+      ctrl.oninput = () => {
+        node._initialValue = ctrl.value !== '' ? ctrl.value : undefined;
+        if (node._initialValue !== undefined) values[node.id] = node._initialValue; else delete values[node.id];
+        setActive(initLink, node._initialValue !== undefined);
+        clearLink.style.display = node._initialValue !== undefined ? '' : 'none';
+        triggerCalcRecalc();
+      };
+    } else {
+      // text, url, reference, open-choice freetext fallback
+      ctrl = document.createElement('input');
+      ctrl.type = 'text';
+      ctrl.className = 'panel-inp-sm';
+      ctrl.value = node._initialValue !== undefined ? String(node._initialValue) : '';
+      ctrl.oninput = () => {
+        node._initialValue = ctrl.value || undefined;
+        if (node._initialValue) values[node.id] = node._initialValue; else delete values[node.id];
+        setActive(initLink, !!node._initialValue);
+        clearLink.style.display = node._initialValue ? '' : 'none';
+        triggerCalcRecalc();
+      };
+    }
+
+    wrap.appendChild(ctrl);
+  };
+
+  render();
+
+  // Re-render the control when itemType changes (via Type panel → typeSelect.onchange fires renderItem)
+  // We simply watch: if the panel is open and itemType differs, re-render.
+  // Since the whole node card is rebuilt on type change, this is handled automatically.
 }

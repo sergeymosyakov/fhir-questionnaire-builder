@@ -2,6 +2,14 @@
 import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, calcTested, _bulkUpdate, questVariables } from '../state.js';
 import { renderTree } from '../render-builder.js';
 
+// Walk the tree and pre-populate values[] from node._initialValue
+function applyInitialValues(nodes) {
+  for (const node of nodes) {
+    if (node._initialValue !== undefined) values[node.id] = node._initialValue;
+    if (node.type === 'group') applyInitialValues(node.children);
+  }
+}
+
 // Read our custom extension value from a FHIR item
 function extractExtension(fhirItem, key) {
   const ext = (fhirItem.extension || []).find(
@@ -139,6 +147,20 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   node._readOnly = !!fhirItem.readOnly;
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
+  // item.initial[0] → _initialValue (string; applied to values[] after tree is built)
+  if (fhirItem.initial && fhirItem.initial.length) {
+    const init = fhirItem.initial[0];
+    if      (init.valueBoolean  !== undefined) node._initialValue = init.valueBoolean;
+    else if (init.valueDecimal  !== undefined) node._initialValue = String(init.valueDecimal);
+    else if (init.valueInteger  !== undefined) node._initialValue = String(init.valueInteger);
+    else if (init.valueDate     !== undefined) node._initialValue = init.valueDate;
+    else if (init.valueDateTime !== undefined) node._initialValue = init.valueDateTime;
+    else if (init.valueTime     !== undefined) node._initialValue = init.valueTime;
+    else if (init.valueString   !== undefined) node._initialValue = init.valueString;
+    else if (init.valueUri      !== undefined) node._initialValue = init.valueUri;
+    else if (init.valueCoding)                 node._initialValue = init.valueCoding.code || init.valueCoding.display || '';
+    else if (init.valueQuantity)               node._initialValue = init.valueQuantity.value !== undefined ? String(init.valueQuantity.value) : '';
+  }
   return node;
 }
 
@@ -229,6 +251,8 @@ export function importFHIR(fhirJson, renderFn) {
   } finally {
     _bulkUpdate.value = false;
   }
+  // Pre-populate values[] from item.initial[0] on each node
+  applyInitialValues(tree);
   if (renderFn) renderFn(); else renderTree();
 }
 

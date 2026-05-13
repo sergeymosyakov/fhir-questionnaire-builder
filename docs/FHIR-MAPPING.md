@@ -208,7 +208,7 @@ The following FHIR R4 / SDC features are currently not handled. Items marked ⚠
 |---|---|---|
 | Repeating items | `item.repeats: true`, `item.maxOccurs` | ⚠️ ignored on import |
 | Answer value sets | `item.answerValueSet` | ⚠️ ignored; use `answerOption[]` |
-| Initial values | `item.initial[]` | ⚠️ ignored on import |
+| Initial values | `item.initial[]` | ✅ `initial[0]` imported → `_initialValue`; pre-fills the form on load; editable via **Default** panel in builder; exported back as `initial[{value...}]` |
 | SDC variables | `sdc-questionnaire-variable` extension | ✅ round-trip safe; collapsible card in left panel; editable via modal; evaluated as `%varName` in FHIRPath calculatedExpression |
 | SDC initial expression | `sdc-questionnaire-initialExpression` | ⚠️ ignored |
 | Questionnaire constraints | `questionnaire-constraint` extension | ⚠️ ignored |

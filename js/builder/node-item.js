@@ -2,7 +2,7 @@
 // renderItem(node, ctx: BuilderCtx) → HTMLElement  — see ctx.js
 import { findAndRemove, escAttr } from '../utils.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildMandPanel, buildCondPanel, buildTypePanel, buildExprPanel, buildStylePanel } from './panels.js';
+import { addPanel, buildVisPanel, buildMandPanel, buildCondPanel, buildTypePanel, buildExprPanel, buildStylePanel, buildInitialPanel } from './panels.js';
 
 export function renderItem(node, ctx) {
   const { renderTree } = ctx;
@@ -111,6 +111,7 @@ export function renderItem(node, ctx) {
   const visLink   = addToggle('Show When',     'vis');
   const condLink  = addToggle('Applicability', 'cond');
   const exprLink  = addToggle('Expression',    'expr');
+  const initLink  = addToggle('Default',       'init');
   const styleLink = addToggle('Appearance',    'style');
 
   const headerTop = document.createElement('div');
@@ -150,11 +151,13 @@ export function renderItem(node, ctx) {
   addPanel('vis',  p => buildVisPanel(node, p, visLink, setActive, ctx), div, panels);
   addPanel('cond', p => buildCondPanel(node, p, condLink, setActive, false), div, panels);
   addPanel('expr', p => buildExprPanel(node, p, exprLink, setActive), div, panels);
+  addPanel('init', p => buildInitialPanel(node, p, initLink, setActive), div, panels);
   addPanel('style',p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
   setActive(visLink,   !!node.visibilityRule);
   setActive(condLink,  !!node.conditionRule);
   setActive(exprLink,  !!node._calculatedExpr);
+  setActive(initLink,  node._initialValue !== undefined && node._initialValue !== '');
   setActive(styleLink, !!node._renderStyle);
   setActive(mandLink,  node.mandatory === true);
 
