@@ -57,11 +57,21 @@ function _openModal() {
 }
 
 function _closeModal() {
+  // Remove fully empty rows
+  for (let i = _vars.length - 1; i >= 0; i--) {
+    if (!_vars[i].name.trim() && !_vars[i].expression.trim()) _vars.splice(i, 1);
+  }
+  // Block close if any remaining variable has no name
+  const invalid = _vars.some(v => !v.name.trim());
+  if (invalid) {
+    _renderModalBody(true);
+    return;
+  }
   _el.modal.style.display = 'none';
   refresh();
 }
 
-function _renderModalBody() {
+function _renderModalBody(showErrors = false) {
   _el.modalBody.innerHTML = '';
 
   if (_vars.length === 0) {
@@ -72,7 +82,7 @@ function _renderModalBody() {
   }
 
   for (let i = 0; i < _vars.length; i++) {
-    _el.modalBody.appendChild(_makeRow(i));
+    _el.modalBody.appendChild(_makeRow(i, showErrors));
   }
 
   const addBtn = document.createElement('button');
@@ -86,7 +96,7 @@ function _renderModalBody() {
   _el.modalBody.appendChild(addBtn);
 }
 
-function _makeRow(index) {
+function _makeRow(index, showErrors = false) {
   const row = document.createElement('div');
   row.className = 'variables-row';
 
@@ -107,6 +117,13 @@ function _makeRow(index) {
   nameInput.spellcheck = false;
   nameInput.addEventListener('input', e => { _vars[index].name = e.target.value.replace(/\s/g, ''); });
   nameWrap.appendChild(nameInput);
+  if (showErrors && !_vars[index].name.trim()) {
+    nameInput.classList.add('variables-name-input--error');
+    const err = document.createElement('span');
+    err.className = 'variables-name-error';
+    err.textContent = 'Name is required';
+    nameWrap.appendChild(err);
+  }
   row.appendChild(nameWrap);
 
   // Expression field

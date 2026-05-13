@@ -70,6 +70,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + up/down/Enter navigation |
 | `js/ui/tooltip.js` | Rich tooltip system — delegated `mouseover` on `[data-tip-title]` / `[data-tip-body]`; positions card below (or above) target; supports `data-tip-fhir` + `data-tip-spec` FHIR footer |
+| `js/ui/autosave.js` | Background autosave — `init(buildFn)` starts 15 s interval; `getDraftMeta/getDraftData/clearDraft` API; persists to `localStorage` |
 | `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup |
 | `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all types |
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History (49 items, depth 5) |
@@ -253,6 +254,9 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Import validation** — same modal shown after loading a file/sample (mode: OK only)
 - **Empty-state placeholder** — right panel shows hint text when tree is empty; Test, Validate, Export buttons are hidden until a questionnaire is loaded
 - **Resizable panels** — drag the divider between left/right panels; width persisted in `localStorage`
+- **Autosave** — background `setInterval` (15 s) saves current questionnaire as FHIR JSON to `localStorage` (`autosave-draft` + `autosave-meta`); only saves when tree is non-empty; on next visit Load menu shows **"Recent: &lt;title&gt; (date/time)"** item at top if a draft exists; loading via Recent calls `_importAndValidate` (full render + file name set); draft cleared on Reset/Clear; implemented in `js/ui/autosave.js`
+- **Variables validation** — closing the Variables modal strips fully blank rows; if any remaining variable has expression but no name, the modal is blocked from closing and the name field is highlighted red with "Name is required" hint
+- **Copyright + GitHub in top panel** — copyright text and GitHub icon link moved from Logic Builder header into the top (patient data) panel, right-aligned via `margin-left:auto`; order: GitHub icon → copyright text
 
 ---
 

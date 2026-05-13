@@ -1,5 +1,5 @@
 // ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
-import { tree, questVariables } from '../state.js';
+import { tree, questVariables, rawFhir } from '../state.js';
 import { parseOptions } from '../utils.js';
 
 function itemTypeToFHIRType(t) {
@@ -117,12 +117,12 @@ function nodeToFHIRItem(node) {
   return fhirItem;
 }
 
-export function exportFHIR(fileName) {
+export function buildFHIRObject() {
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
   const q = {
     resourceType: 'Questionnaire',
     id:     'logic-builder-export',
-    title:  'Exported Questionnaire',
+    title:  (rawFhir.value && rawFhir.value.title) || 'Untitled Questionnaire',
     status: 'draft',
     subjectType: ['Patient'],
     date:   new Date().toISOString().split('T')[0],
@@ -135,6 +135,11 @@ export function exportFHIR(fileName) {
       valueExpression: { name: v.name, language: 'text/fhirpath', expression: v.expression }
     }));
   }
+  return q;
+}
+
+export function exportFHIR(fileName) {
+  const q = buildFHIRObject();
   const blob = new Blob([JSON.stringify(q, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);

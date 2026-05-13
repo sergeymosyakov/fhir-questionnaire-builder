@@ -2,18 +2,18 @@
 import { age, gender, bmi, pregnant, smoker, proc, comorb } from './patient.js';
 import { tree, values, rawFhir, calcTested, _formTick, effect } from './state.js';
 import { importFHIR } from './fhir/import.js';
-import { exportFHIR } from './fhir/export.js';
+import { buildFHIRObject, exportFHIR } from './fhir/export.js';
 import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/validate-modal.js';
 import * as progress from './ui/progress.js';
 import * as search from './ui/search.js';
 import * as tooltip from './ui/tooltip.js';
+import * as autosave from './ui/autosave.js';
 import * as variablesPanel from './ui/variables-panel.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { showLinkId, showPrefix, questVariables } from './state.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 import { buildQR } from './fhir/qr-builder.js';
-import { evalCalcNodes, buildVarEnv } from './fhir/calc.js';
 
 // fhirpath.js v4 browser bundle loaded as global via lib/fhirpath.min.js
 const fhirpath = window.fhirpath;
@@ -239,6 +239,7 @@ function _doReset() {
   // Re-render empty builder
   renderTree();
   _setFileName('');
+  autosave.clearDraft();
 }
 
 // Returns promise resolving to 'export' | 'clear' | 'cancel'
@@ -291,11 +292,39 @@ function _navigateToNode(nodeId) {
 }
 
 // ── Load dropdown ─────────────────────────────────────────────────────────────
-const loadMenu = document.getElementById('loadMenu');
+const loadMenu         = document.getElementById('loadMenu');
+const loadRecentItem   = document.getElementById('loadRecentItem');
+const loadRecentSep    = document.getElementById('loadRecentSep');
+
+function _syncRecentItem() {
+  const meta = autosave.getDraftMeta();
+  if (meta) {
+    const d = new Date(meta.savedAt);
+    const ts = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    loadRecentItem.textContent = '\u{1F552} Recent: ' + (meta.title || 'draft') + ' (' + ts + ')';
+    loadRecentItem.style.display = '';
+    loadRecentSep.style.display  = '';
+  } else {
+    loadRecentItem.style.display = 'none';
+    loadRecentSep.style.display  = 'none';
+  }
+}
+
 document.getElementById('loadFhirBtn').onclick = e => {
   e.stopPropagation();
+  if (loadMenu.style.display === 'none') _syncRecentItem();
   loadMenu.style.display = loadMenu.style.display === 'none' ? 'block' : 'none';
 };
+loadRecentItem.onclick = () => {
+  loadMenu.style.display = 'none';
+  const data = autosave.getDraftData();
+  if (!data) return;
+  const meta = autosave.getDraftMeta();
+  const label = (meta && meta.title) ? meta.title : 'autosave-draft';
+  progress.show('Loading recent draft…');
+  _importAndValidate(data, label);
+};
+
 document.getElementById('loadFromFileItem').onclick = () => {
   loadMenu.style.display = 'none';
   document.getElementById('fhirFileInput').click();
@@ -369,3 +398,4 @@ document.addEventListener('click', () => {
 }
 
 // Start empty — use Example button or Load FHIR JSON to load data
+autosave.init(buildFHIRObject);

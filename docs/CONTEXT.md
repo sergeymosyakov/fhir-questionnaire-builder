@@ -200,6 +200,13 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Rich tooltips on action buttons** — all builder action buttons (Answer Type, Required, Show When, Applicability, Expression, Default, Appearance), toolbar buttons (Load, Export, Add Root Group, Renumber, prefix format select, id/prefix/collapse/expand), and the Variables card title carry `data-tip-*` attributes with FHIR field path and spec reference (R4 / SDC) in the footer; implemented via delegated `mouseover` in `js/ui/tooltip.js`
 - **Tooltip toggle** — `tips` button in the preview toolbar; green = enabled (default), orange = disabled; persisted in `localStorage` (`tooltips-enabled`); **tooltips off** label shown next to Logic Builder heading when disabled
 - **Radio answer options in builder** — Answer Type panel shows the Options (comma-separated) editor for `radio` items (bug fix: was shown only for `select` and `open-choice`)
+- **Validate button** — standalone **Validate** button in the Questionnaire Preview header (next to Test); runs `validateTree()`; shows green ✅ "All good" when no issues; only visible when questionnaire is loaded
+- **Esc closes modals** — Validate modal and Variables modal both close on Escape key
+- **Ctrl+F** — intercepts browser find and focuses preview search input (when visible)
+- **Empty-state placeholder** — right panel shows hint text when tree is empty; Test, Validate, Export hidden until questionnaire is loaded
+- **Autosave** — background `setInterval` (15 s) saves FHIR JSON to `localStorage` (`autosave-draft` + `autosave-meta`); Load menu shows **"Recent: &lt;title&gt; (date/time)"** item when draft exists; loading via Recent calls `_importAndValidate`; draft cleared on Reset/Clear; `js/ui/autosave.js`
+- **Variables validation** — closing Variables modal strips blank rows; blocks close if any variable has expression but no name; highlights name field red with "Name is required"
+- **Copyright + GitHub in top panel** — copyright text and GitHub link moved to the top (patient data) panel, right-aligned; order: GitHub icon → copyright text
 - **Expandable title** — node title shown as a read-only span; click → expands to a full-width textarea (auto-height), collapses on blur
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
