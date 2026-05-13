@@ -143,6 +143,25 @@ function _promptExport(afterExport) {
   if (afterExport) afterExport();
 }
 
+// ── Validate button ──────────────────────────────────────────────────────────
+document.getElementById('validateBtn').onclick = () => {
+  const issues = validateTree(tree, values);
+  validateModal.show('Validate — Report', issues, 'import', { onNavigate: _navigateToNode });
+};
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    const searchWrap = document.getElementById('searchWrap');
+    const searchInput = document.getElementById('searchInput');
+    if (searchWrap && searchInput && searchWrap.style.display !== 'none') {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+  }
+});
+
 document.getElementById('exportFhirBtn').onclick = () => {
   const issues = validateTree(tree, values);
   if (issues.length === 0) { _promptExport(); return; }
@@ -166,7 +185,10 @@ function _setFileName(name) {
 // Show × button and variables card whenever the tree has nodes
 effect(() => {
   const hasNodes = tree.length > 0;
-  document.getElementById('variablesCard').style.display = hasNodes ? '' : 'none';
+  document.getElementById('variablesCard').style.display  = hasNodes ? '' : 'none';
+  document.getElementById('testBtn').style.display        = hasNodes ? '' : 'none';
+  document.getElementById('validateBtn').style.display    = hasNodes ? '' : 'none';
+  document.getElementById('exportFhirBtn').style.display  = hasNodes ? '' : 'none';
   if (hasNodes) {
     _fileNameWrap.style.display = 'inline-flex';
   } else {

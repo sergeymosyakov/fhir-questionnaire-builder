@@ -63,15 +63,22 @@
   <label>Comorbidities
     <input type="text" id="inp-comorb" placeholder="diabetes, hypertension" style="width:160px">
   </label>
-
-  <button id="testBtn" class="btn-test">Test</button>
-  <a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" target="_blank" rel="noopener" class="top-github-link" title="View source on GitHub"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a>
 </div>
 
 <div class="layout" id="mainLayout">
   <div class="left-panel">
     <div class="left-panel-header">
-      <span class="section-title">Logic Builder<span id="tooltipsOffBadge" class="tips-off-badge" style="display:none">tooltips off</span></span>
+      <span class="left-panel-copyright"><span>&copy; 2026 <a href="https://github.com/sergeymosyakov" target="_blank" rel="noopener">Sergey Mosyakov</a> &middot; Free to use with attribution</span> <a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" target="_blank" rel="noopener" class="left-panel-github-link" title="View source on GitHub"><svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:-1px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a></span>
+      <div class="left-panel-title-row">
+        <span class="section-title">Logic Builder<span id="tooltipsOffBadge" class="tips-off-badge" style="display:none">tooltips off</span></span>
+        <span class="left-panel-header-right">
+          <button id="tooltipToggleBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--tips-toggle btn-fhir--active"
+            title="Toggle rich tooltips on / off"
+            data-tip-title="Rich Tooltips"
+            data-tip-body="Show contextual help cards on hover. Each button shows the corresponding FHIR field and spec reference. Click to disable."
+            data-tip-spec="on / off">tips</button>
+        </span>
+      </div>
       <div class="tree-toolbar">
         <button id="addRootGroupBtn" type="button" class="btn-add-root"
           data-tip-title="Add Root Group"
@@ -129,10 +136,22 @@
           <span>Questionnaire Preview</span>
           <span id="loadedFileNameWrap" class="loaded-file-name-wrap" style="display:none">
             <span id="loadedFileName" class="loaded-file-name"></span>
-            <button id="clearFormBtn" type="button" class="clear-form-btn" title="Clear questionnaire">&times;</button>
+            <button id="clearFormBtn" type="button" class="clear-form-btn"
+              data-tip-title="Clear questionnaire"
+              data-tip-body="Removes the current questionnaire from the builder. You will be asked whether to export first."
+              title="Clear questionnaire">&times;</button>
           </span>
         </span>
-        <span class="preview-copyright">&copy; 2026 <a href="https://github.com/sergeymosyakov" target="_blank" rel="noopener">Sergey Mosyakov</a> &middot; Free to use with attribution</span>
+        <span class="preview-header-actions">
+          <button id="testBtn" class="btn-test" style="display:none"
+            data-tip-title="Test"
+            data-tip-body="Evaluates all calculatedExpression FHIRPath formulas against the current patient data and preview answers. Updates computed fields in the preview.">Test</button>
+          <button id="validateBtn" class="btn-validate" style="display:none"
+            data-tip-title="Validate questionnaire"
+            data-tip-body="Checks for FHIR R4 issues: duplicate linkIds, empty titles, missing answer options, broken JS/FHIRPath expressions. Same check runs automatically on Export."
+            data-tip-fhir="Questionnaire (FHIR R4)"
+            data-tip-spec="R4">Validate</button>
+        </span>
       </div>
       <div class="final-result" id="finalResult"></div>
       <div class="fhir-toolbar">
@@ -187,11 +206,6 @@
           data-tip-title="Expand all groups"
           data-tip-body="Shows all child items under every group header."
           style="display:none"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10"/></svg></button>
-        <button id="tooltipToggleBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--tips-toggle btn-fhir--active"
-          title="Toggle rich tooltips on / off"
-          data-tip-title="Rich Tooltips"
-          data-tip-body="Show contextual help cards on hover. Each button shows the corresponding FHIR field and spec reference. Click to disable."
-          data-tip-spec="on / off">tips</button>
       </div>
     </div>
     <div class="right-panel-body">

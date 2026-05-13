@@ -11,12 +11,13 @@ export function init(elements) {
   _el = elements;
   _el.closeBtn.addEventListener('click', _close);
   _el.backdrop.addEventListener('click', e => { if (e.target === _el.backdrop) _close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') _close(); });
 }
 
 export function show(title, issues, mode, { onExport, onNavigate } = {}) {
-  _el.headerTitle.textContent = title;
+  _el.headerTitle.textContent = issues.length === 0 ? 'Validate — All good' : title;
   _renderBody(issues, onNavigate);
-  _renderFooter(mode, onExport);
+  _renderFooter(mode, onExport, issues.length === 0);
   _el.backdrop.style.display = 'flex';
 }
 
@@ -26,6 +27,14 @@ function _close() {
 
 function _renderBody(issues, onNavigate) {
   _el.body.innerHTML = '';
+
+  if (issues.length === 0) {
+    const ok = document.createElement('div');
+    ok.className = 'validate-ok';
+    ok.innerHTML = '<span class="validate-ok-icon">✅</span> No errors or warnings found. The questionnaire looks valid.';
+    _el.body.appendChild(ok);
+    return;
+  }
 
   const errors   = issues.filter(i => i.severity === 'error');
   const warnings = issues.filter(i => i.severity === 'warning');
@@ -75,8 +84,18 @@ function _renderBody(issues, onNavigate) {
   }
 }
 
-function _renderFooter(mode, onExport) {
+function _renderFooter(mode, onExport, allGood = false) {
   _el.footer.innerHTML = '';
+
+  if (allGood) {
+    const okBtn = document.createElement('button');
+    okBtn.type = 'button';
+    okBtn.className = 'btn-fhir btn-fhir-export';
+    okBtn.textContent = 'Great!';
+    okBtn.addEventListener('click', _close);
+    _el.footer.appendChild(okBtn);
+    return;
+  }
 
   if (mode === 'export') {
     const fixBtn = document.createElement('button');

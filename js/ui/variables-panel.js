@@ -15,6 +15,7 @@ export function init(elements, variablesArray) {
   _el.editBtn.addEventListener('click', _openModal);
   _el.closeBtn.addEventListener('click', _closeModal);
   _el.modal.addEventListener('click', e => { if (e.target === _el.modal) _closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && _el.modal.style.display !== 'none') _closeModal(); });
 
   refresh();
 }

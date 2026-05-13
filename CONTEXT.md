@@ -247,8 +247,11 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Tooltip toggle** — `tips` button in the preview toolbar; green when enabled (default), orange when disabled; state persisted in `localStorage` (`tooltips-enabled`); a plain orange **tooltips off** label appears next to the Logic Builder heading when disabled
 - **Radio answer options in builder** — Answer Type panel now shows the Options (comma-separated) editor for `radio` items (previously only shown for `select` and `open-choice`)
 - **Export validation** — on Export: `validateTree()` runs; if issues found → modal with error/warning list, ↗ navigate-to-node button per issue, "Fix first" / "Export anyway" actions
+- **Validate button** — standalone **Validate** button in the Questionnaire Preview header (next to Test); runs same `validateTree()` check; shows green ✅ "All good" state when no issues; only visible when questionnaire is loaded
+- **Esc closes modals** — Validate modal and Variables modal both close on Escape key
+- **Ctrl+F** — intercepts browser find and focuses the preview search input (when search is visible)
 - **Import validation** — same modal shown after loading a file/sample (mode: OK only)
-- **Empty-state placeholder** — right panel shows hint text when tree is empty
+- **Empty-state placeholder** — right panel shows hint text when tree is empty; Test, Validate, Export buttons are hidden until a questionnaire is loaded
 - **Resizable panels** — drag the divider between left/right panels; width persisted in `localStorage`
 
 ---

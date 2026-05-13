@@ -231,8 +231,11 @@ Standard extensions preserved on export:
 - **Search in preview** — 🔍 search box in the preview toolbar (after Export button); type to highlight matching rows (yellow), `↑`/`↓` buttons or keyboard arrows or **Enter** to navigate between matches; shows `2 / 5` counter; red border + "No results" when nothing found; Escape clears; hidden when tree is empty
 - **File attachments** — `attachment` item type renders as styled **Choose file** button; `required:true` requires a file to be chosen
 - **Export validation** — on Export: `validateTree()` runs; modal lists errors/warnings with ↗ navigate-to-node per issue; "Fix first" / "Export anyway"
+- **Validate button** — standalone **Validate** in Questionnaire Preview header; same check as export; green ✅ panel when no issues found; hidden when no questionnaire loaded
+- **Esc closes modals** — Validate and Variables modals close on Escape
+- **Ctrl+F** — focuses the preview search input instead of browser find (when search is visible)
 - **Import validation** — same modal shown after loading a file/sample (OK-only mode)
-- **Empty-state placeholder** — right panel shows hint text when no questionnaire is loaded
+- **Empty-state placeholder** — right panel shows hint text when no questionnaire is loaded; Test, Validate, Export buttons are hidden until a questionnaire is loaded
 - **Date picker / URL input** — `date` renders as native date-picker; `url` validates format with `new URL()`
 - **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; no startup auto-load (empty-state placeholder shown instead)
 - **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported into `node._prefix` and exported back (round-trip safe); amber pill badge in preview; editable in builder meta-row; **Renumber** assigns sequential prefixes (e.g. `1`, `1.1`) — writes `_prefix` only, never changes `node.id`
