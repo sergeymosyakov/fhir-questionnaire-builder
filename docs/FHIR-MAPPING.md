@@ -191,3 +191,25 @@ Always stored as custom extension:
 | FHIR `quantity` unit | Yes | Mapped to `number`, unit discarded |
 | `open-choice` free-text option | Yes | Rendered as plain `select` |
 | Multiple `enableWhen` conditions | Partial | Imported as `&&`-joined JS; re-exported as single `enableWhen` entry if simple, else as extension |
+
+---
+
+## Not Supported (Out of Scope)
+
+The following FHIR R4 / SDC features are currently not handled. Items marked ⚠️ produce silent data loss on import.
+
+| Feature | FHIR field / extension | Status |
+|---|---|---|
+| Repeating items | `item.repeats: true`, `item.maxOccurs` | ⚠️ ignored on import |
+| Answer value sets | `item.answerValueSet` | ⚠️ ignored; use `answerOption[]` |
+| Initial values | `item.initial[]` | ⚠️ ignored on import |
+| SDC variables | `sdc-questionnaire-variable` extension | ⚠️ ignored |
+| SDC initial expression | `sdc-questionnaire-initialExpression` | ⚠️ ignored |
+| Questionnaire constraints | `questionnaire-constraint` extension | ⚠️ ignored |
+| Item prefix | `item.prefix` (e.g. `"1.1"`) | ⚠️ ignored |
+| Item codes | `item.code[]` | ⚠️ ignored |
+| `contained` resources | `Questionnaire.contained[]` | ⚠️ ignored |
+| Multiple `enableWhen` on items with `enableBehavior` | `item.enableBehavior` | Partial: imported as `&&`-joined JS; re-exported as extension |
+| `open-choice` free-text input | `type: 'open-choice'` | ⚠️ rendered as plain `select`; free-text entry not supported |
+| Resource reference resolution | `type: 'reference'` | ⚠️ fallback to text input; no resource search |
+| FHIR versions other than R4 | STU3, R5 | Not tested; may partially work |

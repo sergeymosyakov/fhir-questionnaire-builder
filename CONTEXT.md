@@ -18,6 +18,27 @@ Allows visually building questionnaire logic, testing it against patient data, a
 
 ---
 
+## Product Direction
+
+**Target audience:** Developers and FHIR integration engineers who build, inspect, or maintain logic-heavy questionnaires in FHIR R4 format.
+
+This is a **Variant B** tool — it surfaces FHIR concepts directly (linkId, enableWhen, extensions, FHIRPath) rather than hiding them behind simplified UX. It is not designed for direct use by clinicians without training.
+
+### Key Scenarios
+
+These three scenarios act as a feature filter: new functionality is considered only if it directly supports at least one of them.
+
+**Scenario 1 — Edit & round-trip**  
+Import an existing FHIR R4 `Questionnaire`, adjust visibility/applicability logic using the visual builder, then export the modified questionnaire back to FHIR JSON. Primary workflow for integration projects.
+
+**Scenario 2 — Build from scratch**  
+Assemble a new questionnaire (e.g., bariatric surgery pre-authorization) from scratch using the builder, test it against patient profiles, and export validated FHIR JSON.
+
+**Scenario 3 — Logic testing**  
+Load any FHIR questionnaire and simulate different patient profiles in the patient-data panel. Instantly see which items are visible, which are N/A, and whether the questionnaire resolves to PASS or FAIL.
+
+---
+
 ## Files
 
 | File | Purpose |
@@ -53,6 +74,8 @@ Allows visually building questionnaire logic, testing it against patient data, a
 | `sampledata/prowl-ss.fhir.json` | PROWL-SS post-op pain assessment (44 items) |
 | `sampledata/phq-9.fhir.json` | PHQ-9 depression screening (11 items) |
 | `sampledata/1776102565767-...json` | Real-world questionnaire snapshot for regression testing |
+| `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
+| `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
 
 ---
 

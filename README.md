@@ -45,6 +45,9 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `sampledata/prowl-ss.fhir.json` | PROWL-SS Post-Operative pain assessment — 44 items |
 | `sampledata/phq-9.fhir.json` | PHQ-9 Patient Health Questionnaire (depression screening) — 11 items |
 | `sampledata/1776102565767-...json` | Real-world questionnaire snapshot for regression testing |
+| `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
+| `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
+| `docs/CONTEXT.md` | Internal architecture notes (product direction, scenarios, data flow) |
 
 ---
 
@@ -251,3 +254,4 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 - Multi-condition visibility (`&&`, `||`) not supported in the visual builder — must be written manually as JS
 - `conditionRule` on items is not exported to standard FHIR (prototype-specific concept with no direct R4 equivalent)
+- Full list of unsupported FHIR features (repeating items, answerValueSet, initial values, SDC variables, etc.) → [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md#not-supported-out-of-scope)
