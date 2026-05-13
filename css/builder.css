@@ -279,6 +279,20 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
 .lbl-item  { background: var(--c-teal-lt);    color: var(--c-teal); }
 .lbl-info  { background: #f0f0f0;             color: #888; }
 
+.node-nav-btn {
+  padding: 0 4px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--c-text-2);
+  cursor: pointer;
+  opacity: .45;
+  flex-shrink: 0;
+  transition: opacity .15s, color .15s;
+}
+.node-nav-btn:hover { opacity: 1; color: var(--c-primary); }
+
 /* === meta row: prefix + id labels =========================================== */
 .node-meta-row {
   display: flex;

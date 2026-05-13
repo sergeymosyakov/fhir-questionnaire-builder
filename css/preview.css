@@ -181,7 +181,7 @@
   border-radius: 20px;
   padding: 1px 8px;
   flex-shrink: 0;
-  cursor: help;
+  cursor: pointer;
   white-space: nowrap;
   transition: background .15s;
 }

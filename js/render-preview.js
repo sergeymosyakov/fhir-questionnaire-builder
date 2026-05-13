@@ -241,7 +241,28 @@ effect(() => {
     const idTag = document.createElement('span');
     idTag.className = 'preview-linkid';
     idTag.textContent = res.node.id;
-    idTag.title = 'FHIR linkId \u2014 use as: values[\'' + res.node.id + '\']';
+    const _it = res.node.itemType;
+    const _valExample = _it === 'checkbox' ? 'true / false'
+      : _it === 'number'   ? '42'
+      : _it === 'date'     ? '"2024-01-15"'
+      : _it === 'select' || _it === 'radio' || _it === 'open-choice' ? '"option-code"'
+      : _it === 'quantity' ? '{ value: 70, unit: "kg" }'
+      : '"text value"';
+    idTag.dataset.tipTitle = 'linkId: ' + res.node.id;
+    idTag.dataset.tipBody  =
+      'In visibility rules:  values[\'' + res.node.id + '\']\n' +
+      'Expected value:  ' + _valExample +
+      (_it ? '\nItem type:  ' + _it : '') +
+      '\nClick to copy linkId to clipboard.';
+    idTag.dataset.tipFhir = 'Questionnaire.item.linkId';
+    idTag.dataset.tipSpec  = 'R4';
+    idTag.style.cursor = 'pointer';
+    idTag.addEventListener('click', e => {
+      e.stopPropagation();
+      navigator.clipboard.writeText(res.node.id).catch(() => {});
+      idTag.textContent = '✓ copied';
+      setTimeout(() => { idTag.textContent = res.node.id; }, 1200);
+    });
     if (showLinkId.value) row.appendChild(idTag);
 
     if (res.node._prefix && showPrefix.value) {

@@ -206,7 +206,7 @@ Standard extensions preserved on export:
 
 ## UX Features
 
-- **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue)
+- **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue); `↗` button on every builder node header provides explicit one-click navigation to the preview row
 - **Drag & drop reorder** — ⠿ handle on every node; drag to reorder within the tree, drop between nodes, drop into a group, or drop at root level; drop zones appear only during drag (height 0 → 28px, labeled contextually: "Drop here to add as first child", "Drop here", "Drop here to add as last child", "Drop here to move to end") — no layout shift
 - **Resizable panels** — drag the divider between Logic Builder and Preview to resize; width persisted in `localStorage`
 - **Clear questionnaire** — `×` button next to the loaded file name; if tree is non-empty shows a modal asking to export first (Export first / Clear anyway / Cancel)
@@ -240,7 +240,7 @@ Standard extensions preserved on export:
 - **Date picker / URL input** — `date` renders as native date-picker; `url` validates format with `new URL()`
 - **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; no startup auto-load (empty-state placeholder shown instead)
 - **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported into `node._prefix` and exported back (round-trip safe); amber pill badge in preview; editable in builder meta-row; **Renumber** assigns sequential prefixes (e.g. `1`, `1.1`) — writes `_prefix` only, never changes `node.id`
-- **linkId / prefix toggles** — `id` (blue) and `prefix` (amber) buttons in preview toolbar toggle the corresponding pill badges; state stored in `showLinkId` / `showPrefix` refs
+- **linkId / prefix toggles** — `id` (blue) and `prefix` (amber) buttons in preview toolbar toggle the corresponding pill badges; state stored in `showLinkId` / `showPrefix` refs; clicking a linkId badge copies the linkId to clipboard; rich tooltip shows visibility-rule usage + expected value type + item type
 - **Rich tooltips** — all builder action buttons, toolbar buttons (Load, Export, Add Root Group, Renumber, format select, id/prefix/collapse/expand), and the Variables card title show contextual help cards with FHIR field path and spec reference (R4 / SDC); `js/ui/tooltip.js` uses delegated `mouseover`; dark card positions below or above target
 - **Tooltip toggle** — `tips` button in the preview toolbar toggles all rich tooltips on/off; green when on (default), orange when off; state persisted in `localStorage`; **tooltips off** label appears next to Logic Builder heading when disabled
 - **Radio answer options** — Answer Type panel shows the Options (comma-separated) editor when `radio` is selected (same as `select` / `open-choice`)
