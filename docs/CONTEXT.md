@@ -66,6 +66,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
 | `tests/validate.test.js` | Unit tests for `js/fhir/validate.js` — `validateTree` (21 tests) |
 | `tests/export.test.js` | Unit tests for `js/fhir/export.js` — `buildFHIRObject` (25 tests) |
+| `tests/import.test.js` | Unit tests for `js/fhir/import.js` — `fhirTypeToItemType`, `fhirOptsToStr`, `enableWhenToExpr` (42 tests) |
+| `tests/qr-builder.test.js` | Unit tests for `js/fhir/qr-builder.js` — `buildQR`, `buildQRItem` (23 tests) |
 | `.github/workflows/test.yml` | GitHub Actions CI — runs `npm test` on every push/PR to main |
 
 ---
@@ -77,7 +79,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
 - **`new Function()`** — sandboxed rule evaluation (`evalRule`)
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`); 95 tests; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`); 160 tests; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---

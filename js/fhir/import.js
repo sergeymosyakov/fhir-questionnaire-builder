@@ -213,6 +213,9 @@ function fhirItemToNode(fhirItem, linkIdMap) {
   return fhirQuestionToItem(fhirItem, linkIdMap);
 }
 
+// Exported for unit testing
+export { enableWhenToExpr, fhirTypeToItemType, fhirOptsToStr };
+
 // Main import entry point
 export function importFHIR(fhirJson, renderFn) {
   let q = fhirJson;
