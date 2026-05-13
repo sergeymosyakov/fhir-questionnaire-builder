@@ -231,7 +231,7 @@ Standard extensions preserved on export:
 - **Empty-state placeholder** — right panel shows hint text when no questionnaire is loaded
 - **Date picker / URL input** — `date` renders as native date-picker; `url` validates format with `new URL()`
 - **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; no startup auto-load (empty-state placeholder shown instead)
-- **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported into `node._prefix`; amber pill badge in preview; editable in builder meta-row; **Renumber** assigns sequential prefixes (e.g. `1`, `1.1`) — writes `_prefix` only, never changes `node.id`
+- **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported into `node._prefix` and exported back (round-trip safe); amber pill badge in preview; editable in builder meta-row; **Renumber** assigns sequential prefixes (e.g. `1`, `1.1`) — writes `_prefix` only, never changes `node.id`
 - **linkId / prefix toggles** — `id` (blue) and `prefix` (amber) buttons in preview toolbar toggle the corresponding pill badges; state stored in `showLinkId` / `showPrefix` refs
 - **Rich tooltips** — toolbar buttons use `data-tip-*` attributes; `js/ui/tooltip.js` renders a dark card below (or above) the target with optional FHIR spec footer; no native `title=` flicker
 - **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)

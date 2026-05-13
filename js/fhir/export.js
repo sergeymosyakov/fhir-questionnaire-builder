@@ -46,6 +46,7 @@ function nodeToFHIRItem(node) {
     text:   node.title,
     type:   node.type === 'group' ? 'group' : itemTypeToFHIRType(node.itemType)
   };
+  if (node._prefix) fhirItem.prefix = node._prefix;
   if (node.mandatory === true) fhirItem.required = true;
   else if (node.mandatory === false) fhirItem.required = false;
   // null = not set, omit from FHIR

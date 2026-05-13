@@ -21,7 +21,7 @@ See [docs/CONTEXT.md](docs/CONTEXT.md) for scenario definitions.
 ## Later
 
 - [ ] Unit tests for `eval.js` and `fhir/import.js` (no DOM; plain Node.js runner)
-- [ ] `item.prefix` support (numbered questions, e.g. `"1.1"`)
+- [x] `item.prefix` support (numbered questions, e.g. `"1.1"`)
 - [ ] Repeating items (`item.repeats: true` / `maxOccurs`)
 - [ ] SDC `variable` and `initialExpression` extension support
 - [ ] FHIR STU3 import compatibility shim
