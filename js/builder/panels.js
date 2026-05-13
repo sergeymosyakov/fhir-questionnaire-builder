@@ -198,7 +198,7 @@ export function buildTypePanel(node, p) {
 
   const optionsDiv = document.createElement('div');
   optionsDiv.className = 'panel-sub-section';
-  optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice') ? 'block' : 'none';
+  optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice' || node.itemType === 'radio') ? 'block' : 'none';
   optionsDiv.innerHTML = 'Options (comma-separated):<br>'
     + '<input type="text" value="' + escAttr(node.options) + '">';
   optionsDiv.querySelector('input').oninput = function () { node.options = this.value; };
@@ -296,7 +296,7 @@ export function buildTypePanel(node, p) {
 
   typeSelect.onchange = () => {
     node.itemType = typeSelect.value;
-    optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice') ? 'block' : 'none';
+    optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice' || node.itemType === 'radio') ? 'block' : 'none';
     refResDiv.style.display  = node.itemType === 'reference' ? 'block' : 'none';
     qUnitDiv.style.display   = node.itemType === 'quantity'  ? 'block' : 'none';
     buildSuccessValueUI(node, successDiv);

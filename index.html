@@ -99,7 +99,11 @@
         <button id="variablesCardToggle" type="button" class="variables-card-toggle" aria-expanded="true" title="Collapse / expand">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
         </button>
-        <span class="variables-card-title">Variables</span>
+        <span class="variables-card-title"
+          data-tip-title="Questionnaire Variables"
+          data-tip-body="SDC questionnaire-level FHIRPath variables. Defined once at the root and referenced as %varName inside any calculatedExpression. Imported and exported as sdc-questionnaire-variable extensions."
+          data-tip-fhir="Questionnaire.extension[sdc-questionnaire-variable]"
+          data-tip-spec="SDC · optional">Variables</span>
         <span id="variablesCardCount" class="variables-card-count"></span>
         <button id="variablesEditBtn" type="button" class="variables-edit-btn">Edit</button>
       </div>

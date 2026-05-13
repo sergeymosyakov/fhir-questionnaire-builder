@@ -93,10 +93,14 @@ export function renderItem(node, ctx) {
   const panels = {};
   let openKey = null;
 
-  const addToggle = (label, key) => {
+  const addToggle = (label, key, tipTitle, tipBody, tipFhir, tipSpec) => {
     const a = document.createElement('a');
     a.textContent = label;
     a.className = 'action-edit';
+    if (tipTitle) a.dataset.tipTitle = tipTitle;
+    if (tipBody)  a.dataset.tipBody  = tipBody;
+    if (tipFhir)  a.dataset.tipFhir  = tipFhir;
+    if (tipSpec)  a.dataset.tipSpec  = tipSpec;
     a.onclick = () => {
       openKey = openKey === key ? null : key;
       for (const k of Object.keys(panels)) panels[k].style.display = openKey === k ? 'block' : 'none';
@@ -106,13 +110,34 @@ export function renderItem(node, ctx) {
   };
   const setActive = (el, active) => el.classList.toggle('action-edit--active', active);
 
-  const typeLink  = addToggle('Answer Type', 'type');
-  const mandLink  = addToggle('Required',      'mand');
-  const visLink   = addToggle('Show When',     'vis');
-  const condLink  = addToggle('Applicability', 'cond');
-  const exprLink  = addToggle('Expression',    'expr');
-  const initLink  = addToggle('Default',       'init');
-  const styleLink = addToggle('Appearance',    'style');
+  const typeLink  = addToggle('Answer Type', 'type',
+    'Answer Type',
+    'Sets the FHIR item type (boolean, decimal, string, choice, date, url, attachment, reference, quantity, display). Controls which input control is rendered in the preview.',
+    'Questionnaire.item.type', 'R4 · required');
+  const mandLink  = addToggle('Required', 'mand',
+    'Required',
+    'Whether the item must be answered. Required items show ✔/✘ validation in the preview and affect the final PASS/FAIL result.',
+    'Questionnaire.item.required', 'R4 · optional');
+  const visLink   = addToggle('Show When', 'vis',
+    'Show When (enableWhen)',
+    'Visibility condition — a JS expression or visual builder rule. Simple patterns export as standard FHIR enableWhen[]; complex JS exports as a custom extension. When false the item is hidden (or dimmed 🔒 if imported from enableWhen).',
+    'Questionnaire.item.enableWhen[]', 'R4 · optional');
+  const condLink  = addToggle('Applicability', 'cond',
+    'Applicability (conditionRule)',
+    'Custom condition for N/A state. When false the item/group is grayed out and excluded from the final result. Not a standard FHIR field — stored as a custom extension on export.',
+    'extension[conditionRule]', 'Custom extension');
+  const exprLink  = addToggle('Expression', 'expr',
+    'Calculated Expression',
+    'SDC FHIRPath expression evaluated when Test is clicked. Result is written into the answer field. Typically used with readOnly items. Supports questionnaire-level %variables.',
+    'sdc-questionnaire-calculatedExpression', 'SDC · optional');
+  const initLink  = addToggle('Default', 'init',
+    'Default Value (initial)',
+    'Pre-fills the answer when the form loads. The user can change it unless readOnly is set. Only the first entry (initial[0]) is used. Supports all item types.',
+    'Questionnaire.item.initial[]', 'R4 · optional');
+  const styleLink = addToggle('Appearance', 'style',
+    'Appearance (rendering-style)',
+    'Inline CSS applied to the item title in the preview. Supports bold, italic, text colour, and raw CSS. Stored in the standard FHIR rendering-style extension on the _text element.',
+    'Questionnaire.item._text.extension[rendering-style]', 'R4 · optional');
 
   const headerTop = document.createElement('div');
   headerTop.className = 'node-header-top';

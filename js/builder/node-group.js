@@ -114,10 +114,14 @@ export function renderGroup(node, ctx) {
   const panels = {};
   let openKey = null;
 
-  const addToggle = (label, key) => {
+  const addToggle = (label, key, tipTitle, tipBody, tipFhir, tipSpec) => {
     const a = document.createElement('a');
     a.textContent = label;
     a.className = 'action-edit';
+    if (tipTitle) a.dataset.tipTitle = tipTitle;
+    if (tipBody)  a.dataset.tipBody  = tipBody;
+    if (tipFhir)  a.dataset.tipFhir  = tipFhir;
+    if (tipSpec)  a.dataset.tipSpec  = tipSpec;
     a.onclick = () => {
       openKey = openKey === key ? null : key;
       for (const k of Object.keys(panels)) panels[k].style.display = openKey === k ? 'block' : 'none';
@@ -127,11 +131,26 @@ export function renderGroup(node, ctx) {
   };
   const setActive = (el, active) => el.classList.toggle('action-edit--active', active);
 
-  const mandLink  = addToggle('Required',      'mand');
-  const visLink   = addToggle('Show When',     'vis');
-  const condLink  = addToggle('Applicability', 'cond');
-  const exprLink  = addToggle('Expression',    'expr');
-  const styleLink = addToggle('Appearance',    'style');
+  const mandLink  = addToggle('Required', 'mand',
+    'Required',
+    'Whether all items in this group must be answered. Required groups show ✔/✘ and affect the final PASS/FAIL result.',
+    'Questionnaire.item.required', 'R4 · optional');
+  const visLink   = addToggle('Show When', 'vis',
+    'Show When (enableWhen)',
+    'Visibility condition for the entire group. Simple patterns export as standard FHIR enableWhen[]; complex JS exports as a custom extension.',
+    'Questionnaire.item.enableWhen[]', 'R4 · optional');
+  const condLink  = addToggle('Applicability', 'cond',
+    'Applicability (conditionRule)',
+    'Custom N/A condition for the group. When false the whole group is grayed out and excluded from the final result. Not a standard FHIR field — stored as a custom extension.',
+    'extension[conditionRule]', 'Custom extension');
+  const exprLink  = addToggle('Expression', 'expr',
+    'Calculated Expression',
+    'SDC FHIRPath calculatedExpression on this group item. Evaluated on Test click. Supports questionnaire-level %variables.',
+    'sdc-questionnaire-calculatedExpression', 'SDC · optional');
+  const styleLink = addToggle('Appearance', 'style',
+    'Appearance (rendering-style)',
+    'Inline CSS applied to the group title in the preview. Stored in the standard FHIR rendering-style extension on the _text element.',
+    'Questionnaire.item._text.extension[rendering-style]', 'R4 · optional');
 
   // ⊕ Add ▾ dropdown
   const addWrap = document.createElement('div');
