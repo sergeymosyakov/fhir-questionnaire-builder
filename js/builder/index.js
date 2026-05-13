@@ -1,5 +1,5 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
-import { tree, makeGroup, _formTick, rawFhir, calcTested, values, _bulkUpdate } from '../state.js';
+import { tree, makeGroup, _formTick, rawFhir, values, _bulkUpdate } from '../state.js';
 import { init as sharedInit, formatSeg } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { renderItem } from './node-item.js';
@@ -9,7 +9,7 @@ import { renderGroup } from './node-group.js';
 const collapsed = new Map();
 
 // Inject reactive state into _shared (triggerCalcRecalc needs them)
-sharedInit({ tree, formTick: _formTick, rawFhir, calcTested, values });
+sharedInit({ tree, formTick: _formTick, rawFhir, values });
 
 /**
  * @typedef {Object} BuilderCtx

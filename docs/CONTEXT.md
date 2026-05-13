@@ -222,7 +222,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
 - **required text/number** — `required:true` on text/number items means non-empty; shows ✔/✘ icon and affects PASS/FAIL
 - **select / radio controls** — no longer auto-fill the first option on render; mandatory fields start empty (`— select —` placeholder for select, no pre-check for radio) so PASS/FAIL is accurate on initial load
-- **text / number / date controls** — now call `_reCalc()` + `_formTick.value++` on every input change so FHIRPath calculatedExpression nodes (e.g. BMI) update live without a Test button
+- **text / number / date / url / attachment / quantity / reference controls** — all call `_reCalc()` + `_formTick.value++` on every change so FHIRPath calculatedExpression nodes update live
 
 ---
 

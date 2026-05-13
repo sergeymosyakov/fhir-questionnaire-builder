@@ -1,7 +1,7 @@
 import { createWrap } from './_base.js';
 
 export function build(node, ctx) {
-  const { values, onChange } = ctx;
+  const { values, onChange, _reCalc, _formTick } = ctx;
   const wrap = createWrap();
 
   const el = document.createElement('input');
@@ -22,7 +22,7 @@ export function build(node, ctx) {
     const file = el.files[0] || null;
     values[node.id] = file ? { name: file.name, size: file.size, type: file.type } : null;
     nameTag.textContent = file ? file.name : 'No file chosen';
-    onChange();
+    _reCalc(); onChange(); _formTick.value++;
   };
 
   wrap.appendChild(el);

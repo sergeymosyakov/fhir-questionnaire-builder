@@ -25,8 +25,8 @@ export function formatSeg(n) {
 }
 
 export function triggerCalcRecalc() {
-  const { tree, formTick, rawFhir, calcTested, values } = _deps;
-  if (calcTested.value && rawFhir.value && fhirpath) {
+  const { tree, formTick, rawFhir, values } = _deps;
+  if (rawFhir.value && fhirpath) {
     const qr = buildQR(JSON.parse(JSON.stringify(rawFhir.value)), values);
     evalCalcNodes(tree, qr, fhirpath, values);
   }

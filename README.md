@@ -97,7 +97,7 @@ age, gender, bmi, pregnant, smoker, proc, comorb  // ref() — patient fields
 tree          // reactive([]) — questionnaire node tree
 values        // plain object — form answers (not reactive; avoids re-render on every keystroke)
 _formTick     // ref(0) — incremented on checkbox/select change to re-trigger effect()
-calcTested    // ref(false) — REMOVED; calculatedExpression now evaluated automatically on every effect() run
+calcTested    // REMOVED — calculatedExpression evaluated automatically on every effect() run
 autoFilledIds // Set — IDs of items auto-filled from conditionRule
 ```
 

@@ -35,7 +35,7 @@ const FHIR_R4_RESOURCES = [
 // Stores { reference: "ResourceType/id" } in values[node.id].
 // If node.referenceResource is set, the dropdown is pre-selected and locked.
 export function build(node, ctx) {
-  const { values, onChange } = ctx;
+  const { values, onChange, _reCalc, _formTick } = ctx;
   const wrap = createWrap();
   wrap.classList.add('ctrl-wrap--joined');
 
@@ -91,7 +91,7 @@ export function build(node, ctx) {
     const id   = idInput.value.trim();
     errMsg.style.display = (type && !id) ? 'inline' : 'none';
     values[node.id] = (type && id) ? { reference: type + '/' + id } : undefined;
-    onChange();
+    _reCalc(); onChange(); _formTick.value++;
   };
 
   sel.oninput    = update;

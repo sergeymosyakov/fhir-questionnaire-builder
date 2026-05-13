@@ -1,5 +1,5 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
-import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, calcTested, _bulkUpdate, questVariables } from '../state.js';
+import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables } from '../state.js';
 import { renderTree } from '../render-builder.js';
 
 // Walk the tree and pre-populate values[] from node._initialValue
@@ -226,7 +226,6 @@ export function importFHIR(fhirJson, renderFn) {
   tree.splice(0);
   Object.keys(values).forEach(k => delete values[k]);
   rawFhir.value = q;
-  calcTested.value = false;
   resetSeq();
   // Read questionnaire-level SDC variables
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';

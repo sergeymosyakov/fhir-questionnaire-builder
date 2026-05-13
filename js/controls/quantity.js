@@ -61,7 +61,7 @@ const QUANTITY_UNITS = [
 // Stores { value: number, unit: string } in values[node.id].
 // node.quantityUnit — default pre-selected unit (set in builder Type panel).
 export function build(node, ctx) {
-  const { values, onChange } = ctx;
+  const { values, onChange, _reCalc, _formTick } = ctx;
   const wrap = createWrap();
 
   // Restore previous value
@@ -123,7 +123,7 @@ export function build(node, ctx) {
     }
 
     values[node.id] = (hasVal && hasUnit) ? { value: vNum, unit: u } : undefined;
-    onChange();
+    _reCalc(); onChange(); _formTick.value++;
   };
 
   numInput.oninput = update;

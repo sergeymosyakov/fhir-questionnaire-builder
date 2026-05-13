@@ -35,8 +35,6 @@ export const rawFhir = ref(null);
 // Questionnaire-level SDC variables: [{name, expression}]
 // Populated from sdc-questionnaire-variable extensions on import.
 export const questVariables = reactive([]);
-// True after Test button clicked, reset on any form value change.
-export const calcTested = ref(false);
 
 // Item types that have form-value validation logic in the preview.
 // CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
