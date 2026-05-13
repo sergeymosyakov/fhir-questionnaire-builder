@@ -80,6 +80,14 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `sampledata/1776102565767-...json` | Real-world questionnaire snapshot for regression testing |
 | `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
 | `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
+| `package.json` | Node dev tooling — Vitest test runner (`npm test`) |
+| `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
+| `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
+| `tests/eval.test.js` | Unit tests for `evalRule` logic and `js/eval.js` (16 tests) |
+| `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
+| `tests/validate.test.js` | Unit tests for `js/fhir/validate.js` — `validateTree` (21 tests) |
+| `tests/export.test.js` | Unit tests for `js/fhir/export.js` — `buildFHIRObject` (25 tests) |
+| `.github/workflows/test.yml` | GitHub Actions CI — runs `npm test` on every push/PR to main |
 
 ---
 
@@ -92,6 +100,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **`new Function()`** — sandboxed rule evaluation (`evalRule`)
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
 - **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`); 95 tests; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---
