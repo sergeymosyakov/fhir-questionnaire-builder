@@ -96,7 +96,7 @@ age, gender, bmi, pregnant, smoker, proc, comorb  // ref() — patient fields
 tree          // reactive([]) — questionnaire node tree
 values        // plain object — form answers (not reactive; avoids re-render on every keystroke)
 _formTick     // ref(0) — incremented on checkbox/select change to re-trigger effect()
-calcTested    // ref(false) — true after Test button clicked; enables calculatedExpression evaluation
+calcTested    // ref(false) — REMOVED; calculatedExpression now evaluated automatically on every effect() run
 autoFilledIds // Set — IDs of items auto-filled from conditionRule
 ```
 
@@ -236,7 +236,7 @@ Standard extensions preserved on export:
 - **Esc closes modals** — Validate and Variables modals close on Escape
 - **Ctrl+F** — focuses the preview search input instead of browser find (when search is visible)
 - **Import validation** — same modal shown after loading a file/sample (OK-only mode)
-- **Empty-state placeholder** — right panel shows hint text when no questionnaire is loaded; Test, Validate, Export buttons are hidden until a questionnaire is loaded
+- **Empty-state placeholder** — right panel shows hint text when no questionnaire is loaded; Validate, Export buttons are hidden until a questionnaire is loaded
 - **Date picker / URL input** — `date` renders as native date-picker; `url` validates format with `new URL()`
 - **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; no startup auto-load (empty-state placeholder shown instead)
 - **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported into `node._prefix` and exported back (round-trip safe); amber pill badge in preview; editable in builder meta-row; **Renumber** assigns sequential prefixes (e.g. `1`, `1.1`) — writes `_prefix` only, never changes `node.id`
@@ -244,7 +244,8 @@ Standard extensions preserved on export:
 - **Rich tooltips** — all builder action buttons, toolbar buttons (Load, Export, Add Root Group, Renumber, format select, id/prefix/collapse/expand), and the Variables card title show contextual help cards with FHIR field path and spec reference (R4 / SDC); `js/ui/tooltip.js` uses delegated `mouseover`; dark card positions below or above target
 - **Tooltip toggle** — `tips` button in the preview toolbar toggles all rich tooltips on/off; green when on (default), orange when off; state persisted in `localStorage`; **tooltips off** label appears next to Logic Builder heading when disabled
 - **Radio answer options** — Answer Type panel shows the Options (comma-separated) editor when `radio` is selected (same as `select` / `open-choice`)
-- **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire imported into `questVariables[]`; collapsible card above tree shows `%name` chips; Edit modal for add/edit/delete; passed as `%varName` env vars to FHIRPath `calculatedExpression` on Test; round-trip safe
+- **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire imported into `questVariables[]`; collapsible card above tree shows `%name` chips; Edit modal for add/edit/delete; passed as `%varName` env vars to FHIRPath `calculatedExpression` automatically on every preview render; round-trip safe
+- **Auto calculatedExpression** — calc fields re-evaluated automatically on every patient input, answer, or tree change; no Test button; calc-badge shows current value immediately
 - **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills preview on load; editable via **Default** action panel (type-aware: select/date/number/text); `× clear` link syncs preview; round-trip safe export
 - **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)
 

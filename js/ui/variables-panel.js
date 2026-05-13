@@ -21,7 +21,6 @@ export function init(elements, variablesArray) {
 }
 
 export function refresh() {
-  _el.card.style.display = '';
   _el.count.textContent = _vars.length > 0 ? String(_vars.length) : '';
   _el.count.style.display = _vars.length > 0 ? '' : 'none';
   _renderChips();

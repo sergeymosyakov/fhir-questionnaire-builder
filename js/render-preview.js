@@ -4,12 +4,12 @@ import {
   effect,
   tree, values, autoFilledIds, _formTick, _bulkUpdate, showLinkId, showPrefix,
   evalRule, calcFormOk, isMandatory,
-  rawFhir, calcTested, CHECKABLE_TYPES
+  rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
 import { isDescendant } from './utils.js';
 import { evaluateNode } from './eval.js';
 import { buildQR } from './fhir/qr-builder.js';
-import { evalCalcNodes } from './fhir/calc.js';
+import { evalCalcNodes, buildVarEnv } from './fhir/calc.js';
 import { buildControl as _buildControl } from './controls/index.js';
 import * as search from './ui/search.js';
 
@@ -19,9 +19,10 @@ const fhirpath = window.fhirpath;
 const collapsedGroups = new Set();
 
 function _reCalc() {
-  if (calcTested.value && rawFhir.value && fhirpath) {
+  if (rawFhir.value && fhirpath) {
     const qr = buildQR(JSON.parse(JSON.stringify(rawFhir.value)), values);
-    evalCalcNodes(tree, qr, fhirpath, values);
+    const envVars = buildVarEnv(questVariables, qr, fhirpath);
+    evalCalcNodes(tree, qr, fhirpath, values, envVars);
   }
 }
 
@@ -47,6 +48,7 @@ function buildControl(node, iconEl, onAfterChange) {
 effect(() => {
   void _formTick.value; // subscribe: re-run when checkbox/select changes
   if (_bulkUpdate.value) return; // mass mutation in progress — skip full render
+  _reCalc(); // always evaluate calculatedExpression fields before rendering
   const ctx = {
     age:      age.value,
     gender:   gender.value,
@@ -101,7 +103,7 @@ effect(() => {
 
   // calc nodes: visible, non-disabled items with a calculatedExpression
   const calcItems = visible.filter(r => !r.disabled && r.node.type === 'item' && r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox');
-  const hasCalc = calcTested.value && calcItems.length > 0;
+  const hasCalc = calcItems.length > 0;
   const calcAllOk = calcItems.every(r => values[r.node.id] === true);
 
   const formItemsOk = visible.filter(r => !r.disabled).every(res => {
@@ -185,7 +187,7 @@ effect(() => {
       const relevantItems = descendantItems.filter(r =>
         (isMandatory(r.node) && r.node.successValue !== '') ||
         (isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)) ||
-        (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
+        (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox')
       );
       if (relevantItems.length === 0) {
         hasCondition = false;
@@ -206,7 +208,7 @@ effect(() => {
       hasCondition = res.node.itemType !== 'display' && (
         (isMandatory(res.node) && res.node.successValue !== '') ||
         (CHECKABLE_TYPES.has(res.node.itemType) && (isMandatory(res.node) || res.node.itemType === 'url')) ||
-        (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox' && calcTested.value)
+        (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox')
       );
       displayOk    = res.ok && calcFormOk(res.node);
     }
@@ -335,21 +337,13 @@ effect(() => {
       if (res.node._calculatedExpr && res.node._readOnly) {
         const badge = document.createElement('span');
         if (res.node.itemType === 'checkbox') {
-          // Boolean calc: show ⚡/✓/✗
-          if (!calcTested.value) {
-            badge.className = 'calc-badge';
-            badge.textContent = '\u26A1 pending';
-          } else {
-            const calcVal = values[res.node.id];
-            badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false');
-            badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
-          }
+          const calcVal = values[res.node.id];
+          badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false');
+          badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
         } else {
-          // String calc: show the computed value
-          badge.className = 'calc-badge';
-          const strVal = calcTested.value ? (values[res.node.id] || '—') : '\u26A1 pending';
+          const strVal = values[res.node.id] || '\u2014';
+          badge.className = 'calc-badge' + (values[res.node.id] ? ' calc-true' : '');
           badge.textContent = strVal;
-          if (calcTested.value && values[res.node.id]) badge.className = 'calc-badge calc-true';
         }
         row.appendChild(badge);
       }
@@ -412,7 +406,7 @@ effect(() => {
       const relevant = descendants.filter(r =>
         (isMandatory(r.node) && r.node.successValue !== '') ||
         (isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)) ||
-        (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox' && calcTested.value)
+        (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox')
       );
       if (relevant.length === 0) {
         icon.className   = 'icon-ok';

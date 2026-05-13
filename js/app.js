@@ -1,6 +1,6 @@
 ﻿// Entry point: wires patient inputs, toolbar buttons, and loads the built-in example.
 import { age, gender, bmi, pregnant, smoker, proc, comorb } from './patient.js';
-import { tree, values, rawFhir, calcTested, _formTick, effect } from './state.js';
+import { tree, values, rawFhir, _formTick, effect } from './state.js';
 import { importFHIR } from './fhir/import.js';
 import { buildFHIRObject, exportFHIR } from './fhir/export.js';
 import { validateTree } from './fhir/validate.js';
@@ -13,7 +13,6 @@ import * as variablesPanel from './ui/variables-panel.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { showLinkId, showPrefix, questVariables } from './state.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
-import { buildQR } from './fhir/qr-builder.js';
 
 // fhirpath.js v4 browser bundle loaded as global via lib/fhirpath.min.js
 const fhirpath = window.fhirpath;
@@ -39,16 +38,6 @@ document.getElementById('addRootGroupBtn').onclick = () => {
   addRootGroup();
   // If no file is loaded, show a default name so the × button makes sense
   if (!_fileNameEl.textContent) _setFileName('New Questionnaire');
-};
-document.getElementById('testBtn').onclick = () => {
-  if (rawFhir.value && fhirpath) {
-    const plainFhir = JSON.parse(JSON.stringify(rawFhir.value));
-    const qr = buildQR(plainFhir, values);
-    const envVars = buildVarEnv(questVariables, qr, fhirpath);
-    evalCalcNodes(tree, qr, fhirpath, values, envVars);
-    calcTested.value = true;
-  }
-  _formTick.value++;
 };
 document.getElementById('collapseAllBtn').onclick  = collapseAll;
 
@@ -186,7 +175,6 @@ function _setFileName(name) {
 effect(() => {
   const hasNodes = tree.length > 0;
   document.getElementById('variablesCard').style.display  = hasNodes ? '' : 'none';
-  document.getElementById('testBtn').style.display        = hasNodes ? '' : 'none';
   document.getElementById('validateBtn').style.display    = hasNodes ? '' : 'none';
   document.getElementById('exportFhirBtn').style.display  = hasNodes ? '' : 'none';
   if (hasNodes) {
@@ -227,7 +215,6 @@ function _doReset() {
   for (const k of Object.keys(values)) delete values[k];
   // Clear rawFhir
   rawFhir.value = null;
-  calcTested.value = false;
   // Clear questionnaire-level variables
   questVariables.splice(0);
   variablesPanel.refresh();

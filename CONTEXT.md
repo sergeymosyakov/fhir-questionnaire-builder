@@ -107,7 +107,7 @@ age, gender, bmi, pregnant, smoker, proc, comorb  // ref() — patient fields
 tree          // reactive([]) — questionnaire node tree
 values        // plain object — form answers (not reactive; avoids re-render on every keystroke)
 _formTick     // ref(0) — incremented on checkbox/select change to re-trigger effect()
-calcTested    // ref(false) — true after Test button clicked; enables calculatedExpression evaluation
+calcTested    // ref(false) — REMOVED; calculatedExpression now evaluated automatically on every effect() run
 autoFilledIds // Set — IDs of items auto-filled from conditionRule
 ```
 
@@ -242,17 +242,18 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Load ▾ dropdown** — single button opens a menu with all built-in samples + "From file…" option; replaces separate Load/Example buttons; no startup auto-load (empty-state placeholder shown instead)
 - **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported from JSON into `node._prefix` and exported back; rendered as an amber pill badge before the item title in the preview; editable via the amber input in the builder node meta-row; **Renumber** button assigns sequential prefixes (e.g. `1`, `1.1`) using the selected format (numeric / roman / letters) — writes `_prefix` only, never changes `node.id`
 - **linkId / prefix toggle badges** — `id` (blue) and `prefix` (amber) toggle buttons in preview toolbar; show/hide the corresponding pill badges on every preview row; active state tracked via `showLinkId` / `showPrefix` refs in `state.js`; clicking a linkId badge copies the linkId to clipboard and briefly shows `✓ copied`; badge shows rich tooltip with visibility-rule usage, expected value type, item type
-- **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire; imported → `questVariables[]` in state; collapsible card above tree shows `%name` chips; Edit button opens modal; variables evaluated as `%varName` in FHIRPath `calculatedExpression` when Test is clicked; round-trip safe on export
+- **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire; imported → `questVariables[]` in state; collapsible card above tree shows `%name` chips; Edit button opens modal; variables evaluated as `%varName` in FHIRPath `calculatedExpression` automatically on every preview render; round-trip safe on export
 - **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills `values[]` on load; editable via **Default** action panel in builder (context-aware control per itemType: select/date/number/text); `× clear` link syncs preview instantly; exported back as standard `item.initial[]`
 - **Rich tooltips on action buttons** — all builder action buttons (Answer Type, Required, Show When, Applicability, Expression, Default, Appearance), toolbar buttons (Load, Export, Add Root Group, Renumber, prefix format select, id/prefix/collapse/expand), and the Variables card title carry `data-tip-*` attributes with FHIR field path and spec reference; implemented via delegated `mouseover` in `js/ui/tooltip.js` — no per-element registration needed
 - **Tooltip toggle** — `tips` button in the preview toolbar; green when enabled (default), orange when disabled; state persisted in `localStorage` (`tooltips-enabled`); a plain orange **tooltips off** label appears next to the Logic Builder heading when disabled
 - **Radio answer options in builder** — Answer Type panel now shows the Options (comma-separated) editor for `radio` items (previously only shown for `select` and `open-choice`)
 - **Export validation** — on Export: `validateTree()` runs; if issues found → modal with error/warning list, ↗ navigate-to-node button per issue, "Fix first" / "Export anyway" actions
-- **Validate button** — standalone **Validate** button in the Questionnaire Preview header (next to Test); runs same `validateTree()` check; shows green ✅ "All good" state when no issues; only visible when questionnaire is loaded
+- **Validate button** — standalone **Validate** button in the Questionnaire Preview header; runs same `validateTree()` check; shows green ✅ "All good" state when no issues; only visible when questionnaire is loaded
 - **Esc closes modals** — Validate modal and Variables modal both close on Escape key
 - **Ctrl+F** — intercepts browser find and focuses the preview search input (when search is visible)
 - **Import validation** — same modal shown after loading a file/sample (mode: OK only)
-- **Empty-state placeholder** — right panel shows hint text when tree is empty; Test, Validate, Export buttons are hidden until a questionnaire is loaded
+- **Auto calculatedExpression** — `calculatedExpression` FHIRPath fields (SDC `_calculatedExpr`/`_readOnly` nodes) are evaluated automatically on every `effect()` run — on patient input change, answer change, or tree change; no manual Test button needed; `buildVarEnv` passes `questVariables` as `%varName` env; calc-badge shows value immediately
+- **Empty-state placeholder** — right panel shows hint text when tree is empty; Validate, Export buttons are hidden until a questionnaire is loaded
 - **Resizable panels** — drag the divider between left/right panels; width persisted in `localStorage`
 - **Autosave** — background `setInterval` (15 s) saves current questionnaire as FHIR JSON to `localStorage` (`autosave-draft` + `autosave-meta`); only saves when tree is non-empty; on next visit Load menu shows **"Recent: &lt;title&gt; (date/time)"** item at top if a draft exists; loading via Recent calls `_importAndValidate` (full render + file name set); draft cleared on Reset/Clear; implemented in `js/ui/autosave.js`
 - **Variables validation** — closing the Variables modal strips fully blank rows; if any remaining variable has expression but no name, the modal is blocked from closing and the name field is highlighted red with "Name is required" hint
