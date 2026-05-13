@@ -170,6 +170,8 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - `type:boolean` → `itemType:'checkbox'`; `type:choice` → `itemType:'select'` or `'radio'` (if `questionnaire-itemControl: radio-button`)
 - Custom extensions at URL `http://logicbuilder.example.org/extension/...`: `conditionRule`, `visibilityRule`, `successValue`
 - `_text.extension[rendering-style]` → `_renderStyle` (applied as inline CSS in preview)
+- `item.prefix` → `node._prefix` (amber badge in preview; editable in builder; exported back)
+- `item.code[]` → `node._codes` (preserved as-is; exported back unchanged)
 - `linkIdMap` built before parsing → used for human-readable condition text
 
 ## FHIR Export (exportFHIR)

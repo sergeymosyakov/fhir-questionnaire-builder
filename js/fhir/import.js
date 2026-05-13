@@ -138,6 +138,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   }
   node._readOnly = !!fhirItem.readOnly;
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
+  if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
   return node;
 }
 
@@ -161,6 +162,7 @@ function fhirItemToNode(fhirItem, linkIdMap) {
       && fhirItem._text.extension.find(x => x.url && x.url.includes('rendering-style'));
     if (rs) node._renderStyle = rs.valueString || '';
     if (fhirItem.prefix) node._prefix = fhirItem.prefix;
+    if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
     for (const child of fhirItem.item || []) {
       const n = fhirItemToNode(child, linkIdMap);
       if (n) node.children.push(n);

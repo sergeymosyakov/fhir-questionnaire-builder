@@ -182,6 +182,8 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `item.enableBehavior:'any'` | `logicWithParent:'OR'` |
 | `item.answerOption` | `options` — stored as `code=display` per option (e.g. `bmi35=BMI 35–39.9 with comorbidity`); plain value if code==display |
 | `_text.extension[rendering-style]` | `_renderStyle` (applied as inline CSS in preview) |
+| `item.prefix` | `_prefix` — amber badge in preview; editable in builder; exported back (round-trip safe) |
+| `item.code[]` | `_codes` — preserved as-is; exported back unchanged (round-trip safe) |
 
 Custom extensions (URL prefix `http://logicbuilder.example.org/extension/`):
 - `conditionRule` — applicability condition

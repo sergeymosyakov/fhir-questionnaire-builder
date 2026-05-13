@@ -109,6 +109,7 @@ Every node in the tree is either a **group** or an **item**:
 | `_calculatedExpr` | SDC `sdc-questionnaire-calculatedExpression` extension (`valueExpression.expression`) | FHIRPath |
 | `_readOnly` | `item.readOnly` | |
 | `_prefix` | `item.prefix` | imported and exported; displayed as amber badge in preview; editable in builder meta-row |
+| `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); not displayed in UI |
 
 ---
 
@@ -211,7 +212,6 @@ The following FHIR R4 / SDC features are currently not handled. Items marked ⚠
 | SDC initial expression | `sdc-questionnaire-initialExpression` | ⚠️ ignored |
 | Questionnaire constraints | `questionnaire-constraint` extension | ⚠️ ignored |
 | Item prefix | `item.prefix` (e.g. `"1.1"`) | ✅ round-trip safe |
-| Item codes | `item.code[]` | ⚠️ ignored |
 | `contained` resources | `Questionnaire.contained[]` | ⚠️ ignored |
 | Multiple `enableWhen` on items with `enableBehavior` | `item.enableBehavior` | Partial: imported as `&&`-joined JS; re-exported as extension |
 | Resource reference resolution | `type: 'reference'` | ⚠️ dropdown + id text field; no live resource search against a FHIR server |
