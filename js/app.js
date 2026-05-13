@@ -393,11 +393,24 @@ document.addEventListener('click', () => {
 }
 
 // Start empty — use Example button or Load FHIR JSON to load data
-const _autosaveIndicator     = document.getElementById('autosaveIndicator');
-const _autosaveIndicatorText = document.getElementById('autosaveIndicatorText');
+const _autosaveToggleBtn = document.getElementById('autosaveToggleBtn');
+const _syncAutosaveState = (enabled, lastSaveDate) => {
+  _autosaveToggleBtn.classList.toggle('btn-fhir--active', enabled);
+  if (enabled) {
+    const label = lastSaveDate
+      ? 'autosave \u00b7 ' + String(lastSaveDate.getHours()).padStart(2,'0') + ':' + String(lastSaveDate.getMinutes()).padStart(2,'0')
+      : 'autosave';
+    _autosaveToggleBtn.textContent = label;
+  } else {
+    _autosaveToggleBtn.textContent = 'autosave off';
+  }
+};
+_syncAutosaveState(autosave.isEnabled(), null);
+_autosaveToggleBtn.addEventListener('click', () => {
+  const next = !autosave.isEnabled();
+  autosave.setEnabled(next);
+  _syncAutosaveState(next, null);
+});
 autosave.init(buildFHIRObject, (date) => {
-  const hh = String(date.getHours()).padStart(2, '0');
-  const mm = String(date.getMinutes()).padStart(2, '0');
-  _autosaveIndicatorText.textContent = 'saved ' + hh + ':' + mm;
-  _autosaveIndicator.classList.add('autosave-indicator--visible');
+  _syncAutosaveState(autosave.isEnabled(), date);
 });

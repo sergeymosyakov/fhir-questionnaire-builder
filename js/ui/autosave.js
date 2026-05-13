@@ -8,14 +8,21 @@
 //   loadDraft(importFn, renderFn) — restore the saved draft
 //   clearDraft() — remove saved draft
 
-const LS_KEY      = 'autosave-draft';
-const LS_META_KEY = 'autosave-meta';
-const INTERVAL_MS = 15_000;
+const LS_KEY         = 'autosave-draft';
+const LS_META_KEY    = 'autosave-meta';
+const LS_ENABLED_KEY = 'autosave-enabled';
+const INTERVAL_MS    = 15_000;
 
 let _buildFn  = null;
 let _timer    = null;
-let _enabled  = false;
+let _enabled  = localStorage.getItem(LS_ENABLED_KEY) !== 'false';
 let _onSaved  = null;
+
+export function isEnabled()       { return _enabled; }
+export function setEnabled(val) {
+  _enabled = val;
+  localStorage.setItem(LS_ENABLED_KEY, String(val));
+}
 
 function _save() {
   if (!_enabled || !_buildFn) return;
@@ -38,7 +45,7 @@ function _save() {
 export function init(buildFn, onSaved) {
   _buildFn = buildFn;
   _onSaved = onSaved || null;
-  _enabled = true;
+  // _enabled already set from localStorage
   if (_timer) clearInterval(_timer);
   _timer = setInterval(_save, INTERVAL_MS);
 }

@@ -76,6 +76,10 @@
       <div class="left-panel-title-row">
         <span class="section-title">Logic Builder<span id="tooltipsOffBadge" class="tips-off-badge" style="display:none">tooltips off</span></span>
         <span class="left-panel-header-right">
+          <button id="autosaveToggleBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--autosave-toggle btn-fhir--active"
+            data-tip-title="Autosave"
+            data-tip-body="Automatically saves the current questionnaire to local storage every 15 seconds. The button label shows the time of the last save. Click to disable."
+            data-tip-spec="on / off">autosave</button>
           <button id="tooltipToggleBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--tips-toggle btn-fhir--active"
             title="Toggle rich tooltips on / off"
             data-tip-title="Rich Tooltips"
@@ -144,14 +148,6 @@
               data-tip-title="Clear questionnaire"
               data-tip-body="Removes the current questionnaire from the builder. You will be asked whether to export first."
               title="Clear questionnaire">&times;</button>
-          </span>
-          <span id="autosaveIndicator" class="autosave-indicator">
-            <svg class="autosave-indicator-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="2" width="12" height="12" rx="1.2"/>
-              <path d="M5 2v5h6V2"/>
-              <rect x="5" y="10" width="6" height="4"/>
-            </svg>
-            <span id="autosaveIndicatorText"></span>
           </span>
         </span>
         <span class="preview-header-actions">

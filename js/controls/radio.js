@@ -15,7 +15,7 @@ export function build(node, ctx) {
   }
 
   const rbName = 'radio_' + node.id;
-  if (values[node.id] === undefined) values[node.id] = opts[0].code;
+  // Do NOT pre-select first option — required radio must be explicitly chosen
 
   for (const { code, display } of opts) {
     const lbl = document.createElement('label');

@@ -73,6 +73,21 @@
 }
 .btn-fhir--tips-toggle:not(.btn-fhir--active):hover { background: #ffe0b2; }
 
+.btn-fhir--autosave-toggle.btn-fhir--active {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #a5d6a7;
+  opacity: 1;
+}
+.btn-fhir--autosave-toggle.btn-fhir--active:hover { background: #c8e6c9; }
+.btn-fhir--autosave-toggle:not(.btn-fhir--active) {
+  background: #f5f5f5;
+  color: var(--c-text-2);
+  border-color: var(--c-border);
+  opacity: 1;
+}
+.btn-fhir--autosave-toggle:not(.btn-fhir--active):hover { background: #eeeeee; }
+
 /* "tooltips off" badge near Logic Builder title */
 .tips-off-badge {
   font-size: 10px;
@@ -81,23 +96,6 @@
   color: #e65100;
   vertical-align: middle;
   margin-left: 4px;
-}
-.autosave-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 72px;
-  font-size: 10px;
-  color: var(--c-text-2);
-  opacity: 0;
-  white-space: nowrap;
-  pointer-events: none;
-}
-.autosave-indicator--visible {
-  opacity: .7;
-}
-.autosave-indicator-icon {
-  flex-shrink: 0;
 }
 .btn-add-root {
   display: inline-flex;

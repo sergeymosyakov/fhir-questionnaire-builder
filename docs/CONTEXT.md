@@ -208,7 +208,7 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Variables card visibility** — controlled solely by `effect()` in `app.js` based on `tree.length`; `refresh()` only updates chips/count
 - **PASS/FAIL status badge** — replaces the full-width status bar; a small pill badge (`✓ PASS` / `✗ FAIL · N issues`) in the preview header right of the filename; click opens a dark dropdown listing numbered failing items with ↗ links to navigate directly to the problem field; dropdown has scroll, closes on outside click; implemented in `js/ui/status-badge.js` + `css/status-badge.css`
 - **Collapse-safe navigation** — `navigateToPreview(id)` in `render-preview.js` finds collapsed ancestors via `findAncestorGroupIds`, expands them, then scrolls; used by ↗ builder buttons and status-badge dropdown
-- **Autosave indicator** — after first save a `saved HH:MM` label (disk icon + time) appears in the preview header next to the filename; persists until next save cycle
+- **Autosave toggle** — `autosave` button in Logic Builder header (green = on, grey = off); when enabled label shows last save time `autosave · HH:MM`; state persisted in `localStorage` (`autosave-enabled`); rich tooltip explains the feature
 - **Variables validation** — closing Variables modal strips blank rows; blocks close if any variable has expression but no name; highlights name field red with "Name is required"
 - **Copyright + GitHub in top panel** — copyright text and GitHub link moved to the top (patient data) panel, right-aligned; order: GitHub icon → copyright text
 - **Expandable title** — node title shown as a read-only span; click → expands to a full-width textarea (auto-height), collapses on blur
@@ -221,7 +221,8 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Dimmed rows** — conditional items shown grayed (🔒) when condition not met; animate to active when met
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
 - **required text/number** — `required:true` on text/number items means non-empty; shows ✔/✘ icon and affects PASS/FAIL
-- **required radio/select** — `required:true` on choice/radio items requires an option to be selected; shows ✔/✘ on item and group icon; affects PASS/FAIL
+- **select / radio controls** — no longer auto-fill the first option on render; mandatory fields start empty (`— select —` placeholder for select, no pre-check for radio) so PASS/FAIL is accurate on initial load
+- **text / number / date controls** — now call `_reCalc()` + `_formTick.value++` on every input change so FHIRPath calculatedExpression nodes (e.g. BMI) update live without a Test button
 
 ---
 
