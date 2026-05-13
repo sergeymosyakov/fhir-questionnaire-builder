@@ -9,8 +9,10 @@ import * as progress from './ui/progress.js';
 import * as search from './ui/search.js';
 import * as tooltip from './ui/tooltip.js';
 import * as autosave from './ui/autosave.js';
+import * as statusBadge from './ui/status-badge.js';
 import * as variablesPanel from './ui/variables-panel.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
+import { navigateToPreview } from './render-preview.js';
 import { showLinkId, showPrefix, questVariables } from './state.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 
@@ -99,6 +101,12 @@ progress.init({
 
 // ── Tooltip init ─────────────────────────────────────────────────────────
 tooltip.init();
+
+statusBadge.init({
+  btn:      document.getElementById('statusBadgeBtn'),
+  dropdown: document.getElementById('statusDropdown'),
+  wrap:     document.getElementById('statusBadgeWrap'),
+}, navigateToPreview);
 
 const _tooltipToggleBtn  = document.getElementById('tooltipToggleBtn');
 const _tooltipsOffBadge  = document.getElementById('tooltipsOffBadge');
@@ -385,4 +393,11 @@ document.addEventListener('click', () => {
 }
 
 // Start empty — use Example button or Load FHIR JSON to load data
-autosave.init(buildFHIRObject);
+const _autosaveIndicator     = document.getElementById('autosaveIndicator');
+const _autosaveIndicatorText = document.getElementById('autosaveIndicatorText');
+autosave.init(buildFHIRObject, (date) => {
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  _autosaveIndicatorText.textContent = 'saved ' + hh + ':' + mm;
+  _autosaveIndicator.classList.add('autosave-indicator--visible');
+});

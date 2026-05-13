@@ -15,6 +15,7 @@ const INTERVAL_MS = 15_000;
 let _buildFn  = null;
 let _timer    = null;
 let _enabled  = false;
+let _onSaved  = null;
 
 function _save() {
   if (!_enabled || !_buildFn) return;
@@ -26,14 +27,17 @@ function _save() {
       savedAt: new Date().toISOString(),
       title:   q.title || 'Untitled',
     }));
+    if (_onSaved) _onSaved(new Date());
   } catch (_) {
     // localStorage full or unavailable — fail silently
   }
 }
 
-/** Start autosave interval. Call once after app is ready. */
-export function init(buildFn) {
+/** Start autosave interval. Call once after app is ready.
+ *  onSaved(date) — optional callback fired after each successful save. */
+export function init(buildFn, onSaved) {
   _buildFn = buildFn;
+  _onSaved = onSaved || null;
   _enabled = true;
   if (_timer) clearInterval(_timer);
   _timer = setInterval(_save, INTERVAL_MS);

@@ -102,9 +102,9 @@ function _isValidUrl(s) {
 }
 
 export const calcFormOk = node => {
-  // ReadOnly calc node: if Test was run, the result is the evaluated FHIRPath value
+  // ReadOnly calc node: evaluated value is always current (auto-calc)
   // Only boolean (checkbox) calc nodes participate in pass/fail
-  if (node._calculatedExpr && node._readOnly && calcTested.value) {
+  if (node._calculatedExpr && node._readOnly) {
     if (node.itemType !== 'checkbox') return true;
     return values[node.id] === true;
   }

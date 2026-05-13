@@ -6,17 +6,44 @@ import {
   evalRule, calcFormOk, isMandatory,
   rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
-import { isDescendant } from './utils.js';
+import { isDescendant, findAncestorGroupIds } from './utils.js';
 import { evaluateNode } from './eval.js';
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes, buildVarEnv } from './fhir/calc.js';
 import { buildControl as _buildControl } from './controls/index.js';
 import * as search from './ui/search.js';
+import * as statusBadge from './ui/status-badge.js';
 
 const fhirpath = window.fhirpath;
 
 // Persists across re-renders (not reactive)
 const collapsedGroups = new Set();
+
+// Navigate to a preview node by id, expanding collapsed ancestors if needed.
+export function navigateToPreview(id) {
+  const ancestors = findAncestorGroupIds(id, tree);
+  if (ancestors && ancestors.length > 0) {
+    let expanded = false;
+    for (const gid of ancestors) {
+      if (collapsedGroups.has(gid)) { collapsedGroups.delete(gid); expanded = true; }
+    }
+    if (expanded) {
+      _formTick.value++;
+      // wait one microtask for DOM to rebuild before scrolling
+      setTimeout(() => _scrollToPreview(id), 50);
+      return;
+    }
+  }
+  _scrollToPreview(id);
+}
+
+function _scrollToPreview(id) {
+  const target = document.querySelector('[data-preview-id="' + id + '"]');
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  target.classList.add('preview-flash');
+  setTimeout(() => target.classList.remove('preview-flash'), 1000);
+}
 
 function _reCalc() {
   if (rawFhir.value && fhirpath) {
@@ -69,10 +96,7 @@ effect(() => {
       '<div class="preview-placeholder-title">No questionnaire loaded</div>' +
       '<div class="preview-placeholder-hint">Use <strong>⬆ Load ▾</strong> to open a sample or upload your own FHIR R4 Questionnaire JSON,<br>or build one from scratch using <strong>+ Add Root Group</strong> in the left panel.</div>';
     lform.appendChild(placeholder);
-    const _fr = document.getElementById('finalResult');
-    _fr.innerHTML = '';
-    _fr.className = 'final-result';
-    _fr.style.display = 'none';
+    statusBadge.update({ anyVisible: false, hasCriteria: false, finalOk: false, failingItems: [] });
     return;
   }
 
@@ -111,6 +135,10 @@ effect(() => {
     return res.ok;
   });
   let finalOk = (hasMandatory ? formItemsOk : true) && (hasCalc ? calcAllOk : true) && (hasMandatory || hasCalc);
+  const failingItems = [
+    ...mandatoryItems.filter(r => !r.ok || !calcFormOk(r.node)).map(r => ({ title: r.node.title, id: r.node.id })),
+    ...calcItems.filter(r => values[r.node.id] !== true).map(r => ({ title: r.node.title, id: r.node.id }))
+  ];
 
   const groupIconMap = new Map();
 
@@ -422,19 +450,7 @@ effect(() => {
     }
   }
 
-  const finalEl = document.getElementById('finalResult');
-  if (!anyVisible) {
-    finalEl.style.display = 'none';
-    finalEl.className = 'final-result';
-  } else if (!hasMandatory && !hasCalc) {
-    finalEl.style.display = 'block';
-    finalEl.textContent = '— No required fields defined';
-    finalEl.className = 'final-result';
-  } else {
-    finalEl.style.display = 'block';
-    finalEl.textContent = (finalOk ? '✓ PASS' : '✗ FAIL') + ' — ' + (finalOk ? 'All criteria met' : 'Criteria not met');
-    finalEl.className = 'final-result ' + (finalOk ? 'pass' : 'fail');
-  }
+  statusBadge.update({ anyVisible, hasCriteria: hasMandatory || hasCalc, finalOk, failingItems });
   search.refresh();
 });
 

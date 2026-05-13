@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="css/controls.css">
 <link rel="stylesheet" href="css/tooltip.css">
 <link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/status-badge.css">
 </head>
 <body>
 <div id="progressWrap" class="progress-wrap">
@@ -144,8 +145,20 @@
               data-tip-body="Removes the current questionnaire from the builder. You will be asked whether to export first."
               title="Clear questionnaire">&times;</button>
           </span>
+          <span id="autosaveIndicator" class="autosave-indicator">
+            <svg class="autosave-indicator-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="12" height="12" rx="1.2"/>
+              <path d="M5 2v5h6V2"/>
+              <rect x="5" y="10" width="6" height="4"/>
+            </svg>
+            <span id="autosaveIndicatorText"></span>
+          </span>
         </span>
         <span class="preview-header-actions">
+          <span id="statusBadgeWrap" class="status-badge-wrap" style="display:none">
+            <button id="statusBadgeBtn" type="button" class="status-badge"></button>
+            <div id="statusDropdown" class="status-dropdown" style="display:none"></div>
+          </span>
           <button id="validateBtn" class="btn-validate" style="display:none"
             data-tip-title="Validate questionnaire"
             data-tip-body="Checks for FHIR R4 issues: duplicate linkIds, empty titles, missing answer options, broken JS/FHIRPath expressions. Same check runs automatically on Export."
@@ -153,7 +166,6 @@
             data-tip-spec="R4">Validate</button>
         </span>
       </div>
-      <div class="final-result" id="finalResult"></div>
       <div class="fhir-toolbar">
         <div class="load-wrap">
           <button id="loadFhirBtn" type="button" class="btn-fhir"

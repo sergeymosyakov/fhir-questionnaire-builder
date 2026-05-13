@@ -18,7 +18,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `css/styles.css` | All styles and CSS design tokens |
 | `js/app.js` | Entry point — wires inputs, buttons, loads example |
 | `js/state.js` | Reactive state, data factories, business logic |
-| `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`, `parseOption`, `parseOptions`) |
+| `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`, `findAncestorGroupIds`, `parseOption`, `parseOptions`) |
 | `js/eval.js` | Tree evaluation (visibility / condition rules) |
 | `js/render-builder.js` | Left panel — 3-line re-export shim → `js/builder/` |
 | `js/builder/ctx.js` | `BuilderCtx` JSDoc typedef (no runtime exports) |
@@ -41,7 +41,8 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + keyboard navigation |
 | `js/ui/tooltip.js` | Rich tooltip system — delegated `mouseover` on `[data-tip-title]`/`[data-tip-body]`; dark card with optional FHIR spec footer |
-| `js/ui/autosave.js` | Background autosave every 15 s to `localStorage`; Recent draft item in Load menu |
+| `js/ui/autosave.js` | Background autosave every 15 s to `localStorage`; `onSaved(date)` callback; Recent draft item in Load menu |
+| `js/ui/status-badge.js` | PASS/FAIL pill badge with dark issue-list dropdown; collapse-safe ↗ navigation |
 | `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup (bariatric surgery pre-auth, compact) |
 | `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all item types |
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History — 49 items, depth 5 |

@@ -1,6 +1,7 @@
 // ── Group node renderer ───────────────────────────────────────────────────────
 // renderGroup(node, ctx: BuilderCtx) → HTMLElement  — see ctx.js
 import { findAndRemove, escAttr } from '../utils.js';
+import { navigateToPreview } from '../render-preview.js';
 import { makeGroup, makeItem } from '../state.js';
 import { formatSeg } from './_shared.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
@@ -62,11 +63,7 @@ export function renderGroup(node, ctx) {
   navBtn.textContent = '\u2197';
   navBtn.addEventListener('click', e => {
     e.stopPropagation();
-    const target = document.querySelector('[data-preview-id="' + node.id + '"]');
-    if (!target) return;
-    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    target.classList.add('preview-flash');
-    setTimeout(() => target.classList.remove('preview-flash'), 1000);
+    navigateToPreview(node.id);
   });
   titleWrap.appendChild(navBtn);
 

@@ -82,6 +82,23 @@
   vertical-align: middle;
   margin-left: 4px;
 }
+.autosave-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 72px;
+  font-size: 10px;
+  color: var(--c-text-2);
+  opacity: 0;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.autosave-indicator--visible {
+  opacity: .7;
+}
+.autosave-indicator-icon {
+  flex-shrink: 0;
+}
 .btn-add-root {
   display: inline-flex;
   align-items: center;

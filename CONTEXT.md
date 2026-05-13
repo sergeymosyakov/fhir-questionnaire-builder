@@ -49,7 +49,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `css/styles.css` | All styles and CSS design tokens |
 | `js/app.js` | Entry point — wires inputs, buttons, loads example |
 | `js/state.js` | Reactive state, data factories, business logic |
-| `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`, `parseOption`, `parseOptions`) |
+| `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`, `findAncestorGroupIds`, `parseOption`, `parseOptions`) |
 | `js/eval.js` | Tree evaluation (visibility / condition rules) |
 | `js/render-builder.js` | Left panel — 3-line re-export shim → `js/builder/` |
 | `js/builder/ctx.js` | `BuilderCtx` JSDoc typedef (no runtime exports) |
@@ -59,7 +59,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/builder/panels.js` | All action panel builders (vis, mand, cond, type, expr, style) |
 | `js/builder/node-item.js` | `renderItem(node, ctx)` |
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` |
-| `js/render-preview.js` | Right panel — reactive preview |
+| `js/render-preview.js` | Right panel — reactive preview; exports `navigateToPreview(id)` (collapse-safe) |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
 | `js/controls/{type}.js` | Per-type control implementations |
 | `js/fhir/import.js` | FHIR R4 → internal model |
@@ -70,7 +70,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + up/down/Enter navigation |
 | `js/ui/tooltip.js` | Rich tooltip system — delegated `mouseover` on `[data-tip-title]` / `[data-tip-body]`; positions card below (or above) target; supports `data-tip-fhir` + `data-tip-spec` FHIR footer |
-| `js/ui/autosave.js` | Background autosave — `init(buildFn)` starts 15 s interval; `getDraftMeta/getDraftData/clearDraft` API; persists to `localStorage` |
+| `js/ui/autosave.js` | Background autosave — `init(buildFn, onSaved)` starts 15 s interval; `onSaved(date)` callback; `getDraftMeta/getDraftData/clearDraft` API; persists to `localStorage` |
+| `js/ui/status-badge.js` | PASS/FAIL pill badge in preview header — `init(elements, navigateFn)`, `update({anyVisible, hasCriteria, finalOk, failingItems})`; dark dropdown with numbered issues + ↗ navigate links |
 | `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup |
 | `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all types |
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History (49 items, depth 5) |

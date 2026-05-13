@@ -206,7 +206,9 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Auto calculatedExpression** — `_calculatedExpr`/`_readOnly` nodes evaluated via FHIRPath automatically on every `effect()` run (patient input, answer, or tree change); `buildVarEnv` resolves `questVariables` as `%varName`; no manual Test button
 - **Empty-state placeholder** — right panel shows hint text when tree is empty; Validate, Export hidden until questionnaire is loaded
 - **Variables card visibility** — controlled solely by `effect()` in `app.js` based on `tree.length`; `refresh()` only updates chips/count
-- **Autosave** — background `setInterval` (15 s) saves FHIR JSON to `localStorage` (`autosave-draft` + `autosave-meta`); Load menu shows **"Recent: &lt;title&gt; (date/time)"** item when draft exists; loading via Recent calls `_importAndValidate`; draft cleared on Reset/Clear; `js/ui/autosave.js`
+- **PASS/FAIL status badge** — replaces the full-width status bar; a small pill badge (`✓ PASS` / `✗ FAIL · N issues`) in the preview header right of the filename; click opens a dark dropdown listing numbered failing items with ↗ links to navigate directly to the problem field; dropdown has scroll, closes on outside click; implemented in `js/ui/status-badge.js` + `css/status-badge.css`
+- **Collapse-safe navigation** — `navigateToPreview(id)` in `render-preview.js` finds collapsed ancestors via `findAncestorGroupIds`, expands them, then scrolls; used by ↗ builder buttons and status-badge dropdown
+- **Autosave indicator** — after first save a `saved HH:MM` label (disk icon + time) appears in the preview header next to the filename; persists until next save cycle
 - **Variables validation** — closing Variables modal strips blank rows; blocks close if any variable has expression but no name; highlights name field red with "Name is required"
 - **Copyright + GitHub in top panel** — copyright text and GitHub link moved to the top (patient data) panel, right-aligned; order: GitHub icon → copyright text
 - **Expandable title** — node title shown as a read-only span; click → expands to a full-width textarea (auto-height), collapses on blur

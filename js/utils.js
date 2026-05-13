@@ -21,6 +21,18 @@ export function isDescendant(nodeId, group) {
   return false;
 }
 
+// Returns array of group IDs that are ancestors of nodeId in the tree.
+export function findAncestorGroupIds(nodeId, nodes, ancestors = []) {
+  for (const n of nodes) {
+    if (n.id === nodeId) return ancestors;
+    if (n.type === 'group') {
+      const found = findAncestorGroupIds(nodeId, n.children, [...ancestors, n.id]);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 // Parse a single option token: "code=display" → { code, display }
 // Backward compat: "value" (no =) → { code: value, display: value }
 export function parseOption(s) {
