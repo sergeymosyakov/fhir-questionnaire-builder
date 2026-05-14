@@ -2,6 +2,9 @@
 // Pure function — no DOM, no side effects.
 // Returns an array of { severity: 'error'|'warning', nodeId, message }.
 
+// System-generated constraint key (must match ITLH_KEY_GROUP_OR in utils.js)
+const _ITLH_KEY_GROUP_OR = 'e3a8c2f1-6b4d-4e9a-87c5:group-or';
+
 // Known FHIR R4 resource types (common subset used in Questionnaire references)
 const FHIR_R4_RESOURCES = new Set([
   'Account','ActivityDefinition','AdverseEvent','AllergyIntolerance','Appointment',
@@ -92,10 +95,19 @@ export function validateTree(tree, values = {}) {
 
     if (Array.isArray(node.constraint)) {
       for (const c of node.constraint) {
+        const cLabel = `Constraint "${c.key || '?'}"`;
+        if (!c.key || !c.key.trim()) {
+          issues.push({ severity: 'error', nodeId: id, message: `A constraint has an empty key — key is required by FHIR R4 (questionnaire-constraint).` });
+        } else if (c.key === _ITLH_KEY_GROUP_OR) {
+          // system-generated key — skip user-facing validation
+        }
+        if (!c.human || !c.human.trim()) {
+          issues.push({ severity: 'warning', nodeId: id, message: `${cLabel} has no human-readable message — the "human" field is required by FHIR R4.` });
+        }
         const cErr = _checkFhirPath(c.expression);
-        if (cErr) issues.push({ severity: 'error', nodeId: id, message: `Constraint "${c.key || '?'}" expression error: ${cErr}` });
+        if (cErr) issues.push({ severity: 'error', nodeId: id, message: `${cLabel} expression error: ${cErr}` });
         if (!c.expression || !c.expression.trim()) {
-          issues.push({ severity: 'warning', nodeId: id, message: `Constraint "${c.key || '?'}" has an empty expression — it will never be evaluated.` });
+          issues.push({ severity: 'warning', nodeId: id, message: `${cLabel} has an empty expression — it will never be evaluated.` });
         }
       }
     }

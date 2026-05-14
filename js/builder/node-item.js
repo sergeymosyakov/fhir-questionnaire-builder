@@ -4,6 +4,7 @@ import { findAndRemove, escAttr } from '../utils.js';
 import { navigateToPreview } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildExprPanel, buildStylePanel, buildInitialPanel, buildConstraintPanel } from './panels.js';
+import { triggerCalcRecalc, confirmDelete } from './_shared.js';
 
 export function renderItem(node, ctx) {
   const { renderTree } = ctx;
@@ -34,14 +35,6 @@ export function renderItem(node, ctx) {
   typeLabel.className = 'node-type-label lbl-item';
   typeLabel.textContent = '[Item]';
   titleWrap.appendChild(typeLabel);
-
-  if (node._readOnly) {
-    const roTag = document.createElement('span');
-    roTag.className = 'node-readonly-tag';
-    roTag.textContent = '\uD83D\uDD12';
-    roTag.title = 'readOnly — this field cannot be edited by the user';
-    titleWrap.appendChild(roTag);
-  }
 
   const navBtn = document.createElement('button');
   navBtn.type = 'button';
@@ -143,8 +136,24 @@ export function renderItem(node, ctx) {
     'Questionnaire.item.enableWhen[]', 'R4 \u00B7 optional');
   const exprLink  = addToggle('Expression', 'expr',
     'Calculated Expression',
-    'SDC FHIRPath expression evaluated when Test is clicked. Result is written into the answer field. Typically used with readOnly items. Supports questionnaire-level %variables.',
+    'SDC FHIRPath expression evaluated automatically on every preview render. Result is written into the answer field. Supports questionnaire-level %variables.',
     'sdc-questionnaire-calculatedExpression', 'SDC · optional');
+
+  // Read-only toggle — direct boolean, no panel needed
+  const roLink = document.createElement('a');
+  roLink.textContent = 'Read-only';
+  roLink.className = 'action-edit';
+  roLink.dataset.tipTitle = 'Read-only';
+  roLink.dataset.tipBody  = 'Marks this field as read-only — the user cannot edit it. Typically combined with a calculatedExpression.';
+  roLink.dataset.tipFhir  = 'Questionnaire.item.readOnly';
+  roLink.dataset.tipSpec  = 'R4';
+  roLink.onclick = () => {
+    node._readOnly = !node._readOnly;
+    setActive(roLink, !!node._readOnly);
+    triggerCalcRecalc();
+  };
+  actions.appendChild(roLink);
+
   const initLink  = addToggle('Default', 'init',
     'Default Value (initial)',
     'Pre-fills the answer when the form loads. The user can change it unless readOnly is set. Only the first entry (initial[0]) is used. Supports all item types.',
@@ -183,7 +192,10 @@ export function renderItem(node, ctx) {
   btnDel.textContent = '\u2715';
   btnDel.className = 'btn-node-delete';
   btnDel.title = 'Delete';
-  btnDel.onclick = () => { findAndRemove(node.id, ctx.tree); renderTree(); };
+  btnDel.onclick = async () => {
+    const ok = await confirmDelete(node.title || node.id);
+    if (ok) { findAndRemove(node.id, ctx.tree); renderTree(); }
+  };
 
   div.appendChild(header);
   div.appendChild(btnDel);
@@ -198,7 +210,8 @@ export function renderItem(node, ctx) {
   addPanel('style',p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
   setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
-  setActive(exprLink,       !!node._calculatedExpr || !!node._readOnly);
+  setActive(exprLink,       !!node._calculatedExpr);
+  setActive(roLink,         !!node._readOnly);
   setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
   setActive(styleLink,      !!node._renderStyle);
   setActive(mandLink,       node.mandatory === true);

@@ -3,7 +3,7 @@
 import { findAndRemove, escAttr } from '../utils.js';
 import { navigateToPreview } from '../render-preview.js';
 import { makeGroup, makeItem } from '../state.js';
-import { formatSeg } from './_shared.js';
+import { formatSeg, confirmDelete } from './_shared.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { addPanel, buildVisPanel, buildMandPanel, buildExprPanel, buildStylePanel } from './panels.js';
 
@@ -241,7 +241,10 @@ export function renderGroup(node, ctx) {
   btnDel.textContent = '\u2715';
   btnDel.className = 'btn-node-delete';
   btnDel.title = 'Delete';
-  btnDel.onclick = () => { findAndRemove(node.id, ctx.tree); renderTree(); };
+  btnDel.onclick = async () => {
+    const ok = await confirmDelete(node.title || node.id);
+    if (ok) { findAndRemove(node.id, ctx.tree); renderTree(); }
+  };
 
   div.appendChild(header);
   div.appendChild(btnDel);

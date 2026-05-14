@@ -45,4 +45,32 @@ export function getAllItems(nodes, result = [], prefix = '') {
   return result;
 }
 
+// Confirmation dialog — matches clear-confirm style in app.js
+export function confirmDelete(label) {
+  return new Promise(resolve => {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'clear-confirm-backdrop';
+    const box = document.createElement('div');
+    box.className = 'clear-confirm-box';
+    box.innerHTML =
+      '<div class="clear-confirm-title">Delete node?</div>' +
+      '<div class="clear-confirm-msg">' +
+        '<strong>' + label.replace(/</g, '&lt;') + '</strong> and all its children will be permanently removed.' +
+      '</div>' +
+      '<div class="clear-confirm-btns">' +
+        '<button class="btn-fhir btn-danger" id="_cdDel">Delete</button>' +
+        '<button class="btn-fhir" id="_cdCancel">Cancel</button>' +
+      '</div>';
+    backdrop.appendChild(box);
+    document.body.appendChild(backdrop);
+    const close = ok => { backdrop.remove(); resolve(ok); };
+    box.querySelector('#_cdDel').onclick    = () => close(true);
+    box.querySelector('#_cdCancel').onclick = () => close(false);
+    backdrop.addEventListener('click', e => { if (e.target === backdrop) close(false); });
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key === 'Escape') { document.removeEventListener('keydown', esc); close(false); }
+    });
+  });
+}
+
 

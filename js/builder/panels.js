@@ -437,15 +437,6 @@ export function buildExprPanel(node, p, exprLink, setActive) {
   };
   p.appendChild(ta);
 
-  const roRow = document.createElement('label');
-  roRow.className = 'panel-ro-row';
-  const roCb = document.createElement('input');
-  roCb.type = 'checkbox';
-  roCb.checked = !!node._readOnly;
-  roCb.onchange = () => { node._readOnly = roCb.checked; triggerCalcRecalc(); };
-  roRow.appendChild(roCb);
-  roRow.appendChild(document.createTextNode('readOnly (computed by expression, not user-editable)'));
-  p.appendChild(roRow);
 }
 
 // ── Style / Appearance panel ──────────────────────────────────────────────────

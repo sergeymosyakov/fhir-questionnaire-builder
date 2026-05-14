@@ -96,6 +96,12 @@
   gap: 8px;
   justify-content: flex-end;
 }
+.btn-danger {
+  background: #c62828;
+  color: #fff;
+  border-color: #b71c1c;
+}
+.btn-danger:hover { background: #b71c1c; }
 
 /* === Export validation modal ================================================= */
 .validate-modal-backdrop {

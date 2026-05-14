@@ -141,15 +141,29 @@ describe('validateTree — constraint[]', () => {
     expect(issues.find(i => i.nodeId === 'q1').message).toMatch(/Constraint "c1" expression error/);
   });
 
+  it('errors on empty constraint key', () => {
+    const item = makeItem({ id: 'q1', constraint: [{ key: '', severity: 'error', human: 'msg', expression: '%age > 0' }] });
+    const issues = validateTree([item]);
+    expect(errIds(issues)).toContain('q1');
+    expect(issues.find(i => i.severity === 'error' && i.nodeId === 'q1').message).toMatch(/empty key/);
+  });
+
+  it('warns on empty constraint human message', () => {
+    const item = makeItem({ id: 'q1', constraint: [{ key: 'c1', severity: 'error', human: '', expression: '%age > 0' }] });
+    const issues = validateTree([item]);
+    expect(warnIds(issues)).toContain('q1');
+    expect(issues.find(i => i.severity === 'warning' && i.nodeId === 'q1').message).toMatch(/human/);
+  });
+
   it('warns on empty constraint expression', () => {
     const item = makeItem({ id: 'q1', constraint: [{ key: 'chk', severity: 'warning', human: 'msg', expression: '' }] });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1').message).toMatch(/Constraint "chk" has an empty expression/);
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.includes('empty expression'))).toBeTruthy();
   });
 
-  it('no issues for valid constraint expression', () => {
-    const item = makeItem({ id: 'q1', constraint: [{ key: 'c1', severity: 'error', human: 'msg', expression: '%age > 18' }] });
+  it('no issues for valid constraint', () => {
+    const item = makeItem({ id: 'q1', constraint: [{ key: 'c1', severity: 'error', human: 'Must be > 18', expression: '%age > 18' }] });
     const issues = validateTree([item]);
     expect(issues.filter(i => i.nodeId === 'q1')).toHaveLength(0);
   });
