@@ -198,6 +198,8 @@ Standard extensions preserved on export:
 - `node.enableWhenExpression` → SDC `sdc-questionnaire-enableWhenExpression` extension
 - `node.constraint[]` → `questionnaire-constraint` extensions
 
+See [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) for the full FHIR field mapping, including partial support and known gaps.
+
 ---
 
 ## UX Features
@@ -280,4 +282,3 @@ CI runs automatically on every push via GitHub Actions (see `.github/workflows/t
 ## Known Limitations / TODO
 
 - Multi-condition visibility with complex FHIRPath (cross-group references, extensions) not supported in the visual enableWhen builder — must be typed as `enableWhenExpression` directly
-- Full list of unsupported FHIR features (repeating items, answerValueSet, etc.) → [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md#not-supported-out-of-scope)
