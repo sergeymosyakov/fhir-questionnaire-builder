@@ -163,11 +163,11 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 
 ---
 
-## What Is Lost on Round-Trip
+## Round-Trip Safety
 
-Nothing significant. All standard FHIR fields are preserved on export and correctly re-read on the next import.
+All standard FHIR fields are preserved on export and correctly re-read on the next import.
 
-The only internal UI fields that are never written to FHIR JSON (and therefore never "lost"):
+Internal UI fields that are not written to FHIR JSON but are fully restored on import:
 
 | Field | Why it is not in FHIR JSON |
 |---|---|
