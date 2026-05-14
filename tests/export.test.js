@@ -214,6 +214,14 @@ describe('buildFHIRObject — answerOption', () => {
     expect(q.item[0].answerOption[0].valueCoding.code).toBe('a');
   });
 
+  it('exports answerOption for open-choice', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'open-choice', options: 'x=Xray,y=Yellow',
+    }]);
+    expect(q.item[0].answerOption).toHaveLength(2);
+    expect(q.item[0].answerOption[1].valueCoding.code).toBe('y');
+  });
+
   it('exports radio-button itemControl extension for radio', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A,b=B',
@@ -271,5 +279,55 @@ describe('buildFHIRObject — SDC variables', () => {
   it('skips variables without name or expression', () => {
     const q = build([], 'Q', [{ name: '', expression: 'x' }, { name: 'y', expression: '' }]);
     expect(q.extension).toBeUndefined();
+  });
+});
+
+// ── OR group — logicWithParent round-trip ──────────────────────────────────────
+describe('buildFHIRObject — OR group constraint', () => {
+  it('exports system OR-group constraint when logicWithParent is OR', () => {
+    const q = build([{
+      id: 'g1', type: 'group', title: 'G', logicWithParent: 'OR',
+      children: [
+        { id: 'c1', type: 'item', title: 'A', itemType: 'text' },
+        { id: 'c2', type: 'item', title: 'B', itemType: 'text' },
+      ],
+    }]);
+    const ext = q.item[0].extension || [];
+    const orExt = ext.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint');
+    expect(orExt).toBeDefined();
+    const key = orExt.extension.find(e => e.url === 'key')?.valueId;
+    expect(key).toMatch(/group-or/);
+    const expr = orExt.extension.find(e => e.url === 'expression')?.valueString;
+    expect(expr).toContain("linkId='c1'");
+    expect(expr).toContain("linkId='c2'");
+    expect(expr).toContain(' or ');
+  });
+
+  it('does not export OR-group constraint when logicWithParent is AND', () => {
+    const q = build([{
+      id: 'g1', type: 'group', title: 'G', logicWithParent: 'AND',
+      children: [{ id: 'c1', type: 'item', title: 'A', itemType: 'text' }],
+    }]);
+    const ext = q.item[0].extension || [];
+    const orExt = ext.find(e =>
+      e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint' &&
+      e.extension?.find(x => x.url === 'key' && String(x.valueId).includes('group-or'))
+    );
+    expect(orExt).toBeUndefined();
+  });
+
+  it('user constraints are preserved alongside OR-group constraint', () => {
+    const q = build([{
+      id: 'g1', type: 'group', title: 'G', logicWithParent: 'OR',
+      constraint: [{ key: 'user-rule', severity: 'error', human: 'msg', expression: '%age > 0' }],
+      children: [{ id: 'c1', type: 'item', title: 'A', itemType: 'text' }],
+    }]);
+    const allConstraints = (q.item[0].extension || []).filter(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint'
+    );
+    expect(allConstraints).toHaveLength(2);
+    const keys = allConstraints.map(c => c.extension.find(e => e.url === 'key')?.valueId);
+    expect(keys).toContain('user-rule');
+    expect(keys.some(k => String(k).includes('group-or'))).toBe(true);
   });
 });

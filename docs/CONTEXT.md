@@ -80,7 +80,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
-- **Vitest** — unit test suite for pure-function modules; **173 tests**; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules; **186 tests**; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---

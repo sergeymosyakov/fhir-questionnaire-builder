@@ -1,6 +1,13 @@
 // ── Pure utility functions ────────────────────────────────────────────────────
 // No imports, no side effects — safe to use from anywhere.
 
+// ── Internal namespace ────────────────────────────────────────────────────────
+// UUID-based prefix for all system-generated constraint keys.
+// Guarantees no collision with user-defined keys.
+export const ITLH_NS = 'e3a8c2f1-6b4d-4e9a-87c5';
+// System constraint keys
+export const ITLH_KEY_GROUP_OR = ITLH_NS + ':group-or';
+
 // Escape a string for use in an HTML attribute value.
 export const escAttr = s => (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 

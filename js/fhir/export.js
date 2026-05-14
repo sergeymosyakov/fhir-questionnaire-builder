@@ -1,6 +1,6 @@
 ﻿// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
 import { tree, questVariables, rawFhir } from '../state.js';
-import { parseOptions } from '../utils.js';
+import { parseOptions, ITLH_KEY_GROUP_OR } from '../utils.js';
 
 function itemTypeToFHIRType(t) {
   if (t === 'checkbox')    return 'boolean';
@@ -74,8 +74,25 @@ function nodeToFHIRItem(node) {
       valueExpression: { language: 'text/fhirpath', expression: node.enableWhenExpression }
     });
   }
-  // questionnaire-constraint[] (pass/fail rules)
-  ext.push(...buildConstraintExtensions(node.constraint));
+  // questionnaire-constraint[] — user rules (strip any stale system key first)
+  const userConstraints = (node.constraint || []).filter(c => c.key !== ITLH_KEY_GROUP_OR);
+  ext.push(...buildConstraintExtensions(userConstraints));
+
+  // OR-group: auto-generate constraint so round-trip restores logicWithParent
+  if (node.type === 'group' && node.logicWithParent === 'OR' && node.children.length > 0) {
+    const fp = node.children
+      .map(c => `%resource.item.where(linkId='${c.id}').answer.exists()`)
+      .join(' or ');
+    ext.push({
+      url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint',
+      extension: [
+        { url: 'key',        valueId:     ITLH_KEY_GROUP_OR },
+        { url: 'severity',   valueCode:   'error' },
+        { url: 'human',      valueString: 'At least one item in this group must be completed' },
+        { url: 'expression', valueString: fp },
+      ]
+    });
+  }
 
   // reference resource type
   if (node.itemType === 'reference' && node.referenceResource)
@@ -101,7 +118,7 @@ function nodeToFHIRItem(node) {
 
   if (node.type === 'group') {
     fhirItem.item = node.children.map(nodeToFHIRItem);
-  } else if ((node.itemType === 'select' || node.itemType === 'radio') && node.options) {
+  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice') && node.options) {
     fhirItem.answerOption = parseOptions(node.options)
       .map(({ code, display }) => ({ valueCoding: { code, display } }));
   }

@@ -104,8 +104,8 @@ Every node in the tree is either a **group** or an **item**:
 | `enableBehavior: 'any'` | `item.enableBehavior: 'any'` | only written when `'any'`; default `'all'` is omitted |
 | `enableWhenExpression` | SDC `sdc-questionnaire-enableWhenExpression` ext | FHIRPath string; omitted if empty |
 | `constraint[]` | `questionnaire-constraint` ext entries | round-trip safe |
-| `logicWithParent: 'OR'` | AND/OR preview badge | UI only; not exported |
-| `logicWithParent: 'AND'` | *(default, not exported)* | UI only |
+| `logicWithParent: 'OR'` | AND/OR preview badge | Exported as `questionnaire-constraint` (key `ITLH_NS:group-or`) with FHIRPath over child linkIds; restored on import |
+| `logicWithParent: 'AND'` | *(default)* | No constraint generated; restored as default on import |
 | `children` | `item.item[]` | recursive |
 
 ### Item-specific
@@ -172,7 +172,7 @@ The only internal UI fields that are never written to FHIR JSON (and therefore n
 | Field | Why it is not in FHIR JSON |
 |---|---|
 | `_enableWhenText` | Generated from `enableWhen[]` on import for display only; not a FHIR field |
-| `logicWithParent` | AND/OR separator badge between sibling items — UI only; no equivalent in FHIR R4 |
+| `logicWithParent` | `'OR'` exported as a namespaced `questionnaire-constraint` (key `e3a8c2f1-6b4d-4e9a-87c5:group-or`); round-trip safe |
 
 ---
 

@@ -1,6 +1,7 @@
 // в”Ђв”Ђ FHIR R4 Questionnaire import в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables } from '../state.js';
 import { renderTree } from '../render-builder.js';
+import { ITLH_KEY_GROUP_OR } from '../utils.js';
 
 // Walk the tree and pre-populate values[] from node._initialValue
 function applyInitialValues(nodes) {
@@ -85,17 +86,23 @@ function applyVisibility(node, fhirItem, linkIdMap) {
 }
 
 // Import FHIR questionnaire-constraint[] into node.constraint[]
+// Returns true if the system OR-group key was detected (logicWithParent should be set to 'OR').
 function applyConstraints(node, fhirItem) {
   const constraints = (fhirItem.extension || []).filter(
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint'
   );
-  if (!constraints.length) return;
+  if (!constraints.length) return false;
+  let hasOrGroup = false;
   node.constraint = constraints.map(ext => ({
     key:        ext.extension?.find(e => e.url === 'key')?.valueId || '',
     expression: ext.extension?.find(e => e.url === 'expression')?.valueString || '',
     human:      ext.extension?.find(e => e.url === 'human')?.valueString || '',
     severity:   ext.extension?.find(e => e.url === 'severity')?.valueCode || 'error',
-  })).filter(c => c.expression);
+  })).filter(c => {
+    if (c.key === ITLH_KEY_GROUP_OR) { hasOrGroup = true; return false; }
+    return c.expression;
+  });
+  return hasOrGroup;
 }
 
 // Build our item node from a FHIR leaf question
@@ -173,9 +180,9 @@ function fhirItemToNode(fhirItem, linkIdMap) {
     const node = makeGroup(fhirItem.text || fhirItem.linkId || 'Group');
     node.id        = fhirItem.linkId || node.id;
     node.mandatory = fhirItem.required === undefined ? null : !!fhirItem.required;
-    // logicWithParent: only relevant for the node's own children AND/OR logic
-    node.logicWithParent = fhirItem.enableBehavior === 'any' ? 'OR' : 'AND';
     applyVisibility(node, fhirItem, linkIdMap);
+    const hasOrGroup = applyConstraints(node, fhirItem);
+    if (hasOrGroup) node.logicWithParent = 'OR';
     const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));
     if (rs) node._renderStyle = rs.valueString || '';
     if (fhirItem.prefix) node._prefix = fhirItem.prefix;
