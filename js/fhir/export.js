@@ -1,4 +1,4 @@
-// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
+﻿// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
 import { tree, questVariables, rawFhir } from '../state.js';
 import { parseOptions } from '../utils.js';
 
@@ -16,28 +16,20 @@ function itemTypeToFHIRType(t) {
   return 'string';
 }
 
-// Try to convert our visibilityRule back to FHIR enableWhen[].
-// Handles patterns produced by the visual builder:
-//   values['linkId'] == true/false / 'string' / number
-// Returns null if the rule is too complex (free-form JS).
-function visRuleToEnableWhen(rule) {
-  if (!rule || !rule.trim()) return null;
-  const m = rule.trim().match(/^values\['([^']+)'\]\s*(==|!=|>=|<=|>|<)\s*(.+)$/);
-  if (!m) return null;
-  const [, question, op, rawVal] = m;
-  const fhirOp = op === '==' ? '=' : op;
-  let answer;
-  if (rawVal === 'true')       answer = { answerBoolean: true };
-  else if (rawVal === 'false') answer = { answerBoolean: false };
-  else if (/^-?\d+(\.\d+)?$/.test(rawVal)) {
-    answer = rawVal.includes('.')
-      ? { answerDecimal: parseFloat(rawVal) }
-      : { answerInteger: parseInt(rawVal, 10) };
-  } else {
-    const s = rawVal.replace(/^['"]|['"]$/g, '');
-    answer = { answerString: s };
-  }
-  return [{ question, operator: fhirOp, ...answer }];
+// Build questionnaire-constraint extensions from node.constraint[]
+function buildConstraintExtensions(constraint) {
+  if (!constraint || !constraint.length) return [];
+  return constraint
+    .filter(c => c.expression)
+    .map(c => ({
+      url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint',
+      extension: [
+        ...(c.key        ? [{ url: 'key',        valueId:     c.key }]      : []),
+        ...(c.severity   ? [{ url: 'severity',   valueCode:   c.severity }] : []),
+        { url: 'expression', valueString: c.expression },
+        ...(c.human      ? [{ url: 'human',      valueString: c.human }]    : []),
+      ]
+    }));
 }
 
 function nodeToFHIRItem(node) {
@@ -46,11 +38,13 @@ function nodeToFHIRItem(node) {
     text:   node.title,
     type:   node.type === 'group' ? 'group' : itemTypeToFHIRType(node.itemType)
   };
+
   if (node._prefix) fhirItem.prefix = node._prefix;
   if (node._codes && node._codes.length) fhirItem.code = node._codes;
-  if (node.mandatory === true) fhirItem.required = true;
+  if (node.mandatory === true)  fhirItem.required = true;
   else if (node.mandatory === false) fhirItem.required = false;
-  // item.initial[] — write back from _initialValue (items only, skip display/group)
+
+  // item.initial[] — write back from _initialValue
   if (node.type === 'item' && node._initialValue !== undefined && node._initialValue !== '') {
     const t = itemTypeToFHIRType(node.itemType);
     let initEntry;
@@ -63,57 +57,57 @@ function nodeToFHIRItem(node) {
     else                       initEntry = { valueString:   String(node._initialValue) };
     if (initEntry) fhirItem.initial = [initEntry];
   }
-  // null = not set, omit from FHIR
 
-  // visibilityRule → enableWhen if possible, else custom extension
-  if (node.visibilityRule) {
-    const ew = visRuleToEnableWhen(node.visibilityRule);
-    if (ew) {
-      fhirItem.enableWhen = ew;
-    } else {
-      fhirItem.extension = (fhirItem.extension || []).concat({
-        url: 'http://logicbuilder.example.org/extension/visibilityRule',
-        valueString: node.visibilityRule
-      });
-    }
+  // ── Standard R4 enableWhen[] ──────────────────────────────────────────────
+  if (node.enableWhen && node.enableWhen.length) {
+    fhirItem.enableWhen = node.enableWhen.map(ew => ({ ...ew }));
+    if (node.enableBehavior === 'any') fhirItem.enableBehavior = 'any';
   }
 
-  const ext = fhirItem.extension ? [...fhirItem.extension] : [];
-  if (node.conditionRule)
-    ext.push({ url: 'http://logicbuilder.example.org/extension/conditionRule', valueString: node.conditionRule });
-  if (node.type === 'item' && node.successValue)
-    ext.push({ url: 'http://logicbuilder.example.org/extension/successValue', valueString: node.successValue });
+  // ── SDC extensions ────────────────────────────────────────────────────────
+  const ext = [];
+
+  // enableWhenExpression (SDC FHIRPath condition)
+  if (node.enableWhenExpression) {
+    ext.push({
+      url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression',
+      valueExpression: { language: 'text/fhirpath', expression: node.enableWhenExpression }
+    });
+  }
+  // questionnaire-constraint[] (pass/fail rules)
+  ext.push(...buildConstraintExtensions(node.constraint));
+
+  // reference resource type
   if (node.itemType === 'reference' && node.referenceResource)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource', valueCode: node.referenceResource });
+  // quantity unit
   if (node.itemType === 'quantity' && node.quantityUnit)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit', valueCoding: { system: 'http://unitsofmeasure.org', code: node.quantityUnit } });
+  // calculatedExpression
+  if (node._calculatedExpr)
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression', valueExpression: { language: 'text/fhirpath', expression: node._calculatedExpr } });
+  // radio-button itemControl
+  if (node.itemType === 'radio')
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'radio-button' }] } });
+
   if (ext.length) fhirItem.extension = ext;
 
-  // _renderStyle → _text.extension[rendering-style] (round-trip)
+  // _renderStyle → _text.extension[rendering-style]
   if (node._renderStyle) {
     fhirItem._text = {
-      extension: [{
-        url: 'http://hl7.org/fhir/StructureDefinition/rendering-style',
-        valueString: node._renderStyle
-      }]
+      extension: [{ url: 'http://hl7.org/fhir/StructureDefinition/rendering-style', valueString: node._renderStyle }]
     };
   }
 
   if (node.type === 'group') {
-    if (node.logicWithParent === 'OR') fhirItem.enableBehavior = 'any';
     fhirItem.item = node.children.map(nodeToFHIRItem);
   } else if ((node.itemType === 'select' || node.itemType === 'radio') && node.options) {
     fhirItem.answerOption = parseOptions(node.options)
       .map(({ code, display }) => ({ valueCoding: { code, display } }));
-    if (node.itemType === 'radio') {
-      fhirItem.extension = (fhirItem.extension || []).concat({
-        url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl',
-        valueCodeableConcept: {
-          coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'radio-button' }]
-        }
-      });
-    }
   }
+
+  if (node._readOnly) fhirItem.readOnly = true;
+
   return fhirItem;
 }
 

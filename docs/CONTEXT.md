@@ -51,22 +51,23 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `css/styles.css` | All styles and CSS design tokens |
 | `js/app.js` | Entry point — wires inputs, buttons, loads example |
 | `js/state.js` | Reactive state, data factories, shared utilities |
-| `js/eval.js` | Tree evaluation (visibility / condition rules) |
+| `js/eval.js` | Tree evaluation — `enableWhen[]` visibility, `enableWhenExpression` FHIRPath, `evalConstraints` |
 | `js/render-builder.js` | Left panel — builder tree DOM |
 | `js/render-preview.js` | Right panel — reactive preview |
 | `js/fhir/import.js` | FHIR R4 → internal model |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables)`, `refresh()` |
+| `js/ui/patient-ctx.js` | Patient context popup — seeds and manages `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
 | `sampledata/example-bariatric.fhir.json` | FHIR R4 example (bariatric pre-authorization) |
 | `sampledata/1776102565767-...json` | Real-world questionnaire for testing |
 | `package.json` | Node dev tooling — Vitest test runner (`npm test`) |
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
-| `tests/eval.test.js` | Unit tests for `evalRule` logic and `js/eval.js` (16 tests) |
+| `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic (23 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
 | `tests/validate.test.js` | Unit tests for `js/fhir/validate.js` — `validateTree` (21 tests) |
-| `tests/export.test.js` | Unit tests for `js/fhir/export.js` — `buildFHIRObject` (25 tests) |
-| `tests/import.test.js` | Unit tests for `js/fhir/import.js` — `fhirTypeToItemType`, `fhirOptsToStr`, `enableWhenToExpr` (42 tests) |
+| `tests/export.test.js` | Unit tests for `js/fhir/export.js` — enableWhen, constraints, SDC variables (33 tests) |
+| `tests/import.test.js` | Unit tests for `js/fhir/import.js` — `fhirTypeToItemType`, `fhirOptsToStr`, `humanEnableWhen`, `applyVisibility` (45 tests) |
 | `tests/qr-builder.test.js` | Unit tests for `js/fhir/qr-builder.js` — `buildQR`, `buildQRItem` (23 tests) |
 | `.github/workflows/test.yml` | GitHub Actions CI — runs `npm test` on every push/PR to main |
 
@@ -78,71 +79,61 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **ES Modules** — `import/export` between files; requires HTTP server (`npx serve .` or GitHub Pages)
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
-- **`new Function()`** — sandboxed rule evaluation (`evalRule`)
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`); 160 tests; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
+- **Vitest** — unit test suite for pure-function modules; **178 tests**; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---
 
 ## Architecture
 
-### Reactive State (FHIR Patient R4)
+### Reactive State
 
 ```js
-age, gender, bmi, pregnant, smoker, proc, comorb  // ref() — patient fields
-tree        // reactive([]) — questionnaire node tree
-values      // plain object — form answers (not reactive; avoids re-render on every keystroke)
-_formTick   // ref(0) — incremented on checkbox/select change to re-trigger effect()
-autoFilledIds // Set — IDs of items auto-filled from conditionRule
+// Patient context — stored as FHIRPath literal expressions in questVariables (js/ui/patient-ctx.js)
+// Seeded as: { name:'age', expression:'30' }, { name:'gender', expression:"'male'" }, etc.
+// Accessible in FHIRPath as %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb
+
+tree              // reactive([]) — questionnaire node tree
+values            // plain object — form answers (not reactive; avoids re-render on every keystroke)
+_formTick         // ref(0) — incremented on checkbox/select change to re-trigger effect()
+questVariables    // reactive([]) — SDC variable entries; patient ctx seeded here
 ```
 
 ### Node Data Model
 
 ```js
 // Group
-{ id, type:'group', title, visibilityRule, conditionRule, mandatory,
+{ id, type:'group', title, mandatory,
+  enableWhen: [], enableBehavior: 'all'|'any', enableWhenExpression: '',
+  constraint: [],
   logicWithParent:'AND'|'OR', children:[] }
 
 // Item
-{ id, type:'item', title, visibilityRule, conditionRule, mandatory,
-  itemType:'text'|'number'|'checkbox'|'select'|'display', options, successValue }
+{ id, type:'item', title, mandatory,
+  itemType:'text'|'number'|'checkbox'|'select'|'display'|...,
+  enableWhen: [], enableBehavior: 'all'|'any', enableWhenExpression: '',
+  constraint: [], options }
 
 // FHIR-imported nodes also carry:
-_enableWhenText  // human-readable visibility condition label
+_enableWhenText  // human-readable enableWhen label (e.g. "«Q» = Yes AND «Q2» = No")
 _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 ```
-
-### evalRule
-
-```js
-new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
-  'return (' + rule + ');')
-```
-
-- `values['linkId']` — enables enableWhen-style rules on form answers
-- Empty rule → `true` (always visible)
 
 ---
 
 ## Evaluation Logic
 
-### visibilityRule
-- `false` → node is not rendered
-- `false` + `_enableWhenText` → rendered dimmed with 🔒 and condition label
-
-### conditionRule on a group
-- `false` → group and all descendants marked **N/A** (grayed, `—`)
-- Excluded from the final result (not FAIL — simply not applicable)
-- Example: `gender === 'female'` on a "Female-Specific Requirements" group
-
-### conditionRule on an item
-- Used for **auto-filling checkboxes** from patient data (🤖 badge)
-- The clinician can override the auto-filled value
+### enableWhen
+- `node.enableWhen[]` checked against `values[ew.question]` using `checkOneEnableWhen(ew)`
+- `node.enableBehavior === 'all'` (default) → all conditions must pass (AND)
+- `node.enableBehavior === 'any'` → any one condition passes (OR)
+- If `enableWhenExpression` is set, evaluated via `fhirpath.evaluate()` as override/fallback
+- Node hidden if conditions not met; `showDimmed` set if any enableWhen is defined
 
 ### Final Result
-- **PASS** — all visible, non-N/A mandatory items are satisfied
+- **PASS** — all visible, mandatory items are satisfied
 - **FAIL** — at least one mandatory item is not satisfied
-- N/A groups do **not** affect the result
 
 ---
 
@@ -175,24 +166,25 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 
 ---
 
-## FHIR Import (importFHIR)
+## FHIR Import (`importFHIR`)
 
-- `enableWhen` → `visibilityRule` JS expression + `_enableWhenText` (human label)
-- `type:group` → group node; `enableBehavior:any` → `logicWithParent:'OR'`
-- `type:boolean` → `itemType:'checkbox'`; `type:choice` → `itemType:'select'` or `'radio'` (if `questionnaire-itemControl: radio-button`)
-- Custom extensions at URL `http://logicbuilder.example.org/extension/...`: `conditionRule`, `visibilityRule`, `successValue`
+- `enableWhen[]` + `enableBehavior` → `node.enableWhen[]`, `node.enableBehavior`, `node._enableWhenText`
+- `sdc-questionnaire-enableWhenExpression` → `node.enableWhenExpression`
+- `questionnaire-constraint` extensions → `node.constraint[]`
+- `type:group` → group node; `type:boolean` → `itemType:'checkbox'`; `type:choice` → `itemType:'select'` or `'radio'` (if `questionnaire-itemControl: radio-button`)
 - `_text.extension[rendering-style]` → `_renderStyle` (applied as inline CSS in preview)
 - `item.prefix` → `node._prefix` (amber badge in preview; editable in builder; exported back)
 - `item.code[]` → `node._codes` (preserved as-is; exported back unchanged)
-- `linkIdMap` built before parsing → used for human-readable condition text
+- `linkIdMap` built before parsing → used for human-readable condition text in `_enableWhenText`
 
-## FHIR Export (exportFHIR)
+## FHIR Export (`exportFHIR`)
 
-- Simple `visibilityRule` patterns (`values['id'] OP value`) → standard FHIR `enableWhen`
-- Complex JS → stored as extension (round-trip safe)
-- `conditionRule`, `successValue` → always as extensions
+- `node.enableWhen[]` → standard FHIR `item.enableWhen[]` (shallow-copied directly)
+- `node.enableBehavior === 'any'` → `item.enableBehavior: 'any'`
+- `node.enableWhenExpression` → SDC `sdc-questionnaire-enableWhenExpression` extension
+- `node.constraint[]` → `questionnaire-constraint` extensions
 - `itemType:'radio'` → exports `type:'choice'` + standard `questionnaire-itemControl: radio-button` extension (round-trip safe)
-- Downloads as `questionnaire.fhir.json`
+- Downloads as `<name>.json` (user prompted for filename)
 
 ---
 
@@ -225,8 +217,8 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 - **Expandable title** — node title shown as a read-only span; click → expands to a full-width textarea (auto-height), collapses on blur
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
-- **Visual condition builder** — in the Visibility panel: pick a question by title to generate JS
-- **Auto-fill** — checkboxes with `conditionRule` pre-filled from patient data (🤖), overridable by clinician
+- **Visual condition builder** — "Show When" action panel uses FHIR `enableWhen[]` directly: AND/ANY toggle, per-condition rows (question picker + operator + type-aware value input), "+ Add condition", FHIRPath `enableWhenExpression` for advanced expressions
+- **Patient Context popup** — "Patient Context" button in toolbar opens modal; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`
 - **AND/OR badges** — on group headers: `ALL items ✓` / `ANY item ✓`
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed (🔒) when condition not met; animate to active when met
@@ -255,7 +247,6 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ## Known Limitations / TODO
 
-- Multi-condition visibility (`&&`, `||`) not supported in the visual builder — must be typed as JS manually
 - `conditionRule` on items is not exported to FHIR (prototype-specific concept, no R4 equivalent)
 - Example loads via `window.EXAMPLE_FHIR_Q` (JS wrapper), not `fetch`, for `file://` compatibility
 

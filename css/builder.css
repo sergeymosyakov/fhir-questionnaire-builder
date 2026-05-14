@@ -535,49 +535,87 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   font-size: 11px;
 }
 
-/* === Visibility condition builder =========================================== */
-.vis-builder {
+/* === Visibility (enableWhen) panel ========================================== */
+.vis-behavior-row {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 4px;
+  gap: 5px;
+  font-size: 12px;
+  margin-bottom: 6px;
 }
-.vis-builder-sel {
-  height: 26px;
+.vis-behavior-sel {
+  height: 24px;
   padding: 0 5px;
   border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
   font-size: 11px;
-  color: var(--c-text);
-  background: #fff;
-  max-width: 180px;
 }
-.vis-builder-op { max-width: 120px; }
-.vis-builder-preview {
-  width: 100%;
-  margin-top: 3px;
-  padding: 3px 7px;
-  background: #f0f4ff;
-  border: 1px dashed #90aee0;
+.vis-cond-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 5px;
+}
+.vis-cond-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.vis-cond-q {
+  height: 26px;
+  padding: 0 4px;
+  border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
   font-size: 11px;
-  font-family: monospace;
-  color: var(--c-primary);
-  word-break: break-all;
+  max-width: 160px;
 }
-.vis-builder-apply {
+.vis-cond-op {
+  height: 26px;
+  padding: 0 4px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  max-width: 100px;
+}
+.vis-cond-val-inp {
+  height: 24px;
+  padding: 0 5px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  max-width: 120px;
+}
+.vis-cond-rm {
+  height: 22px;
+  padding: 0 6px;
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--r-sm);
+  color: #c0392b;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+.vis-cond-rm:hover { background: #ffeaea; }
+.vis-add-btn {
   height: 26px;
   padding: 0 10px;
-  background: var(--c-primary);
-  color: #fff;
-  border: none;
+  background: none;
+  border: 1px dashed var(--c-primary);
   border-radius: var(--r-sm);
+  color: var(--c-primary);
+  cursor: pointer;
   font-size: 11px;
   font-weight: 600;
-  cursor: pointer;
 }
-.vis-builder-apply:hover { background: var(--c-primary-dk); }
+.vis-add-btn:hover { background: #eef2ff; }
+.vis-expr-sep {
+  margin: 8px 0 4px;
+  font-size: 10px;
+  color: var(--c-text-2);
+  text-align: center;
+}
 
 /* === Panel element classes =================================================== */
 .panel-vis-hint    { margin-bottom: 6px; padding: 4px 8px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; font-size: 11px; color: #5d4037; }

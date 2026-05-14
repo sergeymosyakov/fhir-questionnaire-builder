@@ -999,13 +999,7 @@
           "linkId": "q-consent",
           "type": "boolean",
           "text": "I confirm all information provided is accurate and complete to the best of my knowledge.",
-          "required": true,
-          "extension": [
-            {
-              "url": "http://logicbuilder.example.org/extension/successValue",
-              "valueString": "true"
-            }
-          ]
+          "required": true
         },
         {
           "linkId": "q-consent-date",

@@ -1,8 +1,9 @@
-// ── Tree evaluation: visibility and condition rules ───────────────────────────
-import { evalRule } from './state.js';
+// ── Tree evaluation: enableWhen visibility ───────────────────────────────────────
+// ctx: { fp, qr, envVars } — fhirpath + QuestionnaireResponse + variable env
+// (optional; needed only for enableWhenExpression FHIRPath evaluation)
+import { values } from './state.js';
 
 // Marks every node in a subtree as visible-but-disabled.
-// Used when a group's conditionRule evaluates to false.
 export function markAllDisabled(nodes, results) {
   for (const ch of nodes) {
     results.push({ node: ch, visible: true, ok: true, disabled: true });
@@ -10,15 +11,60 @@ export function markAllDisabled(nodes, results) {
   }
 }
 
-// evaluateNode handles external conditions (visibilityRule, conditionRule).
+// Evaluate one enableWhen condition against current form values.
+function checkOneEnableWhen(ew) {
+  const val = values[ew.question];
+  if (ew.operator === 'exists') {
+    const hasVal = val !== undefined && val !== null && val !== '';
+    return ew.answerBoolean !== false ? hasVal : !hasVal;
+  }
+  let answer;
+  if      (ew.answerBoolean  !== undefined) answer = ew.answerBoolean;
+  else if (ew.answerString   !== undefined) answer = ew.answerString;
+  else if (ew.answerInteger  !== undefined) answer = ew.answerInteger;
+  else if (ew.answerDecimal  !== undefined) answer = ew.answerDecimal;
+  else if (ew.answerCoding)                 answer = ew.answerCoding.code || ew.answerCoding.display || '';
+  else return false;
+  // Coerce for consistent comparison (user values may be booleans or strings)
+  const coerced = String(answer);
+  const current = val !== undefined && val !== null ? String(val) : '';
+  switch (ew.operator) {
+    case '=':  return current === coerced;
+    case '!=': return current !== coerced;
+    case '>':  return Number(current) > Number(coerced);
+    case '<':  return Number(current) < Number(coerced);
+    case '>=': return Number(current) >= Number(coerced);
+    case '<=': return Number(current) <= Number(coerced);
+  }
+  return false;
+}
+
+// Evaluate node visibility:
+// 1. enableWhen[] (standard R4) — check against values[]
+// 2. enableWhenExpression (SDC) — evaluate via FHIRPath
+// 3. Neither present → always visible
+function isNodeVisible(node, ctx) {
+  if (node.enableWhen && node.enableWhen.length) {
+    const checks = node.enableWhen.map(checkOneEnableWhen);
+    return node.enableBehavior === 'any' ? checks.some(Boolean) : checks.every(Boolean);
+  }
+  if (node.enableWhenExpression && ctx && ctx.fp && ctx.qr) {
+    try {
+      const result = ctx.fp.evaluate(ctx.qr, node.enableWhenExpression, ctx.envVars || {});
+      return result[0] === true;
+    } catch { return false; }
+  }
+  return true;
+}
+
+// evaluateNode handles external conditions (enableWhen / enableWhenExpression).
 // Form-value checks (calcFormOk) are applied separately in the preview renderer
 // so that typing in a control does NOT trigger a full DOM rebuild via effect().
 export function evaluateNode(node, ctx, results) {
-  const visible = evalRule(node.visibilityRule, ctx);
+  const visible = isNodeVisible(node, ctx);
   if (!visible) {
-    // If this node came from FHIR enableWhen, show it dimmed in preview with condition text
-    const showDimmed = !!node._enableWhenText;
-    results.push({ node, visible: false, ok: !node.mandatory, showDimmed });
+    const showDimmed = !!(node.enableWhen && node.enableWhen.length) || !!node.enableWhenExpression;
+    results.push({ node, visible: false, ok: node.mandatory === false, showDimmed });
     if (showDimmed && node.type === 'group') {
       markAllDisabled(node.children, results);
     }
@@ -26,21 +72,13 @@ export function evaluateNode(node, ctx, results) {
   }
 
   if (node.type === 'item') {
-    const ok = node.mandatory === false || evalRule(node.conditionRule, ctx);
-    results.push({ node, visible: true, ok });
-    return { ok, visible: true };
+    results.push({ node, visible: true, ok: true });
+    return { ok: true, visible: true };
   }
 
   // Group: push placeholder FIRST → group heading appears above children in preview
   const entry = { node, visible: true, ok: true };
   results.push(entry);
-
-  // Group's own conditionRule — if false: whole subtree is N/A (disabled, not FAIL)
-  if (!evalRule(node.conditionRule, ctx)) {
-    entry.disabled = true;
-    markAllDisabled(node.children, results);
-    return { ok: true, visible: true, disabled: true };
-  }
 
   const visKids = [];
   for (const ch of node.children) {
@@ -50,7 +88,7 @@ export function evaluateNode(node, ctx, results) {
 
   let groupOk;
   if (visKids.length === 0) {
-    groupOk = !node.mandatory;
+    groupOk = node.mandatory === false;
   } else {
     groupOk = visKids[0].ok;
     for (let i = 1; i < visKids.length; i++) {

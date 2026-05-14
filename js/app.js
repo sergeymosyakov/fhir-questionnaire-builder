@@ -1,5 +1,4 @@
-﻿// Entry point: wires patient inputs, toolbar buttons, and loads the built-in example.
-import { age, gender, bmi, pregnant, smoker, proc, comorb } from './patient.js';
+﻿// Entry point: wires toolbar buttons, patient context popup, and loads the built-in example.
 import { tree, values, rawFhir, _formTick, effect } from './state.js';
 import { importFHIR } from './fhir/import.js';
 import { buildFHIRObject, exportFHIR } from './fhir/export.js';
@@ -11,6 +10,7 @@ import * as tooltip from './ui/tooltip.js';
 import * as autosave from './ui/autosave.js';
 import * as statusBadge from './ui/status-badge.js';
 import * as variablesPanel from './ui/variables-panel.js';
+import * as patientCtx from './ui/patient-ctx.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview } from './render-preview.js';
 import { showLinkId, showPrefix, questVariables } from './state.js';
@@ -18,21 +18,6 @@ import './render-preview.js'; // side-effect: registers the reactive effect()
 
 // fhirpath.js v4 browser bundle loaded as global via lib/fhirpath.min.js
 const fhirpath = window.fhirpath;
-
-// Wire patient-data inputs to reactive refs
-[
-  ['inp-age',    age,    v => parseFloat(v) || 0],
-  ['inp-bmi',    bmi,    v => parseFloat(v) || 0],
-  ['inp-proc',   proc,   v => v],
-  ['inp-comorb', comorb, v => v],
-  ['inp-gender', gender, v => v],
-].forEach(([id, r, parse]) => {
-  document.getElementById(id).addEventListener('input', e => {
-    r.value = parse(e.target.value);
-  });
-});
-document.getElementById('inp-pregnant').addEventListener('change', e => { pregnant.value = e.target.checked; });
-document.getElementById('inp-smoker').addEventListener('change',   e => { smoker.value   = e.target.checked; });
 
 // Buttons
 document.getElementById('clearFormBtn').onclick    = _clearForm;
@@ -89,6 +74,15 @@ variablesPanel.init({
   modal:     document.getElementById('variablesModal'),
   modalBody: document.getElementById('variablesModalBody'),
   closeBtn:  document.getElementById('variablesModalClose'),
+}, questVariables);
+
+// ── Patient context popup init ────────────────────────────────────────────
+patientCtx.init({
+  btn:      document.getElementById('patientCtxBtn'),
+  modal:    document.getElementById('patientCtxModal'),
+  closeBtn: document.getElementById('patientCtxClose'),
+  applyBtn: document.getElementById('patientCtxApply'),
+  body:     document.getElementById('patientCtxBody'),
 }, questVariables);
 
 // ── Global progress bar init ──────────────────────────────────────────────

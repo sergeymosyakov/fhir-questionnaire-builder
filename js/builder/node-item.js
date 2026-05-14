@@ -3,7 +3,7 @@
 import { findAndRemove, escAttr } from '../utils.js';
 import { navigateToPreview } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildMandPanel, buildCondPanel, buildTypePanel, buildExprPanel, buildStylePanel, buildInitialPanel } from './panels.js';
+import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildExprPanel, buildStylePanel, buildInitialPanel } from './panels.js';
 
 export function renderItem(node, ctx) {
   const { renderTree } = ctx;
@@ -131,12 +131,8 @@ export function renderItem(node, ctx) {
     'Questionnaire.item.required', 'R4 · optional');
   const visLink   = addToggle('Show When', 'vis',
     'Show When (enableWhen)',
-    'Visibility condition — a JS expression or visual builder rule. Simple patterns export as standard FHIR enableWhen[]; complex JS exports as a custom extension. When false the item is hidden (or dimmed 🔒 if imported from enableWhen).',
-    'Questionnaire.item.enableWhen[]', 'R4 · optional');
-  const condLink  = addToggle('Applicability', 'cond',
-    'Applicability (conditionRule)',
-    'Custom condition for N/A state. When false the item/group is grayed out and excluded from the final result. Not a standard FHIR field — stored as a custom extension on export.',
-    'extension[conditionRule]', 'Custom extension');
+    'Add enableWhen conditions to control when this item is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden items are dimmed \uD83D\uDD12 in the preview.',
+    'Questionnaire.item.enableWhen[]', 'R4 \u00B7 optional');
   const exprLink  = addToggle('Expression', 'expr',
     'Calculated Expression',
     'SDC FHIRPath expression evaluated when Test is clicked. Result is written into the answer field. Typically used with readOnly items. Supports questionnaire-level %variables.',
@@ -185,13 +181,11 @@ export function renderItem(node, ctx) {
   addPanel('type', p => buildTypePanel(node, p), div, panels);
   addPanel('mand', p => buildMandPanel(node, p, mandLink, setActive), div, panels);
   addPanel('vis',  p => buildVisPanel(node, p, visLink, setActive, ctx), div, panels);
-  addPanel('cond', p => buildCondPanel(node, p, condLink, setActive, false), div, panels);
   addPanel('expr', p => buildExprPanel(node, p, exprLink, setActive), div, panels);
   addPanel('init', p => buildInitialPanel(node, p, initLink, setActive), div, panels);
   addPanel('style',p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
-  setActive(visLink,   !!node.visibilityRule);
-  setActive(condLink,  !!node.conditionRule);
+  setActive(visLink,   !!(node.enableWhen?.length) || !!node.enableWhenExpression);
   setActive(exprLink,  !!node._calculatedExpr);
   setActive(initLink,  node._initialValue !== undefined && node._initialValue !== '');
   setActive(styleLink, !!node._renderStyle);

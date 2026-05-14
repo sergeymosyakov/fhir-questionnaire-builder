@@ -3,8 +3,7 @@
 //
 // Each panel is keyed and toggled by the action links defined in node-item/group.
 import { escAttr, parseOptions } from '../utils.js';
-import { getAllItems, buildSuccessValueUI, triggerCalcRecalc } from './_shared.js';
-import { values } from '../state.js';
+import { getAllItems, triggerCalcRecalc } from './_shared.js';
 
 // ── Panel factory helper ──────────────────────────────────────────────────────
 export function addPanel(key, buildFn, div, panels) {
@@ -16,134 +15,221 @@ export function addPanel(key, buildFn, div, panels) {
   div.appendChild(p);
 }
 
-// ── Visibility panel ──────────────────────────────────────────────────────────
+// ── Visibility panel (FHIR enableWhen) ───────────────────────────────────────
 export function buildVisPanel(node, p, visLink, setActive, ctx) {
-  const friendly = document.createElement('div');
-  friendly.className = 'panel-vis-hint';
-  const updateFriendly = () => {
-    friendly.innerHTML = node._enableWhenText && node.visibilityRule
-      ? '\uD83D\uDD12 <b>Shown when:</b> ' + escAttr(node._enableWhenText)
-      : '';
-    friendly.style.display = (node._enableWhenText && node.visibilityRule) ? 'block' : 'none';
-  };
-  updateFriendly();
-  p.appendChild(friendly);
+  if (!Array.isArray(node.enableWhen)) node.enableWhen = [];
+  if (!node.enableBehavior) node.enableBehavior = 'all';
+  if (node.enableWhenExpression === undefined) node.enableWhenExpression = '';
 
-  // Visual condition builder
-  const builderWrap = document.createElement('div');
-  builderWrap.className = 'vis-builder';
-  const items = getAllItems(ctx.tree).filter(it => it.id !== node.id);
+  const allItems = getAllItems(ctx.tree).filter(it => it.id !== node.id);
 
-  const qSel = document.createElement('select');
-  qSel.className = 'vis-builder-sel';
-  const blank = document.createElement('option');
-  blank.value = ''; blank.textContent = '\u2014 pick a question \u2014';
-  qSel.appendChild(blank);
-  for (const it of items) {
-    const opt = document.createElement('option');
-    opt.value = it.id; opt.textContent = it.label;
-    opt.dataset.itype = it.itemType; opt.dataset.opts = it.options || '';
-    qSel.appendChild(opt);
-  }
-
-  const opSel = document.createElement('select');
-  opSel.className = 'vis-builder-sel vis-builder-op';
-  const valWrap = document.createElement('span');
-
-  const preview = document.createElement('div');
-  preview.className = 'vis-builder-preview';
-  preview.style.display = 'none';
-
-  const applyBtn = document.createElement('button');
-  applyBtn.type = 'button';
-  applyBtn.className = 'vis-builder-apply';
-  applyBtn.textContent = 'Use \u2192';
-
-  const rebuildValueInput = (itype, opts) => {
-    valWrap.innerHTML = '';
-    opSel.innerHTML = '';
-    if (itype === 'checkbox') {
-      ['== true|is Yes (checked)', '== false|is No (unchecked)'].forEach(s => {
-        const [v, l] = s.split('|');
-        const o = document.createElement('option'); o.value = v; o.textContent = l; opSel.appendChild(o);
-      });
-    } else {
-      ['==|equals', '!=|not equals', '>|greater than', '<|less than'].forEach(s => {
-        const [v, l] = s.split('|');
-        const o = document.createElement('option'); o.value = v; o.textContent = l; opSel.appendChild(o);
-      });
-      if (itype === 'select' && opts) {
-        const sel2 = document.createElement('select');
-        sel2.className = 'vis-builder-sel';
-        parseOptions(opts).forEach(({ code, display }) => {
-          const opt = document.createElement('option'); opt.value = code; opt.textContent = display; sel2.appendChild(opt);
-        });
-        valWrap.appendChild(sel2);
-      } else {
-        const inp2 = document.createElement('input');
-        inp2.type = itype === 'number' ? 'number' : 'text';
-        inp2.placeholder = 'value';
-        inp2.className = 'panel-inp-sm';
-        valWrap.appendChild(inp2);
-      }
-    }
+  const syncActive = () => {
+    setActive(visLink, node.enableWhen.length > 0 || !!node.enableWhenExpression);
   };
 
-  const updatePreview = () => {
-    const qid = qSel.value; if (!qid) { preview.style.display = 'none'; return; }
-    const op  = opSel.value;
-    const selOpt = qSel.options[qSel.selectedIndex];
-    const itype = selOpt.dataset.itype;
-    let valPart = '';
-    if (itype === 'checkbox') {
-      valPart = op;
-    } else {
-      const inp2 = valWrap.querySelector('input,select');
-      const raw  = inp2 ? inp2.value : '';
-      valPart = op + ' ' + (isNaN(raw) || raw === '' ? '\'' + raw.replace(/'/g, "\\'") + '\'' : raw);
+  // ── AND / ANY behavior selector ──────────────────────────────────────────
+  const behaviorRow = document.createElement('div');
+  behaviorRow.className = 'vis-behavior-row';
+  behaviorRow.appendChild(Object.assign(document.createElement('span'), { textContent: 'Show when ' }));
+  const behaviorSel = document.createElement('select');
+  behaviorSel.className = 'vis-behavior-sel';
+  [['all', 'ALL (AND)'], ['any', 'ANY (OR)']].forEach(([v, l]) => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = l;
+    if (node.enableBehavior === v) o.selected = true;
+    behaviorSel.appendChild(o);
+  });
+  behaviorSel.onchange = () => { node.enableBehavior = behaviorSel.value; };
+  behaviorRow.appendChild(behaviorSel);
+  behaviorRow.appendChild(Object.assign(document.createElement('span'), { textContent: ' conditions are met:' }));
+  p.appendChild(behaviorRow);
+
+  // ── Condition list ────────────────────────────────────────────────────────
+  const condList = document.createElement('div');
+  condList.className = 'vis-cond-list';
+  p.appendChild(condList);
+
+  const renderCondRow = (ew, idx) => {
+    const row = document.createElement('div');
+    row.className = 'vis-cond-row';
+
+    const qSel = document.createElement('select');
+    qSel.className = 'vis-cond-q';
+    const blankOpt = document.createElement('option');
+    blankOpt.value = ''; blankOpt.textContent = '\u2014 question \u2014';
+    qSel.appendChild(blankOpt);
+    for (const it of allItems) {
+      const o = document.createElement('option');
+      o.value = it.id; o.textContent = it.label;
+      o.dataset.itype = it.itemType;
+      o.dataset.opts  = it.options || '';
+      if (it.id === ew.question) o.selected = true;
+      qSel.appendChild(o);
     }
-    const expr = `values['${qid}'] ${valPart}`;
-    preview.textContent = expr;
-    preview.style.display = 'block';
-    applyBtn.onclick = () => {
-      node.visibilityRule = expr;
-      rawInp.value = expr;
-      setActive(visLink, !!expr);
+
+    const opSel = document.createElement('select');
+    opSel.className = 'vis-cond-op';
+
+    const valWrap = document.createElement('span');
+    valWrap.className = 'vis-cond-val';
+
+    const rmBtn = document.createElement('button');
+    rmBtn.type = 'button';
+    rmBtn.className = 'vis-cond-rm';
+    rmBtn.textContent = '\u2715';
+    rmBtn.onclick = () => {
+      node.enableWhen.splice(idx, 1);
+      condList.innerHTML = '';
+      node.enableWhen.forEach((e, i) => condList.appendChild(renderCondRow(e, i)));
+      syncActive();
     };
-  };
 
-  qSel.onchange = () => {
+    const buildOpVal = (itype, opts) => {
+      opSel.innerHTML = '';
+      valWrap.innerHTML = '';
+      if (itype === 'checkbox') {
+        [['=|true', 'is Yes (checked)'], ['=|false', 'is No (unchecked)']].forEach(([v, l]) => {
+          const o = document.createElement('option'); o.value = v; o.textContent = l;
+          opSel.appendChild(o);
+        });
+        opSel.value = ew.operator + '|' + (ew.answerBoolean === false ? 'false' : 'true');
+        opSel.onchange = () => {
+          const [op, boolStr] = opSel.value.split('|');
+          ew.operator = op;
+          ew.answerBoolean = boolStr === 'true';
+        };
+      } else if (itype === 'select' || itype === 'radio' || itype === 'open-choice') {
+        [['=', '='], ['!=', '\u2260']].forEach(([v, l]) => {
+          const o = document.createElement('option'); o.value = v; o.textContent = l;
+          opSel.appendChild(o);
+        });
+        opSel.value = ew.operator || '=';
+        opSel.onchange = () => { ew.operator = opSel.value; };
+        if (opts) {
+          const valSel = document.createElement('select');
+          valSel.className = 'vis-cond-val-inp';
+          parseOptions(opts).forEach(({ code, display }) => {
+            const o = document.createElement('option');
+            o.value = code; o.textContent = display || code;
+            if (ew.answerCoding && ew.answerCoding.code === code) o.selected = true;
+            valSel.appendChild(o);
+          });
+          valSel.onchange = () => {
+            const selOpt = valSel.options[valSel.selectedIndex];
+            ew.answerCoding = { code: valSel.value, display: selOpt.textContent };
+          };
+          valWrap.appendChild(valSel);
+        } else {
+          const inp = document.createElement('input');
+          inp.type = 'text'; inp.className = 'vis-cond-val-inp';
+          inp.value = ew.answerCoding?.code || ew.answerString || '';
+          inp.oninput = () => { ew.answerCoding = { code: inp.value }; delete ew.answerString; };
+          valWrap.appendChild(inp);
+        }
+      } else if (itype === 'number' || itype === 'quantity') {
+        [['=','='],['!=','\u2260'],['>','>'],['<','<'],['>=','\u2265'],['<=','\u2264']].forEach(([v, l]) => {
+          const o = document.createElement('option'); o.value = v; o.textContent = l;
+          opSel.appendChild(o);
+        });
+        opSel.value = ew.operator || '=';
+        opSel.onchange = () => { ew.operator = opSel.value; };
+        const inp = document.createElement('input');
+        inp.type = 'number'; inp.className = 'vis-cond-val-inp';
+        inp.value = ew.answerDecimal !== undefined ? ew.answerDecimal
+          : ew.answerInteger !== undefined ? ew.answerInteger : '';
+        inp.oninput = () => {
+          const n = parseFloat(inp.value);
+          if (!isNaN(n)) {
+            if (Number.isInteger(n)) { ew.answerInteger = n; delete ew.answerDecimal; }
+            else { ew.answerDecimal = n; delete ew.answerInteger; }
+          }
+        };
+        valWrap.appendChild(inp);
+      } else if (itype === 'date') {
+        [['=','='],['!=','\u2260'],['>','>'],['<','<']].forEach(([v, l]) => {
+          const o = document.createElement('option'); o.value = v; o.textContent = l;
+          opSel.appendChild(o);
+        });
+        opSel.value = ew.operator || '=';
+        opSel.onchange = () => { ew.operator = opSel.value; };
+        const inp = document.createElement('input');
+        inp.type = 'date'; inp.className = 'vis-cond-val-inp';
+        inp.value = ew.answerDate || '';
+        inp.oninput = () => { ew.answerDate = inp.value; };
+        valWrap.appendChild(inp);
+      } else {
+        [['=','='],['!=','\u2260']].forEach(([v, l]) => {
+          const o = document.createElement('option'); o.value = v; o.textContent = l;
+          opSel.appendChild(o);
+        });
+        opSel.value = ew.operator || '=';
+        opSel.onchange = () => { ew.operator = opSel.value; };
+        const inp = document.createElement('input');
+        inp.type = 'text'; inp.className = 'vis-cond-val-inp';
+        inp.value = ew.answerString || '';
+        inp.oninput = () => { ew.answerString = inp.value; delete ew.answerCoding; delete ew.answerDecimal; };
+        valWrap.appendChild(inp);
+      }
+    };
+
     const selOpt = qSel.options[qSel.selectedIndex];
-    if (!selOpt || !selOpt.value) { preview.style.display = 'none'; return; }
-    rebuildValueInput(selOpt.dataset.itype, selOpt.dataset.opts);
-    opSel.onchange = updatePreview;
-    const inp2 = valWrap.querySelector('input,select');
-    if (inp2) inp2.oninput = inp2.onchange = updatePreview;
-    updatePreview();
+    if (selOpt && selOpt.value) buildOpVal(selOpt.dataset.itype, selOpt.dataset.opts);
+    else opSel.innerHTML = '<option value="">\u2014</option>';
+
+    qSel.onchange = () => {
+      const picked = qSel.options[qSel.selectedIndex];
+      if (!picked || !picked.value) return;
+      ew.question = picked.value;
+      delete ew.answerBoolean; delete ew.answerString; delete ew.answerCoding;
+      delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate;
+      ew.operator = '=';
+      buildOpVal(picked.dataset.itype, picked.dataset.opts);
+      syncActive();
+    };
+
+    row.appendChild(qSel);
+    row.appendChild(opSel);
+    row.appendChild(valWrap);
+    row.appendChild(rmBtn);
+    return row;
   };
 
-  builderWrap.appendChild(qSel);
-  builderWrap.appendChild(opSel);
-  builderWrap.appendChild(valWrap);
-  builderWrap.appendChild(preview);
-  builderWrap.appendChild(applyBtn);
-  p.appendChild(builderWrap);
+  node.enableWhen.forEach((ew, i) => condList.appendChild(renderCondRow(ew, i)));
 
-  const rawLbl = document.createElement('div');
-  rawLbl.className = 'panel-raw-lbl';
-  rawLbl.textContent = 'or type JS directly:';
-  p.appendChild(rawLbl);
-
-  const rawInp = document.createElement('input');
-  rawInp.type = 'text';
-  rawInp.value = node.visibilityRule || '';
-  rawInp.oninput = () => {
-    node.visibilityRule = rawInp.value;
-    if (!rawInp.value) node._enableWhenText = '';
-    updateFriendly();
-    setActive(visLink, !!rawInp.value);
+  // ── Add condition ─────────────────────────────────────────────────────────
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'vis-add-btn';
+  addBtn.textContent = '+ Add condition';
+  addBtn.onclick = () => {
+    const newEw = { question: '', operator: '=', answerBoolean: true };
+    node.enableWhen.push(newEw);
+    condList.appendChild(renderCondRow(newEw, node.enableWhen.length - 1));
+    syncActive();
   };
-  p.appendChild(rawInp);
+  p.appendChild(addBtn);
+
+  // ── FHIRPath expression (advanced) ────────────────────────────────────────
+  const exprSep = document.createElement('div');
+  exprSep.className = 'vis-expr-sep';
+  exprSep.textContent = '\u2014 or FHIRPath expression (advanced) \u2014';
+  p.appendChild(exprSep);
+
+  const exprLbl = document.createElement('div');
+  exprLbl.className = 'panel-raw-lbl panel-raw-lbl--sm';
+  exprLbl.textContent = 'enableWhenExpression (SDC):';
+  p.appendChild(exprLbl);
+
+  const exprInp = document.createElement('input');
+  exprInp.type = 'text';
+  exprInp.className = 'panel-inp-sm';
+  exprInp.style.width = '100%';
+  exprInp.value = node.enableWhenExpression || '';
+  exprInp.placeholder = "e.g. %age > 18 and %gender = 'male'";
+  exprInp.oninput = () => { node.enableWhenExpression = exprInp.value; syncActive(); };
+  p.appendChild(exprInp);
+
+  syncActive();
 }
 
 // ── Mandatory panel ───────────────────────────────────────────────────────────
@@ -167,19 +253,6 @@ export function buildMandPanel(node, p, mandLink, setActive) {
   p.appendChild(label);
 }
 
-// ── Condition panel ───────────────────────────────────────────────────────────
-export function buildCondPanel(node, p, condLink, setActive, isGroup) {
-  p.innerHTML = isGroup
-    ? 'Condition rule \u2014 if false, group is N/A (disabled, not FAIL):<br>'
-      + '<small class="panel-hint">Variables: age, gender, bmi, pregnant, smoker, proc, comorb</small>'
-      + '<input type="text" value="' + escAttr(node.conditionRule) + '">'
-    : 'Condition rule (age, bmi, proc, comorb):<br>'
-      + '<input type="text" value="' + escAttr(node.conditionRule) + '">';
-  p.querySelector('input').oninput = function () {
-    node.conditionRule = this.value;
-    setActive(condLink, !!this.value);
-  };
-}
 
 // ── Type + Options panel (item only) ─────────────────────────────────────────
 export function buildTypePanel(node, p) {
@@ -290,16 +363,11 @@ export function buildTypePanel(node, p) {
   qUnitDiv.appendChild(qUnitSel);
   p.appendChild(qUnitDiv);
 
-  const successDiv = document.createElement('div');
-  p.appendChild(successDiv);
-  buildSuccessValueUI(node, successDiv);
-
   typeSelect.onchange = () => {
     node.itemType = typeSelect.value;
     optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice' || node.itemType === 'radio') ? 'block' : 'none';
     refResDiv.style.display  = node.itemType === 'reference' ? 'block' : 'none';
     qUnitDiv.style.display   = node.itemType === 'quantity'  ? 'block' : 'none';
-    buildSuccessValueUI(node, successDiv);
   };
 }
 

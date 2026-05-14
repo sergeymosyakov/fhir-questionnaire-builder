@@ -10,33 +10,33 @@ vi.mock('../js/state.js', () => ({
   questVariables: [],
   _bulkUpdate:    { value: false },
   resetSeq:       vi.fn(),
-  makeGroup:      vi.fn(title => ({ type: 'group', id: 'g', title, children: [], visibilityRule: '', conditionRule: '', mandatory: null, logicWithParent: 'AND' })),
-  makeItem:       vi.fn(title => ({ type: 'item',  id: 'i', title, itemType: 'text', options: '', mandatory: null, visibilityRule: '', conditionRule: '' })),
+  makeGroup:      vi.fn(title => ({ type: 'group', id: 'g', title, children: [], enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', mandatory: null, logicWithParent: 'AND' })),
+  makeItem:       vi.fn(title => ({ type: 'item',  id: 'i', title, itemType: 'text', options: '', mandatory: null, enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', constraint: [] })),
 }));
 
 vi.mock('../js/render-builder.js', () => ({ renderTree: vi.fn() }));
 
-const { enableWhenToExpr, fhirTypeToItemType, fhirOptsToStr } = await import('../js/fhir/import.js');
+const { fhirTypeToItemType, fhirOptsToStr, humanEnableWhen, applyVisibility } = await import('../js/fhir/import.js');
 
-// ── fhirTypeToItemType ────────────────────────────────────────────────────────
+// ── fhirTypeToItemType ────────────────────────────────────────────────────────────
 describe('fhirTypeToItemType', () => {
   const cases = [
-    ['boolean',   'checkbox'],
-    ['integer',   'number'],
-    ['decimal',   'number'],
-    ['quantity',  'quantity'],
-    ['choice',    'select'],
+    ['boolean',     'checkbox'],
+    ['integer',     'number'],
+    ['decimal',     'number'],
+    ['quantity',    'quantity'],
+    ['choice',      'select'],
     ['open-choice', 'open-choice'],
-    ['display',   'display'],
-    ['date',      'date'],
-    ['dateTime',  'date'],
-    ['time',      'date'],
-    ['url',       'url'],
-    ['attachment','attachment'],
-    ['reference', 'reference'],
-    ['string',    'text'],
-    ['text',      'text'],
-    ['unknown',   'text'],  // fallback
+    ['display',     'display'],
+    ['date',        'date'],
+    ['dateTime',    'date'],
+    ['time',        'date'],
+    ['url',         'url'],
+    ['attachment',  'attachment'],
+    ['reference',   'reference'],
+    ['string',      'text'],
+    ['text',        'text'],
+    ['unknown',     'text'],  // fallback
   ];
   for (const [fhirType, expected] of cases) {
     it(`maps ${fhirType} → ${expected}`, () => {
@@ -45,7 +45,7 @@ describe('fhirTypeToItemType', () => {
   }
 });
 
-// ── fhirOptsToStr ─────────────────────────────────────────────────────────────
+// ── fhirOptsToStr ─────────────────────────────────────────────────────────────────
 describe('fhirOptsToStr', () => {
   it('returns empty string for null/undefined', () => {
     expect(fhirOptsToStr(null)).toBe('');
@@ -100,90 +100,183 @@ describe('fhirOptsToStr', () => {
   });
 });
 
-// ── enableWhenToExpr ──────────────────────────────────────────────────────────
-describe('enableWhenToExpr', () => {
-  it('returns empty string for null/undefined/empty', () => {
-    expect(enableWhenToExpr(null)).toBe('');
-    expect(enableWhenToExpr(undefined)).toBe('');
-    expect(enableWhenToExpr([])).toBe('');
+// ── humanEnableWhen ─────────────────────────────────────────────────────────────────
+describe('humanEnableWhen', () => {
+  it('returns empty for null/undefined/empty', () => {
+    expect(humanEnableWhen(null)).toBe('');
+    expect(humanEnableWhen(undefined)).toBe('');
+    expect(humanEnableWhen([])).toBe('');
   });
 
-  it('handles answerBoolean = true', () => {
-    expect(enableWhenToExpr([{ question: 'q1', operator: '=', answerBoolean: true }]))
-      .toBe("values['q1'] == true");
+  it('formats answerBoolean = true as Yes', () => {
+    const result = humanEnableWhen(
+      [{ question: 'q1', operator: '=', answerBoolean: true }],
+      'all',
+      { q1: 'Diet program' }
+    );
+    expect(result).toBe('«Diet program» = Yes');
   });
 
-  it('handles answerBoolean = false', () => {
-    expect(enableWhenToExpr([{ question: 'q1', operator: '=', answerBoolean: false }]))
-      .toBe("values['q1'] == false");
+  it('formats answerBoolean = false as No', () => {
+    const result = humanEnableWhen(
+      [{ question: 'q1', operator: '=', answerBoolean: false }],
+      'all',
+      { q1: 'Pregnant' }
+    );
+    expect(result).toBe('«Pregnant» = No');
   });
 
-  it('handles answerString', () => {
-    expect(enableWhenToExpr([{ question: 'q1', operator: '=', answerString: 'yes' }]))
-      .toBe("values['q1'] == 'yes'");
+  it('formats answerString value', () => {
+    const result = humanEnableWhen(
+      [{ question: 'q1', operator: '=', answerString: 'male' }],
+      'all',
+      { q1: 'Gender' }
+    );
+    expect(result).toBe('«Gender» = «male»');
   });
 
-  it('handles answerInteger', () => {
-    expect(enableWhenToExpr([{ question: 'q1', operator: '=', answerInteger: 5 }]))
-      .toBe("values['q1'] == 5");
+  it('formats answerCoding by display', () => {
+    const result = humanEnableWhen(
+      [{ question: 'q1', operator: '=', answerCoding: { code: 'm', display: 'Male' } }],
+      'all',
+      { q1: 'Gender' }
+    );
+    expect(result).toBe('«Gender» = Male');
   });
 
-  it('handles answerDecimal', () => {
-    expect(enableWhenToExpr([{ question: 'q1', operator: '=', answerDecimal: 3.5 }]))
-      .toBe("values['q1'] == 3.5");
+  it('uses linkId as label when not in map', () => {
+    const result = humanEnableWhen(
+      [{ question: 'unknown-id', operator: '=', answerBoolean: true }],
+      'all',
+      {}
+    );
+    expect(result).toBe('«unknown-id» = Yes');
   });
 
-  it('handles answerCoding by code', () => {
-    expect(enableWhenToExpr([{ question: 'q1', operator: '=', answerCoding: { code: 'male' } }]))
-      .toBe("values['q1'] == 'male'");
-  });
-
-  it('handles answerCoding by display when no code', () => {
-    expect(enableWhenToExpr([{ question: 'q1', operator: '=', answerCoding: { display: 'Male' } }]))
-      .toBe("values['q1'] == 'Male'");
-  });
-
-  it('handles != operator', () => {
-    expect(enableWhenToExpr([{ question: 'q1', operator: '!=', answerBoolean: true }]))
-      .toBe("values['q1'] != true");
-  });
-
-  it('maps = operator to == in JS', () => {
-    const expr = enableWhenToExpr([{ question: 'q1', operator: '=', answerBoolean: true }]);
-    expect(expr).toContain('==');
-    expect(expr).not.toContain('===');
-  });
-
-  it('handles exists:true operator', () => {
-    expect(enableWhenToExpr([{ question: 'q1', operator: 'exists', answerBoolean: true }]))
-      .toBe("values['q1'] !== undefined");
-  });
-
-  it('handles exists:false operator', () => {
-    expect(enableWhenToExpr([{ question: 'q1', operator: 'exists', answerBoolean: false }]))
-      .toBe("values['q1'] === undefined");
-  });
-
-  it('handles >= operator', () => {
-    expect(enableWhenToExpr([{ question: 'age', operator: '>=', answerInteger: 18 }]))
-      .toBe("values['age'] >= 18");
-  });
-
-  it('handles <= operator', () => {
-    expect(enableWhenToExpr([{ question: 'age', operator: '<=', answerInteger: 65 }]))
-      .toBe("values['age'] <= 65");
-  });
-
-  it('joins multiple conditions with &&', () => {
-    const expr = enableWhenToExpr([
+  it('joins multiple conditions with AND by default', () => {
+    const result = humanEnableWhen([
       { question: 'q1', operator: '=', answerBoolean: true },
       { question: 'q2', operator: '=', answerString: 'yes' },
-    ]);
-    expect(expr).toBe("values['q1'] == true && values['q2'] == 'yes'");
+    ], 'all', { q1: 'A', q2: 'B' });
+    expect(result).toBe('«A» = Yes AND «B» = «yes»');
   });
 
-  it('falls back to true for unknown answer type', () => {
-    expect(enableWhenToExpr([{ question: 'q1', operator: '=' }]))
-      .toBe("values['q1'] == true");
+  it('joins multiple conditions with OR when enableBehavior is any', () => {
+    const result = humanEnableWhen([
+      { question: 'q1', operator: '=', answerBoolean: true },
+      { question: 'q2', operator: '=', answerBoolean: true },
+    ], 'any', { q1: 'A', q2: 'B' });
+    expect(result).toBe('«A» = Yes OR «B» = Yes');
+  });
+
+  it('formats != operator as ≠', () => {
+    const result = humanEnableWhen(
+      [{ question: 'q1', operator: '!=', answerBoolean: true }],
+      'all', { q1: 'X' }
+    );
+    expect(result).toBe('«X» ≠ Yes');
+  });
+
+  it('formats exists operator', () => {
+    const result = humanEnableWhen(
+      [{ question: 'q1', operator: 'exists', answerBoolean: true }],
+      'all', { q1: 'Email' }
+    );
+    expect(result).toBe('«Email» has answer');
+  });
+
+  it('formats answerInteger value', () => {
+    const result = humanEnableWhen(
+      [{ question: 'age', operator: '>=', answerInteger: 18 }],
+      'all', { age: 'Age' }
+    );
+    expect(result).toBe('«Age» ≥ 18');
+  });
+
+  it('formats answerDecimal value', () => {
+    const result = humanEnableWhen(
+      [{ question: 'bmi', operator: '>', answerDecimal: 30.0 }],
+      'all', { bmi: 'BMI' }
+    );
+    expect(result).toBe('«BMI» > 30');
   });
 });
+
+// ── applyVisibility ──────────────────────────────────────────────────────────────────
+describe('applyVisibility', () => {
+  function makeNode() {
+    return { enableWhen: [], enableBehavior: 'all', enableWhenExpression: '' };
+  }
+
+  it('copies enableWhen array from fhirItem', () => {
+    const node = makeNode();
+    const fhirItem = {
+      enableWhen: [{ question: 'q1', operator: '=', answerBoolean: true }],
+      enableBehavior: 'all',
+      extension: []
+    };
+    applyVisibility(node, fhirItem, {});
+    expect(node.enableWhen).toHaveLength(1);
+    expect(node.enableWhen[0].question).toBe('q1');
+  });
+
+  it('sets enableBehavior:any when fhirItem has any', () => {
+    const node = makeNode();
+    applyVisibility(node, {
+      enableWhen: [{ question: 'q1', operator: '=', answerBoolean: true }],
+      enableBehavior: 'any',
+      extension: []
+    }, {});
+    expect(node.enableBehavior).toBe('any');
+  });
+
+  it('sets enableBehavior:all by default', () => {
+    const node = makeNode();
+    applyVisibility(node, {
+      enableWhen: [{ question: 'q1', operator: '=', answerBoolean: true }],
+      extension: []
+    }, {});
+    expect(node.enableBehavior).toBe('all');
+  });
+
+  it('copies enableWhen entries as independent objects', () => {
+    const node = makeNode();
+    const ew = { question: 'q1', operator: '=', answerBoolean: true };
+    applyVisibility(node, { enableWhen: [ew], extension: [] }, {});
+    node.enableWhen[0].question = 'mutated';
+    expect(ew.question).toBe('q1'); // original not mutated
+  });
+
+  it('reads enableWhenExpression from SDC extension', () => {
+    const node = makeNode();
+    applyVisibility(node, {
+      enableWhen: [],
+      extension: [{
+        url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression',
+        valueExpression: { language: 'text/fhirpath', expression: '%age > 18' }
+      }]
+    }, {});
+    expect(node.enableWhenExpression).toBe('%age > 18');
+  });
+
+  it('sets _enableWhenText for display', () => {
+    const node = makeNode();
+    applyVisibility(node, {
+      enableWhen: [{ question: 'q1', operator: '=', answerBoolean: true }],
+      extension: []
+    }, { q1: 'My Question' });
+    expect(node._enableWhenText).toContain('My Question');
+    expect(node._enableWhenText).toContain('Yes');
+  });
+
+  it('does nothing for empty enableWhen and no extensions', () => {
+    const node = makeNode();
+    applyVisibility(node, { enableWhen: [], extension: [] }, {});
+    expect(node.enableWhen).toHaveLength(0);
+    expect(node.enableWhenExpression).toBe('');
+    expect(node._enableWhenText).toBeUndefined();
+  });
+});
+
+
+// ── fhirTypeToItemType ────────────────────────────────────────────────────────

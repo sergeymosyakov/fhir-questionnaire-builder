@@ -21,12 +21,7 @@
           "type": "choice",
           "required": true,
           "initial": [{ "valueCoding": { "code": "bmi40", "display": "BMI ≥ 40 kg/m²" } }],
-          "extension": [
-            {
-              "url": "http://logicbuilder.example.org/extension/successValue",
-              "valueString": "BMI ≥ 40 kg/m²"
-            }
-          ],
+
           "answerOption": [
             {
               "valueCoding": {
@@ -296,8 +291,11 @@
       "type": "group",
       "extension": [
         {
-          "url": "http://logicbuilder.example.org/extension/conditionRule",
-          "valueString": "gender === 'female'"
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%gender = 'female'"
+          }
         }
       ],
       "item": [

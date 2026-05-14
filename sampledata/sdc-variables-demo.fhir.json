@@ -68,10 +68,11 @@
       "linkId": "bmi-category",
       "text": "BMI category",
       "type": "display",
-      "extension": [
+      "enableWhen": [
         {
-          "url": "http://logicbuilder.example.org/extension/visibilityRule",
-          "valueString": "values['bmi'] !== undefined && values['bmi'] !== ''"
+          "question": "bmi",
+          "operator": "exists",
+          "answerBoolean": true
         }
       ]
     }

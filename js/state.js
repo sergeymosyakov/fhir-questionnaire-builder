@@ -5,15 +5,11 @@ export { _effect as effect };
 export { ref, reactive };
 
 // ── Reactive state ────────────────────────────────────────────────────────────
-// Patient R4 context lives in js/patient.js.
 export const tree = reactive([]);
 
 // Plain (non-reactive) store for current form values in preview.
 // Not reactive on purpose — avoids re-triggering effect() on every keystroke.
 export const values = {};
-
-// Tracks which node IDs were pre-filled by conditionRule (vs manually edited).
-export const autoFilledIds = new Set();
 
 // Reactive tick: incremented when a checkbox/select changes in the preview.
 // Causes effect() to re-run → re-evaluates enableWhen visibility conditions.
@@ -34,6 +30,7 @@ export const rawFhir = ref(null);
 
 // Questionnaire-level SDC variables: [{name, expression}]
 // Populated from sdc-questionnaire-variable extensions on import.
+// Also used to store patient context variables (%age, %gender, %bmi, ...).
 export const questVariables = reactive([]);
 
 // Item types that have form-value validation logic in the preview.
@@ -51,7 +48,12 @@ export const resetSeq = () => { _seq = 1; };
 export const makeGroup = title => ({
   id: nextId(), type: 'group',
   title: title || 'New Group',
-  visibilityRule: '', conditionRule: '', mandatory: null,
+  // FHIR R4 standard visibility
+  enableWhen:           [],    // [{question, operator, answerBoolean|String|Integer|Decimal|Coding}]
+  enableBehavior:       'all', // 'all' (AND) | 'any' (OR)
+  // SDC enableWhenExpression — FHIRPath for complex conditions (e.g. "%age > 18")
+  enableWhenExpression: '',
+  mandatory: null,
   logicWithParent: 'AND', children: []
 });
 
@@ -62,41 +64,50 @@ export const makeItem = (title, template) => {
     return {
       id: nextId(), type: 'item',
       title: title || 'New Item',
-      visibilityRule: '',                    // do not inherit: specific to source item
+      enableWhen:           [],
+      enableBehavior:       'all',
+      enableWhenExpression: '',
       mandatory:      template.mandatory,
-      conditionRule:  template.conditionRule,
       itemType:       template.itemType,
       options:        template.options,
-      successValue:   template.successValue
+      // FHIR questionnaire-constraint: [{key, expression, human, severity}]
+      constraint:     template.constraint ? [...template.constraint] : []
     };
   }
   return {
     id: nextId(), type: 'item',
     title: title || 'New Item',
-    visibilityRule: '', mandatory: null,
-    conditionRule: '', itemType: 'text',
-    options: '', successValue: ''
+    enableWhen:           [],
+    enableBehavior:       'all',
+    enableWhenExpression: '',
+    mandatory: null,
+    itemType: 'text',
+    options: '',
+    constraint: []
   };
 };
 
 // Helper: null mandatory behaves as true (required unless explicitly set false)
 export const isMandatory = node => node.mandatory !== false;
 
-// ── Rule evaluation ───────────────────────────────────────────────────────────
-// Evaluates a JS rule string with patient R4 context (from patient.js) + values.
-export const evalRule = (rule, ctx) => {
-  if (!rule || !rule.trim()) return true;
-  try {
-    return !!new Function(
-      'age', 'gender', 'bmi', 'pregnant', 'smoker', 'proc', 'comorb', 'values',
-      'return (' + rule + ');'
-    )(ctx.age, ctx.gender, ctx.bmi, ctx.pregnant, ctx.smoker, ctx.proc, ctx.comorb, values);
-  } catch (_) { return false; }
-};
-
 // ── Form-value success check ──────────────────────────────────────────────────
 function _isValidUrl(s) {
   try { new URL(s); return true; } catch { return false; }
+}
+
+// Evaluate FHIR questionnaire-constraint[] against current value.
+// Returns true if all error-severity constraints pass (or there are none).
+export function evalConstraints(node, fp, qr, varEnv) {
+  if (!node.constraint || !node.constraint.length) return true;
+  if (!fp || !qr) return true;
+  for (const c of node.constraint) {
+    if (!c.expression || c.severity !== 'error') continue;
+    try {
+      const result = fp.evaluate(qr, c.expression, varEnv);
+      if (!result || result[0] === false) return false;
+    } catch { return false; }
+  }
+  return true;
 }
 
 export const calcFormOk = node => {
@@ -106,11 +117,11 @@ export const calcFormOk = node => {
     if (node.itemType !== 'checkbox') return true;
     return values[node.id] === true;
   }
-  // checkbox: mandatory without conditionRule → must be checked by the user
-  if (node.itemType === 'checkbox' && isMandatory(node) && !node.conditionRule) {
+  // checkbox: mandatory → must be checked by the user
+  if (node.itemType === 'checkbox' && isMandatory(node)) {
     return values[node.id] === true;
   }
-  // url: validate format regardless of required (must come before mandatory===false early return)
+  // url: validate format regardless of required
   if (node.itemType === 'url') {
     const val = values[node.id];
     if (!val || val === '') return !isMandatory(node);
@@ -119,8 +130,7 @@ export const calcFormOk = node => {
   // attachment: required means a file must be chosen
   if (node.itemType === 'attachment') {
     if (!isMandatory(node)) return true;
-    const val = values[node.id];
-    return val != null;
+    return values[node.id] != null;
   }
   if (node.mandatory === false) return true;
   // reference: mandatory → { reference: "Type/id" } must be present
@@ -135,7 +145,7 @@ export const calcFormOk = node => {
     const val = values[node.id];
     return val != null && typeof val === 'object' && val.value !== undefined && !!val.unit;
   }
-  // No successValue but mandatory → text/number/date must be non-empty
+  // mandatory text/number/date/etc → must be non-empty
   if (isMandatory(node) && NONEMPTY_TYPES.has(node.itemType)) {
     const val = values[node.id];
     return val !== undefined && val !== '' && val !== null;

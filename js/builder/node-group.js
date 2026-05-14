@@ -5,7 +5,7 @@ import { navigateToPreview } from '../render-preview.js';
 import { makeGroup, makeItem } from '../state.js';
 import { formatSeg } from './_shared.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildMandPanel, buildCondPanel, buildExprPanel, buildStylePanel } from './panels.js';
+import { addPanel, buildVisPanel, buildMandPanel, buildExprPanel, buildStylePanel } from './panels.js';
 
 export function renderGroup(node, ctx) {
   const { renderTree, renderNode } = ctx;
@@ -148,12 +148,8 @@ export function renderGroup(node, ctx) {
     'Questionnaire.item.required', 'R4 · optional');
   const visLink   = addToggle('Show When', 'vis',
     'Show When (enableWhen)',
-    'Visibility condition for the entire group. Simple patterns export as standard FHIR enableWhen[]; complex JS exports as a custom extension.',
-    'Questionnaire.item.enableWhen[]', 'R4 · optional');
-  const condLink  = addToggle('Applicability', 'cond',
-    'Applicability (conditionRule)',
-    'Custom N/A condition for the group. When false the whole group is grayed out and excluded from the final result. Not a standard FHIR field — stored as a custom extension.',
-    'extension[conditionRule]', 'Custom extension');
+    'Add enableWhen conditions to control when this group is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden groups are dimmed \uD83D\uDD12 in the preview.',
+    'Questionnaire.item.enableWhen[]', 'R4 \u00B7 optional');
   const exprLink  = addToggle('Expression', 'expr',
     'Calculated Expression',
     'SDC FHIRPath calculatedExpression on this group item. Evaluated on Test click. Supports questionnaire-level %variables.',
@@ -253,12 +249,10 @@ export function renderGroup(node, ctx) {
   // ── Panels ────────────────────────────────────────────────────────────────
   addPanel('mand',  p => buildMandPanel(node, p, mandLink, setActive), div, panels);
   addPanel('vis',   p => buildVisPanel(node, p, visLink, setActive, ctx), div, panels);
-  addPanel('cond',  p => buildCondPanel(node, p, condLink, setActive, true), div, panels);
   addPanel('expr',  p => buildExprPanel(node, p, exprLink, setActive), div, panels);
   addPanel('style', p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
-  setActive(visLink,   !!node.visibilityRule);
-  setActive(condLink,  !!node.conditionRule);
+  setActive(visLink,   !!(node.enableWhen?.length) || !!node.enableWhenExpression);
   setActive(exprLink,  !!node._calculatedExpr);
   setActive(styleLink, !!node._renderStyle);
   setActive(mandLink,  node.mandatory === true);

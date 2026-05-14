@@ -25,7 +25,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, etc.) |
 | `js/builder/_shared.js` | Shared utilities injected via `init(deps)` |
 | `js/builder/dnd.js` | Self-contained drag & drop, injected via `init(onDrop, tree, formTick)` |
-| `js/builder/panels.js` | All action panel builders (vis, mand, cond, type, expr, style) |
+| `js/builder/panels.js` | All action panel builders (enableWhen vis panel, mand, type, expr, style) |
 | `js/builder/node-item.js` | `renderItem(node, ctx)` — item node DOM |
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` — group node DOM |
 | `js/render-preview.js` | Right panel — reactive preview + controls |
@@ -38,6 +38,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/fhir/validate.js` | `validateTree` → `{severity, nodeId, message}[]` |
 | `js/ui/validate-modal.js` | Validate modal — `init(elements)`, `show(title, issues, mode, callbacks)` |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables)`, `refresh()` |
+| `js/ui/patient-ctx.js` | Patient context popup — seeds and manages `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + keyboard navigation |
 | `js/ui/tooltip.js` | Rich tooltip system — delegated `mouseover` on `[data-tip-title]`/`[data-tip-body]`; dark card with optional FHIR spec footer |
@@ -183,26 +184,25 @@ new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
 | `type:'string'` / `type:'text'` / etc. | `itemType:'text'` |
 | `item.required` | `mandatory` |
 | `item.linkId` | `id` (editable in builder) |
-| `item.enableWhen` | `visibilityRule` (JS expression) + `_enableWhenText` (human label) |
-| `item.enableBehavior:'any'` | `logicWithParent:'OR'` |
+| `item.enableWhen` | `node.enableWhen[]` — stored directly; `node._enableWhenText` set for display (e.g. `«Q» = Yes AND «Q2» = No`) |
+| `item.enableBehavior` | `node.enableBehavior` — `'all'` (default) or `'any'` |
+| SDC `enableWhenExpression` | `node.enableWhenExpression` — FHIRPath string |
 | `item.answerOption` | `options` — stored as `code=display` per option (e.g. `bmi35=BMI 35–39.9 with comorbidity`); plain value if code==display |
 | `_text.extension[rendering-style]` | `_renderStyle` (applied as inline CSS in preview) |
 | `item.prefix` | `_prefix` — amber badge in preview; editable in builder; exported back (round-trip safe) |
 | `item.code[]` | `_codes` — preserved as-is; exported back unchanged (round-trip safe) |
 
-Custom extensions (URL prefix `http://logicbuilder.example.org/extension/`):
-- `conditionRule` — applicability condition
-- `visibilityRule` — complex JS expression (when not convertible to enableWhen)
-- `successValue` — expected answer for pass/fail evaluation
-
 Standard extensions preserved on export:
 - `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` — `radio-button` code for `radio` itemType
+- `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression` — `enableWhenExpression` field
+- `http://hl7.org/fhir/StructureDefinition/questionnaire-constraint` — `constraint[]` entries
 
 ### Export
 
-- Simple `visibilityRule` patterns (`values['id'] OP value`) → standard FHIR `enableWhen`
-- Complex JS expressions → stored as extension (round-trip safe)
-- `conditionRule`, `successValue` → always as extensions
+- `node.enableWhen[]` → standard FHIR `item.enableWhen[]` (shallow-copied directly)
+- `node.enableBehavior === 'any'` → `item.enableBehavior: 'any'`
+- `node.enableWhenExpression` → SDC `sdc-questionnaire-enableWhenExpression` extension
+- `node.constraint[]` → `questionnaire-constraint` extensions
 
 ---
 
@@ -220,8 +220,8 @@ Standard extensions preserved on export:
 - **Expandable title** — node title shown as read-only span; click → expands to full-width textarea, collapses on blur
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Changes apply live in the preview
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
-- **Visual condition builder** — in the Visibility panel: pick a question by title to generate JS
-- **Auto-fill** — checkboxes with `conditionRule` are pre-filled from patient data (🤖), overridable by the clinician
+- **enableWhen panel** — "Show When" action panel on every node; FHIR `enableWhen[]` list UI: AND/ALL vs OR/ANY toggle, per-condition rows (question picker + operator + type-aware value input + remove button), "+ Add condition" button; FHIRPath `enableWhenExpression` field for advanced SDC expressions
+- **Patient Context popup** — "Patient Context" button in toolbar opens a modal popup; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; available in `enableWhenExpression` and `calculatedExpression` fields
 - **AND/OR badges** — on group headers: `ALL items ✓` / `ANY item ✓`
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed out (🔒) when their condition is not met; animate to active when met
@@ -278,6 +278,6 @@ CI runs automatically on every push via GitHub Actions (see `.github/workflows/t
 
 ## Known Limitations / TODO
 
-- Multi-condition visibility (`&&`, `||`) not supported in the visual builder — must be written manually as JS
-- `conditionRule` on items is not exported to standard FHIR (prototype-specific concept with no direct R4 equivalent)
-- Full list of unsupported FHIR features (repeating items, answerValueSet, initial values, etc.) → [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md#not-supported-out-of-scope)
+- Multi-condition visibility with complex FHIRPath (cross-group references, extensions) not supported in the visual enableWhen builder — must be typed as `enableWhenExpression` directly
+- `questionnaire-constraint` imported and exported but not evaluated in the preview (stored as-is)
+- Full list of unsupported FHIR features (repeating items, answerValueSet, etc.) → [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md#not-supported-out-of-scope)

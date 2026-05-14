@@ -1,4 +1,4 @@
-// ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
+// в”Ђв”Ђ FHIR R4 Questionnaire import в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables } from '../state.js';
 import { renderTree } from '../render-builder.js';
 
@@ -10,50 +10,22 @@ function applyInitialValues(nodes) {
   }
 }
 
-// Read our custom extension value from a FHIR item
-function extractExtension(fhirItem, key) {
-  const ext = (fhirItem.extension || []).find(
-    e => e.url === 'http://logicbuilder.example.org/extension/' + key
-  );
-  return ext ? (ext.valueString || '') : '';
-}
-
-// FHIR enableWhen[] → JS expression string using values['linkId']
-function enableWhenToExpr(enableWhen) {
-  if (!enableWhen || !enableWhen.length) return '';
-  return enableWhen.map(ew => {
-    const q = `values['${ew.question}']`;
-    let val;
-    if      (ew.answerBoolean  !== undefined) val = ew.answerBoolean;
-    else if (ew.answerString   !== undefined) val = `'${ew.answerString}'`;
-    else if (ew.answerInteger  !== undefined) val = ew.answerInteger;
-    else if (ew.answerDecimal  !== undefined) val = ew.answerDecimal;
-    else if (ew.answerCoding)                 val = `'${ew.answerCoding.code || ew.answerCoding.display || ''}'`;
-    else val = true;
-    if (ew.operator === 'exists') return val ? `${q} !== undefined` : `${q} === undefined`;
-    const jsOp = ew.operator === '=' ? '==' : ew.operator;
-    return `${q} ${jsOp} ${val}`;
-  }).join(' && ');
-}
-
-// FHIR item.type → our itemType
+// FHIR item.type в†’ our itemType
 function fhirTypeToItemType(t) {
-  if (t === 'boolean')                                        return 'checkbox';
-  if (t === 'integer' || t === 'decimal') return 'number';
-  if (t === 'quantity') return 'quantity';
-  if (t === 'choice')                                         return 'select';
-  if (t === 'open-choice')                                    return 'open-choice';
-  if (t === 'display')                                        return 'display';
-  if (t === 'date' || t === 'dateTime' || t === 'time')       return 'date';
-  if (t === 'url')                                            return 'url';
-  if (t === 'attachment')                                     return 'attachment';
-  if (t === 'reference')                                      return 'reference';
+  if (t === 'boolean')                                  return 'checkbox';
+  if (t === 'integer' || t === 'decimal')               return 'number';
+  if (t === 'quantity')                                 return 'quantity';
+  if (t === 'choice')                                   return 'select';
+  if (t === 'open-choice')                              return 'open-choice';
+  if (t === 'display')                                  return 'display';
+  if (t === 'date' || t === 'dateTime' || t === 'time') return 'date';
+  if (t === 'url')                                      return 'url';
+  if (t === 'attachment')                               return 'attachment';
+  if (t === 'reference')                                return 'reference';
   return 'text'; // string, text
 }
 
-// answerOption[] → comma-separated options string in "code=display" format.
-// If both code and display are present and differ: "code=display".
-// Otherwise just the value (backward compat).
+// answerOption[] в†’ comma-separated options string in "code=display" format.
 function fhirOptsToStr(opts) {
   return (opts || []).map(o => {
     if (o.valueCoding) {
@@ -66,7 +38,7 @@ function fhirOptsToStr(opts) {
   }).filter(Boolean).join(', ');
 }
 
-// Build linkId → question text map for human-friendly display
+// Build linkId в†’ question text map for human-friendly display
 function buildLinkIdMap(items, map = {}) {
   for (const item of items || []) {
     map[item.linkId] = item.text || item.linkId || '';
@@ -75,46 +47,77 @@ function buildLinkIdMap(items, map = {}) {
   return map;
 }
 
-// FHIR enableWhen[] → readable string like: "«Diet program» = Yes"
-function humanEnableWhen(enableWhen, linkIdMap) {
+// FHIR enableWhen[] -> human-readable label string
+function humanEnableWhen(enableWhen, enableBehavior, linkIdMap) {
   if (!enableWhen || !enableWhen.length) return '';
+  const joiner = enableBehavior === 'any' ? ' OR ' : ' AND ';
   const parts = enableWhen.map(ew => {
-    const qText = linkIdMap[ew.question] || ew.question;
-    if (ew.operator === 'exists') return `«${qText}» есть ответ`;
+    const qText = (linkIdMap && linkIdMap[ew.question]) || ew.question;
+    if (ew.operator === 'exists') return '\u00AB' + qText + '\u00BB has answer';
     let val;
     if      (ew.answerBoolean  !== undefined) val = ew.answerBoolean ? 'Yes' : 'No';
-    else if (ew.answerString   !== undefined) val = `«${ew.answerString}»`;
+    else if (ew.answerString   !== undefined) val = '\u00AB' + ew.answerString + '\u00BB';
     else if (ew.answerInteger  !== undefined) val = ew.answerInteger;
     else if (ew.answerDecimal  !== undefined) val = ew.answerDecimal;
     else if (ew.answerCoding)                 val = ew.answerCoding.display || ew.answerCoding.code || '?';
     else val = '?';
-    const opLabel = { '=': '=', '!=': '≠', '>': '>', '<': '<', '>=': '≥', '<=': '≤' }[ew.operator] || ew.operator;
-    return `«${qText}» ${opLabel} ${val}`;
+    const opLabel = { '=': '=', '!=': '\u2260', '>': '>', '<': '<', '>=': '\u2265', '<=': '\u2264' }[ew.operator] || ew.operator;
+    return '\u00AB' + qText + '\u00BB ' + opLabel + ' ' + val;
   });
-  return parts.join(' AND ');
+  return parts.join(joiner);
+}
+
+// Apply enableWhen, enableBehavior, enableWhenExpression to a node from a FHIR item
+function applyVisibility(node, fhirItem, linkIdMap) {
+  // Standard enableWhen[] в†’ stored structurally
+  if (fhirItem.enableWhen && fhirItem.enableWhen.length) {
+    node.enableWhen     = fhirItem.enableWhen.map(ew => ({ ...ew }));
+    node.enableBehavior = fhirItem.enableBehavior === 'any' ? 'any' : 'all';
+    node._enableWhenText = humanEnableWhen(fhirItem.enableWhen, fhirItem.enableBehavior, linkIdMap);
+  }
+  // SDC enableWhenExpression в†’ FHIRPath condition
+  const eweExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression'
+  );
+  if (eweExt && eweExt.valueExpression) {
+    node.enableWhenExpression = eweExt.valueExpression.expression || '';
+  }
+}
+
+// Import FHIR questionnaire-constraint[] into node.constraint[]
+function applyConstraints(node, fhirItem) {
+  const constraints = (fhirItem.extension || []).filter(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint'
+  );
+  if (!constraints.length) return;
+  node.constraint = constraints.map(ext => ({
+    key:        ext.extension?.find(e => e.url === 'key')?.valueId || '',
+    expression: ext.extension?.find(e => e.url === 'expression')?.valueString || '',
+    human:      ext.extension?.find(e => e.url === 'human')?.valueString || '',
+    severity:   ext.extension?.find(e => e.url === 'severity')?.valueCode || 'error',
+  })).filter(c => c.expression);
 }
 
 // Build our item node from a FHIR leaf question
 function fhirQuestionToItem(fhirItem, linkIdMap) {
   const node = makeItem(fhirItem.text || fhirItem.linkId || 'Item');
-  node.id             = fhirItem.linkId || node.id;
-  node.mandatory      = fhirItem.required === undefined ? null : !!fhirItem.required;
-  node.visibilityRule = extractExtension(fhirItem, 'visibilityRule') || enableWhenToExpr(fhirItem.enableWhen);
-  node.conditionRule  = extractExtension(fhirItem, 'conditionRule')  || '';
-  node.itemType       = fhirTypeToItemType(fhirItem.type || 'string');
-  // questionnaire-itemControl: radio-button → use 'radio' instead of 'select'
+  node.id        = fhirItem.linkId || node.id;
+  node.mandatory = fhirItem.required === undefined ? null : !!fhirItem.required;
+  node.itemType  = fhirTypeToItemType(fhirItem.type || 'string');
+
+  // questionnaire-itemControl: radio-button в†’ use 'radio' instead of 'select'
   if (node.itemType === 'select' || node.itemType === 'open-choice') {
     const itemCtrl = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl'
     );
-    const ctrlCode = itemCtrl && itemCtrl.valueCodeableConcept &&
-      itemCtrl.valueCodeableConcept.coding && itemCtrl.valueCodeableConcept.coding[0] &&
-      itemCtrl.valueCodeableConcept.coding[0].code;
+    const ctrlCode = itemCtrl?.valueCodeableConcept?.coding?.[0]?.code;
     if (ctrlCode === 'radio-button') node.itemType = 'radio';
   }
-  node.options        = fhirOptsToStr(fhirItem.answerOption);
-  const sv = extractExtension(fhirItem, 'successValue');
-  if (sv) node.successValue = sv;
+
+  node.options = fhirOptsToStr(fhirItem.answerOption);
+  applyVisibility(node, fhirItem, linkIdMap);
+  applyConstraints(node, fhirItem);
+
   // reference: allowed resource type from standard extension
   if (node.itemType === 'reference') {
     const refResExt = (fhirItem.extension || []).find(
@@ -127,27 +130,25 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
     const unitExt = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit'
     );
-    if (unitExt && unitExt.valueCoding && unitExt.valueCoding.code) {
-      node.quantityUnit = unitExt.valueCoding.code;
-    }
+    if (unitExt?.valueCoding?.code) node.quantityUnit = unitExt.valueCoding.code;
   }
-  if (fhirItem.enableWhen && fhirItem.enableWhen.length && linkIdMap) {
-    node._enableWhenText = humanEnableWhen(fhirItem.enableWhen, linkIdMap);
-  }
-  const rs = fhirItem._text && fhirItem._text.extension
-    && fhirItem._text.extension.find(x => x.url && x.url.includes('rendering-style'));
+
+  const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));
   if (rs) node._renderStyle = rs.valueString || '';
+
   // SDC calculatedExpression
   const calcExpr = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression'
   );
-  if (calcExpr && calcExpr.valueExpression) {
+  if (calcExpr?.valueExpression) {
     node._calculatedExpr = calcExpr.valueExpression.expression || '';
   }
+
   node._readOnly = !!fhirItem.readOnly;
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
-  // item.initial[0] → _initialValue (string; applied to values[] after tree is built)
+
+  // item.initial[0] в†’ _initialValue
   if (fhirItem.initial && fhirItem.initial.length) {
     const init = fhirItem.initial[0];
     if      (init.valueBoolean  !== undefined) node._initialValue = init.valueBoolean;
@@ -164,24 +165,18 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   return node;
 }
 
-// Recursive FHIR item → our node.
-// Non-group questions with nested items are wrapped in a synthetic group
-// (FHIR allows nesting under any item; our model only allows children under groups).
+// Recursive FHIR item в†’ our node.
 function fhirItemToNode(fhirItem, linkIdMap) {
   const t = fhirItem.type || 'string';
 
   if (t === 'group') {
     const node = makeGroup(fhirItem.text || fhirItem.linkId || 'Group');
-    node.id              = fhirItem.linkId || node.id;
-    node.mandatory       = fhirItem.required === undefined ? null : !!fhirItem.required;
+    node.id        = fhirItem.linkId || node.id;
+    node.mandatory = fhirItem.required === undefined ? null : !!fhirItem.required;
+    // logicWithParent: only relevant for the node's own children AND/OR logic
     node.logicWithParent = fhirItem.enableBehavior === 'any' ? 'OR' : 'AND';
-    node.visibilityRule  = extractExtension(fhirItem, 'visibilityRule') || enableWhenToExpr(fhirItem.enableWhen);
-    node.conditionRule   = extractExtension(fhirItem, 'conditionRule')  || '';
-    if (fhirItem.enableWhen && fhirItem.enableWhen.length && linkIdMap) {
-      node._enableWhenText = humanEnableWhen(fhirItem.enableWhen, linkIdMap);
-    }
-    const rs = fhirItem._text && fhirItem._text.extension
-      && fhirItem._text.extension.find(x => x.url && x.url.includes('rendering-style'));
+    applyVisibility(node, fhirItem, linkIdMap);
+    const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));
     if (rs) node._renderStyle = rs.valueString || '';
     if (fhirItem.prefix) node._prefix = fhirItem.prefix;
     if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
@@ -192,16 +187,12 @@ function fhirItemToNode(fhirItem, linkIdMap) {
     return node;
   }
 
-  // Question with nested sub-items → wrap in synthetic group
+  // Question with nested sub-items в†’ wrap in synthetic group
   if ((fhirItem.item || []).length > 0) {
     const wrapper = makeGroup(fhirItem.text || fhirItem.linkId || 'Group');
-    wrapper.id             = (fhirItem.linkId || wrapper.id) + '-grp';
-    wrapper.mandatory      = fhirItem.required === undefined ? null : !!fhirItem.required;
-    wrapper.visibilityRule = extractExtension(fhirItem, 'visibilityRule') || enableWhenToExpr(fhirItem.enableWhen);
-    wrapper.conditionRule  = extractExtension(fhirItem, 'conditionRule')  || '';
-    if (fhirItem.enableWhen && fhirItem.enableWhen.length && linkIdMap) {
-      wrapper._enableWhenText = humanEnableWhen(fhirItem.enableWhen, linkIdMap);
-    }
+    wrapper.id        = (fhirItem.linkId || wrapper.id) + '-grp';
+    wrapper.mandatory = fhirItem.required === undefined ? null : !!fhirItem.required;
+    applyVisibility(wrapper, fhirItem, linkIdMap);
     wrapper.children.push(fhirQuestionToItem(fhirItem, linkIdMap));
     for (const child of fhirItem.item) {
       const n = fhirItemToNode(child, linkIdMap);
@@ -214,7 +205,7 @@ function fhirItemToNode(fhirItem, linkIdMap) {
 }
 
 // Exported for unit testing
-export { enableWhenToExpr, fhirTypeToItemType, fhirOptsToStr };
+export { fhirTypeToItemType, fhirOptsToStr, humanEnableWhen, applyVisibility };
 
 // Main import entry point
 export function importFHIR(fhirJson, renderFn) {
@@ -230,6 +221,7 @@ export function importFHIR(fhirJson, renderFn) {
   Object.keys(values).forEach(k => delete values[k]);
   rawFhir.value = q;
   resetSeq();
+
   // Read questionnaire-level SDC variables
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
   questVariables.splice(0);
@@ -241,8 +233,7 @@ export function importFHIR(fhirJson, renderFn) {
       });
     }
   }
-  // Pause Vue tracking: pushing plain nodes into reactive tree would otherwise
-  // trigger the preview effect() once per push (O(n) full preview re-renders).
+
   _bulkUpdate.value = true;
   try {
     const linkIdMap = buildLinkIdMap(q.item);
@@ -253,8 +244,8 @@ export function importFHIR(fhirJson, renderFn) {
   } finally {
     _bulkUpdate.value = false;
   }
-  // Pre-populate values[] from item.initial[0] on each node
   applyInitialValues(tree);
   if (renderFn) renderFn(); else renderTree();
 }
+
 

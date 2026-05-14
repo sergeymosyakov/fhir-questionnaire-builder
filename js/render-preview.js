@@ -1,9 +1,8 @@
 // ── Right panel: reactive preview ─────────────────────────────────────────────
-import { age, gender, bmi, pregnant, smoker, proc, comorb } from './patient.js';
 import {
   effect,
-  tree, values, autoFilledIds, _formTick, _bulkUpdate, showLinkId, showPrefix,
-  evalRule, calcFormOk, isMandatory,
+  tree, values, _formTick, _bulkUpdate, showLinkId, showPrefix,
+  calcFormOk, isMandatory,
   rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
 import { isDescendant, findAncestorGroupIds } from './utils.js';
@@ -46,11 +45,14 @@ function _scrollToPreview(id) {
 }
 
 function _reCalc() {
-  if (rawFhir.value && fhirpath) {
-    const qr = buildQR(JSON.parse(JSON.stringify(rawFhir.value)), values);
+  if (fhirpath) {
+    const base = rawFhir.value ? JSON.parse(JSON.stringify(rawFhir.value)) : { resourceType: 'Questionnaire', item: [] };
+    const qr = buildQR(base, values);
     const envVars = buildVarEnv(questVariables, qr, fhirpath);
     evalCalcNodes(tree, qr, fhirpath, values, envVars);
+    return { fp: fhirpath, qr, envVars };
   }
+  return { fp: null, qr: null, envVars: {} };
 }
 
 // ── Interactive control for preview ──────────────────────────────────────────
@@ -65,7 +67,7 @@ function buildControl(node, iconEl, onAfterChange) {
   };
   const onChange = () => { updateOwnIcon(); if (onAfterChange) onAfterChange(); };
 
-  return _buildControl(node, { values, autoFilledIds, onChange, _reCalc, _formTick });
+  return _buildControl(node, { values, onChange, _reCalc, _formTick });
 }
 
 // ── Reactive preview effect ───────────────────────────────────────────────────
@@ -75,16 +77,7 @@ function buildControl(node, iconEl, onAfterChange) {
 effect(() => {
   void _formTick.value; // subscribe: re-run when checkbox/select changes
   if (_bulkUpdate.value) return; // mass mutation in progress — skip full render
-  _reCalc(); // always evaluate calculatedExpression fields before rendering
-  const ctx = {
-    age:      age.value,
-    gender:   gender.value,
-    bmi:      bmi.value,
-    pregnant: pregnant.value,
-    smoker:   smoker.value,
-    proc:     proc.value,
-    comorb:   comorb.value.toLowerCase()
-  };
+  const ctx = _reCalc(); // evaluate calcExpression fields; get fp/qr/envVars for enableWhen
   const lform = document.getElementById('lform');
   lform.innerHTML = '';
 
@@ -118,10 +111,7 @@ effect(() => {
   }
 
   const mandatoryItems = visible.filter(r => !r.disabled && r.node.type === 'item' &&
-    isMandatory(r.node) && (
-      r.node.successValue !== '' ||
-      CHECKABLE_TYPES.has(r.node.itemType)
-    )
+    isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)
   );
   const hasMandatory = mandatoryItems.length > 0;
 
@@ -213,7 +203,6 @@ effect(() => {
       );
       // Only count items that actually have a checkable condition right now
       const relevantItems = descendantItems.filter(r =>
-        (isMandatory(r.node) && r.node.successValue !== '') ||
         (isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)) ||
         (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox')
       );
@@ -234,7 +223,6 @@ effect(() => {
       // - is optional URL (format validation always applies), OR
       // - is a readOnly boolean calc node after Test
       hasCondition = res.node.itemType !== 'display' && (
-        (isMandatory(res.node) && res.node.successValue !== '') ||
         (CHECKABLE_TYPES.has(res.node.itemType) && (isMandatory(res.node) || res.node.itemType === 'url')) ||
         (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox')
       );
@@ -351,15 +339,8 @@ effect(() => {
     }
 
     if (res.node.type === 'item') {
-      if (res.node.itemType === 'checkbox' && res.node.conditionRule) {
-        if (values[res.node.id] === undefined || autoFilledIds.has(res.node.id)) {
-          values[res.node.id] = evalRule(res.node.conditionRule, ctx);
-          autoFilledIds.add(res.node.id);
-        }
-      }
       if (res.node.itemType !== 'display' && !(res.node._readOnly && res.node._calculatedExpr)) {
-        const isAuto = autoFilledIds.has(res.node.id);
-        row.appendChild(buildControl(res.node, iconEl, () => updateGroupIcons(), isAuto));
+        row.appendChild(buildControl(res.node, iconEl, () => updateGroupIcons()));
       }
       // calc-badge: show for readOnly nodes with calculatedExpression
       if (res.node._calculatedExpr && res.node._readOnly) {

@@ -9,27 +9,24 @@ const _questVariables = [];
 let _rawFhir = { value: null };
 
 vi.mock('../js/state.js', () => ({
-  tree:           _tree,
-  questVariables: _questVariables,
-  rawFhir:        _rawFhir,
-  // other exports used by state — provide stubs
-  values:         {},
-  _formTick:      { value: 0 },
-  _bulkUpdate:    { value: false },
-  ref:            v => ({ value: v }),
-  reactive:       v => v,
-  effect:         () => {},
-  evalRule:       () => true,
-  calcFormOk:     () => true,
-  isMandatory:    () => false,
+  tree:            _tree,
+  questVariables:  _questVariables,
+  rawFhir:         _rawFhir,
+  values:          {},
+  _formTick:       { value: 0 },
+  _bulkUpdate:     { value: false },
+  ref:             v => ({ value: v }),
+  reactive:        v => v,
+  effect:          () => {},
+  calcFormOk:      () => true,
+  isMandatory:     () => false,
   CHECKABLE_TYPES: new Set(),
-  autoFilledIds:  new Set(),
-  showLinkId:     { value: false },
-  showPrefix:     { value: false },
-  resetSeq:       () => {},
-  makeGroup:      () => ({}),
-  makeItem:       () => ({}),
-  NONEMPTY_TYPES: new Set(),
+  showLinkId:      { value: false },
+  showPrefix:      { value: false },
+  resetSeq:        () => {},
+  makeGroup:       () => ({}),
+  makeItem:        () => ({}),
+  NONEMPTY_TYPES:  new Set(),
 }));
 
 const { buildFHIRObject } = await import('../js/fhir/export.js');
@@ -105,28 +102,105 @@ describe('buildFHIRObject — required', () => {
   });
 });
 
-// ── visibilityRule → enableWhen ───────────────────────────────────────────────
-describe('buildFHIRObject — visibilityRule to enableWhen', () => {
-  it('converts simple == rule to enableWhen', () => {
+// ── enableWhen ────────────────────────────────────────────────────────────────
+describe('buildFHIRObject — enableWhen', () => {
+  it('exports enableWhen array directly', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'text',
-      visibilityRule: "values['age-item'] == true",
+      enableWhen: [{ question: 'age-item', operator: '=', answerBoolean: true }],
+      enableBehavior: 'all',
     }]);
-    expect(q.item[0].enableWhen).toBeDefined();
+    expect(q.item[0].enableWhen).toHaveLength(1);
     expect(q.item[0].enableWhen[0].question).toBe('age-item');
     expect(q.item[0].enableWhen[0].operator).toBe('=');
     expect(q.item[0].enableWhen[0].answerBoolean).toBe(true);
   });
 
-  it('stores complex rule as extension', () => {
+  it('sets enableBehavior:any when node.enableBehavior is any', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'text',
-      visibilityRule: "age > 18 && gender === 'male'",
+      enableWhen: [
+        { question: 'q1', operator: '=', answerBoolean: true },
+        { question: 'q2', operator: '=', answerString: 'yes' },
+      ],
+      enableBehavior: 'any',
     }]);
+    expect(q.item[0].enableBehavior).toBe('any');
+  });
+
+  it('omits enableBehavior when enableBehavior is all', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'text',
+      enableWhen: [
+        { question: 'q1', operator: '=', answerBoolean: true },
+        { question: 'q2', operator: '=', answerString: 'yes' },
+      ],
+      enableBehavior: 'all',
+    }]);
+    expect(q.item[0].enableBehavior).toBeUndefined();
+  });
+
+  it('omits enableWhen when array is empty', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', enableWhen: [] }]);
     expect(q.item[0].enableWhen).toBeUndefined();
-    expect(q.item[0].extension?.some(e =>
-      e.url.includes('visibilityRule')
-    )).toBe(true);
+  });
+
+  it('exports enableWhenExpression as SDC extension', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'text',
+      enableWhen: [], enableBehavior: 'all',
+      enableWhenExpression: '%age > 18',
+    }]);
+    const ext = q.item[0].extension || [];
+    const ewe = ext.find(e => e.url.includes('enableWhenExpression'));
+    expect(ewe).toBeDefined();
+    expect(ewe.valueExpression.expression).toBe('%age > 18');
+  });
+
+  it('copies enableWhen entries as independent objects', () => {
+    const ew = { question: 'q1', operator: '=', answerBoolean: true };
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', enableWhen: [ew], enableBehavior: 'all' }]);
+    expect(q.item[0].enableWhen[0]).not.toBe(ew);
+    expect(q.item[0].enableWhen[0].question).toBe('q1');
+  });
+});
+
+// ── questionnaire-constraint ──────────────────────────────────────────────────
+describe('buildFHIRObject — constraint', () => {
+  it('exports constraint[] as questionnaire-constraint extensions', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'text',
+      enableWhen: [],
+      constraint: [{
+        key: 'bmi-ok',
+        expression: '%bmi < 50',
+        human: 'BMI must be less than 50',
+        severity: 'error',
+      }],
+    }]);
+    const ext = q.item[0].extension || [];
+    const c = ext.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint');
+    expect(c).toBeDefined();
+    expect(c.extension.find(e => e.url === 'key')?.valueId).toBe('bmi-ok');
+    expect(c.extension.find(e => e.url === 'expression')?.valueString).toBe('%bmi < 50');
+    expect(c.extension.find(e => e.url === 'human')?.valueString).toBe('BMI must be less than 50');
+    expect(c.extension.find(e => e.url === 'severity')?.valueCode).toBe('error');
+  });
+
+  it('skips constraints without expression', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'text',
+      enableWhen: [],
+      constraint: [{ key: 'k', expression: '', human: 'h', severity: 'error' }],
+    }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.some(e => e.url.includes('questionnaire-constraint'))).toBe(false);
+  });
+
+  it('omits extension for empty constraint array', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', enableWhen: [], constraint: [] }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.some(e => e.url.includes('questionnaire-constraint'))).toBe(false);
   });
 });
 
@@ -161,11 +235,23 @@ describe('buildFHIRObject — groups', () => {
     expect(q.item[0].item[0].linkId).toBe('q1');
   });
 
-  it('sets enableBehavior:any for OR groups', () => {
+  it('exports enableBehavior:any from node.enableBehavior for a group', () => {
     const q = build([{
-      id: 'g1', type: 'group', title: 'G', logicWithParent: 'OR', children: [],
+      id: 'g1', type: 'group', title: 'G',
+      enableWhen: [{ question: 'q1', operator: '=', answerBoolean: true }],
+      enableBehavior: 'any',
+      children: [],
     }]);
     expect(q.item[0].enableBehavior).toBe('any');
+  });
+
+  it('does not set enableBehavior on group with no enableWhen', () => {
+    const q = build([{
+      id: 'g1', type: 'group', title: 'G',
+      enableWhen: [], enableBehavior: 'all',
+      children: [],
+    }]);
+    expect(q.item[0].enableBehavior).toBeUndefined();
   });
 });
 

@@ -70,7 +70,7 @@ export function expandAll()   { setCollapsedAll(tree, false); renderTree(); }
 
 // ── Renumber ──────────────────────────────────────────────────────────────────
 // Renumber writes only node._prefix — node.id (FHIR linkId) is never touched,
-// so all visibilityRule / conditionRule / calculatedExpression references stay valid.
+// so all enableWhen / calculatedExpression references stay valid.
 function _applyPrefixes(nodes, parentPrefix) {
   nodes.forEach((node, i) => {
     const seg = formatSeg(i + 1);

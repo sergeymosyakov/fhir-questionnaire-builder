@@ -1,3 +1,65 @@
+/* === Patient context modal =================================================== */
+.patient-ctx-backdrop {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0,0,0,.35);
+  display: flex; align-items: center; justify-content: center;
+}
+.patient-ctx-box {
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.22);
+  width: 380px; max-width: 94vw;
+  display: flex; flex-direction: column;
+}
+.patient-ctx-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--c-border);
+  font-weight: 600; font-size: 14px;
+}
+.patient-ctx-close {
+  background: none; border: none; cursor: pointer;
+  font-size: 16px; color: #888; padding: 1px 6px; border-radius: 3px;
+}
+.patient-ctx-close:hover { background: #f0f0f0; color: #333; }
+.patient-ctx-hint {
+  padding: 8px 16px;
+  font-size: 11px; color: var(--c-text-2);
+  background: #f7f9ff;
+  border-bottom: 1px solid var(--c-border);
+}
+.patient-ctx-body {
+  padding: 12px 16px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.patient-ctx-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.patient-ctx-lbl {
+  font-size: 12px; color: var(--c-text); flex: 0 0 130px;
+}
+.patient-ctx-inp, .patient-ctx-sel {
+  flex: 1; height: 26px; padding: 0 6px;
+  border: 1px solid var(--c-border); border-radius: var(--r-sm); font-size: 12px;
+}
+.patient-ctx-cb { width: 16px; height: 16px; }
+.patient-ctx-footer {
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--c-border);
+  display: flex; justify-content: flex-end;
+}
+.btn-primary {
+  padding: 6px 18px;
+  background: var(--c-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary:hover { background: var(--c-primary-dk); }
+
 /* === Clear form confirmation modal ========================================== */
 .clear-confirm-backdrop {
   position: fixed;
