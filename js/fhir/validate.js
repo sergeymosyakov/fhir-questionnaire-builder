@@ -79,6 +79,27 @@ export function validateTree(tree, values = {}) {
     const fhirPathErr = _checkFhirPath(node._calculatedExpr);
     if (fhirPathErr) issues.push({ severity: 'error', nodeId: id, message: `Calculated expression error: ${fhirPathErr}` });
 
+    const fhirPathEwErr = _checkFhirPath(node.enableWhenExpression);
+    if (fhirPathEwErr) issues.push({ severity: 'error', nodeId: id, message: `enableWhenExpression error: ${fhirPathEwErr}` });
+
+    if (Array.isArray(node.enableWhen)) {
+      for (const ew of node.enableWhen) {
+        if (ew.question && !allIds.includes(ew.question)) {
+          issues.push({ severity: 'error', nodeId: id, message: `Show When references unknown linkId "${ew.question}" — the target question does not exist.` });
+        }
+      }
+    }
+
+    if (Array.isArray(node.constraint)) {
+      for (const c of node.constraint) {
+        const cErr = _checkFhirPath(c.expression);
+        if (cErr) issues.push({ severity: 'error', nodeId: id, message: `Constraint "${c.key || '?'}" expression error: ${cErr}` });
+        if (!c.expression || !c.expression.trim()) {
+          issues.push({ severity: 'warning', nodeId: id, message: `Constraint "${c.key || '?'}" has an empty expression — it will never be evaluated.` });
+        }
+      }
+    }
+
     // ── Warnings ──────────────────────────────────────────────────────────────
     if (!node.title || !node.title.trim()) {
       issues.push({ severity: 'warning', nodeId: id || '(empty)', message: 'Empty item text (title) — FHIR R4 requires text on every item.' });

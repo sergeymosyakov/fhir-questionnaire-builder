@@ -131,3 +131,66 @@ describe('validateTree — nested groups', () => {
     expect(errIds(validateTree(tree))).toContain('(empty)');
   });
 });
+
+// ── constraint[] ──────────────────────────────────────────────────────────────
+describe('validateTree — constraint[]', () => {
+  it('errors on invalid FHIRPath in constraint expression', () => {
+    const item = makeItem({ id: 'q1', constraint: [{ key: 'c1', severity: 'error', human: 'msg', expression: 'INVALID_EXPR' }] });
+    const issues = validateTree([item]);
+    expect(errIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1').message).toMatch(/Constraint "c1" expression error/);
+  });
+
+  it('warns on empty constraint expression', () => {
+    const item = makeItem({ id: 'q1', constraint: [{ key: 'chk', severity: 'warning', human: 'msg', expression: '' }] });
+    const issues = validateTree([item]);
+    expect(warnIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1').message).toMatch(/Constraint "chk" has an empty expression/);
+  });
+
+  it('no issues for valid constraint expression', () => {
+    const item = makeItem({ id: 'q1', constraint: [{ key: 'c1', severity: 'error', human: 'msg', expression: '%age > 18' }] });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1')).toHaveLength(0);
+  });
+
+  it('no issues when constraint[] is absent', () => {
+    const item = makeItem({ id: 'q1' });
+    expect(validateTree([item])).toHaveLength(0);
+  });
+});
+
+// ── enableWhenExpression ───────────────────────────────────────────────────────
+describe('validateTree — enableWhenExpression', () => {
+  it('errors on invalid FHIRPath in enableWhenExpression', () => {
+    const item = makeItem({ id: 'q1', enableWhenExpression: 'INVALID_EXPR' });
+    const issues = validateTree([item]);
+    expect(errIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1').message).toMatch(/enableWhenExpression error/);
+  });
+
+  it('no error for valid enableWhenExpression', () => {
+    const item = makeItem({ id: 'q1', enableWhenExpression: '%age > 18' });
+    expect(errIds(validateTree([item]))).toHaveLength(0);
+  });
+});
+
+// ── enableWhen[].question linkId references ────────────────────────────────────
+describe('validateTree — enableWhen linkId references', () => {
+  it('errors when enableWhen.question references unknown linkId', () => {
+    const item = makeItem({ id: 'q2', enableWhen: [{ question: 'ghost', operator: 'exists', answerBoolean: true }] });
+    const issues = validateTree([item]);
+    expect(errIds(issues)).toContain('q2');
+    expect(issues.find(i => i.nodeId === 'q2').message).toMatch(/unknown linkId "ghost"/);
+  });
+
+  it('no error when enableWhen.question references a valid sibling', () => {
+    const q1 = makeItem({ id: 'q1' });
+    const q2 = makeItem({ id: 'q2', enableWhen: [{ question: 'q1', operator: 'exists', answerBoolean: true }] });
+    expect(errIds(validateTree([q1, q2]))).toHaveLength(0);
+  });
+
+  it('no error when enableWhen[] is absent', () => {
+    expect(errIds(validateTree([makeItem({ id: 'q1' })]))).toHaveLength(0);
+  });
+});
