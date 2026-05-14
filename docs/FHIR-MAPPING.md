@@ -52,7 +52,7 @@ Every node in the tree is either a **group** or an **item**:
 | FHIR `item.type` | `itemType` | Notes |
 |---|---|---|
 | `boolean` | `checkbox` | |
-| `integer`, `decimal` | `number` | |
+| `integer`, `decimal` | `number` | Both map to the same `number` control; original precision is not preserved |
 | `quantity` | `quantity` | UCUM unit dropdown; `questionnaire-unit` extension read/written |
 | `string`, `text` | `text` | |
 | `reference` | `reference` | dropdown (resource type) + id input; `questionnaire-referenceResource` extension locks dropdown to one type |
@@ -70,7 +70,7 @@ Every node in the tree is either a **group** or an **item**:
 | `itemType` | FHIR `item.type` | Extra |
 |---|---|---|
 | `checkbox` | `boolean` | |
-| `number` | `decimal` | |
+| `number` | `decimal` | `integer` inputs are exported as `decimal` — integer precision is not round-trip safe |
 | `text` | `string` | |
 | `select` | `choice` | + `answerOption[]` |
 | `radio` | `choice` | + `answerOption[]` + `questionnaire-itemControl: radio-button` extension |
