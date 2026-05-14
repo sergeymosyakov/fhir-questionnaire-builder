@@ -1,7 +1,7 @@
 // ── Right panel: reactive preview ─────────────────────────────────────────────
 import {
   effect,
-  tree, values, _formTick, _bulkUpdate, showLinkId, showPrefix,
+  tree, values, _formTick, _bulkUpdate, showLinkId, showPrefix, showBadges,
   calcFormOk, isMandatory,
   rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
@@ -35,6 +35,20 @@ export function navigateToPreview(id) {
     }
   }
   _scrollToPreview(id);
+}
+
+function _scrollToBuilder(nodeId) {
+  const target = document.querySelector('[data-node-id="' + nodeId + '"]');
+  if (!target) return;
+  const panel = document.querySelector('.left-panel-body');
+  if (panel) {
+    const top = target.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop - 10;
+    panel.scrollTo({ top, behavior: 'smooth' });
+  } else {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  target.classList.add('node-flash');
+  setTimeout(() => target.classList.remove('node-flash'), 1000);
 }
 
 function _scrollToPreview(id) {
@@ -172,13 +186,7 @@ effect(() => {
       row.className = 'lform-item lform-waiting preview-row--pointer';
       row.dataset.previewId = res.node.id;
       row.title = 'Click to navigate to builder node';
-      row.addEventListener('click', () => {
-        const target = document.querySelector('[data-node-id="' + res.node.id + '"]');
-        if (!target) return;
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        target.classList.add('node-flash');
-        setTimeout(() => target.classList.remove('node-flash'), 1000);
-      });
+      row.addEventListener('click', () => _scrollToBuilder(res.node.id));
       const ph = document.createElement('span');
       ph.className = 'preview-icon-ph';
       row.appendChild(ph);
@@ -200,13 +208,7 @@ effect(() => {
       const row = document.createElement('div');
       row.className = 'lform-item lform-disabled preview-row--pointer';
       row.dataset.previewId = res.node.id;
-      row.addEventListener('click', () => {
-        const target = document.querySelector('[data-node-id="' + res.node.id + '"]');
-        if (!target) return;
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        target.classList.add('node-flash');
-        setTimeout(() => target.classList.remove('node-flash'), 1000);
-      });
+      row.addEventListener('click', () => _scrollToBuilder(res.node.id));
       const naIcon = document.createElement('span');
       naIcon.className = 'icon-na';
       row.appendChild(naIcon);
@@ -266,13 +268,7 @@ effect(() => {
     row.className = 'lform-item preview-row--pointer';
     row.dataset.previewId = res.node.id;
     row.title = 'Click to navigate to builder node';
-    row.addEventListener('click', () => {
-      const target = document.querySelector('[data-node-id="' + res.node.id + '"]');
-      if (!target) return;
-      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      target.classList.add('node-flash');
-      setTimeout(() => target.classList.remove('node-flash'), 1000);
-    });
+    row.addEventListener('click', () => _scrollToBuilder(res.node.id));
 
     let iconEl = null;
     if (hasCondition) {
@@ -341,9 +337,12 @@ effect(() => {
       const lb = document.createElement('span');
       lb.className = 'preview-logic-badge preview-logic-' + (isOr ? 'or' : 'and');
       lb.textContent = isOr ? 'ANY item ✓' : 'ALL items ✓';
-      lb.title = isOr
-        ? 'Group passes if at least one item inside is satisfied (OR)'
-        : 'Group passes only if all items inside are satisfied (AND)';
+      lb.dataset.tipTitle = isOr ? 'Any item passes (OR)' : 'All items required (AND)';
+      lb.dataset.tipBody = isOr
+        ? 'Group is satisfied if at least one child item has a valid answer.\nStored in FHIR as a questionnaire-constraint with key e3a8c2f1…:group-or.'
+        : 'Group is satisfied only when all child items have valid answers.\nThis is the default FHIR behaviour — no extra constraint is generated.';
+      lb.dataset.tipFhir = isOr ? 'questionnaire-constraint (key: ITLH_NS:group-or)' : 'item.required (default AND)';
+      lb.dataset.tipSpec = 'R4';
       row.appendChild(lb);
     }
 
@@ -352,7 +351,10 @@ effect(() => {
         const badge = document.createElement('span');
         badge.className = 'preview-optional-badge';
         badge.textContent = 'optional';
-        badge.title = 'This field is not required';
+        badge.dataset.tipTitle = 'Optional field';
+        badge.dataset.tipBody = 'This field is not required — the questionnaire response is valid without an answer.';
+        badge.dataset.tipFhir = 'item.required: false';
+        badge.dataset.tipSpec = 'R4';
         row.appendChild(badge);
       } else {
         const star = document.createElement('span');
@@ -547,7 +549,14 @@ effect(() => {
   const d = tree.length > 0 ? '' : 'none';
   document.getElementById('showLinkIdBtn').style.display = d;
   document.getElementById('showPrefixBtn').style.display = d;
+  document.getElementById('showBadgesBtn').style.display = d;
   document.getElementById('previewCollapseAllBtn').style.display = d;
   document.getElementById('previewExpandAllBtn').style.display = d;
   document.getElementById('searchWrap').style.display = d;
+});
+
+// Toggle no-badges mode via CSS class on the lform container
+effect(() => {
+  const lform = document.getElementById('lform');
+  if (lform) lform.classList.toggle('preview--no-badges', !showBadges.value);
 });

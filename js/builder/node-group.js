@@ -114,7 +114,7 @@ export function renderGroup(node, ctx) {
     if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput || e.target === prefixInput) return;
     const target = document.querySelector('[data-preview-id="' + node.id + '"]');
     if (!target) return;
-    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     target.classList.add('preview-flash');
     setTimeout(() => target.classList.remove('preview-flash'), 1000);
   });
@@ -183,7 +183,7 @@ export function renderGroup(node, ctx) {
       requestAnimationFrame(() => {
         const el = document.querySelector('[data-node-id="' + newNode.id + '"]');
         if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           el.classList.add('node-flash');
           setTimeout(() => el.classList.remove('node-flash'), 1000);
         }

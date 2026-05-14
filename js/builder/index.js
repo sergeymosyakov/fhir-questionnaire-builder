@@ -117,7 +117,16 @@ export function addRootGroup() {
   renderTree();
   requestAnimationFrame(() => {
     const el = document.querySelector('[data-node-id="' + node.id + '"]');
-    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('node-flash'); setTimeout(() => el.classList.remove('node-flash'), 1000); }
+    if (el) {
+      const panel = document.querySelector('.left-panel-body');
+      if (panel) {
+        const top = el.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop;
+        panel.scrollTo({ top, behavior: 'smooth' });
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      el.classList.add('node-flash'); setTimeout(() => el.classList.remove('node-flash'), 1000);
+    }
   });
 }
 

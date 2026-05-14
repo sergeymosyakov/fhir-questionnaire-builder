@@ -18,25 +18,7 @@
   line-height: 1.5;
 }
 
-/* arrow pointing up (default: tooltip below target) */
-.rich-tooltip::before {
-  content: '';
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top: 0;
-  border-bottom-color: #1a2535;
-}
 
-/* arrow pointing down (tooltip above target) */
-.rich-tooltip--above::before {
-  top: auto;
-  bottom: -6px;
-  border-bottom: 0;
-  border-top-color: #1a2535;
-}
 
 .rich-tooltip__title {
   font-size: 12px;

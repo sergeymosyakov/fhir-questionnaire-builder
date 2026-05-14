@@ -13,7 +13,7 @@ import * as variablesPanel from './ui/variables-panel.js';
 import * as patientCtx from './ui/patient-ctx.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview } from './render-preview.js';
-import { showLinkId, showPrefix, questVariables } from './state.js';
+import { showLinkId, showPrefix, showBadges, questVariables } from './state.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 
 // fhirpath.js v4 browser bundle loaded as global via lib/fhirpath.min.js
@@ -38,6 +38,7 @@ function wireToggle(btnId, stateRef) {
 }
 wireToggle('showLinkIdBtn', showLinkId);
 wireToggle('showPrefixBtn', showPrefix);
+wireToggle('showBadgesBtn', showBadges);
 document.getElementById('expandAllBtn').onclick    = expandAll;
 document.getElementById('renumberBtn').onclick = async () => {
   const btn = document.getElementById('renumberBtn');
@@ -278,7 +279,13 @@ async function _importAndValidate(data, fileName) {
 function _navigateToNode(nodeId) {
   const target = document.querySelector(`[data-node-id="${nodeId}"]`);
   if (!target) return;
-  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const panel = document.querySelector('.left-panel-body');
+  if (panel) {
+    const top = target.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop - 10;
+    panel.scrollTo({ top, behavior: 'smooth' });
+  } else {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
   target.classList.add('node-flash');
   setTimeout(() => target.classList.remove('node-flash'), 1000);
 }

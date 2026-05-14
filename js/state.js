@@ -25,6 +25,10 @@ export const showLinkId = ref(true);
 // Show/hide item.prefix badges in preview.
 export const showPrefix = ref(true);
 
+// Show/hide all metadata badges in preview (optional, required, logic, calc).
+// When false, calculated fields render as plain text.
+export const showBadges = ref(true);
+
 // FHIRPath: original FHIR Questionnaire JSON after import; null if not loaded.
 export const rawFhir = ref(null);
 

@@ -145,8 +145,38 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
     const buildOpVal = (itype, opts) => {
       opSel.innerHTML = '';
       valWrap.innerHTML = '';
+
+      // Adds "has answer" / "has no answer" to any operator dropdown
+      const _addExistsOpts = () => {
+        [['exists|true', 'has answer'], ['exists|false', 'has no answer']].forEach(([v, l]) => {
+          const o = document.createElement('option'); o.value = v; o.textContent = l;
+          opSel.appendChild(o);
+        });
+      };
+
+      // Wraps opSel.onchange: if user picks exists, clears valWrap and writes to ew;
+      // if user switches away from exists, rebuilds the full row via buildOpVal.
+      const _wrapChange = () => {
+        opSel.onchange = () => {
+          if (opSel.value.startsWith('exists|')) {
+            ew.operator = 'exists';
+            ew.answerBoolean = opSel.value.endsWith('|true');
+            delete ew.answerString; delete ew.answerCoding;
+            delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate;
+            valWrap.innerHTML = '';
+          } else {
+            const sel = opSel.value;
+            ew.operator = sel;
+            delete ew.answerBoolean;
+            buildOpVal(itype, opts);
+            opSel.value = sel;
+          }
+        };
+      };
+
       if (itype === 'checkbox') {
-        [['=|true', 'is Yes (checked)'], ['=|false', 'is No (unchecked)']].forEach(([v, l]) => {
+        [['=|true', 'is Yes (checked)'], ['=|false', 'is No (unchecked)'],
+         ['exists|true', 'has answer'], ['exists|false', 'has no answer']].forEach(([v, l]) => {
           const o = document.createElement('option'); o.value = v; o.textContent = l;
           opSel.appendChild(o);
         });
@@ -155,78 +185,99 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
           const [op, boolStr] = opSel.value.split('|');
           ew.operator = op;
           ew.answerBoolean = boolStr === 'true';
+          delete ew.answerString; delete ew.answerCoding; delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate;
         };
       } else if (itype === 'select' || itype === 'radio' || itype === 'open-choice') {
         [['=', '='], ['!=', '\u2260']].forEach(([v, l]) => {
           const o = document.createElement('option'); o.value = v; o.textContent = l;
           opSel.appendChild(o);
         });
-        opSel.value = ew.operator || '=';
-        opSel.onchange = () => { ew.operator = opSel.value; };
-        if (opts) {
-          const valSel = document.createElement('select');
-          valSel.className = 'vis-cond-val-inp';
-          parseOptions(opts).forEach(({ code, display }) => {
-            const o = document.createElement('option');
-            o.value = code; o.textContent = display || code;
-            if (ew.answerCoding && ew.answerCoding.code === code) o.selected = true;
-            valSel.appendChild(o);
-          });
-          valSel.onchange = () => {
-            const selOpt = valSel.options[valSel.selectedIndex];
-            ew.answerCoding = { code: valSel.value, display: selOpt.textContent };
-          };
-          valWrap.appendChild(valSel);
+        _addExistsOpts();
+        if (ew.operator === 'exists') {
+          opSel.value = 'exists|' + (ew.answerBoolean === false ? 'false' : 'true');
         } else {
-          const inp = document.createElement('input');
-          inp.type = 'text'; inp.className = 'vis-cond-val-inp';
-          inp.value = ew.answerCoding?.code || ew.answerString || '';
-          inp.oninput = () => { ew.answerCoding = { code: inp.value }; delete ew.answerString; };
-          valWrap.appendChild(inp);
+          opSel.value = ew.operator || '=';
+          if (opts) {
+            const valSel = document.createElement('select');
+            valSel.className = 'vis-cond-val-inp';
+            parseOptions(opts).forEach(({ code, display }) => {
+              const o = document.createElement('option');
+              o.value = code; o.textContent = display || code;
+              if (ew.answerCoding && ew.answerCoding.code === code) o.selected = true;
+              valSel.appendChild(o);
+            });
+            valSel.onchange = () => {
+              const selOpt = valSel.options[valSel.selectedIndex];
+              ew.answerCoding = { code: valSel.value, display: selOpt.textContent };
+            };
+            valWrap.appendChild(valSel);
+          } else {
+            const inp = document.createElement('input');
+            inp.type = 'text'; inp.className = 'vis-cond-val-inp';
+            inp.value = ew.answerCoding?.code || ew.answerString || '';
+            inp.oninput = () => { ew.answerCoding = { code: inp.value }; delete ew.answerString; };
+            valWrap.appendChild(inp);
+          }
         }
+        _wrapChange();
       } else if (itype === 'number' || itype === 'quantity') {
         [['=','='],['!=','\u2260'],['>','>'],['<','<'],['>=','\u2265'],['<=','\u2264']].forEach(([v, l]) => {
           const o = document.createElement('option'); o.value = v; o.textContent = l;
           opSel.appendChild(o);
         });
-        opSel.value = ew.operator || '=';
-        opSel.onchange = () => { ew.operator = opSel.value; };
-        const inp = document.createElement('input');
-        inp.type = 'number'; inp.className = 'vis-cond-val-inp';
-        inp.value = ew.answerDecimal !== undefined ? ew.answerDecimal
-          : ew.answerInteger !== undefined ? ew.answerInteger : '';
-        inp.oninput = () => {
-          const n = parseFloat(inp.value);
-          if (!isNaN(n)) {
-            if (Number.isInteger(n)) { ew.answerInteger = n; delete ew.answerDecimal; }
-            else { ew.answerDecimal = n; delete ew.answerInteger; }
-          }
-        };
-        valWrap.appendChild(inp);
+        _addExistsOpts();
+        if (ew.operator === 'exists') {
+          opSel.value = 'exists|' + (ew.answerBoolean === false ? 'false' : 'true');
+        } else {
+          opSel.value = ew.operator || '=';
+          const inp = document.createElement('input');
+          inp.type = 'number'; inp.className = 'vis-cond-val-inp';
+          inp.value = ew.answerDecimal !== undefined ? ew.answerDecimal
+            : ew.answerInteger !== undefined ? ew.answerInteger : '';
+          inp.oninput = () => {
+            const n = parseFloat(inp.value);
+            if (!isNaN(n)) {
+              if (Number.isInteger(n)) { ew.answerInteger = n; delete ew.answerDecimal; }
+              else { ew.answerDecimal = n; delete ew.answerInteger; }
+            }
+          };
+          valWrap.appendChild(inp);
+        }
+        _wrapChange();
       } else if (itype === 'date') {
         [['=','='],['!=','\u2260'],['>','>'],['<','<']].forEach(([v, l]) => {
           const o = document.createElement('option'); o.value = v; o.textContent = l;
           opSel.appendChild(o);
         });
-        opSel.value = ew.operator || '=';
-        opSel.onchange = () => { ew.operator = opSel.value; };
-        const inp = document.createElement('input');
-        inp.type = 'date'; inp.className = 'vis-cond-val-inp';
-        inp.value = ew.answerDate || '';
-        inp.oninput = () => { ew.answerDate = inp.value; };
-        valWrap.appendChild(inp);
+        _addExistsOpts();
+        if (ew.operator === 'exists') {
+          opSel.value = 'exists|' + (ew.answerBoolean === false ? 'false' : 'true');
+        } else {
+          opSel.value = ew.operator || '=';
+          const inp = document.createElement('input');
+          inp.type = 'date'; inp.className = 'vis-cond-val-inp';
+          inp.value = ew.answerDate || '';
+          inp.oninput = () => { ew.answerDate = inp.value; };
+          valWrap.appendChild(inp);
+        }
+        _wrapChange();
       } else {
         [['=','='],['!=','\u2260']].forEach(([v, l]) => {
           const o = document.createElement('option'); o.value = v; o.textContent = l;
           opSel.appendChild(o);
         });
-        opSel.value = ew.operator || '=';
-        opSel.onchange = () => { ew.operator = opSel.value; };
-        const inp = document.createElement('input');
-        inp.type = 'text'; inp.className = 'vis-cond-val-inp';
-        inp.value = ew.answerString || '';
-        inp.oninput = () => { ew.answerString = inp.value; delete ew.answerCoding; delete ew.answerDecimal; };
-        valWrap.appendChild(inp);
+        _addExistsOpts();
+        if (ew.operator === 'exists') {
+          opSel.value = 'exists|' + (ew.answerBoolean === false ? 'false' : 'true');
+        } else {
+          opSel.value = ew.operator || '=';
+          const inp = document.createElement('input');
+          inp.type = 'text'; inp.className = 'vis-cond-val-inp';
+          inp.value = ew.answerString || '';
+          inp.oninput = () => { ew.answerString = inp.value; delete ew.answerCoding; delete ew.answerDecimal; };
+          valWrap.appendChild(inp);
+        }
+        _wrapChange();
       }
     };
 

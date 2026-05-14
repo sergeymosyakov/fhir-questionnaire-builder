@@ -247,6 +247,31 @@
 .preview-row--pointer { cursor: pointer; }
 .preview-label--dim   { color: #aaa; }
 
+/* === No-badges mode ========================================================== */
+/* Activated by .preview--no-badges class on #lform */
+.preview--no-badges .preview-optional-badge,
+.preview--no-badges .preview-required-star,
+.preview--no-badges .preview-logic-badge,
+.preview--no-badges .preview-condition-hint,
+.preview--no-badges .preview-constraint-badge,
+.preview--no-badges .preview-meta-badge,
+.preview--no-badges .auto-badge { display: none; }
+
+/* linkId and prefix: strip badge styling, show as plain text */
+.preview--no-badges .preview-linkid,
+.preview--no-badges .preview-prefix {
+  background: none;
+  border: none;
+  color: var(--c-text-2);
+  font-size: 11px;
+  font-weight: normal;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* calc-badge: hide entirely in no-badges mode */
+.preview--no-badges .calc-badge { display: none; }
+
 /* === Preview card inputs ===================================================== */
 .preview-card input[type=text],
 .preview-card input[type=number] {
