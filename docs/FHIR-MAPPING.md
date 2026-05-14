@@ -171,7 +171,6 @@ The only internal UI fields that are never written to FHIR JSON (and therefore n
 
 | Field | Why it is not in FHIR JSON |
 |---|---|
-| `_enableWhenText` | Generated from `enableWhen[]` on import for display only; not a FHIR field |
 | `logicWithParent` | `'OR'` exported as a namespaced `questionnaire-constraint` (key `e3a8c2f1-6b4d-4e9a-87c5:group-or`); round-trip safe |
 
 ---
