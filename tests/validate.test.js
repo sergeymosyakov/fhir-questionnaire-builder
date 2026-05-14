@@ -90,25 +90,7 @@ describe('validateTree — select/radio options', () => {
   });
 });
 
-// ── JS expression errors ──────────────────────────────────────────────────────
-describe('validateTree — JS rule syntax', () => {
-  it('errors on invalid visibilityRule JS', () => {
-    const issues = validateTree([makeItem({ id: 'q1', visibilityRule: 'age ===' })]);
-    expect(errIds(issues)).toContain('q1');
-  });
-
-  it('errors on invalid conditionRule JS', () => {
-    const issues = validateTree([makeItem({ id: 'q1', conditionRule: 'age ===' })]);
-    expect(errIds(issues)).toContain('q1');
-  });
-
-  it('no error for valid JS rule', () => {
-    const issues = validateTree([makeItem({ id: 'q1', visibilityRule: 'age > 18' })]);
-    expect(errIds(issues)).toHaveLength(0);
-  });
-});
-
-// ── FHIRPath expression errors ────────────────────────────────────────────────
+// ── FHIRPath expression errors ──────────────────────────────────────────────
 describe('validateTree — FHIRPath expression', () => {
   it('errors on invalid FHIRPath expression', () => {
     const issues = validateTree([makeItem({ id: 'q1', _calculatedExpr: 'INVALID expr' })]);
@@ -121,23 +103,7 @@ describe('validateTree — FHIRPath expression', () => {
   });
 });
 
-// ── visibilityRule references unknown linkId ──────────────────────────────────
-describe('validateTree — unknown linkId in visibilityRule', () => {
-  it('warns when rule references unknown id', () => {
-    const issues = validateTree([makeItem({ id: 'q1', visibilityRule: "values['ghost'] === true" })]);
-    expect(warnIds(issues)).toContain('q1');
-  });
-
-  it('no warning when rule references known id', () => {
-    const tree = [
-      makeItem({ id: 'q1' }),
-      makeItem({ id: 'q2', title: 'Q2', visibilityRule: "values['q1'] === true" }),
-    ];
-    expect(warnIds(validateTree(tree))).toHaveLength(0);
-  });
-});
-
-// ── reference item ────────────────────────────────────────────────────────────
+// ── reference item ──────────────────────────────────────────────────────────
 describe('validateTree — reference item', () => {
   it('warns when no referenceResource defined', () => {
     const issues = validateTree([makeItem({ id: 'q1', itemType: 'reference' })]);

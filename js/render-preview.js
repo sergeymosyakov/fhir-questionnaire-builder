@@ -249,7 +249,6 @@ effect(() => {
       }
     } else {
       // Item has a condition if:
-      // - has explicit successValue, OR
       // - is mandatory checkable type (must be filled/valid), OR
       // - is optional URL (format validation always applies), OR
       // - is a readOnly boolean calc node after Test
@@ -348,7 +347,7 @@ effect(() => {
       row.appendChild(lb);
     }
 
-    if (res.node.type === 'item' && res.node.itemType !== 'display' && !(res.node._readOnly && res.node._calculatedExpr)) {
+    if (res.node.type === 'item' && res.node.itemType !== 'display' && !res.node._readOnly) {
       if (res.node.mandatory === false) {
         const badge = document.createElement('span');
         badge.className = 'preview-optional-badge';
@@ -411,8 +410,18 @@ effect(() => {
     }
 
     if (res.node.type === 'item') {
-      if (res.node.itemType !== 'display' && !(res.node._readOnly && res.node._calculatedExpr)) {
+      if (res.node.itemType !== 'display' && !res.node._readOnly) {
         row.appendChild(buildControl(res.node, iconEl, () => updateGroupIcons()));
+      }
+      // static value badge for readOnly fields without a calculatedExpression
+      if (res.node._readOnly && !res.node._calculatedExpr) {
+        const val = values[res.node.id];
+        if (val !== undefined && val !== null && val !== '') {
+          const vb = document.createElement('span');
+          vb.className = 'calc-badge calc-true';
+          vb.textContent = String(val);
+          row.appendChild(vb);
+        }
       }
       // calc-badge: show for readOnly nodes with calculatedExpression
       if (res.node._calculatedExpr && res.node._readOnly) {
@@ -491,7 +500,6 @@ effect(() => {
   function updateGroupIcons() {
     for (const [, { icon, descendants, node }] of groupIconMap.entries()) {
       const relevant = descendants.filter(r =>
-        (isMandatory(r.node) && r.node.successValue !== '') ||
         (isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)) ||
         (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox')
       );

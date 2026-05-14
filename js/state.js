@@ -155,5 +155,4 @@ export const calcFormOk = node => {
 };
 
 // ── Pure utilities ────────────────────────────────────────────────────────────
-// Moved to js/utils.js — re-exported here for backwards compatibility.
-export { escAttr, findAndRemove, isDescendant } from './utils.js';
+// All utility functions are in js/utils.js — import directly from there.

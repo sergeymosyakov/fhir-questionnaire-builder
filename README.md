@@ -79,11 +79,10 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **ES Modules** — `import/export` between files; requires HTTP server
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
-- **`new Function()`** — sandboxed rule evaluation (`evalRule`)
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`); 160 tests; CDN imports mocked via `vi.mock`; CI via GitHub Actions
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`); 173 tests; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 
 ---
 

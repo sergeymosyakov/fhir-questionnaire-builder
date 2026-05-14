@@ -38,7 +38,7 @@ Every node in the tree is either a **group** or an **item**:
   _renderStyle:        string,           // inline CSS (from rendering-style extension)
   _calculatedExpr:     string,           // FHIRPath expression (SDC calculatedExpression)
   _readOnly:           boolean,          // FHIR item.readOnly
-  _enableWhenText:     string            // human-readable condition label (UI only, not persisted)
+  _enableWhenText:     string,           // human-readable condition label (UI only, not persisted)
   _initialValue:       any               // FHIR item.initial[0] value; pre-fills values[] on import
 }
 ```
@@ -165,28 +165,26 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 
 ## What Is Lost on Round-Trip
 
-| Field | Lost? | Reason |
-|---|---|---|
-| `_enableWhenText` | Yes (intentional) | UI label, regenerated from `enableWhen` on import |
-| Multiple `enableWhen` conditions | ✅ Preserved | Stored and exported as-is (`enableWhen[]` shallow copy) |
+Nothing significant. All standard FHIR fields are preserved on export and correctly re-read on the next import.
+
+The only internal UI fields that are never written to FHIR JSON (and therefore never "lost"):
+
+| Field | Why it is not in FHIR JSON |
+|---|---|
+| `_enableWhenText` | Generated from `enableWhen[]` on import for display only; not a FHIR field |
+| `logicWithParent` | AND/OR separator badge between sibling items — UI only; no equivalent in FHIR R4 |
 
 ---
 
-## Not Supported (Out of Scope)
+## Not Supported / Partial Support
 
-The following FHIR R4 / SDC features are currently not handled. Items marked ⚠️ produce silent data loss on import.
+Items marked ⚠️ produce silent data loss on import.
 
 | Feature | FHIR field / extension | Status |
 |---|---|---|
 | Repeating items | `item.repeats: true`, `item.maxOccurs` | ⚠️ ignored on import |
-| Answer value sets | `item.answerValueSet` | ⚠️ ignored; use `answerOption[]` |
-| Initial values | `item.initial[]` | ✅ `initial[0]` imported → `_initialValue`; pre-fills the form on load; editable via **Default** panel in builder; exported back as `initial[{value...}]` |
-| SDC variables | `sdc-questionnaire-variable` extension | ✅ round-trip safe; collapsible card in left panel; editable via modal; evaluated as `%varName` in FHIRPath calculatedExpression |
-| SDC initial expression | `sdc-questionnaire-initialExpression` | ⚠️ ignored |
-| `questionnaire-constraint` extension | `questionnaire-constraint` extension | ✅ imported → `constraint[]`; exported back; **evaluated in preview** — amber ⚠️ or red ✘ badge per node; `error`+fail blocks Final Result |
-| Multiple `enableWhen` on items with `enableBehavior` | `item.enableBehavior` | ✅ full round-trip via `enableWhen[]` + `enableBehavior` |
-| Item prefix | `item.prefix` (e.g. `"1.1"`) | ✅ round-trip safe; amber badge in preview; editable in builder |
-| Item codes | `item.code[]` (coding array) | ✅ round-trip safe; stored as `_codes`, not displayed in UI |
-| `contained` resources | `Questionnaire.contained[]` | ⚠️ ignored |
-| Resource reference resolution | `type: 'reference'` | ⚠️ dropdown + id text field; no live resource search against a FHIR server |
+| Answer value sets | `item.answerValueSet` | ⚠️ ignored on import; use `answerOption[]` instead |
+| SDC initial expression | `sdc-questionnaire-initialExpression` | ⚠️ ignored on import |
+| `contained` resources | `Questionnaire.contained[]` | ⚠️ ignored on import |
+| Resource reference resolution | `type: 'reference'` | ⚠️ partial — dropdown (resource type) + id text input; no live search against a FHIR server |
 | FHIR versions other than R4 | STU3, R5 | Not tested; may partially work |

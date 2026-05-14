@@ -65,7 +65,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
 | `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic (23 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
-| `tests/validate.test.js` | Unit tests for `js/fhir/validate.js` — `validateTree` (21 tests) |
+| `tests/validate.test.js` | Unit tests for `js/fhir/validate.js` — `validateTree` (16 tests) |
 | `tests/export.test.js` | Unit tests for `js/fhir/export.js` — enableWhen, constraints, SDC variables (33 tests) |
 | `tests/import.test.js` | Unit tests for `js/fhir/import.js` — `fhirTypeToItemType`, `fhirOptsToStr`, `humanEnableWhen`, `applyVisibility` (45 tests) |
 | `tests/qr-builder.test.js` | Unit tests for `js/fhir/qr-builder.js` — `buildQR`, `buildQRItem` (23 tests) |
@@ -80,7 +80,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
-- **Vitest** — unit test suite for pure-function modules; **178 tests**; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules; **173 tests**; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---
@@ -169,17 +169,18 @@ _codes           // object[] — FHIR item.code[] (preserved round-trip; not dis
 | FHIR R4 type | `itemType` | Control | Validation | Notes |
 |---|---|---|---|---|
 | `boolean` | `checkbox` | ✅ | — | |
-| `integer`, `decimal` | `number` | ✅ | — | `quantity` → number, unit ignored |
+| `integer`, `decimal` | `number` | ✅ | — | |
+| `quantity` | `quantity` | ✅ number + unit dropdown (UCUM) | ✅ required = value+unit filled | `questionnaire-unit` extension read/written |
 | `string`, `text` | `text` | ✅ | — | |
 | `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three → `date` |
 | `url` | `url` | ✅ | ✅ `new URL()` | Invalid format → ✘ even if optional |
 | `choice` | `select` / `radio` | ✅ | — | `questionnaire-itemControl: radio-button` → `radio` |
-| `open-choice` | `select` | ⚠️ | — | Free-text option not rendered |
+| `open-choice` | `open-choice` | ✅ text + datalist | — | Free-text allowed; datalist populated from `answerOption[]` |
 | `display` | `display` | ✅ label | — | No control, no pass/fail |
 | `group` | `group` | ✅ | — | |
 | `group` (no children) | `group` | ✅ `[Info]` | — | |
 | `attachment` | `attachment` | ✅ file input | ✅ required = file chosen | |
-| `reference` | `text` | ⚠️ fallback | — | No resource search |
+| `reference` | `reference` | ✅ dropdown (resource type) + id input | ✅ required = type+id filled | `questionnaire-referenceResource` extension locks dropdown; no live FHIR server search |
 
 ---
 
@@ -271,6 +272,5 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ## Known Limitations / TODO
 
-- `conditionRule` on items is not exported to FHIR (prototype-specific concept, no R4 equivalent)
-- Example loads via `window.EXAMPLE_FHIR_Q` (JS wrapper), not `fetch`, for `file://` compatibility
+- Multi-condition visibility with complex FHIRPath (cross-group references, extensions) not supported in the visual enableWhen builder — must be typed as `enableWhenExpression` directly
 

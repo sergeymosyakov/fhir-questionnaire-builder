@@ -42,17 +42,6 @@ function _collectNodes(nodes, out = []) {
 }
 
 // Attempt to compile a JS rule expression. Returns error message or null.
-function _checkJsExpr(rule) {
-  if (!rule || !rule.trim()) return null;
-  try {
-    new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
-      'return (' + rule + ');');
-    return null;
-  } catch (e) {
-    return e.message;
-  }
-}
-
 // Attempt to parse a FHIRPath expression (syntax check only). Returns error message or null.
 function _checkFhirPath(expr) {
   if (!expr || !expr.trim()) return null;
@@ -86,12 +75,6 @@ export function validateTree(tree, values = {}) {
       issues.push({ severity: 'error', nodeId: id, message: `Duplicate linkId "${id}" — linkIds must be unique within a Questionnaire.` });
     }
 
-    // JS expression errors
-    const visErr  = _checkJsExpr(node.visibilityRule);
-    const condErr = _checkJsExpr(node.conditionRule);
-    if (visErr)  issues.push({ severity: 'error', nodeId: id, message: `Visibility rule syntax error: ${visErr}` });
-    if (condErr) issues.push({ severity: 'error', nodeId: id, message: `Applicability rule syntax error: ${condErr}` });
-
     // FHIRPath expression errors
     const fhirPathErr = _checkFhirPath(node._calculatedExpr);
     if (fhirPathErr) issues.push({ severity: 'error', nodeId: id, message: `Calculated expression error: ${fhirPathErr}` });
@@ -116,14 +99,6 @@ export function validateTree(tree, values = {}) {
       }
     }
 
-    // visibilityRule references unknown linkId
-    if (node.visibilityRule) {
-      for (const m of node.visibilityRule.matchAll(/values\['([^']+)'\]/g)) {
-        if (!allIds.includes(m[1])) {
-          issues.push({ severity: 'warning', nodeId: id, message: `Visibility rule references unknown linkId "${m[1]}".` });
-        }
-      }
-    }
   }
 
   return issues;
