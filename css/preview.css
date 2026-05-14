@@ -142,6 +142,11 @@
   background: #ede7f6;
   border-color: #b39ddb;
 }
+.preview-readonly-value {
+  font-size: 13px;
+  color: #546e7a;
+  font-style: italic;
+}
 
 /* === AND/OR separator between sibling items ================================== */
 .logic-separator {

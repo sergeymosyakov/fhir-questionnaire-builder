@@ -413,12 +413,12 @@ effect(() => {
       if (res.node.itemType !== 'display' && !res.node._readOnly) {
         row.appendChild(buildControl(res.node, iconEl, () => updateGroupIcons()));
       }
-      // static value badge for readOnly fields without a calculatedExpression
+      // plain text value for readOnly fields without a calculatedExpression
       if (res.node._readOnly && !res.node._calculatedExpr) {
         const val = values[res.node.id];
         if (val !== undefined && val !== null && val !== '') {
           const vb = document.createElement('span');
-          vb.className = 'calc-badge calc-true';
+          vb.className = 'preview-readonly-value';
           vb.textContent = String(val);
           row.appendChild(vb);
         }

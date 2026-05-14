@@ -35,6 +35,14 @@ export function renderItem(node, ctx) {
   typeLabel.textContent = '[Item]';
   titleWrap.appendChild(typeLabel);
 
+  if (node._readOnly) {
+    const roTag = document.createElement('span');
+    roTag.className = 'node-readonly-tag';
+    roTag.textContent = '\uD83D\uDD12';
+    roTag.title = 'readOnly — this field cannot be edited by the user';
+    titleWrap.appendChild(roTag);
+  }
+
   const navBtn = document.createElement('button');
   navBtn.type = 'button';
   navBtn.className = 'node-nav-btn';
@@ -190,7 +198,7 @@ export function renderItem(node, ctx) {
   addPanel('style',p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
   setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
-  setActive(exprLink,       !!node._calculatedExpr);
+  setActive(exprLink,       !!node._calculatedExpr || !!node._readOnly);
   setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
   setActive(styleLink,      !!node._renderStyle);
   setActive(mandLink,       node.mandatory === true);
