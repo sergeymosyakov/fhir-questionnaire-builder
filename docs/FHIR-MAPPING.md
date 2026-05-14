@@ -11,31 +11,34 @@ Every node in the tree is either a **group** or an **item**:
 ```js
 // Group
 {
-  id:              string,          // FHIR linkId
-  type:            'group',
-  title:           string,          // FHIR item.text
-  mandatory:       true|false|null, // null = not set (omit required from FHIR)
-  visibilityRule:  string,          // JS expression, see "Show When" below
-  conditionRule:   string,          // JS expression for applicability (N/A state)
-  logicWithParent: 'AND'|'OR',      // FHIR enableBehavior
-  children:        Node[]
+  id:                  string,          // FHIR linkId
+  type:                'group',
+  title:               string,          // FHIR item.text
+  mandatory:           true|false|null, // null = not set (omit required from FHIR)
+  enableWhen:          object[],        // FHIR enableWhen[] entries
+  enableBehavior:      'all'|'any',     // FHIR enableBehavior ('all' = AND, default)
+  enableWhenExpression:string,          // SDC enableWhenExpression (FHIRPath)
+  constraint:          object[],        // questionnaire-constraint extension entries
+  logicWithParent:     'AND'|'OR',      // AND/OR badge for children in preview
+  children:            Node[]
 }
 
 // Item
 {
-  id:             string,
-  type:           'item',
-  title:          string,
-  mandatory:      true|false|null,
-  visibilityRule: string,
-  conditionRule:  string,
-  itemType:       'text'|'number'|'date'|'url'|'attachment'|'checkbox'|'select'|'radio'|'display',
-  options:        string,           // comma-separated, used by select/radio
-  successValue:   string,           // expected answer for pass/fail check
-  _renderStyle:   string,           // inline CSS (from rendering-style extension)
-  _calculatedExpr:string,           // FHIRPath expression (SDC calculatedExpression)
-  _readOnly:      boolean,          // FHIR item.readOnly
-  _enableWhenText:string            // human-readable condition label (UI only, not persisted)
+  id:                  string,
+  type:                'item',
+  title:               string,
+  mandatory:           true|false|null,
+  enableWhen:          object[],
+  enableBehavior:      'all'|'any',
+  enableWhenExpression:string,
+  constraint:          object[],
+  itemType:            'text'|'number'|'date'|'url'|'attachment'|'checkbox'|'select'|'radio'|'open-choice'|'quantity'|'reference'|'display',
+  options:             string,           // comma-separated, used by select/radio/open-choice
+  _renderStyle:        string,           // inline CSS (from rendering-style extension)
+  _calculatedExpr:     string,           // FHIRPath expression (SDC calculatedExpression)
+  _readOnly:           boolean,          // FHIR item.readOnly
+  _enableWhenText:     string            // human-readable condition label (UI only, not persisted)
 }
 ```
 
@@ -96,8 +99,12 @@ Every node in the tree is either a **group** or an **item**:
 
 | Internal field | FHIR field | Notes |
 |---|---|---|
-| `logicWithParent: 'OR'` | `item.enableBehavior: 'any'` | |
-| `logicWithParent: 'AND'` | `item.enableBehavior` absent | default |
+| `enableWhen[]` | `item.enableWhen[]` | shallow-copied on export; re-parsed on import |
+| `enableBehavior: 'any'` | `item.enableBehavior: 'any'` | only written when `'any'`; default `'all'` is omitted |
+| `enableWhenExpression` | SDC `sdc-questionnaire-enableWhenExpression` ext | FHIRPath string; omitted if empty |
+| `constraint[]` | `questionnaire-constraint` ext entries | round-trip safe |
+| `logicWithParent: 'OR'` | AND/OR preview badge | UI only; not exported |
+| `logicWithParent: 'AND'` | *(default, not exported)* | UI only |
 | `children` | `item.item[]` | recursive |
 
 ### Item-specific
@@ -110,69 +117,33 @@ Every node in the tree is either a **group** or an **item**:
 | `_readOnly` | `item.readOnly` | |
 | `_prefix` | `item.prefix` | imported and exported; displayed as amber badge in preview; editable in builder meta-row |
 | `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); not displayed in UI |
-
 ---
 
-## Show When (visibilityRule)
+## Show When (enableWhen)
 
 Controls whether the item/group is **visible** in the preview.
 
-### Export
-
-Simple patterns (produced by the visual builder) are converted to standard FHIR `enableWhen[]`:
-
-| JS pattern | FHIR enableWhen |
-|---|---|
-| `values['id'] == true` | `{ question:'id', operator:'=', answerBoolean:true }` |
-| `values['id'] == false` | `{ question:'id', operator:'=', answerBoolean:false }` |
-| `values['id'] == 'text'` | `{ question:'id', operator:'=', answerString:'text' }` |
-| `values['id'] == 42` | `{ question:'id', operator:'=', answerInteger:42 }` |
-| `values['id'] != ...` | operator `!=` |
-| `values['id'] > / < / >= / <=` | numeric operators |
-
-Complex / free-form JS that doesn't match the pattern → stored as custom extension:
-```json
-{
-  "url": "http://logicbuilder.example.org/extension/visibilityRule",
-  "valueString": "age > 18 && bmi > 35"
-}
-```
+The builder stores standard FHIR `enableWhen[]` objects directly on the node. The visual panel ("Show When") edits them in-place.
 
 ### Import
 
-1. Custom extension `visibilityRule` → restored as-is
-2. Standard `enableWhen[]` → converted to JS: `values['linkId'] == value`
-3. `enableWhen` also generates `_enableWhenText` (human-readable label shown in preview UI)
+1. Standard `item.enableWhen[]` → `node.enableWhen[]` (copied as-is)
+2. `item.enableBehavior` → `node.enableBehavior` (`'all'` | `'any'`; default `'all'`)
+3. SDC `sdc-questionnaire-enableWhenExpression` extension → `node.enableWhenExpression` (FHIRPath string)
+4. `enableWhen` also generates `_enableWhenText` (human-readable label, e.g. `«Q» = Yes AND «Q2» = No`)
 
----
+### Export
 
-## Applicability Rule (conditionRule)
+- `node.enableWhen[]` → `item.enableWhen[]` (shallow copy)
+- `node.enableBehavior === 'any'` → `item.enableBehavior: 'any'` (omitted otherwise)
+- `node.enableWhenExpression` → SDC `sdc-questionnaire-enableWhenExpression` extension
 
-Controls whether a group is **applicable** (shows as N/A when false). Not a FHIR standard field.
+### Evaluation
 
-Always stored as custom extension:
-```json
-{
-  "url": "http://logicbuilder.example.org/extension/conditionRule",
-  "valueString": "proc === '43644'"
-}
-```
-
-Round-trips cleanly. Not converted to `enableWhen`.
-
----
-
-## Success Value (successValue)
-
-Expected answer string for pass/fail evaluation of an item. Not a FHIR standard field.
-
-Always stored as custom extension:
-```json
-{
-  "url": "http://logicbuilder.example.org/extension/successValue",
-  "valueString": "true"
-}
-```
+- `node.enableBehavior === 'all'` (default): **all** conditions must be met (AND)
+- `node.enableBehavior === 'any'`: **any** condition is sufficient (OR)
+- `enableWhenExpression`: evaluated via FHIRPath if present (takes precedence over `enableWhen[]`)
+- Answer type coercion: all comparisons use `String()` normalization for consistent boolean/string matching
 
 ---
 
@@ -180,13 +151,14 @@ Always stored as custom extension:
 
 | Extension URL | Type | Field | Standard? |
 |---|---|---|---|
-| `http://logicbuilder.example.org/extension/visibilityRule` | custom | `visibilityRule` (complex JS) | No |
-| `http://logicbuilder.example.org/extension/conditionRule` | custom | `conditionRule` | No |
-| `http://logicbuilder.example.org/extension/successValue` | custom | `successValue` | No |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-style` | standard | `_renderStyle` | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression` | SDC | `_calculatedExpr` | Yes (SDC) |
-| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable` | SDC | `questVariables[]` on Questionnaire root | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable` | SDC | `questVariables[]` on root | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression` | SDC | `enableWhenExpression` | Yes (SDC) |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-constraint` | standard | `constraint[]` | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-unit` | standard | `quantityUnit` (quantity default unit) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource` | standard | `referenceResource` (reference type lock) | Yes |
 
 ---
 
@@ -195,8 +167,7 @@ Always stored as custom extension:
 | Field | Lost? | Reason |
 |---|---|---|
 | `_enableWhenText` | Yes (intentional) | UI label, regenerated from `enableWhen` on import |
-| `autoFilledIds` | Yes (intentional) | Runtime UI state only |
-| Multiple `enableWhen` conditions | Partial | Imported as `&&`-joined JS; re-exported as single `enableWhen` entry if simple, else as extension |
+| Multiple `enableWhen` conditions | ✅ Preserved | Stored and exported as-is (`enableWhen[]` shallow copy) |
 
 ---
 
@@ -211,10 +182,10 @@ The following FHIR R4 / SDC features are currently not handled. Items marked ⚠
 | Initial values | `item.initial[]` | ✅ `initial[0]` imported → `_initialValue`; pre-fills the form on load; editable via **Default** panel in builder; exported back as `initial[{value...}]` |
 | SDC variables | `sdc-questionnaire-variable` extension | ✅ round-trip safe; collapsible card in left panel; editable via modal; evaluated as `%varName` in FHIRPath calculatedExpression |
 | SDC initial expression | `sdc-questionnaire-initialExpression` | ⚠️ ignored |
-| Questionnaire constraints | `questionnaire-constraint` extension | ⚠️ ignored |
-| Item prefix | `item.prefix` (e.g. `"1.1"`) | ✅ round-trip safe |
+| `questionnaire-constraint` extension | `questionnaire-constraint` extension | ✅ imported → `constraint[]`; exported back; not evaluated in preview |
+| Multiple `enableWhen` on items with `enableBehavior` | `item.enableBehavior` | ✅ full round-trip via `enableWhen[]` + `enableBehavior` |
+| Item prefix | `item.prefix` (e.g. `"1.1"`) | ✅ round-trip safe; amber badge in preview; editable in builder |
 | Item codes | `item.code[]` (coding array) | ✅ round-trip safe; stored as `_codes`, not displayed in UI |
 | `contained` resources | `Questionnaire.contained[]` | ⚠️ ignored |
-| Multiple `enableWhen` on items with `enableBehavior` | `item.enableBehavior` | Partial: imported as `&&`-joined JS; re-exported as extension |
 | Resource reference resolution | `type: 'reference'` | ⚠️ dropdown + id text field; no live resource search against a FHIR server |
 | FHIR versions other than R4 | STU3, R5 | Not tested; may partially work |
