@@ -15,6 +15,68 @@ export function addPanel(key, buildFn, div, panels) {
   div.appendChild(p);
 }
 
+// ── Custom question picker (styled dropdown, handles long titles) ────────────
+function buildQuestionSelect(allItems, selectedId, onSelect) {
+  const wrap = document.createElement('div');
+  wrap.className = 'vis-q-sel';
+
+  const trigger = document.createElement('div');
+  trigger.className = 'vis-q-sel-trigger';
+  const found = allItems.find(it => it.id === selectedId);
+  trigger.textContent = found ? found.label : '\u2014 question \u2014';
+  trigger.title = found ? found.id : '';
+
+  let dropEl = null;
+
+  const close = () => {
+    if (dropEl) { dropEl.remove(); dropEl = null; }
+    document.removeEventListener('mousedown', onOutside, true);
+  };
+
+  const onOutside = e => {
+    if (!wrap.contains(e.target)) close();
+  };
+
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    if (dropEl) { close(); return; }
+
+    dropEl = document.createElement('div');
+    dropEl.className = 'vis-q-sel-drop';
+
+    const blank = document.createElement('div');
+    blank.className = 'vis-q-sel-opt' + (!selectedId ? ' vis-q-sel-opt--sel' : '');
+    blank.textContent = '\u2014 question \u2014';
+    blank.addEventListener('mousedown', () => {
+      trigger.textContent = '\u2014 question \u2014';
+      trigger.title = '';
+      onSelect('', null);
+      close();
+    });
+    dropEl.appendChild(blank);
+
+    for (const it of allItems) {
+      const opt = document.createElement('div');
+      opt.className = 'vis-q-sel-opt' + (it.id === selectedId ? ' vis-q-sel-opt--sel' : '');
+      opt.textContent = it.label;
+      opt.title = it.id;
+      opt.addEventListener('mousedown', () => {
+        trigger.textContent = it.label;
+        trigger.title = it.id;
+        onSelect(it.id, it);
+        close();
+      });
+      dropEl.appendChild(opt);
+    }
+
+    wrap.appendChild(dropEl);
+    setTimeout(() => document.addEventListener('mousedown', onOutside, true), 0);
+  });
+
+  wrap.appendChild(trigger);
+  return wrap;
+}
+
 // ── Visibility panel (FHIR enableWhen) ───────────────────────────────────────
 export function buildVisPanel(node, p, visLink, setActive, ctx) {
   if (!Array.isArray(node.enableWhen)) node.enableWhen = [];
@@ -53,19 +115,15 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
     const row = document.createElement('div');
     row.className = 'vis-cond-row';
 
-    const qSel = document.createElement('select');
-    qSel.className = 'vis-cond-q';
-    const blankOpt = document.createElement('option');
-    blankOpt.value = ''; blankOpt.textContent = '\u2014 question \u2014';
-    qSel.appendChild(blankOpt);
-    for (const it of allItems) {
-      const o = document.createElement('option');
-      o.value = it.id; o.textContent = it.label;
-      o.dataset.itype = it.itemType;
-      o.dataset.opts  = it.options || '';
-      if (it.id === ew.question) o.selected = true;
-      qSel.appendChild(o);
-    }
+    const qWidget = buildQuestionSelect(allItems, ew.question || '', (id, it) => {
+      ew.question = id;
+      delete ew.answerBoolean; delete ew.answerString; delete ew.answerCoding;
+      delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate;
+      ew.operator = '=';
+      if (it) buildOpVal(it.itemType || '', it.options || '');
+      else opSel.innerHTML = '<option value="">\u2014</option>';
+      syncActive();
+    });
 
     const opSel = document.createElement('select');
     opSel.className = 'vis-cond-op';
@@ -172,22 +230,11 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
       }
     };
 
-    const selOpt = qSel.options[qSel.selectedIndex];
-    if (selOpt && selOpt.value) buildOpVal(selOpt.dataset.itype, selOpt.dataset.opts);
+    const selItem = allItems.find(it => it.id === ew.question);
+    if (selItem) buildOpVal(selItem.itemType || '', selItem.options || '');
     else opSel.innerHTML = '<option value="">\u2014</option>';
 
-    qSel.onchange = () => {
-      const picked = qSel.options[qSel.selectedIndex];
-      if (!picked || !picked.value) return;
-      ew.question = picked.value;
-      delete ew.answerBoolean; delete ew.answerString; delete ew.answerCoding;
-      delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate;
-      ew.operator = '=';
-      buildOpVal(picked.dataset.itype, picked.dataset.opts);
-      syncActive();
-    };
-
-    row.appendChild(qSel);
+    row.appendChild(qWidget);
     row.appendChild(opSel);
     row.appendChild(valWrap);
     row.appendChild(rmBtn);
@@ -620,4 +667,102 @@ export function buildInitialPanel(node, p, initLink, setActive) {
   // Re-render the control when itemType changes (via Type panel → typeSelect.onchange fires renderItem)
   // We simply watch: if the panel is open and itemType differs, re-render.
   // Since the whole node card is rebuilt on type change, this is handled automatically.
+}
+
+// ── Constraint panel (questionnaire-constraint, read-only display + expression editing) ────────
+export function buildConstraintPanel(node, p, constraintLink, setActive) {
+  if (!Array.isArray(node.constraint)) node.constraint = [];
+
+  const syncActive = () => setActive(constraintLink, node.constraint.length > 0);
+
+  const render = () => {
+    p.innerHTML = '';
+
+    if (node.constraint.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'panel-raw-lbl';
+      empty.style.color = 'var(--c-text-2)';
+      empty.textContent = 'No constraints. Add one below.';
+      p.appendChild(empty);
+    }
+
+    node.constraint.forEach((c, idx) => {
+      const card = document.createElement('div');
+      card.className = 'constraint-card';
+
+      const hdr = document.createElement('div');
+      hdr.className = 'constraint-card-hdr';
+
+      const keyLbl = document.createElement('span');
+      keyLbl.className = 'constraint-key';
+      keyLbl.textContent = c.key || '(no key)';
+      hdr.appendChild(keyLbl);
+
+      const sevSel = document.createElement('select');
+      sevSel.className = 'constraint-sev-sel';
+      [['error', 'error ❌'], ['warning', 'warning ⚠️']].forEach(([v, l]) => {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = l;
+        if (c.severity === v) o.selected = true;
+        sevSel.appendChild(o);
+      });
+      sevSel.onchange = () => { c.severity = sevSel.value; };
+      hdr.appendChild(sevSel);
+
+      const rmBtn = document.createElement('button');
+      rmBtn.type = 'button'; rmBtn.className = 'vis-cond-rm'; rmBtn.textContent = '\u2715';
+      rmBtn.onclick = () => { node.constraint.splice(idx, 1); render(); syncActive(); };
+      hdr.appendChild(rmBtn);
+      card.appendChild(hdr);
+
+      // key
+      const keyInp = document.createElement('input');
+      keyInp.type = 'text'; keyInp.className = 'panel-inp-sm constraint-inp';
+      keyInp.placeholder = 'key (e.g. consent-required)';
+      keyInp.value = c.key || '';
+      keyInp.oninput = () => { c.key = keyInp.value; keyLbl.textContent = keyInp.value || '(no key)'; };
+      card.appendChild(_lbl('Key:', keyInp));
+
+      // human message
+      const humanInp = document.createElement('input');
+      humanInp.type = 'text'; humanInp.className = 'panel-inp-sm constraint-inp';
+      humanInp.placeholder = 'Human-readable message';
+      humanInp.value = c.human || '';
+      humanInp.oninput = () => { c.human = humanInp.value; };
+      card.appendChild(_lbl('Message:', humanInp));
+
+      // expression
+      const exprInp = document.createElement('input');
+      exprInp.type = 'text'; exprInp.className = 'panel-inp-sm constraint-inp';
+      exprInp.placeholder = 'FHIRPath expression (must return true to pass)';
+      exprInp.value = c.expression || '';
+      exprInp.oninput = () => { c.expression = exprInp.value; };
+      card.appendChild(_lbl('Expression:', exprInp));
+
+      p.appendChild(card);
+    });
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button'; addBtn.className = 'vis-add-btn'; addBtn.textContent = '+ Add constraint';
+    addBtn.style.marginTop = '6px';
+    addBtn.onclick = () => {
+      node.constraint.push({ key: '', severity: 'error', human: '', expression: '' });
+      render(); syncActive();
+    };
+    p.appendChild(addBtn);
+  };
+
+  function _lbl(text, input) {
+    const row = document.createElement('div');
+    row.className = 'constraint-field-row';
+    const lbl = document.createElement('label');
+    lbl.className = 'constraint-field-lbl';
+    lbl.textContent = text;
+    row.appendChild(lbl);
+    row.appendChild(input);
+    return row;
+  }
+
+  render();
+  syncActive();
 }

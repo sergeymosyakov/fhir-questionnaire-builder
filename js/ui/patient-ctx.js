@@ -1,6 +1,10 @@
 // Patient context popup — seeds and manages SDC variables used as FHIRPath context:
 //   %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb
 // Values are stored as literal FHIRPath expressions in the questVariables reactive array.
+import { _formTick, tree, effect } from '../state.js';
+
+// Dispatched after Apply so other modules (variables-panel) can refresh.
+const PATIENT_APPLY_EVENT = 'patient-ctx-applied';
 
 const PATIENT_VARS = [
   { name: 'age',      type: 'number',   label: 'Age (years)',    default: 30 },
@@ -101,6 +105,8 @@ export function init(els, questVariables) {
         setEntry(questVariables, name, toExpr(def.type, raw));
       }
       modal.style.display = 'none';
+      _formTick.value++; // trigger preview re-evaluation with new variable values
+      document.dispatchEvent(new CustomEvent(PATIENT_APPLY_EVENT));
     };
 
     modal.style.display = 'flex';
@@ -109,4 +115,7 @@ export function init(els, questVariables) {
   btn.addEventListener('click', open);
   closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
   modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+
+  // Show button only when a questionnaire is loaded
+  effect(() => { btn.disabled = tree.length === 0; });
 }

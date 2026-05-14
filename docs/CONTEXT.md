@@ -118,6 +118,11 @@ questVariables    // reactive([]) — SDC variable entries; patient ctx seeded h
 // FHIR-imported nodes also carry:
 _enableWhenText  // human-readable enableWhen label (e.g. "«Q» = Yes AND «Q2» = No")
 _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
+_calculatedExpr  // FHIRPath string (SDC calculatedExpression)
+_readOnly        // boolean — FHIR item.readOnly
+_initialValue    // any — FHIR item.initial[0] value (pre-fills values[] on import)
+_prefix          // string — FHIR item.prefix (amber badge; editable in builder)
+_codes           // object[] — FHIR item.code[] (preserved round-trip; not displayed)
 ```
 
 ---
@@ -131,9 +136,15 @@ _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 - If `enableWhenExpression` is set, evaluated via `fhirpath.evaluate()` as override/fallback
 - Node hidden if conditions not met; `showDimmed` set if any enableWhen is defined
 
+### constraint[]
+- Each `node.constraint[]` entry: `{ key, severity, human, expression }` (mirrors FHIR `questionnaire-constraint` extension)
+- Evaluated via FHIRPath against the QuestionnaireResponse in `evalConstraints(node, qr, envVars)` in `state.js`
+- Empty FHIRPath result (`[]`) or `false` → constraint **fails**; `true` → passes
+- `severity: 'error'` fail is counted as a failing item in Final Result; `severity: 'warning'` shows badge only
+
 ### Final Result
-- **PASS** — all visible, mandatory items are satisfied
-- **FAIL** — at least one mandatory item is not satisfied
+- **PASS** — all visible, mandatory items satisfied and no `error`-severity constraints fail
+- **FAIL** — at least one mandatory item not satisfied, or at least one `error`-severity constraint fails
 
 ---
 
@@ -144,6 +155,12 @@ _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 3. `type:'group'` with no children → italic gray text (informational display, no controls, no logic badge)
 4. Normal → row with ✔/✘ icon, control, linkId prefix, AND/OR badge (groups)
 - `_renderStyle` applied as inline `style` on the label span in all row types
+
+### Informational badges (per row)
+- **Calc badge** — blue pill with current computed value; refreshed in-place by `refreshCalcBadges()` without full DOM rebuild; tooltip shows FHIRPath expression + SDC spec footer
+- **Constraint badge** — amber ⚠️ (warning) or red ✘ (error) when `node.constraint[]` non-empty; tooltip shows key/human/expression; error + fail blocks Final Result
+- **Read-only badge** — grey 🔒 `read-only` pill when `_readOnly === true` and no `_calculatedExpr`; `.preview-meta-badge` in `css/preview.css`
+- **Default badge** — purple ↺ `default` pill when `_initialValue` is defined; `.preview-meta-badge--init` in `css/preview.css`
 
 ---
 
@@ -199,7 +216,14 @@ _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 - **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported into `node._prefix` and exported back (round-trip safe); amber pill badge in preview; editable in builder meta-row; **Renumber** assigns sequential prefixes (e.g. `1`, `1.1`) — writes `_prefix` only, never changes `node.id`
 - **linkId / prefix toggles** — `id` (blue) and `prefix` (amber) buttons in preview toolbar toggle the corresponding pill badges; state stored in `showLinkId` / `showPrefix` refs; clicking a linkId badge copies the linkId to clipboard (✓ copied feedback); badge shows rich tooltip with visibility-rule usage, expected value type, item type
 - **SDC Variables** — `sdc-questionnaire-variable` extensions on the root Questionnaire are imported into `questVariables[]`; a collapsible card above the tree shows `%name` chips; clicking Edit opens a modal to add/edit/delete variables (name + FHIRPath expression); variables are passed as `%varName` env vars when evaluating `calculatedExpression` automatically on every preview render; round-trip safe on export
-- **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills the preview on load; editable via **Default** action panel in builder; control adapts to itemType (select for checkbox/choice, date, number, text); `× clear` link updates preview instantly; exported back as `item.initial[]`
+- **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills the preview on load (`applyInitialValues` runs inside the `_bulkUpdate` block so `effect()` sees filled values on first run); editable via **Default** action panel in builder; control adapts to itemType (select for checkbox/choice, date, number, text); `× clear` link updates preview instantly; exported back as `item.initial[]`
+- **Constraint panel in builder** — **Constraint** action button on every node (dark purple when `constraint[]` non-empty); editable cards per constraint (key, severity, human message, FHIRPath expression, remove) + **+ Add constraint**; exported as `questionnaire-constraint` extensions
+- **Constraint badge in preview** — per-node badge: amber ⚠️ `constraint` (warning or passing error), red ✘ `constraint` (failing error); tooltip; affects Final Result when `severity: 'error'` and expression fails or returns empty
+- **Read-only badge** — grey 🔒 `read-only` pill when `_readOnly === true` and no `_calculatedExpr`
+- **Default badge** — purple ↺ `default` pill when `_initialValue` is defined
+- **Real-time calc badge** — `refreshCalcBadges()` patches calc-badge in-place via `data-calc-id` — no DOM rebuild on answer change
+- **Calc-badge tooltip** — shows FHIRPath expression + SDC spec footer
+- **Custom question picker** — Show When panel uses `.vis-q-sel` styled dropdown widget instead of native `<select>` for question picker; shows full title with ellipsis
 - **Rich tooltips on action buttons** — all builder action buttons (Answer Type, Required, Show When, Applicability, Expression, Default, Appearance), toolbar buttons (Load, Export, Add Root Group, Renumber, prefix format select, id/prefix/collapse/expand), and the Variables card title carry `data-tip-*` attributes with FHIR field path and spec reference (R4 / SDC) in the footer; implemented via delegated `mouseover` in `js/ui/tooltip.js`
 - **Tooltip toggle** — `tips` button in the preview toolbar; green = enabled (default), orange = disabled; persisted in `localStorage` (`tooltips-enabled`); **tooltips off** label shown next to Logic Builder heading when disabled
 - **Radio answer options in builder** — Answer Type panel shows the Options (comma-separated) editor for `radio` items (bug fix: was shown only for `select` and `open-choice`)
@@ -218,14 +242,14 @@ _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
 - **Visual condition builder** — "Show When" action panel uses FHIR `enableWhen[]` directly: AND/ANY toggle, per-condition rows (question picker + operator + type-aware value input), "+ Add condition", FHIRPath `enableWhenExpression` for advanced expressions
-- **Patient Context popup** — "Patient Context" button in toolbar opens modal; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`
+- **Patient Context popup** — "Patient Context" button in toolbar opens modal; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; button disabled when no questionnaire is loaded; Apply increments `_formTick` → immediate preview re-eval; fires `patient-ctx-applied` event → `variablesPanel.refresh()` updates chips
 - **AND/OR badges** — on group headers: `ALL items ✓` / `ANY item ✓`
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed (🔒) when condition not met; animate to active when met
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
 - **required text/number** — `required:true` on text/number items means non-empty; shows ✔/✘ icon and affects PASS/FAIL
 - **select / radio controls** — no longer auto-fill the first option on render; mandatory fields start empty (`— select —` placeholder for select, no pre-check for radio) so PASS/FAIL is accurate on initial load
-- **text / number / date / url / attachment / quantity / reference controls** — all call `_reCalc()` + `_formTick.value++` on every change so FHIRPath calculatedExpression nodes update live
+- **text / number / date / url / attachment / quantity / reference controls** — `oninput` calls `_reCalc()` (calc badge updates live) without triggering a full preview rebuild; `onchange`/blur increments `_formTick.value++` (re-evaluates enableWhen + constraints on discrete commit)
 
 ---
 

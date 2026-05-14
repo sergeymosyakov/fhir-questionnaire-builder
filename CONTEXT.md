@@ -48,7 +48,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `start.ps1` | Local dev server: `npx serve .` |
 | `css/styles.css` | All styles and CSS design tokens |
 | `js/app.js` | Entry point — wires inputs, buttons, loads example |
-| `js/state.js` | Reactive state, data factories, business logic |
+| `js/state.js` | Reactive state, data factories, business logic, `evalConstraints` |
 | `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`, `findAncestorGroupIds`, `parseOption`, `parseOptions`) |
 | `js/eval.js` | Tree evaluation — `enableWhen[]` visibility, `enableWhenExpression` FHIRPath, `evalConstraints` |
 | `js/render-builder.js` | Left panel — 3-line re-export shim → `js/builder/` |
@@ -56,7 +56,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, etc.) |
 | `js/builder/_shared.js` | Shared utilities; injected deps via `init(deps)` |
 | `js/builder/dnd.js` | Self-contained drag & drop; all state via `init(onDrop, tree, formTick)` |
-| `js/builder/panels.js` | All action panel builders (enableWhen vis panel, mand, type, expr, style) |
+| `js/builder/panels.js` | All action panel builders (enableWhen vis panel, mand, type, expr, style, constraint) |
 | `js/builder/node-item.js` | `renderItem(node, ctx)` |
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` |
 | `js/render-preview.js` | Right panel — reactive preview; exports `navigateToPreview(id)` (collapse-safe) |
@@ -142,6 +142,11 @@ questVariables    // reactive([]) — SDC sdc-questionnaire-variable entries; pa
 // FHIR-imported nodes also carry:
 _enableWhenText  // human-readable enableWhen label (e.g. "«Q» = Yes AND «Q2» = No")
 _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
+_calculatedExpr  // FHIRPath string (SDC calculatedExpression)
+_readOnly        // boolean — FHIR item.readOnly
+_initialValue    // any — FHIR item.initial[0] value (pre-fills values[] on import)
+_prefix          // string — FHIR item.prefix (amber badge; editable in builder)
+_codes           // object[] — FHIR item.code[] (preserved round-trip; not displayed)
 ```
 
 
@@ -154,9 +159,16 @@ _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 - If `enableWhenExpression` is set, it is evaluated via `fhirpath.evaluate()` as a fallback/override
 - Node is hidden if conditions are not met; `showDimmed` set if any enableWhen is defined
 
+### constraint[]
+- Each `node.constraint[]` entry has `{ key, severity, human, expression }` (mirrors FHIR `questionnaire-constraint` extension)
+- Evaluated via FHIRPath against the QuestionnaireResponse in `evalConstraints(node, qr, envVars)` in `state.js`
+- Empty FHIRPath result (`[]`) or `false` → constraint **fails**; `true` → passes
+- `severity: 'error'` fail blocks Final Result (counted as failing item); `severity: 'warning'` shows badge only
+- Preview shows a badge per node: amber ⚠️ (warning, passing), amber ⚠️ (warning, failing), or red ✘ (error, failing)
+
 ### Final Result
-- **PASS** — all visible, mandatory items are satisfied
-- **FAIL** — at least one mandatory item is not satisfied
+- **PASS** — all visible, mandatory items are satisfied and no `error`-severity constraints fail
+- **FAIL** — at least one mandatory item not satisfied, or at least one `error`-severity constraint fails
 
 ---
 
@@ -167,6 +179,12 @@ _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 3. `type:'group'` with no children → italic gray text (informational display, no controls, no logic badge)
 4. Normal → row with ✔/✘ icon, control, linkId prefix, AND/OR badge (groups)
 - `_renderStyle` applied as inline `style` on the label span in all row types
+
+### Informational badges (per row)
+- **Calc badge** — blue pill showing current computed value; updated in-place by `refreshCalcBadges()` without full DOM rebuild; has FHIRPath tooltip with SDC spec footer
+- **Constraint badge** — amber ⚠️ (warning) or red ✘ (error) when `node.constraint[]` is non-empty; with tooltip showing key, human message, FHIRPath expression
+- **Read-only badge** — grey 🔒 `read-only` when `_readOnly === true` and no `_calculatedExpr`
+- **Default badge** — purple ↺ `default` when `_initialValue` is defined (non-empty)
 
 ---
 
@@ -227,7 +245,7 @@ _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview
 - **enableWhen panel** — "Show When" action panel on every node; FHIR `enableWhen[]` list UI: AND/ALL vs OR/ANY toggle, per-condition rows (question picker + operator + type-aware value input + remove button), "+ Add condition" button; FHIRPath `enableWhenExpression` field for advanced SDC expressions
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
-- **Patient Context popup** — "Patient Context" button in toolbar opens a modal popup; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; available in `enableWhenExpression` and `calculatedExpression` fields; implemented in `js/ui/patient-ctx.js`
+- **Patient Context popup** — "Patient Context" button in toolbar opens a modal popup; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; available in `enableWhenExpression` and `calculatedExpression` fields; button disabled when no questionnaire is loaded; clicking Apply increments `_formTick` → immediate preview re-eval; also fires `patient-ctx-applied` event → `variablesPanel.refresh()` updates chips; implemented in `js/ui/patient-ctx.js`
 - **AND/OR badges** — on group headers: `ALL items ✓` / `ANY item ✓`
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed (🔒) when condition not met; animate to active when met
@@ -243,7 +261,14 @@ _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 - **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported from JSON into `node._prefix` and exported back; rendered as an amber pill badge before the item title in the preview; editable via the amber input in the builder node meta-row; **Renumber** button assigns sequential prefixes (e.g. `1`, `1.1`) using the selected format (numeric / roman / letters) — writes `_prefix` only, never changes `node.id`
 - **linkId / prefix toggle badges** — `id` (blue) and `prefix` (amber) toggle buttons in preview toolbar; show/hide the corresponding pill badges on every preview row; active state tracked via `showLinkId` / `showPrefix` refs in `state.js`; clicking a linkId badge copies the linkId to clipboard and briefly shows `✓ copied`; badge shows rich tooltip with visibility-rule usage, expected value type, item type
 - **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire; imported → `questVariables[]` in state; collapsible card above tree shows `%name` chips; Edit button opens modal; variables evaluated as `%varName` in FHIRPath `calculatedExpression` automatically on every preview render; round-trip safe on export
-- **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills `values[]` on load; editable via **Default** action panel in builder (context-aware control per itemType: select/date/number/text); `× clear` link syncs preview instantly; exported back as standard `item.initial[]`
+- **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills `values[]` on load (`applyInitialValues` runs inside the `_bulkUpdate` block so `effect()` sees populated values on first run); editable via **Default** action panel in builder (context-aware control per itemType: select/date/number/text); `× clear` link syncs preview instantly; exported back as standard `item.initial[]`
+- **Constraint panel in builder** — **Constraint** action button on every node (dark purple when `constraint[]` non-empty); panel shows editable cards per constraint (key, severity error/warning, human message, FHIRPath expression, remove button) + **+ Add constraint** button; exported as `questionnaire-constraint` extensions
+- **Constraint badge in preview** — per-node badge: amber ⚠️ `constraint` (warning or passing error), red ✘ `constraint` (failing error); tooltip shows key, severity, human message, FHIRPath expression; affects Final Result when `severity: 'error'` and expression fails
+- **Read-only badge in preview** — grey 🔒 `read-only` pill when `node._readOnly === true` and no `_calculatedExpr`; CSS class `.preview-meta-badge` in `css/preview.css`
+- **Default badge in preview** — purple ↺ `default` pill when `node._initialValue` is defined; CSS class `.preview-meta-badge--init` in `css/preview.css`
+- **Calc-badge tooltip** — calculated value badge now carries `data-tip-*` tooltip showing the FHIRPath expression and SDC spec footer
+- **Real-time calc badge** — `refreshCalcBadges()` updates calc-badge text+class in-place via `data-calc-id` attribute after each answer change — avoids full DOM rebuild while keeping the displayed value current
+- **Custom question picker in Show When panel** — vis panel uses a styled `div`-based dropdown widget (`.vis-q-sel`) instead of a native `<select>` for the question picker; shows full item title with ellipsis; max-height 200px with scroll
 - **Rich tooltips on action buttons** — all builder action buttons (Answer Type, Required, Show When, Expression, Default, Appearance), toolbar buttons (Load, Export, Add Root Group, Renumber, prefix format select, id/prefix/collapse/expand, Patient Context), and the Variables card title carry `data-tip-*` attributes with FHIR field path and spec reference; implemented via delegated `mouseover` in `js/ui/tooltip.js` — no per-element registration needed
 - **Tooltip toggle** — `tips` button in the preview toolbar; green when enabled (default), orange when disabled; state persisted in `localStorage` (`tooltips-enabled`); a plain orange **tooltips off** label appears next to the Logic Builder heading when disabled
 - **Radio answer options in builder** — Answer Type panel now shows the Options (comma-separated) editor for `radio` items (previously only shown for `select` and `open-choice`)
@@ -310,8 +335,8 @@ Styles are split into modules — `css/styles.css` contains only design tokens +
 |---|---|---|
 | `css/styles.css` | ~85 | CSS custom properties (`:root`), base reset, progress bar, `.resize-overlay` |
 | `css/layout.css` | ~236 | Top panel, 2-column layout, section titles, loaded file name, clear button |
-| `css/builder.css` | ~485 | Toolbar, node cards, drag/drop zones, action chips, collapsible panels, vis-builder, flash animation, `.panel-color-inp/clear`, `.panel-hint` |
-| `css/preview.css` | ~244 | Preview card, lform-item, status icons, AND/OR badges, final result, calc-badge, flash |
+| `css/builder.css` | ~520 | Toolbar, node cards, drag/drop zones, action chips, collapsible panels, vis-builder, vis-q-sel custom picker, constraint-card, flash animation |
+| `css/preview.css` | ~280 | Preview card, lform-item, status icons, AND/OR badges, final result, calc-badge, constraint/meta/default badges, flash |
 | `css/controls.css` | ~106 | `.ctrl-wrap`, `.ctrl-err`, `.ref-*`, `.qty-*`, open-choice, file input, radio, shared-success |
 | `css/tooltip.css` | ~60 | Dark card tooltip (`#1a2535`), CSS arrow, `.rich-tooltip__title`, `.rich-tooltip__body`, `.rich-tooltip__fhir` FHIR spec footer row |
 | `css/modals.css` | ~105 | Clear-confirm modal, validate modal, preview placeholder |
@@ -325,5 +350,4 @@ Styles are split into modules — `css/styles.css` contains only design tokens +
 ## Known Limitations / TODO
 
 - Multi-condition visibility with complex FHIRPath (cross-group references, extensions) not supported in the visual enableWhen builder — must be typed as `enableWhenExpression` directly
-- `questionnaire-constraint` imported and exported but not evaluated in the preview (stored as-is)
 

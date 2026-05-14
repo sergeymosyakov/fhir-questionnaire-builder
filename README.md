@@ -98,59 +98,54 @@ age, gender, bmi, pregnant, smoker, proc, comorb  // ref() — patient fields
 // App state (js/state.js)
 tree          // reactive([]) — questionnaire node tree
 values        // plain object — form answers (not reactive; avoids re-render on every keystroke)
-_formTick     // ref(0) — incremented on checkbox/select change to re-trigger effect()
-calcTested    // REMOVED — calculatedExpression evaluated automatically on every effect() run
-autoFilledIds // Set — IDs of items auto-filled from conditionRule
+_formTick     // ref(0) — incremented on discrete answer change (blur/commit) to re-trigger effect()
+questVariables // reactive([]) — SDC sdc-questionnaire-variable entries; patient ctx seeded here
 ```
 
 ### Node Data Model
 
 ```js
 // Group
-{ id, type:'group', title, visibilityRule, conditionRule, mandatory,
+{ id, type:'group', title, mandatory,
+  enableWhen: [], enableBehavior: 'all'|'any', enableWhenExpression: '',
+  constraint: [],
   logicWithParent:'AND'|'OR', children:[] }
 
 // Item
-{ id, type:'item', title, visibilityRule, conditionRule, mandatory,
+{ id, type:'item', title, mandatory,
   itemType:'text'|'number'|'checkbox'|'select'|'radio'|'open-choice'|'date'|'url'|'attachment'|'reference'|'quantity'|'display',
-  options, successValue }
+  enableWhen: [], enableBehavior: 'all'|'any', enableWhenExpression: '',
+  constraint: [], options }
 
 // FHIR-imported nodes also carry:
-_enableWhenText  // human-readable visibility condition label
+_enableWhenText  // human-readable enableWhen label (e.g. "«Q» = Yes AND «Q2» = No")
 _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
+_calculatedExpr  // FHIRPath string (SDC calculatedExpression)
+_readOnly        // boolean — FHIR item.readOnly
+_initialValue    // any — FHIR item.initial[0] value; pre-fills values[] on import
+_prefix          // string — FHIR item.prefix (amber badge; editable in builder)
+_codes           // object[] — FHIR item.code[] (round-trip safe; not displayed)
 ```
-
-### evalRule
-
-```js
-new Function('age','gender','bmi','pregnant','smoker','proc','comorb','values',
-  'return (' + rule + ');')
-```
-
-- `values['linkId']` — enables enableWhen-style rules on form answers
-- Empty rule → `true` (always visible)
 
 ---
 
 ## Evaluation Logic
 
-### visibilityRule
-- `false` → node is not rendered
-- `false` + `_enableWhenText` → rendered dimmed with 🔒 and condition label
+### enableWhen
+- `node.enableWhen[]` checked against `values[ew.question]` using `checkOneEnableWhen(ew)`
+- `node.enableBehavior === 'all'` (default) → all conditions must pass (AND)
+- `node.enableBehavior === 'any'` → any one condition passes (OR)
+- `enableWhenExpression` FHIRPath expression used as override/fallback if set
+- Node hidden if conditions not met; rendered dimmed with 🔒 if `enableWhen` defined
 
-### conditionRule on a group
-- `false` → group and all descendants are marked **N/A** (grayed, `—`)
-- Excluded from the final result (not FAIL — simply not applicable)
-- Example: `gender === 'female'` on a "Female-Specific Requirements" group
-
-### conditionRule on an item
-- Used for **auto-filling checkboxes** from patient data (🤖 badge)
-- The clinician can override the auto-filled value
+### constraint[]
+- Each `node.constraint[]` entry: `{ key, severity, human, expression }`
+- Evaluated via FHIRPath; empty result or `false` → constraint fails
+- `severity: 'error'` fail blocks PASS; `severity: 'warning'` shows badge only
 
 ### Final Result
-- **PASS** — all visible, non-N/A mandatory items are satisfied
-- **FAIL** — at least one mandatory item is not satisfied
-- N/A groups do **not** affect the result
+- **PASS** — all visible, mandatory items satisfied and no `error`-severity constraint fails
+- **FAIL** — at least one mandatory item not satisfied, or one `error`-severity constraint fails
 
 ---
 
@@ -221,7 +216,7 @@ Standard extensions preserved on export:
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Changes apply live in the preview
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
 - **enableWhen panel** — "Show When" action panel on every node; FHIR `enableWhen[]` list UI: AND/ALL vs OR/ANY toggle, per-condition rows (question picker + operator + type-aware value input + remove button), "+ Add condition" button; FHIRPath `enableWhenExpression` field for advanced SDC expressions
-- **Patient Context popup** — "Patient Context" button in toolbar opens a modal popup; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; available in `enableWhenExpression` and `calculatedExpression` fields
+- **Patient Context popup** — "Patient Context" button in toolbar opens a modal popup; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; button disabled when no questionnaire is loaded; Apply increments `_formTick` → immediate preview re-eval; fires `patient-ctx-applied` event → variables panel chips refresh
 - **AND/OR badges** — on group headers: `ALL items ✓` / `ANY item ✓`
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed out (🔒) when their condition is not met; animate to active when met
@@ -249,6 +244,13 @@ Standard extensions preserved on export:
 - **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire imported into `questVariables[]`; collapsible card above tree shows `%name` chips; Edit modal for add/edit/delete; passed as `%varName` env vars to FHIRPath `calculatedExpression` automatically on every preview render; round-trip safe
 - **Auto calculatedExpression** — calc fields re-evaluated automatically on every patient input, answer, or tree change; no Test button; calc-badge shows current value immediately
 - **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills preview on load; editable via **Default** action panel (type-aware: select/date/number/text); `× clear` link syncs preview; round-trip safe export
+- **Constraint panel in builder** — **Constraint** action button on every node (dark purple when `constraint[]` non-empty); editable cards per constraint (key, severity error/warning, human message, FHIRPath expression, remove) + **+ Add constraint**; exported as `questionnaire-constraint` extensions
+- **Constraint badge in preview** — per-node badge: amber ⚠️ (warning or passing error), red ✘ (failing error); tooltip shows key/severity/message/expression; `error`+fail blocks Final Result
+- **Read-only badge** — grey 🔒 `read-only` pill when `_readOnly === true` and no `_calculatedExpr`
+- **Default badge** — purple ↺ `default` pill when `_initialValue` is defined
+- **Real-time calc badge** — `refreshCalcBadges()` patches calc-badge in-place via `data-calc-id` after each answer change — no full DOM rebuild
+- **Calc-badge tooltip** — FHIRPath expression + SDC spec footer
+- **Custom question picker** — Show When panel uses `.vis-q-sel` styled dropdown (div-based) for question picker; shows full title with ellipsis; max-height 200px with scroll
 - **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)
 
 ---
@@ -279,5 +281,4 @@ CI runs automatically on every push via GitHub Actions (see `.github/workflows/t
 ## Known Limitations / TODO
 
 - Multi-condition visibility with complex FHIRPath (cross-group references, extensions) not supported in the visual enableWhen builder — must be typed as `enableWhenExpression` directly
-- `questionnaire-constraint` imported and exported but not evaluated in the preview (stored as-is)
 - Full list of unsupported FHIR features (repeating items, answerValueSet, etc.) → [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md#not-supported-out-of-scope)

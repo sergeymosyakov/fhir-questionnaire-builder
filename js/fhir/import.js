@@ -241,10 +241,10 @@ export function importFHIR(fhirJson, renderFn) {
       const n = fhirItemToNode(item, linkIdMap);
       if (n) tree.push(n);
     }
+    applyInitialValues(tree); // must run before _bulkUpdate=false so effect() sees filled values[]
   } finally {
     _bulkUpdate.value = false;
   }
-  applyInitialValues(tree);
   if (renderFn) renderFn(); else renderTree();
 }
 

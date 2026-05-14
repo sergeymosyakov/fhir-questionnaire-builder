@@ -7,6 +7,7 @@ import {
 } from './state.js';
 import { isDescendant, findAncestorGroupIds } from './utils.js';
 import { evaluateNode } from './eval.js';
+import { evalConstraints } from './state.js';
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes, buildVarEnv } from './fhir/calc.js';
 import { buildControl as _buildControl } from './controls/index.js';
@@ -55,6 +56,23 @@ function _reCalc() {
   return { fp: null, qr: null, envVars: {} };
 }
 
+// Update all visible calc-badge elements from current values[] without a full DOM rebuild.
+function refreshCalcBadges() {
+  document.querySelectorAll('[data-calc-id]').forEach(badge => {
+    const id   = badge.dataset.calcId;
+    const type = badge.dataset.calcType;
+    if (type === 'checkbox') {
+      const v = values[id];
+      badge.className   = 'calc-badge ' + (v ? 'calc-true' : 'calc-false');
+      badge.textContent = v ? '\u2713 true' : '\u2717 false';
+    } else {
+      const s = values[id];
+      badge.className   = 'calc-badge' + (s !== undefined && s !== '' ? ' calc-true' : '');
+      badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
+    }
+  });
+}
+
 // ── Interactive control for preview ──────────────────────────────────────────
 // Thin wrapper: resolves onChange/icon update, delegates DOM construction to
 // the control registry in js/controls/index.js
@@ -67,7 +85,10 @@ function buildControl(node, iconEl, onAfterChange) {
   };
   const onChange = () => { updateOwnIcon(); if (onAfterChange) onAfterChange(); };
 
-  return _buildControl(node, { values, onChange, _reCalc, _formTick });
+  // Wrap _reCalc so calc badges update in-place after every oninput.
+  const reCalcAndRefresh = () => { _reCalc(); refreshCalcBadges(); };
+
+  return _buildControl(node, { values, onChange, _reCalc: reCalcAndRefresh, _formTick });
 }
 
 // ── Reactive preview effect ───────────────────────────────────────────────────
@@ -120,14 +141,23 @@ effect(() => {
   const hasCalc = calcItems.length > 0;
   const calcAllOk = calcItems.every(r => values[r.node.id] === true);
 
+  // constraint items: visible, non-disabled items with questionnaire-constraint[]
+  const _cEnv = ctx.envVars || {};
+  const constraintItems = visible.filter(r => !r.disabled && r.node.type === 'item' && r.node.constraint?.length);
+  const hasConstraints = constraintItems.length > 0;
+  const constraintsAllOk = constraintItems.every(r => evalConstraints(r.node, ctx.fp, ctx.qr, _cEnv));
+
   const formItemsOk = visible.filter(r => !r.disabled).every(res => {
     if (res.node.type === 'item') return res.ok && calcFormOk(res.node);
     return res.ok;
   });
-  let finalOk = (hasMandatory ? formItemsOk : true) && (hasCalc ? calcAllOk : true) && (hasMandatory || hasCalc);
+  let finalOk = (hasMandatory ? formItemsOk : true) && (hasCalc ? calcAllOk : true) &&
+    (!hasConstraints || constraintsAllOk) &&
+    (hasMandatory || hasCalc || hasConstraints);
   const failingItems = [
     ...mandatoryItems.filter(r => !r.ok || !calcFormOk(r.node)).map(r => ({ title: r.node.title, id: r.node.id })),
-    ...calcItems.filter(r => values[r.node.id] !== true).map(r => ({ title: r.node.title, id: r.node.id }))
+    ...calcItems.filter(r => values[r.node.id] !== true).map(r => ({ title: r.node.title, id: r.node.id })),
+    ...constraintItems.filter(r => !evalConstraints(r.node, ctx.fp, ctx.qr, _cEnv)).map(r => ({ title: r.node.title, id: r.node.id }))
   ];
 
   const groupIconMap = new Map();
@@ -158,7 +188,8 @@ effect(() => {
       row.appendChild(label);
       const hint = document.createElement('span');
       hint.className = 'preview-condition-hint preview-condition-waiting';
-      hint.textContent = '\uD83D\uDD12 ' + res.node._enableWhenText;
+      const _dimText = res.node._enableWhenText || res.node.enableWhenExpression || 'condition not met';
+      hint.textContent = '\uD83D\uDD12 ' + _dimText;
       row.appendChild(hint);
       container.appendChild(row);
       return;
@@ -222,11 +253,14 @@ effect(() => {
       // - is mandatory checkable type (must be filled/valid), OR
       // - is optional URL (format validation always applies), OR
       // - is a readOnly boolean calc node after Test
+      const _constraintPass = res.node.constraint?.length
+        ? evalConstraints(res.node, ctx.fp, ctx.qr, _cEnv) : true;
       hasCondition = res.node.itemType !== 'display' && (
         (CHECKABLE_TYPES.has(res.node.itemType) && (isMandatory(res.node) || res.node.itemType === 'url')) ||
-        (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox')
+        (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox') ||
+        (res.node.constraint?.length > 0)
       );
-      displayOk    = res.ok && calcFormOk(res.node);
+      displayOk    = res.ok && calcFormOk(res.node) && _constraintPass;
     }
 
     const row = document.createElement('div');
@@ -330,12 +364,50 @@ effect(() => {
       }
     }
 
-    if (res.node._enableWhenText) {
+    const _visHintText = res.node._enableWhenText || res.node.enableWhenExpression;
+    if (_visHintText) {
       const hint = document.createElement('span');
       hint.className = 'preview-condition-hint';
-      hint.title = 'Visible when: ' + res.node._enableWhenText;
-      hint.textContent = '\uD83D\uDC41\uFE0F ' + res.node._enableWhenText;
+      hint.title = 'Visible when: ' + _visHintText;
+      hint.textContent = '\uD83D\uDC41\uFE0F ' + _visHintText;
       row.appendChild(hint);
+    }
+
+    if (res.node.constraint?.length) {
+      const _cEnvLocal = ctx.envVars || {};
+      const _constraintOk = evalConstraints(res.node, ctx.fp, ctx.qr, _cEnvLocal);
+      const cb = document.createElement('span');
+      cb.className = 'preview-constraint-badge' + (_constraintOk ? '' : ' preview-constraint-badge--fail');
+      const _msgs = res.node.constraint.filter(c => c.severity === 'error').map(c => c.human || c.expression || c.key).filter(Boolean);
+      cb.textContent = _constraintOk ? '\u26A0\uFE0F constraint' : '\u2718 constraint';
+      cb.title = _msgs.length ? _msgs.join('\n') : 'questionnaire-constraint';
+      cb.dataset.tipTitle = _constraintOk ? 'Has constraint' : 'Constraint: FAIL';
+      cb.dataset.tipBody  = _msgs.length ? _msgs.join('\n') : 'questionnaire-constraint on this item';
+      cb.dataset.tipFhir  = 'Questionnaire.item.extension[questionnaire-constraint]';
+      cb.dataset.tipSpec  = 'R4';
+      row.appendChild(cb);
+    }
+
+    if (res.node._readOnly && !res.node._calculatedExpr) {
+      const rb = document.createElement('span');
+      rb.className = 'preview-meta-badge';
+      rb.textContent = '\uD83D\uDD12 read-only';
+      rb.dataset.tipTitle = 'Read-only field';
+      rb.dataset.tipBody  = 'This field is marked readOnly in the FHIR Questionnaire. It cannot be edited by the user.';
+      rb.dataset.tipFhir  = 'Questionnaire.item.readOnly';
+      rb.dataset.tipSpec  = 'R4';
+      row.appendChild(rb);
+    }
+
+    if (res.node._initialValue !== undefined && res.node._initialValue !== '') {
+      const ib = document.createElement('span');
+      ib.className = 'preview-meta-badge preview-meta-badge--init';
+      ib.textContent = '\u21BA default';
+      ib.dataset.tipTitle = 'Has default value';
+      ib.dataset.tipBody  = 'Pre-filled from Questionnaire.item.initial[]. User can change it unless the field is readOnly.';
+      ib.dataset.tipFhir  = 'Questionnaire.item.initial[]';
+      ib.dataset.tipSpec  = 'R4';
+      row.appendChild(ib);
     }
 
     if (res.node.type === 'item') {
@@ -345,14 +417,20 @@ effect(() => {
       // calc-badge: show for readOnly nodes with calculatedExpression
       if (res.node._calculatedExpr && res.node._readOnly) {
         const badge = document.createElement('span');
+        badge.dataset.calcId   = res.node.id;
+        badge.dataset.calcType = res.node.itemType;
+        badge.dataset.tipTitle = 'Calculated value';
+        badge.dataset.tipBody  = 'Auto-computed by FHIRPath:\n' + res.node._calculatedExpr;
+        badge.dataset.tipFhir  = 'sdc-questionnaire-calculatedExpression';
+        badge.dataset.tipSpec  = 'SDC';
         if (res.node.itemType === 'checkbox') {
           const calcVal = values[res.node.id];
           badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false');
           badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
         } else {
-          const strVal = values[res.node.id] || '\u2014';
-          badge.className = 'calc-badge' + (values[res.node.id] ? ' calc-true' : '');
-          badge.textContent = strVal;
+          const s = values[res.node.id];
+          badge.className = 'calc-badge' + (s !== undefined && s !== '' ? ' calc-true' : '');
+          badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
         }
         row.appendChild(badge);
       }

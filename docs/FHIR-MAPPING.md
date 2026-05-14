@@ -39,6 +39,7 @@ Every node in the tree is either a **group** or an **item**:
   _calculatedExpr:     string,           // FHIRPath expression (SDC calculatedExpression)
   _readOnly:           boolean,          // FHIR item.readOnly
   _enableWhenText:     string            // human-readable condition label (UI only, not persisted)
+  _initialValue:       any               // FHIR item.initial[0] value; pre-fills values[] on import
 }
 ```
 
@@ -182,7 +183,7 @@ The following FHIR R4 / SDC features are currently not handled. Items marked ⚠
 | Initial values | `item.initial[]` | ✅ `initial[0]` imported → `_initialValue`; pre-fills the form on load; editable via **Default** panel in builder; exported back as `initial[{value...}]` |
 | SDC variables | `sdc-questionnaire-variable` extension | ✅ round-trip safe; collapsible card in left panel; editable via modal; evaluated as `%varName` in FHIRPath calculatedExpression |
 | SDC initial expression | `sdc-questionnaire-initialExpression` | ⚠️ ignored |
-| `questionnaire-constraint` extension | `questionnaire-constraint` extension | ✅ imported → `constraint[]`; exported back; not evaluated in preview |
+| `questionnaire-constraint` extension | `questionnaire-constraint` extension | ✅ imported → `constraint[]`; exported back; **evaluated in preview** — amber ⚠️ or red ✘ badge per node; `error`+fail blocks Final Result |
 | Multiple `enableWhen` on items with `enableBehavior` | `item.enableBehavior` | ✅ full round-trip via `enableWhen[]` + `enableBehavior` |
 | Item prefix | `item.prefix` (e.g. `"1.1"`) | ✅ round-trip safe; amber badge in preview; editable in builder |
 | Item codes | `item.code[]` (coding array) | ✅ round-trip safe; stored as `_codes`, not displayed in UI |

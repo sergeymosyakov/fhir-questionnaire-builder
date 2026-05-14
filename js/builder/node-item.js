@@ -3,7 +3,7 @@
 import { findAndRemove, escAttr } from '../utils.js';
 import { navigateToPreview } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildExprPanel, buildStylePanel, buildInitialPanel } from './panels.js';
+import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildExprPanel, buildStylePanel, buildInitialPanel, buildConstraintPanel } from './panels.js';
 
 export function renderItem(node, ctx) {
   const { renderTree } = ctx;
@@ -141,11 +141,14 @@ export function renderItem(node, ctx) {
     'Default Value (initial)',
     'Pre-fills the answer when the form loads. The user can change it unless readOnly is set. Only the first entry (initial[0]) is used. Supports all item types.',
     'Questionnaire.item.initial[]', 'R4 · optional');
+  const constraintLink = addToggle('Constraint', 'constraint',
+    'Validation Constraints (questionnaire-constraint)',
+    'FHIR questionnaire-constraint extensions on this item. Each entry has a FHIRPath expression, human-readable message, and severity. Error-severity constraints must pass for the item to show \u2714 in the preview.',
+    'Questionnaire.item.extension[questionnaire-constraint]', 'R4 \u00B7 optional');
   const styleLink = addToggle('Appearance', 'style',
     'Appearance (rendering-style)',
     'Inline CSS applied to the item title in the preview. Supports bold, italic, text colour, and raw CSS. Stored in the standard FHIR rendering-style extension on the _text element.',
-    'Questionnaire.item._text.extension[rendering-style]', 'R4 · optional');
-
+    'Questionnaire.item._text.extension[rendering-style]', 'R4 \u00B7 optional');
   const headerTop = document.createElement('div');
   headerTop.className = 'node-header-top';
   headerTop.appendChild(titleWrap);
@@ -183,13 +186,15 @@ export function renderItem(node, ctx) {
   addPanel('vis',  p => buildVisPanel(node, p, visLink, setActive, ctx), div, panels);
   addPanel('expr', p => buildExprPanel(node, p, exprLink, setActive), div, panels);
   addPanel('init', p => buildInitialPanel(node, p, initLink, setActive), div, panels);
+  addPanel('constraint', p => buildConstraintPanel(node, p, constraintLink, setActive), div, panels);
   addPanel('style',p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
-  setActive(visLink,   !!(node.enableWhen?.length) || !!node.enableWhenExpression);
-  setActive(exprLink,  !!node._calculatedExpr);
-  setActive(initLink,  node._initialValue !== undefined && node._initialValue !== '');
-  setActive(styleLink, !!node._renderStyle);
-  setActive(mandLink,  node.mandatory === true);
+  setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
+  setActive(exprLink,       !!node._calculatedExpr);
+  setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
+  setActive(styleLink,      !!node._renderStyle);
+  setActive(mandLink,       node.mandatory === true);
+  setActive(constraintLink, !!(node.constraint?.length));
 
   wrapper.appendChild(div);
 

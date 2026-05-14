@@ -599,7 +599,7 @@
               "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
               "valueExpression": {
                 "language": "text/fhirpath",
-                "expression": "(%resource.item.where(linkId='q-weight-kg').answer.valueDecimal / ((%resource.item.where(linkId='q-height-cm').answer.valueDecimal / 100) * (%resource.item.where(linkId='q-height-cm').answer.valueDecimal / 100))).round(1)"
+                "expression": "(%resource.repeat(item).where(linkId='q-weight-kg').answer.valueDecimal / ((%resource.repeat(item).where(linkId='q-height-cm').answer.valueDecimal / 100) * (%resource.repeat(item).where(linkId='q-height-cm').answer.valueDecimal / 100))).round(1)"
               }
             }
           ]
@@ -638,6 +638,65 @@
           "prefix": "9.7",
           "type": "display",
           "text": "ℹ️ All documents must be uploaded before submission. Incomplete applications will not be processed."
+        },
+        {
+          "linkId": "q-status-readonly",
+          "prefix": "9.8",
+          "type": "string",
+          "text": "Authorization status (system-assigned)",
+          "readOnly": true,
+          "initial": [{ "valueString": "Pending review" }]
+        }
+      ]
+    },
+    {
+      "linkId": "g-consent",
+      "prefix": "10.",
+      "type": "group",
+      "text": "Consent & Confirmation",
+      "item": [
+        {
+          "linkId": "q-consent-given",
+          "prefix": "10.1",
+          "type": "boolean",
+          "text": "Patient has given informed consent for bariatric surgery",
+          "required": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
+              "extension": [
+                { "url": "key",        "valueId": "consent-required" },
+                { "url": "severity",   "valueCode": "error" },
+                { "url": "human",      "valueString": "Informed consent must be confirmed before submission" },
+                { "url": "expression", "valueString": "%resource.repeat(item).where(linkId='q-consent-given').answer.valueBoolean = true" }
+              ]
+            }
+          ]
+        },
+        {
+          "linkId": "q-risks-explained",
+          "prefix": "10.2",
+          "type": "boolean",
+          "text": "Surgical risks and alternatives have been explained to the patient",
+          "required": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
+              "extension": [
+                { "url": "key",        "valueId": "risks-required" },
+                { "url": "severity",   "valueCode": "error" },
+                { "url": "human",      "valueString": "Risks must be explained and confirmed" },
+                { "url": "expression", "valueString": "%resource.repeat(item).where(linkId='q-risks-explained').answer.valueBoolean = true" }
+              ]
+            }
+          ]
+        },
+        {
+          "linkId": "q-auth-signature",
+          "prefix": "10.3",
+          "type": "string",
+          "text": "Authorizing clinician name (signature)",
+          "required": true
         }
       ]
     }

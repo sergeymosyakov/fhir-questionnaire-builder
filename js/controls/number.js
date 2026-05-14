@@ -8,7 +8,8 @@ export function build(node, ctx) {
   el.type = 'number';
   el.className = 'ctrl-input--number';
   el.value = values[node.id] !== undefined ? values[node.id] : '';
-  el.oninput = () => { values[node.id] = el.value === '' ? undefined : parseFloat(el.value); _reCalc(); onChange(); _formTick.value++; };
+  el.oninput  = () => { values[node.id] = el.value === '' ? undefined : parseFloat(el.value); _reCalc(); onChange(); };
+  el.onchange = () => { _formTick.value++; };
 
   wrap.appendChild(el);
   return wrap;

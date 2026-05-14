@@ -85,6 +85,9 @@ patientCtx.init({
   body:     document.getElementById('patientCtxBody'),
 }, questVariables);
 
+// Refresh variables panel chips when patient context changes
+document.addEventListener('patient-ctx-applied', () => variablesPanel.refresh());
+
 // ── Global progress bar init ──────────────────────────────────────────────
 progress.init({
   wrap:    document.getElementById('progressWrap'),

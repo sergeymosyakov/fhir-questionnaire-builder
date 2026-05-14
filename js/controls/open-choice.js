@@ -21,7 +21,8 @@ export function build(node, ctx) {
   el.setAttribute('list', listId);
   el.placeholder = 'Choose or type\u2026';
   el.value = values[node.id] !== undefined ? values[node.id] : '';
-  el.oninput = () => { values[node.id] = el.value; _reCalc(); onChange(); _formTick.value++; };
+  el.oninput  = () => { values[node.id] = el.value; _reCalc(); onChange(); };
+  el.onchange = () => { _formTick.value++; };
 
   wrap.appendChild(dl);
   wrap.appendChild(el);

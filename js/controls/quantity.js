@@ -123,11 +123,12 @@ export function build(node, ctx) {
     }
 
     values[node.id] = (hasVal && hasUnit) ? { value: vNum, unit: u } : undefined;
-    _reCalc(); onChange(); _formTick.value++;
+    _reCalc(); onChange();
   };
 
-  numInput.oninput = update;
-  unitSel.onchange = update;
+  numInput.oninput  = update;
+  numInput.onchange = () => { _formTick.value++; };
+  unitSel.onchange  = () => { update(); _formTick.value++; };
 
   wrap.appendChild(numInput);
   wrap.appendChild(unitSel);

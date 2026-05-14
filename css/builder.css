@@ -21,6 +21,7 @@
   transition: background .15s;
 }
 .btn-fhir:hover { background: #bbdefb; }
+.btn-fhir:disabled { opacity: .4; cursor: default; pointer-events: none; }
 .btn-fhir--toggle {
   opacity: .45;
 }
@@ -562,14 +563,52 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   gap: 4px;
   flex-wrap: wrap;
 }
-.vis-cond-q {
+/* Custom question picker */
+.vis-q-sel {
+  position: relative;
+  min-width: 130px;
+  max-width: 200px;
+  flex-shrink: 1;
+}
+.vis-q-sel-trigger {
   height: 26px;
-  padding: 0 4px;
+  padding: 0 20px 0 6px;
   border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
   font-size: 11px;
-  max-width: 160px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 26px;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 6px center;
+  user-select: none;
 }
+.vis-q-sel-trigger:hover { border-color: var(--c-primary); }
+.vis-q-sel-drop {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  min-width: 100%;
+  max-width: 300px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.14);
+  z-index: 300;
+}
+.vis-q-sel-opt {
+  padding: 5px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vis-q-sel-opt:hover { background: #f0f4ff; }
+.vis-q-sel-opt--sel { background: #eef2ff; color: var(--c-primary); font-weight: 600; }
 .vis-cond-op {
   height: 26px;
   padding: 0 4px;
@@ -615,6 +654,54 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   font-size: 10px;
   color: var(--c-text-2);
   text-align: center;
+}
+
+/* === Constraint panel ======================================================== */
+.constraint-card {
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: #fafafa;
+}
+.constraint-card-hdr {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.constraint-key {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-primary);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.constraint-sev-sel {
+  height: 22px;
+  font-size: 11px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 0 4px;
+}
+.constraint-field-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+.constraint-field-lbl {
+  font-size: 10px;
+  color: var(--c-text-2);
+  width: 64px;
+  flex-shrink: 0;
+}
+.constraint-inp {
+  flex: 1;
+  min-width: 0;
 }
 
 /* === Panel element classes =================================================== */

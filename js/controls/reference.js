@@ -91,11 +91,12 @@ export function build(node, ctx) {
     const id   = idInput.value.trim();
     errMsg.style.display = (type && !id) ? 'inline' : 'none';
     values[node.id] = (type && id) ? { reference: type + '/' + id } : undefined;
-    _reCalc(); onChange(); _formTick.value++;
+    _reCalc(); onChange();
   };
 
-  sel.oninput    = update;
+  sel.onchange    = () => { update(); _formTick.value++; };
   idInput.oninput = update;
+  idInput.onchange = () => { _formTick.value++; };
 
   wrap.appendChild(sel);
   wrap.appendChild(sep);

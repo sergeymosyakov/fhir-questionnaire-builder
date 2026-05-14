@@ -100,11 +100,12 @@ function _isValidUrl(s) {
 export function evalConstraints(node, fp, qr, varEnv) {
   if (!node.constraint || !node.constraint.length) return true;
   if (!fp || !qr) return true;
+  const env = { resource: qr, ...varEnv };
   for (const c of node.constraint) {
     if (!c.expression || c.severity !== 'error') continue;
     try {
-      const result = fp.evaluate(qr, c.expression, varEnv);
-      if (!result || result[0] === false) return false;
+      const result = fp.evaluate(qr, c.expression, env);
+      if (!result || result.length === 0 || result[0] === false) return false;
     } catch { return false; }
   }
   return true;
