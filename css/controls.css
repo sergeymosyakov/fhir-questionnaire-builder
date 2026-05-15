@@ -131,6 +131,10 @@
   flex-shrink: 0;
 }
 .oc-btn:hover { background-color: #f0f4ff; border-color: var(--c-primary); }
+.oc-wrap:hover .oc-input,
+.oc-wrap:hover .oc-btn,
+.oc-wrap:focus-within .oc-input,
+.oc-wrap:focus-within .oc-btn { border-color: var(--c-primary); }
 .oc-drop {
   position: fixed;
   max-width: 320px;

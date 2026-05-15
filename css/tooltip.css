@@ -33,7 +33,14 @@
   color: #b8c9db;
   margin-bottom: 0;
   white-space: pre-line;
+  max-height: 120px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #3a5070 transparent;
 }
+.rich-tooltip__body::-webkit-scrollbar { width: 4px; }
+.rich-tooltip__body::-webkit-scrollbar-track { background: transparent; }
+.rich-tooltip__body::-webkit-scrollbar-thumb { background: #3a5070; border-radius: 2px; }
 
 /* FHIR reference row at the bottom */
 .rich-tooltip__fhir {
@@ -63,6 +70,9 @@
   font-size: 11px;
   color: #90caf9;
   word-break: break-all;
+  max-height: 80px;
+  overflow: hidden;
+  display: block;
 }
 
 .rich-tooltip__spec {

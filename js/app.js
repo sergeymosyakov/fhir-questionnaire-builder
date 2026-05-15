@@ -271,11 +271,6 @@ function _doReset() {
   // Clear questionnaire-level variables
   questVariables.splice(0);
   variablesPanel.refresh();
-  // Explicitly reset finalResult (class carries pass/fail styling even when innerHTML empty)
-  const finalEl = document.getElementById('finalResult');
-  finalEl.innerHTML = '';
-  finalEl.className = 'final-result';
-  finalEl.style.display = 'none';
   // Re-render empty builder
   renderTree();
   _setFileName('');
