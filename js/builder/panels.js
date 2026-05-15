@@ -711,18 +711,36 @@ export function buildInitialPanel(node, p, initLink, setActive) {
         triggerCalcRecalc();
       };
     } else {
-      // text, url, reference, open-choice freetext fallback
-      ctrl = document.createElement('input');
-      ctrl.type = 'text';
-      ctrl.className = 'panel-inp-sm';
-      ctrl.value = node._initialValue !== undefined ? String(node._initialValue) : '';
-      ctrl.oninput = () => {
-        node._initialValue = ctrl.value || undefined;
-        if (node._initialValue) values[node.id] = node._initialValue; else delete values[node.id];
-        setActive(initLink, !!node._initialValue);
-        clearLink.style.display = node._initialValue ? '' : 'none';
-        triggerCalcRecalc();
-      };
+      // text: auto-growing textarea
+      if (itype === 'text') {
+        ctrl = document.createElement('textarea');
+        ctrl.className = 'panel-inp-textarea';
+        ctrl.rows = 1;
+        const autoResize = () => { ctrl.style.height = 'auto'; ctrl.style.height = ctrl.scrollHeight + 'px'; };
+        ctrl.value = node._initialValue !== undefined ? String(node._initialValue) : '';
+        ctrl.oninput = () => {
+          node._initialValue = ctrl.value || undefined;
+          if (node._initialValue) values[node.id] = node._initialValue; else delete values[node.id];
+          setActive(initLink, !!node._initialValue);
+          clearLink.style.display = node._initialValue ? '' : 'none';
+          triggerCalcRecalc();
+          autoResize();
+        };
+        if (ctrl.value) autoResize();
+      } else {
+        // url, reference, open-choice freetext fallback
+        ctrl = document.createElement('input');
+        ctrl.type = 'text';
+        ctrl.className = 'panel-inp-sm';
+        ctrl.value = node._initialValue !== undefined ? String(node._initialValue) : '';
+        ctrl.oninput = () => {
+          node._initialValue = ctrl.value || undefined;
+          if (node._initialValue) values[node.id] = node._initialValue; else delete values[node.id];
+          setActive(initLink, !!node._initialValue);
+          clearLink.style.display = node._initialValue ? '' : 'none';
+          triggerCalcRecalc();
+        };
+      }
     }
 
     wrap.appendChild(ctrl);

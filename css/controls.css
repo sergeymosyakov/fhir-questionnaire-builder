@@ -1,13 +1,14 @@
 /* === Control wrapper ========================================================= */
 .ctrl-wrap        { display: inline-flex; align-items: center; gap: 5px; }
 .ctrl-wrap--joined { gap: 0; }
+.ctrl-wrap--text  { flex: 1; align-items: flex-start; }
 
 /* === Inline error message ==================================================== */
 .ctrl-err     { font-size: 10px; color: var(--c-err); display: none; }
 .ctrl-err--ml { margin-left: 6px; }
 
 /* === Input width variants ==================================================== */
-.ctrl-input--text   { width: 120px; }
+.ctrl-input--text   { width: 100%; resize: vertical; min-height: 1.5em; max-height: 200px; overflow-y: auto; line-height: 1.4; vertical-align: top; }
 .ctrl-input--number { width: 80px; }
 .ctrl-input--date   { width: 150px; }
 .ctrl-input--url    { width: 200px; }

@@ -708,7 +708,8 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
 .panel-vis-hint    { margin-bottom: 6px; padding: 4px 8px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; font-size: 11px; color: #5d4037; }
 .panel-raw-lbl     { margin-top: 8px; font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: .05em; }
 .panel-raw-lbl--sm { margin-top: 4px; }
-.panel-inp-sm      { width: 70px; }
+.panel-inp-sm        { width: 70px; }
+.panel-inp-textarea  { width: 100%; resize: none; min-height: 1.5em; max-height: 80px; overflow-y: auto; line-height: 1.4; box-sizing: border-box; }
 .panel-mand-label  { font-size: 12px; display: flex; align-items: center; gap: 6px; }
 .panel-mand-sel    { font-size: 11px; padding: 2px 4px; border-radius: 4px; border: 1px solid var(--c-border); }
 .panel-type-sel    { width: auto; }

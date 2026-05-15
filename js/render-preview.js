@@ -93,7 +93,7 @@ function refreshCalcBadges() {
       badge.textContent = v ? '\u2713 true' : '\u2717 false';
     } else {
       const s = values[id];
-      badge.className   = 'calc-badge' + (s !== undefined && s !== '' ? ' calc-true' : '');
+      badge.className   = 'preview-calc-value';
       badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
     }
   });
@@ -381,8 +381,11 @@ effect(() => {
     if (_visHintText) {
       const hint = document.createElement('span');
       hint.className = 'preview-condition-hint';
-      hint.title = 'Visible when: ' + _visHintText;
       hint.textContent = '\uD83D\uDC41\uFE0F ' + _visHintText;
+      hint.dataset.tipTitle = 'Visibility condition';
+      hint.dataset.tipBody  = 'This item is shown only when: ' + _visHintText + '\n\nThis label is auto-generated from the enableWhen condition. To change it — edit the Show When panel in the builder.';
+      hint.dataset.tipFhir  = 'Questionnaire.item.enableWhen[]';
+      hint.dataset.tipSpec  = 'R4';
       row.appendChild(hint);
     }
 
@@ -452,7 +455,7 @@ effect(() => {
           badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
         } else {
           const s = values[res.node.id];
-          badge.className = 'preview-readonly-value';
+          badge.className = 'preview-calc-value';
           badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
         }
         row.appendChild(badge);

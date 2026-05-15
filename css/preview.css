@@ -147,6 +147,17 @@
   color: #546e7a;
   font-style: italic;
 }
+.preview-calc-value {
+  display: inline-block;
+  font-size: 12px;
+  padding: 1px 7px;
+  border-radius: 4px;
+  margin-left: 6px;
+  background: #f0f4ff;
+  color: #3b4db8;
+  border: 1px solid #c7d2fe;
+  font-variant-numeric: tabular-nums;
+}
 
 /* === AND/OR separator between sibling items ================================== */
 .logic-separator {

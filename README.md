@@ -253,7 +253,7 @@ See [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) for the full FHIR field mapping
 - **Tooltip toggle** — `tips` button in the preview toolbar toggles all rich tooltips on/off; green when on (default), orange when off; state persisted in `localStorage`; **tooltips off** label appears next to Logic Builder heading when disabled
 - **Radio answer options** — Answer Type panel shows the Options (comma-separated) editor when `radio` is selected (same as `select` / `open-choice`)
 - **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire imported into `questVariables[]`; collapsible card above tree shows `%name` chips; Edit modal for add/edit/delete; passed as `%varName` env vars to FHIRPath `calculatedExpression` automatically on every preview render; round-trip safe
-- **Auto calculatedExpression** — calc fields re-evaluated automatically on every patient input, answer, or tree change; no Test button; for **checkbox** calc fields the badge shows `✓ true` / `✗ false` with green/red colouring; for **all other types** the computed value is shown as plain text (no coloured pill)
+- **Auto calculatedExpression** — calc fields re-evaluated automatically on every patient input, answer, or tree change; no Test button; for **checkbox** calc fields the badge shows `✓ true` / `✗ false` with green/red colouring; for **all other types** the computed value is shown as a soft blue pill (distinct from status badges, no green)
 - **Initial expression (SDC `sdc-questionnaire-initialExpression`)** — **Init Expr** action button on every item node (dark purple when set); FHIRPath evaluated once on import and on every ↺ Re-init; result written to `values[]`; imported/exported as `sdc-questionnaire-initialExpression` extension
 - **Re-init button** — ↺ button in the Variables card header; calls `reinitForm()` to re-evaluate all `_initialExpr` nodes; use after switching patient presets
 - **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills preview on load; editable via **Default** action panel (type-aware: select/date/number/text); `× clear` link syncs preview; round-trip safe export
@@ -264,6 +264,7 @@ See [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) for the full FHIR field mapping
 - **Real-time calc badge** — `refreshCalcBadges()` patches calc-badge in-place via `data-calc-id` after each answer change — no full DOM rebuild
 - **Calc-badge tooltip** — FHIRPath expression + SDC spec footer
 - **Custom question picker** — Show When panel uses `.vis-q-sel` styled dropdown (div-based) for question picker; shows full title with ellipsis; max-height 200px with scroll
+- **Text control — textarea** — `text`-type items use `<textarea>`: starts at 1 row, grows with content up to 200px, manual resize handle, full row width; `_reCalc`/`onChange` debounced 200ms
 - **Hierarchical node IDs** — new groups/items get IDs like `1`, `1.1`, `1.1.1` using the active renumber format (numeric / roman / letters)
 
 ---
