@@ -10,6 +10,7 @@ import { evaluateNode } from './eval.js';
 import { evalConstraints } from './state.js';
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes, buildVarEnv, evalInitialExprNodes } from './fhir/calc.js';
+import { buildFHIRObject } from './fhir/export.js';
 import { buildControl as _buildControl } from './controls/index.js';
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
@@ -20,6 +21,8 @@ const fhirpath = window.fhirpath;
 
 // Last computed FHIRPath context — updated by _reCalc(), read by Explain click handlers.
 let _lastCtx = { fp: null, qr: null, env: {} };
+
+export function getLastCtx() { return _lastCtx; }
 
 // Pre-computed QR/envVars from reinitForm() — consumed once by the next _reCalc() call
 // to avoid rebuilding the same objects twice when patient profile changes.
@@ -82,7 +85,7 @@ function _reCalc() {
       qr = _preQR; envVars = _preEnvVars;
       _preQR = null; _preEnvVars = null;
     } else {
-      const base = rawFhir.value ? JSON.parse(JSON.stringify(rawFhir.value)) : { resourceType: 'Questionnaire', item: [] };
+      const base = rawFhir.value ? JSON.parse(JSON.stringify(rawFhir.value)) : buildFHIRObject();
       qr = buildQR(base, values);
       envVars = buildVarEnv(questVariables, qr, fhirpath);
     }
@@ -380,6 +383,8 @@ async function _asyncRender(version) {
     idTag.textContent = res.node.id;
     const _it = res.node.itemType;
     const _valExample = _it === 'checkbox' ? 'true / false'
+      : _it === 'integer'  ? '42 (valueInteger)'
+      : _it === 'decimal'  ? '3.14 (valueDecimal)'
       : _it === 'number'   ? '42'
       : _it === 'date'     ? '"2024-01-15"'
       : _it === 'select' || _it === 'radio' || _it === 'open-choice' ? '"option-code"'
@@ -491,6 +496,14 @@ async function _asyncRender(version) {
       cb.dataset.tipBody  = _msgs.length ? _msgs.join('\n') : 'questionnaire-constraint on this item';
       cb.dataset.tipFhir  = 'Questionnaire.item.extension[questionnaire-constraint]';
       cb.dataset.tipSpec  = 'R4';
+      const _firstExpr = res.node.constraint.find(c => c.expression?.trim())?.expression;
+      if (_firstExpr) {
+        cb.classList.add('preview-condition-hint--explain');
+        cb.dataset.tipBody += '\n\nClick to explain.';
+        cb.addEventListener('click', () => {
+          if (_lastCtx.fp) explainModal.show(_firstExpr, _lastCtx.fp, _lastCtx.qr, _lastCtx.env);
+        });
+      }
       row.appendChild(cb);
     }
 

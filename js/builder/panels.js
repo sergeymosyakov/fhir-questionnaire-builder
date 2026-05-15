@@ -256,7 +256,7 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
           }
         }
         _wrapChange();
-      } else if (itype === 'number' || itype === 'quantity') {
+      } else if (itype === 'number' || itype === 'integer' || itype === 'decimal' || itype === 'quantity') {
         [['=','='],['!=','\u2260'],['>','>'],['<','<'],['>=','\u2265'],['<=','\u2264']].forEach(([v, l]) => {
           const o = document.createElement('option'); o.value = v; o.textContent = l;
           opSel.appendChild(o);
@@ -409,7 +409,7 @@ export function buildTypePanel(node, p) {
   typeRow.textContent = 'Type: ';
   const typeSelect = document.createElement('select');
   typeSelect.className = 'panel-type-sel';
-  for (const t of ['text', 'number', 'date', 'url', 'attachment', 'checkbox', 'select', 'open-choice', 'radio', 'reference', 'quantity', 'display']) {
+  for (const t of ['text', 'integer', 'decimal', 'date', 'url', 'attachment', 'checkbox', 'select', 'open-choice', 'radio', 'reference', 'quantity', 'display']) {
     const opt = document.createElement('option');
     opt.value = t; opt.textContent = t;
     if (node.itemType === t) opt.selected = true;
@@ -517,6 +517,7 @@ export function buildTypePanel(node, p) {
     optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice' || node.itemType === 'radio') ? 'block' : 'none';
     refResDiv.style.display  = node.itemType === 'reference' ? 'block' : 'none';
     qUnitDiv.style.display   = node.itemType === 'quantity'  ? 'block' : 'none';
+    triggerCalcRecalc();
   };
 }
 
@@ -705,7 +706,7 @@ export function buildInitialPanel(node, p, initLink, setActive) {
         clearLink.style.display = node._initialValue ? '' : 'none';
         triggerCalcRecalc();
       };
-    } else if (itype === 'number' || itype === 'quantity') {
+    } else if (itype === 'number' || itype === 'integer' || itype === 'decimal' || itype === 'quantity') {
       ctrl = document.createElement('input');
       ctrl.type = 'number';
       ctrl.className = 'panel-inp-sm';

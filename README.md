@@ -94,7 +94,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`); 188 tests; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `state`, integration); 221 tests across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 
 ---
 
@@ -124,7 +124,7 @@ questVariables // reactive([]) — SDC sdc-questionnaire-variable entries; patie
 
 // Item
 { id, type:'item', title, mandatory,
-  itemType:'text'|'number'|'checkbox'|'select'|'radio'|'open-choice'|'date'|'url'|'attachment'|'reference'|'quantity'|'display',
+  itemType:'text'|'integer'|'decimal'|'checkbox'|'select'|'radio'|'open-choice'|'date'|'url'|'attachment'|'reference'|'quantity'|'display', // 'number' = legacy alias
   enableWhen: [], enableBehavior: 'all'|'any', enableWhenExpression: '',
   constraint: [], options }
 

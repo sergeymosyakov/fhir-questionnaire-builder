@@ -16,6 +16,8 @@ import { build as quantity    } from './quantity.js';
 const registry = new Map([
   ['checkbox',    checkbox],
   ['number',      number],
+  ['integer',      number],
+  ['decimal',      number],
   ['date',        date],
   ['url',         url],
   ['attachment',  attachment],

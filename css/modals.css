@@ -87,7 +87,7 @@
 #showWhenModal    { z-index: 10100; }
 #constraintModal  { z-index: 10100; }
 #expressionModal  { z-index: 10200; }
-#explainModal     { z-index: 9100; }
+#explainModal     { z-index: 10300; }
 
 /* === Per-modal sizes ========================================================= */
 #variablesModal .modal-box  { width: min(600px, 94vw); max-height: 80vh; }

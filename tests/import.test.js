@@ -22,8 +22,8 @@ const { fhirTypeToItemType, fhirOptsToStr, humanEnableWhen, applyVisibility } = 
 describe('fhirTypeToItemType', () => {
   const cases = [
     ['boolean',     'checkbox'],
-    ['integer',     'number'],
-    ['decimal',     'number'],
+    ['integer',     'integer'],
+    ['decimal',     'decimal'],
     ['quantity',    'quantity'],
     ['choice',      'select'],
     ['open-choice', 'open-choice'],

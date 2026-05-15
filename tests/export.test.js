@@ -65,7 +65,9 @@ describe('buildFHIRObject — structure', () => {
 describe('buildFHIRObject — item type mapping', () => {
   const cases = [
     ['checkbox',    'boolean'],
-    ['number',      'decimal'],
+    ['integer',     'integer'],
+    ['decimal',     'decimal'],
+    ['number',       'decimal'],
     ['text',        'string'],
     ['date',        'date'],
     ['url',         'url'],

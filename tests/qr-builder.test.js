@@ -189,3 +189,49 @@ describe('buildQR — multiple items', () => {
     expect(qr.item[1].answer[0].valueBoolean).toBe(true);
   });
 });
+
+// ── type → value[x] mapping (regression: correct key for FHIRPath expressions) ──
+describe('buildQR — type to value[x] mapping', () => {
+  it('decimal type → valueDecimal (use .answer.valueDecimal in FHIRPath)', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'decimal' }] }, { q: 3.5 });
+    expect(qr.item[0].answer[0].valueDecimal).toBe(3.5);
+    expect(qr.item[0].answer[0].valueInteger).toBeUndefined();
+  });
+
+  it('integer type → valueInteger (use .answer.valueInteger in FHIRPath)', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'integer' }] }, { q: 5 });
+    expect(qr.item[0].answer[0].valueInteger).toBe(5);
+    expect(qr.item[0].answer[0].valueDecimal).toBeUndefined();
+  });
+
+  it('integer parses string input', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'integer' }] }, { q: '7' });
+    expect(qr.item[0].answer[0].valueInteger).toBe(7);
+  });
+
+  it('decimal parses string input', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'decimal' }] }, { q: '2.5' });
+    expect(qr.item[0].answer[0].valueDecimal).toBe(2.5);
+  });
+
+  it('string type → valueString', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'string' }] }, { q: 'hello' });
+    expect(qr.item[0].answer[0].valueString).toBe('hello');
+  });
+
+  it('boolean type → valueBoolean', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'boolean' }] }, { q: true });
+    expect(qr.item[0].answer[0].valueBoolean).toBe(true);
+  });
+
+  it('quantity type → valueDecimal (use .answer.valueDecimal in FHIRPath)', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'quantity' }] }, { q: 75 });
+    expect(qr.item[0].answer[0].valueDecimal).toBe(75);
+  });
+
+  it('choice type → valueCoding (use .answer.valueCoding.code in FHIRPath)', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'choice' }] }, { q: 'opt1' });
+    expect(qr.item[0].answer[0].valueCoding.code).toBe('opt1');
+  });
+});
+

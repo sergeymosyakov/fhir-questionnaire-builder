@@ -171,6 +171,7 @@ function _promptExport(afterExport) {
   if (name === null) return; // cancelled
   const trimmed = (name.trim() || suggested).replace(/\.json$/i, '');
   exportFHIR(trimmed + '.json');
+  _setFileName(trimmed);
   if (afterExport) afterExport();
 }
 

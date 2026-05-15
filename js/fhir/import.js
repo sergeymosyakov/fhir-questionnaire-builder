@@ -14,7 +14,8 @@ function applyInitialValues(nodes) {
 // FHIR item.type → our itemType
 function fhirTypeToItemType(t) {
   if (t === 'boolean')                                  return 'checkbox';
-  if (t === 'integer' || t === 'decimal')               return 'number';
+  if (t === 'integer')                                        return 'integer';
+  if (t === 'decimal')                                         return 'decimal';
   if (t === 'quantity')                                 return 'quantity';
   if (t === 'choice')                                   return 'select';
   if (t === 'open-choice')                              return 'open-choice';

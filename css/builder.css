@@ -718,6 +718,26 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   flex: 1;
   min-width: 0;
 }
+.constraint-expr-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.expr-explain-btn {
+  align-self: flex-end;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 11px;
+  border: 1px solid var(--c-primary);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--c-primary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.expr-explain-btn:hover { background: var(--c-primary-lt); }
 
 /* === Panel element classes =================================================== */
 .panel-vis-hint    { margin-bottom: 6px; padding: 4px 8px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; font-size: 11px; color: #5d4037; }

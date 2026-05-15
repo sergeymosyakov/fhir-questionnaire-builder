@@ -4,7 +4,9 @@ import { parseOptions, ITLH_KEY_GROUP_OR } from '../utils.js';
 
 function itemTypeToFHIRType(t) {
   if (t === 'checkbox')    return 'boolean';
-  if (t === 'number')      return 'decimal';
+  if (t === 'integer')       return 'integer';
+  if (t === 'decimal')        return 'decimal';
+  if (t === 'number')         return 'decimal'; // legacy fallback
   if (t === 'quantity')    return 'quantity';
   if (t === 'select' || t === 'radio') return 'choice';
   if (t === 'open-choice') return 'open-choice';

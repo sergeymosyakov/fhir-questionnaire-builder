@@ -70,7 +70,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/validate-modal.js` | Validation modal UI — `init(elements)` + `show(title, issues, mode, onExport?)`; no hardcoded DOM IDs |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; collapsible chip list with `%name` chip tooltips (expression + FHIR footer); modal uses draft pattern — edits are buffered until Apply; Cancel discards draft; Apply validates (blocks on missing name) then commits to `questVariables` and calls `reinitForm()` |
 | `js/ui/showwhen-modal.js` | Show When (enableWhen) centered modal — `init(elements)`, `open(node, visLink, setActive, ctx, buildVisFn)`, `close()`; draft pattern: deep-clones `enableWhen[]`, `enableBehavior`, `enableWhenExpression` on open; Apply commits to node + calls `triggerCalcRecalc()`; Cancel discards; no-op `setActive` passed to `buildVisPanel` so the action button state only changes on Apply |
-| `js/ui/constraint-modal.js` | Constraint edit modal — `init(elements)`, `open(node, constraintLink, setActive)`; draft pattern: deep-clones `node.constraint[]` on open; Apply commits + calls `triggerCalcRecalc()` + updates button state; Cancel discards; expression field is a resizable `.expr-textarea` |
+| `js/ui/constraint-modal.js` | Constraint edit modal — `init(elements)`, `open(node, constraintLink, setActive)`; draft pattern: deep-clones `node.constraint[]` on open; Apply commits + calls `triggerCalcRecalc()` + updates button state; Cancel discards; expression field is a resizable `.expr-textarea`; each constraint card has an **Explain** button that opens `explain-modal` via `window.fhirpath` |
 | `js/ui/expression-modal.js` | Config-driven modal for `_calculatedExpr` and `_initialExpr` FHIRPath fields — `init(elements)`, `open(cfg)` where cfg = `{node, link, setActive, field, label, fhirLabel, hint, placeholder, onApply}`; auto-resize `.expr-textarea`; live expr icon via debounced `refreshExprIcons`; draft pattern; closes on Escape / backdrop click |
 | `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles (Adult Male, Adult Female, Obese Male, Child, Pregnant Female) + Custom…; `Patient ▾` button in toolbar; selecting a preset auto-applies patient vars and fires `reinitForm()`; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
@@ -97,9 +97,11 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic (23 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
 | `tests/validate.test.js` | Unit tests for `js/fhir/validate.js` — `validateTree` (21 tests) |
-| `tests/export.test.js` | Unit tests for `js/fhir/export.js` — `buildFHIRObject`, enableWhen, constraints, SDC variables (33 tests) |
+| `tests/export.test.js` | Unit tests for `js/fhir/export.js` — `buildFHIRObject`, enableWhen, constraints, SDC variables, `integer`/`decimal`/`number` type mapping (39 tests) |
 | `tests/import.test.js` | Unit tests for `js/fhir/import.js` — `fhirTypeToItemType`, `fhirOptsToStr`, `humanEnableWhen`, `applyVisibility` (45 tests) |
-| `tests/qr-builder.test.js` | Unit tests for `js/fhir/qr-builder.js` — `buildQR`, `buildQRItem` (23 tests) |
+| `tests/qr-builder.test.js` | Unit tests for `js/fhir/qr-builder.js` — `buildQR`, `buildQRItem`, `integer`→`valueInteger` / `decimal`→`valueDecimal` mapping (31 tests) |
+| `tests/state.test.js` | Unit tests for `evalConstraints` in `js/state.js` — severity filtering, empty/false/throw/empty-expression results, varEnv passing (16 tests) |
+| `tests/integration.test.js` | Integration tests for `buildQR` + `evalConstraints` pipeline — decimal/integer pass/fail, wrong key regression, warning-only, nested groups (7 tests) |
 | `.github/workflows/test.yml` | GitHub Actions CI — runs `npm test` on every push/PR to main |
 
 ---
@@ -113,7 +115,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
 - **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
-- **Vitest** — unit test suite for pure-function modules; **188 tests**; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules; **221 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---

@@ -33,7 +33,7 @@ Every node in the tree is either a **group** or an **item**:
   enableBehavior:      'all'|'any',
   enableWhenExpression:string,
   constraint:          object[],
-  itemType:            'text'|'number'|'date'|'url'|'attachment'|'checkbox'|'select'|'radio'|'open-choice'|'quantity'|'reference'|'display',
+  itemType:            'text'|'integer'|'decimal'|'date'|'url'|'attachment'|'checkbox'|'select'|'radio'|'open-choice'|'quantity'|'reference'|'display', // 'number' legacy alias
   options:             string,           // comma-separated, used by select/radio/open-choice
   _renderStyle:        string,           // inline CSS (from rendering-style extension)
   _calculatedExpr:     string,           // FHIRPath expression (SDC calculatedExpression)
@@ -53,7 +53,8 @@ Every node in the tree is either a **group** or an **item**:
 | FHIR `item.type` | `itemType` | Notes |
 |---|---|---|
 | `boolean` | `checkbox` | |
-| `integer`, `decimal` | `number` | Both map to the same `number` control; original precision is not preserved |
+| `integer` | `integer` | Stored as `valueInteger` in QR; use `.answer.valueInteger` in FHIRPath constraints |
+| `decimal` | `decimal` | Stored as `valueDecimal` in QR; use `.answer.valueDecimal` in FHIRPath constraints |
 | `quantity` | `quantity` | UCUM unit dropdown; `questionnaire-unit` extension read/written |
 | `string`, `text` | `text` | |
 | `reference` | `reference` | dropdown (resource type) + id input; `questionnaire-referenceResource` extension locks dropdown to one type |
@@ -71,7 +72,9 @@ Every node in the tree is either a **group** or an **item**:
 | `itemType` | FHIR `item.type` | Extra |
 |---|---|---|
 | `checkbox` | `boolean` | |
-| `number` | `decimal` | `integer` inputs are exported as `decimal` — integer precision is not round-trip safe |
+| `integer` | `integer` | round-trip safe; QR stores as `valueInteger` |
+| `decimal` | `decimal` | round-trip safe; QR stores as `valueDecimal` |
+| `number` | `decimal` | legacy alias — kept for backward compatibility with saved questionnaires |
 | `text` | `string` | |
 | `select` | `choice` | + `answerOption[]` |
 | `radio` | `choice` | + `answerOption[]` + `questionnaire-itemControl: radio-button` extension |

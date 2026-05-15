@@ -8,6 +8,8 @@
 // close()                                 — cancel (discard draft)
 
 import { triggerCalcRecalc } from '../builder/_shared.js';
+import * as explainModal from './explain-modal.js';
+import { getLastCtx } from '../render-preview.js';
 
 let _el      = null;
 let _pending = null; // { node, constraintLink, setActive, draft }
@@ -121,7 +123,7 @@ function _renderBody(draft, container) {
     humanInp.oninput = () => { c.human = humanInp.value; };
     card.appendChild(_lbl('Message:', humanInp));
 
-    // FHIRPath expression
+    // FHIRPath expression + Explain button row
     const exprInp = document.createElement('textarea');
     exprInp.rows = 2;
     exprInp.className = 'expr-textarea';
@@ -131,7 +133,23 @@ function _renderBody(draft, container) {
     exprInp.addEventListener('input', _resize);
     setTimeout(_resize, 0);
     exprInp.oninput = () => { c.expression = exprInp.value; };
-    card.appendChild(_lbl('Expression:', exprInp));
+
+    const explainBtn = document.createElement('button');
+    explainBtn.type = 'button';
+    explainBtn.className = 'expr-explain-btn';
+    explainBtn.textContent = 'Explain';
+    explainBtn.title = 'Evaluate expression and show result tree';
+    explainBtn.onclick = () => {
+      const fp = window.fhirpath;
+      const { qr, env } = getLastCtx();
+      if (fp && exprInp.value.trim()) explainModal.show(exprInp.value.trim(), fp, qr, env);
+    };
+
+    const exprWrap = document.createElement('div');
+    exprWrap.className = 'constraint-expr-wrap';
+    exprWrap.appendChild(exprInp);
+    exprWrap.appendChild(explainBtn);
+    card.appendChild(_lbl('Expression:', exprWrap));
 
     container.appendChild(card);
   });
