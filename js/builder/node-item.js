@@ -42,6 +42,7 @@ export function renderItem(node, ctx) {
   const navBtn = document.createElement('button');
   navBtn.type = 'button';
   navBtn.className = 'node-nav-btn';
+  navBtn.dataset.testid = 'node-nav-btn';
   navBtn.title = 'Navigate to preview row';
   navBtn.textContent = '\u2197'; // ↗
   navBtn.addEventListener('click', e => {
@@ -221,6 +222,7 @@ export function renderItem(node, ctx) {
   const btnDel = document.createElement('button');
   btnDel.textContent = '\u2715';
   btnDel.className = 'btn-node-delete';
+  btnDel.dataset.testid = 'node-delete-btn';
   btnDel.title = 'Delete';
   btnDel.onclick = async () => {
     const ok = await confirmDelete(node.title || node.id);

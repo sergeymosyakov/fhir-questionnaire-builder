@@ -95,7 +95,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `package.json` | Node dev tooling — Vitest (`npm test`) + Playwright (`npm run test:e2e`); `serve` devDep used by Playwright webServer |
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
 | `playwright.config.js` | Playwright config — Chromium only, `testDir: tests/e2e`, auto-starts local `serve` (via `node node_modules/.bin/serve`); reporters: `html` (open:never) + `list` |
-| `tests/e2e/builder.spec.js` | E2E tests (9) — load/clear form, collapse/expand group, FHIR export download, builder creates/edits items, preview reacts; all selectors via `data-testid` / `data-node-id` / `data-preview-id`; registry comment at top of file |
+| `tests/e2e/builder.spec.js` | E2E tests (18) — load/clear form, collapse/expand group, FHIR export, group title edit, delete item/group (cascade), type changes (checkbox/display), bidirectional navigation flash (builder↔preview), node count match on import, answer state persistence; all selectors via `data-testid` / `data-node-id` / `data-preview-id`; registry comment at top of file |
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
 | `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic (23 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
@@ -119,7 +119,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
 - **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
 - **Vitest** — unit test suite for pure-function modules; **221 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — E2E test suite; **9 tests** (Chromium); CI via GitHub Actions (`npx playwright test`)
+- **Playwright** — E2E test suite; **18 tests** (Chromium); CI via GitHub Actions (`npx playwright test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---

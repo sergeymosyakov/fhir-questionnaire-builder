@@ -28,10 +28,16 @@
 //   node-title-input     inline <textarea> editor for the node title
 //   group-add-btn        "+" button that opens the add-child menu on a group
 //   group-collapse-btn   "▼/▶" button that collapses or expands the group body
+//   node-delete-btn      "×" delete button on a group or item node
+//   node-nav-btn         "↗" button that scrolls+flashes the matching preview row
 //   add-menu-group       "Group" option in the add-child dropdown menu
 //   add-menu-item        "Item"  option in the add-child dropdown menu
 //   action-type          "Answer Type" action link on an item node
 //   action-mand          "Required"    action link on a group or item node
+//
+// Delete-confirm dialog  (js/builder/_shared.js — dynamically created)
+//   delete-confirm-del-btn     "Delete" button in the delete-confirm dialog
+//   delete-confirm-cancel-btn  "Cancel" button in the delete-confirm dialog
 //
 // Builder panels  (js/builder/panels.js)
 //   type-select          <select> for choosing the item answer type
@@ -173,6 +179,172 @@ test.describe('FHIR export', () => {
     ]);
 
     expect(download.suggestedFilename()).toMatch(/\.json$/);
+  });
+});
+
+
+// ── Bidirectional: builder ↔ preview ──────────────────────────────────────────
+
+test.describe('Builder → preview: group title edit', () => {
+  test('edit group title → preview group header updates', async ({ page }) => {
+    await freshStart(page);
+    const groupId = await addRootGroup(page);
+
+    const group = page.locator(`[data-node-id="${groupId}"]`);
+    await group.getByTestId('node-title-display').first().click();
+    await group.getByTestId('node-title-input').first().fill('My Section');
+    await group.getByTestId('node-title-input').first().blur();
+
+    await expect(page.locator(`[data-preview-id="${groupId}"]`)).toContainText('My Section');
+  });
+});
+
+test.describe('Builder → preview: delete item', () => {
+  test('delete item → builder node and preview row both disappear', async ({ page }) => {
+    await freshStart(page);
+    const groupId = await addRootGroup(page);
+    const itemId  = await addItemToGroup(page, groupId);
+
+    // Confirm both panels show the item before deletion.
+    await expect(page.locator(`[data-node-id="${itemId}"]`)).toBeVisible();
+    await expect(page.locator(`[data-preview-id="${itemId}"]`)).toBeVisible();
+
+    // Delete the item and confirm.
+    await page.locator(`[data-node-id="${itemId}"]`).getByTestId('node-delete-btn').click();
+    await page.getByTestId('delete-confirm-del-btn').click();
+
+    await expect(page.locator(`[data-node-id="${itemId}"]`)).toHaveCount(0);
+    await expect(page.locator(`[data-preview-id="${itemId}"]`)).toHaveCount(0);
+  });
+});
+
+test.describe('Builder → preview: delete group with children', () => {
+  test('delete group removes group + all children from both panels', async ({ page }) => {
+    await freshStart(page);
+    const groupId = await addRootGroup(page);
+    const itemId  = await addItemToGroup(page, groupId);
+
+    // Both panels must contain the group and its child.
+    await expect(page.locator(`[data-preview-id="${groupId}"]`)).toBeVisible();
+    await expect(page.locator(`[data-preview-id="${itemId}"]`)).toBeVisible();
+
+    // Delete the root group (use .first() because the group wraps the child
+    // which also has a node-delete-btn).
+    await page.locator(`[data-node-id="${groupId}"]`).getByTestId('node-delete-btn').first().click();
+    await page.getByTestId('delete-confirm-del-btn').click();
+
+    // Group and child must vanish from builder and preview.
+    await expect(page.locator(`[data-node-id="${groupId}"]`)).toHaveCount(0);
+    await expect(page.locator(`[data-preview-id="${groupId}"]`)).toHaveCount(0);
+    await expect(page.locator(`[data-preview-id="${itemId}"]`)).toHaveCount(0);
+  });
+});
+
+test.describe('Builder → preview: item type changes', () => {
+  async function changeType(page, itemId, typeValue) {
+    const node = page.locator(`[data-node-id="${itemId}"]`);
+    await node.getByTestId('action-type').click();
+    await node.getByTestId('type-select').selectOption(typeValue);
+  }
+
+  test('type = checkbox → preview renders a checkbox input', async ({ page }) => {
+    await freshStart(page);
+    const groupId = await addRootGroup(page);
+    const itemId  = await addItemToGroup(page, groupId);
+
+    await changeType(page, itemId, 'checkbox');
+
+    await expect(
+      page.locator(`[data-preview-id="${itemId}"] input[type="checkbox"]`)
+    ).toBeVisible();
+  });
+
+  test('type = display → preview has no interactive input', async ({ page }) => {
+    await freshStart(page);
+    const groupId = await addRootGroup(page);
+    const itemId  = await addItemToGroup(page, groupId);
+
+    await changeType(page, itemId, 'display');
+
+    // Display items are purely informational — no input or textarea.
+    await expect(
+      page.locator(`[data-preview-id="${itemId}"] input, [data-preview-id="${itemId}"] textarea`)
+    ).toHaveCount(0);
+  });
+});
+
+test.describe('Navigation', () => {
+  test('↗ button in builder flashes the corresponding preview row', async ({ page }) => {
+    await freshStart(page);
+    const groupId = await addRootGroup(page);
+    const itemId  = await addItemToGroup(page, groupId);
+
+    // Wait for the preview to finish its async render before navigating.
+    await expect(page.locator(`[data-preview-id="${itemId}"]`)).toBeVisible();
+
+    await page.locator(`[data-node-id="${itemId}"]`).getByTestId('node-nav-btn').click();
+
+    // preview-flash class is added synchronously and held for 1 s.
+    await expect(page.locator(`[data-preview-id="${itemId}"]`))
+      .toHaveClass(/preview-flash/, { timeout: 1500 });
+  });
+
+  test('click preview row flashes the corresponding builder node', async ({ page }) => {
+    await freshStart(page);
+    const groupId = await addRootGroup(page);
+    const itemId  = await addItemToGroup(page, groupId);
+
+    await page.locator(`[data-preview-id="${itemId}"]`).click();
+
+    // node-flash class is added synchronously and held for 1 s.
+    await expect(page.locator(`[data-node-id="${itemId}"]`))
+      .toHaveClass(/node-flash/, { timeout: 1500 });
+  });
+});
+
+test.describe('Load FHIR → both panels', () => {
+  test('node count in builder matches row count in preview after sample load', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+
+    await page.getByTestId('load-fhir-btn').click();
+    await page.click('[data-sample="example-bariatric.fhir.json"]');
+    await expect(
+      page.locator('[data-testid="preview-panel"] [data-preview-id]').first()
+    ).toBeVisible();
+    // Also wait for the builder tree to finish rendering (renderTreeAsync is chunked).
+    await expect(
+      page.locator('[data-testid="tree-container"] [data-node-id]').first()
+    ).toBeVisible();
+
+    const nodeCount    = await page.locator('[data-testid="tree-container"] [data-node-id]').count();
+    const previewCount = await page.locator('[data-testid="preview-panel"] [data-preview-id]').count();
+
+    expect(nodeCount).toBeGreaterThan(0);
+    // Allow a small tolerance: the preview may render a handful of nodes
+    // differently (e.g. implicit group wrappers), but the counts must be close.
+    expect(Math.abs(nodeCount - previewCount)).toBeLessThanOrEqual(5);
+  });
+});
+
+test.describe('Preview answers → state', () => {
+  test('fill text answer persists after tree re-render', async ({ page }) => {
+    await freshStart(page);
+    const groupId = await addRootGroup(page);
+    const itemId  = await addItemToGroup(page, groupId);
+
+    // Default item type is text — find the input/textarea in the preview row.
+    const previewInput = page.locator(`[data-preview-id="${itemId}"]`).locator('input, textarea').first();
+    await previewInput.fill('hello world');
+
+    // Editing the group title is a reactive tree mutation that triggers a preview re-render.
+    const group = page.locator(`[data-node-id="${groupId}"]`);
+    await group.getByTestId('node-title-display').first().click();
+    await group.getByTestId('node-title-input').first().fill('Updated Title');
+    await group.getByTestId('node-title-input').first().blur();
+
+    // The answer must survive the re-render (stored in values, restored on control rebuild).
+    await expect(previewInput).toHaveValue('hello world');
   });
 });
 

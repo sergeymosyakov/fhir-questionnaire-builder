@@ -58,8 +58,8 @@ export function confirmDelete(label) {
         '<strong>' + label.replace(/</g, '&lt;') + '</strong> and all its children will be permanently removed.' +
       '</div>' +
       '<div class="clear-confirm-btns">' +
-        '<button class="btn-fhir btn-danger" id="_cdDel">Delete</button>' +
-        '<button class="btn-fhir" id="_cdCancel">Cancel</button>' +
+        '<button class="btn-fhir btn-danger" id="_cdDel" data-testid="delete-confirm-del-btn">Delete</button>' +
+        '<button class="btn-fhir" id="_cdCancel" data-testid="delete-confirm-cancel-btn">Cancel</button>' +
       '</div>';
     backdrop.appendChild(box);
     document.body.appendChild(backdrop);
