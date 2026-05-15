@@ -15,6 +15,7 @@ import * as variablesPanel from './ui/variables-panel.js';
 import * as patientCtx from './ui/patient-ctx.js';
 import * as showWhenModal from './ui/showwhen-modal.js';
 import * as constraintModal from './ui/constraint-modal.js';
+import * as expressionModal from './ui/expression-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
 import { showLinkId, showPrefix, showBadges, questVariables } from './state.js';
@@ -76,6 +77,15 @@ constraintModal.init({
   closeBtn:  document.getElementById('constraintModalClose'),
   cancelBtn: document.getElementById('constraintModalCancel'),
   applyBtn:  document.getElementById('constraintModalApply'),
+});
+// ── Expression modal init ────────────────────────────────────────
+expressionModal.init({
+  modal:     document.getElementById('expressionModal'),
+  title:     document.getElementById('exprModalTitle'),
+  body:      document.getElementById('exprModalBody'),
+  closeBtn:  document.getElementById('exprModalClose'),
+  cancelBtn: document.getElementById('exprModalCancel'),
+  applyBtn:  document.getElementById('exprModalApply'),
 });
 // ── Validate modal init ───────────────────────────────────────────────────
 const _modal = document.getElementById('validateModal');

@@ -3,9 +3,10 @@
 import { findAndRemove, escAttr } from '../utils.js';
 import { navigateToPreview } from '../render-preview.js';
 import { makeGroup, makeItem } from '../state.js';
-import { formatSeg, confirmDelete } from './_shared.js';
+import { formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildMandPanel, buildExprPanel, buildStylePanel } from './panels.js';
+import { addPanel, buildVisPanel, buildMandPanel, buildStylePanel } from './panels.js';
+import * as expressionModal from '../ui/expression-modal.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
 
 export function renderGroup(node, ctx) {
@@ -156,6 +157,14 @@ export function renderGroup(node, ctx) {
     'Calculated Expression',
     'SDC FHIRPath calculatedExpression on this group item. Evaluated on Test click. Supports questionnaire-level %variables.',
     'sdc-questionnaire-calculatedExpression', 'SDC · optional');
+  exprLink.onclick = () => expressionModal.open({
+    node, link: exprLink, setActive,
+    field:       '_calculatedExpr',
+    label:       'Calculated Expression',
+    fhirLabel:   'FHIRPath calculatedExpression:',
+    placeholder: "%resource.item.where(linkId='...')",
+    onApply:     triggerCalcRecalc,
+  });
   const styleLink = addToggle('Appearance', 'style',
     'Appearance (rendering-style)',
     'Inline CSS applied to the group title in the preview. Stored in the standard FHIR rendering-style extension on the _text element.',
@@ -253,7 +262,6 @@ export function renderGroup(node, ctx) {
 
   // ── Panels ────────────────────────────────────────────────────────────────
   addPanel('mand',  p => buildMandPanel(node, p, mandLink, setActive), div, panels);
-  addPanel('expr',  p => buildExprPanel(node, p, exprLink, setActive), div, panels);
   addPanel('style', p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
   setActive(visLink,   !!(node.enableWhen?.length) || !!node.enableWhenExpression);

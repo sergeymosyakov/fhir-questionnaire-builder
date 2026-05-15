@@ -56,12 +56,12 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, etc.) |
 | `js/builder/_shared.js` | Shared utilities; injected deps via `init(deps)` |
 | `js/builder/dnd.js` | Self-contained drag & drop; all state via `init(onDrop, tree, formTick)` |
-| `js/builder/panels.js` | All action panel builders (enableWhen vis panel, mand, type, expr, style, constraint) |
-| `js/builder/node-item.js` | `renderItem(node, ctx)` |
-| `js/builder/node-group.js` | `renderGroup(node, ctx)` |
+| `js/builder/panels.js` | Action panel builders: enableWhen vis panel, mand, type, style, constraint. `buildExprPanel` / `buildInitialExprPanel` removed — expression editing moved to `expression-modal.js` |
+| `js/builder/node-item.js` | `renderItem(node, ctx)` — opens `expression-modal` for expr/initExpr action links |
+| `js/builder/node-group.js` | `renderGroup(node, ctx)` — opens `expression-modal` for expr action link |
 | `js/render-preview.js` | Right panel — async preview render; `reinitForm()` async with progress; `_asyncRender(version)` splits FHIRPath eval (Phase 1) from DOM rebuild (Phase 2) with `_yield()` breaks; stale renders self-abort via `_renderVersion`; exports `navigateToPreview(id)`, `refreshExprIcons()` |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
-| `js/controls/{type}.js` | Per-type control implementations |
+| `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns (`.sc-trigger` / `.oc-wrap`) instead of native `<select>` / `<datalist>` for consistent cross-platform rendering |
 | `js/patient.js` | **Removed** — patient context now managed as FHIRPath literal expressions in `questVariables` via `js/ui/patient-ctx.js` |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
 | `js/fhir/qr-export.js` | `exportQR(fileName)` — builds QR from current tree + answers, adds `authored` timestamp, downloads JSON |
@@ -70,7 +70,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/validate-modal.js` | Validation modal UI — `init(elements)` + `show(title, issues, mode, onExport?)`; no hardcoded DOM IDs |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; collapsible chip list with `%name` chip tooltips (expression + FHIR footer); modal uses draft pattern — edits are buffered until Apply; Cancel discards draft; Apply validates (blocks on missing name) then commits to `questVariables` and calls `reinitForm()` |
 | `js/ui/showwhen-modal.js` | Show When (enableWhen) centered modal — `init(elements)`, `open(node, visLink, setActive, ctx, buildVisFn)`, `close()`; draft pattern: deep-clones `enableWhen[]`, `enableBehavior`, `enableWhenExpression` on open; Apply commits to node + calls `triggerCalcRecalc()`; Cancel discards; no-op `setActive` passed to `buildVisPanel` so the action button state only changes on Apply |
-| `js/ui/constraint-modal.js` | Constraint edit modal — `init(elements)`, `open(node, constraintLink, setActive)`; draft pattern: deep-clones `node.constraint[]` on open; Apply commits + updates button state; Cancel discards; expression field is a resizable `.expr-textarea` |
+| `js/ui/constraint-modal.js` | Constraint edit modal — `init(elements)`, `open(node, constraintLink, setActive)`; draft pattern: deep-clones `node.constraint[]` on open; Apply commits + calls `triggerCalcRecalc()` + updates button state; Cancel discards; expression field is a resizable `.expr-textarea` |
+| `js/ui/expression-modal.js` | Config-driven modal for `_calculatedExpr` and `_initialExpr` FHIRPath fields — `init(elements)`, `open(cfg)` where cfg = `{node, link, setActive, field, label, fhirLabel, hint, placeholder, onApply}`; auto-resize `.expr-textarea`; live expr icon via debounced `refreshExprIcons`; draft pattern; closes on Escape / backdrop click |
 | `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles (Adult Male, Adult Female, Obese Male, Child, Pregnant Female) + Custom…; `Patient ▾` button in toolbar; selecting a preset auto-applies patient vars and fires `reinitForm()`; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + up/down/Enter navigation |

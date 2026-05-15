@@ -521,67 +521,6 @@ export function buildTypePanel(node, p) {
 }
 
 // ── Expression panel ──────────────────────────────────────────────────────────
-export function buildExprPanel(node, p, exprLink, setActive) {
-  const lbl = document.createElement('div');
-  lbl.className = 'panel-expr-lbl panel-lbl-row';
-  const lblTxt = document.createElement('span');
-  lblTxt.textContent = 'FHIRPath calculatedExpression:';
-  const calcIcon = document.createElement('span');
-  calcIcon.className = 'expr-live-icon';
-  calcIcon.dataset.exprIcon = node._calculatedExpr || '';
-  lbl.appendChild(lblTxt);
-  lbl.appendChild(calcIcon);
-  p.appendChild(lbl);
-
-  const ta = document.createElement('textarea');
-  ta.rows = 4;
-  ta.className = 'panel-ta';
-  ta.value = node._calculatedExpr || '';
-  ta.placeholder = '%resource.item.where(linkId=\'...\')';
-  ta.oninput = () => {
-    node._calculatedExpr = ta.value.trim() || undefined;
-    calcIcon.dataset.exprIcon = ta.value.trim();
-    setActive(exprLink, !!ta.value.trim());
-    clearTimeout(ta._d);
-    ta._d = setTimeout(refreshExprIcons, 400);
-  };
-  ta.onblur = () => { triggerCalcRecalc(); };
-  p.appendChild(ta);
-}
-
-// ── Initial expression panel (sdc-questionnaire-initialExpression) ────────────
-export function buildInitialExprPanel(node, p, link, setActive) {
-  const hint = document.createElement('div');
-  hint.className = 'panel-hint';
-  hint.textContent = 'FHIRPath expression evaluated once to populate this field. Click \u21BA Re-init in the Variables panel to apply.';
-  p.appendChild(hint);
-
-  const lbl = document.createElement('div');
-  lbl.className = 'panel-expr-lbl panel-lbl-row';
-  const lblTxt = document.createElement('span');
-  lblTxt.textContent = 'sdc-questionnaire-initialExpression:';
-  const initIcon = document.createElement('span');
-  initIcon.className = 'expr-live-icon';
-  initIcon.dataset.exprIcon = node._initialExpr || '';
-  lbl.appendChild(lblTxt);
-  lbl.appendChild(initIcon);
-  p.appendChild(lbl);
-
-  const ta = document.createElement('textarea');
-  ta.rows = 3;
-  ta.className = 'panel-ta';
-  ta.value = node._initialExpr || '';
-  ta.placeholder = "e.g. %age > 18 or %today";
-  ta.oninput = () => {
-    node._initialExpr = ta.value.trim() || undefined;
-    initIcon.dataset.exprIcon = ta.value.trim();
-    setActive(link, !!ta.value.trim());
-    clearTimeout(ta._d);
-    ta._d = setTimeout(refreshExprIcons, 400);
-  };
-  p.appendChild(ta);
-}
-
 // ── Style / Appearance panel ──────────────────────────────────────────────────
 export function buildStylePanel(node, p, styleLink, setActive, ctx) {
   const styleRow = (label, fn) => {

@@ -292,6 +292,7 @@
   font-size: 12px;
   color: var(--c-text);
 }
+.preview-card .oc-input[type=text] { border-right: none; border-radius: var(--r-sm) 0 0 var(--r-sm); }
 .preview-card input[type=checkbox] { accent-color: var(--c-primary); }
 .preview-card select {
   padding: 3px 6px;

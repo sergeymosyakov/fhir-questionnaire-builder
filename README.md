@@ -30,7 +30,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` — group node DOM |
 | `js/render-preview.js` | Right panel — async preview; `reinitForm()` shows progress bar, yields between stages; `_asyncRender(version)` separates FHIRPath eval from DOM rebuild; DocumentFragment; stale-render abort |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
-| `js/controls/{type}.js` | Per-type control implementations |
+| `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns instead of native `<select>` / `<datalist>` |
 | `js/fhir/import.js` | FHIR R4 → internal model |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
 | `js/fhir/calc.js` | `evalCalcNodes`, `evalInitialExprNodes` — FHIRPath calculatedExpression and initialExpression evaluation |
@@ -39,6 +39,8 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/ui/validate-modal.js` | Validate modal — `init(elements)`, `show(title, issues, mode, callbacks)` |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; draft-based editing with Apply/Cancel buttons; `%name` chip rich tooltips |
 | `js/ui/showwhen-modal.js` | Show When centered modal — draft pattern (Apply/Cancel); action button indicator only changes on Apply; searchable question picker portal dropdown |
+| `js/ui/constraint-modal.js` | Constraint edit modal — draft pattern; Apply commits + calls `triggerCalcRecalc()` so preview re-renders; expression field is a resizable `.expr-textarea` |
+| `js/ui/expression-modal.js` | Config-driven modal for `_calculatedExpr` and `_initialExpr` FHIRPath fields — `open(cfg)`; draft pattern; auto-resize textarea; live expr icon |
 | `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles (Adult Male, Adult Female, Obese Male, Child, Pregnant Female) + Custom…; `Patient ▾` button in toolbar; selecting a preset auto-applies patient vars and calls `reinitForm()`; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + keyboard navigation |

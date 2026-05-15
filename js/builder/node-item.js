@@ -3,9 +3,10 @@
 import { findAndRemove, escAttr } from '../utils.js';
 import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildExprPanel, buildInitialExprPanel, buildStylePanel, buildInitialPanel } from './panels.js';
+import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildStylePanel, buildInitialPanel } from './panels.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
 import * as constraintModal from '../ui/constraint-modal.js';
+import * as expressionModal from '../ui/expression-modal.js';
 import { triggerCalcRecalc, confirmDelete } from './_shared.js';
 
 export function renderItem(node, ctx) {
@@ -142,10 +143,26 @@ export function renderItem(node, ctx) {
     'Calculated Expression',
     'SDC FHIRPath expression evaluated automatically on every preview render. Result is written into the answer field. Supports questionnaire-level %variables.',
     'sdc-questionnaire-calculatedExpression', 'SDC · optional');
+  exprLink.onclick = () => expressionModal.open({
+    node, link: exprLink, setActive,
+    field:       '_calculatedExpr',
+    label:       'Calculated Expression',
+    fhirLabel:   'FHIRPath calculatedExpression:',
+    placeholder: "%resource.item.where(linkId='...')",
+    onApply:     triggerCalcRecalc,
+  });
   const initExprLink = addToggle('Init Expr', 'initExpr',
     'Initial Expression',
     'SDC FHIRPath expression evaluated once to pre-populate this field. Click \u21BA Re-init in the Variables panel to apply. Unlike calculatedExpression, this runs only on load/re-init.',
     'sdc-questionnaire-initialExpression', 'SDC · optional');
+  initExprLink.onclick = () => expressionModal.open({
+    node, link: initExprLink, setActive,
+    field:       '_initialExpr',
+    label:       'Initial Expression',
+    fhirLabel:   'sdc-questionnaire-initialExpression:',
+    hint:        'FHIRPath expression evaluated once to populate this field. Click \u21BA Re-init in the Variables panel to apply.',
+    placeholder: "e.g. %age > 18 or %today",
+  });
 
   // Read-only toggle — direct boolean, no panel needed
   const roLink = document.createElement('a');
@@ -212,8 +229,6 @@ export function renderItem(node, ctx) {
   // ── Panels ────────────────────────────────────────────────────────────────
   addPanel('type', p => buildTypePanel(node, p), div, panels);
   addPanel('mand', p => buildMandPanel(node, p, mandLink, setActive), div, panels);
-  addPanel('expr', p => buildExprPanel(node, p, exprLink, setActive), div, panels);
-  addPanel('initExpr', p => buildInitialExprPanel(node, p, initExprLink, setActive), div, panels);
   addPanel('init', p => buildInitialPanel(node, p, initLink, setActive), div, panels);
   addPanel('style',p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 

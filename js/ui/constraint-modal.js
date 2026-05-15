@@ -7,6 +7,8 @@
 // open(node, constraintLink, setActive)   — populate body + show
 // close()                                 — cancel (discard draft)
 
+import { triggerCalcRecalc } from '../builder/_shared.js';
+
 let _el      = null;
 let _pending = null; // { node, constraintLink, setActive, draft }
 
@@ -48,6 +50,7 @@ function _apply() {
   const { node, draft, constraintLink, setActive } = _pending;
   node.constraint = draft;
   setActive(constraintLink, draft.length > 0);
+  triggerCalcRecalc();
   _close();
 }
 
