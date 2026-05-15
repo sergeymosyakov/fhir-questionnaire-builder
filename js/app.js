@@ -76,6 +76,8 @@ variablesPanel.init({
   modal:     document.getElementById('variablesModal'),
   modalBody: document.getElementById('variablesModalBody'),
   closeBtn:  document.getElementById('variablesModalClose'),
+  applyBtn:  document.getElementById('variablesModalApply'),
+  cancelBtn: document.getElementById('variablesModalCancel'),
 }, questVariables, reinitForm);
 
 // ── Patient context popup init ────────────────────────────────────────────

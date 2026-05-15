@@ -1,4 +1,4 @@
-// в”Ђв”Ђ FHIR R4 Questionnaire import в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+// ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
 import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables } from '../state.js';
 import { renderTree } from '../render-builder.js';
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
@@ -11,7 +11,7 @@ function applyInitialValues(nodes) {
   }
 }
 
-// FHIR item.type в†’ our itemType
+// FHIR item.type → our itemType
 function fhirTypeToItemType(t) {
   if (t === 'boolean')                                  return 'checkbox';
   if (t === 'integer' || t === 'decimal')               return 'number';
@@ -26,7 +26,7 @@ function fhirTypeToItemType(t) {
   return 'text'; // string, text
 }
 
-// answerOption[] в†’ comma-separated options string in "code=display" format.
+// answerOption[] → comma-separated options string in "code=display" format.
 function fhirOptsToStr(opts) {
   return (opts || []).map(o => {
     if (o.valueCoding) {
@@ -39,7 +39,7 @@ function fhirOptsToStr(opts) {
   }).filter(Boolean).join(', ');
 }
 
-// Build linkId в†’ question text map for human-friendly display
+// Build linkId → question text map for human-friendly display
 function buildLinkIdMap(items, map = {}) {
   for (const item of items || []) {
     map[item.linkId] = item.text || item.linkId || '';
@@ -70,13 +70,13 @@ function humanEnableWhen(enableWhen, enableBehavior, linkIdMap) {
 
 // Apply enableWhen, enableBehavior, enableWhenExpression to a node from a FHIR item
 function applyVisibility(node, fhirItem, linkIdMap) {
-  // Standard enableWhen[] в†’ stored structurally
+  // Standard enableWhen[] → stored structurally
   if (fhirItem.enableWhen && fhirItem.enableWhen.length) {
     node.enableWhen     = fhirItem.enableWhen.map(ew => ({ ...ew }));
     node.enableBehavior = fhirItem.enableBehavior === 'any' ? 'any' : 'all';
     node._enableWhenText = humanEnableWhen(fhirItem.enableWhen, fhirItem.enableBehavior, linkIdMap);
   }
-  // SDC enableWhenExpression в†’ FHIRPath condition
+  // SDC enableWhenExpression → FHIRPath condition
   const eweExt = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression'
   );
@@ -112,7 +112,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   node.mandatory = fhirItem.required === undefined ? null : !!fhirItem.required;
   node.itemType  = fhirTypeToItemType(fhirItem.type || 'string');
 
-  // questionnaire-itemControl: radio-button в†’ use 'radio' instead of 'select'
+  // questionnaire-itemControl: radio-button → use 'radio' instead of 'select'
   if (node.itemType === 'select' || node.itemType === 'open-choice') {
     const itemCtrl = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl'
@@ -163,7 +163,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
 
-  // item.initial[0] в†’ _initialValue
+  // item.initial[0] → _initialValue
   if (fhirItem.initial && fhirItem.initial.length) {
     const init = fhirItem.initial[0];
     if      (init.valueBoolean  !== undefined) node._initialValue = init.valueBoolean;
@@ -180,7 +180,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   return node;
 }
 
-// Recursive FHIR item в†’ our node.
+// Recursive FHIR item → our node.
 function fhirItemToNode(fhirItem, linkIdMap) {
   const t = fhirItem.type || 'string';
 
@@ -202,7 +202,7 @@ function fhirItemToNode(fhirItem, linkIdMap) {
     return node;
   }
 
-  // Question with nested sub-items в†’ wrap in synthetic group
+  // Question with nested sub-items → wrap in synthetic group
   if ((fhirItem.item || []).length > 0) {
     const wrapper = makeGroup(fhirItem.text || fhirItem.linkId || 'Group');
     wrapper.id        = (fhirItem.linkId || wrapper.id) + '-grp';

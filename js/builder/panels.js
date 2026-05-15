@@ -328,7 +328,7 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
   const exprInp = document.createElement('input');
   exprInp.type = 'text';
   exprInp.className = 'panel-inp-sm';
-  exprInp.style.width = '100%';
+  exprInp.classList.add('panel-inp-full');
   exprInp.value = node.enableWhenExpression || '';
   exprInp.placeholder = "e.g. %age > 18 and %gender = 'male'";
   exprInp.oninput = () => {
@@ -796,7 +796,7 @@ export function buildConstraintPanel(node, p, constraintLink, setActive) {
     if (node.constraint.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'panel-raw-lbl';
-      empty.style.color = 'var(--c-text-2)';
+      empty.classList.add('constraint-empty-msg');
       empty.textContent = 'No constraints. Add one below.';
       p.appendChild(empty);
     }
@@ -859,7 +859,7 @@ export function buildConstraintPanel(node, p, constraintLink, setActive) {
 
     const addBtn = document.createElement('button');
     addBtn.type = 'button'; addBtn.className = 'vis-add-btn'; addBtn.textContent = '+ Add constraint';
-    addBtn.style.marginTop = '6px';
+    addBtn.classList.add('vis-add-btn--mt');
     addBtn.onclick = () => {
       node.constraint.push({ key: '', severity: 'error', human: '', expression: '' });
       render(); syncActive();
