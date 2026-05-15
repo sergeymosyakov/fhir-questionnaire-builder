@@ -11,6 +11,7 @@ import * as autosave from './ui/autosave.js';
 import * as statusBadge from './ui/status-badge.js';
 import * as variablesPanel from './ui/variables-panel.js';
 import * as patientCtx from './ui/patient-ctx.js';
+import * as showWhenModal from './ui/showwhen-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
 import { showLinkId, showPrefix, showBadges, questVariables } from './state.js';
@@ -55,14 +56,24 @@ document.getElementById('renumberBtn').onclick = async () => {
   document.addEventListener('renumber-done', onDone);
   await renumberAll();
 };
+// ── Show When modal init ─────────────────────────────────────────────────
+showWhenModal.init({
+  modal:     document.getElementById('showWhenModal'),
+  title:     document.getElementById('showWhenModalTitle'),
+  body:      document.getElementById('showWhenModalBody'),
+  closeBtn:  document.getElementById('showWhenModalClose'),
+  cancelBtn: document.getElementById('showWhenModalCancel'),
+  applyBtn:  document.getElementById('showWhenModalApply'),
+});
+
 // ── Validate modal init ───────────────────────────────────────────────────
 const _modal = document.getElementById('validateModal');
 validateModal.init({
   backdrop:    _modal,
   headerTitle: _modal.querySelector('.validate-modal-header span'),
-  body:        _modal.querySelector('.validate-modal-body'),
-  footer:      _modal.querySelector('.validate-modal-footer'),
-  closeBtn:    _modal.querySelector('.validate-modal-close'),
+  body:        _modal.querySelector('.modal-body'),
+  footer:      _modal.querySelector('.modal-footer'),
+  closeBtn:    _modal.querySelector('.modal-close'),
 });
 
 // ── Variables panel init ──────────────────────────────────────────────────

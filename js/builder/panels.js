@@ -35,7 +35,7 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
   };
 
   const onOutside = e => {
-    if (!wrap.contains(e.target)) close();
+    if (!wrap.contains(e.target) && !dropEl?.contains(e.target)) close();
   };
 
   trigger.addEventListener('click', e => {
@@ -44,6 +44,14 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
 
     dropEl = document.createElement('div');
     dropEl.className = 'vis-q-sel-drop';
+
+    // ── Search input ─────────────────────────────────────────────────────
+    const searchInp = document.createElement('input');
+    searchInp.type = 'text';
+    searchInp.className = 'vis-q-sel-search';
+    searchInp.placeholder = 'Search id or title\u2026';
+    searchInp.addEventListener('mousedown', ev => ev.stopPropagation());
+    dropEl.appendChild(searchInp);
 
     const blank = document.createElement('div');
     blank.className = 'vis-q-sel-opt' + (!selectedId ? ' vis-q-sel-opt--sel' : '');
@@ -56,11 +64,13 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
     });
     dropEl.appendChild(blank);
 
+    const optDivs = [];
     for (const it of allItems) {
       const opt = document.createElement('div');
       opt.className = 'vis-q-sel-opt' + (it.id === selectedId ? ' vis-q-sel-opt--sel' : '');
       opt.textContent = it.label;
       opt.title = it.id;
+      opt.dataset.id = it.id;
       opt.addEventListener('mousedown', () => {
         trigger.textContent = it.label;
         trigger.title = it.id;
@@ -68,10 +78,35 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
         close();
       });
       dropEl.appendChild(opt);
+      optDivs.push(opt);
     }
 
-    wrap.appendChild(dropEl);
-    setTimeout(() => document.addEventListener('mousedown', onOutside, true), 0);
+    searchInp.addEventListener('input', () => {
+      const q = searchInp.value.toLowerCase();
+      for (const opt of optDivs) {
+        const match = !q
+          || opt.dataset.id.toLowerCase().includes(q)
+          || opt.textContent.toLowerCase().includes(q);
+        opt.style.display = match ? '' : 'none';
+      }
+    });
+
+    // Render as portal so it escapes any overflow:hidden/auto ancestor
+    const rect = trigger.getBoundingClientRect();
+    dropEl.style.top      = (rect.bottom + 2) + 'px';
+    dropEl.style.left     = rect.left + 'px';
+    dropEl.style.minWidth = rect.width + 'px';
+    document.body.appendChild(dropEl);
+
+    setTimeout(() => {
+      // Flip upward if dropdown would extend below the viewport
+      const dRect = dropEl.getBoundingClientRect();
+      if (dRect.bottom > window.innerHeight - 8) {
+        dropEl.style.top = Math.max(4, rect.top - dRect.height - 2) + 'px';
+      }
+      document.addEventListener('mousedown', onOutside, true);
+      searchInp.focus();
+    }, 0);
   });
 
   wrap.appendChild(trigger);

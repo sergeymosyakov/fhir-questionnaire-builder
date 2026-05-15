@@ -211,44 +211,59 @@
 </div>
 
 <!-- Patient context modal -->
-<div id="patientCtxModal" class="patient-ctx-backdrop" style="display:none">
-  <div class="patient-ctx-box">
-    <div class="patient-ctx-header">
+<div id="patientCtxModal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
       <span>Patient Context</span>
-      <button type="button" id="patientCtxClose" class="patient-ctx-close" title="Close">&#x2715;</button>
+      <button type="button" id="patientCtxClose" class="modal-close" title="Close">&#x2715;</button>
     </div>
     <div class="patient-ctx-hint">Values are available in FHIRPath expressions as <code>%age</code>, <code>%gender</code>, <code>%bmi</code>, <code>%pregnant</code>, <code>%smoker</code>, <code>%proc</code>, <code>%comorb</code>.</div>
-    <div id="patientCtxBody" class="patient-ctx-body"></div>
-    <div class="patient-ctx-footer">
-      <button type="button" id="patientCtxApply" class="btn-primary">Apply</button>
+    <div id="patientCtxBody" class="modal-body"></div>
+    <div class="modal-footer">
+      <button type="button" id="patientCtxApply" class="modal-btn modal-btn--apply">Apply</button>
     </div>
   </div>
 </div>
 
 <!-- SDC Variables edit modal -->
-<div id="variablesModal" class="variables-modal-backdrop" style="display:none">
-  <div class="variables-modal">
-    <div class="variables-modal-header">
+<div id="variablesModal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
       <span>Questionnaire Variables</span>
-      <button id="variablesModalClose" type="button" class="variables-modal-close" title="Close">&#x2715;</button>
+      <button id="variablesModalClose" type="button" class="modal-close" title="Close">&#x2715;</button>
     </div>
-    <div class="variables-modal-body" id="variablesModalBody"></div>
-    <div class="variables-modal-footer">
-      <button id="variablesModalCancel" type="button" class="variables-modal-cancel">Cancel</button>
-      <button id="variablesModalApply" type="button" class="variables-modal-apply">Apply</button>
+    <div class="modal-body" id="variablesModalBody"></div>
+    <div class="modal-footer">
+      <button id="variablesModalCancel" type="button" class="modal-btn modal-btn--cancel">Cancel</button>
+      <button id="variablesModalApply"  type="button" class="modal-btn modal-btn--apply">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Show When edit modal -->
+<div id="showWhenModal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span id="showWhenModalTitle">Show When</span>
+      <button id="showWhenModalClose" type="button" class="modal-close" title="Close">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="showWhenModalBody"></div>
+    <div class="modal-footer">
+      <button id="showWhenModalCancel" type="button" class="modal-btn modal-btn--cancel">Cancel</button>
+      <button id="showWhenModalApply"  type="button" class="modal-btn modal-btn--apply">Apply</button>
     </div>
   </div>
 </div>
 
 <!-- Export Validation Modal -->
-<div id="validateModal" class="validate-modal-backdrop" style="display:none">
-  <div class="validate-modal">
-    <div class="validate-modal-header">
+<div id="validateModal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
       <span>Export — Validation Report</span>
-      <button id="validateModalClose" type="button" class="validate-modal-close" title="Close">&#x2715;</button>
+      <button id="validateModalClose" type="button" class="modal-close" title="Close">&#x2715;</button>
     </div>
-    <div class="validate-modal-body" id="validateModalBody"></div>
-    <div class="validate-modal-footer" id="validateModalFooter">
+    <div class="modal-body" id="validateModalBody"></div>
+    <div class="modal-footer" id="validateModalFooter">
       <!-- buttons injected by JS depending on mode -->
     </div>
   </div>

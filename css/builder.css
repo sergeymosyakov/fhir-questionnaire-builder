@@ -586,18 +586,15 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
 }
 .vis-q-sel-trigger:hover { border-color: var(--c-primary); }
 .vis-q-sel-drop {
-  position: absolute;
-  top: calc(100% + 2px);
-  left: 0;
-  min-width: 100%;
-  max-width: 300px;
-  max-height: 200px;
+  position: fixed;
+  max-width: 340px;
+  max-height: 220px;
   overflow-y: auto;
   background: #fff;
   border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
   box-shadow: 0 4px 12px rgba(0,0,0,0.14);
-  z-index: 300;
+  z-index: 10200;
 }
 .vis-q-sel-opt {
   padding: 5px 10px;
@@ -609,6 +606,22 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
 }
 .vis-q-sel-opt:hover { background: #f0f4ff; }
 .vis-q-sel-opt--sel { background: #eef2ff; color: var(--c-primary); font-weight: 600; }
+.vis-q-sel-search {
+  display: block;
+  position: sticky;
+  top: 0;
+  width: calc(100% - 16px);
+  margin: 6px 8px 4px;
+  padding: 3px 7px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+  z-index: 1;
+}
+.vis-q-sel-search:focus { border-color: var(--c-primary); }
 .vis-cond-op {
   height: 26px;
   padding: 0 4px;

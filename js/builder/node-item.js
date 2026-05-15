@@ -4,6 +4,7 @@ import { findAndRemove, escAttr } from '../utils.js';
 import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildExprPanel, buildInitialExprPanel, buildStylePanel, buildInitialPanel, buildConstraintPanel } from './panels.js';
+import * as showWhenModal from '../ui/showwhen-modal.js';
 import { triggerCalcRecalc, confirmDelete } from './_shared.js';
 
 export function renderItem(node, ctx) {
@@ -135,6 +136,7 @@ export function renderItem(node, ctx) {
     'Show When (enableWhen)',
     'Add enableWhen conditions to control when this item is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden items are dimmed \uD83D\uDD12 in the preview.',
     'Questionnaire.item.enableWhen[]', 'R4 \u00B7 optional');
+  visLink.onclick = () => showWhenModal.open(node, visLink, setActive, ctx, buildVisPanel);
   const exprLink  = addToggle('Expression', 'expr',
     'Calculated Expression',
     'SDC FHIRPath expression evaluated automatically on every preview render. Result is written into the answer field. Supports questionnaire-level %variables.',
@@ -208,7 +210,6 @@ export function renderItem(node, ctx) {
   // ── Panels ────────────────────────────────────────────────────────────────
   addPanel('type', p => buildTypePanel(node, p), div, panels);
   addPanel('mand', p => buildMandPanel(node, p, mandLink, setActive), div, panels);
-  addPanel('vis',  p => buildVisPanel(node, p, visLink, setActive, ctx), div, panels);
   addPanel('expr', p => buildExprPanel(node, p, exprLink, setActive), div, panels);
   addPanel('initExpr', p => buildInitialExprPanel(node, p, initExprLink, setActive), div, panels);
   addPanel('init', p => buildInitialPanel(node, p, initLink, setActive), div, panels);

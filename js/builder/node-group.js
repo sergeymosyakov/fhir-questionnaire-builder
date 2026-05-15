@@ -6,6 +6,7 @@ import { makeGroup, makeItem } from '../state.js';
 import { formatSeg, confirmDelete } from './_shared.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { addPanel, buildVisPanel, buildMandPanel, buildExprPanel, buildStylePanel } from './panels.js';
+import * as showWhenModal from '../ui/showwhen-modal.js';
 
 export function renderGroup(node, ctx) {
   const { renderTree, renderNode } = ctx;
@@ -150,6 +151,7 @@ export function renderGroup(node, ctx) {
     'Show When (enableWhen)',
     'Add enableWhen conditions to control when this group is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden groups are dimmed \uD83D\uDD12 in the preview.',
     'Questionnaire.item.enableWhen[]', 'R4 \u00B7 optional');
+  visLink.onclick = () => showWhenModal.open(node, visLink, setActive, ctx, buildVisPanel);
   const exprLink  = addToggle('Expression', 'expr',
     'Calculated Expression',
     'SDC FHIRPath calculatedExpression on this group item. Evaluated on Test click. Supports questionnaire-level %variables.',
@@ -251,7 +253,6 @@ export function renderGroup(node, ctx) {
 
   // ── Panels ────────────────────────────────────────────────────────────────
   addPanel('mand',  p => buildMandPanel(node, p, mandLink, setActive), div, panels);
-  addPanel('vis',   p => buildVisPanel(node, p, visLink, setActive, ctx), div, panels);
   addPanel('expr',  p => buildExprPanel(node, p, exprLink, setActive), div, panels);
   addPanel('style', p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
