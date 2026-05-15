@@ -165,7 +165,7 @@ _codes           // object[] — FHIR item.code[] (preserved round-trip; not dis
 
 ## Preview Rendering (renderPreviewNode)
 
-1. `!visible && showDimmed` → gray row with 🔒 + `_enableWhenText`
+1. `!visible && showDimmed` → gray row with 🔒 + `_enableWhenText`; if the node is a group, its children are also rendered as disabled (N/A) rows so every builder node has a corresponding preview row
 2. `disabled` → gray row with `—` icon, pointer-events:none
 3. `type:'group'` with no children → italic gray text (informational display, no controls, no logic badge)
 4. Normal → row with ✔/✘ icon, control, linkId prefix, AND/OR badge (groups)
@@ -268,7 +268,7 @@ _codes           // object[] — FHIR item.code[] (preserved round-trip; not dis
 - **Patient Context popup** — "Patient Context" button in toolbar opens modal; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; button disabled when no questionnaire is loaded; Apply increments `_formTick` → immediate preview re-eval; fires `patient-ctx-applied` event → `variablesPanel.refresh()` updates chips
 - **AND/OR badges** — on group headers: `ALL items ✓` / `ANY item ✓`
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
-- **Dimmed rows** — conditional items shown grayed (🔒) when condition not met; animate to active when met
+- **Dimmed rows** — conditional items shown grayed (🔒) when condition not met; groups also show their children as disabled (N/A) rows; animate to active when met
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
 - **required text/number** — `required:true` on text/number items means non-empty; shows ✔/✘ icon and affects PASS/FAIL
 - **select / radio controls** — no longer auto-fill the first option on render; mandatory fields start empty (`— select —` placeholder for select, no pre-check for radio) so PASS/FAIL is accurate on initial load

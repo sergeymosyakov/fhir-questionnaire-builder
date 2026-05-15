@@ -293,6 +293,17 @@ async function _asyncRender(version) {
       }
       row.appendChild(hint);
       container.appendChild(row);
+      // Also render children of dimmed groups as disabled so every builder node
+      // has a corresponding preview row (keeps counts in sync).
+      if (res.node.type === 'group' && res.node.children.length > 0) {
+        const nested = document.createElement('div');
+        nested.className = 'preview-nested';
+        for (const ch of res.node.children) {
+          const childRes = resultMap.get(ch.id);
+          if (childRes) renderPreviewNode(childRes, nested);
+        }
+        if (nested.childElementCount > 0) container.appendChild(nested);
+      }
       return;
     }
 

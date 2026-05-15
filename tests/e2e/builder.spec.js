@@ -303,27 +303,26 @@ test.describe('Navigation', () => {
 });
 
 test.describe('Load FHIR → both panels', () => {
-  test('node count in builder matches row count in preview after sample load', async ({ page }) => {
+  test('both panels render after sample load', async ({ page }) => {
     await page.goto('/');
     await waitForLoad(page);
 
     await page.getByTestId('load-fhir-btn').click();
     await page.click('[data-sample="example-bariatric.fhir.json"]');
-    await expect(
-      page.locator('[data-testid="preview-panel"] [data-preview-id]').first()
-    ).toBeVisible();
-    // Also wait for the builder tree to finish rendering (renderTreeAsync is chunked).
-    await expect(
-      page.locator('[data-testid="tree-container"] [data-node-id]').first()
-    ).toBeVisible();
+
+    // Wait until both async renders finish and counts are equal.
+    // Every builder node must have a corresponding preview row.
+    await page.waitForFunction(() => {
+      const nodes = document.querySelectorAll('[data-testid="tree-container"] [data-node-id]').length;
+      const rows  = document.querySelectorAll('[data-testid="preview-panel"] [data-preview-id]').length;
+      return nodes > 0 && nodes === rows;
+    }, { timeout: 15000 });
 
     const nodeCount    = await page.locator('[data-testid="tree-container"] [data-node-id]').count();
     const previewCount = await page.locator('[data-testid="preview-panel"] [data-preview-id]').count();
 
     expect(nodeCount).toBeGreaterThan(0);
-    // Allow a small tolerance: the preview may render a handful of nodes
-    // differently (e.g. implicit group wrappers), but the counts must be close.
-    expect(Math.abs(nodeCount - previewCount)).toBeLessThanOrEqual(5);
+    expect(nodeCount).toBe(previewCount);
   });
 });
 

@@ -234,7 +234,7 @@ See [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) for the full FHIR field mapping
 - **Patient presets dropdown** — `Patient ▾` button in toolbar opens a fixed-position dropdown with 5 preset profiles (Adult Male 35·BMI 24, Adult Female 28·BMI 22, Obese Male 45·BMI 38·smoker, Child 10·BMI 16, Pregnant Female 30·BMI 26) + Custom…; selecting a preset auto-applies patient vars and calls `reinitForm()`; Custom… opens the manual edit modal; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` in `questVariables`
 - **AND/OR badges** — on group headers: `ALL items ✓` / `ANY item ✓`
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
-- **Dimmed rows** — conditional items shown grayed out (🔒) when their condition is not met; animate to active when met
+- **Dimmed rows** — conditional items shown grayed out (🔒) when their condition is not met; dimmed groups also show their children as disabled (N/A) rows; animate to active when met
 - **Informational rows** — `type:'group'` nodes with no children rendered as plain italic text; labeled `[Info]` in builder
 - **required text/number/decimal/reference** — `required:true` on text, number, decimal, integer, quantity, reference items requires a non-empty value; shows ✔/✘ and affects PASS/FAIL
 - **required checkbox** — `required:true` on boolean items requires the box to be checked; shows ✔/✘ and affects PASS/FAIL
