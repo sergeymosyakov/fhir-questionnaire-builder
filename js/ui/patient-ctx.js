@@ -1,9 +1,8 @@
-// Patient context popup — seeds and manages SDC variables used as FHIRPath context:
-//   %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb
-// Values are stored as literal FHIRPath expressions in the questVariables reactive array.
+// Patient context — preset profiles and manual edit modal.
+// Manages SDC variables: %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb
+// init(els, questVariables, onAfterApply) — wire once at startup.
 import { _formTick, tree, effect } from '../state.js';
 
-// Dispatched after Apply so other modules (variables-panel) can refresh.
 const PATIENT_APPLY_EVENT = 'patient-ctx-applied';
 
 const PATIENT_VARS = [
@@ -15,6 +14,40 @@ const PATIENT_VARS = [
   { name: 'smoker',   type: 'checkbox', label: 'Smoker',         default: false },
   { name: 'proc',     type: 'text',     label: 'Procedure code', default: '43644' },
   { name: 'comorb',   type: 'text',     label: 'Comorbidities',  default: '' },
+];
+
+// ── Patient presets ───────────────────────────────────────────────────────────
+export const PATIENT_PRESETS = [
+  {
+    id: 'adult-male',
+    label: 'Adult Male (35 \u00B7 BMI\u202F24)',
+    shortLabel: 'Adult Male',
+    values: { age: 35, gender: 'male', bmi: 24, pregnant: false, smoker: false, proc: '43644', comorb: '' },
+  },
+  {
+    id: 'adult-female',
+    label: 'Adult Female (28 \u00B7 BMI\u202F22)',
+    shortLabel: 'Adult Female',
+    values: { age: 28, gender: 'female', bmi: 22, pregnant: false, smoker: false, proc: '43644', comorb: '' },
+  },
+  {
+    id: 'obese-male',
+    label: 'Obese Male (45 \u00B7 BMI\u202F38 \u00B7 smoker)',
+    shortLabel: 'Obese Male',
+    values: { age: 45, gender: 'male', bmi: 38, pregnant: false, smoker: true, proc: '43644', comorb: 'diabetes, hypertension' },
+  },
+  {
+    id: 'child',
+    label: 'Child (10 \u00B7 BMI\u202F16)',
+    shortLabel: 'Child',
+    values: { age: 10, gender: 'male', bmi: 16, pregnant: false, smoker: false, proc: '', comorb: '' },
+  },
+  {
+    id: 'pregnant-female',
+    label: 'Pregnant Female (30 \u00B7 BMI\u202F26)',
+    shortLabel: 'Pregnant F',
+    values: { age: 30, gender: 'female', bmi: 26, pregnant: true, smoker: false, proc: '', comorb: '' },
+  },
 ];
 
 function toExpr(type, val) {
@@ -38,24 +71,35 @@ function getEntry(qv, name) {
 
 function setEntry(qv, name, expression) {
   const idx = qv.findIndex(v => v.name === name);
-  if (idx >= 0) {
-    qv[idx].expression = expression;
-  } else {
-    qv.push({ name, expression });
+  if (idx >= 0) qv[idx].expression = expression;
+  else qv.push({ name, expression });
+}
+
+function applyPreset(preset, questVariables) {
+  for (const def of PATIENT_VARS) {
+    const val = preset.values[def.name];
+    if (val !== undefined) setEntry(questVariables, def.name, toExpr(def.type, val));
   }
 }
 
-export function init(els, questVariables) {
-  // Seed defaults for any patient ctx vars not already in the array
+export function init(els, questVariables, onAfterApply) {
+  // Seed defaults for any patient vars not yet present
   for (const def of PATIENT_VARS) {
     if (!getEntry(questVariables, def.name)) {
       setEntry(questVariables, def.name, toExpr(def.type, def.default));
     }
   }
 
-  const { btn, modal, closeBtn, applyBtn, body } = els;
+  const { presetBtn, presetMenu, modal, closeBtn, applyBtn, body } = els;
 
-  const open = () => {
+  const _doAfterApply = () => {
+    if (onAfterApply) onAfterApply();
+    else _formTick.value++;
+    document.dispatchEvent(new CustomEvent(PATIENT_APPLY_EVENT));
+  };
+
+  // ── Manual edit modal ─────────────────────────────────────────────────────
+  const openModal = () => {
     body.innerHTML = '';
     const inputs = {};
 
@@ -105,17 +149,49 @@ export function init(els, questVariables) {
         setEntry(questVariables, name, toExpr(def.type, raw));
       }
       modal.style.display = 'none';
-      _formTick.value++; // trigger preview re-evaluation with new variable values
-      document.dispatchEvent(new CustomEvent(PATIENT_APPLY_EVENT));
+      _doAfterApply();
     };
 
     modal.style.display = 'flex';
   };
 
-  btn.addEventListener('click', open);
   closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
   modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
 
-  // Show button only when a questionnaire is loaded
-  effect(() => { btn.disabled = tree.length === 0; });
+  // ── Preset dropdown ───────────────────────────────────────────────────────
+  if (presetBtn && presetMenu) {
+    presetBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (presetMenu.style.display !== 'none') { presetMenu.style.display = 'none'; return; }
+      // Position with fixed coords — top-panel has overflow-x:auto which clips absolute children
+      const rect = presetBtn.getBoundingClientRect();
+      presetMenu.style.position = 'fixed';
+      presetMenu.style.top  = (rect.bottom + 2) + 'px';
+      presetMenu.style.left = rect.left + 'px';
+      presetMenu.style.display = 'block';
+    });
+
+    presetMenu.addEventListener('click', e => {
+      const item = e.target.closest('[data-preset]');
+      if (!item) return;
+      const presetId = item.dataset.preset;
+      presetMenu.style.display = 'none';
+      if (presetId === 'custom') { openModal(); return; }
+      const preset = PATIENT_PRESETS.find(p => p.id === presetId);
+      if (!preset) return;
+      applyPreset(preset, questVariables);
+      presetBtn.textContent = '\uD83D\uDC64 ' + preset.shortLabel + ' \u25BE';
+      _doAfterApply();
+    });
+
+    // Close on outside click
+    document.addEventListener('click', () => { presetMenu.style.display = 'none'; });
+  }
+
+  // Disable when no questionnaire loaded
+  effect(() => {
+    const disabled = tree.length === 0;
+    if (presetBtn) presetBtn.disabled = disabled;
+  });
 }
+

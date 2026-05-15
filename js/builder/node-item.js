@@ -3,7 +3,7 @@
 import { findAndRemove, escAttr } from '../utils.js';
 import { navigateToPreview } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildExprPanel, buildStylePanel, buildInitialPanel, buildConstraintPanel } from './panels.js';
+import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildExprPanel, buildInitialExprPanel, buildStylePanel, buildInitialPanel, buildConstraintPanel } from './panels.js';
 import { triggerCalcRecalc, confirmDelete } from './_shared.js';
 
 export function renderItem(node, ctx) {
@@ -138,6 +138,10 @@ export function renderItem(node, ctx) {
     'Calculated Expression',
     'SDC FHIRPath expression evaluated automatically on every preview render. Result is written into the answer field. Supports questionnaire-level %variables.',
     'sdc-questionnaire-calculatedExpression', 'SDC · optional');
+  const initExprLink = addToggle('Init Expr', 'initExpr',
+    'Initial Expression',
+    'SDC FHIRPath expression evaluated once to pre-populate this field. Click \u21BA Re-init in the Variables panel to apply. Unlike calculatedExpression, this runs only on load/re-init.',
+    'sdc-questionnaire-initialExpression', 'SDC · optional');
 
   // Read-only toggle — direct boolean, no panel needed
   const roLink = document.createElement('a');
@@ -205,12 +209,14 @@ export function renderItem(node, ctx) {
   addPanel('mand', p => buildMandPanel(node, p, mandLink, setActive), div, panels);
   addPanel('vis',  p => buildVisPanel(node, p, visLink, setActive, ctx), div, panels);
   addPanel('expr', p => buildExprPanel(node, p, exprLink, setActive), div, panels);
+  addPanel('initExpr', p => buildInitialExprPanel(node, p, initExprLink, setActive), div, panels);
   addPanel('init', p => buildInitialPanel(node, p, initLink, setActive), div, panels);
   addPanel('constraint', p => buildConstraintPanel(node, p, constraintLink, setActive), div, panels);
   addPanel('style',p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
   setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
   setActive(exprLink,       !!node._calculatedExpr);
+  setActive(initExprLink,   !!node._initialExpr);
   setActive(roLink,         !!node._readOnly);
   setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
   setActive(styleLink,      !!node._renderStyle);

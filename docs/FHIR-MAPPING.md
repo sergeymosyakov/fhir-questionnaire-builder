@@ -37,6 +37,7 @@ Every node in the tree is either a **group** or an **item**:
   options:             string,           // comma-separated, used by select/radio/open-choice
   _renderStyle:        string,           // inline CSS (from rendering-style extension)
   _calculatedExpr:     string,           // FHIRPath expression (SDC calculatedExpression)
+  _initialExpr:        string,           // FHIRPath expression (SDC initialExpression) — evaluated once on import + Re-init
   _readOnly:           boolean,          // FHIR item.readOnly
   _enableWhenText:     string,           // human-readable condition label (UI only, not persisted)
   _initialValue:       any               // FHIR item.initial[0] value; pre-fills values[] on import
@@ -115,6 +116,7 @@ Every node in the tree is either a **group** or an **item**:
 | `options` | `item.answerOption[]` | comma-split → `valueCoding.{code, display}` on export; reverse on import |
 | `_renderStyle` | `item._text.extension[rendering-style]` | standard FHIR `rendering-style` extension |
 | `_calculatedExpr` | SDC `sdc-questionnaire-calculatedExpression` extension (`valueExpression.expression`) | FHIRPath |
+| `_initialExpr` | SDC `sdc-questionnaire-initialExpression` extension (`valueExpression.expression`) | FHIRPath; evaluated once on import and on Re-init; result pre-fills `values[]` |
 | `_readOnly` | `item.readOnly` | |
 | `_prefix` | `item.prefix` | imported and exported; displayed as amber badge in preview; editable in builder meta-row |
 | `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); not displayed in UI |
@@ -155,6 +157,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-style` | standard | `_renderStyle` | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression` | SDC | `_calculatedExpr` | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression` | SDC | `_initialExpr` | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable` | SDC | `questVariables[]` on root | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression` | SDC | `enableWhenExpression` | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-constraint` | standard | `constraint[]` | Yes |
@@ -183,7 +186,6 @@ Items marked ⚠️ produce silent data loss on import.
 |---|---|---|
 | Repeating items | `item.repeats: true`, `item.maxOccurs` | ⚠️ ignored on import |
 | Answer value sets | `item.answerValueSet` | ⚠️ ignored on import; use `answerOption[]` instead |
-| SDC initial expression | `sdc-questionnaire-initialExpression` | ⚠️ ignored on import |
 | `contained` resources | `Questionnaire.contained[]` | ⚠️ ignored on import |
 | Resource reference resolution | `type: 'reference'` | ⚠️ partial — dropdown (resource type) + id text input; no live search against a FHIR server |
 | FHIR versions other than R4 | STU3, R5 | Not tested; may partially work |

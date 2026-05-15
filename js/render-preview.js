@@ -9,7 +9,7 @@ import { isDescendant, findAncestorGroupIds } from './utils.js';
 import { evaluateNode } from './eval.js';
 import { evalConstraints } from './state.js';
 import { buildQR } from './fhir/qr-builder.js';
-import { evalCalcNodes, buildVarEnv } from './fhir/calc.js';
+import { evalCalcNodes, buildVarEnv, evalInitialExprNodes } from './fhir/calc.js';
 import { buildControl as _buildControl } from './controls/index.js';
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
@@ -68,6 +68,18 @@ function _reCalc() {
     return { fp: fhirpath, qr, envVars };
   }
   return { fp: null, qr: null, envVars: {} };
+}
+
+// Re-evaluate questionnaire-level variables and all initialExpression fields,
+// then tick _formTick to refresh the preview.
+// Called on form load and when the user clicks ↺ Re-init in the Variables panel.
+export function reinitForm() {
+  if (!fhirpath) return;
+  const base = rawFhir.value ? JSON.parse(JSON.stringify(rawFhir.value)) : { resourceType: 'Questionnaire', item: [] };
+  const qr = buildQR(base, values);
+  const envVars = buildVarEnv(questVariables, qr, fhirpath);
+  evalInitialExprNodes(tree, qr, fhirpath, values, envVars);
+  _formTick.value++;
 }
 
 // Update all visible calc-badge elements from current values[] without a full DOM rebuild.
@@ -440,7 +452,7 @@ effect(() => {
           badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
         } else {
           const s = values[res.node.id];
-          badge.className = 'calc-badge' + (s !== undefined && s !== '' ? ' calc-true' : '');
+          badge.className = 'preview-readonly-value';
           badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
         }
         row.appendChild(badge);

@@ -6,14 +6,17 @@
 let _el   = null;  // resolved DOM nodes
 let _vars = null;  // reference to reactive questVariables array
 let _collapsed = false;
+let _onReinit  = null;
 
-export function init(elements, variablesArray) {
+export function init(elements, variablesArray, onReinit) {
   _el   = elements;
   _vars = variablesArray;
+  _onReinit = onReinit || null;
 
   _el.toggle.addEventListener('click', _toggleCollapse);
   _el.editBtn.addEventListener('click', _openModal);
   _el.closeBtn.addEventListener('click', _closeModal);
+  if (_el.reinitBtn) _el.reinitBtn.addEventListener('click', () => { if (_onReinit) _onReinit(); });
   _el.modal.addEventListener('click', e => { if (e.target === _el.modal) _closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && _el.modal.style.display !== 'none') _closeModal(); });
 

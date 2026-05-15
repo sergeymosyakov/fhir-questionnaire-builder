@@ -33,12 +33,12 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/controls/{type}.js` | Per-type control implementations |
 | `js/fhir/import.js` | FHIR R4 → internal model |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
-| `js/fhir/calc.js` | `evalCalcNodes` — FHIRPath calculatedExpression evaluation |
+| `js/fhir/calc.js` | `evalCalcNodes`, `evalInitialExprNodes` — FHIRPath calculatedExpression and initialExpression evaluation |
 | `js/fhir/qr-builder.js` | QuestionnaireResponse builder for FHIRPath context |
 | `js/fhir/validate.js` | `validateTree` → `{severity, nodeId, message}[]` |
 | `js/ui/validate-modal.js` | Validate modal — `init(elements)`, `show(title, issues, mode, callbacks)` |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables)`, `refresh()` |
-| `js/ui/patient-ctx.js` | Patient context popup — seeds and manages `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
+| `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles (Adult Male, Adult Female, Obese Male, Child, Pregnant Female) + Custom…; `Patient ▾` button in toolbar; selecting a preset auto-applies patient vars and calls `reinitForm()`; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + keyboard navigation |
 | `js/ui/tooltip.js` | Rich tooltip system — delegated `mouseover` on `[data-tip-title]`/`[data-tip-body]`; dark card with optional FHIR spec footer |
@@ -50,6 +50,12 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `sampledata/prowl-ss.fhir.json` | PROWL-SS Post-Operative pain assessment — 44 items |
 | `sampledata/phq-9.fhir.json` | PHQ-9 Patient Health Questionnaire (depression screening) — 11 items |
 | `sampledata/1776102565767-...json` | Real-world questionnaire snapshot for regression testing |
+| `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` fills patient fields, `enableWhenExpression` gates pathways |
+| `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields, risk groups by `enableWhenExpression` |
+| `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline |
+| `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` + `enableWhenExpression` pathways |
+| `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields, risk groups by `enableWhenExpression` |
+| `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline |
 | `sampledata/sdc-variables-demo.fhir.json` | SDC Variables demo — BMI calculator with `%weightKg`, `%heightM`, `%bmiCalc` variables |
 | `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
 | `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
@@ -70,6 +76,9 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 | `phq-9.fhir.json` | 11 | 0 | Minimal — PHQ-9 depression screening. Fast to load; good baseline smoke-test. |
 | `reference-example.fhir.json` | 4 | 0 | Demonstrates the `reference` item type — Patient, Practitioner, Encounter references with `questionnaire-referenceResource` extension. |
 | `1776102565767-...json` | — | — | Real-world production snapshot. Use for regression testing after refactors. |
+| `patient-scenario-eligibility.fhir.json` | — | — | Load + select "Adult Male" preset + Re-init. Verifies `initialExpression` fills patient fields; `enableWhenExpression` shows/hides Adult, Pediatric, Pregnancy, Smoker sections. |
+| `patient-scenario-risk.fhir.json` | — | — | Pre-op risk assessment. ReadOnly fields filled via `initialExpression`; risk sections gated by `enableWhenExpression`. |
+| `patient-scenario-calc-chain.fhir.json` | — | — | **Expression chain demo.** Preset → Re-init → `initialExpression` fills Step 1 → `calculatedExpression` computes risk pts → `enableWhenExpression` shows LOW/MODERATE/HIGH. Obese Male → HIGH; Pregnant F → MODERATE; others → LOW. |
 
 ---
 
@@ -120,6 +129,7 @@ questVariables // reactive([]) — SDC sdc-questionnaire-variable entries; patie
 _enableWhenText  // human-readable enableWhen label (e.g. "«Q» = Yes AND «Q2» = No")
 _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 _calculatedExpr  // FHIRPath string (SDC calculatedExpression)
+_initialExpr     // FHIRPath string (SDC initialExpression) — evaluated once on import + Re-init
 _readOnly        // boolean — FHIR item.readOnly
 _initialValue    // any — FHIR item.initial[0] value; pre-fills values[] on import
 _prefix          // string — FHIR item.prefix (amber badge; editable in builder)
@@ -217,7 +227,7 @@ See [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) for the full FHIR field mapping
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Changes apply live in the preview
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
 - **enableWhen panel** — "Show When" action panel on every node; FHIR `enableWhen[]` list UI: AND/ALL vs OR/ANY toggle, per-condition rows (question picker + operator + type-aware value input + remove button), "+ Add condition" button; FHIRPath `enableWhenExpression` field for advanced SDC expressions
-- **Patient Context popup** — "Patient Context" button in toolbar opens a modal popup; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; button disabled when no questionnaire is loaded; Apply increments `_formTick` → immediate preview re-eval; fires `patient-ctx-applied` event → variables panel chips refresh
+- **Patient presets dropdown** — `Patient ▾` button in toolbar opens a fixed-position dropdown with 5 preset profiles (Adult Male 35·BMI 24, Adult Female 28·BMI 22, Obese Male 45·BMI 38·smoker, Child 10·BMI 16, Pregnant Female 30·BMI 26) + Custom…; selecting a preset auto-applies patient vars and calls `reinitForm()`; Custom… opens the manual edit modal; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` in `questVariables`
 - **AND/OR badges** — on group headers: `ALL items ✓` / `ANY item ✓`
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed out (🔒) when their condition is not met; animate to active when met
@@ -243,7 +253,9 @@ See [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) for the full FHIR field mapping
 - **Tooltip toggle** — `tips` button in the preview toolbar toggles all rich tooltips on/off; green when on (default), orange when off; state persisted in `localStorage`; **tooltips off** label appears next to Logic Builder heading when disabled
 - **Radio answer options** — Answer Type panel shows the Options (comma-separated) editor when `radio` is selected (same as `select` / `open-choice`)
 - **SDC Variables** — `sdc-questionnaire-variable` extensions on root Questionnaire imported into `questVariables[]`; collapsible card above tree shows `%name` chips; Edit modal for add/edit/delete; passed as `%varName` env vars to FHIRPath `calculatedExpression` automatically on every preview render; round-trip safe
-- **Auto calculatedExpression** — calc fields re-evaluated automatically on every patient input, answer, or tree change; no Test button; calc-badge shows current value immediately
+- **Auto calculatedExpression** — calc fields re-evaluated automatically on every patient input, answer, or tree change; no Test button; for **checkbox** calc fields the badge shows `✓ true` / `✗ false` with green/red colouring; for **all other types** the computed value is shown as plain text (no coloured pill)
+- **Initial expression (SDC `sdc-questionnaire-initialExpression`)** — **Init Expr** action button on every item node (dark purple when set); FHIRPath evaluated once on import and on every ↺ Re-init; result written to `values[]`; imported/exported as `sdc-questionnaire-initialExpression` extension
+- **Re-init button** — ↺ button in the Variables card header; calls `reinitForm()` to re-evaluate all `_initialExpr` nodes; use after switching patient presets
 - **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills preview on load; editable via **Default** action panel (type-aware: select/date/number/text); `× clear` link syncs preview; round-trip safe export
 - **Constraint panel in builder** — **Constraint** action button on every node (dark purple when `constraint[]` non-empty); editable cards per constraint (key, severity error/warning, human message, FHIRPath expression, remove) + **+ Add constraint**; exported as `questionnaire-constraint` extensions
 - **Constraint badge in preview** — per-node badge: amber ⚠️ (warning or passing error), red ✘ (failing error); tooltip shows key/severity/message/expression; `error`+fail blocks Final Result

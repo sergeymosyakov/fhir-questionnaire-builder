@@ -34,3 +34,24 @@ export function evalCalcNodes(nodes, qr, fp, values, envVars = {}) {
     if (node.type === 'group') evalCalcNodes(node.children, qr, fp, values, envVars);
   }
 }
+
+// Evaluate sdc-questionnaire-initialExpression on all nodes and write to values[].
+// Called once on form load and on manual re-init (↺ button in Variables panel).
+export function evalInitialExprNodes(nodes, qr, fp, values, envVars = {}) {
+  const env = { resource: qr, ...envVars };
+  for (const node of nodes) {
+    if (node._initialExpr) {
+      try {
+        const result = fp.evaluate(qr, node._initialExpr, env);
+        if (node.itemType === 'checkbox') {
+          values[node.id] = result[0] === true || result[0] === 'true';
+        } else {
+          values[node.id] = Array.isArray(result) ? result.join('') : (result[0] !== undefined ? String(result[0]) : '');
+        }
+      } catch (e) {
+        // silently skip nodes whose expression fails
+      }
+    }
+    if (node.type === 'group') evalInitialExprNodes(node.children, qr, fp, values, envVars);
+  }
+}

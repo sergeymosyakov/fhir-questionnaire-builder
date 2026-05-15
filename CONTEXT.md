@@ -67,7 +67,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/fhir/validate.js` | `validateTree(tree)` → `{severity,nodeId,message}[]`; linkId uniqueness, JS/FHIRPath syntax, empty titles, missing options |
 | `js/ui/validate-modal.js` | Validation modal UI — `init(elements)` + `show(title, issues, mode, onExport?)`; no hardcoded DOM IDs |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables)`, `refresh()`; collapsible chip list above tree; modal with name/expression rows |
-| `js/ui/patient-ctx.js` | Patient context popup — seeds and manages `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; "Patient Context" button in toolbar opens modal |
+| `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles (Adult Male, Adult Female, Obese Male, Child, Pregnant Female) + Custom…; `Patient ▾` button in toolbar; selecting a preset auto-applies patient vars and fires `reinitForm()`; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + up/down/Enter navigation |
 | `js/ui/tooltip.js` | Rich tooltip system — delegated `mouseover` on `[data-tip-title]` / `[data-tip-body]`; positions card below (or above) target; supports `data-tip-fhir` + `data-tip-spec` FHIR footer |
@@ -79,6 +79,9 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `sampledata/prowl-ss.fhir.json` | PROWL-SS post-op pain assessment (44 items) |
 | `sampledata/phq-9.fhir.json` | PHQ-9 depression screening (11 items) |
 | `sampledata/1776102565767-...json` | Real-world questionnaire snapshot for regression testing |
+| `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` fills patient fields, `enableWhenExpression` gates Adult/Pediatric/Pregnancy/Smoker pathways |
+| `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly fields with `initialExpression`, risk groups gated by `enableWhenExpression` |
+| `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — full `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline; LOW/MODERATE/HIGH per preset |
 | `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
 | `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
 | `package.json` | Node dev tooling — Vitest test runner (`npm test`) |
@@ -143,6 +146,7 @@ questVariables    // reactive([]) — SDC sdc-questionnaire-variable entries; pa
 _enableWhenText  // human-readable enableWhen label (e.g. "«Q» = Yes AND «Q2» = No")
 _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 _calculatedExpr  // FHIRPath string (SDC calculatedExpression)
+_initialExpr     // FHIRPath string (SDC initialExpression) — evaluated once on import + Re-init
 _readOnly        // boolean — FHIR item.readOnly
 _initialValue    // any — FHIR item.initial[0] value (pre-fills values[] on import)
 _prefix          // string — FHIR item.prefix (amber badge; editable in builder)
@@ -245,7 +249,6 @@ _codes           // object[] — FHIR item.code[] (preserved round-trip; not dis
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview
 - **enableWhen panel** — "Show When" action panel on every node; FHIR `enableWhen[]` list UI: AND/ALL vs OR/ANY toggle, per-condition rows (question picker + operator + type-aware value input + remove button), "+ Add condition" button; FHIRPath `enableWhenExpression` field for advanced SDC expressions
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
-- **Patient Context popup** — "Patient Context" button in toolbar opens a modal popup; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; available in `enableWhenExpression` and `calculatedExpression` fields; button disabled when no questionnaire is loaded; clicking Apply increments `_formTick` → immediate preview re-eval; also fires `patient-ctx-applied` event → `variablesPanel.refresh()` updates chips; implemented in `js/ui/patient-ctx.js`
 - **AND/OR badges** — on group headers: `ALL items ✓` / `ANY item ✓`
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed (🔒) when condition not met; animate to active when met
@@ -277,7 +280,10 @@ _codes           // object[] — FHIR item.code[] (preserved round-trip; not dis
 - **Esc closes modals** — Validate modal and Variables modal both close on Escape key
 - **Ctrl+F** — intercepts browser find and focuses the preview search input (when search is visible)
 - **Import validation** — same modal shown after loading a file/sample (mode: OK only)
-- **Auto calculatedExpression** — `calculatedExpression` FHIRPath fields (SDC `_calculatedExpr`/`_readOnly` nodes) are evaluated automatically on every `effect()` run — on patient input change, answer change, or tree change; no manual Test button needed; `buildVarEnv` passes `questVariables` as `%varName` env; calc-badge shows value immediately
+- **Auto calculatedExpression** — `calculatedExpression` FHIRPath fields (SDC `_calculatedExpr`/`_readOnly` nodes) are evaluated automatically on every `effect()` run — on patient input change, answer change, or tree change; no manual Test button needed; `buildVarEnv` passes `questVariables` as `%varName` env; for **checkbox** calc fields the badge shows `✓ true` / `✗ false` with green/red colouring; for **all other types** the computed value is shown as plain text (same `.preview-readonly-value` style as static readOnly fields — no coloured pill)
+- **Initial expression (SDC `sdc-questionnaire-initialExpression`)** — **Init Expr** action button on every item node (dark purple when set); FHIRPath evaluated once on import and on every ↺ Re-init click; result written to `values[]`; imported from / exported to `sdc-questionnaire-initialExpression` extension; builder panel shows hint about Re-init workflow
+- **Re-init button** — ↺ button in the Variables card header (before Edit); calls `reinitForm()` — re-evaluates all `_initialExpr` nodes against current questionnaire variables; use after switching patient presets to propagate patient values into `initialExpression` fields
+- **Patient presets dropdown** — `Patient ▾` button in toolbar replaces the old Patient Context button; opens a fixed-position dropdown (uses `getBoundingClientRect()` to escape `overflow-x: auto` clipping) with 5 preset profiles (Adult Male 35·BMI 24, Adult Female 28·BMI 22, Obese Male 45·BMI 38·smoker, Child 10·BMI 16, Pregnant Female 30·BMI 26) + Custom…; selecting a preset auto-applies patient vars and calls `reinitForm()`; Custom… opens the manual edit modal
 - **Empty-state placeholder** — right panel shows hint text when tree is empty; Validate, Export buttons are hidden until a questionnaire is loaded
 - **Resizable panels** — drag the divider between left/right panels; width persisted in `localStorage`
 - **Autosave** — background `setInterval` (15 s) saves current questionnaire as FHIR JSON to `localStorage` (`autosave-draft` + `autosave-meta`); only saves when tree is non-empty; on next visit Load menu shows **"Recent: &lt;title&gt; (date/time)"** item at top if a draft exists; loading via Recent calls `_importAndValidate` (full render + file name set); draft cleared on Reset/Clear; implemented in `js/ui/autosave.js`

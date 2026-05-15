@@ -245,7 +245,7 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
         }
         _wrapChange();
       } else if (itype === 'date') {
-        [['=','='],['!=','\u2260'],['>','>'],['<','<']].forEach(([v, l]) => {
+        [['=','='],['!=','\u2260'],['>','>'],['<','<'],['>=','\u2265'],['<=','\u2264']].forEach(([v, l]) => {
           const o = document.createElement('option'); o.value = v; o.textContent = l;
           opSel.appendChild(o);
         });
@@ -488,6 +488,30 @@ export function buildExprPanel(node, p, exprLink, setActive) {
   };
   p.appendChild(ta);
 
+}
+
+// ── Initial expression panel (sdc-questionnaire-initialExpression) ────────────
+export function buildInitialExprPanel(node, p, link, setActive) {
+  const hint = document.createElement('div');
+  hint.className = 'panel-hint';
+  hint.textContent = 'FHIRPath expression evaluated once to populate this field. Click \u21BA Re-init in the Variables panel to apply.';
+  p.appendChild(hint);
+
+  const lbl = document.createElement('div');
+  lbl.className = 'panel-expr-lbl';
+  lbl.textContent = 'sdc-questionnaire-initialExpression:';
+  p.appendChild(lbl);
+
+  const ta = document.createElement('textarea');
+  ta.rows = 3;
+  ta.className = 'panel-ta';
+  ta.value = node._initialExpr || '';
+  ta.placeholder = "e.g. %age > 18 or %today";
+  ta.oninput = () => {
+    node._initialExpr = ta.value.trim() || undefined;
+    setActive(link, !!ta.value.trim());
+  };
+  p.appendChild(ta);
 }
 
 // ── Style / Appearance panel ──────────────────────────────────────────────────

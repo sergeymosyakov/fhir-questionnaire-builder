@@ -57,9 +57,12 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/fhir/import.js` | FHIR R4 → internal model |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables)`, `refresh()` |
-| `js/ui/patient-ctx.js` | Patient context popup — seeds and manages `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
+| `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles + Custom…; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` in `questVariables`; auto-applies and calls `reinitForm()` on selection |
 | `sampledata/example-bariatric.fhir.json` | FHIR R4 example (bariatric pre-authorization) |
 | `sampledata/1776102565767-...json` | Real-world questionnaire for testing |
+| `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` + `enableWhenExpression` pathways |
+| `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields |
+| `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline |
 | `package.json` | Node dev tooling — Vitest test runner (`npm test`) |
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
@@ -119,6 +122,7 @@ questVariables    // reactive([]) — SDC variable entries; patient ctx seeded h
 _enableWhenText  // human-readable enableWhen label (e.g. "«Q» = Yes AND «Q2» = No")
 _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
 _calculatedExpr  // FHIRPath string (SDC calculatedExpression)
+_initialExpr     // FHIRPath string (SDC initialExpression) — evaluated once on import + Re-init
 _readOnly        // boolean — FHIR item.readOnly
 _initialValue    // any — FHIR item.initial[0] value (pre-fills values[] on import)
 _prefix          // string — FHIR item.prefix (amber badge; editable in builder)

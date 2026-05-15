@@ -151,6 +151,14 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
     node._calculatedExpr = calcExpr.valueExpression.expression || '';
   }
 
+  // SDC initialExpression
+  const initExpr = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression'
+  );
+  if (initExpr?.valueExpression) {
+    node._initialExpr = initExpr.valueExpression.expression || '';
+  }
+
   node._readOnly = !!fhirItem.readOnly;
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;

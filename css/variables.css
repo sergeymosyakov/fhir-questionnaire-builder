@@ -50,7 +50,6 @@
   display: inline-block;
 }
 .variables-edit-btn {
-  margin-left: auto;
   font-size: 11px;
   padding: 2px 8px;
   background: none;
@@ -64,6 +63,22 @@
   background: var(--c-primary);
   color: #fff;
   border-color: var(--c-primary);
+}
+.variables-reinit-btn {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 2px 8px;
+  background: none;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  color: var(--c-text-2);
+  transition: background .12s, color .12s, border-color .12s;
+}
+.variables-reinit-btn:hover {
+  background: var(--c-accent, #0891b2);
+  color: #fff;
+  border-color: var(--c-accent, #0891b2);
 }
 .variables-card-chips {
   display: flex;

@@ -12,7 +12,7 @@ import * as statusBadge from './ui/status-badge.js';
 import * as variablesPanel from './ui/variables-panel.js';
 import * as patientCtx from './ui/patient-ctx.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
-import { navigateToPreview } from './render-preview.js';
+import { navigateToPreview, reinitForm } from './render-preview.js';
 import { showLinkId, showPrefix, showBadges, questVariables } from './state.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 
@@ -72,19 +72,21 @@ variablesPanel.init({
   chipList:  document.getElementById('variablesCardChips'),
   count:     document.getElementById('variablesCardCount'),
   editBtn:   document.getElementById('variablesEditBtn'),
+  reinitBtn: document.getElementById('variablesReinitBtn'),
   modal:     document.getElementById('variablesModal'),
   modalBody: document.getElementById('variablesModalBody'),
   closeBtn:  document.getElementById('variablesModalClose'),
-}, questVariables);
+}, questVariables, reinitForm);
 
 // ── Patient context popup init ────────────────────────────────────────────
 patientCtx.init({
-  btn:      document.getElementById('patientCtxBtn'),
+  presetBtn: document.getElementById('patientPresetBtn'),
+  presetMenu: document.getElementById('patientPresetMenu'),
   modal:    document.getElementById('patientCtxModal'),
   closeBtn: document.getElementById('patientCtxClose'),
   applyBtn: document.getElementById('patientCtxApply'),
   body:     document.getElementById('patientCtxBody'),
-}, questVariables);
+}, questVariables, reinitForm);
 
 // Refresh variables panel chips when patient context changes
 document.addEventListener('patient-ctx-applied', () => variablesPanel.refresh());
@@ -267,6 +269,7 @@ async function _importAndValidate(data, fileName) {
   // importFHIR is sync (parses tree); skip its internal renderTree, do async render instead
   importFHIR(data, () => {}); // pass no-op renderFn — we render below
   variablesPanel.refresh();
+  reinitForm(); // evaluate initialExpression fields from imported data
   const issues = validateTree(tree, values);
   progress.show('Rendering ' + tree.length + ' nodes…');
   await renderTreeAsync((done, total) => progress.update(done, total));
@@ -354,6 +357,8 @@ document.getElementById('fhirFileInput').onchange  = e => {
 document.addEventListener('click', () => {
   document.querySelectorAll('.action-add-menu').forEach(m => { m.style.display = 'none'; });
   loadMenu.style.display = 'none';
+  const ppMenu = document.getElementById('patientPresetMenu');
+  if (ppMenu) ppMenu.style.display = 'none';
 });
 
 // ── Panel resize drag ─────────────────────────────────────────────────────────
