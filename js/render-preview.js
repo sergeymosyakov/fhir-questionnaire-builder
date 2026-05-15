@@ -445,6 +445,7 @@ async function _asyncRender(version) {
       if (res.node.mandatory === false) {
         const badge = document.createElement('span');
         badge.className = 'preview-optional-badge';
+        badge.dataset.testid = 'preview-optional-badge';
         badge.textContent = 'optional';
         badge.dataset.tipTitle = 'Optional field';
         badge.dataset.tipBody = 'This field is not required — the questionnaire response is valid without an answer.';
@@ -454,6 +455,7 @@ async function _asyncRender(version) {
       } else {
         const star = document.createElement('span');
         star.className = 'preview-required-star';
+        star.dataset.testid = 'preview-required-star';
         star.textContent = '*';
         star.title = 'Required field';
         label.appendChild(star);

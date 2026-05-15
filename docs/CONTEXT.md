@@ -70,8 +70,10 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` + `enableWhenExpression` pathways |
 | `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields |
 | `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline |
-| `package.json` | Node dev tooling — Vitest test runner (`npm test`) |
+| `package.json` | Node dev tooling — Vitest (`npm test`) + Playwright (`npm run test:e2e`) |
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
+| `playwright.config.js` | Playwright config — Chromium, `testDir: tests/e2e`, auto-starts `npx serve .` |
+| `tests/e2e/builder.spec.js` | E2E tests (6) — builder creates/edits items, preview reacts; all selectors via `data-testid` / `data-node-id` / `data-preview-id`; registry comment at top of file |
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
 | `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic (23 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |

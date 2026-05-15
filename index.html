@@ -65,7 +65,7 @@
         </span>
       </div>
       <div class="tree-toolbar">
-        <button id="addRootGroupBtn" type="button" class="btn-add-root"
+        <button id="addRootGroupBtn" type="button" class="btn-add-root" data-testid="add-root-group-btn"
           data-tip-title="Add Root Group"
           data-tip-body="Creates a new top-level group at the end of the questionnaire. Groups can contain items and other nested groups."
           data-tip-fhir="Questionnaire.item[type=group]"
@@ -111,7 +111,7 @@
       <div id="variablesCardChips" class="variables-card-chips"></div>
     </div>
     <div class="left-panel-body">
-      <div id="treeContainer"></div>
+      <div id="treeContainer" data-testid="tree-container"></div>
     </div>
   </div>
   <div class="panel-resizer" id="panelResizer"></div>
@@ -130,7 +130,7 @@
         </span>
         <span class="preview-header-actions">
           <span id="statusBadgeWrap" class="status-badge-wrap" style="display:none">
-            <button id="statusBadgeBtn" type="button" class="status-badge"></button>
+            <button id="statusBadgeBtn" type="button" class="status-badge" data-testid="status-badge-btn"></button>
             <div id="statusDropdown" class="status-dropdown" style="display:none"></div>
           </span>
           <button id="validateBtn" class="btn-validate" style="display:none"
@@ -142,7 +142,7 @@
       </div>
       <div class="fhir-toolbar">
         <div class="load-wrap">
-          <button id="loadFhirBtn" type="button" class="btn-fhir"
+          <button id="loadFhirBtn" type="button" class="btn-fhir" data-testid="load-fhir-btn"
             data-tip-title="Load questionnaire"
             data-tip-body="Open a FHIR R4 Questionnaire JSON from a file or pick one of the built-in samples. Replaces the current questionnaire (you will be asked to export first if unsaved changes exist)."
             data-tip-fhir="Questionnaire (FHIR R4)"
@@ -213,7 +213,7 @@
       </div>
     </div>
     <div class="right-panel-body">
-      <div class="preview-card" id="lform"></div>
+      <div class="preview-card" id="lform" data-testid="preview-panel"></div>
     </div>
   </div>
 </div>

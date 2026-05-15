@@ -92,9 +92,11 @@ export function renderGroup(node, ctx) {
   titleRow.className = 'node-title-row';
   const titleDisplay = document.createElement('span');
   titleDisplay.className = 'node-title-display';
+  titleDisplay.dataset.testid = 'node-title-display';
   titleDisplay.textContent = node.title || '(no title)';
   const titleTextarea = document.createElement('textarea');
   titleTextarea.className = 'node-title-textarea';
+  titleTextarea.dataset.testid = 'node-title-input';
   titleTextarea.value = node.title;
   titleTextarea.style.display = 'none';
   titleTextarea.oninput = () => { node.title = titleTextarea.value; titleDisplay.textContent = titleTextarea.value || '(no title)'; };
@@ -148,6 +150,7 @@ export function renderGroup(node, ctx) {
     'Required',
     'Whether all items in this group must be answered. Required groups show ✔/✘ and affect the final PASS/FAIL result.',
     'Questionnaire.item.required', 'R4 · optional');
+  mandLink.dataset.testid = 'action-mand';
   const visLink   = addToggle('Show When', 'vis',
     'Show When (enableWhen)',
     'Add enableWhen conditions to control when this group is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden groups are dimmed \uD83D\uDD12 in the preview.',
@@ -175,6 +178,7 @@ export function renderGroup(node, ctx) {
   addWrap.className = 'action-add-wrap';
   const addBtn = document.createElement('button');
   addBtn.className = 'action-add-btn';
+  addBtn.dataset.testid = 'group-add-btn';
   addBtn.innerHTML = '&#x2295; Add &#x25BE;';
   const addMenu = document.createElement('div');
   addMenu.className = 'action-add-menu';
@@ -183,6 +187,7 @@ export function renderGroup(node, ctx) {
   const addChild = (label, factory) => {
     const mi = document.createElement('div');
     mi.className = 'action-add-menu-item';
+    mi.dataset.testid = 'add-menu-' + label.toLowerCase();
     mi.textContent = label;
     mi.onclick = () => {
       addMenu.style.display = 'none';

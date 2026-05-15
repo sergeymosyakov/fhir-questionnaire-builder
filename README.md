@@ -95,6 +95,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
 - **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `state`, integration); 221 tests across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Playwright** — e2e test suite (`tests/e2e/`); 6 tests covering builder → preview reactivity; Chromium only; all selectors use `data-testid` / `data-node-id` / `data-preview-id`; run with `npm run test:e2e`
 
 ---
 
@@ -292,10 +293,12 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ### Tests
 ```powershell
-npm test          # single run (Vitest)
-npm run test:watch  # watch mode — re-runs on file changes
+npm test             # unit tests — single run (Vitest, 221 tests)
+npm run test:watch   # unit tests — watch mode
+npm run test:e2e     # e2e tests — Playwright/Chromium (6 tests, requires Chromium installed)
+npm run test:e2e:ui  # e2e tests — Playwright UI mode
 ```
-CI runs automatically on every push via GitHub Actions (see `.github/workflows/test.yml`).
+Vitest CI runs automatically on every push via GitHub Actions (see `.github/workflows/test.yml`).
 
 ---
 

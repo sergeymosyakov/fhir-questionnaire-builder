@@ -73,9 +73,11 @@ export function renderItem(node, ctx) {
   titleRow.className = 'node-title-row';
   const titleDisplay = document.createElement('span');
   titleDisplay.className = 'node-title-display';
+  titleDisplay.dataset.testid = 'node-title-display';
   titleDisplay.textContent = node.title || '(no title)';
   const titleTextarea = document.createElement('textarea');
   titleTextarea.className = 'node-title-textarea';
+  titleTextarea.dataset.testid = 'node-title-input';
   titleTextarea.value = node.title;
   titleTextarea.style.display = 'none';
   titleTextarea.oninput = () => { node.title = titleTextarea.value; titleDisplay.textContent = titleTextarea.value || '(no title)'; };
@@ -130,10 +132,12 @@ export function renderItem(node, ctx) {
     'Answer Type',
     'Sets the FHIR item type (boolean, decimal, string, choice, date, url, attachment, reference, quantity, display). Controls which input control is rendered in the preview.',
     'Questionnaire.item.type', 'R4 · required');
+  typeLink.dataset.testid = 'action-type';
   const mandLink  = addToggle('Required', 'mand',
     'Required',
     'Whether the item must be answered. Required items show ✔/✘ validation in the preview and affect the final PASS/FAIL result.',
     'Questionnaire.item.required', 'R4 · optional');
+  mandLink.dataset.testid = 'action-mand';
   const visLink   = addToggle('Show When', 'vis',
     'Show When (enableWhen)',
     'Add enableWhen conditions to control when this item is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden items are dimmed \uD83D\uDD12 in the preview.',

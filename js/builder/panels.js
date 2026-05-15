@@ -388,6 +388,7 @@ export function buildMandPanel(node, p, mandLink, setActive) {
   label.textContent = 'Required:';
   const sel = document.createElement('select');
   sel.className = 'panel-mand-sel';
+  sel.dataset.testid = 'mand-sel';
   [['null', 'Not set (acts as required)'], ['true', 'Yes \u2014 required'], ['false', 'No \u2014 optional']].forEach(([val, text]) => {
     const o = document.createElement('option');
     o.value = val; o.textContent = text;
@@ -409,6 +410,7 @@ export function buildTypePanel(node, p) {
   typeRow.textContent = 'Type: ';
   const typeSelect = document.createElement('select');
   typeSelect.className = 'panel-type-sel';
+  typeSelect.dataset.testid = 'type-select';
   for (const t of ['text', 'integer', 'decimal', 'date', 'url', 'attachment', 'checkbox', 'select', 'open-choice', 'radio', 'reference', 'quantity', 'display']) {
     const opt = document.createElement('option');
     opt.value = t; opt.textContent = t;

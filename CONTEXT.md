@@ -8,6 +8,7 @@
 4. **DI** — DOM resolved once in `app.js`, passed via `init(elements)`. No `getElementById` inside submodules.
 5. **No inline styles** — `style="..."` in HTML and `el.style.foo =` in JS are forbidden for static values. Allowed only for **runtime-dynamic** values: show/hide (`display`), computed dimensions, user-driven colors. All static appearance → CSS classes.
 6. **English only** — all code comments, doc strings, commit messages, CONTEXT.md, README.md, any in-repo text, **and all UI labels, button text, and tooltip text in HTML and JS** must be in English. No Russian anywhere in the codebase.
+7. **E2E test selectors** — selectors in `tests/e2e/*.spec.js` must use `data-testid` (via `element.dataset.testid`) where applicable. No raw class or tag selectors. When adding a testable element, register its ID in the registry comment at the top of the relevant spec file.
 
 ---
 
@@ -91,8 +92,10 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — full `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline; LOW/MODERATE/HIGH per preset |
 | `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
 | `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
-| `package.json` | Node dev tooling — Vitest test runner (`npm test`) |
+| `package.json` | Node dev tooling — Vitest (`npm test`) + Playwright (`npm run test:e2e`) |
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
+| `playwright.config.js` | Playwright config — Chromium, `testDir: tests/e2e`, auto-starts `npx serve .` |
+| `tests/e2e/builder.spec.js` | E2E tests (6) — builder creates/edits items, preview reacts; all selectors via `data-testid` / `data-node-id` / `data-preview-id`; registry comment at top of file |
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
 | `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic (23 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
