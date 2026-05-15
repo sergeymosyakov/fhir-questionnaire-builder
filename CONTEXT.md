@@ -70,7 +70,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/validate-modal.js` | Validation modal UI — `init(elements)` + `show(title, issues, mode, onExport?)`; no hardcoded DOM IDs |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; collapsible chip list with `%name` chip tooltips (expression + FHIR footer); modal uses draft pattern — edits are buffered until Apply; Cancel discards draft; Apply validates (blocks on missing name) then commits to `questVariables` and calls `reinitForm()` |
 | `js/ui/showwhen-modal.js` | Show When (enableWhen) centered modal — `init(elements)`, `open(node, visLink, setActive, ctx, buildVisFn)`, `close()`; draft pattern: deep-clones `enableWhen[]`, `enableBehavior`, `enableWhenExpression` on open; Apply commits to node + calls `triggerCalcRecalc()`; Cancel discards; no-op `setActive` passed to `buildVisPanel` so the action button state only changes on Apply |
-| `js/ui/constraint-modal.js` | Constraint edit modal — `init(elements)`, `open(node, constraintLink, setActive)`; draft pattern: deep-clones `node.constraint[]` on open; Apply commits + updates button state; Cancel discards |
+| `js/ui/constraint-modal.js` | Constraint edit modal — `init(elements)`, `open(node, constraintLink, setActive)`; draft pattern: deep-clones `node.constraint[]` on open; Apply commits + updates button state; Cancel discards; expression field is a resizable `.expr-textarea` |
 | `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles (Adult Male, Adult Female, Obese Male, Child, Pregnant Female) + Custom…; `Patient ▾` button in toolbar; selecting a preset auto-applies patient vars and fires `reinitForm()`; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + up/down/Enter navigation |
@@ -79,7 +79,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/explain-modal.js` | Expression Explain modal — `show(expr, fp, resource, env)` renders AND/OR/NOT/LEAF tree with ✓/✗ icons in shared modal; single Close button; FHIRPath strip at body bottom; `hide()` closes it |
 | `js/ui/autosave.js` | Background autosave — `init(buildFn, onSaved)` starts 15 s interval; `onSaved(date)` callback; `getDraftMeta/getDraftData/clearDraft` API; persists to `localStorage` |
 | `js/ui/status-badge.js` | PASS/FAIL pill badge in preview header — `init(elements, navigateFn)`, `update({anyVisible, hasCriteria, finalOk, failingItems})`; dark dropdown with numbered issues + ↗ navigate links |
-| `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup |
+| `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup. Constraints: `diet-min-months` (error, integer ≥ 3), `phq9-severity` (warning, score < 15), `bmi-eligibility` (error, readOnly calc ≥ 35) |
 | `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all types |
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History (49 items, depth 5) |
 | `sampledata/prowl-ss.fhir.json` | PROWL-SS post-op pain assessment (44 items) |

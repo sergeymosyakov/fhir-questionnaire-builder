@@ -119,10 +119,14 @@ function _renderBody(draft, container) {
     card.appendChild(_lbl('Message:', humanInp));
 
     // FHIRPath expression
-    const exprInp = document.createElement('input');
-    exprInp.type = 'text'; exprInp.className = 'panel-inp-sm constraint-inp';
+    const exprInp = document.createElement('textarea');
+    exprInp.rows = 2;
+    exprInp.className = 'expr-textarea';
     exprInp.placeholder = 'FHIRPath expression (must return true to pass)';
     exprInp.value = c.expression || '';
+    const _resize = () => { exprInp.style.height = 'auto'; exprInp.style.height = exprInp.scrollHeight + 'px'; };
+    exprInp.addEventListener('input', _resize);
+    setTimeout(_resize, 0);
     exprInp.oninput = () => { c.expression = exprInp.value; };
     card.appendChild(_lbl('Expression:', exprInp));
 

@@ -60,9 +60,9 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/fhir/qr-import.js` | `importQRAnswers(qrJson, values, tree)` — flattens QR answers, loads into `values`, reports unmatched linkIds |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; draft-based Apply/Cancel modal; `%name` chip rich tooltips |
 | `js/ui/showwhen-modal.js` | Show When (enableWhen) centered modal — draft pattern; Apply commits + triggers preview re-render; Cancel discards; no-op `setActive` during editing so action button only changes on Apply |
-| `js/ui/constraint-modal.js` | Constraint edit modal — draft pattern; `node.constraint[]` deep-cloned on open; Apply commits + updates button state; Cancel discards |
+| `js/ui/constraint-modal.js` | Constraint edit modal — draft pattern; `node.constraint[]` deep-cloned on open; Apply commits + updates button state; Cancel discards; expression field is a resizable `.expr-textarea` |
 | `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles + Custom…; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` in `questVariables`; auto-applies and calls `reinitForm()` on selection |
-| `sampledata/example-bariatric.fhir.json` | FHIR R4 example (bariatric pre-authorization) |
+| `sampledata/example-bariatric.fhir.json` | FHIR R4 example (bariatric pre-authorization). Constraints: `diet-min-months` (error, integer ≥ 3), `phq9-severity` (warning, score < 15), `bmi-eligibility` (error, readOnly calc ≥ 35) |
 | `sampledata/1776102565767-...json` | Real-world questionnaire for testing |
 | `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` + `enableWhenExpression` pathways |
 | `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields |

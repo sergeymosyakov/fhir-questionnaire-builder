@@ -360,12 +360,14 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
   exprLbl.appendChild(exprIcon);
   p.appendChild(exprLbl);
 
-  const exprInp = document.createElement('input');
-  exprInp.type = 'text';
-  exprInp.className = 'panel-inp-sm';
-  exprInp.classList.add('panel-inp-full');
+  const exprInp = document.createElement('textarea');
+  exprInp.rows = 2;
+  exprInp.className = 'expr-textarea';
   exprInp.value = node.enableWhenExpression || '';
   exprInp.placeholder = "e.g. %age > 18 and %gender = 'male'";
+  const _resizeExpr = () => { exprInp.style.height = 'auto'; exprInp.style.height = exprInp.scrollHeight + 'px'; };
+  exprInp.addEventListener('input', _resizeExpr);
+  setTimeout(_resizeExpr, 0);
   exprInp.oninput = () => {
     node.enableWhenExpression = exprInp.value;
     exprIcon.dataset.exprIcon = exprInp.value.trim();

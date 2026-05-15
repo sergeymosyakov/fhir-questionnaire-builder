@@ -105,6 +105,17 @@
           "text": "Months of documented supervised diet",
           "type": "integer",
           "required": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
+              "extension": [
+                { "url": "key",        "valueId": "diet-min-months" },
+                { "url": "severity",   "valueCode": "error" },
+                { "url": "human",      "valueString": "At least 3 months of supervised diet required for surgery eligibility" },
+                { "url": "expression", "valueString": "%resource.repeat(item).where(linkId='q-diet-months').answer.valueInteger >= 3" }
+              ]
+            }
+          ],
           "initial": [{ "valueInteger": 6 }]
         },
         {
@@ -179,8 +190,17 @@
           "linkId": "q-phq9",
           "prefix": "3.2",
           "text": "PHQ-9 score (0–27)",
-          "type": "integer",
-          "enableWhen": [
+          "type": "integer",          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
+              "extension": [
+                { "url": "key",        "valueId": "phq9-severity" },
+                { "url": "severity",   "valueCode": "warning" },
+                { "url": "human",      "valueString": "PHQ-9 >= 15 indicates moderate-to-severe depression — additional psychiatric review recommended" },
+                { "url": "expression", "valueString": "%resource.repeat(item).where(linkId='q-phq9').answer.valueInteger < 15" }
+              ]
+            }
+          ],          "enableWhen": [
             {
               "question": "q-psych-done",
               "operator": "=",
@@ -601,6 +621,15 @@
                 "language": "text/fhirpath",
                 "expression": "(%resource.repeat(item).where(linkId='q-weight-kg').answer.valueDecimal / ((%resource.repeat(item).where(linkId='q-height-cm').answer.valueDecimal / 100) * (%resource.repeat(item).where(linkId='q-height-cm').answer.valueDecimal / 100))).round(1)"
               }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
+              "extension": [
+                { "url": "key",        "valueId": "bmi-eligibility" },
+                { "url": "severity",   "valueCode": "error" },
+                { "url": "human",      "valueString": "Calculated BMI must be >= 35 to meet minimum bariatric surgery eligibility" },
+                { "url": "expression", "valueString": "%resource.repeat(item).where(linkId='q-bmi-calc').answer.valueDecimal >= 35" }
+              ]
             }
           ]
         },
@@ -660,36 +689,14 @@
           "prefix": "10.1",
           "type": "boolean",
           "text": "Patient has given informed consent for bariatric surgery",
-          "required": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
-              "extension": [
-                { "url": "key",        "valueId": "consent-required" },
-                { "url": "severity",   "valueCode": "error" },
-                { "url": "human",      "valueString": "Informed consent must be confirmed before submission" },
-                { "url": "expression", "valueString": "%resource.repeat(item).where(linkId='q-consent-given').answer.valueBoolean = true" }
-              ]
-            }
-          ]
+          "required": true
         },
         {
           "linkId": "q-risks-explained",
           "prefix": "10.2",
           "type": "boolean",
           "text": "Surgical risks and alternatives have been explained to the patient",
-          "required": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
-              "extension": [
-                { "url": "key",        "valueId": "risks-required" },
-                { "url": "severity",   "valueCode": "error" },
-                { "url": "human",      "valueString": "Risks must be explained and confirmed" },
-                { "url": "expression", "valueString": "%resource.repeat(item).where(linkId='q-risks-explained').answer.valueBoolean = true" }
-              ]
-            }
-          ]
+          "required": true
         },
         {
           "linkId": "q-auth-signature",
