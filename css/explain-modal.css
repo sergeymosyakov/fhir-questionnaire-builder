@@ -146,9 +146,11 @@
 
 /* ── Clickable calc badge hint ───────────────────────────────────────────── */
 
-.calc-badge--explain {
+.calc-badge--explain,
+.preview-condition-hint--explain {
   cursor: pointer;
 }
-.calc-badge--explain:hover {
+.calc-badge--explain:hover,
+.preview-condition-hint--explain:hover {
   filter: brightness(0.92);
 }

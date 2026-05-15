@@ -71,9 +71,29 @@ function _reCalc() {
     evalCalcNodes(tree, qr, fhirpath, values, envVars);
     const env = { resource: qr, ...envVars };
     _lastCtx = { fp: fhirpath, qr, env };
+    refreshExprIcons();
     return { fp: fhirpath, qr, envVars };
   }
   return { fp: null, qr: null, envVars: {} };
+}
+
+// Update live-eval icons in the builder panels after every recalculation.
+export function refreshExprIcons() {
+  const { fp, qr, env } = _lastCtx;
+  if (!fp) return;
+  document.querySelectorAll('[data-expr-icon]').forEach(el => {
+    const expr = el.dataset.exprIcon;
+    if (!expr) { el.className = 'expr-live-icon'; el.textContent = ''; return; }
+    try {
+      const raw = fp.evaluate(qr || {}, expr, env || {});
+      const ok  = Array.isArray(raw) ? (raw.length > 0 && raw[0] !== false) : Boolean(raw);
+      el.className = 'expr-live-icon ' + (ok ? 'expr-live-icon--ok' : 'expr-live-icon--fail');
+      el.textContent = ok ? '\u2713' : '\u2717';
+    } catch {
+      el.className = 'expr-live-icon expr-live-icon--err';
+      el.textContent = '?';
+    }
+  });
 }
 
 // Re-evaluate questionnaire-level variables and all initialExpression fields,
@@ -216,6 +236,18 @@ effect(() => {
       hint.className = 'preview-condition-hint preview-condition-waiting';
       const _dimText = res.node._enableWhenText || res.node.enableWhenExpression || 'condition not met';
       hint.textContent = '\uD83D\uDD12 ' + _dimText;
+      if (res.node.enableWhenExpression) {
+        hint.classList.add('preview-condition-hint--explain');
+        hint.dataset.tipTitle = 'Visibility condition';
+        hint.dataset.tipBody  = 'Not met. FHIRPath: ' + res.node.enableWhenExpression + '\n\nClick to explain.';
+        hint.dataset.tipFhir  = 'sdc-questionnaire-enableWhenExpression';
+        hint.dataset.tipSpec  = 'SDC';
+        const _expr = res.node.enableWhenExpression;
+        hint.addEventListener('click', e => {
+          e.stopPropagation();
+          if (_lastCtx.fp) explainModal.show(_expr, _lastCtx.fp, _lastCtx.qr, _lastCtx.env);
+        });
+      }
       row.appendChild(hint);
       container.appendChild(row);
       return;
@@ -388,10 +420,22 @@ effect(() => {
       const hint = document.createElement('span');
       hint.className = 'preview-condition-hint';
       hint.textContent = '\uD83D\uDC41\uFE0F ' + _visHintText;
-      hint.dataset.tipTitle = 'Visibility condition';
-      hint.dataset.tipBody  = 'This item is shown only when: ' + _visHintText + '\n\nThis label is auto-generated from the enableWhen condition. To change it — edit the Show When panel in the builder.';
-      hint.dataset.tipFhir  = 'Questionnaire.item.enableWhen[]';
-      hint.dataset.tipSpec  = 'R4';
+      if (res.node.enableWhenExpression) {
+        hint.classList.add('preview-condition-hint--explain');
+        hint.dataset.tipTitle = 'Visibility condition';
+        hint.dataset.tipBody  = 'FHIRPath: ' + res.node.enableWhenExpression + '\n\nClick to explain.';
+        hint.dataset.tipFhir  = 'sdc-questionnaire-enableWhenExpression';
+        hint.dataset.tipSpec  = 'SDC';
+        const _expr = res.node.enableWhenExpression;
+        hint.addEventListener('click', () => {
+          if (_lastCtx.fp) explainModal.show(_expr, _lastCtx.fp, _lastCtx.qr, _lastCtx.env);
+        });
+      } else {
+        hint.dataset.tipTitle = 'Visibility condition';
+        hint.dataset.tipBody  = 'This item is shown only when: ' + _visHintText + '\n\nThis label is auto-generated from the enableWhen condition. To change it \u2014 edit the Show When panel in the builder.';
+        hint.dataset.tipFhir  = 'Questionnaire.item.enableWhen[]';
+        hint.dataset.tipSpec  = 'R4';
+      }
       row.appendChild(hint);
     }
 

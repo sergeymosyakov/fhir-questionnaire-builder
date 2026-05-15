@@ -4,6 +4,7 @@
 // Each panel is keyed and toggled by the action links defined in node-item/group.
 import { escAttr, parseOptions } from '../utils.js';
 import { getAllItems, triggerCalcRecalc } from './_shared.js';
+import { refreshExprIcons } from '../render-preview.js';
 
 // ── Panel factory helper ──────────────────────────────────────────────────────
 export function addPanel(key, buildFn, div, panels) {
@@ -314,8 +315,14 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
   p.appendChild(exprSep);
 
   const exprLbl = document.createElement('div');
-  exprLbl.className = 'panel-raw-lbl panel-raw-lbl--sm';
-  exprLbl.textContent = 'enableWhenExpression (SDC):';
+  exprLbl.className = 'panel-raw-lbl panel-raw-lbl--sm panel-lbl-row';
+  const exprLblTxt = document.createElement('span');
+  exprLblTxt.textContent = 'enableWhenExpression (SDC):';
+  const exprIcon = document.createElement('span');
+  exprIcon.className = 'expr-live-icon';
+  exprIcon.dataset.exprIcon = node.enableWhenExpression || '';
+  exprLbl.appendChild(exprLblTxt);
+  exprLbl.appendChild(exprIcon);
   p.appendChild(exprLbl);
 
   const exprInp = document.createElement('input');
@@ -324,7 +331,14 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
   exprInp.style.width = '100%';
   exprInp.value = node.enableWhenExpression || '';
   exprInp.placeholder = "e.g. %age > 18 and %gender = 'male'";
-  exprInp.oninput = () => { node.enableWhenExpression = exprInp.value; syncActive(); };
+  exprInp.oninput = () => {
+    node.enableWhenExpression = exprInp.value;
+    exprIcon.dataset.exprIcon = exprInp.value.trim();
+    syncActive();
+    clearTimeout(exprInp._d);
+    exprInp._d = setTimeout(refreshExprIcons, 400);
+  };
+  exprInp.onblur = () => { triggerCalcRecalc(); };
   p.appendChild(exprInp);
 
   syncActive();
@@ -472,8 +486,14 @@ export function buildTypePanel(node, p) {
 // ── Expression panel ──────────────────────────────────────────────────────────
 export function buildExprPanel(node, p, exprLink, setActive) {
   const lbl = document.createElement('div');
-  lbl.className = 'panel-expr-lbl';
-  lbl.textContent = 'FHIRPath calculatedExpression:';
+  lbl.className = 'panel-expr-lbl panel-lbl-row';
+  const lblTxt = document.createElement('span');
+  lblTxt.textContent = 'FHIRPath calculatedExpression:';
+  const calcIcon = document.createElement('span');
+  calcIcon.className = 'expr-live-icon';
+  calcIcon.dataset.exprIcon = node._calculatedExpr || '';
+  lbl.appendChild(lblTxt);
+  lbl.appendChild(calcIcon);
   p.appendChild(lbl);
 
   const ta = document.createElement('textarea');
@@ -483,11 +503,13 @@ export function buildExprPanel(node, p, exprLink, setActive) {
   ta.placeholder = '%resource.item.where(linkId=\'...\')';
   ta.oninput = () => {
     node._calculatedExpr = ta.value.trim() || undefined;
+    calcIcon.dataset.exprIcon = ta.value.trim();
     setActive(exprLink, !!ta.value.trim());
-    triggerCalcRecalc();
+    clearTimeout(ta._d);
+    ta._d = setTimeout(refreshExprIcons, 400);
   };
+  ta.onblur = () => { triggerCalcRecalc(); };
   p.appendChild(ta);
-
 }
 
 // ── Initial expression panel (sdc-questionnaire-initialExpression) ────────────
@@ -498,8 +520,14 @@ export function buildInitialExprPanel(node, p, link, setActive) {
   p.appendChild(hint);
 
   const lbl = document.createElement('div');
-  lbl.className = 'panel-expr-lbl';
-  lbl.textContent = 'sdc-questionnaire-initialExpression:';
+  lbl.className = 'panel-expr-lbl panel-lbl-row';
+  const lblTxt = document.createElement('span');
+  lblTxt.textContent = 'sdc-questionnaire-initialExpression:';
+  const initIcon = document.createElement('span');
+  initIcon.className = 'expr-live-icon';
+  initIcon.dataset.exprIcon = node._initialExpr || '';
+  lbl.appendChild(lblTxt);
+  lbl.appendChild(initIcon);
   p.appendChild(lbl);
 
   const ta = document.createElement('textarea');
@@ -509,7 +537,10 @@ export function buildInitialExprPanel(node, p, link, setActive) {
   ta.placeholder = "e.g. %age > 18 or %today";
   ta.oninput = () => {
     node._initialExpr = ta.value.trim() || undefined;
+    initIcon.dataset.exprIcon = ta.value.trim();
     setActive(link, !!ta.value.trim());
+    clearTimeout(ta._d);
+    ta._d = setTimeout(refreshExprIcons, 400);
   };
   p.appendChild(ta);
 }

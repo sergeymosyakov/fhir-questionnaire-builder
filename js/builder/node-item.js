@@ -1,7 +1,7 @@
 // ── Item node renderer ────────────────────────────────────────────────────────
 // renderItem(node, ctx: BuilderCtx) → HTMLElement  — see ctx.js
 import { findAndRemove, escAttr } from '../utils.js';
-import { navigateToPreview } from '../render-preview.js';
+import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildExprPanel, buildInitialExprPanel, buildStylePanel, buildInitialPanel, buildConstraintPanel } from './panels.js';
 import { triggerCalcRecalc, confirmDelete } from './_shared.js';
@@ -116,6 +116,7 @@ export function renderItem(node, ctx) {
     a.onclick = () => {
       openKey = openKey === key ? null : key;
       for (const k of Object.keys(panels)) panels[k].style.display = openKey === k ? 'block' : 'none';
+      refreshExprIcons();
     };
     actions.appendChild(a);
     return a;
