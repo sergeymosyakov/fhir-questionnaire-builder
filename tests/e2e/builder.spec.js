@@ -17,6 +17,8 @@
 //   tree-container            <div> wrapping the entire builder node tree
 //   status-badge-btn          coloured status badge button in the preview header
 //   preview-panel             <div> wrapping the entire questionnaire preview
+//   patient-preset-btn        "👤 Patient ▾" preset dropdown button
+//   variables-reinit-btn      "↺ Re-init" button in the Variables panel
 //
 // Clear-confirm dialog  (js/app.js — dynamically created)
 //   clear-confirm-export-btn  "⬇ Export first" option in the clear dialog
@@ -34,6 +36,7 @@
 //   add-menu-item        "Item"  option in the add-child dropdown menu
 //   action-type          "Answer Type" action link on an item node
 //   action-mand          "Required"    action link on a group or item node
+//   action-vis           "Show When"   action link on an item node
 //
 // Delete-confirm dialog  (js/builder/_shared.js — dynamically created)
 //   delete-confirm-del-btn     "Delete" button in the delete-confirm dialog
@@ -49,6 +52,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+// Frozen fixture copies of test-critical samples.
+// Tests that depend on specific FHIR content load from here, not from sampledata/,
+// so editing sampledata/ files cannot silently break the test suite.
+const FIXTURES = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../fixtures');
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
@@ -426,5 +436,202 @@ test.describe('Builder creates items → preview reacts', () => {
     // Preview must now show "optional" badge instead of the star.
     await expect(previewRow.getByTestId('preview-optional-badge')).toBeVisible();
     await expect(previewRow.getByTestId('preview-required-star')).not.toBeVisible();
+  });
+});
+
+
+// ── enableWhen ────────────────────────────────────────────────────────────────
+
+test.describe('enableWhen (standard)', () => {
+  test('set condition on item → preview shows dimmed; fill trigger answer → item becomes visible', async ({ page }) => {
+    await freshStart(page);
+
+    // Add group "1" with two text items: trigger "1.1" and dependent "1.2"
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+
+    const group = page.locator('[data-node-id="1"]');
+
+    // Add trigger item → id "1.1"
+    await group.getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
+
+    // Title the trigger so it appears by name in the question selector
+    const triggerNode = page.locator('[data-node-id="1.1"]');
+    await triggerNode.getByTestId('node-title-display').click();
+    await triggerNode.getByTestId('node-title-input').fill('Trigger');
+    await triggerNode.getByTestId('node-title-input').blur();
+
+    // Add dependent item → id "1.2"
+    await group.getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.2"]')).toBeVisible();
+
+    // Open Show When modal on dependent item
+    await page.locator('[data-node-id="1.2"]').getByTestId('action-vis').click();
+    await expect(page.locator('#showWhenModal')).toBeVisible();
+
+    // Add a condition row
+    await page.locator('#showWhenModalBody .vis-add-btn').click();
+
+    // Open the question picker dropdown
+    await page.locator('#showWhenModalBody .vis-q-sel-trigger').click();
+    await page.waitForSelector('.vis-q-sel-drop', { timeout: 3000 });
+
+    // Select "1.1 — Trigger" from the portal dropdown
+    await page.locator('.vis-q-sel-opt[data-id="1.1"]').click();
+
+    // Operator defaults to "=" for text type; fill the answer value
+    await page.locator('#showWhenModalBody .vis-cond-val-inp').fill('yes');
+
+    // Apply the condition
+    await page.locator('#showWhenModalApply').click();
+
+    // Dependent item must now be dimmed in preview (answer "yes" not yet given)
+    await expect(page.locator('[data-preview-id="1.2"]')).toHaveClass(/lform-waiting/);
+
+    // Fill "yes" in the trigger's preview textarea; blur triggers the change event
+    // → _formTick.value++ → full re-render with enableWhen re-evaluation
+    const triggerInput = page.locator('[data-preview-id="1.1"]').locator('textarea').first();
+    await triggerInput.fill('yes');
+    await triggerInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+
+    // Dependent item must now be visible (condition met)
+    await expect(page.locator('[data-preview-id="1.2"]')).not.toHaveClass(/lform-waiting/, { timeout: 3000 });
+  });
+});
+
+
+// ── Patient preset → variables populate ──────────────────────────────────────
+
+/** Load the Eligibility Scenario fixture and wait for the initial reinit to finish.
+ *  Loads from tests/fixtures/ so editing sampledata/ cannot break these tests. */
+async function loadEligibility(page) {
+  await page.goto('/');
+  await waitForLoad(page);
+  // Upload the frozen fixture directly via the hidden file input — bypasses the
+  // sample dropdown so sampledata/ edits have no effect on this test.
+  await page.locator('#fhirFileInput').setInputFiles(
+    path.join(FIXTURES, 'patient-scenario-eligibility.fhir.json')
+  );
+  // reinitForm() runs automatically on load; wait until profile-age is populated
+  // (default %age = 30 in the fixture's questionnaire-level variable)
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector('[data-preview-id="profile-age"] .preview-readonly-value');
+      return el && el.textContent.trim() !== '';
+    },
+    { timeout: 15000 }
+  );
+}
+
+/** Click the patient preset button and select a preset by its data-preset value. */
+async function selectPreset(page, presetId) {
+  await page.getByTestId('patient-preset-btn').click();
+  await page.locator(`[data-preset="${presetId}"]`).click();
+}
+
+test.describe('Patient preset → variables populate', () => {
+  test('default state: adult section visible, pediatric section dimmed (age 30)', async ({ page }) => {
+    await loadEligibility(page);
+
+    // Default %age = 30: "adult-section" (age >= 18) must be visible
+    await expect(page.locator('[data-preview-id="adult-section"]')).not.toHaveClass(/lform-waiting/);
+    // "pediatric-section" (age < 18) must be dimmed
+    await expect(page.locator('[data-preview-id="pediatric-section"]')).toHaveClass(/lform-waiting/);
+  });
+
+  test('selecting Child preset (age 10) dims adult section and shows pediatric section', async ({ page }) => {
+    await loadEligibility(page);
+
+    // Select Child preset → %age = 10 → reinitForm() triggered automatically
+    await selectPreset(page, 'child');
+
+    // Wait for profile-age to update to 10
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-preview-id="profile-age"] .preview-readonly-value');
+        return el && el.textContent.trim() === '10';
+      },
+      { timeout: 10000 }
+    );
+
+    // Adult section (age >= 18): age=10 → condition false → must be dimmed
+    await expect(page.locator('[data-preview-id="adult-section"]')).toHaveClass(/lform-waiting/);
+    // Pediatric section (age < 18): age=10 → condition true → must be visible
+    await expect(page.locator('[data-preview-id="pediatric-section"]')).not.toHaveClass(/lform-waiting/);
+  });
+});
+
+
+// ── Re-init ───────────────────────────────────────────────────────────────────
+
+test.describe('Re-init', () => {
+  test('sample load auto-evaluates initialExpression: profile-age shows default variable value', async ({ page }) => {
+    await loadEligibility(page);
+
+    // Default %age = 30 in the sample; reinitForm() runs on load and writes values['profile-age']
+    await expect(
+      page.locator('[data-preview-id="profile-age"] .preview-readonly-value')
+    ).toContainText('30');
+  });
+
+  test('selecting Obese Male preset updates profile fields via reinit', async ({ page }) => {
+    await loadEligibility(page);
+
+    // Obese Male: age=45, bmi=38, smoker=true — preset click triggers reinitForm()
+    await selectPreset(page, 'obese-male');
+
+    // Wait for profile-age to reflect the new %age = 45
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-preview-id="profile-age"] .preview-readonly-value');
+        return el && el.textContent.trim() === '45';
+      },
+      { timeout: 10000 }
+    );
+
+    await expect(
+      page.locator('[data-preview-id="profile-age"] .preview-readonly-value')
+    ).toContainText('45');
+    await expect(
+      page.locator('[data-preview-id="profile-bmi"] .preview-readonly-value')
+    ).toContainText('38');
+
+    // Smoker section (%smoker = true) must now be visible
+    await expect(page.locator('[data-preview-id="smoker-section"]')).not.toHaveClass(/lform-waiting/);
+  });
+
+  test('Re-init button re-evaluates initialExpression fields', async ({ page }) => {
+    await loadEligibility(page);
+
+    // Select Adult Male preset (age=35, bmi=24) — preset click triggers reinitForm()
+    await selectPreset(page, 'adult-male');
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-preview-id="profile-age"] .preview-readonly-value');
+        return el && el.textContent.trim() === '35';
+      },
+      { timeout: 10000 }
+    );
+
+    // Click Re-init button — runs reinitForm() again with the same variables
+    await page.getByTestId('variables-reinit-btn').click();
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-preview-id="profile-age"] .preview-readonly-value');
+        return el && el.textContent.trim() === '35';
+      },
+      { timeout: 10000 }
+    );
+
+    // Profile fields must still show the preset values after Re-init
+    await expect(
+      page.locator('[data-preview-id="profile-age"] .preview-readonly-value')
+    ).toContainText('35');
+    await expect(
+      page.locator('[data-preview-id="profile-bmi"] .preview-readonly-value')
+    ).toContainText('24');
   });
 });

@@ -10,6 +10,7 @@
 4. **DI** — DOM resolved once in `app.js`, passed via `init(elements)`. No `getElementById` inside submodules.
 5. **No inline styles** — `style="..."` in HTML and `el.style.foo =` in JS are forbidden for static values. Allowed only for **runtime-dynamic** values: show/hide (`display`), computed dimensions, user-driven colors. All static appearance → CSS classes.
 6. **English only** — all code comments, doc strings, commit messages, CONTEXT.md, README.md, any in-repo text, **and all UI labels, button text, and tooltip text in HTML and JS** must be in English. No Russian anywhere in the codebase.
+7. **E2E test selectors** — selectors in `tests/e2e/*.spec.js` must use `data-testid` (via `element.dataset.testid`) where applicable. No raw class or tag selectors. When adding a testable element, register its ID in the registry comment at the top of the relevant spec file.
 
 ---
 
@@ -48,11 +49,20 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `index.html` | Entry point — markup, script imports |
 | `favicon.svg` | Browser tab icon |
 | `start.ps1` | Local dev server: `npx serve .` |
-| `css/styles.css` | All styles and CSS design tokens |
+| `css/styles.css` | All styles and CSS design tokens (`--c-hover`, `--c-text-1`, `--c-accent`, etc.) |
+| `css/modals.css` | Shared modal system (`.modal-backdrop`, `.modal-box`, `.modal-header`, `.modal-close`, `.modal-body`, `.modal-footer`, `.modal-btn`) + per-modal z-index/size overrides via `#id` selectors |
 | `js/app.js` | Entry point — wires inputs, buttons, loads example |
-| `js/state.js` | Reactive state, data factories, shared utilities |
+| `js/state.js` | Reactive state, data factories, business logic, `evalConstraints` |
+| `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`, `findAncestorGroupIds`, `parseOption`, `parseOptions`) |
 | `js/eval.js` | Tree evaluation — `enableWhen[]` visibility, `enableWhenExpression` FHIRPath, `evalConstraints` |
-| `js/render-builder.js` | Left panel — builder tree DOM |
+| `js/render-builder.js` | Left panel — 3-line re-export shim → `js/builder/` |
+| `js/builder/ctx.js` | `BuilderCtx` JSDoc typedef (no runtime exports) |
+| `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, `renumberAll`, `addRootGroup`, `renderTreeAsync`) |
+| `js/builder/_shared.js` | Shared utilities; injected deps via `init(deps)`; `getAllItems`, `triggerCalcRecalc`, `confirmDelete` |
+| `js/builder/dnd.js` | Self-contained drag & drop; all state via `init(onDrop, tree, formTick)` |
+| `js/builder/panels.js` | Action panel builders: enableWhen vis panel, mand, type, style, constraint, default, init-expr |
+| `js/builder/node-item.js` | `renderItem(node, ctx)` — opens `expression-modal` for expr/initExpr, `showwhen-modal` for Show When |
+| `js/builder/node-group.js` | `renderGroup(node, ctx)` — opens `expression-modal` for expr action link |
 | `js/render-preview.js` | Right panel — reactive preview |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
 | `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns (`.sc-trigger` / `.oc-wrap`) replacing native `<select>` / `<datalist>` |
@@ -65,15 +75,32 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/constraint-modal.js` | Constraint edit modal — draft pattern; `node.constraint[]` deep-cloned on open; Apply commits + calls `triggerCalcRecalc()` + updates button state; Cancel discards; expression field is a resizable `.expr-textarea`; each card has an **Explain** button (uses `window.fhirpath` directly) |
 | `js/ui/expression-modal.js` | Config-driven modal for `_calculatedExpr` and `_initialExpr` fields — `init(elements)`, `open(cfg)`; draft pattern; auto-resize `.expr-textarea`; live expr icon via debounced `refreshExprIcons`; Escape / backdrop close |
 | `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles + Custom…; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` in `questVariables`; auto-applies and calls `reinitForm()` on selection |
+| `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
+| `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + up/down/Enter navigation |
+| `js/ui/tooltip.js` | Rich tooltip system — delegated `mouseover` on `[data-tip-title]`/`[data-tip-body]`; positions card below/above target; supports `data-tip-fhir` + `data-tip-spec` footer |
+| `js/fhir/explain.js` | FHIRPath boolean expression tree parser — `parseExprTree(expr)` + `evaluateExprTree(node, fp, resource, env)` with AND/OR/NOT/LEAF nodes |
+| `js/ui/explain-modal.js` | Expression Explain modal — `show(expr, fp, resource, env)`; renders AND/OR/NOT/LEAF tree with ✓/✗ icons; FHIRPath strip at bottom |
+| `js/ui/autosave.js` | Background autosave — 15 s interval; `getDraftMeta/getDraftData/clearDraft`; persists to `localStorage` |
+| `js/ui/status-badge.js` | PASS/FAIL pill badge in preview header — `update({anyVisible, hasCriteria, finalOk, failingItems})`; dark dropdown with numbered issues + ↗ navigate links |
+| `js/fhir/validate.js` | `validateTree(tree)` → `{severity,nodeId,message}[]`; linkId uniqueness, JS/FHIRPath syntax, empty titles, missing options |
+| `js/ui/validate-modal.js` | Validation modal UI — `init(elements)` + `show(title, issues, mode, onExport?)`; no hardcoded DOM IDs |
 | `sampledata/example-bariatric.fhir.json` | FHIR R4 example (bariatric pre-authorization). Constraints: `diet-min-months` (error, integer ≥ 3), `phq9-severity` (warning, score < 15), `bmi-eligibility` (error, readOnly calc ≥ 35) |
 | `sampledata/1776102565767-...json` | Real-world questionnaire for testing |
 | `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` + `enableWhenExpression` pathways |
 | `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields |
-| `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline |
+| `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline; LOW/MODERATE/HIGH per preset |
+| `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all types |
+| `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History (49 items, depth 5) |
+| `sampledata/prowl-ss.fhir.json` | PROWL-SS post-op pain assessment (44 items) |
+| `sampledata/phq-9.fhir.json` | PHQ-9 depression screening (11 items) |
+| `sampledata/1776102565767-…json` | Real-world questionnaire snapshot for regression testing |
+| `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
+| `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
 | `package.json` | Node dev tooling — Vitest (`npm test`) + Playwright (`npm run test:e2e`); `serve` devDep used by Playwright webServer |
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
 | `playwright.config.js` | Playwright config — Chromium only, `testDir: tests/e2e`, auto-starts local `serve` (via `node node_modules/.bin/serve`); reporters: `html` (open:never) + `list` |
-| `tests/e2e/builder.spec.js` | E2E tests (18) — load/clear form, collapse/expand group, FHIR export, group title edit, delete item/group (cascade), type changes (checkbox/display), bidirectional navigation flash (builder↔preview), node count match on import, answer state persistence; all selectors via `data-testid` / `data-node-id` / `data-preview-id`; registry comment at top of file |
+| `tests/e2e/builder.spec.js` | E2E tests (24) — load/clear form, collapse/expand group, FHIR export, group title edit, delete item/group (cascade), type changes (checkbox/display), bidirectional navigation flash (builder↔preview), node count match on import, answer state persistence, enableWhen (Show When modal), patient preset section visibility, Re-init / initialExpression population; all selectors via `data-testid`; fixtures from `tests/fixtures/` |
+| `tests/fixtures/` | Frozen FHIR samples for e2e tests — do not edit. `example-bariatric.fhir.json`, `patient-scenario-eligibility.fhir.json` |
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
 | `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic (23 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
@@ -94,6 +121,9 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
+- **Playwright** — E2E test suite; **24 tests** (Chromium); CI via GitHub Actions (`npx playwright test`)
+- **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
+- **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
 - **Vitest** — unit test suite for pure-function modules; **221 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 

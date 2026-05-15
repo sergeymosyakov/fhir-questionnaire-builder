@@ -27,7 +27,7 @@
   <div class="top-panel-sep"></div>
 
   <div class="load-wrap" id="patientPresetWrap">
-    <button type="button" id="patientPresetBtn" class="btn-fhir"
+    <button type="button" id="patientPresetBtn" data-testid="patient-preset-btn" class="btn-fhir"
       data-tip-title="Patient Preset"
       data-tip-body="Select a patient profile to populate %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb variables. Applying a preset re-evaluates all initialExpression fields. Use Custom… to edit values manually."
       data-tip-spec="SDC &#xB7; questionnaire-level variable">&#x1F464; Patient &#x25BE;</button>
@@ -105,7 +105,7 @@
           data-tip-fhir="Questionnaire.extension[sdc-questionnaire-variable]"
           data-tip-spec="SDC · optional">Variables</span>
         <span id="variablesCardCount" class="variables-card-count"></span>
-        <button id="variablesReinitBtn" type="button" class="variables-reinit-btn" title="Re-evaluate variables and initialExpression fields">&#x21BA; Re-init</button>
+        <button id="variablesReinitBtn" data-testid="variables-reinit-btn" type="button" class="variables-reinit-btn" title="Re-evaluate variables and initialExpression fields">&#x21BA; Re-init</button>
         <button id="variablesEditBtn" type="button" class="variables-edit-btn">Edit</button>
       </div>
       <div id="variablesCardChips" class="variables-card-chips"></div>

@@ -56,10 +56,8 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` fills patient fields, `enableWhenExpression` gates pathways |
 | `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields, risk groups by `enableWhenExpression` |
 | `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline |
-| `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` + `enableWhenExpression` pathways |
-| `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields, risk groups by `enableWhenExpression` |
-| `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline |
 | `sampledata/sdc-variables-demo.fhir.json` | SDC Variables demo — BMI calculator with `%weightKg`, `%heightM`, `%bmiCalc` variables |
+| `tests/fixtures/` | Frozen FHIR samples used by e2e tests — never modified by hand; keeps tests stable when sampledata evolves |
 | `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
 | `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
 | `docs/CONTEXT.md` | Internal architecture notes (product direction, scenarios, data flow) |
@@ -95,7 +93,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
 - **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `state`, integration); 221 tests across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — e2e test suite (`tests/e2e/`); 18 tests covering load/clear form, collapse/expand group, FHIR export download, delete item/group (cascade), type changes (checkbox/display), bidirectional navigation flash (builder↔preview), node count match on import, answer state persistence; Chromium only; all selectors use `data-testid` / `data-node-id` / `data-preview-id`; run with `npm run test:e2e`
+- **Playwright** — e2e test suite (`tests/e2e/`); **24 tests** covering load/clear form, collapse/expand group, FHIR export download, delete item/group (cascade), type changes (checkbox/display), bidirectional navigation flash (builder↔preview), node count match on import, answer state persistence, enableWhen visibility, patient preset → variable population, Re-init / initialExpression; Chromium only; all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
 
@@ -295,7 +293,7 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 ```powershell
 npm test             # unit tests — single run (Vitest, 221 tests)
 npm run test:watch   # unit tests — watch mode
-npm run test:e2e     # e2e tests — Playwright/Chromium (18 tests, requires Chromium installed)
+npm run test:e2e     # e2e tests — Playwright/Chromium (24 tests, requires Chromium installed)
 npm run test:e2e:ui  # e2e tests — Playwright UI mode
 ```
 Vitest and Playwright CI run automatically on every push via GitHub Actions (see `.github/workflows/test.yml`).

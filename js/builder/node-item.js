@@ -143,6 +143,7 @@ export function renderItem(node, ctx) {
     'Show When (enableWhen)',
     'Add enableWhen conditions to control when this item is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden items are dimmed \uD83D\uDD12 in the preview.',
     'Questionnaire.item.enableWhen[]', 'R4 \u00B7 optional');
+  visLink.dataset.testid = 'action-vis';
   visLink.onclick = () => showWhenModal.open(node, visLink, setActive, ctx, buildVisPanel);
   const exprLink  = addToggle('Expression', 'expr',
     'Calculated Expression',
