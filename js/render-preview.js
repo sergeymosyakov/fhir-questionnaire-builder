@@ -13,8 +13,12 @@ import { evalCalcNodes, buildVarEnv, evalInitialExprNodes } from './fhir/calc.js
 import { buildControl as _buildControl } from './controls/index.js';
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
+import * as explainModal from './ui/explain-modal.js';
 
 const fhirpath = window.fhirpath;
+
+// Last computed FHIRPath context — updated by _reCalc(), read by Explain click handlers.
+let _lastCtx = { fp: null, qr: null, env: {} };
 
 // Persists across re-renders (not reactive)
 const collapsedGroups = new Set();
@@ -65,6 +69,8 @@ function _reCalc() {
     const qr = buildQR(base, values);
     const envVars = buildVarEnv(questVariables, qr, fhirpath);
     evalCalcNodes(tree, qr, fhirpath, values, envVars);
+    const env = { resource: qr, ...envVars };
+    _lastCtx = { fp: fhirpath, qr, env };
     return { fp: fhirpath, qr, envVars };
   }
   return { fp: null, qr: null, envVars: {} };
@@ -89,7 +95,7 @@ function refreshCalcBadges() {
     const type = badge.dataset.calcType;
     if (type === 'checkbox') {
       const v = values[id];
-      badge.className   = 'calc-badge ' + (v ? 'calc-true' : 'calc-false');
+      badge.className   = 'calc-badge ' + (v ? 'calc-true' : 'calc-false') + ' calc-badge--explain';
       badge.textContent = v ? '\u2713 true' : '\u2717 false';
     } else {
       const s = values[id];
@@ -445,14 +451,18 @@ effect(() => {
         const badge = document.createElement('span');
         badge.dataset.calcId   = res.node.id;
         badge.dataset.calcType = res.node.itemType;
-        badge.dataset.tipTitle = 'Calculated value';
-        badge.dataset.tipBody  = 'Auto-computed by FHIRPath:\n' + res.node._calculatedExpr;
-        badge.dataset.tipFhir  = 'sdc-questionnaire-calculatedExpression';
-        badge.dataset.tipSpec  = 'SDC';
         if (res.node.itemType === 'checkbox') {
           const calcVal = values[res.node.id];
-          badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false');
+          badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false') + ' calc-badge--explain';
           badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
+          badge.dataset.tipTitle = 'Calculated value';
+          badge.dataset.tipBody  = 'FHIRPath: ' + res.node._calculatedExpr + '\n\nClick to explain.';
+          badge.dataset.tipFhir  = 'sdc-questionnaire-calculatedExpression';
+          badge.dataset.tipSpec  = 'SDC';
+          const _expr = res.node._calculatedExpr;
+          badge.addEventListener('click', () => {
+            if (_lastCtx.fp) explainModal.show(_expr, _lastCtx.fp, _lastCtx.qr, _lastCtx.env);
+          });
         } else {
           const s = values[res.node.id];
           badge.className = 'preview-calc-value';

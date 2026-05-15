@@ -236,6 +236,7 @@ _codes           // object[] — FHIR item.code[] (preserved round-trip; not dis
 - **Esc closes modals** — Validate modal and Variables modal both close on Escape key
 - **Ctrl+F** — intercepts browser find and focuses preview search input (when visible)
 - **Auto calculatedExpression** — `_calculatedExpr`/`_readOnly` nodes evaluated via FHIRPath automatically on every `effect()` run (patient input, answer, or tree change); `buildVarEnv` resolves `questVariables` as `%varName`; no manual Test button
+- **Expression Explain popup** — clicking a checkbox `calc-badge` opens a centered popup; `js/fhir/explain.js` parses the expression into AND/OR/NOT/LEAF tree; `js/ui/explain-modal.js` renders it with ✓/✗ per node; tooltip on badge says "Click to explain."
 - **Empty-state placeholder** — right panel shows hint text when tree is empty; Validate, Export hidden until questionnaire is loaded
 - **Variables card visibility** — controlled solely by `effect()` in `app.js` based on `tree.length`; `refresh()` only updates chips/count
 - **PASS/FAIL status badge** — replaces the full-width status bar; a small pill badge (`✓ PASS` / `✗ FAIL · N issues`) in the preview header right of the filename; click opens a dark dropdown listing numbered failing items with ↗ links to navigate directly to the problem field; dropdown has scroll, closes on outside click; implemented in `js/ui/status-badge.js` + `css/status-badge.css`
