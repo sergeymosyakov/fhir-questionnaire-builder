@@ -2,6 +2,8 @@
 import { tree, values, rawFhir, _formTick, effect } from './state.js';
 import { importFHIR } from './fhir/import.js';
 import { buildFHIRObject, exportFHIR } from './fhir/export.js';
+import { exportQR } from './fhir/qr-export.js';
+import { importQRAnswers } from './fhir/qr-import.js';
 import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/validate-modal.js';
 import * as progress from './ui/progress.js';
@@ -12,6 +14,7 @@ import * as statusBadge from './ui/status-badge.js';
 import * as variablesPanel from './ui/variables-panel.js';
 import * as patientCtx from './ui/patient-ctx.js';
 import * as showWhenModal from './ui/showwhen-modal.js';
+import * as constraintModal from './ui/constraint-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
 import { showLinkId, showPrefix, showBadges, questVariables } from './state.js';
@@ -65,7 +68,15 @@ showWhenModal.init({
   cancelBtn: document.getElementById('showWhenModalCancel'),
   applyBtn:  document.getElementById('showWhenModalApply'),
 });
-
+// ── Constraint modal init ────────────────────────────────────────
+constraintModal.init({
+  modal:     document.getElementById('constraintModal'),
+  title:     document.getElementById('constraintModalTitle'),
+  body:      document.getElementById('constraintModalBody'),
+  closeBtn:  document.getElementById('constraintModalClose'),
+  cancelBtn: document.getElementById('constraintModalCancel'),
+  applyBtn:  document.getElementById('constraintModalApply'),
+});
 // ── Validate modal init ───────────────────────────────────────────────────
 const _modal = document.getElementById('validateModal');
 validateModal.init({
@@ -178,6 +189,14 @@ document.getElementById('exportFhirBtn').onclick = () => {
   validateModal.show('Export — Validation Report', issues, 'export', { onExport: () => _promptExport(), onNavigate: _navigateToNode });
 };
 
+document.getElementById('exportResponseBtn').onclick = () => {
+  const suggested = (_fileNameEl && _fileNameEl.textContent.trim()) || 'questionnaire';
+  const name = window.prompt('Save as:', suggested + '-response.json');
+  if (name === null) return;
+  const trimmed = (name.trim() || (suggested + '-response')).replace(/\.json$/i, '');
+  exportQR(trimmed + '.json');
+};
+
 // Wrapper: run import then show validation report if needed
 const _fileNameWrap = document.getElementById('loadedFileNameWrap');
 const _fileNameEl   = document.getElementById('loadedFileName');
@@ -195,9 +214,12 @@ function _setFileName(name) {
 // Show × button and variables card whenever the tree has nodes
 effect(() => {
   const hasNodes = tree.length > 0;
-  document.getElementById('variablesCard').style.display  = hasNodes ? '' : 'none';
-  document.getElementById('validateBtn').style.display    = hasNodes ? '' : 'none';
-  document.getElementById('exportFhirBtn').style.display  = hasNodes ? '' : 'none';
+  document.getElementById('variablesCard').style.display       = hasNodes ? '' : 'none';
+  document.getElementById('validateBtn').style.display         = hasNodes ? '' : 'none';
+  document.getElementById('exportFhirBtn').style.display       = hasNodes ? '' : 'none';
+  document.getElementById('exportResponseBtn').style.display   = hasNodes ? '' : 'none';
+  document.getElementById('loadAnswersItem').style.display     = hasNodes ? '' : 'none';
+  document.getElementById('loadAnswersSep').style.display      = hasNodes ? '' : 'none';
   if (hasNodes) {
     _fileNameWrap.style.display = 'inline-flex';
   } else {
@@ -365,6 +387,55 @@ document.getElementById('fhirFileInput').onchange  = e => {
   reader.readAsText(file);
   e.target.value = '';
 };
+
+document.getElementById('loadAnswersItem').onclick = () => {
+  loadMenu.style.display = 'none';
+  document.getElementById('qrFileInput').click();
+};
+document.getElementById('qrFileInput').onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      _applyQRAnswers(JSON.parse(ev.target.result));
+    } catch (err) {
+      alert('Parse error: ' + err.message);
+    }
+  };
+  reader.onerror = () => { alert('Error reading file.'); };
+  reader.readAsText(file);
+  e.target.value = '';
+};
+
+function _applyQRAnswers(qr) {
+  const result = importQRAnswers(qr, values, tree);
+  if (!result.ok) { alert('Cannot load answers: ' + result.error); return; }
+
+  // Check questionnaire URL match
+  const currentUrl = (rawFhir.value && (rawFhir.value.url || rawFhir.value.id)) || '';
+  const issues = [];
+  if (result.questionnaire && currentUrl && result.questionnaire !== currentUrl) {
+    issues.push({
+      severity: 'warning', nodeId: null,
+      message: 'QR questionnaire "' + result.questionnaire + '" does not match loaded questionnaire "' + currentUrl + '"',
+    });
+  }
+  if (result.unmatched.length > 0) {
+    const preview = result.unmatched.slice(0, 5).join(', ') + (result.unmatched.length > 5 ? '…' : '');
+    issues.push({
+      severity: 'warning', nodeId: null,
+      message: result.unmatched.length + ' answer(s) in response not found in questionnaire: ' + preview,
+    });
+  }
+
+  // Trigger reactive re-render
+  _formTick.value++;
+
+  if (issues.length > 0) {
+    validateModal.show('Load Answers — ' + result.loaded + ' loaded', issues, 'import', { onNavigate: _navigateToNode });
+  }
+}
 
 // Close any open ⊕ Add dropdown when clicking outside
 document.addEventListener('click', () => {

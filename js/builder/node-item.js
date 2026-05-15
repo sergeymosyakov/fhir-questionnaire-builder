@@ -3,8 +3,9 @@
 import { findAndRemove, escAttr } from '../utils.js';
 import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildExprPanel, buildInitialExprPanel, buildStylePanel, buildInitialPanel, buildConstraintPanel } from './panels.js';
+import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel, buildExprPanel, buildInitialExprPanel, buildStylePanel, buildInitialPanel } from './panels.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
+import * as constraintModal from '../ui/constraint-modal.js';
 import { triggerCalcRecalc, confirmDelete } from './_shared.js';
 
 export function renderItem(node, ctx) {
@@ -169,6 +170,7 @@ export function renderItem(node, ctx) {
     'Validation Constraints (questionnaire-constraint)',
     'FHIR questionnaire-constraint extensions on this item. Each entry has a FHIRPath expression, human-readable message, and severity. Error-severity constraints must pass for the item to show \u2714 in the preview.',
     'Questionnaire.item.extension[questionnaire-constraint]', 'R4 \u00B7 optional');
+  constraintLink.onclick = () => constraintModal.open(node, constraintLink, setActive);
   const styleLink = addToggle('Appearance', 'style',
     'Appearance (rendering-style)',
     'Inline CSS applied to the item title in the preview. Supports bold, italic, text colour, and raw CSS. Stored in the standard FHIR rendering-style extension on the _text element.',
@@ -213,7 +215,6 @@ export function renderItem(node, ctx) {
   addPanel('expr', p => buildExprPanel(node, p, exprLink, setActive), div, panels);
   addPanel('initExpr', p => buildInitialExprPanel(node, p, initExprLink, setActive), div, panels);
   addPanel('init', p => buildInitialPanel(node, p, initLink, setActive), div, panels);
-  addPanel('constraint', p => buildConstraintPanel(node, p, constraintLink, setActive), div, panels);
   addPanel('style',p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
   setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);

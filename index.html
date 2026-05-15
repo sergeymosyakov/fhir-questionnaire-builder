@@ -163,14 +163,22 @@
             <div class="load-menu-item" data-sample="patient-scenario-eligibility.fhir.json">&#x1F9EA; Scenario: Eligibility Screen</div>
             <div class="load-menu-item" data-sample="patient-scenario-risk.fhir.json">&#x1F9EA; Scenario: Pre-op Risk Assessment</div>
             <div class="load-menu-item" data-sample="patient-scenario-calc-chain.fhir.json">&#x1F9EA; Scenario: Risk Score Calc Chain</div>
+            <div class="load-menu-sep" id="loadAnswersSep" style="display:none"></div>
+            <div class="load-menu-item" id="loadAnswersItem" style="display:none">&#x1F4E5; Load Answers&#x2026;</div>
           </div>
         </div>
         <input type="file" id="fhirFileInput" accept=".json,application/json" style="display:none">
+        <input type="file" id="qrFileInput" accept=".json,application/json" style="display:none">
         <button id="exportFhirBtn" type="button" class="btn-fhir btn-fhir-export"
           data-tip-title="Export to FHIR JSON"
           data-tip-body="Validates the questionnaire, then downloads a FHIR R4 Questionnaire JSON file. Simple enableWhen conditions are exported as standard FHIR; complex JS rules as custom extensions."
           data-tip-fhir="Questionnaire (FHIR R4)"
           data-tip-spec="R4">&#x2B07; Export</button>
+        <button id="exportResponseBtn" type="button" class="btn-fhir" style="display:none"
+          data-tip-title="Export Response"
+          data-tip-body="Download current answers as a FHIR R4 QuestionnaireResponse JSON."
+          data-tip-fhir="QuestionnaireResponse (FHIR R4)"
+          data-tip-spec="R4">&#x2B07; Response</button>
         <div class="search-wrap" id="searchWrap" style="display:none">
           <input type="search" id="searchInput" class="search-input" placeholder="&#x1F50D; Search&hellip;" autocomplete="off">
           <button id="searchPrevBtn" type="button" class="search-nav-btn" title="Previous match (&#x2191;)">&#x2191;</button>
@@ -251,6 +259,21 @@
     <div class="modal-footer">
       <button id="showWhenModalCancel" type="button" class="modal-btn modal-btn--cancel">Cancel</button>
       <button id="showWhenModalApply"  type="button" class="modal-btn modal-btn--apply">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Constraint edit modal -->
+<div id="constraintModal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span id="constraintModalTitle">Constraints</span>
+      <button id="constraintModalClose" type="button" class="modal-close" title="Close">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="constraintModalBody"></div>
+    <div class="modal-footer">
+      <button id="constraintModalCancel" type="button" class="modal-btn modal-btn--cancel">Cancel</button>
+      <button id="constraintModalApply"  type="button" class="modal-btn modal-btn--apply">Apply</button>
     </div>
   </div>
 </div>

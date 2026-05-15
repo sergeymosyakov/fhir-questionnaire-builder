@@ -1,6 +1,6 @@
-// ── Expression Explain popup ───────────────────────────────────────────────────
-// Floating panel (centered, fixed) that renders a parsed AND/OR/NOT/LEAF
-// expression tree with ✓/✗ icons.
+// ── Expression Explain modal ───────────────────────────────────────────────────
+// Centered modal (shared modal system) that renders a parsed AND/OR/NOT/LEAF
+// expression tree with ✓/✗ icons. Single Close button; no Apply.
 //
 // Usage:
 //   explainModal.show(expr, fp, resource, env);
@@ -8,25 +8,65 @@
 
 import { parseExprTree, evaluateExprTree } from '../fhir/explain.js';
 
-let _popup = null;
+let _backdrop = null;
+let _body     = null;
 
-function _getPopup() {
-  if (_popup) return _popup;
-  _popup = document.createElement('div');
-  _popup.className = 'explain-popup';
-  _popup.setAttribute('role', 'dialog');
-  _popup.style.display = 'none';
-  document.body.appendChild(_popup);
+function _getModal() {
+  if (_backdrop) return;
 
-  // Close on outside click
-  document.addEventListener('mousedown', e => {
-    if (_popup.style.display !== 'none' && !_popup.contains(e.target)) hide();
+  _backdrop = document.createElement('div');
+  _backdrop.className = 'modal-backdrop';
+  _backdrop.id        = 'explainModal';
+  _backdrop.style.display = 'none';
+
+  const box = document.createElement('div');
+  box.className = 'modal-box';
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'modal-header';
+
+  const title = document.createElement('span');
+  title.className   = 'modal-title-label';
+  title.textContent = 'Expression Explain';
+  header.appendChild(title);
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'modal-close';
+  closeBtn.setAttribute('aria-label', 'Close');
+  closeBtn.textContent = '\u2715';
+  closeBtn.onclick = hide;
+  header.appendChild(closeBtn);
+
+  box.appendChild(header);
+
+  // Body (repopulated on each show())
+  _body = document.createElement('div');
+  _body.className = 'modal-body';
+  box.appendChild(_body);
+
+  // Footer — single Cancel button
+  const footer = document.createElement('div');
+  footer.className = 'modal-footer';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className   = 'modal-btn modal-btn--cancel';
+  cancelBtn.textContent = 'Close';
+  cancelBtn.onclick     = hide;
+  footer.appendChild(cancelBtn);
+
+  box.appendChild(footer);
+  _backdrop.appendChild(box);
+  document.body.appendChild(_backdrop);
+
+  // Close on backdrop click
+  _backdrop.addEventListener('mousedown', e => {
+    if (e.target === _backdrop) hide();
   });
   // Close on Escape
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') hide();
+    if (e.key === 'Escape' && _backdrop.style.display !== 'none') hide();
   });
-  return _popup;
 }
 
 // ── DOM helpers ───────────────────────────────────────────────────────────────
@@ -36,7 +76,7 @@ function _icon(result) {
   span.className = 'explain-icon' +
     (result === true  ? ' explain-icon--true'  :
      result === false ? ' explain-icon--false' : ' explain-icon--err');
-  span.textContent = result === true ? '✓' : result === false ? '✗' : '?';
+  span.textContent = result === true ? '\u2713' : result === false ? '\u2717' : '?';
   return span;
 }
 
@@ -51,18 +91,18 @@ function _renderNode(node, depth) {
 
   if (node.type === 'LEAF') {
     const code = document.createElement('code');
-    code.className = 'explain-expr';
+    code.className   = 'explain-expr';
     code.textContent = node.expr;
     row.appendChild(code);
     if (node.error) {
       const err = document.createElement('span');
-      err.className = 'explain-error';
+      err.className   = 'explain-error';
       err.textContent = node.error;
       row.appendChild(err);
     }
   } else {
     const label = document.createElement('span');
-    label.className = 'explain-op explain-op--' + node.type.toLowerCase();
+    label.className   = 'explain-op explain-op--' + node.type.toLowerCase();
     label.textContent = node.type;
     row.appendChild(label);
   }
@@ -83,67 +123,45 @@ function _renderNode(node, depth) {
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
- * Parse `expr`, evaluate every node, and show the popup centered on screen.
+ * Parse `expr`, evaluate every node, and show the modal centered on screen.
  * `env` must be `{ resource: qr, ...envVars }` (same format as calc.js).
  */
 export function show(expr, fp, resource, env) {
-  const popup = _getPopup();
-  popup.innerHTML = '';
+  _getModal();
+  _body.innerHTML = '';
 
-  // ── Header ────────────────────────────────────────────────────────────────
-  const header = document.createElement('div');
-  header.className = 'explain-header';
-
-  const title = document.createElement('span');
-  title.className = 'explain-title';
-  title.textContent = 'Expression explain';
-  header.appendChild(title);
-
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'explain-close';
-  closeBtn.setAttribute('aria-label', 'Close');
-  closeBtn.textContent = '✕';
-  closeBtn.onclick = hide;
-  header.appendChild(closeBtn);
-
-  popup.appendChild(header);
-
-  // ── Body ──────────────────────────────────────────────────────────────────
-  const body = document.createElement('div');
-  body.className = 'explain-body';
-
+  // Tree
   try {
     const tree = parseExprTree(expr);
     evaluateExprTree(tree, fp, resource, env);
-    body.appendChild(_renderNode(tree, 0));
+    _body.appendChild(_renderNode(tree, 0));
   } catch (e) {
     const errDiv = document.createElement('div');
-    errDiv.className = 'explain-parse-error';
+    errDiv.className   = 'explain-parse-error';
     errDiv.textContent = 'Could not parse expression: ' + e.message;
-    body.appendChild(errDiv);
+    _body.appendChild(errDiv);
   }
 
-  popup.appendChild(body);
-
-  // ── Footer: full raw expression ───────────────────────────────────────────
-  const footer = document.createElement('div');
-  footer.className = 'explain-footer';
+  // FHIRPath raw expression strip at the bottom of the body
+  const strip = document.createElement('div');
+  strip.className = 'explain-fhirpath';
 
   const label = document.createElement('span');
-  label.className = 'explain-footer-label';
+  label.className   = 'explain-fhirpath-label';
   label.textContent = 'FHIRPath:';
-  footer.appendChild(label);
+  strip.appendChild(label);
 
   const code = document.createElement('code');
-  code.className = 'explain-full-expr';
+  code.className   = 'explain-full-expr';
   code.textContent = expr;
-  footer.appendChild(code);
+  strip.appendChild(code);
 
-  popup.appendChild(footer);
+  _body.appendChild(strip);
 
-  popup.style.display = 'block';
+  _backdrop.style.display = 'flex';
 }
 
 export function hide() {
-  if (_popup) _popup.style.display = 'none';
+  if (_backdrop) _backdrop.style.display = 'none';
 }
+

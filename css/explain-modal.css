@@ -1,60 +1,12 @@
 /* ── Expression Explain popup ─────────────────────────────────────────────── */
 
-.explain-popup {
-  position: fixed;
-  z-index: 9100;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
-  width: 640px;
-  max-width: calc(100vw - 32px);
-  font-size: 13px;
-  line-height: 1.4;
-  color: #111827;
-}
+/* Expression Explain — tree content only; structure comes from shared modals.css */
+
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 
-.explain-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 9px 12px 8px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f0f4ff;
-  border-radius: 8px 8px 0 0;
-}
-
-.explain-title {
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.03em;
-  color: #1e3a8a;
-  text-transform: uppercase;
-}
-
-.explain-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 13px;
-  color: #6b7280;
-  padding: 0 2px;
-  line-height: 1;
-}
-.explain-close:hover { color: #111; }
 
 /* ── Body / tree rows ────────────────────────────────────────────────────── */
-
-.explain-body {
-  padding: 6px 0;
-  max-height: 340px;
-  overflow-y: auto;
-}
 
 .explain-row {
   display: flex;
@@ -62,6 +14,8 @@
   gap: 7px;
   padding: 4px 12px 4px calc(12px + var(--explain-depth, 0) * 20px);
   border-bottom: 1px solid #f3f4f6;
+  font-size: 13px;
+  line-height: 1.4;
 }
 .explain-row:last-child { border-bottom: none; }
 
@@ -110,17 +64,16 @@
 
 /* ── Footer: raw FHIRPath ─────────────────────────────────────────────────── */
 
-.explain-footer {
+.explain-fhirpath {
   display: flex;
   align-items: flex-start;
   gap: 6px;
   padding: 7px 12px;
   border-top: 1px solid #e5e7eb;
   background: #f9fafb;
-  border-radius: 0 0 8px 8px;
 }
 
-.explain-footer-label {
+.explain-fhirpath-label {
   flex-shrink: 0;
   font-size: 10px;
   font-weight: 600;
