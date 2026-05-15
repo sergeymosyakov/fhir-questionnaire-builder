@@ -122,7 +122,7 @@
           <span>Questionnaire Preview</span>
           <span id="loadedFileNameWrap" class="loaded-file-name-wrap" style="display:none">
             <span id="loadedFileName" class="loaded-file-name"></span>
-            <button id="clearFormBtn" type="button" class="clear-form-btn"
+            <button id="clearFormBtn" type="button" class="clear-form-btn" data-testid="clear-form-btn"
               data-tip-title="Clear questionnaire"
               data-tip-body="Removes the current questionnaire from the builder. You will be asked whether to export first."
               title="Clear questionnaire">&times;</button>
@@ -169,7 +169,7 @@
         </div>
         <input type="file" id="fhirFileInput" accept=".json,application/json" style="display:none">
         <input type="file" id="qrFileInput" accept=".json,application/json" style="display:none">
-        <button id="exportFhirBtn" type="button" class="btn-fhir btn-fhir-export"
+        <button id="exportFhirBtn" type="button" class="btn-fhir btn-fhir-export" data-testid="export-fhir-btn"
           data-tip-title="Export to FHIR JSON"
           data-tip-body="Validates the questionnaire, then downloads a FHIR R4 Questionnaire JSON file. Simple enableWhen conditions are exported as standard FHIR; complex JS rules as custom extensions."
           data-tip-fhir="Questionnaire (FHIR R4)"

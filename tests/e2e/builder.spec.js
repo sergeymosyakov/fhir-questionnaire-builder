@@ -10,16 +10,24 @@
 // All stable test selectors used in this suite. Set via element.dataset.testid.
 //
 // Toolbar / shell  (index.html)
-//   add-root-group-btn   "+ Add Root Group" button in the builder toolbar
-//   load-fhir-btn        "⬆ Load ▾" dropdown trigger button
-//   tree-container       <div> wrapping the entire builder node tree
-//   status-badge-btn     coloured status badge button in the preview header
-//   preview-panel        <div> wrapping the entire questionnaire preview
+//   add-root-group-btn        "+Add Root Group" button in the builder toolbar
+//   load-fhir-btn             "⬆ Load ▾" dropdown trigger button
+//   clear-form-btn            "×" button that opens the clear-confirm dialog
+//   export-fhir-btn           "⬇ Export" button; triggers filename prompt then download
+//   tree-container            <div> wrapping the entire builder node tree
+//   status-badge-btn          coloured status badge button in the preview header
+//   preview-panel             <div> wrapping the entire questionnaire preview
+//
+// Clear-confirm dialog  (js/app.js — dynamically created)
+//   clear-confirm-export-btn  "⬇ Export first" option in the clear dialog
+//   clear-confirm-clear-btn   "Clear anyway"  option in the clear dialog
+//   clear-confirm-cancel-btn  "Cancel"        option in the clear dialog
 //
 // Builder nodes  (js/builder/node-group.js, node-item.js)
 //   node-title-display   read-only title <span> (click → opens textarea editor)
 //   node-title-input     inline <textarea> editor for the node title
 //   group-add-btn        "+" button that opens the add-child menu on a group
+//   group-collapse-btn   "▼/▶" button that collapses or expands the group body
 //   add-menu-group       "Group" option in the add-child dropdown menu
 //   add-menu-item        "Item"  option in the add-child dropdown menu
 //   action-type          "Answer Type" action link on an item node
@@ -95,6 +103,79 @@ test.describe('App boot', () => {
     await expect(page.getByTestId('status-badge-btn')).toBeVisible();
   });
 });
+
+test.describe('Clear form', () => {
+  test('clear loaded questionnaire → tree is empty', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+
+    // Load a sample so there is content to clear.
+    await page.getByTestId('load-fhir-btn').click();
+    await page.click('[data-sample="example-bariatric.fhir.json"]');
+    await expect(page.locator('[data-testid="preview-panel"] [data-preview-id]').first()).toBeVisible();
+
+    // Click the × button (visible only when a questionnaire is loaded).
+    await page.getByTestId('clear-form-btn').click();
+
+    // Custom confirm dialog must appear.
+    await page.waitForSelector('.clear-confirm-backdrop');
+    await page.getByTestId('clear-confirm-clear-btn').click();
+
+    // Builder tree must now be empty.
+    await expect(page.locator('[data-testid="tree-container"] [data-node-id]')).toHaveCount(0);
+  });
+});
+
+test.describe('Collapse / expand group', () => {
+  test('collapse group hides children; expand restores them', async ({ page }) => {
+    await freshStart(page);
+    const groupId = await addRootGroup(page);
+    const itemId  = await addItemToGroup(page, groupId);
+
+    const item = page.locator(`[data-node-id="${itemId}"]`);
+    await expect(item).toBeVisible();
+
+    // Collapse the group — child item must disappear.
+    await page.locator(`[data-node-id="${groupId}"]`).getByTestId('group-collapse-btn').click();
+    await expect(item).not.toBeVisible();
+
+    // Expand again — child item must reappear.
+    await page.locator(`[data-node-id="${groupId}"]`).getByTestId('group-collapse-btn').click();
+    await expect(item).toBeVisible();
+  });
+});
+
+test.describe('FHIR export', () => {
+  test('export triggers file download with .json filename', async ({ page }) => {
+    await freshStart(page);
+    const groupId = await addRootGroup(page);
+    const itemId  = await addItemToGroup(page, groupId);
+
+    // Give both group and item a title so validation has no warnings.
+    // Use .first() because the group container also wraps the child item,
+    // so both share data-testid="node-title-display".
+    const group = page.locator(`[data-node-id="${groupId}"]`);
+    await group.getByTestId('node-title-display').first().click();
+    await group.getByTestId('node-title-input').first().fill('My Group');
+    await group.getByTestId('node-title-input').first().blur();
+
+    const node = page.locator(`[data-node-id="${itemId}"]`);
+    await node.getByTestId('node-title-display').click();
+    await node.getByTestId('node-title-input').fill('My Question');
+    await node.getByTestId('node-title-input').blur();
+
+    // Accept the filename prompt with the default value.
+    page.once('dialog', d => d.accept());
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-btn').click(),
+    ]);
+
+    expect(download.suggestedFilename()).toMatch(/\.json$/);
+  });
+});
+
 
 test.describe('Builder creates items → preview reacts', () => {
   test('add root group → group appears in builder and preview', async ({ page }) => {

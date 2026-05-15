@@ -70,10 +70,10 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` + `enableWhenExpression` pathways |
 | `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields |
 | `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline |
-| `package.json` | Node dev tooling — Vitest (`npm test`) + Playwright (`npm run test:e2e`) |
+| `package.json` | Node dev tooling — Vitest (`npm test`) + Playwright (`npm run test:e2e`); `serve` devDep used by Playwright webServer |
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
-| `playwright.config.js` | Playwright config — Chromium, `testDir: tests/e2e`, auto-starts `npx serve .` |
-| `tests/e2e/builder.spec.js` | E2E tests (6) — builder creates/edits items, preview reacts; all selectors via `data-testid` / `data-node-id` / `data-preview-id`; registry comment at top of file |
+| `playwright.config.js` | Playwright config — Chromium only, `testDir: tests/e2e`, auto-starts local `serve` (via `node node_modules/.bin/serve`); reporters: `html` (open:never) + `list` |
+| `tests/e2e/builder.spec.js` | E2E tests (9) — load/clear form, collapse/expand group, FHIR export download, builder creates/edits items, preview reacts; all selectors via `data-testid` / `data-node-id` / `data-preview-id`; registry comment at top of file |
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
 | `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic (23 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
@@ -83,7 +83,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `tests/qr-builder.test.js` | Unit tests for `js/fhir/qr-builder.js` — `buildQR`, `buildQRItem`, `integer`→`valueInteger` / `decimal`→`valueDecimal` mapping (31 tests) |
 | `tests/state.test.js` | Unit tests for `evalConstraints` in `js/state.js` — severity filtering, empty/false/throw results, varEnv passing (16 tests) |
 | `tests/integration.test.js` | Integration tests for `buildQR` + `evalConstraints` pipeline — decimal/integer pass/fail, wrong key regression, warning-only, nested groups (7 tests) |
-| `.github/workflows/test.yml` | GitHub Actions CI — runs `npm test` on every push/PR to main |
+| `.github/workflows/test.yml` | GitHub Actions CI — `test` job: Vitest; `e2e` job: Playwright (uploads `playwright-report/` artifact); `deploy` job: bundles app + report into `_site/`, deploys to GitHub Pages (`/playwright-report/` = latest test report); both `test`/`e2e` triggered on every push/PR to main |
 
 ---
 

@@ -5,9 +5,14 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 8_000 },
 
+  // Always generate HTML report (open: never so it doesn't auto-launch).
+  // Add list reporter for readable CI logs.
+  reporter: [['html', { open: 'never' }], ['list']],
+
+
   // Start the static server before tests; reuse an already-running one locally.
   webServer: {
-    command: 'npx serve . --listen 3000',
+    command: 'node node_modules/.bin/serve . --listen 3000',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 15_000,

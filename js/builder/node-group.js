@@ -38,6 +38,7 @@ export function renderGroup(node, ctx) {
   const toggleBtn = document.createElement('button');
   toggleBtn.type = 'button';
   toggleBtn.className = 'node-collapse-btn';
+  toggleBtn.dataset.testid = 'group-collapse-btn';
   toggleBtn.textContent = collapsed ? '\u25B6' : '\u25BC';
   toggleBtn.title = collapsed ? 'Expand' : 'Collapse';
   toggleBtn.onclick = e => {

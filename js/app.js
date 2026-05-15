@@ -290,9 +290,9 @@ function _askBeforeClear() {
       '<div class="clear-confirm-title">Clear questionnaire?</div>' +
       '<div class="clear-confirm-msg">You have unsaved changes. Do you want to export before clearing?</div>' +
       '<div class="clear-confirm-btns">' +
-        '<button class="btn-fhir btn-fhir-export" id="_ccExport">⬇ Export first</button>' +
-        '<button class="btn-fhir" id="_ccClear">Clear anyway</button>' +
-        '<button class="btn-fhir" id="_ccCancel">Cancel</button>' +
+        '<button class="btn-fhir btn-fhir-export" id="_ccExport" data-testid="clear-confirm-export-btn">⬇ Export first</button>' +
+        '<button class="btn-fhir" id="_ccClear" data-testid="clear-confirm-clear-btn">Clear anyway</button>' +
+        '<button class="btn-fhir" id="_ccCancel" data-testid="clear-confirm-cancel-btn">Cancel</button>' +
       '</div>';
 
     backdrop.appendChild(box);
