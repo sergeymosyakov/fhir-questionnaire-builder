@@ -59,7 +59,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/builder/panels.js` | All action panel builders (enableWhen vis panel, mand, type, expr, style, constraint) |
 | `js/builder/node-item.js` | `renderItem(node, ctx)` |
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` |
-| `js/render-preview.js` | Right panel — reactive preview; exports `navigateToPreview(id)` (collapse-safe) |
+| `js/render-preview.js` | Right panel — async preview render; `reinitForm()` async with progress; `_asyncRender(version)` splits FHIRPath eval (Phase 1) from DOM rebuild (Phase 2) with `_yield()` breaks; stale renders self-abort via `_renderVersion`; exports `navigateToPreview(id)`, `refreshExprIcons()` |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
 | `js/controls/{type}.js` | Per-type control implementations |
 | `js/patient.js` | **Removed** — patient context now managed as FHIRPath literal expressions in `questVariables` via `js/ui/patient-ctx.js` |
@@ -104,7 +104,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **`@vue/reactivity`** (ESM CDN) — only `ref`, `reactive`, `effect`. No Vue components.
 - **ES Modules** — `import/export` between files; requires HTTP server (`npx serve .` or GitHub Pages)
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
-- **`effect()`** — rebuilds the right panel (preview) on reactive state changes
+- **`effect()`** — subscribes to reactive deps (`_formTick`, `rawFhir`, `showLinkId`, `showPrefix`, `showBadges`), fires `_asyncRender(++_renderVersion)` fire-and-forget; all heavy work in the async function
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
 - **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
@@ -294,6 +294,7 @@ _codes           // object[] — FHIR item.code[] (preserved round-trip; not dis
 - **Variables validation** — closing the Variables modal strips fully blank rows; if any remaining variable has expression but no name, the modal is blocked from closing and the name field is highlighted red with "Name is required" hint
 - **Text control — textarea** — `text`-type items in the preview use `<textarea>` instead of `<input>`: starts at 1 row, grows with content (auto-resize via `scrollHeight`), max 200px, manual `resize: vertical` handle; takes full available row width via `flex: 1` on `ctrl-wrap--text`; `_reCalc`/`onChange` debounced 200ms to avoid lag on fast typing; `values` updated immediately on every keystroke
 - **Visibility condition tooltip** — the `👁️` condition hint badge in preview now carries a rich tooltip explaining the auto-generated text and pointing to the Show When panel
+- **Async preview rendering** — `reinitForm()` is async: shows progress bar (`progress.show(label)`) and yields two rAF frames between each stage (buildQR → buildVarEnv → evalInitialExprNodes → DOM rebuild); `effect()` delegates all work to `_asyncRender(version)` which yields between FHIRPath evaluation (Phase 1) and DOM mutation (Phase 2); stale renders abort before any DOM write; `DocumentFragment` batches top-level DOM insertions into a single reflow; `_preQR`/`_preEnvVars` cache avoids double `buildQR`/`buildVarEnv` when patient profile switches
 
 ---
 

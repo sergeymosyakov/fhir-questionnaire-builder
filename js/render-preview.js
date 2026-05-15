@@ -14,11 +14,22 @@ import { buildControl as _buildControl } from './controls/index.js';
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
 import * as explainModal from './ui/explain-modal.js';
+import * as progress from './ui/progress.js';
 
 const fhirpath = window.fhirpath;
 
 // Last computed FHIRPath context — updated by _reCalc(), read by Explain click handlers.
 let _lastCtx = { fp: null, qr: null, env: {} };
+
+// Pre-computed QR/envVars from reinitForm() — consumed once by the next _reCalc() call
+// to avoid rebuilding the same objects twice when patient profile changes.
+let _preQR = null;
+let _preEnvVars = null;
+
+// Yields two animation frames so the browser can paint before heavy work resumes.
+function _yield() {
+  return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+}
 
 // Persists across re-renders (not reactive)
 const collapsedGroups = new Set();
@@ -65,9 +76,16 @@ function _scrollToPreview(id) {
 
 function _reCalc() {
   if (fhirpath) {
-    const base = rawFhir.value ? JSON.parse(JSON.stringify(rawFhir.value)) : { resourceType: 'Questionnaire', item: [] };
-    const qr = buildQR(base, values);
-    const envVars = buildVarEnv(questVariables, qr, fhirpath);
+    let qr, envVars;
+    if (_preQR) {
+      // Reuse pre-computed values from reinitForm() to avoid double build.
+      qr = _preQR; envVars = _preEnvVars;
+      _preQR = null; _preEnvVars = null;
+    } else {
+      const base = rawFhir.value ? JSON.parse(JSON.stringify(rawFhir.value)) : { resourceType: 'Questionnaire', item: [] };
+      qr = buildQR(base, values);
+      envVars = buildVarEnv(questVariables, qr, fhirpath);
+    }
     evalCalcNodes(tree, qr, fhirpath, values, envVars);
     const env = { resource: qr, ...envVars };
     _lastCtx = { fp: fhirpath, qr, env };
@@ -99,13 +117,24 @@ export function refreshExprIcons() {
 // Re-evaluate questionnaire-level variables and all initialExpression fields,
 // then tick _formTick to refresh the preview.
 // Called on form load and when the user clicks ↺ Re-init in the Variables panel.
-export function reinitForm() {
+export async function reinitForm() {
   if (!fhirpath) return;
+  progress.show('Building questionnaire response…');
+  await _yield();
   const base = rawFhir.value ? JSON.parse(JSON.stringify(rawFhir.value)) : { resourceType: 'Questionnaire', item: [] };
   const qr = buildQR(base, values);
+  progress.show('Evaluating variables…');
+  await _yield();
   const envVars = buildVarEnv(questVariables, qr, fhirpath);
+  progress.show('Applying initial values…');
+  await _yield();
   evalInitialExprNodes(tree, qr, fhirpath, values, envVars);
-  _formTick.value++;
+  // Cache pre-computed QR/envVars — _reCalc() will consume them to skip double build.
+  _preQR = qr;
+  _preEnvVars = envVars;
+  progress.show('Refreshing preview…');
+  await _yield();
+  _formTick.value++; // triggers effect() → _asyncRender, which calls progress.hide() when done
 }
 
 // Update all visible calc-badge elements from current values[] without a full DOM rebuild.
@@ -143,26 +172,31 @@ function buildControl(node, iconEl, onAfterChange) {
   return _buildControl(node, { values, onChange, _reCalc: reCalcAndRefresh, _formTick });
 }
 
-// ── Reactive preview effect ───────────────────────────────────────────────────
-// effect() re-runs when tree structure, patient data, or node config changes.
-// Form value changes (user typing) are handled imperatively via updateIcon()
-// inside buildControl — no effect re-run needed.
-effect(() => {
-  void _formTick.value; // subscribe: re-run when checkbox/select changes
-  if (_bulkUpdate.value) return; // mass mutation in progress — skip full render
-  const ctx = _reCalc(); // evaluate calcExpression fields; get fp/qr/envVars for enableWhen
-  const lform = document.getElementById('lform');
-  lform.innerHTML = '';
+// ── Async preview render with yield breaks ───────────────────────────────────
+// Splits heavy FHIRPath evaluation (Phase 1) from DOM rebuild (Phase 2) using
+// requestAnimationFrame yield points so the browser stays responsive.
+// The _renderVersion counter ensures stale renders self-abort.
+let _renderVersion = 0;
+async function _asyncRender(version) {
+  // Phase 1: FHIRPath evaluation — CPU-heavy, no DOM mutations yet
+  const ctx = _reCalc();
+  await _yield();
+  if (version !== _renderVersion) return; // newer render started — abort
 
   if (tree.length === 0) {
-    const placeholder = document.createElement('div');
-    placeholder.className = 'preview-placeholder';
-    placeholder.innerHTML =
-      '<div class="preview-placeholder-icon">📋</div>' +
-      '<div class="preview-placeholder-title">No questionnaire loaded</div>' +
-      '<div class="preview-placeholder-hint">Use <strong>⬆ Load ▾</strong> to open a sample or upload your own FHIR R4 Questionnaire JSON,<br>or build one from scratch using <strong>+ Add Root Group</strong> in the left panel.</div>';
-    lform.appendChild(placeholder);
+    const lform = document.getElementById('lform');
+    if (lform) {
+      lform.innerHTML = '';
+      const placeholder = document.createElement('div');
+      placeholder.className = 'preview-placeholder';
+      placeholder.innerHTML =
+        '<div class="preview-placeholder-icon">📋</div>' +
+        '<div class="preview-placeholder-title">No questionnaire loaded</div>' +
+        '<div class="preview-placeholder-hint">Use <strong>⬆ Load ▾</strong> to open a sample or upload your own FHIR R4 Questionnaire JSON,<br>or build one from scratch using <strong>+ Add Root Group</strong> in the left panel.</div>';
+      lform.appendChild(placeholder);
+    }
     statusBadge.update({ anyVisible: false, hasCriteria: false, finalOk: false, failingItems: [] });
+    progress.hide();
     return;
   }
 
@@ -175,13 +209,6 @@ effect(() => {
 
   const visible = results.filter(r => r.visible);
   const resultMap = new Map(results.map(r => [r.node.id, r]));
-
-  if (visible.length === 0) {
-    const msg = document.createElement('div');
-    msg.className = 'preview-no-visible';
-    msg.textContent = 'No visible groups/items.';
-    lform.appendChild(msg);
-  }
 
   const mandatoryItems = visible.filter(r => !r.disabled && r.node.type === 'item' &&
     isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)
@@ -211,6 +238,14 @@ effect(() => {
     ...calcItems.filter(r => values[r.node.id] !== true).map(r => ({ title: r.node.title, id: r.node.id })),
     ...constraintItems.filter(r => !evalConstraints(r.node, ctx.fp, ctx.qr, _cEnv)).map(r => ({ title: r.node.title, id: r.node.id }))
   ];
+
+  await _yield();
+  if (version !== _renderVersion) return; // abort before touching the DOM
+
+  // Phase 2: DOM render — batched into a DocumentFragment for a single reflow
+  const lform = document.getElementById('lform');
+  if (!lform) { progress.hide(); return; }
+  lform.innerHTML = '';
 
   const groupIconMap = new Map();
 
@@ -247,6 +282,11 @@ effect(() => {
           e.stopPropagation();
           if (_lastCtx.fp) explainModal.show(_expr, _lastCtx.fp, _lastCtx.qr, _lastCtx.env);
         });
+      } else {
+        hint.dataset.tipTitle = 'Visibility condition';
+        hint.dataset.tipBody  = 'Not yet met: ' + _dimText + '\n\nThis label is auto-generated from the enableWhen condition. To change it \u2014 edit the Show When panel in the builder.';
+        hint.dataset.tipFhir  = 'Questionnaire.item.enableWhen[]';
+        hint.dataset.tipSpec  = 'R4';
       }
       row.appendChild(hint);
       container.appendChild(row);
@@ -563,10 +603,19 @@ effect(() => {
     }
   }
 
+  const frag = document.createDocumentFragment();
+  if (visible.length === 0) {
+    const msg = document.createElement('div');
+    msg.className = 'preview-no-visible';
+    msg.textContent = 'No visible groups/items.';
+    frag.appendChild(msg);
+  }
+
   for (const node of tree) {
     const res = resultMap.get(node.id);
-    if (res) renderPreviewNode(res, lform);
+    if (res) renderPreviewNode(res, frag);
   }
+  lform.appendChild(frag);
 
   function updateGroupIcons() {
     for (const [, { icon, descendants, node }] of groupIconMap.entries()) {
@@ -590,6 +639,19 @@ effect(() => {
 
   statusBadge.update({ anyVisible, hasCriteria: hasMandatory || hasCalc, finalOk, failingItems });
   search.refresh();
+  progress.hide(); // no-op when progress was not shown (normal form interactions)
+}
+
+// effect() subscribes to reactive deps and triggers the async render.
+// Heavy computation and DOM work happen in _asyncRender() with yield breaks.
+effect(() => {
+  void _formTick.value;   // main trigger: structure / patient / config changes
+  void rawFhir.value;     // trigger on questionnaire data reload
+  void showLinkId.value;  // trigger on linkId display toggle
+  void showPrefix.value;  // trigger on prefix display toggle
+  void showBadges.value;  // trigger on badges display toggle
+  if (_bulkUpdate.value) return; // mass mutation in progress — skip
+  _asyncRender(++_renderVersion); // fire-and-forget; stale renders self-abort
 });
 
 // ── Collapse / Expand all ─────────────────────────────────────────────────────

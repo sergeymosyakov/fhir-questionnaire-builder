@@ -28,7 +28,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/builder/panels.js` | All action panel builders (enableWhen vis panel, mand, type, expr, style) |
 | `js/builder/node-item.js` | `renderItem(node, ctx)` — item node DOM |
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` — group node DOM |
-| `js/render-preview.js` | Right panel — reactive preview + controls |
+| `js/render-preview.js` | Right panel — async preview; `reinitForm()` shows progress bar, yields between stages; `_asyncRender(version)` separates FHIRPath eval from DOM rebuild; DocumentFragment; stale-render abort |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
 | `js/controls/{type}.js` | Per-type control implementations |
 | `js/fhir/import.js` | FHIR R4 → internal model |
