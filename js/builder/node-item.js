@@ -139,6 +139,7 @@ export function renderItem(node, ctx) {
     'Calculated Expression',
     'SDC FHIRPath expression evaluated automatically on every preview render. Result is written into the answer field. Supports questionnaire-level %variables.',
     'sdc-questionnaire-calculatedExpression', 'SDC · optional');
+  exprLink.dataset.testid = 'action-calcexpr';
   exprLink.onclick = () => expressionModal.open({
     node, link: exprLink, setActive,
     field:       '_calculatedExpr',
@@ -151,6 +152,7 @@ export function renderItem(node, ctx) {
     'Initial Expression',
     'SDC FHIRPath expression evaluated once to pre-populate this field. Click \u21BA Re-init in the Variables panel to apply. Unlike calculatedExpression, this runs only on load/re-init.',
     'sdc-questionnaire-initialExpression', 'SDC · optional');
+  initExprLink.dataset.testid = 'action-initexpr';
   initExprLink.onclick = () => expressionModal.open({
     node, link: initExprLink, setActive,
     field:       '_initialExpr',
@@ -168,6 +170,7 @@ export function renderItem(node, ctx) {
   roLink.dataset.tipBody  = 'Marks this field as read-only — the user cannot edit it. Typically combined with a calculatedExpression.';
   roLink.dataset.tipFhir  = 'Questionnaire.item.readOnly';
   roLink.dataset.tipSpec  = 'R4';
+  roLink.dataset.testid   = 'action-readonly';
   roLink.onclick = () => {
     node._readOnly = !node._readOnly;
     setActive(roLink, !!node._readOnly);
@@ -185,6 +188,7 @@ export function renderItem(node, ctx) {
     'Validation Constraints (questionnaire-constraint)',
     'FHIR questionnaire-constraint extensions on this item. Each entry has a FHIRPath expression, human-readable message, and severity. Error-severity constraints must pass for the item to show \u2714 in the preview.',
     'Questionnaire.item.extension[questionnaire-constraint]', 'R4 \u00B7 optional');
+  constraintLink.dataset.testid = 'action-constraint';
   constraintLink.onclick = () => constraintModal.open(node, constraintLink, setActive);
   const styleLink = addToggle('Appearance', 'style',
     'Appearance (rendering-style)',
