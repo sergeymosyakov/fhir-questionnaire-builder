@@ -106,8 +106,23 @@ function applyConstraints(node, fhirItem) {
   return hasOrGroup;
 }
 
+// Extract options string from a contained[] ValueSet referenced by '#id'
+function resolveContainedValueSet(contained, ref) {
+  if (!ref || !ref.startsWith('#')) return '';
+  const id = ref.slice(1);
+  const vs = (contained || []).find(r => r.resourceType === 'ValueSet' && r.id === id);
+  if (!vs) return '';
+  const parts = [];
+  for (const inc of vs.compose?.include || []) {
+    for (const c of inc.concept || []) {
+      if (c.code) parts.push(c.code + (c.display ? '=' + c.display : ''));
+    }
+  }
+  return parts.join(',');
+}
+
 // Build our item node from a FHIR leaf question
-function fhirQuestionToItem(fhirItem, linkIdMap) {
+function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   const node = makeItem(fhirItem.text || fhirItem.linkId || 'Item');
   node.id        = fhirItem.linkId || node.id;
   node.mandatory = fhirItem.required === undefined ? null : !!fhirItem.required;
@@ -177,7 +192,11 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   if (fhirItem.repeats) node.repeats = true;
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
-  if (fhirItem.answerValueSet) node._answerValueSet = fhirItem.answerValueSet;
+  if (fhirItem.answerValueSet) {
+    node._answerValueSet = fhirItem.answerValueSet;
+    const resolved = resolveContainedValueSet(contained, fhirItem.answerValueSet);
+    if (resolved) node.options = resolved;
+  }
 
   // item.initial[0] → _initialValue
   if (fhirItem.initial && fhirItem.initial.length) {
@@ -197,7 +216,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
 }
 
 // Recursive FHIR item → our node.
-function fhirItemToNode(fhirItem, linkIdMap) {
+function fhirItemToNode(fhirItem, linkIdMap, contained) {
   const t = fhirItem.type || 'string';
 
   if (t === 'group') {
@@ -212,7 +231,7 @@ function fhirItemToNode(fhirItem, linkIdMap) {
     if (fhirItem.prefix) node._prefix = fhirItem.prefix;
     if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
     for (const child of fhirItem.item || []) {
-      const n = fhirItemToNode(child, linkIdMap);
+      const n = fhirItemToNode(child, linkIdMap, contained);
       if (n) node.children.push(n);
     }
     return node;
@@ -224,15 +243,15 @@ function fhirItemToNode(fhirItem, linkIdMap) {
     wrapper.id        = (fhirItem.linkId || wrapper.id) + '-grp';
     wrapper.mandatory = fhirItem.required === undefined ? null : !!fhirItem.required;
     applyVisibility(wrapper, fhirItem, linkIdMap);
-    wrapper.children.push(fhirQuestionToItem(fhirItem, linkIdMap));
+    wrapper.children.push(fhirQuestionToItem(fhirItem, linkIdMap, contained));
     for (const child of fhirItem.item) {
-      const n = fhirItemToNode(child, linkIdMap);
+      const n = fhirItemToNode(child, linkIdMap, contained);
       if (n) wrapper.children.push(n);
     }
     return wrapper;
   }
 
-  return fhirQuestionToItem(fhirItem, linkIdMap);
+  return fhirQuestionToItem(fhirItem, linkIdMap, contained);
 }
 
 // Exported for unit testing
@@ -275,7 +294,7 @@ export function importFHIR(fhirJson, renderFn) {
   try {
     const linkIdMap = buildLinkIdMap(q.item);
     for (const item of q.item || []) {
-      const n = fhirItemToNode(item, linkIdMap);
+      const n = fhirItemToNode(item, linkIdMap, q.contained);
       if (n) tree.push(n);
     }
     applyInitialValues(tree); // must run before _bulkUpdate=false so effect() sees filled values[]

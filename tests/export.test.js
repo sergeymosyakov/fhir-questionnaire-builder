@@ -418,6 +418,17 @@ describe('buildFHIRObject — answerValueSet', () => {
     }]);
     expect(q.item[0].answerValueSet).toBeUndefined();
   });
+
+  it('skips answerOption when _answerValueSet is set (even if options populated)', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Diet', itemType: 'select',
+      _answerValueSet: '#vs-diet',
+      options: 'veg=Vegetarian,omn=Omnivore',
+      enableWhen: [], constraint: [], mandatory: null,
+    }]);
+    expect(q.item[0].answerValueSet).toBe('#vs-diet');
+    expect(q.item[0].answerOption).toBeUndefined();
+  });
 });
 
 // ── item.initial[] export ─────────────────────────────────────────────────────

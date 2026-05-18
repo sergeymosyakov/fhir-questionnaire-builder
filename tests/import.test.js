@@ -419,4 +419,30 @@ describe('importFHIR', () => {
     }]));
     expect(_tree[0]._answerValueSet).toBeUndefined();
   });
+
+  it('resolves local #vs-id answerValueSet into node.options from contained[]', () => {
+    importFHIR({
+      resourceType: 'Questionnaire',
+      contained: [{
+        resourceType: 'ValueSet',
+        id: 'vs-diet',
+        compose: { include: [{ system: 'http://example.org', concept: [
+          { code: 'veg', display: 'Vegetarian' },
+          { code: 'omn', display: 'Omnivore' },
+        ]}]}
+      }],
+      item: [{ linkId: 'q1', type: 'choice', text: 'Diet', answerValueSet: '#vs-diet' }],
+    });
+    expect(_tree[0]._answerValueSet).toBe('#vs-diet');
+    expect(_tree[0].options).toBe('veg=Vegetarian,omn=Omnivore');
+  });
+
+  it('leaves options empty for external answerValueSet URL', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Occupation',
+      answerValueSet: 'http://hl7.org/fhir/ValueSet/occupation-snomed-ct',
+    }]));
+    expect(_tree[0]._answerValueSet).toBe('http://hl7.org/fhir/ValueSet/occupation-snomed-ct');
+    expect(_tree[0].options).toBe('');
+  });
 });

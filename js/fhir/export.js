@@ -121,7 +121,7 @@ function nodeToFHIRItem(node) {
 
   if (node.type === 'group') {
     fhirItem.item = node.children.map(nodeToFHIRItem);
-  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice') && node.options) {
+  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice') && node.options && !node._answerValueSet) {
     fhirItem.answerOption = parseOptions(node.options)
       .map(({ code, display }) => ({ valueCoding: { code, display } }));
   }
