@@ -57,17 +57,18 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, etc.) |
 | `js/builder/_shared.js` | Shared utilities; injected deps via `init(deps)` |
 | `js/builder/dnd.js` | Self-contained drag & drop; all state via `init(onDrop, tree, formTick)` |
-| `js/builder/panels.js` | Action panel builders: `addPanel`, `buildVisPanel` (enableWhen), `buildTypePanel` (type+options), `buildStylePanel` (appearance for groups). On type change: clears all stored answers (primary + repeat rows) and resets `node.repeats` for `checkbox`/`display` types |
-| `js/builder/node-item.js` | `renderItem(node, ctx)` — opens `showwhen-modal`, `expression-modal`, `constraint-modal`, `initial-modal`, `appearance-modal`, `required-modal` for respective action links; only `type` remains as inline panel |
+| `js/builder/panels.js` | Action panel builders: `addPanel` (used by `node-group.js` for style), `buildVisPanel` (enableWhen), `buildTypePanel` (type+options — dead code since type moved to modal), `buildStylePanel` (appearance for groups). On type change: clears all stored answers and resets `node.repeats` for `checkbox`/`display` types |
+| `js/builder/node-item.js` | `renderItem(node, ctx)` — opens `answer-type-modal`, `showwhen-modal`, `expression-modal`, `constraint-modal`, `initial-modal`, `appearance-modal`, `required-modal`, `repeatable-modal` for all action links; no inline panels remain |
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` — opens `showwhen-modal`, `expression-modal`, `required-modal` for respective action links; `style` still uses inline `buildStylePanel` |
 | `js/render-preview.js` | Right panel — async preview render; `reinitForm()` async with progress; `_asyncRender(version)` splits FHIRPath eval (Phase 1) from DOM rebuild (Phase 2) with `_yield()` breaks; stale renders self-abort via `_renderVersion`; exports `navigateToPreview(id)`, `refreshExprIcons()`; `buildRepeatControls(node, iconEl, onAfterChange)` renders multi-row repeat UI for `node.repeats === true` items (except `checkbox`/`display`) |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
 | `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns (`.sc-trigger` / `.oc-wrap`) instead of native `<select>` / `<datalist>` for consistent cross-platform rendering. `url` uses `<textarea>` (same auto-resize pattern as `text`) with `new URL()` validation on blur. All controls receive `{ getValue, setValue, onChange, _reCalc, _formTick }` via `ctx` — no direct `values` access |
 | `js/patient.js` | **Removed** — patient context now managed as FHIRPath literal expressions in `questVariables` via `js/ui/patient-ctx.js` |
-| `js/fhir/export.js` | Internal model → FHIR R4 |
+| `js/fhir/import.js` | FHIR R4 → internal model; reads `item.repeats`, `item.maxLength` (→ `_maxLength`), `item.answerValueSet` (→ `_answerValueSet`), `Questionnaire.contained[]` (→ `questContained`); exports `resolveContainedValueSet(contained, ref)` — resolves `#vs-id` local refs into `code=Label,...` string; called during import and from `answer-type-modal` |
+| `js/fhir/export.js` | Internal model → FHIR R4; writes `maxLength`, `item.answerValueSet` (from `_answerValueSet`), `Questionnaire.contained[]`; skips `answerOption` when `_answerValueSet` is set (mutually exclusive) |
 | `js/fhir/qr-export.js` | `exportQR(fileName)` — builds QR from current tree + answers, adds `authored` timestamp, downloads JSON |
 | `js/fhir/qr-import.js` | `importQRAnswers(qrJson, values, tree)` — validates `resourceType`, flattens QR `item[]` recursively into `{linkId: value}`, loads matched answers into `values`, returns `{ok, loaded, unmatched, questionnaire}` |
-| `js/fhir/validate.js` | `validateTree(tree)` → `{severity,nodeId,message}[]`; linkId uniqueness, JS/FHIRPath syntax, empty titles, missing options |
+| `js/fhir/validate.js` | `validateTree(tree)` → `{severity,nodeId,message}[]`; linkId uniqueness, JS/FHIRPath syntax, empty titles, missing options; suppresses "no answer options" warning when `_answerValueSet` is set |
 | `js/ui/validate-modal.js` | Validation modal UI — `init(elements)` + `show(title, issues, mode, onExport?)`; no hardcoded DOM IDs |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; collapsible chip list with `%name` chip tooltips (expression + FHIR footer); modal uses draft pattern — edits are buffered until Apply; Cancel discards draft; Apply validates (blocks on missing name) then commits to `questVariables` and calls `reinitForm()` |
 | `js/ui/showwhen-modal.js` | Show When (enableWhen) centered modal — `init(elements)`, `open(node, visLink, setActive, ctx, buildVisFn)`, `close()`; draft pattern: deep-clones `enableWhen[]`, `enableBehavior`, `enableWhenExpression` on open; Apply commits to node + calls `triggerCalcRecalc()`; Cancel discards; no-op `setActive` passed to `buildVisPanel` so the action button state only changes on Apply |
@@ -84,7 +85,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/explain-modal.js` | Expression Explain modal — `show(expr, fp, resource, env)` renders AND/OR/NOT/LEAF tree with ✓/✗ icons in shared modal; single Close button; FHIRPath strip at body bottom; `hide()` closes it |
 | `js/ui/autosave.js` | Background autosave — `init(buildFn, onSaved)` starts 15 s interval; `onSaved(date)` callback; `getDraftMeta/getDraftData/clearDraft` API; persists to `localStorage` |
 | `js/ui/status-badge.js` | PASS/FAIL pill badge in preview header — `init(elements, navigateFn)`, `update({anyVisible, hasCriteria, finalOk, failingItems})`; dark dropdown with numbered issues + ↗ navigate links |
-| `sampledata/example-bariatric.fhir.json` | Built-in example loaded on startup. Constraints: `diet-min-months` (error, integer ≥ 3), `phq9-severity` (warning, score < 15), `bmi-eligibility` (error, readOnly calc ≥ 35) |
+| `sampledata/example-bariatric.fhir.json` | Built-in example. Contains `contained[]` with 2 ValueSets; two items use `answerValueSet`. Constraints: `diet-min-months` (error), `phq9-severity` (warning), `bmi-eligibility` (error) |
+| `sampledata/valueset-demo.fhir.json` | Demo “ValueSet Demo — Coded Answers”: 3 contained ValueSets; 3 items with local `#vs-id` refs (resolved on import), 1 with external URL |
 | `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all types |
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History (49 items, depth 5) |
 | `sampledata/prowl-ss.fhir.json` | PROWL-SS post-op pain assessment (44 items) |
@@ -103,9 +105,9 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
 | `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic (23 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
-| `tests/validate.test.js` | Unit tests for `js/fhir/validate.js` — `validateTree` (21 tests) |
-| `tests/export.test.js` | Unit tests for `js/fhir/export.js` — `buildFHIRObject`, enableWhen, constraints, SDC variables, `integer`/`decimal`/`number` type mapping (39 tests) |
-| `tests/import.test.js` | Unit tests for `js/fhir/import.js` — `fhirTypeToItemType`, `fhirOptsToStr`, `humanEnableWhen`, `applyVisibility` (45 tests) |
+| `tests/validate.test.js` | Unit tests for `js/fhir/validate.js` — `validateTree` (28 tests) |
+| `tests/export.test.js` | Unit tests for `js/fhir/export.js` — `buildFHIRObject`, enableWhen, constraints, SDC variables, `integer`/`decimal`/`number` type mapping, `answerValueSet`, `contained[]` (59 tests) |
+| `tests/import.test.js` | Unit tests for `js/fhir/import.js` — `fhirTypeToItemType`, `fhirOptsToStr`, `humanEnableWhen`, `applyVisibility`, `contained[]`, `answerValueSet` (62 tests) |
 | `tests/qr-builder.test.js` | Unit tests for `js/fhir/qr-builder.js` — `buildQR`, `buildQRItem`, `integer`→`valueInteger` / `decimal`→`valueDecimal` mapping (31 tests) |
 | `tests/state.test.js` | Unit tests for `evalConstraints` in `js/state.js` — severity filtering, empty/false/throw/empty-expression results, varEnv passing (16 tests) |
 | `tests/integration.test.js` | Integration tests for `buildQR` + `evalConstraints` pipeline — decimal/integer pass/fail, wrong key regression, warning-only, nested groups (7 tests) |
@@ -122,8 +124,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
 - **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
-- **Vitest** — unit test suite for pure-function modules; **246 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — E2E test suite; **130 tests** across 12 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
+- **Vitest** — unit test suite for pure-function modules; **259 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Playwright** — E2E test suite; **151 tests** across 12 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---
