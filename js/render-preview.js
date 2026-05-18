@@ -212,12 +212,19 @@ function buildRepeatControls(node, iconEl, onAfterChange) {
     wrap.appendChild(rowEl);
   }
 
+  const maxOccurs = node._maxOccurs;
+  const atMax = maxOccurs !== undefined && (n + 1) >= maxOccurs;
+
   const addBtn = document.createElement('button');
   addBtn.type = 'button';
   addBtn.className = 'repeat-add-btn';
   addBtn.textContent = '+ Add another';
   addBtn.dataset.testid = 'repeat-add-btn';
-  addBtn.onclick = () => { values[id + '$$n'] = n + 1; _formTick.value++; };
+  if (atMax) {
+    addBtn.disabled = true;
+    addBtn.title = 'Maximum ' + maxOccurs + ' answer' + (maxOccurs === 1 ? '' : 's') + ' reached';
+  }
+  addBtn.onclick = () => { if (!atMax) { values[id + '$$n'] = n + 1; _formTick.value++; } };
   wrap.appendChild(addBtn);
 
   return wrap;

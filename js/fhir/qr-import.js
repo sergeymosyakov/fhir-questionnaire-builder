@@ -9,20 +9,30 @@ function _collectLinkIds(nodes, set = new Set()) {
   return set;
 }
 
-// Flatten QR item[] recursively → { [linkId]: primitiveValue }
+// Flatten QR item[] recursively → { [linkId]: primaryValue, [linkId+'$$N']: extraValue, [linkId+'$$n']: count }
 function _flattenQR(items, out = {}) {
   for (const item of items || []) {
     if (item.answer && item.answer.length) {
-      const ans = item.answer[0];
-      if      (ans.valueBoolean  !== undefined) out[item.linkId] = ans.valueBoolean;
-      else if (ans.valueCoding   !== undefined) out[item.linkId] = ans.valueCoding.code;
-      else if (ans.valueDecimal  !== undefined) out[item.linkId] = ans.valueDecimal;
-      else if (ans.valueInteger  !== undefined) out[item.linkId] = ans.valueInteger;
-      else if (ans.valueDate     !== undefined) out[item.linkId] = ans.valueDate;
-      else if (ans.valueDateTime !== undefined) out[item.linkId] = ans.valueDateTime;
-      else if (ans.valueString   !== undefined) out[item.linkId] = ans.valueString;
+      const extractVal = ans => {
+        if (ans.valueBoolean  !== undefined) return ans.valueBoolean;
+        if (ans.valueCoding   !== undefined) return ans.valueCoding.code;
+        if (ans.valueDecimal  !== undefined) return ans.valueDecimal;
+        if (ans.valueInteger  !== undefined) return ans.valueInteger;
+        if (ans.valueDate     !== undefined) return ans.valueDate;
+        if (ans.valueDateTime !== undefined) return ans.valueDateTime;
+        if (ans.valueString   !== undefined) return ans.valueString;
+        return undefined;
+      };
+      out[item.linkId] = extractVal(item.answer[0]);
+      if (item.answer.length > 1) {
+        for (let i = 1; i < item.answer.length; i++) {
+          const v = extractVal(item.answer[i]);
+          if (v !== undefined) out[item.linkId + '$$' + i] = v;
+        }
+        out[item.linkId + '$$n'] = item.answer.length - 1;
+      }
       // Nested items inside answer (non-group questions with sub-items)
-      if (ans.item) _flattenQR(ans.item, out);
+      if (item.answer[0].item) _flattenQR(item.answer[0].item, out);
     }
     // Group children
     if (item.item) _flattenQR(item.item, out);
@@ -49,12 +59,18 @@ export function importQRAnswers(qrJson, values, tree) {
   const unmatched = [];
   let loaded = 0;
 
-  for (const [id, val] of Object.entries(extracted)) {
-    if (knownIds.has(id)) {
-      values[id] = val;
+  for (const [key, val] of Object.entries(extracted)) {
+    // Repeat meta-keys: id$$n and id$$N — load if base id is known
+    const repeatMatch = key.match(/^(.+)\$\$(\d+|n)$/);
+    if (repeatMatch && knownIds.has(repeatMatch[1])) {
+      values[key] = val;
+      continue;
+    }
+    if (knownIds.has(key)) {
+      values[key] = val;
       loaded++;
     } else {
-      unmatched.push(id);
+      unmatched.push(key);
     }
   }
 

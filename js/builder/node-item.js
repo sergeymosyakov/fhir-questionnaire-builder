@@ -10,6 +10,7 @@ import * as constraintModal from '../ui/constraint-modal.js';
 import * as expressionModal from '../ui/expression-modal.js';
 import * as initialModal from '../ui/initial-modal.js';
 import * as appearanceModal from '../ui/appearance-modal.js';
+import * as repeatableModal from '../ui/repeatable-modal.js';
 import { triggerCalcRecalc, confirmDelete } from './_shared.js';
 
 export function renderItem(node, ctx) {
@@ -178,20 +179,16 @@ export function renderItem(node, ctx) {
   };
   actions.appendChild(roLink);
 
-  // Repeatable toggle — direct boolean, no panel needed
+  // Repeatable — opens modal for repeats + minOccurs / maxOccurs
   const repeatLink = document.createElement('a');
   repeatLink.textContent = 'Repeatable';
   repeatLink.className = 'action-edit';
   repeatLink.dataset.tipTitle = 'Repeatable';
-  repeatLink.dataset.tipBody  = 'Allows the user to provide multiple answers for this item. Stored as item.repeats: true in the FHIR Questionnaire.';
+  repeatLink.dataset.tipBody  = 'Allow multiple answers for this item. Opens a dialog to configure item.repeats and optional cardinality (minOccurs / maxOccurs extensions).';
   repeatLink.dataset.tipFhir  = 'Questionnaire.item.repeats';
   repeatLink.dataset.tipSpec  = 'R4';
   repeatLink.dataset.testid   = 'action-repeatable';
-  repeatLink.onclick = () => {
-    node.repeats = !node.repeats;
-    setActive(repeatLink, !!node.repeats);
-    triggerCalcRecalc();
-  };
+  repeatLink.onclick = () => repeatableModal.open(node, repeatLink, setActive);
   actions.appendChild(repeatLink);
 
   const initLink  = addToggle('Default', 'init',

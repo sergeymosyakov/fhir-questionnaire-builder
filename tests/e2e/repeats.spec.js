@@ -52,19 +52,36 @@ test.describe('Repeatable toggle — builder', () => {
     await expect(repeatableLink(page)).not.toHaveClass(/action-edit--active/);
   });
 
-  test('clicking "Repeatable" activates the link', async ({ page }) => {
+  test('clicking "Repeatable" opens the modal', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
     await repeatableLink(page).click();
+    await expect(page.locator('#repeatableModal')).toBeVisible();
+    await page.locator('#repeatableModalCancel').click();
+    await expect(page.locator('#repeatableModal')).not.toBeVisible();
+  });
+
+  test('enabling repeats in modal activates the link', async ({ page }) => {
+    await freshStart(page);
+    await addTextItem(page);
+    await repeatableLink(page).click();
+    await page.locator('[data-testid="repeat-modal-toggle"]').check();
+    await page.locator('#repeatableModalApply').click();
     await expect(repeatableLink(page)).toHaveClass(/action-edit--active/);
   });
 
-  test('clicking "Repeatable" again deactivates the link', async ({ page }) => {
+  test('disabling repeats in modal deactivates the link', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
+    // Enable first
     await repeatableLink(page).click();
+    await page.locator('[data-testid="repeat-modal-toggle"]').check();
+    await page.locator('#repeatableModalApply').click();
     await expect(repeatableLink(page)).toHaveClass(/action-edit--active/);
+    // Disable
     await repeatableLink(page).click();
+    await page.locator('[data-testid="repeat-modal-toggle"]').uncheck();
+    await page.locator('#repeatableModalApply').click();
     await expect(repeatableLink(page)).not.toHaveClass(/action-edit--active/);
   });
 });
@@ -75,15 +92,23 @@ test.describe('Repeatable toggle — preview', () => {
     await addTextItem(page);
     await expect(page.getByTestId('repeat-add-btn')).not.toBeVisible();
     await repeatableLink(page).click();
+    await page.locator('[data-testid="repeat-modal-toggle"]').check();
+    await page.locator('#repeatableModalApply').click();
     await expect(page.getByTestId('repeat-add-btn')).toBeVisible();
   });
 
   test('"+ Add another" button disappears after disabling', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
+    // Enable
     await repeatableLink(page).click();
+    await page.locator('[data-testid="repeat-modal-toggle"]').check();
+    await page.locator('#repeatableModalApply').click();
     await expect(page.getByTestId('repeat-add-btn')).toBeVisible();
+    // Disable
     await repeatableLink(page).click();
+    await page.locator('[data-testid="repeat-modal-toggle"]').uncheck();
+    await page.locator('#repeatableModalApply').click();
     await expect(page.getByTestId('repeat-add-btn')).not.toBeVisible();
   });
 });

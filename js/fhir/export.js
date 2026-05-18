@@ -112,8 +112,6 @@ function nodeToFHIRItem(node) {
   if (node.itemType === 'radio')
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'radio-button' }] } });
 
-  if (ext.length) fhirItem.extension = ext;
-
   // _renderStyle → _text.extension[rendering-style]
   if (node._renderStyle) {
     fhirItem._text = {
@@ -128,8 +126,17 @@ function nodeToFHIRItem(node) {
       .map(({ code, display }) => ({ valueCoding: { code, display } }));
   }
 
+  // maxLength (text/url/open-choice types)
+  if (node._maxLength) fhirItem.maxLength = node._maxLength;
+
   if (node._readOnly) fhirItem.readOnly = true;
   if (node.repeats)   fhirItem.repeats  = true;
+  // minOccurs / maxOccurs cardinality extensions
+  if (node.repeats && node._minOccurs !== undefined)
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs', valueInteger: node._minOccurs });
+  if (node.repeats && node._maxOccurs !== undefined)
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs', valueInteger: node._maxOccurs });
+  if (ext.length) fhirItem.extension = ext;
 
   return fhirItem;
 }

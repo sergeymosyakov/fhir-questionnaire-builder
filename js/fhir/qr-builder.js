@@ -13,35 +13,42 @@ function buildQRItem(fhirItem, values) {
   const t = fhirItem.type || 'string';
   const val = values[fhirItem.linkId];
 
+  // Collect all answer values: primary + repeat rows ($$1, $$2, …)
+  function allVals() {
+    const id = fhirItem.linkId;
+    const n  = values[id + '$$n'] || 0;
+    const vs = val !== undefined ? [val] : [];
+    for (let i = 1; i <= n; i++) {
+      const v = values[id + '$$' + i];
+      if (v !== undefined) vs.push(v);
+    }
+    return vs;
+  }
+
+  function makeAnswer(v) {
+    if (t === 'boolean')                     return { valueBoolean: v === true };
+    if (t === 'choice' || t === 'open-choice') return { valueCoding: { code: String(v) } };
+    if (t === 'integer')                     return { valueInteger: parseInt(v) || 0 };
+    if (t === 'decimal' || t === 'quantity') return { valueDecimal: parseFloat(v) || 0 };
+    return { valueString: String(v) };
+  }
+
   if (t === 'group') {
-    // Groups: children go directly under item[], no answer
     if (children.length > 0) {
       qrItem.item = children.map(child => buildQRItem(child, values));
     }
   } else if (children.length > 0) {
-    // Non-group question with sub-items: answer contains value + nested items
     const answerObj = {};
     if (t === 'boolean') {
-      // Only add valueBoolean if explicitly answered
       if (val !== undefined) answerObj.valueBoolean = val === true;
     } else if (t === 'string' || t === 'text') {
       if (val !== undefined) answerObj.valueString = String(val);
     }
     answerObj.item = children.map(child => buildQRItem(child, values));
     qrItem.answer = [answerObj];
-  } else if (val !== undefined) {
-    // Leaf question with a value
-    if (t === 'boolean') {
-      qrItem.answer = [{ valueBoolean: val === true }];
-    } else if (t === 'choice' || t === 'open-choice') {
-      qrItem.answer = [{ valueCoding: { code: String(val) } }];
-    } else if (t === 'integer') {
-      qrItem.answer = [{ valueInteger: parseInt(val) || 0 }];
-    } else if (t === 'decimal' || t === 'quantity') {
-      qrItem.answer = [{ valueDecimal: parseFloat(val) || 0 }];
-    } else {
-      qrItem.answer = [{ valueString: String(val) }];
-    }
+  } else {
+    const vs = allVals();
+    if (vs.length > 0) qrItem.answer = vs.map(makeAnswer);
   }
 
   return qrItem;

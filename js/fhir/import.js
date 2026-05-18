@@ -160,6 +160,19 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
     node._initialExpr = initExpr.valueExpression.expression || '';
   }
 
+  // maxLength
+  if (fhirItem.maxLength) node._maxLength = fhirItem.maxLength;
+
+  // minOccurs / maxOccurs cardinality extensions
+  const minOccExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs'
+  );
+  if (minOccExt?.valueInteger !== undefined) node._minOccurs = minOccExt.valueInteger;
+  const maxOccExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs'
+  );
+  if (maxOccExt?.valueInteger !== undefined) node._maxOccurs = maxOccExt.valueInteger;
+
   node._readOnly = !!fhirItem.readOnly;
   if (fhirItem.repeats) node.repeats = true;
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;

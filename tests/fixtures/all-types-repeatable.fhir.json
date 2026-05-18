@@ -1,0 +1,37 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "all-types-repeatable",
+  "status": "active",
+  "title": "All Types Repeatable",
+  "item": [
+    {
+      "linkId": "text-item",
+      "text": "Text answer",
+      "type": "string",
+      "repeats": true
+    },
+    {
+      "linkId": "number-item",
+      "text": "Number answer",
+      "type": "integer",
+      "repeats": true
+    },
+    {
+      "linkId": "date-item",
+      "text": "Date answer",
+      "type": "date",
+      "repeats": true
+    },
+    {
+      "linkId": "select-item",
+      "text": "Select answer",
+      "type": "choice",
+      "repeats": true,
+      "answerOption": [
+        { "valueCoding": { "code": "A", "display": "Option A" } },
+        { "valueCoding": { "code": "B", "display": "Option B" } },
+        { "valueCoding": { "code": "C", "display": "Option C" } }
+      ]
+    }
+  ]
+}

@@ -18,6 +18,7 @@ import * as constraintModal from './ui/constraint-modal.js';
 import * as expressionModal from './ui/expression-modal.js';
 import * as initialModal from './ui/initial-modal.js';
 import * as appearanceModal from './ui/appearance-modal.js';
+import * as repeatableModal from './ui/repeatable-modal.js';
 import * as requiredModal from './ui/required-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
@@ -107,6 +108,15 @@ initialModal.init({
   closeBtn:  document.getElementById('initialModalClose'),
   cancelBtn: document.getElementById('initialModalCancel'),
   applyBtn:  document.getElementById('initialModalApply'),
+});
+// ── Repeatable modal init ────────────────────────────────────────────────────
+repeatableModal.init({
+  modal:     document.getElementById('repeatableModal'),
+  title:     document.getElementById('repeatableModalTitle'),
+  body:      document.getElementById('repeatableModalBody'),
+  closeBtn:  document.getElementById('repeatableModalClose'),
+  cancelBtn: document.getElementById('repeatableModalCancel'),
+  applyBtn:  document.getElementById('repeatableModalApply'),
 });
 // ── Required modal init ──────────────────────────────────────────────────────
 requiredModal.init({

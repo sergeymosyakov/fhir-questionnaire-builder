@@ -506,7 +506,11 @@ export function buildTypePanel(node, p) {
 
     // checkbox and display cannot be repeatable
     const noRepeats = node.itemType === 'checkbox' || node.itemType === 'display';
-    if (noRepeats && node.repeats) node.repeats = false;
+    if (noRepeats && node.repeats) {
+      node.repeats = false;
+      delete node._minOccurs;
+      delete node._maxOccurs;
+    }
     const rl = p.closest('[data-node-id]')?.querySelector('[data-testid="action-repeatable"]');
     if (rl) rl.style.display = noRepeats ? 'none' : '';
 
