@@ -290,6 +290,7 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   border-radius: 20px;
   white-space: nowrap;
   flex-shrink: 0;
+  cursor: pointer;
 }
 .lbl-group { background: var(--c-primary-lt); color: var(--c-primary); }
 .lbl-item  { background: var(--c-teal-lt);    color: var(--c-teal); }
