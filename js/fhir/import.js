@@ -1,5 +1,5 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
-import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables, setValue, clearAllValues } from '../state.js';
+import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables, questContained, setValue, clearAllValues } from '../state.js';
 import { renderTree } from '../render-builder.js';
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
 
@@ -177,6 +177,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   if (fhirItem.repeats) node.repeats = true;
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
+  if (fhirItem.answerValueSet) node._answerValueSet = fhirItem.answerValueSet;
 
   // item.initial[0] → _initialValue
   if (fhirItem.initial && fhirItem.initial.length) {
@@ -255,6 +256,12 @@ export function importFHIR(fhirJson, renderFn) {
   // Read questionnaire-level SDC variables
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
   questVariables.splice(0);
+
+  // Questionnaire.contained[] — preserve raw resources for round-trip
+  questContained.splice(0);
+  if (Array.isArray(q.contained)) {
+    for (const r of q.contained) questContained.push(r);
+  }
   for (const ext of q.extension || []) {
     if (ext.url === SDC_VAR_URL && ext.valueExpression) {
       questVariables.push({

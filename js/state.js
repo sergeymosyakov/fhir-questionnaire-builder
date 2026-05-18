@@ -54,6 +54,9 @@ export const rawFhir = ref(null);
 // Also used to store patient context variables (%age, %gender, %bmi, ...).
 export const questVariables = reactive([]);
 
+// Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.
+export const questContained = reactive([]);
+
 // Item types that have form-value validation logic in the preview.
 // CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
 // NONEMPTY_TYPES: mandatory → value must be non-empty (subset, excludes url/attachment).

@@ -1,5 +1,5 @@
 ﻿// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
-import { tree, questVariables, rawFhir } from '../state.js';
+import { tree, questVariables, questContained, rawFhir } from '../state.js';
 import { parseOptions, ITLH_KEY_GROUP_OR } from '../utils.js';
 
 function itemTypeToFHIRType(t) {
@@ -128,6 +128,7 @@ function nodeToFHIRItem(node) {
 
   // maxLength (text/url/open-choice types)
   if (node._maxLength) fhirItem.maxLength = node._maxLength;
+  if (node.type === 'item' && node._answerValueSet) fhirItem.answerValueSet = node._answerValueSet;
 
   if (node._readOnly) fhirItem.readOnly = true;
   if (node.repeats)   fhirItem.repeats  = true;
@@ -158,6 +159,9 @@ export function buildFHIRObject() {
       url: SDC_VAR_URL,
       valueExpression: { name: v.name, language: 'text/fhirpath', expression: v.expression }
     }));
+  }
+  if (questContained.length) {
+    q.contained = questContained.map(r => JSON.parse(JSON.stringify(r)));
   }
   return q;
 }

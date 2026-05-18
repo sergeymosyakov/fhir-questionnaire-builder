@@ -21,8 +21,8 @@ See [docs/CONTEXT.md](docs/CONTEXT.md) for scenario definitions.
 
 - [x] Unit tests for `eval.js` and `fhir/import.js`
 - [x] `item.prefix` support (numbered questions, e.g. `"1.1"`)
-- [ ] Repeating items (`item.repeats: true` / `maxOccurs`)
+- [x] Repeating items (`item.repeats: true` / `maxOccurs`) — modal configures repeats + min/max cardinality; QR round-trip safe
 - [x] SDC `variable` extension support (questionnaire-level variables, `%varName` in FHIRPath)
-- [ ] SDC `initialExpression` extension support
+- [x] SDC `initialExpression` extension support — evaluated once on import + Re-init; result pre-fills `values[]`
 - [ ] FHIR STU3 import compatibility shim
 - [ ] External validator integration (link to HL7 / Simplifier validator, or local FHIR validation API call)

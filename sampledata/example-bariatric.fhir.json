@@ -7,6 +7,52 @@
     "Patient"
   ],
   "date": "2024-01-01",
+  "contained": [
+    {
+      "resourceType": "ValueSet",
+      "id": "vs-comorbidities",
+      "url": "http://example.org/fhir/ValueSet/bariatric-comorbidities",
+      "name": "BariatricComorbidities",
+      "title": "Obesity-Related Comorbidities",
+      "status": "active",
+      "description": "Comorbidities qualifying patients with BMI 35\u201339.9 for bariatric surgery",
+      "compose": {
+        "include": [
+          {
+            "system": "http://snomed.info/sct",
+            "concept": [
+              { "code": "44054006",  "display": "Type 2 Diabetes Mellitus" },
+              { "code": "38341003",  "display": "Hypertension" },
+              { "code": "78275009",  "display": "Obstructive Sleep Apnea" },
+              { "code": "235494005", "display": "Non-alcoholic Fatty Liver Disease / NASH" },
+              { "code": "235595009", "display": "Gastroesophageal Reflux Disease" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "vs-vitamin-deficiencies",
+      "url": "http://example.org/fhir/ValueSet/bariatric-vitamin-deficiencies",
+      "name": "VitaminDeficiencies",
+      "title": "Pre-operative Vitamin Deficiency Types",
+      "status": "active",
+      "compose": {
+        "include": [
+          {
+            "system": "http://example.org/bariatric/codes",
+            "concept": [
+              { "code": "vitD",   "display": "Vitamin D" },
+              { "code": "B12",    "display": "Vitamin B12" },
+              { "code": "iron",   "display": "Iron" },
+              { "code": "folate", "display": "Folate" }
+            ]
+          }
+        ]
+      }
+    }
+  ],
   "item": [
     {
       "linkId": "g-eligibility",
@@ -58,38 +104,7 @@
               }
             }
           ],
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "T2DM",
-                "display": "Type 2 Diabetes"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "HTN",
-                "display": "Hypertension"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "OSA",
-                "display": "Obstructive Sleep Apnea"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "NAFLD",
-                "display": "NAFLD / NASH"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "GERD",
-                "display": "GERD"
-              }
-            }
-          ]
+          "answerValueSet": "#vs-comorbidities"
         }
       ]
     },
@@ -275,32 +290,7 @@
               "answerBoolean": true
             }
           ],
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "vitD",
-                "display": "Vitamin D"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "B12",
-                "display": "Vitamin B12"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "iron",
-                "display": "Iron"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "folate",
-                "display": "Folate"
-              }
-            }
-          ]
+          "answerValueSet": "#vs-vitamin-deficiencies"
         }
       ]
     },

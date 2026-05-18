@@ -6,11 +6,13 @@ import { describe, it, expect, vi } from 'vitest';
 // Minimal state mock — buildFHIRObject reads tree, questVariables, rawFhir
 const _tree = [];
 const _questVariables = [];
+const _questContained = [];
 let _rawFhir = { value: null };
 
 vi.mock('../js/state.js', () => ({
   tree:            _tree,
   questVariables:  _questVariables,
+  questContained:  _questContained,
   rawFhir:         _rawFhir,
   values:          {},
   _formTick:       { value: 0 },
@@ -367,6 +369,54 @@ describe('buildFHIRObject — _renderStyle', () => {
 
     const q2 = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
     expect(q2.item[0]._text).toBeUndefined();
+  });
+});
+
+// ── Questionnaire.contained[] ─────────────────────────────────────────────────
+describe('buildFHIRObject — contained[]', () => {
+  it('omits contained when questContained is empty', () => {
+    _questContained.splice(0);
+    const q = build([]);
+    expect(q.contained).toBeUndefined();
+  });
+
+  it('exports questContained as Questionnaire.contained', () => {
+    _questContained.splice(0);
+    _questContained.push({ resourceType: 'ValueSet', id: 'vs-1', title: 'Test VS' });
+    const q = build([]);
+    expect(q.contained).toHaveLength(1);
+    expect(q.contained[0].id).toBe('vs-1');
+    _questContained.splice(0);
+  });
+
+  it('deep-copies contained resources (mutations do not affect state)', () => {
+    _questContained.splice(0);
+    const src = { resourceType: 'ValueSet', id: 'vs-2', title: 'Original' };
+    _questContained.push(src);
+    const q = build([]);
+    q.contained[0].title = 'Mutated';
+    expect(src.title).toBe('Original');
+    _questContained.splice(0);
+  });
+});
+
+// ── item.answerValueSet ───────────────────────────────────────────────────────
+describe('buildFHIRObject — answerValueSet', () => {
+  it('exports node._answerValueSet as item.answerValueSet', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Diet', itemType: 'select',
+      _answerValueSet: 'http://example.org/vs/diet',
+      enableWhen: [], constraint: [], options: '', mandatory: null,
+    }]);
+    expect(q.item[0].answerValueSet).toBe('http://example.org/vs/diet');
+  });
+
+  it('does not emit answerValueSet when not set on node', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Procedure', itemType: 'select',
+      enableWhen: [], constraint: [], options: 'a=Alpha', mandatory: null,
+    }]);
+    expect(q.item[0].answerValueSet).toBeUndefined();
   });
 });
 

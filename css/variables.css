@@ -101,6 +101,91 @@
   text-overflow: ellipsis;
 }
 
+/* === Contained / AnswerValueSet resource cards ================================ */
+.fhir-res-card {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--c-border);
+  background: var(--c-surface);
+  padding: 6px 14px 8px;
+}
+.fhir-res-card-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.fhir-res-card-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--c-text-2);
+  border-radius: var(--r-sm);
+  transition: background .12s;
+  flex-shrink: 0;
+}
+.fhir-res-card-toggle:hover { background: var(--c-hover); }
+.fhir-res-card-toggle svg { transition: transform .18s; }
+.fhir-res-card-toggle--collapsed svg { transform: rotate(-90deg); }
+
+.fhir-res-card-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+}
+.fhir-res-card-title--contained { color: #b45309; }
+.fhir-res-card-title--avs       { color: #0891b2; }
+
+.fhir-res-card-count {
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0 5px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 16px;
+  height: 16px;
+  display: inline-block;
+  color: #fff;
+}
+.fhir-res-card-count--contained { background: #b45309; }
+.fhir-res-card-count--avs       { background: #0891b2; }
+
+.fhir-res-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.fhir-res-chip {
+  font-size: 11px;
+  font-family: var(--f-mono, monospace);
+  border-radius: 4px;
+  padding: 1px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity .12s;
+}
+.fhir-res-chip:hover { opacity: .72; }
+.fhir-res-chip--contained {
+  background: color-mix(in srgb, #b45309 14%, transparent);
+  color: #b45309;
+  border: 1px solid color-mix(in srgb, #b45309 30%, transparent);
+}
+.fhir-res-chip--avs {
+  background: color-mix(in srgb, #0891b2 14%, transparent);
+  color: #0891b2;
+  border: 1px solid color-mix(in srgb, #0891b2 30%, transparent);
+}
+
 /* === Variables edit modal ==================================================== */
 .variables-modal-empty {
   font-size: 12px;

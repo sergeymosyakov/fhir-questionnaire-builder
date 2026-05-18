@@ -6,6 +6,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Exposed so importFHIR tests can inspect state after import.
 const _tree           = [];
 const _questVariables = [];
+const _questContained = [];
 const _values         = {};
 const _rawFhir        = { value: null };
 const _bulkUpdate     = { value: false };
@@ -15,6 +16,7 @@ vi.mock('../js/state.js', () => ({
   values:         _values,
   rawFhir:        _rawFhir,
   questVariables: _questVariables,
+  questContained: { splice: () => { _questContained.splice(0); }, push: (v) => _questContained.push(v) },
   _bulkUpdate:    _bulkUpdate,
   resetSeq:       vi.fn(),
   makeGroup:      vi.fn(title => ({ type: 'group', id: 'g', title, children: [], enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', mandatory: null, logicWithParent: 'AND' })),
@@ -294,6 +296,7 @@ describe('importFHIR', () => {
   beforeEach(() => {
     _tree.splice(0);
     _questVariables.splice(0);
+    _questContained.splice(0);
     Object.keys(_values).forEach(k => delete _values[k]);
     _rawFhir.value = null;
     vi.mocked(alert).mockClear();
@@ -379,5 +382,41 @@ describe('importFHIR', () => {
     importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
     expect(_tree).toHaveLength(1);
     expect(_tree[0].id).toBe('q1');
+  });
+
+  it('imports contained[] resources into questContained', () => {
+    importFHIR({
+      resourceType: 'Questionnaire',
+      contained: [
+        { resourceType: 'ValueSet',  id: 'vs-1', title: 'Test VS' },
+        { resourceType: 'CodeSystem', id: 'cs-1', title: 'Test CS' },
+      ],
+      item: [],
+    });
+    expect(_questContained).toHaveLength(2);
+    expect(_questContained[0].id).toBe('vs-1');
+    expect(_questContained[1].resourceType).toBe('CodeSystem');
+  });
+
+  it('clears questContained on re-import when no contained present', () => {
+    _questContained.push({ resourceType: 'ValueSet', id: 'old' });
+    importFHIR(minQ([]));
+    expect(_questContained).toHaveLength(0);
+  });
+
+  it('stores answerValueSet URL on the imported node', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Diet',
+      answerValueSet: 'http://example.org/vs/diet',
+    }]));
+    expect(_tree[0]._answerValueSet).toBe('http://example.org/vs/diet');
+  });
+
+  it('does not set _answerValueSet when not present in FHIR item', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Procedure',
+      answerOption: [{ valueCoding: { code: 'a', display: 'A' } }],
+    }]));
+    expect(_tree[0]._answerValueSet).toBeUndefined();
   });
 });

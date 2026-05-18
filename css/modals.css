@@ -92,6 +92,7 @@
 #repeatableModal  { z-index: 10100; }
 #expressionModal  { z-index: 10200; }
 #explainModal     { z-index: 10300; }
+#fhirJsonModal    { z-index: 10000; }
 
 /* === Per-modal sizes ========================================================= */
 #variablesModal .modal-box  { width: min(600px, 94vw); max-height: 80vh; }
@@ -105,6 +106,19 @@
 #repeatableModal .modal-box { width: min(360px, 94vw); }
 #patientCtxModal .modal-box { width: 380px; max-width: 94vw; max-height: none; overflow: visible; }
 #explainModal .modal-box    { width: min(640px, 94vw); }
+#fhirJsonModal .modal-box   { width: min(700px, 94vw); max-height: 80vh; display: flex; flex-direction: column; }
+
+/* === Per-modal body overrides ================================================ */
+/* JSON viewer — scrollable pre */
+.fhir-json-modal-body { overflow: auto; flex: 1; }
+.fhir-json-pre {
+  margin: 0;
+  font-size: 12px;
+  font-family: var(--f-mono, monospace);
+  white-space: pre;
+  color: var(--c-text-1);
+  line-height: 1.5;
+}
 
 /* === Per-modal body overrides ================================================ */
 /* Variables — flex column with gap for variable rows */

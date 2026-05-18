@@ -44,7 +44,8 @@ Every node in the tree is either a **group** or an **item**:
   _initialValue:       any,              // FHIR item.initial[0] value; pre-fills values[] on import
   _maxLength:          integer,          // FHIR item.maxLength
   _minOccurs:          integer,          // questionnaire-minOccurs extension (when repeats: true)
-  _maxOccurs:          integer           // questionnaire-maxOccurs extension (when repeats: true; enforced in preview)
+  _maxOccurs:          integer,          // questionnaire-maxOccurs extension (when repeats: true; enforced in preview)
+  _answerValueSet:     string            // FHIR item.answerValueSet URL — preserved round-trip; not resolved to options
 }
 ```
 
@@ -130,6 +131,7 @@ Every node in the tree is either a **group** or an **item**:
 | `_maxLength` | `item.maxLength` | imported → `node._maxLength`; exported back when set; not enforced in UI |
 | `_minOccurs` | `questionnaire-minOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true` |
 | `_maxOccurs` | `questionnaire-maxOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true`; enforced in preview — add button disabled at limit |
+| `_answerValueSet` | `item.answerValueSet` | imported → `node._answerValueSet`; exported back unchanged; URL not resolved — items show no selectable options in the builder |
 ---
 
 ## Show When (enableWhen)
@@ -188,6 +190,13 @@ Internal UI fields that are not written to FHIR JSON but are fully restored on i
 |---|---|
 | `logicWithParent` | `'OR'` exported as a namespaced `questionnaire-constraint` (key `e3a8c2f1-6b4d-4e9a-87c5:group-or`); round-trip safe |
 
+Additional round-trip fields (stored opaquely; not editable in the builder):
+
+| Field | FHIR field | Notes |
+|---|---|---|
+| `_answerValueSet` | `item.answerValueSet` | URL preserved; not resolved to answer options |
+| `questContained[]` | `Questionnaire.contained[]` | Resources deep-copied on export; not otherwise processed |
+
 ---
 
 ## Not Supported / Partial Support
@@ -196,10 +205,7 @@ Items marked ⚠️ produce silent data loss on import.
 
 | Feature | FHIR field / extension | Status |
 |---|---|---|
-| Repeating items (`item.repeats`) | `item.repeats: true` | ✅ imported/exported; modal configures repeats + min/max cardinality; QR round-trip safe |
-| `item.maxLength` | `item.maxLength` | ✅ imported (`node._maxLength`) / exported; not enforced in UI |
-| Cardinality | `questionnaire-minOccurs`, `questionnaire-maxOccurs` | ✅ imported/exported; `_maxOccurs` enforced in preview |
-| Answer value sets | `item.answerValueSet` | ⚠️ ignored on import; use `answerOption[]` instead |
-| `contained` resources | `Questionnaire.contained[]` | ⚠️ ignored on import |
+| Answer value sets | `item.answerValueSet` | ⚠️ URL preserved round-trip; not resolved — items using `answerValueSet` have no answer options in the builder |
+| `contained` resources | `Questionnaire.contained[]` | ⚠️ Resources preserved round-trip; viewable as JSON in the Contained card; not otherwise processed |
 | Resource reference resolution | `type: 'reference'` | ⚠️ partial — dropdown (resource type) + id text input; no live search against a FHIR server |
 | FHIR versions other than R4 | STU3, R5 | Not tested; may partially work |

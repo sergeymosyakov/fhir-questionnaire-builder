@@ -12,6 +12,9 @@ import * as tooltip from './ui/tooltip.js';
 import * as autosave from './ui/autosave.js';
 import * as statusBadge from './ui/status-badge.js';
 import * as variablesPanel from './ui/variables-panel.js';
+import * as containedPanel from './ui/contained-panel.js';
+import * as answerValueSetPanel from './ui/answer-valueset-panel.js';
+import * as jsonViewer from './ui/json-viewer.js';
 import * as patientCtx from './ui/patient-ctx.js';
 import * as showWhenModal from './ui/showwhen-modal.js';
 import * as constraintModal from './ui/constraint-modal.js';
@@ -22,7 +25,7 @@ import * as repeatableModal from './ui/repeatable-modal.js';
 import * as requiredModal from './ui/required-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
-import { showLinkId, showPrefix, showBadges, questVariables } from './state.js';
+import { showLinkId, showPrefix, showBadges, questVariables, questContained } from './state.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 
 // fhirpath.js v4 browser bundle loaded as global via lib/fhirpath.min.js
@@ -150,6 +153,31 @@ variablesPanel.init({
   applyBtn:  document.getElementById('variablesModalApply'),
   cancelBtn: document.getElementById('variablesModalCancel'),
 }, questVariables, reinitForm);
+
+// ── JSON Viewer modal init ────────────────────────────────────────────────
+jsonViewer.init({
+  modal:          document.getElementById('fhirJsonModal'),
+  title:          document.getElementById('fhirJsonModalTitle'),
+  pre:            document.getElementById('fhirJsonModalPre'),
+  closeBtn:       document.getElementById('fhirJsonModalClose'),
+  closeBtnFooter: document.getElementById('fhirJsonModalCloseBtn'),
+});
+
+// ── Contained resources panel init ───────────────────────────────────────
+containedPanel.init({
+  card:     document.getElementById('containedCard'),
+  toggle:   document.getElementById('containedCardToggle'),
+  chipList: document.getElementById('containedCardChips'),
+  count:    document.getElementById('containedCardCount'),
+}, questContained, jsonViewer.show);
+
+// ── Answer ValueSet panel init ────────────────────────────────────────────
+answerValueSetPanel.init({
+  card:     document.getElementById('answerValueSetCard'),
+  toggle:   document.getElementById('answerValueSetCardToggle'),
+  chipList: document.getElementById('answerValueSetCardChips'),
+  count:    document.getElementById('answerValueSetCardCount'),
+}, tree, jsonViewer.show);
 
 // ── Patient context popup init ────────────────────────────────────────────
 patientCtx.init({
@@ -311,6 +339,9 @@ function _doReset() {
   // Clear questionnaire-level variables
   questVariables.splice(0);
   variablesPanel.refresh();
+  questContained.splice(0);
+  containedPanel.refresh();
+  answerValueSetPanel.refresh();
   // Re-render empty builder
   renderTree();
   _setFileName('');
@@ -349,6 +380,8 @@ async function _importAndValidate(data, fileName) {
   // importFHIR is sync (parses tree); skip its internal renderTree, do async render instead
   importFHIR(data, () => {}); // pass no-op renderFn — we render below
   variablesPanel.refresh();
+  containedPanel.refresh();
+  answerValueSetPanel.refresh();
   reinitForm(); // evaluate initialExpression fields from imported data
   const issues = validateTree(tree, values);
   progress.show('Rendering ' + tree.length + ' nodes…');

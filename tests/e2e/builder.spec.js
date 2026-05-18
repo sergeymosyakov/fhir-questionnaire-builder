@@ -131,6 +131,12 @@ test.describe('Clear form', () => {
     await page.click('[data-sample="example-bariatric.fhir.json"]');
     await expect(page.locator('[data-testid="preview-panel"] [data-preview-id]').first()).toBeVisible();
 
+    // The bariatric sample has answerValueSet items — the import validation report appears.
+    // Wait for it and dismiss so it doesn't block subsequent clicks.
+    await page.locator('#validateModal').waitFor({ state: 'visible', timeout: 5_000 });
+    await page.locator('#validateModalClose').click();
+    await page.locator('#validateModal').waitFor({ state: 'hidden' });
+
     // Click the × button (visible only when a questionnaire is loaded).
     await page.getByTestId('clear-form-btn').click();
 
