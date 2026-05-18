@@ -292,9 +292,9 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   flex-shrink: 0;
   cursor: pointer;
 }
-.lbl-group { background: var(--c-primary-lt); color: var(--c-primary); }
-.lbl-item  { background: var(--c-teal-lt);    color: var(--c-teal); }
-.lbl-info  { background: #f0f0f0;             color: #888; }
+.lbl-group { background: var(--c-primary-lt); color: var(--c-primary); cursor: pointer; }
+.lbl-item  { background: var(--c-teal-lt);    color: var(--c-teal);    cursor: pointer; }
+.lbl-info  { background: #f0f0f0;             color: #888;             cursor: pointer; }
 
 .node-nav-btn {
   padding: 0 4px;
