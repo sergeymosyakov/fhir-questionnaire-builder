@@ -3,7 +3,8 @@
 import { findAndRemove } from '../utils.js';
 import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildTypePanel } from './panels.js';
+import { buildVisPanel } from './panels.js';
+import * as answerTypeModal from '../ui/answer-type-modal.js';
 import * as requiredModal from '../ui/required-modal.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
 import * as constraintModal from '../ui/constraint-modal.js';
@@ -124,6 +125,7 @@ export function renderItem(node, ctx) {
     'Sets the FHIR item type (boolean, decimal, string, choice, date, url, attachment, reference, quantity, display). Controls which input control is rendered in the preview.',
     'Questionnaire.item.type', 'R4 · required');
   typeLink.dataset.testid = 'action-type';
+  typeLink.onclick = () => answerTypeModal.open(node, typeLink, setActive);
   const mandLink  = addToggle('Required', 'mand',
     'Required',
     'Whether the item must be answered. Required items show ✔/✘ validation in the preview and affect the final PASS/FAIL result.',
@@ -243,9 +245,6 @@ export function renderItem(node, ctx) {
 
   div.appendChild(header);
   div.appendChild(btnDel);
-
-  // ── Panels ────────────────────────────────────────────────────────────────
-  addPanel('type', p => buildTypePanel(node, p), div, panels);
 
   setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
   setActive(exprLink,       !!node._calculatedExpr);

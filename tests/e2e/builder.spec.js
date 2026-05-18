@@ -131,12 +131,6 @@ test.describe('Clear form', () => {
     await page.click('[data-sample="example-bariatric.fhir.json"]');
     await expect(page.locator('[data-testid="preview-panel"] [data-preview-id]').first()).toBeVisible();
 
-    // The bariatric sample has answerValueSet items — the import validation report appears.
-    // Wait for it and dismiss so it doesn't block subsequent clicks.
-    await page.locator('#validateModal').waitFor({ state: 'visible', timeout: 5_000 });
-    await page.locator('#validateModalClose').click();
-    await page.locator('#validateModal').waitFor({ state: 'hidden' });
-
     // Click the × button (visible only when a questionnaire is loaded).
     await page.getByTestId('clear-form-btn').click();
 
@@ -261,7 +255,11 @@ test.describe('Builder → preview: item type changes', () => {
   async function changeType(page, itemId, typeValue) {
     const node = page.locator(`[data-node-id="${itemId}"]`);
     await node.getByTestId('action-type').click();
-    await node.getByTestId('type-select').selectOption(typeValue);
+    const modal = page.locator('#answerTypeModal');
+    await expect(modal).toBeVisible();
+    await modal.getByTestId('type-select').selectOption(typeValue);
+    await page.locator('#answerTypeModalApply').click();
+    await expect(modal).not.toBeVisible();
   }
 
   test('type = checkbox → preview renders a checkbox input', async ({ page }) => {
@@ -412,11 +410,14 @@ test.describe('Builder creates items → preview reacts', () => {
 
     const node = page.locator(`[data-node-id="${itemId}"]`);
 
-    // Open the Answer Type panel.
+    // Open the Answer Type modal.
     await node.getByTestId('action-type').click();
-
-    // The type-select is inside the same node's panel.
-    await node.getByTestId('type-select').selectOption('decimal');
+    const atModal = page.locator('#answerTypeModal');
+    await expect(atModal).toBeVisible();
+    // The type-select is inside the modal.
+    await atModal.getByTestId('type-select').selectOption('decimal');
+    await page.locator('#answerTypeModalApply').click();
+    await expect(atModal).not.toBeVisible();
 
     // Preview must now render a number <input>.
     await expect(page.locator(`[data-preview-id="${itemId}"] input[type="number"]`))

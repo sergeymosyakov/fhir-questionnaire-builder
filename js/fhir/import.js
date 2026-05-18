@@ -107,7 +107,7 @@ function applyConstraints(node, fhirItem) {
 }
 
 // Extract options string from a contained[] ValueSet referenced by '#id'
-function resolveContainedValueSet(contained, ref) {
+export function resolveContainedValueSet(contained, ref) {
   if (!ref || !ref.startsWith('#')) return '';
   const id = ref.slice(1);
   const vs = (contained || []).find(r => r.resourceType === 'ValueSet' && r.id === id);

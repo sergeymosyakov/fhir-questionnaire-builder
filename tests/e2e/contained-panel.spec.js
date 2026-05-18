@@ -42,11 +42,6 @@ async function freshStart(page) {
 async function loadFixture(page) {
   await page.locator('#fhirFileInput').setInputFiles(FIXTURE);
   await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 8_000 });
-  // The fixture has answerValueSet items — the import validation report always appears.
-  // Wait for it and dismiss so it doesn't block subsequent clicks.
-  await page.locator('#validateModal').waitFor({ state: 'visible', timeout: 5_000 });
-  await page.locator('#validateModalClose').click();
-  await page.locator('#validateModal').waitFor({ state: 'hidden' });
 }
 
 const containedCard      = (page) => page.locator('#containedCard');

@@ -23,6 +23,7 @@ import * as initialModal from './ui/initial-modal.js';
 import * as appearanceModal from './ui/appearance-modal.js';
 import * as repeatableModal from './ui/repeatable-modal.js';
 import * as requiredModal from './ui/required-modal.js';
+import * as answerTypeModal from './ui/answer-type-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
 import { showLinkId, showPrefix, showBadges, questVariables, questContained } from './state.js';
@@ -129,6 +130,15 @@ requiredModal.init({
   closeBtn:  document.getElementById('requiredModalClose'),
   cancelBtn: document.getElementById('requiredModalCancel'),
   applyBtn:  document.getElementById('requiredModalApply'),
+});
+// ── Answer Type modal init ─────────────────────────────────────────────
+answerTypeModal.init({
+  modal:     document.getElementById('answerTypeModal'),
+  title:     document.getElementById('answerTypeModalTitle'),
+  body:      document.getElementById('answerTypeModalBody'),
+  closeBtn:  document.getElementById('answerTypeModalClose'),
+  cancelBtn: document.getElementById('answerTypeModalCancel'),
+  applyBtn:  document.getElementById('answerTypeModalApply'),
 });
 // ── Appearance modal init ─────────────────────────────────────────────────────
 appearanceModal.init({

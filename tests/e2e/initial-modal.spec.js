@@ -204,7 +204,11 @@ test.describe('Default Value modal — not applicable types', () => {
   async function changeType(page, itemId, typeValue) {
     const node = page.locator(`[data-node-id="${itemId}"]`);
     await node.getByTestId('action-type').click();
-    await node.getByTestId('type-select').selectOption(typeValue);
+    const modal = page.locator('#answerTypeModal');
+    await expect(modal).toBeVisible();
+    await modal.getByTestId('type-select').selectOption(typeValue);
+    await page.locator('#answerTypeModalApply').click();
+    await expect(modal).not.toBeVisible();
   }
 
   test('display type: modal shows "not applicable" message', async ({ page }) => {
