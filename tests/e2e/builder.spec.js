@@ -428,11 +428,14 @@ test.describe('Builder creates items → preview reacts', () => {
     // By default (null) the preview shows a required star *.
     await expect(previewRow.getByTestId('preview-required-star')).toBeVisible();
 
-    // Open the Required panel.
+    // Open the Required modal.
     await node.getByTestId('action-mand').click();
+    const reqModal = page.locator('#requiredModal');
+    await expect(reqModal).toBeVisible();
 
-    // The mandatory panel select.
-    await node.getByTestId('mand-sel').selectOption('false');
+    // Select "No — optional" and apply.
+    await reqModal.locator('.required-modal-sel').selectOption('false');
+    await page.locator('#requiredModalApply').click();
 
     // Preview must now show "optional" badge instead of the star.
     await expect(previewRow.getByTestId('preview-optional-badge')).toBeVisible();

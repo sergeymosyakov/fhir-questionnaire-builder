@@ -1,6 +1,6 @@
 // ── Item node renderer ────────────────────────────────────────────────────────
 // renderItem(node, ctx: BuilderCtx) → HTMLElement  — see ctx.js
-import { findAndRemove, escAttr } from '../utils.js';
+import { findAndRemove } from '../utils.js';
 import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { addPanel, buildVisPanel, buildTypePanel } from './panels.js';
