@@ -147,6 +147,52 @@
   background: #e3f2fd;
   border-color: #90caf9;
 }
+
+/* Repeatable item UI */
+.repeat-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.repeat-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.repeat-remove-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  color: #999;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+.repeat-remove-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+.repeat-add-btn {
+  align-self: flex-start;
+  padding: 3px 10px;
+  border: 1px dashed #90caf9;
+  border-radius: 4px;
+  background: #f0f7ff;
+  color: #1565c0;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+.repeat-add-btn:hover {
+  background: #e3f2fd;
+  border-color: #42a5f5;
+}
 .preview-readonly-value {
   font-size: 13px;
   color: #546e7a;

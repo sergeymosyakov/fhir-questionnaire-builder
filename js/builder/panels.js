@@ -5,6 +5,7 @@
 import { escAttr, parseOptions } from '../utils.js';
 import { getAllItems, triggerCalcRecalc } from './_shared.js';
 import { refreshExprIcons } from '../render-preview.js';
+import { values, deleteValue } from '../state.js';
 
 // ── Panel factory helper ──────────────────────────────────────────────────────
 export function addPanel(key, buildFn, div, panels) {
@@ -494,7 +495,21 @@ export function buildTypePanel(node, p) {
   p.appendChild(qUnitDiv);
 
   typeSelect.onchange = () => {
+    // Clear all stored answers for this item (primary + repeat rows)
+    const id = node.id;
+    deleteValue(id);
+    const n = values[id + '$$n'] || 0;
+    for (let i = 1; i <= n; i++) deleteValue(id + '$$' + i);
+    delete values[id + '$$n'];
+
     node.itemType = typeSelect.value;
+
+    // checkbox and display cannot be repeatable
+    const noRepeats = node.itemType === 'checkbox' || node.itemType === 'display';
+    if (noRepeats && node.repeats) node.repeats = false;
+    const rl = p.closest('[data-node-id]')?.querySelector('[data-testid="action-repeatable"]');
+    if (rl) rl.style.display = noRepeats ? 'none' : '';
+
     optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice' || node.itemType === 'radio') ? 'block' : 'none';
     refResDiv.style.display  = node.itemType === 'reference' ? 'block' : 'none';
     qUnitDiv.style.display   = node.itemType === 'quantity'  ? 'block' : 'none';

@@ -2,7 +2,7 @@ import { createWrap } from './_base.js';
 import { parseOptions } from '../utils.js';
 
 export function build(node, ctx) {
-  const { values, onChange, _reCalc, _formTick } = ctx;
+  const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
   const wrap = createWrap();
 
   const opts = parseOptions(node.options);
@@ -22,8 +22,8 @@ export function build(node, ctx) {
     lbl.className = 'radio-label';
     const rb = document.createElement('input');
     rb.type = 'radio'; rb.name = rbName; rb.value = code;
-    rb.checked = values[node.id] === code;
-    rb.onchange = () => { if (rb.checked) { values[node.id] = code; _reCalc(); onChange(); _formTick.value++; } };
+    rb.checked = getValue(node.id) === code;
+    rb.onchange = () => { if (rb.checked) { setValue(node.id, code); _reCalc(); onChange(); _formTick.value++; } };
     lbl.appendChild(rb);
     lbl.appendChild(document.createTextNode(display));
     wrap.appendChild(lbl);

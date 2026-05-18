@@ -255,6 +255,7 @@ export function renderItem(node, ctx) {
   setActive(initExprLink,   !!node._initialExpr);
   setActive(roLink,         !!node._readOnly);
   setActive(repeatLink,     !!node.repeats);
+  if (node.itemType === 'checkbox' || node.itemType === 'display') repeatLink.style.display = 'none';
   setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
   setActive(styleLink,      !!node._renderStyle);
   setActive(mandLink,       node.mandatory === true);

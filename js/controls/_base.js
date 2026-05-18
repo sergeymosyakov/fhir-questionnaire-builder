@@ -7,8 +7,9 @@
 // Parameters:
 //   node  — the questionnaire node (id, itemType, options, mandatory, …)
 //   ctx   — {
-//     values   : plain object — current form answers
-//     onChange : () => void   — call after updating values[node.id]
+//     getValue : (id: string) => any  — read the primary answer for a linkId
+//     setValue : (id: string, val: any) => void  — write the primary answer
+//     onChange : () => void   — call after updating; updates own icon + group icons
 //                              updates own icon + group icons
 //     _reCalc  : () => void   — re-run FHIRPath calc (select/radio/open-choice)
 //     _formTick: Ref<number>  — increment to re-trigger effect() for

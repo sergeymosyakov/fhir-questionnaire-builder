@@ -1,5 +1,5 @@
 ﻿// Entry point: wires toolbar buttons, patient context popup, and loads the built-in example.
-import { tree, values, rawFhir, _formTick, effect } from './state.js';
+import { tree, values, rawFhir, _formTick, effect, clearAllValues } from './state.js';
 import { importFHIR } from './fhir/import.js';
 import { buildFHIRObject, exportFHIR } from './fhir/export.js';
 import { exportQR } from './fhir/qr-export.js';
@@ -295,7 +295,7 @@ function _doReset() {
   // Clear reactive tree
   tree.splice(0, tree.length);
   // Clear plain values store
-  for (const k of Object.keys(values)) delete values[k];
+  clearAllValues();
   // Clear rawFhir
   rawFhir.value = null;
   // Clear questionnaire-level variables

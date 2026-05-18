@@ -35,7 +35,6 @@ async function addTextItem(page) {
 }
 
 const repeatableLink  = (page) => page.locator('[data-node-id="1.1"]').getByTestId('action-repeatable');
-const repeatsBadge    = (page) => page.locator('[data-testid="preview-repeats-badge"]');
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
@@ -71,22 +70,21 @@ test.describe('Repeatable toggle — builder', () => {
 });
 
 test.describe('Repeatable toggle — preview', () => {
-  test('"⇄ repeatable" badge appears in preview after enabling', async ({ page }) => {
+  test('"+ Add another" button appears in preview after enabling', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
-    await expect(repeatsBadge(page)).not.toBeVisible();
+    await expect(page.getByTestId('repeat-add-btn')).not.toBeVisible();
     await repeatableLink(page).click();
-    await expect(repeatsBadge(page)).toBeVisible();
-    await expect(repeatsBadge(page)).toContainText('repeatable');
+    await expect(page.getByTestId('repeat-add-btn')).toBeVisible();
   });
 
-  test('"⇄ repeatable" badge disappears after disabling', async ({ page }) => {
+  test('"+ Add another" button disappears after disabling', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
     await repeatableLink(page).click();
-    await expect(repeatsBadge(page)).toBeVisible();
+    await expect(page.getByTestId('repeat-add-btn')).toBeVisible();
     await repeatableLink(page).click();
-    await expect(repeatsBadge(page)).not.toBeVisible();
+    await expect(page.getByTestId('repeat-add-btn')).not.toBeVisible();
   });
 });
 

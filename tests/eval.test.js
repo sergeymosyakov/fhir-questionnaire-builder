@@ -8,6 +8,7 @@ const _values = {};
 
 vi.mock('../js/state.js', () => ({
   values: _values,
+  getValue: id => _values[id],
 }));
 
 const { evaluateNode, markAllDisabled } = await import('../js/eval.js');

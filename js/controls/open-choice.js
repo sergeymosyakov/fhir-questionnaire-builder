@@ -2,7 +2,7 @@ import { createWrap } from './_base.js';
 import { parseOptions } from '../utils.js';
 
 export function build(node, ctx) {
-  const { values, onChange, _reCalc, _formTick } = ctx;
+  const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
   const wrap = createWrap();
 
   const parsed = parseOptions(node.options);
@@ -15,7 +15,7 @@ export function build(node, ctx) {
   el.type        = 'text';
   el.className   = 'oc-input';
   el.placeholder = 'Choose or type\u2026';
-  el.value       = values[node.id] !== undefined ? values[node.id] : '';
+  el.value       = getValue(node.id) !== undefined ? getValue(node.id) : '';
   el.autocomplete = 'off';
 
   const btn = document.createElement('button');
@@ -43,7 +43,7 @@ export function build(node, ctx) {
 
   const _pick = display => {
     el.value = display;
-    values[node.id] = display;
+    setValue(node.id, display);
     _reCalc();
     onChange();
     _formTick.value++;
@@ -96,7 +96,7 @@ export function build(node, ctx) {
   };
 
   el.addEventListener('input', () => {
-    values[node.id] = el.value;
+    setValue(node.id, el.value);
     _reCalc();
     onChange();
     openDrop(el.value);

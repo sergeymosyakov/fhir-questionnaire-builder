@@ -61,11 +61,11 @@ const QUANTITY_UNITS = [
 // Stores { value: number, unit: string } in values[node.id].
 // node.quantityUnit — default pre-selected unit (set in builder Type panel).
 export function build(node, ctx) {
-  const { values, onChange, _reCalc, _formTick } = ctx;
+  const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
   const wrap = createWrap();
 
   // Restore previous value
-  const current = values[node.id];
+  const current = getValue(node.id);
   const initVal  = current ? (current.value  !== undefined ? current.value : '') : '';
   const initUnit = current ? (current.unit   || node.quantityUnit || '') : (node.quantityUnit || '');
 
@@ -122,7 +122,7 @@ export function build(node, ctx) {
       errMsg.style.display = 'none';
     }
 
-    values[node.id] = (hasVal && hasUnit) ? { value: vNum, unit: u } : undefined;
+    setValue(node.id, (hasVal && hasUnit) ? { value: vNum, unit: u } : undefined);
     _reCalc(); onChange();
   };
 

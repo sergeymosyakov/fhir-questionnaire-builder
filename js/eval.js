@@ -1,7 +1,7 @@
 // ── Tree evaluation: enableWhen visibility ───────────────────────────────────────
 // ctx: { fp, qr, envVars } — fhirpath + QuestionnaireResponse + variable env
 // (optional; needed only for enableWhenExpression FHIRPath evaluation)
-import { values } from './state.js';
+import { getValue } from './state.js';
 
 // Marks every node in a subtree as visible-but-disabled.
 export function markAllDisabled(nodes, results) {
@@ -13,7 +13,7 @@ export function markAllDisabled(nodes, results) {
 
 // Evaluate one enableWhen condition against current form values.
 function checkOneEnableWhen(ew) {
-  const val = values[ew.question];
+  const val = getValue(ew.question);
   if (ew.operator === 'exists') {
     const hasVal = val !== undefined && val !== null && val !== '';
     return ew.answerBoolean !== false ? hasVal : !hasVal;

@@ -7,7 +7,7 @@
 // open(node, initLink, setActive)   — populate body + show
 
 import { parseOptions } from '../utils.js';
-import { values } from '../state.js';
+import { setValue, deleteValue } from '../state.js';
 import { triggerCalcRecalc } from '../builder/_shared.js';
 
 let _el      = null;
@@ -48,10 +48,10 @@ function _apply() {
   const v = _pending.draftValue;
   if (v !== undefined && v !== '') {
     node._initialValue = v;
-    values[node.id] = v;
+    setValue(node.id, v);
   } else {
     delete node._initialValue;
-    delete values[node.id];
+    deleteValue(node.id);
   }
   setActive(initLink, node._initialValue !== undefined && node._initialValue !== '');
   triggerCalcRecalc();

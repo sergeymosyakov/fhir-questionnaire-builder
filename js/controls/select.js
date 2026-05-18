@@ -2,11 +2,11 @@ import { createWrap } from './_base.js';
 import { parseOptions } from '../utils.js';
 
 export function build(node, ctx) {
-  const { values, onChange, _reCalc, _formTick } = ctx;
+  const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
   const wrap = createWrap();
 
   const opts   = parseOptions(node.options);
-  let selected = values[node.id] || '';
+  let selected = getValue(node.id) || '';
 
   // ── Trigger button ────────────────────────────────────────────────────────
   const trigger = document.createElement('div');
@@ -40,7 +40,7 @@ export function build(node, ctx) {
 
   const _pick = code => {
     selected = code;
-    values[node.id] = code;
+    setValue(node.id, code);
     setLabel();
     _reCalc();
     onChange();

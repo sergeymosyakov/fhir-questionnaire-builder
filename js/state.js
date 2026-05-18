@@ -9,7 +9,24 @@ export const tree = reactive([]);
 
 // Plain (non-reactive) store for current form values in preview.
 // Not reactive on purpose — avoids re-triggering effect() on every keystroke.
+// Do not access this directly — use getValue / setValue / deleteValue / clearAllValues.
 export const values = {};
+
+// ── Values API ────────────────────────────────────────────────────────────────
+// The single source of truth for answer access. When repeats support is added
+// the internal storage will change; all callers that use this API will be safe.
+
+/** Return the primary (first) answer for a linkId. */
+export const getValue   = id  => values[id];
+
+/** Set the primary answer for a linkId. */
+export const setValue   = (id, val) => { values[id] = val; };
+
+/** Delete the answer for a linkId. */
+export const deleteValue = id => { delete values[id]; };
+
+/** Wipe the entire answer store (used on import / reset). */
+export const clearAllValues = () => { Object.keys(values).forEach(k => delete values[k]); };
 
 // Reactive tick: incremented when a checkbox/select changes in the preview.
 // Causes effect() to re-run → re-evaluates enableWhen visibility conditions.
@@ -122,39 +139,39 @@ export const calcFormOk = node => {
   // Only boolean (checkbox) calc nodes participate in pass/fail
   if (node._calculatedExpr && node._readOnly) {
     if (node.itemType !== 'checkbox') return true;
-    return values[node.id] === true;
+    return getValue(node.id) === true;
   }
   // checkbox: mandatory → must be checked by the user
   if (node.itemType === 'checkbox' && isMandatory(node)) {
-    return values[node.id] === true;
+    return getValue(node.id) === true;
   }
   // url: validate format regardless of required
   if (node.itemType === 'url') {
-    const val = values[node.id];
+    const val = getValue(node.id);
     if (!val || val === '') return !isMandatory(node);
     return _isValidUrl(val);
   }
   // attachment: required means a file must be chosen
   if (node.itemType === 'attachment') {
     if (!isMandatory(node)) return true;
-    return values[node.id] != null;
+    return getValue(node.id) != null;
   }
   if (node.mandatory === false) return true;
   // reference: mandatory → { reference: "Type/id" } must be present
   if (node.itemType === 'reference') {
     if (!isMandatory(node)) return true;
-    const val = values[node.id];
+    const val = getValue(node.id);
     return val != null && typeof val === 'object' && !!val.reference;
   }
   // quantity: mandatory → { value: number, unit: string } must be present
   if (node.itemType === 'quantity') {
     if (!isMandatory(node)) return true;
-    const val = values[node.id];
+    const val = getValue(node.id);
     return val != null && typeof val === 'object' && val.value !== undefined && !!val.unit;
   }
   // mandatory text/number/date/etc → must be non-empty
   if (isMandatory(node) && NONEMPTY_TYPES.has(node.itemType)) {
-    const val = values[node.id];
+    const val = getValue(node.id);
     return val !== undefined && val !== '' && val !== null;
   }
   return true;

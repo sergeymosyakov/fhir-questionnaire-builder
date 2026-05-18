@@ -1,12 +1,12 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
-import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables } from '../state.js';
+import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables, setValue, clearAllValues } from '../state.js';
 import { renderTree } from '../render-builder.js';
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
 
 // Walk the tree and pre-populate values[] from node._initialValue
 function applyInitialValues(nodes) {
   for (const node of nodes) {
-    if (node._initialValue !== undefined) values[node.id] = node._initialValue;
+    if (node._initialValue !== undefined) setValue(node.id, node._initialValue);
     if (node.type === 'group') applyInitialValues(node.children);
   }
 }
@@ -235,7 +235,7 @@ export function importFHIR(fhirJson, renderFn) {
     return;
   }
   tree.splice(0);
-  Object.keys(values).forEach(k => delete values[k]);
+  clearAllValues();
   rawFhir.value = q;
   resetSeq();
 

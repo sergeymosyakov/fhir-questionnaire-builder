@@ -1,7 +1,7 @@
 // ── Right panel: reactive preview ─────────────────────────────────────────────
 import {
   effect,
-  tree, values, _formTick, _bulkUpdate, showLinkId, showPrefix, showBadges,
+  tree, values, getValue, setValue, deleteValue, _formTick, _bulkUpdate, showLinkId, showPrefix, showBadges,
   calcFormOk, isMandatory,
   rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
@@ -146,11 +146,11 @@ function refreshCalcBadges() {
     const id   = badge.dataset.calcId;
     const type = badge.dataset.calcType;
     if (type === 'checkbox') {
-      const v = values[id];
+      const v = getValue(id);
       badge.className   = 'calc-badge ' + (v ? 'calc-true' : 'calc-false') + ' calc-badge--explain';
       badge.textContent = v ? '\u2713 true' : '\u2717 false';
     } else {
-      const s = values[id];
+      const s = getValue(id);
       badge.className   = 'preview-calc-value';
       badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
     }
@@ -172,7 +172,55 @@ function buildControl(node, iconEl, onAfterChange) {
   // Wrap _reCalc so calc badges update in-place after every oninput.
   const reCalcAndRefresh = () => { _reCalc(); refreshCalcBadges(); };
 
-  return _buildControl(node, { values, onChange, _reCalc: reCalcAndRefresh, _formTick });
+  return _buildControl(node, { getValue, setValue, onChange, _reCalc: reCalcAndRefresh, _formTick });
+}
+
+// ── Repeat container: renders N+1 rows with add/remove buttons ────────────────
+function buildRepeatControls(node, iconEl, onAfterChange) {
+  const id     = node.id;
+  const rowKey = i => i === 0 ? id : id + '$$' + i;
+  const n      = values[id + '$$n'] || 0;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'repeat-wrap';
+
+  for (let i = 0; i <= n; i++) {
+    const rk       = rowKey(i);
+    const fakeNode = i === 0 ? node : { ...node, id: rk };
+    const rowEl    = document.createElement('div');
+    rowEl.className = 'repeat-row';
+
+    rowEl.appendChild(buildControl(fakeNode, i === 0 ? iconEl : null, onAfterChange));
+
+    if (n > 0) {
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'repeat-remove-btn';
+      rm.textContent = '\xD7';
+      rm.title = 'Remove this answer';
+      rm.dataset.testid = 'repeat-remove-btn';
+      const _i = i;
+      rm.onclick = () => {
+        for (let j = _i; j < n; j++) values[rowKey(j)] = values[rowKey(j + 1)];
+        delete values[rowKey(n)];
+        values[id + '$$n'] = n - 1;
+        _formTick.value++;
+      };
+      rowEl.appendChild(rm);
+    }
+
+    wrap.appendChild(rowEl);
+  }
+
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'repeat-add-btn';
+  addBtn.textContent = '+ Add another';
+  addBtn.dataset.testid = 'repeat-add-btn';
+  addBtn.onclick = () => { values[id + '$$n'] = n + 1; _formTick.value++; };
+  wrap.appendChild(addBtn);
+
+  return wrap;
 }
 
 // ── Async preview render with yield breaks ───────────────────────────────────
@@ -221,7 +269,7 @@ async function _asyncRender(version) {
   // calc nodes: visible, non-disabled items with a calculatedExpression
   const calcItems = visible.filter(r => !r.disabled && r.node.type === 'item' && r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox');
   const hasCalc = calcItems.length > 0;
-  const calcAllOk = calcItems.every(r => values[r.node.id] === true);
+  const calcAllOk = calcItems.every(r => getValue(r.node.id) === true);
 
   // constraint items: visible, non-disabled items with questionnaire-constraint[]
   const _cEnv = ctx.envVars || {};
@@ -238,7 +286,7 @@ async function _asyncRender(version) {
     (hasMandatory || hasCalc || hasConstraints);
   const failingItems = [
     ...mandatoryItems.filter(r => !r.ok || !calcFormOk(r.node)).map(r => ({ title: r.node.title, id: r.node.id })),
-    ...calcItems.filter(r => values[r.node.id] !== true).map(r => ({ title: r.node.title, id: r.node.id })),
+    ...calcItems.filter(r => getValue(r.node.id) !== true).map(r => ({ title: r.node.title, id: r.node.id })),
     ...constraintItems.filter(r => !evalConstraints(r.node, ctx.fp, ctx.qr, _cEnv)).map(r => ({ title: r.node.title, id: r.node.id }))
   ];
 
@@ -531,18 +579,6 @@ async function _asyncRender(version) {
       row.appendChild(rb);
     }
 
-    if (res.node.repeats) {
-      const rpb = document.createElement('span');
-      rpb.className = 'preview-meta-badge preview-meta-badge--repeats';
-      rpb.dataset.testid = 'preview-repeats-badge';
-      rpb.textContent = '\u21C4 repeatable';
-      rpb.dataset.tipTitle = 'Repeatable item';
-      rpb.dataset.tipBody  = 'This item allows multiple answers (item.repeats: true). In a real form, the user can add additional answer rows.';
-      rpb.dataset.tipFhir  = 'Questionnaire.item.repeats';
-      rpb.dataset.tipSpec  = 'R4';
-      row.appendChild(rpb);
-    }
-
     if (res.node._initialValue !== undefined && res.node._initialValue !== '') {
       const ib = document.createElement('span');
       ib.className = 'preview-meta-badge preview-meta-badge--init';
@@ -556,11 +592,15 @@ async function _asyncRender(version) {
 
     if (res.node.type === 'item') {
       if (res.node.itemType !== 'display' && !res.node._readOnly) {
-        row.appendChild(buildControl(res.node, iconEl, () => updateGroupIcons()));
+        if (res.node.repeats && res.node.itemType !== 'checkbox') {
+          row.appendChild(buildRepeatControls(res.node, iconEl, () => updateGroupIcons()));
+        } else {
+          row.appendChild(buildControl(res.node, iconEl, () => updateGroupIcons()));
+        }
       }
       // plain text value for readOnly fields without a calculatedExpression
       if (res.node._readOnly && !res.node._calculatedExpr) {
-        const val = values[res.node.id];
+        const val = getValue(res.node.id);
         if (val !== undefined && val !== null && val !== '') {
           const vb = document.createElement('span');
           vb.className = 'preview-readonly-value';
@@ -574,7 +614,7 @@ async function _asyncRender(version) {
         badge.dataset.calcId   = res.node.id;
         badge.dataset.calcType = res.node.itemType;
         if (res.node.itemType === 'checkbox') {
-          const calcVal = values[res.node.id];
+          const calcVal = getValue(res.node.id);
           badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false') + ' calc-badge--explain';
           badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
           badge.dataset.tipTitle = 'Calculated value';
@@ -586,7 +626,7 @@ async function _asyncRender(version) {
             if (_lastCtx.fp) explainModal.show(_expr, _lastCtx.fp, _lastCtx.qr, _lastCtx.env);
           });
         } else {
-          const s = values[res.node.id];
+          const s = getValue(res.node.id);
           badge.className = 'preview-calc-value';
           badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
         }

@@ -49,7 +49,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `start.ps1` | Local dev server: `npx serve .` |
 | `css/styles.css` | All styles and CSS design tokens (`--c-hover`, `--c-text-1`, `--c-accent`, etc.) |
 | `css/modals.css` | Shared modal system (`.modal-backdrop`, `.modal-box`, `.modal-header`, `.modal-close`, `.modal-body`, `.modal-footer`, `.modal-btn`, `.modal-title-label/subject`) + per-modal z-index/size overrides via ID selectors |
-| `js/state.js` | Reactive state, data factories, business logic, `evalConstraints` |
+| `js/state.js` | Reactive state, data factories, business logic, `evalConstraints`; exports `getValue(id)`, `setValue(id,val)`, `deleteValue(id)`, `clearAllValues()` — all callers must use these instead of accessing `values` directly; `values` itself still exported for pure functions (calc, qr-builder) that take it as a parameter |
 | `js/utils.js` | Pure utility functions (`escAttr`, `findAndRemove`, `isDescendant`, `findAncestorGroupIds`, `parseOption`, `parseOptions`) |
 | `js/eval.js` | Tree evaluation — `enableWhen[]` visibility, `enableWhenExpression` FHIRPath, `evalConstraints` |
 | `js/render-builder.js` | Left panel — 3-line re-export shim → `js/builder/` |
@@ -57,12 +57,12 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, etc.) |
 | `js/builder/_shared.js` | Shared utilities; injected deps via `init(deps)` |
 | `js/builder/dnd.js` | Self-contained drag & drop; all state via `init(onDrop, tree, formTick)` |
-| `js/builder/panels.js` | Action panel builders: `addPanel`, `buildVisPanel` (enableWhen), `buildTypePanel` (type+options), `buildStylePanel` (appearance for groups). Dead functions `buildMandPanel` / `buildInitialPanel` / `buildConstraintPanel` removed — those actions moved to dedicated modals |
+| `js/builder/panels.js` | Action panel builders: `addPanel`, `buildVisPanel` (enableWhen), `buildTypePanel` (type+options), `buildStylePanel` (appearance for groups). On type change: clears all stored answers (primary + repeat rows) and resets `node.repeats` for `checkbox`/`display` types |
 | `js/builder/node-item.js` | `renderItem(node, ctx)` — opens `showwhen-modal`, `expression-modal`, `constraint-modal`, `initial-modal`, `appearance-modal`, `required-modal` for respective action links; only `type` remains as inline panel |
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` — opens `showwhen-modal`, `expression-modal`, `required-modal` for respective action links; `style` still uses inline `buildStylePanel` |
-| `js/render-preview.js` | Right panel — async preview render; `reinitForm()` async with progress; `_asyncRender(version)` splits FHIRPath eval (Phase 1) from DOM rebuild (Phase 2) with `_yield()` breaks; stale renders self-abort via `_renderVersion`; exports `navigateToPreview(id)`, `refreshExprIcons()` |
+| `js/render-preview.js` | Right panel — async preview render; `reinitForm()` async with progress; `_asyncRender(version)` splits FHIRPath eval (Phase 1) from DOM rebuild (Phase 2) with `_yield()` breaks; stale renders self-abort via `_renderVersion`; exports `navigateToPreview(id)`, `refreshExprIcons()`; `buildRepeatControls(node, iconEl, onAfterChange)` renders multi-row repeat UI for `node.repeats === true` items (except `checkbox`/`display`) |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
-| `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns (`.sc-trigger` / `.oc-wrap`) instead of native `<select>` / `<datalist>` for consistent cross-platform rendering |
+| `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns (`.sc-trigger` / `.oc-wrap`) instead of native `<select>` / `<datalist>` for consistent cross-platform rendering. `url` uses `<textarea>` (same auto-resize pattern as `text`) with `new URL()` validation on blur. All controls receive `{ getValue, setValue, onChange, _reCalc, _formTick }` via `ctx` — no direct `values` access |
 | `js/patient.js` | **Removed** — patient context now managed as FHIRPath literal expressions in `questVariables` via `js/ui/patient-ctx.js` |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
 | `js/fhir/qr-export.js` | `exportQR(fileName)` — builds QR from current tree + answers, adds `authored` timestamp, downloads JSON |
@@ -122,8 +122,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
 - **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
-- **Vitest** — unit test suite for pure-function modules; **221 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — E2E test suite; **24 tests** (Chromium); CI via GitHub Actions (`npx playwright test`)
+- **Vitest** — unit test suite for pure-function modules; **246 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Playwright** — E2E test suite; **130 tests** across 12 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---
@@ -140,6 +140,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 // App state (js/state.js)
 tree              // reactive([]) — questionnaire node tree
 values            // plain object — form answers (not reactive; avoids re-render on every keystroke)
+                  // Access only via: getValue(id), setValue(id,val), deleteValue(id), clearAllValues()
+                  // Repeat rows: values[id+'$$1'], values[id+'$$2']…; row count: values[id+'$$n']
 _formTick         // ref(0) — incremented on checkbox/select change to re-trigger effect()
 questVariables    // reactive([]) — SDC sdc-questionnaire-variable entries; patient ctx seeded here
 ```
@@ -156,6 +158,7 @@ questVariables    // reactive([]) — SDC sdc-questionnaire-variable entries; pa
 // Item
 { id, type:'item', title, mandatory,
   itemType:'text'|'number'|'checkbox'|'select'|'display'|...,
+  repeats: bool,   // item.repeats — multi-row input in preview (not for checkbox/display)
   enableWhen: [], enableBehavior: 'all'|'any', enableWhenExpression: '',
   constraint: [], options }
 
@@ -291,6 +294,8 @@ _codes           // object[] — FHIR item.code[] (preserved round-trip; not dis
 - **Constraint badge in preview** — per-node badge: amber ⚠️ `constraint` (warning or passing error), red ✘ `constraint` (failing error); tooltip shows key, severity, human message, FHIRPath expression; affects Final Result when `severity: 'error'` and expression fails
 - **Read-only badge in preview** — grey 🔒 `read-only` pill when `node._readOnly === true` and no `_calculatedExpr`; CSS class `.preview-meta-badge` in `css/preview.css`
 - **Default badge in preview** — purple ↺ `default` pill when `node._initialValue` is defined; CSS class `.preview-meta-badge--init` in `css/preview.css`
+- **Repeatable items** — `Repeatable` action toggle on every non-checkbox/non-display item in the builder; sets `node.repeats: true`; hidden for `checkbox` and `display` types; when active, preview renders a `.repeat-wrap` container with one row per answer, `×` remove buttons (shown when >1 row), and `+ Add another` button; primary answer stored at `values[id]`, extras at `values[id+'$$1']`, …, row count at `values[id+'$$n']`; `getValue(id)` always returns the primary answer so FHIRPath expressions are unaffected; changing item type clears all rows
+- **URL control — textarea** — `url`-type items use `<textarea>` (same auto-resize as `text`); URL format validated via `new URL()` on blur; invalid format shows `✘` error message below
 - **Calc-badge tooltip** — calculated value badge now carries `data-tip-*` tooltip showing the FHIRPath expression and SDC spec footer
 - **Real-time calc badge** — `refreshCalcBadges()` updates calc-badge text+class in-place via `data-calc-id` attribute after each answer change — avoids full DOM rebuild while keeping the displayed value current
 - **Show When modal** — "Show When" action button on every node opens a centered modal (`js/ui/showwhen-modal.js`); **draft pattern** — `enableWhen[]`, `enableBehavior`, `enableWhenExpression` deep-cloned on open; **Apply** commits to node + calls `triggerCalcRecalc()` (preview re-renders immediately); **Cancel** / Escape / backdrop click discards all edits; action button indicator (dark purple) only updates on Apply — no premature state change during editing; modal title: bold `.modal-title-label` ("Show When") + muted `.modal-title-subject` ("— item title")

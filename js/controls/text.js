@@ -1,14 +1,14 @@
 import { createWrap } from './_base.js';
 
 export function build(node, ctx) {
-  const { values, onChange, _reCalc, _formTick } = ctx;
+  const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
   const wrap = createWrap();
   wrap.className = 'ctrl-wrap ctrl-wrap--text';
 
   const el = document.createElement('textarea');
   el.className = 'ctrl-input--text';
   el.rows = 1;
-  el.value = values[node.id] !== undefined ? values[node.id] : '';
+  el.value = getValue(node.id) !== undefined ? getValue(node.id) : '';
 
   const autoResize = () => {
     el.style.height = 'auto';
@@ -17,7 +17,7 @@ export function build(node, ctx) {
 
   let _debounce = null;
   el.oninput  = () => {
-    values[node.id] = el.value;
+    setValue(node.id, el.value);
     autoResize();
     clearTimeout(_debounce);
     _debounce = setTimeout(() => { _reCalc(); onChange(); }, 200);

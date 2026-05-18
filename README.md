@@ -92,8 +92,8 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `state`, integration); 221 tests across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — e2e test suite (`tests/e2e/`); **24 tests** covering load/clear form, collapse/expand group, FHIR export download, delete item/group (cascade), type changes (checkbox/display), bidirectional navigation flash (builder↔preview), node count match on import, answer state persistence, enableWhen visibility, patient preset → variable population, Re-init / initialExpression; Chromium only; all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `state`, integration); **246 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Playwright** — e2e test suite (`tests/e2e/`); **130 tests** across 12 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
 
@@ -107,8 +107,9 @@ age, gender, bmi, pregnant, smoker, proc, comorb  // ref() — patient fields
 
 // App state (js/state.js)
 tree          // reactive([]) — questionnaire node tree
-values        // plain object — form answers (not reactive; avoids re-render on every keystroke)
-_formTick     // ref(0) — incremented on discrete answer change (blur/commit) to re-trigger effect()
+values        // plain object — form answers; access via getValue/setValue/deleteValue/clearAllValues
+              // Repeat rows: values[id+'$$1'], values[id+'$$2']…; count: values[id+'$$n']
+_formTick     // ref(0) — incremented on discrete answer change to re-trigger effect()
 questVariables // reactive([]) — SDC sdc-questionnaire-variable entries; patient ctx seeded here
 ```
 
@@ -123,7 +124,8 @@ questVariables // reactive([]) — SDC sdc-questionnaire-variable entries; patie
 
 // Item
 { id, type:'item', title, mandatory,
-  itemType:'text'|'integer'|'decimal'|'checkbox'|'select'|'radio'|'open-choice'|'date'|'url'|'attachment'|'reference'|'quantity'|'display', // 'number' = legacy alias
+  itemType:'text'|'integer'|'decimal'|'checkbox'|'select'|'radio'|'open-choice'|'date'|'url'|'attachment'|'reference'|'quantity'|'display',
+  repeats: bool,   // allows multiple answers in preview (not for checkbox/display)
   enableWhen: [], enableBehavior: 'all'|'any', enableWhenExpression: '',
   constraint: [], options }
 
