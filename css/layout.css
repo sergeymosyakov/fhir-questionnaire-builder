@@ -234,7 +234,7 @@
 .right-panel-body {
   flex: 1;
   overflow-y: auto;
-  padding: 10px 14px 14px;
+  padding: 10px 14px 50px;
 }
 
 /* === Section titles ========================================================== */

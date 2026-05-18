@@ -129,6 +129,7 @@ function nodeToFHIRItem(node) {
   }
 
   if (node._readOnly) fhirItem.readOnly = true;
+  if (node.repeats)   fhirItem.repeats  = true;
 
   return fhirItem;
 }

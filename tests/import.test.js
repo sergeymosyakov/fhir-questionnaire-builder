@@ -345,6 +345,17 @@ describe('importFHIR', () => {
     expect(_tree[0].mandatory).toBe(true);
   });
 
+  it('imports repeats:true', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', repeats: true }]));
+    expect(_tree[0].repeats).toBe(true);
+  });
+
+  it('leaves repeats unset when not present in FHIR', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
+    // makeItem mock does not set repeats, so it is falsy / undefined
+    expect(_tree[0].repeats).toBeFalsy();
+  });
+
   it('imports questionnaire-level SDC variables', () => {
     const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
     importFHIR(minQ([], [

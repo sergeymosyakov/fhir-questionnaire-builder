@@ -1,0 +1,122 @@
+// ── E2E: Repeatable (item.repeats) ────────────────────────────────────────────
+// Tests for the "Repeatable" action toggle on item nodes and the resulting
+// preview badge, plus import/export round-trip via the in-browser flow.
+//
+// Run: npx playwright test tests/e2e/repeats.spec.js
+//
+// ── data-testid used in this suite ───────────────────────────────────────────
+//   add-root-group-btn      "+Add Root Group"
+//   group-add-btn           "+" button on a group
+//   add-menu-item           "Item" in add-child menu
+//   action-repeatable       "Repeatable" action link on an item
+//   preview-repeats-badge   "⇄ repeatable" badge in the preview panel
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { test, expect } from '@playwright/test';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+async function waitForLoad(page) {
+  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+}
+
+async function freshStart(page) {
+  await page.addInitScript(() => localStorage.clear());
+  await page.goto('/');
+  await waitForLoad(page);
+}
+
+async function addTextItem(page) {
+  await page.getByTestId('add-root-group-btn').click();
+  await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+  await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
+  await page.locator('[data-testid="add-menu-item"]').first().click();
+  await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
+}
+
+const repeatableLink  = (page) => page.locator('[data-node-id="1.1"]').getByTestId('action-repeatable');
+const repeatsBadge    = (page) => page.locator('[data-testid="preview-repeats-badge"]');
+
+// ── Tests ──────────────────────────────────────────────────────────────────────
+
+test.describe('Repeatable toggle — builder', () => {
+  test('"Repeatable" action link is present on an item node', async ({ page }) => {
+    await freshStart(page);
+    await addTextItem(page);
+    await expect(repeatableLink(page)).toBeVisible();
+    await expect(repeatableLink(page)).toContainText('Repeatable');
+  });
+
+  test('"Repeatable" link is inactive by default', async ({ page }) => {
+    await freshStart(page);
+    await addTextItem(page);
+    await expect(repeatableLink(page)).not.toHaveClass(/action-edit--active/);
+  });
+
+  test('clicking "Repeatable" activates the link', async ({ page }) => {
+    await freshStart(page);
+    await addTextItem(page);
+    await repeatableLink(page).click();
+    await expect(repeatableLink(page)).toHaveClass(/action-edit--active/);
+  });
+
+  test('clicking "Repeatable" again deactivates the link', async ({ page }) => {
+    await freshStart(page);
+    await addTextItem(page);
+    await repeatableLink(page).click();
+    await expect(repeatableLink(page)).toHaveClass(/action-edit--active/);
+    await repeatableLink(page).click();
+    await expect(repeatableLink(page)).not.toHaveClass(/action-edit--active/);
+  });
+});
+
+test.describe('Repeatable toggle — preview', () => {
+  test('"⇄ repeatable" badge appears in preview after enabling', async ({ page }) => {
+    await freshStart(page);
+    await addTextItem(page);
+    await expect(repeatsBadge(page)).not.toBeVisible();
+    await repeatableLink(page).click();
+    await expect(repeatsBadge(page)).toBeVisible();
+    await expect(repeatsBadge(page)).toContainText('repeatable');
+  });
+
+  test('"⇄ repeatable" badge disappears after disabling', async ({ page }) => {
+    await freshStart(page);
+    await addTextItem(page);
+    await repeatableLink(page).click();
+    await expect(repeatsBadge(page)).toBeVisible();
+    await repeatableLink(page).click();
+    await expect(repeatsBadge(page)).not.toBeVisible();
+  });
+});
+
+test.describe('Repeatable — import round-trip', () => {
+  test('item with repeats:true loads with Repeatable link active', async ({ page }) => {
+    await freshStart(page);
+
+    const fhirJson = JSON.stringify({
+      resourceType: 'Questionnaire',
+      id: 'repeats-test',
+      title: 'Repeats Test',
+      status: 'draft',
+      item: [{
+        linkId: 'q1',
+        text: 'How many times?',
+        type: 'integer',
+        repeats: true
+      }]
+    });
+
+    // Inject directly via the hidden file input (same pattern as builder.spec.js)
+    await page.locator('#fhirFileInput').setInputFiles({
+      name: 'repeats-test.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(fhirJson),
+    });
+
+    // After import, node q1 should exist and Repeatable must be active
+    await expect(page.locator('[data-node-id="q1"]')).toBeVisible();
+    const link = page.locator('[data-node-id="q1"]').getByTestId('action-repeatable');
+    await expect(link).toHaveClass(/action-edit--active/);
+  });
+});

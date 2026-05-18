@@ -72,6 +72,7 @@ export const makeItem = (title, template) => {
       enableBehavior:       'all',
       enableWhenExpression: '',
       mandatory:      template.mandatory,
+      repeats:        template.repeats || false,
       itemType:       template.itemType,
       options:        template.options,
       // FHIR questionnaire-constraint: [{key, expression, human, severity}]
@@ -85,6 +86,7 @@ export const makeItem = (title, template) => {
     enableBehavior:       'all',
     enableWhenExpression: '',
     mandatory: null,
+    repeats:   false,
     itemType: 'text',
     options: '',
     constraint: []

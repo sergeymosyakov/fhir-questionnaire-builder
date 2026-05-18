@@ -161,6 +161,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap) {
   }
 
   node._readOnly = !!fhirItem.readOnly;
+  if (fhirItem.repeats) node.repeats = true;
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
 

@@ -531,6 +531,18 @@ async function _asyncRender(version) {
       row.appendChild(rb);
     }
 
+    if (res.node.repeats) {
+      const rpb = document.createElement('span');
+      rpb.className = 'preview-meta-badge preview-meta-badge--repeats';
+      rpb.dataset.testid = 'preview-repeats-badge';
+      rpb.textContent = '\u21C4 repeatable';
+      rpb.dataset.tipTitle = 'Repeatable item';
+      rpb.dataset.tipBody  = 'This item allows multiple answers (item.repeats: true). In a real form, the user can add additional answer rows.';
+      rpb.dataset.tipFhir  = 'Questionnaire.item.repeats';
+      rpb.dataset.tipSpec  = 'R4';
+      row.appendChild(rpb);
+    }
+
     if (res.node._initialValue !== undefined && res.node._initialValue !== '') {
       const ib = document.createElement('span');
       ib.className = 'preview-meta-badge preview-meta-badge--init';

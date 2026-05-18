@@ -178,6 +178,22 @@ export function renderItem(node, ctx) {
   };
   actions.appendChild(roLink);
 
+  // Repeatable toggle — direct boolean, no panel needed
+  const repeatLink = document.createElement('a');
+  repeatLink.textContent = 'Repeatable';
+  repeatLink.className = 'action-edit';
+  repeatLink.dataset.tipTitle = 'Repeatable';
+  repeatLink.dataset.tipBody  = 'Allows the user to provide multiple answers for this item. Stored as item.repeats: true in the FHIR Questionnaire.';
+  repeatLink.dataset.tipFhir  = 'Questionnaire.item.repeats';
+  repeatLink.dataset.tipSpec  = 'R4';
+  repeatLink.dataset.testid   = 'action-repeatable';
+  repeatLink.onclick = () => {
+    node.repeats = !node.repeats;
+    setActive(repeatLink, !!node.repeats);
+    triggerCalcRecalc();
+  };
+  actions.appendChild(repeatLink);
+
   const initLink  = addToggle('Default', 'init',
     'Default Value (initial)',
     'Pre-fills the answer when the form loads. The user can change it unless readOnly is set. Only the first entry (initial[0]) is used. Supports all item types.',
@@ -238,6 +254,7 @@ export function renderItem(node, ctx) {
   setActive(exprLink,       !!node._calculatedExpr);
   setActive(initExprLink,   !!node._initialExpr);
   setActive(roLink,         !!node._readOnly);
+  setActive(repeatLink,     !!node.repeats);
   setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
   setActive(styleLink,      !!node._renderStyle);
   setActive(mandLink,       node.mandatory === true);

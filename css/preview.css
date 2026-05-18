@@ -142,6 +142,11 @@
   background: #ede7f6;
   border-color: #b39ddb;
 }
+.preview-meta-badge--repeats {
+  color: #1565c0;
+  background: #e3f2fd;
+  border-color: #90caf9;
+}
 .preview-readonly-value {
   font-size: 13px;
   color: #546e7a;

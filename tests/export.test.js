@@ -104,6 +104,24 @@ describe('buildFHIRObject — required', () => {
   });
 });
 
+// ── repeats ───────────────────────────────────────────────────────────────────
+describe('buildFHIRObject — repeats', () => {
+  it('exports repeats:true when node.repeats is true', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: true }]);
+    expect(q.item[0].repeats).toBe(true);
+  });
+
+  it('omits repeats when node.repeats is false', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: false }]);
+    expect(q.item[0].repeats).toBeUndefined();
+  });
+
+  it('omits repeats when node.repeats is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
+    expect(q.item[0].repeats).toBeUndefined();
+  });
+});
+
 // ── enableWhen ────────────────────────────────────────────────────────────────
 describe('buildFHIRObject — enableWhen', () => {
   it('exports enableWhen array directly', () => {
