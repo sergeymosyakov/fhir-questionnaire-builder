@@ -88,13 +88,12 @@ expressionModal.init({
   applyBtn:  document.getElementById('exprModalApply'),
 });
 // ── Validate modal init ───────────────────────────────────────────────────
-const _modal = document.getElementById('validateModal');
 validateModal.init({
-  backdrop:    _modal,
-  headerTitle: _modal.querySelector('.validate-modal-header span'),
-  body:        _modal.querySelector('.modal-body'),
-  footer:      _modal.querySelector('.modal-footer'),
-  closeBtn:    _modal.querySelector('.modal-close'),
+  modal:    document.getElementById('validateModal'),
+  title:    document.getElementById('validateModalTitle'),
+  body:     document.getElementById('validateModalBody'),
+  footer:   document.getElementById('validateModalFooter'),
+  closeBtn: document.getElementById('validateModalClose'),
 });
 
 // ── Variables panel init ──────────────────────────────────────────────────

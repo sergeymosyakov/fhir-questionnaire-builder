@@ -14,6 +14,7 @@
 //   load-fhir-btn             "⬆ Load ▾" dropdown trigger button
 //   clear-form-btn            "×" button that opens the clear-confirm dialog
 //   export-fhir-btn           "⬇ Export" button; triggers filename prompt then download
+//   validate-btn              "Validate" button in the builder toolbar
 //   tree-container            <div> wrapping the entire builder node tree
 //   status-badge-btn          coloured status badge button in the preview header
 //   preview-panel             <div> wrapping the entire questionnaire preview

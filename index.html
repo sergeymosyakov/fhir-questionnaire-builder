@@ -146,6 +146,7 @@
             <div id="statusDropdown" class="status-dropdown" style="display:none"></div>
           </span>
           <button id="validateBtn" class="btn-validate" style="display:none"
+            data-testid="validate-btn"
             data-tip-title="Validate questionnaire"
             data-tip-body="Checks for FHIR R4 issues: duplicate linkIds, empty titles, missing answer options, broken JS/FHIRPath expressions. Same check runs automatically on Export."
             data-tip-fhir="Questionnaire (FHIR R4)"
@@ -309,7 +310,7 @@
 <div id="validateModal" class="modal-backdrop" style="display:none">
   <div class="modal-box">
     <div class="modal-header">
-      <span>Export — Validation Report</span>
+      <span id="validateModalTitle">Export — Validation Report</span>
       <button id="validateModalClose" type="button" class="modal-close" title="Close">&#x2715;</button>
     </div>
     <div class="modal-body" id="validateModalBody"></div>

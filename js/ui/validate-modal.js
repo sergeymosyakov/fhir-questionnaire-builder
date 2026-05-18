@@ -10,19 +10,19 @@ let _el = null;
 export function init(elements) {
   _el = elements;
   _el.closeBtn.addEventListener('click', _close);
-  _el.backdrop.addEventListener('click', e => { if (e.target === _el.backdrop) _close(); });
+  _el.modal.addEventListener('click', e => { if (e.target === _el.modal) _close(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') _close(); });
 }
 
 export function show(title, issues, mode, { onExport, onNavigate } = {}) {
-  _el.headerTitle.textContent = issues.length === 0 ? 'Validate — All good' : title;
+  _el.title.textContent = issues.length === 0 ? 'Validate — All good' : title;
   _renderBody(issues, onNavigate);
   _renderFooter(mode, onExport, issues.length === 0);
-  _el.backdrop.style.display = 'flex';
+  _el.modal.style.display = 'flex';
 }
 
 function _close() {
-  _el.backdrop.style.display = 'none';
+  _el.modal.style.display = 'none';
 }
 
 function _renderBody(issues, onNavigate) {
