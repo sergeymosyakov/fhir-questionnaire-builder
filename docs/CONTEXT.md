@@ -60,7 +60,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, `renumberAll`, `addRootGroup`, `renderTreeAsync`) |
 | `js/builder/_shared.js` | Shared utilities; injected deps via `init(deps)`; `getAllItems`, `triggerCalcRecalc`, `confirmDelete` |
 | `js/builder/dnd.js` | Self-contained drag & drop; all state via `init(onDrop, tree, formTick)` |
-| `js/builder/panels.js` | Action panel builders: enableWhen vis panel (`buildVisPanel`), type+options (`buildTypePanel`). `buildMandPanel` / `buildStylePanel` / `buildInitialPanel` still exist but are no longer called — those actions moved to dedicated modals |
+| `js/builder/panels.js` | Action panel builders: `addPanel`, `buildVisPanel` (enableWhen), `buildTypePanel` (type+options), `buildStylePanel` (appearance for groups). Dead functions `buildMandPanel` / `buildInitialPanel` / `buildConstraintPanel` removed — those actions moved to dedicated modals |
 | `js/builder/node-item.js` | `renderItem(node, ctx)` — opens `showwhen-modal`, `expression-modal`, `constraint-modal`, `initial-modal`, `appearance-modal`, `required-modal` for respective action links; only `type` remains as inline panel |
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` — opens `showwhen-modal`, `expression-modal`, `required-modal` for respective action links; `style` still uses inline `buildStylePanel` |
 | `js/render-preview.js` | Right panel — reactive preview |
