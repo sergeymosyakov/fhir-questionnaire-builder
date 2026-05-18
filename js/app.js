@@ -16,6 +16,8 @@ import * as patientCtx from './ui/patient-ctx.js';
 import * as showWhenModal from './ui/showwhen-modal.js';
 import * as constraintModal from './ui/constraint-modal.js';
 import * as expressionModal from './ui/expression-modal.js';
+import * as initialModal from './ui/initial-modal.js';
+import * as appearanceModal from './ui/appearance-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
 import { showLinkId, showPrefix, showBadges, questVariables } from './state.js';
@@ -96,6 +98,24 @@ validateModal.init({
   closeBtn: document.getElementById('validateModalClose'),
 });
 
+// ── Default Value modal init ──────────────────────────────────────────────────
+initialModal.init({
+  modal:     document.getElementById('initialModal'),
+  title:     document.getElementById('initialModalTitle'),
+  body:      document.getElementById('initialModalBody'),
+  closeBtn:  document.getElementById('initialModalClose'),
+  cancelBtn: document.getElementById('initialModalCancel'),
+  applyBtn:  document.getElementById('initialModalApply'),
+});
+// ── Appearance modal init ─────────────────────────────────────────────────────
+appearanceModal.init({
+  modal:     document.getElementById('appearanceModal'),
+  title:     document.getElementById('appearanceModalTitle'),
+  body:      document.getElementById('appearanceModalBody'),
+  closeBtn:  document.getElementById('appearanceModalClose'),
+  cancelBtn: document.getElementById('appearanceModalCancel'),
+  applyBtn:  document.getElementById('appearanceModalApply'),
+});
 // ── Variables panel init ──────────────────────────────────────────────────
 variablesPanel.init({
   card:      document.getElementById('variablesCard'),

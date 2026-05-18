@@ -1,0 +1,172 @@
+// ── Appearance (rendering-style) edit modal ───────────────────────────────────
+// Centered modal for editing a node's _renderStyle CSS string.
+// Uses a draft pattern — changes are only committed on Apply.
+// Cancel discards all edits.
+//
+// init(elements)                       — wire DOM once at startup
+// open(node, styleLink, setActive)     — populate body + show
+// close()                              — cancel (discard draft)
+
+import { triggerCalcRecalc } from '../builder/_shared.js';
+
+let _el      = null;
+let _pending = null; // { node, styleLink, setActive, draftStyle }
+
+// ── helpers ───────────────────────────────────────────────────────────────────
+
+function _parseStyle(s) {
+  return {
+    bold:   /font-weight\s*:\s*bold/i.test(s),
+    italic: /font-style\s*:\s*italic/i.test(s),
+    color:  (s.match(/(?:^|;)\s*color\s*:\s*([^;]+)/i) || [])[1]?.trim() || '',
+  };
+}
+
+function _buildStyle(bold, italic, color) {
+  return [
+    'font-weight: ' + (bold   ? 'bold'   : 'normal'),
+    'font-style: '  + (italic ? 'italic' : 'normal'),
+    ...(color ? ['color: ' + color] : []),
+  ].join('; ');
+}
+
+// ── module API ────────────────────────────────────────────────────────────────
+
+export function init(elements) {
+  _el = elements;
+  _el.closeBtn.addEventListener('click', _cancel);
+  _el.cancelBtn.addEventListener('click', _cancel);
+  _el.applyBtn.addEventListener('click', _apply);
+  _el.modal.addEventListener('click', e => { if (e.target === _el.modal) _cancel(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && _el.modal.style.display !== 'none') _cancel();
+  });
+}
+
+export function open(node, styleLink, setActive) {
+  _pending = { node, styleLink, setActive, draftStyle: node._renderStyle || '' };
+
+  _el.title.innerHTML = '';
+  const labelEl = document.createElement('span');
+  labelEl.className   = 'modal-title-label';
+  labelEl.textContent = 'Appearance';
+  const subjectEl = document.createElement('span');
+  subjectEl.className   = 'modal-title-subject';
+  subjectEl.textContent = '\u2014 ' + (node.title || node.id || 'Item');
+  _el.title.appendChild(labelEl);
+  _el.title.appendChild(subjectEl);
+
+  _el.body.innerHTML = '';
+  _renderBody(_el.body);
+  _el.modal.style.display = 'flex';
+}
+
+function _apply() {
+  if (!_pending) return;
+  const { node, styleLink, setActive } = _pending;
+  node._renderStyle = _pending.draftStyle || undefined;
+  setActive(styleLink, !!node._renderStyle);
+  triggerCalcRecalc();
+  _close();
+}
+
+function _cancel() { _close(); }
+
+function _close() {
+  _pending = null;
+  _el.modal.style.display = 'none';
+}
+
+// ── body renderer ─────────────────────────────────────────────────────────────
+
+function _renderBody(container) {
+  const hint = document.createElement('div');
+  hint.className   = 'panel-hint';
+  hint.textContent = 'Inline CSS applied to the item title in the preview. Stored in rendering-style extension.';
+  container.appendChild(hint);
+
+  const form = document.createElement('div');
+  form.className = 'appearance-modal-form';
+  container.appendChild(form);
+
+  const cur = _parseStyle(_pending.draftStyle);
+
+  // ── bold ──────────────────────────────────────────────────────────────────
+  const boldCb   = Object.assign(document.createElement('input'), { type: 'checkbox', checked: cur.bold,   id: '_am_bold'   });
+  const italicCb = Object.assign(document.createElement('input'), { type: 'checkbox', checked: cur.italic, id: '_am_italic' });
+
+  // ── color ─────────────────────────────────────────────────────────────────
+  const colorInp = Object.assign(document.createElement('input'), {
+    type: 'color',
+    value: cur.color?.startsWith('#') ? cur.color : '#000000',
+    className: 'panel-color-inp',
+  });
+  const colorClear = Object.assign(document.createElement('button'), {
+    type: 'button', textContent: '\u2715',
+    className: 'panel-color-clear',
+    title: 'Remove color',
+  });
+  let _colorCleared = !cur.color;
+
+  // ── raw CSS textarea ──────────────────────────────────────────────────────
+  const rawTa = document.createElement('textarea');
+  rawTa.className   = 'style-modal-raw-ta';
+  rawTa.rows        = 1;
+  rawTa.placeholder = 'e.g. font-weight: bold; color: blue';
+  rawTa.value       = _pending.draftStyle;
+  rawTa.dataset.testid = 'appearance-raw-input';
+
+  // ── sync helpers ──────────────────────────────────────────────────────────
+  const syncFromWidgets = () => {
+    const color = _colorCleared ? '' : colorInp.value;
+    const s = _buildStyle(boldCb.checked, italicCb.checked, color);
+    _pending.draftStyle = s;
+    rawTa.value = s;
+  };
+
+  const syncFromRaw = () => {
+    _pending.draftStyle = rawTa.value;
+    const p2 = _parseStyle(rawTa.value);
+    boldCb.checked   = p2.bold;
+    italicCb.checked = p2.italic;
+    if (p2.color?.startsWith('#')) { colorInp.value = p2.color; _colorCleared = false; }
+    else { colorInp.value = '#000000'; _colorCleared = true; }
+  };
+
+  boldCb.onchange    = syncFromWidgets;
+  italicCb.onchange  = syncFromWidgets;
+  colorInp.oninput   = () => { _colorCleared = false; syncFromWidgets(); };
+  colorClear.onclick = () => { _colorCleared = true; colorInp.value = '#000000'; syncFromWidgets(); };
+  rawTa.oninput      = syncFromRaw;
+
+  // ── rows ──────────────────────────────────────────────────────────────────
+  const styleRow = (label, ...controls) => {
+    const row = document.createElement('div');
+    row.className = 'panel-style-row';
+    const lbl = document.createElement('label');
+    lbl.className = 'panel-style-lbl';
+    lbl.textContent = label;
+    row.appendChild(lbl);
+    controls.forEach(c => row.appendChild(c));
+    form.appendChild(row);
+  };
+
+  styleRow('Bold',   boldCb);
+  styleRow('Italic', italicCb);
+
+  const colorRow = document.createElement('div');
+  colorRow.className = 'panel-style-row';
+  const colorLbl = document.createElement('label');
+  colorLbl.className   = 'panel-style-lbl';
+  colorLbl.textContent = 'Color';
+  colorRow.appendChild(colorLbl);
+  colorRow.appendChild(colorInp);
+  colorRow.appendChild(colorClear);
+  form.appendChild(colorRow);
+
+  const rawLbl = document.createElement('div');
+  rawLbl.className   = 'panel-raw-lbl panel-raw-lbl--sm';
+  rawLbl.textContent = 'raw CSS:';
+  form.appendChild(rawLbl);
+  form.appendChild(rawTa);
+}

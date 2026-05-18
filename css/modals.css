@@ -86,6 +86,8 @@
 #validateModal    { z-index: 10000; }
 #showWhenModal    { z-index: 10100; }
 #constraintModal  { z-index: 10100; }
+#initialModal     { z-index: 10100; }
+#appearanceModal  { z-index: 10100; }
 #expressionModal  { z-index: 10200; }
 #explainModal     { z-index: 10300; }
 
@@ -95,6 +97,8 @@
 #showWhenModal .modal-box   { width: min(680px, 92vw); }
 #constraintModal .modal-box { width: min(560px, 94vw); }
 #expressionModal .modal-box { width: min(560px, 94vw); }
+#initialModal .modal-box    { width: min(420px, 94vw); }
+#appearanceModal .modal-box { width: min(380px, 94vw); }
 #patientCtxModal .modal-box { width: 380px; max-width: 94vw; max-height: none; overflow: visible; }
 #explainModal .modal-box    { width: min(640px, 94vw); }
 
@@ -109,6 +113,15 @@
 #constraintModal .modal-body { padding: 12px 16px 16px; }
 /* Expression — padding for the textarea */
 #expressionModal .modal-body { padding: 12px 16px 16px; }
+/* Initial — padding for the control */
+#initialModal .modal-body    { padding: 12px 16px 16px; }
+/* Appearance — padding for the style controls */
+#appearanceModal .modal-body { padding: 12px 16px 16px; }
+.appearance-modal-form { margin-top: 10px; }
+.style-modal-raw-ta    { width: 100%; box-sizing: border-box; resize: vertical;
+                          min-height: 26px; font-size: 11px; font-family: monospace;
+                          margin-top: 4px; padding: 3px 5px; }
+.initial-modal-label         { display: block; font-size: 12px; font-weight: 600; color: var(--c-text-2); margin-bottom: 6px; }
 /* Show When — widen condition row widgets */
 #showWhenModal .vis-q-sel        { min-width: 180px; max-width: 300px; }
 #showWhenModal .vis-cond-val-inp { max-width: 180px; }
