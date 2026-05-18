@@ -35,12 +35,16 @@ Every node in the tree is either a **group** or an **item**:
   constraint:          object[],
   itemType:            'text'|'integer'|'decimal'|'date'|'url'|'attachment'|'checkbox'|'select'|'radio'|'open-choice'|'quantity'|'reference'|'display', // 'number' legacy alias
   options:             string,           // comma-separated, used by select/radio/open-choice
+  repeats:             boolean,          // FHIR item.repeats — multi-row input in preview
   _renderStyle:        string,           // inline CSS (from rendering-style extension)
   _calculatedExpr:     string,           // FHIRPath expression (SDC calculatedExpression)
   _initialExpr:        string,           // FHIRPath expression (SDC initialExpression) — evaluated once on import + Re-init
   _readOnly:           boolean,          // FHIR item.readOnly
   _enableWhenText:     string,           // human-readable condition label (UI only, not persisted)
-  _initialValue:       any               // FHIR item.initial[0] value; pre-fills values[] on import
+  _initialValue:       any,              // FHIR item.initial[0] value; pre-fills values[] on import
+  _maxLength:          integer,          // FHIR item.maxLength
+  _minOccurs:          integer,          // questionnaire-minOccurs extension (when repeats: true)
+  _maxOccurs:          integer           // questionnaire-maxOccurs extension (when repeats: true; enforced in preview)
 }
 ```
 
@@ -123,6 +127,9 @@ Every node in the tree is either a **group** or an **item**:
 | `_readOnly` | `item.readOnly` | |
 | `_prefix` | `item.prefix` | imported and exported; displayed as amber badge in preview; editable in builder meta-row |
 | `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); not displayed in UI |
+| `_maxLength` | `item.maxLength` | imported → `node._maxLength`; exported back when set; not enforced in UI |
+| `_minOccurs` | `questionnaire-minOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true` |
+| `_maxOccurs` | `questionnaire-maxOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true`; enforced in preview — add button disabled at limit |
 ---
 
 ## Show When (enableWhen)
@@ -166,6 +173,8 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-constraint` | standard | `constraint[]` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-unit` | standard | `quantityUnit` (quantity default unit) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource` | standard | `referenceResource` (reference type lock) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs` | standard | `_minOccurs` (min repeat rows required) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs` | standard | `_maxOccurs` (max repeat rows; enforced in preview) | Yes |
 
 ---
 
@@ -187,7 +196,9 @@ Items marked ⚠️ produce silent data loss on import.
 
 | Feature | FHIR field / extension | Status |
 |---|---|---|
-| Repeating items | `item.repeats: true`, `item.maxOccurs` | ⚠️ ignored on import |
+| Repeating items (`item.repeats`) | `item.repeats: true` | ✅ imported/exported; modal configures repeats + min/max cardinality; QR round-trip safe |
+| `item.maxLength` | `item.maxLength` | ✅ imported (`node._maxLength`) / exported; not enforced in UI |
+| Cardinality | `questionnaire-minOccurs`, `questionnaire-maxOccurs` | ✅ imported/exported; `_maxOccurs` enforced in preview |
 | Answer value sets | `item.answerValueSet` | ⚠️ ignored on import; use `answerOption[]` instead |
 | `contained` resources | `Questionnaire.contained[]` | ⚠️ ignored on import |
 | Resource reference resolution | `type: 'reference'` | ⚠️ partial — dropdown (resource type) + id text input; no live search against a FHIR server |

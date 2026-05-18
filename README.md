@@ -41,6 +41,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/ui/showwhen-modal.js` | Show When centered modal — draft pattern (Apply/Cancel); action button indicator only changes on Apply; searchable question picker portal dropdown |
 | `js/ui/constraint-modal.js` | Constraint edit modal — draft pattern; Apply commits + calls `triggerCalcRecalc()` so preview re-renders; expression field is a resizable `.expr-textarea` |
 | `js/ui/expression-modal.js` | Config-driven modal for `_calculatedExpr` and `_initialExpr` FHIRPath fields — `open(cfg)`; draft pattern; auto-resize textarea; live expr icon |
+| `js/ui/repeatable-modal.js` | Repeatable edit modal — toggle for `node.repeats` + cardinality card (`_minOccurs` / `_maxOccurs`); Apply trims excess rows when maxOccurs reduced; calls `triggerCalcRecalc()` |
 | `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles (Adult Male, Adult Female, Obese Male, Child, Pregnant Female) + Custom…; `Patient ▾` button in toolbar; selecting a preset auto-applies patient vars and calls `reinitForm()`; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + keyboard navigation |
@@ -93,7 +94,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
 - **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `state`, integration); **246 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — e2e test suite (`tests/e2e/`); **130 tests** across 12 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
+- **Playwright** — e2e test suite (`tests/e2e/`); **132 tests** across 11 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
 
@@ -138,6 +139,9 @@ _readOnly        // boolean — FHIR item.readOnly
 _initialValue    // any — FHIR item.initial[0] value; pre-fills values[] on import
 _prefix          // string — FHIR item.prefix (amber badge; editable in builder)
 _codes           // object[] — FHIR item.code[] (round-trip safe; not displayed)
+_maxLength       // integer — FHIR item.maxLength (imported/exported; not enforced in UI)
+_minOccurs       // integer — questionnaire-minOccurs ext (imported/exported when repeats:true)
+_maxOccurs       // integer — questionnaire-maxOccurs ext; enforced in preview — add button disabled at limit
 ```
 
 ---
@@ -199,6 +203,10 @@ _codes           // object[] — FHIR item.code[] (round-trip safe; not displaye
 | `_text.extension[rendering-style]` | `_renderStyle` (applied as inline CSS in preview) |
 | `item.prefix` | `_prefix` — amber badge in preview; editable in builder; exported back (round-trip safe) |
 | `item.code[]` | `_codes` — preserved as-is; exported back unchanged (round-trip safe) |
+| `item.repeats` | `node.repeats` — multi-row input in preview (not for checkbox/display); QR round-trip safe |
+| `item.maxLength` | `node._maxLength` — imported and exported; not enforced in UI |
+| `questionnaire-minOccurs` ext | `node._minOccurs` — min repeat rows; exported when repeats:true |
+| `questionnaire-maxOccurs` ext | `node._maxOccurs` — max repeat rows; enforced in preview — add button disabled at limit |
 
 Standard extensions preserved on export:
 - `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` — `radio-button` code for `radio` itemType
@@ -266,6 +274,7 @@ See [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) for the full FHIR field mapping
 - **Constraint modal** — **Constraint** action button on every node (dark purple when `constraint[]` non-empty) opens a centered modal with draft pattern; editable cards per constraint (key, severity error/warning, human message, FHIRPath expression, remove) + **+ Add constraint**; Apply commits, Cancel discards; exported as `questionnaire-constraint` extensions
 - **QR Export** — **⬇ Response** button in toolbar (visible when questionnaire loaded); prompts for filename; downloads current answers as FHIR R4 `QuestionnaireResponse` JSON with `authored` timestamp
 - **QR Import (Load Answers)** — **Load Answers…** at bottom of Load dropdown (visible when questionnaire loaded); reads a `QuestionnaireResponse` file; loads matched answers into `values[]`; shows warning for URL mismatch or unknown linkIds
+- **Repeatable items** — `Repeatable` action link on every non-checkbox/non-display item opens a modal; toggle for `node.repeats` + optional **Min** / **Max** cardinality inputs (`questionnaire-minOccurs` / `questionnaire-maxOccurs`); preview renders `.repeat-wrap` with `×` remove + `+ Add another`; `_maxOccurs` enforced — add button disabled at limit; QR export collects all rows into `answer[]`; QR import restores rows; `item.maxLength` imported/exported as `node._maxLength`
 - **Constraint badge in preview** — per-node badge: amber ⚠️ (warning or passing error), red ✘ (failing error); tooltip shows key/severity/message/expression; `error`+fail blocks Final Result
 - **Read-only badge** — grey 🔒 `read-only` pill when `_readOnly === true` and no `_calculatedExpr`
 - **Default badge** — purple ↺ `default` pill when `_initialValue` is defined

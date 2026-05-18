@@ -61,15 +61,15 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/builder/_shared.js` | Shared utilities; injected deps via `init(deps)`; `getAllItems`, `triggerCalcRecalc`, `confirmDelete` |
 | `js/builder/dnd.js` | Self-contained drag & drop; all state via `init(onDrop, tree, formTick)` |
 | `js/builder/panels.js` | Action panel builders: `addPanel`, `buildVisPanel` (enableWhen), `buildTypePanel` (type+options), `buildStylePanel` (appearance for groups). Dead functions `buildMandPanel` / `buildInitialPanel` / `buildConstraintPanel` removed — those actions moved to dedicated modals |
-| `js/builder/node-item.js` | `renderItem(node, ctx)` — opens `showwhen-modal`, `expression-modal`, `constraint-modal`, `initial-modal`, `appearance-modal`, `required-modal` for respective action links; only `type` remains as inline panel |
+| `js/builder/node-item.js` | `renderItem(node, ctx)` — opens `showwhen-modal`, `expression-modal`, `constraint-modal`, `initial-modal`, `appearance-modal`, `required-modal`, `repeatable-modal` for respective action links; only `type` remains as inline panel |
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` — opens `showwhen-modal`, `expression-modal`, `required-modal` for respective action links; `style` still uses inline `buildStylePanel` |
-| `js/render-preview.js` | Right panel — reactive preview |
+| `js/render-preview.js` | Right panel — reactive preview; `buildRepeatControls` renders multi-row repeat UI; enforces `node._maxOccurs` — add button disabled at limit |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
 | `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns (`.sc-trigger` / `.oc-wrap`) replacing native `<select>` / `<datalist>` |
-| `js/fhir/import.js` | FHIR R4 → internal model |
-| `js/fhir/export.js` | Internal model → FHIR R4 |
+| `js/fhir/import.js` | FHIR R4 → internal model; reads `item.repeats`, `item.maxLength` (→ `_maxLength`), and `questionnaire-minOccurs` / `questionnaire-maxOccurs` extensions |
+| `js/fhir/export.js` | Internal model → FHIR R4; writes `maxLength`, `questionnaire-minOccurs` / `questionnaire-maxOccurs` when `node.repeats` |
 | `js/fhir/qr-export.js` | `exportQR(fileName)` — builds QR from current tree + answers, downloads JSON |
-| `js/fhir/qr-import.js` | `importQRAnswers(qrJson, values, tree)` — flattens QR answers, loads into `values`, reports unmatched linkIds |
+| `js/fhir/qr-import.js` | `importQRAnswers(qrJson, values, tree)` — flattens QR answers; multi-answer items write `id$$1`…`id$$N` + `id$$n` (repeat row restoration); reports unmatched linkIds |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; draft-based Apply/Cancel modal; `%name` chip rich tooltips |
 | `js/ui/showwhen-modal.js` | Show When (enableWhen) centered modal — draft pattern; Apply commits + triggers preview re-render; Cancel discards; no-op `setActive` during editing so action button only changes on Apply |
 | `js/ui/constraint-modal.js` | Constraint edit modal — draft pattern; `node.constraint[]` deep-cloned on open; Apply commits + calls `triggerCalcRecalc()` + updates button state; Cancel discards; expression field is a resizable `.expr-textarea`; each card has an **Explain** button (uses `window.fhirpath` directly) |
@@ -77,6 +77,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/initial-modal.js` | Default Value edit modal — `init(elements)`, `open(node, initLink, setActive)`; draft pattern; renders context-aware control per `itemType`; Apply commits `node._initialValue` + `values[node.id]` + calls `triggerCalcRecalc()` |
 | `js/ui/appearance-modal.js` | Appearance (rendering-style) edit modal — `init(elements)`, `open(node, styleLink, setActive)`; draft pattern; Bold / Italic checkboxes, color picker + clear, raw CSS `<textarea rows=1 resize:vertical>`; Apply sets `node._renderStyle` |
 | `js/ui/required-modal.js` | Required (mandatory) edit modal — `init(elements)`, `open(node, mandLink, setActive)`; draft pattern; `<select>` with null / true / false options; Apply sets `node.mandatory`; link active only when `mandatory === true` |
+| `js/ui/repeatable-modal.js` | Repeatable edit modal — `init(elements)`, `open(node, repeatLink, setActive)`; draft pattern; toggle for `node.repeats` + cardinality card (`_minOccurs` / `_maxOccurs` integer inputs); Apply trims excess rows when maxOccurs reduced; calls `triggerCalcRecalc()` |
 | `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles + Custom…; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` in `questVariables`; auto-applies and calls `reinitForm()` on selection |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + up/down/Enter navigation |
@@ -103,7 +104,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
 | `playwright.config.js` | Playwright config — Chromium only, `testDir: tests/e2e`, auto-starts local `serve` (via `node node_modules/.bin/serve`); reporters: `html` (open:never) + `list` |
 | `tests/e2e/builder.spec.js` | E2E tests (24) — load/clear form, collapse/expand group, FHIR export, group title edit, delete item/group (cascade), type changes (checkbox/display), bidirectional navigation flash (builder↔preview), node count match on import, answer state persistence, enableWhen (Show When modal), patient preset section visibility, Re-init / initialExpression population; all selectors via `data-testid`; fixtures from `tests/fixtures/` |
-| `tests/fixtures/` | Frozen FHIR samples for e2e tests — do not edit. `example-bariatric.fhir.json`, `patient-scenario-eligibility.fhir.json` |
+| `tests/fixtures/` | Frozen FHIR samples for e2e tests — do not edit. `example-bariatric.fhir.json`, `patient-scenario-eligibility.fhir.json`, `all-types-repeatable.fhir.json` |
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
 | `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic (23 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
@@ -124,10 +125,10 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
-- **Playwright** — E2E test suite; **24 tests** (Chromium); CI via GitHub Actions (`npx playwright test`)
+- **Playwright** — E2E test suite; **132 tests** across 11 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
 - **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
-- **Vitest** — unit test suite for pure-function modules; **221 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules; **246 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---
@@ -171,6 +172,9 @@ _readOnly        // boolean — FHIR item.readOnly
 _initialValue    // any — FHIR item.initial[0] value (pre-fills values[] on import)
 _prefix          // string — FHIR item.prefix (amber badge; editable in builder)
 _codes           // object[] — FHIR item.code[] (preserved round-trip; not displayed)
+_maxLength       // integer — FHIR item.maxLength (imported/exported; not enforced in UI yet)
+_minOccurs       // integer — questionnaire-minOccurs ext (imported/exported when repeats:true)
+_maxOccurs       // integer — questionnaire-maxOccurs ext; enforced in preview — add button disabled at limit
 ```
 
 ---
@@ -241,6 +245,10 @@ _codes           // object[] — FHIR item.code[] (preserved round-trip; not dis
 - `_text.extension[rendering-style]` → `_renderStyle` (applied as inline CSS in preview)
 - `item.prefix` → `node._prefix` (amber badge in preview; editable in builder; exported back)
 - `item.code[]` → `node._codes` (preserved as-is; exported back unchanged)
+- `item.repeats` → `node.repeats` (multi-row input; not for checkbox/display)
+- `item.maxLength` → `node._maxLength` (imported/exported; not enforced in UI)
+- `questionnaire-minOccurs` ext → `node._minOccurs` (imported/exported when repeats:true)
+- `questionnaire-maxOccurs` ext → `node._maxOccurs` (enforced in preview)
 - `linkIdMap` built before parsing → used for human-readable condition text in `_enableWhenText`
 
 ## FHIR Export (`exportFHIR`)
@@ -249,6 +257,9 @@ _codes           // object[] — FHIR item.code[] (preserved round-trip; not dis
 - `node.enableBehavior === 'any'` → `item.enableBehavior: 'any'`
 - `node.enableWhenExpression` → SDC `sdc-questionnaire-enableWhenExpression` extension
 - `node.constraint[]` → `questionnaire-constraint` extensions
+- `node._maxLength` → `item.maxLength` (when set)
+- `node._minOccurs` → `questionnaire-minOccurs` extension (when `node.repeats`)
+- `node._maxOccurs` → `questionnaire-maxOccurs` extension (when `node.repeats`)
 - `itemType:'radio'` → exports `type:'choice'` + standard `questionnaire-itemControl: radio-button` extension (round-trip safe)
 - Downloads as `<name>.json` (user prompted for filename)
 
@@ -276,6 +287,7 @@ _codes           // object[] — FHIR item.code[] (preserved round-trip; not dis
 - **Searchable question picker** — enableWhen condition rows have a sticky search input filtering by `id` and title; dropdown rendered as a portal (`document.body`) with `position: fixed` + `getBoundingClientRect()` — escapes `overflow` clipping in any ancestor; auto-flips upward if needed; z-index 10200
 - **QR Export** — **⬇ Response** button in toolbar; prompts for filename; downloads current answers as FHIR R4 `QuestionnaireResponse` JSON with `authored` timestamp
 - **QR Import (Load Answers)** — **Load Answers…** at bottom of Load dropdown; reads a QR JSON file; loads matched answers into `values[]`; shows warning modal for URL mismatch or unknown linkIds
+- **Repeatable items** — `Repeatable` action link opens `js/ui/repeatable-modal.js`; modal: toggle for `node.repeats` + optional **Min** / **Max** cardinality inputs (`questionnaire-minOccurs` / `questionnaire-maxOccurs`); preview renders `.repeat-wrap` with `×` remove + `+ Add another`; `_maxOccurs` enforced — add button disabled at limit; QR export collects all rows into `answer[]`; QR import restores rows; `item.maxLength` imported/exported as `node._maxLength`
 - **Shared modal system** — all dialogs (Variables, Show When, Constraints, Patient Context, Validate, Expression Explain) use `.modal-backdrop / .modal-box / .modal-header / .modal-close / .modal-body / .modal-footer / .modal-btn` from `css/modals.css`; per-modal z-index and width via `#id` selectors; tokens `--c-hover` and `--c-text-1` added to `css/styles.css`; title pattern: `.modal-title-label` (bold) + `.modal-title-subject` (muted)
 - **Rich tooltips on action buttons** — all builder action buttons (Answer Type, Required, Show When, Applicability, Expression, Default, Appearance), toolbar buttons (Load, Export, Add Root Group, Renumber, prefix format select, id/prefix/collapse/expand), and the Variables card title carry `data-tip-*` attributes with FHIR field path and spec reference (R4 / SDC) in the footer; implemented via delegated `mouseover` in `js/ui/tooltip.js`
 - **Tooltip toggle** — `tips` button in the preview toolbar; green = enabled (default), orange = disabled; persisted in `localStorage` (`tooltips-enabled`); **tooltips off** label shown next to Logic Builder heading when disabled
