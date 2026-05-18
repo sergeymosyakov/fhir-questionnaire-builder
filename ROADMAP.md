@@ -14,7 +14,7 @@ See [docs/CONTEXT.md](docs/CONTEXT.md) for scenario definitions.
 
 - [ ] **Patient presets** — 3–4 quick-switch patient buttons (e.g. Child, Adult F, Obese M); replaces manual field-by-field editing for faster Scenario 3 testing
 - [x] **`open-choice` free-text rendering** — text input + `<datalist>` suggestions from `answerOption[]`; free-text allowed
-- [ ] **`answerValueSet` warning** — show import warning when `answerValueSet` is used (currently silently dropped)
+- [x] **`answerValueSet` warning** — suppressed when `answerValueSet` is present; validator no longer flags items that delegate answer options to an external value set
 - [ ] **More sample data** — 2–3 additional questionnaires covering different complexity levels, with documented expected PASS/FAIL outcomes per patient profile
 
 ## Later

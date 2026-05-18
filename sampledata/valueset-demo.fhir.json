@@ -1,0 +1,118 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "valueset-demo",
+  "title": "ValueSet Demo — Coded Answers",
+  "status": "draft",
+  "date": "2024-01-01",
+  "description": "Demonstrates answerValueSet round-trip: contained[] ValueSets referenced via '#id', and one external URL. Items render as select, radio, and open-choice.",
+  "contained": [
+    {
+      "resourceType": "ValueSet",
+      "id": "vs-smoking-status",
+      "name": "SmokingStatus",
+      "title": "Smoking Status",
+      "status": "active",
+      "compose": {
+        "include": [
+          {
+            "system": "http://snomed.info/sct",
+            "concept": [
+              { "code": "266919005", "display": "Never smoked" },
+              { "code": "77176002",  "display": "Current smoker" },
+              { "code": "8517006",   "display": "Ex-smoker" },
+              { "code": "394917008", "display": "Passive smoker" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "vs-alcohol-frequency",
+      "name": "AlcoholFrequency",
+      "title": "Alcohol Use Frequency (AUDIT-C)",
+      "status": "active",
+      "compose": {
+        "include": [
+          {
+            "system": "http://loinc.org",
+            "concept": [
+              { "code": "LA6270-8",  "display": "Never" },
+              { "code": "LA18926-8", "display": "Monthly or less" },
+              { "code": "LA18927-6", "display": "2–4 times per month" },
+              { "code": "LA18928-4", "display": "2–3 times per week" },
+              { "code": "LA18929-2", "display": "4 or more times per week" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "vs-activity-level",
+      "name": "PhysicalActivityLevel",
+      "title": "Physical Activity Level",
+      "status": "active",
+      "compose": {
+        "include": [
+          {
+            "system": "http://example.org/fhir/CodeSystem/activity-level",
+            "concept": [
+              { "code": "sedentary", "display": "Sedentary (little or no exercise)" },
+              { "code": "light",     "display": "Lightly active (1–3 days/week)" },
+              { "code": "moderate",  "display": "Moderately active (3–5 days/week)" },
+              { "code": "very",      "display": "Very active (6–7 days/week)" },
+              { "code": "extra",     "display": "Extremely active (hard daily training)" }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "linkId": "s-lifestyle",
+      "text": "Lifestyle & Social History",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "q-smoking",
+          "text": "Smoking status",
+          "type": "choice",
+          "answerValueSet": "#vs-smoking-status"
+        },
+        {
+          "linkId": "q-alcohol",
+          "text": "How often do you drink alcohol?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerValueSet": "#vs-alcohol-frequency"
+        },
+        {
+          "linkId": "q-activity",
+          "text": "Physical activity level (free text allowed)",
+          "type": "open-choice",
+          "answerValueSet": "#vs-activity-level"
+        },
+        {
+          "linkId": "q-occupation",
+          "text": "Occupation type",
+          "type": "choice",
+          "answerValueSet": "http://hl7.org/fhir/ValueSet/occupation-snomed-ct"
+        }
+      ]
+    }
+  ]
+}

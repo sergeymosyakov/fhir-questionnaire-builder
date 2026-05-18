@@ -119,7 +119,8 @@ export function validateTree(tree, values = {}) {
 
     if (node.type === 'item' &&
         (node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice') &&
-        (!node.options || !node.options.trim())) {
+        (!node.options || !node.options.trim()) &&
+        !node._answerValueSet) {
       issues.push({ severity: 'warning', nodeId: id, message: `Item type "${node.itemType}" has no answer options — answerOption will be empty in the export.` });
     }
 

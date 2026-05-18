@@ -88,6 +88,11 @@ describe('validateTree — select/radio options', () => {
     const issues = validateTree([makeItem({ id: 'q1', itemType: 'select', options: 'a=A,b=B' })]);
     expect(issues.filter(i => i.nodeId === 'q1' && i.severity === 'warning')).toHaveLength(0);
   });
+
+  it('no warning when select uses answerValueSet', () => {
+    const issues = validateTree([makeItem({ id: 'q1', itemType: 'select', options: '', _answerValueSet: '#vs-diet' })]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.severity === 'warning')).toHaveLength(0);
+  });
 });
 
 // ── FHIRPath expression errors ──────────────────────────────────────────────
