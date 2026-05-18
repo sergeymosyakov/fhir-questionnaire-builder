@@ -285,7 +285,7 @@ test.describe('Builder → preview: item type changes', () => {
 });
 
 test.describe('Navigation', () => {
-  test('↗ button in builder flashes the corresponding preview row', async ({ page }) => {
+  test('clicking title area in builder flashes the corresponding preview row', async ({ page }) => {
     await freshStart(page);
     const groupId = await addRootGroup(page);
     const itemId  = await addItemToGroup(page, groupId);
@@ -293,7 +293,7 @@ test.describe('Navigation', () => {
     // Wait for the preview to finish its async render before navigating.
     await expect(page.locator(`[data-preview-id="${itemId}"]`)).toBeVisible();
 
-    await page.locator(`[data-node-id="${itemId}"]`).getByTestId('node-nav-btn').click();
+    await page.locator(`[data-node-id="${itemId}"]`).getByTestId('node-type-label').click();
 
     // preview-flash class is added synchronously and held for 1 s.
     await expect(page.locator(`[data-preview-id="${itemId}"]`))

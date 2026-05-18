@@ -39,20 +39,10 @@ export function renderItem(node, ctx) {
 
   const typeLabel = document.createElement('span');
   typeLabel.className = 'node-type-label lbl-item';
+  typeLabel.dataset.testid = 'node-type-label';
   typeLabel.textContent = '[Item]';
   titleWrap.appendChild(typeLabel);
 
-  const navBtn = document.createElement('button');
-  navBtn.type = 'button';
-  navBtn.className = 'node-nav-btn';
-  navBtn.dataset.testid = 'node-nav-btn';
-  navBtn.title = 'Navigate to preview row';
-  navBtn.textContent = '\u2197'; // ↗
-  navBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    navigateToPreview(node.id);
-  });
-  titleWrap.appendChild(navBtn);
   const prefixInput = document.createElement('input');
   prefixInput.type = 'text';
   prefixInput.value = node._prefix || '';
@@ -101,11 +91,7 @@ export function renderItem(node, ctx) {
   // Navigate to preview row on header click
   titleWrap.addEventListener('click', e => {
     if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput || e.target === prefixInput) return;
-    const target = document.querySelector('[data-preview-id="' + node.id + '"]');
-    if (!target) return;
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    target.classList.add('preview-flash');
-    setTimeout(() => target.classList.remove('preview-flash'), 1000);
+    navigateToPreview(node.id);
   });
 
   // ── Actions ───────────────────────────────────────────────────────────────

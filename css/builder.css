@@ -375,7 +375,7 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   border-radius: var(--r-sm);
   border: 1px solid transparent;
   color: var(--c-text);
-  cursor: text;
+  cursor: pointer;
   white-space: pre-wrap;
   word-break: break-word;
   min-height: 24px;

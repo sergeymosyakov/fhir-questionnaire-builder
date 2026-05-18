@@ -57,20 +57,9 @@ export function renderGroup(node, ctx) {
   const isEmptyGroupNode = node.children.length === 0;
   const typeLabel = document.createElement('span');
   typeLabel.className = 'node-type-label ' + (isEmptyGroupNode ? 'lbl-info' : 'lbl-group');
+  typeLabel.dataset.testid = 'node-type-label';
   typeLabel.textContent = isEmptyGroupNode ? '[Info]' : '[Group]';
   titleWrap.appendChild(typeLabel);
-
-  const navBtn = document.createElement('button');
-  navBtn.type = 'button';
-  navBtn.className = 'node-nav-btn';
-  navBtn.dataset.testid = 'node-nav-btn';
-  navBtn.title = 'Navigate to preview row';
-  navBtn.textContent = '\u2197';
-  navBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    navigateToPreview(node.id);
-  });
-  titleWrap.appendChild(navBtn);
 
   const linkIdInput = document.createElement('input');
   linkIdInput.type = 'text';
@@ -119,11 +108,7 @@ export function renderGroup(node, ctx) {
   // Navigate to preview row
   titleWrap.addEventListener('click', e => {
     if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput || e.target === prefixInput) return;
-    const target = document.querySelector('[data-preview-id="' + node.id + '"]');
-    if (!target) return;
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    target.classList.add('preview-flash');
-    setTimeout(() => target.classList.remove('preview-flash'), 1000);
+    navigateToPreview(node.id);
   });
 
   // ── Actions ───────────────────────────────────────────────────────────────
