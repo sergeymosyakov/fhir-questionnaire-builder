@@ -18,6 +18,7 @@ import * as constraintModal from './ui/constraint-modal.js';
 import * as expressionModal from './ui/expression-modal.js';
 import * as initialModal from './ui/initial-modal.js';
 import * as appearanceModal from './ui/appearance-modal.js';
+import * as requiredModal from './ui/required-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
 import { showLinkId, showPrefix, showBadges, questVariables } from './state.js';
@@ -106,6 +107,15 @@ initialModal.init({
   closeBtn:  document.getElementById('initialModalClose'),
   cancelBtn: document.getElementById('initialModalCancel'),
   applyBtn:  document.getElementById('initialModalApply'),
+});
+// ── Required modal init ──────────────────────────────────────────────────────
+requiredModal.init({
+  modal:     document.getElementById('requiredModal'),
+  title:     document.getElementById('requiredModalTitle'),
+  body:      document.getElementById('requiredModalBody'),
+  closeBtn:  document.getElementById('requiredModalClose'),
+  cancelBtn: document.getElementById('requiredModalCancel'),
+  applyBtn:  document.getElementById('requiredModalApply'),
 });
 // ── Appearance modal init ─────────────────────────────────────────────────────
 appearanceModal.init({

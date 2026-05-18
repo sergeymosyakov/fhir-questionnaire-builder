@@ -88,6 +88,7 @@
 #constraintModal  { z-index: 10100; }
 #initialModal     { z-index: 10100; }
 #appearanceModal  { z-index: 10100; }
+#requiredModal    { z-index: 10100; }
 #expressionModal  { z-index: 10200; }
 #explainModal     { z-index: 10300; }
 
@@ -99,6 +100,7 @@
 #expressionModal .modal-box { width: min(560px, 94vw); }
 #initialModal .modal-box    { width: min(420px, 94vw); }
 #appearanceModal .modal-box { width: min(380px, 94vw); }
+#requiredModal .modal-box   { width: min(340px, 94vw); }
 #patientCtxModal .modal-box { width: 380px; max-width: 94vw; max-height: none; overflow: visible; }
 #explainModal .modal-box    { width: min(640px, 94vw); }
 
@@ -117,6 +119,11 @@
 #initialModal .modal-body    { padding: 12px 16px 16px; }
 /* Appearance — padding for the style controls */
 #appearanceModal .modal-body { padding: 12px 16px 16px; }
+/* Required — padding */
+#requiredModal .modal-body   { padding: 12px 16px 16px; }
+.required-modal-row   { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.required-modal-label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.required-modal-sel   { flex: 1; }
 .appearance-modal-form { margin-top: 10px; }
 .style-modal-raw-ta    { width: 100%; box-sizing: border-box; resize: vertical;
                           min-height: 26px; font-size: 11px; font-family: monospace;

@@ -3,7 +3,8 @@
 import { findAndRemove, escAttr } from '../utils.js';
 import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildMandPanel, buildTypePanel } from './panels.js';
+import { addPanel, buildVisPanel, buildTypePanel } from './panels.js';
+import * as requiredModal from '../ui/required-modal.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
 import * as constraintModal from '../ui/constraint-modal.js';
 import * as expressionModal from '../ui/expression-modal.js';
@@ -141,6 +142,7 @@ export function renderItem(node, ctx) {
     'Whether the item must be answered. Required items show ✔/✘ validation in the preview and affect the final PASS/FAIL result.',
     'Questionnaire.item.required', 'R4 · optional');
   mandLink.dataset.testid = 'action-mand';
+  mandLink.onclick = () => requiredModal.open(node, mandLink, setActive);
   const visLink   = addToggle('Show When', 'vis',
     'Show When (enableWhen)',
     'Add enableWhen conditions to control when this item is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden items are dimmed \uD83D\uDD12 in the preview.',
@@ -239,7 +241,6 @@ export function renderItem(node, ctx) {
 
   // ── Panels ────────────────────────────────────────────────────────────────
   addPanel('type', p => buildTypePanel(node, p), div, panels);
-  addPanel('mand', p => buildMandPanel(node, p, mandLink, setActive), div, panels);
 
   setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
   setActive(exprLink,       !!node._calculatedExpr);

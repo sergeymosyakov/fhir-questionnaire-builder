@@ -5,7 +5,8 @@ import { navigateToPreview } from '../render-preview.js';
 import { makeGroup, makeItem } from '../state.js';
 import { formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildMandPanel, buildStylePanel } from './panels.js';
+import { addPanel, buildVisPanel, buildStylePanel } from './panels.js';
+import * as requiredModal from '../ui/required-modal.js';
 import * as expressionModal from '../ui/expression-modal.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
 
@@ -153,6 +154,7 @@ export function renderGroup(node, ctx) {
     'Whether all items in this group must be answered. Required groups show ✔/✘ and affect the final PASS/FAIL result.',
     'Questionnaire.item.required', 'R4 · optional');
   mandLink.dataset.testid = 'action-mand';
+  mandLink.onclick = () => requiredModal.open(node, mandLink, setActive);
   const visLink   = addToggle('Show When', 'vis',
     'Show When (enableWhen)',
     'Add enableWhen conditions to control when this group is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden groups are dimmed \uD83D\uDD12 in the preview.',
@@ -269,7 +271,6 @@ export function renderGroup(node, ctx) {
   div.appendChild(btnDel);
 
   // ── Panels ────────────────────────────────────────────────────────────────
-  addPanel('mand',  p => buildMandPanel(node, p, mandLink, setActive), div, panels);
   addPanel('style', p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
   setActive(visLink,   !!(node.enableWhen?.length) || !!node.enableWhenExpression);
