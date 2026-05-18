@@ -1,14 +1,21 @@
 // Tests for pure helper functions exported from js/fhir/import.js.
 // import.js depends on state.js (CDN) — mocked below.
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Exposed so importFHIR tests can inspect state after import.
+const _tree           = [];
+const _questVariables = [];
+const _values         = {};
+const _rawFhir        = { value: null };
+const _bulkUpdate     = { value: false };
 
 vi.mock('../js/state.js', () => ({
-  tree:           [],
-  values:         {},
-  rawFhir:        { value: null },
-  questVariables: [],
-  _bulkUpdate:    { value: false },
+  tree:           _tree,
+  values:         _values,
+  rawFhir:        _rawFhir,
+  questVariables: _questVariables,
+  _bulkUpdate:    _bulkUpdate,
   resetSeq:       vi.fn(),
   makeGroup:      vi.fn(title => ({ type: 'group', id: 'g', title, children: [], enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', mandatory: null, logicWithParent: 'AND' })),
   makeItem:       vi.fn(title => ({ type: 'item',  id: 'i', title, itemType: 'text', options: '', mandatory: null, enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', constraint: [] })),
@@ -16,7 +23,9 @@ vi.mock('../js/state.js', () => ({
 
 vi.mock('../js/render-builder.js', () => ({ renderTree: vi.fn() }));
 
-const { fhirTypeToItemType, fhirOptsToStr, humanEnableWhen, applyVisibility } = await import('../js/fhir/import.js');
+const { fhirTypeToItemType, fhirOptsToStr, humanEnableWhen, applyVisibility, importFHIR } = await import('../js/fhir/import.js');
+
+vi.stubGlobal('alert', vi.fn());
 
 // ── fhirTypeToItemType ────────────────────────────────────────────────────────────
 describe('fhirTypeToItemType', () => {
@@ -278,5 +287,84 @@ describe('applyVisibility', () => {
   });
 });
 
+// ── importFHIR ───────────────────────────────────────────────────────────────
+describe('importFHIR', () => {
+  beforeEach(() => {
+    _tree.splice(0);
+    _questVariables.splice(0);
+    Object.keys(_values).forEach(k => delete _values[k]);
+    _rawFhir.value = null;
+    vi.mocked(alert).mockClear();
+  });
 
-// ── fhirTypeToItemType ────────────────────────────────────────────────────────
+  const minQ = (items = [], ext = []) => ({
+    resourceType: 'Questionnaire',
+    title: 'Test',
+    extension: ext,
+    item: items,
+  });
+
+  it('rejects non-Questionnaire JSON and calls alert', () => {
+    importFHIR({ resourceType: 'Patient' });
+    expect(alert).toHaveBeenCalled();
+    expect(_tree).toHaveLength(0);
+  });
+
+  it('rejects invalid JSON string and calls alert', () => {
+    importFHIR('{ not valid json }');
+    expect(alert).toHaveBeenCalled();
+    expect(_tree).toHaveLength(0);
+  });
+
+  it('accepts JSON string input', () => {
+    importFHIR(JSON.stringify(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }])));
+    expect(_tree).toHaveLength(1);
+  });
+
+  it('imports a flat text item', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Name' }]));
+    expect(_tree).toHaveLength(1);
+    expect(_tree[0].id).toBe('q1');
+    expect(_tree[0].title).toBe('Name');
+  });
+
+  it('imports a group with children', () => {
+    importFHIR(minQ([{
+      linkId: 'g1', type: 'group', text: 'Section',
+      item: [{ linkId: 'q1', type: 'string', text: 'Q' }],
+    }]));
+    expect(_tree).toHaveLength(1);
+    expect(_tree[0].type).toBe('group');
+    expect(_tree[0].id).toBe('g1');
+    expect(_tree[0].children).toHaveLength(1);
+    expect(_tree[0].children[0].id).toBe('q1');
+  });
+
+  it('imports required flag', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', required: true }]));
+    expect(_tree[0].mandatory).toBe(true);
+  });
+
+  it('imports questionnaire-level SDC variables', () => {
+    const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
+    importFHIR(minQ([], [
+      { url: SDC_VAR_URL, valueExpression: { name: 'bmi', expression: '%w/%h' } },
+    ]));
+    expect(_questVariables).toHaveLength(1);
+    expect(_questVariables[0].name).toBe('bmi');
+    expect(_questVariables[0].expression).toBe('%w/%h');
+  });
+
+  it('sets rawFhir after import', () => {
+    const q = minQ();
+    importFHIR(q);
+    expect(_rawFhir.value).toBe(q);
+  });
+
+  it('clears tree before importing new questionnaire', () => {
+    _tree.push({ id: 'stale' });
+    importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
+    expect(_tree).toHaveLength(1);
+    expect(_tree[0].id).toBe('q1');
+  });
+});

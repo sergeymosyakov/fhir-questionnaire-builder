@@ -333,3 +333,71 @@ describe('buildFHIRObject — OR group constraint', () => {
     expect(keys.some(k => String(k).includes('group-or'))).toBe(true);
   });
 });
+
+// ── _renderStyle ──────────────────────────────────────────────────────────────
+describe('buildFHIRObject — _renderStyle', () => {
+  it('exports _renderStyle as _text rendering-style extension', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _renderStyle: 'color: red; font-weight: bold' }]);
+    expect(q.item[0]._text).toBeDefined();
+    expect(q.item[0]._text.extension[0].url).toContain('rendering-style');
+    expect(q.item[0]._text.extension[0].valueString).toBe('color: red; font-weight: bold');
+  });
+
+  it('omits _text when _renderStyle is empty or absent', () => {
+    const q1 = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _renderStyle: '' }]);
+    expect(q1.item[0]._text).toBeUndefined();
+
+    const q2 = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
+    expect(q2.item[0]._text).toBeUndefined();
+  });
+});
+
+// ── item.initial[] export ─────────────────────────────────────────────────────
+describe('buildFHIRObject — _initialValue export', () => {
+  const item = (itemType, _initialValue) => ({ id: 'q1', type: 'item', title: 'Q', itemType, _initialValue });
+
+  it('exports boolean initial as valueBoolean', () => {
+    const q = build([item('checkbox', true)]);
+    expect(q.item[0].initial[0].valueBoolean).toBe(true);
+  });
+
+  it('exports decimal initial as valueDecimal', () => {
+    const q = build([item('decimal', '3.14')]);
+    expect(q.item[0].initial[0].valueDecimal).toBeCloseTo(3.14);
+  });
+
+  it('exports integer initial as valueInteger', () => {
+    const q = build([item('integer', '42')]);
+    expect(q.item[0].initial[0].valueInteger).toBe(42);
+  });
+
+  it('exports date initial as valueDate', () => {
+    const q = build([item('date', '2024-01-15')]);
+    expect(q.item[0].initial[0].valueDate).toBe('2024-01-15');
+  });
+
+  it('exports url initial as valueUri', () => {
+    const q = build([item('url', 'https://example.com')]);
+    expect(q.item[0].initial[0].valueUri).toBe('https://example.com');
+  });
+
+  it('exports select initial as valueCoding', () => {
+    const q = build([item('select', 'opt1')]);
+    expect(q.item[0].initial[0].valueCoding.code).toBe('opt1');
+  });
+
+  it('exports text initial as valueString', () => {
+    const q = build([item('text', 'hello')]);
+    expect(q.item[0].initial[0].valueString).toBe('hello');
+  });
+
+  it('omits initial when _initialValue is undefined', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
+    expect(q.item[0].initial).toBeUndefined();
+  });
+
+  it('omits initial when _initialValue is empty string', () => {
+    const q = build([item('text', '')]);
+    expect(q.item[0].initial).toBeUndefined();
+  });
+});
