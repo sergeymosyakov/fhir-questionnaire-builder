@@ -5,7 +5,6 @@
 //
 // init(elements)                    — wire DOM once at startup
 // open(node, initLink, setActive)   — populate body + show
-// close()                           — cancel (discard draft)
 
 import { parseOptions } from '../utils.js';
 import { values } from '../state.js';

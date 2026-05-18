@@ -5,7 +5,6 @@
 //
 // init(elements)                       — wire DOM once at startup
 // open(node, styleLink, setActive)     — populate body + show
-// close()                              — cancel (discard draft)
 
 import { triggerCalcRecalc } from '../builder/_shared.js';
 
@@ -23,11 +22,11 @@ function _parseStyle(s) {
 }
 
 function _buildStyle(bold, italic, color) {
-  return [
-    'font-weight: ' + (bold   ? 'bold'   : 'normal'),
-    'font-style: '  + (italic ? 'italic' : 'normal'),
-    ...(color ? ['color: ' + color] : []),
-  ].join('; ');
+  const parts = [];
+  if (bold)   parts.push('font-weight: bold');
+  if (italic) parts.push('font-style: italic');
+  if (color)  parts.push('color: ' + color);
+  return parts.join('; ');
 }
 
 // ── module API ────────────────────────────────────────────────────────────────

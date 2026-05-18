@@ -192,8 +192,10 @@ export function renderItem(node, ctx) {
   const initLink  = addToggle('Default', 'init',
     'Default Value (initial)',
     'Pre-fills the answer when the form loads. The user can change it unless readOnly is set. Only the first entry (initial[0]) is used. Supports all item types.',
-    'Questionnaire.item.initial[]', 'R4 · optional');  initLink.dataset.testid = 'action-default';
-  initLink.onclick = () => initialModal.open(node, initLink, setActive);  const constraintLink = addToggle('Constraint', 'constraint',
+    'Questionnaire.item.initial[]', 'R4 · optional');
+  initLink.dataset.testid = 'action-default';
+  initLink.onclick = () => initialModal.open(node, initLink, setActive);
+  const constraintLink = addToggle('Constraint', 'constraint',
     'Validation Constraints (questionnaire-constraint)',
     'FHIR questionnaire-constraint extensions on this item. Each entry has a FHIRPath expression, human-readable message, and severity. Error-severity constraints must pass for the item to show \u2714 in the preview.',
     'Questionnaire.item.extension[questionnaire-constraint]', 'R4 \u00B7 optional');

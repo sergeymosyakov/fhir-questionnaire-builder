@@ -5,7 +5,6 @@
 //
 // init(elements)                       — wire DOM once at startup
 // open(node, mandLink, setActive)      — populate body + show
-// close()                              — cancel (discard draft)
 
 let _el      = null;
 let _pending = null; // { node, mandLink, setActive, draftValue }
