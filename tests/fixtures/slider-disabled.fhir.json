@@ -1,0 +1,33 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "slider-disabled-test",
+  "title": "Slider and Disabled Display Test",
+  "status": "draft",
+  "subjectType": ["Patient"],
+  "item": [
+    {
+      "linkId": "pain-score",
+      "text": "Pain Score (0\u201310)",
+      "type": "integer",
+      "required": true,
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/minValue", "valueInteger": 0 },
+        { "url": "http://hl7.org/fhir/StructureDefinition/maxValue", "valueInteger": 10 },
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue", "valueInteger": 1 }
+      ]
+    },
+    {
+      "linkId": "extra-notes",
+      "text": "Extra Notes (hidden when no pain)",
+      "type": "string",
+      "enableWhen": [{ "question": "pain-score", "operator": ">", "answerInteger": 5 }],
+      "disabledDisplay": "hidden"
+    },
+    {
+      "linkId": "general-notes",
+      "text": "General Notes (protected when no pain)",
+      "type": "string",
+      "enableWhen": [{ "question": "pain-score", "operator": ">", "answerInteger": 5 }]
+    }
+  ]
+}

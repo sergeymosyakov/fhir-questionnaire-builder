@@ -251,7 +251,7 @@ test.describe('ordinalValue display', () => {
     const q = JSON.parse(readFileSync(filePath, 'utf8'));
     const moodItem = q.item.find(i => i.linkId === 'mood');
     const firstOpt = moodItem.answerOption[0];
-    const ordExt = (firstOpt.valueCoding?.extension || []).find(
+    const ordExt = (firstOpt.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/ordinalValue'
     );
     expect(ordExt?.valueDecimal).toBe(0);

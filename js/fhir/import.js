@@ -141,14 +141,18 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   node.options = fhirOptsToStr(fhirItem.answerOption);
 
-  // ordinalValue extension on each answerOption.valueCoding
+  // ordinalValue — may sit on answerOption.extension (FHIR R4) or on valueCoding.extension (older style)
   const ordinals = {};
   for (const opt of fhirItem.answerOption || []) {
     if (opt.valueCoding) {
       const code = opt.valueCoding.code || opt.valueCoding.display || '';
-      const ordExt = (opt.valueCoding.extension || []).find(
-        e => e.url === 'http://hl7.org/fhir/StructureDefinition/ordinalValue'
-      );
+      const ordExt =
+        (opt.extension || []).find(
+          e => e.url === 'http://hl7.org/fhir/StructureDefinition/ordinalValue'
+        ) ||
+        (opt.valueCoding.extension || []).find(
+          e => e.url === 'http://hl7.org/fhir/StructureDefinition/ordinalValue'
+        );
       if (ordExt && ordExt.valueDecimal !== undefined && code) {
         ordinals[code] = ordExt.valueDecimal;
       }
@@ -221,6 +225,22 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs'
   );
   if (maxOccExt?.valueInteger !== undefined) node._maxOccurs = maxOccExt.valueInteger;
+
+  // questionnaire-sliderStepValue
+  const sliderExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue'
+  );
+  if (sliderExt) {
+    const v = sliderExt.valueDecimal ?? sliderExt.valueInteger;
+    if (v !== undefined) node._sliderStep = v;
+  }
+
+  // disabledDisplay (R4B native field or R4 extension backport)
+  if (fhirItem.disabledDisplay) node._disabledDisplay = fhirItem.disabledDisplay;
+  const ddExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay'
+  );
+  if (ddExt?.valueCode) node._disabledDisplay = ddExt.valueCode;
 
   node._readOnly = !!fhirItem.readOnly;
   if (fhirItem.repeats) node.repeats = true;

@@ -48,7 +48,9 @@ Every node in the tree is either a **group** or an **item**:
   _answerValueSet:     string,           // FHIR item.answerValueSet URL — preserved round-trip; not resolved to options
   _minValue:           number,           // questionnaire-minValue extension value (decimal or integer)
   _maxValue:           number,           // questionnaire-maxValue extension value (decimal or integer)
-  _optionOrdinals:     object            // map of option code → ordinalValue (from ordinalValue extension on answerOption.valueCoding)
+  _optionOrdinals:     object,           // map of option code → ordinalValue (from ordinalValue extension on answerOption.extension or valueCoding.extension fallback)
+  _sliderStep:         number,           // questionnaire-sliderStepValue ext; when set, integer/decimal renders as <input type="range"> slider
+  _disabledDisplay:    string            // 'hidden'|'protected' — behaviour when enableWhen condition is not met; 'protected' is default (not persisted)
 }
 ```
 
@@ -138,7 +140,9 @@ Every node in the tree is either a **group** or an **item**:
 | `_maxLength` | `item.maxLength` | imported → `node._maxLength`; exported back when set; character counter + `maxlength` attribute enforced in preview |
 | `_minValue` | `questionnaire-minValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; min HTML attribute set on input; error shown in preview when violated |
 | `_maxValue` | `questionnaire-maxValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; max HTML attribute set on input; error shown in preview when violated |
-| `_optionOrdinals` | `ordinalValue` ext on `answerOption[].valueCoding.extension` | map of option code → numeric score; shown as `(N)` badge in radio/select; round-trip safe |
+| `_optionOrdinals` | `ordinalValue` ext on `answerOption[].extension` (primary) or `valueCoding.extension` (fallback) | map of option code → numeric score; shown as `(N)` badge in radio/select; editable in Answer Type modal (`code=Label=score` format); exported to `answerOption.extension` |
+| `_sliderStep` | `questionnaire-sliderStepValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; renders item as `<input type="range">` slider in preview; editable in Answer Type modal |
+| `_disabledDisplay` | `item.disabledDisplay` (R4B native field) + R4 backport extension `extension-Questionnaire.item.disabledDisplay` | `'hidden'` → item removed from DOM when not visible; `'protected'` (default) → grayed row; editable in Show When modal |
 | `_minOccurs` | `questionnaire-minOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true` |
 | `_maxOccurs` | `questionnaire-maxOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true`; enforced in preview — add button disabled at limit |
 | `_answerValueSet` | `item.answerValueSet` | imported → `node._answerValueSet`; exported back unchanged; URL not resolved — items show no selectable options in the builder |
@@ -189,7 +193,9 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs` | standard | `_maxOccurs` (max repeat rows; enforced in preview) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/minValue` | standard | `_minValue` (minimum value for numeric inputs; enforced in preview) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/maxValue` | standard | `_maxValue` (maximum value for numeric inputs; enforced in preview) | Yes |
-| `http://hl7.org/fhir/StructureDefinition/ordinalValue` | standard | `_optionOrdinals[code]` (score per answer option; displayed in preview) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/ordinalValue` | standard | `_optionOrdinals[code]` (score per answer option; on `answerOption.extension`; displayed in preview; editable in builder) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue` | standard | `_sliderStep` (step for range slider; triggers slider rendering) | Yes |
+| `http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay` | R4 backport | `_disabledDisplay` (hidden/protected; also read from native `item.disabledDisplay` field) | Yes (R4B/R5 backport) |
 
 ---
 

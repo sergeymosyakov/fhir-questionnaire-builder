@@ -25,15 +25,35 @@ export function open(node, visLink, setActive, ctx, buildVisFn) {
     enableWhen:            JSON.parse(JSON.stringify(node.enableWhen || [])),
     enableBehavior:        node.enableBehavior        || 'all',
     enableWhenExpression:  node.enableWhenExpression  || '',
+    _disabledDisplay:      node._disabledDisplay      || 'protected',
   });
 
   _pending = { node, visLink, setActive, draft };
 
-  // Build title: label + muted subject
   setModalTitle(_el.title, 'Show When', node.title || node.id || 'Item');
   _el.body.innerHTML = '';
-  // Pass a no-op setActive — button state must only change on Apply, not during draft editing
   buildVisFn(draft, _el.body, visLink, () => {}, ctx);
+
+  // ── disabledDisplay row ──────────────────────────────────────────────────
+  const ddRow = document.createElement('div');
+  ddRow.className = 'sw-disabled-display-row';
+  const ddLbl = document.createElement('label');
+  ddLbl.textContent = 'When not visible:';
+  const ddSel = document.createElement('select');
+  ddSel.className = 'sw-dd-select';
+  ddSel.dataset.testid = 'disabled-display-select';
+  [{ value: 'protected', label: 'Show grayed (protected)' },
+   { value: 'hidden',    label: 'Remove from view (hidden)' }]
+    .forEach(({ value, label }) => {
+      const opt = document.createElement('option');
+      opt.value = value; opt.textContent = label;
+      if (value === draft._disabledDisplay) opt.selected = true;
+      ddSel.appendChild(opt);
+    });
+  ddSel.onchange = () => { draft._disabledDisplay = ddSel.value; };
+  ddRow.append(ddLbl, ddSel);
+  _el.body.appendChild(ddRow);
+
   openModal(_el.modal);
   refreshExprIcons();
 }
@@ -44,6 +64,11 @@ function _apply() {
   node.enableWhen           = draft.enableWhen;
   node.enableBehavior       = draft.enableBehavior;
   node.enableWhenExpression = draft.enableWhenExpression;
+  if (draft._disabledDisplay && draft._disabledDisplay !== 'protected') {
+    node._disabledDisplay = draft._disabledDisplay;
+  } else {
+    delete node._disabledDisplay; // 'protected' is default — don't persist
+  }
   setActive(visLink, node.enableWhen.length > 0 || !!node.enableWhenExpression);
   triggerCalcRecalc();
   _close();

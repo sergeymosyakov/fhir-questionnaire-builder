@@ -129,10 +129,11 @@ function nodeToFHIRItem(node) {
     fhirItem.answerOption = parseOptions(node.options)
       .map(({ code, display }) => {
         const coding = { code, display };
+        const answerOpt = { valueCoding: coding };
         if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
-          coding.extension = [{ url: 'http://hl7.org/fhir/StructureDefinition/ordinalValue', valueDecimal: node._optionOrdinals[code] }];
+          answerOpt.extension = [{ url: 'http://hl7.org/fhir/StructureDefinition/ordinalValue', valueDecimal: node._optionOrdinals[code] }];
         }
-        return { valueCoding: coding };
+        return answerOpt;
       });
   }
 
@@ -151,12 +152,18 @@ function nodeToFHIRItem(node) {
   if (node.type === 'item' && node._answerValueSet) fhirItem.answerValueSet = node._answerValueSet;
 
   if (node._readOnly) fhirItem.readOnly = true;
+  if (node._disabledDisplay) fhirItem.disabledDisplay = node._disabledDisplay;
   if (node.repeats)   fhirItem.repeats  = true;
   // minOccurs / maxOccurs cardinality extensions
   if (node.repeats && node._minOccurs !== undefined)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs', valueInteger: node._minOccurs });
   if (node.repeats && node._maxOccurs !== undefined)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs', valueInteger: node._maxOccurs });
+  // questionnaire-sliderStepValue
+  if (node._sliderStep !== undefined) {
+    const isInt = Number.isInteger(node._sliderStep);
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue', [isInt ? 'valueInteger' : 'valueDecimal']: node._sliderStep });
+  }
   if (ext.length) fhirItem.extension = ext;
 
   return fhirItem;

@@ -229,3 +229,29 @@
 /* === Shared: success-value sub-UI =========================================== */
 .shared-success-hdr { margin-top: 6px; }
 .shared-success-inp { margin-top: 2px; }
+
+/* === Slider control ========================================================= */
+.ctrl-input--slider  { flex: 1; min-width: 0; cursor: pointer; accent-color: var(--c-accent); height: 20px; }
+.ctrl-slider-value   { font-size: 13px; font-weight: 600; color: var(--c-text-1); min-width: 32px; text-align: center; padding: 1px 6px; background: var(--c-hover); border-radius: var(--r-sm, 4px); flex-shrink: 0; }
+
+/* === Numeric constraints section (answer-type-modal) ======================== */
+.at-modal-num-grid  { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.at-modal-num-field { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 72px; }
+.at-modal-num-lbl   { font-size: 11px; color: var(--c-text-2); font-weight: 500; }
+.at-modal-num-inp   { font-size: 13px; border: 1px solid var(--c-border, #dde3ec); border-radius: var(--r-sm, 4px); padding: 3px 6px; width: 100%; box-sizing: border-box; }
+.at-modal-num-inp:focus { outline: none; border-color: var(--c-accent); }
+.at-modal-num-hint  { font-size: 11px; color: var(--c-text-2); margin-top: 4px; }
+
+/* Render-as-slider toggle row */
+.at-modal-slider-row {
+  display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;
+}
+.at-modal-slider-lbl {
+  font-size: 13px; cursor: pointer; user-select: none;
+}
+
+/* === disabledDisplay row (show-when modal) =================================== */
+.sw-disabled-display-row        { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--c-border, #dde3ec); flex-wrap: wrap; }
+.sw-disabled-display-row label  { font-size: 13px; color: var(--c-text-1); white-space: nowrap; }
+.sw-dd-select                   { font-size: 13px; border: 1px solid var(--c-border, #dde3ec); border-radius: var(--r-sm, 4px); padding: 3px 8px; background: #fff; color: var(--c-text-1); cursor: pointer; }
+.sw-dd-select:focus             { outline: none; border-color: var(--c-accent); }

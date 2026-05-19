@@ -341,6 +341,8 @@ async function _asyncRender(version) {
 
     // Dimmed: enableWhen condition not yet met
     if (!res.visible && res.showDimmed) {
+      // 'hidden' disabledDisplay: remove entirely from view (including children)
+      if (res.node._disabledDisplay === 'hidden') return;
       const row = document.createElement('div');
       row.className = 'lform-item lform-waiting preview-row--pointer';
       row.dataset.previewId = res.node.id;

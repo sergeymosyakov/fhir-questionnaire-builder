@@ -13,11 +13,43 @@
 
 import { questContained, values, deleteValue } from '../state.js';
 import { resolveContainedValueSet } from '../fhir/import.js';
+import { parseOptions } from '../utils.js';
 import { triggerCalcRecalc } from '../builder/_shared.js';
 import { createCustomSelect } from './custom-select.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 
 const CHOICE_TYPES = new Set(['select', 'radio', 'open-choice']);
+
+// Build textarea string with optional ordinal suffix: "code=Label=0,code2=Label2=1"
+function _optsWithOrdinals(node) {
+  if (!node.options) return '';
+  const ords = node._optionOrdinals || {};
+  return parseOptions(node.options)
+    .map(({ code, display }) => {
+      const o = ords[code];
+      return o !== undefined ? `${code}=${display}=${o}` : `${code}=${display}`;
+    })
+    .join(',');
+}
+
+// Parse "code=Label=N" entries; returns [{ code, display, ordinal? }]
+function _parseOptsWithOrdinals(str) {
+  return (str || '').split(',').map(s => s.trim()).filter(Boolean).map(s => {
+    const eq = s.indexOf('=');
+    if (eq === -1) return { code: s, display: s };
+    const code = s.slice(0, eq).trim();
+    const rest = s.slice(eq + 1);
+    const lastEq = rest.lastIndexOf('=');
+    if (lastEq !== -1) {
+      const maybeOrd = rest.slice(lastEq + 1).trim();
+      const ordVal = Number(maybeOrd);
+      if (maybeOrd !== '' && !isNaN(ordVal)) {
+        return { code, display: rest.slice(0, lastEq).trim(), ordinal: ordVal };
+      }
+    }
+    return { code, display: rest.trim() };
+  });
+}
 
 const ITEM_TYPES = [
   'text','integer','decimal','date','dateTime','time','url','attachment',
@@ -77,11 +109,14 @@ export function init(elements) {
 export function open(node, typeLink, setActive) {
   _pending = {
     node, typeLink, setActive,
-    draftType:    node.itemType,
-    draftOptions: node.options || '',
-    draftAVS:     node._answerValueSet || '',
-    draftRefRes:  node.referenceResource || '',
-    draftUnit:    node.quantityUnit || '',
+    draftType:        node.itemType,
+    draftOptions:     _optsWithOrdinals(node),
+    draftAVS:         node._answerValueSet || '',
+    draftRefRes:      node.referenceResource || '',
+    draftUnit:        node.quantityUnit || '',
+    draftMinValue:    node._minValue    !== undefined ? String(node._minValue)    : '',
+    draftMaxValue:    node._maxValue    !== undefined ? String(node._maxValue)    : '',
+    draftSliderStep:  node._sliderStep  !== undefined ? String(node._sliderStep)  : '',
   };
 
   setModalTitle(_el.title, 'Answer Type', node.title || node.id || 'Item');
@@ -120,18 +155,45 @@ function _apply() {
       node._answerValueSet = _pending.draftAVS;
       // Resolve local #vs-id → options string for preview rendering
       node.options = resolveContainedValueSet(questContained, _pending.draftAVS);
+      delete node._optionOrdinals;
     } else {
       delete node._answerValueSet;
-      node.options = _pending.draftOptions;
+      // Extract ordinals from draft, store clean "code=Label" in node.options
+      const _parsedOrds = _parseOptsWithOrdinals(_pending.draftOptions);
+      const _newOrdinals = {};
+      node.options = _parsedOrds.map(({ code, display, ordinal }) => {
+        if (ordinal !== undefined) _newOrdinals[code] = ordinal;
+        return code + '=' + display;
+      }).join(',');
+      if (Object.keys(_newOrdinals).length) node._optionOrdinals = _newOrdinals;
+      else delete node._optionOrdinals;
     }
   } else {
     // Non-choice type: clear choice-specific state
     delete node._answerValueSet;
+    delete node._optionOrdinals;
     node.options = '';
   }
 
   node.referenceResource = (node.itemType === 'reference' && _pending.draftRefRes) ? _pending.draftRefRes : undefined;
   node.quantityUnit      = (node.itemType === 'quantity'  && _pending.draftUnit)   ? _pending.draftUnit   : undefined;
+
+  // Numeric constraints: min/max/slider step (integer and decimal only)
+  const _NUMERIC = new Set(['integer', 'decimal']);
+  if (_NUMERIC.has(node.itemType)) {
+    const _pf    = s => { const n = parseFloat(s); return isNaN(n) ? undefined : n; };
+    const _round = node.itemType === 'integer';
+    const minV   = _pf(_pending.draftMinValue);
+    const maxV   = _pf(_pending.draftMaxValue);
+    const stepV  = _pf(_pending.draftSliderStep);
+    if (minV  !== undefined)              node._minValue   = _round ? Math.round(minV)  : minV;  else delete node._minValue;
+    if (maxV  !== undefined)              node._maxValue   = _round ? Math.round(maxV)  : maxV;  else delete node._maxValue;
+    if (stepV !== undefined && stepV > 0) node._sliderStep = _round ? Math.round(stepV) : stepV; else delete node._sliderStep;
+  } else {
+    delete node._minValue;
+    delete node._maxValue;
+    delete node._sliderStep;
+  }
 
   // Keep the repeatable link visible/hidden correctly
   const nodeEl = document.querySelector(`[data-node-id="${node.id}"]`);
@@ -174,9 +236,10 @@ function _renderBody(container) {
     testid:    'type-select',
     onChange:  v => {
       _pending.draftType = v;
-      choiceSection.style.display = CHOICE_TYPES.has(_pending.draftType) ? 'block' : 'none';
-      refSection.style.display    = _pending.draftType === 'reference' ? 'block' : 'none';
-      unitSection.style.display   = _pending.draftType === 'quantity'  ? 'block' : 'none';
+      choiceSection.style.display  = CHOICE_TYPES.has(_pending.draftType) ? 'block' : 'none';
+      refSection.style.display     = _pending.draftType === 'reference'   ? 'block' : 'none';
+      unitSection.style.display    = _pending.draftType === 'quantity'    ? 'block' : 'none';
+      numericSection.style.display = (_pending.draftType === 'integer' || _pending.draftType === 'decimal') ? 'block' : 'none';
     },
   });
   typeRow.appendChild(typeLbl);
@@ -207,13 +270,13 @@ function _renderBody(container) {
 
   const optSubLbl = document.createElement('div');
   optSubLbl.className   = 'at-modal-sub-lbl';
-  optSubLbl.textContent = 'Options (code=Label, comma-separated):';
+  optSubLbl.textContent = 'Options (code=Label or code=Label=score, comma-separated):';
 
   const optInp = document.createElement('textarea');
   optInp.className   = 'at-modal-opt-inp';
   optInp.dataset.testid = 'options-input';
   optInp.value       = _pending.draftOptions;
-  optInp.placeholder = 'e.g. yes=Yes,no=No,maybe=Maybe';
+  optInp.placeholder = 'e.g. la1=Not at all=0,la2=Several days=1,la3=Always=2';
   optInp.rows        = 1;
   optInp.oninput = () => { _pending.draftOptions = optInp.value; };
 
@@ -340,4 +403,74 @@ function _renderBody(container) {
 
   unitSection.append(unitLbl, unitSel.el);
   container.appendChild(unitSection);
+
+  // ── Numeric constraints (integer / decimal) ───────────────────────────────
+  const numericSection = document.createElement('div');
+  numericSection.className = 'at-modal-sub';
+  numericSection.style.display = (_pending.draftType === 'integer' || _pending.draftType === 'decimal') ? 'block' : 'none';
+
+  const numericHdr = document.createElement('div');
+  numericHdr.className   = 'at-modal-sub-lbl';
+  numericHdr.textContent = 'Numeric constraints:';
+
+  const numericGrid = document.createElement('div');
+  numericGrid.className = 'at-modal-num-grid';
+
+  const _numField = (lbl, tid, initVal, onInput) => {
+    const fw = document.createElement('div');
+    fw.className = 'at-modal-num-field';
+    const la = document.createElement('label');
+    la.className   = 'at-modal-num-lbl';
+    la.textContent = lbl;
+    const inp = document.createElement('input');
+    inp.type = 'number'; inp.step = 'any';
+    inp.className = 'at-modal-num-inp';
+    inp.dataset.testid = tid;
+    inp.value = initVal;
+    inp.placeholder = '—';
+    inp.oninput = () => onInput(inp.value);
+    fw.append(la, inp);
+    return fw;
+  };
+
+  numericGrid.appendChild(_numField('Min', 'min-value-input', _pending.draftMinValue, v => { _pending.draftMinValue = v; }));
+  numericGrid.appendChild(_numField('Max', 'max-value-input', _pending.draftMaxValue, v => { _pending.draftMaxValue = v; }));
+
+  // ── "Render as slider" toggle + step field ────────────────────────────────
+  const sliderRow = document.createElement('div');
+  sliderRow.className = 'at-modal-slider-row';
+
+  const sliderChk = document.createElement('input');
+  sliderChk.type = 'checkbox';
+  sliderChk.dataset.testid = 'slider-toggle';
+  sliderChk.checked = _pending.draftSliderStep !== '';
+
+  const sliderChkLbl = document.createElement('label');
+  sliderChkLbl.className = 'at-modal-slider-lbl';
+  sliderChkLbl.textContent = 'Render as slider';
+
+  const stepWrap = _numField('Step', 'slider-step-input',
+    _pending.draftSliderStep !== '' ? _pending.draftSliderStep : '1',
+    v => { _pending.draftSliderStep = v; });
+  stepWrap.style.display = sliderChk.checked ? 'flex' : 'none';
+
+  sliderChk.onchange = () => {
+    if (sliderChk.checked) {
+      if (!_pending.draftSliderStep) _pending.draftSliderStep = '1';
+      stepWrap.querySelector('input').value = _pending.draftSliderStep;
+      stepWrap.style.display = 'flex';
+    } else {
+      _pending.draftSliderStep = '';
+      stepWrap.style.display = 'none';
+    }
+  };
+
+  sliderRow.append(sliderChk, sliderChkLbl, stepWrap);
+
+  const numericHint = document.createElement('div');
+  numericHint.className   = 'at-modal-num-hint';
+  numericHint.textContent = 'Min / Max set HTML constraints and show error badge in the preview.';
+
+  numericSection.append(numericHdr, numericGrid, sliderRow, numericHint);
+  container.appendChild(numericSection);
 }

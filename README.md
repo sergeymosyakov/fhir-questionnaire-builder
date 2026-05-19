@@ -100,7 +100,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
 - **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **296 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — e2e test suite (`tests/e2e/`); **170 tests** across 13 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
+- **Playwright** — e2e test suite (`tests/e2e/`); **185 tests** across 14 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
 
@@ -150,7 +150,9 @@ _minOccurs       // integer — questionnaire-minOccurs ext (imported/exported w
 _maxOccurs       // integer — questionnaire-maxOccurs ext; enforced in preview — add button disabled at limit
 _minValue        // number — questionnaire-minValue ext; error badge + blocks PASS when violated
 _maxValue        // number — questionnaire-maxValue ext; error badge + blocks PASS when violated
-_optionOrdinals  // object — map of option code → numeric ordinalValue; shown as (N) badge in radio/select; round-trip safe
+_optionOrdinals  // object — map of option code → numeric ordinalValue; shown as (N) badge in radio/select; editable in Answer Type modal (code=Label=score); round-trip safe
+_sliderStep      // number — questionnaire-sliderStepValue ext; renders integer/decimal as <input type="range"> slider; editable in Answer Type modal
+_disabledDisplay // 'hidden'|'protected' — when not visible: 'hidden' removes from DOM, 'protected' grays out (default); editable in Show When modal
 ```
 
 ---
@@ -180,7 +182,7 @@ _optionOrdinals  // object — map of option code → numeric ordinalValue; show
 | FHIR R4 type | Internal `itemType` | Control in preview | Validation | Notes |
 |---|---|---|---|---|
 | `boolean` | `checkbox` | ✅ checkbox | — | |
-| `integer`, `decimal` | `number` | ✅ number input | ✅ `minValue`/`maxValue` | `questionnaire-minValue`/`questionnaire-maxValue` extensions enforced; error badge + blocks PASS |
+| `integer`, `decimal` | `number` | ✅ number input or range slider | ✅ `minValue`/`maxValue` | `questionnaire-minValue`/`questionnaire-maxValue` extensions enforced; error badge + blocks PASS; `questionnaire-sliderStepValue` → renders as `<input type="range">` slider |
 | `string`, `text` | `text` | ✅ text input | — | |
 | `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three map to `date` |
 | `url` | `url` | ✅ url input | ✅ `new URL()` format check | Invalid URL → ✘ even if not required |
@@ -218,7 +220,9 @@ _optionOrdinals  // object — map of option code → numeric ordinalValue; show
 | `questionnaire-maxOccurs` ext | `node._maxOccurs` — max repeat rows; enforced in preview — add button disabled at limit |
 | `questionnaire-minValue` ext | `node._minValue` — error badge + blocks PASS when violated |
 | `questionnaire-maxValue` ext | `node._maxValue` — error badge + blocks PASS when violated |
-| `ordinalValue` ext on `answerOption.valueCoding` | `node._optionOrdinals[code]` — numeric score per option; shown as `(N)` badge in radio/select; round-trip safe |
+| `ordinalValue` ext on `answerOption.extension` (or `valueCoding.extension` fallback) | `node._optionOrdinals[code]` — numeric score per option; shown as `(N)` badge in radio/select; editable in Answer Type modal via `code=Label=score` syntax |
+| `questionnaire-sliderStepValue` ext | `node._sliderStep` — renders integer/decimal as range slider; exported back; editable in Answer Type modal |
+| `item.disabledDisplay` (R4B) + R4 backport extension | `node._disabledDisplay` — `'hidden'` removes item from DOM when not visible; `'protected'` (default) grays it out; exported back; editable in Show When modal |
 
 Standard extensions preserved on export:
 - `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` — `radio-button` code for `radio` itemType
@@ -291,7 +295,7 @@ See [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) for the full FHIR field mapping
 - **Read-only enforcement** — `_readOnly: true` items render a styled placeholder (current value or `—`) instead of an editable input; cursor: not-allowed; 🔒 `read-only` badge displayed; does not affect PASS/FAIL
 - **maxLength enforcement** — `node._maxLength` sets the `maxlength` HTML attribute on text/url inputs and renders a live character counter `(N/M)` below the field
 - **minValue/maxValue enforcement** — `questionnaire-minValue` / `questionnaire-maxValue` extensions imported and enforced: `min`/`max` attributes on number inputs, inline error badge when value is out of range, blocks PASS/FAIL; round-trip safe
-- **ordinalValue display** — `ordinalValue` extension on `answerOption.valueCoding` imported into `_optionOrdinals`; score shown as `(N)` badge on each radio label and inside the select trigger + dropdown; exported back; round-trip safe
+- **ordinalValue display** — `ordinalValue` extension on `answerOption.extension` (or `valueCoding.extension` fallback) imported into `_optionOrdinals`; score shown as `(N)` badge on each radio label and inside the select trigger + dropdown; exported to `answerOption.extension`; editable in Answer Type modal — append `=score` to any option: `la1=Not at all=0,la2=Several days=1`
 - **Read-only badge** — grey 🔒 `read-only` pill when `_readOnly === true` and no `_calculatedExpr`
 - **Default badge** — purple ↺ `default` pill when `_initialValue` is defined
 - **Real-time calc badge** — `refreshCalcBadges()` patches calc-badge in-place via `data-calc-id` after each answer change — no full DOM rebuild
