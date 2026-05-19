@@ -7,6 +7,7 @@
 // open(node, mandLink, setActive)      — populate body + show
 
 import { createCustomSelect } from './custom-select.js';
+import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 
 let _el      = null;
 let _pending = null; // { node, mandLink, setActive, draftValue }
@@ -35,31 +36,17 @@ function _fromKey(k) {
 
 export function init(elements) {
   _el = elements;
-  _el.closeBtn.addEventListener('click', _cancel);
-  _el.cancelBtn.addEventListener('click', _cancel);
-  _el.applyBtn.addEventListener('click', _apply);
-  _el.modal.addEventListener('click', e => { if (e.target === _el.modal) _cancel(); });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && _el.modal.style.display !== 'none') _cancel();
-  });
+  initModal(elements, { onApply: _apply, onCancel: _cancel });
 }
 
 export function open(node, mandLink, setActive) {
   _pending = { node, mandLink, setActive, draftValue: node.mandatory };
 
-  _el.title.innerHTML = '';
-  const labelEl = document.createElement('span');
-  labelEl.className   = 'modal-title-label';
-  labelEl.textContent = 'Required';
-  const subjectEl = document.createElement('span');
-  subjectEl.className   = 'modal-title-subject';
-  subjectEl.textContent = '\u2014 ' + (node.title || node.id || 'Item');
-  _el.title.appendChild(labelEl);
-  _el.title.appendChild(subjectEl);
+  setModalTitle(_el.title, 'Required', node.title || node.id || 'Item');
 
   _el.body.innerHTML = '';
   _renderBody(_el.body);
-  _el.modal.style.display = 'flex';
+  openModal(_el.modal);
 }
 
 function _apply() {
@@ -74,7 +61,7 @@ function _cancel() { _close(); }
 
 function _close() {
   _pending = null;
-  _el.modal.style.display = 'none';
+  closeModal(_el.modal);
 }
 
 // ── body renderer ─────────────────────────────────────────────────────────────

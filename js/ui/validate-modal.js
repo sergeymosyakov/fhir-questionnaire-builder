@@ -5,24 +5,24 @@
 //         'import' → "OK" only
 //   onNavigate(nodeId) — called when user clicks the ↗ link next to an issue
 
+import { initModal, openModal, closeModal } from './modal-base.js';
+
 let _el = null;
 
 export function init(elements) {
   _el = elements;
-  _el.closeBtn.addEventListener('click', _close);
-  _el.modal.addEventListener('click', e => { if (e.target === _el.modal) _close(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') _close(); });
+  initModal(elements, { onCancel: _close });
 }
 
 export function show(title, issues, mode, { onExport, onNavigate } = {}) {
   _el.title.textContent = issues.length === 0 ? 'Validate — All good' : title;
   _renderBody(issues, onNavigate);
   _renderFooter(mode, onExport, issues.length === 0);
-  _el.modal.style.display = 'flex';
+  openModal(_el.modal);
 }
 
 function _close() {
-  _el.modal.style.display = 'none';
+  closeModal(_el.modal);
 }
 
 function _renderBody(issues, onNavigate) {

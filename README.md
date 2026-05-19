@@ -41,6 +41,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/ui/json-viewer.js` | Shared read-only FHIR JSON viewer modal — `init(elements)`, `show(title, data)`, `close()`; Esc / backdrop / × close |
 | `js/ui/contained-panel.js` | Collapsible card showing `Questionnaire.contained[]` resources — each chip opens JSON viewer |
 | `js/ui/answer-valueset-panel.js` | Collapsible card showing unique `answerValueSet` URLs used by items — each chip shows URL and which items use it |
+| `js/ui/modal-base.js` | Shared modal lifecycle utilities — `initModal`, `setModalTitle`, `openModal`, `closeModal`; used by all draft-pattern modals to eliminate boilerplate |
 | `js/ui/showwhen-modal.js` | Show When centered modal — draft pattern (Apply/Cancel); action button indicator only changes on Apply; searchable question picker portal dropdown |
 | `js/ui/constraint-modal.js` | Constraint edit modal — draft pattern; Apply commits + calls `triggerCalcRecalc()` so preview re-renders; expression field is a resizable `.expr-textarea` |
 | `js/ui/expression-modal.js` | Config-driven modal for `_calculatedExpr` and `_initialExpr` FHIRPath fields — `open(cfg)`; draft pattern; auto-resize textarea; live expr icon |

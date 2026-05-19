@@ -21,6 +21,7 @@
 // close()  — cancel (discard draft)
 
 import { refreshExprIcons } from '../render-preview.js';
+import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 
 let _el      = null;
 let _pending = null; // { cfg, draft }
@@ -29,13 +30,7 @@ let _icon    = null;
 
 export function init(elements) {
   _el = elements;
-  _el.closeBtn.addEventListener('click', _cancel);
-  _el.cancelBtn.addEventListener('click', _cancel);
-  _el.applyBtn.addEventListener('click', _apply);
-  _el.modal.addEventListener('click', e => { if (e.target === _el.modal) _cancel(); });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && _el?.modal.style.display !== 'none') _cancel();
-  });
+  initModal(elements, { onApply: _apply, onCancel: _cancel });
 }
 
 export function open(cfg) {
@@ -43,15 +38,7 @@ export function open(cfg) {
   _pending = { cfg, draft };
 
   // ── Title ──────────────────────────────────────────────────────────────────
-  _el.title.innerHTML = '';
-  const labelEl = document.createElement('span');
-  labelEl.className   = 'modal-title-label';
-  labelEl.textContent = cfg.label;
-  const subjectEl = document.createElement('span');
-  subjectEl.className   = 'modal-title-subject';
-  subjectEl.textContent = '\u2014 ' + (cfg.node.title || cfg.node.id || 'Item');
-  _el.title.appendChild(labelEl);
-  _el.title.appendChild(subjectEl);
+  setModalTitle(_el.title, cfg.label, cfg.node.title || cfg.node.id || 'Item');
 
   // ── Body ───────────────────────────────────────────────────────────────────
   _el.body.innerHTML = '';
@@ -92,7 +79,7 @@ export function open(cfg) {
   };
 
   _el.body.appendChild(_ta);
-  _el.modal.style.display = 'flex';
+  openModal(_el.modal);
   setTimeout(() => _ta?.focus(), 50);
 }
 
@@ -110,7 +97,7 @@ function _apply() {
 function _cancel() { _close(); }
 
 function _close() {
-  if (_el) _el.modal.style.display = 'none';
+  if (_el) closeModal(_el.modal);
   _pending = null;
   _ta      = null;
   _icon    = null;

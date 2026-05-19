@@ -15,6 +15,7 @@ import { questContained, values, deleteValue } from '../state.js';
 import { resolveContainedValueSet } from '../fhir/import.js';
 import { triggerCalcRecalc } from '../builder/_shared.js';
 import { createCustomSelect } from './custom-select.js';
+import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 
 const CHOICE_TYPES = new Set(['select', 'radio', 'open-choice']);
 
@@ -70,13 +71,7 @@ let _pending = null;
 
 export function init(elements) {
   _el = elements;
-  _el.closeBtn.addEventListener('click', _cancel);
-  _el.cancelBtn.addEventListener('click', _cancel);
-  _el.applyBtn.addEventListener('click', _apply);
-  _el.modal.addEventListener('click', e => { if (e.target === _el.modal) _cancel(); });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && _el.modal.style.display !== 'none') _cancel();
-  });
+  initModal(elements, { onApply: _apply, onCancel: _cancel });
 }
 
 export function open(node, typeLink, setActive) {
@@ -89,19 +84,11 @@ export function open(node, typeLink, setActive) {
     draftUnit:    node.quantityUnit || '',
   };
 
-  _el.title.innerHTML = '';
-  const labelEl = document.createElement('span');
-  labelEl.className   = 'modal-title-label';
-  labelEl.textContent = 'Answer Type';
-  const subjectEl = document.createElement('span');
-  subjectEl.className   = 'modal-title-subject';
-  subjectEl.textContent = ' \u2014 ' + (node.title || node.id || 'Item');
-  _el.title.appendChild(labelEl);
-  _el.title.appendChild(subjectEl);
+  setModalTitle(_el.title, 'Answer Type', node.title || node.id || 'Item');
 
   _el.body.innerHTML = '';
   _renderBody(_el.body);
-  _el.modal.style.display = 'flex';
+  openModal(_el.modal);
 }
 
 // ── internals ─────────────────────────────────────────────────────────────────
@@ -163,7 +150,7 @@ function _cancel() { _close(); }
 
 function _close() {
   _pending = null;
-  _el.modal.style.display = 'none';
+  closeModal(_el.modal);
 }
 
 // ── body renderer ─────────────────────────────────────────────────────────────
