@@ -2,6 +2,7 @@
 // Manages SDC variables: %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb
 // init(els, questVariables, onAfterApply) — wire once at startup.
 import { _formTick, tree, effect } from '../state.js';
+import { createCustomSelect } from './custom-select.js';
 
 const PATIENT_APPLY_EVENT = 'patient-ctx-applied';
 
@@ -121,14 +122,14 @@ export function init(els, questVariables, onAfterApply) {
         inp.className = 'patient-ctx-cb';
         inp.checked = !!current;
       } else if (def.type === 'select') {
-        inp = document.createElement('select');
-        inp.className = 'patient-ctx-sel';
-        for (const [val, label] of def.options) {
-          const o = document.createElement('option');
-          o.value = val; o.textContent = label;
-          if (current === val) o.selected = true;
-          inp.appendChild(o);
-        }
+        const csel = createCustomSelect({
+          items:     def.options.map(([val, label]) => ({ value: val, label })),
+          value:     current,
+          className: 'patient-ctx-sel sc-trigger--full',
+          onChange:  () => {},  // value read back via csel.getValue() on apply
+        });
+        inp = csel.el;
+        inp._csel = csel;  // stash for value retrieval
       } else {
         inp = document.createElement('input');
         inp.type = def.type === 'number' ? 'number' : 'text';
@@ -145,7 +146,10 @@ export function init(els, questVariables, onAfterApply) {
 
     applyBtn.onclick = () => {
       for (const [name, { inp, def }] of Object.entries(inputs)) {
-        const raw = def.type === 'checkbox' ? inp.checked : inp.value;
+        let raw;
+        if (def.type === 'checkbox') raw = inp.checked;
+        else if (inp._csel)          raw = inp._csel.getValue();
+        else                          raw = inp.value;
         setEntry(questVariables, name, toExpr(def.type, raw));
       }
       modal.style.display = 'none';

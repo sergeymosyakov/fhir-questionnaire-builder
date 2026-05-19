@@ -9,6 +9,7 @@ import { addPanel, buildVisPanel, buildStylePanel } from './panels.js';
 import * as requiredModal from '../ui/required-modal.js';
 import * as expressionModal from '../ui/expression-modal.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
+import { createCustomSelect } from '../ui/custom-select.js';
 
 export function renderGroup(node, ctx) {
   const { renderTree, renderNode } = ctx;
@@ -271,15 +272,13 @@ export function renderGroup(node, ctx) {
   const logicRow = document.createElement('div');
   logicRow.className = 'logic-row';
   logicRow.textContent = 'Logic between children: ';
-  const logicSel = document.createElement('select');
-  for (const v of ['AND', 'OR']) {
-    const opt = document.createElement('option');
-    opt.value = v; opt.textContent = v;
-    if (node.logicWithParent === v) opt.selected = true;
-    logicSel.appendChild(opt);
-  }
-  logicSel.onchange = () => { node.logicWithParent = logicSel.value; };
-  logicRow.appendChild(logicSel);
+  const logicSel = createCustomSelect({
+    items:    [{ value: 'AND', label: 'AND' }, { value: 'OR', label: 'OR' }],
+    value:    node.logicWithParent || 'AND',
+    className: 'sc-trigger--sm',
+    onChange: v => { node.logicWithParent = v; },
+  });
+  logicRow.appendChild(logicSel.el);
   body.appendChild(logicRow);
 
   for (let i = 0; i < node.children.length; i++) {

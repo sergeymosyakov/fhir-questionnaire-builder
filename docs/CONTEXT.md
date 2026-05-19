@@ -65,7 +65,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` — opens `showwhen-modal`, `expression-modal`, `required-modal` for respective action links; `style` still uses inline `buildStylePanel` |
 | `js/render-preview.js` | Right panel — reactive preview; `buildRepeatControls` renders multi-row repeat UI; enforces `node._maxOccurs` — add button disabled at limit |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
-| `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns (`.sc-trigger` / `.oc-wrap`) replacing native `<select>` / `<datalist>` |
+| `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns (`.sc-trigger` / `.oc-wrap`) replacing native `<select>` / `<datalist>`. `date` and `dateTime` use `js/ui/date-picker.js` custom calendar. `time` uses native `<input type="time">`. |
 | `js/fhir/import.js` | FHIR R4 → internal model; reads `item.repeats`, `item.maxLength` (→ `_maxLength`), `item.answerValueSet` (→ `_answerValueSet`), `Questionnaire.contained[]` (→ `questContained`), and `questionnaire-minOccurs` / `questionnaire-maxOccurs` extensions; exports `resolveContainedValueSet(contained, ref)` — resolves `#vs-id` local refs into `code=Label,...` string; called during import and from `answer-type-modal` |
 | `js/fhir/export.js` | Internal model → FHIR R4; writes `maxLength`, `item.answerValueSet` (from `_answerValueSet`), `Questionnaire.contained[]` (from `questContained`), and `questionnaire-minOccurs` / `questionnaire-maxOccurs` when `node.repeats`; skips writing `answerOption` when `_answerValueSet` is set (mutually exclusive per FHIR spec) |
 | `js/fhir/qr-export.js` | `exportQR(fileName)` — builds QR from current tree + answers, downloads JSON |
@@ -232,7 +232,9 @@ _answerValueSet  // string — FHIR item.answerValueSet URL; round-trip preserve
 | `integer`, `decimal` | `number` | ✅ | — | |
 | `quantity` | `quantity` | ✅ number + unit dropdown (UCUM) | ✅ required = value+unit filled | `questionnaire-unit` extension read/written |
 | `string`, `text` | `text` | ✅ | — | |
-| `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three → `date` |
+| `date` | `date` | ✅ custom calendar picker | — | |
+| `dateTime` | `dateTime` | ✅ custom calendar + time inputs | — | Stored as `YYYY-MM-DDTHH:MM:SS`; QR → `valueDateTime` |
+| `time` | `time` | ✅ native `<input type="time">` | — | Stored as `HH:MM:SS`; QR → `valueTime` |
 | `url` | `url` | ✅ | ✅ `new URL()` | Invalid format → ✘ even if optional |
 | `choice` | `select` / `radio` | ✅ | — | `questionnaire-itemControl: radio-button` → `radio` |
 | `open-choice` | `open-choice` | ✅ text + datalist | — | Free-text allowed; datalist populated from `answerOption[]` |

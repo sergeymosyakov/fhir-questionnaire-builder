@@ -1,35 +1,20 @@
-// ── Required (mandatory) edit modal ──────────────────────────────────────────
-// Centered modal for editing a node's mandatory flag.
-// Uses a draft pattern — changes are only committed on Apply.
-// Cancel discards all edits.
+// ── Read-only edit modal ──────────────────────────────────────────────────────
+// Centered modal for toggling a node's readOnly flag.
+// Uses draft pattern — changes are only committed on Apply. Cancel discards.
 //
 // init(elements)                       — wire DOM once at startup
-// open(node, mandLink, setActive)      — populate body + show
+// open(node, roLink, setActive)        — populate body + show
 
+import { triggerCalcRecalc } from '../builder/_shared.js';
 import { createCustomSelect } from './custom-select.js';
 
-let _el      = null;
-let _pending = null; // { node, mandLink, setActive, draftValue }
-
-// ── value helpers ─────────────────────────────────────────────────────────────
-
 const OPTIONS = [
-  ['null',  'Not set (acts as required)'],
-  ['true',  'Yes \u2014 required'],
-  ['false', 'No \u2014 optional'],
+  ['false', 'No \u2014 editable'],
+  ['true',  'Yes \u2014 read-only'],
 ];
 
-function _toKey(v) {
-  if (v === true)  return 'true';
-  if (v === false) return 'false';
-  return 'null';
-}
-
-function _fromKey(k) {
-  if (k === 'true')  return true;
-  if (k === 'false') return false;
-  return null;
-}
+let _el      = null;
+let _pending = null; // { node, roLink, setActive, draftValue }
 
 // ── module API ────────────────────────────────────────────────────────────────
 
@@ -44,16 +29,16 @@ export function init(elements) {
   });
 }
 
-export function open(node, mandLink, setActive) {
-  _pending = { node, mandLink, setActive, draftValue: node.mandatory };
+export function open(node, roLink, setActive) {
+  _pending = { node, roLink, setActive, draftValue: !!node._readOnly };
 
   _el.title.innerHTML = '';
   const labelEl = document.createElement('span');
   labelEl.className   = 'modal-title-label';
-  labelEl.textContent = 'Required';
+  labelEl.textContent = 'Read-only';
   const subjectEl = document.createElement('span');
   subjectEl.className   = 'modal-title-subject';
-  subjectEl.textContent = '\u2014 ' + (node.title || node.id || 'Item');
+  subjectEl.textContent = ' \u2014 ' + (node.title || node.id || 'Item');
   _el.title.appendChild(labelEl);
   _el.title.appendChild(subjectEl);
 
@@ -62,11 +47,14 @@ export function open(node, mandLink, setActive) {
   _el.modal.style.display = 'flex';
 }
 
+// ── internals ─────────────────────────────────────────────────────────────────
+
 function _apply() {
   if (!_pending) return;
-  const { node, mandLink, setActive } = _pending;
-  node.mandatory = _pending.draftValue;
-  setActive(mandLink, node.mandatory === true);
+  const { node, roLink, setActive } = _pending;
+  node._readOnly = _pending.draftValue || undefined;
+  setActive(roLink, !!node._readOnly);
+  triggerCalcRecalc();
   _close();
 }
 
@@ -82,7 +70,7 @@ function _close() {
 function _renderBody(container) {
   const hint = document.createElement('div');
   hint.className   = 'panel-hint';
-  hint.textContent = 'Whether this item must be answered. Required items show \u2714/\u2718 validation in the preview and affect the final PASS/FAIL result.';
+  hint.textContent = 'Marks this field as read-only \u2014 the user cannot edit it. Typically combined with a calculatedExpression.';
   container.appendChild(hint);
 
   const row = document.createElement('div');
@@ -90,14 +78,14 @@ function _renderBody(container) {
 
   const lbl = document.createElement('label');
   lbl.className   = 'required-modal-label';
-  lbl.textContent = 'Required:';
+  lbl.textContent = 'Read-only:';
 
   const sel = createCustomSelect({
     items:    OPTIONS.map(([val, text]) => ({ value: val, label: text })),
-    value:    _toKey(_pending.draftValue),
-    onChange: v => { _pending.draftValue = _fromKey(v); },
+    value:    _pending.draftValue ? 'true' : 'false',
+    onChange: v => { _pending.draftValue = v === 'true'; },
     className: 'required-modal-sel sc-trigger--full',
-    testid:   'required-sel',
+    testid:   'readonly-sel',
   });
 
   row.appendChild(lbl);

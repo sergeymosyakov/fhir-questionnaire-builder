@@ -530,12 +530,6 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   margin-bottom: 6px;
   letter-spacing: .2px;
 }
-.logic-row select {
-  padding: 2px 6px;
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-sm);
-  font-size: 11px;
-}
 
 /* === Visibility (enableWhen) panel ========================================== */
 .vis-behavior-row {
@@ -545,13 +539,7 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   font-size: 12px;
   margin-bottom: 6px;
 }
-.vis-behavior-sel {
-  height: 24px;
-  padding: 0 5px;
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-sm);
-  font-size: 11px;
-}
+.vis-behavior-sel { min-width: 90px; }
 .vis-cond-list {
   display: flex;
   flex-direction: column;
@@ -623,14 +611,7 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   z-index: 1;
 }
 .vis-q-sel-search:focus { border-color: var(--c-primary); }
-.vis-cond-op {
-  height: 26px;
-  padding: 0 4px;
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-sm);
-  font-size: 11px;
-  max-width: 100px;
-}
+.vis-cond-op-wrap { min-width: 80px; max-width: 130px; }
 .vis-cond-val-inp {
   height: 24px;
   padding: 0 5px;
@@ -696,13 +677,7 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.constraint-sev-sel {
-  height: 22px;
-  font-size: 11px;
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-sm);
-  padding: 0 4px;
-}
+.constraint-sev-sel { min-width: 80px; max-width: 140px; }
 .constraint-field-row {
   display: flex;
   align-items: center;

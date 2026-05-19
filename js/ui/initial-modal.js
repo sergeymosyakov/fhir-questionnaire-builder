@@ -9,6 +9,8 @@
 import { parseOptions } from '../utils.js';
 import { setValue, deleteValue } from '../state.js';
 import { triggerCalcRecalc } from '../builder/_shared.js';
+import { createCustomSelect } from './custom-select.js';
+import { createDatePicker } from './date-picker.js';
 
 let _el      = null;
 let _pending = null; // { node, initLink, setActive, draftValue }
@@ -97,38 +99,52 @@ function _renderBody(node, container) {
 
   let ctrl;
   if (itype === 'checkbox') {
-    ctrl = document.createElement('select');
-    ctrl.className = 'panel-type-sel';
-    [['', '— none —'], ['true', 'Checked (Yes)'], ['false', 'Unchecked (No)']].forEach(([v, l]) => {
-      const o = document.createElement('option');
-      o.value = v; o.textContent = l;
-      const cur = _pending.draftValue;
-      if ((v === '' && cur === undefined) || String(cur) === v) o.selected = true;
-      ctrl.appendChild(o);
+    const cbSel = createCustomSelect({
+      items: [{ value: '', label: '\u2014 none \u2014' }, { value: 'true', label: 'Checked (Yes)' }, { value: 'false', label: 'Unchecked (No)' }],
+      value: _pending.draftValue === undefined ? '' : String(_pending.draftValue),
+      className: 'sc-trigger--full',
+      onChange: v => setDraft(v === '' ? undefined : v === 'true'),
     });
-    ctrl.onchange = () => setDraft(ctrl.value === '' ? undefined : ctrl.value === 'true');
+    ctrl = cbSel.el;
 
   } else if (itype === 'select' || itype === 'radio' || itype === 'open-choice') {
-    ctrl = document.createElement('select');
-    ctrl.className = 'panel-type-sel';
-    const blank = document.createElement('option');
-    blank.value = ''; blank.textContent = '— none —';
-    if (!_pending.draftValue) blank.selected = true;
-    ctrl.appendChild(blank);
-    parseOptions(node.options || '').forEach(({ code, display }) => {
-      const o = document.createElement('option');
-      o.value = code; o.textContent = display || code;
-      if (_pending.draftValue === code) o.selected = true;
-      ctrl.appendChild(o);
+    const optSel = createCustomSelect({
+      items: [
+        { value: '', label: '\u2014 none \u2014' },
+        ...parseOptions(node.options || '').map(({ code, display }) => ({ value: code, label: display || code })),
+      ],
+      value:     _pending.draftValue || '',
+      className: 'sc-trigger--full',
+      onChange:  v => setDraft(v || undefined),
     });
-    ctrl.onchange = () => setDraft(ctrl.value || undefined);
+    ctrl = optSel.el;
 
   } else if (itype === 'date') {
+    const dp = createDatePicker({
+      value:    _pending.draftValue || '',
+      onChange: v => setDraft(v || undefined),
+      className: 'sc-trigger--full',
+    });
+    ctrl = dp.el;
+
+  } else if (itype === 'dateTime') {
+    const dp = createDatePicker({
+      value:    _pending.draftValue || '',
+      onChange: v => setDraft(v || undefined),
+      withTime:  true,
+      className: 'sc-trigger--full',
+    });
+    ctrl = dp.el;
+
+  } else if (itype === 'time') {
     ctrl = document.createElement('input');
-    ctrl.type  = 'date';
-    ctrl.className = 'panel-inp-sm';
-    ctrl.value = _pending.draftValue || '';
-    ctrl.onchange = () => setDraft(ctrl.value || undefined);
+    ctrl.type = 'time';
+    ctrl.className = 'panel-inp-sm ctrl-input--time';
+    // FHIR time stored as HH:MM:SS — native input uses HH:MM
+    ctrl.value = _pending.draftValue ? String(_pending.draftValue).slice(0, 5) : '';
+    ctrl.addEventListener('change', () => {
+      setDraft(ctrl.value ? ctrl.value + ':00' : undefined);
+    });
 
   } else if (['number', 'integer', 'decimal', 'quantity'].includes(itype)) {
     ctrl = document.createElement('input');

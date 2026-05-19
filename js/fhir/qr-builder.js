@@ -27,6 +27,9 @@ function buildQRItem(fhirItem, values) {
 
   function makeAnswer(v) {
     if (t === 'boolean')                     return { valueBoolean: v === true };
+    if (t === 'date')                        return { valueDate: String(v) };
+    if (t === 'dateTime')                    return { valueDateTime: String(v) };
+    if (t === 'time')                        return { valueTime: String(v) };
     if (t === 'choice' || t === 'open-choice') return { valueCoding: { code: String(v) } };
     if (t === 'integer')                     return { valueInteger: parseInt(v) || 0 };
     if (t === 'decimal' || t === 'quantity') return { valueDecimal: parseFloat(v) || 0 };

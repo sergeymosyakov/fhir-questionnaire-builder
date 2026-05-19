@@ -20,7 +20,9 @@ function fhirTypeToItemType(t) {
   if (t === 'choice')                                   return 'select';
   if (t === 'open-choice')                              return 'open-choice';
   if (t === 'display')                                  return 'display';
-  if (t === 'date' || t === 'dateTime' || t === 'time') return 'date';
+  if (t === 'date')              return 'date';
+  if (t === 'dateTime')          return 'dateTime';
+  if (t === 'time')              return 'time';
   if (t === 'url')                                      return 'url';
   if (t === 'attachment')                               return 'attachment';
   if (t === 'reference')                                return 'reference';

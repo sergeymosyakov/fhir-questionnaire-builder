@@ -1,0 +1,137 @@
+/* ── Date picker ─────────────────────────────────────────────────────────────── */
+
+/* Trigger — inherits .sc-trigger look, overrides arrow with calendar icon */
+.dp-trigger {
+  min-width: 130px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Crect x='1' y='2' width='12' height='11' rx='1.5' fill='none' stroke='%23999' stroke-width='1.3'/%3E%3Cline x1='1' y1='5.5' x2='13' y2='5.5' stroke='%23999' stroke-width='1.3'/%3E%3Cline x1='4.5' y1='0.5' x2='4.5' y2='3.5' stroke='%23999' stroke-width='1.3'/%3E%3Cline x1='9.5' y1='0.5' x2='9.5' y2='3.5' stroke='%23999' stroke-width='1.3'/%3E%3Crect x='2.5' y='7.2' width='1.8' height='1.8' rx='0.3' fill='%23999'/%3E%3Crect x='6' y='7.2' width='1.8' height='1.8' rx='0.3' fill='%23999'/%3E%3Crect x='9.5' y='7.2' width='1.8' height='1.8' rx='0.3' fill='%23999'/%3E%3Crect x='2.5' y='10' width='1.8' height='1.8' rx='0.3' fill='%23999'/%3E%3Crect x='6' y='10' width='1.8' height='1.8' rx='0.3' fill='%23999'/%3E%3C/svg%3E");
+}
+
+/* Calendar portal */
+.dp-cal {
+  position: fixed;
+  width: 224px;
+  background: #fff;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  z-index: 10300;
+  font-size: 12px;
+  overflow: hidden;
+  user-select: none;
+}
+.dp-cal--dt { width: 240px; }
+
+/* Header row */
+.dp-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--c-border);
+  background: var(--c-surface-2, #f8f9fa);
+}
+.dp-nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 6px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--c-primary);
+  border-radius: var(--r-sm);
+}
+.dp-nav-btn:hover { background: var(--c-primary-lt, #eef2ff); }
+.dp-month-lbl {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text);
+  flex: 1;
+  text-align: center;
+}
+
+/* Day name row + day grid (7 columns) */
+.dp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 4px 4px 0;
+  gap: 2px;
+}
+.dp-dn {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--c-text-2);
+  text-align: center;
+  padding: 2px 0;
+}
+.dp-day {
+  text-align: center;
+  padding: 4px 0;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--c-text);
+}
+.dp-day:not(.dp-day--blank):hover { background: #f0f4ff; color: var(--c-primary); }
+.dp-day--blank { cursor: default; }
+.dp-day--today {
+  font-weight: 700;
+  color: var(--c-primary);
+}
+.dp-day--sel {
+  background: var(--c-primary);
+  color: #fff !important;
+  font-weight: 600;
+}
+.dp-day--sel.dp-day--today { background: var(--c-primary); }
+
+/* Footer */
+.dp-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-top: 1px solid var(--c-border);
+  background: var(--c-surface-2, #f8f9fa);
+  gap: 8px;
+}
+.dp-footer-btn {
+  background: none;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px 8px;
+  color: var(--c-text);
+}
+.dp-footer-btn:hover { border-color: var(--c-primary); color: var(--c-primary); }
+.dp-footer-btn--clear { color: #c0392b; border-color: #e0b0b0; }
+.dp-footer-btn--clear:hover { background: #ffeaea; border-color: #c0392b; }
+
+/* Time row (datetime mode only) */
+.dp-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 8px 2px;
+  border-top: 1px solid var(--c-border);
+}
+.dp-time-inp {
+  width: 42px;
+  text-align: center;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 2px 4px;
+  font-size: 12px;
+  -moz-appearance: textfield;
+}
+.dp-time-inp::-webkit-inner-spin-button,
+.dp-time-inp::-webkit-outer-spin-button { -webkit-appearance: none; }
+.dp-time-inp:focus { outline: none; border-color: var(--c-primary); }
+.dp-time-sep { font-size: 13px; font-weight: 700; color: var(--c-text-2); }
+.dp-footer-btn--set {
+  color: var(--c-primary);
+  border-color: var(--c-primary);
+  font-weight: 600;
+}
+.dp-footer-btn--set:hover { background: var(--c-primary-lt, #eef2ff); }
+.dp-footer-btn--set:disabled { opacity: 0.4; cursor: default; pointer-events: none; }

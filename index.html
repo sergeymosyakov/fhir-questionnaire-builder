@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="css/builder.css">
 <link rel="stylesheet" href="css/preview.css">
 <link rel="stylesheet" href="css/controls.css">
+<link rel="stylesheet" href="css/date-picker.css">
 <link rel="stylesheet" href="css/tooltip.css">
 <link rel="stylesheet" href="css/variables.css">
 <link rel="stylesheet" href="css/status-badge.css">
@@ -364,6 +365,21 @@
     <div class="modal-footer">
       <button id="requiredModalCancel" type="button" class="modal-btn modal-btn--cancel">Cancel</button>
       <button id="requiredModalApply"  type="button" class="modal-btn modal-btn--apply">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Read-only edit modal -->
+<div id="readonlyModal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span id="readonlyModalTitle">Read-only</span>
+      <button id="readonlyModalClose" type="button" class="modal-close" title="Close">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="readonlyModalBody"></div>
+    <div class="modal-footer">
+      <button id="readonlyModalCancel" type="button" class="modal-btn modal-btn--cancel">Cancel</button>
+      <button id="readonlyModalApply"  type="button" class="modal-btn modal-btn--apply">Apply</button>
     </div>
   </div>
 </div>

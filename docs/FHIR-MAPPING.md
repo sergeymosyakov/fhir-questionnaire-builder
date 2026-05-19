@@ -33,7 +33,7 @@ Every node in the tree is either a **group** or an **item**:
   enableBehavior:      'all'|'any',
   enableWhenExpression:string,
   constraint:          object[],
-  itemType:            'text'|'integer'|'decimal'|'date'|'url'|'attachment'|'checkbox'|'select'|'radio'|'open-choice'|'quantity'|'reference'|'display', // 'number' legacy alias
+  itemType:            'text'|'integer'|'decimal'|'date'|'dateTime'|'time'|'url'|'attachment'|'checkbox'|'select'|'radio'|'open-choice'|'quantity'|'reference'|'display', // 'number' legacy alias
   options:             string,           // comma-separated, used by select/radio/open-choice
   repeats:             boolean,          // FHIR item.repeats — multi-row input in preview
   _renderStyle:        string,           // inline CSS (from rendering-style extension)
@@ -67,7 +67,9 @@ Every node in the tree is either a **group** or an **item**:
 | `choice` + itemControl `radio-button` | `radio` | see Extensions section |
 | `open-choice` | `open-choice` | text input + `<datalist>` suggestions from `answerOption[]`; free-text allowed |
 | `display` | `display` | label only, no control, no pass/fail |
-| `date`, `dateTime`, `time` | `date` | all three map to native date-picker |
+| `date` | `date` | |
+| `dateTime` | `dateTime` | Stored as `YYYY-MM-DDTHH:MM:SS`; QR → `valueDateTime` |
+| `time` | `time` | Stored as `HH:MM:SS`; QR → `valueTime` |
 | `url` | `url` | format validated with `new URL()` |
 | `attachment` | `attachment` | file input, stores `{name, size, type}` |
 | `group` | `group` (node.type) | |
@@ -88,6 +90,8 @@ Every node in the tree is either a **group** or an **item**:
 | `reference` | `reference` | + `questionnaire-referenceResource` extension (if type is locked) |
 | `display` | `display` | |
 | `date` | `date` | |
+| `dateTime` | `dateTime` | |
+| `time` | `time` | |
 | `url` | `url` | |
 | `attachment` | `attachment` | |
 

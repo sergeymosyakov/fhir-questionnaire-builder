@@ -154,15 +154,15 @@
 /* Answer Type modal */
 .at-modal-type-row     { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .at-modal-lbl          { font-size: 13px; font-weight: 600; white-space: nowrap; min-width: 42px; }
-.at-modal-type-sel     { flex: 1; }
+.at-modal-type-sel     { flex: 1; min-width: 0; }
 .at-modal-source-row   { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .at-modal-src-lbl      { font-size: 13px; cursor: pointer; margin-right: 12px; }
 .at-modal-sub          { background: var(--c-surface-2, #f8f9fa); border: 1px solid var(--c-border); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; }
 .at-modal-sub-lbl      { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: var(--c-text-2); margin-bottom: 6px; }
-.at-modal-opt-inp      { width: 100%; box-sizing: border-box; }
-.at-modal-avs-drop     { width: 100%; box-sizing: border-box; margin-bottom: 6px; }
+.at-modal-opt-inp      { width: 100%; box-sizing: border-box; resize: vertical; min-height: 2rem; font-family: inherit; font-size: inherit; }
+.at-modal-avs-drop     { margin-bottom: 6px; }
 .at-modal-avs-url      { width: 100%; box-sizing: border-box; margin-top: 2px; }
-.at-modal-sub-sel      { width: 100%; box-sizing: border-box; }
+.at-modal-sub-sel      { min-width: 0; }
 .required-modal-label { font-size: 13px; font-weight: 600; white-space: nowrap; }
 .required-modal-sel   { flex: 1; }
 .appearance-modal-form { margin-top: 10px; }
@@ -189,10 +189,11 @@
 .patient-ctx-lbl {
   font-size: 12px; color: var(--c-text); flex: 0 0 130px;
 }
-.patient-ctx-inp, .patient-ctx-sel {
+.patient-ctx-inp {
   flex: 1; height: 26px; padding: 0 6px;
   border: 1px solid var(--c-border); border-radius: var(--r-sm); font-size: 12px;
 }
+.patient-ctx-sel  { flex: 1; min-width: 0; font-size: 12px; }
 .patient-ctx-cb { width: 16px; height: 16px; }
 
 /* === Clear form confirmation modal ========================================== */

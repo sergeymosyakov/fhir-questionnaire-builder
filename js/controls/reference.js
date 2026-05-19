@@ -1,4 +1,5 @@
 import { createWrap } from './_base.js';
+import { createCustomSelect } from '../ui/custom-select.js';
 
 // All FHIR R4 resource types (for the resource-type dropdown)
 const FHIR_R4_RESOURCES = [
@@ -47,27 +48,16 @@ export function build(node, ctx) {
   const initId   = slashIdx > -1 ? existing.slice(slashIdx + 1) : '';
 
   // Resource type dropdown
-  const sel = document.createElement('select');
-  sel.className = 'ref-type-sel';
+  const typeItems = node.referenceResource
+    ? [{ value: node.referenceResource, label: node.referenceResource }]
+    : [{ value: '', label: '\u2014 type \u2014' }, ...FHIR_R4_RESOURCES.map(r => ({ value: r, label: r }))];
 
-  // If referenceResource is set, show only that type; otherwise show all
-  const options = node.referenceResource ? [node.referenceResource] : FHIR_R4_RESOURCES;
-  for (const r of options) {
-    const opt = document.createElement('option');
-    opt.value = r;
-    opt.textContent = r;
-    if (r === initType) opt.selected = true;
-    sel.appendChild(opt);
-  }
-  // If no referenceResource, add a blank "select type" placeholder at top
-  if (!node.referenceResource) {
-    const blank = document.createElement('option');
-    blank.value = '';
-    blank.textContent = '— type —';
-    blank.disabled = true;
-    if (!initType) blank.selected = true;
-    sel.insertBefore(blank, sel.firstChild);
-  }
+  const sel = createCustomSelect({
+    items:     typeItems,
+    value:     initType || '',
+    className: 'ref-type-sel',
+    onChange:  () => { update(); _formTick.value++; },
+  });
 
   // Separator label
   const sep = document.createElement('span');
@@ -87,18 +77,17 @@ export function build(node, ctx) {
   errMsg.textContent  = 'id is required';
 
   const update = () => {
-    const type = sel.value;
+    const type = sel.getValue();
     const id   = idInput.value.trim();
     errMsg.style.display = (type && !id) ? 'inline' : 'none';
     setValue(node.id, (type && id) ? { reference: type + '/' + id } : undefined);
     _reCalc(); onChange();
   };
 
-  sel.onchange    = () => { update(); _formTick.value++; };
   idInput.oninput = update;
   idInput.onchange = () => { _formTick.value++; };
 
-  wrap.appendChild(sel);
+  wrap.appendChild(sel.el);
   wrap.appendChild(sep);
   wrap.appendChild(idInput);
   wrap.appendChild(errMsg);

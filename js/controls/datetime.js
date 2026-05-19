@@ -13,8 +13,9 @@ export function build(node, ctx) {
       onChange();
       _formTick.value++;
     },
+    withTime:  true,
     className: 'ctrl-input--date',
-    testid:   'date-input',
+    testid:   'datetime-input',
   });
 
   wrap.appendChild(dp.el);

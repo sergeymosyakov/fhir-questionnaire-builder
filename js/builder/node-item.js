@@ -6,6 +6,7 @@ import { makeDragHandle, attachDropZone } from './dnd.js';
 import { buildVisPanel } from './panels.js';
 import * as answerTypeModal from '../ui/answer-type-modal.js';
 import * as requiredModal from '../ui/required-modal.js';
+import * as readonlyModal from '../ui/readonly-modal.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
 import * as constraintModal from '../ui/constraint-modal.js';
 import * as expressionModal from '../ui/expression-modal.js';
@@ -165,7 +166,7 @@ export function renderItem(node, ctx) {
     placeholder: "e.g. %age > 18 or %today",
   });
 
-  // Read-only toggle — direct boolean, no panel needed
+  // Read-only — opens modal for consistency with other action buttons
   const roLink = document.createElement('a');
   roLink.textContent = 'Read-only';
   roLink.className = 'action-edit';
@@ -174,11 +175,7 @@ export function renderItem(node, ctx) {
   roLink.dataset.tipFhir  = 'Questionnaire.item.readOnly';
   roLink.dataset.tipSpec  = 'R4';
   roLink.dataset.testid   = 'action-readonly';
-  roLink.onclick = () => {
-    node._readOnly = !node._readOnly;
-    setActive(roLink, !!node._readOnly);
-    triggerCalcRecalc();
-  };
+  roLink.onclick = () => readonlyModal.open(node, roLink, setActive);
   actions.appendChild(roLink);
 
   // Repeatable — opens modal for repeats + minOccurs / maxOccurs
@@ -246,6 +243,7 @@ export function renderItem(node, ctx) {
   div.appendChild(header);
   div.appendChild(btnDel);
 
+  setActive(typeLink,        true);  // Answer type is always set
   setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
   setActive(exprLink,       !!node._calculatedExpr);
   setActive(initExprLink,   !!node._initialExpr);

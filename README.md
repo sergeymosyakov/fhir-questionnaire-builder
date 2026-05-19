@@ -30,7 +30,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/builder/node-group.js` | `renderGroup(node, ctx)` — group node DOM |
 | `js/render-preview.js` | Right panel — async preview; `reinitForm()` shows progress bar, yields between stages; `_asyncRender(version)` separates FHIRPath eval from DOM rebuild; DocumentFragment; stale-render abort |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
-| `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns instead of native `<select>` / `<datalist>` |
+| `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns instead of native `<select>` / `<datalist>`. `date` and `dateTime` use a custom calendar picker (`js/ui/date-picker.js`). `time` uses native `<input type="time">`. |
 | `js/fhir/import.js` | FHIR R4 → internal model |
 | `js/fhir/export.js` | Internal model → FHIR R4 |
 | `js/fhir/calc.js` | `evalCalcNodes`, `evalInitialExprNodes` — FHIRPath calculatedExpression and initialExpression evaluation |
@@ -96,8 +96,8 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `state`, integration); **246 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — e2e test suite (`tests/e2e/`); **132 tests** across 11 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `state`, integration); **259 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Playwright** — e2e test suite (`tests/e2e/`); **151 tests** across 12 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
 

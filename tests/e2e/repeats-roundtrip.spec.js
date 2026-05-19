@@ -39,11 +39,11 @@ async function fillNumberRows(page, linkId, values) {
 
 async function fillDateRows(page, linkId, values) {
   const wrap = page.locator(`[data-preview-id="${linkId}"]`);
-  await wrap.locator('.repeat-row').nth(0).locator('input[type="date"]').fill(values[0]);
+  await wrap.locator('.repeat-row').nth(0).locator('[data-testid="date-input"]').evaluate((el, v) => el._dpSetValue(v), values[0]);
   for (let i = 1; i < values.length; i++) {
     await wrap.locator('[data-testid="repeat-add-btn"]').click();
     await expect(wrap.locator('.repeat-row')).toHaveCount(i + 1);
-    await wrap.locator('.repeat-row').nth(i).locator('input[type="date"]').fill(values[i]);
+    await wrap.locator('.repeat-row').nth(i).locator('[data-testid="date-input"]').evaluate((el, v) => el._dpSetValue(v), values[i]);
   }
 }
 
@@ -122,9 +122,9 @@ test('QR repeat round-trip: fill 3 rows per field, export, reload, import, verif
 
   // ── 9. Verify date-item ──
   await expect(page.locator('[data-preview-id="date-item"] .repeat-row')).toHaveCount(3);
-  await expect(page.locator('[data-preview-id="date-item"] .repeat-row').nth(0).locator('input[type="date"]')).toHaveValue('2024-01-01');
-  await expect(page.locator('[data-preview-id="date-item"] .repeat-row').nth(1).locator('input[type="date"]')).toHaveValue('2024-02-15');
-  await expect(page.locator('[data-preview-id="date-item"] .repeat-row').nth(2).locator('input[type="date"]')).toHaveValue('2024-03-31');
+  await expect(page.locator('[data-preview-id="date-item"] .repeat-row').nth(0).locator('[data-testid="date-input"]')).toHaveAttribute('data-value', '2024-01-01');
+  await expect(page.locator('[data-preview-id="date-item"] .repeat-row').nth(1).locator('[data-testid="date-input"]')).toHaveAttribute('data-value', '2024-02-15');
+  await expect(page.locator('[data-preview-id="date-item"] .repeat-row').nth(2).locator('[data-testid="date-input"]')).toHaveAttribute('data-value', '2024-03-31');
 
   // ── 10. Verify select-item ──
   await expect(page.locator('[data-preview-id="select-item"] .repeat-row')).toHaveCount(3);

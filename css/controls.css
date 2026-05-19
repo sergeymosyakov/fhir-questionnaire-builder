@@ -15,15 +15,12 @@
 
 /* === Reference control: [resource-type] / [id-input] ======================== */
 .ref-type-sel {
-  height: 28px;
-  padding: 0 4px;
-  border: 1px solid var(--c-border);
-  border-right: none;
-  border-radius: var(--r-sm) 0 0 var(--r-sm);
-  font-size: 12px;
-  color: var(--c-text);
-  background: var(--c-surface);
+  min-width: 100px;
   max-width: 160px;
+  height: 28px;
+  border-radius: var(--r-sm) 0 0 var(--r-sm);
+  border-right: none;
+  font-size: 12px;
 }
 .ref-sep {
   padding: 0 2px;
@@ -58,13 +55,10 @@
   color: var(--c-text);
 }
 .qty-unit-sel {
+  min-width: 80px;
+  max-width: 120px;
   height: 28px;
-  padding: 0 4px;
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-sm);
   font-size: 12px;
-  color: var(--c-text);
-  background: var(--c-surface);
 }
 
 /* === Select (single-choice dropdown) ========================================= */
@@ -97,6 +91,22 @@
 .sc-trigger:focus       { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 2px var(--c-primary-lt); }
 .sc-trigger:hover       { border-color: var(--c-primary); }
 .sc-trigger--empty      { color: var(--c-text-2); }
+
+/* Custom select portal drop — shared with oc-drop */
+.csel-drop { z-index: 10200; }
+
+/* Compact variant — used inside builder panels (vis-cond-op, behavior sel, etc.) */
+.sc-trigger--sm {
+  min-width: 0;
+  max-width: 180px;
+  height: 24px;
+  padding: 0 18px 0 5px;
+  font-size: 11px;
+  background-position: right 5px center;
+}
+
+/* Full-width variant — used in modal rows (required, readonly, type selectors) */
+.sc-trigger--full { min-width: 0; max-width: none; width: 100%; }
 
 /* === Open-choice combobox ==================================================== */
 .oc-wrap  { display: inline-flex; align-items: center; gap: 0; }

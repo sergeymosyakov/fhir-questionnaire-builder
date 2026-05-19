@@ -257,7 +257,8 @@ test.describe('Builder → preview: item type changes', () => {
     await node.getByTestId('action-type').click();
     const modal = page.locator('#answerTypeModal');
     await expect(modal).toBeVisible();
-    await modal.getByTestId('type-select').selectOption(typeValue);
+    await modal.getByTestId('type-select').click();
+    await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
     await page.locator('#answerTypeModalApply').click();
     await expect(modal).not.toBeVisible();
   }
@@ -415,7 +416,8 @@ test.describe('Builder creates items → preview reacts', () => {
     const atModal = page.locator('#answerTypeModal');
     await expect(atModal).toBeVisible();
     // The type-select is inside the modal.
-    await atModal.getByTestId('type-select').selectOption('decimal');
+    await atModal.getByTestId('type-select').click();
+    await page.locator('[data-testid="csel-drop"] [data-val="decimal"]').click();
     await page.locator('#answerTypeModalApply').click();
     await expect(atModal).not.toBeVisible();
 
@@ -441,7 +443,8 @@ test.describe('Builder creates items → preview reacts', () => {
     await expect(reqModal).toBeVisible();
 
     // Select "No — optional" and apply.
-    await reqModal.locator('.required-modal-sel').selectOption('false');
+    await reqModal.locator('[data-testid="required-sel"]').click();
+    await page.locator('[data-testid="csel-drop"] [data-val="false"]').click();
     await page.locator('#requiredModalApply').click();
 
     // Preview must now show "optional" badge instead of the star.

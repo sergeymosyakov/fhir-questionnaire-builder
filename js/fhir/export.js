@@ -12,6 +12,8 @@ function itemTypeToFHIRType(t) {
   if (t === 'open-choice') return 'open-choice';
   if (t === 'display')     return 'display';
   if (t === 'date')        return 'date';
+  if (t === 'dateTime')    return 'dateTime';
+  if (t === 'time')        return 'time';
   if (t === 'url')         return 'url';
   if (t === 'attachment')  return 'attachment';
   if (t === 'reference')   return 'reference';
@@ -54,6 +56,8 @@ function nodeToFHIRItem(node) {
     else if (t === 'decimal')  initEntry = { valueDecimal:  parseFloat(node._initialValue) };
     else if (t === 'integer')  initEntry = { valueInteger:  parseInt(node._initialValue, 10) };
     else if (t === 'date')     initEntry = { valueDate:     String(node._initialValue) };
+    else if (t === 'dateTime') initEntry = { valueDateTime: String(node._initialValue) };
+    else if (t === 'time')     initEntry = { valueTime:     String(node._initialValue) };
     else if (t === 'url')      initEntry = { valueUri:      String(node._initialValue) };
     else if (t === 'choice')   initEntry = { valueCoding:   { code: String(node._initialValue), display: String(node._initialValue) } };
     else                       initEntry = { valueString:   String(node._initialValue) };

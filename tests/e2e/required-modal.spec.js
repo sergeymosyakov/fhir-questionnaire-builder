@@ -10,7 +10,7 @@
 //   node-title-display    read-only title span
 //   node-title-input      title textarea
 //   action-mand           "Required" action link on an item node
-//   required-sel          <select> inside the modal body
+//   required-sel          custom select trigger inside the modal body
 //
 // ── element IDs ──────────────────────────────────────────────────────────────
 //   requiredModal         backdrop (display:flex when open)
@@ -22,6 +22,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+
+/** Pick an option from an open custom-select portal. */
+async function selectCustomOpt(page, triggerLoc, value) {
+  await triggerLoc.click();
+  await page.locator(`[data-testid="csel-drop"] [data-val="${value}"]`).click();
+}
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
@@ -79,13 +85,15 @@ test.describe('Required modal — open / close', () => {
     await expect(modalTitle(page)).toContainText('Smoking status');
   });
 
-  test('modal body contains a <select> with 3 options', async ({ page }) => {
+  test('modal body contains a custom select with 3 options', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
 
     await page.locator('[data-node-id="1.1"]').getByTestId('action-mand').click();
     await expect(requiredSel(page)).toBeVisible();
-    await expect(requiredSel(page).locator('option')).toHaveCount(3);
+    await requiredSel(page).click();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val]')).toHaveCount(3);
+    await page.keyboard.press('Escape');
   });
 
   test('close via × button hides the modal', async ({ page }) => {
@@ -136,7 +144,7 @@ test.describe('Required modal — draft pattern', () => {
     await actionLink.click();
 
     // Change to "Yes — required"
-    await requiredSel(page).selectOption('true');
+    await selectCustomOpt(page, requiredSel(page), 'true');
     await modalCancel(page).click();
 
     // Link should NOT be active (no save happened)
@@ -150,7 +158,7 @@ test.describe('Required modal — draft pattern', () => {
     const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-mand');
     await actionLink.click();
 
-    await requiredSel(page).selectOption('true');
+    await selectCustomOpt(page, requiredSel(page), 'true');
     await modalApply(page).click();
 
     await expect(modal(page)).toBeHidden();
@@ -164,7 +172,7 @@ test.describe('Required modal — draft pattern', () => {
     const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-mand');
     await actionLink.click();
 
-    await requiredSel(page).selectOption('false');
+    await selectCustomOpt(page, requiredSel(page), 'false');
     await modalApply(page).click();
 
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
@@ -177,7 +185,7 @@ test.describe('Required modal — draft pattern', () => {
     const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-mand');
     await actionLink.click();
 
-    await requiredSel(page).selectOption('null');
+    await selectCustomOpt(page, requiredSel(page), 'null');
     await modalApply(page).click();
 
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
@@ -191,12 +199,12 @@ test.describe('Required modal — draft pattern', () => {
 
     // Save "Yes — required"
     await actionLink.click();
-    await requiredSel(page).selectOption('true');
+    await selectCustomOpt(page, requiredSel(page), 'true');
     await modalApply(page).click();
 
-    // Re-open — select should show 'true'
+    // Re-open — select should reflect 'true'
     await actionLink.click();
-    await expect(requiredSel(page)).toHaveValue('true');
+    await expect(requiredSel(page)).toHaveAttribute('data-value', 'true');
     await modalCancel(page).click();
   });
 
@@ -208,13 +216,13 @@ test.describe('Required modal — draft pattern', () => {
 
     // First: set to Yes
     await actionLink.click();
-    await requiredSel(page).selectOption('true');
+    await selectCustomOpt(page, requiredSel(page), 'true');
     await modalApply(page).click();
     await expect(actionLink).toHaveClass(/action-edit--active/);
 
     // Then: reset to null
     await actionLink.click();
-    await requiredSel(page).selectOption('null');
+    await selectCustomOpt(page, requiredSel(page), 'null');
     await modalApply(page).click();
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
   });

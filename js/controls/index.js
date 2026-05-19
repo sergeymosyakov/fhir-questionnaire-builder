@@ -4,6 +4,8 @@
 import { build as checkbox    } from './checkbox.js';
 import { build as number      } from './number.js';
 import { build as date        } from './date.js';
+import { build as datetime    } from './datetime.js';
+import { build as time        } from './time.js';
 import { build as url         } from './url.js';
 import { build as attachment  } from './attachment.js';
 import { build as select      } from './select.js';
@@ -19,6 +21,8 @@ const registry = new Map([
   ['integer',      number],
   ['decimal',      number],
   ['date',        date],
+  ['dateTime',    datetime],
+  ['time',         time],
   ['url',         url],
   ['attachment',  attachment],
   ['select',      select],

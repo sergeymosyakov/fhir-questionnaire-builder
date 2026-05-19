@@ -14,11 +14,12 @@
 import { questContained, values, deleteValue } from '../state.js';
 import { resolveContainedValueSet } from '../fhir/import.js';
 import { triggerCalcRecalc } from '../builder/_shared.js';
+import { createCustomSelect } from './custom-select.js';
 
 const CHOICE_TYPES = new Set(['select', 'radio', 'open-choice']);
 
 const ITEM_TYPES = [
-  'text','integer','decimal','date','url','attachment',
+  'text','integer','decimal','date','dateTime','time','url','attachment',
   'checkbox','select','open-choice','radio',
   'reference','quantity','display',
 ];
@@ -153,6 +154,7 @@ function _apply() {
     rl.style.display = noRepeats ? 'none' : '';
   }
 
+  setActive(typeLink, true);
   triggerCalcRecalc();
   _close();
 }
@@ -178,19 +180,20 @@ function _renderBody(container) {
   const typeLbl = document.createElement('label');
   typeLbl.className = 'at-modal-lbl';
   typeLbl.textContent = 'Type:';
-  typeLbl.htmlFor = '_at_type_sel';
-  const typeSel = document.createElement('select');
-  typeSel.id        = '_at_type_sel';
-  typeSel.className = 'at-modal-type-sel';
-  typeSel.dataset.testid = 'type-select';
-  for (const t of ITEM_TYPES) {
-    const o = document.createElement('option');
-    o.value = t; o.textContent = t;
-    if (_pending.draftType === t) o.selected = true;
-    typeSel.appendChild(o);
-  }
+  const typeSel = createCustomSelect({
+    items:     ITEM_TYPES.map(t => ({ value: t, label: t })),
+    value:     _pending.draftType,
+    className: 'at-modal-type-sel sc-trigger--full',
+    testid:    'type-select',
+    onChange:  v => {
+      _pending.draftType = v;
+      choiceSection.style.display = CHOICE_TYPES.has(_pending.draftType) ? 'block' : 'none';
+      refSection.style.display    = _pending.draftType === 'reference' ? 'block' : 'none';
+      unitSection.style.display   = _pending.draftType === 'quantity'  ? 'block' : 'none';
+    },
+  });
   typeRow.appendChild(typeLbl);
-  typeRow.appendChild(typeSel);
+  typeRow.appendChild(typeSel.el);
   container.appendChild(typeRow);
 
   // ── Choice-type: answer source section ────────────────────────────────────
@@ -219,12 +222,12 @@ function _renderBody(container) {
   optSubLbl.className   = 'at-modal-sub-lbl';
   optSubLbl.textContent = 'Options (code=Label, comma-separated):';
 
-  const optInp = document.createElement('input');
-  optInp.type        = 'text';
+  const optInp = document.createElement('textarea');
   optInp.className   = 'at-modal-opt-inp';
   optInp.dataset.testid = 'options-input';
   optInp.value       = _pending.draftOptions;
   optInp.placeholder = 'e.g. yes=Yes,no=No,maybe=Maybe';
+  optInp.rows        = 1;
   optInp.oninput = () => { _pending.draftOptions = optInp.value; };
 
   optSection.append(optSubLbl, optInp);
@@ -242,25 +245,29 @@ function _renderBody(container) {
   // Dropdown of contained ValueSets
   const containedVS = [...questContained].filter(r => r.resourceType === 'ValueSet');
 
-  const avsDrop = document.createElement('select');
-  avsDrop.className = 'at-modal-avs-drop';
-  avsDrop.dataset.testid = 'avs-select';
-  const noneOpt = document.createElement('option');
-  noneOpt.value = ''; noneOpt.textContent = '\u2014 none \u2014';
-  if (!_pending.draftAVS) noneOpt.selected = true;
-  avsDrop.appendChild(noneOpt);
-  for (const vs of containedVS) {
-    const o = document.createElement('option');
-    o.value = '#' + vs.id;
-    o.textContent = '#' + vs.id + (vs.title ? ' \u2014 ' + vs.title : '');
-    if (_pending.draftAVS === '#' + vs.id) o.selected = true;
-    avsDrop.appendChild(o);
-  }
-  const extOpt = document.createElement('option');
-  extOpt.value = '__ext__'; extOpt.textContent = '\u2014 external URL \u2014';
-  const isExternalAVS = _pending.draftAVS && !_pending.draftAVS.startsWith('#');
-  if (isExternalAVS) extOpt.selected = true;
-  avsDrop.appendChild(extOpt);
+  const avsItems = [
+    { value: '', label: '\u2014 none \u2014' },
+    ...containedVS.map(vs => ({ value: '#' + vs.id, label: '#' + vs.id + (vs.title ? ' \u2014 ' + vs.title : '') })),
+    { value: '__ext__', label: '\u2014 external URL \u2014' },
+  ];
+  const isExternalAVS = !!_pending.draftAVS && !_pending.draftAVS.startsWith('#');
+  const avsInitVal = isExternalAVS ? '__ext__' : (_pending.draftAVS || '');
+
+  const avsDrop = createCustomSelect({
+    items:     avsItems,
+    value:     avsInitVal,
+    className: 'at-modal-avs-drop sc-trigger--full',
+    testid:    'avs-select',
+    onChange:  v => {
+      if (v === '__ext__') {
+        avsUrlInp.style.display = 'block';
+        _pending.draftAVS = avsUrlInp.value.trim();
+      } else {
+        avsUrlInp.style.display = 'none';
+        _pending.draftAVS = v;
+      }
+    },
+  });
 
   // Free-text input for external URLs
   const avsUrlInp = document.createElement('input');
@@ -272,17 +279,7 @@ function _renderBody(container) {
   avsUrlInp.style.display = isExternalAVS ? 'block' : 'none';
   avsUrlInp.oninput = () => { _pending.draftAVS = avsUrlInp.value.trim(); };
 
-  avsDrop.onchange = () => {
-    if (avsDrop.value === '__ext__') {
-      avsUrlInp.style.display = 'block';
-      _pending.draftAVS = avsUrlInp.value.trim();
-    } else {
-      avsUrlInp.style.display = 'none';
-      _pending.draftAVS = avsDrop.value; // '' or '#vs-id'
-    }
-  };
-
-  avsSection.append(avsSubLbl, avsDrop, avsUrlInp);
+  avsSection.append(avsSubLbl, avsDrop.el, avsUrlInp);
   choiceSection.appendChild(avsSection);
 
   // Wire radio toggles
@@ -301,9 +298,9 @@ function _renderBody(container) {
       if (!_pending.draftAVS) {
         if (containedVS.length) {
           _pending.draftAVS = '#' + containedVS[0].id;
-          avsDrop.value = '#' + containedVS[0].id;
+          avsDrop.setValue('#' + containedVS[0].id);
         } else {
-          avsDrop.value = '__ext__';
+          avsDrop.setValue('__ext__');
           avsUrlInp.style.display = 'block';
           _pending.draftAVS = '';
         }
@@ -320,21 +317,18 @@ function _renderBody(container) {
   refLbl.className   = 'at-modal-sub-lbl';
   refLbl.textContent = 'Allowed resource type:';
 
-  const refSel = document.createElement('select');
-  refSel.className = 'at-modal-sub-sel';
-  const refBlank = document.createElement('option');
-  refBlank.value = ''; refBlank.textContent = '\u2014 Any (unrestricted) \u2014';
-  if (!_pending.draftRefRes) refBlank.selected = true;
-  refSel.appendChild(refBlank);
-  for (const t of [...new Set(FHIR_R4_TYPES)].sort()) {
-    const o = document.createElement('option');
-    o.value = t; o.textContent = t;
-    if (_pending.draftRefRes === t) o.selected = true;
-    refSel.appendChild(o);
-  }
-  refSel.onchange = () => { _pending.draftRefRes = refSel.value; };
+  const refSel = createCustomSelect({
+    items:     [
+      { value: '', label: '\u2014 Any (unrestricted) \u2014' },
+      ...[...new Set(FHIR_R4_TYPES)].sort().map(t => ({ value: t, label: t })),
+    ],
+    value:     _pending.draftRefRes || '',
+    className: 'at-modal-sub-sel sc-trigger--full',
+    testid:    'ref-resource-sel',
+    onChange:  v => { _pending.draftRefRes = v; },
+  });
 
-  refSection.append(refLbl, refSel);
+  refSection.append(refLbl, refSel.el);
   container.appendChild(refSection);
 
   // ── Quantity unit ─────────────────────────────────────────────────────────
@@ -346,28 +340,17 @@ function _renderBody(container) {
   unitLbl.className   = 'at-modal-sub-lbl';
   unitLbl.textContent = 'Default unit:';
 
-  const unitSel = document.createElement('select');
-  unitSel.className = 'at-modal-sub-sel';
-  const unitBlank = document.createElement('option');
-  unitBlank.value = ''; unitBlank.textContent = '\u2014 none \u2014';
-  if (!_pending.draftUnit) unitBlank.selected = true;
-  unitSel.appendChild(unitBlank);
-  for (const u of BUILDER_UNITS) {
-    const o = document.createElement('option');
-    o.value = u; o.textContent = u;
-    if (_pending.draftUnit === u) o.selected = true;
-    unitSel.appendChild(o);
-  }
-  unitSel.onchange = () => { _pending.draftUnit = unitSel.value; };
+  const unitSel = createCustomSelect({
+    items:     [
+      { value: '', label: '\u2014 none \u2014' },
+      ...BUILDER_UNITS.map(u => ({ value: u, label: u })),
+    ],
+    value:     _pending.draftUnit || '',
+    className: 'at-modal-sub-sel sc-trigger--full',
+    testid:    'unit-sel',
+    onChange:  v => { _pending.draftUnit = v; },
+  });
 
-  unitSection.append(unitLbl, unitSel);
+  unitSection.append(unitLbl, unitSel.el);
   container.appendChild(unitSection);
-
-  // ── Type-change handler — show/hide sections ──────────────────────────────
-  typeSel.onchange = () => {
-    _pending.draftType = typeSel.value;
-    choiceSection.style.display = CHOICE_TYPES.has(_pending.draftType) ? 'block' : 'none';
-    refSection.style.display    = _pending.draftType === 'reference' ? 'block' : 'none';
-    unitSection.style.display   = _pending.draftType === 'quantity'  ? 'block' : 'none';
-  };
 }

@@ -23,6 +23,7 @@ import * as initialModal from './ui/initial-modal.js';
 import * as appearanceModal from './ui/appearance-modal.js';
 import * as repeatableModal from './ui/repeatable-modal.js';
 import * as requiredModal from './ui/required-modal.js';
+import * as readonlyModal from './ui/readonly-modal.js';
 import * as answerTypeModal from './ui/answer-type-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
@@ -130,6 +131,15 @@ requiredModal.init({
   closeBtn:  document.getElementById('requiredModalClose'),
   cancelBtn: document.getElementById('requiredModalCancel'),
   applyBtn:  document.getElementById('requiredModalApply'),
+});
+// ── Read-only modal init ─────────────────────────────────────────────────────
+readonlyModal.init({
+  modal:     document.getElementById('readonlyModal'),
+  title:     document.getElementById('readonlyModalTitle'),
+  body:      document.getElementById('readonlyModalBody'),
+  closeBtn:  document.getElementById('readonlyModalClose'),
+  cancelBtn: document.getElementById('readonlyModalCancel'),
+  applyBtn:  document.getElementById('readonlyModalApply'),
 });
 // ── Answer Type modal init ─────────────────────────────────────────────
 answerTypeModal.init({

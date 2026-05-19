@@ -206,7 +206,8 @@ test.describe('Default Value modal — not applicable types', () => {
     await node.getByTestId('action-type').click();
     const modal = page.locator('#answerTypeModal');
     await expect(modal).toBeVisible();
-    await modal.getByTestId('type-select').selectOption(typeValue);
+    await modal.getByTestId('type-select').click();
+    await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
     await page.locator('#answerTypeModalApply').click();
     await expect(modal).not.toBeVisible();
   }

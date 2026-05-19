@@ -1,4 +1,5 @@
 import { createWrap } from './_base.js';
+import { createCustomSelect } from '../ui/custom-select.js';
 
 // Common medical UCUM units grouped for the dropdown
 const QUANTITY_UNITS = [
@@ -77,29 +78,17 @@ export function build(node, ctx) {
   numInput.value       = initVal;
   numInput.className   = 'qty-num-input';
 
-  // Unit dropdown
-  const unitSel = document.createElement('select');
-  unitSel.className = 'qty-unit-sel';
-
-  // Blank "— unit —" option
-  const blankOpt = document.createElement('option');
-  blankOpt.value = '';
-  blankOpt.textContent = '— unit —';
-  if (!initUnit) blankOpt.selected = true;
-  unitSel.appendChild(blankOpt);
-
-  for (const u of QUANTITY_UNITS) {
-    const opt = document.createElement('option');
-    if (u.disabled) {
-      opt.disabled = true;
-      opt.textContent = u.label;
-    } else {
-      opt.value = u.value;
-      opt.textContent = u.label;
-      if (u.value === initUnit) opt.selected = true;
-    }
-    unitSel.appendChild(opt);
-  }
+  // Unit dropdown (custom select — disabled group headers excluded)
+  const unitItems = [
+    { value: '', label: '\u2014 unit \u2014' },
+    ...QUANTITY_UNITS.filter(u => !u.disabled).map(u => ({ value: u.value, label: u.label })),
+  ];
+  const unitSel = createCustomSelect({
+    items:    unitItems,
+    value:    initUnit || '',
+    className: 'qty-unit-sel',
+    onChange: () => { update(); _formTick.value++; },
+  });
 
   // Required: value AND unit must both be filled
   const errMsg = document.createElement('span');
@@ -107,7 +96,7 @@ export function build(node, ctx) {
 
   const update = () => {
     const v = numInput.value.trim();
-    const u = unitSel.value;
+    const u = unitSel.getValue();
     const vNum = v !== '' ? parseFloat(v) : undefined;
     const hasVal  = vNum !== undefined && !isNaN(vNum);
     const hasUnit = !!u;
@@ -128,10 +117,9 @@ export function build(node, ctx) {
 
   numInput.oninput  = update;
   numInput.onchange = () => { _formTick.value++; };
-  unitSel.onchange  = () => { update(); _formTick.value++; };
 
   wrap.appendChild(numInput);
-  wrap.appendChild(unitSel);
+  wrap.appendChild(unitSel.el);
   wrap.appendChild(errMsg);
 
   return wrap;

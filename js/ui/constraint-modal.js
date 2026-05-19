@@ -10,6 +10,7 @@
 import { triggerCalcRecalc } from '../builder/_shared.js';
 import * as explainModal from './explain-modal.js';
 import { getLastCtx } from '../render-preview.js';
+import { createCustomSelect } from './custom-select.js';
 
 let _el      = null;
 let _pending = null; // { node, constraintLink, setActive, draft }
@@ -90,16 +91,13 @@ function _renderBody(draft, container) {
     keyLbl.textContent = c.key || '(no key)';
     hdr.appendChild(keyLbl);
 
-    const sevSel = document.createElement('select');
-    sevSel.className = 'constraint-sev-sel';
-    [['error', 'error \u274C'], ['warning', 'warning \u26A0\uFE0F']].forEach(([v, l]) => {
-      const o = document.createElement('option');
-      o.value = v; o.textContent = l;
-      if (c.severity === v) o.selected = true;
-      sevSel.appendChild(o);
+    const sevSel = createCustomSelect({
+      items: [{ value: 'error', label: 'error \u274C' }, { value: 'warning', label: 'warning \u26A0\uFE0F' }],
+      value: c.severity || 'error',
+      className: 'constraint-sev-sel sc-trigger--sm',
+      onChange: v => { c.severity = v; },
     });
-    sevSel.onchange = () => { c.severity = sevSel.value; };
-    hdr.appendChild(sevSel);
+    hdr.appendChild(sevSel.el);
 
     const rmBtn = document.createElement('button');
     rmBtn.type = 'button'; rmBtn.className = 'vis-cond-rm'; rmBtn.textContent = '\u2715';
