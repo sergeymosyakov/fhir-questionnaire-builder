@@ -13,7 +13,9 @@
 //   add-root-group-btn        "+Add Root Group" button in the builder toolbar
 //   load-fhir-btn             "⬆ Load ▾" dropdown trigger button
 //   clear-form-btn            "×" button that opens the clear-confirm dialog
-//   export-fhir-btn           "⬇ Export" button; triggers filename prompt then download
+//   export-btn                "⬇ Export ▾" dropdown trigger button
+//   export-fhir-item          "Questionnaire (FHIR R4)" item in the export dropdown
+//   export-qr-item            "QuestionnaireResponse" item in the export dropdown
 //   validate-btn              "Validate" button in the builder toolbar
 //   tree-container            <div> wrapping the entire builder node tree
 //   status-badge-btn          coloured status badge button in the preview header
@@ -184,9 +186,10 @@ test.describe('FHIR export', () => {
     // Accept the filename prompt with the default value.
     page.once('dialog', d => d.accept());
 
+    await page.getByTestId('export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-btn').click(),
+      page.getByTestId('export-fhir-item').click(),
     ]);
 
     expect(download.suggestedFilename()).toMatch(/\.json$/);

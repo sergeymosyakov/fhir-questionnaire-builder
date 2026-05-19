@@ -1,0 +1,80 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "bariatric-sample-response-eligible",
+  "questionnaire": "bariatric-pre-auth",
+  "status": "completed",
+  "authored": "2026-05-19T12:00:00Z",
+  "subject": { "display": "John Smith — Male, 45 yr, BMI 41.5 — eligible candidate" },
+  "item": [
+    {
+      "linkId": "g-eligibility",
+      "item": [
+        {
+          "linkId": "q-bmi-criterion",
+          "answer": [{ "valueCoding": { "code": "bmi40", "display": "BMI \u2265 40 kg/m\u00b2" } }]
+        }
+      ]
+    },
+    {
+      "linkId": "g-diet",
+      "item": [
+        { "linkId": "q-diet-months",     "answer": [{ "valueInteger": 6 }] },
+        { "linkId": "q-diet-program",    "answer": [{ "valueBoolean": true }] },
+        { "linkId": "q-program-name",    "answer": [{ "valueString": "Weight Management Center" }] },
+        { "linkId": "q-preferred-surgeon", "answer": [{ "valueString": "University Medical Center" }] },
+        { "linkId": "q-diet-meds",       "answer": [{ "valueBoolean": true }] },
+        { "linkId": "q-diet-meds-lst",   "answer": [{ "valueString": "Orlistat, Metformin" }] }
+      ]
+    },
+    {
+      "linkId": "g-psych",
+      "item": [
+        { "linkId": "q-psych-done",    "answer": [{ "valueBoolean": true }] },
+        { "linkId": "q-phq9",          "answer": [{ "valueInteger": 8 }] },
+        { "linkId": "q-psych-cleared", "answer": [{ "valueBoolean": true }] },
+        { "linkId": "q-substance",     "answer": [{ "valueBoolean": false }] }
+      ]
+    },
+    {
+      "linkId": "g-nutrition",
+      "item": [
+        { "linkId": "q-rd-done",  "answer": [{ "valueBoolean": true }] },
+        { "linkId": "q-vit-def",  "answer": [{ "valueBoolean": false }] }
+      ]
+    },
+    {
+      "linkId": "g-surgical",
+      "item": [
+        {
+          "linkId": "q-proc-type",
+          "answer": [{ "valueCoding": { "code": "43644", "display": "Laparoscopic Roux-en-Y Gastric Bypass" } }]
+        },
+        { "linkId": "q-surgeon-cert", "answer": [{ "valueBoolean": true }] },
+        { "linkId": "q-facility",     "answer": [{ "valueBoolean": true }] }
+      ]
+    },
+    {
+      "linkId": "g-documents",
+      "item": [
+        { "linkId": "q-surgery-date",    "answer": [{ "valueDate": "2026-07-15" }] },
+        { "linkId": "q-last-visit-date", "answer": [{ "valueDate": "2026-05-01" }] }
+      ]
+    },
+    {
+      "linkId": "g-field-types",
+      "item": [
+        { "linkId": "q-weight-kg",  "answer": [{ "valueDecimal": 120 }] },
+        { "linkId": "q-height-cm",  "answer": [{ "valueDecimal": 170 }] },
+        { "linkId": "q-notes",      "answer": [{ "valueString": "Patient motivated, no contraindications." }] }
+      ]
+    },
+    {
+      "linkId": "g-consent",
+      "item": [
+        { "linkId": "q-consent-given",    "answer": [{ "valueBoolean": true }] },
+        { "linkId": "q-risks-explained",  "answer": [{ "valueBoolean": true }] },
+        { "linkId": "q-auth-signature",   "answer": [{ "valueString": "Dr. Sarah Chen, MD" }] }
+      ]
+    }
+  ]
+}

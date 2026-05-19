@@ -1,0 +1,376 @@
+// Unit tests for importQRAnswers in js/fhir/qr-import.js.
+// qr-import.js has no external imports — no mocking needed.
+
+import { describe, it, expect } from 'vitest';
+import { importQRAnswers } from '../js/fhir/qr-import.js';
+
+// ── helpers ───────────────────────────────────────────────────────────────────
+
+function makeTree(...ids) {
+  return ids.map(id => ({ id, children: [] }));
+}
+
+function makeQR(items, questionnaire = '') {
+  return { resourceType: 'QuestionnaireResponse', questionnaire, item: items };
+}
+
+// ── input validation ──────────────────────────────────────────────────────────
+
+describe('importQRAnswers — input validation', () => {
+  it('rejects null input', () => {
+    const r = importQRAnswers(null, {}, []);
+    expect(r.ok).toBe(false);
+    expect(r.error).toBeDefined();
+  });
+
+  it('rejects undefined input', () => {
+    const r = importQRAnswers(undefined, {}, []);
+    expect(r.ok).toBe(false);
+  });
+
+  it('rejects wrong resourceType — Questionnaire', () => {
+    const r = importQRAnswers({ resourceType: 'Questionnaire' }, {}, []);
+    expect(r.ok).toBe(false);
+    expect(r.error).toMatch(/Not a QuestionnaireResponse/);
+    expect(r.error).toContain('Questionnaire');
+  });
+
+  it('rejects wrong resourceType — Patient', () => {
+    const r = importQRAnswers({ resourceType: 'Patient' }, {}, []);
+    expect(r.ok).toBe(false);
+    expect(r.error).toContain('Patient');
+  });
+
+  it('rejects missing resourceType', () => {
+    const r = importQRAnswers({}, {}, []);
+    expect(r.ok).toBe(false);
+  });
+
+  it('accepts valid QR', () => {
+    const r = importQRAnswers(makeQR([]), {}, []);
+    expect(r.ok).toBe(true);
+  });
+});
+
+// ── basic value loading ───────────────────────────────────────────────────────
+
+describe('importQRAnswers — basic loading', () => {
+  const tree = makeTree('q1', 'q2');
+
+  it('returns ok: true on success', () => {
+    const r = importQRAnswers(makeQR([
+      { linkId: 'q1', answer: [{ valueString: 'hello' }] },
+    ]), {}, tree);
+    expect(r.ok).toBe(true);
+  });
+
+  it('loads a string value', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueString: 'hello' }] }]), values, tree);
+    expect(values.q1).toBe('hello');
+  });
+
+  it('loads a boolean value', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueBoolean: false }] }]), values, tree);
+    expect(values.q1).toBe(false);
+  });
+
+  it('loads an integer value', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueInteger: 42 }] }]), values, tree);
+    expect(values.q1).toBe(42);
+  });
+
+  it('loads a decimal value', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueDecimal: 3.14 }] }]), values, tree);
+    expect(values.q1).toBe(3.14);
+  });
+
+  it('loads a date value', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueDate: '2025-06-01' }] }]), values, tree);
+    expect(values.q1).toBe('2025-06-01');
+  });
+
+  it('loads a dateTime value', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueDateTime: '2025-06-01T10:00:00Z' }] }]), values, tree);
+    expect(values.q1).toBe('2025-06-01T10:00:00Z');
+  });
+
+  it('loads a valueCoding code', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueCoding: { code: 'LA1', display: 'Option 1' } }] }]), values, tree);
+    expect(values.q1).toBe('LA1');
+  });
+
+  it('reports correct loaded count', () => {
+    const r = importQRAnswers(makeQR([
+      { linkId: 'q1', answer: [{ valueString: 'a' }] },
+      { linkId: 'q2', answer: [{ valueString: 'b' }] },
+    ]), {}, tree);
+    expect(r.loaded).toBe(2);
+  });
+
+  it('captures the questionnaire reference', () => {
+    const r = importQRAnswers(
+      makeQR([], 'http://example.org/q1'),
+      {}, []
+    );
+    expect(r.questionnaire).toBe('http://example.org/q1');
+  });
+
+  it('returns empty string questionnaire when not set', () => {
+    const qr = { resourceType: 'QuestionnaireResponse', item: [] };
+    const r = importQRAnswers(qr, {}, []);
+    expect(r.questionnaire).toBe('');
+  });
+});
+
+// ── all value types in one pass ───────────────────────────────────────────────
+
+describe('importQRAnswers — all value types', () => {
+  const tree = makeTree('q-str', 'q-bool', 'q-int', 'q-dec', 'q-date', 'q-dt', 'q-code');
+  const qr = makeQR([
+    { linkId: 'q-str',  answer: [{ valueString: 'text' }] },
+    { linkId: 'q-bool', answer: [{ valueBoolean: true }] },
+    { linkId: 'q-int',  answer: [{ valueInteger: 99 }] },
+    { linkId: 'q-dec',  answer: [{ valueDecimal: 1.5 }] },
+    { linkId: 'q-date', answer: [{ valueDate: '2026-01-15' }] },
+    { linkId: 'q-dt',   answer: [{ valueDateTime: '2026-01-15T08:30:00Z' }] },
+    { linkId: 'q-code', answer: [{ valueCoding: { code: 'C001', display: 'Choice 1' } }] },
+  ]);
+
+  it('loads all seven value types correctly in one pass', () => {
+    const values = {};
+    importQRAnswers(qr, values, tree);
+    expect(values['q-str']).toBe('text');
+    expect(values['q-bool']).toBe(true);
+    expect(values['q-int']).toBe(99);
+    expect(values['q-dec']).toBe(1.5);
+    expect(values['q-date']).toBe('2026-01-15');
+    expect(values['q-dt']).toBe('2026-01-15T08:30:00Z');
+    expect(values['q-code']).toBe('C001');
+  });
+});
+
+// ── unmatched linkIds ─────────────────────────────────────────────────────────
+
+describe('importQRAnswers — unmatched linkIds', () => {
+  const tree = makeTree('q-known');
+
+  it('reports unmatched linkId in result', () => {
+    const r = importQRAnswers(makeQR([
+      { linkId: 'q-known',   answer: [{ valueString: 'yes' }] },
+      { linkId: 'q-unknown', answer: [{ valueString: 'no' }] },
+    ]), {}, tree);
+    expect(r.unmatched).toContain('q-unknown');
+  });
+
+  it('does not load value for unmatched linkId', () => {
+    const values = {};
+    importQRAnswers(makeQR([
+      { linkId: 'q-unknown', answer: [{ valueString: 'no' }] },
+    ]), values, tree);
+    expect(values['q-unknown']).toBeUndefined();
+  });
+
+  it('still loads matched answer alongside unmatched', () => {
+    const values = {};
+    importQRAnswers(makeQR([
+      { linkId: 'q-known',   answer: [{ valueString: 'yes' }] },
+      { linkId: 'q-unknown', answer: [{ valueString: 'no' }] },
+    ]), values, tree);
+    expect(values['q-known']).toBe('yes');
+  });
+
+  it('does not count unmatched in loaded count', () => {
+    const r = importQRAnswers(makeQR([
+      { linkId: 'q-known',   answer: [{ valueString: 'yes' }] },
+      { linkId: 'q-unknown', answer: [{ valueString: 'no' }] },
+    ]), {}, tree);
+    expect(r.loaded).toBe(1);
+  });
+
+  it('returns empty unmatched array when all match', () => {
+    const r = importQRAnswers(makeQR([
+      { linkId: 'q-known', answer: [{ valueString: 'yes' }] },
+    ]), {}, tree);
+    expect(r.unmatched).toEqual([]);
+  });
+});
+
+// ── nested group items ────────────────────────────────────────────────────────
+
+describe('importQRAnswers — nested groups', () => {
+  const tree = [{
+    id: 'group1',
+    children: [
+      { id: 'q1', children: [] },
+      { id: 'q2', children: [] },
+    ],
+  }];
+
+  it('loads answers from nested group children', () => {
+    const values = {};
+    importQRAnswers(makeQR([{
+      linkId: 'group1',
+      item: [
+        { linkId: 'q1', answer: [{ valueString: 'alpha' }] },
+        { linkId: 'q2', answer: [{ valueInteger: 7 }] },
+      ],
+    }]), values, tree);
+    expect(values.q1).toBe('alpha');
+    expect(values.q2).toBe(7);
+  });
+
+  it('handles two-level nesting', () => {
+    const deepTree = [{
+      id: 'outer',
+      children: [{
+        id: 'inner',
+        children: [{ id: 'leaf', children: [] }],
+      }],
+    }];
+    const values = {};
+    importQRAnswers(makeQR([{
+      linkId: 'outer',
+      item: [{
+        linkId: 'inner',
+        item: [{ linkId: 'leaf', answer: [{ valueBoolean: true }] }],
+      }],
+    }]), values, deepTree);
+    expect(values.leaf).toBe(true);
+  });
+});
+
+// ── repeat rows (multiple answers) ───────────────────────────────────────────
+
+describe('importQRAnswers — repeat rows', () => {
+  const tree = makeTree('q-rep');
+
+  it('loads first answer as the primary value', () => {
+    const values = {};
+    importQRAnswers(makeQR([{
+      linkId: 'q-rep',
+      answer: [
+        { valueString: 'first' },
+        { valueString: 'second' },
+        { valueString: 'third' },
+      ],
+    }]), values, tree);
+    expect(values['q-rep']).toBe('first');
+  });
+
+  it('loads extra answers as $$N keys', () => {
+    const values = {};
+    importQRAnswers(makeQR([{
+      linkId: 'q-rep',
+      answer: [
+        { valueString: 'first' },
+        { valueString: 'second' },
+        { valueString: 'third' },
+      ],
+    }]), values, tree);
+    expect(values['q-rep$$1']).toBe('second');
+    expect(values['q-rep$$2']).toBe('third');
+  });
+
+  it('sets $$n to the number of extra rows', () => {
+    const values = {};
+    importQRAnswers(makeQR([{
+      linkId: 'q-rep',
+      answer: [
+        { valueString: 'a' },
+        { valueString: 'b' },
+        { valueString: 'c' },
+      ],
+    }]), values, tree);
+    expect(values['q-rep$$n']).toBe(2);
+  });
+
+  it('does not set $$n for single-answer items', () => {
+    const values = {};
+    importQRAnswers(makeQR([{
+      linkId: 'q-rep',
+      answer: [{ valueString: 'only' }],
+    }]), values, tree);
+    expect(values['q-rep$$n']).toBeUndefined();
+  });
+
+  it('$$N repeat keys count as loaded for known linkId base', () => {
+    const r = importQRAnswers(makeQR([{
+      linkId: 'q-rep',
+      answer: [
+        { valueString: 'first' },
+        { valueString: 'second' },
+      ],
+    }]), {}, tree);
+    // Primary answer increments loaded; repeat meta-keys do not
+    expect(r.loaded).toBe(1);
+  });
+});
+
+// ── empty / missing answers ───────────────────────────────────────────────────
+
+describe('importQRAnswers — empty/missing answers', () => {
+  const tree = makeTree('q1');
+
+  it('handles item with no answer key — ok: true, no value set', () => {
+    const values = {};
+    const r = importQRAnswers(makeQR([{ linkId: 'q1' }]), values, tree);
+    expect(r.ok).toBe(true);
+    expect(values.q1).toBeUndefined();
+  });
+
+  it('handles item with empty answer array — ok: true, no value set', () => {
+    const values = {};
+    const r = importQRAnswers(makeQR([{ linkId: 'q1', answer: [] }]), values, tree);
+    expect(r.ok).toBe(true);
+    expect(values.q1).toBeUndefined();
+  });
+
+  it('handles QR with no item array — ok: true, loaded: 0', () => {
+    const r = importQRAnswers({ resourceType: 'QuestionnaireResponse' }, {}, tree);
+    expect(r.ok).toBe(true);
+    expect(r.loaded).toBe(0);
+  });
+
+  it('handles empty QR item array — ok: true, loaded: 0', () => {
+    const r = importQRAnswers(makeQR([]), {}, tree);
+    expect(r.ok).toBe(true);
+    expect(r.loaded).toBe(0);
+  });
+
+  it('handles empty tree — all answers are unmatched', () => {
+    const r = importQRAnswers(makeQR([
+      { linkId: 'q1', answer: [{ valueString: 'hi' }] },
+    ]), {}, []);
+    expect(r.ok).toBe(true);
+    expect(r.loaded).toBe(0);
+    expect(r.unmatched).toContain('q1');
+  });
+});
+
+// ── values object mutation ────────────────────────────────────────────────────
+
+describe('importQRAnswers — values object mutation', () => {
+  it('merges new keys into existing values (does not clear)', () => {
+    const values = { existing: 'preserved' };
+    importQRAnswers(makeQR([
+      { linkId: 'q1', answer: [{ valueString: 'new' }] },
+    ]), values, makeTree('q1'));
+    expect(values.existing).toBe('preserved');
+    expect(values.q1).toBe('new');
+  });
+
+  it('overwrites existing key when same linkId present in QR', () => {
+    const values = { q1: 'old' };
+    importQRAnswers(makeQR([
+      { linkId: 'q1', answer: [{ valueString: 'new' }] },
+    ]), values, makeTree('q1'));
+    expect(values.q1).toBe('new');
+  });
+});

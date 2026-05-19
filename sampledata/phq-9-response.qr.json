@@ -1,0 +1,60 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "phq9-sample-mild-depression",
+  "questionnaire": "http://hl7.org/fhir/us/core/Questionnaire/phq-9-example",
+  "status": "completed",
+  "authored": "2026-05-19T10:00:00Z",
+  "subject": { "display": "Sample Patient — Mild Depression (score 7)" },
+  "item": [
+    {
+      "linkId": "/44250-9",
+      "text": "Little interest or pleasure in doing things?",
+      "answer": [{ "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } }]
+    },
+    {
+      "linkId": "/44255-8",
+      "text": "Feeling down, depressed, or hopeless?",
+      "answer": [{ "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" } }]
+    },
+    {
+      "linkId": "/44259-0",
+      "text": "Trouble falling or staying asleep, or sleeping too much?",
+      "answer": [{ "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } }]
+    },
+    {
+      "linkId": "/44254-1",
+      "text": "Feeling tired or having little energy?",
+      "answer": [{ "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" } }]
+    },
+    {
+      "linkId": "/44251-7",
+      "text": "Poor appetite or overeating?",
+      "answer": [{ "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } }]
+    },
+    {
+      "linkId": "/44258-2",
+      "text": "Feeling bad about yourself?",
+      "answer": [{ "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } }]
+    },
+    {
+      "linkId": "/44252-5",
+      "text": "Trouble concentrating?",
+      "answer": [{ "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } }]
+    },
+    {
+      "linkId": "/44253-3",
+      "text": "Moving or speaking slowly?",
+      "answer": [{ "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } }]
+    },
+    {
+      "linkId": "/44260-8",
+      "text": "Thoughts of self-harm?",
+      "answer": [{ "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } }]
+    },
+    {
+      "linkId": "/69722-7",
+      "text": "How difficult have these problems made things for you?",
+      "answer": [{ "valueCoding": { "system": "http://loinc.org", "code": "LA6573-5", "display": "Somewhat difficult" } }]
+    }
+  ]
+}

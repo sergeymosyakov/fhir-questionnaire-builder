@@ -281,13 +281,20 @@ document.addEventListener('keydown', e => {
   }
 });
 
-document.getElementById('exportFhirBtn').onclick = () => {
+// ── Export dropdown ──────────────────────────────────────────────────────────
+const exportMenu = document.getElementById('exportMenu');
+document.getElementById('exportBtn').onclick = e => {
+  e.stopPropagation();
+  exportMenu.style.display = exportMenu.style.display === 'none' ? 'block' : 'none';
+};
+document.getElementById('exportFhirItem').onclick = () => {
+  exportMenu.style.display = 'none';
   const issues = validateTree(tree, values);
   if (issues.length === 0) { _promptExport(); return; }
   validateModal.show('Export — Validation Report', issues, 'export', { onExport: () => _promptExport(), onNavigate: _navigateToNode });
 };
-
-document.getElementById('exportResponseBtn').onclick = () => {
+document.getElementById('exportQrItem').onclick = () => {
+  exportMenu.style.display = 'none';
   const suggested = (_fileNameEl && _fileNameEl.textContent.trim()) || 'questionnaire';
   const name = window.prompt('Save as:', suggested + '-response.json');
   if (name === null) return;
@@ -312,12 +319,10 @@ function _setFileName(name) {
 // Show × button and variables card whenever the tree has nodes
 effect(() => {
   const hasNodes = tree.length > 0;
-  document.getElementById('variablesCard').style.display       = hasNodes ? '' : 'none';
-  document.getElementById('validateBtn').style.display         = hasNodes ? '' : 'none';
-  document.getElementById('exportFhirBtn').style.display       = hasNodes ? '' : 'none';
-  document.getElementById('exportResponseBtn').style.display   = hasNodes ? '' : 'none';
-  document.getElementById('loadAnswersItem').style.display     = hasNodes ? '' : 'none';
-  document.getElementById('loadAnswersSep').style.display      = hasNodes ? '' : 'none';
+  document.getElementById('variablesCard').style.display = hasNodes ? '' : 'none';
+  document.getElementById('validateBtn').style.display   = hasNodes ? '' : 'none';
+  document.getElementById('exportWrap').style.display    = hasNodes ? '' : 'none';
+  document.getElementById('answersWrap').style.display   = hasNodes ? '' : 'none';
   if (hasNodes) {
     _fileNameWrap.style.display = 'inline-flex';
   } else {
@@ -478,16 +483,25 @@ document.querySelectorAll('#loadMenu [data-sample]').forEach(item => {
 document.getElementById('fhirFileInput').onchange  = e => {
   const file = e.target.files[0];
   if (!file) return;
-  progress.show('Loading ' + file.name + '…');
+  progress.show('Loading ' + file.name + '\u2026');
   const reader = new FileReader();
-  reader.onload  = ev => { try { progress.update(0, 1); _importAndValidate(JSON.parse(ev.target.result), file.name); } catch (err) { progress.hide(); alert('Parse error: ' + err.message); } };
+  reader.onload  = ev => {
+    try { progress.update(0, 1); _importAndValidate(JSON.parse(ev.target.result), file.name); }
+    catch (err) { progress.hide(); alert('Parse error: ' + err.message); }
+  };
   reader.onerror = () => { progress.hide(); alert('Error reading file.'); };
   reader.readAsText(file);
   e.target.value = '';
 };
 
+// ── Answers button (load QuestionnaireResponse) ──────────────────────────────────────
+const answersMenu = document.getElementById('answersMenu');
+document.getElementById('answersBtn').onclick = e => {
+  e.stopPropagation();
+  answersMenu.style.display = answersMenu.style.display === 'none' ? 'block' : 'none';
+};
 document.getElementById('loadAnswersItem').onclick = () => {
-  loadMenu.style.display = 'none';
+  answersMenu.style.display = 'none';
   document.getElementById('qrFileInput').click();
 };
 document.getElementById('qrFileInput').onchange = e => {
@@ -505,6 +519,16 @@ document.getElementById('qrFileInput').onchange = e => {
   reader.readAsText(file);
   e.target.value = '';
 };
+
+document.querySelectorAll('#answersMenu [data-response]').forEach(item => {
+  item.onclick = () => {
+    answersMenu.style.display = 'none';
+    fetch('sampledata/' + item.dataset.response)
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(data => _applyQRAnswers(data))
+      .catch(err => alert('Could not load sample response: ' + err.message));
+  };
+});
 
 function _applyQRAnswers(qr) {
   const result = importQRAnswers(qr, values, tree);
@@ -539,6 +563,8 @@ function _applyQRAnswers(qr) {
 document.addEventListener('click', () => {
   document.querySelectorAll('.action-add-menu').forEach(m => { m.style.display = 'none'; });
   loadMenu.style.display = 'none';
+  exportMenu.style.display = 'none';
+  answersMenu.style.display = 'none';
   const ppMenu = document.getElementById('patientPresetMenu');
   if (ppMenu) ppMenu.style.display = 'none';
 });

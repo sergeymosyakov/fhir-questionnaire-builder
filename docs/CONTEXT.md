@@ -70,7 +70,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/fhir/import.js` | FHIR R4 → internal model; reads `item.repeats`, `item.maxLength` (→ `_maxLength`), `item.answerValueSet` (→ `_answerValueSet`), `Questionnaire.contained[]` (→ `questContained`), and `questionnaire-minOccurs` / `questionnaire-maxOccurs` extensions; exports `resolveContainedValueSet(contained, ref)` — resolves `#vs-id` local refs into `code=Label,...` string; called during import and from `answer-type-modal` |
 | `js/fhir/export.js` | Internal model → FHIR R4; writes `maxLength`, `item.answerValueSet` (from `_answerValueSet`), `Questionnaire.contained[]` (from `questContained`), and `questionnaire-minOccurs` / `questionnaire-maxOccurs` when `node.repeats`; skips writing `answerOption` when `_answerValueSet` is set (mutually exclusive per FHIR spec) |
 | `js/fhir/qr-export.js` | `exportQR(fileName)` — builds QR from current tree + answers, downloads JSON |
-| `js/fhir/qr-import.js` | `importQRAnswers(qrJson, values, tree)` — flattens QR answers; multi-answer items write `id$$1`…`id$$N` + `id$$n` (repeat row restoration); reports unmatched linkIds |
+| `js/fhir/qr-import.js` | `importQRAnswers(qrJson, values, tree)` — flattens QR answers; multi-answer items write `id$$1`…`id$$N` + `id$$n` (repeat row restoration); reports unmatched linkIds; returns `{ok, loaded, unmatched, questionnaire}` |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; draft-based Apply/Cancel modal; `%name` chip rich tooltips |
 | `js/ui/json-viewer.js` | Shared read-only FHIR JSON viewer modal — `init(elements)`, `show(title, data)`, `close()`; Esc / backdrop / × close |
 | `js/ui/contained-panel.js` | Collapsible read-only card for `Questionnaire.contained[]` — `init(elements, containedArray, showJsonFn)`, `refresh()`; each chip opens JSON viewer |
@@ -104,6 +104,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History (49 items, depth 5) |
 | `sampledata/prowl-ss.fhir.json` | PROWL-SS post-op pain assessment (44 items) |
 | `sampledata/phq-9.fhir.json` | PHQ-9 depression screening (11 items) |
+| `sampledata/phq-9-response.qr.json` | Sample QuestionnaireResponse for PHQ-9 (mild depression, score 7) — 10 answered items with `valueCoding` (LOINC codes) |
+| `sampledata/example-bariatric-response.qr.json` | Sample QuestionnaireResponse for example-bariatric (eligible male patient, BMI 41.5) — groups + nested items |
 | `sampledata/1776102565767-…json` | Real-world questionnaire snapshot for regression testing |
 | `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
 | `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
@@ -120,6 +122,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `tests/export.test.js` | Unit tests for `js/fhir/export.js` — enableWhen, constraints, SDC variables, `integer`/`decimal`/`number` type mapping, `answerValueSet`, `contained[]` (59 tests) |
 | `tests/import.test.js` | Unit tests for `js/fhir/import.js` — `fhirTypeToItemType`, `fhirOptsToStr`, `humanEnableWhen`, `applyVisibility`, `contained[]`, `answerValueSet` (62 tests) |
 | `tests/qr-builder.test.js` | Unit tests for `js/fhir/qr-builder.js` — `buildQR`, `buildQRItem`, `integer`→`valueInteger` / `decimal`→`valueDecimal` mapping (31 tests) |
+| `tests/qr-import.test.js` | Unit tests for `js/fhir/qr-import.js` — input validation, all value types, unmatched linkIds, nested groups, repeat rows, empty/missing answers, values mutation (37 tests) |
 | `tests/state.test.js` | Unit tests for `evalConstraints` in `js/state.js` — severity filtering, empty/false/throw results, varEnv passing (16 tests) |
 | `tests/integration.test.js` | Integration tests for `buildQR` + `evalConstraints` pipeline — decimal/integer pass/fail, wrong key regression, warning-only, nested groups (7 tests) |
 | `.github/workflows/test.yml` | GitHub Actions CI — `test` job: Vitest; `e2e` job: Playwright (uploads `playwright-report/` artifact); `deploy` job: bundles app + report into `_site/`, deploys to GitHub Pages (`/playwright-report/` = latest test report); both `test`/`e2e` triggered on every push/PR to main |
@@ -136,7 +139,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **Playwright** — E2E test suite; **151 tests** across 12 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
 - **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
-- **Vitest** — unit test suite for pure-function modules; **259 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules; **296 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---

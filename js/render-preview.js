@@ -303,6 +303,25 @@ async function _asyncRender(version) {
   // Phase 2: DOM render — batched into a DocumentFragment for a single reflow
   const lform = document.getElementById('lform');
   if (!lform) { progress.hide(); return; }
+  const _scrollPanel = lform.closest('.right-panel-body');
+  const _savedScroll = _scrollPanel ? _scrollPanel.scrollTop : 0;
+
+  // Save focused element so we can restore focus after rebuilding the DOM
+  const _activeEl = document.activeElement;
+  let _focusInfo = null;
+  if (_activeEl && lform.contains(_activeEl)) {
+    const row = _activeEl.closest('[data-preview-id]');
+    if (row) {
+      const inputs = Array.from(row.querySelectorAll('input, textarea, select'));
+      _focusInfo = {
+        previewId: row.dataset.previewId,
+        inputIndex: inputs.indexOf(_activeEl),
+        selStart: _activeEl.selectionStart,
+        selEnd: _activeEl.selectionEnd,
+      };
+    }
+  }
+
   lform.innerHTML = '';
 
   const groupIconMap = new Map();
@@ -701,6 +720,20 @@ async function _asyncRender(version) {
     if (res) renderPreviewNode(res, frag);
   }
   lform.appendChild(frag);
+  if (_scrollPanel) _scrollPanel.scrollTop = _savedScroll;
+
+  // Restore focus to the input that was active before the DOM rebuild
+  if (_focusInfo) {
+    const row = lform.querySelector('[data-preview-id="' + _focusInfo.previewId + '"]');
+    if (row) {
+      const inputs = Array.from(row.querySelectorAll('input, textarea, select'));
+      const el = inputs[_focusInfo.inputIndex];
+      if (el) {
+        el.focus();
+        try { el.setSelectionRange(_focusInfo.selStart, _focusInfo.selEnd); } catch (_) {}
+      }
+    }
+  }
 
   function updateGroupIcons() {
     for (const [, { icon, descendants, node }] of groupIconMap.entries()) {

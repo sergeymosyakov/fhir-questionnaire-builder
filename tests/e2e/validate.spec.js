@@ -5,6 +5,8 @@
 //
 // ── data-testid used in this suite ───────────────────────────────────────────
 //   validate-btn        "Validate" button in the builder toolbar
+//   export-btn          "⬇ Export ▾" dropdown trigger button
+//   export-fhir-item    "Questionnaire (FHIR R4)" item in the export dropdown
 //
 // ── element IDs used in this suite ───────────────────────────────────────────
 //   validateModal       backdrop <div>  (display:flex when open)
@@ -233,7 +235,8 @@ test.describe('Validate modal — export mode', () => {
     // Wait for UI to reflect cleared title before clicking export.
     await expect(group.getByTestId('node-title-display').first()).toHaveText('(no title)');
 
-    await page.getByTestId('export-fhir-btn').click();
+    await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-fhir-item').click();
 
     // Validate modal opens in export mode.
     await expect(validateModal(page)).toBeVisible();
@@ -255,7 +258,8 @@ test.describe('Validate modal — export mode', () => {
     await group.getByTestId('node-title-input').first().fill('');
     await group.getByTestId('node-title-input').first().blur();
 
-    await page.getByTestId('export-fhir-btn').click();
+    await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-fhir-item').click();
     await expect(validateModal(page)).toBeVisible();
 
     await page.locator('#validateModal').getByText('Fix first').click();
@@ -275,7 +279,8 @@ test.describe('Validate modal — export mode', () => {
     // Handle the filename prompt that appears on export.
     page.once('dialog', d => d.accept());
 
-    await page.getByTestId('export-fhir-btn').click();
+    await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-fhir-item').click();
     await expect(validateModal(page)).toBeVisible();
 
     const [download] = await Promise.all([

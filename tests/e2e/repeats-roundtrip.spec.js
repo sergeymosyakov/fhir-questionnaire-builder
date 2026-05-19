@@ -85,9 +85,10 @@ test('QR repeat round-trip: fill 3 rows per field, export, reload, import, verif
 
   // ── 3. Export QR ──
   page.once('dialog', d => d.accept());
+  await page.getByTestId('export-btn').click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.locator('#exportResponseBtn').click(),
+    page.getByTestId('export-qr-item').click(),
   ]);
   const qrPath = await download.path();
   expect(qrPath).toBeTruthy();

@@ -57,6 +57,8 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History — 49 items, depth 5 |
 | `sampledata/prowl-ss.fhir.json` | PROWL-SS Post-Operative pain assessment — 44 items |
 | `sampledata/phq-9.fhir.json` | PHQ-9 Patient Health Questionnaire (depression screening) — 11 items |
+| `sampledata/phq-9-response.qr.json` | Sample QuestionnaireResponse for PHQ-9 (mild depression, score 7) |
+| `sampledata/example-bariatric-response.qr.json` | Sample QuestionnaireResponse for example-bariatric (eligible male patient, BMI 41.5) |
 | `sampledata/1776102565767-...json` | Real-world questionnaire snapshot for regression testing |
 | `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` fills patient fields, `enableWhenExpression` gates pathways |
 | `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields, risk groups by `enableWhenExpression` |
@@ -97,7 +99,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `state`, integration); **259 tests** across 9 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **296 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **Playwright** — e2e test suite (`tests/e2e/`); **151 tests** across 12 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
@@ -276,8 +278,8 @@ See [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) for the full FHIR field mapping
 - **Re-init button** — ↺ button in the Variables card header; calls `reinitForm()` to re-evaluate all `_initialExpr` nodes; use after switching patient presets
 - **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills preview on load; editable via **Default** action panel (type-aware: select/date/number/text); `× clear` link syncs preview; round-trip safe export
 - **Constraint modal** — **Constraint** action button on every node (dark purple when `constraint[]` non-empty) opens a centered modal with draft pattern; editable cards per constraint (key, severity error/warning, human message, FHIRPath expression, remove) + **+ Add constraint**; Apply commits, Cancel discards; exported as `questionnaire-constraint` extensions
-- **QR Export** — **⬇ Response** button in toolbar (visible when questionnaire loaded); prompts for filename; downloads current answers as FHIR R4 `QuestionnaireResponse` JSON with `authored` timestamp
-- **QR Import (Load Answers)** — **Load Answers…** at bottom of Load dropdown (visible when questionnaire loaded); reads a `QuestionnaireResponse` file; loads matched answers into `values[]`; shows warning for URL mismatch or unknown linkIds
+- **QR Export** — **⬇ Export ▾** dropdown in toolbar → *QuestionnaireResponse* item; prompts for filename; downloads current answers as FHIR R4 `QuestionnaireResponse` JSON with `authored` timestamp
+- **QR Import (Load Answers)** — separate **὎5 Answers ▾** button in toolbar (visible only when a questionnaire is loaded); dropdown with **From file…** + built-in sample responses (PHQ-9, Bariatric); loads matched answers into `values[]`; warns on questionnaire URL mismatch or unrecognised linkIds; Answers button is separate from Load to avoid confusing questionnaires and responses
 - **Repeatable items** — `Repeatable` action link on every non-checkbox/non-display item opens a modal; toggle for `node.repeats` + optional **Min** / **Max** cardinality inputs (`questionnaire-minOccurs` / `questionnaire-maxOccurs`); preview renders `.repeat-wrap` with `×` remove + `+ Add another`; `_maxOccurs` enforced — add button disabled at limit; QR export collects all rows into `answer[]`; QR import restores rows; `item.maxLength` imported/exported as `node._maxLength`
 - **Constraint badge in preview** — per-node badge: amber ⚠️ (warning or passing error), red ✘ (failing error); tooltip shows key/severity/message/expression; `error`+fail blocks Final Result
 - **Read-only badge** — grey 🔒 `read-only` pill when `_readOnly === true` and no `_calculatedExpr`
