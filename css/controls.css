@@ -8,6 +8,16 @@
 .ctrl-err--ml { margin-left: 6px; }
 
 /* === Input width variants ==================================================== */
+/* shared border/radius for all ctrl-input variants (textarea & input) */
+[class*="ctrl-input--"] {
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  box-sizing: border-box;
+}
+[class*="ctrl-input--"]:focus {
+  outline: none;
+  border-color: var(--c-primary);
+}
 .ctrl-input--text   { width: 100%; resize: vertical; min-height: 1.5em; max-height: 200px; overflow-y: auto; line-height: 1.4; vertical-align: top; }
 .ctrl-input--number { width: 80px; }
 .ctrl-input--date   { width: 150px; }
