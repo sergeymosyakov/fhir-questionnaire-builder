@@ -100,7 +100,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
 - **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **296 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — e2e test suite (`tests/e2e/`); **151 tests** across 12 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
+- **Playwright** — e2e test suite (`tests/e2e/`); **170 tests** across 13 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
 
@@ -145,9 +145,12 @@ _readOnly        // boolean — FHIR item.readOnly
 _initialValue    // any — FHIR item.initial[0] value; pre-fills values[] on import
 _prefix          // string — FHIR item.prefix (amber badge; editable in builder)
 _codes           // object[] — FHIR item.code[] (round-trip safe; not displayed)
-_maxLength       // integer — FHIR item.maxLength (imported/exported; not enforced in UI)
+_maxLength       // integer — FHIR item.maxLength; character counter + maxlength attribute enforced in preview
 _minOccurs       // integer — questionnaire-minOccurs ext (imported/exported when repeats:true)
 _maxOccurs       // integer — questionnaire-maxOccurs ext; enforced in preview — add button disabled at limit
+_minValue        // number — questionnaire-minValue ext; error badge + blocks PASS when violated
+_maxValue        // number — questionnaire-maxValue ext; error badge + blocks PASS when violated
+_optionOrdinals  // object — map of option code → numeric ordinalValue; shown as (N) badge in radio/select; round-trip safe
 ```
 
 ---
@@ -177,7 +180,7 @@ _maxOccurs       // integer — questionnaire-maxOccurs ext; enforced in preview
 | FHIR R4 type | Internal `itemType` | Control in preview | Validation | Notes |
 |---|---|---|---|---|
 | `boolean` | `checkbox` | ✅ checkbox | — | |
-| `integer`, `decimal` | `number` | ✅ number input | — | |
+| `integer`, `decimal` | `number` | ✅ number input | ✅ `minValue`/`maxValue` | `questionnaire-minValue`/`questionnaire-maxValue` extensions enforced; error badge + blocks PASS |
 | `string`, `text` | `text` | ✅ text input | — | |
 | `date`, `dateTime`, `time` | `date` | ✅ date-picker | — | All three map to `date` |
 | `url` | `url` | ✅ url input | ✅ `new URL()` format check | Invalid URL → ✘ even if not required |
@@ -210,9 +213,12 @@ _maxOccurs       // integer — questionnaire-maxOccurs ext; enforced in preview
 | `item.prefix` | `_prefix` — amber badge in preview; editable in builder; exported back (round-trip safe) |
 | `item.code[]` | `_codes` — preserved as-is; exported back unchanged (round-trip safe) |
 | `item.repeats` | `node.repeats` — multi-row input in preview (not for checkbox/display); QR round-trip safe |
-| `item.maxLength` | `node._maxLength` — imported and exported; not enforced in UI |
+| `item.maxLength` | `node._maxLength` — character counter + `maxlength` attribute enforced in preview |
 | `questionnaire-minOccurs` ext | `node._minOccurs` — min repeat rows; exported when repeats:true |
 | `questionnaire-maxOccurs` ext | `node._maxOccurs` — max repeat rows; enforced in preview — add button disabled at limit |
+| `questionnaire-minValue` ext | `node._minValue` — error badge + blocks PASS when violated |
+| `questionnaire-maxValue` ext | `node._maxValue` — error badge + blocks PASS when violated |
+| `ordinalValue` ext on `answerOption.valueCoding` | `node._optionOrdinals[code]` — numeric score per option; shown as `(N)` badge in radio/select; round-trip safe |
 
 Standard extensions preserved on export:
 - `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` — `radio-button` code for `radio` itemType
@@ -282,6 +288,10 @@ See [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) for the full FHIR field mapping
 - **QR Import (Load Answers)** — separate **὎5 Answers ▾** button in toolbar (visible only when a questionnaire is loaded); dropdown with **From file…** + built-in sample responses (PHQ-9, Bariatric); loads matched answers into `values[]`; warns on questionnaire URL mismatch or unrecognised linkIds; Answers button is separate from Load to avoid confusing questionnaires and responses
 - **Repeatable items** — `Repeatable` action link on every non-checkbox/non-display item opens a modal; toggle for `node.repeats` + optional **Min** / **Max** cardinality inputs (`questionnaire-minOccurs` / `questionnaire-maxOccurs`); preview renders `.repeat-wrap` with `×` remove + `+ Add another`; `_maxOccurs` enforced — add button disabled at limit; QR export collects all rows into `answer[]`; QR import restores rows; `item.maxLength` imported/exported as `node._maxLength`
 - **Constraint badge in preview** — per-node badge: amber ⚠️ (warning or passing error), red ✘ (failing error); tooltip shows key/severity/message/expression; `error`+fail blocks Final Result
+- **Read-only enforcement** — `_readOnly: true` items render a styled placeholder (current value or `—`) instead of an editable input; cursor: not-allowed; 🔒 `read-only` badge displayed; does not affect PASS/FAIL
+- **maxLength enforcement** — `node._maxLength` sets the `maxlength` HTML attribute on text/url inputs and renders a live character counter `(N/M)` below the field
+- **minValue/maxValue enforcement** — `questionnaire-minValue` / `questionnaire-maxValue` extensions imported and enforced: `min`/`max` attributes on number inputs, inline error badge when value is out of range, blocks PASS/FAIL; round-trip safe
+- **ordinalValue display** — `ordinalValue` extension on `answerOption.valueCoding` imported into `_optionOrdinals`; score shown as `(N)` badge on each radio label and inside the select trigger + dropdown; exported back; round-trip safe
 - **Read-only badge** — grey 🔒 `read-only` pill when `_readOnly === true` and no `_calculatedExpr`
 - **Default badge** — purple ↺ `default` pill when `_initialValue` is defined
 - **Real-time calc badge** — `refreshCalcBadges()` patches calc-badge in-place via `data-calc-id` after each answer change — no full DOM rebuild
@@ -308,9 +318,9 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ### Tests
 ```powershell
-npm test             # unit tests — single run (Vitest, 221 tests)
+npm test             # unit tests — single run (Vitest, 296 tests)
 npm run test:watch   # unit tests — watch mode
-npm run test:e2e     # e2e tests — Playwright/Chromium (24 tests, requires Chromium installed)
+npm run test:e2e     # e2e tests — Playwright/Chromium (170 tests, requires Chromium installed)
 npm run test:e2e:ui  # e2e tests — Playwright UI mode
 ```
 Vitest and Playwright CI run automatically on every push via GitHub Actions (see `.github/workflows/test.yml`).

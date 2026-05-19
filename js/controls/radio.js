@@ -26,6 +26,12 @@ export function build(node, ctx) {
     rb.onchange = () => { if (rb.checked) { setValue(node.id, code); _reCalc(); onChange(); _formTick.value++; } };
     lbl.appendChild(rb);
     lbl.appendChild(document.createTextNode(display));
+    if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
+      const ord = document.createElement('span');
+      ord.className = 'option-ordinal';
+      ord.textContent = '\u00A0(' + node._optionOrdinals[code] + ')';
+      lbl.appendChild(ord);
+    }
     wrap.appendChild(lbl);
   }
 

@@ -172,6 +172,19 @@ export const calcFormOk = node => {
     const val = getValue(node.id);
     return val != null && typeof val === 'object' && val.value !== undefined && !!val.unit;
   }
+  // integer/decimal/number: check min/max range (regardless of required)
+  if (node.itemType === 'integer' || node.itemType === 'decimal' || node.itemType === 'number') {
+    const val = getValue(node.id);
+    if (val !== undefined && val !== '' && val !== null) {
+      const num = Number(val);
+      if (!isNaN(num)) {
+        if (node._minValue !== undefined && num < Number(node._minValue)) return false;
+        if (node._maxValue !== undefined && num > Number(node._maxValue)) return false;
+      }
+    }
+    if (isMandatory(node)) return val !== undefined && val !== '' && val !== null;
+    return true;
+  }
   // mandatory text/number/date/etc → must be non-empty
   if (isMandatory(node) && NONEMPTY_TYPES.has(node.itemType)) {
     const val = getValue(node.id);

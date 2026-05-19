@@ -284,17 +284,26 @@ async function _asyncRender(version) {
   const hasConstraints = constraintItems.length > 0;
   const constraintsAllOk = constraintItems.every(r => evalConstraints(r.node, ctx.fp, ctx.qr, _cEnv));
 
+  // range items: optional items with minValue/maxValue (mandatory ones are covered by mandatoryItems+calcFormOk)
+  const rangeItems = visible.filter(r => !r.disabled && r.node.type === 'item' &&
+    !isMandatory(r.node) && (r.node._minValue !== undefined || r.node._maxValue !== undefined)
+  );
+  const hasRange = rangeItems.length > 0;
+  const rangeAllOk = rangeItems.every(r => calcFormOk(r.node));
+
   const formItemsOk = visible.filter(r => !r.disabled).every(res => {
     if (res.node.type === 'item') return res.ok && calcFormOk(res.node);
     return res.ok;
   });
   let finalOk = (hasMandatory ? formItemsOk : true) && (hasCalc ? calcAllOk : true) &&
     (!hasConstraints || constraintsAllOk) &&
-    (hasMandatory || hasCalc || hasConstraints);
+    (!hasRange || rangeAllOk) &&
+    (hasMandatory || hasCalc || hasConstraints || hasRange);
   const failingItems = [
     ...mandatoryItems.filter(r => !r.ok || !calcFormOk(r.node)).map(r => ({ title: r.node.title, id: r.node.id })),
     ...calcItems.filter(r => getValue(r.node.id) !== true).map(r => ({ title: r.node.title, id: r.node.id })),
-    ...constraintItems.filter(r => !evalConstraints(r.node, ctx.fp, ctx.qr, _cEnv)).map(r => ({ title: r.node.title, id: r.node.id }))
+    ...constraintItems.filter(r => !evalConstraints(r.node, ctx.fp, ctx.qr, _cEnv)).map(r => ({ title: r.node.title, id: r.node.id })),
+    ...rangeItems.filter(r => !calcFormOk(r.node)).map(r => ({ title: r.node.title, id: r.node.id }))
   ];
 
   await _yield();
@@ -437,7 +446,8 @@ async function _asyncRender(version) {
       hasCondition = res.node.itemType !== 'display' && (
         (CHECKABLE_TYPES.has(res.node.itemType) && (isMandatory(res.node) || res.node.itemType === 'url')) ||
         (res.node._calculatedExpr && res.node._readOnly && res.node.itemType === 'checkbox') ||
-        (res.node.constraint?.length > 0)
+        (res.node.constraint?.length > 0) ||
+        (res.node._minValue !== undefined || res.node._maxValue !== undefined)
       );
       displayOk    = res.ok && calcFormOk(res.node) && _constraintPass;
     }
@@ -617,22 +627,21 @@ async function _asyncRender(version) {
     }
 
     if (res.node.type === 'item') {
-      if (res.node.itemType !== 'display' && !res.node._readOnly) {
+      if (res.node.itemType !== 'display' && !res.node._readOnly && !res.node._calculatedExpr) {
         if (res.node.repeats && res.node.itemType !== 'checkbox') {
           row.appendChild(buildRepeatControls(res.node, iconEl, () => updateGroupIcons()));
         } else {
           row.appendChild(buildControl(res.node, iconEl, () => updateGroupIcons()));
         }
       }
-      // plain text value for readOnly fields without a calculatedExpression
+      // readOnly field without calculatedExpression: show value (or placeholder) as disabled-looking span
       if (res.node._readOnly && !res.node._calculatedExpr) {
         const val = getValue(res.node.id);
-        if (val !== undefined && val !== null && val !== '') {
-          const vb = document.createElement('span');
-          vb.className = 'preview-readonly-value';
-          vb.textContent = String(val);
-          row.appendChild(vb);
-        }
+        const vb = document.createElement('span');
+        vb.className = 'preview-readonly-value';
+        vb.dataset.testid = 'preview-readonly-value';
+        vb.textContent = (val !== undefined && val !== null && val !== '') ? String(val) : '\u2014';
+        row.appendChild(vb);
       }
       // calc-badge: show for readOnly nodes with calculatedExpression
       if (res.node._calculatedExpr && res.node._readOnly) {

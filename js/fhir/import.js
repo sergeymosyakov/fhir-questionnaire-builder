@@ -140,6 +140,22 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   }
 
   node.options = fhirOptsToStr(fhirItem.answerOption);
+
+  // ordinalValue extension on each answerOption.valueCoding
+  const ordinals = {};
+  for (const opt of fhirItem.answerOption || []) {
+    if (opt.valueCoding) {
+      const code = opt.valueCoding.code || opt.valueCoding.display || '';
+      const ordExt = (opt.valueCoding.extension || []).find(
+        e => e.url === 'http://hl7.org/fhir/StructureDefinition/ordinalValue'
+      );
+      if (ordExt && ordExt.valueDecimal !== undefined && code) {
+        ordinals[code] = ordExt.valueDecimal;
+      }
+    }
+  }
+  if (Object.keys(ordinals).length) node._optionOrdinals = ordinals;
+
   applyVisibility(node, fhirItem, linkIdMap);
   applyConstraints(node, fhirItem);
 
@@ -179,6 +195,22 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // maxLength
   if (fhirItem.maxLength) node._maxLength = fhirItem.maxLength;
+
+  // questionnaire-minValue / questionnaire-maxValue (SDC R4 extensions)
+  const minValExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/minValue'
+  );
+  if (minValExt) {
+    const v = minValExt.valueDecimal ?? minValExt.valueInteger;
+    if (v !== undefined) node._minValue = v;
+  }
+  const maxValExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxValue'
+  );
+  if (maxValExt) {
+    const v = maxValExt.valueDecimal ?? maxValExt.valueInteger;
+    if (v !== undefined) node._maxValue = v;
+  }
 
   // minOccurs / maxOccurs cardinality extensions
   const minOccExt = (fhirItem.extension || []).find(

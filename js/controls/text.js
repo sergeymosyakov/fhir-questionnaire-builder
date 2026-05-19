@@ -10,10 +10,22 @@ export function build(node, ctx) {
   el.rows = 1;
   el.value = getValue(node.id) !== undefined ? getValue(node.id) : '';
 
+  if (node._maxLength) el.maxLength = node._maxLength;
+
   const autoResize = () => {
     el.style.height = 'auto';
     el.style.height = el.scrollHeight + 'px';
   };
+
+  let counter = null;
+  if (node._maxLength) {
+    counter = document.createElement('span');
+    counter.className = 'ctrl-char-counter';
+    counter.dataset.testid = 'char-counter';
+    const updateCounter = () => { counter.textContent = el.value.length + '\u00A0/\u00A0' + node._maxLength; };
+    updateCounter();
+    el.addEventListener('input', updateCounter);
+  }
 
   let _debounce = null;
   el.oninput  = () => {
@@ -27,5 +39,6 @@ export function build(node, ctx) {
   if (el.value) autoResize();
 
   wrap.appendChild(el);
+  if (counter) wrap.appendChild(counter);
   return wrap;
 }

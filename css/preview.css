@@ -194,9 +194,15 @@
   border-color: #42a5f5;
 }
 .preview-readonly-value {
+  display: inline-block;
   font-size: 13px;
-  color: #546e7a;
-  font-style: italic;
+  color: var(--c-text-2, #546e7a);
+  background: #f5f7fa;
+  border: 1px solid var(--c-border, #dde3ec);
+  border-radius: var(--r-sm, 4px);
+  padding: 2px 8px;
+  min-width: 40px;
+  cursor: not-allowed;
 }
 .preview-calc-value {
   display: inline-block;

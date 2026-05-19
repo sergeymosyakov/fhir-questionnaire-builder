@@ -1,0 +1,140 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "fhir-features-test",
+  "title": "FHIR Features Test",
+  "status": "draft",
+  "subjectType": ["Patient"],
+  "item": [
+    {
+      "linkId": "readonly-text",
+      "text": "Read-only note",
+      "type": "string",
+      "readOnly": true,
+      "initial": [{ "valueString": "Pre-filled value" }]
+    },
+    {
+      "linkId": "text-with-max",
+      "text": "Short answer",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "linkId": "score",
+      "text": "Pain score",
+      "type": "integer",
+      "required": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+          "valueInteger": 0
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+          "valueInteger": 10
+        }
+      ]
+    },
+    {
+      "linkId": "mood",
+      "text": "How are you feeling?",
+      "type": "choice",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "http://example.org",
+            "code": "not-at-all",
+            "display": "Not at all",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                "valueDecimal": 0
+              }
+            ]
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "http://example.org",
+            "code": "several-days",
+            "display": "Several days",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                "valueDecimal": 1
+              }
+            ]
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "http://example.org",
+            "code": "more-than-half",
+            "display": "More than half the days",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                "valueDecimal": 2
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "mood-radio",
+      "text": "Frequency (radio)",
+      "type": "choice",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ],
+      "answerOption": [
+        {
+          "valueCoding": {
+            "code": "never",
+            "display": "Never",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                "valueDecimal": 0
+              }
+            ]
+          }
+        },
+        {
+          "valueCoding": {
+            "code": "sometimes",
+            "display": "Sometimes",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                "valueDecimal": 1
+              }
+            ]
+          }
+        },
+        {
+          "valueCoding": {
+            "code": "always",
+            "display": "Always",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                "valueDecimal": 2
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

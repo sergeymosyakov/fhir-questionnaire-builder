@@ -18,7 +18,7 @@
   outline: none;
   border-color: var(--c-primary);
 }
-.ctrl-input--text   { width: 100%; resize: vertical; min-height: 1.5em; max-height: 200px; overflow-y: auto; line-height: 1.4; vertical-align: top; }
+.ctrl-input--text   { flex: 1; min-width: 0; resize: vertical; min-height: 1.5em; max-height: 200px; overflow-y: auto; line-height: 1.4; vertical-align: top; }
 .ctrl-input--number { width: 80px; }
 .ctrl-input--date   { width: 150px; }
 .ctrl-input--url    { width: 200px; }
@@ -197,6 +197,29 @@
   color: var(--c-text-2);
   margin-left: 6px;
   font-style: italic;
+}
+
+/* === Read-only control (item.readOnly === true) ============================== */
+.ctrl-readonly {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* === Character counter (item.maxLength) ===================================== */
+.ctrl-char-counter {
+  font-size: 10px;
+  color: var(--c-text-2);
+  align-self: flex-end;
+  padding-bottom: 2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* === Ordinal value badge (PHQ-9 scoring) ==================================== */
+.option-ordinal {
+  font-size: 10px;
+  color: var(--c-text-2);
+  margin-left: 2px;
 }
 
 /* === Radio control =========================================================== */

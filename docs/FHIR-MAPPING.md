@@ -45,7 +45,10 @@ Every node in the tree is either a **group** or an **item**:
   _maxLength:          integer,          // FHIR item.maxLength
   _minOccurs:          integer,          // questionnaire-minOccurs extension (when repeats: true)
   _maxOccurs:          integer,          // questionnaire-maxOccurs extension (when repeats: true; enforced in preview)
-  _answerValueSet:     string            // FHIR item.answerValueSet URL — preserved round-trip; not resolved to options
+  _answerValueSet:     string,           // FHIR item.answerValueSet URL — preserved round-trip; not resolved to options
+  _minValue:           number,           // questionnaire-minValue extension value (decimal or integer)
+  _maxValue:           number,           // questionnaire-maxValue extension value (decimal or integer)
+  _optionOrdinals:     object            // map of option code → ordinalValue (from ordinalValue extension on answerOption.valueCoding)
 }
 ```
 
@@ -132,7 +135,10 @@ Every node in the tree is either a **group** or an **item**:
 | `_readOnly` | `item.readOnly` | |
 | `_prefix` | `item.prefix` | imported and exported; displayed as amber badge in preview; editable in builder meta-row |
 | `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); not displayed in UI |
-| `_maxLength` | `item.maxLength` | imported → `node._maxLength`; exported back when set; not enforced in UI |
+| `_maxLength` | `item.maxLength` | imported → `node._maxLength`; exported back when set; character counter + `maxlength` attribute enforced in preview |
+| `_minValue` | `questionnaire-minValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; min HTML attribute set on input; error shown in preview when violated |
+| `_maxValue` | `questionnaire-maxValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; max HTML attribute set on input; error shown in preview when violated |
+| `_optionOrdinals` | `ordinalValue` ext on `answerOption[].valueCoding.extension` | map of option code → numeric score; shown as `(N)` badge in radio/select; round-trip safe |
 | `_minOccurs` | `questionnaire-minOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true` |
 | `_maxOccurs` | `questionnaire-maxOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true`; enforced in preview — add button disabled at limit |
 | `_answerValueSet` | `item.answerValueSet` | imported → `node._answerValueSet`; exported back unchanged; URL not resolved — items show no selectable options in the builder |
@@ -181,6 +187,9 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource` | standard | `referenceResource` (reference type lock) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs` | standard | `_minOccurs` (min repeat rows required) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs` | standard | `_maxOccurs` (max repeat rows; enforced in preview) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/minValue` | standard | `_minValue` (minimum value for numeric inputs; enforced in preview) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/maxValue` | standard | `_maxValue` (maximum value for numeric inputs; enforced in preview) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/ordinalValue` | standard | `_optionOrdinals[code]` (score per answer option; displayed in preview) | Yes |
 
 ---
 

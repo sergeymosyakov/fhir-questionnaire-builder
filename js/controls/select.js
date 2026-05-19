@@ -19,7 +19,15 @@ export function build(node, ctx) {
 
   const setLabel = () => {
     const found = opts.find(o => o.code === selected);
-    textSpan.textContent = found ? (found.display || found.code) : '\u2014 select \u2014';
+    if (found) {
+      let label = found.display || found.code;
+      if (node._optionOrdinals && node._optionOrdinals[found.code] !== undefined) {
+        label += '\u00A0(' + node._optionOrdinals[found.code] + ')';
+      }
+      textSpan.textContent = label;
+    } else {
+      textSpan.textContent = '\u2014 select \u2014';
+    }
     trigger.classList.toggle('sc-trigger--empty', !found);
   };
   setLabel();
@@ -59,7 +67,15 @@ export function build(node, ctx) {
       const label = display || code;
       const opt   = document.createElement('div');
       opt.className   = 'oc-opt';
-      opt.textContent = label;
+      if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
+        opt.textContent = label;
+        const ord = document.createElement('span');
+        ord.className = 'option-ordinal';
+        ord.textContent = '\u00A0(' + node._optionOrdinals[code] + ')';
+        opt.appendChild(ord);
+      } else {
+        opt.textContent = label;
+      }
       if (code === selected) opt.classList.add('oc-opt--sel');
       opt.addEventListener('mousedown', e => { e.preventDefault(); _pick(code); });
       dropEl.appendChild(opt);

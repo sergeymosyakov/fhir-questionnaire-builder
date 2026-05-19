@@ -67,8 +67,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/render-preview.js` | Right panel — reactive preview; `buildRepeatControls` renders multi-row repeat UI; enforces `node._maxOccurs` — add button disabled at limit |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
 | `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns (`.sc-trigger` / `.oc-wrap`) replacing native `<select>` / `<datalist>`. `date` and `dateTime` use `js/ui/date-picker.js` custom calendar. `time` uses native `<input type="time">`. |
-| `js/fhir/import.js` | FHIR R4 → internal model; reads `item.repeats`, `item.maxLength` (→ `_maxLength`), `item.answerValueSet` (→ `_answerValueSet`), `Questionnaire.contained[]` (→ `questContained`), and `questionnaire-minOccurs` / `questionnaire-maxOccurs` extensions; exports `resolveContainedValueSet(contained, ref)` — resolves `#vs-id` local refs into `code=Label,...` string; called during import and from `answer-type-modal` |
-| `js/fhir/export.js` | Internal model → FHIR R4; writes `maxLength`, `item.answerValueSet` (from `_answerValueSet`), `Questionnaire.contained[]` (from `questContained`), and `questionnaire-minOccurs` / `questionnaire-maxOccurs` when `node.repeats`; skips writing `answerOption` when `_answerValueSet` is set (mutually exclusive per FHIR spec) |
+| `js/fhir/import.js` | FHIR R4 → internal model; reads `item.repeats`, `item.maxLength` (→ `_maxLength`), `item.answerValueSet` (→ `_answerValueSet`), `Questionnaire.contained[]` (→ `questContained`), `questionnaire-minOccurs`/`questionnaire-maxOccurs` extensions, `questionnaire-minValue`/`questionnaire-maxValue` extensions (→ `_minValue`/`_maxValue`), and `ordinalValue` extension on `answerOption.valueCoding` (→ `_optionOrdinals`); exports `resolveContainedValueSet(contained, ref)` |
+| `js/fhir/export.js` | Internal model → FHIR R4; writes `maxLength`, `item.answerValueSet` (from `_answerValueSet`), `Questionnaire.contained[]` (from `questContained`), `questionnaire-minOccurs`/`questionnaire-maxOccurs` when `node.repeats`, `questionnaire-minValue`/`questionnaire-maxValue` from `_minValue`/`_maxValue`, and `ordinalValue` extension on `answerOption.valueCoding` from `_optionOrdinals`; skips writing `answerOption` when `_answerValueSet` is set |
 | `js/fhir/qr-export.js` | `exportQR(fileName)` — builds QR from current tree + answers, downloads JSON |
 | `js/fhir/qr-import.js` | `importQRAnswers(qrJson, values, tree)` — flattens QR answers; multi-answer items write `id$$1`…`id$$N` + `id$$n` (repeat row restoration); reports unmatched linkIds; returns `{ok, loaded, unmatched, questionnaire}` |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; draft-based Apply/Cancel modal; `%name` chip rich tooltips |
@@ -114,7 +114,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `playwright.config.js` | Playwright config — Chromium only, `testDir: tests/e2e`, auto-starts local `serve` (via `node node_modules/.bin/serve`); reporters: `html` (open:never) + `list` |
 | `tests/e2e/builder.spec.js` | E2E tests (24) — load/clear form, collapse/expand group, FHIR export, group title edit, delete item/group (cascade), type changes (checkbox/display), bidirectional navigation flash (builder↔preview), node count match on import, answer state persistence, enableWhen (Show When modal), patient preset section visibility, Re-init / initialExpression population; all selectors via `data-testid`; fixtures from `tests/fixtures/` |
 | `tests/e2e/contained-panel.spec.js` | E2E tests (17) — Contained Resources card + Answer ValueSet card; chip rendering, JSON viewer modal (open/close via ×/footer/Esc/backdrop), toggle collapse/expand, cards hidden on clear; fixture `tests/fixtures/contained-valueset.fhir.json` |
-| `tests/fixtures/` | Frozen FHIR samples for e2e tests — do not edit. `example-bariatric.fhir.json`, `patient-scenario-eligibility.fhir.json`, `all-types-repeatable.fhir.json`, `contained-valueset.fhir.json` |
+| `tests/e2e/fhir-features.spec.js` | E2E tests (19) — readOnly enforcement, maxLength counter, minValue/maxValue error display and round-trip, ordinalValue badges in radio/select, ordinalValue round-trip export; fixture `tests/fixtures/fhir-features.fhir.json` |
+| `tests/fixtures/` | Frozen FHIR samples for e2e tests — do not edit. `example-bariatric.fhir.json`, `patient-scenario-eligibility.fhir.json`, `all-types-repeatable.fhir.json`, `contained-valueset.fhir.json`, `fhir-features.fhir.json` |
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (22 tests) |
 | `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic (23 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (11 tests) |
@@ -136,7 +137,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
-- **Playwright** — E2E test suite; **151 tests** across 12 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
+- **Playwright** — E2E test suite; **170 tests** across 13 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
 - **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
 - **Vitest** — unit test suite for pure-function modules; **296 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
@@ -184,10 +185,13 @@ _readOnly        // boolean — FHIR item.readOnly
 _initialValue    // any — FHIR item.initial[0] value (pre-fills values[] on import)
 _prefix          // string — FHIR item.prefix (amber badge; editable in builder)
 _codes           // object[] — FHIR item.code[] (preserved round-trip; not displayed)
-_maxLength       // integer — FHIR item.maxLength (imported/exported; not enforced in UI yet)
+_maxLength       // integer — FHIR item.maxLength (imported/exported; character counter + maxlength attr enforced in preview)
 _minOccurs       // integer — questionnaire-minOccurs ext (imported/exported when repeats:true)
 _maxOccurs       // integer — questionnaire-maxOccurs ext; enforced in preview — add button disabled at limit
 _answerValueSet  // string — FHIR item.answerValueSet URL; round-trip preserved; local #vs-id refs resolved into node.options during import so preview renders real options
+_minValue        // number — questionnaire-minValue ext; error badge shown in preview + blocks PASS when violated
+_maxValue        // number — questionnaire-maxValue ext; error badge shown in preview + blocks PASS when violated
+_optionOrdinals  // object — map of option code → numeric ordinalValue; shown as (N) badge on radio/select options; round-trip safe
 ```
 
 ---
@@ -234,7 +238,7 @@ _answerValueSet  // string — FHIR item.answerValueSet URL; round-trip preserve
 | FHIR R4 type | `itemType` | Control | Validation | Notes |
 |---|---|---|---|---|
 | `boolean` | `checkbox` | ✅ | — | |
-| `integer`, `decimal` | `number` | ✅ | — | |
+| `integer`, `decimal` | `number` | ✅ | ✅ `minValue`/`maxValue` validation | `questionnaire-minValue` / `questionnaire-maxValue` extensions enforced; error badge shown; blocks PASS |
 | `quantity` | `quantity` | ✅ number + unit dropdown (UCUM) | ✅ required = value+unit filled | `questionnaire-unit` extension read/written |
 | `string`, `text` | `text` | ✅ | — | |
 | `date` | `date` | ✅ custom calendar picker | — | |
@@ -261,9 +265,12 @@ _answerValueSet  // string — FHIR item.answerValueSet URL; round-trip preserve
 - `item.prefix` → `node._prefix` (amber badge in preview; editable in builder; exported back)
 - `item.code[]` → `node._codes` (preserved as-is; exported back unchanged)
 - `item.repeats` → `node.repeats` (multi-row input; not for checkbox/display)
-- `item.maxLength` → `node._maxLength` (imported/exported; not enforced in UI)
+- `item.maxLength` → `node._maxLength` (character counter + `maxlength` HTML attribute enforced in preview)
 - `questionnaire-minOccurs` ext → `node._minOccurs` (imported/exported when repeats:true)
 - `questionnaire-maxOccurs` ext → `node._maxOccurs` (enforced in preview)
+- `questionnaire-minValue` ext (`valueDecimal`/`valueInteger`) → `node._minValue` (enforced in preview — error badge + blocks PASS)
+- `questionnaire-maxValue` ext (`valueDecimal`/`valueInteger`) → `node._maxValue` (enforced in preview — error badge + blocks PASS)
+- `ordinalValue` extension on `answerOption[].valueCoding.extension` → `node._optionOrdinals` (map of code → score; shown as `(N)` badge in radio/select)
 - `linkIdMap` built before parsing → used for human-readable condition text in `_enableWhenText`
 
 ## FHIR Export (`exportFHIR`)
@@ -275,6 +282,9 @@ _answerValueSet  // string — FHIR item.answerValueSet URL; round-trip preserve
 - `node._maxLength` → `item.maxLength` (when set)
 - `node._minOccurs` → `questionnaire-minOccurs` extension (when `node.repeats`)
 - `node._maxOccurs` → `questionnaire-maxOccurs` extension (when `node.repeats`)
+- `node._minValue` → `questionnaire-minValue` extension (`valueInteger` when integer, `valueDecimal` otherwise)
+- `node._maxValue` → `questionnaire-maxValue` extension (`valueInteger` when integer, `valueDecimal` otherwise)
+- `node._optionOrdinals` → `ordinalValue` extension on each `answerOption[].valueCoding` that has an entry
 - `itemType:'radio'` → exports `type:'choice'` + standard `questionnaire-itemControl: radio-button` extension (round-trip safe)
 - Downloads as `<name>.json` (user prompted for filename)
 
@@ -294,6 +304,10 @@ _answerValueSet  // string — FHIR item.answerValueSet URL; round-trip preserve
 - **Default value (item.initial[])** — `item.initial[0]` imported → `node._initialValue`; pre-fills the preview on load (`applyInitialValues` runs inside the `_bulkUpdate` block so `effect()` sees filled values on first run); editable via **Default** action panel in builder; control adapts to itemType (select for checkbox/choice, date, number, text); `× clear` link updates preview instantly; exported back as `item.initial[]`
 - **Constraint modal** — **Constraint** action button opens a centered modal (`js/ui/constraint-modal.js`) with draft pattern; editable cards per constraint (key, severity, human message, FHIRPath expression, remove) + **+ Add constraint**; Apply commits, Cancel discards; exported as `questionnaire-constraint` extensions
 - **Constraint badge in preview** — per-node badge: amber ⚠️ `constraint` (warning or passing error), red ✘ `constraint` (failing error); tooltip; affects Final Result when `severity: 'error'` and expression fails or returns empty
+- **Read-only enforcement** — `_readOnly: true` items show a styled `.preview-readonly-value` placeholder (value or `—`) instead of an input; input cannot be edited; 🔒 `read-only` badge shown; does not block PASS/FAIL
+- **maxLength enforcement** — `node._maxLength` sets the `maxlength` HTML attribute on text/url inputs + renders a live character counter `(N/M)` below the input
+- **minValue/maxValue enforcement** — `questionnaire-minValue` / `questionnaire-maxValue` extensions imported into `_minValue`/`_maxValue`; `min`/`max` HTML attributes set on number inputs; error badge shown inline when value is out of range; blocks PASS/FAIL
+- **ordinalValue display** — `ordinalValue` extension on `answerOption.valueCoding` imported into `_optionOrdinals`; shown as `(N)` badge on each radio option label and in the select trigger + dropdown items; exported back; round-trip safe
 - **Read-only badge** — grey 🔒 `read-only` pill when `_readOnly === true` and no `_calculatedExpr`
 - **Default badge** — purple ↺ `default` pill when `_initialValue` is defined
 - **Real-time calc badge** — `refreshCalcBadges()` patches calc-badge in-place via `data-calc-id` — no DOM rebuild on answer change

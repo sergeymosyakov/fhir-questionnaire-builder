@@ -18,10 +18,22 @@ export function build(node, ctx) {
 
   const isValidUrl = v => { try { new URL(v); return true; } catch { return false; } };
 
+  if (node._maxLength) el.maxLength = node._maxLength;
+
   const errMsg = document.createElement('span');
   errMsg.className = 'ctrl-err ctrl-err--ml';
   errMsg.textContent = 'Invalid URL';
   errMsg.style.display = 'none';
+
+  let counter = null;
+  if (node._maxLength) {
+    counter = document.createElement('span');
+    counter.className = 'ctrl-char-counter';
+    counter.dataset.testid = 'char-counter';
+    const updateCounter = () => { counter.textContent = el.value.length + '\u00A0/\u00A0' + node._maxLength; };
+    updateCounter();
+    el.addEventListener('input', updateCounter);
+  }
 
   let _debounce = null;
   el.oninput = () => {
@@ -39,5 +51,6 @@ export function build(node, ctx) {
 
   wrap.appendChild(el);
   wrap.appendChild(errMsg);
+  if (counter) wrap.appendChild(counter);
   return wrap;
 }

@@ -127,11 +127,27 @@ function nodeToFHIRItem(node) {
     fhirItem.item = node.children.map(nodeToFHIRItem);
   } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice') && node.options && !node._answerValueSet) {
     fhirItem.answerOption = parseOptions(node.options)
-      .map(({ code, display }) => ({ valueCoding: { code, display } }));
+      .map(({ code, display }) => {
+        const coding = { code, display };
+        if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
+          coding.extension = [{ url: 'http://hl7.org/fhir/StructureDefinition/ordinalValue', valueDecimal: node._optionOrdinals[code] }];
+        }
+        return { valueCoding: coding };
+      });
   }
 
   // maxLength (text/url/open-choice types)
   if (node._maxLength) fhirItem.maxLength = node._maxLength;
+
+  // questionnaire-minValue / questionnaire-maxValue
+  if (node._minValue !== undefined) {
+    const isInt = Number.isInteger(node._minValue);
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/minValue', [isInt ? 'valueInteger' : 'valueDecimal']: node._minValue });
+  }
+  if (node._maxValue !== undefined) {
+    const isInt = Number.isInteger(node._maxValue);
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/maxValue', [isInt ? 'valueInteger' : 'valueDecimal']: node._maxValue });
+  }
   if (node.type === 'item' && node._answerValueSet) fhirItem.answerValueSet = node._answerValueSet;
 
   if (node._readOnly) fhirItem.readOnly = true;
