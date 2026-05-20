@@ -39,6 +39,15 @@ async function loadFixture(page) {
 
 const badge = page => page.getByTestId('status-badge-btn');
 
+// Blur the input, click away into a neutral area so the browser fires the
+// change event reliably (headless Chromium may not fire it on blur() alone),
+// then wait a tick for the async re-render to complete.
+async function commitInput(page, input) {
+  await input.blur();
+  await page.locator('text=Questionnaire Preview').click();
+  await page.waitForTimeout(300);
+}
+
 // ── 1. hasCriteria — badge visibility ─────────────────────────────────────────
 
 test.describe('hasCriteria: badge visible for constraint-only questionnaire', () => {
@@ -60,7 +69,7 @@ test.describe('hasCriteria: badge visible for constraint-only questionnaire', ()
     await loadFixture(page);
     const input = page.locator('[data-preview-id="age"] input[type="number"]');
     await input.fill('20');
-    await input.blur();
+    await commitInput(page, input);
     await expect(badge(page)).toContainText('PASS');
   });
 
@@ -68,10 +77,10 @@ test.describe('hasCriteria: badge visible for constraint-only questionnaire', ()
     await loadFixture(page);
     const input = page.locator('[data-preview-id="age"] input[type="number"]');
     await input.fill('20');
-    await input.blur();
+    await commitInput(page, input);
     await expect(badge(page)).toContainText('PASS');
     await input.fill('5');
-    await input.blur();
+    await commitInput(page, input);
     await expect(badge(page)).toContainText('FAIL');
   });
 });
@@ -90,10 +99,10 @@ test.describe('hasCriteria: badge visible for range-only (minValue/maxValue) ite
     const rangeInput = page.locator('[data-preview-id="score-range"] input[type="number"]');
     // Satisfy constraint, then violate the range
     await ageInput.fill('20');
-    await ageInput.blur();
+    await commitInput(page, ageInput);
     // Now violate the range — badge must show FAIL
     await rangeInput.fill('200');
-    await rangeInput.blur();
+    await commitInput(page, rangeInput);
     await expect(badge(page)).toContainText('FAIL');
   });
 
@@ -102,9 +111,9 @@ test.describe('hasCriteria: badge visible for range-only (minValue/maxValue) ite
     const ageInput   = page.locator('[data-preview-id="age"] input[type="number"]');
     const rangeInput = page.locator('[data-preview-id="score-range"] input[type="number"]');
     await ageInput.fill('25');
-    await ageInput.blur();
+    await commitInput(page, ageInput);
     await rangeInput.fill('50');
-    await rangeInput.blur();
+    await commitInput(page, rangeInput);
     await expect(badge(page)).toContainText('PASS');
   });
 });
@@ -124,7 +133,7 @@ test.describe('group icon reflects constraint-only child state', () => {
     const groupOk   = page.locator('[data-preview-id="grp-constraint"] .icon-ok');
     const groupFail = page.locator('[data-preview-id="grp-constraint"] .icon-fail');
     await input.fill('21');
-    await input.blur();
+    await commitInput(page, input);
     await expect(groupOk).toBeVisible();
     await expect(groupFail).toHaveCount(0);
   });
@@ -134,10 +143,10 @@ test.describe('group icon reflects constraint-only child state', () => {
     const input   = page.locator('[data-preview-id="age"] input[type="number"]');
     const groupOk = page.locator('[data-preview-id="grp-constraint"] .icon-ok');
     await input.fill('18');
-    await input.blur();
+    await commitInput(page, input);
     await expect(groupOk).toBeVisible();
     await input.fill('17');
-    await input.blur();
+    await commitInput(page, input);
     await expect(page.locator('[data-preview-id="grp-constraint"] .icon-fail')).toBeVisible();
   });
 });
