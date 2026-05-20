@@ -3,6 +3,7 @@
   "id": "patient-scenario-calc-chain",
   "title": "Risk Score Calculator — initialExpression + calculatedExpression Chain",
   "status": "draft",
+  "copyright": "© 2026 Sergey Mosyakov",
   "description": "Demonstrates the initialExpression → calculatedExpression → enableWhenExpression chain. Select a Patient preset, click ↺ Re-init, then observe: (1) Step 1 fields populate from patient context; (2) Step 2 risk scores recompute; (3) the matching Risk Level section appears.",
   "extension": [
     {

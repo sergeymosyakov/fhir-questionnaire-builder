@@ -6,6 +6,7 @@
   "name": "PROWL_SS",
   "title": "PROWL-SS — Post-Surgical Pain Assessment",
   "status": "active",
+  "copyright": "© 2026 Sergey Mosyakov",
   "experimental": true,
   "subjectType": ["Patient"],
   "date": "2024-01-01",

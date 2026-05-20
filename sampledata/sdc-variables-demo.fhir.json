@@ -2,8 +2,7 @@
   "resourceType": "Questionnaire",
   "id": "sdc-variables-demo",
   "title": "SDC Variables Demo — BMI Calculator",
-  "status": "draft",
-  "subjectType": ["Patient"],
+  "status": "draft",  "copyright": "© 2026 Sergey Mosyakov",  "subjectType": ["Patient"],
   "date": "2026-05-13",
   "extension": [
     {

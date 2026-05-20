@@ -23,6 +23,11 @@
 .ctrl-input--date   { width: 150px; }
 .ctrl-input--url    { width: 200px; }
 
+/* Webkit calendar / clock picker icon — ensure cursor: pointer */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointer; }
+
 /* === Reference control: [resource-type] / [id-input] ======================== */
 .ref-type-sel {
   min-width: 100px;

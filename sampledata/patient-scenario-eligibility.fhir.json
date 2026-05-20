@@ -3,6 +3,7 @@
   "id": "patient-scenario-eligibility",
   "title": "Bariatric Surgery Eligibility Screen",
   "status": "draft",
+  "copyright": "© 2026 Sergey Mosyakov",
   "description": "Automated eligibility assessment driven by patient context. Select a Patient preset and click ↺ Re-init in the Variables panel to populate all auto-filled fields.",
   "extension": [
     {

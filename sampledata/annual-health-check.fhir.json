@@ -5,6 +5,7 @@
   "version": "1.0",
   "title": "Annual Health Check",
   "status": "active",
+  "copyright": "© 2026 Sergey Mosyakov",
   "publisher": "Example Health Organisation",
   "description": "Comprehensive annual health assessment covering vital signs, lifestyle factors, current medications, wellbeing screening, and clinician follow-up. Demonstrates: version, publisher, prefix, item.code[], minValue/maxValue, rendering-style, calculatedExpression (BMI), sliderStepValue, repeats+minOccurs/maxOccurs, ordinalValue, enableWhen, initial[], maxLength, and questionnaire-constraint.",
   "subjectType": ["Patient"],

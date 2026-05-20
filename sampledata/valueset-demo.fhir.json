@@ -2,8 +2,7 @@
   "resourceType": "Questionnaire",
   "id": "valueset-demo",
   "title": "ValueSet Demo — Coded Answers",
-  "status": "draft",
-  "date": "2024-01-01",
+  "status": "draft",  "copyright": "© 2026 Sergey Mosyakov",  "date": "2024-01-01",
   "description": "Demonstrates answerValueSet round-trip: contained[] ValueSets referenced via '#id', and one external URL. Items render as select, radio, and open-choice.",
   "contained": [
     {

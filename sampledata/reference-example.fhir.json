@@ -3,6 +3,7 @@
   "id": "reference-example",
   "title": "Reference Type Demo",
   "status": "draft",
+  "copyright": "© 2026 Sergey Mosyakov",
   "subjectType": ["Patient"],
   "date": "2026-05-12",
   "item": [

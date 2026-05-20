@@ -3,6 +3,7 @@
   "id": "bariatric-pre-auth",
   "title": "Bariatric Surgery Pre-Authorization Screening",
   "status": "active",
+  "copyright": "© 2026 Sergey Mosyakov",
   "subjectType": [
     "Patient"
   ],

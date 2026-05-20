@@ -3,6 +3,7 @@
   "id": "patient-scenario-risk",
   "title": "Pre-operative Risk Assessment",
   "status": "draft",
+  "copyright": "© 2026 Sergey Mosyakov",
   "description": "Patient-driven risk stratification for surgical planning. Select a Patient preset and click ↺ Re-init to populate risk flags. Sections appear based on active risk factors.",
   "extension": [
     {
