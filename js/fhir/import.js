@@ -253,6 +253,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   node._readOnly = !!fhirItem.readOnly;
   if (fhirItem.repeats) node.repeats = true;
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
+  if (fhirItem.definition) node._definition = fhirItem.definition;
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
   if (fhirItem.answerValueSet) {
     node._answerValueSet = fhirItem.answerValueSet;
@@ -316,6 +317,7 @@ function fhirItemToNode(fhirItem, linkIdMap, contained) {
     const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));
     if (rs) node._renderStyle = rs.valueString || '';
     if (fhirItem.prefix) node._prefix = fhirItem.prefix;
+    if (fhirItem.definition) node._definition = fhirItem.definition;
     if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
     for (const child of fhirItem.item || []) {
       const n = fhirItemToNode(child, linkIdMap, contained);
@@ -384,6 +386,7 @@ export function importFHIR(fhirJson, renderFn) {
   questMeta._rawUseContext   = Array.isArray(q.useContext)   ? q.useContext   : null;
   questMeta._rawJurisdiction = Array.isArray(q.jurisdiction) ? q.jurisdiction : null;
   questMeta._rawCode         = Array.isArray(q.code)         ? q.code         : null;
+  questMeta.derivedFrom      = Array.isArray(q.derivedFrom)  ? [...q.derivedFrom] : [];
 
   // Read questionnaire-level SDC variables
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';

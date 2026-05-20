@@ -417,9 +417,7 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
 .node-title-input:focus { outline: none; border-color: var(--c-primary); background: var(--c-primary-lt); }
 
 /* === Action chips ============================================================ */
-.node-actions { display: contents; }
-.node-actions > a:first-child,
-.node-actions > div:first-child { margin-left: 10px; }
+.node-actions { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 4px; }
 .node-actions a {
   display: inline-block;
   padding: 2px 8px;

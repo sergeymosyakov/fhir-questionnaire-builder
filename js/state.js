@@ -76,6 +76,7 @@ export const questMeta = reactive({
   effectivePeriodEnd:   '',   // Questionnaire.effectivePeriod.end
   experimental:    null,       // null = not set, true/false = Questionnaire.experimental
   language:        '',          // BCP-47 language code, e.g. 'en', 'en-US'
+  derivedFrom:     [],          // canonical[] — parent questionnaire URLs
   // Pass-through: preserved from import, written back on export, no editing UI
   _rawContact:      null,
   _rawUseContext:   null,
@@ -190,19 +191,6 @@ export const calcFormOk = node => {
     if (!isMandatory(node)) return true;
     return getValue(node.id) != null;
   }
-  if (node.mandatory === false) return true;
-  // reference: mandatory → { reference: "Type/id" } must be present
-  if (node.itemType === 'reference') {
-    if (!isMandatory(node)) return true;
-    const val = getValue(node.id);
-    return val != null && typeof val === 'object' && !!val.reference;
-  }
-  // quantity: mandatory → { value: number, unit: string } must be present
-  if (node.itemType === 'quantity') {
-    if (!isMandatory(node)) return true;
-    const val = getValue(node.id);
-    return val != null && typeof val === 'object' && val.value !== undefined && !!val.unit;
-  }
   // integer/decimal/number: check min/max range (regardless of required)
   if (node.itemType === 'integer' || node.itemType === 'decimal' || node.itemType === 'number') {
     const val = getValue(node.id);
@@ -215,6 +203,19 @@ export const calcFormOk = node => {
     }
     if (isMandatory(node)) return val !== undefined && val !== '' && val !== null;
     return true;
+  }
+  if (node.mandatory === false) return true;
+  // reference: mandatory → { reference: "Type/id" } must be present
+  if (node.itemType === 'reference') {
+    if (!isMandatory(node)) return true;
+    const val = getValue(node.id);
+    return val != null && typeof val === 'object' && !!val.reference;
+  }
+  // quantity: mandatory → { value: number, unit: string } must be present
+  if (node.itemType === 'quantity') {
+    if (!isMandatory(node)) return true;
+    const val = getValue(node.id);
+    return val != null && typeof val === 'object' && val.value !== undefined && !!val.unit;
   }
   // mandatory text/number/date/etc → must be non-empty
   if (isMandatory(node) && NONEMPTY_TYPES.has(node.itemType)) {

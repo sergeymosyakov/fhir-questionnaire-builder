@@ -1,5 +1,8 @@
-// ── Item Codes edit modal ─────────────────────────────────────────────────────
-// Centered modal for editing a node's _codes[] array (FHIR item.code[]).
+// ── Item Properties modal ─────────────────────────────────────────────────────
+// Centered modal for editing item-level metadata:
+//   Core      (always visible): item.definition URL
+//   Codes     (collapsible)   : item.code[] — system / code / display rows
+//
 // Uses a draft pattern — changes committed only on Apply, discarded on Cancel.
 //
 // init(elements)               — wire DOM once at startup (called from app.js)
@@ -8,7 +11,7 @@
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 
 let _el      = null;
-let _pending = null; // { node, link, setActive, draft }
+let _pending = null; // { node, link, setActive, codes, definition }
 
 export function init(elements) {
   _el = elements;
@@ -16,20 +19,32 @@ export function init(elements) {
 }
 
 export function open(node, link, setActive) {
-  const draft = JSON.parse(JSON.stringify(node._codes || []));
-  _pending = { node, link, setActive, draft };
-  setModalTitle(_el.title, 'Codes (item.code[])', node.title || node.id || 'Item');
-  _renderBody(draft, _el.body);
+  _pending = {
+    node,
+    link,
+    setActive,
+    codes:      JSON.parse(JSON.stringify(node._codes || [])),
+    definition: node._definition || '',
+  };
+  setModalTitle(_el.title, 'Item Properties', node.title || node.id || 'Item');
+  _renderBody(_pending, _el.body);
   openModal(_el.modal);
 }
 
 function _apply() {
   if (!_pending) return;
-  const { node, draft, link, setActive } = _pending;
-  const filtered = draft.filter(c => c.code.trim());
+  const { node, codes, definition, link, setActive } = _pending;
+
+  // definition
+  if (definition.trim()) node._definition = definition.trim();
+  else delete node._definition;
+
+  // codes
+  const filtered = codes.filter(c => c.code.trim());
   if (filtered.length) node._codes = filtered;
   else delete node._codes;
-  setActive(link, !!(node._codes && node._codes.length));
+
+  setActive(link, !!(node._codes?.length) || !!node._definition);
   _close();
 }
 
@@ -42,8 +57,65 @@ function _close() {
 
 // ── Body renderer ─────────────────────────────────────────────────────────────
 
-function _renderBody(draft, container) {
-  renderCodesEditor(draft, container, 'code');
+function _renderBody(pending, container) {
+  container.innerHTML = '';
+
+  // ── Core: definition ──────────────────────────────────────────────────────
+  const defRow = document.createElement('div');
+  defRow.className = 'meta-modal-row';
+
+  const defLbl = document.createElement('label');
+  defLbl.className = 'meta-modal-lbl';
+  defLbl.htmlFor = 'itemPropsDefInput';
+  defLbl.textContent = 'Definition';
+
+  const defInp = document.createElement('input');
+  defInp.type = 'url';
+  defInp.id = 'itemPropsDefInput';
+  defInp.className = 'meta-modal-inp';
+  defInp.placeholder = 'https://...StructureDefinition#element';
+  defInp.dataset.testid = 'item-props-definition';
+  defInp.value = pending.definition;
+  defInp.oninput = () => { pending.definition = defInp.value; };
+
+  defRow.appendChild(defLbl);
+  defRow.appendChild(defInp);
+  container.appendChild(defRow);
+
+  // ── Codes (collapsible) ───────────────────────────────────────────────────
+  const codesSection = document.createElement('div');
+  codesSection.className = 'meta-modal-advanced';
+
+  const codesToggle = document.createElement('button');
+  codesToggle.type      = 'button';
+  codesToggle.className = 'meta-modal-adv-toggle';
+  codesToggle.dataset.testid = 'item-props-codes-toggle';
+  let codesOpen = true;
+
+  const codesBody = document.createElement('div');
+  codesBody.className = 'meta-modal-adv-body';
+  codesBody.style.display = codesOpen ? '' : 'none';
+  renderCodesEditor(pending.codes, codesBody, 'code');
+
+  const _setCodesLabel = () => {
+    const count = pending.codes.filter(c => c.code.trim()).length;
+    const badge = count ? ` (${count})` : '';
+    codesToggle.textContent = (codesOpen ? '\u25BC' : '\u25BA') + ' Codes' + badge;
+  };
+  _setCodesLabel();
+
+  codesToggle.addEventListener('click', () => {
+    codesOpen = !codesOpen;
+    codesBody.style.display = codesOpen ? '' : 'none';
+    _setCodesLabel();
+  });
+
+  // Refresh badge after add/remove inside the editor
+  codesBody.addEventListener('input', _setCodesLabel);
+  codesBody.addEventListener('click', () => setTimeout(_setCodesLabel, 0));
+
+  codesSection.append(codesToggle, codesBody);
+  container.appendChild(codesSection);
 }
 
 /**

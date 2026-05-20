@@ -224,7 +224,6 @@ export function renderGroup(node, ctx) {
   const headerTop = document.createElement('div');
   headerTop.className = 'node-header-top';
   headerTop.appendChild(titleWrap);
-  headerTop.appendChild(actions);
 
   const metaRow = document.createElement('div');
   metaRow.className = 'node-meta-row';
@@ -242,6 +241,7 @@ export function renderGroup(node, ctx) {
   header.appendChild(headerTop);
   header.appendChild(metaRow);
   header.appendChild(titleRow);
+  header.appendChild(actions);
 
   const btnDel = document.createElement('button');
   btnDel.textContent = '\u2715';

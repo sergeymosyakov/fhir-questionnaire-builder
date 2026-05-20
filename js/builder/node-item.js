@@ -140,32 +140,12 @@ export function renderItem(node, ctx) {
     'Questionnaire.item.enableWhen[]', 'R4 \u00B7 optional');
   visLink.dataset.testid = 'action-vis';
   visLink.onclick = () => showWhenModal.open(node, visLink, setActive, ctx, buildVisPanel);
-  const exprLink  = addToggle('Expression', 'expr',
-    'Calculated Expression',
-    'SDC FHIRPath expression evaluated automatically on every preview render. Result is written into the answer field. Supports questionnaire-level %variables.',
-    'sdc-questionnaire-calculatedExpression', 'SDC · optional');
-  exprLink.dataset.testid = 'action-calcexpr';
-  exprLink.onclick = () => expressionModal.open({
-    node, link: exprLink, setActive,
-    field:       '_calculatedExpr',
-    label:       'Calculated Expression',
-    fhirLabel:   'FHIRPath calculatedExpression:',
-    placeholder: "%resource.item.where(linkId='...')",
-    onApply:     triggerCalcRecalc,
-  });
-  const initExprLink = addToggle('Init Expr', 'initExpr',
-    'Initial Expression',
-    'SDC FHIRPath expression evaluated once to pre-populate this field. Click \u21BA Re-init in the Variables panel to apply. Unlike calculatedExpression, this runs only on load/re-init.',
-    'sdc-questionnaire-initialExpression', 'SDC · optional');
-  initExprLink.dataset.testid = 'action-initexpr';
-  initExprLink.onclick = () => expressionModal.open({
-    node, link: initExprLink, setActive,
-    field:       '_initialExpr',
-    label:       'Initial Expression',
-    fhirLabel:   'sdc-questionnaire-initialExpression:',
-    hint:        'FHIRPath expression evaluated once to populate this field. Click \u21BA Re-init in the Variables panel to apply.',
-    placeholder: "e.g. %age > 18 or %today",
-  });
+  const exprLink = addToggle('Expression', 'expr',
+    'FHIRPath Expressions',
+    'Edit both FHIRPath expression fields: calculatedExpression (evaluated on every preview render) and initialExpression (evaluated once on load or re-init). Both support questionnaire-level %variables.',
+    'sdc-questionnaire-calculatedExpression / initialExpression', 'SDC · optional');
+  exprLink.dataset.testid = 'action-expr';
+  exprLink.onclick = () => expressionModal.openDual(node, exprLink, setActive, triggerCalcRecalc);
 
   // Read-only — opens modal for consistency with other action buttons
   const roLink = document.createElement('a');
@@ -211,11 +191,11 @@ export function renderItem(node, ctx) {
   styleLink.onclick = () => appearanceModal.open(node, styleLink, setActive);
 
   const codesLink = document.createElement('a');
-  codesLink.textContent = 'Codes';
+  codesLink.textContent = 'Props';
   codesLink.className = 'action-edit';
-  codesLink.dataset.tipTitle = 'Terminology Codes (item.code[])';
-  codesLink.dataset.tipBody  = 'FHIR item.code[] — one or more terminology codes identifying what concept this item represents (e.g. LOINC, SNOMED). Each entry has system URL, code, and optional display. Round-trip safe.';
-  codesLink.dataset.tipFhir  = 'Questionnaire.item.code[]';
+  codesLink.dataset.tipTitle = 'Item Properties';
+  codesLink.dataset.tipBody  = 'Edit item-level metadata: definition URL (item.definition — points to a StructureDefinition element) and terminology codes (item.code[] — LOINC, SNOMED, etc.).';
+  codesLink.dataset.tipFhir  = 'Questionnaire.item.definition / item.code[]';
   codesLink.dataset.tipSpec  = 'R4 \u00B7 optional';
   codesLink.dataset.testid   = 'action-codes';
   codesLink.onclick = () => codesModal.open(node, codesLink, setActive);
@@ -223,7 +203,6 @@ export function renderItem(node, ctx) {
   const headerTop = document.createElement('div');
   headerTop.className = 'node-header-top';
   headerTop.appendChild(titleWrap);
-  headerTop.appendChild(actions);
 
   const metaRow = document.createElement('div');
   metaRow.className = 'node-meta-row';
@@ -241,6 +220,7 @@ export function renderItem(node, ctx) {
   header.appendChild(headerTop);
   header.appendChild(metaRow);
   header.appendChild(titleRow);
+  header.appendChild(actions);
 
   const btnDel = document.createElement('button');
   btnDel.textContent = '\u2715';
@@ -257,8 +237,7 @@ export function renderItem(node, ctx) {
 
   setActive(typeLink,        true);  // Answer type is always set
   setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
-  setActive(exprLink,       !!node._calculatedExpr);
-  setActive(initExprLink,   !!node._initialExpr);
+  setActive(exprLink,       !!(node._calculatedExpr || node._initialExpr));
   setActive(roLink,         !!node._readOnly);
   setActive(repeatLink,     !!node.repeats);
   if (node.itemType === 'checkbox' || node.itemType === 'display') repeatLink.style.display = 'none';
@@ -266,7 +245,7 @@ export function renderItem(node, ctx) {
   setActive(styleLink,      !!node._renderStyle);
   setActive(mandLink,       node.mandatory === true);
   setActive(constraintLink, !!(node.constraint?.length));
-  setActive(codesLink,      !!(node._codes?.length));
+  setActive(codesLink,      !!(node._codes?.length) || !!node._definition);
 
   wrapper.appendChild(div);
 

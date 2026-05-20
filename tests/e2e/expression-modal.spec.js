@@ -9,8 +9,7 @@
 //   add-menu-item         "Item" option in add-child menu
 //   node-title-display    read-only title span
 //   node-title-input      title textarea
-//   action-calcexpr       "Expression" action link (calculatedExpression)
-//   action-initexpr       "Init Expr" action link (initialExpression)
+//   action-expr           "Expr" action link (combined calculatedExpression + initialExpression)
 //
 // ── element IDs ──────────────────────────────────────────────────────────────
 //   expressionModal       backdrop (display:flex when open)
@@ -61,20 +60,20 @@ const exprModalBody   = (page) => page.locator('#exprModalBody');
 // ── Calculated Expression ──────────────────────────────────────────────────────
 
 test.describe('Expression modal — Calculated Expression', () => {
-  test('clicking "Expression" action link opens the modal', async ({ page }) => {
+  test('clicking "Expr" action link opens the modal', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-calcexpr').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await expect(exprModal(page)).toBeVisible();
   });
 
-  test('modal title contains "Calculated Expression" and item name', async ({ page }) => {
+  test('modal title contains "Expressions" and item name', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page, 'Score');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-calcexpr').click();
-    await expect(exprModalTitle(page)).toContainText('Calculated Expression');
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await expect(exprModalTitle(page)).toContainText('Expressions');
     await expect(exprModalTitle(page)).toContainText('Score');
   });
 
@@ -82,7 +81,7 @@ test.describe('Expression modal — Calculated Expression', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-calcexpr').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await expect(exprModal(page)).toBeVisible();
     await exprModalClose(page).click();
     await expect(exprModal(page)).not.toBeVisible();
@@ -92,7 +91,7 @@ test.describe('Expression modal — Calculated Expression', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-calcexpr').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await expect(exprModal(page)).toBeVisible();
     await exprModalCancel(page).click();
     await expect(exprModal(page)).not.toBeVisible();
@@ -102,7 +101,7 @@ test.describe('Expression modal — Calculated Expression', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-calcexpr').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await expect(exprModal(page)).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(exprModal(page)).not.toBeVisible();
@@ -112,7 +111,7 @@ test.describe('Expression modal — Calculated Expression', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-calcexpr').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await expect(exprModal(page)).toBeVisible();
     await exprModal(page).click({ position: { x: 5, y: 5 } });
     await expect(exprModal(page)).not.toBeVisible();
@@ -123,14 +122,14 @@ test.describe('Expression modal — Calculated Expression', () => {
     await addTextItem(page);
 
     const item = page.locator('[data-node-id="1.1"]');
-    await item.getByTestId('action-calcexpr').click();
+    await item.getByTestId('action-expr').click();
 
-    await exprModalBody(page).locator('textarea').fill('%score * 2');
+    await exprModalBody(page).locator('[data-testid="expr-calc-ta"]').fill('%score * 2');
     await exprModalCancel(page).click();
 
     // Re-open: must be empty
-    await item.getByTestId('action-calcexpr').click();
-    await expect(exprModalBody(page).locator('textarea')).toHaveValue('');
+    await item.getByTestId('action-expr').click();
+    await expect(exprModalBody(page).locator('[data-testid="expr-calc-ta"]')).toHaveValue('');
   });
 
   test('Apply saves expression and activates the action link', async ({ page }) => {
@@ -138,12 +137,12 @@ test.describe('Expression modal — Calculated Expression', () => {
     await addTextItem(page);
 
     const item       = page.locator('[data-node-id="1.1"]');
-    const actionLink = item.getByTestId('action-calcexpr');
+    const actionLink = item.getByTestId('action-expr');
 
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
 
     await actionLink.click();
-    await exprModalBody(page).locator('textarea').fill('%score * 2');
+    await exprModalBody(page).locator('[data-testid="expr-calc-ta"]').fill('%score * 2');
     await exprModalApply(page).click();
 
     await expect(exprModal(page)).not.toBeVisible();
@@ -155,17 +154,17 @@ test.describe('Expression modal — Calculated Expression', () => {
     await addTextItem(page);
 
     const item       = page.locator('[data-node-id="1.1"]');
-    const actionLink = item.getByTestId('action-calcexpr');
+    const actionLink = item.getByTestId('action-expr');
 
     // Set an expression first
     await actionLink.click();
-    await exprModalBody(page).locator('textarea').fill('%score * 2');
+    await exprModalBody(page).locator('[data-testid="expr-calc-ta"]').fill('%score * 2');
     await exprModalApply(page).click();
     await expect(actionLink).toHaveClass(/action-edit--active/);
 
     // Clear it
     await actionLink.click();
-    await exprModalBody(page).locator('textarea').fill('');
+    await exprModalBody(page).locator('[data-testid="expr-calc-ta"]').fill('');
     await exprModalApply(page).click();
 
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
@@ -175,49 +174,49 @@ test.describe('Expression modal — Calculated Expression', () => {
 // ── Initial Expression ─────────────────────────────────────────────────────────
 
 test.describe('Expression modal — Initial Expression', () => {
-  test('clicking "Init Expr" action link opens the modal', async ({ page }) => {
+  test('modal body contains init expression textarea', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-initexpr').click();
-    await expect(exprModal(page)).toBeVisible();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await expect(exprModalBody(page).locator('[data-testid="expr-init-ta"]')).toBeVisible();
   });
 
-  test('modal title contains "Initial Expression"', async ({ page }) => {
+  test('modal title contains "Expressions" and item name', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page, 'Age');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-initexpr').click();
-    await expect(exprModalTitle(page)).toContainText('Initial Expression');
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await expect(exprModalTitle(page)).toContainText('Expressions');
     await expect(exprModalTitle(page)).toContainText('Age');
   });
 
-  test('Apply saves expression and activates the action link', async ({ page }) => {
+  test('Apply saves init expression and activates the action link', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
 
     const item       = page.locator('[data-node-id="1.1"]');
-    const actionLink = item.getByTestId('action-initexpr');
+    const actionLink = item.getByTestId('action-expr');
 
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
 
     await actionLink.click();
-    await exprModalBody(page).locator('textarea').fill('%age');
+    await exprModalBody(page).locator('[data-testid="expr-init-ta"]').fill('%age');
     await exprModalApply(page).click();
 
     await expect(exprModal(page)).not.toBeVisible();
     await expect(actionLink).toHaveClass(/action-edit--active/);
   });
 
-  test('Cancel does not save the typed expression', async ({ page }) => {
+  test('Cancel does not save the init expression', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
 
     const item = page.locator('[data-node-id="1.1"]');
-    await item.getByTestId('action-initexpr').click();
-    await exprModalBody(page).locator('textarea').fill('%age');
+    await item.getByTestId('action-expr').click();
+    await exprModalBody(page).locator('[data-testid="expr-init-ta"]').fill('%age');
     await exprModalCancel(page).click();
 
-    await expect(item.getByTestId('action-initexpr')).not.toHaveClass(/action-edit--active/);
+    await expect(item.getByTestId('action-expr')).not.toHaveClass(/action-edit--active/);
   });
 });

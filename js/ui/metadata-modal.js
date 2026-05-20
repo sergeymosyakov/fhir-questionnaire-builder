@@ -7,6 +7,7 @@
 //   purpose, copyright.
 // Pass-through fields (contact, useContext, jurisdiction) have no
 //   editing UI — they are preserved automatically on import/export.
+// Derived From (collapsible): Questionnaire.derivedFrom[] — canonical URL list.
 // Codes (collapsible): Questionnaire.code[] — editable via shared renderCodesEditor.
 //
 // init(elements)  — wire DOM once at startup
@@ -87,6 +88,7 @@ export function open() {
     effectivePeriodEnd:   questMeta.effectivePeriodEnd,
     experimental: questMeta.experimental === null ? '' : String(questMeta.experimental),
     language:     questMeta.language || '',
+    derivedFrom:  [...(questMeta.derivedFrom || [])],
     codes: JSON.parse(JSON.stringify(questMeta._rawCode || [])),
   };
 
@@ -118,6 +120,7 @@ function _apply() {
   questMeta.effectivePeriodEnd   = _pending.effectivePeriodEnd.trim();
   questMeta.experimental = _pending.experimental === '' ? null : _pending.experimental === 'true';
   questMeta.language     = _pending.language;
+  questMeta.derivedFrom  = _pending.derivedFrom.filter(u => u.trim());
   const filteredCodes = _pending.codes.filter(c => c.code.trim());
   questMeta._rawCode = filteredCodes.length ? filteredCodes : null;
   _close();
@@ -268,6 +271,79 @@ function _renderBody(container) {
 
   adv.append(toggle, body);
   container.appendChild(adv);
+
+  // ── Derived From (collapsible) ────────────────────────────────────────────
+  const derivedSection = document.createElement('div');
+  derivedSection.className = 'meta-modal-advanced';
+
+  const derivedToggle = document.createElement('button');
+  derivedToggle.type      = 'button';
+  derivedToggle.className = 'meta-modal-adv-toggle';
+  derivedToggle.dataset.testid = 'meta-derived-toggle';
+  let derivedOpen = _pending.derivedFrom.length > 0;
+
+  const derivedBody = document.createElement('div');
+  derivedBody.className = 'meta-modal-adv-body';
+  derivedBody.style.display = derivedOpen ? '' : 'none';
+
+  const _setDerivedLabel = () => {
+    const count = _pending.derivedFrom.filter(u => u.trim()).length;
+    const badge = count ? ` (${count})` : '';
+    derivedToggle.textContent = (derivedOpen ? '\u25BC' : '\u25BA') + ' Derived From' + badge;
+  };
+
+  const _renderDerived = () => {
+    derivedBody.innerHTML = '';
+    if (_pending.derivedFrom.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'codes-empty-msg';
+      empty.textContent = 'No derived-from URLs. Click \u2018+ Add URL\u2019 to add one.';
+      derivedBody.appendChild(empty);
+    }
+    _pending.derivedFrom.forEach((url, idx) => {
+      const row = document.createElement('div');
+      row.className = 'codes-row';
+      const inp = document.createElement('input');
+      inp.type = 'url';
+      inp.className = 'codes-inp';
+      inp.value = url;
+      inp.placeholder = 'http://example.org/fhir/Questionnaire/base|1.0';
+      inp.dataset.testid = `meta-derived-url-${idx}`;
+      inp.oninput = () => { _pending.derivedFrom[idx] = inp.value; _setDerivedLabel(); };
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'codes-remove-btn';
+      removeBtn.textContent = '\u00D7';
+      removeBtn.dataset.testid = `meta-derived-remove-${idx}`;
+      removeBtn.onclick = () => { _pending.derivedFrom.splice(idx, 1); _renderDerived(); _setDerivedLabel(); };
+      row.append(inp, removeBtn);
+      derivedBody.appendChild(row);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'codes-add-btn';
+    addBtn.textContent = '+ Add URL';
+    addBtn.dataset.testid = 'meta-derived-add-btn';
+    addBtn.onclick = () => {
+      _pending.derivedFrom.push('');
+      derivedOpen = true;
+      derivedBody.style.display = '';
+      _renderDerived();
+      _setDerivedLabel();
+    };
+    derivedBody.appendChild(addBtn);
+  };
+  _renderDerived();
+  _setDerivedLabel();
+
+  derivedToggle.addEventListener('click', () => {
+    derivedOpen = !derivedOpen;
+    derivedBody.style.display = derivedOpen ? '' : 'none';
+    _setDerivedLabel();
+  });
+
+  derivedSection.append(derivedToggle, derivedBody);
+  container.appendChild(derivedSection);
 
   // ── Codes (collapsible) ──────────────────────────────────────────────────
   const codesSection = document.createElement('div');

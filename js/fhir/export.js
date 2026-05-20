@@ -44,6 +44,7 @@ function nodeToFHIRItem(node) {
   };
 
   if (node._prefix) fhirItem.prefix = node._prefix;
+  if (node._definition) fhirItem.definition = node._definition;
   if (node._codes && node._codes.length) fhirItem.code = node._codes;
   if (node.mandatory === true)  fhirItem.required = true;
   else if (node.mandatory === false) fhirItem.required = false;
@@ -204,7 +205,8 @@ export function buildFHIRObject() {
   if (questMeta._rawContact)      q.contact     = questMeta._rawContact;
   if (questMeta._rawUseContext)   q.useContext  = questMeta._rawUseContext;
   if (questMeta._rawJurisdiction) q.jurisdiction = questMeta._rawJurisdiction;
-  if (questMeta._rawCode)         q.code        = questMeta._rawCode;
+  if (questMeta._rawCode)              q.code        = questMeta._rawCode;
+  if (questMeta.derivedFrom?.length)   q.derivedFrom = questMeta.derivedFrom;
   if (questMeta.effectivePeriodStart || questMeta.effectivePeriodEnd) {
     const ep = {};
     if (questMeta.effectivePeriodStart) ep.start = questMeta.effectivePeriodStart;

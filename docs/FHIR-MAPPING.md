@@ -270,13 +270,13 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 
 | FHIR field | What happens | Notes |
 |---|---|---|
-| `Questionnaire.derivedFrom[]` | ⚠️ Silent loss | Canonical references to parent questionnaires; not stored |
+| `Questionnaire.derivedFrom[]` | ✅ Covered | Canonical references to parent questionnaires; stored as `questMeta.derivedFrom[]`; editable via **Derived From** collapsible section in Questionnaire Properties modal; round-trip safe |
 
 ### Item-level — not implemented
 
 | FHIR field / extension | Status | Notes |
 |---|---|---|
-| `item.definition` | ⚠️ Silent loss | URL pointing to a StructureDefinition element |
+| `item.definition` | ✅ Covered | URL pointing to a StructureDefinition element; stored as `node._definition`; editable via **Props** button (Item Properties modal); round-trip safe |
 | `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
 | `item.answerValueSet` — external URL | 🔧 URL preserved round-trip | Not resolved to answer options; no FHIR terminology server integration. `#id` contained refs ARE resolved (see Round-Trip Safety) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |

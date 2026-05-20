@@ -407,7 +407,7 @@ function _doReset() {
   questMeta.purpose = ''; questMeta.copyright = '';
   questMeta.approvalDate = ''; questMeta.lastReviewDate = '';
   questMeta.effectivePeriodStart = ''; questMeta.effectivePeriodEnd = '';
-  questMeta.experimental = null; questMeta.language = '';
+  questMeta.experimental = null; questMeta.language = ''; questMeta.derivedFrom = [];
   questMeta._rawContact = null; questMeta._rawUseContext = null; questMeta._rawJurisdiction = null;
   questMeta._rawCode = null;
   // Clear questionnaire-level variables

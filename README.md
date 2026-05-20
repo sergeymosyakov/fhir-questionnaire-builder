@@ -46,7 +46,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/ui/modal-base.js` | Shared modal lifecycle utilities — `initModal`, `setModalTitle`, `openModal`, `closeModal`; used by all draft-pattern modals to eliminate boilerplate |
 | `js/ui/showwhen-modal.js` | Show When centered modal — draft pattern (Apply/Cancel); action button indicator only changes on Apply; searchable question picker portal dropdown |
 | `js/ui/constraint-modal.js` | Constraint edit modal — draft pattern; Apply commits + calls `triggerCalcRecalc()` so preview re-renders; expression field is a resizable `.expr-textarea` |
-| `js/ui/expression-modal.js` | Config-driven modal for `_calculatedExpr` and `_initialExpr` FHIRPath fields — `open(cfg)`; draft pattern; auto-resize textarea; live expr icon |
+| `js/ui/expression-modal.js` | FHIRPath expression modal — `open(cfg)` single-field (groups) and `openDual(...)` dual-field (items: calculatedExpression + initialExpression in one modal with section headers); draft pattern; auto-resize textarea; live expr icon |
 | `js/ui/repeatable-modal.js` | Repeatable edit modal — toggle for `node.repeats` + cardinality card (`_minOccurs` / `_maxOccurs`); Apply trims excess rows when maxOccurs reduced; calls `triggerCalcRecalc()` |
 | `js/ui/patient-ctx.js` | Patient presets dropdown — 5 built-in profiles (Adult Male, Adult Female, Obese Male, Child, Pregnant Female) + Custom…; `Patient ▾` button in toolbar; selecting a preset auto-applies patient vars and calls `reinitForm()`; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
