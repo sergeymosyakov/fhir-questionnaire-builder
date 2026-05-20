@@ -525,6 +525,30 @@
   color: var(--c-err);
 }
 
+/* === displayCategory ========================================================= */
+.lform-item--instructions { background: #eef6ff; border-left: 3px solid var(--c-primary-lt, #a3c4ef); }
+.lform-item--security     { background: #fffbec; border-left: 3px solid #f0b429; }
+.lform-item--help         { background: #f8f8f8; border-left: 3px solid #c0c0c0; }
+.display-cat-icon { flex-shrink: 0; font-size: 14px; line-height: 1; margin-top: 1px; }
+.display-cat-icon--instructions { color: var(--c-primary); }
+.display-cat-icon--security     { color: #c88a00; }
+.display-help-wrap   { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.display-help-toggle {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid #bbb;
+  background: #fff;
+  cursor: pointer;
+  color: var(--c-text-2);
+  transition: background .12s, color .12s, border-color .12s;
+}
+.display-help-toggle--open    { background: var(--c-primary-lt, #d9eafc); color: var(--c-primary); border-color: var(--c-primary); }
+.display-help-content         { display: none; font-size: 12px; color: var(--c-text-2); line-height: 1.5; }
+.display-help-content--open   { display: block; }
+
 /* === Flash animations ======================================================== */
 @keyframes preview-flash {
   0%   { box-shadow: 0 0 0 2px var(--c-primary); background: #e3f2fd; }

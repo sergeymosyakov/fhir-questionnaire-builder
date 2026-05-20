@@ -837,3 +837,36 @@ describe('buildFHIRObject — choiceOrientation', () => {
   });
 });
 
+// ── questionnaire-displayCategory ────────────────────────────────────────────
+describe('buildFHIRObject — displayCategory', () => {
+  const DC_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory';
+
+  it('exports _displayCategory=instructions as valueCodeableConcept extension', () => {
+    const q = build([{ id: 'd1', type: 'item', title: 'Info', itemType: 'display', _displayCategory: 'instructions' }]);
+    const ext = q.item[0].extension || [];
+    const dc = ext.find(e => e.url === DC_URL);
+    expect(dc).toBeDefined();
+    expect(dc.valueCodeableConcept?.coding?.[0]?.code).toBe('instructions');
+  });
+
+  it('exports _displayCategory=security as valueCodeableConcept extension', () => {
+    const q = build([{ id: 'd1', type: 'item', title: 'Warning', itemType: 'display', _displayCategory: 'security' }]);
+    const ext = q.item[0].extension || [];
+    const dc = ext.find(e => e.url === DC_URL);
+    expect(dc?.valueCodeableConcept?.coding?.[0]?.code).toBe('security');
+  });
+
+  it('exports _displayCategory=help as valueCodeableConcept extension', () => {
+    const q = build([{ id: 'd1', type: 'item', title: 'Help text', itemType: 'display', _displayCategory: 'help' }]);
+    const ext = q.item[0].extension || [];
+    const dc = ext.find(e => e.url === DC_URL);
+    expect(dc?.valueCodeableConcept?.coding?.[0]?.code).toBe('help');
+  });
+
+  it('does not emit displayCategory extension when _displayCategory is absent', () => {
+    const q = build([{ id: 'd1', type: 'item', title: 'Plain', itemType: 'display' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.some(e => e.url === DC_URL)).toBe(false);
+  });
+});
+

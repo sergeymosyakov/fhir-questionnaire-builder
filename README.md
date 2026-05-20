@@ -166,6 +166,7 @@ _sliderStep      // number — questionnaire-sliderStepValue ext; renders intege
 _disabledDisplay // 'hidden'|'protected' — when not visible: 'hidden' removes from DOM, 'protected' grays out (default); editable in Show When modal
 _entryFormat     // string — sdc-questionnaire-entryFormat ext; shown as placeholder on text/url/number/quantity controls; editable in Answer Type modal
 _choiceOrientation // 'vertical'|'horizontal' — questionnaire-choiceOrientation ext; controls radio button group layout; editable in Answer Type modal for radio items
+_displayCategory   // 'instructions'|'security'|'help' — questionnaire-displayCategory ext; applies colored bg + icon/help-toggle to display items in preview; editable in Answer Type modal for display items
 ```
 
 ---
@@ -237,6 +238,7 @@ _choiceOrientation // 'vertical'|'horizontal' — questionnaire-choiceOrientatio
 | `questionnaire-sliderStepValue` ext | `node._sliderStep` — renders integer/decimal as range slider; exported back; editable in Answer Type modal |
 | `sdc-questionnaire-entryFormat` ext | `node._entryFormat` — placeholder hint on text/url/number/quantity controls; editable in Answer Type modal |
 | `questionnaire-choiceOrientation` ext | `node._choiceOrientation` — `vertical` / `horizontal` layout for radio button groups; editable in Answer Type modal for `radio` items |
+| `questionnaire-displayCategory` ext | `node._displayCategory` — `instructions` / `security` / `help`; applies colored background + border + icon or collapsible help toggle to `display` items in preview; editable in Answer Type modal for `display` items |
 | `item.disabledDisplay` (R4B) + R4 backport extension | `node._disabledDisplay` — `'hidden'` removes item from DOM when not visible; `'protected'` (default) grays it out; exported back; editable in Show When modal |
 
 Standard extensions preserved on export:

@@ -159,6 +159,14 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation', valueCode: node._choiceOrientation });
   }
 
+  // questionnaire-displayCategory
+  if (node._displayCategory) {
+    ext.push({
+      url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory',
+      valueCodeableConcept: { coding: [{ code: node._displayCategory }] },
+    });
+  }
+
   // questionnaire-minValue / questionnaire-maxValue
   if (node._minValue !== undefined) {
     const isInt = Number.isInteger(node._minValue);

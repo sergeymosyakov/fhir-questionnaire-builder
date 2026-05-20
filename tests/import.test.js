@@ -772,5 +772,39 @@ describe('importFHIR', () => {
       expect(_tree[0]._choiceOrientation).toBeUndefined();
     });
   });
+
+  // ── questionnaire-displayCategory ────────────────────────────────────────
+  describe('_displayCategory', () => {
+    const DC_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory';
+
+    it('reads instructions code into node._displayCategory', () => {
+      importFHIR(minQ([{
+        linkId: 'd1', type: 'display', text: 'Read this',
+        extension: [{ url: DC_URL, valueCodeableConcept: { coding: [{ code: 'instructions' }] } }],
+      }]));
+      expect(_tree[0]._displayCategory).toBe('instructions');
+    });
+
+    it('reads security code into node._displayCategory', () => {
+      importFHIR(minQ([{
+        linkId: 'd1', type: 'display', text: 'Warning',
+        extension: [{ url: DC_URL, valueCodeableConcept: { coding: [{ code: 'security' }] } }],
+      }]));
+      expect(_tree[0]._displayCategory).toBe('security');
+    });
+
+    it('reads help code into node._displayCategory', () => {
+      importFHIR(minQ([{
+        linkId: 'd1', type: 'display', text: 'Need help?',
+        extension: [{ url: DC_URL, valueCodeableConcept: { coding: [{ code: 'help' }] } }],
+      }]));
+      expect(_tree[0]._displayCategory).toBe('help');
+    });
+
+    it('does not set _displayCategory when extension is absent', () => {
+      importFHIR(minQ([{ linkId: 'd1', type: 'display', text: 'Plain display' }]));
+      expect(_tree[0]._displayCategory).toBeUndefined();
+    });
+  });
 });
 

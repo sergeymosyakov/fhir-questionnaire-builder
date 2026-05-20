@@ -117,8 +117,9 @@ export function open(node, typeLink, setActive) {
     draftMinValue:    node._minValue    !== undefined ? String(node._minValue)    : '',
     draftMaxValue:    node._maxValue    !== undefined ? String(node._maxValue)    : '',
     draftSliderStep:  node._sliderStep  !== undefined ? String(node._sliderStep)  : '',
-    draftEntryFormat:  node._entryFormat || '',
-    draftOrientation:  node._choiceOrientation || '',
+    draftEntryFormat:     node._entryFormat || '',
+    draftOrientation:     node._choiceOrientation || '',
+    draftDisplayCategory: node._displayCategory || '',
   };
 
   setModalTitle(_el.title, 'Answer Type', node.title || node.id || 'Item');
@@ -212,6 +213,13 @@ function _apply() {
     delete node._choiceOrientation;
   }
 
+  // displayCategory (display items only)
+  if (node.itemType === 'display' && _pending.draftDisplayCategory) {
+    node._displayCategory = _pending.draftDisplayCategory;
+  } else {
+    delete node._displayCategory;
+  }
+
   // Keep the repeatable link visible/hidden correctly
   const nodeEl = document.querySelector(`[data-node-id="${node.id}"]`);
   const rl = nodeEl?.querySelector('[data-testid="action-repeatable"]');
@@ -260,7 +268,8 @@ function _renderBody(container) {
       unitSection.style.display        = _pending.draftType === 'quantity'    ? 'block' : 'none';
       numericSection.style.display     = (_pending.draftType === 'integer' || _pending.draftType === 'decimal') ? 'block' : 'none';
       placeholderSection.style.display = ENTRY_FORMAT_TYPES.has(_pending.draftType) ? 'block' : 'none';
-      orientationSection.style.display = _pending.draftType === 'radio' ? 'block' : 'none';
+      orientationSection.style.display  = _pending.draftType === 'radio'   ? 'block' : 'none';
+      displayCatSection.style.display   = _pending.draftType === 'display' ? 'block' : 'none';
     },
   });
   typeRow.appendChild(typeLbl);
@@ -546,4 +555,33 @@ function _renderBody(container) {
 
   orientationSection.append(orientLbl, orientSel.el);
   container.appendChild(orientationSection);
+
+  // ── Display category (display items only) ──────────────────────────────────
+  const displayCatSection = document.createElement('div');
+  displayCatSection.className = 'at-modal-sub';
+  displayCatSection.style.display = _pending.draftType === 'display' ? 'block' : 'none';
+
+  const displayCatLbl = document.createElement('div');
+  displayCatLbl.className   = 'at-modal-sub-lbl at-modal-sub-lbl--tip';
+  displayCatLbl.textContent = 'Display category:';
+  displayCatLbl.dataset.tipTitle = 'Display Category';
+  displayCatLbl.dataset.tipBody  = 'Controls the visual style of this display item. "Instructions" shows an info block, "Security" shows a warning notice, "Help" renders as a collapsible help toggle.';
+  displayCatLbl.dataset.tipFhir  = 'item.extension[questionnaire-displayCategory].valueCodeableConcept.coding[0].code';
+  displayCatLbl.dataset.tipSpec  = 'R4';
+
+  const displayCatSel = createCustomSelect({
+    items: [
+      { value: '',             label: '\u2014 none \u2014' },
+      { value: 'instructions', label: 'Instructions (\u2139 info block)' },
+      { value: 'security',     label: 'Security notice (\u26A0 warning)' },
+      { value: 'help',         label: 'Help (? collapsible)' },
+    ],
+    value:     _pending.draftDisplayCategory,
+    className: 'at-modal-sub-sel sc-trigger--full',
+    testid:    'display-category-select',
+    onChange:  v => { _pending.draftDisplayCategory = v; },
+  });
+
+  displayCatSection.append(displayCatLbl, displayCatSel.el);
+  container.appendChild(displayCatSection);
 }

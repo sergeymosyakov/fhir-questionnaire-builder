@@ -220,6 +220,15 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (choiceOrientExt?.valueCode) node._choiceOrientation = choiceOrientExt.valueCode;
 
+  // questionnaire-displayCategory (display items only)
+  if (node.itemType === 'display') {
+    const dcExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory'
+    );
+    const dcCode = dcExt?.valueCodeableConcept?.coding?.[0]?.code;
+    if (dcCode) node._displayCategory = dcCode;
+  }
+
   // questionnaire-minValue / questionnaire-maxValue (SDC R4 extensions)
   const minValExt = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/minValue'

@@ -468,8 +468,9 @@ async function _asyncRender(version) {
     const row = document.createElement('div');
     row.className = 'lform-item';
     row.dataset.previewId = res.node.id;
-
-    // Dedicated nav icon — only this button navigates to the builder node.
+    if (res.node.type === 'item' && res.node.itemType === 'display' && res.node._displayCategory) {
+      row.classList.add('lform-item--' + res.node._displayCategory);
+    }
     if (!isPatient) {
       const navBtn = document.createElement('span');
       navBtn.className = 'preview-nav-btn';
@@ -542,10 +543,37 @@ async function _asyncRender(version) {
     } else if (res.node.type === 'group') {
       label.className = 'group-label';
       label.textContent = res.node.title;
+    } else if (res.node.itemType === 'display' && res.node._displayCategory === 'help') {
+      label.className = 'display-help-wrap';
+      const helpToggle = document.createElement('button');
+      helpToggle.type = 'button';
+      helpToggle.className = 'display-help-toggle';
+      helpToggle.dataset.testid = 'display-help-toggle';
+      helpToggle.textContent = '? Help';
+      const helpContent = document.createElement('span');
+      helpContent.className = 'display-help-content';
+      helpContent.dataset.testid = 'display-help-content';
+      helpContent.textContent = res.node.title;
+      helpToggle.addEventListener('click', () => {
+        const open = helpContent.classList.toggle('display-help-content--open');
+        helpToggle.classList.toggle('display-help-toggle--open', open);
+      });
+      label.append(helpToggle, helpContent);
     } else {
       label.textContent = res.node.title;
     }
     if (res.node._renderStyle) label.style.cssText = res.node._renderStyle;
+    if (res.node.type === 'item' && res.node.itemType === 'display' && res.node._displayCategory && res.node._displayCategory !== 'help') {
+      const catIcon = document.createElement('span');
+      catIcon.className = 'display-cat-icon display-cat-icon--' + res.node._displayCategory;
+      catIcon.dataset.testid = 'display-category-icon';
+      catIcon.textContent = res.node._displayCategory === 'instructions' ? '\u2139' : '\u26A0';
+      catIcon.dataset.tipTitle = res.node._displayCategory === 'instructions' ? 'Instructions' : 'Security notice';
+      catIcon.dataset.tipBody  = 'questionnaire-displayCategory: ' + res.node._displayCategory;
+      catIcon.dataset.tipFhir  = 'item.extension[questionnaire-displayCategory].valueCodeableConcept.coding[0].code';
+      catIcon.dataset.tipSpec  = 'R4';
+      row.appendChild(catIcon);
+    }
     row.appendChild(label);
 
     if (!isPatient && res.node.type === 'group' && !isEmptyGroup) {
