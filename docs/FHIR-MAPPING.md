@@ -234,6 +234,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/ordinalValue` | standard | `_optionOrdinals[code]` (score per answer option; on `answerOption.extension`; displayed in preview; editable in builder) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue` | standard | `_sliderStep` (step for range slider; triggers slider rendering) | Yes |
 | `http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay` | R4 backport | `_disabledDisplay` (hidden/protected; also read from native `item.disabledDisplay` field) | Yes (R4B/R5 backport) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` | SDC | `_entryFormat` (placeholder hint text shown on text/url/number/quantity controls; editable in Answer Type modal) | Yes |
 
 ---
 
@@ -285,7 +286,6 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 | Extension | Status | Notes |
 |---|---|---|
 | `sdc-questionnaire-hidden` | ❌ | Item always hidden from preview but participates in logic; distinct from `enableWhen` |
-| `sdc-questionnaire-entryFormat` | ✅ | Placeholder / entry hint text in the input field — shown as `placeholder` on text/number/url/quantity controls; editable via Answer Type modal |
 | `sdc-questionnaire-answerExpression` | ❌ | Dynamic answer options derived from FHIRPath over form values (no server needed) |
 | `sdc-questionnaire-itemWeight` | ❌ | Per-option weight for scoring (analogous to `ordinalValue` at item level) |
 | `sdc-questionnaire-unitOption[]` | ❌ | Multiple selectable units for `quantity` items |
