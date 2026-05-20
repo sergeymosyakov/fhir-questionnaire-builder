@@ -264,6 +264,11 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointe
 .at-modal-num-inp:focus { outline: none; border-color: var(--c-accent); }
 .at-modal-num-hint  { font-size: 11px; color: var(--c-text-2); margin-top: 4px; }
 
+/* Placeholder hint input (entryFormat) */
+.at-modal-placeholder-inp { font-size: 13px; border: 1px solid var(--c-border, #dde3ec); border-radius: var(--r-sm, 4px); padding: 4px 8px; width: 100%; box-sizing: border-box; }
+.at-modal-placeholder-inp:focus { outline: none; border-color: var(--c-accent); }
+.at-modal-sub-lbl--tip { cursor: help; text-decoration: underline dotted var(--c-text-3, #aab); text-underline-offset: 2px; }
+
 /* Render-as-slider toggle row */
 .at-modal-slider-row {
   display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;

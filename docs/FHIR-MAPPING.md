@@ -285,7 +285,7 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 | Extension | Status | Notes |
 |---|---|---|
 | `sdc-questionnaire-hidden` | ❌ | Item always hidden from preview but participates in logic; distinct from `enableWhen` |
-| `sdc-questionnaire-entryFormat` | ❌ | Placeholder / entry hint text in the input field |
+| `sdc-questionnaire-entryFormat` | ✅ | Placeholder / entry hint text in the input field — shown as `placeholder` on text/number/url/quantity controls; editable via Answer Type modal |
 | `sdc-questionnaire-answerExpression` | ❌ | Dynamic answer options derived from FHIRPath over form values (no server needed) |
 | `sdc-questionnaire-itemWeight` | ❌ | Per-option weight for scoring (analogous to `ordinalValue` at item level) |
 | `sdc-questionnaire-unitOption[]` | ❌ | Multiple selectable units for `quantity` items |

@@ -208,6 +208,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // maxLength
   if (fhirItem.maxLength) node._maxLength = fhirItem.maxLength;
 
+  // sdc-questionnaire-entryFormat
+  const entryFmtExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat'
+  );
+  if (entryFmtExt?.valueString) node._entryFormat = entryFmtExt.valueString;
+
   // questionnaire-minValue / questionnaire-maxValue (SDC R4 extensions)
   const minValExt = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/minValue'

@@ -43,6 +43,7 @@ export function build(node, ctx) {
 
   if (node._minValue !== undefined) el.min = String(node._minValue);
   if (node._maxValue !== undefined) el.max = String(node._maxValue);
+  if (node._entryFormat) el.placeholder = node._entryFormat;
 
   const errMsg = document.createElement('span');
   errMsg.className = 'ctrl-err ctrl-err--ml';

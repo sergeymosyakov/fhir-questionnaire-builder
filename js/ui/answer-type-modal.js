@@ -117,6 +117,7 @@ export function open(node, typeLink, setActive) {
     draftMinValue:    node._minValue    !== undefined ? String(node._minValue)    : '',
     draftMaxValue:    node._maxValue    !== undefined ? String(node._maxValue)    : '',
     draftSliderStep:  node._sliderStep  !== undefined ? String(node._sliderStep)  : '',
+    draftEntryFormat: node._entryFormat || '',
   };
 
   setModalTitle(_el.title, 'Answer Type', node.title || node.id || 'Item');
@@ -195,6 +196,14 @@ function _apply() {
     delete node._sliderStep;
   }
 
+  // entryFormat placeholder hint (text-like types)
+  const _ENTRY_FORMAT_TYPES = new Set(['text','integer','decimal','date','dateTime','time','url','quantity']);
+  if (_ENTRY_FORMAT_TYPES.has(node.itemType) && _pending.draftEntryFormat.trim()) {
+    node._entryFormat = _pending.draftEntryFormat.trim();
+  } else {
+    delete node._entryFormat;
+  }
+
   // Keep the repeatable link visible/hidden correctly
   const nodeEl = document.querySelector(`[data-node-id="${node.id}"]`);
   const rl = nodeEl?.querySelector('[data-testid="action-repeatable"]');
@@ -223,6 +232,8 @@ function _renderBody(container) {
   hint.textContent = 'Sets the FHIR item type. For coded-answer types you can supply a plain options list or link to a contained[] ValueSet.';
   container.appendChild(hint);
 
+  const ENTRY_FORMAT_TYPES = new Set(['text','integer','decimal','date','dateTime','time','url','quantity']);
+
   // ── Type selector ─────────────────────────────────────────────────────────
   const typeRow = document.createElement('div');
   typeRow.className = 'at-modal-type-row';
@@ -236,10 +247,11 @@ function _renderBody(container) {
     testid:    'type-select',
     onChange:  v => {
       _pending.draftType = v;
-      choiceSection.style.display  = CHOICE_TYPES.has(_pending.draftType) ? 'block' : 'none';
-      refSection.style.display     = _pending.draftType === 'reference'   ? 'block' : 'none';
-      unitSection.style.display    = _pending.draftType === 'quantity'    ? 'block' : 'none';
-      numericSection.style.display = (_pending.draftType === 'integer' || _pending.draftType === 'decimal') ? 'block' : 'none';
+      choiceSection.style.display      = CHOICE_TYPES.has(_pending.draftType) ? 'block' : 'none';
+      refSection.style.display         = _pending.draftType === 'reference'   ? 'block' : 'none';
+      unitSection.style.display        = _pending.draftType === 'quantity'    ? 'block' : 'none';
+      numericSection.style.display     = (_pending.draftType === 'integer' || _pending.draftType === 'decimal') ? 'block' : 'none';
+      placeholderSection.style.display = ENTRY_FORMAT_TYPES.has(_pending.draftType) ? 'block' : 'none';
     },
   });
   typeRow.appendChild(typeLbl);
@@ -473,4 +485,28 @@ function _renderBody(container) {
 
   numericSection.append(numericHdr, numericGrid, sliderRow, numericHint);
   container.appendChild(numericSection);
+
+  // ── Placeholder hint (entryFormat) ────────────────────────────────────────
+  const placeholderSection = document.createElement('div');
+  placeholderSection.className = 'at-modal-sub';
+  placeholderSection.style.display = ENTRY_FORMAT_TYPES.has(_pending.draftType) ? 'block' : 'none';
+
+  const placeholderLbl = document.createElement('div');
+  placeholderLbl.className   = 'at-modal-sub-lbl at-modal-sub-lbl--tip';
+  placeholderLbl.textContent = 'Placeholder hint (entryFormat):';
+  placeholderLbl.dataset.tipTitle = 'Entry Format';
+  placeholderLbl.dataset.tipBody  = 'Text shown inside the input field before the user types. Guides the expected format (e.g. MM/DD/YYYY, (999) 999-9999). Exported as the sdc-questionnaire-entryFormat SDC extension.';
+  placeholderLbl.dataset.tipFhir  = 'item.extension[sdc-questionnaire-entryFormat].valueString';
+  placeholderLbl.dataset.tipSpec  = 'SDC';
+
+  const placeholderInp = document.createElement('input');
+  placeholderInp.type        = 'text';
+  placeholderInp.className   = 'at-modal-placeholder-inp';
+  placeholderInp.dataset.testid = 'entry-format-input';
+  placeholderInp.value       = _pending.draftEntryFormat;
+  placeholderInp.placeholder = 'e.g. MM/DD/YYYY, (999) 999-9999';
+  placeholderInp.oninput = () => { _pending.draftEntryFormat = placeholderInp.value; };
+
+  placeholderSection.append(placeholderLbl, placeholderInp);
+  container.appendChild(placeholderSection);
 }

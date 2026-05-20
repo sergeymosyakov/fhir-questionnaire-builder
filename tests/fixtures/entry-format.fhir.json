@@ -1,0 +1,47 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "entry-format-test",
+  "title": "Entry Format Test",
+  "status": "draft",
+  "subjectType": ["Patient"],
+  "item": [
+    {
+      "linkId": "text-with-format",
+      "text": "Full name",
+      "type": "string",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat",
+          "valueString": "Last, First Middle"
+        }
+      ]
+    },
+    {
+      "linkId": "int-with-format",
+      "text": "Phone number",
+      "type": "integer",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat",
+          "valueString": "(###) ###-####"
+        }
+      ]
+    },
+    {
+      "linkId": "url-with-format",
+      "text": "Website",
+      "type": "url",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat",
+          "valueString": "https://example.com"
+        }
+      ]
+    },
+    {
+      "linkId": "text-no-format",
+      "text": "Notes",
+      "type": "string"
+    }
+  ]
+}

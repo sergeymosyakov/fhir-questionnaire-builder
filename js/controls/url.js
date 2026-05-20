@@ -8,7 +8,7 @@ export function build(node, ctx) {
   const el = document.createElement('textarea');
   el.className = 'ctrl-input--text';
   el.rows = 1;
-  el.placeholder = 'https://';
+  el.placeholder = node._entryFormat || 'https://';
   el.value = getValue(node.id) !== undefined ? getValue(node.id) : '';
 
   const autoResize = () => {

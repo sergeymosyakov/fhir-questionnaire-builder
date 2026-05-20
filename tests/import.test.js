@@ -717,4 +717,30 @@ describe('importFHIR', () => {
       expect(_tree[0]._initialValues).toEqual(['3', '7']);
     });
   });
+
+  // ── sdc-questionnaire-entryFormat ────────────────────────────────────────
+  describe('_entryFormat', () => {
+    const EF_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat';
+
+    it('reads entryFormat valueString into node._entryFormat', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'string', text: 'Date',
+        extension: [{ url: EF_URL, valueString: 'MM/DD/YYYY' }],
+      }]));
+      expect(_tree[0]._entryFormat).toBe('MM/DD/YYYY');
+    });
+
+    it('does not set _entryFormat when extension is absent', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
+      expect(_tree[0]._entryFormat).toBeUndefined();
+    });
+
+    it('does not set _entryFormat when entryFormat extension has no valueString', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'integer', text: 'Q',
+        extension: [{ url: EF_URL }],
+      }]));
+      expect(_tree[0]._entryFormat).toBeUndefined();
+    });
+  });
 });

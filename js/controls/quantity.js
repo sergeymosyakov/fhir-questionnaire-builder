@@ -74,7 +74,7 @@ export function build(node, ctx) {
   const numInput = document.createElement('input');
   numInput.type        = 'number';
   numInput.step        = 'any';
-  numInput.placeholder = '0';
+  numInput.placeholder = node._entryFormat || '0';
   numInput.value       = initVal;
   numInput.className   = 'qty-num-input';
 

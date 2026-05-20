@@ -4,7 +4,7 @@
    =========================================================================== */
 .rich-tooltip {
   position: fixed;
-  z-index: 9999;
+  z-index: 10500;
   display: none;
   max-width: 280px;
   min-width: 180px;

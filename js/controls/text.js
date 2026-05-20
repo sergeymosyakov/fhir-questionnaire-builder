@@ -11,6 +11,7 @@ export function build(node, ctx) {
   el.value = getValue(node.id) !== undefined ? getValue(node.id) : '';
 
   if (node._maxLength) el.maxLength = node._maxLength;
+  if (node._entryFormat) el.placeholder = node._entryFormat;
 
   const autoResize = () => {
     el.style.height = 'auto';

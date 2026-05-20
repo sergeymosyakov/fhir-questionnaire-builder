@@ -108,8 +108,8 @@ All samples live in `sampledata/` and can be loaded via the **Questionnaires** b
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **403 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — e2e test suite (`tests/e2e/`); **254 tests** across 18 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **409 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Playwright** — e2e test suite (`tests/e2e/`); **264 tests** across 19 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
 
@@ -164,6 +164,7 @@ _maxValue        // number — questionnaire-maxValue ext; error badge + blocks 
 _optionOrdinals  // object — map of option code → numeric ordinalValue; shown as (N) badge in radio/select; editable in Answer Type modal (code=Label=score); round-trip safe
 _sliderStep      // number — questionnaire-sliderStepValue ext; renders integer/decimal as <input type="range"> slider; editable in Answer Type modal
 _disabledDisplay // 'hidden'|'protected' — when not visible: 'hidden' removes from DOM, 'protected' grays out (default); editable in Show When modal
+_entryFormat     // string — sdc-questionnaire-entryFormat ext; shown as placeholder on text/url/number/quantity controls; editable in Answer Type modal
 ```
 
 ---
@@ -233,6 +234,7 @@ _disabledDisplay // 'hidden'|'protected' — when not visible: 'hidden' removes 
 | `questionnaire-maxValue` ext | `node._maxValue` — error badge + blocks PASS when violated |
 | `ordinalValue` ext on `answerOption.extension` (or `valueCoding.extension` fallback) | `node._optionOrdinals[code]` — numeric score per option; shown as `(N)` badge in radio/select; editable in Answer Type modal via `code=Label=score` syntax |
 | `questionnaire-sliderStepValue` ext | `node._sliderStep` — renders integer/decimal as range slider; exported back; editable in Answer Type modal |
+| `sdc-questionnaire-entryFormat` ext | `node._entryFormat` — placeholder hint on text/url/number/quantity controls; editable in Answer Type modal |
 | `item.disabledDisplay` (R4B) + R4 backport extension | `node._disabledDisplay` — `'hidden'` removes item from DOM when not visible; `'protected'` (default) grays it out; exported back; editable in Show When modal |
 
 Standard extensions preserved on export:

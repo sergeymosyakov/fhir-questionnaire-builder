@@ -784,3 +784,29 @@ describe('buildFHIRObject — multi-initial for repeating items', () => {
     expect(q.item[0].initial[1]).toEqual({ valueInteger: 7 });
   });
 });
+
+// ── sdc-questionnaire-entryFormat ────────────────────────────────────────────
+describe('buildFHIRObject — entryFormat', () => {
+  const EF_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat';
+
+  it('exports _entryFormat as sdc-questionnaire-entryFormat extension', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _entryFormat: 'MM/DD/YYYY' }]);
+    const ext = q.item[0].extension || [];
+    const ef = ext.find(e => e.url === EF_URL);
+    expect(ef).toBeDefined();
+    expect(ef.valueString).toBe('MM/DD/YYYY');
+  });
+
+  it('does not emit entryFormat extension when _entryFormat is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.some(e => e.url === EF_URL)).toBe(false);
+  });
+
+  it('exports entryFormat for non-text types such as integer', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'integer', _entryFormat: '###' }]);
+    const ext = q.item[0].extension || [];
+    const ef = ext.find(e => e.url === EF_URL);
+    expect(ef?.valueString).toBe('###');
+  });
+});

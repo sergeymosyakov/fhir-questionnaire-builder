@@ -149,6 +149,11 @@ function nodeToFHIRItem(node) {
   // maxLength (text/url/open-choice types)
   if (node._maxLength) fhirItem.maxLength = node._maxLength;
 
+  // sdc-questionnaire-entryFormat
+  if (node._entryFormat) {
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat', valueString: node._entryFormat });
+  }
+
   // questionnaire-minValue / questionnaire-maxValue
   if (node._minValue !== undefined) {
     const isInt = Number.isInteger(node._minValue);
