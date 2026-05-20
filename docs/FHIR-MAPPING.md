@@ -93,7 +93,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 
 | FHIR `item.type` | `itemType` | Notes |
 |---|---|---|
-| `boolean` | `checkbox` | `required: true` → tristate UX: indeterminate = unanswered (fails), checked = true (passes), unchecked = false (passes) |
+| `boolean` | `checkbox` | Tristate UX: indeterminate = unanswered, checked = `true`, unchecked = `false`; for `required` items only `undefined` fails validation |
 | `integer` | `integer` | Stored as `valueInteger` in QR; use `.answer.valueInteger` in FHIRPath constraints |
 | `decimal` | `decimal` | Stored as `valueDecimal` in QR; use `.answer.valueDecimal` in FHIRPath constraints |
 | `quantity` | `quantity` | UCUM unit dropdown; `questionnaire-unit` extension read/written |

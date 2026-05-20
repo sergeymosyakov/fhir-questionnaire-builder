@@ -8,9 +8,9 @@ export function build(node, ctx) {
   el.type = 'checkbox';
 
   const initialVal = getValue(node.id);
-  // Required boolean with no answer yet → tristate: indeterminate = "not answered"
-  // First click → true (Yes), subsequent clicks toggle true ↔ false normally.
-  if (initialVal === undefined && node.mandatory !== false) {
+  // All boolean checkboxes: indeterminate = "not yet answered" regardless of required/optional.
+  // First click → true (Yes), subsequent clicks toggle true ↔ false.
+  if (initialVal === undefined) {
     el.indeterminate = true;
     el.dataset.testid = 'checkbox-indeterminate';
   } else {
