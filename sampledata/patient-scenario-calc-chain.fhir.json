@@ -183,7 +183,7 @@
                      "item":  [
                                   {
                                       "linkId":  "rs-age",
-                                      "text":  "Age risk points  (age\u003c40в†’1, 40вЂ“59в†’2, в‰Ґ60в†’3)",
+                                      "text":  "Age risk points  (age<40→1, 40–59→2, ≥60→3)",
                                       "type":  "decimal",
                                       "readOnly":  true,
                                       "extension":  [
@@ -198,7 +198,7 @@
                                   },
                                   {
                                       "linkId":  "rs-bmi",
-                                      "text":  "BMI risk points  (BMI\u003c30в†’1, 30вЂ“34в†’2, 35вЂ“39в†’3, в‰Ґ40в†’4)",
+                                      "text":  "BMI risk points  (BMI<30→1, 30–34→2, 35–39→3, ≥40→4)",
                                       "type":  "decimal",
                                       "readOnly":  true,
                                       "extension":  [
@@ -213,7 +213,7 @@
                                   },
                                   {
                                       "linkId":  "rs-smoker",
-                                      "text":  "Smoking risk points  (non-smokerв†’0, smokerв†’2)",
+                                      "text":  "Smoking risk points  (non-smoker→0, smoker→2)",
                                       "type":  "decimal",
                                       "readOnly":  true,
                                       "extension":  [
@@ -228,7 +228,7 @@
                                   },
                                   {
                                       "linkId":  "rs-pregnancy",
-                                      "text":  "Pregnancy risk points  (not pregnantв†’0, pregnantв†’2)",
+                                      "text":  "Pregnancy risk points  (not pregnant→0, pregnant→2)",
                                       "type":  "decimal",
                                       "readOnly":  true,
                                       "extension":  [
@@ -260,7 +260,7 @@
                  },
                  {
                      "linkId":  "risk-low",
-                     "text":  "рџџў Risk Level: LOW (score в‰¤ 2)",
+                     "text":  "🟢 Risk Level: LOW (score ≤ 2)",
                      "type":  "group",
                      "extension":  [
                                        {
@@ -296,7 +296,7 @@
                  },
                  {
                      "linkId":  "risk-moderate",
-                     "text":  "рџџЎ Risk Level: MODERATE (score 3вЂ“5)",
+                     "text":  "🟡 Risk Level: MODERATE (score 3–5)",
                      "type":  "group",
                      "extension":  [
                                        {
@@ -347,7 +347,7 @@
                  },
                  {
                      "linkId":  "risk-high",
-                     "text":  "рџ”ґ Risk Level: HIGH (score в‰Ґ 6)",
+                     "text":  "🔴 Risk Level: HIGH (score ≥ 6)",
                      "type":  "group",
                      "extension":  [
                                        {

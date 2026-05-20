@@ -137,7 +137,7 @@
                                   {
                                       "linkId":  "q-years-obese",
                                       "type":  "integer",
-                                      "text":  "Years with BMI в‰Ґ 35",
+                                      "text":  "Years with BMI ≥ 35",
                                       "required":  true
                                   },
                                   {

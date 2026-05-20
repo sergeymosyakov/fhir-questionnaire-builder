@@ -134,7 +134,7 @@
                  },
                  {
                      "linkId":  "metabolic-risk",
-                     "text":  "Metabolic Risk (BMI в‰Ґ 30)",
+                     "text":  "Metabolic Risk (BMI ≥ 30)",
                      "type":  "group",
                      "extension":  [
                                        {
@@ -148,7 +148,7 @@
                      "item":  [
                                   {
                                       "linkId":  "met-flag",
-                                      "text":  "Metabolic risk flag вЂ” anaesthetic and post-op complications elevated with BMI в‰Ґ 30.",
+                                      "text":  "Metabolic risk flag – anaesthetic and post-op complications elevated with BMI ≥ 30.",
                                       "type":  "display"
                                   },
                                   {

@@ -145,7 +145,7 @@
                                   },
                                   {
                                       "linkId":  "pain-notes-hidden",
-                                      "text":  "Additional Pain Notes (hidden when pain в‰¤ 3; remove from view)",
+                                      "text":  "Additional Pain Notes (hidden when pain ≤ 3; remove from view)",
                                       "type":  "string",
                                       "enableWhen":  [
                                                          {
@@ -177,7 +177,7 @@
                                   },
                                   {
                                       "linkId":  "followup-notes",
-                                      "text":  "Follow-up Notes (protected when not needed, hidden when score в‰¤ 6)",
+                                      "text":  "Follow-up Notes (protected when not needed, hidden when score ≤ 6)",
                                       "type":  "string",
                                       "enableWhen":  [
                                                          {
@@ -189,7 +189,7 @@
                                   },
                                   {
                                       "linkId":  "specialist-referral",
-                                      "text":  "Specialist Referral Notes (hidden when score в‰¤ 6)",
+                                      "text":  "Specialist Referral Notes (hidden when score ≤ 6)",
                                       "type":  "text",
                                       "enableWhen":  [
                                                          {

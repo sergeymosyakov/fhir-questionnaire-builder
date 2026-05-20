@@ -141,7 +141,7 @@
                  },
                  {
                      "linkId":  "adult-section",
-                     "text":  "Adult Pathway (age в‰Ґ 18)",
+                     "text":  "Adult Pathway (age ≥ 18)",
                      "type":  "group",
                      "extension":  [
                                        {
@@ -155,7 +155,7 @@
                      "item":  [
                                   {
                                       "linkId":  "adult-obese",
-                                      "text":  "Obese (BMI в‰Ґ 30)",
+                                      "text":  "Obese (BMI ≥ 30)",
                                       "type":  "boolean",
                                       "readOnly":  true,
                                       "extension":  [
@@ -170,7 +170,7 @@
                                   },
                                   {
                                       "linkId":  "adult-severe-obese",
-                                      "text":  "Severely obese (BMI в‰Ґ 35)",
+                                      "text":  "Severely obese (BMI ≥ 35)",
                                       "type":  "boolean",
                                       "readOnly":  true,
                                       "extension":  [
@@ -185,7 +185,7 @@
                                   },
                                   {
                                       "linkId":  "adult-candidate",
-                                      "text":  "Bariatric surgery candidate (BMI в‰Ґ 40)",
+                                      "text":  "Bariatric surgery candidate (BMI ≥ 40)",
                                       "type":  "boolean",
                                       "readOnly":  true,
                                       "extension":  [
