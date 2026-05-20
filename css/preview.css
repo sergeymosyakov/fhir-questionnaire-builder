@@ -63,6 +63,7 @@
   padding: 2px 8px;
   border-radius: 10px;
   flex-shrink: 0;
+  margin-top: 3px;
   cursor: help;
 }
 .preview-logic-and { background: #e3edfc; color: var(--c-primary); }
@@ -84,6 +85,7 @@
   padding: 1px 7px;
   white-space: nowrap;
   flex-shrink: 0;
+  margin-top: 3px;
   font-style: italic;
 }
 
@@ -100,6 +102,7 @@
   text-overflow: ellipsis;
   max-width: 280px;
   flex-shrink: 1;
+  margin-top: 3px;
 }
 .preview-condition-waiting {
   background: #fff8e1 !important;
@@ -117,6 +120,7 @@
   padding: 1px 8px;
   white-space: nowrap;
   flex-shrink: 0;
+  margin-top: 3px;
   cursor: default;
 }
 .preview-constraint-badge--fail {
@@ -135,6 +139,7 @@
   padding: 1px 8px;
   white-space: nowrap;
   flex-shrink: 0;
+  margin-top: 3px;
   cursor: default;
 }
 .preview-meta-badge--init {
@@ -291,6 +296,7 @@
   border-radius: 20px;
   padding: 1px 8px;
   flex-shrink: 0;
+  margin-top: 3px;
   cursor: pointer;
   white-space: nowrap;
   transition: background .15s;
@@ -307,6 +313,7 @@
   border-radius: 20px;
   padding: 1px 8px;
   flex-shrink: 0;
+  margin-top: 3px;
   white-space: nowrap;
 }
 
@@ -381,6 +388,13 @@
   color: #6b7280;
 }
 .patient-view .preview-required-star { font-size: 14px; }
+.patient-view .preview-linkid,
+.patient-view .preview-prefix,
+.patient-view .preview-logic-badge,
+.patient-view .preview-optional-badge,
+.patient-view .preview-condition-hint,
+.patient-view .preview-constraint-badge,
+.patient-view .preview-meta-badge { margin-top: 1px; }
 .patient-view .preview-nav-btn { display: none; }
 .patient-view .preview-prefix {
   font-size: 14px;
