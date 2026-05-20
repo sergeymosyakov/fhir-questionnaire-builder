@@ -500,6 +500,7 @@ async function _asyncRender(version) {
 
     const idTag = document.createElement('span');
     idTag.className = 'preview-linkid';
+    idTag.dataset.testid = 'preview-linkid';
     idTag.textContent = res.node.id;
     const _it = res.node.itemType;
     const _valExample = _it === 'checkbox' ? 'true / false'

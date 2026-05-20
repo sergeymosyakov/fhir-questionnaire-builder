@@ -1,0 +1,24 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "patient-view-test",
+  "title": "Patient View Test",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "q1",
+      "text": "Do you have symptoms?",
+      "type": "boolean"
+    },
+    {
+      "linkId": "q2",
+      "text": "Describe your symptoms",
+      "type": "string",
+      "enableWhen": [{ "question": "q1", "operator": "=", "answerBoolean": true }]
+    },
+    {
+      "linkId": "q3",
+      "text": "Name",
+      "type": "string"
+    }
+  ]
+}

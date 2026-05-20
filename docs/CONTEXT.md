@@ -156,7 +156,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **`effect()`** — rebuilds the right panel (preview) on reactive state changes
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
-- **Playwright** — E2E test suite; **237 tests** across 17 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
+- **Playwright** — E2E test suite; **254 tests** across 18 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
 - **`ctx` object** — `{ renderTree, renderNode, tree, formTick, collapsed }` passed down to renderers and panels
 - **Vitest** — unit test suite for pure-function modules; **393 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
