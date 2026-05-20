@@ -53,6 +53,7 @@ function buildQRItem(fhirItem, values) {
     }
     if (t === 'integer')                     return { valueInteger: parseInt(v) || 0 };
     if (t === 'decimal' || t === 'quantity') return { valueDecimal: parseFloat(v) || 0 };
+    if (t === 'reference')  return { valueReference: { reference: String(v?.reference || '') } };
     return { valueString: String(v) };
   }
 

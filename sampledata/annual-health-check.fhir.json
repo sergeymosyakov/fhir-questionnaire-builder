@@ -1,0 +1,252 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "annual-health-check",
+  "url": "http://example.org/fhir/Questionnaire/annual-health-check",
+  "version": "1.0",
+  "title": "Annual Health Check",
+  "status": "active",
+  "publisher": "Example Health Organisation",
+  "description": "Comprehensive annual health assessment covering vital signs, lifestyle factors, current medications, wellbeing screening, and clinician follow-up. Demonstrates: version, publisher, prefix, item.code[], minValue/maxValue, rendering-style, calculatedExpression (BMI), sliderStepValue, repeats+minOccurs/maxOccurs, ordinalValue, enableWhen, initial[], maxLength, and questionnaire-constraint.",
+  "subjectType": ["Patient"],
+  "item": [
+    {
+      "linkId": "vitals",
+      "text": "Vital Signs",
+      "type": "group",
+      "prefix": "1",
+      "_text": {
+        "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/rendering-style", "valueString": "font-weight:bold;font-size:1.05em" }]
+      },
+      "item": [
+        {
+          "linkId": "height",
+          "text": "Height (cm)",
+          "type": "decimal",
+          "prefix": "1.1",
+          "required": true,
+          "code": [{ "system": "http://loinc.org", "code": "8302-2", "display": "Body height" }],
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/minValue", "valueDecimal": 50 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/maxValue", "valueDecimal": 250 }
+          ]
+        },
+        {
+          "linkId": "weight",
+          "text": "Weight (kg)",
+          "type": "decimal",
+          "prefix": "1.2",
+          "required": true,
+          "code": [{ "system": "http://loinc.org", "code": "29463-7", "display": "Body weight" }],
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/minValue", "valueDecimal": 10 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/maxValue", "valueDecimal": 300 }
+          ]
+        },
+        {
+          "linkId": "bmi",
+          "text": "BMI (auto-calculated)",
+          "type": "decimal",
+          "prefix": "1.3",
+          "readOnly": true,
+          "code": [{ "system": "http://loinc.org", "code": "39156-5", "display": "Body mass index (BMI)" }],
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "(%resource.item.where(linkId='vitals').item.where(linkId='weight').answer.valueDecimal * 10000 / (%resource.item.where(linkId='vitals').item.where(linkId='height').answer.valueDecimal * %resource.item.where(linkId='vitals').item.where(linkId='height').answer.valueDecimal)).round(1)"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "systolic",
+          "text": "Systolic blood pressure (mmHg)",
+          "type": "integer",
+          "prefix": "1.4",
+          "code": [{ "system": "http://loinc.org", "code": "8480-6", "display": "Systolic blood pressure" }],
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/minValue", "valueInteger": 60 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/maxValue", "valueInteger": 300 }
+          ]
+        },
+        {
+          "linkId": "diastolic",
+          "text": "Diastolic blood pressure (mmHg)",
+          "type": "integer",
+          "prefix": "1.5",
+          "code": [{ "system": "http://loinc.org", "code": "8462-4", "display": "Diastolic blood pressure" }],
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/minValue", "valueInteger": 40 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/maxValue", "valueInteger": 200 }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "lifestyle",
+      "text": "Lifestyle",
+      "type": "group",
+      "prefix": "2",
+      "_text": {
+        "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/rendering-style", "valueString": "font-weight:bold;font-size:1.05em" }]
+      },
+      "item": [
+        {
+          "linkId": "smoker",
+          "text": "Do you currently smoke?",
+          "type": "boolean",
+          "prefix": "2.1",
+          "required": true
+        },
+        {
+          "linkId": "cigs",
+          "text": "Cigarettes per day",
+          "type": "integer",
+          "prefix": "2.2",
+          "enableWhen": [{ "question": "smoker", "operator": "=", "answerBoolean": true }],
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/minValue", "valueInteger": 1 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/maxValue", "valueInteger": 100 }
+          ]
+        },
+        {
+          "linkId": "alcohol",
+          "text": "Alcohol units per week",
+          "type": "integer",
+          "prefix": "2.3",
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/minValue", "valueInteger": 0 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/maxValue", "valueInteger": 70 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue", "valueInteger": 1 }
+          ]
+        },
+        {
+          "linkId": "exercise",
+          "text": "Days of moderate exercise per week (30+ minutes)",
+          "type": "integer",
+          "prefix": "2.4",
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/minValue", "valueInteger": 0 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/maxValue", "valueInteger": 7 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue", "valueInteger": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "medications",
+      "text": "Current Medications",
+      "type": "string",
+      "prefix": "3",
+      "repeats": true,
+      "maxLength": 100,
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs", "valueInteger": 0 },
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs", "valueInteger": 10 }
+      ]
+    },
+    {
+      "linkId": "wellbeing",
+      "text": "Wellbeing Screening",
+      "type": "group",
+      "prefix": "4",
+      "_text": {
+        "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/rendering-style", "valueString": "font-weight:bold;font-size:1.05em" }]
+      },
+      "item": [
+        {
+          "linkId": "mood",
+          "text": "Over the past 2 weeks, how often have you had little interest or pleasure in doing things?",
+          "type": "choice",
+          "prefix": "4.1",
+          "required": true,
+          "code": [{ "system": "http://loinc.org", "code": "44250-9", "display": "PHQ-9 item 1 — little interest or pleasure" }],
+          "answerOption": [
+            {
+              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 0 }],
+              "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" }
+            },
+            {
+              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 1 }],
+              "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" }
+            },
+            {
+              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 2 }],
+              "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" }
+            },
+            {
+              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 3 }],
+              "valueCoding": { "system": "http://loinc.org", "code": "LA6571-9", "display": "Nearly every day" }
+            }
+          ]
+        },
+        {
+          "linkId": "pain",
+          "text": "Current pain level (0 = no pain, 10 = worst imaginable)",
+          "type": "integer",
+          "prefix": "4.2",
+          "code": [{ "system": "http://loinc.org", "code": "72514-3", "display": "Pain severity 0-10 numeric rating" }],
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/minValue", "valueInteger": 0 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/maxValue", "valueInteger": 10 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue", "valueInteger": 1 }
+          ]
+        },
+        {
+          "linkId": "pain-location",
+          "text": "Pain location and character",
+          "type": "text",
+          "prefix": "4.3",
+          "maxLength": 300,
+          "enableWhen": [{ "question": "pain", "operator": ">", "answerInteger": 0 }]
+        }
+      ]
+    },
+    {
+      "linkId": "followup",
+      "text": "Clinician Follow-up",
+      "type": "group",
+      "prefix": "5",
+      "_text": {
+        "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/rendering-style", "valueString": "font-weight:bold;font-size:1.05em" }]
+      },
+      "item": [
+        {
+          "linkId": "referral",
+          "text": "Referral required?",
+          "type": "boolean",
+          "prefix": "5.1",
+          "initial": [{ "valueBoolean": false }]
+        },
+        {
+          "linkId": "notes",
+          "text": "Clinical notes",
+          "type": "text",
+          "prefix": "5.2",
+          "maxLength": 2000,
+          "_text": {
+            "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/rendering-style", "valueString": "color:#1e40af;font-style:italic" }]
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
+              "extension": [
+                { "url": "key",      "valueId": "notes-referral-warning" },
+                { "url": "severity", "valueCode": "warning" },
+                { "url": "human",    "valueString": "Clinical notes are recommended when a referral is required" },
+                {
+                  "url": "expression",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "%resource.item.where(linkId='followup').item.where(linkId='referral').answer.valueBoolean = false or %resource.item.where(linkId='followup').item.where(linkId='notes').answer.exists()"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

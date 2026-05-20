@@ -446,6 +446,8 @@ async function _importAndValidate(data, fileName) {
   await renderTreeAsync((done, total) => progress.update(done, total));
   expandAll();
   progress.hide();
+  document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
+  document.querySelector('.right-panel-body')?.scrollTo({ top: 0 });
   _setFileName(fileName || '');
   if (issues.length > 0) validateModal.show('Import — Validation Report', issues, 'import', { onNavigate: _navigateToNode });
 }

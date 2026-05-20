@@ -156,6 +156,24 @@ describe('importQRAnswers — all value types', () => {
   });
 });
 
+// ── time and reference value types ───────────────────────────────────────────
+
+describe('importQRAnswers — time and reference types', () => {
+  const tree = makeTree('q-time', 'q-ref');
+
+  it('loads a valueTime string', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q-time', answer: [{ valueTime: '14:30:00' }] }]), values, tree);
+    expect(values['q-time']).toBe('14:30:00');
+  });
+
+  it('loads a valueReference as { reference } object', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q-ref', answer: [{ valueReference: { reference: 'Practitioner/456' } }] }]), values, tree);
+    expect(values['q-ref']).toEqual({ reference: 'Practitioner/456' });
+  });
+});
+
 // ── unmatched linkIds ─────────────────────────────────────────────────────────
 
 describe('importQRAnswers — unmatched linkIds', () => {

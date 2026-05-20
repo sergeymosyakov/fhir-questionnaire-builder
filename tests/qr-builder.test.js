@@ -233,6 +233,12 @@ describe('buildQR — type to value[x] mapping', () => {
     const qr = buildQR({ item: [{ linkId: 'q', type: 'choice' }] }, { q: 'opt1' });
     expect(qr.item[0].answer[0].valueCoding.code).toBe('opt1');
   });
+
+  it('reference type → valueReference', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'reference' }] }, { q: { reference: 'Practitioner/123' } });
+    expect(qr.item[0].answer[0].valueReference).toEqual({ reference: 'Practitioner/123' });
+    expect(qr.item[0].answer[0].valueString).toBeUndefined();
+  });
 });
 
 // ── ordinalValue in QR answers ────────────────────────────────────────────────

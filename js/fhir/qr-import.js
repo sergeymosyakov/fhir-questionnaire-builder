@@ -18,9 +18,11 @@ function _flattenQR(items, out = {}) {
         if (ans.valueCoding   !== undefined) return ans.valueCoding.code;
         if (ans.valueDecimal  !== undefined) return ans.valueDecimal;
         if (ans.valueInteger  !== undefined) return ans.valueInteger;
-        if (ans.valueDate     !== undefined) return ans.valueDate;
-        if (ans.valueDateTime !== undefined) return ans.valueDateTime;
-        if (ans.valueString   !== undefined) return ans.valueString;
+        if (ans.valueDate      !== undefined) return ans.valueDate;
+        if (ans.valueDateTime  !== undefined) return ans.valueDateTime;
+        if (ans.valueTime      !== undefined) return ans.valueTime;
+        if (ans.valueReference !== undefined) return { reference: ans.valueReference.reference || '' };
+        if (ans.valueString    !== undefined) return ans.valueString;
         return undefined;
       };
       out[item.linkId] = extractVal(item.answer[0]);

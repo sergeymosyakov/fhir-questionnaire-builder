@@ -65,7 +65,10 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` fills patient fields, `enableWhenExpression` gates pathways |
 | `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields, risk groups by `enableWhenExpression` |
 | `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline |
-| `sampledata/sdc-variables-demo.fhir.json` | SDC Variables demo — BMI calculator with `%weightKg`, `%heightM`, `%bmiCalc` variables |
+| `sampledata/annual-health-check.fhir.json` | Annual Health Check — comprehensive FHIR feature coverage: version, publisher, prefix, item.code[] (LOINC), minValue/maxValue, rendering-style, sliderStepValue, repeats+minOccurs/maxOccurs, ordinalValue (PHQ-9 mood), enableWhen, initial[], maxLength, calculatedExpression (BMI), questionnaire-constraint |
+| `sampledata/sdc-variables-demo.fhir.json` | BMI & Body Composition Assessment — SDC questionnaire-level variables + calculatedExpression (BMI); LOINC codes on items |
+| `sampledata/valueset-demo.fhir.json` | Lifestyle & Social History Assessment — contained ValueSets; local `#vs-id` refs and external URL; rendering-style group header; prefix and code[] on items |
+| `sampledata/slider-disabled-demo.fhir.json` | Pain & Symptom Assessment — numeric sliders, disabledDisplay hidden/protected, ordinalValue radio, LOINC codes, rendering-style section headers |
 | `tests/fixtures/` | Frozen FHIR samples used by e2e tests — never modified by hand; keeps tests stable when sampledata evolves |
 | `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
 | `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
@@ -84,7 +87,11 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 | `ussg-fht.fhir.json` | 49 | 0 | Deep nesting (depth 5). US Surgeon General Family Health History Tool. Good for testing tree collapse/expand and navigation. No enableWhen — purely structural. |
 | `prowl-ss.fhir.json` | 44 | 0 | Flat structure (depth 1). PROWL-SS post-operative pain assessment. Likert-scale radio groups and display items. |
 | `phq-9.fhir.json` | 11 | 0 | Minimal — PHQ-9 depression screening. Fast to load; good baseline smoke-test. |
-| `reference-example.fhir.json` | 4 | 0 | Demonstrates the `reference` item type — Patient, Practitioner, Encounter references with `questionnaire-referenceResource` extension. |
+| `annual-health-check.fhir.json` | 18 | yes | **Full-feature reference.** version/publisher, prefix, LOINC item.code[], minValue/maxValue on vitals + sliders, rendering-style bold section headers + blue italic label, sliderStepValue (alcohol/exercise/pain), repeats+maxOccurs (medications), ordinalValue (PHQ-9 mood), enableWhen (smoking subq, pain details), initial[] (referral=false), calcExpr (BMI), questionnaire-constraint (warning when referral set but no notes). |
+| `reference-example.fhir.json` | 7 | 0 | Care referral request. Demonstrates the `reference` item type — Patient, Practitioner, Encounter references with `questionnaire-referenceResource`. Urgency choice (SNOMED code), reason and history text fields. |
+| `sdc-variables-demo.fhir.json` | 4 | yes | BMI & Body Composition Assessment. SDC questionnaire-level variables (`%weightKg`, `%heightM`, `%bmiCalc`) and `calculatedExpression`. LOINC codes, minValue/maxValue, readOnly calculated BMI display. |
+| `valueset-demo.fhir.json` | 4 | 0 | Lifestyle & Social History Assessment. Contained ValueSets (SNOMED smoking status, LOINC alcohol frequency, custom activity level); `choice` (dropdown), `choice` (radio), `open-choice`, external `answerValueSet` URL. rendering-style on group header; prefix and code[] on items. |
+| `slider-disabled-demo.fhir.json` | ~12 | yes | Pain & Symptom Assessment. Demonstrates sliders (integer/decimal with sliderStepValue), disabledDisplay (hidden vs protected), ordinalValue on radio options, LOINC codes, rendering-style section headers. Conditional sections shown only above pain threshold. |
 | `1776102565767-...json` | — | — | Real-world production snapshot. Use for regression testing after refactors. |
 | `patient-scenario-eligibility.fhir.json` | — | — | Load + select "Adult Male" preset + Re-init. Verifies `initialExpression` fills patient fields; `enableWhenExpression` shows/hides Adult, Pediatric, Pregnancy, Smoker sections. |
 | `patient-scenario-risk.fhir.json` | — | — | Pre-op risk assessment. ReadOnly fields filled via `initialExpression`; risk sections gated by `enableWhenExpression`. |
@@ -101,7 +108,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **333 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **336 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **Playwright** — e2e test suite (`tests/e2e/`); **214 tests** across 16 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
@@ -326,7 +333,7 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ### Tests
 ```powershell
-npm test             # unit tests — single run (Vitest, 333 tests)
+npm test             # unit tests — single run (Vitest, 336 tests)
 npm run test:watch   # unit tests — watch mode
 npm run test:e2e     # e2e tests — Playwright/Chromium (214 tests, requires Chromium installed)
 npm run test:e2e:ui  # e2e tests — Playwright UI mode

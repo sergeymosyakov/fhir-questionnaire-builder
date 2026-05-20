@@ -71,8 +71,8 @@ export const questContained = reactive([]);
 // Item types that have form-value validation logic in the preview.
 // CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
 // NONEMPTY_TYPES: mandatory → value must be non-empty (subset, excludes url/attachment).
-export const CHECKABLE_TYPES = new Set(['checkbox', 'text', 'number', 'date', 'url', 'attachment', 'open-choice', 'decimal', 'integer', 'quantity', 'reference', 'radio', 'select']);
-export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date', 'open-choice', 'decimal', 'integer', 'radio', 'select']);
+export const CHECKABLE_TYPES = new Set(['checkbox', 'text', 'number', 'date', 'dateTime', 'time', 'url', 'attachment', 'open-choice', 'decimal', 'integer', 'quantity', 'reference', 'radio', 'select']);
+export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date', 'dateTime', 'time', 'open-choice', 'decimal', 'integer', 'radio', 'select']);
 
 // ── ID factory ────────────────────────────────────────────────────────────────
 let _seq = 1;
