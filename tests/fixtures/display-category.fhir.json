@@ -1,0 +1,47 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "display-category-test",
+  "title": "Display Category Test",
+  "status": "draft",
+  "subjectType": ["Patient"],
+  "item": [
+    {
+      "linkId": "dc-instructions",
+      "text": "Please complete all required fields before submitting.",
+      "type": "display",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory",
+          "valueCodeableConcept": { "coding": [{ "code": "instructions" }] }
+        }
+      ]
+    },
+    {
+      "linkId": "dc-security",
+      "text": "Your data is encrypted and stored securely.",
+      "type": "display",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory",
+          "valueCodeableConcept": { "coding": [{ "code": "security" }] }
+        }
+      ]
+    },
+    {
+      "linkId": "dc-help",
+      "text": "Enter your date of birth in YYYY-MM-DD format.",
+      "type": "display",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory",
+          "valueCodeableConcept": { "coding": [{ "code": "help" }] }
+        }
+      ]
+    },
+    {
+      "linkId": "dc-plain",
+      "text": "A plain display item with no category.",
+      "type": "display"
+    }
+  ]
+}
