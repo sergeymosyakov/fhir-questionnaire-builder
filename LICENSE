@@ -1,12 +1,35 @@
-Copyright (c) 2026 Sergey Mosyakov
+Copyright (c) 2026 Sergey Mosyakov, Roko Labs Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software to use, copy, modify, merge, publish, and distribute it,
-subject to the following condition:
+of this software and associated documentation files (the "Software"), to use,
+copy, modify, merge, publish, and distribute the Software for NON-COMMERCIAL
+purposes only, subject to the following conditions:
 
-The above copyright notice and this permission notice — including the author's
-name "Sergey Mosyakov" — shall be included in all copies or substantial
-portions of the software, and any public use, publication, or distribution
-must visibly credit the original author.
+1. Attribution required. Any copy, distribution, derivative work, or public
+   use of the Software — in whole or in part — must include a clearly visible
+   credit in the form:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+       Based on FHIR Questionnaire Builder by Sergey Mosyakov / Roko Labs Inc.
+       https://github.com/sergeymosyakov/fhir-questionnaire-builder
+
+   This credit must appear in the source code, documentation, README, or
+   user-facing "About" section of the product, as applicable.
+
+2. Non-commercial use only. Use of the Software for commercial purposes —
+   including but not limited to incorporation into a paid product or service,
+   SaaS offerings, or internal tooling at a for-profit organization — requires
+   prior written permission from Roko Labs Inc.
+
+   To request a commercial license, contact: info@rokolabs.com
+   https://www.rokolabs.com
+
+3. No sublicensing without attribution. You may not re-license or resell the
+   Software without preserving the above attribution.
+
+4. No warranty. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+   IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
+
+

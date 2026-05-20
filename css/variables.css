@@ -30,6 +30,17 @@
 .quest-meta-card-status[data-status="active"]  { color: #16a34a; }
 .quest-meta-card-status[data-status="draft"]   { color: #ca8a04; }
 .quest-meta-card-status[data-status="retired"] { color: #dc2626; }
+.quest-meta-card-experimental {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 8px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.quest-meta-card-experimental[data-exp="true"]  { color: #d97706; }
+.quest-meta-card-experimental[data-exp="false"] { color: #16a34a; }
 .quest-meta-edit-btn {
   margin-left: auto;
   font-size: 11px;

@@ -1,1014 +1,1015 @@
-{
-  "resourceType": "Questionnaire",
-  "id": "bariatric-pre-auth-extended",
-  "title": "Bariatric Surgery Pre-Authorization — Extended Assessment",
-  "status": "draft",
-  "copyright": "© 2026 Sergey Mosyakov",
-  "subjectType": [
-    "Patient"
-  ],
-  "date": "2026-05-08",
-  "description": "Comprehensive prior authorization questionnaire for bariatric surgery candidates. Covers patient demographics, BMI calculation, comorbidities, prior treatment attempts, psychological assessment, medical clearances, and surgical preferences.",
-  "item": [
-    {
-      "linkId": "g-patient",
-      "type": "group",
-      "text": "Patient Information",
-      "item": [
-        {
-          "linkId": "q-name",
-          "type": "string",
-          "text": "Full Legal Name",
-          "required": true
-        },
-        {
-          "linkId": "q-dob",
-          "type": "date",
-          "text": "Date of Birth",
-          "required": true
-        },
-        {
-          "linkId": "q-sex",
-          "type": "choice",
-          "text": "Biological Sex",
-          "required": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
-              "valueCodeableConcept": {
-                "coding": [
-                  {
-                    "system": "http://hl7.org/fhir/questionnaire-item-control",
-                    "code": "radio-button"
-                  }
-                ]
-              }
-            }
-          ],
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "male",
-                "display": "Male"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "female",
-                "display": "Female"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "other",
-                "display": "Other"
-              }
-            }
-          ]
-        },
-        {
-          "linkId": "q-height",
-          "type": "decimal",
-          "text": "Height (inches)",
-          "required": true
-        },
-        {
-          "linkId": "q-weight",
-          "type": "decimal",
-          "text": "Current Weight (lbs)",
-          "required": true
-        },
-        {
-          "linkId": "q-bmi",
-          "type": "decimal",
-          "text": "Calculated BMI (auto)",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-              "valueExpression": {
-                "language": "text/fhirpath",
-                "expression": "(%resource.item.where(linkId='g-patient').item.where(linkId='q-weight').answer.valueDecimal * 703) / (%resource.item.where(linkId='g-patient').item.where(linkId='q-height').answer.valueDecimal * %resource.item.where(linkId='g-patient').item.where(linkId='q-height').answer.valueDecimal)"
-              }
-            }
-          ]
-        },
-        {
-          "linkId": "q-phone",
-          "type": "string",
-          "text": "Phone Number",
-          "required": true
-        },
-        {
-          "linkId": "q-email",
-          "type": "string",
-          "text": "Email Address"
-        },
-        {
-          "linkId": "q-insurance-id",
-          "type": "string",
-          "text": "Insurance Member ID",
-          "required": true
-        },
-        {
-          "linkId": "q-insurance-grp",
-          "type": "string",
-          "text": "Insurance Group Number"
-        }
-      ]
-    },
-    {
-      "linkId": "g-weight-history",
-      "type": "group",
-      "text": "Weight History",
-      "item": [
-        {
-          "linkId": "q-max-weight",
-          "type": "decimal",
-          "text": "Maximum Lifetime Weight (lbs)",
-          "required": true
-        },
-        {
-          "linkId": "q-max-weight-age",
-          "type": "integer",
-          "text": "Age at Maximum Weight"
-        },
-        {
-          "linkId": "q-years-obese",
-          "type": "integer",
-          "text": "Years with BMI ≥ 35",
-          "required": true
-        },
-        {
-          "linkId": "q-weight-trend",
-          "type": "choice",
-          "text": "Weight Trend (past 12 months)",
-          "required": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
-              "valueCodeableConcept": {
-                "coding": [
-                  {
-                    "system": "http://hl7.org/fhir/questionnaire-item-control",
-                    "code": "radio-button"
-                  }
-                ]
-              }
-            }
-          ],
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "gaining",
-                "display": "Gaining"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "stable",
-                "display": "Stable"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "losing",
-                "display": "Losing"
-              }
-            }
-          ]
-        },
-        {
-          "linkId": "q-family-obesity",
-          "type": "boolean",
-          "text": "Family history of obesity (first-degree relative)?"
-        },
-        {
-          "linkId": "q-family-obesity-who",
-          "type": "string",
-          "text": "Which family members?",
-          "enableWhen": [
-            {
-              "question": "q-family-obesity",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-childhood-obesity",
-          "type": "boolean",
-          "text": "Were you overweight as a child?"
-        }
-      ]
-    },
-    {
-      "linkId": "g-comorbidities",
-      "type": "group",
-      "text": "Comorbidities",
-      "item": [
-        {
-          "linkId": "q-has-diabetes",
-          "type": "boolean",
-          "text": "Type 2 Diabetes or Pre-diabetes?"
-        },
-        {
-          "linkId": "q-diabetes-type",
-          "type": "choice",
-          "text": "Diabetes Classification",
-          "enableWhen": [
-            {
-              "question": "q-has-diabetes",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ],
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "type2",
-                "display": "Type 2 Diabetes"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "pre",
-                "display": "Pre-diabetes"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "type1",
-                "display": "Type 1 Diabetes"
-              }
-            }
-          ]
-        },
-        {
-          "linkId": "q-diabetes-hba1c",
-          "type": "decimal",
-          "text": "Most Recent HbA1c (%)",
-          "enableWhen": [
-            {
-              "question": "q-has-diabetes",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-diabetes-meds",
-          "type": "string",
-          "text": "Current Diabetes Medications",
-          "enableWhen": [
-            {
-              "question": "q-has-diabetes",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-has-htn",
-          "type": "boolean",
-          "text": "Hypertension?"
-        },
-        {
-          "linkId": "q-htn-bp",
-          "type": "string",
-          "text": "Most Recent Blood Pressure Reading",
-          "enableWhen": [
-            {
-              "question": "q-has-htn",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-htn-meds",
-          "type": "string",
-          "text": "Blood Pressure Medications",
-          "enableWhen": [
-            {
-              "question": "q-has-htn",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-has-sleep-apnea",
-          "type": "boolean",
-          "text": "Obstructive Sleep Apnea?"
-        },
-        {
-          "linkId": "q-sleep-apnea-severity",
-          "type": "choice",
-          "text": "Severity",
-          "enableWhen": [
-            {
-              "question": "q-has-sleep-apnea",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ],
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
-              "valueCodeableConcept": {
-                "coding": [
-                  {
-                    "system": "http://hl7.org/fhir/questionnaire-item-control",
-                    "code": "radio-button"
-                  }
-                ]
-              }
-            }
-          ],
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "mild",
-                "display": "Mild"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "moderate",
-                "display": "Moderate"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "severe",
-                "display": "Severe"
-              }
-            }
-          ]
-        },
-        {
-          "linkId": "q-uses-cpap",
-          "type": "boolean",
-          "text": "Currently using CPAP/BiPAP?",
-          "enableWhen": [
-            {
-              "question": "q-has-sleep-apnea",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-has-gerd",
-          "type": "boolean",
-          "text": "GERD / Acid Reflux?"
-        },
-        {
-          "linkId": "q-has-joint-pain",
-          "type": "boolean",
-          "text": "Obesity-related joint pain or osteoarthritis?"
-        },
-        {
-          "linkId": "q-joint-location",
-          "type": "string",
-          "text": "Affected joints",
-          "enableWhen": [
-            {
-              "question": "q-has-joint-pain",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-has-nafld",
-          "type": "boolean",
-          "text": "Non-Alcoholic Fatty Liver Disease (NAFLD)?"
-        },
-        {
-          "linkId": "q-has-depression",
-          "type": "boolean",
-          "text": "Depression or Anxiety (diagnosed)?"
-        },
-        {
-          "linkId": "q-other-conditions",
-          "type": "text",
-          "text": "Other significant medical conditions"
-        }
-      ]
-    },
-    {
-      "linkId": "g-prior-treatment",
-      "type": "group",
-      "text": "Prior Weight Loss Treatment",
-      "item": [
-        {
-          "linkId": "q-diet-count",
-          "type": "integer",
-          "text": "Number of supervised diet attempts (past 5 years)",
-          "required": true
-        },
-        {
-          "linkId": "q-diet-months",
-          "type": "integer",
-          "text": "Total months of supervised diet participation",
-          "required": true
-        },
-        {
-          "linkId": "q-tried-meds",
-          "type": "boolean",
-          "text": "Tried prescription weight loss medications?"
-        },
-        {
-          "linkId": "q-meds-list",
-          "type": "string",
-          "text": "Medications (name and duration)",
-          "enableWhen": [
-            {
-              "question": "q-tried-meds",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-meds-outcome",
-          "type": "choice",
-          "text": "Medication outcome",
-          "enableWhen": [
-            {
-              "question": "q-tried-meds",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ],
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
-              "valueCodeableConcept": {
-                "coding": [
-                  {
-                    "system": "http://hl7.org/fhir/questionnaire-item-control",
-                    "code": "radio-button"
-                  }
-                ]
-              }
-            }
-          ],
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "no-effect",
-                "display": "No significant effect"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "temporary",
-                "display": "Temporary loss, weight regained"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "side-effects",
-                "display": "Stopped due to side effects"
-              }
-            }
-          ]
-        },
-        {
-          "linkId": "q-tried-programs",
-          "type": "boolean",
-          "text": "Completed a medically supervised weight loss program?"
-        },
-        {
-          "linkId": "q-programs-detail",
-          "type": "text",
-          "text": "Program name, provider, dates",
-          "enableWhen": [
-            {
-              "question": "q-tried-programs",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-prior-bariatric",
-          "type": "boolean",
-          "text": "Previous bariatric surgery?"
-        },
-        {
-          "linkId": "q-prior-surgery-type",
-          "type": "choice",
-          "text": "Previous procedure",
-          "enableWhen": [
-            {
-              "question": "q-prior-bariatric",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ],
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "band",
-                "display": "Adjustable Gastric Band"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "sleeve",
-                "display": "Sleeve Gastrectomy"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "bypass",
-                "display": "Roux-en-Y Gastric Bypass"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "other",
-                "display": "Other"
-              }
-            }
-          ]
-        },
-        {
-          "linkId": "q-prior-surgery-date",
-          "type": "date",
-          "text": "Date of previous surgery",
-          "enableWhen": [
-            {
-              "question": "q-prior-bariatric",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-prior-surgery-complication",
-          "type": "boolean",
-          "text": "Complications from previous surgery?",
-          "enableWhen": [
-            {
-              "question": "q-prior-bariatric",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-complication-detail",
-          "type": "text",
-          "text": "Describe complications",
-          "enableWhen": [
-            {
-              "question": "q-prior-surgery-complication",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "linkId": "g-psychological",
-      "type": "group",
-      "text": "Psychological Assessment",
-      "item": [
-        {
-          "linkId": "q-psych-done",
-          "type": "boolean",
-          "text": "Psychological evaluation completed?",
-          "required": true
-        },
-        {
-          "linkId": "q-psych-date",
-          "type": "date",
-          "text": "Evaluation date",
-          "enableWhen": [
-            {
-              "question": "q-psych-done",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-psych-result",
-          "type": "choice",
-          "text": "Evaluation outcome",
-          "enableWhen": [
-            {
-              "question": "q-psych-done",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ],
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
-              "valueCodeableConcept": {
-                "coding": [
-                  {
-                    "system": "http://hl7.org/fhir/questionnaire-item-control",
-                    "code": "radio-button"
-                  }
-                ]
-              }
-            }
-          ],
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "cleared",
-                "display": "Cleared for surgery"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "conditional",
-                "display": "Cleared with conditions"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "deferred",
-                "display": "Surgery deferred pending treatment"
-              }
-            }
-          ]
-        },
-        {
-          "linkId": "q-psych-conditions",
-          "type": "string",
-          "text": "Conditions or requirements noted",
-          "enableWhen": [
-            {
-              "question": "q-psych-result",
-              "operator": "=",
-              "answerString": "conditional"
-            }
-          ]
-        },
-        {
-          "linkId": "q-psych-report-url",
-          "type": "url",
-          "text": "Link to psychological report",
-          "enableWhen": [
-            {
-              "question": "q-psych-done",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-eating-disorder",
-          "type": "boolean",
-          "text": "History of eating disorder (binge eating, bulimia, anorexia)?"
-        },
-        {
-          "linkId": "q-eating-disorder-type",
-          "type": "string",
-          "text": "Describe eating disorder history",
-          "enableWhen": [
-            {
-              "question": "q-eating-disorder",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-eating-disorder-treatment",
-          "type": "boolean",
-          "text": "Received treatment for eating disorder?",
-          "enableWhen": [
-            {
-              "question": "q-eating-disorder",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-substance-history",
-          "type": "boolean",
-          "text": "History of substance use disorder?"
-        },
-        {
-          "linkId": "q-substance-detail",
-          "type": "string",
-          "text": "Substance(s) and last use date",
-          "enableWhen": [
-            {
-              "question": "q-substance-history",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-substance-free-months",
-          "type": "integer",
-          "text": "Months since last use",
-          "enableWhen": [
-            {
-              "question": "q-substance-history",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-support-system",
-          "type": "choice",
-          "text": "Primary support system",
-          "required": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
-              "valueCodeableConcept": {
-                "coding": [
-                  {
-                    "system": "http://hl7.org/fhir/questionnaire-item-control",
-                    "code": "radio-button"
-                  }
-                ]
-              }
-            }
-          ],
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "spouse",
-                "display": "Spouse / Partner"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "family",
-                "display": "Family members"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "friends",
-                "display": "Friends"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "support-group",
-                "display": "Support group"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "none",
-                "display": "None identified"
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "linkId": "g-clearances",
-      "type": "group",
-      "text": "Medical Clearances",
-      "item": [
-        {
-          "linkId": "q-pcp-clearance",
-          "type": "boolean",
-          "text": "Primary Care Physician clearance obtained?",
-          "required": true
-        },
-        {
-          "linkId": "q-pcp-name",
-          "type": "string",
-          "text": "PCP Name",
-          "enableWhen": [
-            {
-              "question": "q-pcp-clearance",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-pcp-date",
-          "type": "date",
-          "text": "PCP clearance date",
-          "enableWhen": [
-            {
-              "question": "q-pcp-clearance",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-pcp-doc",
-          "type": "attachment",
-          "text": "Upload PCP clearance letter",
-          "enableWhen": [
-            {
-              "question": "q-pcp-clearance",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-cardio-clearance",
-          "type": "boolean",
-          "text": "Cardiologist clearance obtained?"
-        },
-        {
-          "linkId": "q-cardio-name",
-          "type": "string",
-          "text": "Cardiologist Name",
-          "enableWhen": [
-            {
-              "question": "q-cardio-clearance",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-cardio-date",
-          "type": "date",
-          "text": "Cardiology clearance date",
-          "enableWhen": [
-            {
-              "question": "q-cardio-clearance",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-cardio-doc",
-          "type": "attachment",
-          "text": "Upload cardiology clearance",
-          "enableWhen": [
-            {
-              "question": "q-cardio-clearance",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-endocrine-eval",
-          "type": "boolean",
-          "text": "Endocrinology evaluation completed?"
-        },
-        {
-          "linkId": "q-endocrine-date",
-          "type": "date",
-          "text": "Endocrinology evaluation date",
-          "enableWhen": [
-            {
-              "question": "q-endocrine-eval",
-              "operator": "=",
-              "answerBoolean": true
-            }
-          ]
-        },
-        {
-          "linkId": "q-labs-date",
-          "type": "date",
-          "text": "Date of most recent comprehensive labs",
-          "required": true
-        },
-        {
-          "linkId": "q-labs-doc",
-          "type": "attachment",
-          "text": "Upload lab results"
-        }
-      ]
-    },
-    {
-      "linkId": "g-surgery-auth",
-      "type": "group",
-      "text": "Surgery Preference & Authorization",
-      "item": [
-        {
-          "linkId": "q-procedure",
-          "type": "choice",
-          "text": "Preferred Surgical Procedure",
-          "required": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
-              "valueCodeableConcept": {
-                "coding": [
-                  {
-                    "system": "http://hl7.org/fhir/questionnaire-item-control",
-                    "code": "radio-button"
-                  }
-                ]
-              }
-            }
-          ],
-          "answerOption": [
-            {
-              "valueCoding": {
-                "code": "sleeve",
-                "display": "Sleeve Gastrectomy (VSG)"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "bypass",
-                "display": "Roux-en-Y Gastric Bypass (RYGB)"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "band",
-                "display": "Adjustable Gastric Band (AGB)"
-              }
-            },
-            {
-              "valueCoding": {
-                "code": "bpd-ds",
-                "display": "Biliopancreatic Diversion with Duodenal Switch (BPD/DS)"
-              }
-            }
-          ]
-        },
-        {
-          "linkId": "q-gerd-notice",
-          "type": "display",
-          "text": "⚠️ Note: Sleeve gastrectomy may worsen GERD. Consider discussing Roux-en-Y Bypass with your surgeon.",
-          "enableWhen": [
-            {
-              "question": "q-procedure",
-              "operator": "=",
-              "answerString": "sleeve"
-            }
-          ]
-        },
-        {
-          "linkId": "q-preferred-hospital",
-          "type": "string",
-          "text": "Preferred Hospital or Surgery Center"
-        },
-        {
-          "linkId": "q-preferred-surgeon",
-          "type": "string",
-          "text": "Preferred Surgeon Name"
-        },
-        {
-          "linkId": "q-target-date",
-          "type": "date",
-          "text": "Target Surgery Date"
-        },
-        {
-          "linkId": "q-auth-number",
-          "type": "string",
-          "text": "Insurance Pre-Authorization Number",
-          "required": true
-        },
-        {
-          "linkId": "q-auth-url",
-          "type": "url",
-          "text": "Insurance Authorization Portal URL"
-        },
-        {
-          "linkId": "q-auth-doc",
-          "type": "attachment",
-          "text": "Upload Insurance Authorization Letter",
-          "required": true
-        },
-        {
-          "linkId": "q-referral-doc",
-          "type": "attachment",
-          "text": "Upload Physician Referral",
-          "required": true
-        },
-        {
-          "linkId": "q-consent",
-          "type": "boolean",
-          "text": "I confirm all information provided is accurate and complete to the best of my knowledge.",
-          "required": true
-        },
-        {
-          "linkId": "q-consent-date",
-          "type": "date",
-          "text": "Date of Acknowledgment",
-          "required": true
-        }
-      ]
-    }
-  ]
+﻿{
+    "resourceType":  "Questionnaire",
+    "id":  "bariatric-pre-auth-extended",
+    "title":  "Bariatric Surgery Pre-Authorization вЂ” Extended Assessment",
+    "status":  "draft",
+    "experimental":  true,
+    "copyright":  "В© 2026 Sergey Mosyakov",
+    "subjectType":  [
+                        "Patient"
+                    ],
+    "date":  "2026-05-08",
+    "description":  "Comprehensive prior authorization questionnaire for bariatric surgery candidates. Covers patient demographics, BMI calculation, comorbidities, prior treatment attempts, psychological assessment, medical clearances, and surgical preferences.",
+    "item":  [
+                 {
+                     "linkId":  "g-patient",
+                     "type":  "group",
+                     "text":  "Patient Information",
+                     "item":  [
+                                  {
+                                      "linkId":  "q-name",
+                                      "type":  "string",
+                                      "text":  "Full Legal Name",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-dob",
+                                      "type":  "date",
+                                      "text":  "Date of Birth",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-sex",
+                                      "type":  "choice",
+                                      "text":  "Biological Sex",
+                                      "required":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                                                            "valueCodeableConcept":  {
+                                                                                         "coding":  [
+                                                                                                        {
+                                                                                                            "system":  "http://hl7.org/fhir/questionnaire-item-control",
+                                                                                                            "code":  "radio-button"
+                                                                                                        }
+                                                                                                    ]
+                                                                                     }
+                                                        }
+                                                    ],
+                                      "answerOption":  [
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "male",
+                                                                                   "display":  "Male"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "female",
+                                                                                   "display":  "Female"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "other",
+                                                                                   "display":  "Other"
+                                                                               }
+                                                           }
+                                                       ]
+                                  },
+                                  {
+                                      "linkId":  "q-height",
+                                      "type":  "decimal",
+                                      "text":  "Height (inches)",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-weight",
+                                      "type":  "decimal",
+                                      "text":  "Current Weight (lbs)",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-bmi",
+                                      "type":  "decimal",
+                                      "text":  "Calculated BMI (auto)",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "(%resource.item.where(linkId=\u0027g-patient\u0027).item.where(linkId=\u0027q-weight\u0027).answer.valueDecimal * 703) / (%resource.item.where(linkId=\u0027g-patient\u0027).item.where(linkId=\u0027q-height\u0027).answer.valueDecimal * %resource.item.where(linkId=\u0027g-patient\u0027).item.where(linkId=\u0027q-height\u0027).answer.valueDecimal)"
+                                                                                }
+                                                        }
+                                                    ]
+                                  },
+                                  {
+                                      "linkId":  "q-phone",
+                                      "type":  "string",
+                                      "text":  "Phone Number",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-email",
+                                      "type":  "string",
+                                      "text":  "Email Address"
+                                  },
+                                  {
+                                      "linkId":  "q-insurance-id",
+                                      "type":  "string",
+                                      "text":  "Insurance Member ID",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-insurance-grp",
+                                      "type":  "string",
+                                      "text":  "Insurance Group Number"
+                                  }
+                              ]
+                 },
+                 {
+                     "linkId":  "g-weight-history",
+                     "type":  "group",
+                     "text":  "Weight History",
+                     "item":  [
+                                  {
+                                      "linkId":  "q-max-weight",
+                                      "type":  "decimal",
+                                      "text":  "Maximum Lifetime Weight (lbs)",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-max-weight-age",
+                                      "type":  "integer",
+                                      "text":  "Age at Maximum Weight"
+                                  },
+                                  {
+                                      "linkId":  "q-years-obese",
+                                      "type":  "integer",
+                                      "text":  "Years with BMI в‰Ґ 35",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-weight-trend",
+                                      "type":  "choice",
+                                      "text":  "Weight Trend (past 12 months)",
+                                      "required":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                                                            "valueCodeableConcept":  {
+                                                                                         "coding":  [
+                                                                                                        {
+                                                                                                            "system":  "http://hl7.org/fhir/questionnaire-item-control",
+                                                                                                            "code":  "radio-button"
+                                                                                                        }
+                                                                                                    ]
+                                                                                     }
+                                                        }
+                                                    ],
+                                      "answerOption":  [
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "gaining",
+                                                                                   "display":  "Gaining"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "stable",
+                                                                                   "display":  "Stable"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "losing",
+                                                                                   "display":  "Losing"
+                                                                               }
+                                                           }
+                                                       ]
+                                  },
+                                  {
+                                      "linkId":  "q-family-obesity",
+                                      "type":  "boolean",
+                                      "text":  "Family history of obesity (first-degree relative)?"
+                                  },
+                                  {
+                                      "linkId":  "q-family-obesity-who",
+                                      "type":  "string",
+                                      "text":  "Which family members?",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-family-obesity",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-childhood-obesity",
+                                      "type":  "boolean",
+                                      "text":  "Were you overweight as a child?"
+                                  }
+                              ]
+                 },
+                 {
+                     "linkId":  "g-comorbidities",
+                     "type":  "group",
+                     "text":  "Comorbidities",
+                     "item":  [
+                                  {
+                                      "linkId":  "q-has-diabetes",
+                                      "type":  "boolean",
+                                      "text":  "Type 2 Diabetes or Pre-diabetes?"
+                                  },
+                                  {
+                                      "linkId":  "q-diabetes-type",
+                                      "type":  "choice",
+                                      "text":  "Diabetes Classification",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-has-diabetes",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ],
+                                      "answerOption":  [
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "type2",
+                                                                                   "display":  "Type 2 Diabetes"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "pre",
+                                                                                   "display":  "Pre-diabetes"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "type1",
+                                                                                   "display":  "Type 1 Diabetes"
+                                                                               }
+                                                           }
+                                                       ]
+                                  },
+                                  {
+                                      "linkId":  "q-diabetes-hba1c",
+                                      "type":  "decimal",
+                                      "text":  "Most Recent HbA1c (%)",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-has-diabetes",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-diabetes-meds",
+                                      "type":  "string",
+                                      "text":  "Current Diabetes Medications",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-has-diabetes",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-has-htn",
+                                      "type":  "boolean",
+                                      "text":  "Hypertension?"
+                                  },
+                                  {
+                                      "linkId":  "q-htn-bp",
+                                      "type":  "string",
+                                      "text":  "Most Recent Blood Pressure Reading",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-has-htn",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-htn-meds",
+                                      "type":  "string",
+                                      "text":  "Blood Pressure Medications",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-has-htn",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-has-sleep-apnea",
+                                      "type":  "boolean",
+                                      "text":  "Obstructive Sleep Apnea?"
+                                  },
+                                  {
+                                      "linkId":  "q-sleep-apnea-severity",
+                                      "type":  "choice",
+                                      "text":  "Severity",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-has-sleep-apnea",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ],
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                                                            "valueCodeableConcept":  {
+                                                                                         "coding":  [
+                                                                                                        {
+                                                                                                            "system":  "http://hl7.org/fhir/questionnaire-item-control",
+                                                                                                            "code":  "radio-button"
+                                                                                                        }
+                                                                                                    ]
+                                                                                     }
+                                                        }
+                                                    ],
+                                      "answerOption":  [
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "mild",
+                                                                                   "display":  "Mild"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "moderate",
+                                                                                   "display":  "Moderate"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "severe",
+                                                                                   "display":  "Severe"
+                                                                               }
+                                                           }
+                                                       ]
+                                  },
+                                  {
+                                      "linkId":  "q-uses-cpap",
+                                      "type":  "boolean",
+                                      "text":  "Currently using CPAP/BiPAP?",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-has-sleep-apnea",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-has-gerd",
+                                      "type":  "boolean",
+                                      "text":  "GERD / Acid Reflux?"
+                                  },
+                                  {
+                                      "linkId":  "q-has-joint-pain",
+                                      "type":  "boolean",
+                                      "text":  "Obesity-related joint pain or osteoarthritis?"
+                                  },
+                                  {
+                                      "linkId":  "q-joint-location",
+                                      "type":  "string",
+                                      "text":  "Affected joints",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-has-joint-pain",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-has-nafld",
+                                      "type":  "boolean",
+                                      "text":  "Non-Alcoholic Fatty Liver Disease (NAFLD)?"
+                                  },
+                                  {
+                                      "linkId":  "q-has-depression",
+                                      "type":  "boolean",
+                                      "text":  "Depression or Anxiety (diagnosed)?"
+                                  },
+                                  {
+                                      "linkId":  "q-other-conditions",
+                                      "type":  "text",
+                                      "text":  "Other significant medical conditions"
+                                  }
+                              ]
+                 },
+                 {
+                     "linkId":  "g-prior-treatment",
+                     "type":  "group",
+                     "text":  "Prior Weight Loss Treatment",
+                     "item":  [
+                                  {
+                                      "linkId":  "q-diet-count",
+                                      "type":  "integer",
+                                      "text":  "Number of supervised diet attempts (past 5 years)",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-diet-months",
+                                      "type":  "integer",
+                                      "text":  "Total months of supervised diet participation",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-tried-meds",
+                                      "type":  "boolean",
+                                      "text":  "Tried prescription weight loss medications?"
+                                  },
+                                  {
+                                      "linkId":  "q-meds-list",
+                                      "type":  "string",
+                                      "text":  "Medications (name and duration)",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-tried-meds",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-meds-outcome",
+                                      "type":  "choice",
+                                      "text":  "Medication outcome",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-tried-meds",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ],
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                                                            "valueCodeableConcept":  {
+                                                                                         "coding":  [
+                                                                                                        {
+                                                                                                            "system":  "http://hl7.org/fhir/questionnaire-item-control",
+                                                                                                            "code":  "radio-button"
+                                                                                                        }
+                                                                                                    ]
+                                                                                     }
+                                                        }
+                                                    ],
+                                      "answerOption":  [
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "no-effect",
+                                                                                   "display":  "No significant effect"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "temporary",
+                                                                                   "display":  "Temporary loss, weight regained"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "side-effects",
+                                                                                   "display":  "Stopped due to side effects"
+                                                                               }
+                                                           }
+                                                       ]
+                                  },
+                                  {
+                                      "linkId":  "q-tried-programs",
+                                      "type":  "boolean",
+                                      "text":  "Completed a medically supervised weight loss program?"
+                                  },
+                                  {
+                                      "linkId":  "q-programs-detail",
+                                      "type":  "text",
+                                      "text":  "Program name, provider, dates",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-tried-programs",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-prior-bariatric",
+                                      "type":  "boolean",
+                                      "text":  "Previous bariatric surgery?"
+                                  },
+                                  {
+                                      "linkId":  "q-prior-surgery-type",
+                                      "type":  "choice",
+                                      "text":  "Previous procedure",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-prior-bariatric",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ],
+                                      "answerOption":  [
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "band",
+                                                                                   "display":  "Adjustable Gastric Band"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "sleeve",
+                                                                                   "display":  "Sleeve Gastrectomy"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "bypass",
+                                                                                   "display":  "Roux-en-Y Gastric Bypass"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "other",
+                                                                                   "display":  "Other"
+                                                                               }
+                                                           }
+                                                       ]
+                                  },
+                                  {
+                                      "linkId":  "q-prior-surgery-date",
+                                      "type":  "date",
+                                      "text":  "Date of previous surgery",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-prior-bariatric",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-prior-surgery-complication",
+                                      "type":  "boolean",
+                                      "text":  "Complications from previous surgery?",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-prior-bariatric",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-complication-detail",
+                                      "type":  "text",
+                                      "text":  "Describe complications",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-prior-surgery-complication",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  }
+                              ]
+                 },
+                 {
+                     "linkId":  "g-psychological",
+                     "type":  "group",
+                     "text":  "Psychological Assessment",
+                     "item":  [
+                                  {
+                                      "linkId":  "q-psych-done",
+                                      "type":  "boolean",
+                                      "text":  "Psychological evaluation completed?",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-psych-date",
+                                      "type":  "date",
+                                      "text":  "Evaluation date",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-psych-done",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-psych-result",
+                                      "type":  "choice",
+                                      "text":  "Evaluation outcome",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-psych-done",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ],
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                                                            "valueCodeableConcept":  {
+                                                                                         "coding":  [
+                                                                                                        {
+                                                                                                            "system":  "http://hl7.org/fhir/questionnaire-item-control",
+                                                                                                            "code":  "radio-button"
+                                                                                                        }
+                                                                                                    ]
+                                                                                     }
+                                                        }
+                                                    ],
+                                      "answerOption":  [
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "cleared",
+                                                                                   "display":  "Cleared for surgery"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "conditional",
+                                                                                   "display":  "Cleared with conditions"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "deferred",
+                                                                                   "display":  "Surgery deferred pending treatment"
+                                                                               }
+                                                           }
+                                                       ]
+                                  },
+                                  {
+                                      "linkId":  "q-psych-conditions",
+                                      "type":  "string",
+                                      "text":  "Conditions or requirements noted",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-psych-result",
+                                                             "operator":  "=",
+                                                             "answerString":  "conditional"
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-psych-report-url",
+                                      "type":  "url",
+                                      "text":  "Link to psychological report",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-psych-done",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-eating-disorder",
+                                      "type":  "boolean",
+                                      "text":  "History of eating disorder (binge eating, bulimia, anorexia)?"
+                                  },
+                                  {
+                                      "linkId":  "q-eating-disorder-type",
+                                      "type":  "string",
+                                      "text":  "Describe eating disorder history",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-eating-disorder",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-eating-disorder-treatment",
+                                      "type":  "boolean",
+                                      "text":  "Received treatment for eating disorder?",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-eating-disorder",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-substance-history",
+                                      "type":  "boolean",
+                                      "text":  "History of substance use disorder?"
+                                  },
+                                  {
+                                      "linkId":  "q-substance-detail",
+                                      "type":  "string",
+                                      "text":  "Substance(s) and last use date",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-substance-history",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-substance-free-months",
+                                      "type":  "integer",
+                                      "text":  "Months since last use",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-substance-history",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-support-system",
+                                      "type":  "choice",
+                                      "text":  "Primary support system",
+                                      "required":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                                                            "valueCodeableConcept":  {
+                                                                                         "coding":  [
+                                                                                                        {
+                                                                                                            "system":  "http://hl7.org/fhir/questionnaire-item-control",
+                                                                                                            "code":  "radio-button"
+                                                                                                        }
+                                                                                                    ]
+                                                                                     }
+                                                        }
+                                                    ],
+                                      "answerOption":  [
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "spouse",
+                                                                                   "display":  "Spouse / Partner"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "family",
+                                                                                   "display":  "Family members"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "friends",
+                                                                                   "display":  "Friends"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "support-group",
+                                                                                   "display":  "Support group"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "none",
+                                                                                   "display":  "None identified"
+                                                                               }
+                                                           }
+                                                       ]
+                                  }
+                              ]
+                 },
+                 {
+                     "linkId":  "g-clearances",
+                     "type":  "group",
+                     "text":  "Medical Clearances",
+                     "item":  [
+                                  {
+                                      "linkId":  "q-pcp-clearance",
+                                      "type":  "boolean",
+                                      "text":  "Primary Care Physician clearance obtained?",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-pcp-name",
+                                      "type":  "string",
+                                      "text":  "PCP Name",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-pcp-clearance",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-pcp-date",
+                                      "type":  "date",
+                                      "text":  "PCP clearance date",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-pcp-clearance",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-pcp-doc",
+                                      "type":  "attachment",
+                                      "text":  "Upload PCP clearance letter",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-pcp-clearance",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-cardio-clearance",
+                                      "type":  "boolean",
+                                      "text":  "Cardiologist clearance obtained?"
+                                  },
+                                  {
+                                      "linkId":  "q-cardio-name",
+                                      "type":  "string",
+                                      "text":  "Cardiologist Name",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-cardio-clearance",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-cardio-date",
+                                      "type":  "date",
+                                      "text":  "Cardiology clearance date",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-cardio-clearance",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-cardio-doc",
+                                      "type":  "attachment",
+                                      "text":  "Upload cardiology clearance",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-cardio-clearance",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-endocrine-eval",
+                                      "type":  "boolean",
+                                      "text":  "Endocrinology evaluation completed?"
+                                  },
+                                  {
+                                      "linkId":  "q-endocrine-date",
+                                      "type":  "date",
+                                      "text":  "Endocrinology evaluation date",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-endocrine-eval",
+                                                             "operator":  "=",
+                                                             "answerBoolean":  true
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-labs-date",
+                                      "type":  "date",
+                                      "text":  "Date of most recent comprehensive labs",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-labs-doc",
+                                      "type":  "attachment",
+                                      "text":  "Upload lab results"
+                                  }
+                              ]
+                 },
+                 {
+                     "linkId":  "g-surgery-auth",
+                     "type":  "group",
+                     "text":  "Surgery Preference \u0026 Authorization",
+                     "item":  [
+                                  {
+                                      "linkId":  "q-procedure",
+                                      "type":  "choice",
+                                      "text":  "Preferred Surgical Procedure",
+                                      "required":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                                                            "valueCodeableConcept":  {
+                                                                                         "coding":  [
+                                                                                                        {
+                                                                                                            "system":  "http://hl7.org/fhir/questionnaire-item-control",
+                                                                                                            "code":  "radio-button"
+                                                                                                        }
+                                                                                                    ]
+                                                                                     }
+                                                        }
+                                                    ],
+                                      "answerOption":  [
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "sleeve",
+                                                                                   "display":  "Sleeve Gastrectomy (VSG)"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "bypass",
+                                                                                   "display":  "Roux-en-Y Gastric Bypass (RYGB)"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "band",
+                                                                                   "display":  "Adjustable Gastric Band (AGB)"
+                                                                               }
+                                                           },
+                                                           {
+                                                               "valueCoding":  {
+                                                                                   "code":  "bpd-ds",
+                                                                                   "display":  "Biliopancreatic Diversion with Duodenal Switch (BPD/DS)"
+                                                                               }
+                                                           }
+                                                       ]
+                                  },
+                                  {
+                                      "linkId":  "q-gerd-notice",
+                                      "type":  "display",
+                                      "text":  "вљ пёЏ Note: Sleeve gastrectomy may worsen GERD. Consider discussing Roux-en-Y Bypass with your surgeon.",
+                                      "enableWhen":  [
+                                                         {
+                                                             "question":  "q-procedure",
+                                                             "operator":  "=",
+                                                             "answerString":  "sleeve"
+                                                         }
+                                                     ]
+                                  },
+                                  {
+                                      "linkId":  "q-preferred-hospital",
+                                      "type":  "string",
+                                      "text":  "Preferred Hospital or Surgery Center"
+                                  },
+                                  {
+                                      "linkId":  "q-preferred-surgeon",
+                                      "type":  "string",
+                                      "text":  "Preferred Surgeon Name"
+                                  },
+                                  {
+                                      "linkId":  "q-target-date",
+                                      "type":  "date",
+                                      "text":  "Target Surgery Date"
+                                  },
+                                  {
+                                      "linkId":  "q-auth-number",
+                                      "type":  "string",
+                                      "text":  "Insurance Pre-Authorization Number",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-auth-url",
+                                      "type":  "url",
+                                      "text":  "Insurance Authorization Portal URL"
+                                  },
+                                  {
+                                      "linkId":  "q-auth-doc",
+                                      "type":  "attachment",
+                                      "text":  "Upload Insurance Authorization Letter",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-referral-doc",
+                                      "type":  "attachment",
+                                      "text":  "Upload Physician Referral",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-consent",
+                                      "type":  "boolean",
+                                      "text":  "I confirm all information provided is accurate and complete to the best of my knowledge.",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "q-consent-date",
+                                      "type":  "date",
+                                      "text":  "Date of Acknowledgment",
+                                      "required":  true
+                                  }
+                              ]
+                 }
+             ]
 }

@@ -3,6 +3,7 @@
   "id": "bariatric-pre-auth",
   "title": "Bariatric Surgery Pre-Authorization Screening",
   "status": "active",
+  "experimental": true,
   "copyright": "© 2026 Sergey Mosyakov",
   "subjectType": [
     "Patient"
@@ -16,17 +17,32 @@
       "name": "BariatricComorbidities",
       "title": "Obesity-Related Comorbidities",
       "status": "active",
-      "description": "Comorbidities qualifying patients with BMI 35\u201339.9 for bariatric surgery",
+      "description": "Comorbidities qualifying patients with BMI 35–39.9 for bariatric surgery",
       "compose": {
         "include": [
           {
             "system": "http://snomed.info/sct",
             "concept": [
-              { "code": "44054006",  "display": "Type 2 Diabetes Mellitus" },
-              { "code": "38341003",  "display": "Hypertension" },
-              { "code": "78275009",  "display": "Obstructive Sleep Apnea" },
-              { "code": "235494005", "display": "Non-alcoholic Fatty Liver Disease / NASH" },
-              { "code": "235595009", "display": "Gastroesophageal Reflux Disease" }
+              {
+                "code": "44054006",
+                "display": "Type 2 Diabetes Mellitus"
+              },
+              {
+                "code": "38341003",
+                "display": "Hypertension"
+              },
+              {
+                "code": "78275009",
+                "display": "Obstructive Sleep Apnea"
+              },
+              {
+                "code": "235494005",
+                "display": "Non-alcoholic Fatty Liver Disease / NASH"
+              },
+              {
+                "code": "235595009",
+                "display": "Gastroesophageal Reflux Disease"
+              }
             ]
           }
         ]
@@ -44,10 +60,22 @@
           {
             "system": "http://example.org/bariatric/codes",
             "concept": [
-              { "code": "vitD",   "display": "Vitamin D" },
-              { "code": "B12",    "display": "Vitamin B12" },
-              { "code": "iron",   "display": "Iron" },
-              { "code": "folate", "display": "Folate" }
+              {
+                "code": "vitD",
+                "display": "Vitamin D"
+              },
+              {
+                "code": "B12",
+                "display": "Vitamin B12"
+              },
+              {
+                "code": "iron",
+                "display": "Iron"
+              },
+              {
+                "code": "folate",
+                "display": "Folate"
+              }
             ]
           }
         ]
@@ -67,8 +95,14 @@
           "text": "BMI eligibility criterion",
           "type": "choice",
           "required": true,
-          "initial": [{ "valueCoding": { "code": "bmi40", "display": "BMI ≥ 40 kg/m²" } }],
-
+          "initial": [
+            {
+              "valueCoding": {
+                "code": "bmi40",
+                "display": "BMI ≥ 40 kg/m²"
+              }
+            }
+          ],
           "answerOption": [
             {
               "valueCoding": {
@@ -125,14 +159,30 @@
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
               "extension": [
-                { "url": "key",        "valueId": "diet-min-months" },
-                { "url": "severity",   "valueCode": "error" },
-                { "url": "human",      "valueString": "At least 3 months of supervised diet required for surgery eligibility" },
-                { "url": "expression", "valueString": "%resource.repeat(item).where(linkId='q-diet-months').answer.valueInteger >= 3" }
+                {
+                  "url": "key",
+                  "valueId": "diet-min-months"
+                },
+                {
+                  "url": "severity",
+                  "valueCode": "error"
+                },
+                {
+                  "url": "human",
+                  "valueString": "At least 3 months of supervised diet required for surgery eligibility"
+                },
+                {
+                  "url": "expression",
+                  "valueString": "%resource.repeat(item).where(linkId='q-diet-months').answer.valueInteger >= 3"
+                }
               ]
             }
           ],
-          "initial": [{ "valueInteger": 6 }]
+          "initial": [
+            {
+              "valueInteger": 6
+            }
+          ]
         },
         {
           "linkId": "q-diet-program",
@@ -140,7 +190,11 @@
           "text": "Participated in a formal weight-loss program?",
           "type": "boolean",
           "required": true,
-          "initial": [{ "valueBoolean": false }]
+          "initial": [
+            {
+              "valueBoolean": false
+            }
+          ]
         },
         {
           "linkId": "q-program-name",
@@ -162,9 +216,15 @@
           "type": "open-choice",
           "required": false,
           "answerOption": [
-            { "valueString": "University Medical Center" },
-            { "valueString": "Regional Bariatric Institute" },
-            { "valueString": "City General Hospital" }
+            {
+              "valueString": "University Medical Center"
+            },
+            {
+              "valueString": "Regional Bariatric Institute"
+            },
+            {
+              "valueString": "City General Hospital"
+            }
           ]
         },
         {
@@ -200,23 +260,41 @@
           "text": "Psychiatric evaluation completed?",
           "type": "boolean",
           "required": true,
-          "initial": [{ "valueBoolean": true }]
+          "initial": [
+            {
+              "valueBoolean": true
+            }
+          ]
         },
         {
           "linkId": "q-phq9",
           "prefix": "3.2",
           "text": "PHQ-9 score (0–27)",
-          "type": "integer",          "extension": [
+          "type": "integer",
+          "extension": [
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
               "extension": [
-                { "url": "key",        "valueId": "phq9-severity" },
-                { "url": "severity",   "valueCode": "warning" },
-                { "url": "human",      "valueString": "PHQ-9 >= 15 indicates moderate-to-severe depression — additional psychiatric review recommended" },
-                { "url": "expression", "valueString": "%resource.repeat(item).where(linkId='q-phq9').answer.valueInteger < 15" }
+                {
+                  "url": "key",
+                  "valueId": "phq9-severity"
+                },
+                {
+                  "url": "severity",
+                  "valueCode": "warning"
+                },
+                {
+                  "url": "human",
+                  "valueString": "PHQ-9 >= 15 indicates moderate-to-severe depression — additional psychiatric review recommended"
+                },
+                {
+                  "url": "expression",
+                  "valueString": "%resource.repeat(item).where(linkId='q-phq9').answer.valueInteger < 15"
+                }
               ]
             }
-          ],          "enableWhen": [
+          ],
+          "enableWhen": [
             {
               "question": "q-psych-done",
               "operator": "=",
@@ -616,10 +694,22 @@
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
               "extension": [
-                { "url": "key",        "valueId": "bmi-eligibility" },
-                { "url": "severity",   "valueCode": "error" },
-                { "url": "human",      "valueString": "Calculated BMI must be >= 35 to meet minimum bariatric surgery eligibility" },
-                { "url": "expression", "valueString": "%resource.repeat(item).where(linkId='q-bmi-calc').answer.valueDecimal >= 35" }
+                {
+                  "url": "key",
+                  "valueId": "bmi-eligibility"
+                },
+                {
+                  "url": "severity",
+                  "valueCode": "error"
+                },
+                {
+                  "url": "human",
+                  "valueString": "Calculated BMI must be >= 35 to meet minimum bariatric surgery eligibility"
+                },
+                {
+                  "url": "expression",
+                  "valueString": "%resource.repeat(item).where(linkId='q-bmi-calc').answer.valueDecimal >= 35"
+                }
               ]
             }
           ]
@@ -665,7 +755,11 @@
           "type": "string",
           "text": "Authorization status (system-assigned)",
           "readOnly": true,
-          "initial": [{ "valueString": "Pending review" }]
+          "initial": [
+            {
+              "valueString": "Pending review"
+            }
+          ]
         }
       ]
     },

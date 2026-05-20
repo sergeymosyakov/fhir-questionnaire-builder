@@ -4,7 +4,7 @@ A prototype **visual logic builder** for medical prior authorization questionnai
 
 Lets you build questionnaire logic visually, test it against patient data, and import/export valid FHIR R4 JSON.
 
-> © 2026 [Sergey Mosyakov](https://github.com/sergeymosyakov). Free to use with attribution.
+> © 2026 [Sergey Mosyakov](https://github.com/sergeymosyakov) / [Roko Labs Inc.](https://www.rokolabs.com) — Non-commercial use with attribution. Commercial use requires prior written permission.
 
 ---
 
@@ -38,7 +38,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/fhir/validate.js` | `validateTree` → `{severity, nodeId, message}[]` |
 | `js/ui/validate-modal.js` | Validate modal — `init(elements)`, `show(title, issues, mode, callbacks)` |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; draft-based editing with Apply/Cancel buttons; `%name` chip rich tooltips |
-| `js/ui/metadata-modal.js` | Questionnaire Properties modal — `init(elements)`, `open()`; draft pattern; edits all `questMeta` fields via three sections: **Core** (id, url, version, name, title, status, publisher, description), **Advanced** (collapsible: date, subjectType, effectivePeriodStart/End, approvalDate, lastReviewDate, purpose, copyright), and **Codes** (collapsible: edits `Questionnaire.code[]`; badge shows count); changes committed on Apply; status badge reflected in questMetaCard above Variables card |
+| `js/ui/metadata-modal.js` | Questionnaire Properties modal — `init(elements)`, `open()`; draft pattern; edits all `questMeta` fields via three sections: **Core** (id, url, version, name, title, status, language BCP-47 dropdown, publisher, description), **Advanced** (collapsible: experimental select, date, subjectType, effectivePeriodStart/End, approvalDate, lastReviewDate, purpose, copyright), and **Codes** (collapsible: edits `Questionnaire.code[]`; badge shows count); changes committed on Apply; status + experimental badge reflected in questMetaCard above Variables card |
 | `js/ui/codes-modal.js` | Item Codes modal — `init(elements)`, `open(node, link, setActive)`; draft pattern; edits `node._codes[]` (FHIR `item.code[]`); each row has system URL, code, display; Apply commits filtered codes; Cancel discards; Codes action button highlighted when non-empty |
 | `js/ui/json-viewer.js` | Shared read-only FHIR JSON viewer modal — `init(elements)`, `show(title, data)`, `close()`; Esc / backdrop / × close |
 | `js/ui/contained-panel.js` | Collapsible card showing `Questionnaire.contained[]` resources — each chip opens JSON viewer |
@@ -267,6 +267,7 @@ See [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) for the full FHIR field mapping
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
 - **enableWhen panel** — "Show When" action panel on every node; FHIR `enableWhen[]` list UI: AND/ALL vs OR/ANY toggle, per-condition rows (question picker + operator + type-aware value input + remove button), "+ Add condition" button; FHIRPath `enableWhenExpression` field for advanced SDC expressions
 - **Patient presets dropdown** — `Patient ▾` button in toolbar opens a fixed-position dropdown with 5 preset profiles (Adult Male 35·BMI 24, Adult Female 28·BMI 22, Obese Male 45·BMI 38·smoker, Child 10·BMI 16, Pregnant Female 30·BMI 26) + Custom…; selecting a preset auto-applies patient vars and calls `reinitForm()`; Custom… opens the manual edit modal; seeds `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` in `questVariables`
+- **Experimental badge** — `Questionnaire.experimental` flag shown in `questMetaCard` as amber `⚗ experimental` (when `true`) or green `✓ production` (when `false`); hidden when field is not set; configurable via Questionnaire Properties modal (Advanced section)
 - **AND/OR badges** — on group headers: `ALL items ✓` / `ANY item ✓`
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed out (🔒) when their condition is not met; dimmed groups also show their children as disabled (N/A) rows; animate to active when met

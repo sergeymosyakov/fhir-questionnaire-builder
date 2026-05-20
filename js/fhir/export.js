@@ -191,6 +191,8 @@ export function buildFHIRObject() {
   if (questMeta.name)        q.name        = questMeta.name;
   if (questMeta.publisher)   q.publisher   = questMeta.publisher;
   if (questMeta.description) q.description = questMeta.description;
+  if (questMeta.experimental !== null) q.experimental = questMeta.experimental;
+  if (questMeta.language)    q.language    = questMeta.language;
   if (questMeta.purpose)     q.purpose     = questMeta.purpose;
   if (questMeta.copyright)   q.copyright   = questMeta.copyright;
   if (questMeta.approvalDate)   q.approvalDate   = questMeta.approvalDate;

@@ -290,10 +290,19 @@ document.getElementById('validateBtn').onclick = () => {
 document.getElementById('propertiesBtn').onclick = () => metadataModal.open();
 
 // Sync metadata card summary whenever questMeta changes
-const _metaCardStatus = document.getElementById('questMetaCardStatus');
+const _metaCardStatus       = document.getElementById('questMetaCardStatus');
+const _metaCardExperimental = document.getElementById('questMetaCardExperimental');
 effect(() => {
   _metaCardStatus.textContent    = questMeta.status || 'draft';
   _metaCardStatus.dataset.status = questMeta.status || 'draft';
+  const exp = questMeta.experimental;
+  if (exp === null || exp === undefined) {
+    _metaCardExperimental.style.display = 'none';
+  } else {
+    _metaCardExperimental.style.display  = '';
+    _metaCardExperimental.textContent    = exp ? '⚗ experimental' : '✓ production';
+    _metaCardExperimental.dataset.exp    = String(exp);
+  }
 });
 
 // ── Keyboard shortcuts ────────────────────────────────────────────────────────
@@ -398,6 +407,7 @@ function _doReset() {
   questMeta.purpose = ''; questMeta.copyright = '';
   questMeta.approvalDate = ''; questMeta.lastReviewDate = '';
   questMeta.effectivePeriodStart = ''; questMeta.effectivePeriodEnd = '';
+  questMeta.experimental = null; questMeta.language = '';
   questMeta._rawContact = null; questMeta._rawUseContext = null; questMeta._rawJurisdiction = null;
   questMeta._rawCode = null;
   // Clear questionnaire-level variables

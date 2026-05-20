@@ -1,281 +1,358 @@
-{
-  "resourceType": "Questionnaire",
-  "id": "patient-scenario-risk",
-  "title": "Pre-operative Risk Assessment",
-  "status": "draft",
-  "copyright": "© 2026 Sergey Mosyakov",
-  "description": "Patient-driven risk stratification for surgical planning. Select a Patient preset and click ↺ Re-init to populate risk flags. Sections appear based on active risk factors.",
-  "extension": [
-    {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-      "valueExpression": { "name": "age",      "language": "text/fhirpath", "expression": "30" }
-    },
-    {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-      "valueExpression": { "name": "gender",   "language": "text/fhirpath", "expression": "'male'" }
-    },
-    {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-      "valueExpression": { "name": "bmi",      "language": "text/fhirpath", "expression": "42" }
-    },
-    {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-      "valueExpression": { "name": "pregnant", "language": "text/fhirpath", "expression": "false" }
-    },
-    {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-      "valueExpression": { "name": "smoker",   "language": "text/fhirpath", "expression": "false" }
-    },
-    {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-      "valueExpression": { "name": "comorb",   "language": "text/fhirpath", "expression": "''" }
-    },
-    {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-      "valueExpression": { "name": "proc",     "language": "text/fhirpath", "expression": "'43644'" }
-    }
-  ],
-  "item": [
-    {
-      "linkId": "summary",
-      "text": "Patient Summary",
-      "type": "group",
-      "item": [
-        {
-          "linkId": "sum-age",
-          "text": "Age",
-          "type": "decimal",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%age" }
-            }
-          ]
-        },
-        {
-          "linkId": "sum-gender",
-          "text": "Sex",
-          "type": "string",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%gender" }
-            }
-          ]
-        },
-        {
-          "linkId": "sum-bmi",
-          "text": "BMI (kg/m²)",
-          "type": "decimal",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%bmi" }
-            }
-          ]
-        },
-        {
-          "linkId": "sum-proc",
-          "text": "Planned procedure code",
-          "type": "string",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%proc" }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "linkId": "metabolic-risk",
-      "text": "Metabolic Risk (BMI ≥ 30)",
-      "type": "group",
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-          "valueExpression": { "language": "text/fhirpath", "expression": "%bmi >= 30" }
-        }
-      ],
-      "item": [
-        {
-          "linkId": "met-flag",
-          "text": "Metabolic risk flag — anaesthetic and post-op complications elevated with BMI ≥ 30.",
-          "type": "display"
-        },
-        {
-          "linkId": "met-airway",
-          "text": "Difficult airway assessment required",
-          "type": "boolean",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%bmi >= 30" }
-            }
-          ]
-        },
-        {
-          "linkId": "met-osa",
-          "text": "Screen for obstructive sleep apnoea",
-          "type": "boolean",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%bmi >= 35" }
-            }
-          ]
-        },
-        {
-          "linkId": "met-vte",
-          "text": "Elevated VTE prophylaxis indicated",
-          "type": "boolean",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%bmi >= 30" }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "linkId": "cardio-risk",
-      "text": "Cardiovascular Risk (age > 50 or smoker)",
-      "type": "group",
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-          "valueExpression": { "language": "text/fhirpath", "expression": "%age > 50 or %smoker" }
-        }
-      ],
-      "item": [
-        {
-          "linkId": "cardio-note",
-          "text": "Cardiology review recommended for patients over 50 or with active smoking history.",
-          "type": "display"
-        },
-        {
-          "linkId": "cardio-ecg",
-          "text": "Pre-operative ECG required",
-          "type": "boolean",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%age > 50" }
-            }
-          ]
-        },
-        {
-          "linkId": "cardio-echo",
-          "text": "Echocardiogram indicated (age > 60)",
-          "type": "boolean",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%age > 60" }
-            }
-          ]
-        },
-        {
-          "linkId": "cardio-smoking",
-          "text": "Smoking cessation counselling required",
-          "type": "boolean",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%smoker" }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "linkId": "pregnancy-risk",
-      "text": "Pregnancy — Procedure Contraindicated",
-      "type": "group",
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-          "valueExpression": { "language": "text/fhirpath", "expression": "%pregnant" }
-        }
-      ],
-      "item": [
-        {
-          "linkId": "preg-block",
-          "text": "Elective surgical procedure must be deferred. Obtain obstetric clearance before re-assessment.",
-          "type": "display"
-        },
-        {
-          "linkId": "preg-deferred",
-          "text": "Procedure deferred pending delivery",
-          "type": "boolean",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%pregnant" }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "linkId": "pediatric-risk",
-      "text": "Paediatric Considerations (age < 16)",
-      "type": "group",
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-          "valueExpression": { "language": "text/fhirpath", "expression": "%age < 16" }
-        }
-      ],
-      "item": [
-        {
-          "linkId": "ped-consent",
-          "text": "Parental/guardian consent required. Paediatric anaesthetist must be involved.",
-          "type": "display"
-        },
-        {
-          "linkId": "ped-paed-anaes",
-          "text": "Paediatric anaesthetist referral required",
-          "type": "boolean",
-          "readOnly": true,
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": { "language": "text/fhirpath", "expression": "%age < 16" }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "linkId": "clearance",
-      "text": "Final Clearance",
-      "type": "group",
-      "item": [
-        {
-          "linkId": "clear-proceed",
-          "text": "Cleared to proceed (confirm after reviewing all flagged items above)",
-          "type": "boolean",
-          "required": true
-        },
-        {
-          "linkId": "clear-notes",
-          "text": "Clinician notes",
-          "type": "text"
-        }
-      ]
-    }
-  ]
+﻿{
+    "resourceType":  "Questionnaire",
+    "id":  "patient-scenario-risk",
+    "title":  "Pre-operative Risk Assessment",
+    "status":  "draft",
+    "experimental":  true,
+    "copyright":  "В© 2026 Sergey Mosyakov",
+    "description":  "Patient-driven risk stratification for surgical planning. Select a Patient preset and click в†є Re-init to populate risk flags. Sections appear based on active risk factors.",
+    "extension":  [
+                      {
+                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+                          "valueExpression":  {
+                                                  "name":  "age",
+                                                  "language":  "text/fhirpath",
+                                                  "expression":  "30"
+                                              }
+                      },
+                      {
+                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+                          "valueExpression":  {
+                                                  "name":  "gender",
+                                                  "language":  "text/fhirpath",
+                                                  "expression":  "\u0027male\u0027"
+                                              }
+                      },
+                      {
+                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+                          "valueExpression":  {
+                                                  "name":  "bmi",
+                                                  "language":  "text/fhirpath",
+                                                  "expression":  "42"
+                                              }
+                      },
+                      {
+                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+                          "valueExpression":  {
+                                                  "name":  "pregnant",
+                                                  "language":  "text/fhirpath",
+                                                  "expression":  "false"
+                                              }
+                      },
+                      {
+                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+                          "valueExpression":  {
+                                                  "name":  "smoker",
+                                                  "language":  "text/fhirpath",
+                                                  "expression":  "false"
+                                              }
+                      },
+                      {
+                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+                          "valueExpression":  {
+                                                  "name":  "comorb",
+                                                  "language":  "text/fhirpath",
+                                                  "expression":  "\u0027\u0027"
+                                              }
+                      },
+                      {
+                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+                          "valueExpression":  {
+                                                  "name":  "proc",
+                                                  "language":  "text/fhirpath",
+                                                  "expression":  "\u002743644\u0027"
+                                              }
+                      }
+                  ],
+    "item":  [
+                 {
+                     "linkId":  "summary",
+                     "text":  "Patient Summary",
+                     "type":  "group",
+                     "item":  [
+                                  {
+                                      "linkId":  "sum-age",
+                                      "text":  "Age",
+                                      "type":  "decimal",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%age"
+                                                                                }
+                                                        }
+                                                    ]
+                                  },
+                                  {
+                                      "linkId":  "sum-gender",
+                                      "text":  "Sex",
+                                      "type":  "string",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%gender"
+                                                                                }
+                                                        }
+                                                    ]
+                                  },
+                                  {
+                                      "linkId":  "sum-bmi",
+                                      "text":  "BMI (kg/mВІ)",
+                                      "type":  "decimal",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%bmi"
+                                                                                }
+                                                        }
+                                                    ]
+                                  },
+                                  {
+                                      "linkId":  "sum-proc",
+                                      "text":  "Planned procedure code",
+                                      "type":  "string",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%proc"
+                                                                                }
+                                                        }
+                                                    ]
+                                  }
+                              ]
+                 },
+                 {
+                     "linkId":  "metabolic-risk",
+                     "text":  "Metabolic Risk (BMI в‰Ґ 30)",
+                     "type":  "group",
+                     "extension":  [
+                                       {
+                                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+                                           "valueExpression":  {
+                                                                   "language":  "text/fhirpath",
+                                                                   "expression":  "%bmi \u003e= 30"
+                                                               }
+                                       }
+                                   ],
+                     "item":  [
+                                  {
+                                      "linkId":  "met-flag",
+                                      "text":  "Metabolic risk flag вЂ” anaesthetic and post-op complications elevated with BMI в‰Ґ 30.",
+                                      "type":  "display"
+                                  },
+                                  {
+                                      "linkId":  "met-airway",
+                                      "text":  "Difficult airway assessment required",
+                                      "type":  "boolean",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%bmi \u003e= 30"
+                                                                                }
+                                                        }
+                                                    ]
+                                  },
+                                  {
+                                      "linkId":  "met-osa",
+                                      "text":  "Screen for obstructive sleep apnoea",
+                                      "type":  "boolean",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%bmi \u003e= 35"
+                                                                                }
+                                                        }
+                                                    ]
+                                  },
+                                  {
+                                      "linkId":  "met-vte",
+                                      "text":  "Elevated VTE prophylaxis indicated",
+                                      "type":  "boolean",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%bmi \u003e= 30"
+                                                                                }
+                                                        }
+                                                    ]
+                                  }
+                              ]
+                 },
+                 {
+                     "linkId":  "cardio-risk",
+                     "text":  "Cardiovascular Risk (age \u003e 50 or smoker)",
+                     "type":  "group",
+                     "extension":  [
+                                       {
+                                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+                                           "valueExpression":  {
+                                                                   "language":  "text/fhirpath",
+                                                                   "expression":  "%age \u003e 50 or %smoker"
+                                                               }
+                                       }
+                                   ],
+                     "item":  [
+                                  {
+                                      "linkId":  "cardio-note",
+                                      "text":  "Cardiology review recommended for patients over 50 or with active smoking history.",
+                                      "type":  "display"
+                                  },
+                                  {
+                                      "linkId":  "cardio-ecg",
+                                      "text":  "Pre-operative ECG required",
+                                      "type":  "boolean",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%age \u003e 50"
+                                                                                }
+                                                        }
+                                                    ]
+                                  },
+                                  {
+                                      "linkId":  "cardio-echo",
+                                      "text":  "Echocardiogram indicated (age \u003e 60)",
+                                      "type":  "boolean",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%age \u003e 60"
+                                                                                }
+                                                        }
+                                                    ]
+                                  },
+                                  {
+                                      "linkId":  "cardio-smoking",
+                                      "text":  "Smoking cessation counselling required",
+                                      "type":  "boolean",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%smoker"
+                                                                                }
+                                                        }
+                                                    ]
+                                  }
+                              ]
+                 },
+                 {
+                     "linkId":  "pregnancy-risk",
+                     "text":  "Pregnancy вЂ” Procedure Contraindicated",
+                     "type":  "group",
+                     "extension":  [
+                                       {
+                                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+                                           "valueExpression":  {
+                                                                   "language":  "text/fhirpath",
+                                                                   "expression":  "%pregnant"
+                                                               }
+                                       }
+                                   ],
+                     "item":  [
+                                  {
+                                      "linkId":  "preg-block",
+                                      "text":  "Elective surgical procedure must be deferred. Obtain obstetric clearance before re-assessment.",
+                                      "type":  "display"
+                                  },
+                                  {
+                                      "linkId":  "preg-deferred",
+                                      "text":  "Procedure deferred pending delivery",
+                                      "type":  "boolean",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%pregnant"
+                                                                                }
+                                                        }
+                                                    ]
+                                  }
+                              ]
+                 },
+                 {
+                     "linkId":  "pediatric-risk",
+                     "text":  "Paediatric Considerations (age \u003c 16)",
+                     "type":  "group",
+                     "extension":  [
+                                       {
+                                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+                                           "valueExpression":  {
+                                                                   "language":  "text/fhirpath",
+                                                                   "expression":  "%age \u003c 16"
+                                                               }
+                                       }
+                                   ],
+                     "item":  [
+                                  {
+                                      "linkId":  "ped-consent",
+                                      "text":  "Parental/guardian consent required. Paediatric anaesthetist must be involved.",
+                                      "type":  "display"
+                                  },
+                                  {
+                                      "linkId":  "ped-paed-anaes",
+                                      "text":  "Paediatric anaesthetist referral required",
+                                      "type":  "boolean",
+                                      "readOnly":  true,
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                                                            "valueExpression":  {
+                                                                                    "language":  "text/fhirpath",
+                                                                                    "expression":  "%age \u003c 16"
+                                                                                }
+                                                        }
+                                                    ]
+                                  }
+                              ]
+                 },
+                 {
+                     "linkId":  "clearance",
+                     "text":  "Final Clearance",
+                     "type":  "group",
+                     "item":  [
+                                  {
+                                      "linkId":  "clear-proceed",
+                                      "text":  "Cleared to proceed (confirm after reviewing all flagged items above)",
+                                      "type":  "boolean",
+                                      "required":  true
+                                  },
+                                  {
+                                      "linkId":  "clear-notes",
+                                      "text":  "Clinician notes",
+                                      "type":  "text"
+                                  }
+                              ]
+                 }
+             ]
 }

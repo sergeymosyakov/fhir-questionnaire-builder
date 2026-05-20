@@ -115,6 +115,12 @@
         data-tip-body="Lifecycle status of this questionnaire: draft (work in progress), active (published and in use), retired (no longer used), or unknown."
         data-tip-fhir="Questionnaire.status"
         data-tip-spec="R4 &middot; required"></span>
+      <span id="questMetaCardExperimental" class="quest-meta-card-experimental" data-testid="quest-meta-experimental"
+        data-tip-title="Experimental flag"
+        data-tip-body="experimental=true means this questionnaire is for testing only and should not be used in production. experimental=false means it is production-ready."
+        data-tip-fhir="Questionnaire.experimental"
+        data-tip-spec="R4 &middot; optional"
+        style="display:none"></span>
       <button id="propertiesBtn" type="button" class="quest-meta-edit-btn" data-testid="properties-btn"
         data-tip-title="Questionnaire Properties"
         data-tip-body="Edit questionnaire-level metadata: id, url, version, title, status, publisher and description. These fields are preserved on import and written back on export.">Edit</button>

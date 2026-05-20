@@ -74,6 +74,8 @@ export const questMeta = reactive({
   lastReviewDate: '',
   effectivePeriodStart: '',   // Questionnaire.effectivePeriod.start
   effectivePeriodEnd:   '',   // Questionnaire.effectivePeriod.end
+  experimental:    null,       // null = not set, true/false = Questionnaire.experimental
+  language:        '',          // BCP-47 language code, e.g. 'en', 'en-US'
   // Pass-through: preserved from import, written back on export, no editing UI
   _rawContact:      null,
   _rawUseContext:   null,

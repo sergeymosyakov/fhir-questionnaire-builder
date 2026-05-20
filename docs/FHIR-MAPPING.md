@@ -80,6 +80,8 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `questMeta.subjectType` | `Questionnaire.subjectType` | ← `subjectType[]` joined as comma-separated string (default: `'Patient'`) | → split back to array (default: `['Patient']`) |
 | `questMeta.effectivePeriodStart` | `Questionnaire.effectivePeriod.start` | ← `effectivePeriod?.start` (default: `''`) | → `effectivePeriod.start` (omitted when empty) |
 | `questMeta.effectivePeriodEnd` | `Questionnaire.effectivePeriod.end` | ← `effectivePeriod?.end` (default: `''`) | → `effectivePeriod.end` (omitted when empty) |
+| `questMeta.experimental` | `Questionnaire.experimental` | ← `experimental` (default: `null`) | → `experimental` (omitted when `null`) |
+| `questMeta.language` | `Questionnaire.language` | ← `language` (default: `''`) | → `language` (omitted when empty) |
 | `questMeta._rawContact` | `Questionnaire.contact[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawUseContext` | `Questionnaire.useContext[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawJurisdiction` | `Questionnaire.jurisdiction[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
@@ -268,9 +270,7 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 
 | FHIR field | What happens | Notes |
 |---|---|---|
-| `Questionnaire.experimental` | ⚠️ Silent loss | Boolean flag; not stored in `questMeta`; lost on export |
 | `Questionnaire.derivedFrom[]` | ⚠️ Silent loss | Canonical references to parent questionnaires; not stored |
-| `Questionnaire.language` | ⚠️ Silent loss | BCP-47 language code for the resource; not stored |
 
 ### Item-level — not implemented
 

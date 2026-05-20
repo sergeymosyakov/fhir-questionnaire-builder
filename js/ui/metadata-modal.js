@@ -1,8 +1,8 @@
 // ── Questionnaire Properties (metadata) modal ─────────────────────────────────
 // Edits questionnaire-level fields.
-// Core fields (always visible): id, url, version, title, status, publisher,
-//   description, name.
-// Advanced (collapsible, collapsed by default): date, subjectType,
+// Core fields (always visible): id, url, version, title, status, language,
+//   publisher, description, name.
+// Advanced (collapsible, collapsed by default): experimental, date, subjectType,
 //   effectivePeriodStart, effectivePeriodEnd, approvalDate, lastReviewDate,
 //   purpose, copyright.
 // Pass-through fields (contact, useContext, jurisdiction) have no
@@ -17,6 +17,45 @@ import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js
 import { renderCodesEditor } from './codes-modal.js';
 
 const STATUSES = ['draft', 'active', 'retired', 'unknown'];
+
+const LANGUAGES = [
+  { value: '',      label: '(not set)' },
+  { value: 'en',    label: 'en \u2014 English' },
+  { value: 'en-US', label: 'en-US \u2014 English (US)' },
+  { value: 'en-GB', label: 'en-GB \u2014 English (UK)' },
+  { value: 'de',    label: 'de \u2014 German' },
+  { value: 'de-DE', label: 'de-DE \u2014 German (Germany)' },
+  { value: 'de-AT', label: 'de-AT \u2014 German (Austria)' },
+  { value: 'de-CH', label: 'de-CH \u2014 German (Switzerland)' },
+  { value: 'fr',    label: 'fr \u2014 French' },
+  { value: 'fr-FR', label: 'fr-FR \u2014 French (France)' },
+  { value: 'fr-BE', label: 'fr-BE \u2014 French (Belgium)' },
+  { value: 'fr-CH', label: 'fr-CH \u2014 French (Switzerland)' },
+  { value: 'nl',    label: 'nl \u2014 Dutch' },
+  { value: 'nl-NL', label: 'nl-NL \u2014 Dutch (Netherlands)' },
+  { value: 'nl-BE', label: 'nl-BE \u2014 Dutch (Belgium)' },
+  { value: 'es',    label: 'es \u2014 Spanish' },
+  { value: 'es-ES', label: 'es-ES \u2014 Spanish (Spain)' },
+  { value: 'pt',    label: 'pt \u2014 Portuguese' },
+  { value: 'pt-BR', label: 'pt-BR \u2014 Portuguese (Brazil)' },
+  { value: 'it',    label: 'it \u2014 Italian' },
+  { value: 'pl',    label: 'pl \u2014 Polish' },
+  { value: 'sv',    label: 'sv \u2014 Swedish' },
+  { value: 'da',    label: 'da \u2014 Danish' },
+  { value: 'nb',    label: 'nb \u2014 Norwegian Bokm\u00e5l' },
+  { value: 'fi',    label: 'fi \u2014 Finnish' },
+  { value: 'ja',    label: 'ja \u2014 Japanese' },
+  { value: 'zh',    label: 'zh \u2014 Chinese' },
+  { value: 'ar',    label: 'ar \u2014 Arabic' },
+  { value: 'ru',    label: 'ru \u2014 Russian' },
+  { value: 'uk',    label: 'uk \u2014 Ukrainian' },
+];
+
+const EXPERIMENTALS = [
+  { value: '',      label: '(not set)' },
+  { value: 'true',  label: 'Yes \u2014 experimental / for testing only' },
+  { value: 'false', label: 'No \u2014 production ready' },
+];
 
 let _el      = null;
 let _pending = null;
@@ -46,6 +85,8 @@ export function open() {
     lastReviewDate: questMeta.lastReviewDate,
     effectivePeriodStart: questMeta.effectivePeriodStart,
     effectivePeriodEnd:   questMeta.effectivePeriodEnd,
+    experimental: questMeta.experimental === null ? '' : String(questMeta.experimental),
+    language:     questMeta.language || '',
     codes: JSON.parse(JSON.stringify(questMeta._rawCode || [])),
   };
 
@@ -75,6 +116,8 @@ function _apply() {
   questMeta.lastReviewDate = _pending.lastReviewDate.trim();
   questMeta.effectivePeriodStart = _pending.effectivePeriodStart.trim();
   questMeta.effectivePeriodEnd   = _pending.effectivePeriodEnd.trim();
+  questMeta.experimental = _pending.experimental === '' ? null : _pending.experimental === 'true';
+  questMeta.language     = _pending.language;
   const filteredCodes = _pending.codes.filter(c => c.code.trim());
   questMeta._rawCode = filteredCodes.length ? filteredCodes : null;
   _close();
@@ -110,6 +153,34 @@ function _makeRow(key, label, type, placeholder, testid) {
   inp.dataset.testid = testid;
   inp.oninput = () => { _pending[key] = inp.value; };
   row.append(lbl, inp);
+  return row;
+}
+
+function _makeSelectRow(key, label, options, testid) {
+  const row = document.createElement('div');
+  row.className = 'meta-modal-row';
+  const lbl = document.createElement('label');
+  lbl.className   = 'meta-modal-lbl';
+  lbl.textContent = label + ':';
+  const sel = document.createElement('select');
+  sel.className      = 'meta-modal-sel';
+  sel.dataset.testid = testid;
+  const currentVal   = String(_pending[key] ?? '');
+  // If imported value isn't in the predefined list, add it as a custom option at top
+  if (currentVal && !options.find(o => o.value === currentVal)) {
+    const opt = document.createElement('option');
+    opt.value = currentVal; opt.textContent = currentVal + ' (imported)';
+    opt.selected = true;
+    sel.appendChild(opt);
+  }
+  for (const o of options) {
+    const opt = document.createElement('option');
+    opt.value = o.value; opt.textContent = o.label;
+    if (o.value === currentVal) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  sel.onchange = () => { _pending[key] = sel.value; };
+  row.append(lbl, sel);
   return row;
 }
 
@@ -152,6 +223,12 @@ function _renderBody(container) {
   // Insert after title (index 4 in fields array = 5th row node after hint)
   container.insertBefore(statusRow, container.children[6]);
 
+  // Language dropdown (after Status)
+  container.insertBefore(
+    _makeSelectRow('language', 'Language', LANGUAGES, 'meta-language'),
+    container.children[7]
+  );
+
   // ── Advanced (collapsible) ───────────────────────────────────────────────
   const adv = document.createElement('div');
   adv.className = 'meta-modal-advanced';
@@ -176,6 +253,7 @@ function _renderBody(container) {
     { key: 'purpose',             label: 'Purpose',        type: 'textarea', placeholder: 'Intended use…',              testid: 'meta-purpose'             },
     { key: 'copyright',           label: 'Copyright',      type: 'textarea', placeholder: 'Copyright statement…',       testid: 'meta-copyright'           },
   ];
+  body.appendChild(_makeSelectRow('experimental', 'Experimental', EXPERIMENTALS, 'meta-experimental'));
   for (const f of advFields) body.appendChild(_makeRow(f.key, f.label, f.type, f.placeholder, f.testid));
 
   const _setToggleLabel = () => {
