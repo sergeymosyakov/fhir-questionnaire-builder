@@ -1,0 +1,18 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "meta-test-id",
+  "url": "http://example.org/fhir/Questionnaire/meta-test",
+  "version": "2.0",
+  "title": "Meta Test Questionnaire",
+  "status": "active",
+  "publisher": "Test Publisher",
+  "description": "A test questionnaire for metadata round-trip.",
+  "subjectType": ["Patient"],
+  "item": [
+    {
+      "linkId": "q1",
+      "text": "Sample question",
+      "type": "string"
+    }
+  ]
+}

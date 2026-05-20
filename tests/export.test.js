@@ -1,18 +1,20 @@
 // Tests for export helpers.
 // export.js imports reactive state — we mock ../js/state.js.
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 
 // Minimal state mock — buildFHIRObject reads tree, questVariables, rawFhir
 const _tree = [];
 const _questVariables = [];
 const _questContained = [];
 let _rawFhir = { value: null };
+const _questMeta = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '' };
 
 vi.mock('../js/state.js', () => ({
   tree:            _tree,
   questVariables:  _questVariables,
   questContained:  _questContained,
+  questMeta:       _questMeta,
   rawFhir:         _rawFhir,
   values:          {},
   _formTick:       { value: 0 },
@@ -478,5 +480,94 @@ describe('buildFHIRObject — _initialValue export', () => {
   it('omits initial when _initialValue is empty string', () => {
     const q = build([item('text', '')]);
     expect(q.item[0].initial).toBeUndefined();
+  });
+});
+
+// ── questMeta round-trip ──────────────────────────────────────────────────────
+describe('buildFHIRObject — questMeta', () => {
+  const EMPTY_META = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '' };
+
+  afterEach(() => { Object.assign(_questMeta, EMPTY_META); });
+
+  it('uses questMeta.id in export', () => {
+    _questMeta.id = 'my-questionnaire';
+    const q = buildFHIRObject();
+    expect(q.id).toBe('my-questionnaire');
+  });
+
+  it('falls back to logic-builder-export when questMeta.id is empty', () => {
+    _questMeta.id = '';
+    const q = buildFHIRObject();
+    expect(q.id).toBe('logic-builder-export');
+  });
+
+  it('uses questMeta.title (takes precedence over rawFhir.title)', () => {
+    _rawFhir.value = { title: 'Raw Title' };
+    _questMeta.title = 'Meta Title';
+    const q = buildFHIRObject();
+    expect(q.title).toBe('Meta Title');
+    _rawFhir.value = null;
+  });
+
+  it('falls back to rawFhir.title when questMeta.title is empty', () => {
+    _rawFhir.value = { title: 'Raw Title' };
+    _questMeta.title = '';
+    const q = buildFHIRObject();
+    expect(q.title).toBe('Raw Title');
+    _rawFhir.value = null;
+  });
+
+  it('uses questMeta.status in export', () => {
+    _questMeta.status = 'active';
+    const q = buildFHIRObject();
+    expect(q.status).toBe('active');
+  });
+
+  it('exports url when questMeta.url is set', () => {
+    _questMeta.url = 'http://example.org/fhir/Questionnaire/test';
+    const q = buildFHIRObject();
+    expect(q.url).toBe('http://example.org/fhir/Questionnaire/test');
+  });
+
+  it('omits url when questMeta.url is empty', () => {
+    _questMeta.url = '';
+    const q = buildFHIRObject();
+    expect(q.url).toBeUndefined();
+  });
+
+  it('exports version when questMeta.version is set', () => {
+    _questMeta.version = '2.0.1';
+    const q = buildFHIRObject();
+    expect(q.version).toBe('2.0.1');
+  });
+
+  it('omits version when questMeta.version is empty', () => {
+    _questMeta.version = '';
+    const q = buildFHIRObject();
+    expect(q.version).toBeUndefined();
+  });
+
+  it('exports publisher when questMeta.publisher is set', () => {
+    _questMeta.publisher = 'HL7 International';
+    const q = buildFHIRObject();
+    expect(q.publisher).toBe('HL7 International');
+  });
+
+  it('omits publisher when questMeta.publisher is empty', () => {
+    _questMeta.publisher = '';
+    const q = buildFHIRObject();
+    expect(q.publisher).toBeUndefined();
+  });
+
+  it('exports description when questMeta.description is set', () => {
+    _questMeta.description = 'A screening tool.';
+    const q = buildFHIRObject();
+    expect(q.description).toBe('A screening tool.');
+  });
+
+  it('omits description when questMeta.description is empty', () => {
+    _questMeta.description = '';
+    const q = buildFHIRObject();
+    expect(q.description).toBeUndefined();
   });
 });

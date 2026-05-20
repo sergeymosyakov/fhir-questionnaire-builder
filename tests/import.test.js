@@ -10,6 +10,7 @@ const _questContained = [];
 const _values         = {};
 const _rawFhir        = { value: null };
 const _bulkUpdate     = { value: false };
+const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '' };
 
 vi.mock('../js/state.js', () => ({
   tree:           _tree,
@@ -17,6 +18,7 @@ vi.mock('../js/state.js', () => ({
   rawFhir:        _rawFhir,
   questVariables: _questVariables,
   questContained: { splice: () => { _questContained.splice(0); }, push: (v) => _questContained.push(v) },
+  questMeta:      _questMeta,
   _bulkUpdate:    _bulkUpdate,
   resetSeq:       vi.fn(),
   makeGroup:      vi.fn(title => ({ type: 'group', id: 'g', title, children: [], enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', mandatory: null, logicWithParent: 'AND' })),
@@ -299,6 +301,7 @@ describe('importFHIR', () => {
     _questContained.splice(0);
     Object.keys(_values).forEach(k => delete _values[k]);
     _rawFhir.value = null;
+    Object.assign(_questMeta, { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '' });
     vi.mocked(alert).mockClear();
   });
 
@@ -444,5 +447,54 @@ describe('importFHIR', () => {
     }]));
     expect(_tree[0]._answerValueSet).toBe('http://hl7.org/fhir/ValueSet/occupation-snomed-ct');
     expect(_tree[0].options).toBe('');
+  });
+
+  // ── questMeta population ──────────────────────────────────────────────────────
+  it('populates questMeta.id from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', id: 'my-q', item: [] });
+    expect(_questMeta.id).toBe('my-q');
+  });
+
+  it('populates questMeta.url from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', url: 'http://example.org/fhir/q', item: [] });
+    expect(_questMeta.url).toBe('http://example.org/fhir/q');
+  });
+
+  it('populates questMeta.version from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', version: '1.2.3', item: [] });
+    expect(_questMeta.version).toBe('1.2.3');
+  });
+
+  it('populates questMeta.title from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', title: 'PHQ-9', item: [] });
+    expect(_questMeta.title).toBe('PHQ-9');
+  });
+
+  it('populates questMeta.status from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', status: 'active', item: [] });
+    expect(_questMeta.status).toBe('active');
+  });
+
+  it('defaults questMeta.status to draft when not present in FHIR', () => {
+    importFHIR({ resourceType: 'Questionnaire', item: [] });
+    expect(_questMeta.status).toBe('draft');
+  });
+
+  it('populates questMeta.publisher from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', publisher: 'HL7', item: [] });
+    expect(_questMeta.publisher).toBe('HL7');
+  });
+
+  it('populates questMeta.description from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', description: 'A screening tool.', item: [] });
+    expect(_questMeta.description).toBe('A screening tool.');
+  });
+
+  it('resets questMeta fields to empty on re-import', () => {
+    importFHIR({ resourceType: 'Questionnaire', id: 'first', url: 'http://first.org', publisher: 'Pub', item: [] });
+    importFHIR({ resourceType: 'Questionnaire', item: [] });
+    expect(_questMeta.id).toBe('');
+    expect(_questMeta.url).toBe('');
+    expect(_questMeta.publisher).toBe('');
   });
 });

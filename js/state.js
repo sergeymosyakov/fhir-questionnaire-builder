@@ -54,6 +54,17 @@ export const rawFhir = ref(null);
 // Also used to store patient context variables (%age, %gender, %bmi, ...).
 export const questVariables = reactive([]);
 
+// Questionnaire-level metadata — preserved across import/export and editable via Properties modal.
+export const questMeta = reactive({
+  id:          '',
+  url:         '',
+  version:     '',
+  title:       '',
+  status:      'draft',
+  publisher:   '',
+  description: '',
+});
+
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.
 export const questContained = reactive([]);
 

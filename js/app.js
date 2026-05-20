@@ -25,9 +25,10 @@ import * as repeatableModal from './ui/repeatable-modal.js';
 import * as requiredModal from './ui/required-modal.js';
 import * as readonlyModal from './ui/readonly-modal.js';
 import * as answerTypeModal from './ui/answer-type-modal.js';
+import * as metadataModal from './ui/metadata-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
-import { showLinkId, showPrefix, showBadges, questVariables, questContained } from './state.js';
+import { showLinkId, showPrefix, showBadges, questVariables, questContained, questMeta } from './state.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 
 // fhirpath.js v4 browser bundle loaded as global via lib/fhirpath.min.js
@@ -150,6 +151,15 @@ answerTypeModal.init({
   cancelBtn: document.getElementById('answerTypeModalCancel'),
   applyBtn:  document.getElementById('answerTypeModalApply'),
 });
+// ── Metadata (Properties) modal init ──────────────────────────────────────────
+metadataModal.init({
+  modal:     document.getElementById('metadataModal'),
+  title:     document.getElementById('metadataModalTitle'),
+  body:      document.getElementById('metadataModalBody'),
+  closeBtn:  document.getElementById('metadataModalClose'),
+  cancelBtn: document.getElementById('metadataModalCancel'),
+  applyBtn:  document.getElementById('metadataModalApply'),
+});
 // ── Appearance modal init ─────────────────────────────────────────────────────
 appearanceModal.init({
   modal:     document.getElementById('appearanceModal'),
@@ -268,6 +278,16 @@ document.getElementById('validateBtn').onclick = () => {
   validateModal.show('Validate — Report', issues, 'import', { onNavigate: _navigateToNode });
 };
 
+// ── Properties button ────────────────────────────────────────────────────────
+document.getElementById('propertiesBtn').onclick = () => metadataModal.open();
+
+// Sync metadata card summary whenever questMeta changes
+const _metaCardStatus = document.getElementById('questMetaCardStatus');
+effect(() => {
+  _metaCardStatus.textContent    = questMeta.status || 'draft';
+  _metaCardStatus.dataset.status = questMeta.status || 'draft';
+});
+
 // ── Keyboard shortcuts ────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
@@ -322,6 +342,7 @@ effect(() => {
   document.getElementById('variablesCard').style.display = hasNodes ? '' : 'none';
   document.getElementById('validateBtn').style.display   = hasNodes ? '' : 'none';
   document.getElementById('exportWrap').style.display    = hasNodes ? '' : 'none';
+  document.getElementById('questMetaCard').style.display = hasNodes ? '' : 'none';
   document.getElementById('answersWrap').style.display   = hasNodes ? '' : 'none';
   if (hasNodes) {
     _fileNameWrap.style.display = 'inline-flex';
@@ -361,6 +382,10 @@ function _doReset() {
   clearAllValues();
   // Clear rawFhir
   rawFhir.value = null;
+  // Reset questionnaire-level metadata
+  questMeta.id = ''; questMeta.url = ''; questMeta.version = '';
+  questMeta.title = ''; questMeta.status = 'draft';
+  questMeta.publisher = ''; questMeta.description = '';
   // Clear questionnaire-level variables
   questVariables.splice(0);
   variablesPanel.refresh();

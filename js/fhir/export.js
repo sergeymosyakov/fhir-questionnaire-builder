@@ -1,5 +1,5 @@
 ﻿// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
-import { tree, questVariables, questContained, rawFhir } from '../state.js';
+import { tree, questVariables, questContained, rawFhir, questMeta } from '../state.js';
 import { parseOptions, ITLH_KEY_GROUP_OR } from '../utils.js';
 
 function itemTypeToFHIRType(t) {
@@ -173,13 +173,17 @@ export function buildFHIRObject() {
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
   const q = {
     resourceType: 'Questionnaire',
-    id:     'logic-builder-export',
-    title:  (rawFhir.value && rawFhir.value.title) || 'Untitled Questionnaire',
-    status: 'draft',
-    subjectType: ['Patient'],
-    date:   new Date().toISOString().split('T')[0],
+    id:     questMeta.id     || 'logic-builder-export',
+    status: questMeta.status || 'draft',
     item:   tree.map(nodeToFHIRItem)
   };
+  if (questMeta.url)         q.url         = questMeta.url;
+  if (questMeta.version)     q.version     = questMeta.version;
+  q.title = questMeta.title || (rawFhir.value && rawFhir.value.title) || 'Untitled Questionnaire';
+  if (questMeta.publisher)   q.publisher   = questMeta.publisher;
+  if (questMeta.description) q.description = questMeta.description;
+  q.subjectType = ['Patient'];
+  q.date = new Date().toISOString().split('T')[0];
   const vars = questVariables.filter(v => v.name && v.expression);
   if (vars.length) {
     q.extension = vars.map(v => ({

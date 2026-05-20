@@ -56,6 +56,22 @@ Every node in the tree is either a **group** or an **item**:
 
 ---
 
+## Questionnaire-Level Metadata
+
+Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, written back on export, editable via the Properties modal. Reset to defaults when the questionnaire is cleared.
+
+| Field | FHIR field | Import | Export |
+|---|---|---|---|
+| `questMeta.id` | `Questionnaire.id` | ← `id` | → `id` (fallback: `'logic-builder-export'`) |
+| `questMeta.url` | `Questionnaire.url` | ← `url` | → `url` (omitted when empty) |
+| `questMeta.version` | `Questionnaire.version` | ← `version` | → `version` (omitted when empty) |
+| `questMeta.title` | `Questionnaire.title` | ← `title` | → `title` (takes precedence over rawFhir.title; fallback: `'Untitled Questionnaire'`) |
+| `questMeta.status` | `Questionnaire.status` | ← `status` (default: `'draft'`) | → `status` |
+| `questMeta.publisher` | `Questionnaire.publisher` | ← `publisher` | → `publisher` (omitted when empty) |
+| `questMeta.description` | `Questionnaire.description` | ← `description` | → `description` (omitted when empty) |
+
+---
+
 ## Item Type Mapping
 
 ### Import: `item.type` → `itemType`

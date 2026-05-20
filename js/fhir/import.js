@@ -1,5 +1,5 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
-import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables, questContained, setValue, clearAllValues } from '../state.js';
+import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables, questContained, questMeta, setValue, clearAllValues } from '../state.js';
 import { renderTree } from '../render-builder.js';
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
 
@@ -325,6 +325,15 @@ export function importFHIR(fhirJson, renderFn) {
   clearAllValues();
   rawFhir.value = q;
   resetSeq();
+
+  // Populate questionnaire-level metadata
+  questMeta.id          = q.id          || '';
+  questMeta.url         = q.url         || '';
+  questMeta.version     = q.version     || '';
+  questMeta.title       = q.title       || '';
+  questMeta.status      = q.status      || 'draft';
+  questMeta.publisher   = q.publisher   || '';
+  questMeta.description = q.description || '';
 
   // Read questionnaire-level SDC variables
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';

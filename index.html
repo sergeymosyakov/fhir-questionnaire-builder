@@ -107,6 +107,18 @@
           data-tip-spec="R4 · optional">&#x21BA; Renumber</button>
       </div>
     </div>
+    <!-- Questionnaire metadata card (shown when tree has nodes) -->
+    <div id="questMetaCard" class="quest-meta-card" data-testid="quest-meta-card" style="display:none">
+      <span class="quest-meta-card-label">Questionnaire</span>
+      <span id="questMetaCardStatus" class="quest-meta-card-status" data-testid="quest-meta-status"
+        data-tip-title="Publication status"
+        data-tip-body="Lifecycle status of this questionnaire: draft (work in progress), active (published and in use), retired (no longer used), or unknown."
+        data-tip-fhir="Questionnaire.status"
+        data-tip-spec="R4 &middot; required"></span>
+      <button id="propertiesBtn" type="button" class="quest-meta-edit-btn" data-testid="properties-btn"
+        data-tip-title="Questionnaire Properties"
+        data-tip-body="Edit questionnaire-level metadata: id, url, version, title, status, publisher and description. These fields are preserved on import and written back on export.">Edit</button>
+    </div>
     <!-- Questionnaire-level SDC variables card (shown when tree has nodes) -->
     <div id="variablesCard" class="variables-card" style="display:none">
       <div class="variables-card-header">
@@ -269,6 +281,21 @@
     </div>
     <div class="right-panel-body">
       <div class="preview-card" id="lform" data-testid="preview-panel"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Questionnaire Properties (metadata) modal -->
+<div id="metadataModal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span id="metadataModalTitle">Questionnaire Properties</span>
+      <button type="button" id="metadataModalClose" class="modal-close" title="Close">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="metadataModalBody"></div>
+    <div class="modal-footer">
+      <button type="button" id="metadataModalCancel" class="modal-btn">Cancel</button>
+      <button type="button" id="metadataModalApply" class="modal-btn modal-btn--apply">Apply</button>
     </div>
   </div>
 </div>

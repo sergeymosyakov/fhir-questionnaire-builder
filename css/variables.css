@@ -1,3 +1,53 @@
+/* === Questionnaire metadata card (above variables card, left panel) ========= */
+.quest-meta-card {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--c-border);
+  background: var(--c-surface);
+  padding: 5px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.quest-meta-card-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  color: var(--c-text-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.quest-meta-card-status {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 8px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: var(--c-text-2);
+}
+.quest-meta-card-status[data-status="active"]  { color: #16a34a; }
+.quest-meta-card-status[data-status="draft"]   { color: #ca8a04; }
+.quest-meta-card-status[data-status="retired"] { color: #dc2626; }
+.quest-meta-edit-btn {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 2px 8px;
+  background: none;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  color: var(--c-text-2);
+  flex-shrink: 0;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.quest-meta-edit-btn:hover {
+  background: var(--c-primary);
+  color: #fff;
+  border-color: var(--c-primary);
+}
+
 /* === Variables card (above tree in left panel) =============================== */
 .variables-card {
   flex-shrink: 0;
