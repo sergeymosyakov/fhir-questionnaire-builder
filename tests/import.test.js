@@ -743,4 +743,34 @@ describe('importFHIR', () => {
       expect(_tree[0]._entryFormat).toBeUndefined();
     });
   });
+
+  // ── questionnaire-choiceOrientation ──────────────────────────────────────
+  describe('_choiceOrientation', () => {
+    const CO_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation';
+
+    it('reads vertical valueCode into node._choiceOrientation', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'choice', text: 'Pick one',
+        extension: [{ url: CO_URL, valueCode: 'vertical' }],
+        answerOption: [{ valueCoding: { code: 'a', display: 'A' } }],
+      }]));
+      expect(_tree[0]._choiceOrientation).toBe('vertical');
+    });
+
+    it('reads horizontal valueCode into node._choiceOrientation', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'choice', text: 'Pick one',
+        extension: [{ url: CO_URL, valueCode: 'horizontal' }],
+        answerOption: [{ valueCoding: { code: 'a', display: 'A' } }],
+      }]));
+      expect(_tree[0]._choiceOrientation).toBe('horizontal');
+    });
+
+    it('does not set _choiceOrientation when extension is absent', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Pick one',
+        answerOption: [{ valueCoding: { code: 'a', display: 'A' } }] }]));
+      expect(_tree[0]._choiceOrientation).toBeUndefined();
+    });
+  });
 });
+

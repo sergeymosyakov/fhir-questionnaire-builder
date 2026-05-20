@@ -810,3 +810,30 @@ describe('buildFHIRObject — entryFormat', () => {
     expect(ef?.valueString).toBe('###');
   });
 });
+
+// ── questionnaire-choiceOrientation ──────────────────────────────────────────
+describe('buildFHIRObject — choiceOrientation', () => {
+  const CO_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation';
+
+  it('exports _choiceOrientation=vertical as valueCode extension', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A', _choiceOrientation: 'vertical' }]);
+    const ext = q.item[0].extension || [];
+    const co = ext.find(e => e.url === CO_URL);
+    expect(co).toBeDefined();
+    expect(co.valueCode).toBe('vertical');
+  });
+
+  it('exports _choiceOrientation=horizontal as valueCode extension', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A', _choiceOrientation: 'horizontal' }]);
+    const ext = q.item[0].extension || [];
+    const co = ext.find(e => e.url === CO_URL);
+    expect(co?.valueCode).toBe('horizontal');
+  });
+
+  it('does not emit choiceOrientation extension when _choiceOrientation is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.some(e => e.url === CO_URL)).toBe(false);
+  });
+});
+

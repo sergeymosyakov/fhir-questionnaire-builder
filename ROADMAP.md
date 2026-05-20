@@ -6,23 +6,16 @@ See [docs/CONTEXT.md](docs/CONTEXT.md) for scenario definitions.
 
 ---
 
-## Now
-
-- [x] **Multi-condition visual builder** — `enableWhen[]` panel with AND/ALL vs OR/ANY toggle, per-condition rows (question picker + operator + value), FHIRPath `enableWhenExpression` for advanced expressions
-
 ## Next
 
-- [ ] **Patient presets** — 3–4 quick-switch patient buttons (e.g. Child, Adult F, Obese M); replaces manual field-by-field editing for faster Scenario 3 testing
-- [x] **`open-choice` free-text rendering** — text input + `<datalist>` suggestions from `answerOption[]`; free-text allowed
-- [x] **`answerValueSet` warning** — suppressed when `answerValueSet` is present; validator no longer flags items that delegate answer options to an external value set
 - [ ] **More sample data** — 2–3 additional questionnaires covering different complexity levels, with documented expected PASS/FAIL outcomes per patient profile
+- [ ] **`sdc-questionnaire-hidden`** — permanently hidden items that participate in logic but are never shown in the preview; distinct from `enableWhen`-based visibility
+- [ ] **`sdc-questionnaire-answerExpression`** — dynamic answer options derived from FHIRPath over current form values (no server required); SDC extension
 
 ## Later
 
-- [x] Unit tests for `eval.js` and `fhir/import.js`
-- [x] `item.prefix` support (numbered questions, e.g. `"1.1"`)
-- [x] Repeating items (`item.repeats: true` / `maxOccurs`) — modal configures repeats + min/max cardinality; QR round-trip safe
-- [x] SDC `variable` extension support (questionnaire-level variables, `%varName` in FHIRPath)
-- [x] SDC `initialExpression` extension support — evaluated once on import + Re-init; result pre-fills `values[]`
-- [ ] FHIR STU3 import compatibility shim
-- [ ] External validator integration (link to HL7 / Simplifier validator, or local FHIR validation API call)
+- [ ] **`rendering-xhtml`** — currently silently dropped on import; at minimum, round-trip preserve the raw extension value rather than discard it
+- [ ] **`questionnaire-displayCategory`** — category hint for `display` items (`instructions`, `security`, `help`); affects rendering style
+- [ ] **`sdc-questionnaire-supportLink`** — per-item help / documentation URL; could render as a tooltip or "?" icon
+- [ ] **FHIR STU3 import compatibility shim** — map STU3 field names to R4 equivalents on load so older questionnaires open without errors
+- [ ] **External validator integration** — link to HL7 / Simplifier validator or call a local FHIR validation API; surface results as item-level badges

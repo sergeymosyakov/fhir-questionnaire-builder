@@ -117,7 +117,8 @@ export function open(node, typeLink, setActive) {
     draftMinValue:    node._minValue    !== undefined ? String(node._minValue)    : '',
     draftMaxValue:    node._maxValue    !== undefined ? String(node._maxValue)    : '',
     draftSliderStep:  node._sliderStep  !== undefined ? String(node._sliderStep)  : '',
-    draftEntryFormat: node._entryFormat || '',
+    draftEntryFormat:  node._entryFormat || '',
+    draftOrientation:  node._choiceOrientation || '',
   };
 
   setModalTitle(_el.title, 'Answer Type', node.title || node.id || 'Item');
@@ -204,6 +205,13 @@ function _apply() {
     delete node._entryFormat;
   }
 
+  // choiceOrientation (radio items only)
+  if (node.itemType === 'radio' && _pending.draftOrientation) {
+    node._choiceOrientation = _pending.draftOrientation;
+  } else {
+    delete node._choiceOrientation;
+  }
+
   // Keep the repeatable link visible/hidden correctly
   const nodeEl = document.querySelector(`[data-node-id="${node.id}"]`);
   const rl = nodeEl?.querySelector('[data-testid="action-repeatable"]');
@@ -252,6 +260,7 @@ function _renderBody(container) {
       unitSection.style.display        = _pending.draftType === 'quantity'    ? 'block' : 'none';
       numericSection.style.display     = (_pending.draftType === 'integer' || _pending.draftType === 'decimal') ? 'block' : 'none';
       placeholderSection.style.display = ENTRY_FORMAT_TYPES.has(_pending.draftType) ? 'block' : 'none';
+      orientationSection.style.display = _pending.draftType === 'radio' ? 'block' : 'none';
     },
   });
   typeRow.appendChild(typeLbl);
@@ -509,4 +518,32 @@ function _renderBody(container) {
 
   placeholderSection.append(placeholderLbl, placeholderInp);
   container.appendChild(placeholderSection);
+
+  // ── Choice orientation (radio only) ──────────────────────────────────────
+  const orientationSection = document.createElement('div');
+  orientationSection.className = 'at-modal-sub';
+  orientationSection.style.display = _pending.draftType === 'radio' ? 'block' : 'none';
+
+  const orientLbl = document.createElement('div');
+  orientLbl.className   = 'at-modal-sub-lbl at-modal-sub-lbl--tip';
+  orientLbl.textContent = 'Choice orientation:';
+  orientLbl.dataset.tipTitle = 'Choice Orientation';
+  orientLbl.dataset.tipBody  = 'Controls whether radio buttons are stacked vertically or placed side by side horizontally. Exported as the questionnaire-choiceOrientation extension.';
+  orientLbl.dataset.tipFhir  = 'item.extension[questionnaire-choiceOrientation].valueCode';
+  orientLbl.dataset.tipSpec  = 'R4';
+
+  const orientSel = createCustomSelect({
+    items: [
+      { value: '',           label: '\u2014 default \u2014' },
+      { value: 'vertical',   label: 'Vertical (stacked)' },
+      { value: 'horizontal', label: 'Horizontal (inline)' },
+    ],
+    value:     _pending.draftOrientation,
+    className: 'at-modal-sub-sel sc-trigger--full',
+    testid:    'orientation-select',
+    onChange:  v => { _pending.draftOrientation = v; },
+  });
+
+  orientationSection.append(orientLbl, orientSel.el);
+  container.appendChild(orientationSection);
 }

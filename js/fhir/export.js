@@ -154,6 +154,11 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat', valueString: node._entryFormat });
   }
 
+  // questionnaire-choiceOrientation
+  if (node._choiceOrientation) {
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation', valueCode: node._choiceOrientation });
+  }
+
   // questionnaire-minValue / questionnaire-maxValue
   if (node._minValue !== undefined) {
     const isInt = Number.isInteger(node._minValue);

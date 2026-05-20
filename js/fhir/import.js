@@ -214,6 +214,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (entryFmtExt?.valueString) node._entryFormat = entryFmtExt.valueString;
 
+  // questionnaire-choiceOrientation
+  const choiceOrientExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation'
+  );
+  if (choiceOrientExt?.valueCode) node._choiceOrientation = choiceOrientExt.valueCode;
+
   // questionnaire-minValue / questionnaire-maxValue (SDC R4 extensions)
   const minValExt = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/minValue'

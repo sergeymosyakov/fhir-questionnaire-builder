@@ -14,6 +14,9 @@ export function build(node, ctx) {
     return wrap;
   }
 
+  if (node._choiceOrientation === 'vertical') wrap.classList.add('ctrl-wrap--vertical');
+  else if (node._choiceOrientation === 'horizontal') wrap.classList.add('ctrl-wrap--horizontal');
+
   const rbName = 'radio_' + node.id;
   // Do NOT pre-select first option — required radio must be explicitly chosen
 
