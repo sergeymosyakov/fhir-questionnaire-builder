@@ -5,14 +5,16 @@
 // Advanced (collapsible, collapsed by default): date, subjectType,
 //   effectivePeriodStart, effectivePeriodEnd, approvalDate, lastReviewDate,
 //   purpose, copyright.
-// Pass-through fields (contact, useContext, jurisdiction, code[]) have no
+// Pass-through fields (contact, useContext, jurisdiction) have no
 //   editing UI — they are preserved automatically on import/export.
+// Codes (collapsible): Questionnaire.code[] — editable via shared renderCodesEditor.
 //
 // init(elements)  — wire DOM once at startup
 // open()          — populate body + show
 
 import { questMeta } from '../state.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { renderCodesEditor } from './codes-modal.js';
 
 const STATUSES = ['draft', 'active', 'retired', 'unknown'];
 
@@ -44,6 +46,7 @@ export function open() {
     lastReviewDate: questMeta.lastReviewDate,
     effectivePeriodStart: questMeta.effectivePeriodStart,
     effectivePeriodEnd:   questMeta.effectivePeriodEnd,
+    codes: JSON.parse(JSON.stringify(questMeta._rawCode || [])),
   };
 
   setModalTitle(_el.title, 'Questionnaire Properties', '');
@@ -72,6 +75,8 @@ function _apply() {
   questMeta.lastReviewDate = _pending.lastReviewDate.trim();
   questMeta.effectivePeriodStart = _pending.effectivePeriodStart.trim();
   questMeta.effectivePeriodEnd   = _pending.effectivePeriodEnd.trim();
+  const filteredCodes = _pending.codes.filter(c => c.code.trim());
+  questMeta._rawCode = filteredCodes.length ? filteredCodes : null;
   _close();
 }
 
@@ -185,4 +190,39 @@ function _renderBody(container) {
 
   adv.append(toggle, body);
   container.appendChild(adv);
+
+  // ── Codes (collapsible) ──────────────────────────────────────────────────
+  const codesSection = document.createElement('div');
+  codesSection.className = 'meta-modal-advanced';
+
+  const codesToggle = document.createElement('button');
+  codesToggle.type      = 'button';
+  codesToggle.className = 'meta-modal-adv-toggle';
+  codesToggle.dataset.testid = 'meta-codes-toggle';
+  let codesOpen = false;
+
+  const codesBody = document.createElement('div');
+  codesBody.className = 'meta-modal-adv-body';
+  codesBody.style.display = 'none';
+  renderCodesEditor(_pending.codes, codesBody, 'meta-code');
+
+  const _setCodesLabel = () => {
+    const count = _pending.codes.filter(c => c.code.trim()).length;
+    const badge = count ? ` (${count})` : '';
+    codesToggle.textContent = (codesOpen ? '\u25BC' : '\u25BA') + ' Codes' + badge;
+  };
+  _setCodesLabel();
+  codesToggle.addEventListener('click', () => {
+    codesOpen = !codesOpen;
+    codesBody.style.display = codesOpen ? '' : 'none';
+    _setCodesLabel();
+  });
+
+  // Refresh badge after any add/remove inside the editor
+  const _refreshBadge = () => _setCodesLabel();
+  codesBody.addEventListener('input', _refreshBadge);
+  codesBody.addEventListener('click', () => setTimeout(_refreshBadge, 0));
+
+  codesSection.append(codesToggle, codesBody);
+  container.appendChild(codesSection);
 }

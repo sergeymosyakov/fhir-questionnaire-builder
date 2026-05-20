@@ -83,7 +83,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `questMeta._rawContact` | `Questionnaire.contact[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawUseContext` | `Questionnaire.useContext[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawJurisdiction` | `Questionnaire.jurisdiction[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
-| `questMeta._rawCode` | `Questionnaire.code[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
+| `questMeta._rawCode` | `Questionnaire.code[]` | ← stored as array (default: `null`) | → written back unchanged; editable via **Codes** section in Properties modal (system/code/display rows; draft pattern; badge shows count) |
 
 ---
 

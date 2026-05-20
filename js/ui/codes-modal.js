@@ -43,6 +43,17 @@ function _close() {
 // ── Body renderer ─────────────────────────────────────────────────────────────
 
 function _renderBody(draft, container) {
+  renderCodesEditor(draft, container, 'code');
+}
+
+/**
+ * Shared codes editor — renders system/code/display rows + Add button.
+ * Reusable across modals (item codes, questionnaire codes).
+ * @param {object[]} draft   — mutable array of {system, code, display}
+ * @param {Element}  container — cleared and repopulated
+ * @param {string}   prefix  — testid prefix, e.g. 'code' or 'meta-code'
+ */
+export function renderCodesEditor(draft, container, prefix = 'code') {
   container.innerHTML = '';
 
   if (draft.length === 0) {
@@ -62,7 +73,7 @@ function _renderBody(draft, container) {
       inp.value = c[field] || '';
       inp.placeholder = placeholder;
       inp.className = 'codes-inp';
-      inp.dataset.testid = `code-${field}-${idx}`;
+      inp.dataset.testid = `${prefix}-${field}-${idx}`;
       inp.oninput = () => { draft[idx][field] = inp.value; };
       return inp;
     };
@@ -76,8 +87,8 @@ function _renderBody(draft, container) {
     removeBtn.className = 'codes-remove-btn';
     removeBtn.textContent = '\u00D7';
     removeBtn.title = 'Remove';
-    removeBtn.dataset.testid = `code-remove-${idx}`;
-    removeBtn.onclick = () => { draft.splice(idx, 1); _renderBody(draft, container); };
+    removeBtn.dataset.testid = `${prefix}-remove-${idx}`;
+    removeBtn.onclick = () => { draft.splice(idx, 1); renderCodesEditor(draft, container, prefix); };
     row.appendChild(removeBtn);
 
     container.appendChild(row);
@@ -86,8 +97,8 @@ function _renderBody(draft, container) {
   const addBtn = document.createElement('button');
   addBtn.type = 'button';
   addBtn.className = 'codes-add-btn';
-  addBtn.dataset.testid = 'codes-add-btn';
+  addBtn.dataset.testid = `${prefix}s-add-btn`;
   addBtn.textContent = '+ Add code';
-  addBtn.onclick = () => { draft.push({ system: '', code: '', display: '' }); _renderBody(draft, container); };
+  addBtn.onclick = () => { draft.push({ system: '', code: '', display: '' }); renderCodesEditor(draft, container, prefix); };
   container.appendChild(addBtn);
 }

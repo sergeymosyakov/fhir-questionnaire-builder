@@ -29,6 +29,12 @@
 //   meta-last-review     (data-testid) lastReviewDate input (Advanced)
 //   meta-purpose         (data-testid) purpose textarea (Advanced)
 //   meta-copyright       (data-testid) copyright textarea (Advanced)
+//   meta-codes-toggle    (data-testid) Codes section toggle button
+//   meta-code-code-0     (data-testid) code input for first Questionnaire.code[] row
+//   meta-code-system-0   (data-testid) system input for first row
+//   meta-code-display-0  (data-testid) display input for first row
+//   meta-code-remove-0   (data-testid) remove button for first row
+//   meta-codes-add-btn   (data-testid) Add code button inside Codes section
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -372,5 +378,96 @@ test.describe('metadata modal — effectivePeriod', () => {
     await expect(page.getByTestId('meta-effective-start')).toHaveValue('');
     await expect(page.getByTestId('meta-effective-end')).toHaveValue('');
     await page.locator('#metadataModalCancel').click();
+  });
+});
+
+// ── Questionnaire.code[] section ──────────────────────────────────────────────
+test.describe('metadata modal — Questionnaire codes', () => {
+  test('Codes toggle visible, collapsed by default', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-codes-toggle')).toBeVisible();
+    await expect(page.getByTestId('meta-code-code-0')).not.toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('Codes toggle shows count badge when codes are present', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-codes-toggle')).toContainText('(1)');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('expanding Codes section shows imported code row', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-codes-toggle').click();
+    await expect(page.getByTestId('meta-code-code-0')).toHaveValue('44249-1');
+    await expect(page.getByTestId('meta-code-system-0')).toHaveValue('http://loinc.org');
+    await expect(page.getByTestId('meta-code-display-0')).toHaveValue('PHQ-9 total score');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('Add code button appends a new empty row', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-codes-toggle').click();
+    await page.getByTestId('meta-codes-add-btn').click();
+    await expect(page.getByTestId('meta-code-code-1')).toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('edited codes are committed on Apply and round-trip through export', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-codes-toggle').click();
+    await page.getByTestId('meta-codes-add-btn').click();
+    await page.getByTestId('meta-code-system-1').fill('http://snomed.info/sct');
+    await page.getByTestId('meta-code-code-1').fill('44054006');
+    await page.getByTestId('meta-code-display-1').fill('Type 2 diabetes');
+    await page.locator('#metadataModalApply').click();
+    // Export and verify both codes in JSON
+    page.once('dialog', d => d.accept());
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click(),
+    ]);
+    const filePath = await download.path();
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(filePath, 'utf8'));
+    expect(q.code).toHaveLength(2);
+    expect(q.code[1].code).toBe('44054006');
+  });
+
+  test('Cancel discards code changes', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-codes-toggle').click();
+    await page.getByTestId('meta-code-remove-0').click();
+    await page.locator('#metadataModalCancel').click();
+    // Reopen — code must still be there
+    await openModal(page);
+    await page.getByTestId('meta-codes-toggle').click();
+    await expect(page.getByTestId('meta-code-code-0')).toHaveValue('44249-1');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('removing all codes sets _rawCode to null (no code[] in export)', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-codes-toggle').click();
+    await page.getByTestId('meta-code-remove-0').click();
+    await page.locator('#metadataModalApply').click();
+    page.once('dialog', d => d.accept());
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click(),
+    ]);
+    const filePath = await download.path();
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(filePath, 'utf8'));
+    expect(q.code).toBeUndefined();
   });
 });

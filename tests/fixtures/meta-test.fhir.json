@@ -18,6 +18,9 @@
   "contact": [{"name": "Test Contact"}],
   "useContext": [{"code": {"code": "venue"}, "valueCodeableConcept": {"text": "inpatient"}}],
   "jurisdiction": [{"coding": [{"system": "urn:iso:std:iso:3166", "code": "US"}]}],
+  "code": [
+    { "system": "http://loinc.org", "code": "44249-1", "display": "PHQ-9 total score" }
+  ],
   "item": [
     {
       "linkId": "q1",
