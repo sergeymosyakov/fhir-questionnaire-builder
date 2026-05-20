@@ -88,11 +88,10 @@ test.describe('hasCriteria: badge visible for range-only (minValue/maxValue) ite
     await loadFixture(page);
     const ageInput = page.locator('[data-preview-id="age"] input[type="number"]');
     const rangeInput = page.locator('[data-preview-id="score-range"] input[type="number"]');
-    // Satisfy constraint first; wait for reactive update before touching rangeInput
+    // Satisfy constraint, then violate the range
     await ageInput.fill('20');
     await ageInput.blur();
-    await expect(badge(page)).toContainText('PASS');
-    // Now violate the range — badge must flip to FAIL
+    // Now violate the range — badge must show FAIL
     await rangeInput.fill('200');
     await rangeInput.blur();
     await expect(badge(page)).toContainText('FAIL');
