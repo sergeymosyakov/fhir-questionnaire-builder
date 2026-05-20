@@ -21,6 +21,8 @@ function _flattenQR(items, out = {}) {
         if (ans.valueDate      !== undefined) return ans.valueDate;
         if (ans.valueDateTime  !== undefined) return ans.valueDateTime;
         if (ans.valueTime      !== undefined) return ans.valueTime;
+        if (ans.valueQuantity  !== undefined) return { value: ans.valueQuantity.value, unit: ans.valueQuantity.unit || '' };
+        if (ans.valueUri       !== undefined) return ans.valueUri;
         if (ans.valueReference !== undefined) return { reference: ans.valueReference.reference || '' };
         if (ans.valueString    !== undefined) return ans.valueString;
         return undefined;

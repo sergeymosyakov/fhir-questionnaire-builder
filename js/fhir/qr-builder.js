@@ -51,9 +51,11 @@ function buildQRItem(fhirItem, values) {
       }
       return { valueCoding: coding };
     }
-    if (t === 'integer')                     return { valueInteger: parseInt(v) || 0 };
-    if (t === 'decimal' || t === 'quantity') return { valueDecimal: parseFloat(v) || 0 };
-    if (t === 'reference')  return { valueReference: { reference: String(v?.reference || '') } };
+    if (t === 'integer')  return { valueInteger: parseInt(v) || 0 };
+    if (t === 'decimal')   return { valueDecimal: parseFloat(v) || 0 };
+    if (t === 'quantity')  return { valueQuantity: { value: parseFloat(v?.value) || 0, unit: v?.unit || '' } };
+    if (t === 'url')       return { valueUri: String(v) };
+    if (t === 'reference') return { valueReference: { reference: String(v?.reference || '') } };
     return { valueString: String(v) };
   }
 

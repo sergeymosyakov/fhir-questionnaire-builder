@@ -172,6 +172,18 @@ describe('importQRAnswers — time and reference types', () => {
     importQRAnswers(makeQR([{ linkId: 'q-ref', answer: [{ valueReference: { reference: 'Practitioner/456' } }] }]), values, tree);
     expect(values['q-ref']).toEqual({ reference: 'Practitioner/456' });
   });
+
+  it('loads a valueQuantity as { value, unit } object', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q-time', answer: [{ valueQuantity: { value: 70, unit: 'kg' } }] }]), values, tree);
+    expect(values['q-time']).toEqual({ value: 70, unit: 'kg' });
+  });
+
+  it('loads a valueUri as string', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q-ref', answer: [{ valueUri: 'https://example.org' }] }]), values, tree);
+    expect(values['q-ref']).toBe('https://example.org');
+  });
 });
 
 // ── unmatched linkIds ─────────────────────────────────────────────────────────

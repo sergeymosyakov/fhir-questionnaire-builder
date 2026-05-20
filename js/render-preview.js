@@ -426,14 +426,16 @@ async function _asyncRender(version) {
       // Only count items that actually have a checkable condition right now
       const relevantItems = descendantItems.filter(r =>
         (isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)) ||
-        (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox')
+        (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox') ||
+        r.node.constraint?.length > 0 ||
+        (r.node._minValue !== undefined || r.node._maxValue !== undefined)
       );
       if (relevantItems.length === 0) {
         hasCondition = false;
         displayOk    = true;
       } else {
         hasCondition = true;
-        const itemOk = k => k.ok && calcFormOk(k.node);
+        const itemOk = k => k.ok && calcFormOk(k.node) && (!k.node.constraint?.length || evalConstraints(k.node, ctx.fp, ctx.qr, _cEnv));
         displayOk = res.node.logicWithParent === 'OR'
           ? relevantItems.some(itemOk)
           : relevantItems.every(itemOk);
@@ -750,14 +752,16 @@ async function _asyncRender(version) {
     for (const [, { icon, descendants, node }] of groupIconMap.entries()) {
       const relevant = descendants.filter(r =>
         (isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)) ||
-        (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox')
+        (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox') ||
+        r.node.constraint?.length > 0 ||
+        (r.node._minValue !== undefined || r.node._maxValue !== undefined)
       );
       if (relevant.length === 0) {
         icon.className   = 'icon-ok';
         icon.textContent = '\u2714';
         continue;
       }
-      const itemOk = k => k.ok && calcFormOk(k.node);
+      const itemOk = k => k.ok && calcFormOk(k.node) && (!k.node.constraint?.length || evalConstraints(k.node, ctx.fp, ctx.qr, ctx.envVars || {}));
       const ok = node.logicWithParent === 'OR'
         ? relevant.some(itemOk)
         : relevant.every(itemOk);
@@ -766,7 +770,7 @@ async function _asyncRender(version) {
     }
   }
 
-  statusBadge.update({ anyVisible, hasCriteria: hasMandatory || hasCalc, finalOk, failingItems });
+  statusBadge.update({ anyVisible, hasCriteria: hasMandatory || hasCalc || hasConstraints || hasRange, finalOk, failingItems });
   search.refresh();
   progress.hide(); // no-op when progress was not shown (normal form interactions)
 }

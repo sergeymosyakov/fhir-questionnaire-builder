@@ -96,14 +96,21 @@ describe('buildQR — leaf answer types', () => {
     expect(qr.item[0].answer[0].valueCoding).toEqual({ code: 'custom' });
   });
 
-  it('quantity → valueDecimal', () => {
-    const qr = buildQR(mkFhir('q', 'quantity'), { q: 75 });
-    expect(qr.item[0].answer[0].valueDecimal).toBe(75);
+  it('quantity → valueQuantity with value and unit', () => {
+    const qr = buildQR(mkFhir('q', 'quantity'), { q: { value: 70, unit: 'kg' } });
+    expect(qr.item[0].answer[0].valueQuantity).toEqual({ value: 70, unit: 'kg' });
+    expect(qr.item[0].answer[0].valueDecimal).toBeUndefined();
+  });
+
+  it('url → valueUri', () => {
+    const qr = buildQR(mkFhir('q', 'url'), { q: 'https://example.org' });
+    expect(qr.item[0].answer[0].valueUri).toBe('https://example.org');
+    expect(qr.item[0].answer[0].valueString).toBeUndefined();
   });
 
   it('unknown type falls back to valueString', () => {
-    const qr = buildQR(mkFhir('q', 'url'), { q: 'https://example.org' });
-    expect(qr.item[0].answer[0].valueString).toBe('https://example.org');
+    const qr = buildQR(mkFhir('q', 'string'), { q: 'text' });
+    expect(qr.item[0].answer[0].valueString).toBe('text');
   });
 });
 
@@ -224,9 +231,10 @@ describe('buildQR — type to value[x] mapping', () => {
     expect(qr.item[0].answer[0].valueBoolean).toBe(true);
   });
 
-  it('quantity type → valueDecimal (use .answer.valueDecimal in FHIRPath)', () => {
-    const qr = buildQR({ item: [{ linkId: 'q', type: 'quantity' }] }, { q: 75 });
-    expect(qr.item[0].answer[0].valueDecimal).toBe(75);
+  it('quantity type \u2192 valueQuantity (value + unit preserved)', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'quantity' }] }, { q: { value: 75, unit: 'kg' } });
+    expect(qr.item[0].answer[0].valueQuantity).toEqual({ value: 75, unit: 'kg' });
+    expect(qr.item[0].answer[0].valueDecimal).toBeUndefined();
   });
 
   it('choice type → valueCoding (use .answer.valueCoding.code in FHIRPath)', () => {

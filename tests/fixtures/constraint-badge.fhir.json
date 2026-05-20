@@ -1,0 +1,47 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "constraint-badge-test",
+  "title": "Constraint Badge Test",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "grp-constraint",
+      "text": "Constraint Group",
+      "type": "group",
+      "item": [
+        {          "linkId": "age",
+          "text": "Age (must be 18 or older)",
+          "type": "integer",
+          "required": false,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-constraint",
+              "extension": [
+                { "url": "key",        "valueId": "age-min" },
+                { "url": "severity",   "valueCode": "error" },
+                { "url": "human",      "valueString": "Must be 18 or older" },
+                { "url": "expression", "valueString": "%resource.repeat(item).where(linkId='age').answer.valueInteger >= 18" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "score-range",
+      "text": "Score (0 to 100)",
+      "type": "integer",
+      "required": false,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+          "valueInteger": 0
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+          "valueInteger": 100
+        }
+      ]
+    }
+  ]
+}

@@ -108,8 +108,8 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **336 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — e2e test suite (`tests/e2e/`); **214 tests** across 16 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **339 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Playwright** — e2e test suite (`tests/e2e/`); **224 tests** across 17 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
 
@@ -333,9 +333,9 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ### Tests
 ```powershell
-npm test             # unit tests — single run (Vitest, 336 tests)
+npm test             # unit tests — single run (Vitest, 339 tests)
 npm run test:watch   # unit tests — watch mode
-npm run test:e2e     # e2e tests — Playwright/Chromium (214 tests, requires Chromium installed)
+npm run test:e2e     # e2e tests — Playwright/Chromium (224 tests, requires Chromium installed)
 npm run test:e2e:ui  # e2e tests — Playwright UI mode
 ```
 Vitest and Playwright CI run automatically on every push via GitHub Actions (see `.github/workflows/test.yml`).
