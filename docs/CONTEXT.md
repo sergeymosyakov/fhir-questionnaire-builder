@@ -12,6 +12,7 @@
 5. **No inline styles** — `style="..."` in HTML and `el.style.foo =` in JS are forbidden for static values. Allowed only for **runtime-dynamic** values: show/hide (`display`), computed dimensions, user-driven colors. All static appearance → CSS classes.
 6. **English only** — all code comments, doc strings, commit messages, CONTEXT.md, README.md, any in-repo text, **and all UI labels, button text, and tooltip text in HTML and JS** must be in English. No Russian anywhere in the codebase.
 7. **E2E test selectors** — selectors in `tests/e2e/*.spec.js` must use `data-testid` (via `element.dataset.testid`) where applicable. No raw class or tag selectors. When adding a testable element, register its ID in the registry comment at the top of the relevant spec file.
+8. **Tooltips** — **never use the native `title="..."` attribute**. Always use the custom rich tooltip system via `data-tip-title` / `data-tip-body` (and optionally `data-tip-fhir` / `data-tip-spec`). Triggered automatically by `js/ui/tooltip.js` on mouseover.
 
 ---
 
@@ -309,11 +310,11 @@ _disabledDisplay // 'hidden'|'protected' — when not visible: 'hidden' removes 
 
 ## Key UX Features
 
-- **Bidirectional navigation** — click preview row → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue); `↗` button on every builder node header (after `[Item]`/`[Group]` label) provides explicit one-click navigation to the corresponding preview row
+- **Bidirectional navigation** — `↗` icon on every active preview row (visible on hover; `data-testid="preview-nav-btn"`) → scroll+flash builder node (teal); click builder node header → scroll+flash preview row (blue); `↗` button on every builder node header provides explicit one-click navigation to the corresponding preview row; dimmed and disabled rows remain fully clickable (no interactive controls there)
 - **Drag & drop reorder** — ⠿ handle on every node; drag to reorder, drop between nodes (blue line), drop into group (dashed zone), drop at root level; ancestor→descendant drop blocked
 - **Collapse sections (preview)** — `▼/▶` toggle on each group row in the preview; SVG corner-arrow icon buttons in the preview toolbar collapse/expand all (appear when tree is non-empty, right-aligned via flex spacer)
 - **Preview toolbar order** — `⬆ Load ▾` | `⬇ Export` | 🔍 Search | [flex spacer] | `id` toggle | `prefix` toggle | collapse | expand; search and collapse/expand shown only when tree has content
-- **Disabled groups clickable** — N/A (grayed `—`) groups in preview are still clickable to navigate to builder node
+- **Required boolean tristate** — `boolean`/`checkbox` items with `required: true` render an indeterminate (gray-fill) checkbox when unanswered (`values[id] === undefined`); first click → `true`; subsequent clicks toggle `true ↔ false`; `calcFormOk` passes for both `true` and `false` — only `undefined` fails (FHIR: `required` means an answer must be given, not that the answer must be `true`)
 - **Editable linkId** — blue monospace input in the builder node header; directly edits `node.id`
 - **item.prefix** — FHIR R4 `Questionnaire.item.prefix` imported into `node._prefix` and exported back (round-trip safe); amber pill badge in preview; editable in builder meta-row; **Renumber** assigns sequential prefixes (e.g. `1`, `1.1`) — writes `_prefix` only, never changes `node.id`
 - **linkId / prefix toggles** — `id` (blue) and `prefix` (amber) buttons in preview toolbar toggle the corresponding pill badges; state stored in `showLinkId` / `showPrefix` refs; clicking a linkId badge copies the linkId to clipboard (✓ copied feedback); badge shows rich tooltip with visibility-rule usage, expected value type, item type

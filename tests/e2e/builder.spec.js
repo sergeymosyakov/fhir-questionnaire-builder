@@ -52,6 +52,7 @@
 // Preview rows  (js/render-preview.js)
 //   preview-required-star   "*" span shown when mandatory is null or true
 //   preview-optional-badge  "optional" badge shown when mandatory is false
+//   preview-nav-btn         "↗" icon on every active preview row; navigates to builder node
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -313,7 +314,7 @@ test.describe('Navigation', () => {
     const groupId = await addRootGroup(page);
     const itemId  = await addItemToGroup(page, groupId);
 
-    await page.locator(`[data-preview-id="${itemId}"]`).click();
+    await page.locator(`[data-preview-id="${itemId}"] [data-testid="preview-nav-btn"]`).click();
 
     // node-flash class is added synchronously and held for 1 s.
     await expect(page.locator(`[data-node-id="${itemId}"]`))

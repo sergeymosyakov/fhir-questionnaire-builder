@@ -5,8 +5,17 @@ export function build(node, ctx) {
   const wrap = createWrap();
 
   const el = document.createElement('input');
-  el.type    = 'checkbox';
-  el.checked = !!getValue(node.id);
+  el.type = 'checkbox';
+
+  const initialVal = getValue(node.id);
+  // Required boolean with no answer yet → tristate: indeterminate = "not answered"
+  // First click → true (Yes), subsequent clicks toggle true ↔ false normally.
+  if (initialVal === undefined && node.mandatory !== false) {
+    el.indeterminate = true;
+    el.dataset.testid = 'checkbox-indeterminate';
+  } else {
+    el.checked = initialVal === true;
+  }
 
   el.onchange = () => {
     setValue(node.id, el.checked);

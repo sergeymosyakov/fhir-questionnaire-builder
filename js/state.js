@@ -171,9 +171,11 @@ export const calcFormOk = node => {
     if (node.itemType !== 'checkbox') return true;
     return getValue(node.id) === true;
   }
-  // checkbox: mandatory → must be checked by the user
+  // checkbox: mandatory → must have been explicitly answered (true = yes, false = no)
+  // undefined means the user has not interacted yet → still invalid
   if (node.itemType === 'checkbox' && isMandatory(node)) {
-    return getValue(node.id) === true;
+    const val = getValue(node.id);
+    return val === true || val === false;
   }
   // url: validate format regardless of required
   if (node.itemType === 'url') {

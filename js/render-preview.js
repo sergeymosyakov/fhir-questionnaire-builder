@@ -457,10 +457,18 @@ async function _asyncRender(version) {
     }
 
     const row = document.createElement('div');
-    row.className = 'lform-item preview-row--pointer';
+    row.className = 'lform-item';
     row.dataset.previewId = res.node.id;
-    row.title = 'Click to navigate to builder node';
-    row.addEventListener('click', () => _scrollToBuilder(res.node.id));
+
+    // Dedicated nav icon — only this button navigates to the builder node.
+    const navBtn = document.createElement('span');
+    navBtn.className = 'preview-nav-btn';
+    navBtn.dataset.testid = 'preview-nav-btn';
+    navBtn.textContent = '\u2197'; // ↗
+    navBtn.dataset.tipTitle = 'Go to builder node';
+    navBtn.dataset.tipBody  = 'Scroll and highlight the corresponding node in the builder panel.';
+    navBtn.addEventListener('click', e => { e.stopPropagation(); _scrollToBuilder(res.node.id); });
+    row.appendChild(navBtn);
 
     let iconEl = null;
     if (hasCondition) {
