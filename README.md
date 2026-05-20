@@ -78,7 +78,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 
 ## Sample Questionnaires
 
-All samples live in `sampledata/` and can be loaded via the **Load** button.
+All samples live in `sampledata/` and can be loaded via the **Questionnaires** button.
 
 | File | Items | enableWhen | What to look for |
 |---|---|---|---|
@@ -109,7 +109,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
 - **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **393 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — e2e test suite (`tests/e2e/`); **237 tests** across 17 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
+- **Playwright** — e2e test suite (`tests/e2e/`); **244 tests** across 17 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
 

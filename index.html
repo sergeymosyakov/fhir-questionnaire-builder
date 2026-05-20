@@ -191,16 +191,20 @@
           </span>
         </span>
         <span class="preview-header-actions">
-          <span id="statusBadgeWrap" class="status-badge-wrap" style="display:none">
-            <button id="statusBadgeBtn" type="button" class="status-badge" data-testid="status-badge-btn"></button>
-            <div id="statusDropdown" class="status-dropdown" style="display:none"></div>
-          </span>
+          <button id="patientViewBtn" class="btn-patient-view" style="display:none"
+            data-testid="patient-view-btn"
+            data-tip-title="Patient View"
+            data-tip-body="Renders the form exactly as a patient would see it — hidden items excluded, builder annotations removed. Click again to return to Preview mode.">&#x1F441; Patient View</button>
           <button id="validateBtn" class="btn-validate" style="display:none"
             data-testid="validate-btn"
             data-tip-title="Validate questionnaire"
             data-tip-body="Checks for FHIR R4 issues: duplicate linkIds, empty titles, missing answer options, broken JS/FHIRPath expressions. Same check runs automatically on Export."
             data-tip-fhir="Questionnaire (FHIR R4)"
             data-tip-spec="R4">Validate</button>
+          <span id="statusBadgeWrap" class="status-badge-wrap" style="display:none">
+            <button id="statusBadgeBtn" type="button" class="status-badge" data-testid="status-badge-btn"></button>
+            <div id="statusDropdown" class="status-dropdown" style="display:none"></div>
+          </span>
         </span>
       </div>
       <div class="fhir-toolbar">
@@ -209,7 +213,7 @@
             data-tip-title="Load questionnaire"
             data-tip-body="Open a FHIR R4 Questionnaire JSON from a file or pick one of the built-in samples. Replaces the current questionnaire (you will be asked to export first if unsaved changes exist)."
             data-tip-fhir="Questionnaire (FHIR R4)"
-            data-tip-spec="R4">&#x2B06; Load &#x25BE;</button>
+            data-tip-spec="R4">Questionnaires &#x25BE;</button>
           <div class="load-menu" id="loadMenu" style="display:none">
             <div class="load-menu-item" id="loadRecentItem" style="display:none">&#x1F552; Recent draft…</div>
             <div id="loadRecentSep" class="load-menu-sep" style="display:none"></div>
@@ -233,15 +237,6 @@
         </div>
         <input type="file" id="fhirFileInput" accept=".json,application/json" style="display:none">
         <input type="file" id="qrFileInput" accept=".json,application/json" style="display:none">
-        <div class="load-wrap" id="exportWrap" style="display:none">
-          <button id="exportBtn" type="button" class="btn-fhir btn-fhir-export" data-testid="export-btn"
-            data-tip-title="Export"
-            data-tip-body="Export the questionnaire as FHIR R4 JSON, or download current answers as a QuestionnaireResponse.">&#x2B07; Export &#x25BE;</button>
-          <div class="load-menu" id="exportMenu" style="display:none">
-            <div class="load-menu-item" id="exportFhirItem" data-testid="export-fhir-item">&#x1F4C4; Questionnaire (FHIR R4)</div>
-            <div class="load-menu-item" id="exportQrItem" data-testid="export-qr-item">&#x1F4CB; QuestionnaireResponse</div>
-          </div>
-        </div>
         <div class="load-wrap" id="answersWrap" style="display:none">
           <button id="answersBtn" type="button" class="btn-fhir" data-testid="answers-btn"
             data-tip-title="Load Answers"
@@ -253,7 +248,16 @@
             <div class="load-menu-item" data-response="example-bariatric-response.qr.json" id="loadResponseBariatric">&#x1F4CB; Bariatric &#x2014; Sample Response</div>
           </div>
         </div>
-        <div class="search-wrap" id="searchWrap" style="display:none">
+        <div class="load-wrap fhir-toolbar-gap" id="exportWrap" style="display:none">
+          <button id="exportBtn" type="button" class="btn-fhir btn-fhir-export" data-testid="export-btn"
+            data-tip-title="Export"
+            data-tip-body="Export the questionnaire as FHIR R4 JSON, or download current answers as a QuestionnaireResponse.">&#x2B07; Export &#x25BE;</button>
+          <div class="load-menu" id="exportMenu" style="display:none">
+            <div class="load-menu-item" id="exportFhirItem" data-testid="export-fhir-item">&#x1F4C4; Questionnaire (FHIR R4)</div>
+            <div class="load-menu-item" id="exportQrItem" data-testid="export-qr-item">&#x1F4CB; QuestionnaireResponse</div>
+          </div>
+        </div>
+        <div class="search-wrap fhir-toolbar-gap" id="searchWrap" style="display:none">
           <input type="search" id="searchInput" class="search-input" placeholder="&#x1F50D; Search&hellip;" autocomplete="off">
           <button id="searchPrevBtn" type="button" class="search-nav-btn" title="Previous match (&#x2191;)">&#x2191;</button>
           <button id="searchNextBtn" type="button" class="search-nav-btn" title="Next match (&#x2193;)">&#x2193;</button>

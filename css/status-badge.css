@@ -10,8 +10,9 @@
   align-items: center;
   font-size: 11px;
   font-weight: 700;
-  padding: 2px 9px;
-  border-radius: 10px;
+  padding: 3px 9px;
+  line-height: 1.4;
+  border-radius: var(--r-sm);
   border: 1px solid var(--c-border);
   background: var(--c-surface);
   color: var(--c-text-2);

@@ -336,6 +336,113 @@
 .preview-nav-btn:hover              { opacity: 1 !important; background: #e8f0fe; }
 .preview-label--dim   { color: #aaa; }
 
+/* ======================================================================
+   Patient View — .patient-view on #lform
+   Clean questionnaire form, no builder chrome.
+   ====================================================================== */
+.patient-view {
+  background: #fff;
+  box-shadow: 0 1px 12px rgba(0,0,0,0.07);
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+.patient-view .lform-item {
+  padding: 16px 24px;
+  gap: 14px;
+  border-bottom: 1px solid #f3f4f6;
+  transition: none;
+  cursor: default;
+}
+.patient-view .lform-item:hover { background: #fff; }
+.patient-view .lform-item.success,
+.patient-view .lform-item.error {
+  background: #fff;
+  border-left: none;
+}
+.patient-view .preview-nested {
+  border-left: none;
+  margin-left: 0;
+  padding-left: 24px;
+  background: transparent;
+}
+.patient-view .preview-nested .lform-item {
+  font-size: 14px;
+  padding: 12px 24px;
+}
+.patient-view .group-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: 0.01em;
+  padding: 4px 0 2px;
+}
+.patient-view .display-info-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+.patient-view .preview-required-star { font-size: 14px; }
+.patient-view .preview-nav-btn { display: none; }
+.patient-view .preview-prefix {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 600;
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+}
+.patient-view .preview-calc-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 2px 10px;
+}
+.patient-view .preview-collapse-toggle {
+  color: #9ca3af;
+  font-size: 11px;
+}
+.patient-view .preview-collapse-toggle:hover { color: #374151; }
+.patient-view input[type="text"],
+.patient-view input[type="number"],
+.patient-view input[type="date"],
+.patient-view input[type="url"],
+.patient-view textarea,
+.patient-view select {
+  font-size: 14px;
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #f9fafb;
+  min-width: 180px;
+}
+.patient-view input[type="text"]:focus,
+.patient-view input[type="number"]:focus,
+.patient-view input[type="date"]:focus,
+.patient-view input[type="url"]:focus,
+.patient-view textarea:focus,
+.patient-view select:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+}
+.patient-view input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #4f46e5;
+}
+.patient-view .preview-readonly-value {
+  font-size: 14px;
+  color: #374151;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 4px 10px;
+}
+
 /* === No-badges mode ========================================================== */
 /* Activated by .preview--no-badges class on #lform */
 .preview--no-badges .preview-optional-badge,

@@ -96,6 +96,7 @@
 .btn-validate {
   flex-shrink: 0;
   padding: 4px 10px;
+  line-height: 1.4;
   background: #fff8e1;
   color: #e65100;
   border: 1px solid #ffcc80;
@@ -107,6 +108,32 @@
   transition: background .15s;
 }
 .btn-validate:hover { background: #ffe0b2; }
+
+.btn-patient-view {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  line-height: 1.4;
+  background: #f0f4f8;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .3px;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.btn-patient-view:hover { background: #e5e7eb; }
+.btn-patient-view { margin-right: 8px; }
+.btn-patient-view.btn-fhir--active {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #1e293b;
+}
+.btn-patient-view.btn-fhir--active:hover {
+  background: #334155;
+  border-color: #334155;
+}
 
 .top-github-link {
   display: inline-flex;

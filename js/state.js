@@ -46,6 +46,10 @@ export const showPrefix = ref(true);
 // When false, calculated fields render as plain text.
 export const showBadges = ref(true);
 
+// Patient View mode: when true, renders the form as a patient would see it.
+// Hidden items excluded; builder annotations (linkIds, badges, nav icons) hidden.
+export const patientMode = ref(false);
+
 // FHIRPath: original FHIR Questionnaire JSON after import; null if not loaded.
 export const rawFhir = ref(null);
 

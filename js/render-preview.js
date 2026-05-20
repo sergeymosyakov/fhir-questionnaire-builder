@@ -2,6 +2,7 @@
 import {
   effect,
   tree, values, getValue, setValue, deleteValue, _formTick, _bulkUpdate, showLinkId, showPrefix, showBadges,
+  patientMode,
   calcFormOk, isMandatory,
   rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
@@ -339,8 +340,14 @@ async function _asyncRender(version) {
     if (!res) return;
     if (!res.visible && !res.showDimmed) return;
 
+    const isPatient = patientMode.value;
+    // Hidden items (sdc-questionnaire-hidden) are excluded in patient view.
+    if (isPatient && res.node.hidden) return;
+
     // Dimmed: enableWhen condition not yet met
     if (!res.visible && res.showDimmed) {
+      // Patient view: don't show waiting/dimmed items — form reflects only live visible items.
+      if (isPatient) return;
       // 'hidden' disabledDisplay: remove entirely from view (including children)
       if (res.node._disabledDisplay === 'hidden') return;
       const row = document.createElement('div');
@@ -394,6 +401,8 @@ async function _asyncRender(version) {
 
     // Disabled: group conditionRule not met → N/A
     if (res.disabled) {
+      // Patient view: skip disabled items entirely.
+      if (isPatient) return;
       const row = document.createElement('div');
       row.className = 'lform-item lform-disabled preview-row--pointer';
       row.dataset.previewId = res.node.id;
@@ -461,25 +470,29 @@ async function _asyncRender(version) {
     row.dataset.previewId = res.node.id;
 
     // Dedicated nav icon — only this button navigates to the builder node.
-    const navBtn = document.createElement('span');
-    navBtn.className = 'preview-nav-btn';
-    navBtn.dataset.testid = 'preview-nav-btn';
-    navBtn.textContent = '\u2197'; // ↗
-    navBtn.dataset.tipTitle = 'Go to builder node';
-    navBtn.dataset.tipBody  = 'Scroll and highlight the corresponding node in the builder panel.';
-    navBtn.addEventListener('click', e => { e.stopPropagation(); _scrollToBuilder(res.node.id); });
-    row.appendChild(navBtn);
+    if (!isPatient) {
+      const navBtn = document.createElement('span');
+      navBtn.className = 'preview-nav-btn';
+      navBtn.dataset.testid = 'preview-nav-btn';
+      navBtn.textContent = '\u2197'; // ↗
+      navBtn.dataset.tipTitle = 'Go to builder node';
+      navBtn.dataset.tipBody  = 'Scroll and highlight the corresponding node in the builder panel.';
+      navBtn.addEventListener('click', e => { e.stopPropagation(); _scrollToBuilder(res.node.id); });
+      row.appendChild(navBtn);
+    }
 
     let iconEl = null;
-    if (hasCondition) {
-      iconEl = document.createElement('span');
-      iconEl.className   = displayOk ? 'icon-ok' : 'icon-fail';
-      iconEl.textContent = displayOk ? '\u2714' : '\u2718';
-      row.appendChild(iconEl);
-    } else {
-      const ph = document.createElement('span');
-      ph.className = 'preview-icon-ph';
-      row.appendChild(ph);
+    if (!isPatient) {
+      if (hasCondition) {
+        iconEl = document.createElement('span');
+        iconEl.className   = displayOk ? 'icon-ok' : 'icon-fail';
+        iconEl.textContent = displayOk ? '\u2714' : '\u2718';
+        row.appendChild(iconEl);
+      } else {
+        const ph = document.createElement('span');
+        ph.className = 'preview-icon-ph';
+        row.appendChild(ph);
+      }
     }
     res._iconEl = iconEl;
 
@@ -512,7 +525,7 @@ async function _asyncRender(version) {
       idTag.textContent = '✓ copied';
       setTimeout(() => { idTag.textContent = res.node.id; }, 1200);
     });
-    if (showLinkId.value) row.appendChild(idTag);
+    if (showLinkId.value && !isPatient) row.appendChild(idTag);
 
     if (res.node._prefix && showPrefix.value) {
       const prefixEl = document.createElement('span');
@@ -534,7 +547,7 @@ async function _asyncRender(version) {
     if (res.node._renderStyle) label.style.cssText = res.node._renderStyle;
     row.appendChild(label);
 
-    if (res.node.type === 'group' && !isEmptyGroup) {
+    if (!isPatient && res.node.type === 'group' && !isEmptyGroup) {
       const isOr = res.node.logicWithParent === 'OR';
       const lb = document.createElement('span');
       lb.className = 'preview-logic-badge preview-logic-' + (isOr ? 'or' : 'and');
@@ -548,7 +561,7 @@ async function _asyncRender(version) {
       row.appendChild(lb);
     }
 
-    if (res.node.type === 'item' && res.node.itemType !== 'display' && !res.node._readOnly) {
+    if (!isPatient && res.node.type === 'item' && res.node.itemType !== 'display' && !res.node._readOnly) {
       if (res.node.mandatory === false) {
         const badge = document.createElement('span');
         badge.className = 'preview-optional-badge';
@@ -570,7 +583,7 @@ async function _asyncRender(version) {
     }
 
     const _visHintText = res.node._enableWhenText || res.node.enableWhenExpression;
-    if (_visHintText) {
+    if (!isPatient && _visHintText) {
       const hint = document.createElement('span');
       hint.className = 'preview-condition-hint';
       hint.textContent = '\uD83D\uDC41\uFE0F ' + _visHintText;
@@ -593,7 +606,7 @@ async function _asyncRender(version) {
       row.appendChild(hint);
     }
 
-    if (res.node.constraint?.length) {
+    if (!isPatient && res.node.constraint?.length) {
       const _cEnvLocal = ctx.envVars || {};
       const _constraintOk = evalConstraints(res.node, ctx.fp, ctx.qr, _cEnvLocal);
       const cb = document.createElement('span');
@@ -616,7 +629,7 @@ async function _asyncRender(version) {
       row.appendChild(cb);
     }
 
-    if (res.node._readOnly && !res.node._calculatedExpr) {
+    if (!isPatient && res.node._readOnly && !res.node._calculatedExpr) {
       const rb = document.createElement('span');
       rb.className = 'preview-meta-badge';
       rb.textContent = '\uD83D\uDD12 read-only';
@@ -627,7 +640,7 @@ async function _asyncRender(version) {
       row.appendChild(rb);
     }
 
-    if (res.node._initialValue !== undefined && res.node._initialValue !== '') {
+    if (!isPatient && res.node._initialValue !== undefined && res.node._initialValue !== '') {
       const ib = document.createElement('span');
       ib.className = 'preview-meta-badge preview-meta-badge--init';
       ib.textContent = '\u21BA default';
@@ -660,7 +673,12 @@ async function _asyncRender(version) {
         const badge = document.createElement('span');
         badge.dataset.calcId   = res.node.id;
         badge.dataset.calcType = res.node.itemType;
-        if (res.node.itemType === 'checkbox') {
+        if (isPatient) {
+          // Patient view: show computed value as plain readable text, no explain UI.
+          const s = getValue(res.node.id);
+          badge.className = 'preview-calc-value';
+          badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
+        } else if (res.node.itemType === 'checkbox') {
           const calcVal = getValue(res.node.id);
           badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false') + ' calc-badge--explain';
           badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
@@ -791,6 +809,7 @@ effect(() => {
   void showLinkId.value;  // trigger on linkId display toggle
   void showPrefix.value;  // trigger on prefix display toggle
   void showBadges.value;  // trigger on badges display toggle
+  void patientMode.value; // trigger on patient/preview mode switch
   if (_bulkUpdate.value) return; // mass mutation in progress — skip
   _asyncRender(++_renderVersion); // fire-and-forget; stale renders self-abort
 });
@@ -825,10 +844,17 @@ effect(() => {
   document.getElementById('previewCollapseAllBtn').style.display = d;
   document.getElementById('previewExpandAllBtn').style.display = d;
   document.getElementById('searchWrap').style.display = d;
+  document.getElementById('patientViewBtn').style.display = d;
 });
 
 // Toggle no-badges mode via CSS class on the lform container
 effect(() => {
   const lform = document.getElementById('lform');
   if (lform) lform.classList.toggle('preview--no-badges', !showBadges.value);
+});
+
+// Toggle patient-view mode via CSS class on the lform container
+effect(() => {
+  const lform = document.getElementById('lform');
+  if (lform) lform.classList.toggle('patient-view', patientMode.value);
 });
