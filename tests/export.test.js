@@ -571,3 +571,32 @@ describe('buildFHIRObject — questMeta', () => {
     expect(q.description).toBeUndefined();
   });
 });
+
+// ── _codes round-trip ─────────────────────────────────────────────────────────
+describe('buildFHIRObject — _codes', () => {
+  it('exports item.code[] when _codes is set', () => {
+    const codes = [{ system: 'http://loinc.org', code: '44249-1', display: 'PHQ-9 total' }];
+    const q = build([{ id: 'q1', type: 'item', itemType: 'number', title: 'Score', _codes: codes }]);
+    expect(q.item[0].code).toEqual(codes);
+  });
+
+  it('exports multiple codes', () => {
+    const codes = [
+      { system: 'http://loinc.org', code: '44249-1', display: 'PHQ-9 total' },
+      { system: 'http://snomed.info/sct', code: '720433000' },
+    ];
+    const q = build([{ id: 'q1', type: 'item', itemType: 'text', title: 'Q', _codes: codes }]);
+    expect(q.item[0].code).toHaveLength(2);
+    expect(q.item[0].code[1].system).toBe('http://snomed.info/sct');
+  });
+
+  it('omits item.code[] when _codes is empty', () => {
+    const q = build([{ id: 'q1', type: 'item', itemType: 'text', title: 'Q', _codes: [] }]);
+    expect(q.item[0].code).toBeUndefined();
+  });
+
+  it('omits item.code[] when _codes not set', () => {
+    const q = build([{ id: 'q1', type: 'item', itemType: 'text', title: 'Q' }]);
+    expect(q.item[0].code).toBeUndefined();
+  });
+});

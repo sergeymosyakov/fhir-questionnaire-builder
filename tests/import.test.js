@@ -497,4 +497,33 @@ describe('importFHIR', () => {
     expect(_questMeta.url).toBe('');
     expect(_questMeta.publisher).toBe('');
   });
+
+  // ── _codes import ───────────────────────────────────────────────────────────
+  describe('_codes', () => {
+    it('imports item.code[] into node._codes', () => {
+      const codes = [{ system: 'http://loinc.org', code: '44249-1', display: 'PHQ-9 total' }];
+      importFHIR(minQ([{ linkId: 'q1', type: 'decimal', text: 'Score', code: codes }]));
+      expect(_tree[0]._codes).toEqual(codes);
+    });
+
+    it('imports multiple codes', () => {
+      const codes = [
+        { system: 'http://loinc.org', code: '44249-1' },
+        { system: 'http://snomed.info/sct', code: '720433000', display: 'PHQ-9' },
+      ];
+      importFHIR(minQ([{ linkId: 'q1', type: 'decimal', text: 'Score', code: codes }]));
+      expect(_tree[0]._codes).toHaveLength(2);
+      expect(_tree[0]._codes[1].system).toBe('http://snomed.info/sct');
+    });
+
+    it('does not set _codes when item.code[] is absent', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
+      expect(_tree[0]._codes).toBeUndefined();
+    });
+
+    it('does not set _codes when item.code[] is empty', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', code: [] }]));
+      expect(_tree[0]._codes).toBeUndefined();
+    });
+  });
 });

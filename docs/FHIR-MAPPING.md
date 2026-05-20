@@ -152,7 +152,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `_initialExpr` | SDC `sdc-questionnaire-initialExpression` extension (`valueExpression.expression`) | FHIRPath; evaluated once on import and on Re-init; result pre-fills `values[]` |
 | `_readOnly` | `item.readOnly` | |
 | `_prefix` | `item.prefix` | imported and exported; displayed as amber badge in preview; editable in builder meta-row |
-| `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); not displayed in UI |
+| `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); editable via **Codes** action button in builder (modal with system/code/display rows; draft pattern) |
 | `_maxLength` | `item.maxLength` | imported → `node._maxLength`; exported back when set; character counter + `maxlength` attribute enforced in preview |
 | `_minValue` | `questionnaire-minValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; min HTML attribute set on input; error shown in preview when violated |
 | `_maxValue` | `questionnaire-maxValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; max HTML attribute set on input; error shown in preview when violated |
@@ -231,6 +231,14 @@ Additional round-trip fields (stored opaquely; not editable in the builder):
 |---|---|---|
 | `_answerValueSet` | `item.answerValueSet` | URL preserved; not resolved to answer options |
 | `questContained[]` | `Questionnaire.contained[]` | Resources deep-copied on export; not otherwise processed |
+
+### QR answer encoding
+
+For `choice`/`open-choice` items the exported `QuestionnaireResponse.item.answer[].valueCoding` is enriched from `answerOption`:
+- `system` and `display` copied from the matching `answerOption.valueCoding`
+- `ordinalValue` extension (`http://hl7.org/fhir/StructureDefinition/ordinalValue`) added when present on `answerOption.extension` (primary) or `answerOption.valueCoding.extension` (fallback)
+
+This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR with `ordinalValue` on every answer without any post-processing.
 
 ---
 

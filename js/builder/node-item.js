@@ -13,6 +13,7 @@ import * as expressionModal from '../ui/expression-modal.js';
 import * as initialModal from '../ui/initial-modal.js';
 import * as appearanceModal from '../ui/appearance-modal.js';
 import * as repeatableModal from '../ui/repeatable-modal.js';
+import * as codesModal from '../ui/codes-modal.js';
 import { triggerCalcRecalc, confirmDelete } from './_shared.js';
 
 export function renderItem(node, ctx) {
@@ -208,6 +209,17 @@ export function renderItem(node, ctx) {
     'Questionnaire.item._text.extension[rendering-style]', 'R4 \u00B7 optional');
   styleLink.dataset.testid = 'action-appearance';
   styleLink.onclick = () => appearanceModal.open(node, styleLink, setActive);
+
+  const codesLink = document.createElement('a');
+  codesLink.textContent = 'Codes';
+  codesLink.className = 'action-edit';
+  codesLink.dataset.tipTitle = 'Terminology Codes (item.code[])';
+  codesLink.dataset.tipBody  = 'FHIR item.code[] — one or more terminology codes identifying what concept this item represents (e.g. LOINC, SNOMED). Each entry has system URL, code, and optional display. Round-trip safe.';
+  codesLink.dataset.tipFhir  = 'Questionnaire.item.code[]';
+  codesLink.dataset.tipSpec  = 'R4 \u00B7 optional';
+  codesLink.dataset.testid   = 'action-codes';
+  codesLink.onclick = () => codesModal.open(node, codesLink, setActive);
+  actions.appendChild(codesLink);
   const headerTop = document.createElement('div');
   headerTop.className = 'node-header-top';
   headerTop.appendChild(titleWrap);
@@ -254,6 +266,7 @@ export function renderItem(node, ctx) {
   setActive(styleLink,      !!node._renderStyle);
   setActive(mandLink,       node.mandatory === true);
   setActive(constraintLink, !!(node.constraint?.length));
+  setActive(codesLink,      !!(node._codes?.length));
 
   wrapper.appendChild(div);
 

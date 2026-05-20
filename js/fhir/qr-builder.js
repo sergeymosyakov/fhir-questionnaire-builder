@@ -7,6 +7,8 @@
 //   non-group with children → answer[0].valueX + answer[0].item[]
 //   leaf questions → answer[0].valueX (only when answered)
 
+const ORDINAL_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+
 function buildQRItem(fhirItem, values) {
   const qrItem = { linkId: fhirItem.linkId };
   const children = fhirItem.item || [];
@@ -26,11 +28,29 @@ function buildQRItem(fhirItem, values) {
   }
 
   function makeAnswer(v) {
-    if (t === 'boolean')                     return { valueBoolean: v === true };
-    if (t === 'date')                        return { valueDate: String(v) };
-    if (t === 'dateTime')                    return { valueDateTime: String(v) };
-    if (t === 'time')                        return { valueTime: String(v) };
-    if (t === 'choice' || t === 'open-choice') return { valueCoding: { code: String(v) } };
+    if (t === 'boolean')  return { valueBoolean: v === true };
+    if (t === 'date')     return { valueDate: String(v) };
+    if (t === 'dateTime') return { valueDateTime: String(v) };
+    if (t === 'time')     return { valueTime: String(v) };
+    if (t === 'choice' || t === 'open-choice') {
+      const codeStr = String(v);
+      const coding  = { code: codeStr };
+      // Enrich from answerOption: system, display, ordinalValue extension
+      const opt = (fhirItem.answerOption || []).find(o =>
+        (o.valueCoding && o.valueCoding.code === codeStr) ||
+        (o.valueString !== undefined && String(o.valueString) === codeStr)
+      );
+      if (opt && opt.valueCoding) {
+        if (opt.valueCoding.system)  coding.system  = opt.valueCoding.system;
+        if (opt.valueCoding.display) coding.display = opt.valueCoding.display;
+        const ordExt =
+          (opt.extension        || []).find(e => e.url === ORDINAL_URL) ||
+          (opt.valueCoding.extension || []).find(e => e.url === ORDINAL_URL);
+        if (ordExt !== undefined)
+          coding.extension = [{ url: ORDINAL_URL, valueDecimal: ordExt.valueDecimal }];
+      }
+      return { valueCoding: coding };
+    }
     if (t === 'integer')                     return { valueInteger: parseInt(v) || 0 };
     if (t === 'decimal' || t === 'quantity') return { valueDecimal: parseFloat(v) || 0 };
     return { valueString: String(v) };

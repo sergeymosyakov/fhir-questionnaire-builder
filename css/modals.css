@@ -294,6 +294,33 @@
 }
 .validate-nav-btn:hover { opacity: 1; background: var(--c-primary-lt); }
 
+/* === Codes modal (item.code[]) ============================================== */
+#codesModal            { z-index: 10100; }
+#codesModal .modal-box { width: min(540px, 94vw); }
+#codesModal .modal-body { padding: 10px 16px 14px; display: flex; flex-direction: column; gap: 4px; }
+.codes-empty-msg { font-size: 13px; color: var(--c-text-2); padding: 4px 0 8px; }
+.codes-row {
+  display: flex; align-items: center; gap: 6px;
+}
+.codes-inp {
+  flex: 1; height: 28px; padding: 0 6px; border: 1px solid var(--c-border);
+  border-radius: 4px; font-size: 12px; background: var(--c-bg); color: var(--c-text);
+  min-width: 0;
+}
+.codes-inp:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 2px var(--c-primary-lt); }
+.codes-remove-btn {
+  flex-shrink: 0; width: 24px; height: 24px; padding: 0;
+  background: none; border: 1px solid transparent; border-radius: 4px;
+  cursor: pointer; font-size: 15px; color: var(--c-text-2); line-height: 1;
+}
+.codes-remove-btn:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+.codes-add-btn {
+  align-self: flex-start; margin-top: 4px; padding: 3px 10px;
+  background: none; border: 1px dashed var(--c-border); border-radius: 4px;
+  font-size: 12px; color: var(--c-primary); cursor: pointer;
+}
+.codes-add-btn:hover { background: var(--c-primary-lt); }
+
 /* === Preview placeholder (empty state) ====================================== */
 .preview-placeholder {
   display: flex; flex-direction: column; align-items: center; justify-content: center;

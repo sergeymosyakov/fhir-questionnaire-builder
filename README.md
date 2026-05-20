@@ -39,6 +39,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/ui/validate-modal.js` | Validate modal — `init(elements)`, `show(title, issues, mode, callbacks)` |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; draft-based editing with Apply/Cancel buttons; `%name` chip rich tooltips |
 | `js/ui/metadata-modal.js` | Questionnaire Properties modal — `init(elements)`, `open()`; draft pattern; edits `questMeta` (id, url, version, title, status, publisher, description); status `<select>` with draft/active/retired/unknown; changes committed on Apply; status badge reflected in questMetaCard above Variables card |
+| `js/ui/codes-modal.js` | Item Codes modal — `init(elements)`, `open(node, link, setActive)`; draft pattern; edits `node._codes[]` (FHIR `item.code[]`); each row has system URL, code, display; Apply commits filtered codes; Cancel discards; Codes action button highlighted when non-empty |
 | `js/ui/json-viewer.js` | Shared read-only FHIR JSON viewer modal — `init(elements)`, `show(title, data)`, `close()`; Esc / backdrop / × close |
 | `js/ui/contained-panel.js` | Collapsible card showing `Questionnaire.contained[]` resources — each chip opens JSON viewer |
 | `js/ui/answer-valueset-panel.js` | Collapsible card showing unique `answerValueSet` URLs used by items — each chip shows URL and which items use it |
@@ -100,8 +101,8 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **318 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
-- **Playwright** — e2e test suite (`tests/e2e/`); **203 tests** across 15 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **333 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Playwright** — e2e test suite (`tests/e2e/`); **214 tests** across 16 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
 
@@ -325,9 +326,9 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ### Tests
 ```powershell
-npm test             # unit tests — single run (Vitest, 318 tests)
+npm test             # unit tests — single run (Vitest, 333 tests)
 npm run test:watch   # unit tests — watch mode
-npm run test:e2e     # e2e tests — Playwright/Chromium (203 tests, requires Chromium installed)
+npm run test:e2e     # e2e tests — Playwright/Chromium (214 tests, requires Chromium installed)
 npm run test:e2e:ui  # e2e tests — Playwright UI mode
 ```
 Vitest and Playwright CI run automatically on every push via GitHub Actions (see `.github/workflows/test.yml`).

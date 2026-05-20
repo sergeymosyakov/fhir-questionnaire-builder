@@ -26,6 +26,7 @@ import * as requiredModal from './ui/required-modal.js';
 import * as readonlyModal from './ui/readonly-modal.js';
 import * as answerTypeModal from './ui/answer-type-modal.js';
 import * as metadataModal from './ui/metadata-modal.js';
+import * as codesModal from './ui/codes-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
 import { showLinkId, showPrefix, showBadges, questVariables, questContained, questMeta } from './state.js';
@@ -87,8 +88,15 @@ constraintModal.init({
   closeBtn:  document.getElementById('constraintModalClose'),
   cancelBtn: document.getElementById('constraintModalCancel'),
   applyBtn:  document.getElementById('constraintModalApply'),
-});
-// ── Expression modal init ────────────────────────────────────────
+});// ── Codes modal init ────────────────────────────────────
+codesModal.init({
+  modal:     document.getElementById('codesModal'),
+  title:     document.getElementById('codesModalTitle'),
+  body:      document.getElementById('codesModalBody'),
+  closeBtn:  document.getElementById('codesModalClose'),
+  cancelBtn: document.getElementById('codesModalCancel'),
+  applyBtn:  document.getElementById('codesModalApply'),
+});// ── Expression modal init ────────────────────────────────────────
 expressionModal.init({
   modal:     document.getElementById('expressionModal'),
   title:     document.getElementById('exprModalTitle'),

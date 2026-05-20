@@ -235,3 +235,90 @@ describe('buildQR — type to value[x] mapping', () => {
   });
 });
 
+// ── ordinalValue in QR answers ────────────────────────────────────────────────
+const ORDINAL_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+
+describe('buildQR — ordinalValue in valueCoding answers', () => {
+  const mkChoiceFhir = answerOption => ({
+    item: [{ linkId: 'q', type: 'choice', answerOption }],
+  });
+
+  it('no answerOption → plain valueCoding with code only', () => {
+    const qr = buildQR(mkChoiceFhir([]), { q: 'opt1' });
+    const vc = qr.item[0].answer[0].valueCoding;
+    expect(vc.code).toBe('opt1');
+    expect(vc.extension).toBeUndefined();
+    expect(vc.system).toBeUndefined();
+    expect(vc.display).toBeUndefined();
+  });
+
+  it('matching answerOption with ordinalValue on answerOption.extension', () => {
+    const answerOption = [{
+      extension: [{ url: ORDINAL_URL, valueDecimal: 3 }],
+      valueCoding: { code: 'opt1', display: 'Option 1', system: 'http://example.org' },
+    }];
+    const qr = buildQR(mkChoiceFhir(answerOption), { q: 'opt1' });
+    const vc = qr.item[0].answer[0].valueCoding;
+    expect(vc.code).toBe('opt1');
+    expect(vc.extension).toEqual([{ url: ORDINAL_URL, valueDecimal: 3 }]);
+    expect(vc.display).toBe('Option 1');
+    expect(vc.system).toBe('http://example.org');
+  });
+
+  it('matching answerOption with ordinalValue on valueCoding.extension (fallback)', () => {
+    const answerOption = [{
+      valueCoding: {
+        code: 'opt2', display: 'Option 2',
+        extension: [{ url: ORDINAL_URL, valueDecimal: 7 }],
+      },
+    }];
+    const qr = buildQR(mkChoiceFhir(answerOption), { q: 'opt2' });
+    const vc = qr.item[0].answer[0].valueCoding;
+    expect(vc.code).toBe('opt2');
+    expect(vc.extension).toEqual([{ url: ORDINAL_URL, valueDecimal: 7 }]);
+  });
+
+  it('answerOption with no ordinalValue → no extension on valueCoding', () => {
+    const answerOption = [{ valueCoding: { code: 'opt1', display: 'Option 1' } }];
+    const qr = buildQR(mkChoiceFhir(answerOption), { q: 'opt1' });
+    const vc = qr.item[0].answer[0].valueCoding;
+    expect(vc.code).toBe('opt1');
+    expect(vc.display).toBe('Option 1');
+    expect(vc.extension).toBeUndefined();
+  });
+
+  it('non-matching code → no enrichment (no system/display/extension)', () => {
+    const answerOption = [{
+      extension: [{ url: ORDINAL_URL, valueDecimal: 5 }],
+      valueCoding: { code: 'other', display: 'Other', system: 'http://example.org' },
+    }];
+    const qr = buildQR(mkChoiceFhir(answerOption), { q: 'unknown' });
+    const vc = qr.item[0].answer[0].valueCoding;
+    expect(vc.code).toBe('unknown');
+    expect(vc.extension).toBeUndefined();
+    expect(vc.system).toBeUndefined();
+  });
+
+  it('open-choice also enriched with ordinalValue', () => {
+    const answerOption = [{
+      extension: [{ url: ORDINAL_URL, valueDecimal: 1 }],
+      valueCoding: { code: 'la1', display: 'Not at all' },
+    }];
+    const fhir = { item: [{ linkId: 'q', type: 'open-choice', answerOption }] };
+    const qr = buildQR(fhir, { q: 'la1' });
+    const vc = qr.item[0].answer[0].valueCoding;
+    expect(vc.extension).toEqual([{ url: ORDINAL_URL, valueDecimal: 1 }]);
+  });
+
+  it('multiple answers — each gets correct ordinalValue', () => {
+    const answerOption = [
+      { extension: [{ url: ORDINAL_URL, valueDecimal: 0 }], valueCoding: { code: 'a0', display: 'None' } },
+      { extension: [{ url: ORDINAL_URL, valueDecimal: 1 }], valueCoding: { code: 'a1', display: 'Once' } },
+    ];
+    const fhir = { item: [{ linkId: 'q', type: 'choice', answerOption }] };
+    const values = { q: 'a0', 'q$$1': 'a1', 'q$$n': 1 };
+    const qr = buildQR(fhir, values);
+    expect(qr.item[0].answer[0].valueCoding.extension[0].valueDecimal).toBe(0);
+    expect(qr.item[0].answer[1].valueCoding.extension[0].valueDecimal).toBe(1);
+  });
+});
