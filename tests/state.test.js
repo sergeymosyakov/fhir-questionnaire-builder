@@ -1,7 +1,7 @@
 // Tests for evalConstraints in js/state.js.
 // evalConstraints is pure — fp, qr, varEnv all injected.
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock Vue reactivity CDN (state.js imports it at module level)
 vi.mock('https://unpkg.com/@vue/reactivity@3/dist/reactivity.esm-browser.js', () => ({
@@ -15,7 +15,44 @@ function makeFp(routes) {
   return { evaluate: vi.fn((qr, expr, env) => routes[expr] ?? []) };
 }
 
-const { evalConstraints } = await import('../js/state.js');
+const { evalConstraints, getValue, setValue, getAllValues, deleteValue, clearAllValues } = await import('../js/state.js');
+
+// ── getAllValues ───────────────────────────────────────────────────────────────
+describe('getAllValues', () => {
+  beforeEach(() => clearAllValues());
+
+  it('returns empty array when no value set', () => {
+    expect(getAllValues('q1')).toEqual([]);
+  });
+
+  it('returns [primary] when only primary value set', () => {
+    setValue('q1', 'hello');
+    expect(getAllValues('q1')).toEqual(['hello']);
+  });
+
+  it('returns primary + repeat rows in order', () => {
+    setValue('q1', 'first');
+    setValue('q1$$n', 2);
+    setValue('q1$$1', 'second');
+    setValue('q1$$2', 'third');
+    expect(getAllValues('q1')).toEqual(['first', 'second', 'third']);
+  });
+
+  it('skips undefined repeat slots', () => {
+    setValue('q1', 'first');
+    setValue('q1$$n', 2);
+    setValue('q1$$1', 'second');
+    // $$2 deliberately not set
+    expect(getAllValues('q1')).toEqual(['first', 'second']);
+  });
+
+  it('returns only repeat rows when primary not set', () => {
+    setValue('q1$$n', 1);
+    setValue('q1$$1', 'only-repeat');
+    expect(getAllValues('q1')).toEqual(['only-repeat']);
+  });
+});
+
 
 // ── baseline ──────────────────────────────────────────────────────────────────
 describe('evalConstraints — baseline', () => {

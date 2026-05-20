@@ -28,6 +28,17 @@ export const deleteValue = id => { delete values[id]; };
 /** Wipe the entire answer store (used on import / reset). */
 export const clearAllValues = () => { Object.keys(values).forEach(k => delete values[k]); };
 
+/** Return all answers for a linkId: primary + repeat rows ($$1, $$2, …). */
+export function getAllValues(id) {
+  const result = [];
+  if (values[id] !== undefined) result.push(values[id]);
+  const n = values[id + '$$n'] || 0;
+  for (let i = 1; i <= n; i++) {
+    if (values[id + '$$' + i] !== undefined) result.push(values[id + '$$' + i]);
+  }
+  return result;
+}
+
 // Reactive tick: incremented when a checkbox/select changes in the preview.
 // Causes effect() to re-run → re-evaluates enableWhen visibility conditions.
 export const _formTick = ref(0);

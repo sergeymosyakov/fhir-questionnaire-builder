@@ -1,7 +1,7 @@
 // ── Tree evaluation: enableWhen visibility ───────────────────────────────────────
 // ctx: { fp, qr, envVars } — fhirpath + QuestionnaireResponse + variable env
 // (optional; needed only for enableWhenExpression FHIRPath evaluation)
-import { getValue } from './state.js';
+import { getAllValues } from './state.js';
 
 // Marks every node in a subtree as visible-but-disabled.
 export function markAllDisabled(nodes, results) {
@@ -11,9 +11,8 @@ export function markAllDisabled(nodes, results) {
   }
 }
 
-// Evaluate one enableWhen condition against current form values.
-function checkOneEnableWhen(ew) {
-  const val = getValue(ew.question);
+// Compare a single value against one enableWhen condition.
+function compareValue(val, ew) {
   if (ew.operator === 'exists') {
     const hasVal = val !== undefined && val !== null && val !== '';
     return ew.answerBoolean !== false ? hasVal : !hasVal;
@@ -37,6 +36,14 @@ function checkOneEnableWhen(ew) {
     case '<=': return Number(current) <= Number(coerced);
   }
   return false;
+}
+
+// Evaluate one enableWhen condition against current form values.
+// For repeating items: condition is met if ANY answer satisfies it (FHIR R4 spec).
+function checkOneEnableWhen(ew) {
+  const all = getAllValues(ew.question);
+  if (all.length === 0) return compareValue(undefined, ew);
+  return all.some(v => compareValue(v, ew));
 }
 
 // Evaluate node visibility:

@@ -9,6 +9,15 @@ const _values = {};
 vi.mock('../js/state.js', () => ({
   values: _values,
   getValue: id => _values[id],
+  getAllValues: id => {
+    const result = [];
+    if (_values[id] !== undefined) result.push(_values[id]);
+    const n = _values[id + '$$n'] || 0;
+    for (let i = 1; i <= n; i++) {
+      if (_values[id + '$$' + i] !== undefined) result.push(_values[id + '$$' + i]);
+    }
+    return result;
+  },
 }));
 
 const { evaluateNode, markAllDisabled } = await import('../js/eval.js');
@@ -314,5 +323,64 @@ describe('evaluateNode — group', () => {
     };
     const r = evaluateNode(node, {}, []);
     expect(r.visible).toBe(true);
+  });
+});
+
+// ── enableWhen with repeating source item ─────────────────────────────────────
+describe('evaluateNode — enableWhen with repeat values', () => {
+  it('hidden when primary empty and no repeat rows', () => {
+    const node = {
+      id: 'q2', type: 'item', mandatory: null,
+      enableWhen: [{ question: 'q1', operator: '=', answerString: 'yes' }],
+      enableBehavior: 'all', enableWhenExpression: '',
+    };
+    expect(evaluateNode(node, {}, []).visible).toBe(false);
+  });
+
+  it('visible when condition met by primary value', () => {
+    const node = {
+      id: 'q2', type: 'item', mandatory: null,
+      enableWhen: [{ question: 'q1', operator: '=', answerString: 'yes' }],
+      enableBehavior: 'all', enableWhenExpression: '',
+    };
+    _values['q1'] = 'yes';
+    expect(evaluateNode(node, {}, []).visible).toBe(true);
+  });
+
+  it('visible when condition met by a repeat row (not primary)', () => {
+    const node = {
+      id: 'q2', type: 'item', mandatory: null,
+      enableWhen: [{ question: 'q1', operator: '=', answerString: 'yes' }],
+      enableBehavior: 'all', enableWhenExpression: '',
+    };
+    _values['q1'] = 'no';       // primary does not satisfy
+    _values['q1$$n'] = 1;
+    _values['q1$$1'] = 'yes';   // repeat row satisfies
+    expect(evaluateNode(node, {}, []).visible).toBe(true);
+  });
+
+  it('hidden when no repeat row satisfies condition', () => {
+    const node = {
+      id: 'q2', type: 'item', mandatory: null,
+      enableWhen: [{ question: 'q1', operator: '=', answerString: 'yes' }],
+      enableBehavior: 'all', enableWhenExpression: '',
+    };
+    _values['q1'] = 'no';
+    _values['q1$$n'] = 2;
+    _values['q1$$1'] = 'maybe';
+    _values['q1$$2'] = 'no';
+    expect(evaluateNode(node, {}, []).visible).toBe(false);
+  });
+
+  it('exists:true satisfied by any repeat row', () => {
+    const node = {
+      id: 'q2', type: 'item', mandatory: null,
+      enableWhen: [{ question: 'q1', operator: 'exists', answerBoolean: true }],
+      enableBehavior: 'all', enableWhenExpression: '',
+    };
+    // primary not set, but repeat row is
+    _values['q1$$n'] = 1;
+    _values['q1$$1'] = 'something';
+    expect(evaluateNode(node, {}, []).visible).toBe(true);
   });
 });
