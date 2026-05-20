@@ -2,6 +2,13 @@
 
 > Internal architecture and codebase notes. See [README.md](../README.md) for user-facing docs.
 
+## 🚨 THE MUST — highest priority, no exceptions
+
+1. **Stop and ask after one failed attempt.** If a bug or issue is not resolved on the first real attempt — STOP immediately. Ask the user to reproduce manually and provide more details. Do NOT keep iterating or running more diagnostics.
+2. **Never guess. Never infer. Ask.** If any detail is unclear or missing — stop and ask exactly what information is needed. Do not proceed on assumptions.
+
+---
+
 ## ⚠️ WORKFLOW RULES — MANDATORY
 
 1. **git commit/push only on explicit user instruction** ("push it", "пушай"). Never automatically.
