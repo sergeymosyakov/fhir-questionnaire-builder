@@ -268,7 +268,9 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 
 | FHIR field | What happens | Notes |
 |---|---|---|
-| *(none — all root-level fields now covered)* | — | `effectivePeriod`, `Questionnaire.code[]` pass-through, and all metadata fields implemented |
+| `Questionnaire.experimental` | ⚠️ Silent loss | Boolean flag; not stored in `questMeta`; lost on export |
+| `Questionnaire.derivedFrom[]` | ⚠️ Silent loss | Canonical references to parent questionnaires; not stored |
+| `Questionnaire.language` | ⚠️ Silent loss | BCP-47 language code for the resource; not stored |
 
 ### Item-level — not implemented
 
@@ -279,6 +281,9 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 | `item.answerValueSet` — external URL | 🔧 URL preserved round-trip | Not resolved to answer options; no FHIR terminology server integration. `#id` contained refs ARE resolved (see Round-Trip Safety) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
+| `rendering-xhtml` extension | ⚠️ Silent loss | Rich HTML text in `_text.extension[rendering-xhtml]`; only plain `item.text` is used |
+| `questionnaire-choiceOrientation` | ❌ Not handled | Horizontal / vertical layout hint for choice items |
+| `questionnaire-displayCategory` | ❌ Not handled | Category for `display` items (instructions, security, help) |
 
 ### SDC extensions — not implemented (no server required)
 
