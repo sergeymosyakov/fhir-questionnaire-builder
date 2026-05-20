@@ -334,6 +334,18 @@ export function importFHIR(fhirJson, renderFn) {
   questMeta.status      = q.status      || 'draft';
   questMeta.publisher   = q.publisher   || '';
   questMeta.description = q.description || '';
+  questMeta.name        = q.name        || '';
+  questMeta.date        = q.date        || '';
+  questMeta.subjectType = Array.isArray(q.subjectType) && q.subjectType.length
+    ? q.subjectType.join(', ')
+    : 'Patient';
+  questMeta.purpose        = q.purpose        || '';
+  questMeta.copyright      = q.copyright      || '';
+  questMeta.approvalDate   = q.approvalDate   || '';
+  questMeta.lastReviewDate = q.lastReviewDate || '';
+  questMeta._rawContact      = Array.isArray(q.contact)      ? q.contact      : null;
+  questMeta._rawUseContext   = Array.isArray(q.useContext)   ? q.useContext   : null;
+  questMeta._rawJurisdiction = Array.isArray(q.jurisdiction) ? q.jurisdiction : null;
 
   // Read questionnaire-level SDC variables
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';

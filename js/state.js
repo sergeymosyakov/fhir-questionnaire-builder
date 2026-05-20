@@ -56,13 +56,26 @@ export const questVariables = reactive([]);
 
 // Questionnaire-level metadata — preserved across import/export and editable via Properties modal.
 export const questMeta = reactive({
-  id:          '',
-  url:         '',
-  version:     '',
-  title:       '',
-  status:      'draft',
-  publisher:   '',
-  description: '',
+  // Core (always visible in Properties modal)
+  id:            '',
+  url:           '',
+  version:       '',
+  title:         '',
+  status:        'draft',
+  publisher:     '',
+  description:   '',
+  name:          '',
+  // Advanced (collapsible section in Properties modal)
+  date:          '',          // Questionnaire.date — last changed; exported as-is (today if blank)
+  subjectType:   'Patient',   // comma-separated, e.g. 'Patient, Practitioner'
+  purpose:       '',
+  copyright:     '',
+  approvalDate:  '',
+  lastReviewDate: '',
+  // Pass-through: preserved from import, written back on export, no editing UI
+  _rawContact:      null,
+  _rawUseContext:   null,
+  _rawJurisdiction: null,
 });
 
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.

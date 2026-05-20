@@ -180,10 +180,20 @@ export function buildFHIRObject() {
   if (questMeta.url)         q.url         = questMeta.url;
   if (questMeta.version)     q.version     = questMeta.version;
   q.title = questMeta.title || (rawFhir.value && rawFhir.value.title) || 'Untitled Questionnaire';
+  if (questMeta.name)        q.name        = questMeta.name;
   if (questMeta.publisher)   q.publisher   = questMeta.publisher;
   if (questMeta.description) q.description = questMeta.description;
-  q.subjectType = ['Patient'];
-  q.date = new Date().toISOString().split('T')[0];
+  if (questMeta.purpose)     q.purpose     = questMeta.purpose;
+  if (questMeta.copyright)   q.copyright   = questMeta.copyright;
+  if (questMeta.approvalDate)   q.approvalDate   = questMeta.approvalDate;
+  if (questMeta.lastReviewDate) q.lastReviewDate = questMeta.lastReviewDate;
+  q.date = questMeta.date || new Date().toISOString().split('T')[0];
+  q.subjectType = questMeta.subjectType
+    ? questMeta.subjectType.split(',').map(s => s.trim()).filter(Boolean)
+    : ['Patient'];
+  if (questMeta._rawContact)      q.contact     = questMeta._rawContact;
+  if (questMeta._rawUseContext)   q.useContext  = questMeta._rawUseContext;
+  if (questMeta._rawJurisdiction) q.jurisdiction = questMeta._rawJurisdiction;
   const vars = questVariables.filter(v => v.name && v.expression);
   if (vars.length) {
     q.extension = vars.map(v => ({

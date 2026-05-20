@@ -393,7 +393,11 @@ function _doReset() {
   // Reset questionnaire-level metadata
   questMeta.id = ''; questMeta.url = ''; questMeta.version = '';
   questMeta.title = ''; questMeta.status = 'draft';
-  questMeta.publisher = ''; questMeta.description = '';
+  questMeta.publisher = ''; questMeta.description = ''; questMeta.name = '';
+  questMeta.date = ''; questMeta.subjectType = 'Patient';
+  questMeta.purpose = ''; questMeta.copyright = '';
+  questMeta.approvalDate = ''; questMeta.lastReviewDate = '';
+  questMeta._rawContact = null; questMeta._rawUseContext = null; questMeta._rawJurisdiction = null;
   // Clear questionnaire-level variables
   questVariables.splice(0);
   variablesPanel.refresh();

@@ -10,7 +10,9 @@ const _questContained = [];
 const _values         = {};
 const _rawFhir        = { value: null };
 const _bulkUpdate     = { value: false };
-const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '' };
+const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
+  name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
+  _rawContact: null, _rawUseContext: null, _rawJurisdiction: null };
 
 vi.mock('../js/state.js', () => ({
   tree:           _tree,
@@ -301,7 +303,9 @@ describe('importFHIR', () => {
     _questContained.splice(0);
     Object.keys(_values).forEach(k => delete _values[k]);
     _rawFhir.value = null;
-    Object.assign(_questMeta, { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '' });
+    Object.assign(_questMeta, { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
+      name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
+      _rawContact: null, _rawUseContext: null, _rawJurisdiction: null });
     vi.mocked(alert).mockClear();
   });
 
@@ -488,6 +492,70 @@ describe('importFHIR', () => {
   it('populates questMeta.description from the questionnaire', () => {
     importFHIR({ resourceType: 'Questionnaire', description: 'A screening tool.', item: [] });
     expect(_questMeta.description).toBe('A screening tool.');
+  });
+
+  it('populates questMeta.name from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', name: 'MyQuestionnaire', item: [] });
+    expect(_questMeta.name).toBe('MyQuestionnaire');
+  });
+
+  it('populates questMeta.date from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', date: '2024-03-15', item: [] });
+    expect(_questMeta.date).toBe('2024-03-15');
+  });
+
+  it('populates questMeta.subjectType as comma-separated string', () => {
+    importFHIR({ resourceType: 'Questionnaire', subjectType: ['Patient', 'Practitioner'], item: [] });
+    expect(_questMeta.subjectType).toBe('Patient, Practitioner');
+  });
+
+  it('defaults questMeta.subjectType to Patient when not present', () => {
+    importFHIR({ resourceType: 'Questionnaire', item: [] });
+    expect(_questMeta.subjectType).toBe('Patient');
+  });
+
+  it('populates questMeta.purpose from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', purpose: 'Screening', item: [] });
+    expect(_questMeta.purpose).toBe('Screening');
+  });
+
+  it('populates questMeta.copyright from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', copyright: '© HL7', item: [] });
+    expect(_questMeta.copyright).toBe('© HL7');
+  });
+
+  it('populates questMeta.approvalDate from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', approvalDate: '2023-01-01', item: [] });
+    expect(_questMeta.approvalDate).toBe('2023-01-01');
+  });
+
+  it('populates questMeta.lastReviewDate from the questionnaire', () => {
+    importFHIR({ resourceType: 'Questionnaire', lastReviewDate: '2024-06-01', item: [] });
+    expect(_questMeta.lastReviewDate).toBe('2024-06-01');
+  });
+
+  it('stores contact[] as _rawContact pass-through', () => {
+    const contact = [{ name: 'HL7', telecom: [] }];
+    importFHIR({ resourceType: 'Questionnaire', contact, item: [] });
+    expect(_questMeta._rawContact).toEqual(contact);
+  });
+
+  it('stores useContext[] as _rawUseContext pass-through', () => {
+    const useContext = [{ code: { code: 'venue' } }];
+    importFHIR({ resourceType: 'Questionnaire', useContext, item: [] });
+    expect(_questMeta._rawUseContext).toEqual(useContext);
+  });
+
+  it('stores jurisdiction[] as _rawJurisdiction pass-through', () => {
+    const jurisdiction = [{ coding: [{ system: 'urn:iso:std:iso:3166', code: 'US' }] }];
+    importFHIR({ resourceType: 'Questionnaire', jurisdiction, item: [] });
+    expect(_questMeta._rawJurisdiction).toEqual(jurisdiction);
+  });
+
+  it('resets pass-through fields to null on re-import without those fields', () => {
+    importFHIR({ resourceType: 'Questionnaire', contact: [{ name: 'A' }], item: [] });
+    importFHIR({ resourceType: 'Questionnaire', item: [] });
+    expect(_questMeta._rawContact).toBeNull();
   });
 
   it('resets questMeta fields to empty on re-import', () => {

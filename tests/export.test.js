@@ -8,7 +8,9 @@ const _tree = [];
 const _questVariables = [];
 const _questContained = [];
 let _rawFhir = { value: null };
-const _questMeta = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '' };
+const _questMeta = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
+  name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
+  _rawContact: null, _rawUseContext: null, _rawJurisdiction: null };
 
 vi.mock('../js/state.js', () => ({
   tree:            _tree,
@@ -485,7 +487,9 @@ describe('buildFHIRObject — _initialValue export', () => {
 
 // ── questMeta round-trip ──────────────────────────────────────────────────────
 describe('buildFHIRObject — questMeta', () => {
-  const EMPTY_META = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '' };
+  const EMPTY_META = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
+    name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
+    _rawContact: null, _rawUseContext: null, _rawJurisdiction: null };
 
   afterEach(() => { Object.assign(_questMeta, EMPTY_META); });
 
@@ -569,6 +573,84 @@ describe('buildFHIRObject — questMeta', () => {
     _questMeta.description = '';
     const q = buildFHIRObject();
     expect(q.description).toBeUndefined();
+  });
+
+  it('exports name when questMeta.name is set', () => {
+    _questMeta.name = 'MyQuestionnaire';
+    const q = buildFHIRObject();
+    expect(q.name).toBe('MyQuestionnaire');
+  });
+
+  it('omits name when questMeta.name is empty', () => {
+    const q = buildFHIRObject();
+    expect(q.name).toBeUndefined();
+  });
+
+  it('exports subjectType from questMeta.subjectType (comma-separated string)', () => {
+    _questMeta.subjectType = 'Patient, Practitioner';
+    const q = buildFHIRObject();
+    expect(q.subjectType).toEqual(['Patient', 'Practitioner']);
+  });
+
+  it('defaults subjectType to [Patient] when questMeta.subjectType is empty', () => {
+    _questMeta.subjectType = '';
+    const q = buildFHIRObject();
+    expect(q.subjectType).toEqual(['Patient']);
+  });
+
+  it('exports questMeta.date when set (preserves imported date)', () => {
+    _questMeta.date = '2024-01-15';
+    const q = buildFHIRObject();
+    expect(q.date).toBe('2024-01-15');
+  });
+
+  it('falls back to today when questMeta.date is empty', () => {
+    _questMeta.date = '';
+    const today = new Date().toISOString().split('T')[0];
+    const q = buildFHIRObject();
+    expect(q.date).toBe(today);
+  });
+
+  it('exports purpose when set', () => {
+    _questMeta.purpose = 'Screening tool';
+    const q = buildFHIRObject();
+    expect(q.purpose).toBe('Screening tool');
+  });
+
+  it('exports copyright when set', () => {
+    _questMeta.copyright = '© 2024 HL7';
+    const q = buildFHIRObject();
+    expect(q.copyright).toBe('© 2024 HL7');
+  });
+
+  it('exports approvalDate when set', () => {
+    _questMeta.approvalDate = '2024-06-01';
+    const q = buildFHIRObject();
+    expect(q.approvalDate).toBe('2024-06-01');
+  });
+
+  it('exports lastReviewDate when set', () => {
+    _questMeta.lastReviewDate = '2025-01-01';
+    const q = buildFHIRObject();
+    expect(q.lastReviewDate).toBe('2025-01-01');
+  });
+
+  it('writes back _rawContact pass-through', () => {
+    _questMeta._rawContact = [{ name: 'HL7', telecom: [] }];
+    const q = buildFHIRObject();
+    expect(q.contact).toEqual([{ name: 'HL7', telecom: [] }]);
+  });
+
+  it('writes back _rawUseContext pass-through', () => {
+    _questMeta._rawUseContext = [{ code: { code: 'venue' } }];
+    const q = buildFHIRObject();
+    expect(q.useContext).toEqual([{ code: { code: 'venue' } }]);
+  });
+
+  it('writes back _rawJurisdiction pass-through', () => {
+    _questMeta._rawJurisdiction = [{ coding: [{ system: 'urn:iso:std:iso:3166', code: 'US' }] }];
+    const q = buildFHIRObject();
+    expect(q.jurisdiction).toEqual([{ coding: [{ system: 'urn:iso:std:iso:3166', code: 'US' }] }]);
   });
 });
 

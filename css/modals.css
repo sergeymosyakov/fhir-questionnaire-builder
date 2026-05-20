@@ -198,18 +198,25 @@
 
 /* === Questionnaire Properties (metadata) modal ============================== */
 #metadataModal { z-index: 10100; }
-#metadataModal .modal-box { width: min(480px, 94vw); }
+#metadataModal .modal-box { width: min(520px, 94vw); }
 #metadataModal .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
 .meta-modal-row      { display: flex; align-items: flex-start; gap: 8px; }
-.meta-modal-lbl      { flex: 0 0 82px; font-size: 13px; font-weight: 500; line-height: 26px; }
+.meta-modal-lbl      { flex: 0 0 90px; font-size: 13px; font-weight: 500; line-height: 26px; }
 .meta-modal-inp      { flex: 1; height: 26px; padding: 0 6px; font-size: 13px;
                         border: 1px solid var(--c-border); border-radius: var(--r-sm); background: var(--c-bg); color: var(--c-text); }
+.meta-modal-inp--date { max-width: 160px; flex: 0 0 160px; }
 .meta-modal-sel      { flex: 1; font-size: 13px;
                         border: 1px solid var(--c-border); border-radius: var(--r-sm); height: 26px; background: var(--c-bg); color: var(--c-text); }
 .meta-modal-textarea { flex: 1; padding: 4px 6px; font-size: 13px; font-family: inherit;
                         border: 1px solid var(--c-border); border-radius: var(--r-sm); resize: vertical;
                         background: var(--c-bg); color: var(--c-text); min-height: 54px; }
 .meta-modal-inp:focus, .meta-modal-sel:focus, .meta-modal-textarea:focus { outline: 1px solid var(--c-accent); }
+
+.meta-modal-advanced   { border-top: 1px solid var(--c-border); margin-top: 4px; padding-top: 6px; }
+.meta-modal-adv-toggle { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 600;
+                          color: var(--c-accent); padding: 0; letter-spacing: .02em; }
+.meta-modal-adv-toggle:hover { opacity: .75; }
+.meta-modal-adv-body   { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 
 /* === Clear form confirmation modal ========================================== */
 .clear-confirm-backdrop {

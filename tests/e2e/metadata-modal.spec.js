@@ -15,10 +15,18 @@
 //   meta-id              (data-testid) id input inside modal body
 //   meta-url             (data-testid) url input
 //   meta-version         (data-testid) version input
+//   meta-name            (data-testid) name input
 //   meta-title           (data-testid) title input
 //   meta-status          (data-testid) status select
 //   meta-publisher       (data-testid) publisher input
 //   meta-description     (data-testid) description textarea
+//   meta-advanced-toggle (data-testid) Advanced section toggle button
+//   meta-date            (data-testid) date input (Advanced)
+//   meta-subject-type    (data-testid) subjectType input (Advanced)
+//   meta-approval-date   (data-testid) approvalDate input (Advanced)
+//   meta-last-review     (data-testid) lastReviewDate input (Advanced)
+//   meta-purpose         (data-testid) purpose textarea (Advanced)
+//   meta-copyright       (data-testid) copyright textarea (Advanced)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -147,6 +155,12 @@ test.describe('metadata modal — fields populated on open', () => {
     await openModal(page);
     await expect(page.getByTestId('meta-publisher')).toHaveValue('Test Publisher');
   });
+
+  test('name field shows the questionnaire name', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-name')).toHaveValue('MetaTestQuestionnaire');
+  });
 });
 
 // ── Apply commits changes ─────────────────────────────────────────────────────
@@ -186,6 +200,91 @@ test.describe('metadata modal — apply', () => {
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(filePath, 'utf8'));
     expect(q.title).toBe('Updated Title');
+  });
+});
+
+// ── Advanced section ──────────────────────────────────────────────────────────
+
+test.describe('metadata modal — Advanced section', () => {
+  test('Advanced section is collapsed by default', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-date')).not.toBeVisible();
+  });
+
+  test('clicking Advanced toggle expands the section', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-advanced-toggle').click();
+    await expect(page.getByTestId('meta-date')).toBeVisible();
+  });
+
+  test('date field shows questionnaire date after expanding', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-advanced-toggle').click();
+    await expect(page.getByTestId('meta-date')).toHaveValue('2024-03-15');
+  });
+
+  test('subjectType field shows comma-separated types after expanding', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-advanced-toggle').click();
+    await expect(page.getByTestId('meta-subject-type')).toHaveValue('Patient, Practitioner');
+  });
+
+  test('purpose field shows questionnaire purpose after expanding', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-advanced-toggle').click();
+    await expect(page.getByTestId('meta-purpose')).toHaveValue('Used for E2E testing.');
+  });
+
+  test('Advanced fields round-trip through export', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-advanced-toggle').click();
+    await page.getByTestId('meta-subject-type').fill('Patient, RelatedPerson');
+    await page.locator('#metadataModalApply').click();
+
+    page.once('dialog', d => d.accept());
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click(),
+    ]);
+    const filePath = await download.path();
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(filePath, 'utf8'));
+    expect(q.subjectType).toEqual(['Patient', 'RelatedPerson']);
+  });
+
+  test('date is preserved in export round-trip', async ({ page }) => {
+    await loadFixture(page);
+    page.once('dialog', d => d.accept());
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click(),
+    ]);
+    const filePath = await download.path();
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(filePath, 'utf8'));
+    expect(q.date).toBe('2024-03-15');
+  });
+
+  test('contact[] is preserved in export pass-through', async ({ page }) => {
+    await loadFixture(page);
+    page.once('dialog', d => d.accept());
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click(),
+    ]);
+    const filePath = await download.path();
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(filePath, 'utf8'));
+    expect(q.contact).toEqual([{ name: 'Test Contact' }]);
   });
 });
 

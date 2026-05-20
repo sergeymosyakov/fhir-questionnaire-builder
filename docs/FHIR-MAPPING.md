@@ -65,10 +65,20 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `questMeta.id` | `Questionnaire.id` | ← `id` | → `id` (fallback: `'logic-builder-export'`) |
 | `questMeta.url` | `Questionnaire.url` | ← `url` | → `url` (omitted when empty) |
 | `questMeta.version` | `Questionnaire.version` | ← `version` | → `version` (omitted when empty) |
+| `questMeta.name` | `Questionnaire.name` | ← `name` | → `name` (omitted when empty) |
 | `questMeta.title` | `Questionnaire.title` | ← `title` | → `title` (takes precedence over rawFhir.title; fallback: `'Untitled Questionnaire'`) |
 | `questMeta.status` | `Questionnaire.status` | ← `status` (default: `'draft'`) | → `status` |
+| `questMeta.date` | `Questionnaire.date` | ← `date` | → `date` (preserved from import; falls back to today's ISO date for new questionnaires) |
 | `questMeta.publisher` | `Questionnaire.publisher` | ← `publisher` | → `publisher` (omitted when empty) |
 | `questMeta.description` | `Questionnaire.description` | ← `description` | → `description` (omitted when empty) |
+| `questMeta.purpose` | `Questionnaire.purpose` | ← `purpose` | → `purpose` (omitted when empty) |
+| `questMeta.copyright` | `Questionnaire.copyright` | ← `copyright` | → `copyright` (omitted when empty) |
+| `questMeta.approvalDate` | `Questionnaire.approvalDate` | ← `approvalDate` | → `approvalDate` (omitted when empty) |
+| `questMeta.lastReviewDate` | `Questionnaire.lastReviewDate` | ← `lastReviewDate` | → `lastReviewDate` (omitted when empty) |
+| `questMeta.subjectType` | `Questionnaire.subjectType` | ← `subjectType[]` joined as comma-separated string (default: `'Patient'`) | → split back to array (default: `['Patient']`) |
+| `questMeta._rawContact` | `Questionnaire.contact[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
+| `questMeta._rawUseContext` | `Questionnaire.useContext[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
+| `questMeta._rawJurisdiction` | `Questionnaire.jurisdiction[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 
 ---
 
@@ -244,11 +254,51 @@ This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR wit
 
 ## Not Supported / Partial Support
 
-Items marked ⚠️ produce silent data loss on import.
+Legend: ⚠️ = silent data loss (field present in import file, ignored or overwritten on export); ❌ = not handled at all; 🔧 = partial support.
 
-| Feature | FHIR field / extension | Status |
+### Questionnaire-level — remaining gaps
+
+| FHIR field | What happens | Notes |
 |---|---|---|
-| Answer value sets | `item.answerValueSet` | ⚠️ URL preserved round-trip; not resolved — items using `answerValueSet` have no answer options in the builder |
-| `contained` resources | `Questionnaire.contained[]` | ⚠️ Resources preserved round-trip; viewable as JSON in the Contained card; not otherwise processed |
-| Resource reference resolution | `type: 'reference'` | ⚠️ partial — dropdown (resource type) + id text input; no live search against a FHIR server |
-| FHIR versions other than R4 | STU3, R5 | Not tested; may partially work |
+| `effectivePeriod` | ⚠️ Not read / not written | Date range during which questionnaire is valid |
+| `Questionnaire.code[]` | ⚠️ Not handled | Root-level coding (≠ `item.code[]` which IS supported) |
+
+### Item-level — not implemented
+
+| FHIR field / extension | Status | Notes |
+|---|---|---|
+| `item.definition` | ⚠️ Silent loss | URL pointing to a StructureDefinition element |
+| `answerOption[].initialSelected` | ⚠️ Silent loss | Pre-selected answer option ignored on import |
+| `item.initial[]` — multiple values | 🔧 Only `initial[0]` used | For repeating items all initial rows should be loaded; only the first is |
+| `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
+| `item.answerValueSet` — external URL | 🔧 URL preserved round-trip | Not resolved to answer options; no FHIR terminology server integration. `#id` contained refs ARE resolved (see Round-Trip Safety) |
+| `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
+| Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
+
+### SDC extensions — not implemented (no server required)
+
+| Extension | Status | Notes |
+|---|---|---|
+| `sdc-questionnaire-hidden` | ❌ | Item always hidden from preview but participates in logic; distinct from `enableWhen` |
+| `sdc-questionnaire-entryFormat` | ❌ | Placeholder / entry hint text in the input field |
+| `sdc-questionnaire-answerExpression` | ❌ | Dynamic answer options derived from FHIRPath over form values (no server needed) |
+| `sdc-questionnaire-itemWeight` | ❌ | Per-option weight for scoring (analogous to `ordinalValue` at item level) |
+| `sdc-questionnaire-unitOption[]` | ❌ | Multiple selectable units for `quantity` items |
+| `sdc-questionnaire-supportLink` | ❌ | Help / documentation URL per item |
+| `sdc-questionnaire-shortText` | ❌ | Abbreviated label for summary views |
+
+### QuestionnaireResponse — minor gaps
+
+| QR field | What happens | Notes |
+|---|---|---|
+| `status` | Hardcoded `'in-progress'` | Exported QR always has this status |
+| `subject` | Not set | No Patient reference written |
+| `author` | Not set | |
+
+### FHIR versions
+
+| Version | Status |
+|---|---|
+| R4 | ✅ Fully supported |
+| R4B / R5 | 🔧 Partial — most fields overlap; `answerConstraint` and `disabledDisplay` are R4B/R5 native (R4 backport extension handled for `disabledDisplay`) |
+| STU3 | ❌ Not tested; may partially import |
