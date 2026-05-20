@@ -12,7 +12,8 @@ const _rawFhir        = { value: null };
 const _bulkUpdate     = { value: false };
 const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
-  _rawContact: null, _rawUseContext: null, _rawJurisdiction: null };
+  effectivePeriodStart: '', effectivePeriodEnd: '',
+  _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
 vi.mock('../js/state.js', () => ({
   tree:           _tree,
@@ -305,7 +306,8 @@ describe('importFHIR', () => {
     _rawFhir.value = null;
     Object.assign(_questMeta, { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
       name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
-      _rawContact: null, _rawUseContext: null, _rawJurisdiction: null });
+      effectivePeriodStart: '', effectivePeriodEnd: '',
+      _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null });
     vi.mocked(alert).mockClear();
   });
 
@@ -592,6 +594,127 @@ describe('importFHIR', () => {
     it('does not set _codes when item.code[] is empty', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', code: [] }]));
       expect(_tree[0]._codes).toBeUndefined();
+    });
+  });
+
+  // ── effectivePeriod import ──────────────────────────────────────────────────
+  describe('effectivePeriod', () => {
+    it('populates effectivePeriodStart from questionnaire', () => {
+      importFHIR({ resourceType: 'Questionnaire', effectivePeriod: { start: '2024-01-01' }, item: [] });
+      expect(_questMeta.effectivePeriodStart).toBe('2024-01-01');
+    });
+
+    it('populates effectivePeriodEnd from questionnaire', () => {
+      importFHIR({ resourceType: 'Questionnaire', effectivePeriod: { end: '2025-12-31' }, item: [] });
+      expect(_questMeta.effectivePeriodEnd).toBe('2025-12-31');
+    });
+
+    it('reads both start and end when present', () => {
+      importFHIR({ resourceType: 'Questionnaire', effectivePeriod: { start: '2024-01-01', end: '2025-12-31' }, item: [] });
+      expect(_questMeta.effectivePeriodStart).toBe('2024-01-01');
+      expect(_questMeta.effectivePeriodEnd).toBe('2025-12-31');
+    });
+
+    it('defaults effectivePeriod fields to empty when not present', () => {
+      importFHIR({ resourceType: 'Questionnaire', item: [] });
+      expect(_questMeta.effectivePeriodStart).toBe('');
+      expect(_questMeta.effectivePeriodEnd).toBe('');
+    });
+  });
+
+  // ── Questionnaire.code[] pass-through ──────────────────────────────────────
+  describe('_rawCode pass-through', () => {
+    it('stores Questionnaire.code[] as _rawCode', () => {
+      const code = [{ system: 'http://loinc.org', code: '44249-1', display: 'PHQ-9' }];
+      importFHIR({ resourceType: 'Questionnaire', code, item: [] });
+      expect(_questMeta._rawCode).toEqual(code);
+    });
+
+    it('sets _rawCode to null when code[] is absent', () => {
+      importFHIR({ resourceType: 'Questionnaire', item: [] });
+      expect(_questMeta._rawCode).toBeNull();
+    });
+
+    it('sets _rawCode to null when code[] is not an array', () => {
+      importFHIR({ resourceType: 'Questionnaire', code: 'bad', item: [] });
+      expect(_questMeta._rawCode).toBeNull();
+    });
+  });
+
+  // ── answerOption.initialSelected import ────────────────────────────────────
+  describe('answerOption.initialSelected', () => {
+    it('reads initialSelected into node._initialSelected', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [
+          { valueCoding: { code: 'yes', display: 'Yes' }, initialSelected: true },
+          { valueCoding: { code: 'no',  display: 'No'  } },
+        ],
+      }]));
+      expect(_tree[0]._initialSelected).toBe('yes');
+    });
+
+    it('sets _initialValue from initialSelected when no item.initial[]', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{ valueCoding: { code: 'yes' }, initialSelected: true }],
+      }]));
+      expect(_tree[0]._initialValue).toBe('yes');
+    });
+
+    it('item.initial[] takes precedence over initialSelected for _initialValue', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{ valueCoding: { code: 'yes' }, initialSelected: true }],
+        initial: [{ valueCoding: { code: 'no' } }],
+      }]));
+      expect(_tree[0]._initialSelected).toBe('yes');
+      expect(_tree[0]._initialValue).toBe('no');
+    });
+
+    it('does not set _initialSelected when no option is marked', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{ valueCoding: { code: 'yes' } }, { valueCoding: { code: 'no' } }],
+      }]));
+      expect(_tree[0]._initialSelected).toBeUndefined();
+    });
+
+    it('reads initialSelected from valueString option', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'open-choice', text: 'Q',
+        answerOption: [{ valueString: 'maybe', initialSelected: true }],
+      }]));
+      expect(_tree[0]._initialSelected).toBe('maybe');
+    });
+  });
+
+  // ── item.initial[] multiple values for repeating items ─────────────────────
+  describe('item.initial[] multi-value', () => {
+    it('reads multiple initial values for a repeating item into _initialValues', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', repeats: true,
+        initial: [{ valueString: 'a' }, { valueString: 'b' }, { valueString: 'c' }],
+      }]));
+      expect(_tree[0]._initialValues).toEqual(['a', 'b', 'c']);
+      expect(_tree[0]._initialValue).toBe('a');
+    });
+
+    it('reads single initial value without _initialValues for non-repeating item', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
+        initial: [{ valueString: 'hello' }],
+      }]));
+      expect(_tree[0]._initialValue).toBe('hello');
+      expect(_tree[0]._initialValues).toBeUndefined();
+    });
+
+    it('reads single initial value without _initialValues even for repeating item', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', repeats: true,
+        initial: [{ valueString: 'only' }],
+      }]));
+      expect(_tree[0]._initialValue).toBe('only');
+      expect(_tree[0]._initialValues).toBeUndefined();
+    });
+
+    it('reads integer initial values (stored as strings for form fields)', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'integer', text: 'Q', repeats: true,
+        initial: [{ valueInteger: 3 }, { valueInteger: 7 }],
+      }]));
+      expect(_tree[0]._initialValues).toEqual(['3', '7']);
     });
   });
 });

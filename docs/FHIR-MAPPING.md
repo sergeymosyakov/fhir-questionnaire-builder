@@ -42,6 +42,8 @@ Every node in the tree is either a **group** or an **item**:
   _readOnly:           boolean,          // FHIR item.readOnly
   _enableWhenText:     string,           // human-readable condition label (UI only, not persisted)
   _initialValue:       any,              // FHIR item.initial[0] value; pre-fills values[] on import
+  _initialValues:      any[],            // FHIR item.initial[] all values (set only for repeating items with >1 initial)
+  _initialSelected:    string,           // answerOption[].initialSelected code (round-trip; pre-fills _initialValue when no item.initial)
   _maxLength:          integer,          // FHIR item.maxLength
   _minOccurs:          integer,          // questionnaire-minOccurs extension (when repeats: true)
   _maxOccurs:          integer,          // questionnaire-maxOccurs extension (when repeats: true; enforced in preview)
@@ -76,9 +78,12 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `questMeta.approvalDate` | `Questionnaire.approvalDate` | ← `approvalDate` | → `approvalDate` (omitted when empty) |
 | `questMeta.lastReviewDate` | `Questionnaire.lastReviewDate` | ← `lastReviewDate` | → `lastReviewDate` (omitted when empty) |
 | `questMeta.subjectType` | `Questionnaire.subjectType` | ← `subjectType[]` joined as comma-separated string (default: `'Patient'`) | → split back to array (default: `['Patient']`) |
+| `questMeta.effectivePeriodStart` | `Questionnaire.effectivePeriod.start` | ← `effectivePeriod?.start` (default: `''`) | → `effectivePeriod.start` (omitted when empty) |
+| `questMeta.effectivePeriodEnd` | `Questionnaire.effectivePeriod.end` | ← `effectivePeriod?.end` (default: `''`) | → `effectivePeriod.end` (omitted when empty) |
 | `questMeta._rawContact` | `Questionnaire.contact[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawUseContext` | `Questionnaire.useContext[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawJurisdiction` | `Questionnaire.jurisdiction[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
+| `questMeta._rawCode` | `Questionnaire.code[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 
 ---
 
@@ -172,6 +177,9 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `_minOccurs` | `questionnaire-minOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true` |
 | `_maxOccurs` | `questionnaire-maxOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true`; enforced in preview — add button disabled at limit |
 | `_answerValueSet` | `item.answerValueSet` | imported → `node._answerValueSet`; exported back unchanged; URL not resolved — items show no selectable options in the builder |
+| `_initialValue` | `item.initial[0]` value | imported from `initial[0]`; exported as `initial: [entry]`; pre-fills `values[]` on import |
+| `_initialValues` | `item.initial[]` all values | set only for repeating items with >1 initial value; exported as `initial: [entry, …]`; `_initialValue` holds `initial[0]` for backwards compat |
+| `_initialSelected` | `answerOption[].initialSelected` | code of the initially-selected option; preserved round-trip; if no `item.initial[]` exists, also used to pre-fill `_initialValue` |
 ---
 
 ## Show When (enableWhen)
@@ -260,16 +268,13 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 
 | FHIR field | What happens | Notes |
 |---|---|---|
-| `effectivePeriod` | ⚠️ Not read / not written | Date range during which questionnaire is valid |
-| `Questionnaire.code[]` | ⚠️ Not handled | Root-level coding (≠ `item.code[]` which IS supported) |
+| *(none — all root-level fields now covered)* | — | `effectivePeriod`, `Questionnaire.code[]` pass-through, and all metadata fields implemented |
 
 ### Item-level — not implemented
 
 | FHIR field / extension | Status | Notes |
 |---|---|---|
 | `item.definition` | ⚠️ Silent loss | URL pointing to a StructureDefinition element |
-| `answerOption[].initialSelected` | ⚠️ Silent loss | Pre-selected answer option ignored on import |
-| `item.initial[]` — multiple values | 🔧 Only `initial[0]` used | For repeating items all initial rows should be loaded; only the first is |
 | `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
 | `item.answerValueSet` — external URL | 🔧 URL preserved round-trip | Not resolved to answer options; no FHIR terminology server integration. `#id` contained refs ARE resolved (see Round-Trip Safety) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |

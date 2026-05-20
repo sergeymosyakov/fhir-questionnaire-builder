@@ -72,10 +72,13 @@ export const questMeta = reactive({
   copyright:     '',
   approvalDate:  '',
   lastReviewDate: '',
+  effectivePeriodStart: '',   // Questionnaire.effectivePeriod.start
+  effectivePeriodEnd:   '',   // Questionnaire.effectivePeriod.end
   // Pass-through: preserved from import, written back on export, no editing UI
   _rawContact:      null,
   _rawUseContext:   null,
   _rawJurisdiction: null,
+  _rawCode:         null,     // Questionnaire.code[] root-level coding
 });
 
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.

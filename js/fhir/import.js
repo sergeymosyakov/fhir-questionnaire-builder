@@ -3,10 +3,18 @@ import { tree, values, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, ques
 import { renderTree } from '../render-builder.js';
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
 
-// Walk the tree and pre-populate values[] from node._initialValue
+// Walk the tree and pre-populate values[] from node._initialValue / _initialValues
 function applyInitialValues(nodes) {
   for (const node of nodes) {
-    if (node._initialValue !== undefined) setValue(node.id, node._initialValue);
+    if (node.repeats && node._initialValues && node._initialValues.length > 1) {
+      // Multiple initial values for a repeating item — populate repeat rows
+      setValue(node.id + '$$n', node._initialValues.length);
+      for (let i = 0; i < node._initialValues.length; i++) {
+        setValue(node.id + '$$' + (i + 1), node._initialValues[i]);
+      }
+    } else if (node._initialValue !== undefined) {
+      setValue(node.id, node._initialValue);
+    }
     if (node.type === 'group') applyInitialValues(node.children);
   }
 }
@@ -252,19 +260,44 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     if (resolved) node.options = resolved;
   }
 
-  // item.initial[0] → _initialValue
+  // item.initial[] → _initialValue / _initialValues (multi-row for repeating items)
   if (fhirItem.initial && fhirItem.initial.length) {
-    const init = fhirItem.initial[0];
-    if      (init.valueBoolean  !== undefined) node._initialValue = init.valueBoolean;
-    else if (init.valueDecimal  !== undefined) node._initialValue = String(init.valueDecimal);
-    else if (init.valueInteger  !== undefined) node._initialValue = String(init.valueInteger);
-    else if (init.valueDate     !== undefined) node._initialValue = init.valueDate;
-    else if (init.valueDateTime !== undefined) node._initialValue = init.valueDateTime;
-    else if (init.valueTime     !== undefined) node._initialValue = init.valueTime;
-    else if (init.valueString   !== undefined) node._initialValue = init.valueString;
-    else if (init.valueUri      !== undefined) node._initialValue = init.valueUri;
-    else if (init.valueCoding)                 node._initialValue = init.valueCoding.code || init.valueCoding.display || '';
-    else if (init.valueQuantity)               node._initialValue = init.valueQuantity.value !== undefined ? String(init.valueQuantity.value) : '';
+    const extractVal = init => {
+      if (init.valueBoolean  !== undefined) return init.valueBoolean;
+      if (init.valueDecimal  !== undefined) return String(init.valueDecimal);
+      if (init.valueInteger  !== undefined) return String(init.valueInteger);
+      if (init.valueDate     !== undefined) return init.valueDate;
+      if (init.valueDateTime !== undefined) return init.valueDateTime;
+      if (init.valueTime     !== undefined) return init.valueTime;
+      if (init.valueString   !== undefined) return init.valueString;
+      if (init.valueUri      !== undefined) return init.valueUri;
+      if (init.valueCoding)                 return init.valueCoding.code || init.valueCoding.display || '';
+      if (init.valueQuantity)               return init.valueQuantity.value !== undefined ? String(init.valueQuantity.value) : '';
+      return undefined;
+    };
+    if (node.repeats && fhirItem.initial.length > 1) {
+      const vals = fhirItem.initial.map(extractVal).filter(v => v !== undefined);
+      node._initialValues = vals;
+      node._initialValue  = vals[0];
+    } else {
+      const val = extractVal(fhirItem.initial[0]);
+      if (val !== undefined) node._initialValue = val;
+    }
+  }
+  // answerOption[].initialSelected → _initialSelected (round-trip flag)
+  for (const opt of fhirItem.answerOption || []) {
+    if (opt.initialSelected) {
+      let code;
+      if (opt.valueCoding)              code = opt.valueCoding.code || opt.valueCoding.display || '';
+      else if (opt.valueString  !== undefined) code = opt.valueString;
+      else if (opt.valueInteger !== undefined) code = String(opt.valueInteger);
+      if (code !== undefined) {
+        node._initialSelected = code;
+        // Pre-fill initial value from initialSelected when item.initial[] is absent
+        if (node._initialValue === undefined) node._initialValue = code;
+        break;
+      }
+    }
   }
   return node;
 }
@@ -343,9 +376,12 @@ export function importFHIR(fhirJson, renderFn) {
   questMeta.copyright      = q.copyright      || '';
   questMeta.approvalDate   = q.approvalDate   || '';
   questMeta.lastReviewDate = q.lastReviewDate || '';
+  questMeta.effectivePeriodStart = q.effectivePeriod?.start || '';
+  questMeta.effectivePeriodEnd   = q.effectivePeriod?.end   || '';
   questMeta._rawContact      = Array.isArray(q.contact)      ? q.contact      : null;
   questMeta._rawUseContext   = Array.isArray(q.useContext)   ? q.useContext   : null;
   questMeta._rawJurisdiction = Array.isArray(q.jurisdiction) ? q.jurisdiction : null;
+  questMeta._rawCode         = Array.isArray(q.code)         ? q.code         : null;
 
   // Read questionnaire-level SDC variables
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';

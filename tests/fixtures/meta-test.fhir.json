@@ -13,6 +13,7 @@
   "copyright": "\u00a9 2024 Test",
   "approvalDate": "2024-01-01",
   "lastReviewDate": "2024-06-01",
+  "effectivePeriod": { "start": "2024-01-01", "end": "2025-12-31" },
   "subjectType": ["Patient", "Practitioner"],
   "contact": [{"name": "Test Contact"}],
   "useContext": [{"code": {"code": "venue"}, "valueCodeableConcept": {"text": "inpatient"}}],

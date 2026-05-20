@@ -10,7 +10,8 @@ const _questContained = [];
 let _rawFhir = { value: null };
 const _questMeta = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
-  _rawContact: null, _rawUseContext: null, _rawJurisdiction: null };
+  effectivePeriodStart: '', effectivePeriodEnd: '',
+  _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
 vi.mock('../js/state.js', () => ({
   tree:            _tree,
@@ -489,7 +490,8 @@ describe('buildFHIRObject — _initialValue export', () => {
 describe('buildFHIRObject — questMeta', () => {
   const EMPTY_META = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
     name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
-    _rawContact: null, _rawUseContext: null, _rawJurisdiction: null };
+    effectivePeriodStart: '', effectivePeriodEnd: '',
+    _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
   afterEach(() => { Object.assign(_questMeta, EMPTY_META); });
 
@@ -680,5 +682,105 @@ describe('buildFHIRObject — _codes', () => {
   it('omits item.code[] when _codes not set', () => {
     const q = build([{ id: 'q1', type: 'item', itemType: 'text', title: 'Q' }]);
     expect(q.item[0].code).toBeUndefined();
+  });
+});
+
+// ── effectivePeriod round-trip ──────────────────────────────────────────────────────
+describe('buildFHIRObject — effectivePeriod', () => {
+  afterEach(() => { _questMeta.effectivePeriodStart = ''; _questMeta.effectivePeriodEnd = ''; });
+
+  it('exports effectivePeriod when both start and end are set', () => {
+    _questMeta.effectivePeriodStart = '2024-01-01';
+    _questMeta.effectivePeriodEnd   = '2025-12-31';
+    const q = buildFHIRObject();
+    expect(q.effectivePeriod).toEqual({ start: '2024-01-01', end: '2025-12-31' });
+  });
+
+  it('exports effectivePeriod with only start', () => {
+    _questMeta.effectivePeriodStart = '2024-06-01';
+    const q = buildFHIRObject();
+    expect(q.effectivePeriod).toEqual({ start: '2024-06-01' });
+    expect(q.effectivePeriod.end).toBeUndefined();
+  });
+
+  it('exports effectivePeriod with only end', () => {
+    _questMeta.effectivePeriodEnd = '2025-12-31';
+    const q = buildFHIRObject();
+    expect(q.effectivePeriod).toEqual({ end: '2025-12-31' });
+  });
+
+  it('omits effectivePeriod when both are empty', () => {
+    const q = buildFHIRObject();
+    expect(q.effectivePeriod).toBeUndefined();
+  });
+});
+
+// ── Questionnaire.code[] pass-through ───────────────────────────────────────────────
+describe('buildFHIRObject — _rawCode pass-through', () => {
+  afterEach(() => { _questMeta._rawCode = null; });
+
+  it('writes Questionnaire.code[] back when _rawCode is set', () => {
+    const codes = [{ system: 'http://loinc.org', code: '44249-1', display: 'Test' }];
+    _questMeta._rawCode = codes;
+    const q = buildFHIRObject();
+    expect(q.code).toEqual(codes);
+  });
+
+  it('omits Questionnaire.code[] when _rawCode is null', () => {
+    const q = buildFHIRObject();
+    expect(q.code).toBeUndefined();
+  });
+});
+
+// ── answerOption.initialSelected export ───────────────────────────────────────────────
+describe('buildFHIRObject — answerOption initialSelected', () => {
+  it('marks the matching answerOption with initialSelected: true', () => {
+    const q = build([{ id: 'q1', type: 'item', itemType: 'select', title: 'Q',
+      options: 'a=Alpha, b=Beta, c=Gamma', _initialSelected: 'b' }]);
+    const opts = q.item[0].answerOption;
+    expect(opts.find(o => o.valueCoding.code === 'b').initialSelected).toBe(true);
+    expect(opts.find(o => o.valueCoding.code === 'a').initialSelected).toBeUndefined();
+    expect(opts.find(o => o.valueCoding.code === 'c').initialSelected).toBeUndefined();
+  });
+
+  it('does not add initialSelected when _initialSelected is not set', () => {
+    const q = build([{ id: 'q1', type: 'item', itemType: 'select', title: 'Q',
+      options: 'a=Alpha, b=Beta' }]);
+    expect(q.item[0].answerOption.every(o => !o.initialSelected)).toBe(true);
+  });
+
+  it('works with radio item type', () => {
+    const q = build([{ id: 'q1', type: 'item', itemType: 'radio', title: 'Q',
+      options: 'yes=Yes, no=No', _initialSelected: 'yes' }]);
+    expect(q.item[0].answerOption.find(o => o.valueCoding.code === 'yes').initialSelected).toBe(true);
+  });
+});
+
+// ── item.initial[] multiple values (repeating items) ──────────────────────────────
+describe('buildFHIRObject — multi-initial for repeating items', () => {
+  it('exports all _initialValues as item.initial[] for a repeating item', () => {
+    const q = build([{ id: 'q1', type: 'item', itemType: 'text', title: 'Q',
+      repeats: true, _initialValues: ['foo', 'bar', 'baz'] }]);
+    expect(q.item[0].initial).toHaveLength(3);
+    expect(q.item[0].initial[0]).toEqual({ valueString: 'foo' });
+    expect(q.item[0].initial[2]).toEqual({ valueString: 'baz' });
+  });
+
+  it('falls back to single _initialValue when _initialValues is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', itemType: 'text', title: 'Q',
+      repeats: true, _initialValue: 'hello' }]);
+    expect(q.item[0].initial).toEqual([{ valueString: 'hello' }]);
+  });
+
+  it('omits initial[] for a repeating item with no initial data', () => {
+    const q = build([{ id: 'q1', type: 'item', itemType: 'text', title: 'Q', repeats: true }]);
+    expect(q.item[0].initial).toBeUndefined();
+  });
+
+  it('exports integer type initial values correctly', () => {
+    const q = build([{ id: 'q1', type: 'item', itemType: 'integer', title: 'Q',
+      repeats: true, _initialValues: ['3', '7'] }]);
+    expect(q.item[0].initial[0]).toEqual({ valueInteger: 3 });
+    expect(q.item[0].initial[1]).toEqual({ valueInteger: 7 });
   });
 });

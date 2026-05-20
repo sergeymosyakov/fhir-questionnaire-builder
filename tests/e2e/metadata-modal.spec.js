@@ -23,6 +23,8 @@
 //   meta-advanced-toggle (data-testid) Advanced section toggle button
 //   meta-date            (data-testid) date input (Advanced)
 //   meta-subject-type    (data-testid) subjectType input (Advanced)
+//   meta-effective-start (data-testid) effectivePeriod.start input (Advanced)
+//   meta-effective-end   (data-testid) effectivePeriod.end input (Advanced)
 //   meta-approval-date   (data-testid) approvalDate input (Advanced)
 //   meta-last-review     (data-testid) lastReviewDate input (Advanced)
 //   meta-purpose         (data-testid) purpose textarea (Advanced)
@@ -313,6 +315,62 @@ test.describe('metadata card — reset on clear', () => {
     await expect(page.getByTestId('meta-id')).toHaveValue('');
     await expect(page.getByTestId('meta-url')).toHaveValue('');
     await expect(page.getByTestId('meta-title')).toHaveValue('');
+    await page.locator('#metadataModalCancel').click();
+  });
+});
+
+// ── effectivePeriod fields ─────────────────────────────────────────────────────
+test.describe('metadata modal — effectivePeriod', () => {
+  test('effectivePeriod start and end shown in Advanced section', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-advanced-toggle').click();
+    await expect(page.getByTestId('meta-effective-start')).toHaveValue('2024-01-01');
+    await expect(page.getByTestId('meta-effective-end')).toHaveValue('2025-12-31');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('effectivePeriod round-trips through export', async ({ page }) => {
+    await loadFixture(page);
+    page.once('dialog', d => d.accept());
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click(),
+    ]);
+    const filePath = await download.path();
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(filePath, 'utf8'));
+    expect(q.effectivePeriod).toEqual({ start: '2024-01-01', end: '2025-12-31' });
+  });
+
+  test('effectivePeriod can be edited and applied', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-advanced-toggle').click();
+    await page.getByTestId('meta-effective-start').fill('2025-03-01');
+    await page.locator('#metadataModalApply').click();
+    // Reopen and verify saved value
+    await openModal(page);
+    await page.getByTestId('meta-advanced-toggle').click();
+    await expect(page.getByTestId('meta-effective-start')).toHaveValue('2025-03-01');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('effectivePeriod cleared when form is cleared', async ({ page }) => {
+    await loadFixture(page);
+    // Clear the form
+    await page.getByTestId('clear-form-btn').click();
+    await page.waitForSelector('.clear-confirm-backdrop');
+    await page.getByTestId('clear-confirm-clear-btn').click();
+    // Add a node so card is visible
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.getByTestId('quest-meta-card')).toBeVisible();
+    // Open modal — effectivePeriod fields must be empty
+    await openModal(page);
+    await page.getByTestId('meta-advanced-toggle').click();
+    await expect(page.getByTestId('meta-effective-start')).toHaveValue('');
+    await expect(page.getByTestId('meta-effective-end')).toHaveValue('');
     await page.locator('#metadataModalCancel').click();
   });
 });

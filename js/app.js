@@ -397,7 +397,9 @@ function _doReset() {
   questMeta.date = ''; questMeta.subjectType = 'Patient';
   questMeta.purpose = ''; questMeta.copyright = '';
   questMeta.approvalDate = ''; questMeta.lastReviewDate = '';
+  questMeta.effectivePeriodStart = ''; questMeta.effectivePeriodEnd = '';
   questMeta._rawContact = null; questMeta._rawUseContext = null; questMeta._rawJurisdiction = null;
+  questMeta._rawCode = null;
   // Clear questionnaire-level variables
   questVariables.splice(0);
   variablesPanel.refresh();

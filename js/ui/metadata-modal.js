@@ -2,10 +2,11 @@
 // Edits questionnaire-level fields.
 // Core fields (always visible): id, url, version, title, status, publisher,
 //   description, name.
-// Advanced (collapsible, collapsed by default): date, subjectType, approvalDate,
-//   lastReviewDate, purpose, copyright.
-// Pass-through fields (contact, useContext, jurisdiction) have no editing UI —
-//   they are preserved automatically on import/export.
+// Advanced (collapsible, collapsed by default): date, subjectType,
+//   effectivePeriodStart, effectivePeriodEnd, approvalDate, lastReviewDate,
+//   purpose, copyright.
+// Pass-through fields (contact, useContext, jurisdiction, code[]) have no
+//   editing UI — they are preserved automatically on import/export.
 //
 // init(elements)  — wire DOM once at startup
 // open()          — populate body + show
@@ -41,6 +42,8 @@ export function open() {
     copyright:     questMeta.copyright,
     approvalDate:  questMeta.approvalDate,
     lastReviewDate: questMeta.lastReviewDate,
+    effectivePeriodStart: questMeta.effectivePeriodStart,
+    effectivePeriodEnd:   questMeta.effectivePeriodEnd,
   };
 
   setModalTitle(_el.title, 'Questionnaire Properties', '');
@@ -67,6 +70,8 @@ function _apply() {
   questMeta.copyright     = _pending.copyright.trim();
   questMeta.approvalDate  = _pending.approvalDate.trim();
   questMeta.lastReviewDate = _pending.lastReviewDate.trim();
+  questMeta.effectivePeriodStart = _pending.effectivePeriodStart.trim();
+  questMeta.effectivePeriodEnd   = _pending.effectivePeriodEnd.trim();
   _close();
 }
 
@@ -157,12 +162,14 @@ function _renderBody(container) {
   body.style.display = 'none';
 
   const advFields = [
-    { key: 'date',          label: 'Date',          type: 'date',     placeholder: '',                        testid: 'meta-date'           },
-    { key: 'subjectType',   label: 'Subject Type',  type: 'text',     placeholder: 'e.g. Patient, Practitioner', testid: 'meta-subject-type' },
-    { key: 'approvalDate',  label: 'Approved',      type: 'date',     placeholder: '',                        testid: 'meta-approval-date'  },
-    { key: 'lastReviewDate',label: 'Last Review',   type: 'date',     placeholder: '',                        testid: 'meta-last-review'    },
-    { key: 'purpose',       label: 'Purpose',       type: 'textarea', placeholder: 'Intended use…',           testid: 'meta-purpose'        },
-    { key: 'copyright',     label: 'Copyright',     type: 'textarea', placeholder: 'Copyright statement…',    testid: 'meta-copyright'      },
+    { key: 'date',                label: 'Date',           type: 'date',     placeholder: '',                           testid: 'meta-date'                },
+    { key: 'subjectType',         label: 'Subject Type',   type: 'text',     placeholder: 'e.g. Patient, Practitioner',  testid: 'meta-subject-type'        },
+    { key: 'effectivePeriodStart',label: 'Effective From', type: 'date',     placeholder: '',                           testid: 'meta-effective-start'     },
+    { key: 'effectivePeriodEnd',  label: 'Effective To',   type: 'date',     placeholder: '',                           testid: 'meta-effective-end'       },
+    { key: 'approvalDate',        label: 'Approved',       type: 'date',     placeholder: '',                           testid: 'meta-approval-date'       },
+    { key: 'lastReviewDate',      label: 'Last Review',    type: 'date',     placeholder: '',                           testid: 'meta-last-review'         },
+    { key: 'purpose',             label: 'Purpose',        type: 'textarea', placeholder: 'Intended use…',              testid: 'meta-purpose'             },
+    { key: 'copyright',           label: 'Copyright',      type: 'textarea', placeholder: 'Copyright statement…',       testid: 'meta-copyright'           },
   ];
   for (const f of advFields) body.appendChild(_makeRow(f.key, f.label, f.type, f.placeholder, f.testid));
 

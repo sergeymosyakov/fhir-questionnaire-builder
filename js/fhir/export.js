@@ -48,20 +48,27 @@ function nodeToFHIRItem(node) {
   if (node.mandatory === true)  fhirItem.required = true;
   else if (node.mandatory === false) fhirItem.required = false;
 
-  // item.initial[] — write back from _initialValue
-  if (node.type === 'item' && node._initialValue !== undefined && node._initialValue !== '') {
+  // item.initial[] — multi-value for repeating items; single value otherwise
+  if (node.type === 'item') {
     const t = itemTypeToFHIRType(node.itemType);
-    let initEntry;
-    if      (t === 'boolean')  initEntry = { valueBoolean:  typeof node._initialValue === 'boolean' ? node._initialValue : node._initialValue === 'true' };
-    else if (t === 'decimal')  initEntry = { valueDecimal:  parseFloat(node._initialValue) };
-    else if (t === 'integer')  initEntry = { valueInteger:  parseInt(node._initialValue, 10) };
-    else if (t === 'date')     initEntry = { valueDate:     String(node._initialValue) };
-    else if (t === 'dateTime') initEntry = { valueDateTime: String(node._initialValue) };
-    else if (t === 'time')     initEntry = { valueTime:     String(node._initialValue) };
-    else if (t === 'url')      initEntry = { valueUri:      String(node._initialValue) };
-    else if (t === 'choice')   initEntry = { valueCoding:   { code: String(node._initialValue), display: String(node._initialValue) } };
-    else                       initEntry = { valueString:   String(node._initialValue) };
-    if (initEntry) fhirItem.initial = [initEntry];
+    const buildInitEntry = v => {
+      if (t === 'boolean')  return { valueBoolean:  typeof v === 'boolean' ? v : v === 'true' };
+      if (t === 'decimal')  return { valueDecimal:  parseFloat(v) };
+      if (t === 'integer')  return { valueInteger:  parseInt(v, 10) };
+      if (t === 'date')     return { valueDate:     String(v) };
+      if (t === 'dateTime') return { valueDateTime: String(v) };
+      if (t === 'time')     return { valueTime:     String(v) };
+      if (t === 'url')      return { valueUri:      String(v) };
+      if (t === 'choice')   return { valueCoding:   { code: String(v), display: String(v) } };
+      return { valueString: String(v) };
+    };
+    if (node.repeats && node._initialValues && node._initialValues.length > 1) {
+      const entries = node._initialValues.map(buildInitEntry).filter(Boolean);
+      if (entries.length) fhirItem.initial = entries;
+    } else if (node._initialValue !== undefined && node._initialValue !== '') {
+      const entry = buildInitEntry(node._initialValue);
+      if (entry) fhirItem.initial = [entry];
+    }
   }
 
   // ── Standard R4 enableWhen[] ──────────────────────────────────────────────
@@ -133,6 +140,7 @@ function nodeToFHIRItem(node) {
         if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
           answerOpt.extension = [{ url: 'http://hl7.org/fhir/StructureDefinition/ordinalValue', valueDecimal: node._optionOrdinals[code] }];
         }
+        if (node._initialSelected === code) answerOpt.initialSelected = true;
         return answerOpt;
       });
   }
@@ -194,6 +202,13 @@ export function buildFHIRObject() {
   if (questMeta._rawContact)      q.contact     = questMeta._rawContact;
   if (questMeta._rawUseContext)   q.useContext  = questMeta._rawUseContext;
   if (questMeta._rawJurisdiction) q.jurisdiction = questMeta._rawJurisdiction;
+  if (questMeta._rawCode)         q.code        = questMeta._rawCode;
+  if (questMeta.effectivePeriodStart || questMeta.effectivePeriodEnd) {
+    const ep = {};
+    if (questMeta.effectivePeriodStart) ep.start = questMeta.effectivePeriodStart;
+    if (questMeta.effectivePeriodEnd)   ep.end   = questMeta.effectivePeriodEnd;
+    q.effectivePeriod = ep;
+  }
   const vars = questVariables.filter(v => v.name && v.expression);
   if (vars.length) {
     q.extension = vars.map(v => ({
