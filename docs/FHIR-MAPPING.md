@@ -86,6 +86,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `questMeta._rawUseContext` | `Questionnaire.useContext[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawJurisdiction` | `Questionnaire.jurisdiction[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawCode` | `Questionnaire.code[]` | ← stored as array (default: `null`) | → written back unchanged; editable via **Codes** section in Properties modal (system/code/display rows; draft pattern; badge shows count) |
+| `questMeta.derivedFrom` | `Questionnaire.derivedFrom[]` | ← stored as string array (default: `[]`) | → written back as array; editable via **Derived From** collapsible section in Properties modal; round-trip safe |
 
 ---
 
@@ -182,6 +183,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `_initialValue` | `item.initial[0]` value | imported from `initial[0]`; exported as `initial: [entry]`; pre-fills `values[]` on import |
 | `_initialValues` | `item.initial[]` all values | set only for repeating items with >1 initial value; exported as `initial: [entry, …]`; `_initialValue` holds `initial[0]` for backwards compat |
 | `_initialSelected` | `answerOption[].initialSelected` | code of the initially-selected option; preserved round-trip; if no `item.initial[]` exists, also used to pre-fill `_initialValue` |
+| `_definition` | `item.definition` | URL pointing to a StructureDefinition element; stored as `node._definition`; editable via **Props** button (Item Properties modal); round-trip safe |
 ---
 
 ## Show When (enableWhen)
@@ -266,17 +268,10 @@ This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR wit
 
 Legend: ⚠️ = silent data loss (field present in import file, ignored or overwritten on export); ❌ = not handled at all; 🔧 = partial support.
 
-### Questionnaire-level — remaining gaps
-
-| FHIR field | What happens | Notes |
-|---|---|---|
-| `Questionnaire.derivedFrom[]` | ✅ Covered | Canonical references to parent questionnaires; stored as `questMeta.derivedFrom[]`; editable via **Derived From** collapsible section in Questionnaire Properties modal; round-trip safe |
-
 ### Item-level — not implemented
 
 | FHIR field / extension | Status | Notes |
 |---|---|---|
-| `item.definition` | ✅ Covered | URL pointing to a StructureDefinition element; stored as `node._definition`; editable via **Props** button (Item Properties modal); round-trip safe |
 | `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
 | `item.answerValueSet` — external URL | 🔧 URL preserved round-trip | Not resolved to answer options; no FHIR terminology server integration. `#id` contained refs ARE resolved (see Round-Trip Safety) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |

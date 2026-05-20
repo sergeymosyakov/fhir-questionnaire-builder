@@ -6,6 +6,7 @@
 
 1. **Stop and ask after one failed attempt.** If a bug or issue is not resolved on the first real attempt — STOP immediately. Ask the user to reproduce manually and provide more details. Do NOT keep iterating or running more diagnostics.
 2. **Never guess. Never infer. Ask.** If any detail is unclear or missing — stop and ask exactly what information is needed. Do not proceed on assumptions.
+3. **Implemented = documented in the supported section.** Once a FHIR field or feature is fully implemented, move it from "Not Supported / remaining gaps" to the relevant supported table in `docs/FHIR-MAPPING.md`. Never leave a ✅ Covered row in the Not Supported section.
 
 ---
 
