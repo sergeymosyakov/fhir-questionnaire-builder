@@ -9,16 +9,16 @@
 //   add-menu-item         "Item" option in add-child menu
 //   node-title-display    read-only title span
 //   node-title-input      title textarea
-//   action-mand           "Required" action link on an item node
+//   action-states           "Required" action link on an item node
 //   required-sel          custom select trigger inside the modal body
 //
 // ── element IDs ──────────────────────────────────────────────────────────────
-//   requiredModal         backdrop (display:flex when open)
-//   requiredModalTitle    <span> inside modal-header
-//   requiredModalBody     scrollable body
-//   requiredModalClose    × close button
-//   requiredModalCancel   Cancel button
-//   requiredModalApply    Apply button
+//   statesModal         backdrop (display:flex when open)
+//   statesModalTitle    <span> inside modal-header
+//   statesModalBody     scrollable body
+//   statesModalClose    × close button
+//   statesModalCancel   Cancel button
+//   statesModalApply    Apply button
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -58,12 +58,12 @@ async function addTextItem(page, title = 'My Question') {
   }
 }
 
-const modal       = (page) => page.locator('#requiredModal');
-const modalTitle  = (page) => page.locator('#requiredModalTitle');
-const modalClose  = (page) => page.locator('#requiredModalClose');
-const modalCancel = (page) => page.locator('#requiredModalCancel');
-const modalApply  = (page) => page.locator('#requiredModalApply');
-const requiredSel = (page) => page.locator('[data-testid="required-sel"]');
+const modal       = (page) => page.locator('#statesModal');
+const modalTitle  = (page) => page.locator('#statesModalTitle');
+const modalClose  = (page) => page.locator('#statesModalClose');
+const modalCancel = (page) => page.locator('#statesModalCancel');
+const modalApply  = (page) => page.locator('#statesModalApply');
+const requiredSel = (page) => page.locator('[data-testid="states-required-sel"]');
 
 // ── Open / close ──────────────────────────────────────────────────────────────
 
@@ -72,7 +72,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-mand').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
     await expect(modal(page)).toBeVisible();
   });
 
@@ -80,8 +80,8 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page, 'Smoking status');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-mand').click();
-    await expect(modalTitle(page)).toContainText('Required');
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await expect(modalTitle(page)).toContainText('States');
     await expect(modalTitle(page)).toContainText('Smoking status');
   });
 
@@ -89,7 +89,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-mand').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
     await expect(requiredSel(page)).toBeVisible();
     await requiredSel(page).click();
     await expect(page.locator('[data-testid="csel-drop"] [data-val]')).toHaveCount(3);
@@ -100,7 +100,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-mand').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
     await modalClose(page).click();
     await expect(modal(page)).toBeHidden();
   });
@@ -109,7 +109,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-mand').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
     await modalCancel(page).click();
     await expect(modal(page)).toBeHidden();
   });
@@ -118,7 +118,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-mand').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
     await page.keyboard.press('Escape');
     await expect(modal(page)).toBeHidden();
   });
@@ -127,7 +127,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-mand').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
     await modal(page).click({ position: { x: 5, y: 5 } });
     await expect(modal(page)).toBeHidden();
   });
@@ -140,7 +140,7 @@ test.describe('Required modal — draft pattern', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-mand');
+    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
     await actionLink.click();
 
     // Change to "Yes — required"
@@ -155,7 +155,7 @@ test.describe('Required modal — draft pattern', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-mand');
+    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
     await actionLink.click();
 
     await selectCustomOpt(page, requiredSel(page), 'true');
@@ -169,7 +169,7 @@ test.describe('Required modal — draft pattern', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-mand');
+    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
     await actionLink.click();
 
     await selectCustomOpt(page, requiredSel(page), 'false');
@@ -182,7 +182,7 @@ test.describe('Required modal — draft pattern', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-mand');
+    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
     await actionLink.click();
 
     await selectCustomOpt(page, requiredSel(page), 'null');
@@ -195,7 +195,7 @@ test.describe('Required modal — draft pattern', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-mand');
+    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
 
     // Save "Yes — required"
     await actionLink.click();
@@ -212,7 +212,7 @@ test.describe('Required modal — draft pattern', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-mand');
+    const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
 
     // First: set to Yes
     await actionLink.click();
@@ -227,3 +227,5 @@ test.describe('Required modal — draft pattern', () => {
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
   });
 });
+
+

@@ -5,8 +5,7 @@ import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { buildVisPanel } from './panels.js';
 import * as answerTypeModal from '../ui/answer-type-modal.js';
-import * as requiredModal from '../ui/required-modal.js';
-import * as readonlyModal from '../ui/readonly-modal.js';
+import * as statesModal from '../ui/states-modal.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
 import * as constraintModal from '../ui/constraint-modal.js';
 import * as expressionModal from '../ui/expression-modal.js';
@@ -128,12 +127,16 @@ export function renderItem(node, ctx) {
     'Questionnaire.item.type', 'R4 · required');
   typeLink.dataset.testid = 'action-type';
   typeLink.onclick = () => answerTypeModal.open(node, typeLink, setActive);
-  const mandLink  = addToggle('Required', 'mand',
-    'Required',
-    'Whether the item must be answered. Required items show ✔/✘ validation in the preview and affect the final PASS/FAIL result.',
-    'Questionnaire.item.required', 'R4 · optional');
-  mandLink.dataset.testid = 'action-mand';
-  mandLink.onclick = () => requiredModal.open(node, mandLink, setActive);
+  const statesLink = document.createElement('a');
+  statesLink.textContent = 'States';
+  statesLink.className = 'action-edit';
+  statesLink.dataset.tipTitle = 'Item / group states';
+  statesLink.dataset.tipBody  = 'Required \u2014 must be answered to pass validation.\nRead-only \u2014 value set programmatically, not editable (items only).\nHidden \u2014 excluded from patient view; participates in logic.';
+  statesLink.dataset.tipFhir  = 'item.required / item.readOnly / sdc-questionnaire-hidden';
+  statesLink.dataset.tipSpec  = 'R4 \u00B7 SDC';
+  statesLink.dataset.testid   = 'action-states';
+  statesLink.onclick = () => statesModal.open(node, statesLink, setActive);
+  actions.appendChild(statesLink);
   const visLink   = addToggle('Show When', 'vis',
     'Show When (enableWhen)',
     'Add enableWhen conditions to control when this item is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden items are dimmed \uD83D\uDD12 in the preview.',
@@ -146,18 +149,6 @@ export function renderItem(node, ctx) {
     'sdc-questionnaire-calculatedExpression / initialExpression', 'SDC · optional');
   exprLink.dataset.testid = 'action-expr';
   exprLink.onclick = () => expressionModal.openDual(node, exprLink, setActive, triggerCalcRecalc);
-
-  // Read-only — opens modal for consistency with other action buttons
-  const roLink = document.createElement('a');
-  roLink.textContent = 'Read-only';
-  roLink.className = 'action-edit';
-  roLink.dataset.tipTitle = 'Read-only';
-  roLink.dataset.tipBody  = 'Marks this field as read-only — the user cannot edit it. Typically combined with a calculatedExpression.';
-  roLink.dataset.tipFhir  = 'Questionnaire.item.readOnly';
-  roLink.dataset.tipSpec  = 'R4';
-  roLink.dataset.testid   = 'action-readonly';
-  roLink.onclick = () => readonlyModal.open(node, roLink, setActive);
-  actions.appendChild(roLink);
 
   // Repeatable — opens modal for repeats + minOccurs / maxOccurs
   const repeatLink = document.createElement('a');
@@ -201,21 +192,6 @@ export function renderItem(node, ctx) {
   codesLink.onclick = () => codesModal.open(node, codesLink, setActive);
   actions.appendChild(codesLink);
 
-  const hiddenLink = document.createElement('a');
-  hiddenLink.textContent = 'Hidden';
-  hiddenLink.className = 'action-edit';
-  hiddenLink.dataset.tipTitle = 'Hidden item (sdc-questionnaire-hidden)';
-  hiddenLink.dataset.tipBody  = 'Item is permanently hidden from patients. Still participates in calculatedExpression logic. Controls inside are disabled in preview.';
-  hiddenLink.dataset.tipFhir  = 'sdc-questionnaire-hidden';
-  hiddenLink.dataset.tipSpec  = 'SDC';
-  hiddenLink.dataset.testid   = 'action-hidden';
-  hiddenLink.onclick = () => {
-    node._hidden = !node._hidden;
-    setActive(hiddenLink, !!node._hidden);
-    triggerCalcRecalc();
-  };
-  actions.appendChild(hiddenLink);
-
   const headerTop = document.createElement('div');
   headerTop.className = 'node-header-top';
   headerTop.appendChild(titleWrap);
@@ -254,15 +230,13 @@ export function renderItem(node, ctx) {
   setActive(typeLink,        true);  // Answer type is always set
   setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
   setActive(exprLink,       !!(node._calculatedExpr || node._initialExpr));
-  setActive(roLink,         !!node._readOnly);
+  setActive(statesLink,     node.mandatory === true || !!node._readOnly || !!node._hidden);
   setActive(repeatLink,     !!node.repeats);
   if (node.itemType === 'checkbox' || node.itemType === 'display') repeatLink.style.display = 'none';
   setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
   setActive(styleLink,      !!(node._renderStyle || node._renderXhtml));
-  setActive(mandLink,       node.mandatory === true);
   setActive(constraintLink, !!(node.constraint?.length));
   setActive(codesLink,      !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.some(u => u)));
-  setActive(hiddenLink,     !!node._hidden);
 
   wrapper.appendChild(div);
 

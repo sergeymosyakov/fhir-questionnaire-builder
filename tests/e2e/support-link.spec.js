@@ -79,14 +79,14 @@ test.describe('support-link — patient view', () => {
   test('shows one "More info" button in patient view for single-link item', async ({ page }) => {
     await loadFixture(page);
     // Switch to patient view
-    await page.getByTestId('patient-mode-toggle').click();
+    await page.getByTestId('patient-view-btn').click();
     const row = page.locator('[data-preview-id="q-single"]');
     await expect(row.getByTestId('support-link-patient-btn')).toHaveCount(1);
   });
 
   test('patient button has correct href and opens in new tab', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('patient-mode-toggle').click();
+    await page.getByTestId('patient-view-btn').click();
     const btn = page.locator('[data-preview-id="q-single"]').getByTestId('support-link-patient-btn').first();
     await expect(btn).toHaveAttribute('href', 'https://example.com/help1');
     await expect(btn).toHaveAttribute('target', '_blank');
@@ -94,14 +94,14 @@ test.describe('support-link — patient view', () => {
 
   test('shows two "More info" buttons for two-link item in patient view', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('patient-mode-toggle').click();
+    await page.getByTestId('patient-view-btn').click();
     const row = page.locator('[data-preview-id="q-multi"]');
     await expect(row.getByTestId('support-link-patient-btn')).toHaveCount(2);
   });
 
   test('no "More info" button for item without supportLinks in patient view', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('patient-mode-toggle').click();
+    await page.getByTestId('patient-view-btn').click();
     const row = page.locator('[data-preview-id="q-none"]');
     await expect(row.getByTestId('support-link-patient-btn')).toHaveCount(0);
   });
@@ -165,3 +165,4 @@ test.describe('support-link — Props modal', () => {
     ).toHaveCount(1, { timeout: 3000 });
   });
 });
+

@@ -22,8 +22,7 @@ import * as expressionModal from './ui/expression-modal.js';
 import * as initialModal from './ui/initial-modal.js';
 import * as appearanceModal from './ui/appearance-modal.js';
 import * as repeatableModal from './ui/repeatable-modal.js';
-import * as requiredModal from './ui/required-modal.js';
-import * as readonlyModal from './ui/readonly-modal.js';
+import * as statesModal from './ui/states-modal.js';
 import * as answerTypeModal from './ui/answer-type-modal.js';
 import * as metadataModal from './ui/metadata-modal.js';
 import * as codesModal from './ui/codes-modal.js';
@@ -135,23 +134,14 @@ repeatableModal.init({
   cancelBtn: document.getElementById('repeatableModalCancel'),
   applyBtn:  document.getElementById('repeatableModalApply'),
 });
-// ── Required modal init ──────────────────────────────────────────────────────
-requiredModal.init({
-  modal:     document.getElementById('requiredModal'),
-  title:     document.getElementById('requiredModalTitle'),
-  body:      document.getElementById('requiredModalBody'),
-  closeBtn:  document.getElementById('requiredModalClose'),
-  cancelBtn: document.getElementById('requiredModalCancel'),
-  applyBtn:  document.getElementById('requiredModalApply'),
-});
-// ── Read-only modal init ─────────────────────────────────────────────────────
-readonlyModal.init({
-  modal:     document.getElementById('readonlyModal'),
-  title:     document.getElementById('readonlyModalTitle'),
-  body:      document.getElementById('readonlyModalBody'),
-  closeBtn:  document.getElementById('readonlyModalClose'),
-  cancelBtn: document.getElementById('readonlyModalCancel'),
-  applyBtn:  document.getElementById('readonlyModalApply'),
+// ── States modal init (Required / Read-only / Hidden) ───────────────────────
+statesModal.init({
+  modal:     document.getElementById('statesModal'),
+  title:     document.getElementById('statesModalTitle'),
+  body:      document.getElementById('statesModalBody'),
+  closeBtn:  document.getElementById('statesModalClose'),
+  cancelBtn: document.getElementById('statesModalCancel'),
+  applyBtn:  document.getElementById('statesModalApply'),
 });
 // ── Answer Type modal init ─────────────────────────────────────────────
 answerTypeModal.init({

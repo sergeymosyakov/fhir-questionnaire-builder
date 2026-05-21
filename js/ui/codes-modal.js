@@ -9,6 +9,7 @@
 // open(node, link, setActive)  — populate body + show modal
 
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { triggerCalcRecalc } from '../builder/_shared.js';
 
 let _el      = null;
 let _pending = null; // { node, link, setActive, codes, definition }
@@ -51,6 +52,7 @@ function _apply() {
   else delete node._supportLinks;
 
   setActive(link, !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length));
+  triggerCalcRecalc();
   _close();
 }
 

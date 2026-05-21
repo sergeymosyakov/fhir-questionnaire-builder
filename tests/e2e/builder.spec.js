@@ -38,7 +38,7 @@
 //   add-menu-group       "Group" option in the add-child dropdown menu
 //   add-menu-item        "Item"  option in the add-child dropdown menu
 //   action-type          "Answer Type" action link on an item node
-//   action-mand          "Required"    action link on a group or item node
+//   action-states          "Required"    action link on a group or item node
 //   action-vis           "Show When"   action link on an item node
 //
 // Delete-confirm dialog  (js/builder/_shared.js — dynamically created)
@@ -442,14 +442,14 @@ test.describe('Builder creates items → preview reacts', () => {
     await expect(previewRow.getByTestId('preview-required-star')).toBeVisible();
 
     // Open the Required modal.
-    await node.getByTestId('action-mand').click();
-    const reqModal = page.locator('#requiredModal');
+    await node.getByTestId('action-states').click();
+    const reqModal = page.locator('#statesModal');
     await expect(reqModal).toBeVisible();
 
     // Select "No — optional" and apply.
-    await reqModal.locator('[data-testid="required-sel"]').click();
+    await reqModal.locator('[data-testid="states-required-sel"]').click();
     await page.locator('[data-testid="csel-drop"] [data-val="false"]').click();
-    await page.locator('#requiredModalApply').click();
+    await page.locator('#statesModalApply').click();
 
     // Preview must now show "optional" badge instead of the star.
     await expect(previewRow.getByTestId('preview-optional-badge')).toBeVisible();
@@ -653,3 +653,4 @@ test.describe('Re-init', () => {
     ).toContainText('24');
   });
 });
+

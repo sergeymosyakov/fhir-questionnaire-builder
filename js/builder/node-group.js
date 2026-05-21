@@ -6,7 +6,7 @@ import { makeGroup, makeItem } from '../state.js';
 import { formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
 import { makeDragHandle, attachDropZone } from './dnd.js';
 import { addPanel, buildVisPanel, buildStylePanel } from './panels.js';
-import * as requiredModal from '../ui/required-modal.js';
+import * as statesModal from '../ui/states-modal.js';
 import * as expressionModal from '../ui/expression-modal.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
 import * as codesModal from '../ui/codes-modal.js';
@@ -136,12 +136,16 @@ export function renderGroup(node, ctx) {
   };
   const setActive = (el, active) => el.classList.toggle('action-edit--active', active);
 
-  const mandLink  = addToggle('Required', 'mand',
-    'Required',
-    'Whether all items in this group must be answered. Required groups show ✔/✘ and affect the final PASS/FAIL result.',
-    'Questionnaire.item.required', 'R4 · optional');
-  mandLink.dataset.testid = 'action-mand';
-  mandLink.onclick = () => requiredModal.open(node, mandLink, setActive);
+  const statesLink = document.createElement('a');
+  statesLink.textContent = 'States';
+  statesLink.className = 'action-edit';
+  statesLink.dataset.tipTitle = 'Item / group states';
+  statesLink.dataset.tipBody  = 'Required \u2014 must be answered to pass validation.\nRead-only \u2014 value set programmatically, not editable (items only).\nHidden \u2014 excluded from patient view; participates in logic.';
+  statesLink.dataset.tipFhir  = 'item.required / item.readOnly / sdc-questionnaire-hidden';
+  statesLink.dataset.tipSpec  = 'R4 \u00B7 SDC';
+  statesLink.dataset.testid   = 'action-states';
+  statesLink.onclick = () => statesModal.open(node, statesLink, setActive);
+  actions.appendChild(statesLink);
   const visLink   = addToggle('Show When', 'vis',
     'Show When (enableWhen)',
     'Add enableWhen conditions to control when this group is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden groups are dimmed \uD83D\uDD12 in the preview.',
@@ -174,21 +178,6 @@ export function renderGroup(node, ctx) {
   propsLink.dataset.testid   = 'action-codes';
   propsLink.onclick = () => codesModal.open(node, propsLink, setActive);
   actions.appendChild(propsLink);
-
-  const hiddenLink = document.createElement('a');
-  hiddenLink.textContent = 'Hidden';
-  hiddenLink.className = 'action-edit';
-  hiddenLink.dataset.tipTitle = 'Hidden group (sdc-questionnaire-hidden)';
-  hiddenLink.dataset.tipBody  = 'Group is permanently hidden from patients. Still participates in calculatedExpression logic. Controls inside are disabled in preview.';
-  hiddenLink.dataset.tipFhir  = 'sdc-questionnaire-hidden';
-  hiddenLink.dataset.tipSpec  = 'SDC';
-  hiddenLink.dataset.testid   = 'action-hidden';
-  hiddenLink.onclick = () => {
-    node._hidden = !node._hidden;
-    setActive(hiddenLink, !!node._hidden);
-    triggerCalcRecalc();
-  };
-  actions.appendChild(hiddenLink);
 
   // ⊕ Add ▾ dropdown
   const addWrap = document.createElement('div');
@@ -286,12 +275,11 @@ export function renderGroup(node, ctx) {
   // ── Panels ────────────────────────────────────────────────────────────────
   addPanel('style', p => buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
-  setActive(visLink,   !!(node.enableWhen?.length) || !!node.enableWhenExpression);
-  setActive(exprLink,  !!node._calculatedExpr);
-  setActive(styleLink, !!(node._renderStyle || node._renderXhtml));
-  setActive(mandLink,  node.mandatory === true);
-  setActive(propsLink, !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length));
-  setActive(hiddenLink, !!node._hidden);
+  setActive(visLink,    !!(node.enableWhen?.length) || !!node.enableWhenExpression);
+  setActive(exprLink,   !!node._calculatedExpr);
+  setActive(styleLink,  !!(node._renderStyle || node._renderXhtml));
+  setActive(statesLink, node.mandatory === true || !!node._hidden);
+  setActive(propsLink,  !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length));
 
   // ── Body: children + logic row ────────────────────────────────────────────
   const body = document.createElement('div');
