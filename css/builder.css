@@ -46,6 +46,16 @@
   background: var(--c-amber-lt);
   color: var(--c-amber);
 }
+.btn-fhir--purple {
+  background: #f3e8ff;
+  color: #7e22ce;
+  border-color: #c4b5fd;
+}
+.btn-fhir--purple:hover { background: #ede9fe; }
+.btn-fhir--purple.btn-fhir--toggle.btn-fhir--active {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
 .btn-fhir-export {
   background: var(--c-teal-lt);
   color: var(--c-teal);

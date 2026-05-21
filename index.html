@@ -281,6 +281,12 @@
           data-tip-title="Toggle badges"
           data-tip-body="Show or hide metadata badges (optional, required, logic, calc). When hidden, calculated fields display as plain text — useful for a clean questionnaire view."
           style="display:none">badges</button>
+        <button id="showHiddenBtn" type="button" class="btn-fhir btn-fhir--purple btn-fhir--toggle btn-fhir--active"
+          data-tip-title="Hidden items (sdc-questionnaire-hidden)"
+          data-tip-body="Show or hide items marked as sdc-questionnaire-hidden. Hidden items never appear to patients but participate in calculatedExpression logic. Controls inside are disabled."
+          data-tip-fhir="sdc-questionnaire-hidden"
+          data-tip-spec="SDC"
+          style="display:none">hidden</button>
         <button id="previewCollapseAllBtn" type="button" class="btn-fhir btn-fhir--icon"
           data-tip-title="Collapse all groups"
           data-tip-body="Hides child items under every group header. Useful for a high-level overview of the questionnaire structure."

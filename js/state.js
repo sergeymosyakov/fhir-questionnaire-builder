@@ -61,6 +61,10 @@ export const showBadges = ref(true);
 // Hidden items excluded; builder annotations (linkIds, badges, nav icons) hidden.
 export const patientMode = ref(false);
 
+// Show/hide items marked as sdc-questionnaire-hidden in the preview panel.
+// When false, hidden items are invisible in builder preview (as patients see them).
+export const showHiddenItems = ref(true);
+
 // FHIRPath: original FHIR Questionnaire JSON after import; null if not loaded.
 export const rawFhir = ref(null);
 

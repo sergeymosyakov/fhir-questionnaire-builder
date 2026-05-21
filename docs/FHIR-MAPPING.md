@@ -24,7 +24,8 @@ Every node in the tree is either a **group** or an **item**:
   // ── also possible on groups (imported/exported; editable via Props button) ──
   _definition:         string,          // item.definition URL
   _codes:              object[],        // item.code[] coding entries
-  _supportLinks:       string[]         // questionnaire-supportLink URIs (0..*)
+  _supportLinks:       string[],        // questionnaire-supportLink URIs (0..*)
+  _hidden:             true|undefined   // sdc-questionnaire-hidden: never shown to patients; participates in calculatedExpression
 }
 
 // Item
@@ -58,7 +59,8 @@ Every node in the tree is either a **group** or an **item**:
   _optionOrdinals:     object,           // map of option code → ordinalValue (from ordinalValue extension on answerOption.extension or valueCoding.extension fallback)
   _sliderStep:         number,           // questionnaire-sliderStepValue ext; when set, integer/decimal renders as <input type="range"> slider
   _disabledDisplay:    string,           // 'hidden'|'protected' — behaviour when enableWhen condition is not met; 'protected' is default (not persisted)
-  _supportLinks:       string[]          // questionnaire-supportLink URIs (0..*); 🔗 icons in builder preview; "More info ↗" buttons in patient view
+  _supportLinks:       string[],         // questionnaire-supportLink URIs (0..*); 🔗 icons in builder preview; "More info ↗" buttons in patient view
+  _hidden:             true|undefined    // sdc-questionnaire-hidden: never shown to patients; participates in calculatedExpression; controls disabled in preview
 }
 ```
 
@@ -168,6 +170,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `_definition` | `item.definition` | URL pointing to a StructureDefinition element; round-trip safe; editable via **Props** button |
 | `_codes` | `item.code[]` | coding entries (system / code / display); round-trip safe; editable via **Props** button |
 | `_supportLinks` | `questionnaire-supportLink` ext (0..*) | help / documentation URIs; rendered as 🔗 icons in builder preview and "More info ↗" buttons in patient view; editable via **Props** button |
+| `_hidden` | `sdc-questionnaire-hidden` ext (`valueBoolean: true`) | item/group permanently hidden from patients; still participates in `calculatedExpression`; rendered with purple dashed border + **HIDDEN badge** in builder preview when **hidden** toggle is on; excluded from PASS/FAIL validation; controls disabled in preview; toggled via **Hidden** action button in builder |
 
 ### Item-specific
 
@@ -249,6 +252,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation` | standard | `_choiceOrientation` (`vertical` / `horizontal`; controls layout of radio button groups; editable in Answer Type modal for `radio` items) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory` | standard | `_displayCategory` (`instructions` / `security` / `help`; applies visual category styling to `display` items in preview; editable in Answer Type modal) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink` | standard | `_supportLinks` (0..* help/documentation URIs per item or group; 🔗 icons in builder; "More info ↗" in patient view; editable via **Props** button) | Yes |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden` | SDC | `_hidden` (item/group hidden from patients; purple dashed border + HIDDEN badge in builder preview; excluded from PASS/FAIL; controls disabled; **Hidden** toggle button in builder actions) | Yes (SDC) |
 
 ---
 
@@ -296,7 +300,6 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 
 | Extension | Status | Notes |
 |---|---|---|
-| `sdc-questionnaire-hidden` | ❌ | Item always hidden from preview but participates in logic; distinct from `enableWhen` |
 | `sdc-questionnaire-answerExpression` | ❌ | Dynamic answer options derived from FHIRPath over form values (no server needed) |
 | `sdc-questionnaire-itemWeight` | ❌ | Per-option weight for scoring (analogous to `ordinalValue` at item level) |
 | `sdc-questionnaire-unitOption[]` | ❌ | Multiple selectable units for `quantity` items |

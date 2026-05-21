@@ -272,6 +272,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     .map(e => e.valueUri);
   if (supportLinks.length) node._supportLinks = supportLinks;
 
+  // sdc-questionnaire-hidden: item is never shown to patient but participates in logic
+  const hiddenExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden'
+  );
+  if (hiddenExt?.valueBoolean === true) node._hidden = true;
+
   // disabledDisplay (R4B native field or R4 extension backport)
   if (fhirItem.disabledDisplay) node._disabledDisplay = fhirItem.disabledDisplay;
   const ddExt = (fhirItem.extension || []).find(
@@ -354,6 +360,10 @@ function fhirItemToNode(fhirItem, linkIdMap, contained) {
       .filter(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink' && e.valueUri)
       .map(e => e.valueUri);
     if (groupSupportLinks.length) node._supportLinks = groupSupportLinks;
+    const groupHiddenExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden'
+    );
+    if (groupHiddenExt?.valueBoolean === true) node._hidden = true;
     for (const child of fhirItem.item || []) {
       const n = fhirItemToNode(child, linkIdMap, contained);
       if (n) node.children.push(n);

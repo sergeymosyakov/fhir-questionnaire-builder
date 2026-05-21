@@ -47,6 +47,54 @@ describe('markAllDisabled', () => {
   });
 });
 
+// ── evaluateNode — sdc-questionnaire-hidden ───────────────────────────────────
+describe('evaluateNode — _hidden', () => {
+  it('marks hidden item as hiddenRoot with hidden=true', () => {
+    const node = { id: 'q1', type: 'item', _hidden: true };
+    const results = [];
+    const r = evaluateNode(node, {}, results);
+    expect(r.hidden).toBe(true);
+    expect(r.visible).toBe(true);
+    expect(r.ok).toBe(true);
+    expect(results[0].hiddenRoot).toBe(true);
+    expect(results[0].hidden).toBe(true);
+  });
+
+  it('marks hidden group and all children as hidden', () => {
+    const node = {
+      id: 'g1', type: 'group', _hidden: true,
+      children: [
+        { id: 'g1.q1', type: 'item' },
+        { id: 'g1.q2', type: 'item' },
+      ],
+    };
+    const results = [];
+    evaluateNode(node, {}, results);
+    expect(results).toHaveLength(3);
+    expect(results[0].hiddenRoot).toBe(true);
+    expect(results[1].hidden).toBe(true);
+    expect(results[1].hiddenRoot).toBe(false);
+    expect(results[2].hidden).toBe(true);
+    expect(results[2].hiddenRoot).toBe(false);
+  });
+
+  it('marks nested children as hidden but not hiddenRoot', () => {
+    const node = { id: 'q1', type: 'item', _hidden: true };
+    const results = [];
+    evaluateNode(node, {}, results, true); // called with _insideHidden = true
+    expect(results[0].hiddenRoot).toBe(false);
+    expect(results[0].hidden).toBe(true);
+  });
+
+  it('non-hidden item is not marked hidden', () => {
+    const node = { id: 'q1', type: 'item' };
+    const results = [];
+    const r = evaluateNode(node, {}, results);
+    expect(r.hidden).toBeUndefined();
+    expect(results[0].hidden).toBeUndefined();
+  });
+});
+
 // ── evaluateNode — no enableWhen (always visible) ─────────────────────────────
 describe('evaluateNode — no conditions', () => {
   it('item with no enableWhen is always visible', () => {

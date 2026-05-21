@@ -201,6 +201,21 @@ export function renderItem(node, ctx) {
   codesLink.onclick = () => codesModal.open(node, codesLink, setActive);
   actions.appendChild(codesLink);
 
+  const hiddenLink = document.createElement('a');
+  hiddenLink.textContent = 'Hidden';
+  hiddenLink.className = 'action-edit';
+  hiddenLink.dataset.tipTitle = 'Hidden item (sdc-questionnaire-hidden)';
+  hiddenLink.dataset.tipBody  = 'Item is permanently hidden from patients. Still participates in calculatedExpression logic. Controls inside are disabled in preview.';
+  hiddenLink.dataset.tipFhir  = 'sdc-questionnaire-hidden';
+  hiddenLink.dataset.tipSpec  = 'SDC';
+  hiddenLink.dataset.testid   = 'action-hidden';
+  hiddenLink.onclick = () => {
+    node._hidden = !node._hidden;
+    setActive(hiddenLink, !!node._hidden);
+    triggerCalcRecalc();
+  };
+  actions.appendChild(hiddenLink);
+
   const headerTop = document.createElement('div');
   headerTop.className = 'node-header-top';
   headerTop.appendChild(titleWrap);
@@ -247,6 +262,7 @@ export function renderItem(node, ctx) {
   setActive(mandLink,       node.mandatory === true);
   setActive(constraintLink, !!(node.constraint?.length));
   setActive(codesLink,      !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.some(u => u)));
+  setActive(hiddenLink,     !!node._hidden);
 
   wrapper.appendChild(div);
 

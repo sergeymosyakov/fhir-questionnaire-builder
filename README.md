@@ -27,7 +27,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/builder/dnd.js` | Self-contained drag & drop, injected via `init(onDrop, tree, formTick)` |
 | `js/builder/panels.js` | All action panel builders (enableWhen vis panel, mand, type, expr, style). Dead code removed: `buildSupportLinkPanel`, `buildMandPanel`, `buildInitialPanel`, `buildConstraintPanel`. |
 | `js/builder/node-item.js` | `renderItem(node, ctx)` — item node DOM |
-| `js/builder/node-group.js` | `renderGroup(node, ctx)` — group node DOM; opens `showwhen-modal`, `expression-modal`, `required-modal`, `codes-modal` (**Props** button — edits `_definition`, `_codes[]`, `_supportLinks[]`) |
+| `js/builder/node-group.js` | `renderGroup(node, ctx)` — group node DOM; opens `showwhen-modal`, `expression-modal`, `required-modal`, `codes-modal` (**Props** button — edits `_definition`, `_codes[]`, `_supportLinks[]`); **Hidden** button toggles `sdc-questionnaire-hidden` |
 | `js/render-preview.js` | Right panel — async preview; `reinitForm()` shows progress bar, yields between stages; `_asyncRender(version)` separates FHIRPath eval from DOM rebuild; DocumentFragment; stale-render abort |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
 | `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns instead of native `<select>` / `<datalist>`. `date` and `dateTime` use a custom calendar picker (`js/ui/date-picker.js`). `time` uses native `<input type="time">`. |

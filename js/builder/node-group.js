@@ -175,6 +175,21 @@ export function renderGroup(node, ctx) {
   propsLink.onclick = () => codesModal.open(node, propsLink, setActive);
   actions.appendChild(propsLink);
 
+  const hiddenLink = document.createElement('a');
+  hiddenLink.textContent = 'Hidden';
+  hiddenLink.className = 'action-edit';
+  hiddenLink.dataset.tipTitle = 'Hidden group (sdc-questionnaire-hidden)';
+  hiddenLink.dataset.tipBody  = 'Group is permanently hidden from patients. Still participates in calculatedExpression logic. Controls inside are disabled in preview.';
+  hiddenLink.dataset.tipFhir  = 'sdc-questionnaire-hidden';
+  hiddenLink.dataset.tipSpec  = 'SDC';
+  hiddenLink.dataset.testid   = 'action-hidden';
+  hiddenLink.onclick = () => {
+    node._hidden = !node._hidden;
+    setActive(hiddenLink, !!node._hidden);
+    triggerCalcRecalc();
+  };
+  actions.appendChild(hiddenLink);
+
   // ⊕ Add ▾ dropdown
   const addWrap = document.createElement('div');
   addWrap.className = 'action-add-wrap';
@@ -276,6 +291,7 @@ export function renderGroup(node, ctx) {
   setActive(styleLink, !!(node._renderStyle || node._renderXhtml));
   setActive(mandLink,  node.mandatory === true);
   setActive(propsLink, !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length));
+  setActive(hiddenLink, !!node._hidden);
 
   // ── Body: children + logic row ────────────────────────────────────────────
   const body = document.createElement('div');

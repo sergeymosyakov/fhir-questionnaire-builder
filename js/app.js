@@ -30,7 +30,7 @@ import * as codesModal from './ui/codes-modal.js';
 import * as qrExportModal from './ui/qr-export-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
-import { showLinkId, showPrefix, showBadges, patientMode, questVariables, questContained, questMeta, qrMeta, resetQrMeta } from './state.js';
+import { showLinkId, showPrefix, showBadges, patientMode, showHiddenItems, questVariables, questContained, questMeta, qrMeta, resetQrMeta } from './state.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 
 // fhirpath.js v4 browser bundle loaded as global via lib/fhirpath.min.js
@@ -56,6 +56,7 @@ function wireToggle(btnId, stateRef) {
 wireToggle('showLinkIdBtn', showLinkId);
 wireToggle('showPrefixBtn', showPrefix);
 wireToggle('showBadgesBtn', showBadges);
+wireToggle('showHiddenBtn', showHiddenItems);
 wireToggle('patientViewBtn', patientMode);
 document.getElementById('expandAllBtn').onclick    = expandAll;
 document.getElementById('renumberBtn').onclick = async () => {

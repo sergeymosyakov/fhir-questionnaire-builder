@@ -2,7 +2,7 @@
 import {
   effect,
   tree, values, getValue, setValue, deleteValue, _formTick, _bulkUpdate, showLinkId, showPrefix, showBadges,
-  patientMode,
+  patientMode, showHiddenItems,
   calcFormOk, isMandatory,
   rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
@@ -279,30 +279,31 @@ async function _asyncRender(version) {
   const visible = results.filter(r => r.visible);
   const resultMap = new Map(results.map(r => [r.node.id, r]));
 
-  const mandatoryItems = visible.filter(r => !r.disabled && r.node.type === 'item' &&
+  // Hidden nodes (sdc-questionnaire-hidden) are excluded from all validation/scoring.
+  const mandatoryItems = visible.filter(r => !r.disabled && !r.hidden && r.node.type === 'item' &&
     isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)
   );
   const hasMandatory = mandatoryItems.length > 0;
 
-  // calc nodes: visible, non-disabled items with a calculatedExpression
-  const calcItems = visible.filter(r => !r.disabled && r.node.type === 'item' && r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox');
+  // calc nodes: visible, non-disabled, non-hidden items with a calculatedExpression
+  const calcItems = visible.filter(r => !r.disabled && !r.hidden && r.node.type === 'item' && r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox');
   const hasCalc = calcItems.length > 0;
   const calcAllOk = calcItems.every(r => getValue(r.node.id) === true);
 
-  // constraint items: visible, non-disabled items with questionnaire-constraint[]
+  // constraint items: visible, non-disabled, non-hidden items with questionnaire-constraint[]
   const _cEnv = ctx.envVars || {};
-  const constraintItems = visible.filter(r => !r.disabled && r.node.type === 'item' && r.node.constraint?.length);
+  const constraintItems = visible.filter(r => !r.disabled && !r.hidden && r.node.type === 'item' && r.node.constraint?.length);
   const hasConstraints = constraintItems.length > 0;
   const constraintsAllOk = constraintItems.every(r => evalConstraints(r.node, ctx.fp, ctx.qr, _cEnv));
 
   // range items: optional items with minValue/maxValue (mandatory ones are covered by mandatoryItems+calcFormOk)
-  const rangeItems = visible.filter(r => !r.disabled && r.node.type === 'item' &&
+  const rangeItems = visible.filter(r => !r.disabled && !r.hidden && r.node.type === 'item' &&
     !isMandatory(r.node) && (r.node._minValue !== undefined || r.node._maxValue !== undefined)
   );
   const hasRange = rangeItems.length > 0;
   const rangeAllOk = rangeItems.every(r => calcFormOk(r.node));
 
-  const formItemsOk = visible.filter(r => !r.disabled).every(res => {
+  const formItemsOk = visible.filter(r => !r.disabled && !r.hidden).every(res => {
     if (res.node.type === 'item') return res.ok && calcFormOk(res.node);
     return res.ok;
   });
@@ -351,8 +352,8 @@ async function _asyncRender(version) {
     if (!res.visible && !res.showDimmed) return;
 
     const isPatient = patientMode.value;
-    // Hidden items (sdc-questionnaire-hidden) are excluded in patient view.
-    if (isPatient && res.node.hidden) return;
+    // Hidden items (sdc-questionnaire-hidden): excluded in patient view and when toggle is off.
+    if (res.hidden && (isPatient || !showHiddenItems.value)) return;
 
     // Dimmed: enableWhen condition not yet met
     if (!res.visible && res.showDimmed) {
@@ -481,6 +482,8 @@ async function _asyncRender(version) {
     if (res.node.type === 'item' && res.node.itemType === 'display' && res.node._displayCategory) {
       row.classList.add('lform-item--' + res.node._displayCategory);
     }
+    // sdc-questionnaire-hidden: add dashed border to the root hidden node
+    if (res.hiddenRoot) row.classList.add('lform-item--hidden');
     if (!isPatient) {
       const navBtn = document.createElement('span');
       navBtn.className = 'preview-nav-btn';
@@ -538,6 +541,18 @@ async function _asyncRender(version) {
       setTimeout(() => { idTag.textContent = res.node.id; }, 1200);
     });
     if (showLinkId.value && !isPatient) row.appendChild(idTag);
+
+    // HIDDEN badge for sdc-questionnaire-hidden root nodes
+    if (res.hiddenRoot && !isPatient) {
+      const hiddenBadge = document.createElement('span');
+      hiddenBadge.className = 'preview-hidden-badge';
+      hiddenBadge.textContent = 'HIDDEN';
+      hiddenBadge.dataset.tipTitle = 'sdc-questionnaire-hidden';
+      hiddenBadge.dataset.tipBody  = 'This item is permanently hidden from patients. It still participates in calculatedExpression logic. Controls are disabled in preview.';
+      hiddenBadge.dataset.tipFhir  = 'sdc-questionnaire-hidden';
+      hiddenBadge.dataset.tipSpec  = 'SDC';
+      row.appendChild(hiddenBadge);
+    }
 
     if (res.node._prefix && showPrefix.value) {
       const prefixEl = document.createElement('span');
@@ -791,11 +806,15 @@ async function _asyncRender(version) {
       row.insertBefore(toggle, row.firstChild);
     }
 
+    // Disable all interactive controls for hidden items (sdc-questionnaire-hidden)
+    if (res.hidden && res.node.type === 'item') {
+      row.querySelectorAll('input, select, textarea').forEach(el => { el.disabled = true; });
+    }
     container.appendChild(row);
 
     if (res.node.type === 'group' && res.node.children.length > 0) {
       const descendants = visible.filter(r =>
-        r.node.type === 'item' && !r.disabled && isDescendant(r.node.id, res.node)
+        r.node.type === 'item' && !r.disabled && !r.hidden && isDescendant(r.node.id, res.node)
       );
       if (iconEl) groupIconMap.set(res.node.id, { icon: iconEl, descendants, node: res.node });
 
@@ -884,8 +903,9 @@ effect(() => {
   void rawFhir.value;     // trigger on questionnaire data reload
   void showLinkId.value;  // trigger on linkId display toggle
   void showPrefix.value;  // trigger on prefix display toggle
-  void showBadges.value;  // trigger on badges display toggle
-  void patientMode.value; // trigger on patient/preview mode switch
+  void showBadges.value;      // trigger on badges display toggle
+  void patientMode.value;     // trigger on patient/preview mode switch
+  void showHiddenItems.value; // trigger on hidden items toggle
   if (_bulkUpdate.value) return; // mass mutation in progress — skip
   _asyncRender(++_renderVersion); // fire-and-forget; stale renders self-abort
 });
@@ -917,6 +937,7 @@ effect(() => {
   document.getElementById('showLinkIdBtn').style.display = d;
   document.getElementById('showPrefixBtn').style.display = d;
   document.getElementById('showBadgesBtn').style.display = d;
+  document.getElementById('showHiddenBtn').style.display = d;
   document.getElementById('previewCollapseAllBtn').style.display = d;
   document.getElementById('previewExpandAllBtn').style.display = d;
   document.getElementById('searchWrap').style.display = d;

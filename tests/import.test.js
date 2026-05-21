@@ -868,5 +868,38 @@ describe('importFHIR', () => {
       expect(_tree[0]._supportLinks).toBeUndefined();
     });
   });
+
+  // ── sdc-questionnaire-hidden ───────────────────────────────────────────────
+  describe('_hidden import', () => {
+    const HIDDEN_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden';
+
+    it('sets _hidden = true for an item with sdc-questionnaire-hidden = true', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
+        extension: [{ url: HIDDEN_URL, valueBoolean: true }]
+      }]));
+      expect(_tree[0]._hidden).toBe(true);
+    });
+
+    it('does not set _hidden when extension is absent', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
+      expect(_tree[0]._hidden).toBeUndefined();
+    });
+
+    it('does not set _hidden when valueBoolean is false', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
+        extension: [{ url: HIDDEN_URL, valueBoolean: false }]
+      }]));
+      expect(_tree[0]._hidden).toBeUndefined();
+    });
+
+    it('sets _hidden = true on a group item', () => {
+      importFHIR(minQ([{ linkId: 'g1', type: 'group', text: 'G',
+        extension: [{ url: HIDDEN_URL, valueBoolean: true }],
+        item: [{ linkId: 'g1.q1', type: 'string', text: 'Child' }]
+      }]));
+      expect(_tree[0]._hidden).toBe(true);
+      expect(_tree[0].children[0]._hidden).toBeUndefined();
+    });
+  });
 });
 

@@ -933,3 +933,35 @@ describe('buildFHIRObject — _supportLinks', () => {
   });
 });
 
+// ── sdc-questionnaire-hidden ───────────────────────────────────────────────────
+describe('buildFHIRObject — _hidden', () => {
+  const HIDDEN_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden';
+
+  it('exports sdc-questionnaire-hidden = true when _hidden is set', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _hidden: true }]);
+    const ext = q.item[0].extension || [];
+    const hiddenExts = ext.filter(e => e.url === HIDDEN_URL);
+    expect(hiddenExts).toHaveLength(1);
+    expect(hiddenExts[0].valueBoolean).toBe(true);
+  });
+
+  it('omits hidden extension when _hidden is falsy', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.filter(e => e.url === HIDDEN_URL)).toHaveLength(0);
+  });
+
+  it('exports sdc-questionnaire-hidden on a group', () => {
+    const q = build([{ id: 'g1', type: 'group', title: 'G', _hidden: true, children: [
+      { id: 'g1.q1', type: 'item', title: 'Child', itemType: 'text' }
+    ]}]);
+    const ext = q.item[0].extension || [];
+    const hiddenExts = ext.filter(e => e.url === HIDDEN_URL);
+    expect(hiddenExts).toHaveLength(1);
+    expect(hiddenExts[0].valueBoolean).toBe(true);
+    // child item should NOT have the extension
+    const childExt = q.item[0].item[0].extension || [];
+    expect(childExt.filter(e => e.url === HIDDEN_URL)).toHaveLength(0);
+  });
+});
+

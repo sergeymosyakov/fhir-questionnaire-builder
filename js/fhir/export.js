@@ -165,6 +165,11 @@ function nodeToFHIRItem(node) {
     }
   }
 
+  // sdc-questionnaire-hidden
+  if (node._hidden) {
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden', valueBoolean: true });
+  }
+
   // questionnaire-displayCategory
   if (node._displayCategory) {
     ext.push({
