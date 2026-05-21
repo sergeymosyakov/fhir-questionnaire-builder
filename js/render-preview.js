@@ -497,7 +497,8 @@ async function _asyncRender(version) {
 
     let iconEl = null;
     if (!isPatient) {
-      if (hasCondition) {
+      // Hidden items are excluded from PASS/FAIL — always show neutral placeholder icon
+      if (hasCondition && !res.hidden) {
         iconEl = document.createElement('span');
         iconEl.className   = displayOk ? 'icon-ok' : 'icon-fail';
         iconEl.textContent = displayOk ? '\u2714' : '\u2718';
