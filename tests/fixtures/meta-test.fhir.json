@@ -1,6 +1,13 @@
 {
   "resourceType": "Questionnaire",
   "id": "meta-test-id",
+  "meta": {
+    "versionId": "42",
+    "lastUpdated": "2024-03-15T10:00:00.000Z",
+    "profile": ["http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire"],
+    "tag": [{ "system": "http://example.org/tags", "code": "reviewed", "display": "Reviewed" }],
+    "security": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality", "code": "N", "display": "Normal" }]
+  },
   "url": "http://example.org/fhir/Questionnaire/meta-test",
   "version": "2.0",
   "name": "MetaTestQuestionnaire",

@@ -422,8 +422,12 @@ function _renderBody(container) {
   const profileSection = document.createElement('div');
   profileSection.className = 'meta-modal-subsection';
   const profileHdr = document.createElement('div');
-  profileHdr.className   = 'meta-modal-subhdr';
-  profileHdr.textContent = 'Profiles (meta.profile[])';
+  profileHdr.className        = 'meta-modal-subhdr';
+  profileHdr.textContent       = 'Profiles';
+  profileHdr.dataset.tipTitle  = 'meta.profile';
+  profileHdr.dataset.tipBody   = 'Canonical URLs of profiles this resource claims conformance to. Used by validators and workflow engines to verify the resource against a known StructureDefinition.';
+  profileHdr.dataset.tipFhir   = 'meta.profile';
+  profileHdr.dataset.tipSpec   = 'R4';
   profileSection.appendChild(profileHdr);
   const _renderProfile = () => {
     const existing = profileSection.querySelectorAll('.codes-row');
@@ -458,19 +462,31 @@ function _renderBody(container) {
   const tagSection = document.createElement('div');
   tagSection.className = 'meta-modal-subsection';
   const tagHdr = document.createElement('div');
-  tagHdr.className   = 'meta-modal-subhdr';
-  tagHdr.textContent = 'Tags (meta.tag[])';
+  tagHdr.className        = 'meta-modal-subhdr';
+  tagHdr.textContent      = 'Tags';
+  tagHdr.dataset.tipTitle = 'meta.tag';
+  tagHdr.dataset.tipBody  = 'Tags applied to this resource. Tags may carry workflow information such as review status, sensitivity classification, or processing instructions. Each tag is a Coding (system + code + display).';
+  tagHdr.dataset.tipFhir  = 'meta.tag';
+  tagHdr.dataset.tipSpec  = 'R4';
   tagSection.appendChild(tagHdr);
-  renderCodesEditor(_pending.metaTag, tagSection, 'meta-tag');
+  const tagEditor = document.createElement('div');
+  tagSection.appendChild(tagEditor);
+  renderCodesEditor(_pending.metaTag, tagEditor, 'meta-tag', 'tag');
   metaBody.appendChild(tagSection);
 
   const secSection = document.createElement('div');
   secSection.className = 'meta-modal-subsection';
   const secHdr = document.createElement('div');
-  secHdr.className   = 'meta-modal-subhdr';
-  secHdr.textContent = 'Security Labels (meta.security[])';
+  secHdr.className        = 'meta-modal-subhdr';
+  secHdr.textContent      = 'Security Labels';
+  secHdr.dataset.tipTitle = 'meta.security';
+  secHdr.dataset.tipBody  = 'Security labels applied to this resource. Used to enforce access control, data sensitivity policies, and audit requirements. Each label is a Coding from a security classification system (e.g. HL7 Confidentiality codes).';
+  secHdr.dataset.tipFhir  = 'meta.security';
+  secHdr.dataset.tipSpec  = 'R4';
   secSection.appendChild(secHdr);
-  renderCodesEditor(_pending.metaSecurity, secSection, 'meta-security');
+  const secEditor = document.createElement('div');
+  secSection.appendChild(secEditor);
+  renderCodesEditor(_pending.metaSecurity, secEditor, 'meta-security', 'security label');
   metaBody.appendChild(secSection);
 
   const _setMetaLabel = () => {

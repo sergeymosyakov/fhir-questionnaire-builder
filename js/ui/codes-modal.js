@@ -204,13 +204,13 @@ function _renderBody(pending, container) {
  * @param {Element}  container — cleared and repopulated
  * @param {string}   prefix  — testid prefix, e.g. 'code' or 'meta-code'
  */
-export function renderCodesEditor(draft, container, prefix = 'code') {
+export function renderCodesEditor(draft, container, prefix = 'code', label = 'code') {
   container.innerHTML = '';
 
   if (draft.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'codes-empty-msg';
-    empty.textContent = 'No codes. Add one below.';
+    empty.textContent = `No ${label}s. Add one below.`;
     container.appendChild(empty);
   }
 
@@ -239,7 +239,7 @@ export function renderCodesEditor(draft, container, prefix = 'code') {
     removeBtn.textContent = '\u00D7';
     removeBtn.title = 'Remove';
     removeBtn.dataset.testid = `${prefix}-remove-${idx}`;
-    removeBtn.onclick = () => { draft.splice(idx, 1); renderCodesEditor(draft, container, prefix); };
+    removeBtn.onclick = () => { draft.splice(idx, 1); renderCodesEditor(draft, container, prefix, label); };
     row.appendChild(removeBtn);
 
     container.appendChild(row);
@@ -249,7 +249,7 @@ export function renderCodesEditor(draft, container, prefix = 'code') {
   addBtn.type = 'button';
   addBtn.className = 'codes-add-btn';
   addBtn.dataset.testid = `${prefix}s-add-btn`;
-  addBtn.textContent = '+ Add code';
-  addBtn.onclick = () => { draft.push({ system: '', code: '', display: '' }); renderCodesEditor(draft, container, prefix); };
+  addBtn.textContent = `+ Add ${label}`;
+  addBtn.onclick = () => { draft.push({ system: '', code: '', display: '' }); renderCodesEditor(draft, container, prefix, label); };
   container.appendChild(addBtn);
 }

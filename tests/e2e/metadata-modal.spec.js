@@ -29,12 +29,28 @@
 //   meta-last-review     (data-testid) lastReviewDate input (Advanced)
 //   meta-purpose         (data-testid) purpose textarea (Advanced)
 //   meta-copyright       (data-testid) copyright textarea (Advanced)
-//   meta-codes-toggle    (data-testid) Codes section toggle button
-//   meta-code-code-0     (data-testid) code input for first Questionnaire.code[] row
-//   meta-code-system-0   (data-testid) system input for first row
-//   meta-code-display-0  (data-testid) display input for first row
-//   meta-code-remove-0   (data-testid) remove button for first row
-//   meta-codes-add-btn   (data-testid) Add code button inside Codes section
+//   meta-codes-toggle           (data-testid) Codes section toggle button
+//   meta-code-code-0             (data-testid) code input for first Questionnaire.code[] row
+//   meta-code-system-0           (data-testid) system input for first row
+//   meta-code-display-0          (data-testid) display input for first row
+//   meta-code-remove-0           (data-testid) remove button for first row
+//   meta-codes-add-btn           (data-testid) Add code button inside Codes section
+//   meta-resource-meta-toggle    (data-testid) Resource Meta section toggle button
+//   meta-version-id              (data-testid) meta.versionId text input
+//   meta-version-id-generate     (data-testid) Generate UUID button
+//   meta-profile-url-{idx}       (data-testid) profile URL input at index idx
+//   meta-profile-remove-{idx}    (data-testid) profile remove button at index idx
+//   meta-profile-add-btn         (data-testid) Add Profile URL button
+//   meta-tag-system-{idx}        (data-testid) tag Coding system input at index idx
+//   meta-tag-code-{idx}          (data-testid) tag Coding code input at index idx
+//   meta-tag-display-{idx}       (data-testid) tag Coding display input at index idx
+//   meta-tag-remove-{idx}        (data-testid) tag Coding remove button at index idx
+//   meta-tags-add-btn            (data-testid) Add tag button
+//   meta-security-system-{idx}   (data-testid) security Coding system input at index idx
+//   meta-security-code-{idx}     (data-testid) security Coding code input at index idx
+//   meta-security-display-{idx}  (data-testid) security Coding display input at index idx
+//   meta-security-remove-{idx}   (data-testid) security Coding remove button at index idx
+//   meta-securitys-add-btn       (data-testid) Add security label button
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
