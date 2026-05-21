@@ -1,0 +1,114 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "rendering-xhtml-demo",
+  "title": "Rendering XHTML Demo",
+  "status": "draft",
+  "description": "Demonstrates rendering-xhtml extension: rich text labels rendered via DOMPurify in the preview panel.",
+  "item": [
+    {
+      "linkId": "intro",
+      "text": "Please answer the following questions. Fields marked required are mandatory.",
+      "type": "display",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml",
+            "valueString": "<p>Please answer the following questions. Fields marked <strong>required</strong> are <em>mandatory</em>.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "linkId": "grp-personal",
+      "text": "Personal Information",
+      "type": "group",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml",
+            "valueString": "<strong>Personal Information</strong>"
+          }
+        ]
+      },
+      "item": [
+        {
+          "linkId": "name",
+          "text": "Full name",
+          "type": "string",
+          "required": true,
+          "_text": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml",
+                "valueString": "Full name <span style=\"color:#c62828\">*</span>"
+              }
+            ]
+          }
+        },
+        {
+          "linkId": "dob",
+          "text": "Date of birth",
+          "type": "date",
+          "_text": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml",
+                "valueString": "Date of birth <em>(DD/MM/YYYY)</em>"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "grp-symptoms",
+      "text": "Symptom Assessment",
+      "type": "group",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml",
+            "valueString": "<strong>Symptom Assessment</strong>"
+          }
+        ]
+      },
+      "item": [
+        {
+          "linkId": "pain-score",
+          "text": "Pain score (0–10)",
+          "type": "integer",
+          "_text": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/rendering-style",
+                "valueString": "font-weight: 600"
+              },
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml",
+                "valueString": "Pain score <span style=\"color:#555\">(0 = none, 10 = worst imaginable)</span>"
+              }
+            ]
+          }
+        },
+        {
+          "linkId": "symptoms-note",
+          "text": "Describe your main symptom",
+          "type": "text",
+          "_text": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml",
+                "valueString": "Describe your <em>main symptom</em> in your own words"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "plain-fallback",
+      "text": "Any additional comments? (plain text, no XHTML)",
+      "type": "text"
+    }
+  ]
+}
