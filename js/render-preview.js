@@ -825,6 +825,8 @@ async function _asyncRender(version) {
         let firstVisible = true;
         for (const ch of res.node.children) {
           const childRes = resultMap.get(ch.id);
+          // Skip hidden children when the toggle is off — prevents orphan AND/OR separators
+          if (childRes && childRes.hidden && (patientMode.value || !showHiddenItems.value)) continue;
           if (childRes && (childRes.visible || childRes.showDimmed)) {
             if (!firstVisible && childRes.visible) {
               const sep = document.createElement('div');
