@@ -441,7 +441,7 @@ async function _asyncRender(version) {
     let hasCondition, displayOk;
     if (res.node.type === 'group') {
       const descendantItems = visible.filter(r =>
-        r.node.type === 'item' && !r.disabled && isDescendant(r.node.id, res.node)
+        r.node.type === 'item' && !r.disabled && !r.hidden && isDescendant(r.node.id, res.node)
       );
       // Only count items that actually have a checkable condition right now
       const relevantItems = descendantItems.filter(r =>
@@ -894,6 +894,7 @@ async function _asyncRender(version) {
     }
   }
 
+  updateGroupIcons(); // sync group icons with initial values after full DOM build
   statusBadge.update({ anyVisible, hasCriteria: hasMandatory || hasCalc || hasConstraints || hasRange, finalOk, failingItems });
   search.refresh();
   progress.hide(); // no-op when progress was not shown (normal form interactions)
