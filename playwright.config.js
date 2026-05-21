@@ -22,6 +22,8 @@ export default defineConfig({
     baseURL: 'http://localhost:3000',
     // data-testid is the default for getByTestId(), explicit here for clarity.
     testIdAttribute: 'data-testid',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
   },
 
   projects: [

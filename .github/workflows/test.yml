@@ -39,6 +39,13 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+      # Upload test-results (screenshots + videos) on failure.
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 30
 
   # Deploy app + test report to GitHub Pages.
   # Requires: Settings → Pages → Source = "GitHub Actions".

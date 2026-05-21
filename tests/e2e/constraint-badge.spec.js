@@ -65,7 +65,7 @@ test.describe('hasCriteria: badge visible for constraint-only questionnaire', ()
     await expect(badge(page)).toContainText('1 issue');
   });
 
-  test.skip('badge shows PASS after filling a valid constraint value', async ({ page }) => {
+  test('badge shows PASS after filling a valid constraint value', async ({ page }) => {
     await loadFixture(page);
     const input = page.locator('[data-preview-id="age"] input[type="number"]');
     await input.fill('20');
