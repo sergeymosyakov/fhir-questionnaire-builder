@@ -422,6 +422,9 @@ function _doReset() {
   questMeta.experimental = null; questMeta.language = ''; questMeta.derivedFrom = [];
   questMeta._rawContact = null; questMeta._rawUseContext = null; questMeta._rawJurisdiction = null;
   questMeta._rawCode = null;
+  questMeta._metaVersionId = ''; questMeta._metaSource = '';
+  questMeta._metaLastUpdated = ''; questMeta._rawMetaProfile = [];
+  questMeta._rawMetaTag = []; questMeta._rawMetaSecurity = [];
   // Clear questionnaire-level variables
   questVariables.splice(0);
   variablesPanel.refresh();

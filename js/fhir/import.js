@@ -435,6 +435,7 @@ export function importFHIR(fhirJson, renderFn) {
   questMeta._rawCode         = Array.isArray(q.code)         ? q.code         : null;
   questMeta.derivedFrom      = Array.isArray(q.derivedFrom)  ? [...q.derivedFrom] : [];
   questMeta._metaVersionId   = q.meta?.versionId  || '';
+  questMeta._metaSource      = q.meta?.source      || '';
   questMeta._metaLastUpdated = q.meta?.lastUpdated || '';
   questMeta._rawMetaProfile  = Array.isArray(q.meta?.profile)  ? [...q.meta.profile]  : [];
   questMeta._rawMetaTag      = Array.isArray(q.meta?.tag)      ? JSON.parse(JSON.stringify(q.meta.tag))      : [];

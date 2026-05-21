@@ -96,6 +96,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `questMeta._rawCode` | `Questionnaire.code[]` | ← stored as array (default: `null`) | → written back unchanged; editable via **Codes** section in Properties modal (system/code/display rows; draft pattern; badge shows count) |
 | `questMeta.derivedFrom` | `Questionnaire.derivedFrom[]` | ← stored as string array (default: `[]`) | → written back as array; editable via **Derived From** collapsible section in Properties modal; round-trip safe |
 | `questMeta._metaVersionId` | `Questionnaire.meta.versionId` | ← `meta.versionId` (default: `''`) | → written back when set; editable in Properties modal — **Resource Meta** section; **Generate** button creates a fresh UUID v4 |
+| `questMeta._metaSource` | `Questionnaire.meta.source` | ← `meta.source` (default: `''`) | → written back when set; editable URI input in Properties modal — Resource Meta section |
 | `questMeta._metaLastUpdated` | `Questionnaire.meta.lastUpdated` | ← `meta.lastUpdated` displayed read-only in Properties modal | → **always** replaced with `new Date().toISOString()` on every export |
 | `questMeta._rawMetaProfile` | `Questionnaire.meta.profile[]` | ← stored as string array (default: `[]`) | → written back as array; editable list of canonical URLs in Properties modal — Resource Meta section |
 | `questMeta._rawMetaTag` | `Questionnaire.meta.tag[]` | ← stored as Coding[] (default: `[]`) | → written back unchanged; editable system/code/display rows in Properties modal — Resource Meta section |
@@ -288,6 +289,21 @@ This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR wit
 
 ---
 
+## QuestionnaireResponse
+
+| QR field | Import | Export | Notes |
+|---|---|---|---|
+| `status` | ← preserved in `qrMeta.status` | → written; editable in QR Export modal | Default: `'in-progress'` |
+| `subject` | ← `subject.reference` in `qrMeta.subject` | → `subject.reference` when non-empty | Optional; editable in QR Export modal |
+| `author` | ← `author.reference` in `qrMeta.author` | → `author.reference` when non-empty | Optional; editable in QR Export modal |
+| `authored` | not stored | → `new Date().toISOString()` | Always set to current time on export |
+
+`qrMeta` is reset to defaults when a new questionnaire is imported. When a QR is loaded via the Answers menu, `qrMeta` is updated from the loaded response and pre-populates the QR Export modal.
+
+**Minor gaps:** `id` is not preserved on import (generated fresh on export). `implicitRules`, `language`, and `meta` are not preserved — pass-through not implemented for QR-level meta.
+
+---
+
 ## Not Supported / Partial Support
 
 Legend: ⚠️ = silent data loss (field present in import file, ignored or overwritten on export); ❌ = not handled at all; 🔧 = partial support.
@@ -299,7 +315,7 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | FHIR field | Status | Notes |
 |---|---|---|
 | `Questionnaire.identifier[]` | ⚠️ Silently dropped | Business identifier (NamingSystem + value). Used by EHR systems to reference questionnaires by external ID, printed on form headers, and required by some IG profiles. Not stored, not editable, not written back. |
-| `Questionnaire.meta` | ⚠️ Partially supported | `meta.versionId`, `meta.lastUpdated`, `meta.profile[]`, `meta.tag[]`, `meta.security[]` are read, editable, and written back. `meta.versionId` / `meta.lastUpdated` — see Questionnaire-Level Metadata table. `meta.lastUpdated` is always refreshed to current time on export. |
+| `Questionnaire.meta` | ✅ Covered | All sub-fields implemented: `versionId` (editable + Generate UUID), `source` (editable URI), `lastUpdated` (always refreshed to current time on export), `profile[]` (editable URL list), `tag[]` and `security[]` (editable Coding rows). Editable in Properties modal — Resource Meta section. |
 | `Questionnaire.text` | ⚠️ Silently dropped | Human-readable narrative (auto-generated in some workflows). Not stored, not written. |
 | `Questionnaire.implicitRules` | ⚠️ Silently dropped | Declares the rules set that constrains how the resource is used. Rare in practice. |
 | Unknown item extensions | ⚠️ Silently dropped | Any `item.extension[]` entry whose URL is not explicitly handled by the builder is discarded on import and will not appear in the exported JSON. |
@@ -360,24 +376,6 @@ These SDC extensions support advanced form pre-population from clinical data and
 | `sdc-questionnaire-targetStructureMap` | StructureMap used to transform a completed QR into other FHIR resources |
 | `sdc-questionnaire-sourceStructureMap` | StructureMap used to pre-populate the questionnaire from existing FHIR data |
 | `sdc-questionnaire-columnCount` / `sdc-questionnaire-width` | Grid layout: number of columns in a group and per-item width for multi-column display |
-
-### QuestionnaireResponse — meta fields
-
-| QR field | Import | Export | Notes |
-|---|---|---|---|
-| `status` | ← preserved in `qrMeta.status` | → written; editable in QR Export modal | Default: `'in-progress'` |
-| `subject` | ← `subject.reference` in `qrMeta.subject` | → `subject.reference` when non-empty | Optional; editable in QR Export modal |
-| `author` | ← `author.reference` in `qrMeta.author` | → `author.reference` when non-empty | Optional; editable in QR Export modal |
-| `authored` | not stored | → `new Date().toISOString()` | Always set to current time on export |
-
-`qrMeta` is reset to defaults when a new questionnaire is imported. When a QR is loaded via the Answers menu, `qrMeta` is updated from the loaded response and pre-populates the QR Export modal.
-
-### QuestionnaireResponse — minor gaps
-
-| QR field | What happens | Notes |
-|---|---|---|
-| `id` | not preserved on import | Generated fresh on export |
-| `implicitRules` / `language` / `meta` | not preserved | Pass-through not implemented for QR-level meta |
 
 ### FHIR versions
 

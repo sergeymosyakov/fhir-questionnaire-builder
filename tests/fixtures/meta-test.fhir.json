@@ -3,6 +3,7 @@
   "id": "meta-test-id",
   "meta": {
     "versionId": "42",
+    "source": "https://example.org/systems/test-builder",
     "lastUpdated": "2024-03-15T10:00:00.000Z",
     "profile": ["http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire"],
     "tag": [{ "system": "http://example.org/tags", "code": "reviewed", "display": "Reviewed" }],

@@ -91,7 +91,9 @@ export function open() {
     derivedFrom:  [...(questMeta.derivedFrom || [])],
     codes: JSON.parse(JSON.stringify(questMeta._rawCode || [])),
     metaVersionId:  questMeta._metaVersionId  || '',
+    metaSource:     questMeta._metaSource      || '',
     metaProfile:    [...(questMeta._rawMetaProfile  || [])],
+
     metaTag:        JSON.parse(JSON.stringify(questMeta._rawMetaTag      || [])),
     metaSecurity:   JSON.parse(JSON.stringify(questMeta._rawMetaSecurity || [])),
   };
@@ -128,6 +130,7 @@ function _apply() {
   const filteredCodes = _pending.codes.filter(c => c.code.trim());
   questMeta._rawCode = filteredCodes.length ? filteredCodes : null;
   questMeta._metaVersionId   = _pending.metaVersionId.trim();
+  questMeta._metaSource      = _pending.metaSource.trim();
   questMeta._rawMetaProfile  = _pending.metaProfile.filter(u => u.trim());
   questMeta._rawMetaTag      = _pending.metaTag.filter(c => c.code?.trim());
   questMeta._rawMetaSecurity = _pending.metaSecurity.filter(c => c.code?.trim());
@@ -362,7 +365,7 @@ function _renderBody(container) {
   metaToggle.className = 'meta-modal-adv-toggle';
   metaToggle.dataset.testid = 'meta-resource-meta-toggle';
   let metaOpen = !!(
-    _pending.metaVersionId || questMeta._metaLastUpdated ||
+    _pending.metaVersionId || _pending.metaSource || questMeta._metaLastUpdated ||
     _pending.metaProfile.length || _pending.metaTag.length || _pending.metaSecurity.length
   );
 
@@ -403,6 +406,26 @@ function _renderBody(container) {
   versionIdWrap.append(versionIdInp, generateBtn);
   versionIdRow.append(versionIdLbl, versionIdWrap);
   metaBody.appendChild(versionIdRow);
+
+  // source row — editable URI
+  const sourceRow = document.createElement('div');
+  sourceRow.className = 'meta-modal-row';
+  const sourceLbl = document.createElement('label');
+  sourceLbl.className   = 'meta-modal-lbl';
+  sourceLbl.textContent = 'Source:';
+  sourceLbl.dataset.tipTitle = 'meta.source';
+  sourceLbl.dataset.tipBody  = 'A URI that identifies the system that created or maintains this resource. Helps downstream consumers trace the origin of the questionnaire.';
+  sourceLbl.dataset.tipFhir  = 'meta.source';
+  sourceLbl.dataset.tipSpec  = 'R4';
+  const sourceInp = document.createElement('input');
+  sourceInp.type        = 'url';
+  sourceInp.className   = 'meta-modal-inp';
+  sourceInp.placeholder = 'https://example.org/systems/questionnaire-builder';
+  sourceInp.value       = _pending.metaSource;
+  sourceInp.dataset.testid = 'meta-source';
+  sourceInp.oninput = () => { _pending.metaSource = sourceInp.value; };
+  sourceRow.append(sourceLbl, sourceInp);
+  metaBody.appendChild(sourceRow);
 
   // lastUpdated row — read-only display
   const lastUpdatedRow = document.createElement('div');
@@ -492,6 +515,7 @@ function _renderBody(container) {
   const _setMetaLabel = () => {
     const count = (
       (_pending.metaVersionId ? 1 : 0) +
+      (_pending.metaSource    ? 1 : 0) +
       _pending.metaProfile.filter(u => u.trim()).length +
       _pending.metaTag.filter(c => c.code?.trim()).length +
       _pending.metaSecurity.filter(c => c.code?.trim()).length
