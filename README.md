@@ -25,9 +25,9 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, etc.) |
 | `js/builder/_shared.js` | Shared utilities injected via `init(deps)` |
 | `js/builder/dnd.js` | Self-contained drag & drop, injected via `init(onDrop, tree, formTick)` |
-| `js/builder/panels.js` | All action panel builders (enableWhen vis panel, mand, type, expr, style) |
+| `js/builder/panels.js` | All action panel builders (enableWhen vis panel, mand, type, expr, style). Dead code removed: `buildSupportLinkPanel`, `buildMandPanel`, `buildInitialPanel`, `buildConstraintPanel`. |
 | `js/builder/node-item.js` | `renderItem(node, ctx)` — item node DOM |
-| `js/builder/node-group.js` | `renderGroup(node, ctx)` — group node DOM |
+| `js/builder/node-group.js` | `renderGroup(node, ctx)` — group node DOM; opens `showwhen-modal`, `expression-modal`, `required-modal`, `codes-modal` (**Props** button — edits `_definition`, `_codes[]`, `_supportLinks[]`) |
 | `js/render-preview.js` | Right panel — async preview; `reinitForm()` shows progress bar, yields between stages; `_asyncRender(version)` separates FHIRPath eval from DOM rebuild; DocumentFragment; stale-render abort |
 | `js/controls/index.js` | Control registry — dispatches by `itemType` |
 | `js/controls/{type}.js` | Per-type control implementations. `select` and `open-choice` use custom portal dropdowns instead of native `<select>` / `<datalist>`. `date` and `dateTime` use a custom calendar picker (`js/ui/date-picker.js`). `time` uses native `<input type="time">`. |
@@ -39,7 +39,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/ui/validate-modal.js` | Validate modal — `init(elements)`, `show(title, issues, mode, callbacks)` |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; draft-based editing with Apply/Cancel buttons; `%name` chip rich tooltips |
 | `js/ui/metadata-modal.js` | Questionnaire Properties modal — `init(elements)`, `open()`; draft pattern; edits all `questMeta` fields via three sections: **Core** (id, url, version, name, title, status, language BCP-47 dropdown, publisher, description), **Advanced** (collapsible: experimental select, date, subjectType, effectivePeriodStart/End, approvalDate, lastReviewDate, purpose, copyright), and **Codes** (collapsible: edits `Questionnaire.code[]`; badge shows count); changes committed on Apply; status + experimental badge reflected in questMetaCard above Variables card |
-| `js/ui/codes-modal.js` | Item Codes modal — `init(elements)`, `open(node, link, setActive)`; draft pattern; edits `node._codes[]` (FHIR `item.code[]`); each row has system URL, code, display; Apply commits filtered codes; Cancel discards; Codes action button highlighted when non-empty |
+| `js/ui/codes-modal.js` | **Item / Group Properties** modal — `init(elements)`, `open(node, link, setActive)`; draft pattern; three sections: **Definition URL** (`node._definition`), **Codes** (`node._codes[]`), **Support Links** (`node._supportLinks[]`); Apply commits all three; Cancel discards; available on both items and groups |
 | `js/ui/json-viewer.js` | Shared read-only FHIR JSON viewer modal — `init(elements)`, `show(title, data)`, `close()`; Esc / backdrop / × close |
 | `js/ui/contained-panel.js` | Collapsible card showing `Questionnaire.contained[]` resources — each chip opens JSON viewer |
 | `js/ui/answer-valueset-panel.js` | Collapsible card showing unique `answerValueSet` URLs used by items — each chip shows URL and which items use it |
@@ -108,7 +108,7 @@ All samples live in `sampledata/` and can be loaded via the **Questionnaires** b
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no global imports
 - **`ctx` object** — `renderNode` passes `{ renderTree, renderNode, tree, formTick, collapsed }` down to node renderers and panels; no module-level singletons
 - **CSS modules** — styles split by concern: `css/styles.css` (tokens + reset), `css/layout.css`, `css/builder.css`, `css/preview.css`, `css/controls.css`, `css/modals.css`, `css/tooltip.css`
-- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **409 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules (`utils`, `eval`, `fhir/calc`, `fhir/validate`, `fhir/export`, `fhir/import`, `fhir/qr-builder`, `fhir/qr-import`, `state`, integration); **443 tests** across 10 files; CDN imports mocked via `vi.mock`; CI via GitHub Actions (`npm test`)
 - **Playwright** — e2e test suite (`tests/e2e/`); **264 tests** across 19 spec files (Chromium); all selectors use `data-testid` / `data-node-id` / `data-preview-id`; fixtures frozen in `tests/fixtures/`; run with `npm run test:e2e`
 
 ---
@@ -156,7 +156,8 @@ _initialExpr     // FHIRPath string (SDC initialExpression) — evaluated once o
 _readOnly        // boolean — FHIR item.readOnly
 _initialValue    // any — FHIR item.initial[0] value; pre-fills values[] on import
 _prefix          // string — FHIR item.prefix (amber badge; editable in builder)
-_codes           // object[] — FHIR item.code[] (round-trip safe; not displayed)
+_codes           // object[] — FHIR item.code[] (round-trip safe; editable via Props button for items and groups)
+_supportLinks    // string[] — questionnaire-supportLink URIs (0..*; 🔗 icons in builder, "More info ↗" in patient view; editable via Props button)
 _maxLength       // integer — FHIR item.maxLength; character counter + maxlength attribute enforced in preview
 _minOccurs       // integer — questionnaire-minOccurs ext (imported/exported when repeats:true)
 _maxOccurs       // integer — questionnaire-maxOccurs ext; enforced in preview — add button disabled at limit

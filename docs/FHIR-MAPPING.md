@@ -20,7 +20,11 @@ Every node in the tree is either a **group** or an **item**:
   enableWhenExpression:string,          // SDC enableWhenExpression (FHIRPath)
   constraint:          object[],        // questionnaire-constraint extension entries
   logicWithParent:     'AND'|'OR',      // AND/OR badge for children in preview
-  children:            Node[]
+  children:            Node[],
+  // ── also possible on groups (imported/exported; editable via Props button) ──
+  _definition:         string,          // item.definition URL
+  _codes:              object[],        // item.code[] coding entries
+  _supportLinks:       string[]         // questionnaire-supportLink URIs (0..*)
 }
 
 // Item
@@ -53,7 +57,8 @@ Every node in the tree is either a **group** or an **item**:
   _maxValue:           number,           // questionnaire-maxValue extension value (decimal or integer)
   _optionOrdinals:     object,           // map of option code → ordinalValue (from ordinalValue extension on answerOption.extension or valueCoding.extension fallback)
   _sliderStep:         number,           // questionnaire-sliderStepValue ext; when set, integer/decimal renders as <input type="range"> slider
-  _disabledDisplay:    string            // 'hidden'|'protected' — behaviour when enableWhen condition is not met; 'protected' is default (not persisted)
+  _disabledDisplay:    string,           // 'hidden'|'protected' — behaviour when enableWhen condition is not met; 'protected' is default (not persisted)
+  _supportLinks:       string[]          // questionnaire-supportLink URIs (0..*); 🔗 icons in builder preview; "More info ↗" buttons in patient view
 }
 ```
 
@@ -160,6 +165,9 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `logicWithParent: 'OR'` | AND/OR preview badge | Exported as `questionnaire-constraint` (key `ITLH_NS:group-or`) with FHIRPath over child linkIds; restored on import |
 | `logicWithParent: 'AND'` | *(default)* | No constraint generated; restored as default on import |
 | `children` | `item.item[]` | recursive |
+| `_definition` | `item.definition` | URL pointing to a StructureDefinition element; round-trip safe; editable via **Props** button |
+| `_codes` | `item.code[]` | coding entries (system / code / display); round-trip safe; editable via **Props** button |
+| `_supportLinks` | `questionnaire-supportLink` ext (0..*) | help / documentation URIs; rendered as 🔗 icons in builder preview and "More info ↗" buttons in patient view; editable via **Props** button |
 
 ### Item-specific
 
@@ -172,7 +180,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `_initialExpr` | SDC `sdc-questionnaire-initialExpression` extension (`valueExpression.expression`) | FHIRPath; evaluated once on import and on Re-init; result pre-fills `values[]` |
 | `_readOnly` | `item.readOnly` | |
 | `_prefix` | `item.prefix` | imported and exported; displayed as amber badge in preview; editable in builder meta-row |
-| `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); editable via **Codes** action button in builder (modal with system/code/display rows; draft pattern) |
+| `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); editable via **Props** button (codes-modal — system/code/display rows, draft pattern); also supported on groups (see Group-specific) |
 | `_maxLength` | `item.maxLength` | imported → `node._maxLength`; exported back when set; character counter + `maxlength` attribute enforced in preview |
 | `_minValue` | `questionnaire-minValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; min HTML attribute set on input; error shown in preview when violated |
 | `_maxValue` | `questionnaire-maxValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; max HTML attribute set on input; error shown in preview when violated |
@@ -185,7 +193,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `_initialValue` | `item.initial[0]` value | imported from `initial[0]`; exported as `initial: [entry]`; pre-fills `values[]` on import |
 | `_initialValues` | `item.initial[]` all values | set only for repeating items with >1 initial value; exported as `initial: [entry, …]`; `_initialValue` holds `initial[0]` for backwards compat |
 | `_initialSelected` | `answerOption[].initialSelected` | code of the initially-selected option; preserved round-trip; if no `item.initial[]` exists, also used to pre-fill `_initialValue` |
-| `_definition` | `item.definition` | URL pointing to a StructureDefinition element; stored as `node._definition`; editable via **Props** button (Item Properties modal); round-trip safe |
+| `_definition` | `item.definition` | URL pointing to a StructureDefinition element; stored as `node._definition`; editable via **Props** button (codes-modal); round-trip safe; also supported on groups (see Group-specific) |
 ---
 
 ## Show When (enableWhen)
@@ -240,6 +248,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` | SDC | `_entryFormat` (placeholder hint text shown on text/url/number/quantity controls; editable in Answer Type modal) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation` | standard | `_choiceOrientation` (`vertical` / `horizontal`; controls layout of radio button groups; editable in Answer Type modal for `radio` items) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory` | standard | `_displayCategory` (`instructions` / `security` / `help`; applies visual category styling to `display` items in preview; editable in Answer Type modal) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink` | standard | `_supportLinks` (0..* help/documentation URIs per item or group; 🔗 icons in builder; "More info ↗" in patient view; editable via **Props** button) | Yes |
 
 ---
 
@@ -291,7 +300,6 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 | `sdc-questionnaire-answerExpression` | ❌ | Dynamic answer options derived from FHIRPath over form values (no server needed) |
 | `sdc-questionnaire-itemWeight` | ❌ | Per-option weight for scoring (analogous to `ordinalValue` at item level) |
 | `sdc-questionnaire-unitOption[]` | ❌ | Multiple selectable units for `quantity` items |
-| `sdc-questionnaire-supportLink` | ❌ | Help / documentation URL per item |
 | `sdc-questionnaire-shortText` | ❌ | Abbreviated label for summary views |
 
 ### QuestionnaireResponse — meta fields

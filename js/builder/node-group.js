@@ -9,6 +9,7 @@ import { addPanel, buildVisPanel, buildStylePanel } from './panels.js';
 import * as requiredModal from '../ui/required-modal.js';
 import * as expressionModal from '../ui/expression-modal.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
+import * as codesModal from '../ui/codes-modal.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 
 export function renderGroup(node, ctx) {
@@ -163,6 +164,17 @@ export function renderGroup(node, ctx) {
     'Inline CSS applied to the group title in the preview. Stored in the standard FHIR rendering-style extension on the _text element.',
     'Questionnaire.item._text.extension[rendering-style]', 'R4 · optional');
 
+  const propsLink = document.createElement('a');
+  propsLink.textContent = 'Props';
+  propsLink.className = 'action-edit';
+  propsLink.dataset.tipTitle = 'Group Properties';
+  propsLink.dataset.tipBody  = 'Edit group-level metadata: definition URL, terminology codes (item.code[]) and support links (questionnaire-supportLink).';
+  propsLink.dataset.tipFhir  = 'Questionnaire.item.definition / item.code[] / questionnaire-supportLink';
+  propsLink.dataset.tipSpec  = 'R4 \u00B7 optional';
+  propsLink.dataset.testid   = 'action-codes';
+  propsLink.onclick = () => codesModal.open(node, propsLink, setActive);
+  actions.appendChild(propsLink);
+
   // ⊕ Add ▾ dropdown
   const addWrap = document.createElement('div');
   addWrap.className = 'action-add-wrap';
@@ -263,6 +275,7 @@ export function renderGroup(node, ctx) {
   setActive(exprLink,  !!node._calculatedExpr);
   setActive(styleLink, !!(node._renderStyle || node._renderXhtml));
   setActive(mandLink,  node.mandatory === true);
+  setActive(propsLink, !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length));
 
   // ── Body: children + logic row ────────────────────────────────────────────
   const body = document.createElement('div');

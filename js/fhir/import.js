@@ -266,6 +266,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     if (v !== undefined) node._sliderStep = v;
   }
 
+  // questionnaire-supportLink (0..* URI links to external help/reference)
+  const supportLinks = (fhirItem.extension || [])
+    .filter(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink' && e.valueUri)
+    .map(e => e.valueUri);
+  if (supportLinks.length) node._supportLinks = supportLinks;
+
   // disabledDisplay (R4B native field or R4 extension backport)
   if (fhirItem.disabledDisplay) node._disabledDisplay = fhirItem.disabledDisplay;
   const ddExt = (fhirItem.extension || []).find(
@@ -344,6 +350,10 @@ function fhirItemToNode(fhirItem, linkIdMap, contained) {
     if (fhirItem.prefix) node._prefix = fhirItem.prefix;
     if (fhirItem.definition) node._definition = fhirItem.definition;
     if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
+    const groupSupportLinks = (fhirItem.extension || [])
+      .filter(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink' && e.valueUri)
+      .map(e => e.valueUri);
+    if (groupSupportLinks.length) node._supportLinks = groupSupportLinks;
     for (const child of fhirItem.item || []) {
       const n = fhirItemToNode(child, linkIdMap, contained);
       if (n) node.children.push(n);

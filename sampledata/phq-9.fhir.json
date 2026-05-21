@@ -53,6 +53,10 @@
   }],
   "item" : [{
     "linkId" : "/44250-9",
+    "extension" : [{
+      "url" : "http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink",
+      "valueUri" : "https://www.phqscreeners.com/"
+    }],
     "code" : [{
       "system" : "http://loinc.org",
       "code" : "44250-9",

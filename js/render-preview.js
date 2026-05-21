@@ -586,6 +586,41 @@ async function _asyncRender(version) {
     }
     row.appendChild(label);
 
+    // ── Support links (questionnaire-supportLink) ───────────────────────────
+    if (res.node._supportLinks && res.node._supportLinks.length) {
+      const validLinks = res.node._supportLinks.filter(u => u && u.trim());
+      if (isPatient) {
+        // Patient view: explicit "More info ↗" button per link
+        for (const url of validLinks) {
+          const btn = document.createElement('a');
+          btn.className = 'support-link-patient-btn';
+          btn.dataset.testid = 'support-link-patient-btn';
+          btn.href = url;
+          btn.target = '_blank';
+          btn.rel = 'noopener noreferrer';
+          btn.textContent = 'More info \u2197';
+          row.appendChild(btn);
+        }
+      } else {
+        // Builder preview: one 🔗 icon per link with tooltip
+        for (const url of validLinks) {
+          const icon = document.createElement('a');
+          icon.className = 'support-link-icon';
+          icon.dataset.testid = 'support-link-icon';
+          icon.href = url;
+          icon.target = '_blank';
+          icon.rel = 'noopener noreferrer';
+          icon.textContent = '\uD83D\uDD17';
+          icon.dataset.tipTitle = 'Support link';
+          icon.dataset.tipBody  = url;
+          icon.dataset.tipFhir  = 'Questionnaire.item.extension[questionnaire-supportLink]';
+          icon.dataset.tipSpec  = 'R4';
+          icon.addEventListener('click', e => e.stopPropagation());
+          row.appendChild(icon);
+        }
+      }
+    }
+
     if (!isPatient && res.node.type === 'group' && !isEmptyGroup) {
       const isOr = res.node.logicWithParent === 'OR';
       const lb = document.createElement('span');

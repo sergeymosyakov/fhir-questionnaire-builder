@@ -1,0 +1,39 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "support-link-test",
+  "status": "draft",
+  "title": "Support Link Test",
+  "item": [
+    {
+      "linkId": "q-single",
+      "text": "Single-link question",
+      "type": "string",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink",
+          "valueUri": "https://example.com/help1"
+        }
+      ]
+    },
+    {
+      "linkId": "q-multi",
+      "text": "Multi-link question",
+      "type": "string",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink",
+          "valueUri": "https://example.com/help-a"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink",
+          "valueUri": "https://example.com/help-b"
+        }
+      ]
+    },
+    {
+      "linkId": "q-none",
+      "text": "No-link question",
+      "type": "string"
+    }
+  ]
+}

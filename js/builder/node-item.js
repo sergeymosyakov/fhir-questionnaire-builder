@@ -200,6 +200,7 @@ export function renderItem(node, ctx) {
   codesLink.dataset.testid   = 'action-codes';
   codesLink.onclick = () => codesModal.open(node, codesLink, setActive);
   actions.appendChild(codesLink);
+
   const headerTop = document.createElement('div');
   headerTop.className = 'node-header-top';
   headerTop.appendChild(titleWrap);
@@ -245,7 +246,7 @@ export function renderItem(node, ctx) {
   setActive(styleLink,      !!(node._renderStyle || node._renderXhtml));
   setActive(mandLink,       node.mandatory === true);
   setActive(constraintLink, !!(node.constraint?.length));
-  setActive(codesLink,      !!(node._codes?.length) || !!node._definition);
+  setActive(codesLink,      !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.some(u => u)));
 
   wrapper.appendChild(div);
 

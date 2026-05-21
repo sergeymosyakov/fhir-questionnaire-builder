@@ -158,6 +158,13 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation', valueCode: node._choiceOrientation });
   }
 
+  // questionnaire-supportLink (0..* URI)
+  if (node._supportLinks && node._supportLinks.length) {
+    for (const uri of node._supportLinks) {
+      if (uri) ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink', valueUri: uri });
+    }
+  }
+
   // questionnaire-displayCategory
   if (node._displayCategory) {
     ext.push({

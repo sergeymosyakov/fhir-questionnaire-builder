@@ -895,3 +895,41 @@ describe('buildFHIRObject — _renderXhtml', () => {
   });
 });
 
+// ── questionnaire-supportLink ─────────────────────────────────────────────────
+describe('buildFHIRObject — _supportLinks', () => {
+  const SL_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink';
+
+  it('exports a single support link as one extension entry', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text',
+      _supportLinks: ['https://example.com/help'] }]);
+    const ext = q.item[0].extension || [];
+    const links = ext.filter(e => e.url === SL_URL);
+    expect(links).toHaveLength(1);
+    expect(links[0].valueUri).toBe('https://example.com/help');
+  });
+
+  it('exports multiple support links as multiple extension entries', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text',
+      _supportLinks: ['https://a.example.com', 'https://b.example.com'] }]);
+    const ext = q.item[0].extension || [];
+    const links = ext.filter(e => e.url === SL_URL);
+    expect(links).toHaveLength(2);
+    expect(links.map(l => l.valueUri)).toEqual(['https://a.example.com', 'https://b.example.com']);
+  });
+
+  it('omits support link extension when _supportLinks is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.filter(e => e.url === SL_URL)).toHaveLength(0);
+  });
+
+  it('omits empty-string entries from _supportLinks', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text',
+      _supportLinks: ['', 'https://example.com'] }]);
+    const ext = q.item[0].extension || [];
+    const links = ext.filter(e => e.url === SL_URL);
+    expect(links).toHaveLength(1);
+    expect(links[0].valueUri).toBe('https://example.com');
+  });
+});
+

@@ -23,8 +23,9 @@ export function open(node, link, setActive) {
     node,
     link,
     setActive,
-    codes:      JSON.parse(JSON.stringify(node._codes || [])),
-    definition: node._definition || '',
+    codes:        JSON.parse(JSON.stringify(node._codes || [])),
+    definition:   node._definition || '',
+    supportLinks: (node._supportLinks || []).slice(),
   };
   setModalTitle(_el.title, 'Item Properties', node.title || node.id || 'Item');
   _renderBody(_pending, _el.body);
@@ -33,7 +34,7 @@ export function open(node, link, setActive) {
 
 function _apply() {
   if (!_pending) return;
-  const { node, codes, definition, link, setActive } = _pending;
+  const { node, codes, definition, supportLinks, link, setActive } = _pending;
 
   // definition
   if (definition.trim()) node._definition = definition.trim();
@@ -44,7 +45,12 @@ function _apply() {
   if (filtered.length) node._codes = filtered;
   else delete node._codes;
 
-  setActive(link, !!(node._codes?.length) || !!node._definition);
+  // support links
+  const filteredLinks = supportLinks.filter(u => u.trim());
+  if (filteredLinks.length) node._supportLinks = filteredLinks;
+  else delete node._supportLinks;
+
+  setActive(link, !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length));
   _close();
 }
 
@@ -116,6 +122,77 @@ function _renderBody(pending, container) {
 
   codesSection.append(codesToggle, codesBody);
   container.appendChild(codesSection);
+
+  // ── Support Links (collapsible) ───────────────────────────────────────────
+  const slSection = document.createElement('div');
+  slSection.className = 'meta-modal-advanced';
+
+  const slToggle = document.createElement('button');
+  slToggle.type      = 'button';
+  slToggle.className = 'meta-modal-adv-toggle';
+  slToggle.dataset.testid = 'item-props-sl-toggle';
+  let slOpen = (pending.supportLinks.length > 0);
+
+  const slBody = document.createElement('div');
+  slBody.className = 'meta-modal-adv-body';
+  slBody.style.display = slOpen ? '' : 'none';
+
+  const _renderSlRows = () => {
+    slBody.innerHTML = '';
+    pending.supportLinks.forEach((url, idx) => {
+      const row = document.createElement('div');
+      row.className = 'support-link-row';
+
+      const inp = document.createElement('input');
+      inp.type = 'url';
+      inp.className = 'support-link-input';
+      inp.placeholder = 'https://example.com/help';
+      inp.value = url;
+      inp.dataset.testid = 'support-link-input';
+      inp.oninput = () => { pending.supportLinks[idx] = inp.value; _setSlLabel(); };
+
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'codes-remove-btn';
+      rm.textContent = '\u00D7';
+      rm.dataset.testid = 'support-link-rm';
+      rm.onclick = () => { pending.supportLinks.splice(idx, 1); _renderSlRows(); _setSlLabel(); };
+
+      row.append(inp, rm);
+      slBody.appendChild(row);
+    });
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'codes-add-btn';
+    addBtn.dataset.testid = 'support-link-add';
+    addBtn.textContent = '+ Add link';
+    addBtn.onclick = () => {
+      pending.supportLinks.push('');
+      _renderSlRows();
+      _setSlLabel();
+      slBody.querySelector('input:last-of-type')?.focus();
+    };
+    slBody.appendChild(addBtn);
+  };
+
+  const _setSlLabel = () => {
+    const count = pending.supportLinks.filter(u => u.trim()).length;
+    const badge = count ? ` (${count})` : '';
+    slToggle.textContent = (slOpen ? '\u25BC' : '\u25BA') + ' Support Links' + badge;
+  };
+
+  _renderSlRows();
+  _setSlLabel();
+
+  slToggle.addEventListener('click', () => {
+    slOpen = !slOpen;
+    slBody.style.display = slOpen ? '' : 'none';
+    _setSlLabel();
+  });
+
+  slSection.append(slToggle, slBody);
+  container.appendChild(slSection);
 }
 
 /**

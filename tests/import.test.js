@@ -834,5 +834,39 @@ describe('importFHIR', () => {
       expect(_tree[0]._renderXhtml).toBeUndefined();
     });
   });
+
+  // ── questionnaire-supportLink ─────────────────────────────────────────────
+  describe('_supportLinks import', () => {
+    const SL_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink';
+
+    it('reads a single supportLink URI into _supportLinks array', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
+        extension: [{ url: SL_URL, valueUri: 'https://example.com/help' }]
+      }]));
+      expect(_tree[0]._supportLinks).toEqual(['https://example.com/help']);
+    });
+
+    it('reads multiple supportLink URIs', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
+        extension: [
+          { url: SL_URL, valueUri: 'https://a.example.com' },
+          { url: SL_URL, valueUri: 'https://b.example.com' },
+        ]
+      }]));
+      expect(_tree[0]._supportLinks).toEqual(['https://a.example.com', 'https://b.example.com']);
+    });
+
+    it('does not set _supportLinks when extension is absent', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
+      expect(_tree[0]._supportLinks).toBeUndefined();
+    });
+
+    it('ignores supportLink entries without valueUri', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
+        extension: [{ url: SL_URL }]
+      }]));
+      expect(_tree[0]._supportLinks).toBeUndefined();
+    });
+  });
 });
 
