@@ -610,6 +610,17 @@
   border-radius: 6px;
   padding: 2px 6px;
 }
+/* Hidden group wrapper spans header + nested children */
+div.lform-item--hidden {
+  padding: 4px 6px 8px;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 10px,
+    rgba(147, 51, 234, 0.04) 10px,
+    rgba(147, 51, 234, 0.04) 20px
+  );
+}
 .preview-hidden-badge {
   display: inline-block;
   font-size: 10px;

@@ -811,7 +811,16 @@ async function _asyncRender(version) {
     if (res.hidden && res.node.type === 'item') {
       row.querySelectorAll('input, select, textarea').forEach(el => { el.disabled = true; });
     }
-    container.appendChild(row);
+    // Hidden groups: wrap header + nested in a single div so the dashed border spans the whole group
+    let _appendTarget = container;
+    if (res.hiddenRoot && res.node.type === 'group') {
+      const hiddenWrap = document.createElement('div');
+      hiddenWrap.className = 'lform-item--hidden';
+      container.appendChild(hiddenWrap);
+      row.classList.remove('lform-item--hidden');
+      _appendTarget = hiddenWrap;
+    }
+    _appendTarget.appendChild(row);
 
     if (res.node.type === 'group' && res.node.children.length > 0) {
       const descendants = visible.filter(r =>
@@ -839,7 +848,7 @@ async function _asyncRender(version) {
             if (childRes.visible) firstVisible = false;
           }
         }
-        if (nested.childElementCount > 0) container.appendChild(nested);
+        if (nested.childElementCount > 0) _appendTarget.appendChild(nested);
       }
     }
   }
