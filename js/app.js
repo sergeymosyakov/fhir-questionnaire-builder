@@ -2,7 +2,6 @@
 import { tree, values, rawFhir, _formTick, effect, clearAllValues } from './state.js';
 import { importFHIR } from './fhir/import.js';
 import { buildFHIRObject, exportFHIR } from './fhir/export.js';
-import { exportQR } from './fhir/qr-export.js';
 import { importQRAnswers } from './fhir/qr-import.js';
 import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/validate-modal.js';
@@ -30,9 +29,6 @@ import * as qrExportModal from './ui/qr-export-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm, initPreview } from './render-preview.js';
 import { showLinkId, showPrefix, showBadges, patientMode, showHiddenItems, questVariables, questContained, questMeta, qrMeta, resetQrMeta } from './state.js';
-
-// fhirpath.js v4 browser bundle loaded as global via lib/fhirpath.min.js
-const fhirpath = window.fhirpath;
 
 // Buttons
 document.getElementById('clearFormBtn').onclick    = _clearForm;

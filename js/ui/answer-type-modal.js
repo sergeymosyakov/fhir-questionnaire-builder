@@ -316,7 +316,7 @@ function _renderBody(container) {
   // ── ValueSet sub-section ──────────────────────────────────────────────────
   const avsSection = document.createElement('div');
   avsSection.className = 'at-modal-sub';
-  avsSection.style.display = !!_pending.draftAVS ? 'block' : 'none';
+  avsSection.style.display = _pending.draftAVS ? 'block' : 'none';
 
   const avsSubLbl = document.createElement('div');
   avsSubLbl.className   = 'at-modal-sub-lbl';

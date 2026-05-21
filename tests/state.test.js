@@ -12,10 +12,10 @@ vi.mock('https://unpkg.com/@vue/reactivity@3/dist/reactivity.esm-browser.js', ()
 
 // Mock fhirpath evaluate — routes by expression string
 function makeFp(routes) {
-  return { evaluate: vi.fn((qr, expr, env) => routes[expr] ?? []) };
+  return { evaluate: vi.fn((qr, expr, _env) => routes[expr] ?? []) };
 }
 
-const { evalConstraints, getValue, setValue, getAllValues, deleteValue, clearAllValues } = await import('../js/state.js');
+const { evalConstraints, setValue, getAllValues, clearAllValues } = await import('../js/state.js');
 
 // ── getAllValues ───────────────────────────────────────────────────────────────
 describe('getAllValues', () => {

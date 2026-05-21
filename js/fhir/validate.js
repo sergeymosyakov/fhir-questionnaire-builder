@@ -58,7 +58,7 @@ function _checkFhirPath(expr) {
   }
 }
 
-export function validateTree(tree, values = {}) {
+export function validateTree(tree, _values = {}) {
   const issues = [];
   const all    = _collectNodes(tree);
   const allIds = all.map(n => n.id);

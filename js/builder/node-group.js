@@ -1,6 +1,6 @@
 // ── Group node renderer ───────────────────────────────────────────────────────
 // renderGroup(node, ctx: BuilderCtx) → HTMLElement  — see ctx.js
-import { findAndRemove, escAttr } from '../utils.js';
+import { findAndRemove } from '../utils.js';
 import { navigateToPreview } from '../render-preview.js';
 import { makeGroup, makeItem } from '../state.js';
 import { formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';

@@ -10,7 +10,7 @@ export function buildVarEnv(variables, qr, fp) {
     try {
       const result = fp.evaluate(qr, v.expression, { resource: qr, ...env });
       env[v.name] = Array.isArray(result) && result.length === 1 ? result[0] : result;
-    } catch (e) { /* skip variables whose expression fails */ }
+    } catch (_e) { /* skip variables whose expression fails */ }
   }
   return env;
 }
@@ -27,7 +27,7 @@ export function evalCalcNodes(nodes, qr, fp, values, envVars = {}) {
           // String/text calc: store the joined result as a string
           values[node.id] = Array.isArray(result) ? result.join('') : (result[0] !== undefined ? String(result[0]) : '');
         }
-      } catch (e) {
+      } catch (_e) {
         // silently skip nodes whose expression fails
       }
     }
@@ -48,7 +48,7 @@ export function evalInitialExprNodes(nodes, qr, fp, values, envVars = {}) {
         } else {
           values[node.id] = Array.isArray(result) ? result.join('') : (result[0] !== undefined ? String(result[0]) : '');
         }
-      } catch (e) {
+      } catch (_e) {
         // silently skip nodes whose expression fails
       }
     }

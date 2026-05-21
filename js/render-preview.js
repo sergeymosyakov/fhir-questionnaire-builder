@@ -1,7 +1,7 @@
 // ── Right panel: reactive preview ─────────────────────────────────────────────
 import {
   effect,
-  tree, values, getValue, setValue, deleteValue, _formTick, _bulkUpdate, showLinkId, showPrefix, showBadges,
+  tree, values, getValue, setValue, _formTick, _bulkUpdate, showLinkId, showPrefix, showBadges,
   patientMode, showHiddenItems,
   calcFormOk, isMandatory,
   rawFhir, questVariables, CHECKABLE_TYPES
@@ -893,7 +893,7 @@ async function _asyncRender(version) {
       const el = inputs[_focusInfo.inputIndex];
       if (el) {
         el.focus();
-        try { el.setSelectionRange(_focusInfo.selStart, _focusInfo.selEnd); } catch (_) {}
+        try { el.setSelectionRange(_focusInfo.selStart, _focusInfo.selEnd); } catch (_) { /* non-text inputs throw — ignore */ }
       }
     }
   }

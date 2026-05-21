@@ -10,6 +10,17 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -50,7 +61,7 @@ jobs:
   # Deploy app + test report to GitHub Pages.
   # Requires: Settings → Pages → Source = "GitHub Actions".
   deploy:
-    needs: [test, e2e]
+    needs: [lint, test, e2e]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
