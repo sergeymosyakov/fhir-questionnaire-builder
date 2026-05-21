@@ -37,7 +37,7 @@ Every node in the tree is either a **group** or an **item**:
   options:             string,           // comma-separated, used by select/radio/open-choice
   repeats:             boolean,          // FHIR item.repeats — multi-row input in preview
   _renderStyle:        string,           // inline CSS (from rendering-style extension)
-  _renderXhtml:        string,           // raw XHTML markup (from rendering-xhtml extension; round-trip only, not rendered)
+  _renderXhtml:        string,           // raw XHTML markup (from rendering-xhtml extension; sanitized via DOMPurify and rendered as innerHTML in preview)
   _calculatedExpr:     string,           // FHIRPath expression (SDC calculatedExpression)
   _initialExpr:        string,           // FHIRPath expression (SDC initialExpression) — evaluated once on import + Re-init
   _readOnly:           boolean,          // FHIR item.readOnly
@@ -294,13 +294,24 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 | `sdc-questionnaire-supportLink` | ❌ | Help / documentation URL per item |
 | `sdc-questionnaire-shortText` | ❌ | Abbreviated label for summary views |
 
+### QuestionnaireResponse — meta fields
+
+| QR field | Import | Export | Notes |
+|---|---|---|---|
+| `status` | ← preserved in `qrMeta.status` | → written; editable in QR Export modal | Default: `'in-progress'` |
+| `subject` | ← `subject.reference` in `qrMeta.subject` | → `subject.reference` when non-empty | Optional; editable in QR Export modal |
+| `author` | ← `author.reference` in `qrMeta.author` | → `author.reference` when non-empty | Optional; editable in QR Export modal |
+| `authored` | not stored | → `new Date().toISOString()` | Always set to current time on export |
+
+`qrMeta` is reset to defaults when a new questionnaire is imported. When a QR is loaded via the Answers menu, `qrMeta` is updated from the loaded response and pre-populates the QR Export modal.
+
 ### QuestionnaireResponse — minor gaps
 
 | QR field | What happens | Notes |
 |---|---|---|
-| `status` | Hardcoded `'in-progress'` | Exported QR always has this status |
-| `subject` | Not set | No Patient reference written |
-| `author` | Not set | |
+| `status` | See meta fields table above | |
+| `subject` | See meta fields table above | |
+| `author` | See meta fields table above | |
 
 ### FHIR versions
 

@@ -78,5 +78,11 @@ export function importQRAnswers(qrJson, values, tree) {
     }
   }
 
-  return { ok: true, loaded, unmatched, questionnaire: qrJson.questionnaire || '' };
+  return { ok: true, loaded, unmatched, questionnaire: qrJson.questionnaire || '',
+    meta: {
+      status:  qrJson.status  || 'in-progress',
+      subject: qrJson.subject?.reference || '',
+      author:  qrJson.author?.reference  || '',
+    },
+  };
 }

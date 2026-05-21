@@ -102,6 +102,20 @@ export const questMeta = reactive({
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.
 export const questContained = reactive([]);
 
+// QuestionnaireResponse meta — populated when a QR is loaded; reset when a new questionnaire is imported.
+// Used to pre-fill the QR Export modal (status, subject, author).
+export const qrMeta = reactive({
+  status:  'in-progress', // QR.status
+  subject: '',            // QR.subject.reference
+  author:  '',            // QR.author.reference
+});
+
+export function resetQrMeta() {
+  qrMeta.status  = 'in-progress';
+  qrMeta.subject = '';
+  qrMeta.author  = '';
+}
+
 // Item types that have form-value validation logic in the preview.
 // CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
 // NONEMPTY_TYPES: mandatory → value must be non-empty (subset, excludes url/attachment).

@@ -522,6 +522,21 @@
   </div>
 </div>
 
+<!-- QR Export modal -->
+<div id="qrExportModal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span id="qrExportModalTitle">Export QuestionnaireResponse</span>
+      <button type="button" id="qrExportModalClose" class="modal-close" title="Close">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="qrExportModalBody"></div>
+    <div class="modal-footer">
+      <button type="button" id="qrExportModalCancel" class="modal-btn modal-btn--cancel">Cancel</button>
+      <button type="button" id="qrExportModalApply" class="modal-btn modal-btn--apply" data-testid="qr-export-apply">&#x2B07; Export</button>
+    </div>
+  </div>
+</div>
+
 <noscript>
   <main style="max-width:720px;margin:40px auto;padding:0 20px;font-family:sans-serif;color:#1f2937">
     <h1>FHIR Questionnaire Logic Builder</h1>

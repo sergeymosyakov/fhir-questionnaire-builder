@@ -27,9 +27,10 @@ import * as readonlyModal from './ui/readonly-modal.js';
 import * as answerTypeModal from './ui/answer-type-modal.js';
 import * as metadataModal from './ui/metadata-modal.js';
 import * as codesModal from './ui/codes-modal.js';
+import * as qrExportModal from './ui/qr-export-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm } from './render-preview.js';
-import { showLinkId, showPrefix, showBadges, patientMode, questVariables, questContained, questMeta } from './state.js';
+import { showLinkId, showPrefix, showBadges, patientMode, questVariables, questContained, questMeta, qrMeta, resetQrMeta } from './state.js';
 import './render-preview.js'; // side-effect: registers the reactive effect()
 
 // fhirpath.js v4 browser bundle loaded as global via lib/fhirpath.min.js
@@ -193,6 +194,15 @@ variablesPanel.init({
   cancelBtn: document.getElementById('variablesModalCancel'),
 }, questVariables, reinitForm);
 
+// ── QR Export modal init ─────────────────────────────────────────────────
+qrExportModal.init({
+  modal:     document.getElementById('qrExportModal'),
+  title:     document.getElementById('qrExportModalTitle'),
+  body:      document.getElementById('qrExportModalBody'),
+  closeBtn:  document.getElementById('qrExportModalClose'),
+  cancelBtn: document.getElementById('qrExportModalCancel'),
+  applyBtn:  document.getElementById('qrExportModalApply'),
+});
 // ── JSON Viewer modal init ────────────────────────────────────────────────
 jsonViewer.init({
   modal:          document.getElementById('fhirJsonModal'),
@@ -334,10 +344,7 @@ document.getElementById('exportFhirItem').onclick = () => {
 document.getElementById('exportQrItem').onclick = () => {
   exportMenu.style.display = 'none';
   const suggested = (_fileNameEl && _fileNameEl.textContent.trim()) || 'questionnaire';
-  const name = window.prompt('Save as:', suggested + '-response.json');
-  if (name === null) return;
-  const trimmed = (name.trim() || (suggested + '-response')).replace(/\.json$/i, '');
-  exportQR(trimmed + '.json');
+  qrExportModal.open(suggested + '-response.json', qrMeta);
 };
 
 // Wrapper: run import then show validation report if needed
@@ -453,6 +460,7 @@ function _askBeforeClear() {
 
 async function _importAndValidate(data, fileName) {
   // importFHIR is sync (parses tree); skip its internal renderTree, do async render instead
+  resetQrMeta();
   importFHIR(data, () => {}); // pass no-op renderFn — we render below
   variablesPanel.refresh();
   containedPanel.refresh();
@@ -585,6 +593,10 @@ document.querySelectorAll('#answersMenu [data-response]').forEach(item => {
 function _applyQRAnswers(qr) {
   const result = importQRAnswers(qr, values, tree);
   if (!result.ok) { alert('Cannot load answers: ' + result.error); return; }
+  // Save QR meta for pre-populating the Export modal
+  qrMeta.status  = result.meta.status;
+  qrMeta.subject = result.meta.subject;
+  qrMeta.author  = result.meta.author;
 
   // Check questionnaire URL match
   const currentUrl = (rawFhir.value && (rawFhir.value.url || rawFhir.value.id)) || '';

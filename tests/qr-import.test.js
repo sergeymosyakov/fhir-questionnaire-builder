@@ -404,3 +404,42 @@ describe('importQRAnswers — values object mutation', () => {
     expect(values.q1).toBe('new');
   });
 });
+
+// ── meta round-trip ───────────────────────────────────────────────────────────
+
+describe('importQRAnswers — meta', () => {
+  it('returns meta.status from QR', () => {
+    const qr = { resourceType: 'QuestionnaireResponse', status: 'completed', item: [] };
+    const r = importQRAnswers(qr, {}, []);
+    expect(r.meta.status).toBe('completed');
+  });
+
+  it('defaults meta.status to in-progress when absent', () => {
+    const r = importQRAnswers({ resourceType: 'QuestionnaireResponse', item: [] }, {}, []);
+    expect(r.meta.status).toBe('in-progress');
+  });
+
+  it('returns meta.subject.reference when present', () => {
+    const qr = { resourceType: 'QuestionnaireResponse', status: 'in-progress',
+      subject: { reference: 'Patient/123' }, item: [] };
+    const r = importQRAnswers(qr, {}, []);
+    expect(r.meta.subject).toBe('Patient/123');
+  });
+
+  it('returns empty string for meta.subject when absent', () => {
+    const r = importQRAnswers({ resourceType: 'QuestionnaireResponse', item: [] }, {}, []);
+    expect(r.meta.subject).toBe('');
+  });
+
+  it('returns meta.author.reference when present', () => {
+    const qr = { resourceType: 'QuestionnaireResponse', status: 'in-progress',
+      author: { reference: 'Practitioner/456' }, item: [] };
+    const r = importQRAnswers(qr, {}, []);
+    expect(r.meta.author).toBe('Practitioner/456');
+  });
+
+  it('returns empty string for meta.author when absent', () => {
+    const r = importQRAnswers({ resourceType: 'QuestionnaireResponse', item: [] }, {}, []);
+    expect(r.meta.author).toBe('');
+  });
+});
