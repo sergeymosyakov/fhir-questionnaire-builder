@@ -39,9 +39,8 @@ async function loadFixture(page) {
 
 const badge = page => page.getByTestId('status-badge-btn');
 
-// Blur the input, click away into a neutral area so the browser fires the
-// change event reliably (headless Chromium may not fire it on blur() alone),
-// then wait a tick for the async re-render to complete.
+// Click on the "Questionnaire Preview" label (tabindex=-1) to move focus away from the
+// input — this reliably fires blur + change even in headless Chromium.
 async function commitInput(page, input) {
   await input.blur();
   await page.locator('text=Questionnaire Preview').click();
@@ -65,7 +64,7 @@ test.describe('hasCriteria: badge visible for constraint-only questionnaire', ()
     await expect(badge(page)).toContainText('1 issue');
   });
 
-  test.skip('badge shows PASS after filling a valid constraint value', async ({ page }) => {
+  test('badge shows PASS after filling a valid constraint value', async ({ page }) => {
     await loadFixture(page);
     const input = page.locator('[data-preview-id="age"] input[type="number"]');
     await input.fill('20');
