@@ -242,7 +242,7 @@ export function renderItem(node, ctx) {
   setActive(repeatLink,     !!node.repeats);
   if (node.itemType === 'checkbox' || node.itemType === 'display') repeatLink.style.display = 'none';
   setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
-  setActive(styleLink,      !!node._renderStyle);
+  setActive(styleLink,      !!(node._renderStyle || node._renderXhtml));
   setActive(mandLink,       node.mandatory === true);
   setActive(constraintLink, !!(node.constraint?.length));
   setActive(codesLink,      !!(node._codes?.length) || !!node._definition);

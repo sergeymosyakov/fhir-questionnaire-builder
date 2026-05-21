@@ -261,7 +261,7 @@ export function renderGroup(node, ctx) {
 
   setActive(visLink,   !!(node.enableWhen?.length) || !!node.enableWhenExpression);
   setActive(exprLink,  !!node._calculatedExpr);
-  setActive(styleLink, !!node._renderStyle);
+  setActive(styleLink, !!(node._renderStyle || node._renderXhtml));
   setActive(mandLink,  node.mandatory === true);
 
   // ── Body: children + logic row ────────────────────────────────────────────
