@@ -287,6 +287,18 @@ This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR wit
 
 Legend: ⚠️ = silent data loss (field present in import file, ignored or overwritten on export); ❌ = not handled at all; 🔧 = partial support.
 
+### Questionnaire root-level — silent data loss on export
+
+These fields are present in the FHIR spec at the `Questionnaire` root level but are not stored on import and are therefore not written back on export.
+
+| FHIR field | Status | Notes |
+|---|---|---|
+| `Questionnaire.identifier[]` | ⚠️ Silently dropped | Business identifier (NamingSystem + value). Used by EHR systems to reference questionnaires by external ID, printed on form headers, and required by some IG profiles. Not stored, not editable, not written back. |
+| `Questionnaire.meta` | ⚠️ Silently dropped | Resource meta (`meta.profile`, `meta.tag`, `meta.security`, `meta.versionId`, `meta.lastUpdated`). Not preserved in round-trip. |
+| `Questionnaire.text` | ⚠️ Silently dropped | Human-readable narrative (auto-generated in some workflows). Not stored, not written. |
+| `Questionnaire.implicitRules` | ⚠️ Silently dropped | Declares the rules set that constrains how the resource is used. Rare in practice. |
+| Unknown item extensions | ⚠️ Silently dropped | Any `item.extension[]` entry whose URL is not explicitly handled by the builder is discarded on import and will not appear in the exported JSON. |
+
 ### Item-level — not implemented
 
 | FHIR field / extension | Status | Notes |
@@ -295,6 +307,28 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 | `item.answerValueSet` — external URL | 🔧 URL preserved round-trip | Not resolved to answer options; no FHIR terminology server integration. `#id` contained refs ARE resolved (see Round-Trip Safety) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
+| `minLength` | ❌ Not handled | Minimum allowed response length for `string` / `text` / `url` items. Counterpart to `maxLength` which is fully supported. |
+| `maxDecimalPlaces` | ❌ Not handled | Maximum number of decimal places for `decimal` items (`http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces`). |
+| `regex` | ❌ Not handled | Regular expression validation pattern for `string` / `text` / `url` items (`http://hl7.org/fhir/StructureDefinition/regex`). |
+| `mimeType` | ❌ Not handled | One or more allowed MIME types for `attachment` items (`http://hl7.org/fhir/StructureDefinition/mimeType`). Multiple values permitted. |
+| `maxSize` | ❌ Not handled | Maximum file size in MB for `attachment` items (`http://hl7.org/fhir/StructureDefinition/maxSize`). |
+| `questionnaire-optionPrefix` | ❌ Not handled | Display prefix for each `answerOption` (e.g. `"A."`, `"1."`). Commonly used in clinical forms with lettered or numbered options. Silently dropped on import. |
+| `questionnaire-unitValueSet` | ❌ Not handled | ValueSet of selectable units for `quantity` items (alternative to `questionnaire-unitOption` / `sdc-questionnaire-unitOption`). |
+| `questionnaire-usageMode` | ❌ Not handled | Controls when the item is relevant: `capture` / `display` / `display-non-empty` / `capture-display` / `capture-display-non-empty`. |
+| `questionnaire-referenceFilter` | ❌ Not handled | FHIRPath expression used to filter valid reference targets for `reference` items. |
+| `questionnaire-referenceProfile` | ❌ Not handled | Profile URL that restricts valid resource types for `reference` items (complementary to `questionnaire-referenceResource` which is supported). |
+| `questionnaire-signatureRequired` | ❌ Not handled | Indicates that a digital signature is required for the item or group. |
+| `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
+| `designNote` | ❌ Not handled | Author-facing design note text; not intended to be displayed to end users. Silently dropped. |
+
+### Extension URL aliasing — silent data loss on import
+
+Some capabilities exist as both a **standard R4 extension** and a separate **SDC extension**, each with a different URL. The builder reads only one variant; questionnaires using the other URL are silently not handled.
+
+| Capability | URL the builder reads | URL that is NOT read | Impact |
+|---|---|---|---|
+| Hidden item | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden` (SDC) | `http://hl7.org/fhir/StructureDefinition/questionnaire-hidden` (R4 standard) | ⚠️ Items marked hidden via the R4 standard extension will NOT receive `_hidden = true` on import |
+| Entry format hint | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` (SDC) | `http://hl7.org/fhir/StructureDefinition/entryFormat` (R4 element-definition ext) | ⚠️ Placeholder hints set via the standard R4 `entryFormat` ext will NOT be imported |
 
 ### SDC extensions — not implemented (no server required)
 
@@ -304,6 +338,23 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 | `sdc-questionnaire-itemWeight` | ❌ | Per-option weight for scoring (analogous to `ordinalValue` at item level) |
 | `sdc-questionnaire-unitOption[]` | ❌ | Multiple selectable units for `quantity` items |
 | `sdc-questionnaire-shortText` | ❌ | Abbreviated label for summary views |
+| `sdc-questionnaire-collapsible` | ❌ | Group renders collapsed by default (`default-closed`) or expanded (`default-open`). Currently all groups start expanded. |
+| `sdc-questionnaire-openLabel` | ❌ | Custom label for the free-text "other" option in `open-choice` items (default: "Other"). |
+
+### SDC extensions — population and extraction (out of scope)
+
+These SDC extensions support advanced form pre-population from clinical data and extraction of completed answers into FHIR resources. They require a FHIR server and/or StructureMap tooling and are out of scope for this builder.
+
+| Extension | Notes |
+|---|---|
+| `sdc-questionnaire-launchContext` | Declares named contexts (patient, encounter, user, etc.) passed at launch time; enables server-side pre-population |
+| `sdc-questionnaire-itemContext` | FHIRPath expression that defines the FHIR context node for population and extraction of a specific item |
+| `sdc-questionnaire-sourceQueries` / `sdc-questionnaire-contextExpression` | Batch FHIR queries to populate form data from a server at launch |
+| `sdc-questionnaire-observationExtract` | Extracts completed answers as FHIR `Observation` resources on QR submission |
+| `sdc-questionnaire-definitionExtract` | Extracts completed answers into specified FHIR resource element paths |
+| `sdc-questionnaire-targetStructureMap` | StructureMap used to transform a completed QR into other FHIR resources |
+| `sdc-questionnaire-sourceStructureMap` | StructureMap used to pre-populate the questionnaire from existing FHIR data |
+| `sdc-questionnaire-columnCount` / `sdc-questionnaire-width` | Grid layout: number of columns in a group and per-item width for multi-column display |
 
 ### QuestionnaireResponse — meta fields
 
