@@ -30,7 +30,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm test -- --reporter=verbose --reporter=github-actions
+      - run: npm test -- --reporter=verbose --reporter=github-actions --coverage
 
   e2e:
     runs-on: ubuntu-latest
