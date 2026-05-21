@@ -128,7 +128,7 @@ test.describe('Required modal — open / close', () => {
     await addTextItem(page);
 
     await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
-    await modal(page).click({ position: { x: 5, y: 5 } });
+    await modal(page).click({ position: { x: 5, y: 400 } });
     await expect(modal(page)).toBeHidden();
   });
 });

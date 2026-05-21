@@ -251,7 +251,7 @@ test.describe('States modal — Hidden', () => {
     await actionLink.click();
     await hidChk(page).check();
     await modalApply(page).click();
-    await expect(page.locator('[data-preview-id="1.1"]')).toHaveClass(/preview-hidden/);
+    await expect(page.locator('[data-preview-id="1.1"]')).toHaveClass(/lform-item--hidden/);
   });
 });
 
