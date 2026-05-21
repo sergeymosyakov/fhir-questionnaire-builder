@@ -18,6 +18,7 @@
 //   qrExportModalCancel    Cancel button
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 
 async function waitForLoad(page) {
@@ -120,8 +121,7 @@ test('downloaded JSON has the user-specified status', async ({ page }) => {
     page.waitForEvent('download'),
     page.getByTestId('qr-export-apply').click(),
   ]);
-  const text = await (await download.createReadStream()).read();
-  const qr = JSON.parse(text.toString());
+  const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
   expect(qr.status).toBe('completed');
 });
 
@@ -132,8 +132,7 @@ test('downloaded JSON has subject when user enters one', async ({ page }) => {
     page.waitForEvent('download'),
     page.getByTestId('qr-export-apply').click(),
   ]);
-  const text = await (await download.createReadStream()).read();
-  const qr = JSON.parse(text.toString());
+  const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
   expect(qr.subject?.reference).toBe('Patient/99');
 });
 
@@ -144,7 +143,6 @@ test('downloaded JSON has no subject when field is empty', async ({ page }) => {
     page.waitForEvent('download'),
     page.getByTestId('qr-export-apply').click(),
   ]);
-  const text = await (await download.createReadStream()).read();
-  const qr = JSON.parse(text.toString());
+  const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
   expect(qr.subject).toBeUndefined();
 });

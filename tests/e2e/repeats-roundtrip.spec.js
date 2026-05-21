@@ -83,12 +83,13 @@ test('QR repeat round-trip: fill 3 rows per field, export, reload, import, verif
   await fillDateRows(page,   'date-item',   ['2024-01-01', '2024-02-15', '2024-03-31']);
   await fillSelectRows(page, 'select-item', ['Option A', 'Option B', 'Option C']);
 
-  // ── 3. Export QR ──
-  page.once('dialog', d => d.accept());
+  // ── 3. Export QR (via modal) ──
   await page.getByTestId('export-btn').click();
+  await page.getByTestId('export-qr-item').click();
+  await expect(page.locator('#qrExportModal')).toBeVisible({ timeout: 5_000 });
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByTestId('export-qr-item').click(),
+    page.getByTestId('qr-export-apply').click(),
   ]);
   const qrPath = await download.path();
   expect(qrPath).toBeTruthy();
