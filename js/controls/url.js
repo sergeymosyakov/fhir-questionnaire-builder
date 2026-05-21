@@ -47,10 +47,9 @@ export function build(node, ctx) {
     errMsg.style.display = (el.value === '' || isValidUrl(el.value)) ? 'none' : '';
   });
 
-  if (el.value) autoResize();
-
   wrap.appendChild(el);
   wrap.appendChild(errMsg);
   if (counter) wrap.appendChild(counter);
+  if (el.value) requestAnimationFrame(autoResize);
   return wrap;
 }

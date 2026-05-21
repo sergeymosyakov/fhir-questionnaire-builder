@@ -37,9 +37,8 @@ export function build(node, ctx) {
   };
   el.onchange = () => { _formTick.value++; };
 
-  if (el.value) autoResize();
-
   wrap.appendChild(el);
   if (counter) wrap.appendChild(counter);
+  if (el.value) requestAnimationFrame(autoResize);
   return wrap;
 }
