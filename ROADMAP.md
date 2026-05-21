@@ -11,6 +11,9 @@ See [docs/CONTEXT.md](docs/CONTEXT.md) for scenario definitions.
 - [ ] **More sample data** — 2–3 additional questionnaires covering different complexity levels, with documented expected PASS/FAIL outcomes per patient profile
 - [ ] **`sdc-questionnaire-hidden`** — permanently hidden items that participate in logic but are never shown in the preview; distinct from `enableWhen`-based visibility
 - [ ] **`sdc-questionnaire-answerExpression`** — dynamic answer options derived from FHIRPath over current form values (no server required); SDC extension
+- [ ] **tx.fhir.org ValueSet expansion** — call HL7's public terminology server directly from the browser (`$expand` operation); user pastes an external ValueSet URL and gets live answer options without any backend; biggest UX gap vs. commercial tools
+- [ ] **Undo / redo** — Ctrl+Z / Ctrl+Y over the node tree; store snapshots in a fixed-size history stack
+- [ ] **Copy / paste nodes** — duplicate a question or an entire group (with children) anywhere in the tree
 
 ## Later
 
