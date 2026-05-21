@@ -56,7 +56,7 @@
     </div>
   </div>
   <div class="top-panel-copyright">
-    <a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" target="_blank" rel="noopener" class="top-panel-github-link" title="View source on GitHub"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:-1px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+    <a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" target="_blank" rel="noopener" class="top-panel-github-link" title="View source on GitHub"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" class="top-panel-github-icon"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
     <span>&copy; 2026 <a href="https://github.com/sergeymosyakov" target="_blank" rel="noopener">Sergey Mosyakov</a> &middot; Free to use with attribution</span>
   </div>
 </div>
@@ -83,10 +83,10 @@
           data-tip-body="Creates a new top-level group at the end of the questionnaire. Groups can contain items and other nested groups."
           data-tip-fhir="Questionnaire.item[type=group]"
           data-tip-spec="R4 · required">+ Add Root Group</button>
-        <button id="collapseAllBtn" type="button" class="btn-icon-ctrl"
+        <button id="collapseAllBtn" type="button" class="btn-icon-ctrl" data-testid="collapse-all-btn"
           data-tip-title="Collapse all"
           data-tip-body="Hides children under every group in the builder tree. Useful for navigating large questionnaires."><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 L6 6 L2 6 M10 2 L10 6 L14 6 M14 10 L10 10 L10 14 M6 14 L6 10 L2 10"/></svg></button>
-        <button id="expandAllBtn"   type="button" class="btn-icon-ctrl"
+        <button id="expandAllBtn"   type="button" class="btn-icon-ctrl" data-testid="expand-all-btn"
           data-tip-title="Expand all"
           data-tip-body="Shows all children under every group in the builder tree."><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10"/></svg></button>
         <span class="tree-toolbar-sep"></span>
@@ -258,38 +258,38 @@
         </div>
         <div class="search-wrap fhir-toolbar-gap" id="searchWrap" style="display:none">
           <input type="search" id="searchInput" class="search-input" placeholder="&#x1F50D; Search&hellip;" autocomplete="off">
-          <button id="searchPrevBtn" type="button" class="search-nav-btn" title="Previous match (&#x2191;)">&#x2191;</button>
-          <button id="searchNextBtn" type="button" class="search-nav-btn" title="Next match (&#x2193;)">&#x2193;</button>
+          <button id="searchPrevBtn" type="button" class="search-nav-btn" data-tip-title="Previous match" data-tip-body="Jump to the previous search result. Keyboard shortcut: ↑ while search is focused.">&#x2191;</button>
+          <button id="searchNextBtn" type="button" class="search-nav-btn" data-tip-title="Next match" data-tip-body="Jump to the next search result. Keyboard shortcut: ↓ or Enter while search is focused.">&#x2193;</button>
           <span id="searchCounter" class="search-counter"></span>
         </div>
         <span class="fhir-toolbar-sep"></span>
-        <button id="showLinkIdBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--active"
+        <button id="showLinkIdBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--active" data-testid="show-linkid-btn"
           data-tip-title="FHIR linkId"
           data-tip-body="Unique identifier for each item. Used in visibility rules as values['linkId'] and in enableWhen conditions. Every item must have a unique linkId within the questionnaire."
           data-tip-fhir="Questionnaire.item.linkId"
           data-tip-spec="R4 · required"
           style="display:none">id</button>
-        <button id="showPrefixBtn" type="button" class="btn-fhir btn-fhir--amber btn-fhir--toggle btn-fhir--active"
+        <button id="showPrefixBtn" type="button" class="btn-fhir btn-fhir--amber btn-fhir--toggle btn-fhir--active" data-testid="show-prefix-btn"
           data-tip-title="item.prefix"
           data-tip-body="Optional display label shown before the item text (e.g. &quot;1.1&quot;, &quot;Q3.&quot;). Purely cosmetic — does not affect visibility rules, enableWhen, or any logic. Set manually or via Renumber."
           data-tip-fhir="Questionnaire.item.prefix"
           data-tip-spec="R4 · optional"
           style="display:none">prefix</button>
-        <button id="showBadgesBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--active"
+        <button id="showBadgesBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--active" data-testid="show-badges-btn"
           data-tip-title="Toggle badges"
           data-tip-body="Show or hide metadata badges (optional, required, logic, calc). When hidden, calculated fields display as plain text — useful for a clean questionnaire view."
           style="display:none">badges</button>
-        <button id="showHiddenBtn" type="button" class="btn-fhir btn-fhir--purple btn-fhir--toggle btn-fhir--active"
+        <button id="showHiddenBtn" type="button" class="btn-fhir btn-fhir--purple btn-fhir--toggle btn-fhir--active" data-testid="show-hidden-btn"
           data-tip-title="Hidden items (sdc-questionnaire-hidden)"
           data-tip-body="Show or hide items marked as sdc-questionnaire-hidden. Hidden items never appear to patients but participate in calculatedExpression logic. Controls inside are disabled."
           data-tip-fhir="sdc-questionnaire-hidden"
           data-tip-spec="SDC"
           style="display:none">hidden</button>
-        <button id="previewCollapseAllBtn" type="button" class="btn-fhir btn-fhir--icon"
+        <button id="previewCollapseAllBtn" type="button" class="btn-fhir btn-fhir--icon" data-testid="preview-collapse-all-btn"
           data-tip-title="Collapse all groups"
           data-tip-body="Hides child items under every group header. Useful for a high-level overview of the questionnaire structure."
           style="display:none"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 L6 6 L2 6 M10 2 L10 6 L14 6 M14 10 L10 10 L10 14 M6 14 L6 10 L2 10"/></svg></button>
-        <button id="previewExpandAllBtn" type="button" class="btn-fhir btn-fhir--icon"
+        <button id="previewExpandAllBtn" type="button" class="btn-fhir btn-fhir--icon" data-testid="preview-expand-all-btn"
           data-tip-title="Expand all groups"
           data-tip-body="Shows all child items under every group header."
           style="display:none"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10"/></svg></button>

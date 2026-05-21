@@ -82,7 +82,7 @@ export function navigateToPreview(id) {
 function _scrollToBuilder(nodeId) {
   const target = document.querySelector('[data-node-id="' + nodeId + '"]');
   if (!target) return;
-  const panel = document.querySelector('.left-panel-body');
+  const panel = _previewElements.leftPanelBody;
   if (panel) {
     const top = target.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop - 10;
     panel.scrollTo({ top, behavior: 'smooth' });
@@ -259,6 +259,7 @@ function buildRepeatControls(node, iconEl, onAfterChange) {
 // requestAnimationFrame yield points so the browser stays responsive.
 // The _renderVersion counter ensures stale renders self-abort.
 let _renderVersion = 0;
+let _previewElements = {}; // injected via initPreview() from app.js
 async function _asyncRender(version) {
   // Phase 1: FHIRPath evaluation — CPU-heavy, no DOM mutations yet
   const ctx = _reCalc();
@@ -266,7 +267,7 @@ async function _asyncRender(version) {
   if (version !== _renderVersion) return; // newer render started — abort
 
   if (tree.length === 0) {
-    const lform = document.getElementById('lform');
+    const lform = _previewElements.lform;
     if (lform) {
       lform.innerHTML = '';
       const placeholder = document.createElement('div');
@@ -335,7 +336,7 @@ async function _asyncRender(version) {
   if (version !== _renderVersion) return; // abort before touching the DOM
 
   // Phase 2: DOM render — batched into a DocumentFragment for a single reflow
-  const lform = document.getElementById('lform');
+  const lform = _previewElements.lform;
   if (!lform) { progress.hide(); return; }
   const _scrollPanel = lform.closest('.right-panel-body');
   const _savedScroll = _scrollPanel ? _scrollPanel.scrollTop : 0;
@@ -950,37 +951,33 @@ function _collectGroupIds(nodes, out = []) {
   return out;
 }
 
-document.getElementById('previewCollapseAllBtn').addEventListener('click', () => {
-  for (const id of _collectGroupIds(tree)) collapsedGroups.add(id);
-  _formTick.value++;
-});
+// ── Preview DOM init (called once from app.js) ────────────────────────────────
+export function initPreview(elements) {
+  _previewElements = elements;
 
-document.getElementById('previewExpandAllBtn').addEventListener('click', () => {
-  collapsedGroups.clear();
-  _formTick.value++;
-});
+  elements.previewCollapseAllBtn.addEventListener('click', () => {
+    for (const id of _collectGroupIds(tree)) collapsedGroups.add(id);
+    _formTick.value++;
+  });
+  elements.previewExpandAllBtn.addEventListener('click', () => {
+    collapsedGroups.clear();
+    _formTick.value++;
+  });
 
-// Dedicated effect: show collapse/expand, search, and badge toggles only when tree has content
-effect(() => {
-  const d = tree.length > 0 ? '' : 'none';
-  document.getElementById('showLinkIdBtn').style.display = d;
-  document.getElementById('showPrefixBtn').style.display = d;
-  document.getElementById('showBadgesBtn').style.display = d;
-  document.getElementById('showHiddenBtn').style.display = d;
-  document.getElementById('previewCollapseAllBtn').style.display = d;
-  document.getElementById('previewExpandAllBtn').style.display = d;
-  document.getElementById('searchWrap').style.display = d;
-  document.getElementById('patientViewBtn').style.display = d;
-});
+  // Show toolbar controls only when tree has content
+  effect(() => {
+    const d = tree.length > 0 ? '' : 'none';
+    elements.showLinkIdBtn.style.display         = d;
+    elements.showPrefixBtn.style.display         = d;
+    elements.showBadgesBtn.style.display         = d;
+    elements.showHiddenBtn.style.display         = d;
+    elements.previewCollapseAllBtn.style.display = d;
+    elements.previewExpandAllBtn.style.display   = d;
+    elements.searchWrap.style.display            = d;
+    elements.patientViewBtn.style.display        = d;
+  });
 
-// Toggle no-badges mode via CSS class on the lform container
-effect(() => {
-  const lform = document.getElementById('lform');
-  if (lform) lform.classList.toggle('preview--no-badges', !showBadges.value);
-});
-
-// Toggle patient-view mode via CSS class on the lform container
-effect(() => {
-  const lform = document.getElementById('lform');
-  if (lform) lform.classList.toggle('patient-view', patientMode.value);
-});
+  // Toggle CSS display modes on the lform container
+  effect(() => { elements.lform.classList.toggle('preview--no-badges', !showBadges.value); });
+  effect(() => { elements.lform.classList.toggle('patient-view', patientMode.value); });
+}

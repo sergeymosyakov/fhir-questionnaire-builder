@@ -104,10 +104,10 @@
   flex-shrink: 1;
   margin-top: 3px;
 }
-.preview-condition-waiting {
-  background: #fff8e1 !important;
-  border-color: #ffe082 !important;
-  color: #795548 !important;
+.preview-condition-hint.preview-condition-waiting {
+  background: #fff8e1;
+  border-color: #ffe082;
+  color: #795548;
 }
 
 /* === questionnaire-constraint badge ========================================= */
@@ -276,7 +276,7 @@
 .lform-disabled textarea,
 .lform-disabled button { pointer-events: none; }
 .lform-waiting { opacity: 0.55; background: #fafafa; }
-.lform-waiting:hover { background: #f0f4f8 !important; }
+.lform-waiting:hover { background: #f0f4f8; }
 
 /* === Auto-fill badge ========================================================= */
 .auto-badge {
@@ -339,8 +339,8 @@
   user-select: none;
   margin-top: 1px;
 }
-.lform-item:hover .preview-nav-btn { opacity: 0.7; }
-.preview-nav-btn:hover              { opacity: 1 !important; background: #e8f0fe; }
+.lform-item:hover .preview-nav-btn       { opacity: 0.7; }
+.lform-item:hover .preview-nav-btn:hover { opacity: 1; background: #e8f0fe; }
 .preview-label--dim   { color: #aaa; }
 
 /* ======================================================================
@@ -581,8 +581,8 @@
   transition: opacity .15s;
   line-height: 1;
 }
-.lform-item:hover .support-link-icon { opacity: 0.8; }
-.support-link-icon:hover              { opacity: 1 !important; }
+.lform-item:hover .support-link-icon       { opacity: 0.8; }
+.lform-item:hover .support-link-icon:hover { opacity: 1; }
 
 .support-link-patient-btn {
   flex-shrink: 0;
@@ -606,7 +606,7 @@
 
 /* Hidden items (sdc-questionnaire-hidden) */
 .lform-item--hidden {
-  border: 2px dashed #9333ea !important;
+  border: 2px dashed #9333ea;
   border-radius: 6px;
   padding: 2px 6px;
 }

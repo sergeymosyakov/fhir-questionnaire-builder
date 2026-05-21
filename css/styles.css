@@ -69,6 +69,8 @@ body {
   width: 30% !important;
   animation: progress-slide 1.1s ease-in-out infinite alternate;
 }
+.top-panel-github-icon { vertical-align: -1px; }
+
 @keyframes progress-slide {
   from { margin-left: 0%;  width: 30%; }
   to   { margin-left: 65%; width: 30%; }
