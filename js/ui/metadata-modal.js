@@ -90,6 +90,10 @@ export function open() {
     language:     questMeta.language || '',
     derivedFrom:  [...(questMeta.derivedFrom || [])],
     codes: JSON.parse(JSON.stringify(questMeta._rawCode || [])),
+    metaVersionId:  questMeta._metaVersionId  || '',
+    metaProfile:    [...(questMeta._rawMetaProfile  || [])],
+    metaTag:        JSON.parse(JSON.stringify(questMeta._rawMetaTag      || [])),
+    metaSecurity:   JSON.parse(JSON.stringify(questMeta._rawMetaSecurity || [])),
   };
 
   setModalTitle(_el.title, 'Questionnaire Properties', '');
@@ -123,6 +127,10 @@ function _apply() {
   questMeta.derivedFrom  = _pending.derivedFrom.filter(u => u.trim());
   const filteredCodes = _pending.codes.filter(c => c.code.trim());
   questMeta._rawCode = filteredCodes.length ? filteredCodes : null;
+  questMeta._metaVersionId   = _pending.metaVersionId.trim();
+  questMeta._rawMetaProfile  = _pending.metaProfile.filter(u => u.trim());
+  questMeta._rawMetaTag      = _pending.metaTag.filter(c => c.code?.trim());
+  questMeta._rawMetaSecurity = _pending.metaSecurity.filter(c => c.code?.trim());
   _close();
 }
 
@@ -344,6 +352,148 @@ function _renderBody(container) {
 
   derivedSection.append(derivedToggle, derivedBody);
   container.appendChild(derivedSection);
+
+  // ── Resource Meta (collapsible) ──────────────────────────────────────────
+  const metaSection = document.createElement('div');
+  metaSection.className = 'meta-modal-advanced';
+
+  const metaToggle = document.createElement('button');
+  metaToggle.type      = 'button';
+  metaToggle.className = 'meta-modal-adv-toggle';
+  metaToggle.dataset.testid = 'meta-resource-meta-toggle';
+  let metaOpen = !!(
+    _pending.metaVersionId || questMeta._metaLastUpdated ||
+    _pending.metaProfile.length || _pending.metaTag.length || _pending.metaSecurity.length
+  );
+
+  const metaBody = document.createElement('div');
+  metaBody.className = 'meta-modal-adv-body';
+  metaBody.style.display = metaOpen ? '' : 'none';
+
+  // versionId row — text input + Generate button
+  const versionIdRow = document.createElement('div');
+  versionIdRow.className = 'meta-modal-row';
+  const versionIdLbl = document.createElement('label');
+  versionIdLbl.className   = 'meta-modal-lbl';
+  versionIdLbl.textContent = 'Version ID:';
+  const versionIdWrap = document.createElement('div');
+  versionIdWrap.className = 'meta-modal-inp-group';
+  const versionIdInp = document.createElement('input');
+  versionIdInp.type        = 'text';
+  versionIdInp.className   = 'meta-modal-inp';
+  versionIdInp.placeholder = 'e.g. 1 (server-assigned)';
+  versionIdInp.value       = _pending.metaVersionId;
+  versionIdInp.dataset.testid = 'meta-version-id';
+  versionIdInp.oninput = () => { _pending.metaVersionId = versionIdInp.value; };
+  const generateBtn = document.createElement('button');
+  generateBtn.type = 'button';
+  generateBtn.className = 'meta-modal-gen-btn';
+  generateBtn.textContent = 'Generate';
+  generateBtn.dataset.testid = 'meta-version-id-generate';
+  generateBtn.dataset.tipTitle = 'Generate UUID';
+  generateBtn.dataset.tipBody  = 'Replaces the current versionId with a new random UUID v4.';
+  generateBtn.onclick = () => {
+    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+    versionIdInp.value = uuid;
+    _pending.metaVersionId = uuid;
+  };
+  versionIdWrap.append(versionIdInp, generateBtn);
+  versionIdRow.append(versionIdLbl, versionIdWrap);
+  metaBody.appendChild(versionIdRow);
+
+  // lastUpdated row — read-only display
+  const lastUpdatedRow = document.createElement('div');
+  lastUpdatedRow.className = 'meta-modal-row';
+  const lastUpdatedLbl = document.createElement('label');
+  lastUpdatedLbl.className   = 'meta-modal-lbl';
+  lastUpdatedLbl.textContent = 'Last Updated:';
+  const lastUpdatedVal = document.createElement('span');
+  lastUpdatedVal.className = 'meta-modal-readonly';
+  lastUpdatedVal.textContent = questMeta._metaLastUpdated
+    ? questMeta._metaLastUpdated + ' \u2192 refreshed on export'
+    : '(not set \u2014 will be written on export)';
+  lastUpdatedRow.append(lastUpdatedLbl, lastUpdatedVal);
+  metaBody.appendChild(lastUpdatedRow);
+
+  // profile[] — URL list (reuse derivedFrom pattern)
+  const profileSection = document.createElement('div');
+  profileSection.className = 'meta-modal-subsection';
+  const profileHdr = document.createElement('div');
+  profileHdr.className   = 'meta-modal-subhdr';
+  profileHdr.textContent = 'Profiles (meta.profile[])';
+  profileSection.appendChild(profileHdr);
+  const _renderProfile = () => {
+    const existing = profileSection.querySelectorAll('.codes-row');
+    existing.forEach(r => r.remove());
+    const addBtn = profileSection.querySelector('.codes-add-btn');
+    _pending.metaProfile.forEach((url, idx) => {
+      const row = document.createElement('div');
+      row.className = 'codes-row';
+      const inp = document.createElement('input');
+      inp.type = 'url'; inp.className = 'codes-inp';
+      inp.value = url; inp.placeholder = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire';
+      inp.dataset.testid = `meta-profile-url-${idx}`;
+      inp.oninput = () => { _pending.metaProfile[idx] = inp.value; };
+      const rm = document.createElement('button');
+      rm.type = 'button'; rm.className = 'codes-remove-btn'; rm.textContent = '\u00D7';
+      rm.dataset.testid = `meta-profile-remove-${idx}`;
+      rm.onclick = () => { _pending.metaProfile.splice(idx, 1); _renderProfile(); };
+      row.append(inp, rm);
+      profileSection.insertBefore(row, addBtn);
+    });
+  };
+  const profileAddBtn = document.createElement('button');
+  profileAddBtn.type = 'button'; profileAddBtn.className = 'codes-add-btn';
+  profileAddBtn.textContent = '+ Add Profile URL';
+  profileAddBtn.dataset.testid = 'meta-profile-add-btn';
+  profileAddBtn.onclick = () => { _pending.metaProfile.push(''); _renderProfile(); };
+  profileSection.appendChild(profileAddBtn);
+  _renderProfile();
+  metaBody.appendChild(profileSection);
+
+  // tag[] and security[] — Coding rows via renderCodesEditor
+  const tagSection = document.createElement('div');
+  tagSection.className = 'meta-modal-subsection';
+  const tagHdr = document.createElement('div');
+  tagHdr.className   = 'meta-modal-subhdr';
+  tagHdr.textContent = 'Tags (meta.tag[])';
+  tagSection.appendChild(tagHdr);
+  renderCodesEditor(_pending.metaTag, tagSection, 'meta-tag');
+  metaBody.appendChild(tagSection);
+
+  const secSection = document.createElement('div');
+  secSection.className = 'meta-modal-subsection';
+  const secHdr = document.createElement('div');
+  secHdr.className   = 'meta-modal-subhdr';
+  secHdr.textContent = 'Security Labels (meta.security[])';
+  secSection.appendChild(secHdr);
+  renderCodesEditor(_pending.metaSecurity, secSection, 'meta-security');
+  metaBody.appendChild(secSection);
+
+  const _setMetaLabel = () => {
+    const count = (
+      (_pending.metaVersionId ? 1 : 0) +
+      _pending.metaProfile.filter(u => u.trim()).length +
+      _pending.metaTag.filter(c => c.code?.trim()).length +
+      _pending.metaSecurity.filter(c => c.code?.trim()).length
+    );
+    const badge = count ? ` (${count})` : '';
+    metaToggle.textContent = (metaOpen ? '\u25BC' : '\u25BA') + ' Resource Meta' + badge;
+  };
+  _setMetaLabel();
+  metaToggle.addEventListener('click', () => {
+    metaOpen = !metaOpen;
+    metaBody.style.display = metaOpen ? '' : 'none';
+    _setMetaLabel();
+  });
+  metaBody.addEventListener('input', () => _setMetaLabel());
+  metaBody.addEventListener('click', () => setTimeout(_setMetaLabel, 0));
+
+  metaSection.append(metaToggle, metaBody);
+  container.appendChild(metaSection);
 
   // ── Codes (collapsible) ──────────────────────────────────────────────────
   const codesSection = document.createElement('div');

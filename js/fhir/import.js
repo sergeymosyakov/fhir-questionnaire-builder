@@ -434,6 +434,11 @@ export function importFHIR(fhirJson, renderFn) {
   questMeta._rawJurisdiction = Array.isArray(q.jurisdiction) ? q.jurisdiction : null;
   questMeta._rawCode         = Array.isArray(q.code)         ? q.code         : null;
   questMeta.derivedFrom      = Array.isArray(q.derivedFrom)  ? [...q.derivedFrom] : [];
+  questMeta._metaVersionId   = q.meta?.versionId  || '';
+  questMeta._metaLastUpdated = q.meta?.lastUpdated || '';
+  questMeta._rawMetaProfile  = Array.isArray(q.meta?.profile)  ? [...q.meta.profile]  : [];
+  questMeta._rawMetaTag      = Array.isArray(q.meta?.tag)      ? JSON.parse(JSON.stringify(q.meta.tag))      : [];
+  questMeta._rawMetaSecurity = Array.isArray(q.meta?.security) ? JSON.parse(JSON.stringify(q.meta.security)) : [];
 
   // Read questionnaire-level SDC variables
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';

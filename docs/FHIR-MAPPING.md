@@ -95,6 +95,11 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `questMeta._rawJurisdiction` | `Questionnaire.jurisdiction[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawCode` | `Questionnaire.code[]` | ← stored as array (default: `null`) | → written back unchanged; editable via **Codes** section in Properties modal (system/code/display rows; draft pattern; badge shows count) |
 | `questMeta.derivedFrom` | `Questionnaire.derivedFrom[]` | ← stored as string array (default: `[]`) | → written back as array; editable via **Derived From** collapsible section in Properties modal; round-trip safe |
+| `questMeta._metaVersionId` | `Questionnaire.meta.versionId` | ← `meta.versionId` (default: `''`) | → written back when set; editable in Properties modal — **Resource Meta** section; **Generate** button creates a fresh UUID v4 |
+| `questMeta._metaLastUpdated` | `Questionnaire.meta.lastUpdated` | ← `meta.lastUpdated` displayed read-only in Properties modal | → **always** replaced with `new Date().toISOString()` on every export |
+| `questMeta._rawMetaProfile` | `Questionnaire.meta.profile[]` | ← stored as string array (default: `[]`) | → written back as array; editable list of canonical URLs in Properties modal — Resource Meta section |
+| `questMeta._rawMetaTag` | `Questionnaire.meta.tag[]` | ← stored as Coding[] (default: `[]`) | → written back unchanged; editable system/code/display rows in Properties modal — Resource Meta section |
+| `questMeta._rawMetaSecurity` | `Questionnaire.meta.security[]` | ← stored as Coding[] (default: `[]`) | → written back unchanged; editable system/code/display rows in Properties modal — Resource Meta section |
 
 ---
 
@@ -294,7 +299,7 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | FHIR field | Status | Notes |
 |---|---|---|
 | `Questionnaire.identifier[]` | ⚠️ Silently dropped | Business identifier (NamingSystem + value). Used by EHR systems to reference questionnaires by external ID, printed on form headers, and required by some IG profiles. Not stored, not editable, not written back. |
-| `Questionnaire.meta` | ⚠️ Silently dropped | Resource meta (`meta.profile`, `meta.tag`, `meta.security`, `meta.versionId`, `meta.lastUpdated`). Not preserved in round-trip. |
+| `Questionnaire.meta` | ⚠️ Partially supported | `meta.versionId`, `meta.lastUpdated`, `meta.profile[]`, `meta.tag[]`, `meta.security[]` are read, editable, and written back. `meta.versionId` / `meta.lastUpdated` — see Questionnaire-Level Metadata table. `meta.lastUpdated` is always refreshed to current time on export. |
 | `Questionnaire.text` | ⚠️ Silently dropped | Human-readable narrative (auto-generated in some workflows). Not stored, not written. |
 | `Questionnaire.implicitRules` | ⚠️ Silently dropped | Declares the rules set that constrains how the resource is used. Rare in practice. |
 | Unknown item extensions | ⚠️ Silently dropped | Any `item.extension[]` entry whose URL is not explicitly handled by the builder is discarded on import and will not appear in the exported JSON. |

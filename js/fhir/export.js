@@ -252,6 +252,18 @@ export function buildFHIRObject() {
   if (questContained.length) {
     q.contained = questContained.map(r => JSON.parse(JSON.stringify(r)));
   }
+
+  // meta.* — write back if any field has content; lastUpdated always refreshed to now
+  const hasMetaContent = questMeta._metaVersionId || questMeta._metaLastUpdated ||
+    questMeta._rawMetaProfile?.length || questMeta._rawMetaTag?.length || questMeta._rawMetaSecurity?.length;
+  if (hasMetaContent) {
+    q.meta = { lastUpdated: new Date().toISOString() };
+    if (questMeta._metaVersionId)           q.meta.versionId = questMeta._metaVersionId;
+    if (questMeta._rawMetaProfile?.length)  q.meta.profile   = questMeta._rawMetaProfile;
+    if (questMeta._rawMetaTag?.length)      q.meta.tag       = questMeta._rawMetaTag;
+    if (questMeta._rawMetaSecurity?.length) q.meta.security  = questMeta._rawMetaSecurity;
+  }
+
   return q;
 }
 

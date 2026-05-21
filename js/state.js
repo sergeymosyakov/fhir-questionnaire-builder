@@ -101,6 +101,12 @@ export const questMeta = reactive({
   _rawUseContext:   null,
   _rawJurisdiction: null,
   _rawCode:         null,     // Questionnaire.code[] root-level coding
+  // meta.* — partially editable via Properties modal "Resource Meta" section
+  _metaVersionId:   '',       // meta.versionId — editable text + Generate button
+  _metaLastUpdated: '',       // meta.lastUpdated — display only; always refreshed to now on export
+  _rawMetaProfile:  [],       // meta.profile[] — canonical URLs; editable list
+  _rawMetaTag:      [],       // meta.tag[] — Coding[]; editable system/code/display rows
+  _rawMetaSecurity: [],       // meta.security[] — Coding[]; editable system/code/display rows
 });
 
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.
