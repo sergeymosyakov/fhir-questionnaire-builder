@@ -38,7 +38,7 @@ export function init(elements) {
 }
 
 export function open(node, styleLink, setActive) {
-  _pending = { node, styleLink, setActive, draftStyle: node._renderStyle || '' };
+  _pending = { node, styleLink, setActive, draftStyle: node._renderStyle || '', draftXhtml: node._renderXhtml || '' };
 
   setModalTitle(_el.title, 'Appearance', node.title || node.id || 'Item');
 
@@ -51,7 +51,8 @@ function _apply() {
   if (!_pending) return;
   const { node, styleLink, setActive } = _pending;
   node._renderStyle = _pending.draftStyle || undefined;
-  setActive(styleLink, !!node._renderStyle);
+  node._renderXhtml  = _pending.draftXhtml  || undefined;
+  setActive(styleLink, !!(node._renderStyle || node._renderXhtml));
   triggerCalcRecalc();
   _close();
 }
@@ -65,11 +66,32 @@ function _close() {
 
 // ── body renderer ─────────────────────────────────────────────────────────────
 
+function _sectionHdr(title, tipTitle, tipBody, tipFhir, tipSpec) {
+  const hdr = document.createElement('div');
+  hdr.className = 'expr-section-hdr';
+  const label = document.createElement('span');
+  label.textContent = title;
+  hdr.appendChild(label);
+  const key = document.createElement('span');
+  key.className = 'expr-section-key';
+  key.textContent = tipFhir;
+  hdr.appendChild(key);
+  hdr.dataset.tipTitle = tipTitle;
+  hdr.dataset.tipBody  = tipBody;
+  hdr.dataset.tipFhir  = tipFhir;
+  hdr.dataset.tipSpec  = tipSpec;
+  return hdr;
+}
+
 function _renderBody(container) {
-  const hint = document.createElement('div');
-  hint.className   = 'panel-hint';
-  hint.textContent = 'Inline CSS applied to the item title in the preview. Stored in rendering-style extension.';
-  container.appendChild(hint);
+  // ── Style section header ─────────────────────────────────────────────────
+  container.appendChild(_sectionHdr(
+    'Style',
+    'rendering-style',
+    'Inline CSS applied to the item title in the preview.',
+    '_text.extension[rendering-style]',
+    'R4'
+  ));
 
   const form = document.createElement('div');
   form.className = 'appearance-modal-form';
@@ -155,4 +177,22 @@ function _renderBody(container) {
   rawLbl.textContent = 'raw CSS:';
   form.appendChild(rawLbl);
   form.appendChild(rawTa);
+
+  // ── XHTML section ────────────────────────────────────────────────────────
+  container.appendChild(_sectionHdr(
+    'XHTML',
+    'rendering-xhtml',
+    'Rich XHTML markup for the item text. Stored for round-trip only — not rendered in preview.',
+    '_text.extension[rendering-xhtml]',
+    'R4'
+  ));
+
+  const xhtmlTa = document.createElement('textarea');
+  xhtmlTa.className   = 'style-modal-raw-ta';
+  xhtmlTa.rows        = 3;
+  xhtmlTa.placeholder = 'e.g. <b>Question</b> <em>text</em>';
+  xhtmlTa.value       = _pending.draftXhtml;
+  xhtmlTa.dataset.testid = 'appearance-xhtml-input';
+  xhtmlTa.oninput = () => { _pending.draftXhtml = xhtmlTa.value; };
+  container.appendChild(xhtmlTa);
 }

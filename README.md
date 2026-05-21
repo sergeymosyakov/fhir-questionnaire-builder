@@ -150,6 +150,7 @@ questMeta      // reactive({}) — questionnaire-level metadata: id, url, versio
 // FHIR-imported nodes also carry:
 _enableWhenText  // human-readable enableWhen label (e.g. "«Q» = Yes AND «Q2» = No")
 _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
+_renderXhtml     // raw XHTML string from FHIR _text.extension[rendering-xhtml] (round-trip only, not rendered)
 _calculatedExpr  // FHIRPath string (SDC calculatedExpression)
 _initialExpr     // FHIRPath string (SDC initialExpression) — evaluated once on import + Re-init
 _readOnly        // boolean — FHIR item.readOnly
@@ -226,6 +227,7 @@ _displayCategory   // 'instructions'|'security'|'help' — questionnaire-display
 | SDC `enableWhenExpression` | `node.enableWhenExpression` — FHIRPath string |
 | `item.answerOption` | `options` — stored as `code=display` per option (e.g. `bmi35=BMI 35–39.9 with comorbidity`); plain value if code==display |
 | `_text.extension[rendering-style]` | `_renderStyle` (applied as inline CSS in preview) |
+| `_text.extension[rendering-xhtml]` | `_renderXhtml` (round-trip preserved; editable in Appearance modal; not rendered in preview) |
 | `item.prefix` | `_prefix` — amber badge in preview; editable in builder; exported back (round-trip safe) |
 | `item.code[]` | `_codes` — preserved as-is; exported back unchanged (round-trip safe) |
 | `item.repeats` | `node.repeats` — multi-row input in preview (not for checkbox/display); QR round-trip safe |

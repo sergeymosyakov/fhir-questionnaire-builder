@@ -124,12 +124,11 @@ function nodeToFHIRItem(node) {
   if (node.itemType === 'radio')
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'radio-button' }] } });
 
-  // _renderStyle → _text.extension[rendering-style]
-  if (node._renderStyle) {
-    fhirItem._text = {
-      extension: [{ url: 'http://hl7.org/fhir/StructureDefinition/rendering-style', valueString: node._renderStyle }]
-    };
-  }
+  // _renderStyle / _renderXhtml → _text.extension[]
+  const _textExts = [];
+  if (node._renderStyle) _textExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/rendering-style', valueString: node._renderStyle });
+  if (node._renderXhtml)  _textExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/rendering-xhtml',  valueString: node._renderXhtml });
+  if (_textExts.length) fhirItem._text = { extension: _textExts };
 
   if (node.type === 'group') {
     fhirItem.item = node.children.map(nodeToFHIRItem);

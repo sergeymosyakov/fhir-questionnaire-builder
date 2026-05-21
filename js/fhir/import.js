@@ -188,6 +188,8 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));
   if (rs) node._renderStyle = rs.valueString || '';
+  const rx = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-xhtml'));
+  if (rx) node._renderXhtml = rx.valueString || '';
 
   // SDC calculatedExpression
   const calcExpr = (fhirItem.extension || []).find(
@@ -337,6 +339,8 @@ function fhirItemToNode(fhirItem, linkIdMap, contained) {
     if (hasOrGroup) node.logicWithParent = 'OR';
     const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));
     if (rs) node._renderStyle = rs.valueString || '';
+    const rx = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-xhtml'));
+    if (rx) node._renderXhtml = rx.valueString || '';
     if (fhirItem.prefix) node._prefix = fhirItem.prefix;
     if (fhirItem.definition) node._definition = fhirItem.definition;
     if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;

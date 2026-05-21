@@ -4,6 +4,7 @@
 
 ## 🚨 THE MUST — highest priority, no exceptions
 
+0. **Announce every step — wait for yes/no.** Before any action (edit, run, push, read, create) — state what you are about to do and wait for explicit confirmation. Do NOT proceed on assumption of approval. No silent multi-step execution.
 1. **Stop and ask after one failed attempt.** If a bug or issue is not resolved on the first real attempt — STOP immediately. Ask the user to reproduce manually and provide more details. Do NOT keep iterating or running more diagnostics.
 2. **Never guess. Never infer. Ask.** If any detail is unclear or missing — stop and ask exactly what information is needed. Do not proceed on assumptions.
 3. **Implemented = documented in the supported section.** Once a FHIR field or feature is fully implemented, move it from "Not Supported / remaining gaps" to the relevant supported table in `docs/FHIR-MAPPING.md`. Never leave a ✅ Covered row in the Not Supported section.
@@ -92,7 +93,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/constraint-modal.js` | Constraint edit modal — draft pattern; `node.constraint[]` deep-cloned on open; Apply commits + calls `triggerCalcRecalc()` + updates button state; Cancel discards; expression field is a resizable `.expr-textarea`; each card has an **Explain** button (uses `window.fhirpath` directly) |
 | `js/ui/expression-modal.js` | FHIRPath expression modal — `init(elements)`; two modes: `open(cfg)` single-field (groups: calculatedExpression only); `openDual(node, link, setActive, cb)` dual-field (items: calc + init in one modal with `.expr-section-hdr` visual section headers separated by `.expr-modal-sep`); draft pattern; auto-resize `.expr-textarea`; live expr icon via debounced `refreshExprIcons`; Escape / backdrop close |
 | `js/ui/initial-modal.js` | Default Value edit modal — `init(elements)`, `open(node, initLink, setActive)`; draft pattern; renders context-aware control per `itemType`; Apply commits `node._initialValue` + `values[node.id]` + calls `triggerCalcRecalc()` |
-| `js/ui/appearance-modal.js` | Appearance (rendering-style) edit modal — `init(elements)`, `open(node, styleLink, setActive)`; draft pattern; Bold / Italic checkboxes, color picker + clear, raw CSS `<textarea rows=1 resize:vertical>`; Apply sets `node._renderStyle` |
+| `js/ui/appearance-modal.js` | Appearance (rendering-style + rendering-xhtml) edit modal — `init(elements)`, `open(node, styleLink, setActive)`; two sections with `expr-section-hdr` headers + `data-tip-*` tooltips; Style section: Bold / Italic checkboxes, color picker + clear, raw CSS `<textarea rows=1>`; XHTML section: raw XHTML `<textarea rows=3>` (round-trip only, not rendered in preview); Apply sets `node._renderStyle` and `node._renderXhtml` |
 | `js/ui/required-modal.js` | Required (mandatory) edit modal — `init(elements)`, `open(node, mandLink, setActive)`; draft pattern; `<select>` with null / true / false options; Apply sets `node.mandatory`; link active only when `mandatory === true` |
 | `js/ui/answer-type-modal.js` | Answer Type edit modal — `init(elements)`, `open(node, typeLink, setActive)`; draft pattern; type `<select>` + conditional sections: for choice types (select/radio/open-choice) shows "Answer source" radio toggle between **Options list** (comma-sep `code=Label` or `code=Label=score` with ordinalValue) and **ValueSet (answerValueSet)** (dropdown from `questContained` ValueSets or free-text external URL); for `reference` — resource type dropdown; for `quantity` — unit dropdown; for `integer`/`decimal` — **Numeric constraints** section with Min / Max / Slider step inputs (`min-value-input`, `max-value-input`, `slider-step-input` testids); **Placeholder hint (entryFormat)** text input (`entry-format-input` testid) shown for text/integer/decimal/date/dateTime/time/url/quantity types — sets `node._entryFormat`; **Choice orientation** select (`orientation-select` testid) shown for `radio` type only — sets `node._choiceOrientation` (`vertical` / `horizontal`); **Display category** select (`display-category-select` testid) shown for `display` type only — sets `node._displayCategory` (`instructions` / `security` / `help`); Apply resolves local `#vs-id` refs into `node.options` for preview; extracts ordinals from `code=Label=score` entries into `node._optionOrdinals` |
 | `js/ui/repeatable-modal.js` | Repeatable edit modal — `init(elements)`, `open(node, repeatLink, setActive)`; draft pattern; toggle for `node.repeats` + cardinality card (`_minOccurs` / `_maxOccurs` integer inputs); Apply trims excess rows when maxOccurs reduced; calls `triggerCalcRecalc()` |
@@ -199,6 +200,7 @@ questMeta         // reactive({}) — questionnaire-level metadata: id, url, ver
 // FHIR-imported nodes also carry:
 _enableWhenText  // human-readable enableWhen label (e.g. "«Q» = Yes AND «Q2» = No")
 _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
+_renderXhtml     // raw XHTML string from FHIR _text.extension[rendering-xhtml] (round-trip only, not rendered)
 _calculatedExpr  // FHIRPath string (SDC calculatedExpression)
 _initialExpr     // FHIRPath string (SDC initialExpression) — evaluated once on import + Re-init
 _readOnly        // boolean — FHIR item.readOnly
@@ -286,6 +288,7 @@ _displayCategory   // 'instructions'|'security'|'help' — questionnaire-display
 - `questionnaire-constraint` extensions → `node.constraint[]`
 - `type:group` → group node; `type:boolean` → `itemType:'checkbox'`; `type:choice` → `itemType:'select'` or `'radio'` (if `questionnaire-itemControl: radio-button`)
 - `_text.extension[rendering-style]` → `_renderStyle` (applied as inline CSS in preview)
+- `_text.extension[rendering-xhtml]` → `_renderXhtml` (round-trip preserved; editable in Appearance modal; not rendered in preview)
 - `item.prefix` → `node._prefix` (amber badge in preview; editable in builder; exported back)
 - `item.code[]` → `node._codes` (preserved as-is; exported back unchanged)
 - `item.repeats` → `node.repeats` (multi-row input; not for checkbox/display)
@@ -366,7 +369,7 @@ _displayCategory   // 'instructions'|'security'|'help' — questionnaire-display
 - **Variable chip tooltips** — `%varName` chips carry rich tooltips with expression + `Questionnaire.extension[sdc-questionnaire-variable]` FHIR path + SDC spec footer
 - **Copyright + GitHub in top panel** — copyright text and GitHub link moved to the top (patient data) panel, right-aligned; order: GitHub icon → copyright text
 - **Expandable title** — node title shown as a read-only span; click → expands to a full-width textarea (auto-height), collapses on blur
-- **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview
+- **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview. XHTML section for `_renderXhtml` (round-trip only, not rendered)
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
 - **Visual condition builder** — "Show When" action panel uses FHIR `enableWhen[]` directly: AND/ANY toggle, per-condition rows (question picker + operator + type-aware value input), "+ Add condition", FHIRPath `enableWhenExpression` for advanced expressions
 - **Patient Context popup** — "Patient Context" button in toolbar opens modal; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; button disabled when no questionnaire is loaded; Apply increments `_formTick` → immediate preview re-eval; fires `patient-ctx-applied` event → `variablesPanel.refresh()` updates chips
