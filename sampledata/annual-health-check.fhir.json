@@ -8,7 +8,7 @@
   "experimental": true,
   "copyright": "© 2026 Sergey Mosyakov",
   "publisher": "Example Health Organisation",
-  "description": "Comprehensive annual health assessment covering vital signs, lifestyle factors, current medications, wellbeing screening, and clinician follow-up. Demonstrates: version, publisher, prefix, item.code[], minValue/maxValue, rendering-style, calculatedExpression (BMI), sliderStepValue, repeats+minOccurs/maxOccurs, ordinalValue, enableWhen, initial[], maxLength, and questionnaire-constraint.",
+  "description": "Comprehensive annual health assessment covering vital signs, lifestyle factors, current medications, wellbeing screening, and clinician follow-up. Demonstrates: version, publisher, prefix, item.code[], minValue/maxValue, rendering-style, calculatedExpression (BMI), sdc-questionnaire-hidden (bmi-high-flag — hidden boolean drives enableWhen), sliderStepValue, repeats+minOccurs/maxOccurs, ordinalValue, enableWhen, initial[], maxLength, and questionnaire-constraint.",
   "subjectType": [
     "Patient"
   ],
@@ -94,6 +94,25 @@
               "valueExpression": {
                 "language": "text/fhirpath",
                 "expression": "(%resource.item.where(linkId='vitals').item.where(linkId='weight').answer.valueDecimal * 10000 / (%resource.item.where(linkId='vitals').item.where(linkId='height').answer.valueDecimal * %resource.item.where(linkId='vitals').item.where(linkId='height').answer.valueDecimal)).round(1)"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "bmi-high-flag",
+          "text": "BMI \u2265 30 flag (hidden — drives enableWhen for weight management display)",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden",
+              "valueBoolean": true
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.item.where(linkId='vitals').item.where(linkId='bmi').answer.valueDecimal >= 30"
               }
             }
           ]
@@ -438,6 +457,31 @@
                   }
                 }
               ]
+            }
+          ]
+        },
+        {
+          "linkId": "bmi-high-display",
+          "text": "BMI \u2265 30 \u2014 consider weight management referral.",
+          "type": "display",
+          "enableWhen": [
+            {
+              "question": "bmi-high-flag",
+              "operator": "=",
+              "answerBoolean": true
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-display-category",
+                    "code": "instructions"
+                  }
+                ]
+              }
             }
           ]
         }
