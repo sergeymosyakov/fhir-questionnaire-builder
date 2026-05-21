@@ -102,6 +102,8 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `questMeta._rawMetaTag` | `Questionnaire.meta.tag[]` | ← stored as Coding[] (default: `[]`) | → written back unchanged; editable system/code/display rows in Properties modal — Resource Meta section |
 | `questMeta._rawMetaSecurity` | `Questionnaire.meta.security[]` | ← stored as Coding[] (default: `[]`) | → written back unchanged; editable system/code/display rows in Properties modal — Resource Meta section |
 
+> **`Questionnaire.meta` is fully covered.** All six sub-fields (`versionId`, `source`, `lastUpdated`, `profile[]`, `tag[]`, `security[]`) are imported, editable in the **Resource Meta** collapsible section of the Properties modal, and written back on export. `meta.lastUpdated` is always refreshed to the current time on export.
+
 ---
 
 ## Item Type Mapping
@@ -315,7 +317,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | FHIR field | Status | Notes |
 |---|---|---|
 | `Questionnaire.identifier[]` | ⚠️ Silently dropped | Business identifier (NamingSystem + value). Used by EHR systems to reference questionnaires by external ID, printed on form headers, and required by some IG profiles. Not stored, not editable, not written back. |
-| `Questionnaire.meta` | ✅ Covered | All sub-fields implemented: `versionId` (editable + Generate UUID), `source` (editable URI), `lastUpdated` (always refreshed to current time on export), `profile[]` (editable URL list), `tag[]` and `security[]` (editable Coding rows). Editable in Properties modal — Resource Meta section. |
 | `Questionnaire.text` | ⚠️ Silently dropped | Human-readable narrative (auto-generated in some workflows). Not stored, not written. |
 | `Questionnaire.implicitRules` | ⚠️ Silently dropped | Declares the rules set that constrains how the resource is used. Rare in practice. |
 | Unknown item extensions | ⚠️ Silently dropped | Any `item.extension[]` entry whose URL is not explicitly handled by the builder is discarded on import and will not appear in the exported JSON. |

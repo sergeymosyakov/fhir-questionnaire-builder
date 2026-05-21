@@ -146,12 +146,18 @@ function _close() {
 
 // ── body renderer ─────────────────────────────────────────────────────────────
 
-function _makeRow(key, label, type, placeholder, testid) {
+function _makeRow(key, label, type, placeholder, testid, tip = null) {
   const row = document.createElement('div');
   row.className = 'meta-modal-row';
   const lbl = document.createElement('label');
   lbl.className   = 'meta-modal-lbl';
   lbl.textContent = label + ':';
+  if (tip) {
+    lbl.dataset.tipTitle = tip.title;
+    if (tip.body) lbl.dataset.tipBody = tip.body;
+    if (tip.fhir) lbl.dataset.tipFhir = tip.fhir;
+    if (tip.spec) lbl.dataset.tipSpec  = tip.spec;
+  }
   let inp;
   if (type === 'textarea') {
     inp = document.createElement('textarea');
@@ -170,12 +176,18 @@ function _makeRow(key, label, type, placeholder, testid) {
   return row;
 }
 
-function _makeSelectRow(key, label, options, testid) {
+function _makeSelectRow(key, label, options, testid, tip = null) {
   const row = document.createElement('div');
   row.className = 'meta-modal-row';
   const lbl = document.createElement('label');
   lbl.className   = 'meta-modal-lbl';
   lbl.textContent = label + ':';
+  if (tip) {
+    lbl.dataset.tipTitle = tip.title;
+    if (tip.body) lbl.dataset.tipBody = tip.body;
+    if (tip.fhir) lbl.dataset.tipFhir = tip.fhir;
+    if (tip.spec) lbl.dataset.tipSpec  = tip.spec;
+  }
   const sel = document.createElement('select');
   sel.className      = 'meta-modal-sel';
   sel.dataset.testid = testid;
@@ -206,16 +218,16 @@ function _renderBody(container) {
 
   // ── Core fields ──────────────────────────────────────────────────────────
   const coreFields = [
-    { key: 'id',          label: 'ID',          type: 'text',     placeholder: 'e.g. my-questionnaire',     testid: 'meta-id'          },
-    { key: 'url',         label: 'URL',          type: 'text',     placeholder: 'http://example.org/fhir/…', testid: 'meta-url'         },
-    { key: 'version',     label: 'Version',      type: 'text',     placeholder: 'e.g. 1.0.0',                testid: 'meta-version'     },
-    { key: 'name',        label: 'Name',         type: 'text',     placeholder: 'e.g. MyQuestionnaire',      testid: 'meta-name'        },
-    { key: 'title',       label: 'Title',        type: 'text',     placeholder: 'e.g. PHQ-9 Depression…',    testid: 'meta-title'       },
-    { key: 'publisher',   label: 'Publisher',    type: 'text',     placeholder: 'e.g. HL7 International',    testid: 'meta-publisher'   },
-    { key: 'description', label: 'Description',  type: 'textarea', placeholder: 'Optional description…',     testid: 'meta-description' },
+    { key: 'id',          label: 'ID',          type: 'text',     placeholder: 'e.g. my-questionnaire',     testid: 'meta-id',          tip: { title: 'Questionnaire.id',          body: 'Logical identifier for this resource. Unique within the server context. Used in resource references and URLs.',                                       fhir: 'Questionnaire.id',          spec: 'R4' } },
+    { key: 'url',         label: 'URL',          type: 'text',     placeholder: 'http://example.org/fhir/…', testid: 'meta-url',         tip: { title: 'Questionnaire.url',         body: 'Canonical URL — globally unique identifier for this questionnaire. Used for cross-server references, versioning, and profile conformance declarations.',  fhir: 'Questionnaire.url',         spec: 'R4' } },
+    { key: 'version',     label: 'Version',      type: 'text',     placeholder: 'e.g. 1.0.0',                testid: 'meta-version',     tip: { title: 'Questionnaire.version',     body: 'Business version. Changes with each substantive update. Follows semver convention (e.g. 1.0.0).',                                                       fhir: 'Questionnaire.version',     spec: 'R4' } },
+    { key: 'name',        label: 'Name',         type: 'text',     placeholder: 'e.g. MyQuestionnaire',      testid: 'meta-name',        tip: { title: 'Questionnaire.name',        body: 'Computer-friendly identifier. No spaces; starts with a letter or underscore. Used in code generation and system identifiers.',                         fhir: 'Questionnaire.name',        spec: 'R4' } },
+    { key: 'title',       label: 'Title',        type: 'text',     placeholder: 'e.g. PHQ-9 Depression…',    testid: 'meta-title',       tip: { title: 'Questionnaire.title',       body: 'Human-readable display name shown in questionnaire catalogs and form headers.',                                                                        fhir: 'Questionnaire.title',       spec: 'R4' } },
+    { key: 'publisher',   label: 'Publisher',    type: 'text',     placeholder: 'e.g. HL7 International',    testid: 'meta-publisher',   tip: { title: 'Questionnaire.publisher',   body: 'Name of the organization or person responsible for publishing this questionnaire.',                                                                   fhir: 'Questionnaire.publisher',   spec: 'R4' } },
+    { key: 'description', label: 'Description',  type: 'textarea', placeholder: 'Optional description…',     testid: 'meta-description', tip: { title: 'Questionnaire.description', body: 'Natural language description of the questionnaire — its purpose, scope, and intended use.',                                                           fhir: 'Questionnaire.description', spec: 'R4' } },
   ];
 
-  for (const f of coreFields) container.appendChild(_makeRow(f.key, f.label, f.type, f.placeholder, f.testid));
+  for (const f of coreFields) container.appendChild(_makeRow(f.key, f.label, f.type, f.placeholder, f.testid, f.tip));
 
   // Status dropdown (after title)
   const statusRow = document.createElement('div');
@@ -223,6 +235,10 @@ function _renderBody(container) {
   const statusLbl = document.createElement('label');
   statusLbl.className   = 'meta-modal-lbl';
   statusLbl.textContent = 'Status:';
+  statusLbl.dataset.tipTitle = 'Questionnaire.status';
+  statusLbl.dataset.tipBody  = '"draft" — work in progress; "active" — in use; "retired" — no longer recommended; "unknown" — status not determined. Required field.';
+  statusLbl.dataset.tipFhir  = 'Questionnaire.status';
+  statusLbl.dataset.tipSpec  = 'R4';
   const statusSel = document.createElement('select');
   statusSel.className      = 'meta-modal-sel';
   statusSel.dataset.testid = 'meta-status';
@@ -239,7 +255,12 @@ function _renderBody(container) {
 
   // Language dropdown (after Status)
   container.insertBefore(
-    _makeSelectRow('language', 'Language', LANGUAGES, 'meta-language'),
+    _makeSelectRow('language', 'Language', LANGUAGES, 'meta-language', {
+      title: 'Questionnaire.language',
+      body: 'BCP-47 language tag for the primary language of the questionnaire (e.g. en, fr, de). Affects text rendering and locale-specific formatting.',
+      fhir: 'Questionnaire.language',
+      spec: 'R4',
+    }),
     container.children[7]
   );
 
@@ -250,7 +271,9 @@ function _renderBody(container) {
   const toggle = document.createElement('button');
   toggle.type      = 'button';
   toggle.className = 'meta-modal-adv-toggle';
-  toggle.dataset.testid = 'meta-advanced-toggle';
+  toggle.dataset.testid  = 'meta-advanced-toggle';
+  toggle.dataset.tipTitle = 'Advanced metadata';
+  toggle.dataset.tipBody  = 'Less commonly used fields: experimental flag, date, subject types, effective period, approval/review dates, purpose, and copyright.';
   let open = false;
 
   const body = document.createElement('div');
@@ -258,17 +281,22 @@ function _renderBody(container) {
   body.style.display = 'none';
 
   const advFields = [
-    { key: 'date',                label: 'Date',           type: 'date',     placeholder: '',                           testid: 'meta-date'                },
-    { key: 'subjectType',         label: 'Subject Type',   type: 'text',     placeholder: 'e.g. Patient, Practitioner',  testid: 'meta-subject-type'        },
-    { key: 'effectivePeriodStart',label: 'Effective From', type: 'date',     placeholder: '',                           testid: 'meta-effective-start'     },
-    { key: 'effectivePeriodEnd',  label: 'Effective To',   type: 'date',     placeholder: '',                           testid: 'meta-effective-end'       },
-    { key: 'approvalDate',        label: 'Approved',       type: 'date',     placeholder: '',                           testid: 'meta-approval-date'       },
-    { key: 'lastReviewDate',      label: 'Last Review',    type: 'date',     placeholder: '',                           testid: 'meta-last-review'         },
-    { key: 'purpose',             label: 'Purpose',        type: 'textarea', placeholder: 'Intended use…',              testid: 'meta-purpose'             },
-    { key: 'copyright',           label: 'Copyright',      type: 'textarea', placeholder: 'Copyright statement…',       testid: 'meta-copyright'           },
+    { key: 'date',                label: 'Date',           type: 'date',     placeholder: '',                           testid: 'meta-date',           tip: { title: 'Questionnaire.date',                body: 'Date this version was last significantly changed. Used for versioning and change tracking in questionnaire registries.',          fhir: 'Questionnaire.date',                spec: 'R4' } },
+    { key: 'subjectType',         label: 'Subject Type',   type: 'text',     placeholder: 'e.g. Patient, Practitioner', testid: 'meta-subject-type',   tip: { title: 'Questionnaire.subjectType',         body: 'Resource type(s) that can be the subject of a QuestionnaireResponse. Comma-separated list (e.g. Patient, Practitioner).',          fhir: 'Questionnaire.subjectType',         spec: 'R4' } },
+    { key: 'effectivePeriodStart',label: 'Effective From', type: 'date',     placeholder: '',                           testid: 'meta-effective-start', tip: { title: 'Questionnaire.effectivePeriod.start', body: 'Start of the period during which this questionnaire is intended to be used.',                                                fhir: 'Questionnaire.effectivePeriod',     spec: 'R4' } },
+    { key: 'effectivePeriodEnd',  label: 'Effective To',   type: 'date',     placeholder: '',                           testid: 'meta-effective-end',   tip: { title: 'Questionnaire.effectivePeriod.end',   body: 'End of the period during which this questionnaire is intended to be used.',                                                  fhir: 'Questionnaire.effectivePeriod',     spec: 'R4' } },
+    { key: 'approvalDate',        label: 'Approved',       type: 'date',     placeholder: '',                           testid: 'meta-approval-date',   tip: { title: 'Questionnaire.approvalDate',         body: 'Date when this questionnaire was formally approved by the publisher or governance body.',                                       fhir: 'Questionnaire.approvalDate',        spec: 'R4' } },
+    { key: 'lastReviewDate',      label: 'Last Review',    type: 'date',     placeholder: '',                           testid: 'meta-last-review',     tip: { title: 'Questionnaire.lastReviewDate',       body: 'Date when this questionnaire was last reviewed. Used by registries to track content currency.',                                  fhir: 'Questionnaire.lastReviewDate',      spec: 'R4' } },
+    { key: 'purpose',             label: 'Purpose',        type: 'textarea', placeholder: 'Intended use…',              testid: 'meta-purpose',         tip: { title: 'Questionnaire.purpose',              body: 'Explains why this questionnaire is needed. Describes the clinical or administrative problem it addresses.',                     fhir: 'Questionnaire.purpose',             spec: 'R4' } },
+    { key: 'copyright',           label: 'Copyright',      type: 'textarea', placeholder: 'Copyright statement…',       testid: 'meta-copyright',       tip: { title: 'Questionnaire.copyright',            body: 'Copyright notice and/or license information applicable to this questionnaire.',                                               fhir: 'Questionnaire.copyright',           spec: 'R4' } },
   ];
-  body.appendChild(_makeSelectRow('experimental', 'Experimental', EXPERIMENTALS, 'meta-experimental'));
-  for (const f of advFields) body.appendChild(_makeRow(f.key, f.label, f.type, f.placeholder, f.testid));
+  body.appendChild(_makeSelectRow('experimental', 'Experimental', EXPERIMENTALS, 'meta-experimental', {
+    title: 'Questionnaire.experimental',
+    body: 'Marks this questionnaire as experimental — for testing and evaluation only. Should not be used in production clinical workflows.',
+    fhir: 'Questionnaire.experimental',
+    spec: 'R4',
+  }));
+  for (const f of advFields) body.appendChild(_makeRow(f.key, f.label, f.type, f.placeholder, f.testid, f.tip));
 
   const _setToggleLabel = () => {
     toggle.textContent = (open ? '\u25BC' : '\u25BA') + ' Advanced';
@@ -290,7 +318,11 @@ function _renderBody(container) {
   const derivedToggle = document.createElement('button');
   derivedToggle.type      = 'button';
   derivedToggle.className = 'meta-modal-adv-toggle';
-  derivedToggle.dataset.testid = 'meta-derived-toggle';
+  derivedToggle.dataset.testid  = 'meta-derived-toggle';
+  derivedToggle.dataset.tipTitle = 'Questionnaire.derivedFrom';
+  derivedToggle.dataset.tipBody  = 'Canonical URLs of questionnaires that this questionnaire was derived from or is a specialization of.';
+  derivedToggle.dataset.tipFhir  = 'Questionnaire.derivedFrom';
+  derivedToggle.dataset.tipSpec  = 'R4';
   let derivedOpen = _pending.derivedFrom.length > 0;
 
   const derivedBody = document.createElement('div');
@@ -363,7 +395,11 @@ function _renderBody(container) {
   const metaToggle = document.createElement('button');
   metaToggle.type      = 'button';
   metaToggle.className = 'meta-modal-adv-toggle';
-  metaToggle.dataset.testid = 'meta-resource-meta-toggle';
+  metaToggle.dataset.testid  = 'meta-resource-meta-toggle';
+  metaToggle.dataset.tipTitle = 'Questionnaire.meta';
+  metaToggle.dataset.tipBody  = 'Resource-level metadata: server version ID, source URI, last-updated timestamp, profile declarations, workflow tags, and security labels.';
+  metaToggle.dataset.tipFhir  = 'Questionnaire.meta';
+  metaToggle.dataset.tipSpec  = 'R4';
   let metaOpen = !!(
     _pending.metaVersionId || _pending.metaSource || questMeta._metaLastUpdated ||
     _pending.metaProfile.length || _pending.metaTag.length || _pending.metaSecurity.length
@@ -379,6 +415,10 @@ function _renderBody(container) {
   const versionIdLbl = document.createElement('label');
   versionIdLbl.className   = 'meta-modal-lbl';
   versionIdLbl.textContent = 'Version ID:';
+  versionIdLbl.dataset.tipTitle = 'meta.versionId';
+  versionIdLbl.dataset.tipBody  = 'Server-assigned version counter, incremented on each update. Use Generate to create a local UUID when working outside a server context.';
+  versionIdLbl.dataset.tipFhir  = 'meta.versionId';
+  versionIdLbl.dataset.tipSpec  = 'R4';
   const versionIdWrap = document.createElement('div');
   versionIdWrap.className = 'meta-modal-inp-group';
   const versionIdInp = document.createElement('input');
@@ -433,6 +473,10 @@ function _renderBody(container) {
   const lastUpdatedLbl = document.createElement('label');
   lastUpdatedLbl.className   = 'meta-modal-lbl';
   lastUpdatedLbl.textContent = 'Last Updated:';
+  lastUpdatedLbl.dataset.tipTitle = 'meta.lastUpdated';
+  lastUpdatedLbl.dataset.tipBody  = 'Timestamp of the last server update. Read-only — always replaced with the current time on export from this builder.';
+  lastUpdatedLbl.dataset.tipFhir  = 'meta.lastUpdated';
+  lastUpdatedLbl.dataset.tipSpec  = 'R4';
   const lastUpdatedVal = document.createElement('span');
   lastUpdatedVal.className = 'meta-modal-readonly';
   lastUpdatedVal.textContent = questMeta._metaLastUpdated
@@ -542,7 +586,11 @@ function _renderBody(container) {
   const codesToggle = document.createElement('button');
   codesToggle.type      = 'button';
   codesToggle.className = 'meta-modal-adv-toggle';
-  codesToggle.dataset.testid = 'meta-codes-toggle';
+  codesToggle.dataset.testid  = 'meta-codes-toggle';
+  codesToggle.dataset.tipTitle = 'Questionnaire.code';
+  codesToggle.dataset.tipBody  = 'Structured clinical codes identifying the concept represented by this questionnaire (e.g. LOINC, SNOMED CT). Used for indexing in clinical registries.';
+  codesToggle.dataset.tipFhir  = 'Questionnaire.code';
+  codesToggle.dataset.tipSpec  = 'R4';
   let codesOpen = false;
 
   const codesBody = document.createElement('div');
