@@ -72,7 +72,6 @@
             data-tip-body="Automatically saves the current questionnaire to local storage every 15 seconds. The button label shows the time of the last save. Click to disable."
             data-tip-spec="on / off">autosave</button>
           <button id="tooltipToggleBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--tips-toggle btn-fhir--active"
-            title="Toggle rich tooltips on / off"
             data-tip-title="Rich Tooltips"
             data-tip-body="Show contextual help cards on hover. Each button shows the corresponding FHIR field and spec reference. Click to disable."
             data-tip-spec="on / off">tips</button>
@@ -128,7 +127,7 @@
     <!-- Questionnaire-level SDC variables card (shown when tree has nodes) -->
     <div id="variablesCard" class="variables-card" style="display:none">
       <div class="variables-card-header">
-        <button id="variablesCardToggle" type="button" class="variables-card-toggle" aria-expanded="true" title="Collapse / expand">
+        <button id="variablesCardToggle" type="button" class="variables-card-toggle" aria-expanded="true" data-tip-title="Collapse / expand" data-tip-body="Toggle the Variables card open or closed.">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
         </button>
         <span class="variables-card-title"
@@ -137,7 +136,7 @@
           data-tip-fhir="Questionnaire.extension[sdc-questionnaire-variable]"
           data-tip-spec="SDC · optional">Variables</span>
         <span id="variablesCardCount" class="variables-card-count"></span>
-        <button id="variablesReinitBtn" data-testid="variables-reinit-btn" type="button" class="variables-reinit-btn" title="Re-evaluate variables and initialExpression fields">&#x21BA; Re-init</button>
+        <button id="variablesReinitBtn" data-testid="variables-reinit-btn" type="button" class="variables-reinit-btn" data-tip-title="Re-init" data-tip-body="Re-evaluate all questionnaire-level variables and item initialExpression fields.">&#x21BA; Re-init</button>
         <button id="variablesEditBtn" type="button" class="variables-edit-btn">Edit</button>
       </div>
       <div id="variablesCardChips" class="variables-card-chips"></div>
@@ -145,7 +144,7 @@
     <!-- Contained resources card (shown when imported questionnaire has contained[]) -->
     <div id="containedCard" class="fhir-res-card" style="display:none">
       <div class="fhir-res-card-header">
-        <button id="containedCardToggle" type="button" class="fhir-res-card-toggle" aria-expanded="true" title="Collapse / expand">
+        <button id="containedCardToggle" type="button" class="fhir-res-card-toggle" aria-expanded="true" data-tip-title="Collapse / expand" data-tip-body="Toggle the Contained Resources card open or closed.">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
         </button>
         <span class="fhir-res-card-title fhir-res-card-title--contained"
@@ -160,7 +159,7 @@
     <!-- Answer ValueSet card (shown when any item uses answerValueSet) -->
     <div id="answerValueSetCard" class="fhir-res-card" style="display:none">
       <div class="fhir-res-card-header">
-        <button id="answerValueSetCardToggle" type="button" class="fhir-res-card-toggle" aria-expanded="true" title="Collapse / expand">
+        <button id="answerValueSetCardToggle" type="button" class="fhir-res-card-toggle" aria-expanded="true" data-tip-title="Collapse / expand" data-tip-body="Toggle the Answer ValueSets card open or closed.">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
         </button>
         <span class="fhir-res-card-title fhir-res-card-title--avs"
@@ -186,8 +185,7 @@
             <span id="loadedFileName" class="loaded-file-name"></span>
             <button id="clearFormBtn" type="button" class="clear-form-btn" data-testid="clear-form-btn"
               data-tip-title="Clear questionnaire"
-              data-tip-body="Removes the current questionnaire from the builder. You will be asked whether to export first."
-              title="Clear questionnaire">&times;</button>
+              data-tip-body="Removes the current questionnaire from the builder. You will be asked whether to export first.">&times;</button>
           </span>
         </span>
         <span class="preview-header-actions">

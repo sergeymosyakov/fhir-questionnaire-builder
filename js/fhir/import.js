@@ -8,10 +8,12 @@ function applyInitialValues(nodes) {
   for (const node of nodes) {
     if (node.repeats && node._initialValues && node._initialValues.length > 1) {
       // Multiple initial values for a repeating item — populate repeat rows
-      setValue(node.id + '$$n', node._initialValues.length);
-      for (let i = 0; i < node._initialValues.length; i++) {
-        setValue(node.id + '$$' + (i + 1), node._initialValues[i]);
+      // $$n = number of extra rows (beyond the primary). Row 0 → base id, rows 1..n → $$1..$$n.
+      setValue(node.id, node._initialValues[0]);
+      for (let i = 1; i < node._initialValues.length; i++) {
+        setValue(node.id + '$$' + i, node._initialValues[i]);
       }
+      setValue(node.id + '$$n', node._initialValues.length - 1);
     } else if (node._initialValue !== undefined) {
       setValue(node.id, node._initialValue);
     }

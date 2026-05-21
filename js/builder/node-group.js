@@ -123,6 +123,7 @@ export function renderGroup(node, ctx) {
     const a = document.createElement('a');
     a.textContent = label;
     a.className = 'action-edit';
+    a.dataset.testid = 'action-' + key;
     if (tipTitle) a.dataset.tipTitle = tipTitle;
     if (tipBody)  a.dataset.tipBody  = tipBody;
     if (tipFhir)  a.dataset.tipFhir  = tipFhir;

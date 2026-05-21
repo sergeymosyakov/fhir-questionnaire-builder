@@ -16,15 +16,26 @@
  * @param {{ modal: HTMLElement, closeBtn: HTMLElement, cancelBtn?: HTMLElement, applyBtn?: HTMLElement }} elements
  * @param {{ onApply?: Function, onCancel: Function }} callbacks
  */
+// Single shared Escape handler — closes the highest z-index open modal.
+const _registry = new Map(); // modalEl → onCancel
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  let topCancel = null, topZ = -1;
+  for (const [modalEl, cancel] of _registry) {
+    if (modalEl.style.display === 'none') continue;
+    const z = parseInt(getComputedStyle(modalEl).zIndex, 10) || 0;
+    if (z > topZ) { topZ = z; topCancel = cancel; }
+  }
+  if (topCancel) topCancel();
+});
+
 export function initModal(elements, { onApply, onCancel }) {
   const { modal, closeBtn, cancelBtn, applyBtn } = elements;
   if (closeBtn)            closeBtn.addEventListener('click', onCancel);
   if (cancelBtn)           cancelBtn.addEventListener('click', onCancel);
   if (applyBtn && onApply) applyBtn.addEventListener('click', onApply);
   modal.addEventListener('click', e => { if (e.target === modal) onCancel(); });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && modal.style.display !== 'none') onCancel();
-  });
+  _registry.set(modal, onCancel);
 }
 
 /**

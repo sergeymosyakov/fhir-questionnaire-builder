@@ -716,6 +716,17 @@ describe('importFHIR', () => {
       }]));
       expect(_tree[0]._initialValues).toEqual(['3', '7']);
     });
+
+    it('populates values correctly: base id=first, $$1..N=extras, $$n=extra count', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', repeats: true,
+        initial: [{ valueString: 'a' }, { valueString: 'b' }, { valueString: 'c' }],
+      }]));
+      expect(_values['q1']).toBe('a');
+      expect(_values['q1$$1']).toBe('b');
+      expect(_values['q1$$2']).toBe('c');
+      expect(_values['q1$$n']).toBe(2); // 2 extra rows beyond the primary
+      expect(_values['q1$$3']).toBeUndefined();
+    });
   });
 
   // ── sdc-questionnaire-entryFormat ────────────────────────────────────────

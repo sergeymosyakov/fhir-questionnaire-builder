@@ -320,9 +320,8 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 
 | QR field | What happens | Notes |
 |---|---|---|
-| `status` | See meta fields table above | |
-| `subject` | See meta fields table above | |
-| `author` | See meta fields table above | |
+| `id` | not preserved on import | Generated fresh on export |
+| `implicitRules` / `language` / `meta` | not preserved | Pass-through not implemented for QR-level meta |
 
 ### FHIR versions
 

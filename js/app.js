@@ -451,21 +451,26 @@ function _askBeforeClear() {
 
 async function _importAndValidate(data, fileName) {
   // importFHIR is sync (parses tree); skip its internal renderTree, do async render instead
-  resetQrMeta();
-  importFHIR(data, () => {}); // pass no-op renderFn — we render below
-  variablesPanel.refresh();
-  containedPanel.refresh();
-  answerValueSetPanel.refresh();
-  reinitForm(); // evaluate initialExpression fields from imported data
-  const issues = validateTree(tree, values);
-  progress.show('Rendering ' + tree.length + ' nodes…');
-  await renderTreeAsync((done, total) => progress.update(done, total));
-  expandAll();
-  progress.hide();
-  document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
-  document.querySelector('.right-panel-body')?.scrollTo({ top: 0 });
-  _setFileName(fileName || '');
-  if (issues.length > 0) validateModal.show('Import — Validation Report', issues, 'import', { onNavigate: _navigateToNode });
+  try {
+    resetQrMeta();
+    importFHIR(data, () => {}); // pass no-op renderFn — we render below
+    variablesPanel.refresh();
+    containedPanel.refresh();
+    answerValueSetPanel.refresh();
+    reinitForm(); // evaluate initialExpression fields from imported data
+    const issues = validateTree(tree, values);
+    progress.show('Rendering ' + tree.length + ' nodes…');
+    await renderTreeAsync((done, total) => progress.update(done, total));
+    expandAll();
+    document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
+    document.querySelector('.right-panel-body')?.scrollTo({ top: 0 });
+    _setFileName(fileName || '');
+    if (issues.length > 0) validateModal.show('Import — Validation Report', issues, 'import', { onNavigate: _navigateToNode });
+  } catch (err) {
+    alert('Import error: ' + err.message);
+  } finally {
+    progress.hide();
+  }
 }
 
 function _navigateToNode(nodeId) {

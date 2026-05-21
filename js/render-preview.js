@@ -33,6 +33,19 @@ function _setNodeLabel(el, node) {
 // Last computed FHIRPath context — updated by _reCalc(), read by Explain click handlers.
 let _lastCtx = { fp: null, qr: null, env: {} };
 
+// Safe allowlist for node._renderStyle — only these CSS properties are applied.
+const _STYLE_ALLOWLIST = new Set(['font-weight','font-style','color','font-size','text-decoration']);
+function _applyRenderStyle(el, raw) {
+  if (!raw) return;
+  raw.split(';').forEach(part => {
+    const sep = part.indexOf(':');
+    if (sep < 1) return;
+    const prop = part.slice(0, sep).trim().toLowerCase();
+    const val  = part.slice(sep + 1).trim();
+    if (_STYLE_ALLOWLIST.has(prop) && val) el.style.setProperty(prop, val);
+  });
+}
+
 export function getLastCtx() { return _lastCtx; }
 
 // Pre-computed QR/envVars from reinitForm() — consumed once by the next _reCalc() call
@@ -588,7 +601,7 @@ async function _asyncRender(version) {
     } else {
       _setNodeLabel(label, res.node);
     }
-    if (res.node._renderStyle) label.style.cssText = res.node._renderStyle;
+    if (res.node._renderStyle) _applyRenderStyle(label, res.node._renderStyle);
     if (res.node.type === 'item' && res.node.itemType === 'display' && res.node._displayCategory && res.node._displayCategory !== 'help') {
       const catIcon = document.createElement('span');
       catIcon.className = 'display-cat-icon display-cat-icon--' + res.node._displayCategory;
@@ -669,7 +682,10 @@ async function _asyncRender(version) {
         star.className = 'preview-required-star';
         star.dataset.testid = 'preview-required-star';
         star.textContent = '*';
-        star.title = 'Required field';
+        star.dataset.tipTitle = 'Required field';
+        star.dataset.tipBody  = 'This item is marked as required (item.required = true) and must be answered.';
+        star.dataset.tipFhir  = 'Questionnaire.item.required';
+        star.dataset.tipSpec  = 'R4';
         label.appendChild(star);
       }
     }

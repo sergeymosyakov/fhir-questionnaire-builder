@@ -50,17 +50,6 @@ export function init(buildFn, onSaved) {
   _timer = setInterval(_save, INTERVAL_MS);
 }
 
-/** Stop autosave (e.g. after clearing the form). */
-export function pause() { _enabled = false; }
-
-/** Resume autosave. */
-export function resume() { _enabled = true; }
-
-/** Returns true if a saved draft exists. */
-export function hasDraft() {
-  return !!localStorage.getItem(LS_KEY);
-}
-
 /** Returns { savedAt, title } metadata or null. */
 export function getDraftMeta() {
   try {
@@ -75,16 +64,6 @@ export function getDraftData() {
     const raw = localStorage.getItem(LS_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch (_) { return null; }
-}
-
-/** Restore the saved draft by calling importFn with the stored FHIR JSON. */
-export function loadDraft(importFn, renderFn) {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return false;
-    importFn(JSON.parse(raw), renderFn);
-    return true;
-  } catch (_) { return false; }
 }
 
 /** Remove the saved draft from localStorage. */
