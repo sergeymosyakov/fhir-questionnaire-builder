@@ -360,3 +360,16 @@ After each push the `deploy` job publishes the app **and** the latest Playwright
 ## Known Limitations / TODO
 
 - Multi-condition visibility with complex FHIRPath (cross-group references, extensions) not supported in the visual enableWhen builder — must be typed as `enableWhenExpression` directly
+
+---
+
+## Feedback welcome
+
+I built this to solve a real problem — we needed to edit FHIR R4 Questionnaires without a full EHR stack.
+Not sure if others have the same need. If you've stumbled on this:
+
+- Does the UX make sense for your workflow?
+- Are there FHIR fields you'd expect that are missing?
+- Any opinion on offline ValueSet resolution?
+
+Open an issue or drop a comment — even a "this isn't useful because X" is helpful.
