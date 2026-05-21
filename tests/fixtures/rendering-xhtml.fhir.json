@@ -1,0 +1,56 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "rendering-xhtml-test",
+  "title": "Rendering XHTML Test",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "q-bold",
+      "text": "Plain bold question",
+      "type": "string",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml",
+            "valueString": "<b>Bold question</b>"
+          }
+        ]
+      }
+    },
+    {
+      "linkId": "q-mixed",
+      "text": "Mixed style question",
+      "type": "string",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-style",
+            "valueString": "color: #1565c0"
+          },
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml",
+            "valueString": "<em>Styled</em> &amp; <strong>formatted</strong> question"
+          }
+        ]
+      }
+    },
+    {
+      "linkId": "q-xss",
+      "text": "XSS test question",
+      "type": "string",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml",
+            "valueString": "<script>window.__xss=1</script><b>Safe content</b>"
+          }
+        ]
+      }
+    },
+    {
+      "linkId": "q-plain",
+      "text": "Plain question (no xhtml)",
+      "type": "string"
+    }
+  ]
+}

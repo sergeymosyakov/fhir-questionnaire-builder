@@ -288,7 +288,7 @@ _displayCategory   // 'instructions'|'security'|'help' — questionnaire-display
 - `questionnaire-constraint` extensions → `node.constraint[]`
 - `type:group` → group node; `type:boolean` → `itemType:'checkbox'`; `type:choice` → `itemType:'select'` or `'radio'` (if `questionnaire-itemControl: radio-button`)
 - `_text.extension[rendering-style]` → `_renderStyle` (applied as inline CSS in preview)
-- `_text.extension[rendering-xhtml]` → `_renderXhtml` (round-trip preserved; editable in Appearance modal; not rendered in preview)
+- `_text.extension[rendering-xhtml]` → `_renderXhtml` (rendered via `DOMPurify.sanitize()` + `innerHTML` in preview; editable in Appearance modal)
 - `item.prefix` → `node._prefix` (amber badge in preview; editable in builder; exported back)
 - `item.code[]` → `node._codes` (preserved as-is; exported back unchanged)
 - `item.repeats` → `node.repeats` (multi-row input; not for checkbox/display)
@@ -369,7 +369,7 @@ _displayCategory   // 'instructions'|'security'|'help' — questionnaire-display
 - **Variable chip tooltips** — `%varName` chips carry rich tooltips with expression + `Questionnaire.extension[sdc-questionnaire-variable]` FHIR path + SDC spec footer
 - **Copyright + GitHub in top panel** — copyright text and GitHub link moved to the top (patient data) panel, right-aligned; order: GitHub icon → copyright text
 - **Expandable title** — node title shown as a read-only span; click → expands to a full-width textarea (auto-height), collapses on blur
-- **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview. XHTML section for `_renderXhtml` (round-trip only, not rendered)
+- **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview. XHTML section for `_renderXhtml` (sanitized via DOMPurify; rendered as `innerHTML` in preview)
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
 - **Visual condition builder** — "Show When" action panel uses FHIR `enableWhen[]` directly: AND/ANY toggle, per-condition rows (question picker + operator + type-aware value input), "+ Add condition", FHIRPath `enableWhenExpression` for advanced expressions
 - **Patient Context popup** — "Patient Context" button in toolbar opens modal; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; button disabled when no questionnaire is loaded; Apply increments `_formTick` → immediate preview re-eval; fires `patient-ctx-applied` event → `variablesPanel.refresh()` updates chips

@@ -167,7 +167,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 |---|---|---|
 | `options` | `item.answerOption[]` | comma-split → `valueCoding.{code, display}` on export; reverse on import |
 | `_renderStyle` | `item._text.extension[rendering-style]` | standard FHIR `rendering-style` extension |
-| `_renderXhtml` | `item._text.extension[rendering-xhtml]` | raw XHTML markup; round-trip preserved; editable in Appearance modal; not rendered in preview |
+| `_renderXhtml` | `item._text.extension[rendering-xhtml]` | raw XHTML markup; sanitized via DOMPurify + rendered as `innerHTML` in preview; editable in Appearance modal |
 | `_calculatedExpr` | SDC `sdc-questionnaire-calculatedExpression` extension (`valueExpression.expression`) | FHIRPath |
 | `_initialExpr` | SDC `sdc-questionnaire-initialExpression` extension (`valueExpression.expression`) | FHIRPath; evaluated once on import and on Re-init; result pre-fills `values[]` |
 | `_readOnly` | `item.readOnly` | |

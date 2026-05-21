@@ -870,3 +870,28 @@ describe('buildFHIRObject — displayCategory', () => {
   });
 });
 
+// ── _renderXhtml ──────────────────────────────────────────────────────────────
+describe('buildFHIRObject — _renderXhtml', () => {
+  it('exports _renderXhtml as _text rendering-xhtml extension', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _renderXhtml: '<b>Bold</b>' }]);
+    expect(q.item[0]._text).toBeDefined();
+    const ext = q.item[0]._text.extension;
+    const xhtmlExt = ext.find(e => e.url.includes('rendering-xhtml'));
+    expect(xhtmlExt).toBeDefined();
+    expect(xhtmlExt.valueString).toBe('<b>Bold</b>');
+  });
+
+  it('exports both _renderStyle and _renderXhtml in one _text.extension[]', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _renderStyle: 'color: red', _renderXhtml: '<em>Q</em>' }]);
+    const ext = q.item[0]._text.extension;
+    expect(ext).toHaveLength(2);
+    expect(ext.find(e => e.url.includes('rendering-style')).valueString).toBe('color: red');
+    expect(ext.find(e => e.url.includes('rendering-xhtml')).valueString).toBe('<em>Q</em>');
+  });
+
+  it('omits _text when both _renderStyle and _renderXhtml are absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
+    expect(q.item[0]._text).toBeUndefined();
+  });
+});
+

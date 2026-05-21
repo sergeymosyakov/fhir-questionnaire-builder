@@ -806,5 +806,33 @@ describe('importFHIR', () => {
       expect(_tree[0]._displayCategory).toBeUndefined();
     });
   });
+
+  // ── _renderXhtml ────────────────────────────────────────────────────────────
+  describe('_renderXhtml', () => {
+    it('reads rendering-xhtml into node._renderXhtml', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'string', text: 'Plain',
+        _text: { extension: [{ url: 'http://hl7.org/fhir/StructureDefinition/rendering-xhtml', valueString: '<b>Bold</b>' }] }
+      }]));
+      expect(_tree[0]._renderXhtml).toBe('<b>Bold</b>');
+    });
+
+    it('reads both rendering-style and rendering-xhtml from same _text.extension[]', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'string', text: 'Mixed',
+        _text: { extension: [
+          { url: 'http://hl7.org/fhir/StructureDefinition/rendering-style', valueString: 'color: red' },
+          { url: 'http://hl7.org/fhir/StructureDefinition/rendering-xhtml',  valueString: '<em>Mixed</em>' }
+        ]}
+      }]));
+      expect(_tree[0]._renderStyle).toBe('color: red');
+      expect(_tree[0]._renderXhtml).toBe('<em>Mixed</em>');
+    });
+
+    it('does not set _renderXhtml when _text is absent', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Plain' }]));
+      expect(_tree[0]._renderXhtml).toBeUndefined();
+    });
+  });
 });
 

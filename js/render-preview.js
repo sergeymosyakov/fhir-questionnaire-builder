@@ -18,7 +18,17 @@ import * as statusBadge from './ui/status-badge.js';
 import * as explainModal from './ui/explain-modal.js';
 import * as progress from './ui/progress.js';
 
-const fhirpath = window.fhirpath;
+const fhirpath  = window.fhirpath;
+const DOMPurify = window.DOMPurify;
+
+// Set label text: use sanitized XHTML when available, plain text otherwise.
+function _setNodeLabel(el, node) {
+  if (node._renderXhtml && DOMPurify) {
+    el.innerHTML = DOMPurify.sanitize(node._renderXhtml);
+  } else {
+    el.textContent = node.title;
+  }
+}
 
 // Last computed FHIRPath context — updated by _reCalc(), read by Explain click handlers.
 let _lastCtx = { fp: null, qr: null, env: {} };
@@ -539,10 +549,10 @@ async function _asyncRender(version) {
     const label = document.createElement('span');
     if (isEmptyGroup) {
       label.className = 'display-info-label';
-      label.textContent = res.node.title;
+      _setNodeLabel(label, res.node);
     } else if (res.node.type === 'group') {
       label.className = 'group-label';
-      label.textContent = res.node.title;
+      _setNodeLabel(label, res.node);
     } else if (res.node.itemType === 'display' && res.node._displayCategory === 'help') {
       label.className = 'display-help-wrap';
       const helpToggle = document.createElement('button');
@@ -560,7 +570,7 @@ async function _asyncRender(version) {
       });
       label.append(helpToggle, helpContent);
     } else {
-      label.textContent = res.node.title;
+      _setNodeLabel(label, res.node);
     }
     if (res.node._renderStyle) label.style.cssText = res.node._renderStyle;
     if (res.node.type === 'item' && res.node.itemType === 'display' && res.node._displayCategory && res.node._displayCategory !== 'help') {
