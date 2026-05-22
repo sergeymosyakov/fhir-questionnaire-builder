@@ -41,6 +41,7 @@ npm run test:e2e:ui  # e2e tests — Playwright UI mode
 ```
 Vitest and Playwright CI run automatically on every push via GitHub Actions.
 Playwright HTML report: https://sergeymosyakov.github.io/fhir-questionnaire-builder/playwright-report/
+Coverage report: https://sergeymosyakov.github.io/fhir-questionnaire-builder/coverage/
 
 > **One-time setup**: in the repo go to **Settings → Pages → Source** and select **GitHub Actions**.
 
