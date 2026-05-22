@@ -99,6 +99,7 @@ export const questMeta = reactive({
   // Business identifiers — editable via Properties modal
   _rawIdentifier:   [],        // Questionnaire.identifier[] — array of { use?, system?, value? }
   // Pass-through: preserved from import, written back on export, no editing UI
+  _rawText:         null,      // Questionnaire.text — FHIR Narrative { status, div }
   _rawContact:      null,
   _rawUseContext:   null,
   _rawJurisdiction: null,

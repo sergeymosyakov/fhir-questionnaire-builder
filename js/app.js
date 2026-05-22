@@ -417,6 +417,7 @@ function _doReset() {
   questMeta.effectivePeriodStart = ''; questMeta.effectivePeriodEnd = '';
   questMeta.experimental = null; questMeta.language = ''; questMeta.derivedFrom = [];
   questMeta._rawIdentifier = [];
+  questMeta._rawText = null;
   questMeta._rawContact = null; questMeta._rawUseContext = null; questMeta._rawJurisdiction = null;
   questMeta._rawCode = null;
   questMeta._metaVersionId = ''; questMeta._metaSource = '';
