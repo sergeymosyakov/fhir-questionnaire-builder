@@ -63,7 +63,7 @@ export function highlightJson(raw) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
   return esc.replace(
-    /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+\-]?\d+)?)/g,
+    /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)/g,
     match => {
       let cls;
       if (/^"/.test(match)) { cls = /:$/.test(match) ? 'jv-k' : 'jv-s'; }
@@ -99,8 +99,7 @@ export function highlightJsonWithSearch(raw, query) {
   }
   marked += raw.slice(last);
   let html = highlightJson(marked);
-  html = html
-    .replace(/\x01/g, '<mark class="search-match">')
-    .replace(/\x02/g, '</mark>');
+  html = html.split('\x01').join('<mark class="search-match">');
+  html = html.split('\x02').join('</mark>');
   return { html, count: positions.length };
 }
