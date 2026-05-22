@@ -2,6 +2,7 @@
 import { tree, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables, questContained, questMeta, setValue, clearAllValues } from '../state.js';
 import { renderTree } from '../render-builder.js';
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
+import { normaliseSTU3 } from './stu3-shim.js';
 
 // Walk the tree and pre-populate values[] from node._initialValue / _initialValues
 function applyInitialValues(nodes) {
@@ -406,6 +407,7 @@ export function importFHIR(fhirJson, renderFn) {
     alert('Not a FHIR Questionnaire resource (resourceType must be "Questionnaire").');
     return;
   }
+  q = normaliseSTU3(q); // no-op for R4; converts STU3 fields to R4 equivalents
   tree.splice(0);
   clearAllValues();
   rawFhir.value = q;

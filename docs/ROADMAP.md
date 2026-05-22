@@ -16,5 +16,5 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Later
 
-- [ ] **FHIR STU3 import compatibility shim** — map STU3 field names to R4 equivalents on load so older questionnaires open without errors
+- [x] **FHIR STU3 import compatibility shim** — `js/fhir/stu3-shim.js` normalises STU3 fields to R4 on load: `option[]`→`answerOption[]`, `options`→`answerValueSet`, `enableWhen.hasAnswer`→`operator:exists`, `initial<Type>`→`initial[{value<Type>}]`; export always produces R4
 - [ ] **External validator integration** — link to HL7 / Simplifier validator or call a local FHIR validation API; surface results as item-level badges

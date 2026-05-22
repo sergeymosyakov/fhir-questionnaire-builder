@@ -1,0 +1,164 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "phq-9-stu3",
+  "meta": {
+    "fhirVersion": "3.0.2"
+  },
+  "url": "http://example.org/Questionnaire/phq-9-stu3",
+  "version": "1.0",
+  "name": "PHQ9",
+  "title": "PHQ-9 Depression Screening (STU3)",
+  "status": "active",
+  "date": "2019-06-01",
+  "publisher": "Pfizer Inc.",
+  "description": "Patient Health Questionnaire 9 — STU3 format for import compatibility testing.",
+  "subjectType": ["Patient"],
+  "item": [
+    {
+      "linkId": "instructions",
+      "text": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
+      "type": "display"
+    },
+    {
+      "linkId": "q1",
+      "text": "Little interest or pleasure in doing things",
+      "type": "choice",
+      "required": true,
+      "option": [
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6571-9", "display": "Nearly every day" } }
+      ]
+    },
+    {
+      "linkId": "q2",
+      "text": "Feeling down, depressed, or hopeless",
+      "type": "choice",
+      "required": true,
+      "option": [
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6571-9", "display": "Nearly every day" } }
+      ]
+    },
+    {
+      "linkId": "q3",
+      "text": "Trouble falling or staying asleep, or sleeping too much",
+      "type": "choice",
+      "required": true,
+      "option": [
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6571-9", "display": "Nearly every day" } }
+      ]
+    },
+    {
+      "linkId": "q4",
+      "text": "Feeling tired or having little energy",
+      "type": "choice",
+      "required": true,
+      "option": [
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6571-9", "display": "Nearly every day" } }
+      ]
+    },
+    {
+      "linkId": "q5",
+      "text": "Poor appetite or overeating",
+      "type": "choice",
+      "required": true,
+      "option": [
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6571-9", "display": "Nearly every day" } }
+      ]
+    },
+    {
+      "linkId": "q6",
+      "text": "Feeling bad about yourself — or that you are a failure or have let yourself or your family down",
+      "type": "choice",
+      "required": true,
+      "option": [
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6571-9", "display": "Nearly every day" } }
+      ]
+    },
+    {
+      "linkId": "q7",
+      "text": "Trouble concentrating on things, such as reading the newspaper or watching television",
+      "type": "choice",
+      "required": true,
+      "option": [
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6571-9", "display": "Nearly every day" } }
+      ]
+    },
+    {
+      "linkId": "q8",
+      "text": "Moving or speaking so slowly that other people could have noticed — or being so fidgety or restless that you have been moving around a lot more than usual",
+      "type": "choice",
+      "required": true,
+      "option": [
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6571-9", "display": "Nearly every day" } }
+      ]
+    },
+    {
+      "linkId": "q9",
+      "text": "Thoughts that you would be better off dead, or thoughts of hurting yourself in some way",
+      "type": "choice",
+      "required": true,
+      "option": [
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6568-5", "display": "Not at all" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6569-3", "display": "Several days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6570-1", "display": "More than half the days" } },
+        { "valueCoding": { "system": "http://loinc.org", "code": "LA6571-9", "display": "Nearly every day" } }
+      ]
+    },
+    {
+      "linkId": "difficulty",
+      "text": "If you checked any problems, how difficult have these problems made it for you to do your work, take care of things at home, or get along with other people?",
+      "type": "choice",
+      "enableWhen": [
+        {
+          "question": "q1",
+          "hasAnswer": true
+        }
+      ],
+      "option": [
+        { "valueCoding": { "code": "not-difficult", "display": "Not difficult at all" } },
+        { "valueCoding": { "code": "somewhat-difficult", "display": "Somewhat difficult" } },
+        { "valueCoding": { "code": "very-difficult", "display": "Very difficult" } },
+        { "valueCoding": { "code": "extremely-difficult", "display": "Extremely difficult" } }
+      ]
+    },
+    {
+      "linkId": "score",
+      "text": "Total PHQ-9 score",
+      "type": "integer",
+      "readOnly": true,
+      "initialInteger": 0,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "0"
+          }
+        }
+      ]
+    }
+  ]
+}

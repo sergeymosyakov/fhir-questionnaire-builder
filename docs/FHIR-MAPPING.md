@@ -385,4 +385,19 @@ These SDC extensions support advanced form pre-population from clinical data and
 |---|---|
 | R4 | ✅ Fully supported |
 | R4B / R5 | 🔧 Partial — most fields overlap; `answerConstraint` and `disabledDisplay` are R4B/R5 native (R4 backport extension handled for `disabledDisplay`) |
-| STU3 | ❌ Not tested; may partially import |
+| STU3 | 🔧 Import shim — automatically normalised to R4 on load via `js/fhir/stu3-shim.js`; see table below |
+
+### STU3 → R4 normalisation (`js/fhir/stu3-shim.js`)
+
+Applied automatically in `importFHIR()` before the R4 parser runs. Detection: `meta.fhirVersion` starts with `3.`/`1.`, or presence of STU3-only fields anywhere in the item tree.
+
+| STU3 field | R4 equivalent | Notes |
+|---|---|---|
+| `item.option[]` | `item.answerOption[]` | Field renamed; entry shape is identical |
+| `item.options` (Reference) | `item.answerValueSet` | Reference URL extracted to canonical string |
+| `enableWhen.hasAnswer: true` | `enableWhen.operator: 'exists', answerBoolean: true` | Visibility condition "has any answer" |
+| `enableWhen.hasAnswer: false` | `enableWhen.operator: 'exists', answerBoolean: false` | Visibility condition "has no answer" |
+| `enableWhen` with `answer[x]` but no `operator` | adds `operator: '='` | STU3 implicit equality |
+| `item.initial<Type>` (e.g. `initialInteger`, `initialCoding`) | `item.initial: [{ value<Type>: ... }]` | All 12 typed initial fields covered |
+
+**Output:** always R4 — the STU3 shim is import-only. Exporting an imported STU3 questionnaire produces valid FHIR R4 JSON.

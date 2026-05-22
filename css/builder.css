@@ -168,6 +168,17 @@
 }
 .load-menu-item:hover { background: var(--c-primary-lt); color: var(--c-primary); }
 .load-menu-sep { height: 1px; background: var(--c-border); margin: 2px 0; }
+.load-menu-group {
+  padding: 6px 14px 3px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--c-text-2);
+  pointer-events: none;
+  user-select: none;
+}
+.load-menu-item--indented { padding-left: 22px; }
 
 /* === Node cards ============================================================== */
 .node-wrap { display: contents; }
