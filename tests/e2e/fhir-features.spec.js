@@ -280,8 +280,9 @@ test.describe('minLength enforcement', () => {
   test('error shown on blur when value is too short', async ({ page }) => {
     await loadFixture(page);
     const textarea = page.locator('[data-preview-id="string-with-min"] textarea');
+    await textarea.click();
     await textarea.fill('Hi');
-    await textarea.blur();
+    await textarea.press('Tab');
     const err = page.locator('[data-preview-id="string-with-min"] [data-testid="minlength-err"]');
     await expect(err).toBeVisible();
     await expect(err).toContainText('5');
@@ -290,10 +291,12 @@ test.describe('minLength enforcement', () => {
   test('error clears when value reaches minLength', async ({ page }) => {
     await loadFixture(page);
     const textarea = page.locator('[data-preview-id="string-with-min"] textarea');
+    await textarea.click();
     await textarea.fill('Hi');
-    await textarea.blur();
+    await textarea.press('Tab');
+    await textarea.click();
     await textarea.fill('Hello world');
-    await textarea.blur();
+    await textarea.press('Tab');
     const err = page.locator('[data-preview-id="string-with-min"] [data-testid="minlength-err"]');
     await expect(err).toBeHidden();
   });
