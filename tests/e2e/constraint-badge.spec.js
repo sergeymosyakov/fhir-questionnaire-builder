@@ -39,11 +39,10 @@ async function loadFixture(page) {
 
 const badge = page => page.getByTestId('status-badge-btn');
 
-// Click on the "Questionnaire Preview" label (tabindex=-1) to move focus away from the
-// input — this reliably fires blur + change even in headless Chromium.
+// press('Tab') moves focus away from the input, reliably firing both blur and
+// change events in headless Chromium — triggering _formTick++ and a badge re-render.
 async function commitInput(page, input) {
-  await input.blur();
-  await page.locator('text=Questionnaire Preview').click();
+  await input.press('Tab');
   await page.waitForTimeout(300);
 }
 

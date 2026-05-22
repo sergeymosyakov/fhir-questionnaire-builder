@@ -40,7 +40,6 @@ export function build(node, ctx) {
     };
     errMinLen.style.display = 'none';
     el.addEventListener('blur', validateMinLen);
-    validateMinLen(); // restore error state after re-render if value already invalid
   }
 
   let _debounce = null;
@@ -50,7 +49,6 @@ export function build(node, ctx) {
     clearTimeout(_debounce);
     _debounce = setTimeout(() => { _reCalc(); onChange(); }, 200);
   };
-  el.onchange = () => { _formTick.value++; };
 
   wrap.appendChild(el);
   if (counter) wrap.appendChild(counter);

@@ -53,9 +53,7 @@ export function build(node, ctx) {
     clearTimeout(_debounce);
     _debounce = setTimeout(() => { _reCalc(); onChange(); }, 200);
   };
-  el.onchange = () => { _formTick.value++; };
   el.addEventListener('blur', validateErr);
-  validateErr(); // restore error state after re-render
 
   wrap.appendChild(el);
   wrap.appendChild(errMsg);
