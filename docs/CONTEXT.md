@@ -1,6 +1,6 @@
 ﻿# QuestionaryPrototype — Build Context
 
-> Internal architecture and codebase notes. See [README.md](../README.md) for user-facing docs.
+> Internal architecture and codebase notes. See [README.md](../README.md) for quick-start and sample data; [FHIR-MAPPING.md](FHIR-MAPPING.md) for FHIR field coverage; [ROADMAP.md](ROADMAP.md) for the feature backlog.
 
 ## 🚨 THE MUST — highest priority, no exceptions
 
@@ -14,7 +14,7 @@
 ## ⚠️ WORKFLOW RULES — MANDATORY
 
 1. **git commit/push only on explicit user instruction** ("push it", "пушай"). Never automatically.
-2. **Before every push** — run `npx vitest run` (must pass); update `docs/CONTEXT.md`, `docs/FHIR-MAPPING.md` (if FHIR mapping changed), and `README.md`. **E2E (Playwright) tests are on-demand only** — run only when user explicitly asks ("прогони e2e"). Do NOT run playwright as part of the default pre-push checklist. Root `CONTEXT.md` does not exist — do not create it.
+2. **Before every push** — run `npx vitest run` (must pass); update relevant `docs/` files: `docs/CONTEXT.md` (file table, UX features, architecture), `docs/FHIR-MAPPING.md` (if FHIR mapping changed), `docs/ROADMAP.md` (if features completed or new features planned). `README.md` — only update for major changes (running instructions, sample data list, tech stack summary). **E2E (Playwright) tests are on-demand only** — run only when user explicitly asks ("прогони e2e"). Do NOT run playwright as part of the default pre-push checklist. Root `CONTEXT.md` does not exist — do not create it.
 3. **Modularity** — new UI widget → `js/ui/<name>.js`; new control → `js/controls/<name>.js`; new CSS concern → `css/<name>.css` + `<link>` in index.html. Do not add logically separate code into existing modules.
 4. **OOP / DRY** — when 2+ modules share the same behavioral pattern, extract a shared base/factory instead of copy-pasting. Example: all modals use `initModal(elements, callbacks)` + `setModalTitle(titleEl, label, subject)` from `js/ui/modal-base.js` — never inline the lifecycle boilerplate in a new modal file.
 5. **DI** — DOM resolved once in `app.js`, passed via `init(elements)`. No `getElementById` inside submodules.
@@ -124,7 +124,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `sampledata/phq-9-response.qr.json` | Sample QuestionnaireResponse for PHQ-9 (mild depression, score 7) — 10 answered items with `valueCoding` (LOINC codes) |
 | `sampledata/example-bariatric-response.qr.json` | Sample QuestionnaireResponse for example-bariatric (eligible male patient, BMI 41.5) — groups + nested items |
 | `sampledata/1776102565767-…json` | Real-world questionnaire snapshot for regression testing |
-| `ROADMAP.md` | Prioritized feature roadmap (Now / Next / Later) |
+| `docs/ROADMAP.md` | Prioritized feature backlog |
 | `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
 | `package.json` | Node dev tooling — Vitest (`npm test`) + Playwright (`npm run test:e2e`); `serve` devDep used by Playwright webServer |
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
