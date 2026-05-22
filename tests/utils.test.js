@@ -6,6 +6,8 @@ import {
   findAncestorGroupIds,
   parseOption,
   parseOptions,
+  highlightJson,
+  highlightJsonWithSearch,
 } from '../js/utils.js';
 
 // ── escAttr ───────────────────────────────────────────────────────────────────
@@ -115,4 +117,99 @@ describe('parseOptions', () => {
 
   it('filters blank tokens', () =>
     expect(parseOptions('a=A,,b=B')).toHaveLength(2));
+});
+
+// ── highlightJson ─────────────────────────────────────────────────────────────
+describe('highlightJson', () => {
+  it('wraps object keys in jv-k span', () => {
+    const out = highlightJson('{"foo": 1}');
+    expect(out).toContain('<span class="jv-k">"foo":</span>');
+  });
+
+  it('wraps string values in jv-s span', () => {
+    const out = highlightJson('{"x": "hello"}');
+    expect(out).toContain('<span class="jv-s">"hello"</span>');
+  });
+
+  it('wraps numbers in jv-n span', () => {
+    const out = highlightJson('{"n": 42}');
+    expect(out).toContain('<span class="jv-n">42</span>');
+  });
+
+  it('wraps true/false in jv-b span', () => {
+    const out = highlightJson('{"a": true, "b": false}');
+    expect(out).toContain('<span class="jv-b">true</span>');
+    expect(out).toContain('<span class="jv-b">false</span>');
+  });
+
+  it('wraps null in jv-null span', () => {
+    const out = highlightJson('{"x": null}');
+    expect(out).toContain('<span class="jv-null">null</span>');
+  });
+
+  it('escapes HTML special chars in values', () => {
+    const out = highlightJson('{"x": "<b>bold</b>"}');
+    expect(out).toContain('&lt;b&gt;');
+    expect(out).not.toContain('<b>');
+  });
+
+  it('escapes ampersand in values', () => {
+    const out = highlightJson('{"x": "a&b"}');
+    expect(out).toContain('&amp;');
+  });
+});
+
+// ── highlightJsonWithSearch ───────────────────────────────────────────────────
+describe('highlightJsonWithSearch', () => {
+  it('returns count 0 and base html when query is empty', () => {
+    const base = highlightJson('{"a": 1}');
+    const { html, count } = highlightJsonWithSearch('{"a": 1}', '');
+    expect(count).toBe(0);
+    expect(html).toBe(base);
+  });
+
+  it('returns count 0 when no match found', () => {
+    const { count } = highlightJsonWithSearch('{"a": 1}', 'zzz');
+    expect(count).toBe(0);
+  });
+
+  it('wraps a match inside a string value in <mark>', () => {
+    const { html, count } = highlightJsonWithSearch('{"x": "hello"}', 'hello');
+    expect(count).toBe(1);
+    expect(html).toContain('<mark class="search-match">hello</mark>');
+  });
+
+  it('wraps a match inside an object key in <mark>', () => {
+    const { html, count } = highlightJsonWithSearch('{"linkId": "q1"}', 'linkId');
+    expect(count).toBe(1);
+    expect(html).toContain('<mark class="search-match">linkId</mark>');
+  });
+
+  it('is case-insensitive', () => {
+    const { count } = highlightJsonWithSearch('{"x": "Hello"}', 'hello');
+    expect(count).toBe(1);
+  });
+
+  it('counts multiple occurrences', () => {
+    const { count } = highlightJsonWithSearch('{"a": "foo", "b": "foo"}', 'foo');
+    expect(count).toBe(2);
+  });
+
+  it('does not produce overlapping marks', () => {
+    const { html } = highlightJsonWithSearch('"aaa"', 'a');
+    // each 'a' should be wrapped separately
+    expect(html.match(/<mark/g)).toHaveLength(3);
+  });
+
+  it('preserves syntax highlighting spans alongside marks', () => {
+    const { html } = highlightJsonWithSearch('{"x": "val"}', 'val');
+    expect(html).toContain('jv-s');
+    expect(html).toContain('search-match');
+  });
+
+  it('HTML-escapes special chars even when marked', () => {
+    const { html } = highlightJsonWithSearch('{"x": "<em>"}', '<em>');
+    expect(html).not.toContain('<em>');
+    expect(html).toContain('&lt;em&gt;');
+  });
 });
