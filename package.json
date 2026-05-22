@@ -10,7 +10,7 @@
     "lint": "eslint js/ tests/"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.60.0",
     "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^10.4.0",
