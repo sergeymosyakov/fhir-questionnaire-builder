@@ -731,7 +731,8 @@ describe('importFHIR', () => {
 
   // ── sdc-questionnaire-entryFormat ────────────────────────────────────────
   describe('_entryFormat', () => {
-    const EF_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat';
+    const EF_URL     = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat';
+    const EF_URL_R4  = 'http://hl7.org/fhir/StructureDefinition/entryFormat';
 
     it('reads entryFormat valueString into node._entryFormat', () => {
       importFHIR(minQ([{
@@ -752,6 +753,25 @@ describe('importFHIR', () => {
         extension: [{ url: EF_URL }],
       }]));
       expect(_tree[0]._entryFormat).toBeUndefined();
+    });
+
+    it('reads R4 entryFormat alias URL into node._entryFormat', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'string', text: 'Date',
+        extension: [{ url: EF_URL_R4, valueString: 'DD/MM/YYYY' }],
+      }]));
+      expect(_tree[0]._entryFormat).toBe('DD/MM/YYYY');
+    });
+
+    it('prefers SDC URL over R4 alias when both are present', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'string', text: 'Date',
+        extension: [
+          { url: EF_URL,    valueString: 'SDC-value' },
+          { url: EF_URL_R4, valueString: 'R4-value'  },
+        ],
+      }]));
+      expect(_tree[0]._entryFormat).toBe('SDC-value');
     });
   });
 
@@ -882,7 +902,8 @@ describe('importFHIR', () => {
 
   // ── sdc-questionnaire-hidden ───────────────────────────────────────────────
   describe('_hidden import', () => {
-    const HIDDEN_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden';
+    const HIDDEN_URL    = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden';
+    const HIDDEN_URL_R4 = 'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden';
 
     it('sets _hidden = true for an item with sdc-questionnaire-hidden = true', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
@@ -906,6 +927,29 @@ describe('importFHIR', () => {
     it('sets _hidden = true on a group item', () => {
       importFHIR(minQ([{ linkId: 'g1', type: 'group', text: 'G',
         extension: [{ url: HIDDEN_URL, valueBoolean: true }],
+        item: [{ linkId: 'g1.q1', type: 'string', text: 'Child' }]
+      }]));
+      expect(_tree[0]._hidden).toBe(true);
+      expect(_tree[0].children[0]._hidden).toBeUndefined();
+    });
+
+    it('sets _hidden = true for an item using R4 questionnaire-hidden URL', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
+        extension: [{ url: HIDDEN_URL_R4, valueBoolean: true }]
+      }]));
+      expect(_tree[0]._hidden).toBe(true);
+    });
+
+    it('does not set _hidden when R4 URL has valueBoolean false', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
+        extension: [{ url: HIDDEN_URL_R4, valueBoolean: false }]
+      }]));
+      expect(_tree[0]._hidden).toBeUndefined();
+    });
+
+    it('sets _hidden = true on a group using R4 questionnaire-hidden URL', () => {
+      importFHIR(minQ([{ linkId: 'g1', type: 'group', text: 'G',
+        extension: [{ url: HIDDEN_URL_R4, valueBoolean: true }],
         item: [{ linkId: 'g1.q1', type: 'string', text: 'Child' }]
       }]));
       expect(_tree[0]._hidden).toBe(true);

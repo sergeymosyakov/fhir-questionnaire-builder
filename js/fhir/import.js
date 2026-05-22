@@ -212,9 +212,10 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // maxLength
   if (fhirItem.maxLength) node._maxLength = fhirItem.maxLength;
 
-  // sdc-questionnaire-entryFormat
+  // sdc-questionnaire-entryFormat (SDC) or entryFormat (R4 element-definition ext)
   const entryFmtExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat'
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat' ||
+         e.url === 'http://hl7.org/fhir/StructureDefinition/entryFormat'
   );
   if (entryFmtExt?.valueString) node._entryFormat = entryFmtExt.valueString;
 
@@ -274,9 +275,10 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     .map(e => e.valueUri);
   if (supportLinks.length) node._supportLinks = supportLinks;
 
-  // sdc-questionnaire-hidden: item is never shown to patient but participates in logic
+  // sdc-questionnaire-hidden (SDC) or questionnaire-hidden (R4 standard) — alias fallback
   const hiddenExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden'
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden' ||
+         e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden'
   );
   if (hiddenExt?.valueBoolean === true) node._hidden = true;
 
@@ -363,7 +365,8 @@ function fhirItemToNode(fhirItem, linkIdMap, contained) {
       .map(e => e.valueUri);
     if (groupSupportLinks.length) node._supportLinks = groupSupportLinks;
     const groupHiddenExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden'
+      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden' ||
+           e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden'
     );
     if (groupHiddenExt?.valueBoolean === true) node._hidden = true;
     for (const child of fhirItem.item || []) {
