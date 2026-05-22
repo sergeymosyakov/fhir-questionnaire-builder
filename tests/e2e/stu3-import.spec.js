@@ -60,8 +60,14 @@ test.describe('STU3 import', () => {
 
   test('STU3 title is imported correctly', async ({ page }) => {
     await loadFixture(page, 'phq-9.stu3.fhir.json');
-    // The questionnaire title from STU3 file is "PHQ-9 Depression Screening (STU3)"
-    await expect(page.locator('[data-testid="preview-panel"]')).toContainText('PHQ-9 Depression Screening');
+    // The questionnaire title is metadata — not rendered in the preview panel items.
+    // Switch to FHIR JSON view to verify it was imported into questMeta.
+    await page.getByTestId('preview-mode-btn').click();
+    await page.getByTestId('preview-mode-json').click();
+    await expect(page.locator('#fhirJsonView')).toContainText('PHQ-9 Depression Screening');
+    // Switch back to Preview for subsequent tests
+    await page.getByTestId('preview-mode-btn').click();
+    await page.getByTestId('preview-mode-preview').click();
   });
 
   test('STU3 display item renders in preview', async ({ page }) => {
@@ -97,6 +103,9 @@ test.describe('STU3 import', () => {
 
   test('exported questionnaire from STU3 import is valid R4', async ({ page }) => {
     await loadFixture(page, 'phq-9.stu3.fhir.json');
+
+    // Accept the filename prompt that appears before download
+    page.on('dialog', dialog => dialog.accept());
 
     // Trigger export and capture the downloaded JSON
     await page.locator('[data-testid="export-btn"]').click();
