@@ -429,6 +429,7 @@ export function importFHIR(fhirJson, renderFn) {
   questMeta.effectivePeriodEnd   = q.effectivePeriod?.end   || '';
   questMeta.experimental      = q.experimental !== undefined ? q.experimental : null;
   questMeta.language          = q.language || '';
+  questMeta._rawIdentifier   = Array.isArray(q.identifier)   ? JSON.parse(JSON.stringify(q.identifier)) : [];
   questMeta._rawContact      = Array.isArray(q.contact)      ? q.contact      : null;
   questMeta._rawUseContext   = Array.isArray(q.useContext)   ? q.useContext   : null;
   questMeta._rawJurisdiction = Array.isArray(q.jurisdiction) ? q.jurisdiction : null;

@@ -90,6 +90,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `questMeta.effectivePeriodEnd` | `Questionnaire.effectivePeriod.end` | ← `effectivePeriod?.end` (default: `''`) | → `effectivePeriod.end` (omitted when empty) |
 | `questMeta.experimental` | `Questionnaire.experimental` | ← `experimental` (default: `null`) | → `experimental` (omitted when `null`) |
 | `questMeta.language` | `Questionnaire.language` | ← `language` (default: `''`) | → `language` (omitted when empty) |
+| `questMeta._rawIdentifier` | `Questionnaire.identifier[]` | ← stored as Identifier[] (default: `[]`) | → written back unchanged; editable via **Identifiers** collapsible section in Properties modal (use/system/value rows; badge shows count) |
 | `questMeta._rawContact` | `Questionnaire.contact[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawUseContext` | `Questionnaire.useContext[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawJurisdiction` | `Questionnaire.jurisdiction[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
@@ -316,7 +317,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 
 | FHIR field | Status | Notes |
 |---|---|---|
-| `Questionnaire.identifier[]` | ⚠️ Silently dropped | Business identifier (NamingSystem + value). Used by EHR systems to reference questionnaires by external ID, printed on form headers, and required by some IG profiles. Not stored, not editable, not written back. |
 | `Questionnaire.text` | ⚠️ Silently dropped | Human-readable narrative (auto-generated in some workflows). Not stored, not written. |
 | `Questionnaire.implicitRules` | ⚠️ Silently dropped | Declares the rules set that constrains how the resource is used. Rare in practice. |
 | Unknown item extensions | ⚠️ Silently dropped | Any `item.extension[]` entry whose URL is not explicitly handled by the builder is discarded on import and will not appear in the exported JSON. |

@@ -38,7 +38,7 @@ Lets you build questionnaire logic visually, test it against patient data, and i
 | `js/fhir/validate.js` | `validateTree` → `{severity, nodeId, message}[]` |
 | `js/ui/validate-modal.js` | Validate modal — `init(elements)`, `show(title, issues, mode, callbacks)` |
 | `js/ui/variables-panel.js` | SDC Variables card + edit modal — `init(elements, questVariables, onReinit)`, `refresh()`; draft-based editing with Apply/Cancel buttons; `%name` chip rich tooltips |
-| `js/ui/metadata-modal.js` | Questionnaire Properties modal — `init(elements)`, `open()`; draft pattern; edits all `questMeta` fields via five sections: **Core** (id, url, version, name, title, status, language BCP-47 dropdown, publisher, description), **Advanced** (collapsible: experimental select, date, subjectType, effectivePeriodStart/End, approvalDate, lastReviewDate, purpose, copyright), **Derived From** (collapsible: canonical URL list), **Resource Meta** (collapsible: versionId + Generate UUID, source URI, lastUpdated read-only, profile[], tag[], security[]), **Codes** (collapsible: `Questionnaire.code[]`; badge shows count); **all field labels and section toggle buttons carry rich tooltips** (FHIR R4 paths); changes committed on Apply; status + experimental badge reflected in questMetaCard |
+| `js/ui/metadata-modal.js` | Questionnaire Properties modal — `init(elements)`, `open()`; draft pattern; edits all `questMeta` fields via six sections: **Core** (id, url, version, name, title, status, language BCP-47 dropdown, publisher, description), **Advanced** (collapsible: experimental select, date, subjectType, effectivePeriodStart/End, approvalDate, lastReviewDate, purpose, copyright), **Derived From** (collapsible: canonical URL list), **Identifiers** (collapsible: `Questionnaire.identifier[]`; each row has use select + system URL + value text + × remove; badge shows count), **Resource Meta** (collapsible: versionId + Generate UUID, source URI, lastUpdated read-only, profile[], tag[], security[]), **Codes** (collapsible: `Questionnaire.code[]`; badge shows count); **all field labels and section toggles carry rich tooltips**; Apply commits; status + experimental badge in questMetaCard |
 | `js/ui/codes-modal.js` | **Item / Group Properties** modal — `init(elements)`, `open(node, link, setActive)`; draft pattern; three sections: **Definition URL** (`node._definition`), **Codes** (`node._codes[]`), **Support Links** (`node._supportLinks[]`); Apply commits all three; Cancel discards; available on both items and groups |
 | `js/ui/json-viewer.js` | Shared read-only FHIR JSON viewer modal — `init(elements)`, `show(title, data)`, `close()`; Esc / backdrop / × close |
 | `js/ui/contained-panel.js` | Collapsible card showing `Questionnaire.contained[]` resources — each chip opens JSON viewer |
@@ -345,7 +345,7 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 ```powershell
 npm test             # unit tests — single run (Vitest, 339 tests)
 npm run test:watch   # unit tests — watch mode
-npm run test:e2e     # e2e tests — Playwright/Chromium (224 tests, requires Chromium installed)
+npm run test:e2e     # e2e tests — Playwright/Chromium (391 tests, requires Chromium installed)
 npm run test:e2e:ui  # e2e tests — Playwright UI mode
 ```
 Vitest and Playwright CI run automatically on every push via GitHub Actions (see `.github/workflows/test.yml`).

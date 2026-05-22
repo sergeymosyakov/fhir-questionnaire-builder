@@ -231,6 +231,7 @@ export function buildFHIRObject() {
   q.subjectType = questMeta.subjectType
     ? questMeta.subjectType.split(',').map(s => s.trim()).filter(Boolean)
     : ['Patient'];
+  if (questMeta._rawIdentifier?.length) q.identifier = JSON.parse(JSON.stringify(questMeta._rawIdentifier));
   if (questMeta._rawContact)      q.contact     = questMeta._rawContact;
   if (questMeta._rawUseContext)   q.useContext  = questMeta._rawUseContext;
   if (questMeta._rawJurisdiction) q.jurisdiction = questMeta._rawJurisdiction;

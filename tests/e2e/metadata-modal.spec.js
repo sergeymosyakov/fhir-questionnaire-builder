@@ -52,6 +52,12 @@
 //   meta-security-display-{idx}  (data-testid) security Coding display input at index idx
 //   meta-security-remove-{idx}   (data-testid) security Coding remove button at index idx
 //   meta-securitys-add-btn       (data-testid) Add security label button
+//   meta-identifiers-toggle      (data-testid) Identifiers section toggle button
+//   meta-identifier-use-{idx}    (data-testid) use select for identifier at index idx
+//   meta-identifier-system-{idx} (data-testid) system input for identifier at index idx
+//   meta-identifier-value-{idx}  (data-testid) value input for identifier at index idx
+//   meta-identifier-remove-{idx} (data-testid) remove button for identifier at index idx
+//   meta-identifier-add-btn      (data-testid) Add Identifier button
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -793,4 +799,134 @@ test.describe('metadata modal — Resource Meta section', () => {
     await page.locator('#metadataModalCancel').click();
   });
 });
+// ── Questionnaire.identifier[] section ─────────────────────────────────────────────────────
 
+test.describe('metadata modal — Identifiers section', () => {
+
+  test('toggle button is visible when modal is open', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-identifiers-toggle')).toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('section is auto-expanded when fixture has identifiers', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-identifier-system-0')).toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('section is collapsed by default on a fresh questionnaire', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await openModal(page);
+    await expect(page.getByTestId('meta-identifier-add-btn')).not.toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('clicking toggle expands the section', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await openModal(page);
+    await page.getByTestId('meta-identifiers-toggle').click();
+    await expect(page.getByTestId('meta-identifier-add-btn')).toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('toggle badge shows count of non-empty identifiers', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-identifiers-toggle')).toContainText('(1)');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('imported identifier row has correct system, value and use', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-identifier-use-0')).toHaveValue('official');
+    await expect(page.getByTestId('meta-identifier-system-0')).toHaveValue('http://example.org/questionnaire-ids');
+    await expect(page.getByTestId('meta-identifier-value-0')).toHaveValue('Q-2024-001');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('Add Identifier button appends a new empty row', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-identifier-add-btn').click();
+    await expect(page.getByTestId('meta-identifier-system-1')).toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('remove button deletes the identifier row', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-identifier-remove-0').click();
+    await expect(page.getByTestId('meta-identifier-system-0')).not.toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('identifier[] round-trips through export', async ({ page }) => {
+    await loadFixture(page);
+    const q = await exportFHIR(page);
+    expect(q.identifier).toEqual([
+      { use: 'official', system: 'http://example.org/questionnaire-ids', value: 'Q-2024-001' },
+    ]);
+  });
+
+  test('edited identifier value is committed on Apply and written to export', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-identifier-value-0').fill('Q-2025-999');
+    await page.locator('#metadataModalApply').click();
+    const q = await exportFHIR(page);
+    expect(q.identifier[0].value).toBe('Q-2025-999');
+  });
+
+  test('edited identifier system is committed on Apply and written to export', async ({ page }) => {
+    await loadFixture(page);  
+    await openModal(page);
+    await page.getByTestId('meta-identifier-system-0').fill('http://new.example.org/ids');
+    await page.locator('#metadataModalApply').click();
+    const q = await exportFHIR(page);
+    expect(q.identifier[0].system).toBe('http://new.example.org/ids');
+  });
+
+  test('Cancel discards identifier edits', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-identifier-value-0').fill('CHANGED');
+    await page.locator('#metadataModalCancel').click();
+    await openModal(page);
+    await expect(page.getByTestId('meta-identifier-value-0')).toHaveValue('Q-2024-001');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('added identifier is written to export JSON', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-identifier-add-btn').click();
+    await page.getByTestId('meta-identifier-system-1').fill('http://acme.org/ids');
+    await page.getByTestId('meta-identifier-value-1').fill('ACME-007');
+    await page.locator('#metadataModalApply').click();
+    const q = await exportFHIR(page);
+    expect(q.identifier).toHaveLength(2);
+    expect(q.identifier[1]).toMatchObject({ system: 'http://acme.org/ids', value: 'ACME-007' });
+  });
+
+  test('removing all identifiers omits identifier[] from export', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-identifier-remove-0').click();
+    await page.locator('#metadataModalApply').click();
+    const q = await exportFHIR(page);
+    expect(q.identifier).toBeUndefined();
+  });
+
+  test('new questionnaire without identifiers has no identifier[] in export', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    const q = await exportFHIR(page);
+    expect(q.identifier).toBeUndefined();
+  });
+});

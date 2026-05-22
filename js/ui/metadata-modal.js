@@ -96,6 +96,7 @@ export function open() {
 
     metaTag:        JSON.parse(JSON.stringify(questMeta._rawMetaTag      || [])),
     metaSecurity:   JSON.parse(JSON.stringify(questMeta._rawMetaSecurity || [])),
+    identifiers:    JSON.parse(JSON.stringify(questMeta._rawIdentifier   || [])),
   };
 
   setModalTitle(_el.title, 'Questionnaire Properties', '');
@@ -134,6 +135,7 @@ function _apply() {
   questMeta._rawMetaProfile  = _pending.metaProfile.filter(u => u.trim());
   questMeta._rawMetaTag      = _pending.metaTag.filter(c => c.code?.trim());
   questMeta._rawMetaSecurity = _pending.metaSecurity.filter(c => c.code?.trim());
+  questMeta._rawIdentifier   = _pending.identifiers.filter(i => i.system?.trim() || i.value?.trim());
   _close();
 }
 
@@ -387,6 +389,113 @@ function _renderBody(container) {
 
   derivedSection.append(derivedToggle, derivedBody);
   container.appendChild(derivedSection);
+
+  // ── Identifiers (collapsible) ────────────────────────────────────────────────────
+  const idSection = document.createElement('div');
+  idSection.className = 'meta-modal-advanced';
+
+  const idToggle = document.createElement('button');
+  idToggle.type = 'button';
+  idToggle.className = 'meta-modal-adv-toggle';
+  idToggle.dataset.testid  = 'meta-identifiers-toggle';
+  idToggle.dataset.tipTitle = 'Questionnaire.identifier';
+  idToggle.dataset.tipBody  = 'Business identifiers for this questionnaire — NamingSystem + value pairs used by EHR systems to look up questionnaires by external ID. Required by some IG profiles.';
+  idToggle.dataset.tipFhir  = 'Questionnaire.identifier';
+  idToggle.dataset.tipSpec  = 'R4';
+  let idOpen = _pending.identifiers.length > 0;
+
+  const idBody = document.createElement('div');
+  idBody.className = 'meta-modal-adv-body';
+  idBody.style.display = idOpen ? '' : 'none';
+
+  const ID_USES = ['', 'usual', 'official', 'temp', 'secondary', 'old'];
+  const ID_USE_LABELS = ['(use)', 'usual', 'official', 'temp', 'secondary', 'old'];
+
+  const _setIdLabel = () => {
+    const count = _pending.identifiers.filter(i => i.system?.trim() || i.value?.trim()).length;
+    const badge = count ? ` (${count})` : '';
+    idToggle.textContent = (idOpen ? '\u25BC' : '\u25BA') + ' Identifiers' + badge;
+  };
+
+  const _renderIdentifiers = () => {
+    idBody.innerHTML = '';
+    if (_pending.identifiers.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'codes-empty-msg';
+      empty.textContent = 'No identifiers. Click \u2018+ Add Identifier\u2019 to add one.';
+      idBody.appendChild(empty);
+    }
+    _pending.identifiers.forEach((ident, idx) => {
+      const row = document.createElement('div');
+      row.className = 'codes-row identifier-row';
+
+      const useSel = document.createElement('select');
+      useSel.className = 'identifier-use-sel';
+      useSel.dataset.testid = `meta-identifier-use-${idx}`;
+      ID_USES.forEach((u, i) => {
+        const opt = document.createElement('option');
+        opt.value = u; opt.textContent = ID_USE_LABELS[i];
+        if (u === (ident.use || '')) opt.selected = true;
+        useSel.appendChild(opt);
+      });
+      useSel.onchange = () => {
+        if (useSel.value) ident.use = useSel.value;
+        else delete ident.use;
+        _setIdLabel();
+      };
+
+      const sysInp = document.createElement('input');
+      sysInp.type = 'url';
+      sysInp.className = 'codes-inp';
+      sysInp.value = ident.system || '';
+      sysInp.placeholder = 'http://example.org/ids';
+      sysInp.dataset.testid = `meta-identifier-system-${idx}`;
+      sysInp.oninput = () => { ident.system = sysInp.value; _setIdLabel(); };
+
+      const valInp = document.createElement('input');
+      valInp.type = 'text';
+      valInp.className = 'codes-inp';
+      valInp.value = ident.value || '';
+      valInp.placeholder = 'e.g. Q001';
+      valInp.dataset.testid = `meta-identifier-value-${idx}`;
+      valInp.oninput = () => { ident.value = valInp.value; _setIdLabel(); };
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'codes-remove-btn';
+      removeBtn.textContent = '\u00D7';
+      removeBtn.dataset.testid = `meta-identifier-remove-${idx}`;
+      removeBtn.onclick = () => { _pending.identifiers.splice(idx, 1); _renderIdentifiers(); _setIdLabel(); };
+
+      row.append(useSel, sysInp, valInp, removeBtn);
+      idBody.appendChild(row);
+    });
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'codes-add-btn';
+    addBtn.textContent = '+ Add Identifier';
+    addBtn.dataset.testid = 'meta-identifier-add-btn';
+    addBtn.onclick = () => {
+      _pending.identifiers.push({ system: '', value: '' });
+      idOpen = true;
+      idBody.style.display = '';
+      _renderIdentifiers();
+      _setIdLabel();
+    };
+    idBody.appendChild(addBtn);
+  };
+  _renderIdentifiers();
+  _setIdLabel();
+
+  idToggle.addEventListener('click', () => {
+    idOpen = !idOpen;
+    idBody.style.display = idOpen ? '' : 'none';
+    _setIdLabel();
+  });
+
+  idSection.append(idToggle, idBody);
+  container.appendChild(idSection);
 
   // ── Resource Meta (collapsible) ──────────────────────────────────────────
   const metaSection = document.createElement('div');
