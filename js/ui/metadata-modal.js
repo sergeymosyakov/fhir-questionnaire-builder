@@ -545,10 +545,7 @@ function _renderBody(container) {
   generateBtn.dataset.tipTitle = 'Generate UUID';
   generateBtn.dataset.tipBody  = 'Replaces the current versionId with a new random UUID v4.';
   generateBtn.onclick = () => {
-    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-      const r = Math.random() * 16 | 0;
-      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
+    const uuid = crypto.randomUUID();
     versionIdInp.value = uuid;
     _pending.metaVersionId = uuid;
   };
