@@ -330,6 +330,15 @@ function _renderBody(container) {
     narrativeVal.textContent        = 'preserved \u00b7 status: ' + questMeta._rawText.status;
     narrativeRow.append(narrativeLbl, narrativeVal);
     container.appendChild(narrativeRow);
+    const narrativeDivRow = document.createElement('div');
+    narrativeDivRow.className = 'meta-modal-row';
+    const narrativeDivSpacer = document.createElement('div');
+    narrativeDivSpacer.className = 'meta-modal-lbl';
+    const narrativeDivPre = document.createElement('pre');
+    narrativeDivPre.className = 'meta-modal-narrative';
+    narrativeDivPre.textContent = questMeta._rawText.div;
+    narrativeDivRow.append(narrativeDivSpacer, narrativeDivPre);
+    container.appendChild(narrativeDivRow);
   }
 
   // ── Derived From (collapsible) ────────────────────────────────────────────
@@ -603,7 +612,8 @@ function _renderBody(container) {
   lastUpdatedLbl.dataset.tipFhir  = 'meta.lastUpdated';
   lastUpdatedLbl.dataset.tipSpec  = 'R4';
   const lastUpdatedVal = document.createElement('span');
-  lastUpdatedVal.className = 'meta-modal-readonly';
+  lastUpdatedVal.className          = 'meta-modal-readonly';
+  lastUpdatedVal.dataset.testid     = 'meta-last-updated';
   lastUpdatedVal.textContent = questMeta._metaLastUpdated
     ? questMeta._metaLastUpdated + ' \u2192 refreshed on export'
     : '(not set \u2014 will be written on export)';

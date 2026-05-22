@@ -58,6 +58,8 @@
 //   meta-identifier-value-{idx}  (data-testid) value input for identifier at index idx
 //   meta-identifier-remove-{idx} (data-testid) remove button for identifier at index idx
 //   meta-identifier-add-btn      (data-testid) Add Identifier button
+//   meta-last-updated            (data-testid) read-only lastUpdated span
+//   meta-narrative-status        (data-testid) read-only Narrative status span
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -625,7 +627,7 @@ test.describe('metadata modal — Resource Meta section', () => {
   test('lastUpdated shows imported value as read-only text', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await expect(page.locator('.meta-modal-readonly').first()).toContainText('2024-03-15T10:00:00.000Z');
+    await expect(page.getByTestId('meta-last-updated')).toContainText('2024-03-15T10:00:00.000Z');
     await page.locator('#metadataModalCancel').click();
   });
 
@@ -928,5 +930,66 @@ test.describe('metadata modal — Identifiers section', () => {
     await page.getByTestId('add-root-group-btn').click();
     const q = await exportFHIR(page);
     expect(q.identifier).toBeUndefined();
+  });
+});
+
+// ── Questionnaire.text (Narrative) — read-only indicator ──────────────────────
+
+test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
+  test('narrative status row is visible when questionnaire has text', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-narrative-status')).toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('narrative status row shows correct status value', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-narrative-status')).toHaveText('preserved \u00b7 status: generated');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('narrative div block is visible below the status row', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    const pre = page.locator('.meta-modal-narrative');
+    await expect(pre).toBeVisible();
+    await expect(pre).toContainText('<div xmlns');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('narrative row is absent when questionnaire has no text field', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await openModal(page);
+    await expect(page.getByTestId('meta-narrative-status')).not.toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('text field round-trips through export unchanged', async ({ page }) => {
+    await loadFixture(page);
+    const q = await exportFHIR(page);
+    expect(q.text).toEqual({
+      status: 'generated',
+      div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Test narrative content</p></div>',
+    });
+  });
+
+  test('text field is absent in export when questionnaire had no text', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    const q = await exportFHIR(page);
+    expect(q.text).toBeUndefined();
+  });
+
+  test('text field is absent in export after form clear', async ({ page }) => {
+    await loadFixture(page);
+    await page.getByTestId('clear-form-btn').click();
+    await page.waitForSelector('.clear-confirm-backdrop');
+    await page.getByTestId('clear-confirm-clear-btn').click();
+    await page.getByTestId('add-root-group-btn').click();
+    const q = await exportFHIR(page);
+    expect(q.text).toBeUndefined();
   });
 });

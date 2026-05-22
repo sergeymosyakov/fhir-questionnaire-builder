@@ -26,6 +26,7 @@
   "lastReviewDate": "2024-06-01",
   "effectivePeriod": { "start": "2024-01-01", "end": "2025-12-31" },
   "subjectType": ["Patient", "Practitioner"],
+  "text": { "status": "generated", "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Test narrative content</p></div>" },
   "contact": [{"name": "Test Contact"}],
   "useContext": [{"code": {"code": "venue"}, "valueCodeableConcept": {"text": "inpatient"}}],
   "jurisdiction": [{"coding": [{"system": "urn:iso:std:iso:3166", "code": "US"}]}],
