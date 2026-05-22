@@ -189,10 +189,14 @@
           </span>
         </span>
         <span class="preview-header-actions">
-          <button id="patientViewBtn" class="btn-patient-view" style="display:none"
-            data-testid="patient-view-btn"
-            data-tip-title="Patient View"
-            data-tip-body="Renders the form exactly as a patient would see it — hidden items excluded, builder annotations removed. Click again to return to Preview mode.">&#x1F441; Patient View</button>
+          <div class="load-wrap" id="previewModeWrap" style="display:none">
+            <button type="button" id="previewModeBtn" class="btn-fhir preview-mode-btn" data-testid="preview-mode-btn">&#x1F441;&#xFE0F; Preview &#x25BE;</button>
+            <div class="load-menu" id="previewModeMenu" style="display:none">
+              <div class="load-menu-item" id="previewModeItemPreview" data-mode="preview" data-testid="preview-mode-preview">&#x1F441;&#xFE0F; Preview</div>
+              <div class="load-menu-item" id="previewModeItemPatient" data-mode="patient" data-testid="preview-mode-patient">&#x1F464; Patient View</div>
+              <div class="load-menu-item" id="previewModeItemJson" data-mode="json" data-testid="preview-mode-json">&#x7B;&#x7D; FHIR JSON</div>
+            </div>
+          </div>
           <button id="validateBtn" class="btn-validate" style="display:none"
             data-testid="validate-btn"
             data-tip-title="Validate questionnaire"
@@ -304,6 +308,7 @@
     </div>
     <div class="right-panel-body">
       <div class="preview-card" id="lform" data-testid="preview-panel"></div>
+      <pre id="fhirJsonView" class="fhir-json-view" style="display:none"></pre>
     </div>
   </div>
 </div>

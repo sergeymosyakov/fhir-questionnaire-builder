@@ -28,7 +28,7 @@ import * as codesModal from './ui/codes-modal.js';
 import * as qrExportModal from './ui/qr-export-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm, initPreview } from './render-preview.js';
-import { showLinkId, showPrefix, showBadges, patientMode, showHiddenItems, questVariables, questContained, questMeta, qrMeta, resetQrMeta } from './state.js';
+import { showLinkId, showPrefix, showBadges, previewMode, showHiddenItems, questVariables, questContained, questMeta, qrMeta, resetQrMeta } from './state.js';
 
 // Buttons
 document.getElementById('clearFormBtn').onclick    = _clearForm;
@@ -51,7 +51,6 @@ wireToggle('showLinkIdBtn', showLinkId);
 wireToggle('showPrefixBtn', showPrefix);
 wireToggle('showBadgesBtn', showBadges);
 wireToggle('showHiddenBtn', showHiddenItems);
-wireToggle('patientViewBtn', patientMode);
 document.getElementById('expandAllBtn').onclick    = expandAll;
 document.getElementById('renumberBtn').onclick = async () => {
   const btn = document.getElementById('renumberBtn');
@@ -269,12 +268,13 @@ search.init({
 // ── Preview module init ──────────────────────────────────────────────────────
 initPreview({
   lform:                 document.getElementById('lform'),
+  fhirJsonView:          document.getElementById('fhirJsonView'),
   leftPanelBody:         document.querySelector('.left-panel-body'),
   showLinkIdBtn:         document.getElementById('showLinkIdBtn'),
   showPrefixBtn:         document.getElementById('showPrefixBtn'),
   showBadgesBtn:         document.getElementById('showBadgesBtn'),
   showHiddenBtn:         document.getElementById('showHiddenBtn'),
-  patientViewBtn:        document.getElementById('patientViewBtn'),
+  previewModeWrap:       document.getElementById('previewModeWrap'),
   previewCollapseAllBtn: document.getElementById('previewCollapseAllBtn'),
   previewExpandAllBtn:   document.getElementById('previewExpandAllBtn'),
   searchWrap:            document.getElementById('searchWrap'),
@@ -641,7 +641,39 @@ document.addEventListener('click', () => {
   answersMenu.style.display = 'none';
   const ppMenu = document.getElementById('patientPresetMenu');
   if (ppMenu) ppMenu.style.display = 'none';
+  const pmMenu = document.getElementById('previewModeMenu');
+  if (pmMenu) pmMenu.style.display = 'none';
 });
+
+// ── Preview mode dropdown ─────────────────────────────────────────────────────
+{
+  const _modeMenu = document.getElementById('previewModeMenu');
+  const _modeBtn  = document.getElementById('previewModeBtn');
+  const _modeLabels = {
+    preview: '\uD83D\uDC41\uFE0F Preview \u25BE',
+    patient: '\uD83D\uDC64 Patient \u25BE',
+    json:    '{} FHIR JSON \u25BE',
+  };
+  function _applyPreviewMode(mode) {
+    previewMode.value = mode;
+    _modeBtn.textContent = _modeLabels[mode];
+    document.querySelectorAll('#previewModeMenu .load-menu-item').forEach(item => {
+      item.classList.toggle('load-menu-item--checked', item.dataset.mode === mode);
+    });
+  }
+  _modeBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    _modeMenu.style.display = _modeMenu.style.display === 'none' ? 'block' : 'none';
+  });
+  document.querySelectorAll('#previewModeMenu .load-menu-item').forEach(item => {
+    item.addEventListener('click', () => {
+      _modeMenu.style.display = 'none';
+      _applyPreviewMode(item.dataset.mode);
+    });
+  });
+  // Set initial active state
+  _applyPreviewMode('preview');
+}
 
 // ── Panel resize drag ─────────────────────────────────────────────────────────
 {

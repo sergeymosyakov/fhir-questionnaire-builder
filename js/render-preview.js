@@ -2,7 +2,7 @@
 import {
   effect,
   tree, values, getValue, setValue, _formTick, _bulkUpdate, showLinkId, showPrefix, showBadges,
-  patientMode, showHiddenItems,
+  previewMode, showHiddenItems,
   calcFormOk, isMandatory,
   rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
@@ -365,7 +365,7 @@ async function _asyncRender(version) {
     if (!res) return;
     if (!res.visible && !res.showDimmed) return;
 
-    const isPatient = patientMode.value;
+    const isPatient = previewMode.value === 'patient';
     // Hidden items (sdc-questionnaire-hidden): excluded in patient view and when toggle is off.
     if (res.hidden && (isPatient || !showHiddenItems.value)) return;
 
@@ -853,7 +853,7 @@ async function _asyncRender(version) {
         for (const ch of res.node.children) {
           const childRes = resultMap.get(ch.id);
           // Skip hidden children when the toggle is off — prevents orphan AND/OR separators
-          if (childRes && childRes.hidden && (patientMode.value || !showHiddenItems.value)) continue;
+          if (childRes && childRes.hidden && (previewMode.value === 'patient' || !showHiddenItems.value)) continue;
           if (childRes && (childRes.visible || childRes.showDimmed)) {
             if (!firstVisible && childRes.visible) {
               const sep = document.createElement('div');
@@ -934,7 +934,7 @@ effect(() => {
   void showLinkId.value;  // trigger on linkId display toggle
   void showPrefix.value;  // trigger on prefix display toggle
   void showBadges.value;      // trigger on badges display toggle
-  void patientMode.value;     // trigger on patient/preview mode switch
+  void previewMode.value;     // trigger on preview mode switch
   void showHiddenItems.value; // trigger on hidden items toggle
   if (_bulkUpdate.value) return; // mass mutation in progress — skip
   _asyncRender(++_renderVersion); // fire-and-forget; stale renders self-abort
@@ -949,6 +949,32 @@ function _collectGroupIds(nodes, out = []) {
     }
   }
   return out;
+}
+
+// ── FHIR JSON syntax highlighter ─────────────────────────────────────────────
+// Tokenises a pretty-printed JSON string and wraps each token in a <span> for
+// colour coding. Safe: HTML is escaped before any regex is applied.
+function _highlightJson(raw) {
+  const esc = raw
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return esc.replace(
+    /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+\-]?\d+)?)/g,
+    match => {
+      let cls;
+      if (/^"/.test(match)) {
+        cls = /:$/.test(match) ? 'jv-k' : 'jv-s';
+      } else if (match === 'true' || match === 'false') {
+        cls = 'jv-b';
+      } else if (match === 'null') {
+        cls = 'jv-null';
+      } else {
+        cls = 'jv-n';
+      }
+      return '<span class="' + cls + '">' + match + '</span>';
+    }
+  );
 }
 
 // ── Preview DOM init (called once from app.js) ────────────────────────────────
@@ -974,10 +1000,23 @@ export function initPreview(elements) {
     elements.previewCollapseAllBtn.style.display = d;
     elements.previewExpandAllBtn.style.display   = d;
     elements.searchWrap.style.display            = d;
-    elements.patientViewBtn.style.display        = d;
+    elements.previewModeWrap.style.display        = d;
   });
 
   // Toggle CSS display modes on the lform container
   effect(() => { elements.lform.classList.toggle('preview--no-badges', !showBadges.value); });
-  effect(() => { elements.lform.classList.toggle('patient-view', patientMode.value); });
+  effect(() => { elements.lform.classList.toggle('patient-view', previewMode.value === 'patient'); });
+
+  // JSON view: show/hide fhirJsonView vs lform, update content live
+  effect(() => {
+    void _formTick.value;
+    void previewMode.value;
+    const isJson = previewMode.value === 'json';
+    elements.lform.style.display         = isJson ? 'none' : '';
+    elements.fhirJsonView.style.display  = isJson ? '' : 'none';
+    if (isJson) {
+      const q = buildFHIRObject();
+      elements.fhirJsonView.innerHTML = _highlightJson(JSON.stringify(q, null, 2));
+    }
+  });
 }

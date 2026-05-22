@@ -57,9 +57,11 @@ export const showPrefix = ref(true);
 // When false, calculated fields render as plain text.
 export const showBadges = ref(true);
 
-// Patient View mode: when true, renders the form as a patient would see it.
-// Hidden items excluded; builder annotations (linkIds, badges, nav icons) hidden.
-export const patientMode = ref(false);
+// Preview mode enum: 'preview' | 'patient' | 'json'
+// - 'preview' : builder view with all annotations
+// - 'patient' : clean patient-facing form (hidden items excluded, badges hidden)
+// - 'json'    : live Questionnaire FHIR JSON with syntax highlighting
+export const previewMode = ref('preview');
 
 // Show/hide items marked as sdc-questionnaire-hidden in the preview panel.
 // When false, hidden items are invisible in builder preview (as patients see them).
