@@ -38,22 +38,26 @@ async function loadFixture(page) {
   await expect(page.locator('[data-preview-id="q1"]')).toBeVisible({ timeout: 8_000 });
 }
 
-const pvBtn   = page => page.getByTestId('patient-view-btn');
+const modeBtn = page => page.getByTestId('preview-mode-btn');
 const lform   = page => page.locator('#lform');
+
+// Helpers: open dropdown and select a mode
+async function pvOn(page)  { await modeBtn(page).click(); await page.getByTestId('preview-mode-patient').click(); }
+async function pvOff(page) { await modeBtn(page).click(); await page.getByTestId('preview-mode-preview').click(); }
 
 // ── 1. Button visibility ──────────────────────────────────────────────────────
 
-test.describe('patient-view-btn visibility', () => {
+test.describe('preview-mode-btn visibility', () => {
   test('button is hidden before a questionnaire is loaded', async ({ page }) => {
     await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
     await waitForLoad(page);
-    await expect(pvBtn(page)).toBeHidden();
+    await expect(modeBtn(page)).toBeHidden();
   });
 
   test('button appears after loading a questionnaire', async ({ page }) => {
     await loadFixture(page);
-    await expect(pvBtn(page)).toBeVisible();
+    await expect(modeBtn(page)).toBeVisible();
   });
 });
 
@@ -62,13 +66,13 @@ test.describe('patient-view-btn visibility', () => {
 test.describe('toggling patient view ON', () => {
   test('lform gains patient-view class after click', async ({ page }) => {
     await loadFixture(page);
-    await pvBtn(page).click();
+    await pvOn(page);
     await expect(lform(page)).toHaveClass(/patient-view/);
   });
 
   test('nav buttons are not visible in patient mode', async ({ page }) => {
     await loadFixture(page);
-    await pvBtn(page).click();
+    await pvOn(page);
     // All nav buttons should be gone
     await expect(page.getByTestId('preview-nav-btn').first()).not.toBeVisible();
   });
@@ -77,7 +81,7 @@ test.describe('toggling patient view ON', () => {
     await loadFixture(page);
     // showLinkId is true by default — badges are present in builder mode
     await expect(page.getByTestId('preview-linkid').first()).toBeVisible();
-    await pvBtn(page).click();
+    await pvOn(page);
     // In patient mode no linkId badges should exist in DOM
     await expect(page.getByTestId('preview-linkid')).toHaveCount(0);
   });
@@ -86,14 +90,14 @@ test.describe('toggling patient view ON', () => {
     await loadFixture(page);
     // q2 starts dimmed (q1 = false) — visible as dim row in builder mode
     await expect(page.locator('[data-preview-id="q2"]')).toBeVisible();
-    await pvBtn(page).click();
+    await pvOn(page);
     // Patient mode hides dimmed items
     await expect(page.locator('[data-preview-id="q2"]')).not.toBeAttached();
   });
 
   test('always-visible items (q1, q3) remain shown in patient mode', async ({ page }) => {
     await loadFixture(page);
-    await pvBtn(page).click();
+    await pvOn(page);
     await expect(page.locator('[data-preview-id="q1"]')).toBeVisible();
     await expect(page.locator('[data-preview-id="q3"]')).toBeVisible();
   });
@@ -104,24 +108,24 @@ test.describe('toggling patient view ON', () => {
 test.describe('toggling patient view OFF', () => {
   test('lform loses patient-view class after second click', async ({ page }) => {
     await loadFixture(page);
-    await pvBtn(page).click();
+    await pvOn(page);
     await expect(lform(page)).toHaveClass(/patient-view/);
-    await pvBtn(page).click();
+    await pvOff(page);
     await expect(lform(page)).not.toHaveClass(/patient-view/);
   });
 
   test('nav buttons reappear after toggling off', async ({ page }) => {
     await loadFixture(page);
-    await pvBtn(page).click();
-    await pvBtn(page).click();
+    await pvOn(page);
+    await pvOff(page);
     await expect(page.getByTestId('preview-nav-btn').first()).toBeVisible();
   });
 
   test('dimmed item (q2) returns after toggling off', async ({ page }) => {
     await loadFixture(page);
-    await pvBtn(page).click();
+    await pvOn(page);
     await expect(page.locator('[data-preview-id="q2"]')).not.toBeAttached();
-    await pvBtn(page).click();
+    await pvOff(page);
     await expect(page.locator('[data-preview-id="q2"]')).toBeVisible();
   });
 });
