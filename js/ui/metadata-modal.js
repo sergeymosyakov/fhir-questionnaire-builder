@@ -313,6 +313,25 @@ function _renderBody(container) {
   adv.append(toggle, body);
   container.appendChild(adv);
 
+  // ── Narrative (text) — read-only indicator ───────────────────────────────
+  if (questMeta._rawText) {
+    const narrativeRow = document.createElement('div');
+    narrativeRow.className = 'meta-modal-row';
+    const narrativeLbl = document.createElement('label');
+    narrativeLbl.className          = 'meta-modal-lbl';
+    narrativeLbl.textContent        = 'Narrative:';
+    narrativeLbl.dataset.tipTitle   = 'Questionnaire.text';
+    narrativeLbl.dataset.tipBody    = 'Human-readable FHIR Narrative (Questionnaire.text). Preserved from the imported file and written back unchanged on export. Not editable in this builder.';
+    narrativeLbl.dataset.tipFhir    = 'Questionnaire.text';
+    narrativeLbl.dataset.tipSpec    = 'R4';
+    const narrativeVal = document.createElement('span');
+    narrativeVal.className          = 'meta-modal-readonly';
+    narrativeVal.dataset.testid     = 'meta-narrative-status';
+    narrativeVal.textContent        = 'preserved \u00b7 status: ' + questMeta._rawText.status;
+    narrativeRow.append(narrativeLbl, narrativeVal);
+    container.appendChild(narrativeRow);
+  }
+
   // ── Derived From (collapsible) ────────────────────────────────────────────
   const derivedSection = document.createElement('div');
   derivedSection.className = 'meta-modal-advanced';
@@ -496,25 +515,6 @@ function _renderBody(container) {
 
   idSection.append(idToggle, idBody);
   container.appendChild(idSection);
-
-  // ── Narrative (text) — read-only indicator ───────────────────────────────
-  if (questMeta._rawText) {
-    const narrativeRow = document.createElement('div');
-    narrativeRow.className = 'meta-modal-row';
-    const narrativeLbl = document.createElement('label');
-    narrativeLbl.className          = 'meta-modal-lbl';
-    narrativeLbl.textContent        = 'Narrative:';
-    narrativeLbl.dataset.tipTitle   = 'Questionnaire.text';
-    narrativeLbl.dataset.tipBody    = 'Human-readable FHIR Narrative (Questionnaire.text). Preserved from the imported file and written back unchanged on export. Not editable in this builder.';
-    narrativeLbl.dataset.tipFhir    = 'Questionnaire.text';
-    narrativeLbl.dataset.tipSpec    = 'R4';
-    const narrativeVal = document.createElement('span');
-    narrativeVal.className          = 'meta-modal-readonly';
-    narrativeVal.dataset.testid     = 'meta-narrative-status';
-    narrativeVal.textContent        = 'preserved \u00b7 status: ' + questMeta._rawText.status;
-    narrativeRow.append(narrativeLbl, narrativeVal);
-    container.appendChild(narrativeRow);
-  }
 
   // ── Resource Meta (collapsible) ──────────────────────────────────────────
   const metaSection = document.createElement('div');
