@@ -1,11 +1,11 @@
-﻿{
+{
     "resourceType":  "Questionnaire",
     "id":  "patient-scenario-eligibility",
     "title":  "Bariatric Surgery Eligibility Screen",
     "status":  "draft",
     "experimental":  true,
-    "copyright":  "В© 2026 Sergey Mosyakov",
-    "description":  "Automated eligibility assessment driven by patient context. Select a Patient preset and click в†є Re-init in the Variables panel to populate all auto-filled fields.",
+    "copyright":  "© 2026 Sergey Mosyakov",
+    "description":  "Automated eligibility assessment driven by patient context. Select a Patient preset and click ↺ Re-init in the Variables panel to populate all auto-filled fields.",
     "extension":  [
                       {
                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
@@ -94,7 +94,7 @@
                                   },
                                   {
                                       "linkId":  "profile-bmi",
-                                      "text":  "BMI (kg/mВІ)",
+                                      "text":  "BMI (kg/m²)",
                                       "type":  "decimal",
                                       "readOnly":  true,
                                       "extension":  [

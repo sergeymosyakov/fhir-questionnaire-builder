@@ -1,11 +1,11 @@
-﻿{
+{
     "resourceType":  "Questionnaire",
     "id":  "patient-scenario-risk",
     "title":  "Pre-operative Risk Assessment",
     "status":  "draft",
     "experimental":  true,
-    "copyright":  "В© 2026 Sergey Mosyakov",
-    "description":  "Patient-driven risk stratification for surgical planning. Select a Patient preset and click в†є Re-init to populate risk flags. Sections appear based on active risk factors.",
+    "copyright":  "© 2026 Sergey Mosyakov",
+    "description":  "Patient-driven risk stratification for surgical planning. Select a Patient preset and click ↺ Re-init to populate risk flags. Sections appear based on active risk factors.",
     "extension":  [
                       {
                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
@@ -102,7 +102,7 @@
                                   },
                                   {
                                       "linkId":  "sum-bmi",
-                                      "text":  "BMI (kg/mВІ)",
+                                      "text":  "BMI (kg/m²)",
                                       "type":  "decimal",
                                       "readOnly":  true,
                                       "extension":  [
@@ -266,7 +266,7 @@
                  },
                  {
                      "linkId":  "pregnancy-risk",
-                     "text":  "Pregnancy вЂ” Procedure Contraindicated",
+                     "text":  "Pregnancy — Procedure Contraindicated",
                      "type":  "group",
                      "extension":  [
                                        {

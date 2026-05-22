@@ -1,10 +1,10 @@
-﻿{
+{
     "resourceType":  "Questionnaire",
     "id":  "valueset-demo",
-    "title":  "ValueSet Demo вЂ” Coded Answers",
+    "title":  "ValueSet Demo — Coded Answers",
     "status":  "draft",
     "experimental":  true,
-    "copyright":  "В© 2026 Sergey Mosyakov",
+    "copyright":  "© 2026 Sergey Mosyakov",
     "date":  "2024-01-01",
     "description":  "Demonstrates answerValueSet round-trip: contained[] ValueSets referenced via \u0027#id\u0027, and one external URL. Items render as select, radio, and open-choice.",
     "contained":  [
@@ -61,11 +61,11 @@
                                                                               },
                                                                               {
                                                                                   "code":  "LA18927-6",
-                                                                                  "display":  "2вЂ“4 times per month"
+                                                                                  "display":  "2–4 times per month"
                                                                               },
                                                                               {
                                                                                   "code":  "LA18928-4",
-                                                                                  "display":  "2вЂ“3 times per week"
+                                                                                  "display":  "2–3 times per week"
                                                                               },
                                                                               {
                                                                                   "code":  "LA18929-2",
@@ -93,15 +93,15 @@
                                                                               },
                                                                               {
                                                                                   "code":  "light",
-                                                                                  "display":  "Lightly active (1вЂ“3 days/week)"
+                                                                                  "display":  "Lightly active (1–3 days/week)"
                                                                               },
                                                                               {
                                                                                   "code":  "moderate",
-                                                                                  "display":  "Moderately active (3вЂ“5 days/week)"
+                                                                                  "display":  "Moderately active (3–5 days/week)"
                                                                               },
                                                                               {
                                                                                   "code":  "very",
-                                                                                  "display":  "Very active (6вЂ“7 days/week)"
+                                                                                  "display":  "Very active (6–7 days/week)"
                                                                               },
                                                                               {
                                                                                   "code":  "extra",

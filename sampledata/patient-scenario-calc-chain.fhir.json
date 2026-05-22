@@ -1,11 +1,11 @@
-﻿{
+{
     "resourceType":  "Questionnaire",
     "id":  "patient-scenario-calc-chain",
-    "title":  "Risk Score Calculator вЂ” initialExpression + calculatedExpression Chain",
+    "title":  "Risk Score Calculator — initialExpression + calculatedExpression Chain",
     "status":  "draft",
     "experimental":  true,
-    "copyright":  "В© 2026 Sergey Mosyakov",
-    "description":  "Demonstrates the initialExpression в†’ calculatedExpression в†’ enableWhenExpression chain. Select a Patient preset, click в†є Re-init, then observe: (1) Step 1 fields populate from patient context; (2) Step 2 risk scores recompute; (3) the matching Risk Level section appears.",
+    "copyright":  "© 2026 Sergey Mosyakov",
+    "description":  "Demonstrates the initialExpression → calculatedExpression → enableWhenExpression chain. Select a Patient preset, click ↺ Re-init, then observe: (1) Step 1 fields populate from patient context; (2) Step 2 risk scores recompute; (3) the matching Risk Level section appears.",
     "extension":  [
                       {
                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
@@ -91,12 +91,12 @@
     "item":  [
                  {
                      "linkId":  "how-to",
-                     "text":  "How to use: (1) Load this questionnaire. (2) Select a patient profile from the Patient в–ѕ dropdown. (3) Click в†є Re-init in the Variables panel. Watch Step 1 fill in, Step 2 recalculate, and the Risk Level section switch.",
+                     "text":  "How to use: (1) Load this questionnaire. (2) Select a patient profile from the Patient ▾ dropdown. (3) Click ↺ Re-init in the Variables panel. Watch Step 1 fill in, Step 2 recalculate, and the Risk Level section switch.",
                      "type":  "display"
                  },
                  {
                      "linkId":  "step1",
-                     "text":  "Step 1 вЂ” Patient Context (filled by initialExpression on в†є Re-init)",
+                     "text":  "Step 1 — Patient Context (filled by initialExpression on ↺ Re-init)",
                      "type":  "group",
                      "item":  [
                                   {
@@ -116,7 +116,7 @@
                                   },
                                   {
                                       "linkId":  "ctx-bmi",
-                                      "text":  "BMI (kg/mВІ)",
+                                      "text":  "BMI (kg/m²)",
                                       "type":  "decimal",
                                       "readOnly":  true,
                                       "extension":  [
@@ -178,7 +178,7 @@
                  },
                  {
                      "linkId":  "step2",
-                     "text":  "Step 2 вЂ” Risk Score Breakdown (calculatedExpression using questionnaire variables)",
+                     "text":  "Step 2 — Risk Score Breakdown (calculatedExpression using questionnaire variables)",
                      "type":  "group",
                      "item":  [
                                   {
@@ -413,7 +413,7 @@
                  },
                  {
                      "linkId":  "step3",
-                     "text":  "Step 3 вЂ” Clinician Sign-off",
+                     "text":  "Step 3 — Clinician Sign-off",
                      "type":  "group",
                      "item":  [
                                   {

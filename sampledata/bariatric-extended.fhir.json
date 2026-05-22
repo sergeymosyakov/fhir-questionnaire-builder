@@ -1,10 +1,10 @@
-﻿{
+{
     "resourceType":  "Questionnaire",
     "id":  "bariatric-pre-auth-extended",
-    "title":  "Bariatric Surgery Pre-Authorization вЂ” Extended Assessment",
+    "title":  "Bariatric Surgery Pre-Authorization — Extended Assessment",
     "status":  "draft",
     "experimental":  true,
-    "copyright":  "В© 2026 Sergey Mosyakov",
+    "copyright":  "© 2026 Sergey Mosyakov",
     "subjectType":  [
                         "Patient"
                     ],
@@ -950,7 +950,7 @@
                                   {
                                       "linkId":  "q-gerd-notice",
                                       "type":  "display",
-                                      "text":  "вљ пёЏ Note: Sleeve gastrectomy may worsen GERD. Consider discussing Roux-en-Y Bypass with your surgeon.",
+                                      "text":  "⚠️ Note: Sleeve gastrectomy may worsen GERD. Consider discussing Roux-en-Y Bypass with your surgeon.",
                                       "enableWhen":  [
                                                          {
                                                              "question":  "q-procedure",

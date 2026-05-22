@@ -1,10 +1,10 @@
-﻿{
+{
     "resourceType":  "Questionnaire",
     "id":  "reference-example",
     "title":  "Reference Type Demo",
     "status":  "draft",
     "experimental":  true,
-    "copyright":  "В© 2026 Sergey Mosyakov",
+    "copyright":  "© 2026 Sergey Mosyakov",
     "subjectType":  [
                         "Patient"
                     ],

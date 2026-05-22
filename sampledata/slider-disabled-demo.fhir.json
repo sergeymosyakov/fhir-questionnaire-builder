@@ -1,10 +1,10 @@
-﻿{
+{
     "resourceType":  "Questionnaire",
     "id":  "slider-disabled-demo",
     "title":  "Slider \u0026 Disabled Display Demo",
     "status":  "draft",
     "experimental":  true,
-    "copyright":  "В© 2026 Sergey Mosyakov",
+    "copyright":  "© 2026 Sergey Mosyakov",
     "subjectType":  [
                         "Patient"
                     ],
@@ -16,7 +16,7 @@
                      "item":  [
                                   {
                                       "linkId":  "pain-score",
-                                      "text":  "Pain Score (0 вЂ“ 10)",
+                                      "text":  "Pain Score (0 – 10)",
                                       "type":  "integer",
                                       "required":  true,
                                       "extension":  [
@@ -36,7 +36,7 @@
                                   },
                                   {
                                       "linkId":  "temperature",
-                                      "text":  "Body Temperature (В°C, 35 вЂ“ 42)",
+                                      "text":  "Body Temperature (°C, 35 – 42)",
                                       "type":  "decimal",
                                       "required":  true,
                                       "extension":  [
@@ -56,7 +56,7 @@
                                   },
                                   {
                                       "linkId":  "bmi-slider",
-                                      "text":  "BMI (15 вЂ“ 60)",
+                                      "text":  "BMI (15 – 60)",
                                       "type":  "decimal",
                                       "extension":  [
                                                         {
@@ -126,7 +126,7 @@
                                   },
                                   {
                                       "linkId":  "pain-duration",
-                                      "text":  "Duration of pain (hours, 0 вЂ“ 72)",
+                                      "text":  "Duration of pain (hours, 0 – 72)",
                                       "type":  "integer",
                                       "extension":  [
                                                         {
@@ -214,7 +214,7 @@
                                   },
                                   {
                                       "linkId":  "satisfaction",
-                                      "text":  "Patient Satisfaction (1 вЂ“ 10)",
+                                      "text":  "Patient Satisfaction (1 – 10)",
                                       "type":  "integer",
                                       "extension":  [
                                                         {
@@ -233,7 +233,7 @@
                                   },
                                   {
                                       "linkId":  "pain-quality",
-                                      "text":  "Pain Quality вЂ” radio with ordinalValue scores",
+                                      "text":  "Pain Quality — radio with ordinalValue scores",
                                       "type":  "choice",
                                       "extension":  [
                                                         {
