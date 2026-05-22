@@ -184,6 +184,12 @@ describe('importQRAnswers — time and reference types', () => {
     importQRAnswers(makeQR([{ linkId: 'q-ref', answer: [{ valueUri: 'https://example.org' }] }]), values, tree);
     expect(values['q-ref']).toBe('https://example.org');
   });
+
+  it('ignores answer entries with no recognised value type', () => {
+    const values = {};
+    importQRAnswers(makeQR([{ linkId: 'q-ref', answer: [{}] }]), values, tree);
+    expect(values['q-ref']).toBeUndefined();
+  });
 });
 
 // ── unmatched linkIds ─────────────────────────────────────────────────────────

@@ -213,3 +213,25 @@ describe('validateTree — enableWhen linkId references', () => {
     expect(errIds(validateTree([makeItem({ id: 'q1' })]))).toHaveLength(0);
   });
 });
+
+// ── constraint key: ITLH group-or system key ──────────────────────────────────
+describe('validateTree — constraint ITLH group-or key', () => {
+  it('silently skips system-generated group-or constraint key', () => {
+    const ITLH_KEY = 'e3a8c2f1-6b4d-4e9a-87c5:group-or';
+    const item = makeItem({ id: 'q1', constraint: [{ key: ITLH_KEY, severity: 'error', human: 'msg', expression: 'true' }] });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/key/i))).toHaveLength(0);
+  });
+});
+
+// ── fhirpath not available ────────────────────────────────────────────────────
+describe('validateTree — fhirpath unavailable', () => {
+  it('returns null (no error) when window.fhirpath is not loaded', () => {
+    const saved = globalThis.window;
+    globalThis.window = {};
+    const item = makeItem({ id: 'q1', constraint: [{ key: 'c1', severity: 'error', human: 'msg', expression: '%age > 0' }] });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.message.match(/expression error/))).toHaveLength(0);
+    globalThis.window = saved;
+  });
+});

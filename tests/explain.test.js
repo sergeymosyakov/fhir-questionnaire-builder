@@ -112,6 +112,12 @@ describe('parseExprTree — parentheses', () => {
     expect(t.type).toBe('OR');
   });
 
+  it('returns expression unchanged when opening paren has no matching close', () => {
+    const t = parseExprTree('(unmatched');
+    expect(t.type).toBe('LEAF');
+    expect(t.expr).toBe('(unmatched');
+  });
+
   it('handles nested parens inside AND', () => {
     const t = parseExprTree('x > 0 and (y = 1 or z = 2)');
     expect(t.type).toBe('AND');

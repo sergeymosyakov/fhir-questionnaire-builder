@@ -197,6 +197,8 @@ describe('normaliseSTU3 — initial<Type> → item.initial[]', () => {
     ['initialUri',       'valueUri',       'http://example.org'],
     ['initialCoding',    'valueCoding',    { code: 'a', display: 'A' }],
     ['initialQuantity',  'valueQuantity',  { value: 70, unit: 'kg' }],
+    ['initialAttachment','valueAttachment',{ contentType: 'text/plain' }],
+    ['initialReference', 'valueReference', { reference: 'Patient/1' }],
   ];
 
   for (const [stu3Key, r4Key, value] of cases) {

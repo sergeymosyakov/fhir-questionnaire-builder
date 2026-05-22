@@ -336,3 +336,51 @@ describe('buildQR — ordinalValue in valueCoding answers', () => {
     expect(qr.item[0].answer[1].valueCoding.extension[0].valueDecimal).toBe(1);
   });
 });
+
+// ── buildQR — || fallback branches ────────────────────────────────────────────
+describe('buildQR — fallback branches', () => {
+  it('questionnaire field falls back to empty string when url and id absent', () => {
+    const qr = buildQR({ item: [] }, {});
+    expect(qr.questionnaire).toBe('');
+  });
+
+  it('integer answer falls back to 0 for non-numeric value', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'integer' }] }, { q: 'not-a-number' });
+    expect(qr.item[0].answer[0].valueInteger).toBe(0);
+  });
+
+  it('decimal answer falls back to 0 for non-numeric value', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'decimal' }] }, { q: 'abc' });
+    expect(qr.item[0].answer[0].valueDecimal).toBe(0);
+  });
+
+  it('quantity answer falls back to 0/empty for missing value/unit', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'quantity' }] }, { q: {} });
+    expect(qr.item[0].answer[0].valueQuantity).toEqual({ value: 0, unit: '' });
+  });
+
+  it('reference answer falls back to empty string for missing reference', () => {
+    const qr = buildQR({ item: [{ linkId: 'q', type: 'reference' }] }, { q: {} });
+    expect(qr.item[0].answer[0].valueReference).toEqual({ reference: '' });
+  });
+
+  it('non-group boolean item with children embeds sub-items in answer', () => {
+    const fhir = { item: [{
+      linkId: 'q', type: 'boolean',
+      item: [{ linkId: 'q.1', type: 'string' }],
+    }]};
+    const qr = buildQR(fhir, { q: true, 'q.1': 'follow-up' });
+    expect(qr.item[0].answer[0].valueBoolean).toBe(true);
+    expect(qr.item[0].answer[0].item).toHaveLength(1);
+  });
+
+  it('non-group string item with children embeds sub-items in answer', () => {
+    const fhir = { item: [{
+      linkId: 'q', type: 'string',
+      item: [{ linkId: 'q.1', type: 'string' }],
+    }]};
+    const qr = buildQR(fhir, { q: 'yes', 'q.1': 'detail' });
+    expect(qr.item[0].answer[0].valueString).toBe('yes');
+    expect(qr.item[0].answer[0].item).toHaveLength(1);
+  });
+});
