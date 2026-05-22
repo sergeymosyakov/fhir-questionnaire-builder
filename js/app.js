@@ -511,7 +511,7 @@ function _syncRecentItem() {
   if (meta) {
     const d = new Date(meta.savedAt);
     const ts = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    loadRecentItem.textContent = '\u{1F552} Recent: ' + (meta.title || 'draft') + ' (' + ts + ')';
+    loadRecentItem.textContent = '🕒 Recent: ' + (meta.title || 'draft') + ' (' + ts + ')';
     loadRecentItem.style.display = '';
     loadRecentSep.style.display  = '';
   } else {
@@ -553,7 +553,7 @@ document.querySelectorAll('#loadMenu [data-sample]').forEach(item => {
 document.getElementById('fhirFileInput').onchange  = e => {
   const file = e.target.files[0];
   if (!file) return;
-  progress.show('Loading ' + file.name + '\u2026');
+  progress.show('Loading ' + file.name + '…');
   const reader = new FileReader();
   reader.onload  = ev => {
     try { progress.update(0, 1); _importAndValidate(JSON.parse(ev.target.result), file.name); }
@@ -689,7 +689,7 @@ const _syncAutosaveState = (enabled, lastSaveDate) => {
   _autosaveToggleBtn.classList.toggle('btn-fhir--active', enabled);
   if (enabled) {
     const label = lastSaveDate
-      ? 'autosave \u00b7 ' + String(lastSaveDate.getHours()).padStart(2,'0') + ':' + String(lastSaveDate.getMinutes()).padStart(2,'0')
+      ? 'autosave · ' + String(lastSaveDate.getHours()).padStart(2,'0') + ':' + String(lastSaveDate.getMinutes()).padStart(2,'0')
       : 'autosave';
     _autosaveToggleBtn.textContent = label;
   } else {
