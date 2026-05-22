@@ -35,10 +35,12 @@ export function build(node, ctx) {
     errMinLen.className = 'ctrl-err ctrl-err--ml';
     errMinLen.dataset.testid = 'minlength-err';
     errMinLen.textContent = 'Min\u00A0' + node._minLength + '\u00A0chars';
+    const validateMinLen = () => {
+      errMinLen.style.display = (el.value.length > 0 && el.value.length < node._minLength) ? 'inline' : 'none';
+    };
     errMinLen.style.display = 'none';
-    el.addEventListener('blur', () => {
-      errMinLen.style.display = (el.value.length > 0 && el.value.length < node._minLength) ? '' : 'none';
-    });
+    el.addEventListener('blur', validateMinLen);
+    validateMinLen(); // restore error state after re-render if value already invalid
   }
 
   let _debounce = null;

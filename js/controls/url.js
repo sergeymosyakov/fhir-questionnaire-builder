@@ -36,6 +36,16 @@ export function build(node, ctx) {
     el.addEventListener('input', updateCounter);
   }
 
+  const validateErr = () => {
+    if (node._minLength && el.value.length > 0 && el.value.length < node._minLength) {
+      errMsg.textContent = 'Min\u00A0' + node._minLength + '\u00A0chars';
+      errMsg.style.display = 'inline';
+    } else {
+      errMsg.textContent = 'Invalid URL';
+      errMsg.style.display = (el.value === '' || isValidUrl(el.value)) ? 'none' : 'inline';
+    }
+  };
+
   let _debounce = null;
   el.oninput = () => {
     setValue(node.id, el.value);
@@ -44,15 +54,8 @@ export function build(node, ctx) {
     _debounce = setTimeout(() => { _reCalc(); onChange(); }, 200);
   };
   el.onchange = () => { _formTick.value++; };
-  el.addEventListener('blur', () => {
-    if (node._minLength && el.value.length > 0 && el.value.length < node._minLength) {
-      errMsg.textContent = 'Min\u00A0' + node._minLength + '\u00A0chars';
-      errMsg.style.display = '';
-    } else {
-      errMsg.textContent = 'Invalid URL';
-      errMsg.style.display = (el.value === '' || isValidUrl(el.value)) ? 'none' : '';
-    }
-  });
+  el.addEventListener('blur', validateErr);
+  validateErr(); // restore error state after re-render
 
   wrap.appendChild(el);
   wrap.appendChild(errMsg);
