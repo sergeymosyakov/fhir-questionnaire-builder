@@ -262,6 +262,11 @@ export const calcFormOk = node => {
     const val = getValue(node.id);
     return val != null && typeof val === 'object' && val.value !== undefined && !!val.unit;
   }
+  // minLength: non-empty value must meet minimum length
+  if (node._minLength) {
+    const val = getValue(node.id);
+    if (val && String(val).length > 0 && String(val).length < node._minLength) return false;
+  }
   // mandatory text/number/date/etc → must be non-empty
   if (isMandatory(node) && NONEMPTY_TYPES.has(node.itemType)) {
     const val = getValue(node.id);

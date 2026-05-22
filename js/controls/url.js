@@ -26,6 +26,20 @@ export function build(node, ctx) {
   errMsg.textContent = 'Invalid URL';
   errMsg.style.display = 'none';
 
+  const validateErr = () => {
+    if (node._minLength && el.value.length > 0 && el.value.length < node._minLength) {
+      errMsg.textContent = 'Min\u00A0' + node._minLength + '\u00A0chars';
+      errMsg.style.display = 'inline';
+    } else {
+      errMsg.textContent = 'Invalid URL';
+      errMsg.style.display = (el.value === '' || isValidUrl(el.value)) ? 'none' : 'inline';
+    }
+  };
+  // Restore error state if user has previously interacted (survives re-render)
+  if (node._minLenInteracted || (el.value && !isValidUrl(el.value))) {
+    validateErr();
+  }
+
   let counter = null;
   if (node._maxLength) {
     counter = document.createElement('span');
@@ -36,16 +50,6 @@ export function build(node, ctx) {
     el.addEventListener('input', updateCounter);
   }
 
-  const validateErr = () => {
-    if (node._minLength && el.value.length > 0 && el.value.length < node._minLength) {
-      errMsg.textContent = 'Min\u00A0' + node._minLength + '\u00A0chars';
-      errMsg.style.display = 'inline';
-    } else {
-      errMsg.textContent = 'Invalid URL';
-      errMsg.style.display = (el.value === '' || isValidUrl(el.value)) ? 'none' : 'inline';
-    }
-  };
-
   let _debounce = null;
   el.oninput = () => {
     setValue(node.id, el.value);
@@ -53,7 +57,11 @@ export function build(node, ctx) {
     clearTimeout(_debounce);
     _debounce = setTimeout(() => { _reCalc(); onChange(); }, 200);
   };
-  el.addEventListener('blur', validateErr);
+  el.onchange = () => { _formTick.value++; };
+  el.addEventListener('blur', () => {
+    node._minLenInteracted = true;
+    validateErr();
+  });
 
   wrap.appendChild(el);
   wrap.appendChild(errMsg);

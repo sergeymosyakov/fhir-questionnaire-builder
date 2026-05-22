@@ -38,8 +38,16 @@ export function build(node, ctx) {
     const validateMinLen = () => {
       errMinLen.style.display = (el.value.length > 0 && el.value.length < node._minLength) ? 'inline' : 'none';
     };
-    errMinLen.style.display = 'none';
-    el.addEventListener('blur', validateMinLen);
+    // Restore error state if user has previously interacted with this field (survives re-render)
+    if (node._minLenInteracted) {
+      validateMinLen();
+    } else {
+      errMinLen.style.display = 'none';
+    }
+    el.addEventListener('blur', () => {
+      node._minLenInteracted = true;
+      validateMinLen();
+    });
   }
 
   let _debounce = null;
@@ -49,6 +57,7 @@ export function build(node, ctx) {
     clearTimeout(_debounce);
     _debounce = setTimeout(() => { _reCalc(); onChange(); }, 200);
   };
+  el.onchange = () => { _formTick.value++; };
 
   wrap.appendChild(el);
   if (counter) wrap.appendChild(counter);
