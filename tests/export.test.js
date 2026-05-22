@@ -11,6 +11,7 @@ let _rawFhir = { value: null };
 const _questMeta = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
   effectivePeriodStart: '', effectivePeriodEnd: '',
+  _rawText: null,
   _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
 vi.mock('../js/state.js', () => ({
@@ -37,6 +38,7 @@ vi.mock('../js/state.js', () => ({
 }));
 
 const { buildFHIRObject } = await import('../js/fhir/export.js');
+const { generateNarrativeDiv } = await import('../js/fhir/export.js');
 
 // Helper: reset tree and run buildFHIRObject
 function build(nodes, title = 'Test Q', vars = []) {
@@ -653,6 +655,101 @@ describe('buildFHIRObject — questMeta', () => {
     _questMeta._rawJurisdiction = [{ coding: [{ system: 'urn:iso:std:iso:3166', code: 'US' }] }];
     const q = buildFHIRObject();
     expect(q.jurisdiction).toEqual([{ coding: [{ system: 'urn:iso:std:iso:3166', code: 'US' }] }]);
+  });
+});
+
+// ── Questionnaire.text (Narrative) ────────────────────────────────────────────────
+describe('buildFHIRObject — Questionnaire.text (Narrative)', () => {
+  afterEach(() => { _questMeta._rawText = null; _questMeta.title = ''; _questMeta.status = 'draft';
+    _questMeta.publisher = ''; _questMeta.description = ''; _tree.splice(0); });
+
+  it('always emits q.text (never undefined)', () => {
+    const q = buildFHIRObject();
+    expect(q.text).toBeDefined();
+  });
+
+  it('uses status "generated" when _rawText is null', () => {
+    _questMeta._rawText = null;
+    const q = buildFHIRObject();
+    expect(q.text.status).toBe('generated');
+  });
+
+  it('div starts with correct XHTML namespace when generated', () => {
+    const q = buildFHIRObject();
+    expect(q.text.div).toMatch(/^<div xmlns="http:\/\/www\.w3\.org\/1999\/xhtml">/);
+  });
+
+  it('generated div includes questionnaire title', () => {
+    _questMeta.title = 'Depression Screening';
+    const q = buildFHIRObject();
+    expect(q.text.div).toContain('Depression Screening');
+  });
+
+  it('generated div includes status', () => {
+    _questMeta.status = 'active';
+    const q = buildFHIRObject();
+    expect(q.text.div).toContain('active');
+  });
+
+  it('generated div includes publisher when set', () => {
+    _questMeta.publisher = 'HL7 International';
+    const q = buildFHIRObject();
+    expect(q.text.div).toContain('HL7 International');
+  });
+
+  it('generated div includes description when set', () => {
+    _questMeta.description = 'Screens for depression.';
+    const q = buildFHIRObject();
+    expect(q.text.div).toContain('Screens for depression.');
+  });
+
+  it('generated div includes item linkId and text', () => {
+    _tree.push({ id: 'q1', type: 'item', itemType: 'text', title: 'Feeling sad?' });
+    const q = buildFHIRObject();
+    expect(q.text.div).toContain('q1');
+    expect(q.text.div).toContain('Feeling sad?');
+  });
+
+  it('generated div includes item type', () => {
+    _tree.push({ id: 'q1', type: 'item', itemType: 'select', title: 'Choose one' });
+    const q = buildFHIRObject();
+    expect(q.text.div).toContain('choice');
+  });
+
+  it('generated div escapes HTML special characters in title', () => {
+    _questMeta.title = '<Script> & "Injection"';
+    const q = buildFHIRObject();
+    expect(q.text.div).not.toContain('<Script>');
+    expect(q.text.div).toContain('&lt;Script&gt;');
+    expect(q.text.div).toContain('&amp;');
+  });
+
+  it('when _rawText is set, preserves status exactly', () => {
+    _questMeta._rawText = { status: 'extensions', div: '<div xmlns="http://www.w3.org/1999/xhtml">custom</div>' };
+    const q = buildFHIRObject();
+    expect(q.text.status).toBe('extensions');
+  });
+
+  it('when _rawText is set, preserves div unchanged', () => {
+    const div = '<div xmlns="http://www.w3.org/1999/xhtml"><p>Custom narrative</p></div>';
+    _questMeta._rawText = { status: 'generated', div };
+    const q = buildFHIRObject();
+    expect(q.text.div).toBe(div);
+  });
+
+  it('generateNarrativeDiv does not include item table when item[] is empty', () => {
+    const div = generateNarrativeDiv({ title: 'T', status: 'draft', item: [] });
+    expect(div).not.toContain('<thead>');
+  });
+
+  it('generateNarrativeDiv nests child items with indent', () => {
+    const div = generateNarrativeDiv({
+      title: 'T', status: 'draft',
+      item: [{ linkId: 'g1', text: 'Group', type: 'group',
+        item: [{ linkId: 'q1', text: 'Q', type: 'string' }] }],
+    });
+    expect(div).toContain('q1');
+    expect(div).toContain('\u00a0\u00a0\u00a0\u00a0');
   });
 });
 

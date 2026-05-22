@@ -102,7 +102,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `questMeta._rawMetaProfile` | `Questionnaire.meta.profile[]` | ← stored as string array (default: `[]`) | → written back as array; editable list of canonical URLs in Properties modal — Resource Meta section |
 | `questMeta._rawMetaTag` | `Questionnaire.meta.tag[]` | ← stored as Coding[] (default: `[]`) | → written back unchanged; editable system/code/display rows in Properties modal — Resource Meta section |
 | `questMeta._rawMetaSecurity` | `Questionnaire.meta.security[]` | ← stored as Coding[] (default: `[]`) | → written back unchanged; editable system/code/display rows in Properties modal — Resource Meta section |
-| `questMeta._rawText` | `Questionnaire.text` | ← stored as Narrative `{ status, div }` (default: `null`) | → written back unchanged; round-trip preservation only — no editing UI |
+| `questMeta._rawText` | `Questionnaire.text` | ← stored as Narrative `{ status, div }` when present (default: `null`) | → if preserved: written back unchanged; if null: auto-generated from title/status/items (`status: "generated"`, XHTML div via `generateNarrativeDiv()`) — always present in export |
 
 > **`Questionnaire.meta` is fully covered.** All six sub-fields (`versionId`, `source`, `lastUpdated`, `profile[]`, `tag[]`, `security[]`) are imported, editable in the **Resource Meta** collapsible section of the Properties modal, and written back on export. `meta.lastUpdated` is always refreshed to the current time on export.
 

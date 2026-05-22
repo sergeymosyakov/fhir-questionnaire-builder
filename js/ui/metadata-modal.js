@@ -314,31 +314,38 @@ function _renderBody(container) {
   container.appendChild(adv);
 
   // ── Narrative (text) — read-only indicator ───────────────────────────────
-  if (questMeta._rawText) {
+  {
     const narrativeRow = document.createElement('div');
     narrativeRow.className = 'meta-modal-row';
     const narrativeLbl = document.createElement('label');
     narrativeLbl.className          = 'meta-modal-lbl';
     narrativeLbl.textContent        = 'Narrative:';
     narrativeLbl.dataset.tipTitle   = 'Questionnaire.text';
-    narrativeLbl.dataset.tipBody    = 'Human-readable FHIR Narrative (Questionnaire.text). Preserved from the imported file and written back unchanged on export. Not editable in this builder.';
+    narrativeLbl.dataset.tipBody    = 'FHIR Narrative (Questionnaire.text). ' +
+      (questMeta._rawText
+        ? 'Preserved from the imported file and written back unchanged on export.'
+        : 'Not present in the imported file — auto-generated from title, status, and items on export (status: "generated").');
     narrativeLbl.dataset.tipFhir    = 'Questionnaire.text';
     narrativeLbl.dataset.tipSpec    = 'R4';
     const narrativeVal = document.createElement('span');
     narrativeVal.className          = 'meta-modal-readonly';
     narrativeVal.dataset.testid     = 'meta-narrative-status';
-    narrativeVal.textContent        = 'preserved \u00b7 status: ' + questMeta._rawText.status;
+    narrativeVal.textContent        = questMeta._rawText
+      ? 'preserved \u00b7 status: ' + questMeta._rawText.status
+      : 'generated on export \u00b7 status: generated';
     narrativeRow.append(narrativeLbl, narrativeVal);
     container.appendChild(narrativeRow);
-    const narrativeDivRow = document.createElement('div');
-    narrativeDivRow.className = 'meta-modal-row';
-    const narrativeDivSpacer = document.createElement('div');
-    narrativeDivSpacer.className = 'meta-modal-lbl';
-    const narrativeDivPre = document.createElement('pre');
-    narrativeDivPre.className = 'meta-modal-narrative';
-    narrativeDivPre.textContent = questMeta._rawText.div;
-    narrativeDivRow.append(narrativeDivSpacer, narrativeDivPre);
-    container.appendChild(narrativeDivRow);
+    if (questMeta._rawText) {
+      const narrativeDivRow = document.createElement('div');
+      narrativeDivRow.className = 'meta-modal-row';
+      const narrativeDivSpacer = document.createElement('div');
+      narrativeDivSpacer.className = 'meta-modal-lbl';
+      const narrativeDivPre = document.createElement('pre');
+      narrativeDivPre.className = 'meta-modal-narrative';
+      narrativeDivPre.textContent = questMeta._rawText.div;
+      narrativeDivRow.append(narrativeDivSpacer, narrativeDivPre);
+      container.appendChild(narrativeDivRow);
+    }
   }
 
   // ── Derived From (collapsible) ────────────────────────────────────────────

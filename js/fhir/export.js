@@ -2,6 +2,42 @@
 import { tree, questVariables, questContained, rawFhir, questMeta } from '../state.js';
 import { parseOptions, ITLH_KEY_GROUP_OR } from '../utils.js';
 
+// Escape text for embedding in XHTML
+function _esc(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Generate FHIR Narrative div from a fully-built Questionnaire object
+export function generateNarrativeDiv(q) {
+  const meta = [];
+  meta.push(`<tr><td><b>Status</b></td><td>${_esc(q.status)}</td></tr>`);
+  if (q.date)        meta.push(`<tr><td><b>Date</b></td><td>${_esc(q.date)}</td></tr>`);
+  if (q.version)     meta.push(`<tr><td><b>Version</b></td><td>${_esc(q.version)}</td></tr>`);
+  if (q.publisher)   meta.push(`<tr><td><b>Publisher</b></td><td>${_esc(q.publisher)}</td></tr>`);
+  if (q.description) meta.push(`<tr><td><b>Description</b></td><td>${_esc(q.description)}</td></tr>`);
+
+  const rows = [];
+  function collectItems(items, depth) {
+    for (const item of items || []) {
+      const pad = '\u00a0\u00a0\u00a0\u00a0'.repeat(depth);
+      rows.push(`<tr><td>${_esc(item.linkId)}</td><td>${pad}${_esc(item.text)}</td><td>${_esc(item.type)}</td></tr>`);
+      if (item.item) collectItems(item.item, depth + 1);
+    }
+  }
+  collectItems(q.item, 0);
+
+  const parts = [
+    '<div xmlns="http://www.w3.org/1999/xhtml">',
+    `<h2>${_esc(q.title || q.id || 'Questionnaire')}</h2>`,
+    `<table><tbody>${meta.join('')}</tbody></table>`,
+  ];
+  if (rows.length) {
+    parts.push(`<table><thead><tr><th>LinkId</th><th>Text</th><th>Type</th></tr></thead><tbody>${rows.join('')}</tbody></table>`);
+  }
+  parts.push('</div>');
+  return parts.join('');
+}
+
 function itemTypeToFHIRType(t) {
   if (t === 'checkbox')    return 'boolean';
   if (t === 'integer')       return 'integer';
@@ -232,7 +268,10 @@ export function buildFHIRObject() {
     ? questMeta.subjectType.split(',').map(s => s.trim()).filter(Boolean)
     : ['Patient'];
   if (questMeta._rawIdentifier?.length) q.identifier = JSON.parse(JSON.stringify(questMeta._rawIdentifier));
-  if (questMeta._rawText)         q.text        = { status: questMeta._rawText.status, div: questMeta._rawText.div };
+  // Narrative — always written: preserved from import if available, otherwise auto-generated
+  q.text = questMeta._rawText
+    ? { status: questMeta._rawText.status, div: questMeta._rawText.div }
+    : { status: 'generated', div: generateNarrativeDiv(q) };
   if (questMeta._rawContact)      q.contact     = questMeta._rawContact;
   if (questMeta._rawUseContext)   q.useContext  = questMeta._rawUseContext;
   if (questMeta._rawJurisdiction) q.jurisdiction = questMeta._rawJurisdiction;

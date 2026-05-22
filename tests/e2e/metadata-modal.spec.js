@@ -959,11 +959,12 @@ test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
     await page.locator('#metadataModalCancel').click();
   });
 
-  test('narrative row is absent when questionnaire has no text field', async ({ page }) => {
+  test('narrative row is visible even when questionnaire has no imported text', async ({ page }) => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
     await openModal(page);
-    await expect(page.getByTestId('meta-narrative-status')).not.toBeVisible();
+    await expect(page.getByTestId('meta-narrative-status')).toBeVisible();
+    await expect(page.getByTestId('meta-narrative-status')).toContainText('generated on export');
     await page.locator('#metadataModalCancel').click();
   });
 
@@ -976,20 +977,23 @@ test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
     });
   });
 
-  test('text field is absent in export when questionnaire had no text', async ({ page }) => {
+  test('text field is auto-generated in export when questionnaire had no imported text', async ({ page }) => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
     const q = await exportFHIR(page);
-    expect(q.text).toBeUndefined();
+    expect(q.text).toBeDefined();
+    expect(q.text.status).toBe('generated');
+    expect(q.text.div).toContain('<div xmlns');
   });
 
-  test('text field is absent in export after form clear', async ({ page }) => {
+  test('text field is auto-generated (not absent) in export after form clear', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('clear-form-btn').click();
     await page.waitForSelector('.clear-confirm-backdrop');
     await page.getByTestId('clear-confirm-clear-btn').click();
     await page.getByTestId('add-root-group-btn').click();
     const q = await exportFHIR(page);
-    expect(q.text).toBeUndefined();
+    expect(q.text).toBeDefined();
+    expect(q.text.status).toBe('generated');
   });
 });

@@ -33,67 +33,69 @@ export function open(suggestedName, meta) {
 
 // ── private ───────────────────────────────────────────────────────────────────
 
-function _row(label, forId) {
+function _fieldRow(labelText, inputEl) {
+  const row = document.createElement('div');
+  row.className = 'meta-modal-row';
   const lbl = document.createElement('label');
-  lbl.className = 'modal-field-label';
-  lbl.textContent = label;
-  lbl.htmlFor = forId;
-  return lbl;
+  lbl.className   = 'meta-modal-lbl';
+  lbl.textContent = labelText;
+  lbl.htmlFor     = inputEl.id || '';
+  row.append(lbl, inputEl);
+  return row;
 }
 
 function _renderBody() {
   _el.body.innerHTML = '';
+  const form = document.createElement('div');
+  form.className = 'meta-modal-form';
 
   // File name
-  _el.body.appendChild(_row('File name', 'qrExportFileName'));
   const nameInp = document.createElement('input');
-  nameInp.type = 'text';
-  nameInp.id = 'qrExportFileName';
-  nameInp.className = 'modal-text-input';
-  nameInp.value = _state.fileName;
+  nameInp.type  = 'text';
+  nameInp.id    = 'qrExportFileName';
+  nameInp.className   = 'meta-modal-inp';
+  nameInp.value       = _state.fileName;
   nameInp.dataset.testid = 'qr-export-filename';
   nameInp.oninput = () => { _state.fileName = nameInp.value; };
-  _el.body.appendChild(nameInp);
+  form.appendChild(_fieldRow('File name:', nameInp));
 
   // Status
-  _el.body.appendChild(_row('Status', 'qrExportStatus'));
   const statusSel = document.createElement('select');
-  statusSel.id = 'qrExportStatus';
-  statusSel.className = 'modal-select';
+  statusSel.id        = 'qrExportStatus';
+  statusSel.className = 'meta-modal-sel';
   statusSel.dataset.testid = 'qr-export-status';
   for (const v of QR_STATUSES) {
     const opt = document.createElement('option');
-    opt.value = v;
-    opt.textContent = v;
+    opt.value = v; opt.textContent = v;
     if (v === _state.status) opt.selected = true;
     statusSel.appendChild(opt);
   }
   statusSel.onchange = () => { _state.status = statusSel.value; };
-  _el.body.appendChild(statusSel);
+  form.appendChild(_fieldRow('Status:', statusSel));
 
   // Subject reference
-  _el.body.appendChild(_row('Subject reference', 'qrExportSubject'));
   const subjectInp = document.createElement('input');
-  subjectInp.type = 'text';
-  subjectInp.id = 'qrExportSubject';
-  subjectInp.className = 'modal-text-input';
+  subjectInp.type  = 'text';
+  subjectInp.id    = 'qrExportSubject';
+  subjectInp.className   = 'meta-modal-inp';
   subjectInp.placeholder = 'Patient/123';
-  subjectInp.value = _state.subject;
+  subjectInp.value       = _state.subject;
   subjectInp.dataset.testid = 'qr-export-subject';
   subjectInp.oninput = () => { _state.subject = subjectInp.value; };
-  _el.body.appendChild(subjectInp);
+  form.appendChild(_fieldRow('Subject:', subjectInp));
 
   // Author reference
-  _el.body.appendChild(_row('Author reference', 'qrExportAuthor'));
   const authorInp = document.createElement('input');
-  authorInp.type = 'text';
-  authorInp.id = 'qrExportAuthor';
-  authorInp.className = 'modal-text-input';
+  authorInp.type  = 'text';
+  authorInp.id    = 'qrExportAuthor';
+  authorInp.className   = 'meta-modal-inp';
   authorInp.placeholder = 'Practitioner/456';
-  authorInp.value = _state.author;
+  authorInp.value       = _state.author;
   authorInp.dataset.testid = 'qr-export-author';
   authorInp.oninput = () => { _state.author = authorInp.value; };
-  _el.body.appendChild(authorInp);
+  form.appendChild(_fieldRow('Author:', authorInp));
+
+  _el.body.appendChild(form);
 }
 
 function _export() {

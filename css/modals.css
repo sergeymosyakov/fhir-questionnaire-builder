@@ -255,6 +255,7 @@
                           white-space: pre-wrap; word-break: break-all; max-height: 120px;
                           overflow-y: auto; background: var(--c-bg-2); border: 1px solid var(--c-border);
                           border-radius: var(--r-sm); padding: 4px 6px; margin-top: 2px; }
+.meta-modal-form       { display: flex; flex-direction: column; gap: 10px; }
 .meta-modal-subsection { display: flex; flex-direction: column; gap: 6px; padding-top: 4px; }
 .meta-modal-subhdr     { font-size: 11px; font-weight: 700; text-transform: uppercase;
                           letter-spacing: .06em; color: var(--c-text-2); }
