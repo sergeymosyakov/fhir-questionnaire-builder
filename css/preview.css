@@ -503,6 +503,17 @@
 .jv-n    { color: #fbbf24; }           /* number           — amber       */
 .jv-b    { color: #c4b5fd; }           /* boolean          — violet      */
 .jv-null { color: #94a3b8; font-style: italic; } /* null  — slate grey  */
+/* Search marks inside JSON view */
+.fhir-json-view mark.search-match {
+  background: rgba(251,191,36,.35);
+  color: inherit;
+  border-radius: 2px;
+  outline: 1px solid rgba(251,191,36,.6);
+}
+.fhir-json-view mark.search-match--active {
+  background: rgba(251,191,36,.75);
+  outline: 1px solid #fbbf24;
+}
 
 /* calc-badge: hide entirely in no-badges mode */
 .preview--no-badges .calc-badge { display: none; }

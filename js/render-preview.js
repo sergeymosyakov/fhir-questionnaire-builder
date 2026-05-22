@@ -6,7 +6,7 @@ import {
   calcFormOk, isMandatory,
   rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
-import { isDescendant, findAncestorGroupIds } from './utils.js';
+import { isDescendant, findAncestorGroupIds, highlightJson } from './utils.js';
 import { evaluateNode } from './eval.js';
 import { evalConstraints } from './state.js';
 import { buildQR } from './fhir/qr-builder.js';
@@ -951,32 +951,6 @@ function _collectGroupIds(nodes, out = []) {
   return out;
 }
 
-// ── FHIR JSON syntax highlighter ─────────────────────────────────────────────
-// Tokenises a pretty-printed JSON string and wraps each token in a <span> for
-// colour coding. Safe: HTML is escaped before any regex is applied.
-function _highlightJson(raw) {
-  const esc = raw
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-  return esc.replace(
-    /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+\-]?\d+)?)/g,
-    match => {
-      let cls;
-      if (/^"/.test(match)) {
-        cls = /:$/.test(match) ? 'jv-k' : 'jv-s';
-      } else if (match === 'true' || match === 'false') {
-        cls = 'jv-b';
-      } else if (match === 'null') {
-        cls = 'jv-null';
-      } else {
-        cls = 'jv-n';
-      }
-      return '<span class="' + cls + '">' + match + '</span>';
-    }
-  );
-}
-
 // ── Preview DOM init (called once from app.js) ────────────────────────────────
 export function initPreview(elements) {
   _previewElements = elements;
@@ -1016,7 +990,8 @@ export function initPreview(elements) {
     elements.fhirJsonView.style.display  = isJson ? '' : 'none';
     if (isJson) {
       const q = buildFHIRObject();
-      elements.fhirJsonView.innerHTML = _highlightJson(JSON.stringify(q, null, 2));
+      elements.fhirJsonView.innerHTML = highlightJson(JSON.stringify(q, null, 2));
+      search.refresh(); // re-apply search marks if a query is active
     }
   });
 }

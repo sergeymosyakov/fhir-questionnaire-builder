@@ -52,3 +52,55 @@ export function parseOption(s) {
 export function parseOptions(str) {
   return (str || '').split(',').map(s => s.trim()).filter(Boolean).map(parseOption);
 }
+
+// ── JSON syntax highlighter ───────────────────────────────────────────────────
+// Tokenises a pretty-printed JSON string and wraps each token in a <span>.
+// Safe: HTML special chars are escaped BEFORE the regex runs.
+// Sentinel chars \x01 / \x02 are preserved (used by highlightJsonWithSearch).
+export function highlightJson(raw) {
+  const esc = raw
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return esc.replace(
+    /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+\-]?\d+)?)/g,
+    match => {
+      let cls;
+      if (/^"/.test(match)) { cls = /:$/.test(match) ? 'jv-k' : 'jv-s'; }
+      else if (match === 'true' || match === 'false') { cls = 'jv-b'; }
+      else if (match === 'null') { cls = 'jv-null'; }
+      else { cls = 'jv-n'; }
+      return '<span class="' + cls + '">' + match + '</span>';
+    }
+  );
+}
+
+// Like highlightJson but also wraps every case-insensitive occurrence of
+// `query` in <mark class="search-match"> tags.
+// Returns { html: string, count: number }.
+export function highlightJsonWithSearch(raw, query) {
+  if (!query) return { html: highlightJson(raw), count: 0 };
+  const lq = query.toLowerCase();
+  const lr = raw.toLowerCase();
+  const positions = [];
+  let pos = 0;
+  while ((pos = lr.indexOf(lq, pos)) !== -1) {
+    positions.push(pos);
+    pos += lq.length;
+  }
+  if (positions.length === 0) return { html: highlightJson(raw), count: 0 };
+  // Insert sentinels (\x01 = open, \x02 = close) — not HTML-escapable,
+  // not valid JSON, pass through highlightJson unchanged.
+  let marked = '';
+  let last = 0;
+  for (const start of positions) {
+    marked += raw.slice(last, start) + '\x01' + raw.slice(start, start + lq.length) + '\x02';
+    last = start + lq.length;
+  }
+  marked += raw.slice(last);
+  let html = highlightJson(marked);
+  html = html
+    .replace(/\x01/g, '<mark class="search-match">')
+    .replace(/\x02/g, '</mark>');
+  return { html, count: positions.length };
+}

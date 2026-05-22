@@ -258,11 +258,12 @@ _tooltipToggleBtn.addEventListener('click', () => {
 
 // ── Search init ───────────────────────────────────────────────────────────
 search.init({
-  input:   document.getElementById('searchInput'),
-  prevBtn: document.getElementById('searchPrevBtn'),
-  nextBtn: document.getElementById('searchNextBtn'),
-  counter: document.getElementById('searchCounter'),
-  lform:   document.getElementById('lform'),
+  input:       document.getElementById('searchInput'),
+  prevBtn:     document.getElementById('searchPrevBtn'),
+  nextBtn:     document.getElementById('searchNextBtn'),
+  counter:     document.getElementById('searchCounter'),
+  lform:       document.getElementById('lform'),
+  fhirJsonView: document.getElementById('fhirJsonView'),
 });
 
 // ── Preview module init ──────────────────────────────────────────────────────
