@@ -46,8 +46,6 @@ function _fieldRow(labelText, inputEl) {
 
 function _renderBody() {
   _el.body.innerHTML = '';
-  const form = document.createElement('div');
-  form.className = 'meta-modal-form';
 
   // File name
   const nameInp = document.createElement('input');
@@ -57,7 +55,7 @@ function _renderBody() {
   nameInp.value       = _state.fileName;
   nameInp.dataset.testid = 'qr-export-filename';
   nameInp.oninput = () => { _state.fileName = nameInp.value; };
-  form.appendChild(_fieldRow('File name:', nameInp));
+  _el.body.appendChild(_fieldRow('File name:', nameInp));
 
   // Status
   const statusSel = document.createElement('select');
@@ -71,7 +69,7 @@ function _renderBody() {
     statusSel.appendChild(opt);
   }
   statusSel.onchange = () => { _state.status = statusSel.value; };
-  form.appendChild(_fieldRow('Status:', statusSel));
+  _el.body.appendChild(_fieldRow('Status:', statusSel));
 
   // Subject reference
   const subjectInp = document.createElement('input');
@@ -82,7 +80,7 @@ function _renderBody() {
   subjectInp.value       = _state.subject;
   subjectInp.dataset.testid = 'qr-export-subject';
   subjectInp.oninput = () => { _state.subject = subjectInp.value; };
-  form.appendChild(_fieldRow('Subject:', subjectInp));
+  _el.body.appendChild(_fieldRow('Subject:', subjectInp));
 
   // Author reference
   const authorInp = document.createElement('input');
@@ -93,9 +91,7 @@ function _renderBody() {
   authorInp.value       = _state.author;
   authorInp.dataset.testid = 'qr-export-author';
   authorInp.oninput = () => { _state.author = authorInp.value; };
-  form.appendChild(_fieldRow('Author:', authorInp));
-
-  _el.body.appendChild(form);
+  _el.body.appendChild(_fieldRow('Author:', authorInp));
 }
 
 function _export() {
