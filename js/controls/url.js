@@ -19,6 +19,7 @@ export function build(node, ctx) {
   const isValidUrl = v => { try { new URL(v); return true; } catch { return false; } };
 
   if (node._maxLength) el.maxLength = node._maxLength;
+  if (node._minLength) el.minLength = node._minLength;
 
   const errMsg = document.createElement('span');
   errMsg.className = 'ctrl-err ctrl-err--ml';
@@ -44,7 +45,13 @@ export function build(node, ctx) {
   };
   el.onchange = () => { _formTick.value++; };
   el.addEventListener('blur', () => {
-    errMsg.style.display = (el.value === '' || isValidUrl(el.value)) ? 'none' : '';
+    if (node._minLength && el.value.length > 0 && el.value.length < node._minLength) {
+      errMsg.textContent = 'Min\u00A0' + node._minLength + '\u00A0chars';
+      errMsg.style.display = '';
+    } else {
+      errMsg.textContent = 'Invalid URL';
+      errMsg.style.display = (el.value === '' || isValidUrl(el.value)) ? 'none' : '';
+    }
   });
 
   wrap.appendChild(el);

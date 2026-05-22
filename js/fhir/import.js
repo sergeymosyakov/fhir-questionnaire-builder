@@ -213,6 +213,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // maxLength
   if (fhirItem.maxLength) node._maxLength = fhirItem.maxLength;
 
+  // minLength (SDC extension)
+  const minLenExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/minLength'
+  );
+  if (minLenExt?.valueInteger !== undefined) node._minLength = minLenExt.valueInteger;
+
   // sdc-questionnaire-entryFormat (SDC) or entryFormat (R4 element-definition ext)
   const entryFmtExt = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat' ||

@@ -1062,3 +1062,25 @@ describe('buildFHIRObject — _hidden', () => {
   });
 });
 
+describe('buildFHIRObject — _minLength', () => {
+  const ML_URL = 'http://hl7.org/fhir/StructureDefinition/minLength';
+
+  it('exports minLength as SDC extension with valueInteger', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _minLength: 5 }]);
+    const ext = q.item[0].extension || [];
+    const minLenExt = ext.find(e => e.url === ML_URL);
+    expect(minLenExt?.valueInteger).toBe(5);
+  });
+
+  it('omits minLength extension when _minLength is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.filter(e => e.url === ML_URL)).toHaveLength(0);
+  });
+
+  it('exports minLength = 1 (minimum valid value)', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string', _minLength: 1 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === ML_URL)?.valueInteger).toBe(1);
+  });
+});

@@ -84,6 +84,17 @@
           "valueCoding": { "code": "always", "display": "Always" }
         }
       ]
+    },
+    {
+      "linkId": "string-with-min",
+      "text": "Describe (min 5 chars)",
+      "type": "string",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/minLength",
+          "valueInteger": 5
+        }
+      ]
     }
   ]
 }

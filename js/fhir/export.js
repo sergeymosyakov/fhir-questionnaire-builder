@@ -184,6 +184,11 @@ function nodeToFHIRItem(node) {
   // maxLength (text/url/open-choice types)
   if (node._maxLength) fhirItem.maxLength = node._maxLength;
 
+  // minLength (SDC extension)
+  if (node._minLength) {
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/minLength', valueInteger: node._minLength });
+  }
+
   // sdc-questionnaire-entryFormat
   if (node._entryFormat) {
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat', valueString: node._entryFormat });

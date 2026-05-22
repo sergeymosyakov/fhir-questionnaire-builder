@@ -11,6 +11,7 @@ export function build(node, ctx) {
   el.value = getValue(node.id) !== undefined ? getValue(node.id) : '';
 
   if (node._maxLength) el.maxLength = node._maxLength;
+  if (node._minLength) el.minLength = node._minLength;
   if (node._entryFormat) el.placeholder = node._entryFormat;
 
   const autoResize = () => {
@@ -28,6 +29,18 @@ export function build(node, ctx) {
     el.addEventListener('input', updateCounter);
   }
 
+  let errMinLen = null;
+  if (node._minLength) {
+    errMinLen = document.createElement('span');
+    errMinLen.className = 'ctrl-err ctrl-err--ml';
+    errMinLen.dataset.testid = 'minlength-err';
+    errMinLen.textContent = 'Min\u00A0' + node._minLength + '\u00A0chars';
+    errMinLen.style.display = 'none';
+    el.addEventListener('blur', () => {
+      errMinLen.style.display = (el.value.length > 0 && el.value.length < node._minLength) ? '' : 'none';
+    });
+  }
+
   let _debounce = null;
   el.oninput  = () => {
     setValue(node.id, el.value);
@@ -39,6 +52,7 @@ export function build(node, ctx) {
 
   wrap.appendChild(el);
   if (counter) wrap.appendChild(counter);
+  if (errMinLen) wrap.appendChild(errMinLen);
   if (el.value) requestAnimationFrame(autoResize);
   return wrap;
 }

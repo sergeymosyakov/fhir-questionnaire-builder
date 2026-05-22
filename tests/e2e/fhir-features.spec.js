@@ -1,9 +1,10 @@
-// ── E2E: FHIR features — readOnly, maxLength, minValue/maxValue, ordinalValue ───
+// ── E2E: FHIR features — readOnly, maxLength, minValue/maxValue, ordinalValue, minLength ───
 // Tests that cover:
 //   1. item.readOnly  — field blocked in preview (disabled-looking, no input rendered)
 //   2. item.maxLength — character counter shown; input blocked at the limit
 //   3. minValue/maxValue — validation icon ✘ when out of range; ✔ when in range
 //   4. ordinalValue   — score shown next to answer option in select and radio controls
+//   5. minLength      — error shown on blur when value is too short; clears when valid
 //
 // Fixture: tests/fixtures/fhir-features.fhir.json
 //
@@ -264,5 +265,54 @@ test.describe('ordinalValue display', () => {
     await row.locator('.radio-label').first().locator('input[type="radio"]').check();
     // Verify no JS errors and row is still visible
     await expect(row).toBeVisible();
+  });
+});
+
+// ── 5. minLength ──────────────────────────────────────────────────────────────
+
+test.describe('minLength enforcement', () => {
+  test('error is hidden on empty field', async ({ page }) => {
+    await loadFixture(page);
+    const err = page.locator('[data-preview-id="string-with-min"] [data-testid="minlength-err"]');
+    await expect(err).toBeHidden();
+  });
+
+  test('error shown on blur when value is too short', async ({ page }) => {
+    await loadFixture(page);
+    const textarea = page.locator('[data-preview-id="string-with-min"] textarea');
+    await textarea.fill('Hi');
+    await textarea.blur();
+    const err = page.locator('[data-preview-id="string-with-min"] [data-testid="minlength-err"]');
+    await expect(err).toBeVisible();
+    await expect(err).toContainText('5');
+  });
+
+  test('error clears when value reaches minLength', async ({ page }) => {
+    await loadFixture(page);
+    const textarea = page.locator('[data-preview-id="string-with-min"] textarea');
+    await textarea.fill('Hi');
+    await textarea.blur();
+    await textarea.fill('Hello world');
+    await textarea.blur();
+    const err = page.locator('[data-preview-id="string-with-min"] [data-testid="minlength-err"]');
+    await expect(err).toBeHidden();
+  });
+
+  test('minLength round-trips through export', async ({ page }) => {
+    await loadFixture(page);
+    page.once('dialog', d => d.accept());
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click(),
+    ]);
+    const filePath = await download.path();
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(filePath, 'utf8'));
+    const item = q.item.find(i => i.linkId === 'string-with-min');
+    const minLenExt = (item.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/minLength'
+    );
+    expect(minLenExt?.valueInteger).toBe(5);
   });
 });

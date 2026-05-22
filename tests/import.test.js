@@ -956,5 +956,31 @@ describe('importFHIR', () => {
       expect(_tree[0].children[0]._hidden).toBeUndefined();
     });
   });
+
+  // ── minLength ────────────────────────────────────────────────────────────
+  describe('_minLength', () => {
+    const ML_URL = 'http://hl7.org/fhir/StructureDefinition/minLength';
+
+    it('reads minLength valueInteger into node._minLength', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'string', text: 'Q',
+        extension: [{ url: ML_URL, valueInteger: 3 }],
+      }]));
+      expect(_tree[0]._minLength).toBe(3);
+    });
+
+    it('does not set _minLength when extension is absent', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
+      expect(_tree[0]._minLength).toBeUndefined();
+    });
+
+    it('does not set _minLength when valueInteger is absent from extension', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'string', text: 'Q',
+        extension: [{ url: ML_URL }],
+      }]));
+      expect(_tree[0]._minLength).toBeUndefined();
+    });
+  });
 });
 
