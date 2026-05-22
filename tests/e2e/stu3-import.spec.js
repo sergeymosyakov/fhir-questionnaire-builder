@@ -82,17 +82,17 @@ test.describe('STU3 import', () => {
     // Select any answer for q1 to satisfy the condition
     const q1Trigger = preview.locator('[data-preview-id="q1"] .sc-trigger');
     await q1Trigger.click();
-    await page.locator('.sc-option').first().click();
+    await page.locator('.oc-opt').first().click();
 
     // difficulty row should now be visible
     await expect(difficultyRow).toBeVisible();
   });
 
-  test('STU3 readOnly item with initialInteger renders as disabled input', async ({ page }) => {
+  test('STU3 readOnly item with initialInteger renders as calculated badge', async ({ page }) => {
     await loadFixture(page, 'phq-9.stu3.fhir.json');
-    // 'score' item is readOnly with initialInteger: 0
-    const scoreInput = page.locator('[data-preview-id="score"] input');
-    await expect(scoreInput).toBeDisabled();
+    // 'score' item is readOnly with calculatedExpression — renders as calc-badge span, not input
+    const scoreBadge = page.locator('[data-calc-id="score"]');
+    await expect(scoreBadge).toBeVisible();
   });
 
   test('exported questionnaire from STU3 import is valid R4', async ({ page }) => {
