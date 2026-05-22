@@ -218,6 +218,14 @@ describe('humanEnableWhen', () => {
     );
     expect(result).toBe('«BMI» > 30');
   });
+
+  it('falls back to ? for unrecognised answer type', () => {
+    const result = humanEnableWhen(
+      [{ question: 'q1', operator: '=' }],
+      'all', { q1: 'Q' }
+    );
+    expect(result).toBe('«Q» = ?');
+  });
 });
 
 // ── applyVisibility ──────────────────────────────────────────────────────────────────
@@ -717,6 +725,27 @@ describe('importFHIR', () => {
       expect(_tree[0]._initialValues).toEqual(['3', '7']);
     });
 
+    it('reads date initial value', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'date', text: 'Q',
+        initial: [{ valueDate: '2024-06-01' }],
+      }]));
+      expect(_tree[0]._initialValue).toBe('2024-06-01');
+    });
+
+    it('reads quantity initial value as string of the numeric value', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'quantity', text: 'Q',
+        initial: [{ valueQuantity: { value: 72.5, unit: 'kg' } }],
+      }]));
+      expect(_tree[0]._initialValue).toBe('72.5');
+    });
+
+    it('reads quantity with no value as empty string', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'quantity', text: 'Q',
+        initial: [{ valueQuantity: { unit: 'kg' } }],
+      }]));
+      expect(_tree[0]._initialValue).toBe('');
+    });
+
     it('populates values correctly: base id=first, $$1..N=extras, $$n=extra count', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', repeats: true,
         initial: [{ valueString: 'a' }, { valueString: 'b' }, { valueString: 'c' }],
@@ -981,6 +1010,210 @@ describe('importFHIR', () => {
       }]));
       expect(_tree[0]._minLength).toBeUndefined();
     });
+  });
+
+  // ── _minValue / _maxValue ─────────────────────────────────────────────────
+  describe('_minValue / _maxValue', () => {
+    const MIN_URL = 'http://hl7.org/fhir/StructureDefinition/minValue';
+    const MAX_URL = 'http://hl7.org/fhir/StructureDefinition/maxValue';
+
+    it('reads minValue integer extension into _minValue', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'integer', text: 'Q',
+        extension: [{ url: MIN_URL, valueInteger: 0 }],
+      }]));
+      expect(_tree[0]._minValue).toBe(0);
+    });
+
+    it('reads maxValue decimal extension into _maxValue', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'decimal', text: 'Q',
+        extension: [{ url: MAX_URL, valueDecimal: 9.9 }],
+      }]));
+      expect(_tree[0]._maxValue).toBe(9.9);
+    });
+  });
+
+  // ── referenceResource / quantityUnit / calculatedExpr / initialExpr ────────
+  describe('reference, quantity, calculated/initial expressions', () => {
+    const REF_URL  = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource';
+    const UNIT_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit';
+    const CALC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression';
+    const INIT_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression';
+
+    it('reads referenceResource from reference item', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'reference', text: 'Q',
+        extension: [{ url: REF_URL, valueCode: 'Patient' }],
+      }]));
+      expect(_tree[0].referenceResource).toBe('Patient');
+    });
+
+    it('reads quantityUnit from questionnaire-unit extension', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'quantity', text: 'Q',
+        extension: [{ url: UNIT_URL, valueCoding: { code: 'kg', system: 'http://unitsofmeasure.org' } }],
+      }]));
+      expect(_tree[0].quantityUnit).toBe('kg');
+    });
+
+    it('reads _calculatedExpr from SDC calculatedExpression extension', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'decimal', text: 'Q',
+        extension: [{ url: CALC_URL, valueExpression: { language: 'text/fhirpath', expression: '%total * 2' } }],
+      }]));
+      expect(_tree[0]._calculatedExpr).toBe('%total * 2');
+    });
+
+    it('reads _initialExpr from SDC initialExpression extension', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'string', text: 'Q',
+        extension: [{ url: INIT_URL, valueExpression: { language: 'text/fhirpath', expression: '%patient.name' } }],
+      }]));
+      expect(_tree[0]._initialExpr).toBe('%patient.name');
+    });
+  });
+
+  // ── _sliderStep ───────────────────────────────────────────────────────────
+  describe('_sliderStep', () => {
+    const SLIDER_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue';
+
+    it('reads sliderStepValue integer into _sliderStep', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'integer', text: 'Q',
+        extension: [{ url: SLIDER_URL, valueInteger: 1 }],
+      }]));
+      expect(_tree[0]._sliderStep).toBe(1);
+    });
+  });
+
+  // ── _optionOrdinals ───────────────────────────────────────────────────────
+  describe('_optionOrdinals', () => {
+    const ORD_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+
+    it('reads ordinalValue from answerOption.extension', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{
+          valueCoding: { code: 'a', display: 'Option A' },
+          extension: [{ url: ORD_URL, valueDecimal: 1.0 }],
+        }],
+      }]));
+      expect(_tree[0]._optionOrdinals).toEqual({ a: 1.0 });
+    });
+
+    it('reads ordinalValue from answerOption.valueCoding.extension (older style)', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{
+          valueCoding: {
+            code: 'b', display: 'Option B',
+            extension: [{ url: ORD_URL, valueDecimal: 2.0 }],
+          },
+        }],
+      }]));
+      expect(_tree[0]._optionOrdinals).toEqual({ b: 2.0 });
+    });
+  });
+
+  // ── initialSelected with integer option ──────────────────────────────────
+  describe('answerOption.initialSelected valueInteger', () => {
+    it('reads initialSelected from valueInteger option', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{ valueInteger: 42, initialSelected: true }],
+      }]));
+      expect(_tree[0]._initialSelected).toBe('42');
+    });
+  });
+
+  // ── initial[] with unrecognised value type ────────────────────────────────
+  describe('item.initial[] unrecognised type', () => {
+    it('ignores initial entries with no recognised value type', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
+        initial: [{}],
+      }]));
+      expect(_tree[0]._initialValue).toBeUndefined();
+    });
+  });
+
+  // ── non-group item with sub-items (synthetic group wrap) ──────────────────
+  describe('non-group item with sub-items', () => {
+    it('wraps a non-group question with item[] in a synthetic group', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'string', text: 'Parent',
+        item: [{ linkId: 'q1.1', type: 'string', text: 'Child' }],
+      }]));
+      expect(_tree[0].type).toBe('group');
+      expect(_tree[0].id).toBe('q1-grp');
+      expect(_tree[0].children).toHaveLength(2); // parent item + child
+    });
+  });
+});
+
+// ── group import (fhirItemToNode group branch) ────────────────────────────────
+describe('importFHIR — group items', () => {
+  const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'Test', item: items });
+  const CONSTRAINT_URL  = 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint';
+  const SUPPORT_URL     = 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink';
+  const HIDDEN_URL_SDC  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden';
+  const ITLH_KEY_GROUP_OR = 'e3a8c2f1-6b4d-4e9a-87c5:group-or';
+
+  it('sets logicWithParent=OR when group-or constraint key is detected', () => {
+    importFHIR(minQ([{
+      linkId: 'g1', type: 'group', text: 'G',
+      extension: [{
+        url: CONSTRAINT_URL,
+        extension: [
+          { url: 'key',        valueId:     ITLH_KEY_GROUP_OR },
+          { url: 'severity',   valueCode:   'error' },
+          { url: 'human',      valueString: 'At least one required' },
+          { url: 'expression', valueString: "%resource.item.where(linkId='g1.q1').answer.exists()" },
+        ],
+      }],
+      item: [{ linkId: 'g1.q1', type: 'string', text: 'Child' }],
+    }]));
+    expect(_tree[0].logicWithParent).toBe('OR');
+  });
+
+  it('imports a regular (non-OR) constraint onto node.constraint', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'string', text: 'Q',
+      extension: [{
+        url: CONSTRAINT_URL,
+        extension: [
+          { url: 'key',        valueId:     'cst-1' },
+          { url: 'expression', valueString: "value.length() > 3" },
+          { url: 'human',      valueString: 'Must be longer than 3 chars' },
+          { url: 'severity',   valueCode:   'error' },
+        ],
+      }],
+    }]));
+    expect(_tree[0].constraint).toHaveLength(1);
+    expect(_tree[0].constraint[0].key).toBe('cst-1');
+    expect(_tree[0].constraint[0].expression).toBe('value.length() > 3');
+  });
+
+  it('reads _supportLinks on a group', () => {
+    importFHIR(minQ([{
+      linkId: 'g1', type: 'group', text: 'G',
+      extension: [
+        { url: SUPPORT_URL, valueUri: 'https://example.org/help1' },
+        { url: SUPPORT_URL, valueUri: 'https://example.org/help2' },
+      ],
+      item: [{ linkId: 'g1.q1', type: 'string', text: 'Child' }],
+    }]));
+    expect(_tree[0]._supportLinks).toEqual([
+      'https://example.org/help1',
+      'https://example.org/help2',
+    ]);
+  });
+
+  it('sets _hidden = true on a group using SDC URL', () => {
+    importFHIR(minQ([{
+      linkId: 'g1', type: 'group', text: 'G',
+      extension: [{ url: HIDDEN_URL_SDC, valueBoolean: true }],
+      item: [{ linkId: 'g1.q1', type: 'string', text: 'Child' }],
+    }]));
+    expect(_tree[0]._hidden).toBe(true);
+    expect(_tree[0].children[0]._hidden).toBeUndefined();
   });
 });
 

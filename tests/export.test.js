@@ -37,7 +37,7 @@ vi.mock('../js/state.js', () => ({
   NONEMPTY_TYPES:  new Set(),
 }));
 
-const { buildFHIRObject } = await import('../js/fhir/export.js');
+const { buildFHIRObject, exportFHIR } = await import('../js/fhir/export.js');
 const { generateNarrativeDiv } = await import('../js/fhir/export.js');
 
 // Helper: reset tree and run buildFHIRObject
@@ -1082,5 +1082,217 @@ describe('buildFHIRObject — _minLength', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string', _minLength: 1 }]);
     const ext = q.item[0].extension || [];
     expect(ext.find(e => e.url === ML_URL)?.valueInteger).toBe(1);
+  });
+});
+
+// ── sliderStepValue ───────────────────────────────────────────────────────────
+describe('buildFHIRObject — _sliderStep', () => {
+  const SLIDER_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue';
+
+  it('exports integer slider step as valueInteger', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'integer', _sliderStep: 5 }]);
+    const ext = q.item[0].extension || [];
+    const sliderExt = ext.find(e => e.url === SLIDER_URL);
+    expect(sliderExt?.valueInteger).toBe(5);
+    expect(sliderExt?.valueDecimal).toBeUndefined();
+  });
+
+  it('exports decimal slider step as valueDecimal', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _sliderStep: 0.5 }]);
+    const ext = q.item[0].extension || [];
+    const sliderExt = ext.find(e => e.url === SLIDER_URL);
+    expect(sliderExt?.valueDecimal).toBe(0.5);
+    expect(sliderExt?.valueInteger).toBeUndefined();
+  });
+});
+
+// ── contained resources ───────────────────────────────────────────────────────
+describe('buildFHIRObject — contained', () => {
+  afterEach(() => { _questContained.splice(0); });
+
+  it('exports contained resources when questContained is non-empty', () => {
+    _questContained.push({ resourceType: 'ValueSet', id: 'vs1' });
+    const q = build([]);
+    expect(q.contained).toHaveLength(1);
+    expect(q.contained[0].id).toBe('vs1');
+  });
+
+  it('omits contained when questContained is empty', () => {
+    const q = build([]);
+    expect(q.contained).toBeUndefined();
+  });
+});
+
+// ── resource meta ─────────────────────────────────────────────────────────────
+describe('buildFHIRObject — resource meta', () => {
+  afterEach(() => {
+    delete _questMeta._metaVersionId;
+    delete _questMeta._metaSource;
+    delete _questMeta._metaLastUpdated;
+    delete _questMeta._rawMetaProfile;
+    delete _questMeta._rawMetaTag;
+    delete _questMeta._rawMetaSecurity;
+  });
+
+  it('writes q.meta when _metaVersionId is set', () => {
+    _questMeta._metaVersionId = 'v2';
+    _questMeta._metaSource = 'https://example.org';
+    _questMeta._rawMetaProfile = ['http://hl7.org/fhir/StructureDefinition/Questionnaire'];
+    _questMeta._rawMetaTag = [{ system: 'http://example.org', code: 'tag1' }];
+    _questMeta._rawMetaSecurity = [{ system: 'http://example.org', code: 'sec1' }];
+    const q = build([]);
+    expect(q.meta).toBeDefined();
+    expect(q.meta.versionId).toBe('v2');
+    expect(q.meta.source).toBe('https://example.org');
+    expect(q.meta.profile).toEqual(['http://hl7.org/fhir/StructureDefinition/Questionnaire']);
+    expect(q.meta.tag).toEqual([{ system: 'http://example.org', code: 'tag1' }]);
+    expect(q.meta.security).toEqual([{ system: 'http://example.org', code: 'sec1' }]);
+    expect(q.meta.lastUpdated).toBeDefined();
+  });
+
+  it('omits q.meta when no meta fields are set', () => {
+    _questMeta._metaVersionId = '';
+    _questMeta._rawMetaProfile = [];
+    _questMeta._rawMetaTag = [];
+    _questMeta._rawMetaSecurity = [];
+    const q = build([]);
+    expect(q.meta).toBeUndefined();
+  });
+});
+
+// ── maxValue ──────────────────────────────────────────────────────────────────
+describe('buildFHIRObject — _maxValue', () => {
+  const MAX_URL = 'http://hl7.org/fhir/StructureDefinition/maxValue';
+
+  it('exports integer _maxValue as valueInteger', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'integer', _maxValue: 100 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MAX_URL)?.valueInteger).toBe(100);
+  });
+
+  it('exports decimal _maxValue as valueDecimal', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _maxValue: 9.9 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MAX_URL)?.valueDecimal).toBe(9.9);
+  });
+});
+
+// ── minOccurs / maxOccurs ─────────────────────────────────────────────────────
+describe('buildFHIRObject — minOccurs/maxOccurs', () => {
+  const MIN_OCC = 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs';
+  const MAX_OCC = 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs';
+
+  it('exports minOccurs when repeats=true and _minOccurs is set', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: true, _minOccurs: 2 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MIN_OCC)?.valueInteger).toBe(2);
+  });
+
+  it('exports maxOccurs when repeats=true and _maxOccurs is set', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: true, _maxOccurs: 5 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MAX_OCC)?.valueInteger).toBe(5);
+  });
+
+  it('does not export minOccurs/maxOccurs when repeats is false', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: false, _minOccurs: 1, _maxOccurs: 3 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MIN_OCC)).toBeUndefined();
+    expect(ext.find(e => e.url === MAX_OCC)).toBeUndefined();
+  });
+});
+
+// ── _minValue ─────────────────────────────────────────────────────────────────
+describe('buildFHIRObject — _minValue', () => {
+  const MIN_URL = 'http://hl7.org/fhir/StructureDefinition/minValue';
+
+  it('exports integer _minValue as valueInteger', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'integer', _minValue: 1 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MIN_URL)?.valueInteger).toBe(1);
+  });
+
+  it('exports decimal _minValue as valueDecimal', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _minValue: 0.5 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MIN_URL)?.valueDecimal).toBe(0.5);
+  });
+});
+
+// ── _optionOrdinals ───────────────────────────────────────────────────────────
+describe('buildFHIRObject — _optionOrdinals', () => {
+  const ORD_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+
+  it('adds ordinalValue extension to answerOption when _optionOrdinals is set', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'a=Option A,b=Option B',
+      _optionOrdinals: { a: 1.0, b: 2.0 },
+    }]);
+    const opts = q.item[0].answerOption || [];
+    const optA = opts.find(o => o.valueCoding?.code === 'a');
+    expect(optA?.extension?.[0]?.url).toBe(ORD_URL);
+    expect(optA?.extension?.[0]?.valueDecimal).toBe(1.0);
+  });
+
+  it('omits ordinalValue extension when _optionOrdinals is absent', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'a=Option A',
+    }]);
+    const opts = q.item[0].answerOption || [];
+    expect(opts[0].extension).toBeUndefined();
+  });
+});
+
+// ── referenceResource / quantityUnit / calculatedExpr / initialExpr ───────────
+describe('buildFHIRObject — reference, quantity, expr extensions', () => {
+  const REF_URL  = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource';
+  const UNIT_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit';
+  const CALC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression';
+  const INIT_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression';
+
+  it('exports referenceResource for reference item type', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference', referenceResource: 'Patient' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === REF_URL)?.valueCode).toBe('Patient');
+  });
+
+  it('exports questionnaire-unit for quantity item type', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'quantity', quantityUnit: 'kg' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === UNIT_URL)?.valueCoding?.code).toBe('kg');
+  });
+
+  it('exports SDC calculatedExpression when _calculatedExpr is set', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _calculatedExpr: '%total * 2' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === CALC_URL)?.valueExpression?.expression).toBe('%total * 2');
+  });
+
+  it('exports SDC initialExpression when _initialExpr is set', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string', _initialExpr: '%patient.name' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === INIT_URL)?.valueExpression?.expression).toBe('%patient.name');
+  });
+});
+
+// ── exportFHIR ────────────────────────────────────────────────────────────────
+describe('exportFHIR', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  it('creates a download anchor and triggers a click', () => {
+    const anchor = { href: '', download: '', click: vi.fn() };
+    const mockCreateObjectURL = vi.fn(() => 'blob:mock');
+    const mockRevokeObjectURL = vi.fn();
+    vi.stubGlobal('URL', { createObjectURL: mockCreateObjectURL, revokeObjectURL: mockRevokeObjectURL });
+    vi.stubGlobal('document', { createElement: vi.fn(() => anchor) });
+    vi.stubGlobal('Blob', class MockBlob { constructor(parts, opts) { this.parts = parts; this.type = opts?.type; } });
+
+    exportFHIR('my-questionnaire.json');
+
+    expect(anchor.download).toBe('my-questionnaire.json');
+    expect(anchor.click).toHaveBeenCalled();
+    expect(mockRevokeObjectURL).toHaveBeenCalled();
   });
 });
