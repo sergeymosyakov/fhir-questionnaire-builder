@@ -330,7 +330,7 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `item.answerValueSet` — external URL | 🔧 URL preserved round-trip | Not resolved to answer options; no FHIR terminology server integration. `#id` contained refs ARE resolved (see Round-Trip Safety) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
-| `minLength` | ❌ Not handled | Minimum allowed response length for `string` / `text` / `url` items. Counterpart to `maxLength` which is fully supported. |
+| `minLength` | ✅ SDC ext `http://hl7.org/fhir/StructureDefinition/minLength` | Imported → `_minLength`; exported back when set; `minlength` HTML attribute enforced in preview; inline error `Min N chars` shown on blur when value is non-empty but shorter than limit; clears when value reaches the limit. |
 | `maxDecimalPlaces` | ❌ Not handled | Maximum number of decimal places for `decimal` items (`http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces`). |
 | `regex` | ❌ Not handled | Regular expression validation pattern for `string` / `text` / `url` items (`http://hl7.org/fhir/StructureDefinition/regex`). |
 | `mimeType` | ❌ Not handled | One or more allowed MIME types for `attachment` items (`http://hl7.org/fhir/StructureDefinition/mimeType`). Multiple values permitted. |
