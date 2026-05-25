@@ -86,6 +86,21 @@ function _yield() {
 // Persists across re-renders (not reactive)
 const collapsedGroups = new Set();
 
+// Reset collapsedGroups from _collapsible values — call after import / clear form.
+// Groups with _collapsible === 'default-closed' start collapsed; all others start expanded.
+export function resetCollapsedFromTree(nodes) {
+  collapsedGroups.clear();
+  function walk(ns) {
+    for (const n of ns) {
+      if (n.type === 'group') {
+        if (n._collapsible === 'default-closed') collapsedGroups.add(n.id);
+        walk(n.children || []);
+      }
+    }
+  }
+  walk(nodes);
+}
+
 // Navigate to a preview node by id, expanding collapsed ancestors if needed.
 export function navigateToPreview(id) {
   const ancestors = findAncestorGroupIds(id, tree);

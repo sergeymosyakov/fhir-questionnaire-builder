@@ -28,6 +28,8 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden',
   'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden',
+  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible',
+  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel',
   'http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay',
   'http://hl7.org/fhir/StructureDefinition/maxSize',
   'http://hl7.org/fhir/StructureDefinition/mimeType',
@@ -348,6 +350,14 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (hiddenExt?.valueBoolean === true) node._hidden = true;
 
+  // sdc-questionnaire-openLabel (open-choice items only)
+  if (node.itemType === 'open-choice') {
+    const openLabelExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel'
+    );
+    if (openLabelExt?.valueString) node._openLabel = openLabelExt.valueString;
+  }
+
   // disabledDisplay (R4B native field or R4 extension backport)
   if (fhirItem.disabledDisplay) node._disabledDisplay = fhirItem.disabledDisplay;
   const ddExt = (fhirItem.extension || []).find(
@@ -441,6 +451,11 @@ function fhirItemToNode(fhirItem, linkIdMap, contained) {
            e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden'
     );
     if (groupHiddenExt?.valueBoolean === true) node._hidden = true;
+    // sdc-questionnaire-collapsible
+    const collapsibleExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible'
+    );
+    if (collapsibleExt?.valueCode) node._collapsible = collapsibleExt.valueCode;
     // Preserve any unrecognised extensions for round-trip pass-through
     const groupUnknown = _collectUnknownExtensions(fhirItem);
     if (groupUnknown) node._unknownExtensions = groupUnknown;

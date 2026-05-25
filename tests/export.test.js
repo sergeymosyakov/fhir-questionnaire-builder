@@ -1517,3 +1517,56 @@ describe('buildFHIRObject — replaces extension', () => {
     expect(entries).toHaveLength(1);
   });
 });
+
+// ── sdc-questionnaire-collapsible ─────────────────────────────────────────────
+describe('buildFHIRObject — sdc-questionnaire-collapsible', () => {
+  const COLL_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible';
+
+  it('exports default-closed as valueCode on a group', () => {
+    const q = build([{ id: 'g1', type: 'group', title: 'G', _collapsible: 'default-closed', children: [] }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === COLL_URL);
+    expect(ext).toBeDefined();
+    expect(ext.valueCode).toBe('default-closed');
+  });
+
+  it('exports default-open as valueCode on a group', () => {
+    const q = build([{ id: 'g1', type: 'group', title: 'G', _collapsible: 'default-open', children: [] }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === COLL_URL);
+    expect(ext?.valueCode).toBe('default-open');
+  });
+
+  it('omits collapsible extension when _collapsible is undefined', () => {
+    const q = build([{ id: 'g1', type: 'group', title: 'G', children: [] }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === COLL_URL);
+    expect(ext).toBeUndefined();
+  });
+
+  it('does not write collapsible extension on item nodes', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _collapsible: 'default-closed' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === COLL_URL);
+    expect(ext).toBeUndefined();
+  });
+});
+
+// ── sdc-questionnaire-openLabel ───────────────────────────────────────────────
+describe('buildFHIRObject — sdc-questionnaire-openLabel', () => {
+  const OL_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel';
+
+  it('exports openLabel as valueString on open-choice', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'open-choice', _openLabel: 'Other (please specify)' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === OL_URL);
+    expect(ext?.valueString).toBe('Other (please specify)');
+  });
+
+  it('omits openLabel when _openLabel is undefined', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'open-choice' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === OL_URL);
+    expect(ext).toBeUndefined();
+  });
+
+  it('does not write openLabel for non-open-choice types', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _openLabel: 'Other' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === OL_URL);
+    expect(ext).toBeUndefined();
+  });
+});

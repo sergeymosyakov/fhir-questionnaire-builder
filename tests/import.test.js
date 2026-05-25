@@ -1456,3 +1456,85 @@ describe('importFHIR — replaces extension', () => {
     expect(_questMeta.replaces).toHaveLength(0);
   });
 });
+
+// ── sdc-questionnaire-collapsible ─────────────────────────────────────────────
+describe('importFHIR — sdc-questionnaire-collapsible', () => {
+  const COLL_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible';
+  beforeEach(() => { _tree.splice(0); });
+
+  const minQ = items => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+
+  it('reads default-closed into group._collapsible', () => {
+    importFHIR(minQ([{
+      linkId: 'g1', type: 'group', text: 'G',
+      extension: [{ url: COLL_URL, valueCode: 'default-closed' }],
+      item: [{ linkId: 'q1', type: 'string', text: 'Q' }],
+    }]));
+    expect(_tree[0]._collapsible).toBe('default-closed');
+  });
+
+  it('reads default-open into group._collapsible', () => {
+    importFHIR(minQ([{
+      linkId: 'g1', type: 'group', text: 'G',
+      extension: [{ url: COLL_URL, valueCode: 'default-open' }],
+      item: [{ linkId: 'q1', type: 'string', text: 'Q' }],
+    }]));
+    expect(_tree[0]._collapsible).toBe('default-open');
+  });
+
+  it('leaves _collapsible undefined when extension absent', () => {
+    importFHIR(minQ([{
+      linkId: 'g1', type: 'group', text: 'G',
+      item: [{ linkId: 'q1', type: 'string', text: 'Q' }],
+    }]));
+    expect(_tree[0]._collapsible).toBeUndefined();
+  });
+
+  it('does not add collapsible to _unknownExtensions', () => {
+    importFHIR(minQ([{
+      linkId: 'g1', type: 'group', text: 'G',
+      extension: [{ url: COLL_URL, valueCode: 'default-closed' }],
+      item: [{ linkId: 'q1', type: 'string', text: 'Q' }],
+    }]));
+    const unknown = _tree[0]._unknownExtensions || [];
+    expect(unknown.some(e => e.url === COLL_URL)).toBe(false);
+  });
+});
+
+// ── sdc-questionnaire-openLabel ───────────────────────────────────────────────
+describe('importFHIR — sdc-questionnaire-openLabel', () => {
+  const OL_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel';
+  beforeEach(() => { _tree.splice(0); });
+
+  const minQ = items => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+
+  it('reads openLabel into node._openLabel for open-choice', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'open-choice', text: 'Q',
+      extension: [{ url: OL_URL, valueString: 'Other (please specify)' }],
+    }]));
+    expect(_tree[0]._openLabel).toBe('Other (please specify)');
+  });
+
+  it('leaves _openLabel undefined when extension absent', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'open-choice', text: 'Q' }]));
+    expect(_tree[0]._openLabel).toBeUndefined();
+  });
+
+  it('does not read openLabel for non-open-choice types', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'string', text: 'Q',
+      extension: [{ url: OL_URL, valueString: 'Other' }],
+    }]));
+    expect(_tree[0]._openLabel).toBeUndefined();
+  });
+
+  it('does not add openLabel to _unknownExtensions for open-choice', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'open-choice', text: 'Q',
+      extension: [{ url: OL_URL, valueString: 'Other' }],
+    }]));
+    const unknown = _tree[0]._unknownExtensions || [];
+    expect(unknown.some(e => e.url === OL_URL)).toBe(false);
+  });
+});

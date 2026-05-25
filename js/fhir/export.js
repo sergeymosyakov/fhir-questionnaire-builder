@@ -228,6 +228,16 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden', valueBoolean: true });
   }
 
+  // sdc-questionnaire-collapsible (groups only)
+  if (node.type === 'group' && node._collapsible) {
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible', valueCode: node._collapsible });
+  }
+
+  // sdc-questionnaire-openLabel (open-choice items only)
+  if (node.itemType === 'open-choice' && node._openLabel) {
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel', valueString: node._openLabel });
+  }
+
   // questionnaire-displayCategory
   if (node._displayCategory) {
     ext.push({

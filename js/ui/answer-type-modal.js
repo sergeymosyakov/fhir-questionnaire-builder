@@ -125,6 +125,7 @@ export function open(node, typeLink, setActive) {
     draftPrefixes:        node._optionPrefixes
       ? Object.entries(node._optionPrefixes).map(([code, pfx]) => `${code}=${pfx}`).join(',')
       : '',
+    draftOpenLabel:       node._openLabel || '',
   };
 
   setModalTitle(_el.title, 'Answer Type', node.title || node.id || 'Item');
@@ -255,6 +256,13 @@ function _apply() {
     delete node._mimeTypes;
   }
 
+  // openLabel (open-choice items only)
+  if (node.itemType === 'open-choice' && _pending.draftOpenLabel.trim()) {
+    node._openLabel = _pending.draftOpenLabel.trim();
+  } else {
+    delete node._openLabel;
+  }
+
   // Keep the repeatable link visible/hidden correctly
   const nodeEl = document.querySelector(`[data-node-id="${node.id}"]`);
   const rl = nodeEl?.querySelector('[data-testid="action-repeatable"]');
@@ -285,6 +293,9 @@ function _renderBody(container) {
 
   const ENTRY_FORMAT_TYPES = new Set(['text','integer','decimal','date','dateTime','time','url','quantity']);
 
+  // openLabelSection reference — declared here so the typeSel onChange closure can update it
+  let openLabelSection;
+
   // ── Type selector ─────────────────────────────────────────────────────────
   const typeRow = document.createElement('div');
   typeRow.className = 'at-modal-type-row';
@@ -310,6 +321,7 @@ function _renderBody(container) {
       orientationSection.style.display  = _pending.draftType === 'radio'      ? 'block' : 'none';
       displayCatSection.style.display   = _pending.draftType === 'display'    ? 'block' : 'none';
       attachSection.style.display       = _pending.draftType === 'attachment' ? 'block' : 'none';
+      if (openLabelSection) openLabelSection.style.display = _pending.draftType === 'open-choice' ? 'block' : 'none';
     },
   });
   typeRow.appendChild(typeLbl);
@@ -428,6 +440,30 @@ function _renderBody(container) {
 
   avsSection.append(avsSubLbl, avsDrop.el, avsUrlInp);
   choiceSection.appendChild(avsSection);
+
+  // ── openLabel sub-section (open-choice only) ──────────────────────────────
+  openLabelSection = document.createElement('div');
+  openLabelSection.className = 'at-modal-sub';
+  openLabelSection.style.display = _pending.draftType === 'open-choice' ? 'block' : 'none';
+
+  const olSubLbl = document.createElement('div');
+  olSubLbl.className   = 'at-modal-sub-lbl';
+  olSubLbl.textContent = 'Open label (Other prompt):';
+  olSubLbl.dataset.tipTitle = 'Open-choice label';
+  olSubLbl.dataset.tipBody  = 'Custom label for the free-text entry in this open-choice control. Replaces the default "Choose or type\u2026" placeholder.';
+  olSubLbl.dataset.tipFhir  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel';
+  olSubLbl.dataset.tipSpec  = 'SDC';
+
+  const olInp = document.createElement('input');
+  olInp.type        = 'text';
+  olInp.className   = 'at-modal-opt-inp';
+  olInp.dataset.testid = 'open-label-input';
+  olInp.value       = _pending.draftOpenLabel;
+  olInp.placeholder = 'e.g. Other (please specify)';
+  olInp.oninput = () => { _pending.draftOpenLabel = olInp.value; };
+
+  openLabelSection.append(olSubLbl, olInp);
+  choiceSection.appendChild(openLabelSection);
 
   // Wire radio toggles
   optRadio.onchange = () => {

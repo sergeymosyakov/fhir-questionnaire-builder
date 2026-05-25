@@ -29,7 +29,7 @@ import * as codesModal from './ui/codes-modal.js';
 import * as qrExportModal from './ui/qr-export-modal.js';
 import * as libraryModal from './ui/library-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
-import { navigateToPreview, reinitForm, initPreview } from './render-preview.js';
+import { navigateToPreview, reinitForm, initPreview, resetCollapsedFromTree } from './render-preview.js';
 import { questVariables, questContained, questMeta } from './state.js';
 
 // Buttons
@@ -512,6 +512,7 @@ async function _importAndValidate(data, fileName) {
   // importFHIR is sync (parses tree); skip its internal renderTree, do async render instead
   try {
     importFHIR(data, () => {}); // pass no-op renderFn — we render below
+    resetCollapsedFromTree(tree);
     reinitForm(); // evaluate initialExpression fields from imported data
     document.dispatchEvent(new CustomEvent('questionnaire-loaded'));
     const issues = validateTree(tree, values);

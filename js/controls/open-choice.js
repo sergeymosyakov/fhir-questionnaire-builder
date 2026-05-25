@@ -14,7 +14,7 @@ export function build(node, ctx) {
   const el = document.createElement('input');
   el.type        = 'text';
   el.className   = 'oc-input';
-  el.placeholder = 'Choose or type\u2026';
+  el.placeholder = node._openLabel || 'Choose or type\u2026';
   el.value       = getValue(node.id) !== undefined ? getValue(node.id) : '';
   el.autocomplete = 'off';
 

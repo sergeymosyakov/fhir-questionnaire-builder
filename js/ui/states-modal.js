@@ -25,9 +25,10 @@ export function init(elements) {
 export function open(node, statesLink, setActive) {
   _pending = {
     node, statesLink, setActive,
-    draftMandatory: node.mandatory,
-    draftReadOnly:  !!node._readOnly,
-    draftHidden:    !!node._hidden,
+    draftMandatory:    node.mandatory,
+    draftReadOnly:     !!node._readOnly,
+    draftHidden:       !!node._hidden,
+    draftCollapsible:  node._collapsible || '',
   };
 
   setModalTitle(_el.title, 'States', node.title || node.id || 'Item');
@@ -48,8 +49,11 @@ function _apply() {
     node._readOnly = _pending.draftReadOnly || undefined;
   }
   node._hidden = _pending.draftHidden || undefined;
+  if (node.type === 'group') {
+    node._collapsible = _pending.draftCollapsible || undefined;
+  }
 
-  const anyActive = node.mandatory === true || !!node._readOnly || !!node._hidden;
+  const anyActive = node.mandatory === true || !!node._readOnly || !!node._hidden || !!node._collapsible;
   setActive(statesLink, anyActive);
   triggerCalcRecalc();
   _close();
@@ -154,4 +158,36 @@ function _renderBody(container, isItem) {
   hidRow.appendChild(hidLbl);
   hidRow.appendChild(hidHint);
   container.appendChild(hidRow);
+
+  // ── Collapsible row (groups only) ─────────────────────────────────────────
+  if (!isItem) {
+    const collRow = document.createElement('div');
+    collRow.className = 'states-modal-row';
+
+    const collLbl = document.createElement('label');
+    collLbl.className   = 'states-modal-label';
+    collLbl.textContent = 'Collapsible:';
+    collLbl.dataset.tipTitle = 'Collapsible group';
+    collLbl.dataset.tipBody  = 'Controls whether this group renders as a collapsible section in the patient view. default-closed = starts collapsed; default-open = starts expanded but collapsible.';
+    collLbl.dataset.tipFhir  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible';
+    collLbl.dataset.tipSpec  = 'SDC';
+
+    const COLL_OPTIONS = [
+      { value: '',               label: 'Not set \u2014 always expanded' },
+      { value: 'default-open',   label: 'Default open (collapsible)' },
+      { value: 'default-closed', label: 'Default closed (collapsed)' },
+    ];
+
+    const collSel = createCustomSelect({
+      items:    COLL_OPTIONS,
+      value:    _pending.draftCollapsible,
+      onChange: v => { _pending.draftCollapsible = v; },
+      className: 'states-modal-sel sc-trigger--full',
+      testid:   'states-collapsible-sel',
+    });
+
+    collRow.appendChild(collLbl);
+    collRow.appendChild(collSel.el);
+    container.appendChild(collRow);
+  }
 }

@@ -143,8 +143,8 @@ export function renderGroup(node, ctx) {
   statesLink.textContent = 'States';
   statesLink.className = 'action-edit';
   statesLink.dataset.tipTitle = 'Item / group states';
-  statesLink.dataset.tipBody  = 'Required \u2014 must be answered to pass validation.\nRead-only \u2014 value set programmatically, not editable (items only).\nHidden \u2014 excluded from patient view; participates in logic.';
-  statesLink.dataset.tipFhir  = 'item.required / item.readOnly / sdc-questionnaire-hidden';
+  statesLink.dataset.tipBody  = 'Required \u2014 must be answered to pass validation.\nHidden \u2014 excluded from patient view; participates in logic.\nCollapsible \u2014 group starts collapsed or expanded in patient view.';
+  statesLink.dataset.tipFhir  = 'item.required / sdc-questionnaire-hidden / sdc-questionnaire-collapsible';
   statesLink.dataset.tipSpec  = 'R4 \u00B7 SDC';
   statesLink.dataset.testid   = 'action-states';
   statesLink.onclick = () => statesModal.open(node, statesLink, setActive);
@@ -281,7 +281,7 @@ export function renderGroup(node, ctx) {
   setActive(visLink,    !!(node.enableWhen?.length) || !!node.enableWhenExpression);
   setActive(exprLink,   !!node._calculatedExpr);
   setActive(styleLink,  !!(node._renderStyle || node._renderXhtml));
-  setActive(statesLink, node.mandatory === true || !!node._hidden);
+  setActive(statesLink, node.mandatory === true || !!node._hidden || !!node._collapsible);
   setActive(propsLink,  !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length));
 
   // ── Body: children + logic row ────────────────────────────────────────────
