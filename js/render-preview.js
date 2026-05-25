@@ -6,6 +6,8 @@ import {
   rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
 import { _formTick, _bulkUpdate } from './render-bus.js';
+import { _rc } from './preview/render-ctx.js';
+import { renderPreviewNode, updateGroupIcons } from './preview/render-node.js';
 
 // View preferences — UI-only, not domain state.
 // Owned here; updated via 'view-pref-change' CustomEvent from app.js.
@@ -46,30 +48,9 @@ import * as progress from './ui/progress.js';
 const fhirpath  = window.fhirpath;
 const DOMPurify = window.DOMPurify;
 
-// Set label text: use sanitized XHTML when available, plain text otherwise.
-function _setNodeLabel(el, node) {
-  if (node._renderXhtml && DOMPurify) {
-    el.innerHTML = DOMPurify.sanitize(node._renderXhtml);
-  } else {
-    el.textContent = node.title;
-  }
-}
-
-// Last computed FHIRPath context — updated by _reCalc(), read by Explain click handlers.
-let _lastCtx = { fp: null, qr: null, env: {} };
-
-// Safe allowlist for node._renderStyle — only these CSS properties are applied.
-const _STYLE_ALLOWLIST = new Set(['font-weight','font-style','color','font-size','text-decoration']);
-function _applyRenderStyle(el, raw) {
-  if (!raw) return;
-  raw.split(';').forEach(part => {
-    const sep = part.indexOf(':');
-    if (sep < 1) return;
-    const prop = part.slice(0, sep).trim().toLowerCase();
-    const val  = part.slice(sep + 1).trim();
-    if (_STYLE_ALLOWLIST.has(prop) && val) el.style.setProperty(prop, val);
-  });
-}
+// Last computed FHIRPath context — stable object, mutated in-place by _reCalc().
+// Exposed via getLastCtx() and via _rc.lastCtx for render-node.js click handlers.
+const _lastCtx = { fp: null, qr: null, env: {} };
 
 export function getLastCtx() { return _lastCtx; }
 
@@ -155,7 +136,7 @@ function _reCalc() {
     }
     evalCalcNodes(tree, qr, fhirpath, values, envVars);
     const env = { resource: qr, ...envVars };
-    _lastCtx = { fp: fhirpath, qr, env };
+    _lastCtx.fp = fhirpath; _lastCtx.qr = qr; _lastCtx.env = env;
     refreshExprIcons();
     return { fp: fhirpath, qr, envVars };
   }
@@ -294,22 +275,21 @@ function buildRepeatControls(node, iconEl, onAfterChange) {
   return wrap;
 }
 
+// Set stable refs on _rc — done once at module load, after all local functions are defined.
+// render-node.js reads these via _rc to avoid a circular import on render-preview.js.
+_rc.viewPrefs         = _viewPrefs;
+_rc.lastCtx           = _lastCtx;
+_rc.collapsedGroups   = collapsedGroups;
+_rc.scrollToBuilder   = _scrollToBuilder;
+_rc.buildControl      = buildControl;
+_rc.buildRepeatControls = buildRepeatControls;
+
 // ── Async preview render with yield breaks ───────────────────────────────────
 // Splits heavy FHIRPath evaluation (Phase 1) from DOM rebuild (Phase 2) using
 // requestAnimationFrame yield points so the browser stays responsive.
 // The _renderVersion counter ensures stale renders self-abort.
 let _renderVersion = 0;
 let _previewElements = {}; // injected via initPreview() from app.js
-
-// Per-render context — populated by _asyncRender once per cycle.
-// Allows renderPreviewNode / updateGroupIcons to be moved out of the closure.
-const _rc = {
-  ctx:         null,  // { fp, qr, envVars } from _reCalc()
-  resultMap:   null,  // Map(id → evalResult)
-  cEnv:        {},    // ctx.envVars || {}
-  visible:     [],    // visible eval results
-  groupIconMap: null, // Map of group id → { icon, descendants, node }
-};
 
 async function _asyncRender(version) {
   // Phase 1: FHIRPath evaluation — CPU-heavy, no DOM mutations yet
@@ -411,9 +391,12 @@ async function _asyncRender(version) {
   lform.innerHTML = '';
 
   const groupIconMap = new Map();
-  _rc.ctx = ctx; _rc.resultMap = resultMap; _rc.cEnv = _cEnv; _rc.visible = visible; _rc.groupIconMap = groupIconMap;
+  _rc.ctx = ctx; _rc.resultMap = resultMap; _rc.cEnv = _cEnv; _rc.visible = visible; _rc.groupIconMap = groupIconMap; _rc.previewMode = _previewMode;
 
-  function renderPreviewNode(res, container) {
+  // renderPreviewNode and updateGroupIcons are imported from js/preview/render-node.js.
+  // The stubs below are retained as dead-code placeholders so the file history is clear;
+  // they are shadowed at module level by the imports above and are never called.
+  function _dead_renderPreviewNode(res, container) {
     const { ctx, resultMap, cEnv: _cEnv, visible, groupIconMap } = _rc;
     if (!res) return;
     if (!res.visible && !res.showDimmed) return;
@@ -951,7 +934,7 @@ async function _asyncRender(version) {
     }
   }
 
-  function updateGroupIcons() {
+  function _dead_updateGroupIcons() {
     const { ctx, groupIconMap } = _rc;
     for (const [, { icon, descendants, node }] of groupIconMap.entries()) {
       const relevant = descendants.filter(r =>
