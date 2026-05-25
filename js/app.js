@@ -1,5 +1,6 @@
 ﻿// Entry point: wires toolbar buttons, patient context popup, and loads the built-in example.
-import { tree, values, rawFhir, _formTick, effect, clearAllValues } from './state.js';
+import { tree, values, rawFhir, effect, clearAllValues } from './state.js';
+import { _formTick } from './render-bus.js';
 import { importFHIR } from './fhir/import.js';
 import { buildFHIRObject, exportFHIR } from './fhir/export.js';
 import { importQRAnswers } from './fhir/qr-import.js';

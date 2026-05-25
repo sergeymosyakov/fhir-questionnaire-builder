@@ -1,5 +1,6 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
-import { tree, makeGroup, _formTick, rawFhir, values, _bulkUpdate } from '../state.js';
+import { tree, makeGroup, rawFhir, values } from '../state.js';
+import { _formTick, _bulkUpdate } from '../render-bus.js';
 import { init as sharedInit, formatSeg } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { renderItem } from './node-item.js';

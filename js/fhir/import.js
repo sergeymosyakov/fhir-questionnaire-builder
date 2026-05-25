@@ -1,5 +1,6 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
-import { tree, makeGroup, makeItem, resetSeq, rawFhir, _bulkUpdate, questVariables, questContained, questMeta, setValue, clearAllValues } from '../state.js';
+import { tree, makeGroup, makeItem, resetSeq, rawFhir, questVariables, questContained, questMeta, setValue, clearAllValues } from '../state.js';
+import { _bulkUpdate } from '../render-bus.js';
 import { renderTree } from '../render-builder.js';
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
 import { normaliseSTU3 } from './stu3-shim.js';

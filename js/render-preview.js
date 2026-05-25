@@ -1,10 +1,11 @@
 // ── Right panel: reactive preview ─────────────────────────────────────────────
 import {
   effect,
-  tree, values, getValue, setValue, _formTick, _bulkUpdate,
+  tree, values, getValue, setValue,
   calcFormOk, isMandatory,
   rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
+import { _formTick, _bulkUpdate } from './render-bus.js';
 
 // View preferences — UI-only, not domain state.
 // Owned here; updated via 'view-pref-change' CustomEvent from app.js.
