@@ -214,7 +214,7 @@ function buildControl(node, iconEl, onAfterChange) {
     if (!iconEl) return;
     const ok = calcFormOk(node);
     iconEl.className   = ok ? 'icon-ok' : 'icon-fail';
-    iconEl.textContent = ok ? '\u2714' : '\u2718';
+    iconEl.textContent = ok ? '\u2713' : '\u2717';
   };
   const onChange = () => { updateOwnIcon(); if (onAfterChange) onAfterChange(); };
 
@@ -540,7 +540,7 @@ async function _asyncRender(version) {
       if (hasCondition && !res.hidden) {
         iconEl = document.createElement('span');
         iconEl.className   = displayOk ? 'icon-ok' : 'icon-fail';
-        iconEl.textContent = displayOk ? '\u2714' : '\u2718';
+        iconEl.textContent = displayOk ? '\u2713' : '\u2717';
         row.appendChild(iconEl);
       } else {
         const ph = document.createElement('span');
@@ -933,7 +933,7 @@ async function _asyncRender(version) {
       );
       if (relevant.length === 0) {
         icon.className   = 'icon-ok';
-        icon.textContent = '\u2714';
+        icon.textContent = '\u2713';
         continue;
       }
       const itemOk = k => k.ok && calcFormOk(k.node) && (!k.node.constraint?.length || evalConstraints(k.node, ctx.fp, ctx.qr, ctx.envVars || {}));
@@ -941,7 +941,7 @@ async function _asyncRender(version) {
         ? relevant.some(itemOk)
         : relevant.every(itemOk);
       icon.className   = ok ? 'icon-ok' : 'icon-fail';
-      icon.textContent = ok ? '\u2714' : '\u2718';
+      icon.textContent = ok ? '\u2713' : '\u2717';
     }
   }
 
