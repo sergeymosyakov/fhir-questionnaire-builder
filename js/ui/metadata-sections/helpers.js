@@ -1,4 +1,5 @@
 import { createCustomSelect } from '../custom-select.js';
+import { applyTip } from '../section.js';
 export { applyTip, makeCollapsible } from '../section.js';
 
 // ── makeRow: label + text/date/textarea input ─────────────────────────────────
