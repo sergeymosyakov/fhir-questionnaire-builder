@@ -20,6 +20,7 @@ export const _rc = {
   buildRepeatControls: null, // function(node, iconEl, onAfterChange)
   formTick:           null, // _formTick ref (injected from render-preview.js)
   renderNode:         null, // function(res, container) — dispatches node.renderPreview
+  updateGroupIcons:   null, // function() — refreshes all group pass/fail icons
 
   // State helpers — injected from state.js to avoid circular imports in node classes:
   isMandatory:    null, // function(node) → bool

@@ -150,9 +150,9 @@ export class ItemNode extends BaseNode {
     if (this.itemType === 'display') return;
     if (this._readOnly || this._calculatedExpr) return;
     if (this.repeats && this.itemType !== 'checkbox') {
-      row.appendChild(rc.buildRepeatControls(this, res._iconEl, () => rc.groupIconMap && _updateGroupIcons(rc)));
+      row.appendChild(rc.buildRepeatControls(this, res._iconEl, () => rc.updateGroupIcons()));
     } else {
-      row.appendChild(rc.buildControl(this, res._iconEl, () => rc.groupIconMap && _updateGroupIcons(rc)));
+      row.appendChild(rc.buildControl(this, res._iconEl, () => rc.updateGroupIcons()));
     }
   }
 
@@ -202,25 +202,5 @@ export class ItemNode extends BaseNode {
       row.querySelectorAll('input, select, textarea').forEach(el => { el.disabled = true; });
     }
     return super._appendRow(row, res, container);
-  }
-}
-
-// Trigger icon refresh on all visible groups after a control value changes.
-function _updateGroupIcons(rc) {
-  const { ctx, groupIconMap } = rc;
-  if (!groupIconMap) return;
-  for (const [, { icon, descendants, node }] of groupIconMap.entries()) {
-    const relevant = descendants.filter(r =>
-      (rc.isMandatory(r.node) && rc.CHECKABLE_TYPES.has(r.node.itemType)) ||
-      (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox') ||
-      r.node.constraint?.length > 0 ||
-      (r.node._minValue !== undefined || r.node._maxValue !== undefined)
-    );
-    if (relevant.length === 0) { icon.className = 'icon-ok'; icon.textContent = '\u2713'; continue; }
-    const itemOk = k => k.ok && rc.calcFormOk(k.node) &&
-      (!k.node.constraint?.length || rc.evalConstraints(k.node, ctx.fp, ctx.qr, ctx.envVars || {}));
-    const ok = node.logicWithParent === 'OR' ? relevant.some(itemOk) : relevant.every(itemOk);
-    icon.className   = ok ? 'icon-ok' : 'icon-fail';
-    icon.textContent = ok ? '\u2713' : '\u2717';
   }
 }
