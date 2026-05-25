@@ -37,7 +37,9 @@ export function build(node, ctx) {
     const file = el.files[0] || null;
     if (file && node._maxFileSizeMB !== undefined && file.size > node._maxFileSizeMB * 1024 * 1024) {
       nameTag.textContent = `⚠ Too large (max ${node._maxFileSizeMB} MB)`;
-      nameTag.classList.add('file-name-tag--error');      showError(`File too large — max ${node._maxFileSizeMB} MB allowed`);      setValue(node.id, null);
+      nameTag.classList.add('file-name-tag--error');
+      showError(`File too large — max ${node._maxFileSizeMB} MB allowed`);
+      setValue(node.id, null);
       _reCalc(); onChange(); _formTick.value++;
       return;
     }
