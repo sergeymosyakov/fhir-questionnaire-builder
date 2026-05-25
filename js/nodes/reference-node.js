@@ -2,7 +2,7 @@
 // FHIR resource reference input. itemType: 'reference'
 // Optional FHIR-imported: referenceResource (allowed type, e.g. 'Patient')
 import { ItemNode } from './item-node.js';
-import { createWrap } from '../controls/_base.js';
+import { createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 
 const FHIR_R4_RESOURCES = [

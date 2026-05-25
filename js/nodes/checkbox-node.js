@@ -2,7 +2,7 @@
 // Boolean yes/no input. itemType: 'checkbox'
 // Optional FHIR-imported: _calculatedExpr (read-only computed boolean)
 import { ItemNode } from './item-node.js';
-import { createWrap } from '../controls/_base.js';
+import { createWrap } from './base-node.js';
 
 export class CheckboxNode extends ItemNode {
   constructor(data = {}) {

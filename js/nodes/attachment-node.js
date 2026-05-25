@@ -2,7 +2,7 @@
 // File upload input. itemType: 'attachment'
 // Optional FHIR-imported: _maxFileSizeMB, _mimeTypes
 import { ItemNode } from './item-node.js';
-import { createWrap } from '../controls/_base.js';
+import { createWrap } from './base-node.js';
 import { showError } from '../ui/toast.js';
 
 export class AttachmentNode extends ItemNode {

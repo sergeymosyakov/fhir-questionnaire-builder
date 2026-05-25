@@ -2,7 +2,7 @@
 // Free-text single/multi-line input. itemType: 'text'
 // Optional FHIR-imported: _maxLength, _minLength, _entryFormat, _minLenInteracted
 import { ItemNode } from './item-node.js';
-import { createWrap } from '../controls/_base.js';
+import { createWrap } from './base-node.js';
 
 export class TextNode extends ItemNode {
   constructor(data = {}) {

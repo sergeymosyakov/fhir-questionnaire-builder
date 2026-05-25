@@ -2,7 +2,7 @@
 // Numeric value + unit input. itemType: 'quantity'
 // Optional FHIR-imported: quantityUnit (default unit code)
 import { ItemNode } from './item-node.js';
-import { createWrap } from '../controls/_base.js';
+import { createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 
 const QUANTITY_UNITS = [

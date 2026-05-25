@@ -4,7 +4,7 @@
 // Optional FHIR-imported properties: _displayCategory ('help' | 'instructions' | 'security')
 import { ItemNode } from './item-node.js';
 import { applyRenderStyle } from './base-node.js';
-import { createWrap } from '../controls/_base.js';
+import { createWrap } from './base-node.js';
 
 export class DisplayNode extends ItemNode {
   constructor(data = {}) {

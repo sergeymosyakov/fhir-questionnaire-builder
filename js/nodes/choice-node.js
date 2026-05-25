@@ -3,7 +3,7 @@
 // Optional FHIR-imported: _optionOrdinals, _optionPrefixes, _choiceOrientation,
 //   _answerValueSet, _openLabel, _initialSelected
 import { ItemNode } from './item-node.js';
-import { createWrap } from '../controls/_base.js';
+import { createWrap } from './base-node.js';
 import { parseOptions } from '../utils.js';
 
 export class ChoiceNode extends ItemNode {

@@ -4,6 +4,13 @@
 import { nextId } from '../id.js';
 import * as explainModal from '../ui/explain-modal.js';
 
+// Shared wrapper factory used by every buildControl() implementation.
+export function createWrap() {
+  const wrap = document.createElement('span');
+  wrap.className = 'ctrl-wrap';
+  return wrap;
+}
+
 // Safe allowlist for node._renderStyle — only these CSS properties are applied.
 const _STYLE_ALLOWLIST = new Set(['font-weight', 'font-style', 'color', 'font-size', 'text-decoration']);
 export function applyRenderStyle(el, raw) {
