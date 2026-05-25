@@ -39,7 +39,7 @@ import { evalConstraints } from './state.js';
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes, buildVarEnv, evalInitialExprNodes } from './fhir/calc.js';
 import { buildFHIRObject } from './fhir/export.js';
-import { buildControl as _buildControl } from './controls/index.js';
+
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
 import * as explainModal from './ui/explain-modal.js';
@@ -217,7 +217,7 @@ function buildControl(node, iconEl, onAfterChange) {
   // Wrap _reCalc so calc badges update in-place after every oninput.
   const reCalcAndRefresh = () => { _reCalc(); refreshCalcBadges(); };
 
-  return _buildControl(node, { getValue, setValue, onChange, _reCalc: reCalcAndRefresh, _formTick });
+  return node.buildControl({ getValue, setValue, onChange, _reCalc: reCalcAndRefresh, _formTick });
 }
 
 // ── Repeat container: renders N+1 rows with add/remove buttons ────────────────
@@ -231,7 +231,7 @@ function buildRepeatControls(node, iconEl, onAfterChange) {
 
   for (let i = 0; i <= n; i++) {
     const rk       = rowKey(i);
-    const fakeNode = i === 0 ? node : { ...node, id: rk };
+    const fakeNode = i === 0 ? node : Object.assign(Object.create(Object.getPrototypeOf(node)), node, { id: rk });
     const rowEl    = document.createElement('div');
     rowEl.className = 'repeat-row';
 

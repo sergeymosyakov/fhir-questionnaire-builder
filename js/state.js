@@ -1,6 +1,7 @@
 // ── Reactive state, factories, and pure utilities ────────────────────────────
 // Re-export effect so other modules don't need to know the CDN URL.
 import { ref, reactive, effect as _effect } from 'https://unpkg.com/@vue/reactivity@3.5/dist/reactivity.esm-browser.js';
+import { createGroupNode, createItemNode, createItemNodeFromTemplate } from './nodes/index.js';
 export { _effect as effect };
 export { ref, reactive };
 
@@ -99,54 +100,15 @@ export const CHECKABLE_TYPES = new Set(['checkbox', 'text', 'number', 'date', 'd
 export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date', 'dateTime', 'time', 'open-choice', 'decimal', 'integer', 'radio', 'select']);
 
 // ── ID factory ────────────────────────────────────────────────────────────────
-let _seq = 1;
-export const nextId   = () => 'n' + (_seq++);
-export const resetSeq = () => { _seq = 1; };
+export { nextId, resetSeq } from './id.js';
 
 // ── Data factories ────────────────────────────────────────────────────────────
-export const makeGroup = title => ({
-  id: nextId(), type: 'group',
-  title: title || 'New Group',
-  // FHIR R4 standard visibility
-  enableWhen:           [],    // [{question, operator, answerBoolean|String|Integer|Decimal|Coding}]
-  enableBehavior:       'all', // 'all' (AND) | 'any' (OR)
-  // SDC enableWhenExpression — FHIRPath for complex conditions (e.g. "%age > 18")
-  enableWhenExpression: '',
-  mandatory: null,
-  logicWithParent: 'AND', children: []
-});
-
 // mandatory: null = not set (acts as required), true = required, false = optional.
 // If template is provided, copies all settings from it (except id and title).
-export const makeItem = (title, template) => {
-  if (template) {
-    return {
-      id: nextId(), type: 'item',
-      title: title || 'New Item',
-      enableWhen:           [],
-      enableBehavior:       'all',
-      enableWhenExpression: '',
-      mandatory:      template.mandatory,
-      repeats:        template.repeats || false,
-      itemType:       template.itemType,
-      options:        template.options,
-      // FHIR questionnaire-constraint: [{key, expression, human, severity}]
-      constraint:     template.constraint ? template.constraint.map(c => ({ ...c })) : []
-    };
-  }
-  return {
-    id: nextId(), type: 'item',
-    title: title || 'New Item',
-    enableWhen:           [],
-    enableBehavior:       'all',
-    enableWhenExpression: '',
-    mandatory: null,
-    repeats:   false,
-    itemType: 'text',
-    options: '',
-    constraint: []
-  };
-};
+export const makeGroup = title => createGroupNode(title);
+export const makeItem  = (title, template) => template
+  ? createItemNodeFromTemplate(title, template)
+  : createItemNode('text', { title });
 
 // Helper: null mandatory behaves as true (required unless explicitly set false)
 export const isMandatory = node => node.mandatory !== false;
