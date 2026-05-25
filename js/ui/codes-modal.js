@@ -136,6 +136,10 @@ function _renderBody(pending, container) {
   defLbl.className = 'meta-modal-lbl';
   defLbl.htmlFor = 'itemPropsDefInput';
   defLbl.textContent = 'Definition';
+  defLbl.dataset.tipTitle = 'Item definition';
+  defLbl.dataset.tipBody  = 'URL that identifies a specific element of a FHIR StructureDefinition this item maps to. Used for structured data capture profiling.';
+  defLbl.dataset.tipFhir  = 'Questionnaire.item.definition';
+  defLbl.dataset.tipSpec  = 'R4';
 
   const defInp = document.createElement('input');
   defInp.type = 'url';
@@ -158,6 +162,10 @@ function _renderBody(pending, container) {
   codesToggle.type      = 'button';
   codesToggle.className = 'meta-modal-adv-toggle';
   codesToggle.dataset.testid = 'item-props-codes-toggle';
+  codesToggle.dataset.tipTitle = 'Item codes';
+  codesToggle.dataset.tipBody  = 'Coding(s) that identify the meaning of this question in a clinical terminology (e.g. LOINC, SNOMED CT).';
+  codesToggle.dataset.tipFhir  = 'Questionnaire.item.code';
+  codesToggle.dataset.tipSpec  = 'R4';
   let codesOpen = true;
 
   const codesBody = document.createElement('div');
@@ -193,6 +201,10 @@ function _renderBody(pending, container) {
   slToggle.type      = 'button';
   slToggle.className = 'meta-modal-adv-toggle';
   slToggle.dataset.testid = 'item-props-sl-toggle';
+  slToggle.dataset.tipTitle = 'Support links';
+  slToggle.dataset.tipBody  = 'URLs shown as "More info ↗" buttons in patient-facing view. Useful for linking to help pages or patient education material.';
+  slToggle.dataset.tipFhir  = 'item.extension[questionnaire-supportLink].valueUri';
+  slToggle.dataset.tipSpec  = 'R4';
   let slOpen = (pending.supportLinks.length > 0);
 
   const slBody = document.createElement('div');
@@ -264,6 +276,10 @@ function _renderBody(pending, container) {
   extToggle.type      = 'button';
   extToggle.className = 'meta-modal-adv-toggle';
   extToggle.dataset.testid = 'item-props-ext-toggle';
+  extToggle.dataset.tipTitle = 'Custom extensions';
+  extToggle.dataset.tipBody  = 'Pass-through FHIR extensions not natively supported by the builder. Preserved as-is in the exported Questionnaire JSON.';
+  extToggle.dataset.tipFhir  = 'Questionnaire.item.extension[]';
+  extToggle.dataset.tipSpec  = 'R4';
   let extOpen = pending.unknownExtensions.length > 0;
 
   const extBody = document.createElement('div');

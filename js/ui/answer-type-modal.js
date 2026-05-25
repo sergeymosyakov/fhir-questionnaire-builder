@@ -256,6 +256,10 @@ function _renderBody(container) {
   const typeLbl = document.createElement('label');
   typeLbl.className = 'at-modal-lbl';
   typeLbl.textContent = 'Type:';
+  typeLbl.dataset.tipTitle = 'Item type';
+  typeLbl.dataset.tipBody  = 'The FHIR data type for answers to this item. Determines which control is rendered in the preview.';
+  typeLbl.dataset.tipFhir  = 'Questionnaire.item.type';
+  typeLbl.dataset.tipSpec  = 'R4';
   const typeSel = createCustomSelect({
     items:     ITEM_TYPES.map(t => ({ value: t, label: t })),
     value:     _pending.draftType,
@@ -301,6 +305,10 @@ function _renderBody(container) {
   const optSubLbl = document.createElement('div');
   optSubLbl.className   = 'at-modal-sub-lbl';
   optSubLbl.textContent = 'Options (code=Label or code=Label=score, comma-separated):';
+  optSubLbl.dataset.tipTitle = 'Answer options';
+  optSubLbl.dataset.tipBody  = 'Coded answer choices. Format: code=Label or code=Label=score (ordinal value). Comma-separated. Exported as item.answerOption[].';
+  optSubLbl.dataset.tipFhir  = 'Questionnaire.item.answerOption[].valueCoding';
+  optSubLbl.dataset.tipSpec  = 'R4';
 
   const optInp = document.createElement('textarea');
   optInp.className   = 'at-modal-opt-inp';
@@ -321,6 +329,10 @@ function _renderBody(container) {
   const avsSubLbl = document.createElement('div');
   avsSubLbl.className   = 'at-modal-sub-lbl';
   avsSubLbl.textContent = 'ValueSet — select from contained[] or enter an external URL:';
+  avsSubLbl.dataset.tipTitle = 'Answer ValueSet';
+  avsSubLbl.dataset.tipBody  = 'Links coded answers to a FHIR ValueSet. Use a #id to reference a local contained[] ValueSet, or a full URL for an external terminology server.';
+  avsSubLbl.dataset.tipFhir  = 'Questionnaire.item.answerValueSet';
+  avsSubLbl.dataset.tipSpec  = 'R4';
 
   // Dropdown of contained ValueSets
   const containedVS = [...questContained].filter(r => r.resourceType === 'ValueSet');
@@ -396,6 +408,10 @@ function _renderBody(container) {
   const refLbl = document.createElement('div');
   refLbl.className   = 'at-modal-sub-lbl';
   refLbl.textContent = 'Allowed resource type:';
+  refLbl.dataset.tipTitle = 'Reference resource type';
+  refLbl.dataset.tipBody  = 'Restricts which FHIR resource types are valid answer references. Leave blank to allow any type.';
+  refLbl.dataset.tipFhir  = 'item.extension[questionnaire-referenceResource].valueCode';
+  refLbl.dataset.tipSpec  = 'R4';
 
   const refSel = createCustomSelect({
     items:     [
@@ -419,6 +435,10 @@ function _renderBody(container) {
   const unitLbl = document.createElement('div');
   unitLbl.className   = 'at-modal-sub-lbl';
   unitLbl.textContent = 'Default unit:';
+  unitLbl.dataset.tipTitle = 'Quantity unit';
+  unitLbl.dataset.tipBody  = 'Default UCUM unit code for this measurement field. Shown next to the numeric input in the preview.';
+  unitLbl.dataset.tipFhir  = 'item.extension[questionnaire-unit].valueCoding.code';
+  unitLbl.dataset.tipSpec  = 'R4';
 
   const unitSel = createCustomSelect({
     items:     [
@@ -442,6 +462,10 @@ function _renderBody(container) {
   const numericHdr = document.createElement('div');
   numericHdr.className   = 'at-modal-sub-lbl';
   numericHdr.textContent = 'Numeric constraints:';
+  numericHdr.dataset.tipTitle = 'Numeric constraints';
+  numericHdr.dataset.tipBody  = 'Sets the allowed value range. Violations show an error badge in preview and are enforced in QR export.';
+  numericHdr.dataset.tipFhir  = 'item.extension[minValue] / item.extension[maxValue]';
+  numericHdr.dataset.tipSpec  = 'R4';
 
   const numericGrid = document.createElement('div');
   numericGrid.className = 'at-modal-num-grid';
@@ -478,6 +502,10 @@ function _renderBody(container) {
   const sliderChkLbl = document.createElement('label');
   sliderChkLbl.className = 'at-modal-slider-lbl';
   sliderChkLbl.textContent = 'Render as slider';
+  sliderChkLbl.dataset.tipTitle = 'Slider';
+  sliderChkLbl.dataset.tipBody  = 'Renders the numeric input as a range slider. The step value sets the slider increment. Exported as questionnaire-sliderStepValue.';
+  sliderChkLbl.dataset.tipFhir  = 'item.extension[questionnaire-sliderStepValue].valueDecimal';
+  sliderChkLbl.dataset.tipSpec  = 'SDC';
 
   const stepWrap = _numField('Step', 'slider-step-input',
     _pending.draftSliderStep !== '' ? _pending.draftSliderStep : '1',

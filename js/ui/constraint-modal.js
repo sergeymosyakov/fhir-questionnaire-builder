@@ -90,6 +90,10 @@ function _renderBody(draft, container) {
     rmBtn.type = 'button'; rmBtn.className = 'vis-cond-rm'; rmBtn.textContent = '\u2715';
     rmBtn.onclick = () => { draft.splice(idx, 1); _renderBody(draft, container); };
     hdr.appendChild(rmBtn);
+    sevSel.el.dataset.tipTitle = 'Constraint severity';
+    sevSel.el.dataset.tipBody  = '"error" prevents a valid QuestionnaireResponse submission; "warning" allows submission but shows a caution badge.';
+    sevSel.el.dataset.tipFhir  = 'questionnaire-constraint.extension[severity].valueCode';
+    sevSel.el.dataset.tipSpec  = 'R4';
     card.appendChild(hdr);
 
     // Key input
@@ -98,7 +102,12 @@ function _renderBody(draft, container) {
     keyInp.placeholder = 'key (e.g. consent-required)';
     keyInp.value = c.key || '';
     keyInp.oninput = () => { c.key = keyInp.value; keyLbl.textContent = keyInp.value || '(no key)'; };
-    card.appendChild(_lbl('Key:', keyInp));
+    card.appendChild(_lbl('Key:', keyInp, {
+      title: 'Constraint key',
+      body:  'Unique identifier for this constraint. Used in validation messages and the questionnaire-constraint-check FHIRPath evaluator.',
+      fhir:  'questionnaire-constraint.extension[key].valueId',
+      spec:  'R4',
+    }));
 
     // Human message
     const humanInp = document.createElement('input');
@@ -106,7 +115,12 @@ function _renderBody(draft, container) {
     humanInp.placeholder = 'Human-readable message';
     humanInp.value = c.human || '';
     humanInp.oninput = () => { c.human = humanInp.value; };
-    card.appendChild(_lbl('Message:', humanInp));
+    card.appendChild(_lbl('Message:', humanInp, {
+      title: 'Human-readable message',
+      body:  'Error message shown to the user when the constraint expression evaluates to false.',
+      fhir:  'questionnaire-constraint.extension[human].valueString',
+      spec:  'R4',
+    }));
 
     // FHIRPath expression + Explain button row
     const exprInp = document.createElement('textarea');
@@ -135,7 +149,12 @@ function _renderBody(draft, container) {
     exprWrap.className = 'constraint-expr-wrap';
     exprWrap.appendChild(exprInp);
     exprWrap.appendChild(explainBtn);
-    card.appendChild(_lbl('Expression:', exprWrap));
+    card.appendChild(_lbl('Expression:', exprWrap, {
+      title: 'Constraint FHIRPath expression',
+      body:  'Must evaluate to true to pass validation. Use %resource and %questionnaire to access answers.',
+      fhir:  'questionnaire-constraint.extension[expression].valueString',
+      spec:  'R4',
+    }));
 
     container.appendChild(card);
   });
@@ -151,12 +170,18 @@ function _renderBody(draft, container) {
   container.appendChild(addBtn);
 }
 
-function _lbl(text, input) {
+function _lbl(text, input, tip = null) {
   const row = document.createElement('div');
   row.className = 'constraint-field-row';
   const lbl = document.createElement('label');
   lbl.className   = 'constraint-field-lbl';
   lbl.textContent = text;
+  if (tip) {
+    lbl.dataset.tipTitle = tip.title;
+    if (tip.body) lbl.dataset.tipBody = tip.body;
+    if (tip.fhir) lbl.dataset.tipFhir = tip.fhir;
+    if (tip.spec) lbl.dataset.tipSpec = tip.spec;
+  }
   row.appendChild(lbl);
   row.appendChild(input);
   return row;

@@ -101,6 +101,10 @@ function _renderBody(container) {
   cbLabel.htmlFor   = '_rmToggle';
   cbLabel.className = 'repeat-modal-cb-label';
   cbLabel.textContent = 'Repeatable (item.repeats)';
+  cbLabel.dataset.tipTitle = 'item.repeats';
+  cbLabel.dataset.tipBody  = 'When true, the user can provide multiple answers for this item. All answers are collected into item.answer[] in the exported QuestionnaireResponse.';
+  cbLabel.dataset.tipFhir  = 'Questionnaire.item.repeats';
+  cbLabel.dataset.tipSpec  = 'R4';
 
   toggleRow.appendChild(cb);
   toggleRow.appendChild(cbLabel);
@@ -114,6 +118,10 @@ function _renderBody(container) {
   const cardTitle = document.createElement('div');
   cardTitle.className   = 'repeat-modal-card-title';
   cardTitle.textContent = 'Cardinality';
+  cardTitle.dataset.tipTitle = 'Cardinality constraints';
+  cardTitle.dataset.tipBody  = 'Enforces minimum and maximum answer counts. Exported as SDC extensions questionnaire-minOccurs and questionnaire-maxOccurs.';
+  cardTitle.dataset.tipFhir  = 'item.extension[questionnaire-minOccurs / questionnaire-maxOccurs]';
+  cardTitle.dataset.tipSpec  = 'SDC';
   card.appendChild(cardTitle);
 
   const grid = document.createElement('div');
@@ -123,6 +131,10 @@ function _renderBody(container) {
   const minLbl = document.createElement('label');
   minLbl.textContent = 'Min answers:';
   minLbl.className   = 'repeat-modal-lbl';
+  minLbl.dataset.tipTitle = 'Minimum answers';
+  minLbl.dataset.tipBody  = 'Minimum number of answers required. 0 or empty means the item is optional.';
+  minLbl.dataset.tipFhir  = 'item.extension[questionnaire-minOccurs].valueInteger';
+  minLbl.dataset.tipSpec  = 'SDC';
 
   const minInp = document.createElement('input');
   minInp.type           = 'number';
@@ -142,6 +154,10 @@ function _renderBody(container) {
   const maxLbl = document.createElement('label');
   maxLbl.textContent = 'Max answers:';
   maxLbl.className   = 'repeat-modal-lbl';
+  maxLbl.dataset.tipTitle = 'Maximum answers';
+  maxLbl.dataset.tipBody  = 'Maximum number of answers allowed. Empty means unlimited.';
+  maxLbl.dataset.tipFhir  = 'item.extension[questionnaire-maxOccurs].valueInteger';
+  maxLbl.dataset.tipSpec  = 'SDC';
 
   const maxInp = document.createElement('input');
   maxInp.type           = 'number';

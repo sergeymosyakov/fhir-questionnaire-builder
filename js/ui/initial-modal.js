@@ -80,6 +80,10 @@ function _renderBody(node, container) {
   const lbl = document.createElement('label');
   lbl.className   = 'initial-modal-label';
   lbl.textContent = 'Default value:';
+  lbl.dataset.tipTitle = 'item.initial';
+  lbl.dataset.tipBody  = 'Pre-filled value when the form loads. Exported as item.initial[0].value[x] in the FHIR Questionnaire. User can edit unless the item is read-only.';
+  lbl.dataset.tipFhir  = 'Questionnaire.item.initial[].value[x]';
+  lbl.dataset.tipSpec  = 'R4';
   wrap.appendChild(lbl);
 
   const setDraft = v => { _pending.draftValue = v; };

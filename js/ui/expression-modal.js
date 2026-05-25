@@ -153,6 +153,10 @@ function _buildDualBody(pending) {
 function _makeSection(title, fhirKey, hint, exprValue, testid, placeholder, onInput) {
   const hdr = document.createElement('div');
   hdr.className = 'expr-section-hdr';
+  hdr.dataset.tipTitle = title;
+  hdr.dataset.tipBody  = hint;
+  hdr.dataset.tipFhir  = 'item.extension[' + fhirKey + '].valueExpression.expression';
+  hdr.dataset.tipSpec  = 'SDC';
   const titleSpan = document.createElement('span');
   titleSpan.textContent = title;
   const keySpan = document.createElement('span');

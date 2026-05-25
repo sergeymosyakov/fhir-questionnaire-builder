@@ -40,6 +40,10 @@ export function open(node, visLink, setActive, ctx, buildVisFn) {
   ddRow.className = 'sw-disabled-display-row';
   const ddLbl = document.createElement('label');
   ddLbl.textContent = 'When not visible:';
+  ddLbl.dataset.tipTitle = 'Disabled display';
+  ddLbl.dataset.tipBody  = '"Protected" keeps the item grayed-out and read-only when its condition is not met. "Hidden" removes it from the form entirely.';
+  ddLbl.dataset.tipFhir  = 'item.extension[questionnaire-disabledDisplay].valueCode';
+  ddLbl.dataset.tipSpec  = 'SDC';
   const ddSel = createCustomSelect({
     items: [
       { value: 'protected', label: 'Show grayed (protected)' },
