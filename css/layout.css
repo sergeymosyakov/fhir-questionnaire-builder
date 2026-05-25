@@ -205,12 +205,6 @@
   flex-direction: column;
   gap: 4px;
 }
-.left-panel-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
 .left-panel-header-right {
   display: flex;
   align-items: center;
@@ -281,6 +275,7 @@
 .left-panel-title-row {
   display: flex;
   align-items: baseline;
+  justify-content: space-between;
   gap: 8px;
   margin-bottom: 10px;
 }

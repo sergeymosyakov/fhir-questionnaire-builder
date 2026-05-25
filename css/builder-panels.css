@@ -296,11 +296,9 @@
 .expr-explain-btn:hover { background: var(--c-primary-lt); }
 
 /* === Panel element classes =================================================== */
-.panel-vis-hint    { margin-bottom: 6px; padding: 4px 8px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; font-size: 11px; color: #5d4037; }
 .panel-raw-lbl     { margin-top: 8px; font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: .05em; }
 .panel-raw-lbl--sm { margin-top: 4px; }
 .panel-inp-sm        { width: 70px; }
-.panel-inp-full      { width: 100%; }
 .panel-inp-textarea  { width: 100%; resize: none; min-height: 1.5em; max-height: 80px; overflow-y: auto; line-height: 1.4; box-sizing: border-box; }
 .expr-textarea {
   width: 100%; box-sizing: border-box;
@@ -314,18 +312,10 @@
   overflow-y: hidden;
 }
 .expr-textarea:focus { outline: none; border-color: var(--c-primary); }
-.panel-mand-label  { font-size: 12px; display: flex; align-items: center; gap: 6px; }
-.panel-mand-sel    { font-size: 11px; padding: 2px 4px; border-radius: 4px; border: 1px solid var(--c-border); }
-.panel-type-sel    { width: auto; }
 .panel-sub-section { margin-top: 4px; }
-.panel-sub-lbl     { font-size: 11px; margin-bottom: 3px; }
-.panel-sub-sel     { width: 100%; font-size: 12px; }
 .panel-color-inp   { width: 36px; height: 22px; padding: 1px; border: 1px solid #ccc; cursor: pointer; }
 .panel-color-clear { font-size: 10px; padding: 1px 5px; }
 .panel-hint        { color: var(--c-text-2); font-size: 10px; }
-.panel-initial-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; font-size: 11px; color: var(--c-text-2); }
-.panel-initial-clear { font-size: 10px; color: var(--c-text-2); text-decoration: none; }
-.panel-initial-clear:hover { color: #b91c1c; text-decoration: underline; }
 
 /* === Preview search ========================================================= */
 .search-wrap { display: inline-flex; align-items: center; gap: 3px; }
@@ -375,8 +365,6 @@
 .expr-live-icon--ok   { color: #16a34a; }
 .expr-live-icon--fail { color: #dc2626; }
 .expr-live-icon--err  { color: #f59e0b; }
-.panel-ta          { width: 100%; font-size: 11px; font-family: monospace; resize: vertical; border: 1px solid var(--c-border); border-radius: 4px; padding: 4px 6px; box-sizing: border-box; }
-.panel-ro-row      { display: flex; align-items: center; gap: 6px; font-size: 11px; margin-top: 6px; cursor: pointer; }
 .panel-style-row   { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 12px; }
 .panel-style-lbl   { min-width: 48px; color: #666; }
 .panel-raw-inp     { width: 100%; margin-top: 4px; font-size: 11px; }
