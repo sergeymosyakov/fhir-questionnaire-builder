@@ -1,0 +1,258 @@
+/* === Node cards ============================================================== */
+.node-wrap { display: contents; }
+.node {
+  position: relative;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r);
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow-sm);
+}
+.node.node-group { border-left: 3px solid var(--c-primary); }
+.node.node-item  { border-left: 3px solid #80cbc4; }
+
+.node-header {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.node-header-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.node-title { display: contents; }
+
+/* === Drag & drop ============================================================= */
+.node-drag-handle {
+  font-size: 14px;
+  color: #ccc;
+  cursor: grab;
+  padding: 0 3px;
+  flex-shrink: 0;
+  user-select: none;
+  line-height: 1;
+}
+.node-drag-handle:hover { color: #999; }
+.node-drag-handle:active { cursor: grabbing; }
+.node-dragging { opacity: 0.4; }
+
+.drop-zone {
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 2px;
+  border: 1px dashed transparent;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: transparent;
+  transition: height .1s, margin .1s, border-color .1s, color .1s, background .1s;
+}
+body.dragging .drop-zone-above {
+  height: 28px;
+  margin: 2px 0;
+  border-color: #ddd;
+  color: #bbb;
+  pointer-events: auto;
+}
+.node-drop-target.drop-zone-above {
+  background: var(--c-primary-lt);
+  border-color: var(--c-primary);
+}
+.drop-zone-inside {
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: transparent;
+  border: 1px dashed transparent;
+  border-radius: var(--r-sm);
+  pointer-events: none;
+  transition: height .1s, margin .1s, border-color .1s, color .1s, background .1s;
+}
+body.dragging .drop-zone-inside {
+  height: 28px;
+  margin: 4px 0;
+  color: #bbb;
+  border-color: #ddd;
+  pointer-events: auto;
+}
+.node-drop-target.drop-zone-inside {
+  border-color: var(--c-primary);
+  color: var(--c-primary);
+  background: var(--c-primary-lt);
+}
+.drop-zone-root {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: transparent;
+  border: 1px dashed transparent;
+  border-radius: 4px;
+  margin-top: 4px;
+  pointer-events: none;
+  transition: border-color .1s, color .1s, background .1s;
+}
+body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events: auto; }
+.drop-zone-root--active { border-color: var(--c-primary) !important; color: var(--c-primary); }
+
+/* === Collapse toggle ========================================================= */
+.node-collapse-btn {
+  background: none;
+  border: none;
+  font-size: 10px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0 2px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.node-collapse-btn:hover { color: var(--c-primary); }
+
+/* === Node type label ========================================================= */
+.node-type-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.lbl-group { background: var(--c-primary-lt); color: var(--c-primary); cursor: pointer; }
+.lbl-item  { background: var(--c-teal-lt);    color: var(--c-teal);    cursor: pointer; }
+.lbl-info  { background: #f0f0f0;             color: #888;             cursor: pointer; }
+
+.node-nav-btn {
+  padding: 0 4px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--c-text-2);
+  cursor: pointer;
+  opacity: .45;
+  flex-shrink: 0;
+  transition: opacity .15s, color .15s;
+}
+.node-nav-btn:hover { opacity: 1; color: var(--c-primary); }
+
+/* === meta row: prefix + id labels =========================================== */
+.node-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+}
+.node-meta-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: lowercase;
+  flex-shrink: 0;
+}
+.node-meta-label--prefix { color: var(--c-amber); }
+.node-meta-label--id     { color: var(--c-primary); }
+
+/* === prefix input ============================================================ */
+.node-prefix-input {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-amber);
+  flex: 1;
+  min-width: 60px;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: var(--c-amber-lt);
+  transition: border-color .15s;
+}
+.node-prefix-input:hover { border-color: var(--c-amber); }
+.node-prefix-input:focus { outline: none; border-color: var(--c-amber); }
+
+/* === linkId input ============================================================ */
+.node-linkid-input {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-primary);
+  flex: 1;
+  min-width: 60px;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: var(--c-primary-lt);
+  transition: border-color .15s;
+}
+.node-linkid-input:hover { border-color: var(--c-primary); }
+.node-linkid-input:focus { outline: none; border-color: var(--c-primary); }
+
+/* === Expandable title ======================================================== */
+.node-title-row {
+  display: block;
+  width: 100%;
+  margin-top: 0;
+  padding: 0 4px;
+}
+.node-title-display {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 3px 6px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  color: var(--c-text);
+  cursor: pointer;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 24px;
+  transition: border-color .15s, background .15s;
+}
+.node-title-display:hover {
+  border-color: var(--c-border);
+  background: var(--c-surface);
+}
+.node-title-textarea {
+  display: block;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 3px 6px;
+  border: 1px solid var(--c-primary);
+  border-radius: var(--r-sm);
+  background: var(--c-primary-lt);
+  color: var(--c-text);
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+/* Legacy rule — kept for safety */
+.node-title-input {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 3px 6px;
+  flex: 1 1 140px;
+  min-width: 100px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--c-text);
+  transition: border-color .15s, background .15s;
+}
+.node-title-input:hover { border-color: var(--c-border); }
+.node-title-input:focus { outline: none; border-color: var(--c-primary); background: var(--c-primary-lt); }
+
