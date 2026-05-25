@@ -28,7 +28,7 @@
 //   clear-confirm-clear-btn   "Clear anyway"  option in the clear dialog
 //   clear-confirm-cancel-btn  "Cancel"        option in the clear dialog
 //
-// Builder nodes  (js/builder/node-group.js, node-item.js)
+// Builder nodes  (GroupNode.buildBuilder / ItemNode.buildBuilder)
 //   node-title-display   read-only title <span> (click → opens textarea editor)
 //   node-title-input     inline <textarea> editor for the node title
 //   group-add-btn        "+" button that opens the add-child menu on a group

@@ -11,7 +11,7 @@
 // Run: npx playwright test tests/e2e/codes-ordinal.spec.js
 //
 // ── data-testid registry ─────────────────────────────────────────────────────
-//   action-codes        action link for codes modal (node-item.js)
+//   action-codes        action link for codes modal (ItemNode.buildBuilder)
 //   codes-add-btn       Add code button inside modal body (codes-modal.js)
 //   code-system-0       system input for first row
 //   code-code-0         code input for first row

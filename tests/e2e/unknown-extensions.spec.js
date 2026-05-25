@@ -10,7 +10,7 @@
 // Run: npx playwright test tests/e2e/unknown-extensions.spec.js
 //
 // ── data-testid registry ─────────────────────────────────────────────────────
-//   action-codes              Props action button (node-item.js)
+//   action-codes              Props action button (ItemNode.buildBuilder)
 //   item-props-ext-toggle     Extensions collapsible toggle
 //   item-props-ext-url-0      URL input for first unknown extension
 //   item-props-ext-type-0     Custom-select trigger for value type (data-value holds current value)
