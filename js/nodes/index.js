@@ -38,8 +38,9 @@ export function createItemNode(itemType, data = {}) {
 }
 
 /** Clone a template node's settings into a new node with a new title/id.
- *  Replaces makeItem(title, template). */
+ *  Replaces makeItem(title, template). template may be null (first child). */
 export function createItemNodeFromTemplate(title, template) {
+  if (!template) return createItemNode('text', { title });
   return createItemNode(template.itemType, {
     title,
     mandatory:  template.mandatory,
