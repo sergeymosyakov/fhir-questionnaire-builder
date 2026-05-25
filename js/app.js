@@ -33,6 +33,36 @@ import { showLinkId, showPrefix, showBadges, previewMode, showHiddenItems, quest
 
 // Buttons
 document.getElementById('clearFormBtn').onclick    = _clearForm;
+
+// ── DOM helpers ───────────────────────────────────────────────────────────────
+// Returns an object with standard modal element keys for modals whose inner
+// element IDs follow the pattern: <id>, <id>Title, <id>Body, <id>Close,
+// <id>Cancel, <id>Apply, <id>Footer. Missing elements are omitted.
+function _modalElements(id) {
+  const map = { '': 'modal', Title: 'title', Body: 'body', Close: 'closeBtn', Cancel: 'cancelBtn', Apply: 'applyBtn', Footer: 'footer' };
+  const result = {};
+  for (const [suffix, key] of Object.entries(map)) {
+    const el = document.getElementById(id + suffix);
+    if (el) result[key] = el;
+  }
+  return result;
+}
+
+// Reads the first file from a file input event, parses it as JSON, and calls
+// onData(parsedObject, fileName). Clears the input value so the same file can
+// be re-selected. Error handling shows alert on parse failure.
+function _readFileAsJSON(e, onData) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload  = ev => {
+    try { onData(JSON.parse(ev.target.result), file.name); }
+    catch (err) { alert('Parse error: ' + err.message); }
+  };
+  reader.onerror = () => { alert('Error reading file.'); };
+  reader.readAsText(file);
+  e.target.value = '';
+}
 document.getElementById('addRootGroupBtn').onclick = () => {
   addRootGroup();
   // If no file is loaded, show a default name so the × button makes sense
@@ -178,9 +208,9 @@ variablesPanel.init({
   closeBtn:  document.getElementById('variablesModalClose'),
   applyBtn:  document.getElementById('variablesModalApply'),
   cancelBtn: document.getElementById('variablesModalCancel'),
-}, questVariables, reinitForm);
+}, questVariables);
 
-// ── QR Export modal init ─────────────────────────────────────────────────
+// QR Export modal init ─────────────────────────────────────────────────
 qrExportModal.init({
   modal:     document.getElementById('qrExportModal'),
   title:     document.getElementById('qrExportModalTitle'),
@@ -197,11 +227,11 @@ libraryModal.init({
 });
 // ── JSON Viewer modal init ────────────────────────────────────────────────
 jsonViewer.init({
-  modal:          document.getElementById('fhirJsonModal'),
-  title:          document.getElementById('fhirJsonModalTitle'),
-  pre:            document.getElementById('fhirJsonModalPre'),
-  closeBtn:       document.getElementById('fhirJsonModalClose'),
-  closeBtnFooter: document.getElementById('fhirJsonModalCloseBtn'),
+  modal:     document.getElementById('fhirJsonModal'),
+  title:     document.getElementById('fhirJsonModalTitle'),
+  pre:       document.getElementById('fhirJsonModalPre'),
+  closeBtn:  document.getElementById('fhirJsonModalClose'),
+  cancelBtn: document.getElementById('fhirJsonModalCloseBtn'),
 });
 
 // ── Contained resources panel init ───────────────────────────────────────
@@ -210,7 +240,7 @@ containedPanel.init({
   toggle:   document.getElementById('containedCardToggle'),
   chipList: document.getElementById('containedCardChips'),
   count:    document.getElementById('containedCardCount'),
-}, questContained, jsonViewer.show);
+}, questContained);
 
 // ── Answer ValueSet panel init ────────────────────────────────────────────
 answerValueSetPanel.init({
@@ -218,7 +248,7 @@ answerValueSetPanel.init({
   toggle:   document.getElementById('answerValueSetCardToggle'),
   chipList: document.getElementById('answerValueSetCardChips'),
   count:    document.getElementById('answerValueSetCardCount'),
-}, tree, jsonViewer.show);
+}, tree);
 
 // ── Patient context popup init ────────────────────────────────────────────
 patientCtx.init({
@@ -228,10 +258,14 @@ patientCtx.init({
   closeBtn: document.getElementById('patientCtxClose'),
   applyBtn: document.getElementById('patientCtxApply'),
   body:     document.getElementById('patientCtxBody'),
-}, questVariables, reinitForm);
+}, questVariables);
 
 // Refresh variables panel chips when patient context changes
 document.addEventListener('patient-ctx-applied', () => variablesPanel.refresh());
+// Re-evaluate FHIRPath when variables or patient context change
+document.addEventListener('reinit-form', reinitForm);
+// Open JSON viewer via event bus
+document.addEventListener('show-json', e => jsonViewer.show(e.detail.title, e.detail.data));
 
 // ── Global progress bar init ──────────────────────────────────────────────
 progress.init({
@@ -435,14 +469,12 @@ function _doReset() {
   questMeta._rawMetaTag = []; questMeta._rawMetaSecurity = [];
   // Clear questionnaire-level variables
   questVariables.splice(0);
-  variablesPanel.refresh();
   questContained.splice(0);
-  containedPanel.refresh();
-  answerValueSetPanel.refresh();
   // Re-render empty builder
   renderTree();
   _setFileName('');
   autosave.clearDraft();
+  document.dispatchEvent(new CustomEvent('questionnaire-cleared'));
 }
 
 // Returns promise resolving to 'export' | 'clear' | 'cancel'
@@ -478,10 +510,8 @@ async function _importAndValidate(data, fileName) {
   try {
     resetQrMeta();
     importFHIR(data, () => {}); // pass no-op renderFn — we render below
-    variablesPanel.refresh();
-    containedPanel.refresh();
-    answerValueSetPanel.refresh();
     reinitForm(); // evaluate initialExpression fields from imported data
+    document.dispatchEvent(new CustomEvent('questionnaire-loaded'));
     const issues = validateTree(tree, values);
     progress.show('Rendering ' + tree.length + ' nodes…');
     await renderTreeAsync((done, total) => progress.update(done, total));
@@ -561,18 +591,11 @@ document.getElementById('loadLibraryItem').onclick = () => {
       .catch(err => { progress.hide(); alert('Could not load sample: ' + err.message); });
   }, 'questionnaire');
 };
-document.getElementById('fhirFileInput').onchange  = e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  progress.show('Loading ' + file.name + '…');
-  const reader = new FileReader();
-  reader.onload  = ev => {
-    try { progress.update(0, 1); _importAndValidate(JSON.parse(ev.target.result), file.name); }
-    catch (err) { progress.hide(); alert('Parse error: ' + err.message); }
-  };
-  reader.onerror = () => { progress.hide(); alert('Error reading file.'); };
-  reader.readAsText(file);
-  e.target.value = '';
+document.getElementById('fhirFileInput').onchange = e => {
+  const fileName = e.target.files[0]?.name;
+  if (!fileName) return;
+  progress.show('Loading ' + fileName + '\u2026');
+  _readFileAsJSON(e, (data, name) => { progress.update(0, 1); _importAndValidate(data, name); });
 };
 
 // ── Answers button (load QuestionnaireResponse) ──────────────────────────────────────
@@ -588,19 +611,7 @@ document.getElementById('loadAnswersItem').onclick = () => {
   document.getElementById('qrFileInput').click();
 };
 document.getElementById('qrFileInput').onchange = e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      _applyQRAnswers(JSON.parse(ev.target.result));
-    } catch (err) {
-      alert('Parse error: ' + err.message);
-    }
-  };
-  reader.onerror = () => { alert('Error reading file.'); };
-  reader.readAsText(file);
-  e.target.value = '';
+  _readFileAsJSON(e, (data) => _applyQRAnswers(data));
 };
 
 document.getElementById('loadAnswersLibraryItem').onclick = () => {
@@ -676,6 +687,9 @@ document.addEventListener('click', () => {
   }
   _modeBtn.addEventListener('click', e => {
     e.stopPropagation();
+    loadMenu.style.display = 'none';
+    answersMenu.style.display = 'none';
+    exportMenu.style.display = 'none';
     _modeMenu.style.display = _modeMenu.style.display === 'none' ? 'block' : 'none';
   });
   document.querySelectorAll('#previewModeMenu .load-menu-item').forEach(item => {

@@ -6,22 +6,25 @@
 let _el   = null;  // resolved DOM nodes
 let _vars = null;  // reference to reactive questVariables array
 let _collapsed = false;
-let _onReinit  = null;
 let _draft     = null; // working copy while modal is open; null when closed
 
-export function init(elements, variablesArray, onReinit) {
+export function init(elements, variablesArray) {
   _el   = elements;
   _vars = variablesArray;
-  _onReinit = onReinit || null;
 
   _el.toggle.addEventListener('click', _toggleCollapse);
   _el.editBtn.addEventListener('click', _openModal);
   _el.closeBtn.addEventListener('click', _closeModal);
   _el.cancelBtn.addEventListener('click', _closeModal);
   _el.applyBtn.addEventListener('click', _applyModal);
-  if (_el.reinitBtn) _el.reinitBtn.addEventListener('click', () => { if (_onReinit) _onReinit(); });
+  if (_el.reinitBtn) _el.reinitBtn.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('reinit-form'));
+  });
   _el.modal.addEventListener('click', e => { if (e.target === _el.modal) _closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && _el.modal.style.display !== 'none') _closeModal(); });
+
+  document.addEventListener('questionnaire-loaded', refresh);
+  document.addEventListener('questionnaire-cleared', refresh);
 
   refresh();
 }
@@ -88,7 +91,7 @@ function _applyModal() {
   _draft = null;
   _el.modal.style.display = 'none';
   refresh();
-  if (_onReinit) _onReinit();
+  document.dispatchEvent(new CustomEvent('reinit-form'));
 }
 
 function _renderModalBody(showErrors = false) {

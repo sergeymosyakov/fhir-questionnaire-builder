@@ -118,8 +118,8 @@ test.describe('support-link — Props modal', () => {
     await page.locator(`[data-node-id="${nodeId}"] [data-testid="action-codes"]`).click();
     await expect(page.locator('#codesModal')).toBeVisible({ timeout: 3000 });
     // Expand the Support Links section if not already open
-    const slBody = page.locator('.meta-modal-adv-body').last();
-    if (await slBody.isHidden()) {
+    const addBtn = page.getByTestId('support-link-add');
+    if (!await addBtn.isVisible()) {
       await page.getByTestId('item-props-sl-toggle').click();
     }
   }

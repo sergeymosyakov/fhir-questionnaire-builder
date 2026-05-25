@@ -6,14 +6,14 @@
 
 let _el       = null;
 let _tree     = null;
-let _showJson = null;
 let _collapsed = false;
 
-export function init(elements, treeRef, showJsonFn) {
+export function init(elements, treeRef) {
   _el       = elements;
   _tree     = treeRef;
-  _showJson = showJsonFn;
   _el.toggle.addEventListener('click', _toggleCollapse);
+  document.addEventListener('questionnaire-loaded', refresh);
+  document.addEventListener('questionnaire-cleared', refresh);
   refresh();
 }
 
@@ -58,7 +58,7 @@ function _renderChips(urlMap) {
     chip.textContent = label;
     chip.title = url;
     chip.addEventListener('click', () =>
-      _showJson(label, { answerValueSet: url, usedByItems: items })
+      document.dispatchEvent(new CustomEvent('show-json', { detail: { title: label, data: { answerValueSet: url, usedByItems: items } } }))
     );
     _el.chipList.appendChild(chip);
   }

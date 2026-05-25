@@ -1,7 +1,7 @@
 // Patient context — preset profiles and manual edit modal.
 // Manages SDC variables: %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb
 // init(els, questVariables, onAfterApply) — wire once at startup.
-import { _formTick, tree, effect } from '../state.js';
+import { tree, effect } from '../state.js';
 import { createCustomSelect } from './custom-select.js';
 
 const PATIENT_APPLY_EVENT = 'patient-ctx-applied';
@@ -83,7 +83,7 @@ function applyPreset(preset, questVariables) {
   }
 }
 
-export function init(els, questVariables, onAfterApply) {
+export function init(els, questVariables) {
   // Seed defaults for any patient vars not yet present
   for (const def of PATIENT_VARS) {
     if (!getEntry(questVariables, def.name)) {
@@ -94,8 +94,7 @@ export function init(els, questVariables, onAfterApply) {
   const { presetBtn, presetMenu, modal, closeBtn, applyBtn, body } = els;
 
   const _doAfterApply = () => {
-    if (onAfterApply) onAfterApply();
-    else _formTick.value++;
+    document.dispatchEvent(new CustomEvent('reinit-form'));
     document.dispatchEvent(new CustomEvent(PATIENT_APPLY_EVENT));
   };
 

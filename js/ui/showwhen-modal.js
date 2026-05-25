@@ -10,6 +10,7 @@
 import { refreshExprIcons } from '../render-preview.js';
 import { triggerCalcRecalc } from '../builder/_shared.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { createCustomSelect } from './custom-select.js';
 
 let _el      = null;
 let _pending = null; // { node, visLink, setActive, draft }
@@ -39,19 +40,17 @@ export function open(node, visLink, setActive, ctx, buildVisFn) {
   ddRow.className = 'sw-disabled-display-row';
   const ddLbl = document.createElement('label');
   ddLbl.textContent = 'When not visible:';
-  const ddSel = document.createElement('select');
-  ddSel.className = 'sw-dd-select';
-  ddSel.dataset.testid = 'disabled-display-select';
-  [{ value: 'protected', label: 'Show grayed (protected)' },
-   { value: 'hidden',    label: 'Remove from view (hidden)' }]
-    .forEach(({ value, label }) => {
-      const opt = document.createElement('option');
-      opt.value = value; opt.textContent = label;
-      if (value === draft._disabledDisplay) opt.selected = true;
-      ddSel.appendChild(opt);
-    });
-  ddSel.onchange = () => { draft._disabledDisplay = ddSel.value; };
-  ddRow.append(ddLbl, ddSel);
+  const ddSel = createCustomSelect({
+    items: [
+      { value: 'protected', label: 'Show grayed (protected)' },
+      { value: 'hidden',    label: 'Remove from view (hidden)' },
+    ],
+    value:     draft._disabledDisplay,
+    testid:    'disabled-display-select',
+    className: 'sc-trigger--sm',
+    onChange:  v => { draft._disabledDisplay = v; },
+  });
+  ddRow.append(ddLbl, ddSel.el);
   _el.body.appendChild(ddRow);
 
   openModal(_el.modal);

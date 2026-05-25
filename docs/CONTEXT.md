@@ -7,7 +7,7 @@
 0. **Announce every step — wait for yes/no.** Before any action (edit, run, push, read, create) — state what you are about to do and wait for explicit confirmation. Do NOT proceed on assumption of approval. No silent multi-step execution.
 1. **Stop and ask after one failed attempt.** If a bug or issue is not resolved on the first real attempt — STOP immediately. Ask the user to reproduce manually and provide more details. Do NOT keep iterating or running more diagnostics.
 2. **Never guess. Never infer. Ask.** If any detail is unclear or missing — stop and ask exactly what information is needed. Do not proceed on assumptions.
-3. **Implemented = documented in the supported section.** Once a FHIR field or feature is fully implemented, move it from "Not Supported / remaining gaps" to the relevant supported table in `docs/FHIR-MAPPING.md`. Never leave a ✅ Covered row in the Not Supported section.
+3. **Implemented = removed from Not Supported.** Once a FHIR field or feature is fully implemented, DELETE its row from all Not Supported / remaining-gaps tables in `docs/FHIR-MAPPING.md` and add it to the relevant supported table. A ✅ row must **never** remain in a Not Supported section.
 
 ---
 
@@ -25,6 +25,7 @@
 10. **Tooltips** — **never use the native `title="..."` attribute**. Always use the custom rich tooltip system via `data-tip-title` / `data-tip-body` (and optionally `data-tip-fhir` / `data-tip-spec`). Triggered automatically by `js/ui/tooltip.js` on mouseover.
 11. **Dropdowns / custom select** — **never use native `<select>`** for user-facing dropdown controls in UI modules or modals. Always use `createCustomSelect` from `js/ui/custom-select.js`. API: `createCustomSelect({items, value, onChange, className, testid, searchable})` → `{el, getValue(), setValue(v), setOptions(items), setOnChange(fn)}`. Append `.el` to the DOM. Use class `sc-trigger--sm` for compact (inline) size. E2E pattern: click trigger by `data-testid`, then `[data-testid="csel-drop"] [data-val="<value>"]`; verify selection via `data-value` attribute on the trigger element. Exception: native `<select>` is still acceptable in the preview panel for rendered questionnaire controls (not builder UI).
 12. **Security — `innerHTML`** — never assign unsanitized external or user-supplied content to `innerHTML`. Any HTML string coming from outside the codebase (FHIR `_renderXhtml`, imported JSON, etc.) must be wrapped in `DOMPurify.sanitize(...)` (available as `window.DOMPurify` from `lib/dompurify.min.js`). Clearing a container with `el.innerHTML = ''` is always safe.
+13. **Event-driven comms** — cross-module communication uses `document.dispatchEvent(new CustomEvent(...))` / `document.addEventListener(...)`. Named events: `questionnaire-loaded` (fired in app.js after successful import), `questionnaire-cleared` (fired in app.js after reset), `reinit-form` (fired by variable/patient modules to trigger FHIRPath re-evaluation), `show-json` (fired with `{ detail: { title, data } }` to open JSON viewer), `patient-ctx-applied` (fired after patient variables change), `renumber-progress` / `renumber-done`. Never pass module function references as callbacks when an event would decouple better.
 
 ---
 

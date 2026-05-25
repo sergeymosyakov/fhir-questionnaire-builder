@@ -7,6 +7,7 @@
 
 import { exportQR } from '../fhir/qr-export.js';
 import { initModal, openModal, closeModal } from './modal-base.js';
+import { createCustomSelect } from './custom-select.js';
 
 const QR_STATUSES = ['in-progress', 'completed', 'amended', 'entered-in-error', 'stopped'];
 
@@ -58,18 +59,14 @@ function _renderBody() {
   _el.body.appendChild(_fieldRow('File name:', nameInp));
 
   // Status
-  const statusSel = document.createElement('select');
-  statusSel.id        = 'qrExportStatus';
-  statusSel.className = 'meta-modal-sel';
-  statusSel.dataset.testid = 'qr-export-status';
-  for (const v of QR_STATUSES) {
-    const opt = document.createElement('option');
-    opt.value = v; opt.textContent = v;
-    if (v === _state.status) opt.selected = true;
-    statusSel.appendChild(opt);
-  }
-  statusSel.onchange = () => { _state.status = statusSel.value; };
-  _el.body.appendChild(_fieldRow('Status:', statusSel));
+  const statusSel = createCustomSelect({
+    items:     QR_STATUSES.map(v => ({ value: v, label: v })),
+    value:     _state.status,
+    testid:    'qr-export-status',
+    className: 'sc-trigger--sm',
+    onChange:  v => { _state.status = v; },
+  });
+  _el.body.appendChild(_fieldRow('Status:', statusSel.el));
 
   // Subject reference
   const subjectInp = document.createElement('input');

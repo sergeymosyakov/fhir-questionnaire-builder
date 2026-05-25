@@ -6,14 +6,14 @@
 
 let _el        = null;
 let _contained = null;
-let _showJson  = null;
 let _collapsed = false;
 
-export function init(elements, containedArray, showJsonFn) {
+export function init(elements, containedArray) {
   _el        = elements;
   _contained = containedArray;
-  _showJson  = showJsonFn;
   _el.toggle.addEventListener('click', _toggleCollapse);
+  document.addEventListener('questionnaire-loaded', refresh);
+  document.addEventListener('questionnaire-cleared', refresh);
   refresh();
 }
 
@@ -44,7 +44,9 @@ function _renderChips() {
     chip.className = 'fhir-res-chip fhir-res-chip--contained';
     chip.textContent = label;
     chip.title = 'Click to view JSON';
-    chip.addEventListener('click', () => _showJson(label, resource));
+    chip.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('show-json', { detail: { title: label, data: resource } }));
+    });
     _el.chipList.appendChild(chip);
   }
 }

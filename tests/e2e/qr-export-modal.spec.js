@@ -8,7 +8,7 @@
 //   export-btn             "Export ▾" toolbar button
 //   export-qr-item         "QuestionnaireResponse" dropdown item
 //   qr-export-filename     file name input inside the modal
-//   qr-export-status       status <select> inside the modal
+//   qr-export-status       status custom-select trigger inside the modal
 //   qr-export-subject      subject reference input
 //   qr-export-author       author reference input
 //   qr-export-apply        "⬇ Export" button in modal footer
@@ -60,7 +60,7 @@ test('modal contains filename, status, subject, author fields', async ({ page })
 
 test('status defaults to in-progress', async ({ page }) => {
   await loadSampleAndOpenExportModal(page);
-  await expect(page.getByTestId('qr-export-status')).toHaveValue('in-progress');
+  await expect(page.getByTestId('qr-export-status')).toHaveAttribute('data-value', 'in-progress');
 });
 
 test('filename is pre-filled with questionnaire name', async ({ page }) => {
@@ -74,8 +74,9 @@ test('filename is pre-filled with questionnaire name', async ({ page }) => {
 
 test('user can change status to completed', async ({ page }) => {
   await loadSampleAndOpenExportModal(page);
-  await page.getByTestId('qr-export-status').selectOption('completed');
-  await expect(page.getByTestId('qr-export-status')).toHaveValue('completed');
+  await page.getByTestId('qr-export-status').click();
+  await page.locator('[data-testid="csel-drop"] [data-val="completed"]').click();
+  await expect(page.getByTestId('qr-export-status')).toHaveAttribute('data-value', 'completed');
 });
 
 test('user can enter subject and author references', async ({ page }) => {
@@ -116,7 +117,8 @@ test('Export button triggers JSON download', async ({ page }) => {
 
 test('downloaded JSON has the user-specified status', async ({ page }) => {
   await loadSampleAndOpenExportModal(page);
-  await page.getByTestId('qr-export-status').selectOption('completed');
+  await page.getByTestId('qr-export-status').click();
+  await page.locator('[data-testid="csel-drop"] [data-val="completed"]').click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByTestId('qr-export-apply').click(),
