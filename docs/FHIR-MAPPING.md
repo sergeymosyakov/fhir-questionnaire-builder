@@ -52,12 +52,15 @@ Every node in the tree is either a **group** or an **item**:
   _initialSelected:    string,           // answerOption[].initialSelected code (round-trip; pre-fills _initialValue when no item.initial)
   _maxLength:          integer,          // FHIR item.maxLength
   _minLength:          integer,          // SDC ext http://hl7.org/fhir/StructureDefinition/minLength
+  _maxFileSizeMB:      number,           // http://hl7.org/fhir/StructureDefinition/maxSize — max file size in MB for attachment items
+  _mimeTypes:          string[],         // http://hl7.org/fhir/StructureDefinition/mimeType — 0..* allowed MIME types for attachment items
   _minOccurs:          integer,          // questionnaire-minOccurs extension (when repeats: true)
   _maxOccurs:          integer,          // questionnaire-maxOccurs extension (when repeats: true; enforced in preview)
   _answerValueSet:     string,           // FHIR item.answerValueSet URL — preserved round-trip; not resolved to options
   _minValue:           number,           // questionnaire-minValue extension value (decimal or integer)
   _maxValue:           number,           // questionnaire-maxValue extension value (decimal or integer)
   _optionOrdinals:     object,           // map of option code → ordinalValue (from ordinalValue extension on answerOption.extension or valueCoding.extension fallback)
+  _optionPrefixes:     object,           // map of option code → display prefix string (from questionnaire-optionPrefix extension on answerOption.extension)
   _sliderStep:         number,           // questionnaire-sliderStepValue ext; when set, integer/decimal renders as <input type="range"> slider
   _disabledDisplay:    string,           // 'hidden'|'protected' — behaviour when enableWhen condition is not met; 'protected' is default (not persisted)
   _supportLinks:       string[],         // questionnaire-supportLink URIs (0..*); 🔗 icons in builder preview; "More info ↗" buttons in patient view
@@ -197,9 +200,12 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); editable via **Props** button (codes-modal — system/code/display rows, draft pattern); also supported on groups (see Group-specific) |
 | `_maxLength` | `item.maxLength` | imported → `node._maxLength`; exported back when set; character counter + `maxlength` attribute enforced in preview |
 | `_minLength` | SDC ext `http://hl7.org/fhir/StructureDefinition/minLength` (`valueInteger`) | imported → `node._minLength`; exported back when set; `minlength` HTML attribute enforced in preview; inline error `Min N chars` shown on blur when value is non-empty but shorter than limit; clears when value reaches the limit |
+| `_maxFileSizeMB` | `questionnaire-maxSize` ext `http://hl7.org/fhir/StructureDefinition/maxSize` (`valueDecimal`) | imported → `node._maxFileSizeMB`; exported back when set; attachment items only; validated on file selection — error tag shown when file exceeds limit; `calcFormOk` returns `false`; hint shown below file button; editable in Answer Type modal |
+| `_mimeTypes` | `http://hl7.org/fhir/StructureDefinition/mimeType` (`valueCode`, 0..*) | imported → `node._mimeTypes` string array; exported as one extension entry per MIME type; sets `accept` attribute on file input; hint shown below file button; editable in Answer Type modal (comma-separated) |
 | `_minValue` | `questionnaire-minValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; min HTML attribute set on input; error shown in preview when violated |
 | `_maxValue` | `questionnaire-maxValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; max HTML attribute set on input; error shown in preview when violated |
 | `_optionOrdinals` | `ordinalValue` ext on `answerOption[].extension` (primary) or `valueCoding.extension` (fallback) | map of option code → numeric score; shown as `(N)` badge in radio/select; editable in Answer Type modal (`code=Label=score` format); exported to `answerOption.extension` |
+| `_optionPrefixes` | `questionnaire-optionPrefix` ext on `answerOption[].extension` | map of option code → display prefix string (e.g. `'A.'`, `'1.'`); prepended to option label in select/radio preview; editable in Answer Type modal (`code=Prefix` format, comma-separated); exported to `answerOption.extension` alongside `ordinalValue` when present |
 | `_sliderStep` | `questionnaire-sliderStepValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; renders item as `<input type="range">` slider in preview; editable in Answer Type modal |
 | `_disabledDisplay` | `item.disabledDisplay` (R4B native field) + R4 backport extension `extension-Questionnaire.item.disabledDisplay` | `'hidden'` → item removed from DOM when not visible; `'protected'` (default) → grayed row; editable in Show When modal |
 | `_minOccurs` | `questionnaire-minOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true` |
@@ -258,6 +264,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/minValue` | standard | `_minValue` (minimum value for numeric inputs; enforced in preview) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/maxValue` | standard | `_maxValue` (maximum value for numeric inputs; enforced in preview) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/ordinalValue` | standard | `_optionOrdinals[code]` (score per answer option; on `answerOption.extension`; displayed in preview; editable in builder) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix` | standard | `_optionPrefixes[code]` (display prefix per answer option e.g. `'A.'`; prepended to label in select/radio preview; editable in Answer Type modal; exported to `answerOption.extension`) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue` | standard | `_sliderStep` (step for range slider; triggers slider rendering) | Yes |
 | `http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay` | R4 backport | `_disabledDisplay` (hidden/protected; also read from native `item.disabledDisplay` field) | Yes (R4B/R5 backport) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` | SDC | `_entryFormat` (placeholder hint text shown on text/url/number/quantity controls; editable in Answer Type modal); **on import also reads** `http://hl7.org/fhir/StructureDefinition/entryFormat` (R4 element-definition alias); SDC URL takes precedence when both are present | Yes |
@@ -266,6 +273,8 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink` | standard | `_supportLinks` (0..* help/documentation URIs per item or group; 🔗 icons in builder; "More info ↗" in patient view; editable via **Props** button) | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden` | SDC | `_hidden` (item/group hidden from patients; purple dashed border + HIDDEN badge in builder preview; excluded from PASS/FAIL; controls disabled; **Hidden** toggle button in builder actions); **on import also reads** `http://hl7.org/fhir/StructureDefinition/questionnaire-hidden` (R4 standard alias); SDC URL takes precedence when both are present | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/minLength` | standard | `_minLength` (minimum character count for `text`/`url` items; `minlength` HTML attribute enforced in preview; inline error `Min N chars` on blur when value is non-empty but shorter than limit; clears when limit is reached) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/maxSize` | standard | `_maxFileSizeMB` (maximum file size in MB for `attachment` items; validated on file selection; error tag shown when exceeded; `calcFormOk` returns `false`; hint shown below file button; editable in Answer Type modal) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/mimeType` | standard | `_mimeTypes` (0..* allowed MIME types for `attachment` items; sets `accept` attribute on file input; hint shown below file button; editable in Answer Type modal as comma-separated list) | Yes |
 
 ---
 
@@ -359,9 +368,7 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
 | `maxDecimalPlaces` | ❌ Not handled | Maximum number of decimal places for `decimal` items (`http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces`). |
 | `regex` | ❌ Not handled | Regular expression validation pattern for `string` / `text` / `url` items (`http://hl7.org/fhir/StructureDefinition/regex`). |
-| `mimeType` | ❌ Not handled | One or more allowed MIME types for `attachment` items (`http://hl7.org/fhir/StructureDefinition/mimeType`). Multiple values permitted. |
-| `maxSize` | ❌ Not handled | Maximum file size in MB for `attachment` items (`http://hl7.org/fhir/StructureDefinition/maxSize`). |
-| `questionnaire-optionPrefix` | ❌ Not handled | Display prefix for each `answerOption` (e.g. `"A."`, `"1."`). Commonly used in clinical forms with lettered or numbered options. Silently dropped on import. |
+| `questionnaire-optionPrefix` | ✅ Handled | Display prefix per `answerOption` (e.g. `'A.'`, `'1.'`); imported to `_optionPrefixes`, exported to `answerOption.extension`, displayed in select/radio preview, editable in Answer Type modal. |
 | `questionnaire-unitValueSet` | ❌ Not handled | ValueSet of selectable units for `quantity` items (alternative to `questionnaire-unitOption` / `sdc-questionnaire-unitOption`). |
 | `questionnaire-usageMode` | ❌ Not handled | Controls when the item is relevant: `capture` / `display` / `display-non-empty` / `capture-display` / `capture-display-non-empty`. |
 | `questionnaire-referenceFilter` | ❌ Not handled | FHIRPath expression used to filter valid reference targets for `reference` items. |

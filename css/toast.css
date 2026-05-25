@@ -1,0 +1,49 @@
+/* ── Toast notifications ──────────────────────────────────────────────────── */
+
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  max-width: 340px;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  word-break: break-word;
+}
+
+.toast--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast--error {
+  background: #fde8e8;
+  color: #b91c1c;
+  border-left: 3px solid #b91c1c;
+}
+
+.toast--warn {
+  background: #fff3cd;
+  color: #92400e;
+  border-left: 3px solid #f59e0b;
+}
+
+.toast--info {
+  background: #e8f0fe;
+  color: #1e40af;
+  border-left: 3px solid #3b82f6;
+}

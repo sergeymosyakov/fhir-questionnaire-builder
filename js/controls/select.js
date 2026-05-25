@@ -21,6 +21,9 @@ export function build(node, ctx) {
     const found = opts.find(o => o.code === selected);
     if (found) {
       let label = found.display || found.code;
+      if (node._optionPrefixes && node._optionPrefixes[found.code] !== undefined) {
+        label = node._optionPrefixes[found.code] + '\u00A0' + label;
+      }
       if (node._optionOrdinals && node._optionOrdinals[found.code] !== undefined) {
         label += '\u00A0(' + node._optionOrdinals[found.code] + ')';
       }
@@ -67,14 +70,20 @@ export function build(node, ctx) {
       const label = display || code;
       const opt   = document.createElement('div');
       opt.className   = 'oc-opt';
+      if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
+        const pfx = document.createElement('span');
+        pfx.className = 'option-prefix';
+        pfx.textContent = node._optionPrefixes[code] + '\u00A0';
+        opt.appendChild(pfx);
+      }
       if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
-        opt.textContent = label;
+        opt.appendChild(document.createTextNode(label));
         const ord = document.createElement('span');
         ord.className = 'option-ordinal';
         ord.textContent = '\u00A0(' + node._optionOrdinals[code] + ')';
         opt.appendChild(ord);
       } else {
-        opt.textContent = label;
+        opt.appendChild(document.createTextNode(label));
       }
       if (code === selected) opt.classList.add('oc-opt--sel');
       opt.addEventListener('mousedown', e => { e.preventDefault(); _pick(code); });

@@ -28,6 +28,12 @@ export function build(node, ctx) {
     rb.checked = getValue(node.id) === code;
     rb.onchange = () => { if (rb.checked) { setValue(node.id, code); _reCalc(); onChange(); _formTick.value++; } };
     lbl.appendChild(rb);
+    if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
+      const pfx = document.createElement('span');
+      pfx.className = 'option-prefix';
+      pfx.textContent = node._optionPrefixes[code] + '\u00A0';
+      lbl.appendChild(pfx);
+    }
     lbl.appendChild(document.createTextNode(display));
     if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
       const ord = document.createElement('span');

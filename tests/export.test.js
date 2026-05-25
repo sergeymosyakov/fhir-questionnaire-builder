@@ -1245,6 +1245,58 @@ describe('buildFHIRObject — _optionOrdinals', () => {
   });
 });
 
+// ── _optionPrefixes ───────────────────────────────────────────────────────────
+describe('buildFHIRObject — _optionPrefixes', () => {
+  const PFX_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix';
+  const ORD_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+
+  it('adds questionnaire-optionPrefix extension to answerOption', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'a=Option A,b=Option B',
+      _optionPrefixes: { a: 'A.', b: 'B.' },
+    }]);
+    const opts = q.item[0].answerOption || [];
+    const optA = opts.find(o => o.valueCoding?.code === 'a');
+    const optB = opts.find(o => o.valueCoding?.code === 'b');
+    expect(optA?.extension?.find(e => e.url === PFX_URL)?.valueString).toBe('A.');
+    expect(optB?.extension?.find(e => e.url === PFX_URL)?.valueString).toBe('B.');
+  });
+
+  it('omits questionnaire-optionPrefix extension when _optionPrefixes is absent', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'a=Option A',
+    }]);
+    const opts = q.item[0].answerOption || [];
+    expect(opts[0].extension).toBeUndefined();
+  });
+
+  it('emits both ordinalValue and optionPrefix extensions on same option', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'a=Option A',
+      _optionOrdinals: { a: 0 },
+      _optionPrefixes: { a: 'A.' },
+    }]);
+    const opts = q.item[0].answerOption || [];
+    const exts = opts[0].extension || [];
+    expect(exts.find(e => e.url === ORD_URL)?.valueDecimal).toBe(0);
+    expect(exts.find(e => e.url === PFX_URL)?.valueString).toBe('A.');
+  });
+
+  it('only emits prefix for codes present in _optionPrefixes', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'a=Option A,b=Option B',
+      _optionPrefixes: { a: 'A.' },
+    }]);
+    const opts = q.item[0].answerOption || [];
+    const optB = opts.find(o => o.valueCoding?.code === 'b');
+    expect(optB?.extension).toBeUndefined();
+  });
+});
+
 // ── referenceResource / quantityUnit / calculatedExpr / initialExpr ───────────
 describe('buildFHIRObject — reference, quantity, expr extensions', () => {
   const REF_URL  = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource';
@@ -1375,5 +1427,46 @@ describe('buildFHIRObject — _maxFileSizeMB', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment', _maxFileSizeMB: null }]);
     const ext = q.item[0].extension || [];
     expect(ext.filter(e => e.url === MS_URL)).toHaveLength(0);
+  });
+});
+
+// ── mimeType (attachment) ─────────────────────────────────────────────────────
+describe('buildFHIRObject — _mimeTypes', () => {
+  const MT_URL = 'http://hl7.org/fhir/StructureDefinition/mimeType';
+
+  it('exports each mimeType as a separate extension entry with valueCode', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment', _mimeTypes: ['image/jpeg', 'application/pdf'] }]);
+    const ext = q.item[0].extension || [];
+    const entries = ext.filter(e => e.url === MT_URL);
+    expect(entries).toHaveLength(2);
+    expect(entries[0].valueCode).toBe('image/jpeg');
+    expect(entries[1].valueCode).toBe('application/pdf');
+  });
+
+  it('exports a single mimeType as one extension entry', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment', _mimeTypes: ['image/*'] }]);
+    const ext = q.item[0].extension || [];
+    const entries = ext.filter(e => e.url === MT_URL);
+    expect(entries).toHaveLength(1);
+    expect(entries[0].valueCode).toBe('image/*');
+  });
+
+  it('omits mimeType extensions when _mimeTypes is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.filter(e => e.url === MT_URL)).toHaveLength(0);
+  });
+
+  it('omits mimeType extensions when _mimeTypes is empty', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment', _mimeTypes: [] }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.filter(e => e.url === MT_URL)).toHaveLength(0);
+  });
+
+  it('can export both maxFileSizeMB and mimeTypes on the same item', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment', _maxFileSizeMB: 5, _mimeTypes: ['image/jpeg'] }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxSize')?.valueDecimal).toBe(5);
+    expect(ext.find(e => e.url === MT_URL)?.valueCode).toBe('image/jpeg');
   });
 });

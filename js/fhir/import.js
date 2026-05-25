@@ -30,6 +30,7 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden',
   'http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay',
   'http://hl7.org/fhir/StructureDefinition/maxSize',
+  'http://hl7.org/fhir/StructureDefinition/mimeType',
 ]);
 
 function _collectUnknownExtensions(fhirItem) {
@@ -204,6 +205,19 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   }
   if (Object.keys(ordinals).length) node._optionOrdinals = ordinals;
 
+  // questionnaire-optionPrefix — per-option display prefix (e.g. 'A.', '1.')
+  const prefixes = {};
+  for (const opt of fhirItem.answerOption || []) {
+    if (opt.valueCoding) {
+      const code = opt.valueCoding.code || opt.valueCoding.display || '';
+      const pfxExt = (opt.extension || []).find(
+        e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix'
+      );
+      if (pfxExt?.valueString && code) prefixes[code] = pfxExt.valueString;
+    }
+  }
+  if (Object.keys(prefixes).length) node._optionPrefixes = prefixes;
+
   applyVisibility(node, fhirItem, linkIdMap);
   applyConstraints(node, fhirItem);
 
@@ -314,6 +328,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxSize'
   );
   if (maxSizeExt?.valueDecimal !== undefined) node._maxFileSizeMB = maxSizeExt.valueDecimal;
+
+  // mimeType (attachment items only — 0..* allowed MIME types as valueCode)
+  const mimeTypes = (fhirItem.extension || [])
+    .filter(e => e.url === 'http://hl7.org/fhir/StructureDefinition/mimeType' && e.valueCode)
+    .map(e => e.valueCode);
+  if (mimeTypes.length) node._mimeTypes = mimeTypes;
 
   // questionnaire-supportLink (0..* URI links to external help/reference)
   const supportLinks = (fhirItem.extension || [])

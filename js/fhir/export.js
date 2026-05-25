@@ -173,9 +173,14 @@ function nodeToFHIRItem(node) {
       .map(({ code, display }) => {
         const coding = { code, display };
         const answerOpt = { valueCoding: coding };
+        const optExts = [];
         if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
-          answerOpt.extension = [{ url: 'http://hl7.org/fhir/StructureDefinition/ordinalValue', valueDecimal: node._optionOrdinals[code] }];
+          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/ordinalValue', valueDecimal: node._optionOrdinals[code] });
         }
+        if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
+          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix', valueString: node._optionPrefixes[code] });
+        }
+        if (optExts.length) answerOpt.extension = optExts;
         if (node._initialSelected === code) answerOpt.initialSelected = true;
         return answerOpt;
       });
@@ -192,6 +197,13 @@ function nodeToFHIRItem(node) {
   // maxSize (attachment items only — maximum file size in MB)
   if (node._maxFileSizeMB !== undefined && node._maxFileSizeMB !== null) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/maxSize', valueDecimal: node._maxFileSizeMB });
+  }
+
+  // mimeType (attachment items only — 0..* allowed MIME types)
+  if (node._mimeTypes && node._mimeTypes.length) {
+    for (const mime of node._mimeTypes) {
+      if (mime) ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/mimeType', valueCode: mime });
+    }
   }
 
   // sdc-questionnaire-entryFormat

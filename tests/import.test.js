@@ -1122,6 +1122,54 @@ describe('importFHIR', () => {
     });
   });
 
+  // ── _mimeTypes ────────────────────────────────────────────────────────────
+  describe('_mimeTypes', () => {
+    const MT_URL = 'http://hl7.org/fhir/StructureDefinition/mimeType';
+
+    it('reads multiple mimeType extensions into node._mimeTypes array', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'attachment', text: 'Q',
+        extension: [
+          { url: MT_URL, valueCode: 'image/jpeg' },
+          { url: MT_URL, valueCode: 'application/pdf' },
+        ],
+      }]));
+      expect(_tree[0]._mimeTypes).toEqual(['image/jpeg', 'application/pdf']);
+    });
+
+    it('reads a single mimeType extension into a one-element array', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'attachment', text: 'Q',
+        extension: [{ url: MT_URL, valueCode: 'image/*' }],
+      }]));
+      expect(_tree[0]._mimeTypes).toEqual(['image/*']);
+    });
+
+    it('does not set _mimeTypes when no mimeType extensions are present', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'attachment', text: 'Q' }]));
+      expect(_tree[0]._mimeTypes).toBeUndefined();
+    });
+
+    it('does not collect mimeType as unknown extension', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'attachment', text: 'Q',
+        extension: [{ url: MT_URL, valueCode: 'image/jpeg' }],
+      }]));
+      expect(_tree[0]._unknownExtensions).toBeUndefined();
+    });
+
+    it('ignores mimeType entries without valueCode', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'attachment', text: 'Q',
+        extension: [
+          { url: MT_URL, valueCode: 'image/jpeg' },
+          { url: MT_URL },
+        ],
+      }]));
+      expect(_tree[0]._mimeTypes).toEqual(['image/jpeg']);
+    });
+  });
+
   // ── _optionOrdinals ───────────────────────────────────────────────────────
   describe('_optionOrdinals', () => {
     const ORD_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
@@ -1146,6 +1194,64 @@ describe('importFHIR', () => {
         }],
       }]));
       expect(_tree[0]._optionOrdinals).toEqual({ b: 2.0 });
+    });
+  });
+
+  // ── _optionPrefixes ───────────────────────────────────────────────────────
+  describe('_optionPrefixes', () => {
+    const PFX_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix';
+
+    it('reads questionnaire-optionPrefix from answerOption.extension', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [
+          {
+            valueCoding: { code: 'a', display: 'Option A' },
+            extension: [{ url: PFX_URL, valueString: 'A.' }],
+          },
+          {
+            valueCoding: { code: 'b', display: 'Option B' },
+            extension: [{ url: PFX_URL, valueString: 'B.' }],
+          },
+        ],
+      }]));
+      expect(_tree[0]._optionPrefixes).toEqual({ a: 'A.', b: 'B.' });
+    });
+
+    it('ignores options without questionnaire-optionPrefix extension', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [
+          { valueCoding: { code: 'a', display: 'Option A' } },
+        ],
+      }]));
+      expect(_tree[0]._optionPrefixes).toBeUndefined();
+    });
+
+    it('handles mixed options (some with prefix, some without)', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [
+          {
+            valueCoding: { code: 'la1', display: 'Never' },
+            extension: [{ url: PFX_URL, valueString: '1.' }],
+          },
+          { valueCoding: { code: 'la2', display: 'Sometimes' } },
+        ],
+      }]));
+      expect(_tree[0]._optionPrefixes).toEqual({ la1: '1.' });
+    });
+
+    it('reads prefix alongside ordinalValue on the same option', () => {
+      const ORD_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{
+          valueCoding: { code: 'a', display: 'Option A' },
+          extension: [
+            { url: ORD_URL, valueDecimal: 0 },
+            { url: PFX_URL, valueString: 'A.' },
+          ],
+        }],
+      }]));
+      expect(_tree[0]._optionOrdinals).toEqual({ a: 0 });
+      expect(_tree[0]._optionPrefixes).toEqual({ a: 'A.' });
     });
   });
 

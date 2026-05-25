@@ -1,0 +1,54 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "attachment-constraints-test",
+  "status": "draft",
+  "title": "Attachment Constraints Test",
+  "item": [
+    {
+      "linkId": "att-maxsize",
+      "text": "Upload report (max 2 MB)",
+      "type": "attachment",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/maxSize",
+          "valueDecimal": 2
+        }
+      ]
+    },
+    {
+      "linkId": "att-mimetypes",
+      "text": "Upload image or PDF",
+      "type": "attachment",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/mimeType",
+          "valueCode": "image/jpeg"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/mimeType",
+          "valueCode": "application/pdf"
+        }
+      ]
+    },
+    {
+      "linkId": "att-both",
+      "text": "Upload image (max 5 MB, images only)",
+      "type": "attachment",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/maxSize",
+          "valueDecimal": 5
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/mimeType",
+          "valueCode": "image/*"
+        }
+      ]
+    },
+    {
+      "linkId": "att-none",
+      "text": "Upload any file",
+      "type": "attachment"
+    }
+  ]
+}

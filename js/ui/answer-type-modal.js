@@ -121,6 +121,10 @@ export function open(node, typeLink, setActive) {
     draftOrientation:     node._choiceOrientation || '',
     draftDisplayCategory: node._displayCategory || '',
     draftMaxFileSizeMB:   node._maxFileSizeMB !== undefined ? String(node._maxFileSizeMB) : '',
+    draftMimeTypes:       node._mimeTypes ? node._mimeTypes.join(', ') : '',
+    draftPrefixes:        node._optionPrefixes
+      ? Object.entries(node._optionPrefixes).map(([code, pfx]) => `${code}=${pfx}`).join(',')
+      : '',
   };
 
   setModalTitle(_el.title, 'Answer Type', node.title || node.id || 'Item');
@@ -160,6 +164,7 @@ function _apply() {
       // Resolve local #vs-id → options string for preview rendering
       node.options = resolveContainedValueSet(questContained, _pending.draftAVS);
       delete node._optionOrdinals;
+      delete node._optionPrefixes;
     } else {
       delete node._answerValueSet;
       // Extract ordinals from draft, store clean "code=Label" in node.options
@@ -171,11 +176,24 @@ function _apply() {
       }).join(',');
       if (Object.keys(_newOrdinals).length) node._optionOrdinals = _newOrdinals;
       else delete node._optionOrdinals;
+
+      // option prefixes
+      const _newPrefixes = {};
+      (_pending.draftPrefixes || '').split(',').forEach(s => {
+        const idx = s.indexOf('=');
+        if (idx < 1) return;
+        const code = s.slice(0, idx).trim();
+        const pfx  = s.slice(idx + 1).trim();
+        if (code && pfx) _newPrefixes[code] = pfx;
+      });
+      if (Object.keys(_newPrefixes).length) node._optionPrefixes = _newPrefixes;
+      else delete node._optionPrefixes;
     }
   } else {
     // Non-choice type: clear choice-specific state
     delete node._answerValueSet;
     delete node._optionOrdinals;
+    delete node._optionPrefixes;
     node.options = '';
   }
 
@@ -227,6 +245,14 @@ function _apply() {
     if (!isNaN(mb) && mb > 0) node._maxFileSizeMB = mb; else delete node._maxFileSizeMB;
   } else {
     delete node._maxFileSizeMB;
+  }
+
+  // mimeTypes (attachment items only)
+  if (node.itemType === 'attachment') {
+    const mimes = _pending.draftMimeTypes.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    if (mimes.length) node._mimeTypes = mimes; else delete node._mimeTypes;
+  } else {
+    delete node._mimeTypes;
   }
 
   // Keep the repeatable link visible/hidden correctly
@@ -329,6 +355,25 @@ function _renderBody(container) {
   optInp.oninput = () => { _pending.draftOptions = optInp.value; };
 
   optSection.append(optSubLbl, optInp);
+
+  // Prefixes sub-field (questionnaire-optionPrefix)
+  const pfxSubLbl = document.createElement('div');
+  pfxSubLbl.className   = 'at-modal-sub-lbl';
+  pfxSubLbl.textContent = 'Prefixes (code=Prefix, ...)';
+  pfxSubLbl.dataset.tipTitle = 'Option prefixes';
+  pfxSubLbl.dataset.tipBody  = 'Display prefix shown before each answer label (e.g. A., 1.). Exported as questionnaire-optionPrefix extension on each answerOption.';
+  pfxSubLbl.dataset.tipFhir  = 'Questionnaire.item.answerOption[].extension[questionnaire-optionPrefix]';
+  pfxSubLbl.dataset.tipSpec  = 'R4';
+
+  const pfxInp = document.createElement('input');
+  pfxInp.type        = 'text';
+  pfxInp.className   = 'at-modal-opt-inp';
+  pfxInp.dataset.testid = 'option-prefix-input';
+  pfxInp.value       = _pending.draftPrefixes;
+  pfxInp.placeholder = 'e.g. la1=A.,la2=B.,la3=C.';
+  pfxInp.oninput = () => { _pending.draftPrefixes = pfxInp.value; };
+
+  optSection.append(pfxSubLbl, pfxInp);
   choiceSection.appendChild(optSection);
 
   // ── ValueSet sub-section ──────────────────────────────────────────────────
@@ -647,5 +692,24 @@ function _renderBody(container) {
   maxSizeInp.oninput = () => { _pending.draftMaxFileSizeMB = maxSizeInp.value; };
 
   attachSection.append(maxSizeLbl, maxSizeInp);
+
+  const mimeTypesLbl = document.createElement('div');
+  mimeTypesLbl.className   = 'at-modal-sub-lbl at-modal-sub-lbl--tip';
+  mimeTypesLbl.textContent = 'Allowed MIME types:';
+  mimeTypesLbl.dataset.tipTitle = 'Allowed MIME types';
+  mimeTypesLbl.dataset.tipBody  = 'Comma-separated list of accepted MIME types (e.g. image/jpeg, application/pdf). Sets the accept attribute on the file input. Exported as one mimeType extension entry per value.';
+  mimeTypesLbl.dataset.tipFhir  = 'item.extension[mimeType].valueCode';
+  mimeTypesLbl.dataset.tipSpec  = 'R4';
+
+  const mimeTypesInp = document.createElement('input');
+  mimeTypesInp.type = 'text';
+  mimeTypesInp.className = 'at-modal-placeholder-inp';
+  mimeTypesInp.dataset.testid = 'mime-types-input';
+  mimeTypesInp.value = _pending.draftMimeTypes;
+  mimeTypesInp.placeholder = 'e.g. image/*,application/pdf';
+  mimeTypesInp.rows = 1;
+  mimeTypesInp.oninput = () => { _pending.draftMimeTypes = mimeTypesInp.value; };
+
+  attachSection.append(mimeTypesLbl, mimeTypesInp);
   container.appendChild(attachSection);
 }

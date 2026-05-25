@@ -254,6 +254,13 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointe
   margin-left: 2px;
 }
 
+/* === Option prefix (questionnaire-optionPrefix extension) =================== */
+.option-prefix {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text-2);
+}
+
 /* === Radio control =========================================================== */
 .radio-no-opts { font-size: 11px; color: var(--c-text-2); }
 .radio-label   { display: inline-flex; align-items: center; gap: 3px; margin-right: 10px; font-size: 13px; cursor: pointer; }
