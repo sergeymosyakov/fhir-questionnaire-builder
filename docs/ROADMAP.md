@@ -24,4 +24,4 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Technical Debt
 
-*No outstanding items.*
+- [ ] **Migrate remaining modals to the Section pattern** — `appearance-modal.js`, `states-modal.js`, `repeatable-modal.js`, `expression-modal.js`, `initial-modal.js` each get a `<modal>-sections/` directory following the same pattern as `item-sections/` and `metadata-sections/`. Each section owns `initPending(node)`, `build(pending)`, `commit(pending, node)`. The modal becomes a thin lifecycle wrapper (~30 lines). `makeCollapsible` + `applyTip` live in `section.js` as the single canonical source.
