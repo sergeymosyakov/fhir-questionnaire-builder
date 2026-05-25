@@ -160,14 +160,14 @@ test.describe('builder UI', () => {
     await loadFixture(page);
     await page.locator('[data-node-id="extra-notes"]').getByTestId('action-vis').click();
     await expect(page.getByTestId('disabled-display-select')).toBeVisible();
-    await expect(page.getByTestId('disabled-display-select')).toHaveValue('hidden');
+    await expect(page.getByTestId('disabled-display-select')).toHaveAttribute('data-value', 'hidden');
     await page.keyboard.press('Escape');
   });
 
   test('Show When modal shows protected as default for general-notes', async ({ page }) => {
     await loadFixture(page);
     await page.locator('[data-node-id="general-notes"]').getByTestId('action-vis').click();
-    await expect(page.getByTestId('disabled-display-select')).toHaveValue('protected');
+    await expect(page.getByTestId('disabled-display-select')).toHaveAttribute('data-value', 'protected');
     await page.keyboard.press('Escape');
   });
 
@@ -176,7 +176,8 @@ test.describe('builder UI', () => {
     // general-notes is currently protected (shows dimmed)
     await expect(page.locator('[data-preview-id="general-notes"]')).toBeVisible();
     await page.locator('[data-node-id="general-notes"]').getByTestId('action-vis').click();
-    await page.getByTestId('disabled-display-select').selectOption('hidden');
+    await page.getByTestId('disabled-display-select').click();
+    await page.locator('.oc-opt[data-val="hidden"]').click();
     await page.locator('#showWhenModalApply').click();
     // After applying, general-notes should no longer be in the DOM (condition still not met)
     await expect(page.locator('[data-preview-id="general-notes"]')).toHaveCount(0);

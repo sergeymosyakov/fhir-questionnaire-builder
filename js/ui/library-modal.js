@@ -108,6 +108,7 @@ function _render(groups, focusGroupId) {
       row.className = 'lib-item';
       row.dataset.testid = 'lib-item-' + group.id + '-' + idx;
       row.dataset.file = item.file;
+      row.dataset.sample = item.file;
       row.dataset.type = item.type;
 
       const icon = document.createElement('span');

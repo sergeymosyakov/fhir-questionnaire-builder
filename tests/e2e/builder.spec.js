@@ -112,7 +112,9 @@ test.describe('App boot', () => {
 
     // Open the Load dropdown.
     await page.getByTestId('load-fhir-btn').click();
-    // Click the Bariatric sample entry.
+    // Open Library modal then click the Bariatric sample entry.
+    await page.getByTestId('load-library-item').click();
+    await page.locator('[data-sample="example-bariatric.fhir.json"]').waitFor({ timeout: 10_000 });
     await page.click('[data-sample="example-bariatric.fhir.json"]');
 
     // Preview must render at least one item row (each row has data-preview-id).
@@ -131,6 +133,8 @@ test.describe('Clear form', () => {
 
     // Load a sample so there is content to clear.
     await page.getByTestId('load-fhir-btn').click();
+    await page.getByTestId('load-library-item').click();
+    await page.locator('[data-sample="example-bariatric.fhir.json"]').waitFor({ timeout: 10_000 });
     await page.click('[data-sample="example-bariatric.fhir.json"]');
     await expect(page.locator('[data-testid="preview-panel"] [data-preview-id]').first()).toBeVisible();
 
@@ -328,6 +332,8 @@ test.describe('Load FHIR → both panels', () => {
     await waitForLoad(page);
 
     await page.getByTestId('load-fhir-btn').click();
+    await page.getByTestId('load-library-item').click();
+    await page.locator('[data-sample="example-bariatric.fhir.json"]').waitFor({ timeout: 10_000 });
     await page.click('[data-sample="example-bariatric.fhir.json"]');
 
     // Wait until both async renders finish and counts are equal.

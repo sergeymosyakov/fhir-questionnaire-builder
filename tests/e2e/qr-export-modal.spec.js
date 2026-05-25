@@ -30,6 +30,8 @@ async function loadSampleAndOpenExportModal(page) {
   await waitForLoad(page);
   // Load PHQ-9 sample questionnaire so Export → QR becomes available
   await page.getByTestId('load-fhir-btn').click();
+  await page.getByTestId('load-library-item').click();
+  await page.locator('[data-sample="phq-9.fhir.json"]').waitFor({ timeout: 10_000 });
   await page.locator('[data-sample="phq-9.fhir.json"]').click();
   await page.waitForSelector('[data-testid="export-btn"]', { state: 'visible', timeout: 10_000 });
   // Open Export menu → QR item
