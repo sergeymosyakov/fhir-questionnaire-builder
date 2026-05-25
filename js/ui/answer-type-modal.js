@@ -16,6 +16,8 @@ import { resolveContainedValueSet } from '../fhir/import.js';
 import { triggerCalcRecalc } from '../builder/_shared.js';
 import { createCustomSelect } from './custom-select.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { NODE_REGISTRY } from '../nodes/index.js';
+import { ItemNode } from '../nodes/item-node.js';
 import {
   CHOICE_TYPES, ENTRY_FORMAT_TYPES, NUMERIC_TYPES,
   ITEM_TYPES, FHIR_R4_TYPES, BUILDER_UNITS,
@@ -77,6 +79,8 @@ function _apply() {
   }
 
   node.itemType = _pending.draftType;
+  // Update prototype so node.buildControl() dispatches the correct implementation.
+  Object.setPrototypeOf(node, NODE_REGISTRY.get(node.itemType)?.prototype ?? ItemNode.prototype);
 
   // checkbox / display cannot be repeatable
   if ((node.itemType === 'checkbox' || node.itemType === 'display') && node.repeats) {
