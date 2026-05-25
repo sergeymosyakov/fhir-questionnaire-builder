@@ -100,6 +100,8 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `questMeta._rawJurisdiction` | `Questionnaire.jurisdiction[]` | ← stored as-is (pass-through) | → written back unchanged (omitted when null) |
 | `questMeta._rawCode` | `Questionnaire.code[]` | ← stored as array (default: `null`) | → written back unchanged; editable via **Codes** section in Properties modal (system/code/display rows; draft pattern; badge shows count) |
 | `questMeta.derivedFrom` | `Questionnaire.derivedFrom[]` | ← stored as string array (default: `[]`) | → written back as array; editable via **Derived From** collapsible section in Properties modal; round-trip safe |
+| `questMeta.replaces` | `extension[].valueCanonical` where `url = …/replaces` | ← one entry per extension occurrence (default: `[]`) | → each URL written as a separate `replaces` extension entry (`http://hl7.org/fhir/StructureDefinition/replaces`); editable via **Replaces** collapsible section in Properties modal; round-trip safe |
+| `questMeta.replaces` | `extension[].valueCanonical` where `url = http://hl7.org/fhir/StructureDefinition/replaces` | ← one entry per extension occurrence (default: `[]`) | → each URL written as a separate `replaces` extension entry; editable via **Replaces** collapsible section in Properties modal; round-trip safe |
 | `questMeta._metaVersionId` | `Questionnaire.meta.versionId` | ← `meta.versionId` (default: `''`) | → written back when set; editable in Properties modal — **Resource Meta** section; **Generate** button creates a fresh UUID v4 |
 | `questMeta._metaSource` | `Questionnaire.meta.source` | ← `meta.source` (default: `''`) | → written back when set; editable URI input in Properties modal — Resource Meta section |
 | `questMeta._metaLastUpdated` | `Questionnaire.meta.lastUpdated` | ← `meta.lastUpdated` displayed read-only in Properties modal | → **always** replaced with `new Date().toISOString()` on every export |
@@ -368,7 +370,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | FHIR field | Status | Notes |
 |---|---|---|
 | `Questionnaire.implicitRules` | ⚠️ Silently dropped | Declares the rules set that constrains how the resource is used. Rare in practice. |
-| `replaces` extension | ⚠️ Silently dropped | Root-level extension (`http://hl7.org/fhir/StructureDefinition/replaces`) indicating this questionnaire supersedes a prior version. Not preserved on import. |
 
 ### Item-level — not implemented
 

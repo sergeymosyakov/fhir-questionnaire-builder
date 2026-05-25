@@ -70,6 +70,7 @@ export const questMeta = reactive({
   experimental:    null,       // null = not set, true/false = Questionnaire.experimental
   language:        '',          // BCP-47 language code, e.g. 'en', 'en-US'
   derivedFrom:     [],          // canonical[] — parent questionnaire URLs
+  replaces:        [],          // canonical[] — questionnaires superseded by this one (extension: replaces)
   // Business identifiers — editable via Properties modal
   _rawIdentifier:   [],        // Questionnaire.identifier[] — array of { use?, system?, value? }
   // Pass-through: preserved from import, written back on export, no editing UI

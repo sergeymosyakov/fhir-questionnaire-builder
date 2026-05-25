@@ -310,10 +310,15 @@ export function buildFHIRObject() {
     q.effectivePeriod = ep;
   }
   const vars = questVariables.filter(v => v.name && v.expression);
+  const REPLACES_EXT_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
   const questExt = [
     ...vars.map(v => ({
       url: SDC_VAR_URL,
       valueExpression: { name: v.name, language: 'text/fhirpath', expression: v.expression }
+    })),
+    ...(questMeta.replaces || []).filter(u => u.trim()).map(u => ({
+      url: REPLACES_EXT_URL,
+      valueCanonical: u.trim()
     })),
     ...(questMeta._rawQuestExtensions || []).map(e => JSON.parse(JSON.stringify(e))),
   ];

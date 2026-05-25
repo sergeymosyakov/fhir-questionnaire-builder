@@ -523,7 +523,8 @@ export function importFHIR(fhirJson, renderFn) {
   questMeta._rawMetaSecurity = Array.isArray(q.meta?.security) ? JSON.parse(JSON.stringify(q.meta.security)) : [];
 
   // Read questionnaire-level SDC variables
-  const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
+  const SDC_VAR_URL  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
+  const REPLACES_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
   questVariables.splice(0);
 
   // Questionnaire.contained[] — preserve raw resources for round-trip
@@ -531,6 +532,10 @@ export function importFHIR(fhirJson, renderFn) {
   if (Array.isArray(q.contained)) {
     for (const r of q.contained) questContained.push(r);
   }
+  // replaces extension — canonical[] of superseded questionnaires
+  questMeta.replaces = (q.extension || [])
+    .filter(e => e.url === REPLACES_URL && e.valueCanonical)
+    .map(e => e.valueCanonical);
   for (const ext of q.extension || []) {
     if (ext.url === SDC_VAR_URL && ext.valueExpression) {
       questVariables.push({
@@ -540,7 +545,8 @@ export function importFHIR(fhirJson, renderFn) {
     }
   }
   // Preserve non-variable questionnaire-level extensions for round-trip
-  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL);
+  // (replaces and sdc-variable are handled explicitly above)
+  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL);
   questMeta._rawQuestExtensions = nonVarExts.length ? JSON.parse(JSON.stringify(nonVarExts)) : [];
 
   _bulkUpdate.value = true;

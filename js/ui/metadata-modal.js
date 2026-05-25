@@ -90,6 +90,7 @@ export function open() {
     experimental: questMeta.experimental === null ? '' : String(questMeta.experimental),
     language:     questMeta.language || '',
     derivedFrom:  [...(questMeta.derivedFrom || [])],
+    replaces:     [...(questMeta.replaces     || [])],
     codes: JSON.parse(JSON.stringify(questMeta._rawCode || [])),
     metaVersionId:  questMeta._metaVersionId  || '',
     metaSource:     questMeta._metaSource      || '',
@@ -129,6 +130,7 @@ function _apply() {
   questMeta.experimental = _pending.experimental === '' ? null : _pending.experimental === 'true';
   questMeta.language     = _pending.language;
   questMeta.derivedFrom  = _pending.derivedFrom.filter(u => u.trim());
+  questMeta.replaces     = _pending.replaces.filter(u => u.trim());
   const filteredCodes = _pending.codes.filter(c => c.code.trim());
   questMeta._rawCode = filteredCodes.length ? filteredCodes : null;
   questMeta._metaVersionId   = _pending.metaVersionId.trim();
@@ -417,6 +419,83 @@ function _renderBody(container) {
 
   derivedSection.append(derivedToggle, derivedBody);
   container.appendChild(derivedSection);
+
+  // ── Replaces (collapsible) ────────────────────────────────────────────────
+  const replacesSection = document.createElement('div');
+  replacesSection.className = 'meta-modal-advanced';
+
+  const replacesToggle = document.createElement('button');
+  replacesToggle.type      = 'button';
+  replacesToggle.className = 'meta-modal-adv-toggle';
+  replacesToggle.dataset.testid  = 'meta-replaces-toggle';
+  replacesToggle.dataset.tipTitle = 'replaces extension';
+  replacesToggle.dataset.tipBody  = 'Canonical URLs of questionnaires that this questionnaire supersedes. Each URL will be written as a separate replaces extension entry.';
+  replacesToggle.dataset.tipFhir  = 'http://hl7.org/fhir/StructureDefinition/replaces';
+  replacesToggle.dataset.tipSpec  = 'R4';
+  let replacesOpen = _pending.replaces.length > 0;
+
+  const replacesBody = document.createElement('div');
+  replacesBody.className = 'meta-modal-adv-body';
+  replacesBody.style.display = replacesOpen ? '' : 'none';
+
+  const _setReplacesLabel = () => {
+    const count = _pending.replaces.filter(u => u.trim()).length;
+    const badge = count ? ` (${count})` : '';
+    replacesToggle.textContent = (replacesOpen ? '\u25BC' : '\u25BA') + ' Replaces' + badge;
+  };
+
+  const _renderReplaces = () => {
+    replacesBody.innerHTML = '';
+    if (_pending.replaces.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'codes-empty-msg';
+      empty.textContent = 'No replaced questionnaire URLs. Click \u2018+ Add URL\u2019 to add one.';
+      replacesBody.appendChild(empty);
+    }
+    _pending.replaces.forEach((url, idx) => {
+      const row = document.createElement('div');
+      row.className = 'codes-row';
+      const inp = document.createElement('input');
+      inp.type = 'url';
+      inp.className = 'codes-inp';
+      inp.value = url;
+      inp.placeholder = 'http://example.org/fhir/Questionnaire/prior|1.0';
+      inp.dataset.testid = `meta-replaces-url-${idx}`;
+      inp.oninput = () => { _pending.replaces[idx] = inp.value; _setReplacesLabel(); };
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'codes-remove-btn';
+      removeBtn.textContent = '\u00D7';
+      removeBtn.dataset.testid = `meta-replaces-remove-${idx}`;
+      removeBtn.onclick = () => { _pending.replaces.splice(idx, 1); _renderReplaces(); _setReplacesLabel(); };
+      row.append(inp, removeBtn);
+      replacesBody.appendChild(row);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'codes-add-btn';
+    addBtn.textContent = '+ Add URL';
+    addBtn.dataset.testid = 'meta-replaces-add-btn';
+    addBtn.onclick = () => {
+      _pending.replaces.push('');
+      replacesOpen = true;
+      replacesBody.style.display = '';
+      _renderReplaces();
+      _setReplacesLabel();
+    };
+    replacesBody.appendChild(addBtn);
+  };
+  _renderReplaces();
+  _setReplacesLabel();
+
+  replacesToggle.addEventListener('click', () => {
+    replacesOpen = !replacesOpen;
+    replacesBody.style.display = replacesOpen ? '' : 'none';
+    _setReplacesLabel();
+  });
+
+  replacesSection.append(replacesToggle, replacesBody);
+  container.appendChild(replacesSection);
 
   // ── Identifiers (collapsible) ────────────────────────────────────────────────────
   const idSection = document.createElement('div');
