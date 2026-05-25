@@ -3,6 +3,7 @@
 // Optional FHIR-imported: _optionOrdinals, _optionPrefixes, _choiceOrientation,
 //   _answerValueSet, _openLabel, _initialSelected
 import { ItemNode } from './item-node.js';
+import { NODE_REGISTRY } from './registry.js';
 import { createWrap } from './base-node.js';
 import { parseOptions } from '../utils.js';
 
@@ -266,3 +267,7 @@ export class OpenChoiceNode extends ItemNode {
     return wrap;
   }
 }
+
+NODE_REGISTRY.set('select',      ChoiceNode);
+NODE_REGISTRY.set('radio',       RadioNode);
+NODE_REGISTRY.set('open-choice', OpenChoiceNode);

@@ -6,6 +6,7 @@
 //   _codes, _supportLinks, _hidden, _designNote, _unknownExtensions
 import { BaseNode } from './base-node.js';
 import { isDescendant } from '../utils.js';
+import { NODE_REGISTRY } from './registry.js';
 
 export class GroupNode extends BaseNode {
   constructor(data = {}) {
@@ -171,3 +172,5 @@ export class GroupNode extends BaseNode {
     }
   }
 }
+
+NODE_REGISTRY.set('group', GroupNode);

@@ -2,6 +2,7 @@
 // Numeric input. itemType: 'number' | 'integer' | 'decimal'
 // Optional FHIR-imported: _minValue, _maxValue, _sliderStep, _entryFormat
 import { ItemNode } from './item-node.js';
+import { NODE_REGISTRY } from './registry.js';
 import { createWrap } from './base-node.js';
 
 export class NumberNode extends ItemNode {
@@ -76,3 +77,7 @@ export class NumberNode extends ItemNode {
     return wrap;
   }
 }
+
+NODE_REGISTRY.set('number',  NumberNode);
+NODE_REGISTRY.set('integer', NumberNode);
+NODE_REGISTRY.set('decimal', NumberNode);

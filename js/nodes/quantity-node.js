@@ -2,6 +2,7 @@
 // Numeric value + unit input. itemType: 'quantity'
 // Optional FHIR-imported: quantityUnit (default unit code)
 import { ItemNode } from './item-node.js';
+import { NODE_REGISTRY } from './registry.js';
 import { createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 
@@ -91,3 +92,5 @@ export class QuantityNode extends ItemNode {
     return wrap;
   }
 }
+
+NODE_REGISTRY.set('quantity',    QuantityNode);

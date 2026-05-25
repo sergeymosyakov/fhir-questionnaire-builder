@@ -3,6 +3,7 @@
 // Displays informational text — no interactive control.
 // Optional FHIR-imported properties: _displayCategory ('help' | 'instructions' | 'security')
 import { ItemNode } from './item-node.js';
+import { NODE_REGISTRY } from './registry.js';
 import { applyRenderStyle } from './base-node.js';
 import { createWrap } from './base-node.js';
 
@@ -74,3 +75,5 @@ export class DisplayNode extends ItemNode {
     // display items have no badges or controls
   }
 }
+
+NODE_REGISTRY.set('display',     DisplayNode);

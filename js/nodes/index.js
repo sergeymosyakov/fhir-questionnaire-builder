@@ -18,27 +18,9 @@ import { ReferenceNode }  from './reference-node.js';
 import { QuantityNode }   from './quantity-node.js';
 import { DisplayNode }    from './display-node.js';
 import { NODE_REGISTRY }  from './registry.js';
-
-// Fill the registry (registry.js is a leaf — no node imports, no circular dep).
-// base-node.js imports registry.js, so BaseNode.dispatch() reads a fully-filled
-// map as long as nodes/index.js is imported before the first dispatch call.
-NODE_REGISTRY.set('group',       GroupNode);
-NODE_REGISTRY.set('text',        TextNode);
-NODE_REGISTRY.set('number',      NumberNode);
-NODE_REGISTRY.set('integer',     NumberNode);
-NODE_REGISTRY.set('decimal',     NumberNode);
-NODE_REGISTRY.set('select',      ChoiceNode);
-NODE_REGISTRY.set('radio',       RadioNode);
-NODE_REGISTRY.set('open-choice', OpenChoiceNode);
-NODE_REGISTRY.set('date',        DateNode);
-NODE_REGISTRY.set('dateTime',    DateTimeNode);
-NODE_REGISTRY.set('time',        TimeNode);
-NODE_REGISTRY.set('checkbox',    CheckboxNode);
-NODE_REGISTRY.set('url',         UrlNode);
-NODE_REGISTRY.set('attachment',  AttachmentNode);
-NODE_REGISTRY.set('reference',   ReferenceNode);
-NODE_REGISTRY.set('quantity',    QuantityNode);
-NODE_REGISTRY.set('display',     DisplayNode);
+// Each node file self-registers its own key(s) into NODE_REGISTRY on import.
+// Importing them here ensures the registry is fully populated whenever
+// nodes/index.js is loaded (which happens before any dispatch call).
 
 export { NODE_REGISTRY };
 

@@ -2,6 +2,7 @@
 // URI input with format validation. itemType: 'url'
 // Optional FHIR-imported: _entryFormat, _maxLength, _minLength
 import { ItemNode } from './item-node.js';
+import { NODE_REGISTRY } from './registry.js';
 import { createWrap } from './base-node.js';
 
 export class UrlNode extends ItemNode {
@@ -71,3 +72,5 @@ export class UrlNode extends ItemNode {
     return wrap;
   }
 }
+
+NODE_REGISTRY.set('url',         UrlNode);

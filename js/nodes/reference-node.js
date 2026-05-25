@@ -2,6 +2,7 @@
 // FHIR resource reference input. itemType: 'reference'
 // Optional FHIR-imported: referenceResource (allowed type, e.g. 'Patient')
 import { ItemNode } from './item-node.js';
+import { NODE_REGISTRY } from './registry.js';
 import { createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 
@@ -96,3 +97,5 @@ export class ReferenceNode extends ItemNode {
     return wrap;
   }
 }
+
+NODE_REGISTRY.set('reference',   ReferenceNode);

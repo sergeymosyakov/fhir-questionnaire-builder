@@ -2,6 +2,7 @@
 // Boolean yes/no input. itemType: 'checkbox'
 // Optional FHIR-imported: _calculatedExpr (read-only computed boolean)
 import { ItemNode } from './item-node.js';
+import { NODE_REGISTRY } from './registry.js';
 import { createWrap } from './base-node.js';
 
 export class CheckboxNode extends ItemNode {
@@ -37,3 +38,5 @@ export class CheckboxNode extends ItemNode {
     return wrap;
   }
 }
+
+NODE_REGISTRY.set('checkbox',    CheckboxNode);

@@ -2,6 +2,7 @@
 // Temporal input controls.
 // Optional FHIR-imported: _entryFormat
 import { ItemNode } from './item-node.js';
+import { NODE_REGISTRY } from './registry.js';
 import { createWrap } from './base-node.js';
 import { createDatePicker } from '../ui/date-picker.js';
 
@@ -76,3 +77,7 @@ export class TimeNode extends ItemNode {
     return wrap;
   }
 }
+
+NODE_REGISTRY.set('date',     DateNode);
+NODE_REGISTRY.set('dateTime', DateTimeNode);
+NODE_REGISTRY.set('time',     TimeNode);
