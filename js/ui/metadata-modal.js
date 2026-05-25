@@ -17,7 +17,7 @@
 
 import { questMeta } from '../state.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
-import { renderMetaSections } from './metadata-sections.js';
+import { renderMetaSections } from './metadata-sections/index.js';
 
 let _el      = null;
 let _pending = null;

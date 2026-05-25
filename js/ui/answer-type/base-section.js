@@ -9,11 +9,12 @@
 //
 // Subclasses self-register via SECTION_REGISTRY.push() at module load time.
 
+import { Section } from '../section.js';
+
 export const SECTION_REGISTRY = [];
 
-export class AnswerTypeSection {
+export class AnswerTypeSection extends Section {
   isVisible(type)       { return false; }                          // eslint-disable-line no-unused-vars
-  build(pending)        { return document.createElement('div'); }  // eslint-disable-line no-unused-vars
   onTypeChange(type)    {}                                         // eslint-disable-line no-unused-vars
   commit(pending, node) {}                                         // eslint-disable-line no-unused-vars
   initDraft(node)       { return {}; }                             // eslint-disable-line no-unused-vars
