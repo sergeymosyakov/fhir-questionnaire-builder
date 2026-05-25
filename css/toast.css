@@ -1,66 +1,44 @@
-/* ── Notification dialog (error / warn / info) ───────────────────────────── */
+/* ── Notification dialog ────────────────────────────────────────────────────
+   Reuses shared modal classes:
+     .modal-backdrop, .modal-box, .modal-header, .modal-body,
+     .modal-footer, .modal-btn, .modal-btn--apply
+   Only adds: z-index override, width, top accent, header icon.
+─────────────────────────────────────────────────────────────────── */
 
 .notif-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.28);
-  z-index: 8998;
+  z-index: 9000;
+  transition: opacity 0.15s ease;
 }
 
-.notif-dialog {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.92);
-  z-index: 8999;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.10);
-  padding: 28px 32px 22px;
-  max-width: 380px;
-  width: calc(100vw - 40px);
-  opacity: 0;
-  transition: opacity 0.18s ease, transform 0.18s ease;
-  text-align: center;
+.notif-box {
+  width: min(360px, calc(100vw - 40px));
 }
 
-.notif-dialog--visible {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+.notif-box.notif--error { border-top: 3px solid #b91c1c; }
+.notif-box.notif--warn  { border-top: 3px solid #d97706; }
+.notif-box.notif--info  { border-top: 3px solid #2563eb; }
+
+/* Header row: icon + title */
+.notif-header-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.notif-dialog--error { border-top: 4px solid #b91c1c; }
-.notif-dialog--warn  { border-top: 4px solid #f59e0b; }
-.notif-dialog--info  { border-top: 4px solid #3b82f6; }
-
-.notif-dialog__icon {
-  font-size: 32px;
-  margin-bottom: 10px;
+/* Small filled circle — letter only, no emoji */
+.notif-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 800;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
-.notif-dialog__msg {
-  font-size: 14px;
-  line-height: 1.55;
-  margin-bottom: 20px;
-  word-break: break-word;
-}
-
-.notif-dialog--error .notif-dialog__msg { color: #7f1d1d; }
-.notif-dialog--warn  .notif-dialog__msg { color: #78350f; }
-.notif-dialog--info  .notif-dialog__msg { color: #1e3a8a; }
-
-.notif-dialog__btn {
-  padding: 7px 32px;
-  border: none;
-  border-radius: 5px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  min-width: 80px;
-}
-
-.notif-dialog--error .notif-dialog__btn { background: #b91c1c; color: #fff; }
-.notif-dialog--warn  .notif-dialog__btn { background: #d97706; color: #fff; }
-.notif-dialog--info  .notif-dialog__btn { background: #2563eb; color: #fff; }
-
-.notif-dialog__btn:hover { filter: brightness(1.1); }
+.notif--error .notif-title-icon { background: #b91c1c; color: #fff; }
+.notif--warn  .notif-title-icon { background: #d97706; color: #fff; }
+.notif--info  .notif-title-icon { background: #2563eb; color: #fff; }

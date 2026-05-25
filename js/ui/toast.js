@@ -1,59 +1,84 @@
-const ICONS = { error: '⛔', warn: '⚠️', info: 'ℹ️' };
-const LABELS = { error: 'OK', warn: 'OK', info: 'OK' };
+const CONF = {
+  error: { title: 'Error',   icon: '!' },
+  warn:  { title: 'Warning', icon: '!' },
+  info:  { title: 'Info',    icon: 'i' },
+};
 
-function _close(backdrop, dialog) {
-  dialog.classList.remove('notif-dialog--visible');
-  dialog.addEventListener('transitionend', () => {
-    dialog.remove();
-    backdrop.remove();
-  }, { once: true });
+function _close(backdrop, onKey) {
+  document.removeEventListener('keydown', onKey, true);
+  backdrop.style.opacity = '0'; // runtime: animate out
+  backdrop.addEventListener('transitionend', () => backdrop.remove(), { once: true });
 }
 
 /**
- * Show a centered notification dialog.
+ * Show a notification dialog that reuses shared .modal-* classes.
  * @param {string} message
  * @param {'error'|'warn'|'info'} type
  */
 export function showToast(message, type = 'error') {
+  const cfg = CONF[type] || CONF.error;
+
+  // Backdrop — reuses .modal-backdrop (fixed, flex-center, dark overlay)
   const backdrop = document.createElement('div');
-  backdrop.className = 'notif-backdrop';
+  backdrop.className = 'modal-backdrop notif-backdrop';
+  backdrop.style.opacity = '0'; // runtime: animation start state
 
-  const dialog = document.createElement('div');
-  dialog.className = `notif-dialog notif-dialog--${type}`;
-  dialog.setAttribute('role', 'alertdialog');
-  dialog.setAttribute('aria-modal', 'true');
+  // Box — reuses .modal-box (surface bg, border, shadow, flex-column)
+  const box = document.createElement('div');
+  box.className = `modal-box notif-box notif--${type}`;
+  box.setAttribute('role', 'alertdialog');
+  box.setAttribute('aria-modal', 'true');
 
-  const icon = document.createElement('div');
-  icon.className = 'notif-dialog__icon';
-  icon.textContent = ICONS[type] || '⛔';
+  // Header — reuses .modal-header
+  const header = document.createElement('div');
+  header.className = 'modal-header';
 
-  const msg = document.createElement('div');
-  msg.className = 'notif-dialog__msg';
-  msg.textContent = message;
+  const titleWrap = document.createElement('div');
+  titleWrap.className = 'notif-header-title';
+
+  const iconEl = document.createElement('span');
+  iconEl.className = 'notif-title-icon';
+  iconEl.textContent = cfg.icon;
+
+  const labelEl = document.createElement('span');
+  labelEl.className = 'modal-title-label';
+  labelEl.textContent = cfg.title;
+
+  titleWrap.append(iconEl, labelEl);
+  header.appendChild(titleWrap);
+
+  // Body — reuses .modal-body
+  const body = document.createElement('div');
+  body.className = 'modal-body';
+  body.textContent = message;
+
+  // Footer — reuses .modal-footer + .modal-btn--apply
+  const footer = document.createElement('div');
+  footer.className = 'modal-footer';
 
   const btn = document.createElement('button');
   btn.type = 'button';
-  btn.className = 'notif-dialog__btn';
-  btn.textContent = LABELS[type];
-  btn.onclick = () => _close(backdrop, dialog);
+  btn.className = 'modal-btn modal-btn--apply';
+  btn.textContent = 'OK';
 
-  backdrop.addEventListener('mousedown', () => _close(backdrop, dialog));
+  footer.appendChild(btn);
+  box.append(header, body, footer);
+  backdrop.appendChild(box);
+  document.body.appendChild(backdrop);
+
+  // Animate in (opacity is runtime-dynamic)
+  backdrop.getBoundingClientRect(); // force reflow
+  backdrop.style.opacity = '1';
+  btn.focus();
 
   const onKey = e => {
-    if (e.key === 'Escape' || e.key === 'Enter') {
-      document.removeEventListener('keydown', onKey, true);
-      _close(backdrop, dialog);
-    }
+    if (e.key === 'Escape' || e.key === 'Enter') _close(backdrop, onKey);
   };
   document.addEventListener('keydown', onKey, true);
-
-  dialog.append(icon, msg, btn);
-  document.body.append(backdrop, dialog);
-
-  // Force reflow so CSS transition plays
-  dialog.getBoundingClientRect();
-  dialog.classList.add('notif-dialog--visible');
-  btn.focus();
+  btn.onclick = () => _close(backdrop, onKey);
+  backdrop.addEventListener('click', e => {
+    if (e.target === backdrop) _close(backdrop, onKey);
+  });
 }
 
 export const showError = msg => showToast(msg, 'error');
