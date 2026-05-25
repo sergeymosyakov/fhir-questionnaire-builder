@@ -4,7 +4,7 @@ import { createGroupNode, createItemNodeFromTemplate } from '../nodes/index.js';
 import { _formTick, _bulkUpdate } from '../render-bus.js';
 import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
 import { init as dndInit, makeRootDropZone, makeDragHandle, attachDropZone } from './dnd.js';
-import { addPanel, buildVisPanel, buildStylePanel } from './panels.js';
+import { buildVisPanel } from './panels.js';
 import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
 import { findAndRemove } from '../utils.js';
 import { createCustomSelect } from '../ui/custom-select.js';
@@ -25,8 +25,6 @@ function _makeCtx() {
     makeDragHandle,
     attachDropZone,
     buildVisPanel,
-    addPanel,
-    buildStylePanel,
     navigateToPreview,
     refreshExprIcons,
     findAndRemove,
