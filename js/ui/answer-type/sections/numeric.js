@@ -109,5 +109,3 @@ class NumericSection extends AnswerTypeSection {
 }
 
 SECTION_REGISTRY.push(new NumericSection());
-
-SECTION_REGISTRY.push(new NumericSection());
