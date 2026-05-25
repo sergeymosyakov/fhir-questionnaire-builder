@@ -110,7 +110,7 @@ function _renderBody(draft, container) {
 
     // FHIRPath expression + Explain button row
     const exprInp = document.createElement('textarea');
-    exprInp.rows = 2;
+    exprInp.rows = 3;
     exprInp.className = 'expr-textarea';
     exprInp.placeholder = 'FHIRPath expression (must return true to pass)';
     exprInp.value = c.expression || '';
@@ -123,7 +123,8 @@ function _renderBody(draft, container) {
     explainBtn.type = 'button';
     explainBtn.className = 'expr-explain-btn';
     explainBtn.textContent = 'Explain';
-    explainBtn.title = 'Evaluate expression and show result tree';
+    explainBtn.dataset.tipTitle = 'Evaluate expression';
+    explainBtn.dataset.tipBody  = 'Evaluate the FHIRPath expression and show the result tree';
     explainBtn.onclick = () => {
       const fp = window.fhirpath;
       const { qr, env } = getLastCtx();

@@ -22,7 +22,7 @@ export function build(node, ctx) {
   btn.type      = 'button';
   btn.className = 'oc-btn';
   btn.innerHTML = '&#x25BE;'; // ▾
-  btn.title     = 'Show options';
+  btn.dataset.tipTitle = 'Show options';
 
   box.appendChild(el);
   box.appendChild(btn);

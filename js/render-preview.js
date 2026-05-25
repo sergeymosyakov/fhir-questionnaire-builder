@@ -221,7 +221,7 @@ function buildRepeatControls(node, iconEl, onAfterChange) {
       rm.type = 'button';
       rm.className = 'repeat-remove-btn';
       rm.textContent = '\xD7';
-      rm.title = 'Remove this answer';
+      rm.dataset.tipTitle = 'Remove this answer';
       rm.dataset.testid = 'repeat-remove-btn';
       const _i = i;
       rm.onclick = () => {
@@ -246,7 +246,7 @@ function buildRepeatControls(node, iconEl, onAfterChange) {
   addBtn.dataset.testid = 'repeat-add-btn';
   if (atMax) {
     addBtn.disabled = true;
-    addBtn.title = 'Maximum ' + maxOccurs + ' answer' + (maxOccurs === 1 ? '' : 's') + ' reached';
+    addBtn.dataset.tipTitle = 'Maximum ' + maxOccurs + ' answer' + (maxOccurs === 1 ? '' : 's') + ' reached';
   }
   addBtn.onclick = () => { if (!atMax) { values[id + '$$n'] = n + 1; _formTick.value++; } };
   wrap.appendChild(addBtn);
@@ -378,7 +378,7 @@ async function _asyncRender(version) {
       const row = document.createElement('div');
       row.className = 'lform-item lform-waiting preview-row--pointer';
       row.dataset.previewId = res.node.id;
-      row.title = 'Click to navigate to builder node';
+      row.dataset.tipTitle = 'Click to navigate to builder node';
       row.addEventListener('click', () => _scrollToBuilder(res.node.id));
       const ph = document.createElement('span');
       ph.className = 'preview-icon-ph';

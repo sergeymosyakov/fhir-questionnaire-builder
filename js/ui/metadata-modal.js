@@ -16,6 +16,7 @@
 import { questMeta } from '../state.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 import { renderCodesEditor } from './codes-modal.js';
+import { createCustomSelect } from './custom-select.js';
 
 const STATUSES = ['draft', 'active', 'retired', 'unknown'];
 
@@ -190,25 +191,20 @@ function _makeSelectRow(key, label, options, testid, tip = null) {
     if (tip.fhir) lbl.dataset.tipFhir = tip.fhir;
     if (tip.spec) lbl.dataset.tipSpec  = tip.spec;
   }
-  const sel = document.createElement('select');
-  sel.className      = 'meta-modal-sel';
-  sel.dataset.testid = testid;
-  const currentVal   = String(_pending[key] ?? '');
+  const currentVal = String(_pending[key] ?? '');
+  let items = options.map(o => ({ value: o.value, label: o.label }));
   // If imported value isn't in the predefined list, add it as a custom option at top
   if (currentVal && !options.find(o => o.value === currentVal)) {
-    const opt = document.createElement('option');
-    opt.value = currentVal; opt.textContent = currentVal + ' (imported)';
-    opt.selected = true;
-    sel.appendChild(opt);
+    items = [{ value: currentVal, label: currentVal + ' (imported)' }, ...items];
   }
-  for (const o of options) {
-    const opt = document.createElement('option');
-    opt.value = o.value; opt.textContent = o.label;
-    if (o.value === currentVal) opt.selected = true;
-    sel.appendChild(opt);
-  }
-  sel.onchange = () => { _pending[key] = sel.value; };
-  row.append(lbl, sel);
+  const sel = createCustomSelect({
+    items,
+    value:     currentVal || (items[0]?.value ?? ''),
+    testid,
+    className: 'sc-trigger--sm',
+    onChange:  v => { _pending[key] = v; },
+  });
+  row.append(lbl, sel.el);
   return row;
 }
 
@@ -241,17 +237,14 @@ function _renderBody(container) {
   statusLbl.dataset.tipBody  = '"draft" — work in progress; "active" — in use; "retired" — no longer recommended; "unknown" — status not determined. Required field.';
   statusLbl.dataset.tipFhir  = 'Questionnaire.status';
   statusLbl.dataset.tipSpec  = 'R4';
-  const statusSel = document.createElement('select');
-  statusSel.className      = 'meta-modal-sel';
-  statusSel.dataset.testid = 'meta-status';
-  for (const s of STATUSES) {
-    const opt = document.createElement('option');
-    opt.value = s; opt.textContent = s;
-    if (s === _pending.status) opt.selected = true;
-    statusSel.appendChild(opt);
-  }
-  statusSel.onchange = () => { _pending.status = statusSel.value; };
-  statusRow.append(statusLbl, statusSel);
+  const statusSel = createCustomSelect({
+    items:     STATUSES.map(s => ({ value: s, label: s })),
+    value:     _pending.status,
+    testid:    'meta-status',
+    className: 'sc-trigger--sm',
+    onChange:  v => { _pending.status = v; },
+  });
+  statusRow.append(statusLbl, statusSel.el);
   // Insert after title (index 4 in fields array = 5th row node after hint)
   container.insertBefore(statusRow, container.children[6]);
 
@@ -464,20 +457,17 @@ function _renderBody(container) {
       const row = document.createElement('div');
       row.className = 'codes-row identifier-row';
 
-      const useSel = document.createElement('select');
-      useSel.className = 'identifier-use-sel';
-      useSel.dataset.testid = `meta-identifier-use-${idx}`;
-      ID_USES.forEach((u, i) => {
-        const opt = document.createElement('option');
-        opt.value = u; opt.textContent = ID_USE_LABELS[i];
-        if (u === (ident.use || '')) opt.selected = true;
-        useSel.appendChild(opt);
+      const useSel = createCustomSelect({
+        items:     ID_USES.map((u, i) => ({ value: u, label: ID_USE_LABELS[i] })),
+        value:     ident.use || '',
+        testid:    `meta-identifier-use-${idx}`,
+        className: 'sc-trigger--sm',
+        onChange:  v => {
+          if (v) ident.use = v;
+          else delete ident.use;
+          _setIdLabel();
+        },
       });
-      useSel.onchange = () => {
-        if (useSel.value) ident.use = useSel.value;
-        else delete ident.use;
-        _setIdLabel();
-      };
 
       const sysInp = document.createElement('input');
       sysInp.type = 'url';
@@ -502,7 +492,7 @@ function _renderBody(container) {
       removeBtn.dataset.testid = `meta-identifier-remove-${idx}`;
       removeBtn.onclick = () => { _pending.identifiers.splice(idx, 1); _renderIdentifiers(); _setIdLabel(); };
 
-      row.append(useSel, sysInp, valInp, removeBtn);
+      row.append(useSel.el, sysInp, valInp, removeBtn);
       idBody.appendChild(row);
     });
 

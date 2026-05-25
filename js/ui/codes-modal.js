@@ -306,7 +306,7 @@ function _renderBody(pending, container) {
       rmBtn.type = 'button';
       rmBtn.className = 'codes-remove-btn';
       rmBtn.textContent = '\u00D7';
-      rmBtn.title = 'Remove';
+      rmBtn.dataset.tipTitle = 'Remove';
       rmBtn.dataset.testid = `item-props-ext-rm-${idx}`;
       rmBtn.onclick = () => { pending.unknownExtensions.splice(idx, 1); _renderExtRows(); _setExtLabel(); };
 
@@ -459,7 +459,7 @@ export function renderCodesEditor(draft, container, prefix = 'code', label = 'co
     removeBtn.type = 'button';
     removeBtn.className = 'codes-remove-btn';
     removeBtn.textContent = '\u00D7';
-    removeBtn.title = 'Remove';
+    removeBtn.dataset.tipTitle = 'Remove';
     removeBtn.dataset.testid = `${prefix}-remove-${idx}`;
     removeBtn.onclick = () => { draft.splice(idx, 1); renderCodesEditor(draft, container, prefix, label); };
     row.appendChild(removeBtn);

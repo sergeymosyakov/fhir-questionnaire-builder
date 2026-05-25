@@ -51,7 +51,8 @@ export function renderItem(node, ctx) {
   prefixInput.value = node._prefix || '';
   prefixInput.className = 'node-prefix-input';
   prefixInput.placeholder = 'prefix';
-  prefixInput.title = 'Display prefix (e.g. 1.2) — cosmetic only, does not affect logic';
+  prefixInput.dataset.tipTitle = 'Display prefix';
+  prefixInput.dataset.tipBody  = 'Cosmetic only — e.g. “1.2”. Does not affect logic or linkId.';
   prefixInput.oninput = () => {
     const v = prefixInput.value.trim();
     node._prefix = v || undefined;
@@ -61,7 +62,8 @@ export function renderItem(node, ctx) {
   linkIdInput.type = 'text';
   linkIdInput.value = node.id;
   linkIdInput.className = 'node-linkid-input';
-  linkIdInput.title = 'FHIR linkId \u2014 editable';
+  linkIdInput.dataset.tipTitle = 'FHIR linkId';
+  linkIdInput.dataset.tipBody  = 'Editable. Must be unique within the questionnaire.';
   linkIdInput.oninput = () => { node.id = linkIdInput.value.trim() || node.id; };
   titleWrap.appendChild(linkIdInput);
 
@@ -218,7 +220,7 @@ export function renderItem(node, ctx) {
   btnDel.textContent = '\u2715';
   btnDel.className = 'btn-node-delete';
   btnDel.dataset.testid = 'node-delete-btn';
-  btnDel.title = 'Delete';
+  btnDel.dataset.tipTitle = 'Delete item';
   btnDel.onclick = async () => {
     const ok = await confirmDelete(node.title || node.id);
     if (ok) { findAndRemove(node.id, ctx.tree); renderTree(); }

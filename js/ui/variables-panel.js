@@ -2,6 +2,7 @@
 // Collapsible card (above tree) + edit modal for sdc-questionnaire-variable.
 // init(elements, variablesArray) — wire DOM and reactive array once at startup.
 // refresh() — re-render chip list and card visibility (call after import/reset).
+import { initModal, openModal, closeModal } from './modal-base.js';
 
 let _el   = null;  // resolved DOM nodes
 let _vars = null;  // reference to reactive questVariables array
@@ -14,14 +15,15 @@ export function init(elements, variablesArray) {
 
   _el.toggle.addEventListener('click', _toggleCollapse);
   _el.editBtn.addEventListener('click', _openModal);
-  _el.closeBtn.addEventListener('click', _closeModal);
-  _el.cancelBtn.addEventListener('click', _closeModal);
-  _el.applyBtn.addEventListener('click', _applyModal);
   if (_el.reinitBtn) _el.reinitBtn.addEventListener('click', () => {
     document.dispatchEvent(new CustomEvent('reinit-form'));
   });
-  _el.modal.addEventListener('click', e => { if (e.target === _el.modal) _closeModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && _el.modal.style.display !== 'none') _closeModal(); });
+  initModal({
+    modal:     _el.modal,
+    closeBtn:  _el.closeBtn,
+    cancelBtn: _el.cancelBtn,
+    applyBtn:  _el.applyBtn,
+  }, { onApply: _applyModal, onCancel: _closeModal });
 
   document.addEventListener('questionnaire-loaded', refresh);
   document.addEventListener('questionnaire-cleared', refresh);
@@ -66,13 +68,13 @@ function _openModal() {
   // Deep-copy current vars into draft; all edits go to draft until Apply.
   _draft = _vars.map(v => ({ name: v.name, expression: v.expression }));
   _renderModalBody();
-  _el.modal.style.display = 'flex';
+  openModal(_el.modal);
 }
 
 function _closeModal() {
   // Cancel: discard draft, close without touching _vars.
   _draft = null;
-  _el.modal.style.display = 'none';
+  closeModal(_el.modal);
 }
 
 function _applyModal() {
@@ -89,7 +91,7 @@ function _applyModal() {
   // Commit draft → reactive _vars.
   _vars.splice(0, _vars.length, ..._draft.map(v => ({ name: v.name, expression: v.expression })));
   _draft = null;
-  _el.modal.style.display = 'none';
+  closeModal(_el.modal);
   refresh();
   document.dispatchEvent(new CustomEvent('reinit-form'));
 }
@@ -154,7 +156,7 @@ function _makeRow(index, showErrors = false) {
   exprInput.className = 'variables-expr-input';
   exprInput.placeholder = 'FHIRPath expression, e.g. item.where(linkId=\'weight\').answer.valueDecimal';
   exprInput.value = _draft[index].expression;
-  exprInput.rows = 2;
+  exprInput.rows = 3;
   exprInput.spellcheck = false;
   exprInput.addEventListener('input', e => { _draft[index].expression = e.target.value; });
   row.appendChild(exprInput);
@@ -163,7 +165,7 @@ function _makeRow(index, showErrors = false) {
   const deleteBtn = document.createElement('button');
   deleteBtn.type = 'button';
   deleteBtn.className = 'variables-delete-btn';
-  deleteBtn.title = 'Remove variable';
+  deleteBtn.dataset.tipTitle = 'Remove variable';
   deleteBtn.textContent = '×';
   deleteBtn.addEventListener('click', () => {
     _draft.splice(index, 1);

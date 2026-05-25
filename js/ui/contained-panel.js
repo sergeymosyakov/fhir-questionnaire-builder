@@ -43,7 +43,7 @@ function _renderChips() {
     chip.type = 'button';
     chip.className = 'fhir-res-chip fhir-res-chip--contained';
     chip.textContent = label;
-    chip.title = 'Click to view JSON';
+    chip.dataset.tipTitle = 'View JSON';
     chip.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent('show-json', { detail: { title: label, data: resource } }));
     });

@@ -61,7 +61,7 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
     blank.textContent = '\u2014 question \u2014';
     blank.addEventListener('mousedown', () => {
       trigger.textContent = '\u2014 question \u2014';
-      trigger.title = '';
+      delete trigger.dataset.tipTitle;
       onSelect('', null);
       close();
     });
@@ -72,7 +72,7 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
       const opt = document.createElement('div');
       opt.className = 'vis-q-sel-opt' + (it.id === selectedId ? ' vis-q-sel-opt--sel' : '');
       opt.textContent = it.label;
-      opt.title = it.id;
+      opt.dataset.tipTitle = it.id;
       opt.dataset.id = it.id;
       opt.addEventListener('mousedown', () => {
         trigger.textContent = it.label;
@@ -370,7 +370,7 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
   p.appendChild(exprLbl);
 
   const exprInp = document.createElement('textarea');
-  exprInp.rows = 2;
+  exprInp.rows = 3;
   exprInp.className = 'expr-textarea';
   exprInp.value = node.enableWhenExpression || '';
   exprInp.placeholder = "e.g. %age > 18 and %gender = 'male'";
@@ -388,145 +388,6 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
   p.appendChild(exprInp);
 
   syncActive();
-}
-
-
-
-// ── Type + Options panel (item only) ─────────────────────────────────────────
-export function buildTypePanel(node, p) {
-  const typeRow = document.createElement('div');
-  typeRow.textContent = 'Type: ';
-  const typeSelect = document.createElement('select');
-  typeSelect.className = 'panel-type-sel';
-  typeSelect.dataset.testid = 'type-select';
-  for (const t of ['text', 'integer', 'decimal', 'date', 'url', 'attachment', 'checkbox', 'select', 'open-choice', 'radio', 'reference', 'quantity', 'display']) {
-    const opt = document.createElement('option');
-    opt.value = t; opt.textContent = t;
-    if (node.itemType === t) opt.selected = true;
-    typeSelect.appendChild(opt);
-  }
-  typeRow.appendChild(typeSelect);
-  p.appendChild(typeRow);
-
-  const optionsDiv = document.createElement('div');
-  optionsDiv.className = 'panel-sub-section';
-  optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice' || node.itemType === 'radio') ? 'block' : 'none';
-  optionsDiv.innerHTML = 'Options (comma-separated):<br>'
-    + '<input type="text" value="' + escAttr(node.options) + '">';
-  optionsDiv.querySelector('input').oninput = function () { node.options = this.value; };
-  p.appendChild(optionsDiv);
-
-  const refResDiv = document.createElement('div');
-  refResDiv.className = 'panel-sub-section';
-  refResDiv.style.display = node.itemType === 'reference' ? 'block' : 'none';
-  const refResLbl = document.createElement('div');
-  refResLbl.textContent = 'Allowed resource type:';
-  refResLbl.className = 'panel-sub-lbl';
-  const refResSel = document.createElement('select');
-  refResSel.className = 'panel-sub-sel';
-  const FHIR_R4_TYPES = ['Patient','Practitioner','PractitionerRole','RelatedPerson','Organization',
-    'Encounter','EpisodeOfCare','Condition','Observation','DiagnosticReport','Procedure',
-    'MedicationRequest','MedicationStatement','Medication','AllergyIntolerance','Immunization',
-    'CarePlan','CareTeam','Goal','ServiceRequest','Appointment','Slot','Schedule',
-    'HealthcareService','Location','Device','Specimen','ImagingStudy','Media',
-    'DocumentReference','Composition','QuestionnaireResponse','Questionnaire',
-    'Coverage','Claim','ExplanationOfBenefit','Account','Invoice','ChargeItem',
-    'ResearchStudy','ResearchSubject','Group','Person','Patient','Account',
-    'ActivityDefinition','AdverseEvent','AppointmentResponse','AuditEvent','Basic',
-    'Binary','BiologicallyDerivedProduct','BodyStructure','Bundle','CapabilityStatement',
-    'ChargeItemDefinition','ClaimResponse','ClinicalImpression','CodeSystem','Communication',
-    'CommunicationRequest','CompartmentDefinition','ConceptMap','Consent','Contract',
-    'CoverageEligibilityRequest','CoverageEligibilityResponse','DetectedIssue','DeviceDefinition',
-    'DeviceMetric','DeviceRequest','DeviceUseStatement','DocumentManifest','Endpoint',
-    'EnrollmentRequest','EnrollmentResponse','EventDefinition','FamilyMemberHistory',
-    'Flag','GuidanceResponse','ImmunizationEvaluation','ImmunizationRecommendation',
-    'ImplementationGuide','InsurancePlan','Library','Linkage','List','Measure',
-    'MeasureReport','MessageDefinition','MessageHeader','MolecularSequence','NamingSystem',
-    'NutritionOrder','ObservationDefinition','OperationDefinition','OperationOutcome',
-    'OrganizationAffiliation','Parameters','PaymentNotice','PaymentReconciliation',
-    'PlanDefinition','Provenance','RequestGroup','RiskAssessment','SearchParameter',
-    'Slot','SpecimenDefinition','StructureDefinition','StructureMap','Subscription',
-    'Substance','SupplyDelivery','SupplyRequest','Task','TerminologyCapabilities',
-    'TestReport','TestScript','ValueSet','VerificationResult','VisionPrescription'];
-  // Deduplicate and sort
-  const uniqueTypes = [...new Set(FHIR_R4_TYPES)].sort();
-  const blankOpt = document.createElement('option');
-  blankOpt.value = ''; blankOpt.textContent = '— Any (unrestricted) —';
-  if (!node.referenceResource) blankOpt.selected = true;
-  refResSel.appendChild(blankOpt);
-  for (const t of uniqueTypes) {
-    const o = document.createElement('option');
-    o.value = t; o.textContent = t;
-    if (node.referenceResource === t) o.selected = true;
-    refResSel.appendChild(o);
-  }
-  refResSel.onchange = () => {
-    node.referenceResource = refResSel.value || undefined;
-  };
-  refResDiv.appendChild(refResLbl);
-  refResDiv.appendChild(refResSel);
-  p.appendChild(refResDiv);
-
-  // ── Quantity: default unit ──
-  const BUILDER_UNITS = [
-    'kg','g','mg','[lb_av]','[oz_av]',
-    'cm','m','mm','[in_i]','[ft_i]',
-    'mL','L','dL',
-    'Cel','[degF]',
-    'mm[Hg]','kPa',
-    'kg/m2','%',
-    '/min','{beats}/min','{breaths}/min',
-    'min','h','d','wk','mo','a',
-    'mg/dL','mmol/L','g/dL','meq/L','U/L','[iU]',
-  ];
-  const qUnitDiv = document.createElement('div');
-  qUnitDiv.className = 'panel-sub-section';
-  qUnitDiv.style.display = node.itemType === 'quantity' ? 'block' : 'none';
-  const qUnitLbl = document.createElement('div');
-  qUnitLbl.textContent = 'Default unit:';
-  qUnitLbl.className = 'panel-sub-lbl';
-  const qUnitSel = document.createElement('select');
-  qUnitSel.className = 'panel-sub-sel';
-  const qUnitBlank = document.createElement('option');
-  qUnitBlank.value = ''; qUnitBlank.textContent = '— none —';
-  if (!node.quantityUnit) qUnitBlank.selected = true;
-  qUnitSel.appendChild(qUnitBlank);
-  for (const u of BUILDER_UNITS) {
-    const o = document.createElement('option');
-    o.value = u; o.textContent = u;
-    if (node.quantityUnit === u) o.selected = true;
-    qUnitSel.appendChild(o);
-  }
-  qUnitSel.onchange = () => { node.quantityUnit = qUnitSel.value || undefined; };
-  qUnitDiv.appendChild(qUnitLbl);
-  qUnitDiv.appendChild(qUnitSel);
-  p.appendChild(qUnitDiv);
-
-  typeSelect.onchange = () => {
-    // Clear all stored answers for this item (primary + repeat rows)
-    const id = node.id;
-    deleteValue(id);
-    const n = values[id + '$$n'] || 0;
-    for (let i = 1; i <= n; i++) deleteValue(id + '$$' + i);
-    delete values[id + '$$n'];
-
-    node.itemType = typeSelect.value;
-
-    // checkbox and display cannot be repeatable
-    const noRepeats = node.itemType === 'checkbox' || node.itemType === 'display';
-    if (noRepeats && node.repeats) {
-      node.repeats = false;
-      delete node._minOccurs;
-      delete node._maxOccurs;
-    }
-    const rl = p.closest('[data-node-id]')?.querySelector('[data-testid="action-repeatable"]');
-    if (rl) rl.style.display = noRepeats ? 'none' : '';
-
-    optionsDiv.style.display = (node.itemType === 'select' || node.itemType === 'open-choice' || node.itemType === 'radio') ? 'block' : 'none';
-    refResDiv.style.display  = node.itemType === 'reference' ? 'block' : 'none';
-    qUnitDiv.style.display   = node.itemType === 'quantity'  ? 'block' : 'none';
-    triggerCalcRecalc();
-  };
 }
 
 // ── Expression panel ──────────────────────────────────────────────────────────

@@ -3,6 +3,7 @@
 // init(els, questVariables, onAfterApply) — wire once at startup.
 import { tree, effect } from '../state.js';
 import { createCustomSelect } from './custom-select.js';
+import { initModal, openModal, closeModal } from './modal-base.js';
 
 const PATIENT_APPLY_EVENT = 'patient-ctx-applied';
 
@@ -83,7 +84,86 @@ function applyPreset(preset, questVariables) {
   }
 }
 
+// ── Module-level state ────────────────────────────────────────────────────────
+let _el = null;
+let _questVariables = null;
+let _inputs = null;
+
+const _doAfterApply = () => {
+  document.dispatchEvent(new CustomEvent('reinit-form'));
+  document.dispatchEvent(new CustomEvent(PATIENT_APPLY_EVENT));
+};
+
+function _openPatientModal() {
+  _el.body.innerHTML = '';
+  _inputs = {};
+
+  for (const def of PATIENT_VARS) {
+    const row = document.createElement('div');
+    row.className = 'patient-ctx-row';
+
+    const lbl = document.createElement('span');
+    lbl.className = 'patient-ctx-lbl';
+    lbl.textContent = def.label;
+
+    const entry = getEntry(_questVariables, def.name);
+    const current = entry ? fromExpr(def.type, entry.expression) : def.default;
+
+    let inp;
+    if (def.type === 'checkbox') {
+      inp = document.createElement('input');
+      inp.type = 'checkbox';
+      inp.className = 'patient-ctx-cb';
+      inp.checked = !!current;
+    } else if (def.type === 'select') {
+      const csel = createCustomSelect({
+        items:     def.options.map(([val, label]) => ({ value: val, label })),
+        value:     current,
+        className: 'patient-ctx-sel sc-trigger--full',
+        onChange:  () => {},  // value read back via csel.getValue() on apply
+      });
+      inp = csel.el;
+      inp._csel = csel;  // stash for value retrieval
+    } else {
+      inp = document.createElement('input');
+      inp.type = def.type === 'number' ? 'number' : 'text';
+      inp.className = 'patient-ctx-inp';
+      inp.value = current;
+      if (def.name === 'comorb') inp.placeholder = 'e.g. diabetes, hypertension';
+    }
+
+    _inputs[def.name] = { inp, def };
+    row.appendChild(lbl);
+    row.appendChild(inp);
+    _el.body.appendChild(row);
+  }
+
+  openModal(_el.modal);
+}
+
+function _applyPatientModal() {
+  if (!_inputs) return;
+  for (const [name, { inp, def }] of Object.entries(_inputs)) {
+    let raw;
+    if (def.type === 'checkbox') raw = inp.checked;
+    else if (inp._csel)          raw = inp._csel.getValue();
+    else                          raw = inp.value;
+    setEntry(_questVariables, name, toExpr(def.type, raw));
+  }
+  _inputs = null;
+  closeModal(_el.modal);
+  _doAfterApply();
+}
+
+function _cancelPatientModal() {
+  _inputs = null;
+  closeModal(_el.modal);
+}
+
 export function init(els, questVariables) {
+  _el = els;
+  _questVariables = questVariables;
+
   // Seed defaults for any patient vars not yet present
   for (const def of PATIENT_VARS) {
     if (!getEntry(questVariables, def.name)) {
@@ -91,110 +171,46 @@ export function init(els, questVariables) {
     }
   }
 
-  const { presetBtn, presetMenu, modal, closeBtn, applyBtn, body } = els;
-
-  const _doAfterApply = () => {
-    document.dispatchEvent(new CustomEvent('reinit-form'));
-    document.dispatchEvent(new CustomEvent(PATIENT_APPLY_EVENT));
-  };
-
-  // ── Manual edit modal ─────────────────────────────────────────────────────
-  const openModal = () => {
-    body.innerHTML = '';
-    const inputs = {};
-
-    for (const def of PATIENT_VARS) {
-      const row = document.createElement('div');
-      row.className = 'patient-ctx-row';
-
-      const lbl = document.createElement('span');
-      lbl.className = 'patient-ctx-lbl';
-      lbl.textContent = def.label;
-
-      const entry = getEntry(questVariables, def.name);
-      const current = entry ? fromExpr(def.type, entry.expression) : def.default;
-
-      let inp;
-      if (def.type === 'checkbox') {
-        inp = document.createElement('input');
-        inp.type = 'checkbox';
-        inp.className = 'patient-ctx-cb';
-        inp.checked = !!current;
-      } else if (def.type === 'select') {
-        const csel = createCustomSelect({
-          items:     def.options.map(([val, label]) => ({ value: val, label })),
-          value:     current,
-          className: 'patient-ctx-sel sc-trigger--full',
-          onChange:  () => {},  // value read back via csel.getValue() on apply
-        });
-        inp = csel.el;
-        inp._csel = csel;  // stash for value retrieval
-      } else {
-        inp = document.createElement('input');
-        inp.type = def.type === 'number' ? 'number' : 'text';
-        inp.className = 'patient-ctx-inp';
-        inp.value = current;
-        if (def.name === 'comorb') inp.placeholder = 'e.g. diabetes, hypertension';
-      }
-
-      inputs[def.name] = { inp, def };
-      row.appendChild(lbl);
-      row.appendChild(inp);
-      body.appendChild(row);
-    }
-
-    applyBtn.onclick = () => {
-      for (const [name, { inp, def }] of Object.entries(inputs)) {
-        let raw;
-        if (def.type === 'checkbox') raw = inp.checked;
-        else if (inp._csel)          raw = inp._csel.getValue();
-        else                          raw = inp.value;
-        setEntry(questVariables, name, toExpr(def.type, raw));
-      }
-      modal.style.display = 'none';
-      _doAfterApply();
-    };
-
-    modal.style.display = 'flex';
-  };
-
-  closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
-  modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+  initModal({
+    modal:    _el.modal,
+    closeBtn: _el.closeBtn,
+    applyBtn: _el.applyBtn,
+  }, { onApply: _applyPatientModal, onCancel: _cancelPatientModal });
 
   // ── Preset dropdown ───────────────────────────────────────────────────────
-  if (presetBtn && presetMenu) {
-    presetBtn.addEventListener('click', e => {
+  if (_el.presetBtn && _el.presetMenu) {
+    _el.presetBtn.addEventListener('click', e => {
       e.stopPropagation();
-      if (presetMenu.style.display !== 'none') { presetMenu.style.display = 'none'; return; }
+      if (_el.presetMenu.style.display !== 'none') { _el.presetMenu.style.display = 'none'; return; }
       // Position with fixed coords — top-panel has overflow-x:auto which clips absolute children
-      const rect = presetBtn.getBoundingClientRect();
-      presetMenu.style.position = 'fixed';
-      presetMenu.style.top  = (rect.bottom + 2) + 'px';
-      presetMenu.style.left = rect.left + 'px';
-      presetMenu.style.display = 'block';
+      const rect = _el.presetBtn.getBoundingClientRect();
+      _el.presetMenu.style.position = 'fixed';
+      _el.presetMenu.style.top  = (rect.bottom + 2) + 'px';
+      _el.presetMenu.style.left = rect.left + 'px';
+      _el.presetMenu.style.display = 'block';
     });
 
-    presetMenu.addEventListener('click', e => {
+    _el.presetMenu.addEventListener('click', e => {
       const item = e.target.closest('[data-preset]');
       if (!item) return;
       const presetId = item.dataset.preset;
-      presetMenu.style.display = 'none';
-      if (presetId === 'custom') { openModal(); return; }
+      _el.presetMenu.style.display = 'none';
+      if (presetId === 'custom') { _openPatientModal(); return; }
       const preset = PATIENT_PRESETS.find(p => p.id === presetId);
       if (!preset) return;
       applyPreset(preset, questVariables);
-      presetBtn.textContent = '\uD83D\uDC64 ' + preset.shortLabel + ' \u25BE';
+      _el.presetBtn.textContent = '\uD83D\uDC64 ' + preset.shortLabel + ' \u25BE';
       _doAfterApply();
     });
 
     // Close on outside click
-    document.addEventListener('click', () => { presetMenu.style.display = 'none'; });
+    document.addEventListener('click', () => { _el.presetMenu.style.display = 'none'; });
   }
 
   // Disable when no questionnaire loaded
   effect(() => {
     const disabled = tree.length === 0;
-    if (presetBtn) presetBtn.disabled = disabled;
+    if (_el.presetBtn) _el.presetBtn.disabled = disabled;
   });
 }
 

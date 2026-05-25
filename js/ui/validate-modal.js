@@ -71,7 +71,7 @@ function _renderBody(issues, onNavigate) {
       const navBtn = document.createElement('button');
       navBtn.type = 'button';
       navBtn.className = 'validate-nav-btn';
-      navBtn.title = 'Go to node in builder';
+      navBtn.dataset.tipTitle = 'Go to node in builder';
       navBtn.textContent = '↗';
       navBtn.addEventListener('click', () => {
         _close();

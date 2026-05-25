@@ -75,7 +75,7 @@ function _renderList(items) {
   items.forEach((item, i) => {
     const row = document.createElement('div');
     row.className = 'status-dropdown-row';
-    row.title = 'Click to navigate';
+    row.dataset.tipTitle = 'Click to navigate';
     row.addEventListener('click', e => {
       e.stopPropagation();
       _close();
