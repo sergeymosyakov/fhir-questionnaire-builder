@@ -3,7 +3,6 @@
 // Subclasses must set `this.type` and optionally `this.itemType`.
 import { nextId } from '../id.js';
 import * as explainModal from '../ui/explain-modal.js';
-import { NODE_REGISTRY } from './registry.js';
 
 // Shared wrapper factory used by every buildControl() implementation.
 export function createWrap() {
@@ -36,14 +35,13 @@ export class BaseNode {
   }
 
   // ── Static dispatcher ────────────────────────────────────────────────────
-  // Resolves the correct class from NODE_REGISTRY and calls renderPreview.
-  // Groups resolve by node.type ('group'); items by node.itemType.
-  // registry.js is a leaf module (no node-class imports) so no circular dep.
+  // Every node has its correct class prototype throughout its lifecycle:
+  //   - fhirItemToNode uses createItemNode/createGroupNode (correct class)
+  //   - answer-type-modal.js calls Object.setPrototypeOf on type-change
+  // So node.renderPreview() always dispatches to the right implementation.
   static dispatch(res, container, rc) {
     if (!res) return;
-    const node = res.node;
-    const Cls = NODE_REGISTRY.get(node.itemType ?? node.type);
-    if (Cls) Cls.prototype.renderPreview.call(node, res, container, rc);
+    res.node.renderPreview(res, container, rc);
   }
 
   // ── Preview rendering entry point ─────────────────────────────────────────

@@ -168,7 +168,7 @@ export class GroupNode extends BaseNode {
   // Called from render-preview.js via _rc.updateGroupIcons after a value change.
   static updateAll(rc) {
     for (const [, { node }] of rc.groupIconMap.entries()) {
-      GroupNode.prototype.refreshIcon.call(node, rc);
+      node.refreshIcon(rc);
     }
   }
 }

@@ -1,5 +1,6 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
-import { tree, makeGroup, rawFhir, values } from '../state.js';
+import { tree, rawFhir, values } from '../state.js';
+import { createGroupNode } from '../nodes/index.js';
 import { _formTick, _bulkUpdate } from '../render-bus.js';
 import { init as sharedInit, formatSeg } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
@@ -111,7 +112,7 @@ export async function renumberAll() {
 
 // ── Root-level add buttons (wired in app.js via these exports) ────────────────
 export function addRootGroup() {
-  const node = makeGroup('New Group');
+  const node = createGroupNode({ title: 'New Group' });
   node.id = formatSeg(tree.length + 1);
   tree.push(node);
   _formTick.value++;

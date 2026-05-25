@@ -1,7 +1,6 @@
 // ── Reactive state, factories, and pure utilities ────────────────────────────
 // Re-export effect so other modules don't need to know the CDN URL.
 import { ref, reactive, effect as _effect } from 'https://unpkg.com/@vue/reactivity@3.5/dist/reactivity.esm-browser.js';
-import { createGroupNode, createItemNode, createItemNodeFromTemplate } from './nodes/index.js';
 export { _effect as effect };
 export { ref };
 
@@ -102,13 +101,6 @@ export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date', 'dateTime', 't
 // ── ID factory ────────────────────────────────────────────────────────────────
 export { resetSeq } from './id.js';
 
-// ── Data factories ────────────────────────────────────────────────────────────
-// mandatory: null = not set (acts as required), true = required, false = optional.
-// If template is provided, copies all settings from it (except id and title).
-export const makeGroup = title => createGroupNode(title);
-export const makeItem  = (title, template) => template
-  ? createItemNodeFromTemplate(title, template)
-  : createItemNode('text', { title });
 
 // Helper: null mandatory behaves as true (required unless explicitly set false)
 export const isMandatory = node => node.mandatory !== false;
