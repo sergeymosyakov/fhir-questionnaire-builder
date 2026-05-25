@@ -1,7 +1,5 @@
-// ── Answer Type modal: static data & pure helpers ────────────────────────────
-// Pure constants and helpers with no side-effects or module state.
-// Imported by modal.js.
-import { parseOptions } from '../../utils.js';
+// ── Answer Type modal: static data ──────────────────────────────────────────
+// Pure constants with no side-effects or module state.
 
 // Choice item types — drive answer-source visibility in the modal.
 export const CHOICE_TYPES = new Set(['select', 'radio', 'open-choice']);
@@ -59,34 +57,3 @@ export const BUILDER_UNITS = [
   'min','h','d','wk','mo','a',
   'mg/dL','mmol/L','g/dL','meq/L','U/L','[iU]',
 ];
-
-// Build textarea string with optional ordinal suffix: "code=Label=0,code2=Label2=1"
-export function _optsWithOrdinals(node) {
-  if (!node.options) return '';
-  const ords = node._optionOrdinals || {};
-  return parseOptions(node.options)
-    .map(({ code, display }) => {
-      const o = ords[code];
-      return o !== undefined ? `${code}=${display}=${o}` : `${code}=${display}`;
-    })
-    .join(',');
-}
-
-// Parse "code=Label=N" entries; returns [{ code, display, ordinal? }]
-export function _parseOptsWithOrdinals(str) {
-  return (str || '').split(',').map(s => s.trim()).filter(Boolean).map(s => {
-    const eq = s.indexOf('=');
-    if (eq === -1) return { code: s, display: s };
-    const code = s.slice(0, eq).trim();
-    const rest = s.slice(eq + 1);
-    const lastEq = rest.lastIndexOf('=');
-    if (lastEq !== -1) {
-      const maybeOrd = rest.slice(lastEq + 1).trim();
-      const ordVal = Number(maybeOrd);
-      if (maybeOrd !== '' && !isNaN(ordVal)) {
-        return { code, display: rest.slice(0, lastEq).trim(), ordinal: ordVal };
-      }
-    }
-    return { code, display: rest.trim() };
-  });
-}

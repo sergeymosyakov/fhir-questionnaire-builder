@@ -39,7 +39,6 @@ class OrientationSection extends AnswerTypeSection {
       delete node._choiceOrientation;
     }
   }
-}
 
   initDraft(node) {
     return { draftOrientation: node._choiceOrientation || '' };

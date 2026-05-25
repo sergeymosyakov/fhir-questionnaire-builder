@@ -60,7 +60,6 @@ class AttachSection extends AnswerTypeSection {
       delete node._mimeTypes;
     }
   }
-}
 
   initDraft(node) {
     return {

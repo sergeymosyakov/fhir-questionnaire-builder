@@ -35,7 +35,6 @@ class PlaceholderSection extends AnswerTypeSection {
       delete node._entryFormat;
     }
   }
-}
 
   initDraft(node) {
     return { draftEntryFormat: node._entryFormat || '' };

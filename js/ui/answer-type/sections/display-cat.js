@@ -40,7 +40,6 @@ class DisplayCatSection extends AnswerTypeSection {
       delete node._displayCategory;
     }
   }
-}
 
   initDraft(node) {
     return { draftDisplayCategory: node._displayCategory || '' };

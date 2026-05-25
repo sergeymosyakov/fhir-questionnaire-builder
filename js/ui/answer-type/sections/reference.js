@@ -35,7 +35,6 @@ class ReferenceSection extends AnswerTypeSection {
   commit(pending, node) {
     node.referenceResource = (node.itemType === 'reference' && pending.draftRefRes) ? pending.draftRefRes : undefined;
   }
-}
 
   initDraft(node) {
     return { draftRefRes: node.referenceResource || '' };

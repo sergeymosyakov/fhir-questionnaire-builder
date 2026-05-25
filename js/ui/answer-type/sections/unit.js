@@ -35,7 +35,6 @@ class UnitSection extends AnswerTypeSection {
   commit(pending, node) {
     node.quantityUnit = (node.itemType === 'quantity' && pending.draftUnit) ? pending.draftUnit : undefined;
   }
-}
 
   initDraft(node) {
     return { draftUnit: node.quantityUnit || '' };

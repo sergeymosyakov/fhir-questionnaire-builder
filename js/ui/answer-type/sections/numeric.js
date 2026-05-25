@@ -98,7 +98,6 @@ class NumericSection extends AnswerTypeSection {
       delete node._sliderStep;
     }
   }
-}
 
   initDraft(node) {
     return {
@@ -108,5 +107,7 @@ class NumericSection extends AnswerTypeSection {
     };
   }
 }
+
+SECTION_REGISTRY.push(new NumericSection());
 
 SECTION_REGISTRY.push(new NumericSection());

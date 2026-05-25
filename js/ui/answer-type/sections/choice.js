@@ -2,7 +2,37 @@ import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
 import { questContained } from '../../../state.js';
 import { resolveContainedValueSet } from '../../../fhir/import.js';
 import { createCustomSelect } from '../../custom-select.js';
-import { CHOICE_TYPES, _parseOptsWithOrdinals, _optsWithOrdinals } from '../data.js';
+import { CHOICE_TYPES } from '../data.js';
+import { parseOptions } from '../../../utils.js';
+
+function _optsWithOrdinals(node) {
+  if (!node.options) return '';
+  const ords = node._optionOrdinals || {};
+  return parseOptions(node.options)
+    .map(({ code, display }) => {
+      const o = ords[code];
+      return o !== undefined ? `${code}=${display}=${o}` : `${code}=${display}`;
+    })
+    .join(',');
+}
+
+function _parseOptsWithOrdinals(str) {
+  return (str || '').split(',').map(s => s.trim()).filter(Boolean).map(s => {
+    const eq = s.indexOf('=');
+    if (eq === -1) return { code: s, display: s };
+    const code = s.slice(0, eq).trim();
+    const rest = s.slice(eq + 1);
+    const lastEq = rest.lastIndexOf('=');
+    if (lastEq !== -1) {
+      const maybeOrd = rest.slice(lastEq + 1).trim();
+      const ordVal = Number(maybeOrd);
+      if (!isNaN(ordVal) && maybeOrd !== '') {
+        return { code, display: rest.slice(0, lastEq).trim(), ordinal: ordVal };
+      }
+    }
+    return { code, display: rest.trim() };
+  });
+}
 
 class ChoiceSection extends AnswerTypeSection {
   isVisible(type) { return CHOICE_TYPES.has(type); }
@@ -213,7 +243,6 @@ class ChoiceSection extends AnswerTypeSection {
       delete node._openLabel;
     }
   }
-}
 
   initDraft(node) {
     return {
