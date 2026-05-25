@@ -1570,3 +1570,35 @@ describe('buildFHIRObject — sdc-questionnaire-openLabel', () => {
     expect(ext).toBeUndefined();
   });
 });
+
+// ── designNote ───────────────────────────────────────────────────────────────
+describe('buildFHIRObject — designNote', () => {
+  const DN_URL = 'http://hl7.org/fhir/StructureDefinition/designNote';
+  const build = nodes => { _tree.splice(0, _tree.length, ...nodes); return buildFHIRObject(); };
+
+  it('exports _designNote on item as valueMarkdown extension', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string', _designNote: 'Check this.' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === DN_URL);
+    expect(ext?.valueMarkdown).toBe('Check this.');
+  });
+
+  it('exports _designNote on group as valueMarkdown extension', () => {
+    const q = build([{ id: 'g1', type: 'group', title: 'G', _designNote: 'Group note.', children: [
+      { id: 'q1', type: 'item', title: 'Q', itemType: 'string' },
+    ] }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === DN_URL);
+    expect(ext?.valueMarkdown).toBe('Group note.');
+  });
+
+  it('omits designNote extension when _designNote is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === DN_URL);
+    expect(ext).toBeUndefined();
+  });
+
+  it('round-trips designNote: node with _designNote exports correct extension', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string', _designNote: 'Round-trip note.' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === DN_URL);
+    expect(ext?.valueMarkdown).toBe('Round-trip note.');
+  });
+});

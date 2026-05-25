@@ -28,6 +28,7 @@ import * as metadataModal from './ui/metadata-modal.js';
 import * as codesModal from './ui/codes-modal.js';
 import * as qrExportModal from './ui/qr-export-modal.js';
 import * as libraryModal from './ui/library-modal.js';
+import * as noteModal from './ui/note-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm, initPreview, resetCollapsedFromTree } from './render-preview.js';
 import { questVariables, questContained, questMeta } from './state.js';
@@ -169,6 +170,15 @@ statesModal.init({
   closeBtn:  document.getElementById('statesModalClose'),
   cancelBtn: document.getElementById('statesModalCancel'),
   applyBtn:  document.getElementById('statesModalApply'),
+});
+// ── Design Note modal init ───────────────────────────────────────────────────
+noteModal.init({
+  modal:     document.getElementById('designNoteModal'),
+  title:     document.getElementById('designNoteModalTitle'),
+  body:      document.getElementById('designNoteModalBody'),
+  closeBtn:  document.getElementById('designNoteModalClose'),
+  cancelBtn: document.getElementById('designNoteModalCancel'),
+  applyBtn:  document.getElementById('designNoteModalApply'),
 });
 // ── Answer Type modal init ─────────────────────────────────────────────
 answerTypeModal.init({

@@ -1538,3 +1538,57 @@ describe('importFHIR — sdc-questionnaire-openLabel', () => {
     expect(unknown.some(e => e.url === OL_URL)).toBe(false);
   });
 });
+
+// ── designNote ───────────────────────────────────────────────────────────────
+describe('importFHIR — designNote', () => {
+  const DN_URL = 'http://hl7.org/fhir/StructureDefinition/designNote';
+  beforeEach(() => { _tree.splice(0); });
+  const minQ = items => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+
+  it('reads valueMarkdown into item._designNote', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'string', text: 'Q',
+      extension: [{ url: DN_URL, valueMarkdown: 'Check with clinical team.' }],
+    }]));
+    expect(_tree[0]._designNote).toBe('Check with clinical team.');
+  });
+
+  it('reads valueString into item._designNote as fallback', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'string', text: 'Q',
+      extension: [{ url: DN_URL, valueString: 'Legacy note.' }],
+    }]));
+    expect(_tree[0]._designNote).toBe('Legacy note.');
+  });
+
+  it('leaves _designNote undefined when extension absent on item', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
+    expect(_tree[0]._designNote).toBeUndefined();
+  });
+
+  it('reads valueMarkdown into group._designNote', () => {
+    importFHIR(minQ([{
+      linkId: 'g1', type: 'group', text: 'G',
+      extension: [{ url: DN_URL, valueMarkdown: 'Group-level note.' }],
+      item: [{ linkId: 'q1', type: 'string', text: 'Q' }],
+    }]));
+    expect(_tree[0]._designNote).toBe('Group-level note.');
+  });
+
+  it('leaves _designNote undefined when extension absent on group', () => {
+    importFHIR(minQ([{
+      linkId: 'g1', type: 'group', text: 'G',
+      item: [{ linkId: 'q1', type: 'string', text: 'Q' }],
+    }]));
+    expect(_tree[0]._designNote).toBeUndefined();
+  });
+
+  it('does not add designNote to item _unknownExtensions', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'string', text: 'Q',
+      extension: [{ url: DN_URL, valueMarkdown: 'Note.' }],
+    }]));
+    const unknown = _tree[0]._unknownExtensions || [];
+    expect(unknown.some(e => e.url === DN_URL)).toBe(false);
+  });
+});

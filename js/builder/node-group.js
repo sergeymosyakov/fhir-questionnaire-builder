@@ -10,6 +10,7 @@ import * as statesModal from '../ui/states-modal.js';
 import * as expressionModal from '../ui/expression-modal.js';
 import * as showWhenModal from '../ui/showwhen-modal.js';
 import * as codesModal from '../ui/codes-modal.js';
+import * as noteModal from '../ui/note-modal.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 
 export function renderGroup(node, ctx) {
@@ -181,6 +182,19 @@ export function renderGroup(node, ctx) {
   propsLink.dataset.testid   = 'action-codes';
   propsLink.onclick = () => codesModal.open(node, propsLink, setActive);
   actions.appendChild(propsLink);
+
+  // Design Note — author-facing internal note (designNote extension)
+  const noteLink = document.createElement('a');
+  noteLink.textContent = 'Note';
+  noteLink.className = 'action-edit';
+  noteLink.dataset.tipTitle = 'Design Note';
+  noteLink.dataset.tipBody  = 'Internal author note — stored as FHIR designNote extension. Never shown to patients.';
+  noteLink.dataset.tipFhir  = 'http://hl7.org/fhir/StructureDefinition/designNote';
+  noteLink.dataset.tipSpec  = 'R4 · optional';
+  noteLink.dataset.testid   = 'action-note';
+  noteLink.onclick = () => noteModal.open(node, noteLink, setActive);
+  setActive(noteLink, !!node._designNote);
+  actions.appendChild(noteLink);
 
   // ⊕ Add ▾ dropdown
   const addWrap = document.createElement('div');

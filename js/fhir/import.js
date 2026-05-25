@@ -33,6 +33,7 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay',
   'http://hl7.org/fhir/StructureDefinition/maxSize',
   'http://hl7.org/fhir/StructureDefinition/mimeType',
+  'http://hl7.org/fhir/StructureDefinition/designNote',
 ]);
 
 function _collectUnknownExtensions(fhirItem) {
@@ -358,6 +359,13 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     if (openLabelExt?.valueString) node._openLabel = openLabelExt.valueString;
   }
 
+  // designNote — author-facing internal note
+  const designNoteExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/designNote'
+  );
+  if (designNoteExt?.valueMarkdown) node._designNote = designNoteExt.valueMarkdown;
+  else if (designNoteExt?.valueString) node._designNote = designNoteExt.valueString;
+
   // disabledDisplay (R4B native field or R4 extension backport)
   if (fhirItem.disabledDisplay) node._disabledDisplay = fhirItem.disabledDisplay;
   const ddExt = (fhirItem.extension || []).find(
@@ -456,6 +464,12 @@ function fhirItemToNode(fhirItem, linkIdMap, contained) {
       e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible'
     );
     if (collapsibleExt?.valueCode) node._collapsible = collapsibleExt.valueCode;
+    // designNote — author-facing internal note (groups)
+    const groupDesignNoteExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/designNote'
+    );
+    if (groupDesignNoteExt?.valueMarkdown) node._designNote = groupDesignNoteExt.valueMarkdown;
+    else if (groupDesignNoteExt?.valueString) node._designNote = groupDesignNoteExt.valueString;
     // Preserve any unrecognised extensions for round-trip pass-through
     const groupUnknown = _collectUnknownExtensions(fhirItem);
     if (groupUnknown) node._unknownExtensions = groupUnknown;

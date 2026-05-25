@@ -13,6 +13,7 @@ import * as initialModal from '../ui/initial-modal.js';
 import * as appearanceModal from '../ui/appearance-modal.js';
 import * as repeatableModal from '../ui/repeatable-modal.js';
 import * as codesModal from '../ui/codes-modal.js';
+import * as noteModal from '../ui/note-modal.js';
 import { triggerCalcRecalc, confirmDelete } from './_shared.js';
 
 export function renderItem(node, ctx) {
@@ -193,6 +194,19 @@ export function renderItem(node, ctx) {
   codesLink.dataset.testid   = 'action-codes';
   codesLink.onclick = () => codesModal.open(node, codesLink, setActive);
   actions.appendChild(codesLink);
+
+  // Design Note — author-facing internal note (designNote extension)
+  const noteLink = document.createElement('a');
+  noteLink.textContent = 'Note';
+  noteLink.className = 'action-edit';
+  noteLink.dataset.tipTitle = 'Design Note';
+  noteLink.dataset.tipBody  = 'Internal author note — stored as FHIR designNote extension. Never shown to patients.';
+  noteLink.dataset.tipFhir  = 'http://hl7.org/fhir/StructureDefinition/designNote';
+  noteLink.dataset.tipSpec  = 'R4 · optional';
+  noteLink.dataset.testid   = 'action-note';
+  noteLink.onclick = () => noteModal.open(node, noteLink, setActive);
+  setActive(noteLink, !!node._designNote);
+  actions.appendChild(noteLink);
 
   const headerTop = document.createElement('div');
   headerTop.className = 'node-header-top';

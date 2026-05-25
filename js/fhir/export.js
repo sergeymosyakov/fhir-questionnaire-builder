@@ -238,6 +238,11 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel', valueString: node._openLabel });
   }
 
+  // designNote — author-facing internal note (not shown to end users)
+  if (node._designNote) {
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/designNote', valueMarkdown: node._designNote });
+  }
+
   // questionnaire-displayCategory
   if (node._displayCategory) {
     ext.push({
