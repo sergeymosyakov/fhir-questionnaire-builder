@@ -346,6 +346,17 @@ Applied automatically in `importFHIR()` before the R4 parser runs. Detection: `m
 
 ---
 
+## Extension URL Aliasing
+
+Some capabilities exist as both a **standard R4 extension** and a separate **SDC extension**, each with a different URL. The builder reads **both** variants on import; the SDC URL takes precedence when both are present in the same item.
+
+| Capability | URLs read on import | Precedence |
+|---|---|---|
+| Hidden item | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden` (SDC, primary) and `http://hl7.org/fhir/StructureDefinition/questionnaire-hidden` (R4 standard, alias) | SDC URL wins if both present |
+| Entry format hint | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` (SDC, primary) and `http://hl7.org/fhir/StructureDefinition/entryFormat` (R4 element-definition ext, alias) | SDC URL wins if both present |
+
+---
+
 ## Not Supported / Partial Support
 
 Legend: ⚠️ = silent data loss (field present in import file, ignored or overwritten on export); ❌ = not handled at all; 🔧 = partial support.
@@ -375,15 +386,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `questionnaire-signatureRequired` | ❌ Not handled | Indicates that a digital signature is required for the item or group. |
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
 | `designNote` | ❌ Not handled | Author-facing design note text; not intended to be displayed to end users. Silently dropped. |
-
-### Extension URL aliasing — resolved on import
-
-Some capabilities exist as both a **standard R4 extension** and a separate **SDC extension**, each with a different URL. The builder now reads **both** variants on import; the SDC URL takes precedence when both are present in the same item.
-
-| Capability | URLs read on import | Precedence |
-|---|---|---|
-| Hidden item | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden` (SDC, primary) and `http://hl7.org/fhir/StructureDefinition/questionnaire-hidden` (R4 standard, alias) | SDC URL wins if both present |
-| Entry format hint | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` (SDC, primary) and `http://hl7.org/fhir/StructureDefinition/entryFormat` (R4 element-definition ext, alias) | SDC URL wins if both present |
 
 ### SDC extensions — not implemented (no server required)
 
