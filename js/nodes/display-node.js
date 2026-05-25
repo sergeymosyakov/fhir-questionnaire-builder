@@ -53,6 +53,7 @@ export class DisplayNode extends ItemNode {
 
   // ── Row content: category icon + label (no control section) ──────────────
   _buildRowContent(row, res, rc) {
+    this._initRowClass(row);
     // Category icon appears BEFORE the label (non-help categories)
     const cat = this._displayCategory;
     if (cat && cat !== 'help') {
