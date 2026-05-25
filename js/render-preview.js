@@ -300,6 +300,17 @@ function buildRepeatControls(node, iconEl, onAfterChange) {
 // The _renderVersion counter ensures stale renders self-abort.
 let _renderVersion = 0;
 let _previewElements = {}; // injected via initPreview() from app.js
+
+// Per-render context — populated by _asyncRender once per cycle.
+// Allows renderPreviewNode / updateGroupIcons to be moved out of the closure.
+const _rc = {
+  ctx:         null,  // { fp, qr, envVars } from _reCalc()
+  resultMap:   null,  // Map(id → evalResult)
+  cEnv:        {},    // ctx.envVars || {}
+  visible:     [],    // visible eval results
+  groupIconMap: null, // Map of group id → { icon, descendants, node }
+};
+
 async function _asyncRender(version) {
   // Phase 1: FHIRPath evaluation — CPU-heavy, no DOM mutations yet
   const ctx = _reCalc();
@@ -400,8 +411,10 @@ async function _asyncRender(version) {
   lform.innerHTML = '';
 
   const groupIconMap = new Map();
+  _rc.ctx = ctx; _rc.resultMap = resultMap; _rc.cEnv = _cEnv; _rc.visible = visible; _rc.groupIconMap = groupIconMap;
 
   function renderPreviewNode(res, container) {
+    const { ctx, resultMap, cEnv: _cEnv, visible, groupIconMap } = _rc;
     if (!res) return;
     if (!res.visible && !res.showDimmed) return;
 
@@ -939,6 +952,7 @@ async function _asyncRender(version) {
   }
 
   function updateGroupIcons() {
+    const { ctx, groupIconMap } = _rc;
     for (const [, { icon, descendants, node }] of groupIconMap.entries()) {
       const relevant = descendants.filter(r =>
         (isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)) ||
