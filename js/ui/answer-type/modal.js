@@ -75,7 +75,7 @@ function _apply() {
   node = newNode; // rebind to the new correctly-typed instance
 
   // checkbox / display cannot be repeatable
-  if ((node.itemType === 'checkbox' || node.itemType === 'display') && node.repeats) {
+  if (!node.supportsRepeat() && node.repeats) {
     node.repeats = false;
     delete node._minOccurs;
     delete node._maxOccurs;
