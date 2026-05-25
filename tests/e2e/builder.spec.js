@@ -327,7 +327,8 @@ test.describe('Navigation', () => {
 });
 
 test.describe('Load FHIR → both panels', () => {
-  test.skip('both panels render after sample load', async ({ page }) => {
+  test('both panels render after sample load', async ({ page }) => {
+    test.setTimeout(60_000);
     await page.goto('/');
     await waitForLoad(page);
 
