@@ -180,7 +180,7 @@ test.describe('metadata modal — fields populated on open', () => {
   test('status select shows the questionnaire status', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await expect(page.getByTestId('meta-status')).toHaveValue('active');
+    await expect(page.getByTestId('meta-status')).toHaveAttribute('data-value', 'active');
   });
 
   test('publisher field shows the questionnaire publisher', async ({ page }) => {
@@ -202,7 +202,8 @@ test.describe('metadata modal — apply', () => {
   test('changing status and applying updates the card badge', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await page.getByTestId('meta-status').selectOption('retired');
+    await page.getByTestId('meta-status').click();
+    await page.locator('.oc-opt[data-val="retired"]').click();
     await page.locator('#metadataModalApply').click();
     await expect(page.locator('#metadataModal')).not.toBeVisible();
     await expect(page.getByTestId('quest-meta-status')).toHaveText('retired');
@@ -211,7 +212,8 @@ test.describe('metadata modal — apply', () => {
   test('Cancel does not commit status change', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await page.getByTestId('meta-status').selectOption('retired');
+    await page.getByTestId('meta-status').click();
+    await page.locator('.oc-opt[data-val="retired"]').click();
     await page.locator('#metadataModalCancel').click();
     await expect(page.getByTestId('quest-meta-status')).toHaveText('active');
   });
@@ -846,7 +848,7 @@ test.describe('metadata modal — Identifiers section', () => {
   test('imported identifier row has correct system, value and use', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await expect(page.getByTestId('meta-identifier-use-0')).toHaveValue('official');
+    await expect(page.getByTestId('meta-identifier-use-0')).toHaveAttribute('data-value', 'official');
     await expect(page.getByTestId('meta-identifier-system-0')).toHaveValue('http://example.org/questionnaire-ids');
     await expect(page.getByTestId('meta-identifier-value-0')).toHaveValue('Q-2024-001');
     await page.locator('#metadataModalCancel').click();
