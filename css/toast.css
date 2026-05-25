@@ -1,49 +1,66 @@
-/* ── Toast notifications ──────────────────────────────────────────────────── */
+/* ── Notification dialog (error / warn / info) ───────────────────────────── */
 
-.toast-container {
+.notif-backdrop {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 9000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: none;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  z-index: 8998;
 }
 
-.toast {
-  padding: 10px 14px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.4;
-  max-width: 340px;
-  pointer-events: auto;
+.notif-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
+  z-index: 8999;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.10);
+  padding: 28px 32px 22px;
+  max-width: 380px;
+  width: calc(100vw - 40px);
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  text-align: center;
+}
+
+.notif-dialog--visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.notif-dialog--error { border-top: 4px solid #b91c1c; }
+.notif-dialog--warn  { border-top: 4px solid #f59e0b; }
+.notif-dialog--info  { border-top: 4px solid #3b82f6; }
+
+.notif-dialog__icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.notif-dialog__msg {
+  font-size: 14px;
+  line-height: 1.55;
+  margin-bottom: 20px;
   word-break: break-word;
 }
 
-.toast--visible {
-  opacity: 1;
-  transform: translateY(0);
+.notif-dialog--error .notif-dialog__msg { color: #7f1d1d; }
+.notif-dialog--warn  .notif-dialog__msg { color: #78350f; }
+.notif-dialog--info  .notif-dialog__msg { color: #1e3a8a; }
+
+.notif-dialog__btn {
+  padding: 7px 32px;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 80px;
 }
 
-.toast--error {
-  background: #fde8e8;
-  color: #b91c1c;
-  border-left: 3px solid #b91c1c;
-}
+.notif-dialog--error .notif-dialog__btn { background: #b91c1c; color: #fff; }
+.notif-dialog--warn  .notif-dialog__btn { background: #d97706; color: #fff; }
+.notif-dialog--info  .notif-dialog__btn { background: #2563eb; color: #fff; }
 
-.toast--warn {
-  background: #fff3cd;
-  color: #92400e;
-  border-left: 3px solid #f59e0b;
-}
-
-.toast--info {
-  background: #e8f0fe;
-  color: #1e40af;
-  border-left: 3px solid #3b82f6;
-}
+.notif-dialog__btn:hover { filter: brightness(1.1); }

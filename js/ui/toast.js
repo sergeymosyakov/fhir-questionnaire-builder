@@ -1,33 +1,59 @@
-let _container = null;
+const ICONS = { error: '⛔', warn: '⚠️', info: 'ℹ️' };
+const LABELS = { error: 'OK', warn: 'OK', info: 'OK' };
 
-function _ensureContainer() {
-  if (!_container) {
-    _container = document.createElement('div');
-    _container.className = 'toast-container';
-    document.body.appendChild(_container);
-  }
-  return _container;
+function _close(backdrop, dialog) {
+  dialog.classList.remove('notif-dialog--visible');
+  dialog.addEventListener('transitionend', () => {
+    dialog.remove();
+    backdrop.remove();
+  }, { once: true });
 }
 
 /**
- * Show a toast notification.
+ * Show a centered notification dialog.
  * @param {string} message
  * @param {'error'|'warn'|'info'} type
- * @param {number} duration  ms before auto-dismiss
  */
-export function showToast(message, type = 'error', duration = 4000) {
-  const c = _ensureContainer();
-  const el = document.createElement('div');
-  el.className = `toast toast--${type}`;
-  el.textContent = message;
-  c.appendChild(el);
-  // Force reflow so CSS transition plays from opacity:0
-  el.getBoundingClientRect();
-  el.classList.add('toast--visible');
-  setTimeout(() => {
-    el.classList.remove('toast--visible');
-    el.addEventListener('transitionend', () => el.remove(), { once: true });
-  }, duration);
+export function showToast(message, type = 'error') {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'notif-backdrop';
+
+  const dialog = document.createElement('div');
+  dialog.className = `notif-dialog notif-dialog--${type}`;
+  dialog.setAttribute('role', 'alertdialog');
+  dialog.setAttribute('aria-modal', 'true');
+
+  const icon = document.createElement('div');
+  icon.className = 'notif-dialog__icon';
+  icon.textContent = ICONS[type] || '⛔';
+
+  const msg = document.createElement('div');
+  msg.className = 'notif-dialog__msg';
+  msg.textContent = message;
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'notif-dialog__btn';
+  btn.textContent = LABELS[type];
+  btn.onclick = () => _close(backdrop, dialog);
+
+  backdrop.addEventListener('mousedown', () => _close(backdrop, dialog));
+
+  const onKey = e => {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+      document.removeEventListener('keydown', onKey, true);
+      _close(backdrop, dialog);
+    }
+  };
+  document.addEventListener('keydown', onKey, true);
+
+  dialog.append(icon, msg, btn);
+  document.body.append(backdrop, dialog);
+
+  // Force reflow so CSS transition plays
+  dialog.getBoundingClientRect();
+  dialog.classList.add('notif-dialog--visible');
+  btn.focus();
 }
 
 export const showError = msg => showToast(msg, 'error');
