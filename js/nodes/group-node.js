@@ -36,6 +36,33 @@ export class GroupNode extends BaseNode {
     return { hasCondition: true, displayOk };
   }
 
+  // ── Re-evaluate pass/fail icon for this group after a value change ────────
+  // Called by render-node.js updateGroupIcons() which iterates groupIconMap.
+  refreshIcon(rc) {
+    const entry = rc.groupIconMap.get(this.id);
+    if (!entry) return;
+    const { icon, descendants } = entry;
+    const relevant = descendants.filter(r =>
+      (rc.isMandatory(r.node) && rc.CHECKABLE_TYPES.has(r.node.itemType)) ||
+      (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox') ||
+      r.node.constraint?.length > 0 ||
+      (r.node._minValue !== undefined || r.node._maxValue !== undefined)
+    );
+    if (relevant.length === 0) {
+      icon.className   = 'icon-ok';
+      icon.textContent = '\u2713';
+      return;
+    }
+    const { ctx } = rc;
+    const itemOk = k => k.ok && rc.calcFormOk(k.node) &&
+      (!k.node.constraint?.length || rc.evalConstraints(k.node, ctx.fp, ctx.qr, ctx.envVars || {}));
+    const ok = this.logicWithParent === 'OR'
+      ? relevant.some(itemOk)
+      : relevant.every(itemOk);
+    icon.className   = ok ? 'icon-ok' : 'icon-fail';
+    icon.textContent = ok ? '\u2713' : '\u2717';
+  }
+
   // ── Label: group-label class, XHTML support ───────────────────────────────
   _buildLabel() {
     const isEmptyGroup = this.children.length === 0;
