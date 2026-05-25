@@ -88,6 +88,12 @@
       "prefix": "1.",
       "text": "Patient Eligibility Criteria",
       "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible",
+          "valueCode": "default-closed"
+        }
+      ],
       "item": [
         {
           "linkId": "q-bmi-criterion",
@@ -148,6 +154,12 @@
       "prefix": "2.",
       "text": "Diet & Weight-Loss History",
       "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible",
+          "valueCode": "default-open"
+        }
+      ],
       "item": [
         {
           "linkId": "q-diet-months",
@@ -215,6 +227,12 @@
           "text": "Preferred surgical facility (or enter your own)",
           "type": "open-choice",
           "required": false,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel",
+              "valueString": "Other facility (type name)"
+            }
+          ],
           "answerOption": [
             {
               "valueString": "University Medical Center"
