@@ -21,8 +21,7 @@ function _itemHasStu3Fields(item) {
   if (item.options) return true;
   for (const ew of item.enableWhen || []) {
     if (ew.hasAnswer !== undefined) return true;
-    // STU3 enableWhen had no operator field
-    if (ew.answer !== undefined || Object.keys(ew).some(k => k.startsWith('answer') && k !== 'answerBoolean' && k !== 'answerCoding' && k !== 'answerDecimal' && k !== 'answerInteger' && k !== 'answerDate' && k !== 'answerDateTime' && k !== 'answerTime' && k !== 'answerString' && k !== 'answerUri' && k !== 'answerAttachment' && k !== 'answerQuantity' && k !== 'answerReference')) return false;
+    // STU3 enableWhen had no operator field — any answer[x] without operator is STU3
     if (!('operator' in ew) && _hasStu3AnswerField(ew)) return true;
   }
   if (_hasStu3InitialField(item)) return true;
@@ -33,7 +32,7 @@ function _itemHasStu3Fields(item) {
 }
 
 function _hasStu3AnswerField(ew) {
-  return Object.keys(ew).some(k => k.startsWith('answer') && k !== 'answerBoolean' && !('operator' in ew));
+  return Object.keys(ew).some(k => k.startsWith('answer'));
 }
 
 const STU3_INITIAL_KEYS = [
@@ -141,7 +140,7 @@ function _normaliseItem(item) {
 /**
  * Normalise a FHIR STU3 Questionnaire to R4-compatible shape.
  * Returns the original object unchanged if it is already R4.
- * Always operates on a deep clone to avoid mutating the caller's input.
+ * Always operates on a deep clone to avoid mutating the caller's input.\n * Returns the original object unchanged if it is already R4 (no clone needed).
  *
  * @param {object} fhirJson - raw Questionnaire JSON
  * @returns {object} R4-compatible Questionnaire JSON

@@ -4,7 +4,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock Vue reactivity CDN (state.js imports it at module level)
-vi.mock('https://unpkg.com/@vue/reactivity@3/dist/reactivity.esm-browser.js', () => ({
+vi.mock('https://unpkg.com/@vue/reactivity@3.5/dist/reactivity.esm-browser.js', () => ({
   ref: v => ({ value: v }),
   reactive: v => v,
   effect: fn => fn(),

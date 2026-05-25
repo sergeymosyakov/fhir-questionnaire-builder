@@ -90,8 +90,8 @@ function nodeToFHIRItem(node) {
     const t = itemTypeToFHIRType(node.itemType);
     const buildInitEntry = v => {
       if (t === 'boolean')  return { valueBoolean:  typeof v === 'boolean' ? v : v === 'true' };
-      if (t === 'decimal')  return { valueDecimal:  parseFloat(v) };
-      if (t === 'integer')  return { valueInteger:  parseInt(v, 10) };
+      if (t === 'decimal')  { const n = parseFloat(v); return isFinite(n) ? { valueDecimal: n } : null; }
+      if (t === 'integer')  { const n = parseInt(v, 10); return isFinite(n) ? { valueInteger: n } : null; }
       if (t === 'date')     return { valueDate:     String(v) };
       if (t === 'dateTime') return { valueDateTime: String(v) };
       if (t === 'time')     return { valueTime:     String(v) };
@@ -131,7 +131,7 @@ function nodeToFHIRItem(node) {
   // OR-group: auto-generate constraint so round-trip restores logicWithParent
   if (node.type === 'group' && node.logicWithParent === 'OR' && node.children.length > 0) {
     const fp = node.children
-      .map(c => `%resource.item.where(linkId='${c.id}').answer.exists()`)
+      .map(c => `%resource.item.where(linkId='${c.id.replace(/'/g, "\\'")  }').answer.exists()`)
       .join(' or ');
     ext.push({
       url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint',
@@ -182,10 +182,10 @@ function nodeToFHIRItem(node) {
   }
 
   // maxLength (text/url/open-choice types)
-  if (node._maxLength) fhirItem.maxLength = node._maxLength;
+  if (node._maxLength !== undefined && node._maxLength !== null) fhirItem.maxLength = node._maxLength;
 
   // minLength (SDC extension)
-  if (node._minLength) {
+  if (node._minLength !== undefined && node._minLength !== null) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/minLength', valueInteger: node._minLength });
   }
 
@@ -293,12 +293,14 @@ export function buildFHIRObject() {
     q.effectivePeriod = ep;
   }
   const vars = questVariables.filter(v => v.name && v.expression);
-  if (vars.length) {
-    q.extension = vars.map(v => ({
+  const questExt = [
+    ...vars.map(v => ({
       url: SDC_VAR_URL,
       valueExpression: { name: v.name, language: 'text/fhirpath', expression: v.expression }
-    }));
-  }
+    })),
+    ...(questMeta._rawQuestExtensions || []).map(e => JSON.parse(JSON.stringify(e))),
+  ];
+  if (questExt.length) q.extension = questExt;
   if (questContained.length) {
     q.contained = questContained.map(r => JSON.parse(JSON.stringify(r)));
   }

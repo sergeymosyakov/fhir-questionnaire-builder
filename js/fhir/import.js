@@ -351,7 +351,10 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       if (init.valueString   !== undefined) return init.valueString;
       if (init.valueUri      !== undefined) return init.valueUri;
       if (init.valueCoding)                 return init.valueCoding.code || init.valueCoding.display || '';
-      if (init.valueQuantity)               return init.valueQuantity.value !== undefined ? String(init.valueQuantity.value) : '';
+      if (init.valueQuantity)               return {
+        value: init.valueQuantity.value !== undefined ? String(init.valueQuantity.value) : '',
+        unit:  init.valueQuantity.unit || '',
+      };
       return undefined;
     };
     if (node.repeats && fhirItem.initial.length > 1) {
@@ -509,6 +512,9 @@ export function importFHIR(fhirJson, renderFn) {
       });
     }
   }
+  // Preserve non-variable questionnaire-level extensions for round-trip
+  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL);
+  questMeta._rawQuestExtensions = nonVarExts.length ? JSON.parse(JSON.stringify(nonVarExts)) : [];
 
   _bulkUpdate.value = true;
   try {

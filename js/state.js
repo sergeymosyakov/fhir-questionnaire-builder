@@ -1,6 +1,6 @@
 // ── Reactive state, factories, and pure utilities ────────────────────────────
 // Re-export effect so other modules don't need to know the CDN URL.
-import { ref, reactive, effect as _effect } from 'https://unpkg.com/@vue/reactivity@3/dist/reactivity.esm-browser.js';
+import { ref, reactive, effect as _effect } from 'https://unpkg.com/@vue/reactivity@3.5/dist/reactivity.esm-browser.js';
 export { _effect as effect };
 export { ref, reactive };
 
@@ -85,6 +85,7 @@ export const questMeta = reactive({
   _rawMetaProfile:  [],       // meta.profile[] — canonical URLs; editable list
   _rawMetaTag:      [],       // meta.tag[] — Coding[]; editable system/code/display rows
   _rawMetaSecurity: [],       // meta.security[] — Coding[]; editable system/code/display rows
+  _rawQuestExtensions: [],    // Questionnaire.extension[] — non-variable extensions, preserved for round-trip
 });
 
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.
@@ -129,7 +130,7 @@ export const makeItem = (title, template) => {
       itemType:       template.itemType,
       options:        template.options,
       // FHIR questionnaire-constraint: [{key, expression, human, severity}]
-      constraint:     template.constraint ? [...template.constraint] : []
+      constraint:     template.constraint ? template.constraint.map(c => ({ ...c })) : []
     };
   }
   return {
@@ -158,7 +159,7 @@ function _isValidUrl(s) {
 // Returns true if all error-severity constraints pass (or there are none).
 export function evalConstraints(node, fp, qr, varEnv) {
   if (!node.constraint || !node.constraint.length) return true;
-  if (!fp || !qr) return true;
+  if (!fp || !qr) return true; // cannot evaluate — treated as pass (no evaluator available)
   const env = { resource: qr, ...varEnv };
   for (const c of node.constraint) {
     if (!c.expression || c.severity !== 'error') continue;
@@ -199,10 +200,9 @@ export const calcFormOk = node => {
     const val = getValue(node.id);
     if (val !== undefined && val !== '' && val !== null) {
       const num = Number(val);
-      if (!isNaN(num)) {
-        if (node._minValue !== undefined && num < Number(node._minValue)) return false;
-        if (node._maxValue !== undefined && num > Number(node._maxValue)) return false;
-      }
+      if (!isFinite(num)) return false; // non-numeric input is always invalid
+      if (node._minValue !== undefined && num < Number(node._minValue)) return false;
+      if (node._maxValue !== undefined && num > Number(node._maxValue)) return false;
     }
     if (isMandatory(node)) return val !== undefined && val !== '' && val !== null;
     return true;

@@ -90,15 +90,15 @@ document.getElementById('renumberBtn').onclick = async () => {
   btn.disabled = true;
   progress.show('Renumbering…');
   const onProgress = e => progress.update(e.detail.done, e.detail.total);
-  const onDone = () => {
+  const cleanup = () => {
     progress.hide();
     btn.disabled = false;
     document.removeEventListener('renumber-progress', onProgress);
-    document.removeEventListener('renumber-done', onDone);
+    document.removeEventListener('renumber-done', cleanup);
   };
   document.addEventListener('renumber-progress', onProgress);
-  document.addEventListener('renumber-done', onDone);
-  await renumberAll();
+  document.addEventListener('renumber-done', cleanup);
+  try { await renumberAll(); } catch { cleanup(); }
 };
 // ── Show When modal init ─────────────────────────────────────────────────
 showWhenModal.init({
@@ -469,6 +469,7 @@ function _doReset() {
   questMeta._metaVersionId = ''; questMeta._metaSource = '';
   questMeta._metaLastUpdated = ''; questMeta._rawMetaProfile = [];
   questMeta._rawMetaTag = []; questMeta._rawMetaSecurity = [];
+  questMeta._rawQuestExtensions = [];
   // Clear questionnaire-level variables
   questVariables.splice(0);
   questContained.splice(0);
@@ -713,7 +714,8 @@ document.addEventListener('click', () => {
   const MIN = 200, MAX = () => window.innerWidth * 0.7;
 
   // Restore saved width
-  const saved = localStorage.getItem(STORAGE_KEY);
+  let saved;
+  try { saved = localStorage.getItem(STORAGE_KEY); } catch { /* private mode / quota */ }
   if (saved) leftPanel.style.width = saved + 'px';
 
   let startX, startW;
@@ -736,7 +738,7 @@ document.addEventListener('click', () => {
     const onUp = () => {
       resizer.classList.remove('resizing');
       overlay.remove();
-      localStorage.setItem(STORAGE_KEY, parseInt(leftPanel.style.width));
+      try { localStorage.setItem(STORAGE_KEY, parseInt(leftPanel.style.width)); } catch { /* ignore */ }
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     };

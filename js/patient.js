@@ -5,7 +5,7 @@
 //
 // Available in visibility / condition rules as bare variables:
 //   age, gender, bmi, pregnant, smoker, proc, comorb
-import { ref } from 'https://unpkg.com/@vue/reactivity@3/dist/reactivity.esm-browser.js';
+import { ref } from 'https://unpkg.com/@vue/reactivity@3.5/dist/reactivity.esm-browser.js';
 
 export const age      = ref(30);
 export const gender   = ref('male');   // male | female | other | unknown

@@ -16,6 +16,7 @@ const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draf
   _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
 vi.mock('../js/state.js', () => ({
+  ref:            v => ({ value: v }),
   tree:           _tree,
   values:         _values,
   rawFhir:        _rawFhir,
@@ -732,18 +733,18 @@ describe('importFHIR', () => {
       expect(_tree[0]._initialValue).toBe('2024-06-01');
     });
 
-    it('reads quantity initial value as string of the numeric value', () => {
+    it('reads quantity initial value preserving unit', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'quantity', text: 'Q',
         initial: [{ valueQuantity: { value: 72.5, unit: 'kg' } }],
       }]));
-      expect(_tree[0]._initialValue).toBe('72.5');
+      expect(_tree[0]._initialValue).toEqual({ value: '72.5', unit: 'kg' });
     });
 
-    it('reads quantity with no value as empty string', () => {
+    it('reads quantity with no value as object with empty strings', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'quantity', text: 'Q',
         initial: [{ valueQuantity: { unit: 'kg' } }],
       }]));
-      expect(_tree[0]._initialValue).toBe('');
+      expect(_tree[0]._initialValue).toEqual({ value: '', unit: 'kg' });
     });
 
     it('populates values correctly: base id=first, $$1..N=extras, $$n=extra count', () => {

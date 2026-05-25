@@ -35,8 +35,10 @@ function _flattenQR(items, out = {}) {
         }
         out[item.linkId + '$$n'] = item.answer.length - 1;
       }
-      // Nested items inside answer (non-group questions with sub-items)
-      if (item.answer[0].item) _flattenQR(item.answer[0].item, out);
+      // Nested items inside answers (non-group questions with sub-items)
+      for (const ans of item.answer) {
+        if (ans.item) _flattenQR(ans.item, out);
+      }
     }
     // Group children
     if (item.item) _flattenQR(item.item, out);
