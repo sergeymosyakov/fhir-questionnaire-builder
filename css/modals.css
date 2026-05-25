@@ -93,6 +93,7 @@
 #expressionModal  { z-index: 10200; }
 #explainModal     { z-index: 10300; }
 #fhirJsonModal    { z-index: 10000; }
+#libraryModal     { z-index: 10000; }
 
 /* === Per-modal sizes ========================================================= */
 #variablesModal .modal-box  { width: min(600px, 94vw); max-height: 80vh; }
