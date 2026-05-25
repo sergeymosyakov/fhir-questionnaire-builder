@@ -390,7 +390,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `questionnaire-referenceProfile` | ❌ Not handled | Profile URL that restricts valid resource types for `reference` items (complementary to `questionnaire-referenceResource` which is supported). |
 | `questionnaire-signatureRequired` | ❌ Not handled | Indicates that a digital signature is required for the item or group. |
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
-
 | `questionnaire-optionExclusive` | ❌ Not handled | On `answerOption.extension`; marks an option as exclusive — if selected, all other options must be deselected (e.g., "None of the above"). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive`. |
 | `questionnaire-unitOption` | ❌ Not handled | Specifies a single allowed unit for `quantity` items (R4 core extension; multiple instances enumerate all allowed units). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption`. Distinct from `questionnaire-unitValueSet` (which references a ValueSet). |
 | `rendering-markdown` | ❌ Not handled | Markdown-formatted equivalent of `item.text` for clients that support markdown rendering. URL: `http://hl7.org/fhir/StructureDefinition/rendering-markdown`. Silently dropped on import (we support `rendering-xhtml` and `rendering-style` but not markdown). |
