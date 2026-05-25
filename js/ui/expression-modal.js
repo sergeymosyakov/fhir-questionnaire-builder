@@ -1,3 +1,4 @@
+import { MODAL_REGISTRY } from './modal-registry.js';
 // ── Expression / Init-Expression edit modal ───────────────────────────────────
 // Two modes:
 //   open(cfg)                             — single-field mode (groups: calculatedExpression only)
@@ -174,3 +175,5 @@ function _makeSection(title, fhirKey, hint, exprValue, testid, placeholder, onIn
   _makeExprField('FHIRPath expression:', exprValue, testid, placeholder, onInput, _el.body);
 }
 
+
+MODAL_REGISTRY.set('expression', { open, openDual });

@@ -1,3 +1,4 @@
+import { MODAL_REGISTRY } from './modal-registry.js';
 // ── Repeatable (item.repeats + cardinality) edit modal ───────────────────────
 // Centered modal for toggling item.repeats and setting minOccurs / maxOccurs.
 // Uses draft pattern — changes committed only on Apply.
@@ -184,3 +185,5 @@ function _renderBody(container) {
     card.style.display = cb.checked ? '' : 'none';
   };
 }
+
+MODAL_REGISTRY.set('repeatable', { open });

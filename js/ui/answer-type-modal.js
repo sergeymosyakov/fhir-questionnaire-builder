@@ -1,3 +1,4 @@
+import { MODAL_REGISTRY } from './modal-registry.js';
 // ── Answer Type edit modal ────────────────────────────────────────────────────
 // Centered modal for editing item type, options, and answerValueSet.
 // For choice types (select / radio / open-choice) the user picks the answer
@@ -679,3 +680,5 @@ function _renderBody(container) {
   attachSection.append(mimeTypesLbl, mimeTypesInp);
   container.appendChild(attachSection);
 }
+
+MODAL_REGISTRY.set('answerType', { open });

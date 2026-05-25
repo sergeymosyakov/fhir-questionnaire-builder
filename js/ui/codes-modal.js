@@ -1,3 +1,4 @@
+import { MODAL_REGISTRY } from './modal-registry.js';
 // ── Item Properties modal ─────────────────────────────────────────────────────
 // Centered modal for editing item-level metadata:
 //   Core      (always visible): item.definition URL
@@ -491,3 +492,5 @@ export function renderCodesEditor(draft, container, prefix = 'code', label = 'co
   addBtn.onclick = () => { draft.push({ system: '', code: '', display: '' }); renderCodesEditor(draft, container, prefix, label); };
   container.appendChild(addBtn);
 }
+
+MODAL_REGISTRY.set('codes', { open });

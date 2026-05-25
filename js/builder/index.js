@@ -1,11 +1,13 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
 import { tree, rawFhir, values } from '../state.js';
-import { createGroupNode } from '../nodes/index.js';
+import { createGroupNode, createItemNodeFromTemplate } from '../nodes/index.js';
 import { _formTick, _bulkUpdate } from '../render-bus.js';
-import { init as sharedInit, formatSeg } from './_shared.js';
-import { init as dndInit, makeRootDropZone } from './dnd.js';
-import { renderItem } from './node-item.js';
-import { renderGroup } from './node-group.js';
+import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
+import { init as dndInit, makeRootDropZone, makeDragHandle, attachDropZone } from './dnd.js';
+import { addPanel, buildVisPanel, buildStylePanel } from './panels.js';
+import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
+import { findAndRemove } from '../utils.js';
+import { createCustomSelect } from '../ui/custom-select.js';
 
 // UI-only collapse state per node.id — not part of FHIR data, owned here
 const collapsed = new Map();
@@ -13,21 +15,32 @@ const collapsed = new Map();
 // Inject reactive state into _shared (triggerCalcRecalc + renderTree need them)
 sharedInit({ tree, formTick: _formTick, rawFhir, values, renderTree });
 
-/**
- * @typedef {Object} BuilderCtx
- * @property {Function} renderTree   - Re-renders the entire tree into #treeContainer
- * @property {Function} renderNode   - Renders a single node (dispatches group/item)
- * @property {Array}    tree         - The reactive root tree array (from state.js)
- * @property {import('@vue/reactivity').Ref<number>} formTick - Reactive tick to trigger preview re-eval
- * @property {Map<string,boolean>}   collapsed    - UI-only collapse state keyed by node.id
- */
+function _makeCtx() {
+  return {
+    renderTree,
+    renderNode,
+    tree,
+    formTick: _formTick,
+    collapsed,
+    makeDragHandle,
+    attachDropZone,
+    buildVisPanel,
+    addPanel,
+    buildStylePanel,
+    navigateToPreview,
+    refreshExprIcons,
+    findAndRemove,
+    confirmDelete,
+    formatSeg,
+    triggerCalcRecalc,
+    createGroupNode,
+    createItemNodeFromTemplate,
+    createCustomSelect,
+  };
+}
 
-// renderNode is passed as ctx so node-item / node-group don't import each other
 function renderNode(node) {
-  const ctx = { renderTree, renderNode, tree, formTick: _formTick, collapsed };
-  return node.type === 'group'
-    ? renderGroup(node, ctx)
-    : renderItem(node, ctx);
+  return node.buildBuilder(_makeCtx());
 }
 
 export function renderTree() {

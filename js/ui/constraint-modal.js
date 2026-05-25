@@ -1,3 +1,4 @@
+import { MODAL_REGISTRY } from './modal-registry.js';
 // ── Constraint edit modal ─────────────────────────────────────────────────────
 // Centered modal for editing a node's questionnaire-constraint[] array.
 // Uses a draft pattern — changes are only committed on Apply.
@@ -186,3 +187,5 @@ function _lbl(text, input, tip = null) {
   row.appendChild(input);
   return row;
 }
+
+MODAL_REGISTRY.set('constraint', { open });

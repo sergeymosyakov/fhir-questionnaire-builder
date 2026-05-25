@@ -1,3 +1,4 @@
+import { MODAL_REGISTRY } from './modal-registry.js';
 // ── Show When (enableWhen) edit modal ─────────────────────────────────────────
 // Centered modal for editing a node's enableWhen conditions and
 // enableWhenExpression. Uses a draft pattern — changes are only committed on
@@ -90,3 +91,5 @@ function _close() {
 
 // Public alias so external callers (e.g. Escape handler) can close the modal
 export { _cancel as close };
+
+MODAL_REGISTRY.set('showWhen', { open });

@@ -1,3 +1,4 @@
+import { MODAL_REGISTRY } from './modal-registry.js';
 // ── Appearance (rendering-style) edit modal ───────────────────────────────────
 // Centered modal for editing a node's _renderStyle CSS string.
 // Uses a draft pattern — changes are only committed on Apply.
@@ -196,3 +197,5 @@ function _renderBody(container) {
   xhtmlTa.oninput = () => { _pending.draftXhtml = xhtmlTa.value; };
   container.appendChild(xhtmlTa);
 }
+
+MODAL_REGISTRY.set('appearance', { open });

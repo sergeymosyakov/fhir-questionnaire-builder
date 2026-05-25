@@ -1,3 +1,4 @@
+import { MODAL_REGISTRY } from './modal-registry.js';
 // ── States modal (Required / Read-only / Hidden) ─────────────────────────────
 // Centered modal for editing the three state flags on a builder node.
 //
@@ -191,3 +192,5 @@ function _renderBody(container, isItem) {
     container.appendChild(collRow);
   }
 }
+
+MODAL_REGISTRY.set('states', { open });

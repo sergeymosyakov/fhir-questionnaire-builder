@@ -1,3 +1,4 @@
+import { MODAL_REGISTRY } from './modal-registry.js';
 // ── Design Note modal ─────────────────────────────────────────────────────────
 // Centered modal for editing node._designNote (FHIR designNote extension).
 // Text is author-facing only — never shown to end users.
@@ -59,3 +60,5 @@ function _renderBody(container) {
   ta.oninput = () => { _pending.draftNote = ta.value; };
   container.appendChild(ta);
 }
+
+MODAL_REGISTRY.set('note', { open });

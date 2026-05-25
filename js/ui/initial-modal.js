@@ -1,3 +1,4 @@
+import { MODAL_REGISTRY } from './modal-registry.js';
 // ── Default Value (initial[]) edit modal ─────────────────────────────────────
 // Centered modal for editing a node's _initialValue.
 // Uses a draft pattern — changes are only committed on Apply.
@@ -162,3 +163,5 @@ function _renderBody(node, container) {
 
   wrap.appendChild(ctrl);
 }
+
+MODAL_REGISTRY.set('initial', { open });
