@@ -5,6 +5,7 @@
 //   build(pending)        → HTMLElement, builds section DOM (called each open)
 //   onTypeChange(type)    → optional, reacts to type dropdown changes
 //   commit(pending, node) → writes draft values back to the node on Apply
+//   initDraft(node)       → returns object of draft fields to merge into _pending
 //
 // Subclasses self-register via SECTION_REGISTRY.push() at module load time.
 
@@ -15,4 +16,5 @@ export class AnswerTypeSection {
   build(pending)        { return document.createElement('div'); }  // eslint-disable-line no-unused-vars
   onTypeChange(type)    {}                                         // eslint-disable-line no-unused-vars
   commit(pending, node) {}                                         // eslint-disable-line no-unused-vars
+  initDraft(node)       { return {}; }                             // eslint-disable-line no-unused-vars
 }

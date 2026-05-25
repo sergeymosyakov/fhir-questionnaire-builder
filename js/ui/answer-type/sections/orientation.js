@@ -41,4 +41,9 @@ class OrientationSection extends AnswerTypeSection {
   }
 }
 
+  initDraft(node) {
+    return { draftOrientation: node._choiceOrientation || '' };
+  }
+}
+
 SECTION_REGISTRY.push(new OrientationSection());

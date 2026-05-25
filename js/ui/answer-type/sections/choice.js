@@ -2,7 +2,7 @@ import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
 import { questContained } from '../../../state.js';
 import { resolveContainedValueSet } from '../../../fhir/import.js';
 import { createCustomSelect } from '../../custom-select.js';
-import { CHOICE_TYPES, _parseOptsWithOrdinals } from '../data.js';
+import { CHOICE_TYPES, _parseOptsWithOrdinals, _optsWithOrdinals } from '../data.js';
 
 class ChoiceSection extends AnswerTypeSection {
   isVisible(type) { return CHOICE_TYPES.has(type); }
@@ -212,6 +212,18 @@ class ChoiceSection extends AnswerTypeSection {
     } else {
       delete node._openLabel;
     }
+  }
+}
+
+  initDraft(node) {
+    return {
+      draftOptions:   _optsWithOrdinals(node),
+      draftAVS:       node._answerValueSet || '',
+      draftPrefixes:  node._optionPrefixes
+        ? Object.entries(node._optionPrefixes).map(([code, pfx]) => `${code}=${pfx}`).join(',')
+        : '',
+      draftOpenLabel: node._openLabel || '',
+    };
   }
 }
 

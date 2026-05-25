@@ -37,4 +37,9 @@ class ReferenceSection extends AnswerTypeSection {
   }
 }
 
+  initDraft(node) {
+    return { draftRefRes: node.referenceResource || '' };
+  }
+}
+
 SECTION_REGISTRY.push(new ReferenceSection());

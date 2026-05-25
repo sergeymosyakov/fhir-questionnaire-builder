@@ -100,4 +100,13 @@ class NumericSection extends AnswerTypeSection {
   }
 }
 
+  initDraft(node) {
+    return {
+      draftMinValue:   node._minValue   !== undefined ? String(node._minValue)   : '',
+      draftMaxValue:   node._maxValue   !== undefined ? String(node._maxValue)   : '',
+      draftSliderStep: node._sliderStep !== undefined ? String(node._sliderStep) : '',
+    };
+  }
+}
+
 SECTION_REGISTRY.push(new NumericSection());

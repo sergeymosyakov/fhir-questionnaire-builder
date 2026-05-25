@@ -42,4 +42,9 @@ class DisplayCatSection extends AnswerTypeSection {
   }
 }
 
+  initDraft(node) {
+    return { draftDisplayCategory: node._displayCategory || '' };
+  }
+}
+
 SECTION_REGISTRY.push(new DisplayCatSection());

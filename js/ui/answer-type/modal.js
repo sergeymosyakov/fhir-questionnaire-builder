@@ -17,7 +17,7 @@ import { triggerCalcRecalc, renderTree } from '../../builder/_shared.js';
 import { createItemNode } from '../../nodes/index.js';
 import { createCustomSelect } from '../custom-select.js';
 import { initModal, setModalTitle, openModal, closeModal } from '../modal-base.js';
-import { ITEM_TYPES, _optsWithOrdinals } from './data.js';
+import { ITEM_TYPES } from './data.js';
 import { SECTION_REGISTRY } from './sections.js';
 
 let _el      = null;
@@ -40,26 +40,10 @@ export function init(elements) {
 }
 
 export function open(node, typeLink, setActive) {
-  _pending = {
-    node, typeLink, setActive,
-    draftType:        node.itemType,
-    draftOptions:     _optsWithOrdinals(node),
-    draftAVS:         node._answerValueSet || '',
-    draftRefRes:      node.referenceResource || '',
-    draftUnit:        node.quantityUnit || '',
-    draftMinValue:    node._minValue    !== undefined ? String(node._minValue)    : '',
-    draftMaxValue:    node._maxValue    !== undefined ? String(node._maxValue)    : '',
-    draftSliderStep:  node._sliderStep  !== undefined ? String(node._sliderStep)  : '',
-    draftEntryFormat:     node._entryFormat || '',
-    draftOrientation:     node._choiceOrientation || '',
-    draftDisplayCategory: node._displayCategory || '',
-    draftMaxFileSizeMB:   node._maxFileSizeMB !== undefined ? String(node._maxFileSizeMB) : '',
-    draftMimeTypes:       node._mimeTypes ? node._mimeTypes.join(', ') : '',
-    draftPrefixes:        node._optionPrefixes
-      ? Object.entries(node._optionPrefixes).map(([code, pfx]) => `${code}=${pfx}`).join(',')
-      : '',
-    draftOpenLabel:       node._openLabel || '',
-  };
+  _pending = Object.assign(
+    { node, typeLink, setActive, draftType: node.itemType },
+    ...SECTION_REGISTRY.map(s => s.initDraft(node)),
+  );
 
   setModalTitle(_el.title, 'Answer Type', node.title || node.id || 'Item');
 

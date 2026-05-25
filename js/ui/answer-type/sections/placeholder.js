@@ -37,4 +37,9 @@ class PlaceholderSection extends AnswerTypeSection {
   }
 }
 
+  initDraft(node) {
+    return { draftEntryFormat: node._entryFormat || '' };
+  }
+}
+
 SECTION_REGISTRY.push(new PlaceholderSection());

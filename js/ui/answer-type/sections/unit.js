@@ -37,4 +37,9 @@ class UnitSection extends AnswerTypeSection {
   }
 }
 
+  initDraft(node) {
+    return { draftUnit: node.quantityUnit || '' };
+  }
+}
+
 SECTION_REGISTRY.push(new UnitSection());

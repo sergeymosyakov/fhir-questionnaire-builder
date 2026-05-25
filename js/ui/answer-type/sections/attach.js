@@ -62,4 +62,12 @@ class AttachSection extends AnswerTypeSection {
   }
 }
 
+  initDraft(node) {
+    return {
+      draftMaxFileSizeMB: node._maxFileSizeMB !== undefined ? String(node._maxFileSizeMB) : '',
+      draftMimeTypes:     node._mimeTypes ? node._mimeTypes.join(', ') : '',
+    };
+  }
+}
+
 SECTION_REGISTRY.push(new AttachSection());
