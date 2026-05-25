@@ -1,11 +1,35 @@
 // ── Right panel: reactive preview ─────────────────────────────────────────────
 import {
   effect,
-  tree, values, getValue, setValue, _formTick, _bulkUpdate, showLinkId, showPrefix, showBadges,
-  previewMode, showHiddenItems,
+  tree, values, getValue, setValue, _formTick, _bulkUpdate,
   calcFormOk, isMandatory,
   rawFhir, questVariables, CHECKABLE_TYPES
 } from './state.js';
+
+// View preferences — UI-only, not domain state.
+// Owned here; updated via 'view-pref-change' CustomEvent from app.js.
+const _viewPrefs = { showLinkId: true, showPrefix: true, showBadges: true, showHiddenItems: true };
+document.addEventListener('view-pref-change', e => {
+  _viewPrefs[e.detail.key] = e.detail.value;
+  if (e.detail.key === 'showBadges') {
+    _previewElements.lform?.classList.toggle('preview--no-badges', !e.detail.value);
+  }
+  _formTick.value++;
+});
+
+// Preview mode — UI-only, not domain state.
+// Owned here; updated via 'preview-mode-change' CustomEvent from app.js.
+let _previewMode = 'preview';
+document.addEventListener('preview-mode-change', e => {
+  _previewMode = e.detail.mode;
+  _previewElements.lform?.classList.toggle('patient-view', _previewMode === 'patient');
+  if (_previewElements.lform) {
+    const isJson = _previewMode === 'json';
+    _previewElements.lform.style.display        = isJson ? 'none' : '';
+    _previewElements.fhirJsonView.style.display = isJson ? '' : 'none';
+  }
+  _formTick.value++;
+});
 import { isDescendant, findAncestorGroupIds, highlightJson } from './utils.js';
 import { evaluateNode } from './eval.js';
 import { evalConstraints } from './state.js';
@@ -365,9 +389,9 @@ async function _asyncRender(version) {
     if (!res) return;
     if (!res.visible && !res.showDimmed) return;
 
-    const isPatient = previewMode.value === 'patient';
+    const isPatient = _previewMode === 'patient';
     // Hidden items (sdc-questionnaire-hidden): excluded in patient view and when toggle is off.
-    if (res.hidden && (isPatient || !showHiddenItems.value)) return;
+    if (res.hidden && (isPatient || !_viewPrefs.showHiddenItems)) return;
 
     // Dimmed: enableWhen condition not yet met
     if (!res.visible && res.showDimmed) {
@@ -555,7 +579,7 @@ async function _asyncRender(version) {
       idTag.textContent = '✓ copied';
       setTimeout(() => { idTag.textContent = res.node.id; }, 1200);
     });
-    if (showLinkId.value && !isPatient) row.appendChild(idTag);
+    if (_viewPrefs.showLinkId && !isPatient) row.appendChild(idTag);
 
     // HIDDEN badge for sdc-questionnaire-hidden root nodes
     if (res.hiddenRoot && !isPatient) {
@@ -569,7 +593,7 @@ async function _asyncRender(version) {
       row.appendChild(hiddenBadge);
     }
 
-    if (res.node._prefix && showPrefix.value) {
+    if (res.node._prefix && _viewPrefs.showPrefix) {
       const prefixEl = document.createElement('span');
       prefixEl.className = 'preview-prefix';
       prefixEl.textContent = res.node._prefix;
@@ -853,7 +877,7 @@ async function _asyncRender(version) {
         for (const ch of res.node.children) {
           const childRes = resultMap.get(ch.id);
           // Skip hidden children when the toggle is off — prevents orphan AND/OR separators
-          if (childRes && childRes.hidden && (previewMode.value === 'patient' || !showHiddenItems.value)) continue;
+          if (childRes && childRes.hidden && (_previewMode === 'patient' || !_viewPrefs.showHiddenItems)) continue;
           if (childRes && (childRes.visible || childRes.showDimmed)) {
             if (!firstVisible && childRes.visible) {
               const sep = document.createElement('div');
@@ -931,11 +955,6 @@ async function _asyncRender(version) {
 effect(() => {
   void _formTick.value;   // main trigger: structure / patient / config changes
   void rawFhir.value;     // trigger on questionnaire data reload
-  void showLinkId.value;  // trigger on linkId display toggle
-  void showPrefix.value;  // trigger on prefix display toggle
-  void showBadges.value;      // trigger on badges display toggle
-  void previewMode.value;     // trigger on preview mode switch
-  void showHiddenItems.value; // trigger on hidden items toggle
   if (_bulkUpdate.value) return; // mass mutation in progress — skip
   _asyncRender(++_renderVersion); // fire-and-forget; stale renders self-abort
 });
@@ -978,20 +997,19 @@ export function initPreview(elements) {
   });
 
   // Toggle CSS display modes on the lform container
-  effect(() => { elements.lform.classList.toggle('preview--no-badges', !showBadges.value); });
-  effect(() => { elements.lform.classList.toggle('patient-view', previewMode.value === 'patient'); });
+  // preview--no-badges initial state (default: badges visible)
+  elements.lform.classList.toggle('preview--no-badges', !_viewPrefs.showBadges);
+  // Initial display state (preview mode starts as 'preview')
+  elements.lform.classList.toggle('patient-view', _previewMode === 'patient');
+  elements.lform.style.display        = _previewMode === 'json' ? 'none' : '';
+  elements.fhirJsonView.style.display = _previewMode === 'json' ? '' : 'none';
 
-  // JSON view: show/hide fhirJsonView vs lform, update content live
+  // JSON view: rebuild content on every form change when in JSON mode.
   effect(() => {
     void _formTick.value;
-    void previewMode.value;
-    const isJson = previewMode.value === 'json';
-    elements.lform.style.display         = isJson ? 'none' : '';
-    elements.fhirJsonView.style.display  = isJson ? '' : 'none';
-    if (isJson) {
-      const q = buildFHIRObject();
-      elements.fhirJsonView.innerHTML = highlightJson(JSON.stringify(q, null, 2));
-      search.refresh(); // re-apply search marks if a query is active
-    }
+    if (_previewMode !== 'json') return;
+    const q = buildFHIRObject();
+    elements.fhirJsonView.innerHTML = highlightJson(JSON.stringify(q, null, 2));
+    search.refresh(); // re-apply search marks if a query is active
   });
 }

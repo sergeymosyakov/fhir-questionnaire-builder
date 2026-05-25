@@ -29,7 +29,7 @@ import * as qrExportModal from './ui/qr-export-modal.js';
 import * as libraryModal from './ui/library-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm, initPreview } from './render-preview.js';
-import { showLinkId, showPrefix, showBadges, previewMode, showHiddenItems, questVariables, questContained, questMeta, qrMeta, resetQrMeta } from './state.js';
+import { questVariables, questContained, questMeta } from './state.js';
 
 // Buttons
 document.getElementById('clearFormBtn').onclick    = _clearForm;
@@ -71,17 +71,18 @@ document.getElementById('addRootGroupBtn').onclick = () => {
 document.getElementById('collapseAllBtn').onclick  = collapseAll;
 
 // Wire a toggle button: click flips stateRef.value and updates active class.
-function wireToggle(btnId, stateRef) {
+function wireToggle(btnId, prefKey) {
   const btn = document.getElementById(btnId);
   btn.onclick = () => {
-    stateRef.value = !stateRef.value;
-    btn.classList.toggle('btn-fhir--active', stateRef.value);
+    const newVal = !btn.classList.contains('btn-fhir--active');
+    btn.classList.toggle('btn-fhir--active', newVal);
+    document.dispatchEvent(new CustomEvent('view-pref-change', { detail: { key: prefKey, value: newVal } }));
   };
 }
-wireToggle('showLinkIdBtn', showLinkId);
-wireToggle('showPrefixBtn', showPrefix);
-wireToggle('showBadgesBtn', showBadges);
-wireToggle('showHiddenBtn', showHiddenItems);
+wireToggle('showLinkIdBtn',  'showLinkId');
+wireToggle('showPrefixBtn',  'showPrefix');
+wireToggle('showBadgesBtn',  'showBadges');
+wireToggle('showHiddenBtn',  'showHiddenItems');
 document.getElementById('expandAllBtn').onclick    = expandAll;
 document.getElementById('renumberBtn').onclick = async () => {
   const btn = document.getElementById('renumberBtn');
@@ -388,7 +389,7 @@ document.getElementById('exportFhirItem').onclick = () => {
 document.getElementById('exportQrItem').onclick = () => {
   exportMenu.style.display = 'none';
   const suggested = (_fileNameEl && _fileNameEl.textContent.trim()) || 'questionnaire';
-  qrExportModal.open(suggested + '-response.json', qrMeta);
+  qrExportModal.open(suggested + '-response.json');
 };
 
 // Wrapper: run import then show validation report if needed
@@ -508,7 +509,6 @@ function _askBeforeClear() {
 async function _importAndValidate(data, fileName) {
   // importFHIR is sync (parses tree); skip its internal renderTree, do async render instead
   try {
-    resetQrMeta();
     importFHIR(data, () => {}); // pass no-op renderFn — we render below
     reinitForm(); // evaluate initialExpression fields from imported data
     document.dispatchEvent(new CustomEvent('questionnaire-loaded'));
@@ -627,10 +627,12 @@ document.getElementById('loadAnswersLibraryItem').onclick = () => {
 function _applyQRAnswers(qr) {
   const result = importQRAnswers(qr, values, tree);
   if (!result.ok) { alert('Cannot load answers: ' + result.error); return; }
-  // Save QR meta for pre-populating the Export modal
-  qrMeta.status  = result.meta.status;
-  qrMeta.subject = result.meta.subject;
-  qrMeta.author  = result.meta.author;
+  // Dispatch qr-loaded so qr-export-modal can pre-fill its fields
+  document.dispatchEvent(new CustomEvent('qr-loaded', { detail: {
+    status:  result.meta.status,
+    subject: result.meta.subject,
+    author:  result.meta.author,
+  } }));
 
   // Check questionnaire URL match
   const currentUrl = (rawFhir.value && (rawFhir.value.url || rawFhir.value.id)) || '';
@@ -679,7 +681,7 @@ document.addEventListener('click', () => {
     json:    '{} FHIR JSON \u25BE',
   };
   function _applyPreviewMode(mode) {
-    previewMode.value = mode;
+    document.dispatchEvent(new CustomEvent('preview-mode-change', { detail: { mode } }));
     _modeBtn.textContent = _modeLabels[mode];
     document.querySelectorAll('#previewModeMenu .load-menu-item').forEach(item => {
       item.classList.toggle('load-menu-item--checked', item.dataset.mode === mode);

@@ -1,15 +1,29 @@
 // ── QR Export modal ────────────────────────────────────────────────────────────
 // Shown before downloading a QuestionnaireResponse.
-// Pre-populated from qrMeta (preserved when a QR was loaded); editable.
+// Pre-populated via 'qr-loaded' event (preserved when a QR was loaded); editable.
+// Resets via 'questionnaire-loaded' event (new questionnaire clears QR context).
 //
-// init(elements)             — wire DOM once at startup
-// open(suggestedName, meta)  — show modal; meta = { status, subject, author }
+// init(elements)      — wire DOM once at startup
+// open(suggestedName) — show modal pre-filled with last loaded QR meta
 
 import { exportQR } from '../fhir/qr-export.js';
 import { initModal, openModal, closeModal } from './modal-base.js';
 import { createCustomSelect } from './custom-select.js';
 
 const QR_STATUSES = ['in-progress', 'completed', 'amended', 'entered-in-error', 'stopped'];
+
+// QR pre-fill state — owned here, not in state.js.
+const _qrMeta = { status: 'in-progress', subject: '', author: '' };
+document.addEventListener('questionnaire-loaded', () => {
+  _qrMeta.status  = 'in-progress';
+  _qrMeta.subject = '';
+  _qrMeta.author  = '';
+});
+document.addEventListener('qr-loaded', e => {
+  _qrMeta.status  = e.detail.status  || 'in-progress';
+  _qrMeta.subject = e.detail.subject || '';
+  _qrMeta.author  = e.detail.author  || '';
+});
 
 let _el    = null;
 let _state = null; // { fileName, status, subject, author }
@@ -21,12 +35,12 @@ export function init(elements) {
   initModal(elements, { onApply: _export, onCancel: _cancel });
 }
 
-export function open(suggestedName, meta) {
+export function open(suggestedName) {
   _state = {
     fileName: suggestedName || 'questionnaire-response.json',
-    status:   (meta && meta.status)  || 'in-progress',
-    subject:  (meta && meta.subject) || '',
-    author:   (meta && meta.author)  || '',
+    status:   _qrMeta.status,
+    subject:  _qrMeta.subject,
+    author:   _qrMeta.author,
   };
   _renderBody();
   openModal(_el.modal);

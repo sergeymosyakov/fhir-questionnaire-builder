@@ -4,7 +4,8 @@
 // init(elements) — wire DOM nodes once at startup (no getElementById inside)
 //   elements: { input, prevBtn, nextBtn, counter, lform, fhirJsonView }
 
-import { previewMode } from '../state.js';
+let _previewMode = 'preview';
+document.addEventListener('preview-mode-change', e => { _previewMode = e.detail.mode; });
 import { highlightJson, highlightJsonWithSearch } from '../utils.js';
 
 let _el      = null;
@@ -37,7 +38,7 @@ function _onInput() {
 
   if (!q) { _clear(); return; }
 
-  if (previewMode.value === 'json') {
+  if (_previewMode === 'json') {
     _onInputJson(q);
   } else {
     _onInputRows(q);
@@ -93,7 +94,7 @@ function _navigate(dir) {
     _matches[_idx].classList.remove('search-match--active');
   }
   _idx = (_idx + dir + _matches.length) % _matches.length;
-  if (previewMode.value === 'json') {
+  if (_previewMode === 'json') {
     _activateJson();
   } else {
     _activate();
@@ -117,7 +118,7 @@ function _activateJson() {
 
 // ── Clear ─────────────────────────────────────────────────────────────────────
 function _clearHighlights() {
-  if (previewMode.value === 'json' && _el.fhirJsonView.querySelector('mark.search-match')) {
+  if (_previewMode === 'json' && _el.fhirJsonView.querySelector('mark.search-match')) {
     // Re-render without marks; textContent gives raw JSON before re-render
     const raw = _el.fhirJsonView.textContent;
     _el.fhirJsonView.innerHTML = highlightJson(raw);

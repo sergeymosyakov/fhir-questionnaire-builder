@@ -47,26 +47,6 @@ export const _formTick = ref(0);
 // The preview effect() returns early while true, then re-runs once on reset.
 export const _bulkUpdate = ref(false);
 
-// Show/hide FHIR linkId badges in preview.
-export const showLinkId = ref(true);
-
-// Show/hide item.prefix badges in preview.
-export const showPrefix = ref(true);
-
-// Show/hide all metadata badges in preview (optional, required, logic, calc).
-// When false, calculated fields render as plain text.
-export const showBadges = ref(true);
-
-// Preview mode enum: 'preview' | 'patient' | 'json'
-// - 'preview' : builder view with all annotations
-// - 'patient' : clean patient-facing form (hidden items excluded, badges hidden)
-// - 'json'    : live Questionnaire FHIR JSON with syntax highlighting
-export const previewMode = ref('preview');
-
-// Show/hide items marked as sdc-questionnaire-hidden in the preview panel.
-// When false, hidden items are invisible in builder preview (as patients see them).
-export const showHiddenItems = ref(true);
-
 // FHIRPath: original FHIR Questionnaire JSON after import; null if not loaded.
 export const rawFhir = ref(null);
 
@@ -117,20 +97,6 @@ export const questMeta = reactive({
 
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.
 export const questContained = reactive([]);
-
-// QuestionnaireResponse meta — populated when a QR is loaded; reset when a new questionnaire is imported.
-// Used to pre-fill the QR Export modal (status, subject, author).
-export const qrMeta = reactive({
-  status:  'in-progress', // QR.status
-  subject: '',            // QR.subject.reference
-  author:  '',            // QR.author.reference
-});
-
-export function resetQrMeta() {
-  qrMeta.status  = 'in-progress';
-  qrMeta.subject = '';
-  qrMeta.author  = '';
-}
 
 // Item types that have form-value validation logic in the preview.
 // CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
