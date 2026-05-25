@@ -999,3 +999,92 @@ test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
     expect(q.text.status).toBe('generated');
   });
 });
+
+// ── Replaces section ──────────────────────────────────────────────────────────
+
+test.describe('metadata modal — Replaces section', () => {
+  const REPLACES_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
+
+  test('Replaces toggle is visible in modal', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-replaces-toggle')).toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('Replaces section is expanded when questionnaire has replaces extensions', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-replaces-url-0')).toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('Replaces inputs are pre-populated from imported extensions', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-replaces-url-0')).toHaveValue('http://example.org/fhir/Questionnaire/meta-test|1.0');
+    await expect(page.getByTestId('meta-replaces-url-1')).toHaveValue('http://example.org/fhir/Questionnaire/meta-test|0.9');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('toggle label shows count of replaces URLs', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-replaces-toggle')).toContainText('(2)');
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('Add URL button appends a new empty input', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await openModal(page);
+    await page.getByTestId('meta-replaces-toggle').click();
+    await page.getByTestId('meta-replaces-add-btn').click();
+    await expect(page.getByTestId('meta-replaces-url-0')).toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('remove button deletes a replaces URL row', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-replaces-remove-1').click();
+    await expect(page.getByTestId('meta-replaces-url-1')).not.toBeVisible();
+    await page.locator('#metadataModalCancel').click();
+  });
+
+  test('replaces URLs round-trip through export as extension entries', async ({ page }) => {
+    await loadFixture(page);
+    page.once('dialog', d => d.accept());
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click(),
+    ]);
+    const filePath = await download.path();
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(filePath, 'utf8'));
+    const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
+    expect(entries).toHaveLength(2);
+    expect(entries[0].valueCanonical).toBe('http://example.org/fhir/Questionnaire/meta-test|1.0');
+    expect(entries[1].valueCanonical).toBe('http://example.org/fhir/Questionnaire/meta-test|0.9');
+  });
+
+  test('edited replaces URL is reflected in export', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-replaces-url-0').fill('http://example.org/fhir/Questionnaire/updated|2.0');
+    await page.locator('#metadataModalApply').click();
+
+    page.once('dialog', d => d.accept());
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click(),
+    ]);
+    const filePath = await download.path();
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(filePath, 'utf8'));
+    const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
+    expect(entries[0].valueCanonical).toBe('http://example.org/fhir/Questionnaire/updated|2.0');
+  });
+});

@@ -33,6 +33,10 @@
   "code": [
     { "system": "http://loinc.org", "code": "44249-1", "display": "PHQ-9 total score" }
   ],
+  "extension": [
+    { "url": "http://hl7.org/fhir/StructureDefinition/replaces", "valueCanonical": "http://example.org/fhir/Questionnaire/meta-test|1.0" },
+    { "url": "http://hl7.org/fhir/StructureDefinition/replaces", "valueCanonical": "http://example.org/fhir/Questionnaire/meta-test|0.9" }
+  ],
   "item": [
     {
       "linkId": "q1",

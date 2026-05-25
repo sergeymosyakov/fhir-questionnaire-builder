@@ -10,7 +10,7 @@ const _questContained = [];
 let _rawFhir = { value: null };
 const _questMeta = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
-  effectivePeriodStart: '', effectivePeriodEnd: '',
+  effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [], _rawQuestExtensions: [],
   _rawText: null,
   _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
@@ -1468,5 +1468,52 @@ describe('buildFHIRObject — _mimeTypes', () => {
     const ext = q.item[0].extension || [];
     expect(ext.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxSize')?.valueDecimal).toBe(5);
     expect(ext.find(e => e.url === MT_URL)?.valueCode).toBe('image/jpeg');
+  });
+});
+
+// ── replaces extension ────────────────────────────────────────────────────────
+describe('buildFHIRObject — replaces extension', () => {
+  const REPLACES_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
+  afterEach(() => { _questMeta.replaces = []; });
+
+  it('exports a single replaces URL as one extension entry', () => {
+    _questMeta.replaces = ['http://example.org/fhir/Questionnaire/prior|1.0'];
+    const q = build([]);
+    const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
+    expect(entries).toHaveLength(1);
+    expect(entries[0].valueCanonical).toBe('http://example.org/fhir/Questionnaire/prior|1.0');
+  });
+
+  it('exports multiple replaces URLs as separate extension entries', () => {
+    _questMeta.replaces = [
+      'http://example.org/fhir/Questionnaire/v1',
+      'http://example.org/fhir/Questionnaire/v2',
+    ];
+    const q = build([]);
+    const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
+    expect(entries).toHaveLength(2);
+    expect(entries[0].valueCanonical).toBe('http://example.org/fhir/Questionnaire/v1');
+    expect(entries[1].valueCanonical).toBe('http://example.org/fhir/Questionnaire/v2');
+  });
+
+  it('omits replaces entries when array is empty', () => {
+    _questMeta.replaces = [];
+    const q = build([]);
+    const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
+    expect(entries).toHaveLength(0);
+  });
+
+  it('trims whitespace from replaces URLs', () => {
+    _questMeta.replaces = ['  http://example.org/fhir/Questionnaire/prior  '];
+    const q = build([]);
+    const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
+    expect(entries[0].valueCanonical).toBe('http://example.org/fhir/Questionnaire/prior');
+  });
+
+  it('skips blank and whitespace-only replaces entries', () => {
+    _questMeta.replaces = ['http://example.org/fhir/Questionnaire/prior', '  ', ''];
+    const q = build([]);
+    const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
+    expect(entries).toHaveLength(1);
   });
 });

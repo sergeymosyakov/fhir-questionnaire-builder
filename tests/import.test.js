@@ -12,7 +12,7 @@ const _rawFhir        = { value: null };
 const _bulkUpdate     = { value: false };
 const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
-  effectivePeriodStart: '', effectivePeriodEnd: '',
+  effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [],
   _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
 vi.mock('../js/state.js', () => ({
@@ -1413,3 +1413,46 @@ describe('importFHIR — unknown extensions', () => {
   });
 });
 
+
+// ── replaces extension ────────────────────────────────────────────────────────
+describe('importFHIR — replaces extension', () => {
+  const REPLACES_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
+  beforeEach(() => { _tree.splice(0); _questMeta.replaces = []; });
+
+  const minQ = (exts = []) => ({
+    resourceType: 'Questionnaire', title: 'T',
+    extension: exts,
+    item: [{ linkId: 'q1', type: 'string', text: 'Q' }],
+  });
+
+  it('reads a single replaces extension into questMeta.replaces', () => {
+    importFHIR(minQ([{ url: REPLACES_URL, valueCanonical: 'http://example.org/fhir/Questionnaire/prior|1.0' }]));
+    expect(_questMeta.replaces).toEqual(['http://example.org/fhir/Questionnaire/prior|1.0']);
+  });
+
+  it('reads multiple replaces extensions into questMeta.replaces array', () => {
+    importFHIR(minQ([
+      { url: REPLACES_URL, valueCanonical: 'http://example.org/fhir/Questionnaire/v1' },
+      { url: REPLACES_URL, valueCanonical: 'http://example.org/fhir/Questionnaire/v2' },
+    ]));
+    expect(_questMeta.replaces).toHaveLength(2);
+    expect(_questMeta.replaces[0]).toBe('http://example.org/fhir/Questionnaire/v1');
+    expect(_questMeta.replaces[1]).toBe('http://example.org/fhir/Questionnaire/v2');
+  });
+
+  it('sets replaces to [] when no replaces extensions are present', () => {
+    importFHIR(minQ([]));
+    expect(_questMeta.replaces).toEqual([]);
+  });
+
+  it('excludes replaces entries from _rawQuestExtensions', () => {
+    importFHIR(minQ([{ url: REPLACES_URL, valueCanonical: 'http://example.org/fhir/Questionnaire/prior' }]));
+    const raw = _questMeta._rawQuestExtensions || [];
+    expect(raw.some(e => e.url === REPLACES_URL)).toBe(false);
+  });
+
+  it('does not include entries without valueCanonical in replaces', () => {
+    importFHIR(minQ([{ url: REPLACES_URL }]));
+    expect(_questMeta.replaces).toHaveLength(0);
+  });
+});
