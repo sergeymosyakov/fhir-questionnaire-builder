@@ -39,11 +39,11 @@ async function loadFixture(page) {
 
 const badge = page => page.getByTestId('status-badge-btn');
 
-// press('Tab') moves focus away from the input, reliably firing both blur and
-// change events in headless Chromium — triggering _formTick++ and a badge re-render.
-async function commitInput(page, input) {
-  await input.press('Tab');
-  await page.waitForTimeout(300);
+// Click the "Questionnaire Preview" title span (tabindex="-1") to move focus
+// away from the input, reliably firing blur+change — triggering _formTick++ and a badge re-render.
+async function commitInput(page, _input) {
+  await page.locator('span[tabindex="-1"]').click();
+  await page.waitForTimeout(200);
 }
 
 // ── 1. hasCriteria — badge visibility ─────────────────────────────────────────
