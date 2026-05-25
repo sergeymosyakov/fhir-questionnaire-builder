@@ -77,7 +77,7 @@ export const questMeta = reactive({
   _rawText:         null,      // Questionnaire.text — FHIR Narrative { status, div } — shown read-only in Properties modal
   _rawContact:      null,      // Questionnaire.contact[] — editable via Contact section in Properties modal
   _rawUseContext:   null,      // Questionnaire.useContext[] — pass-through only; too complex for a generic editor
-  _rawJurisdiction: null,      // Questionnaire.jurisdiction[] — editable (flattened to first coding) via Jurisdiction section in Properties modal
+  _rawJurisdiction: null,      // Questionnaire.jurisdiction[] — editable via Jurisdiction section in Properties modal; full CodeableConcept[] preserved; only coding[0] shown per entry
   _rawCode:         null,      // Questionnaire.code[] root-level coding — editable via Codes section in Properties modal
   // meta.* — partially editable via Properties modal "Resource Meta" section
   _metaVersionId:   '',       // meta.versionId — editable text + Generate button

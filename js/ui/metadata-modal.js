@@ -101,11 +101,7 @@ export function open() {
     metaSecurity:   JSON.parse(JSON.stringify(questMeta._rawMetaSecurity || [])),
     identifiers:    JSON.parse(JSON.stringify(questMeta._rawIdentifier   || [])),
     contacts:       JSON.parse(JSON.stringify(questMeta._rawContact      || [])),
-    jurisdictions:  (questMeta._rawJurisdiction || []).map(jur => ({
-      system:  jur.coding?.[0]?.system  || '',
-      code:    jur.coding?.[0]?.code    || '',
-      display: jur.coding?.[0]?.display || '',
-    })),
+    jurisdictions:  JSON.parse(JSON.stringify(questMeta._rawJurisdiction || [])),
   };
 
   setModalTitle(_el.title, 'Questionnaire Properties', '');
@@ -148,10 +144,8 @@ function _apply() {
   questMeta._rawIdentifier   = _pending.identifiers.filter(i => i.system?.trim() || i.value?.trim());
   const filteredContacts = _pending.contacts.filter(c => c.name?.trim() || c.telecom?.some(t => t.value?.trim()));
   questMeta._rawContact = filteredContacts.length ? filteredContacts : null;
-  const filteredJur = _pending.jurisdictions.filter(c => c.code?.trim());
-  questMeta._rawJurisdiction = filteredJur.length
-    ? filteredJur.map(c => ({ coding: [{ system: c.system, code: c.code, display: c.display }] }))
-    : null;
+  const filteredJur = _pending.jurisdictions.filter(jur => jur.coding?.[0]?.code?.trim());
+  questMeta._rawJurisdiction = filteredJur.length ? filteredJur : null;
   _close();
 }
 
@@ -745,7 +739,7 @@ function _renderBody(container) {
   jurToggle.className = 'meta-modal-adv-toggle';
   jurToggle.dataset.testid  = 'meta-jurisdiction-toggle';
   jurToggle.dataset.tipTitle = 'Questionnaire.jurisdiction';
-  jurToggle.dataset.tipBody  = 'Intended jurisdiction for this questionnaire. Coded as system/code/display (e.g. urn:iso:std:iso:3166 / US). Each entry maps to a CodeableConcept with one coding.';
+  jurToggle.dataset.tipBody  = 'Intended jurisdiction for this questionnaire. Coded as system/code/display (e.g. urn:iso:std:iso:3166 / US). Full CodeableConcept structure is preserved on round-trip; only coding[0] is shown and editable.';
   jurToggle.dataset.tipFhir  = 'Questionnaire.jurisdiction';
   jurToggle.dataset.tipSpec  = 'R4';
   let jurOpen = _pending.jurisdictions.length > 0;
@@ -753,10 +747,50 @@ function _renderBody(container) {
   const jurBody = document.createElement('div');
   jurBody.className = 'meta-modal-adv-body';
   jurBody.style.display = jurOpen ? '' : 'none';
-  renderCodesEditor(_pending.jurisdictions, jurBody, 'meta-jurisdiction', 'jurisdiction');
+  const _renderJurisdictions = () => {
+    jurBody.innerHTML = '';
+    if (_pending.jurisdictions.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'codes-empty-msg';
+      empty.textContent = 'No jurisdictions. Click \u2018+ Add jurisdiction\u2019 to add one.';
+      jurBody.appendChild(empty);
+    }
+    _pending.jurisdictions.forEach((jur, idx) => {
+      if (!jur.coding) jur.coding = [{}];
+      if (!jur.coding[0]) jur.coding[0] = {};
+      const c = jur.coding[0];
+      const row = document.createElement('div');
+      row.className = 'codes-row';
+      const mkInp = (placeholder, field) => {
+        const inp = document.createElement('input');
+        inp.type = 'text'; inp.className = 'codes-inp';
+        inp.value = c[field] || ''; inp.placeholder = placeholder;
+        inp.dataset.testid = `meta-jurisdiction-${field}-${idx}`;
+        inp.oninput = () => { c[field] = inp.value; _setJurLabel(); };
+        return inp;
+      };
+      row.append(mkInp('system URL', 'system'), mkInp('code *', 'code'), mkInp('display', 'display'));
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button'; removeBtn.className = 'codes-remove-btn';
+      removeBtn.textContent = '\u00D7'; removeBtn.dataset.testid = `meta-jurisdiction-remove-${idx}`;
+      removeBtn.onclick = () => { _pending.jurisdictions.splice(idx, 1); _renderJurisdictions(); _setJurLabel(); };
+      row.appendChild(removeBtn);
+      jurBody.appendChild(row);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button'; addBtn.className = 'codes-add-btn';
+    addBtn.dataset.testid = 'meta-jurisdictions-add-btn';
+    addBtn.textContent = '+ Add jurisdiction';
+    addBtn.onclick = () => {
+      _pending.jurisdictions.push({ coding: [{ system: '', code: '', display: '' }] });
+      _renderJurisdictions(); _setJurLabel();
+    };
+    jurBody.appendChild(addBtn);
+  };
+  _renderJurisdictions();
 
   const _setJurLabel = () => {
-    const count = _pending.jurisdictions.filter(c => c.code?.trim()).length;
+    const count = _pending.jurisdictions.filter(jur => jur.coding?.[0]?.code?.trim()).length;
     const badge = count ? ` (${count})` : '';
     jurToggle.textContent = (jurOpen ? '\u25BC' : '\u25BA') + ' Jurisdiction' + badge;
   };
