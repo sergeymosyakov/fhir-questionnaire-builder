@@ -73,7 +73,7 @@ export const questMeta = reactive({
   replaces:        [],          // canonical[] — questionnaires superseded by this one (extension: replaces)
   // Business identifiers — editable via Properties modal
   _rawIdentifier:   [],        // Questionnaire.identifier[] — array of { use?, system?, value? }
-  // Pass-through: preserved from import, written back on export, no editing UI
+  // Questionnaire root fields — varying edit support (see individual comments)
   _rawText:         null,      // Questionnaire.text — FHIR Narrative { status, div } — shown read-only in Properties modal
   _rawContact:      null,      // Questionnaire.contact[] — editable via Contact section in Properties modal
   _rawUseContext:   null,      // Questionnaire.useContext[] — pass-through only; too complex for a generic editor
