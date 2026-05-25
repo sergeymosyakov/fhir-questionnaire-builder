@@ -2,6 +2,7 @@
 // _makeRow and _makeSelectRow are nested closures over `pending`.
 import { renderCodesEditor } from './codes-modal.js';
 import { createCustomSelect } from './custom-select.js';
+import { questMeta } from '../state.js';
 
 const STATUSES = ['draft', 'active', 'retired', 'unknown'];
 
@@ -105,8 +106,8 @@ export function renderMetaSections(container, pending) {
     row.append(lbl, sel.el);
     return row;
   }
-  
 
+  const hint = document.createElement('div');
   hint.className   = 'panel-hint';
   hint.textContent = 'Questionnaire-level metadata. Preserved on import and written back on export.';
   container.appendChild(hint);

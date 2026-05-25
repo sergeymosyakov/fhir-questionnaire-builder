@@ -11,8 +11,8 @@ import { initModal, openModal, closeModal } from './modal-base.js';
 
 const LIBRARY_URL = 'sampledata/library.json';
 
-// Icons per group id
-const GROUP_ICONS = {
+// Icons per group id (unused for now, kept for future UI labeling)
+const _GROUP_ICONS = {
   'fhir-r4':           '\u2605',  // ★
   'fhir-stu3':         '\u2605',  // ★
   'patient-scenarios': '\u1F9EA', // 🧪
