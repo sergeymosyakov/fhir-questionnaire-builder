@@ -311,6 +311,31 @@ This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR wit
 
 ---
 
+## FHIR Version Support
+
+| Version | Status |
+|---|---|
+| R4 | ✅ Fully supported |
+| R4B / R5 | 🔧 Partial — most fields overlap; `answerConstraint` and `disabledDisplay` are R4B/R5 native (R4 backport extension handled for `disabledDisplay`) |
+| STU3 | ✅ Import shim — automatically normalised to R4 on load via `js/fhir/stu3-shim.js`; see table below |
+
+### STU3 → R4 Normalisation (`js/fhir/stu3-shim.js`)
+
+Applied automatically in `importFHIR()` before the R4 parser runs. Detection: `meta.fhirVersion` starts with `3.`/`1.`, or presence of STU3-only fields anywhere in the item tree.
+
+| STU3 field | R4 equivalent | Notes |
+|---|---|---|
+| `item.option[]` | `item.answerOption[]` | Field renamed; entry shape is identical |
+| `item.options` (Reference) | `item.answerValueSet` | Reference URL extracted to canonical string |
+| `enableWhen.hasAnswer: true` | `enableWhen.operator: 'exists', answerBoolean: true` | Visibility condition "has any answer" |
+| `enableWhen.hasAnswer: false` | `enableWhen.operator: 'exists', answerBoolean: false` | Visibility condition "has no answer" |
+| `enableWhen` with `answer[x]` but no `operator` | adds `operator: '='` | STU3 implicit equality |
+| `item.initial<Type>` (e.g. `initialInteger`, `initialCoding`) | `item.initial: [{ value<Type>: ... }]` | All 12 typed initial fields covered |
+
+**Output:** always R4 — the STU3 shim is import-only. Exporting an imported STU3 questionnaire produces valid FHIR R4 JSON.
+
+---
+
 ## Not Supported / Partial Support
 
 Legend: ⚠️ = silent data loss (field present in import file, ignored or overwritten on export); ❌ = not handled at all; 🔧 = partial support.
@@ -322,13 +347,12 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | FHIR field | Status | Notes |
 |---|---|---|
 | `Questionnaire.implicitRules` | ⚠️ Silently dropped | Declares the rules set that constrains how the resource is used. Rare in practice. |
-| `Questionnaire.implicitRules` | ⚠️ Silently dropped | Declares the rules set that constrains how the resource is used. Rare in practice. |
-| Unknown item extensions | ⚠️ Silently dropped | Any `item.extension[]` entry whose URL is not explicitly handled by the builder is discarded on import and will not appear in the exported JSON. |
 
 ### Item-level — not implemented
 
 | FHIR field / extension | Status | Notes |
 |---|---|---|
+| Unknown extensions | ⚠️ Silently dropped | Any `item.extension[]` entry whose URL is not explicitly handled by the builder is discarded on import and will not appear in the exported JSON. |
 | `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
 | `item.answerValueSet` — external URL | 🔧 URL preserved round-trip | Not resolved to answer options; no FHIR terminology server integration. `#id` contained refs ARE resolved (see Round-Trip Safety) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
@@ -381,25 +405,4 @@ These SDC extensions support advanced form pre-population from clinical data and
 | `sdc-questionnaire-sourceStructureMap` | StructureMap used to pre-populate the questionnaire from existing FHIR data |
 | `sdc-questionnaire-columnCount` / `sdc-questionnaire-width` | Grid layout: number of columns in a group and per-item width for multi-column display |
 
-### FHIR versions
 
-| Version | Status |
-|---|---|
-| R4 | ✅ Fully supported |
-| R4B / R5 | 🔧 Partial — most fields overlap; `answerConstraint` and `disabledDisplay` are R4B/R5 native (R4 backport extension handled for `disabledDisplay`) |
-| STU3 | 🔧 Import shim — automatically normalised to R4 on load via `js/fhir/stu3-shim.js`; see table below |
-
-### STU3 → R4 normalisation (`js/fhir/stu3-shim.js`)
-
-Applied automatically in `importFHIR()` before the R4 parser runs. Detection: `meta.fhirVersion` starts with `3.`/`1.`, or presence of STU3-only fields anywhere in the item tree.
-
-| STU3 field | R4 equivalent | Notes |
-|---|---|---|
-| `item.option[]` | `item.answerOption[]` | Field renamed; entry shape is identical |
-| `item.options` (Reference) | `item.answerValueSet` | Reference URL extracted to canonical string |
-| `enableWhen.hasAnswer: true` | `enableWhen.operator: 'exists', answerBoolean: true` | Visibility condition "has any answer" |
-| `enableWhen.hasAnswer: false` | `enableWhen.operator: 'exists', answerBoolean: false` | Visibility condition "has no answer" |
-| `enableWhen` with `answer[x]` but no `operator` | adds `operator: '='` | STU3 implicit equality |
-| `item.initial<Type>` (e.g. `initialInteger`, `initialCoding`) | `item.initial: [{ value<Type>: ... }]` | All 12 typed initial fields covered |
-
-**Output:** always R4 — the STU3 shim is import-only. Exporting an imported STU3 questionnaire produces valid FHIR R4 JSON.
