@@ -13,88 +13,14 @@
 
 import { questContained, values, deleteValue } from '../state.js';
 import { resolveContainedValueSet } from '../fhir/import.js';
-import { parseOptions } from '../utils.js';
 import { triggerCalcRecalc } from '../builder/_shared.js';
 import { createCustomSelect } from './custom-select.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
-
-const CHOICE_TYPES = new Set(['select', 'radio', 'open-choice']);
-
-// Build textarea string with optional ordinal suffix: "code=Label=0,code2=Label2=1"
-function _optsWithOrdinals(node) {
-  if (!node.options) return '';
-  const ords = node._optionOrdinals || {};
-  return parseOptions(node.options)
-    .map(({ code, display }) => {
-      const o = ords[code];
-      return o !== undefined ? `${code}=${display}=${o}` : `${code}=${display}`;
-    })
-    .join(',');
-}
-
-// Parse "code=Label=N" entries; returns [{ code, display, ordinal? }]
-function _parseOptsWithOrdinals(str) {
-  return (str || '').split(',').map(s => s.trim()).filter(Boolean).map(s => {
-    const eq = s.indexOf('=');
-    if (eq === -1) return { code: s, display: s };
-    const code = s.slice(0, eq).trim();
-    const rest = s.slice(eq + 1);
-    const lastEq = rest.lastIndexOf('=');
-    if (lastEq !== -1) {
-      const maybeOrd = rest.slice(lastEq + 1).trim();
-      const ordVal = Number(maybeOrd);
-      if (maybeOrd !== '' && !isNaN(ordVal)) {
-        return { code, display: rest.slice(0, lastEq).trim(), ordinal: ordVal };
-      }
-    }
-    return { code, display: rest.trim() };
-  });
-}
-
-const ITEM_TYPES = [
-  'text','integer','decimal','date','dateTime','time','url','attachment',
-  'checkbox','select','open-choice','radio',
-  'reference','quantity','display',
-];
-
-const FHIR_R4_TYPES = [
-  'Patient','Practitioner','PractitionerRole','RelatedPerson','Organization',
-  'Encounter','EpisodeOfCare','Condition','Observation','DiagnosticReport','Procedure',
-  'MedicationRequest','MedicationStatement','Medication','AllergyIntolerance','Immunization',
-  'CarePlan','CareTeam','Goal','ServiceRequest','Appointment','Slot','Schedule',
-  'HealthcareService','Location','Device','Specimen','ImagingStudy','Media',
-  'DocumentReference','Composition','QuestionnaireResponse','Questionnaire',
-  'Coverage','Claim','ExplanationOfBenefit','Account','Invoice','ChargeItem',
-  'ResearchStudy','ResearchSubject','Group','Person',
-  'ActivityDefinition','AdverseEvent','AppointmentResponse','AuditEvent','Basic',
-  'Binary','BiologicallyDerivedProduct','BodyStructure','Bundle','CapabilityStatement',
-  'ChargeItemDefinition','ClaimResponse','ClinicalImpression','CodeSystem','Communication',
-  'CommunicationRequest','CompartmentDefinition','ConceptMap','Consent','Contract',
-  'CoverageEligibilityRequest','CoverageEligibilityResponse','DetectedIssue','DeviceDefinition',
-  'DeviceMetric','DeviceRequest','DeviceUseStatement','DocumentManifest','Endpoint',
-  'EnrollmentRequest','EnrollmentResponse','EventDefinition','FamilyMemberHistory',
-  'Flag','GuidanceResponse','ImmunizationEvaluation','ImmunizationRecommendation',
-  'ImplementationGuide','InsurancePlan','Library','Linkage','List','Measure',
-  'MeasureReport','MessageDefinition','MessageHeader','MolecularSequence','NamingSystem',
-  'NutritionOrder','ObservationDefinition','OperationDefinition','OperationOutcome',
-  'OrganizationAffiliation','Parameters','PaymentNotice','PaymentReconciliation',
-  'PlanDefinition','Provenance','RequestGroup','RiskAssessment','SearchParameter',
-  'SpecimenDefinition','StructureDefinition','StructureMap','Subscription',
-  'Substance','SupplyDelivery','SupplyRequest','Task','TerminologyCapabilities',
-  'TestReport','TestScript','ValueSet','VerificationResult','VisionPrescription',
-];
-
-const BUILDER_UNITS = [
-  'kg','g','mg','[lb_av]','[oz_av]',
-  'cm','m','mm','[in_i]','[ft_i]',
-  'mL','L','dL',
-  'Cel','[degF]',
-  'mm[Hg]','kPa',
-  'kg/m2','%',
-  '/min','{beats}/min','{breaths}/min',
-  'min','h','d','wk','mo','a',
-  'mg/dL','mmol/L','g/dL','meq/L','U/L','[iU]',
-];
+import {
+  CHOICE_TYPES, ENTRY_FORMAT_TYPES, NUMERIC_TYPES,
+  ITEM_TYPES, FHIR_R4_TYPES, BUILDER_UNITS,
+  _optsWithOrdinals, _parseOptsWithOrdinals,
+} from './answer-type-data.js';
 
 let _el      = null;
 let _pending = null;
@@ -202,8 +128,7 @@ function _apply() {
   node.quantityUnit      = (node.itemType === 'quantity'  && _pending.draftUnit)   ? _pending.draftUnit   : undefined;
 
   // Numeric constraints: min/max/slider step (integer and decimal only)
-  const _NUMERIC = new Set(['integer', 'decimal']);
-  if (_NUMERIC.has(node.itemType)) {
+  if (NUMERIC_TYPES.has(node.itemType)) {
     const _pf    = s => { const n = parseFloat(s); return isNaN(n) ? undefined : n; };
     const _round = node.itemType === 'integer';
     const minV   = _pf(_pending.draftMinValue);
@@ -219,8 +144,7 @@ function _apply() {
   }
 
   // entryFormat placeholder hint (text-like types)
-  const _ENTRY_FORMAT_TYPES = new Set(['text','integer','decimal','date','dateTime','time','url','quantity']);
-  if (_ENTRY_FORMAT_TYPES.has(node.itemType) && _pending.draftEntryFormat.trim()) {
+  if (ENTRY_FORMAT_TYPES.has(node.itemType) && _pending.draftEntryFormat.trim()) {
     node._entryFormat = _pending.draftEntryFormat.trim();
   } else {
     delete node._entryFormat;
@@ -290,8 +214,6 @@ function _renderBody(container) {
   hint.className   = 'panel-hint';
   hint.textContent = 'Sets the FHIR item type. For coded-answer types you can supply a plain options list or link to a contained[] ValueSet.';
   container.appendChild(hint);
-
-  const ENTRY_FORMAT_TYPES = new Set(['text','integer','decimal','date','dateTime','time','url','quantity']);
 
   // openLabelSection reference — declared here so the typeSel onChange closure can update it
   let openLabelSection;
