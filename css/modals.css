@@ -469,3 +469,15 @@
   color: var(--c-text);
   resize: vertical;
 }
+
+/* ── Contact editor (metadata modal) ─────────────────────────────────────────
+ */
+.contact-block {
+  border: 1px solid var(--c-border);
+  border-radius: 4px;
+  padding: 6px 8px 4px;
+  margin-bottom: 6px;
+  background: var(--c-surface);
+}
+.telecom-row { padding-left: 12px; }
+.codes-add-btn--sub { margin-left: 12px; font-size: 11px; padding: 2px 8px; }

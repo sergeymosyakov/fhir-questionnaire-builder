@@ -5,8 +5,9 @@
 // Advanced (collapsible, collapsed by default): experimental, date, subjectType,
 //   effectivePeriodStart, effectivePeriodEnd, approvalDate, lastReviewDate,
 //   purpose, copyright.
-// Pass-through fields (contact, useContext, jurisdiction) have no
-//   editing UI — they are preserved automatically on import/export.
+// Contact (collapsible): Questionnaire.contact[] — editable name + telecom rows.
+// Jurisdiction (collapsible): Questionnaire.jurisdiction[] — editable system/code/display codings.
+// Pass-through (useContext): preserved automatically on import/export, no UI.
 // Derived From (collapsible): Questionnaire.derivedFrom[] — canonical URL list.
 // Codes (collapsible): Questionnaire.code[] — editable via shared renderCodesEditor.
 //
@@ -99,6 +100,12 @@ export function open() {
     metaTag:        JSON.parse(JSON.stringify(questMeta._rawMetaTag      || [])),
     metaSecurity:   JSON.parse(JSON.stringify(questMeta._rawMetaSecurity || [])),
     identifiers:    JSON.parse(JSON.stringify(questMeta._rawIdentifier   || [])),
+    contacts:       JSON.parse(JSON.stringify(questMeta._rawContact      || [])),
+    jurisdictions:  (questMeta._rawJurisdiction || []).map(jur => ({
+      system:  jur.coding?.[0]?.system  || '',
+      code:    jur.coding?.[0]?.code    || '',
+      display: jur.coding?.[0]?.display || '',
+    })),
   };
 
   setModalTitle(_el.title, 'Questionnaire Properties', '');
@@ -139,6 +146,12 @@ function _apply() {
   questMeta._rawMetaTag      = _pending.metaTag.filter(c => c.code?.trim());
   questMeta._rawMetaSecurity = _pending.metaSecurity.filter(c => c.code?.trim());
   questMeta._rawIdentifier   = _pending.identifiers.filter(i => i.system?.trim() || i.value?.trim());
+  const filteredContacts = _pending.contacts.filter(c => c.name?.trim() || c.telecom?.some(t => t.value?.trim()));
+  questMeta._rawContact = filteredContacts.length ? filteredContacts : null;
+  const filteredJur = _pending.jurisdictions.filter(c => c.code?.trim());
+  questMeta._rawJurisdiction = filteredJur.length
+    ? filteredJur.map(c => ({ coding: [{ system: c.system, code: c.code, display: c.display }] }))
+    : null;
   _close();
 }
 
@@ -600,6 +613,164 @@ function _renderBody(container) {
 
   idSection.append(idToggle, idBody);
   container.appendChild(idSection);
+
+  // ── Contact (collapsible) ────────────────────────────────────────────────
+  const contactSection = document.createElement('div');
+  contactSection.className = 'meta-modal-advanced';
+
+  const contactToggle = document.createElement('button');
+  contactToggle.type      = 'button';
+  contactToggle.className = 'meta-modal-adv-toggle';
+  contactToggle.dataset.testid  = 'meta-contact-toggle';
+  contactToggle.dataset.tipTitle = 'Questionnaire.contact';
+  contactToggle.dataset.tipBody  = 'Contact details for the publisher. Typically the author\u2019s name and email or URL.';
+  contactToggle.dataset.tipFhir  = 'Questionnaire.contact';
+  contactToggle.dataset.tipSpec  = 'R4';
+  let contactOpen = _pending.contacts.length > 0;
+
+  const contactBody = document.createElement('div');
+  contactBody.className = 'meta-modal-adv-body';
+  contactBody.style.display = contactOpen ? '' : 'none';
+
+  const TELECOM_SYSTEMS = ['email', 'phone', 'url', 'fax', 'pager', 'sms', 'other'];
+
+  const _setContactLabel = () => {
+    const count = _pending.contacts.filter(c => c.name?.trim() || c.telecom?.some(t => t.value?.trim())).length;
+    const badge = count ? ` (${count})` : '';
+    contactToggle.textContent = (contactOpen ? '\u25BC' : '\u25BA') + ' Contact' + badge;
+  };
+
+  const _renderContacts = () => {
+    contactBody.innerHTML = '';
+    if (_pending.contacts.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'codes-empty-msg';
+      empty.textContent = 'No contacts. Click \u2018+ Add Contact\u2019 to add one.';
+      contactBody.appendChild(empty);
+    }
+    _pending.contacts.forEach((contact, ci) => {
+      const block = document.createElement('div');
+      block.className = 'contact-block';
+
+      const nameRow = document.createElement('div');
+      nameRow.className = 'codes-row';
+      const nameInp = document.createElement('input');
+      nameInp.type = 'text';
+      nameInp.className = 'codes-inp';
+      nameInp.value = contact.name || '';
+      nameInp.placeholder = 'Contact name';
+      nameInp.dataset.testid = `meta-contact-name-${ci}`;
+      nameInp.oninput = () => { contact.name = nameInp.value; _setContactLabel(); };
+      const removeContactBtn = document.createElement('button');
+      removeContactBtn.type = 'button';
+      removeContactBtn.className = 'codes-remove-btn';
+      removeContactBtn.textContent = '\u00D7';
+      removeContactBtn.dataset.testid = `meta-contact-remove-${ci}`;
+      removeContactBtn.onclick = () => { _pending.contacts.splice(ci, 1); _renderContacts(); _setContactLabel(); };
+      nameRow.append(nameInp, removeContactBtn);
+      block.appendChild(nameRow);
+
+      const telecoms = contact.telecom || (contact.telecom = []);
+      telecoms.forEach((tel, ti) => {
+        const telRow = document.createElement('div');
+        telRow.className = 'codes-row telecom-row';
+        const sysSel = createCustomSelect({
+          items:     TELECOM_SYSTEMS.map(s => ({ value: s, label: s })),
+          value:     tel.system || 'email',
+          testid:    `meta-contact-${ci}-tel-sys-${ti}`,
+          className: 'sc-trigger--sm',
+          onChange:  v => { tel.system = v; },
+        });
+        const valInp = document.createElement('input');
+        valInp.type = 'text';
+        valInp.className = 'codes-inp';
+        valInp.value = tel.value || '';
+        valInp.placeholder = 'value';
+        valInp.dataset.testid = `meta-contact-${ci}-tel-val-${ti}`;
+        valInp.oninput = () => { tel.value = valInp.value; _setContactLabel(); };
+        const removeTelBtn = document.createElement('button');
+        removeTelBtn.type = 'button';
+        removeTelBtn.className = 'codes-remove-btn';
+        removeTelBtn.textContent = '\u00D7';
+        removeTelBtn.dataset.testid = `meta-contact-${ci}-tel-remove-${ti}`;
+        removeTelBtn.onclick = () => { telecoms.splice(ti, 1); _renderContacts(); _setContactLabel(); };
+        telRow.append(sysSel.el, valInp, removeTelBtn);
+        block.appendChild(telRow);
+      });
+
+      const addTelBtn = document.createElement('button');
+      addTelBtn.type = 'button';
+      addTelBtn.className = 'codes-add-btn codes-add-btn--sub';
+      addTelBtn.textContent = '+ Add telecom';
+      addTelBtn.dataset.testid = `meta-contact-${ci}-add-tel`;
+      addTelBtn.onclick = () => { telecoms.push({ system: 'email', value: '' }); _renderContacts(); };
+      block.appendChild(addTelBtn);
+      contactBody.appendChild(block);
+    });
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'codes-add-btn';
+    addBtn.textContent = '+ Add Contact';
+    addBtn.dataset.testid = 'meta-contact-add-btn';
+    addBtn.onclick = () => {
+      _pending.contacts.push({ name: '', telecom: [{ system: 'email', value: '' }] });
+      contactOpen = true;
+      contactBody.style.display = '';
+      _renderContacts();
+      _setContactLabel();
+    };
+    contactBody.appendChild(addBtn);
+  };
+  _renderContacts();
+  _setContactLabel();
+
+  contactToggle.addEventListener('click', () => {
+    contactOpen = !contactOpen;
+    contactBody.style.display = contactOpen ? '' : 'none';
+    _setContactLabel();
+  });
+  contactBody.addEventListener('input', () => _setContactLabel());
+  contactBody.addEventListener('click', () => setTimeout(_setContactLabel, 0));
+
+  contactSection.append(contactToggle, contactBody);
+  container.appendChild(contactSection);
+
+  // ── Jurisdiction (collapsible) ────────────────────────────────────────────
+  const jurSection = document.createElement('div');
+  jurSection.className = 'meta-modal-advanced';
+
+  const jurToggle = document.createElement('button');
+  jurToggle.type      = 'button';
+  jurToggle.className = 'meta-modal-adv-toggle';
+  jurToggle.dataset.testid  = 'meta-jurisdiction-toggle';
+  jurToggle.dataset.tipTitle = 'Questionnaire.jurisdiction';
+  jurToggle.dataset.tipBody  = 'Intended jurisdiction for this questionnaire. Coded as system/code/display (e.g. urn:iso:std:iso:3166 / US). Each entry maps to a CodeableConcept with one coding.';
+  jurToggle.dataset.tipFhir  = 'Questionnaire.jurisdiction';
+  jurToggle.dataset.tipSpec  = 'R4';
+  let jurOpen = _pending.jurisdictions.length > 0;
+
+  const jurBody = document.createElement('div');
+  jurBody.className = 'meta-modal-adv-body';
+  jurBody.style.display = jurOpen ? '' : 'none';
+  renderCodesEditor(_pending.jurisdictions, jurBody, 'meta-jurisdiction', 'jurisdiction');
+
+  const _setJurLabel = () => {
+    const count = _pending.jurisdictions.filter(c => c.code?.trim()).length;
+    const badge = count ? ` (${count})` : '';
+    jurToggle.textContent = (jurOpen ? '\u25BC' : '\u25BA') + ' Jurisdiction' + badge;
+  };
+  _setJurLabel();
+  jurToggle.addEventListener('click', () => {
+    jurOpen = !jurOpen;
+    jurBody.style.display = jurOpen ? '' : 'none';
+    _setJurLabel();
+  });
+  jurBody.addEventListener('input', () => _setJurLabel());
+  jurBody.addEventListener('click', () => setTimeout(_setJurLabel, 0));
+
+  jurSection.append(jurToggle, jurBody);
+  container.appendChild(jurSection);
 
   // ── Resource Meta (collapsible) ──────────────────────────────────────────
   const metaSection = document.createElement('div');

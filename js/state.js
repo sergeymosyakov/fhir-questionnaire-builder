@@ -74,11 +74,11 @@ export const questMeta = reactive({
   // Business identifiers — editable via Properties modal
   _rawIdentifier:   [],        // Questionnaire.identifier[] — array of { use?, system?, value? }
   // Pass-through: preserved from import, written back on export, no editing UI
-  _rawText:         null,      // Questionnaire.text — FHIR Narrative { status, div }
-  _rawContact:      null,
-  _rawUseContext:   null,
-  _rawJurisdiction: null,
-  _rawCode:         null,     // Questionnaire.code[] root-level coding
+  _rawText:         null,      // Questionnaire.text — FHIR Narrative { status, div } — shown read-only in Properties modal
+  _rawContact:      null,      // Questionnaire.contact[] — editable via Contact section in Properties modal
+  _rawUseContext:   null,      // Questionnaire.useContext[] — pass-through only; too complex for a generic editor
+  _rawJurisdiction: null,      // Questionnaire.jurisdiction[] — editable (flattened to first coding) via Jurisdiction section in Properties modal
+  _rawCode:         null,      // Questionnaire.code[] root-level coding — editable via Codes section in Properties modal
   // meta.* — partially editable via Properties modal "Resource Meta" section
   _metaVersionId:   '',       // meta.versionId — editable text + Generate button
   _metaSource:      '',       // meta.source — URI; editable text input
