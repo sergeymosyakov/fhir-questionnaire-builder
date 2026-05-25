@@ -10,7 +10,7 @@ vi.mock(
 import { GroupNode }    from '../js/nodes/group-node.js';
 import { TextNode }     from '../js/nodes/text-node.js';
 import { NumberNode }   from '../js/nodes/number-node.js';
-import { CheckboxNode } from '../js/nodes/checkbox-node.js';
+
 import { createGroupNode, createItemNode, createItemNodeFromTemplate, NODE_REGISTRY } from '../js/nodes/index.js';
 
 // ── Class shape ───────────────────────────────────────────────────────────────

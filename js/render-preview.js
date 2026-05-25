@@ -33,7 +33,7 @@ document.addEventListener('preview-mode-change', e => {
   }
   _formTick.value++;
 });
-import { isDescendant, findAncestorGroupIds, highlightJson } from './utils.js';
+import { findAncestorGroupIds, highlightJson } from './utils.js';
 import { evaluateNode } from './eval.js';
 import { evalConstraints } from './state.js';
 import { buildQR } from './fhir/qr-builder.js';
@@ -42,11 +42,11 @@ import { buildFHIRObject } from './fhir/export.js';
 
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
-import * as explainModal from './ui/explain-modal.js';
+import './ui/explain-modal.js';
 import * as progress from './ui/progress.js';
 
 const fhirpath  = window.fhirpath;
-const DOMPurify = window.DOMPurify;
+// window.DOMPurify is loaded globally via <script> in index.html
 
 // Last computed FHIRPath context — stable object, mutated in-place by _reCalc().
 // Exposed via getLastCtx() and via _rc.lastCtx for render-node.js click handlers.
@@ -412,7 +412,7 @@ async function _asyncRender(version) {
       const el = inputs[_focusInfo.inputIndex];
       if (el) {
         el.focus();
-        try { el.setSelectionRange(_focusInfo.selStart, _focusInfo.selEnd); } catch {}
+        try { el.setSelectionRange(_focusInfo.selStart, _focusInfo.selEnd); } catch { /* not all inputs support setSelectionRange */ }
       }
     }
   }

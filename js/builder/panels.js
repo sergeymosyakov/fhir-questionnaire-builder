@@ -2,10 +2,9 @@
 // buildXxxPanel(node, panelEl, linkEl, setActive, ctx: BuilderCtx)  — see ctx.js
 //
 // Each panel is keyed and toggled by the action links defined in node-item/group.
-import { escAttr, parseOptions } from '../utils.js';
+import { parseOptions } from '../utils.js';
 import { getAllItems, triggerCalcRecalc } from './_shared.js';
 import { refreshExprIcons } from '../render-preview.js';
-import { values, deleteValue } from '../state.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { createDatePicker } from '../ui/date-picker.js';
 

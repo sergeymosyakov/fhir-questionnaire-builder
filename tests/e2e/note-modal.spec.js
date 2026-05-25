@@ -22,7 +22,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 
 const DN_URL    = 'http://hl7.org/fhir/StructureDefinition/designNote';
-const FIXTURE   = path.resolve('tests/fixtures/meta-test.fhir.json');
+const _FIXTURE  = path.resolve('tests/fixtures/meta-test.fhir.json');
 
 async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
