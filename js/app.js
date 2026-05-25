@@ -341,6 +341,8 @@ document.addEventListener('keydown', e => {
 const exportMenu = document.getElementById('exportMenu');
 document.getElementById('exportBtn').onclick = e => {
   e.stopPropagation();
+  loadMenu.style.display = 'none';
+  answersMenu.style.display = 'none';
   exportMenu.style.display = exportMenu.style.display === 'none' ? 'block' : 'none';
 };
 document.getElementById('exportFhirItem').onclick = () => {
@@ -530,6 +532,8 @@ function _syncRecentItem() {
 
 document.getElementById('loadFhirBtn').onclick = e => {
   e.stopPropagation();
+  exportMenu.style.display = 'none';
+  answersMenu.style.display = 'none';
   if (loadMenu.style.display === 'none') _syncRecentItem();
   loadMenu.style.display = loadMenu.style.display === 'none' ? 'block' : 'none';
 };
@@ -575,6 +579,8 @@ document.getElementById('fhirFileInput').onchange  = e => {
 const answersMenu = document.getElementById('answersMenu');
 document.getElementById('answersBtn').onclick = e => {
   e.stopPropagation();
+  loadMenu.style.display = 'none';
+  exportMenu.style.display = 'none';
   answersMenu.style.display = answersMenu.style.display === 'none' ? 'block' : 'none';
 };
 document.getElementById('loadAnswersItem').onclick = () => {
