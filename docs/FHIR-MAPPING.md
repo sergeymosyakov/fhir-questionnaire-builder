@@ -368,7 +368,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
 | `maxDecimalPlaces` | ❌ Not handled | Maximum number of decimal places for `decimal` items (`http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces`). |
 | `regex` | ❌ Not handled | Regular expression validation pattern for `string` / `text` / `url` items (`http://hl7.org/fhir/StructureDefinition/regex`). |
-| `questionnaire-optionPrefix` | ✅ Handled | Display prefix per `answerOption` (e.g. `'A.'`, `'1.'`); imported to `_optionPrefixes`, exported to `answerOption.extension`, displayed in select/radio preview, editable in Answer Type modal. |
 | `questionnaire-unitValueSet` | ❌ Not handled | ValueSet of selectable units for `quantity` items (alternative to `questionnaire-unitOption` / `sdc-questionnaire-unitOption`). |
 | `questionnaire-usageMode` | ❌ Not handled | Controls when the item is relevant: `capture` / `display` / `display-non-empty` / `capture-display` / `capture-display-non-empty`. |
 | `questionnaire-referenceFilter` | ❌ Not handled | FHIRPath expression used to filter valid reference targets for `reference` items. |
