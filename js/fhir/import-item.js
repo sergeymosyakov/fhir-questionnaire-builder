@@ -1,6 +1,6 @@
 // ── FHIR import: item node builders ──────────────────────────────────────────
 // Converts FHIR Questionnaire.item into our internal node tree.
-import { makeGroup, makeItem } from '../state.js';
+import { createGroupNode, createItemNode } from '../nodes/index.js';
 import {
   fhirTypeToItemType,
   fhirOptsToStr,
@@ -12,19 +12,23 @@ import {
 
 // Build our item node from a FHIR leaf question
 function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
-  const node = makeItem(fhirItem.text || fhirItem.linkId || 'Item');
-  node.id        = fhirItem.linkId || node.id;
-  node.mandatory = fhirItem.required === undefined ? null : !!fhirItem.required;
-  node.itemType  = fhirTypeToItemType(fhirItem.type || 'string');
+  // Determine itemType before construction so the correct class is instantiated.
+  let itemType = fhirTypeToItemType(fhirItem.type || 'string');
 
-  // questionnaire-itemControl: radio-button → use 'radio' instead of 'select'
-  if (node.itemType === 'select' || node.itemType === 'open-choice') {
+  // questionnaire-itemControl: radio-button → 'radio' instead of 'select'
+  if (itemType === 'select' || itemType === 'open-choice') {
     const itemCtrl = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl'
     );
     const ctrlCode = itemCtrl?.valueCodeableConcept?.coding?.[0]?.code;
-    if (ctrlCode === 'radio-button') node.itemType = 'radio';
+    if (ctrlCode === 'radio-button') itemType = 'radio';
   }
+
+  const node = createItemNode(itemType, {
+    id:        fhirItem.linkId,
+    title:     fhirItem.text || fhirItem.linkId || 'Item',
+    mandatory: fhirItem.required === undefined ? null : !!fhirItem.required,
+  });
 
   node.options = fhirOptsToStr(fhirItem.answerOption);
 
@@ -276,9 +280,11 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
   const t = fhirItem.type || 'string';
 
   if (t === 'group') {
-    const node = makeGroup(fhirItem.text || fhirItem.linkId || 'Group');
-    node.id        = fhirItem.linkId || node.id;
-    node.mandatory = fhirItem.required === undefined ? null : !!fhirItem.required;
+    const node = createGroupNode({
+      id:        fhirItem.linkId,
+      title:     fhirItem.text || fhirItem.linkId || 'Group',
+      mandatory: fhirItem.required === undefined ? null : !!fhirItem.required,
+    });
     applyVisibility(node, fhirItem, linkIdMap);
     const hasOrGroup = applyConstraints(node, fhirItem);
     if (hasOrGroup) node.logicWithParent = 'OR';
@@ -321,9 +327,11 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
 
   // Question with nested sub-items → wrap in synthetic group
   if ((fhirItem.item || []).length > 0) {
-    const wrapper = makeGroup(fhirItem.text || fhirItem.linkId || 'Group');
-    wrapper.id        = (fhirItem.linkId || wrapper.id) + '-grp';
-    wrapper.mandatory = fhirItem.required === undefined ? null : !!fhirItem.required;
+    const wrapper = createGroupNode({
+      id:        fhirItem.linkId ? fhirItem.linkId + '-grp' : undefined,
+      title:     fhirItem.text || fhirItem.linkId || 'Group',
+      mandatory: fhirItem.required === undefined ? null : !!fhirItem.required,
+    });
     applyVisibility(wrapper, fhirItem, linkIdMap);
     wrapper.children.push(fhirQuestionToItem(fhirItem, linkIdMap, contained));
     for (const child of fhirItem.item) {
