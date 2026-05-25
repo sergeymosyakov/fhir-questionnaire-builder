@@ -205,7 +205,6 @@ function refreshCalcBadges() {
 
 // ── Interactive control for preview ──────────────────────────────────────────
 // Thin wrapper: resolves onChange/icon update, delegates DOM construction to
-// the control registry in js/controls/index.js
 function buildControl(node, iconEl, onAfterChange) {
   const updateOwnIcon = () => {
     if (!iconEl) return;
