@@ -124,7 +124,7 @@ export class GroupNode extends BaseNode {
     nested.className = 'preview-nested';
     for (const ch of this.children) {
       const childRes = rc.resultMap.get(ch.id);
-      if (childRes) rc.renderNode(childRes, nested);
+      if (childRes) BaseNode.dispatch(childRes, nested, rc);
     }
     if (nested.childElementCount > 0) container.appendChild(nested);
   }
@@ -156,10 +156,18 @@ export class GroupNode extends BaseNode {
           sep.textContent = logic;
           nested.appendChild(sep);
         }
-        rc.renderNode(childRes, nested);
+        BaseNode.dispatch(childRes, nested, rc);
         if (childRes.visible) firstVisible = false;
       }
     }
     if (nested.childElementCount > 0) target.appendChild(nested);
+  }
+
+  // Refresh pass/fail icons on every rendered group.
+  // Called from render-preview.js via _rc.updateGroupIcons after a value change.
+  static updateAll(rc) {
+    for (const [, { node }] of rc.groupIconMap.entries()) {
+      GroupNode.prototype.refreshIcon.call(node, rc);
+    }
   }
 }

@@ -1,6 +1,6 @@
 // ── Shared render context ──────────────────────────────────────────────────────
-// Written by render-preview.js, read by render-node.js and node classes.
-// Breaks the potential circular dependency between the modules.
+// Written by render-preview.js, read by node classes.
+// Breaks the potential circular dependency between node classes and state.js.
 
 export const _rc = {
   // Per-render-cycle (set at the start of each _asyncRender call):
@@ -19,8 +19,7 @@ export const _rc = {
   buildControl:       null, // function(node, iconEl, onAfterChange)
   buildRepeatControls: null, // function(node, iconEl, onAfterChange)
   formTick:           null, // _formTick ref (injected from render-preview.js)
-  renderNode:         null, // function(res, container) — dispatches node.renderPreview
-  updateGroupIcons:   null, // function() — refreshes all group pass/fail icons
+  updateGroupIcons:   null, // function() — GroupNode.updateAll(_rc); used as callback in item-node.js
 
   // State helpers — injected from state.js to avoid circular imports in node classes:
   isMandatory:    null, // function(node) → bool

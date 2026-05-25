@@ -7,7 +7,8 @@ import {
 } from './state.js';
 import { _formTick, _bulkUpdate } from './render-bus.js';
 import { _rc } from './preview/render-ctx.js';
-import { renderPreviewNode, updateGroupIcons } from './preview/render-node.js';
+import { BaseNode } from './nodes/index.js';
+import { GroupNode } from './nodes/group-node.js';
 
 // View preferences — UI-only, not domain state.
 // Owned here; updated via 'view-pref-change' CustomEvent from app.js.
@@ -280,7 +281,7 @@ function buildRepeatControls(node, iconEl, onAfterChange) {
 }
 
 // Set stable refs on _rc — done once at module load, after all local functions are defined.
-// render-node.js reads these via _rc to avoid a circular import on render-preview.js.
+// Node classes read these via _rc to avoid circular imports on render-preview.js.
 _rc.viewPrefs         = _viewPrefs;
 _rc.lastCtx           = _lastCtx;
 _rc.collapsedGroups   = collapsedGroups;
@@ -288,13 +289,14 @@ _rc.scrollToBuilder   = _scrollToBuilder;
 _rc.buildControl      = buildControl;
 _rc.buildRepeatControls = buildRepeatControls;
 _rc.formTick          = _formTick;
+// Callback used by item-node.js after control value changes:
+_rc.updateGroupIcons  = () => GroupNode.updateAll(_rc);
 // State helpers injected to break circular imports in node classes:
 _rc.isMandatory    = isMandatory;
 _rc.calcFormOk     = calcFormOk;
 _rc.evalConstraints = evalConstraints;
 _rc.getValue       = getValue;
 _rc.CHECKABLE_TYPES = CHECKABLE_TYPES;
-// renderNode is set by render-node.js after its module loads:
 
 // ── Async preview render with yield breaks ───────────────────────────────────
 // Splits heavy FHIRPath evaluation (Phase 1) from DOM rebuild (Phase 2) using
@@ -409,7 +411,7 @@ async function _asyncRender(version) {
   const frag = document.createDocumentFragment();
   for (const node of tree) {
     const res = resultMap.get(node.id);
-    if (res) renderPreviewNode(res, frag);
+    if (res) BaseNode.dispatch(res, frag, _rc);
   }
   lform.appendChild(frag);
 
@@ -429,7 +431,7 @@ async function _asyncRender(version) {
     }
   }
 
-  updateGroupIcons(); // sync group icons with initial values after full DOM build
+  GroupNode.updateAll(_rc); // sync group icons with initial values after full DOM build
   statusBadge.update({ anyVisible, hasCriteria: hasMandatory || hasCalc || hasConstraints || hasRange, finalOk, failingItems });
   search.refresh();
   progress.hide(); // no-op when progress was not shown (normal form interactions)
