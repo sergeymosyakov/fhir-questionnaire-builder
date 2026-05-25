@@ -34,6 +34,7 @@ document.addEventListener('preview-mode-change', e => {
   _formTick.value++;
 });
 import { findAncestorGroupIds, highlightJson } from './utils.js';
+import { NODE_REGISTRY } from './nodes/index.js';
 import { evaluateNode } from './eval.js';
 import { evalConstraints } from './state.js';
 import { buildQR } from './fhir/qr-builder.js';
@@ -217,7 +218,11 @@ function buildControl(node, iconEl, onAfterChange) {
   // Wrap _reCalc so calc badges update in-place after every oninput.
   const reCalcAndRefresh = () => { _reCalc(); refreshCalcBadges(); };
 
-  return node.buildControl({ getValue, setValue, onChange, _reCalc: reCalcAndRefresh, _formTick });
+  // Dispatch by itemType — the node's prototype may not match if itemType was
+  // mutated after creation (FHIR import or Answer Type modal type-change).
+  const ctx = { getValue, setValue, onChange, _reCalc: reCalcAndRefresh, _formTick };
+  const Cls = NODE_REGISTRY.get(node.itemType);
+  return Cls ? Cls.prototype.buildControl.call(node, ctx) : node.buildControl(ctx);
 }
 
 // ── Repeat container: renders N+1 rows with add/remove buttons ────────────────
