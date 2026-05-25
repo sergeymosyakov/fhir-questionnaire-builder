@@ -1217,3 +1217,58 @@ describe('importFHIR — group items', () => {
   });
 });
 
+// ── unknown extensions pass-through ──────────────────────────────────────────
+describe('importFHIR — unknown extensions', () => {
+  beforeEach(() => { _tree.splice(0); });
+
+  const minQ = items => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+
+  it('collects unknown extension on an item into _unknownExtensions', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'string', text: 'Q',
+      extension: [{ url: 'http://vendor.example.com/custom', valueString: 'val' }],
+    }]));
+    expect(_tree[0]._unknownExtensions).toHaveLength(1);
+    expect(_tree[0]._unknownExtensions[0].url).toBe('http://vendor.example.com/custom');
+    expect(_tree[0]._unknownExtensions[0].valueString).toBe('val');
+  });
+
+  it('does not collect known extensions (e.g. minLength) as unknown', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'string', text: 'Q',
+      extension: [{ url: 'http://hl7.org/fhir/StructureDefinition/minLength', valueInteger: 3 }],
+    }]));
+    expect(_tree[0]._unknownExtensions).toBeUndefined();
+    expect(_tree[0]._minLength).toBe(3);
+  });
+
+  it('separates known and unknown extensions on the same item', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'string', text: 'Q',
+      extension: [
+        { url: 'http://hl7.org/fhir/StructureDefinition/minLength', valueInteger: 2 },
+        { url: 'http://vendor.example.com/custom', valueString: 'val' },
+      ],
+    }]));
+    expect(_tree[0]._minLength).toBe(2);
+    expect(_tree[0]._unknownExtensions).toHaveLength(1);
+    expect(_tree[0]._unknownExtensions[0].url).toBe('http://vendor.example.com/custom');
+  });
+
+  it('collects unknown extension on a group into _unknownExtensions', () => {
+    importFHIR(minQ([{
+      linkId: 'g1', type: 'group', text: 'G',
+      extension: [{ url: 'http://vendor.example.com/group-ext', valueInteger: 99 }],
+      item: [{ linkId: 'q1', type: 'string', text: 'Q' }],
+    }]));
+    expect(_tree[0]._unknownExtensions).toHaveLength(1);
+    expect(_tree[0]._unknownExtensions[0].url).toBe('http://vendor.example.com/group-ext');
+    expect(_tree[0]._unknownExtensions[0].valueInteger).toBe(99);
+  });
+
+  it('leaves _unknownExtensions undefined when no extensions are present', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
+    expect(_tree[0]._unknownExtensions).toBeUndefined();
+  });
+});
+

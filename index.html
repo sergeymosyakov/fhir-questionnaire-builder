@@ -221,28 +221,7 @@
             <div id="loadRecentSep" class="load-menu-sep" style="display:none"></div>
             <div class="load-menu-item" id="loadFromFileItem">&#x1F4C2; From file&#x2026;</div>
             <div class="load-menu-sep"></div>
-            <div class="load-menu-group">FHIR R4 Samples</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="annual-health-check.fhir.json">&#x2605; Annual Health Check</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="example-bariatric.fhir.json">&#x2605; Bariatric (compact)</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="bariatric-extended.fhir.json">&#x2605; Bariatric (extended, 87 items)</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="ussg-fht.fhir.json">&#x2605; USSG Family Health History</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="prowl-ss.fhir.json">&#x2605; PROWL-SS Pain Assessment</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="phq-9.fhir.json">&#x2605; PHQ-9 Depression Screening</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="reference-example.fhir.json">&#x2605; Care Referral Request</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="sdc-variables-demo.fhir.json">&#x2605; BMI &amp; Body Composition</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="valueset-demo.fhir.json">&#x2605; Lifestyle &amp; Social History</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="slider-disabled-demo.fhir.json">&#x2605; Pain &amp; Symptom Assessment</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="rendering-xhtml-demo.fhir.json">&#x2605; Rendering XHTML Demo</div>
-            <div class="load-menu-sep"></div>
-            <div class="load-menu-group">FHIR STU3 Samples</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="phq-9.stu3.fhir.json"
-              data-tip-title="STU3 import"
-              data-tip-body="This questionnaire uses FHIR STU3 format (option[], hasAnswer, initialInteger). It is automatically normalised to R4 on import. Export will produce R4 JSON.">&#x2605; PHQ-9 Depression Screening <span style="font-size:10px;opacity:.65">(STU3&#x2192;R4)</span></div>
-            <div class="load-menu-sep"></div>
-            <div class="load-menu-group">Patient Scenarios</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="patient-scenario-eligibility.fhir.json">&#x1F9EA; Eligibility Screen</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="patient-scenario-risk.fhir.json">&#x1F9EA; Pre-op Risk Assessment</div>
-            <div class="load-menu-item load-menu-item--indented" data-sample="patient-scenario-calc-chain.fhir.json">&#x1F9EA; Risk Score Calc Chain</div>
+            <div class="load-menu-item" id="loadLibraryItem" data-testid="load-library-item">&#x1F4DA; From Library&#x2026;</div>
           </div>
         </div>
         <input type="file" id="fhirFileInput" accept=".json,application/json" style="display:none">
@@ -254,8 +233,7 @@
           <div class="load-menu" id="answersMenu" style="display:none">
             <div class="load-menu-item" id="loadAnswersItem" data-testid="load-answers-from-file">&#x1F4C2; From file&#x2026;</div>
             <div class="load-menu-sep"></div>
-            <div class="load-menu-item" data-response="phq-9-response.qr.json" id="loadResponsePhq9">&#x1F4CB; PHQ-9 &#x2014; Sample Response</div>
-            <div class="load-menu-item" data-response="example-bariatric-response.qr.json" id="loadResponseBariatric">&#x1F4CB; Bariatric &#x2014; Sample Response</div>
+            <div class="load-menu-item" id="loadAnswersLibraryItem" data-testid="load-answers-library-item">&#x1F4DA; From Library&#x2026;</div>
           </div>
         </div>
         <div class="load-wrap fhir-toolbar-gap" id="exportWrap" style="display:none">
@@ -524,6 +502,20 @@
 </div>
 
 <!-- QR Export modal -->
+<!-- Library modal -->
+<div id="libraryModal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span>Load from Library</span>
+      <button type="button" id="libraryModalClose" class="modal-close" title="Close">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="libraryModalBody"></div>
+    <div class="modal-footer">
+      <button type="button" id="libraryModalCloseBtn" class="modal-btn modal-btn--cancel">Close</button>
+    </div>
+  </div>
+</div>
+
 <div id="qrExportModal" class="modal-backdrop" style="display:none">
   <div class="modal-box">
     <div class="modal-header">

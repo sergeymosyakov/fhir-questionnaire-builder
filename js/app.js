@@ -26,6 +26,7 @@ import * as answerTypeModal from './ui/answer-type-modal.js';
 import * as metadataModal from './ui/metadata-modal.js';
 import * as codesModal from './ui/codes-modal.js';
 import * as qrExportModal from './ui/qr-export-modal.js';
+import * as libraryModal from './ui/library-modal.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup, renderTreeAsync } from './render-builder.js';
 import { navigateToPreview, reinitForm, initPreview } from './render-preview.js';
 import { showLinkId, showPrefix, showBadges, previewMode, showHiddenItems, questVariables, questContained, questMeta, qrMeta, resetQrMeta } from './state.js';
@@ -187,6 +188,12 @@ qrExportModal.init({
   closeBtn:  document.getElementById('qrExportModalClose'),
   cancelBtn: document.getElementById('qrExportModalCancel'),
   applyBtn:  document.getElementById('qrExportModalApply'),
+});
+libraryModal.init({
+  modal:    document.getElementById('libraryModal'),
+  closeBtn: document.getElementById('libraryModalClose'),
+  cancelBtn: document.getElementById('libraryModalCloseBtn'),
+  body:     document.getElementById('libraryModalBody'),
 });
 // ── JSON Viewer modal init ────────────────────────────────────────────────
 jsonViewer.init({
@@ -540,17 +547,16 @@ document.getElementById('loadFromFileItem').onclick = () => {
   loadMenu.style.display = 'none';
   document.getElementById('fhirFileInput').click();
 };
-document.querySelectorAll('#loadMenu [data-sample]').forEach(item => {
-  item.onclick = () => {
-    loadMenu.style.display = 'none';
-    const name = item.dataset.sample.replace(/\.fhir\.json$/, '').replace(/-/g, ' ');
-    progress.show('Loading ' + name + '…');
-    fetch('sampledata/' + item.dataset.sample)
+document.getElementById('loadLibraryItem').onclick = () => {
+  loadMenu.style.display = 'none';
+  libraryModal.open('fhir-r4', item => {
+    progress.show('Loading ' + item.label + '\u2026');
+    fetch('sampledata/' + item.file)
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(data => { progress.update(0, 1); _importAndValidate(data, item.dataset.sample.replace(/\.fhir\.json$/, '')); })
+      .then(data => { progress.update(0, 1); _importAndValidate(data, item.label); })
       .catch(err => { progress.hide(); alert('Could not load sample: ' + err.message); });
-  };
-});
+  }, 'questionnaire');
+};
 document.getElementById('fhirFileInput').onchange  = e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -591,15 +597,15 @@ document.getElementById('qrFileInput').onchange = e => {
   e.target.value = '';
 };
 
-document.querySelectorAll('#answersMenu [data-response]').forEach(item => {
-  item.onclick = () => {
-    answersMenu.style.display = 'none';
-    fetch('sampledata/' + item.dataset.response)
+document.getElementById('loadAnswersLibraryItem').onclick = () => {
+  answersMenu.style.display = 'none';
+  libraryModal.open('qr-responses', item => {
+    fetch('sampledata/' + item.file)
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(data => _applyQRAnswers(data))
       .catch(err => alert('Could not load sample response: ' + err.message));
-  };
-});
+  }, 'qr');
+};
 
 function _applyQRAnswers(qr) {
   const result = importQRAnswers(qr, values, tree);

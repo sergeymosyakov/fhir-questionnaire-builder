@@ -243,6 +243,10 @@ function nodeToFHIRItem(node) {
     const isInt = Number.isInteger(node._sliderStep);
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue', [isInt ? 'valueInteger' : 'valueDecimal']: node._sliderStep });
   }
+  // Pass-through: unknown extensions collected on import or added via Props modal
+  if (node._unknownExtensions && node._unknownExtensions.length) {
+    ext.push(...node._unknownExtensions.map(e => JSON.parse(JSON.stringify(e))));
+  }
   if (ext.length) fhirItem.extension = ext;
 
   return fhirItem;

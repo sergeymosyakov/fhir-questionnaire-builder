@@ -1,0 +1,43 @@
+[
+  {
+    "id": "fhir-r4",
+    "label": "FHIR R4 Samples",
+    "items": [
+      { "label": "Annual Health Check",          "file": "annual-health-check.fhir.json",         "type": "questionnaire" },
+      { "label": "Bariatric (compact)",           "file": "example-bariatric.fhir.json",           "type": "questionnaire" },
+      { "label": "Bariatric (extended, 87 items)","file": "bariatric-extended.fhir.json",          "type": "questionnaire" },
+      { "label": "USSG Family Health History",    "file": "ussg-fht.fhir.json",                    "type": "questionnaire" },
+      { "label": "PROWL-SS Pain Assessment",      "file": "prowl-ss.fhir.json",                    "type": "questionnaire" },
+      { "label": "PHQ-9 Depression Screening",    "file": "phq-9.fhir.json",                       "type": "questionnaire" },
+      { "label": "Care Referral Request",         "file": "reference-example.fhir.json",           "type": "questionnaire" },
+      { "label": "BMI & Body Composition",        "file": "sdc-variables-demo.fhir.json",          "type": "questionnaire" },
+      { "label": "Lifestyle & Social History",    "file": "valueset-demo.fhir.json",               "type": "questionnaire" },
+      { "label": "Pain & Symptom Assessment",     "file": "slider-disabled-demo.fhir.json",        "type": "questionnaire" },
+      { "label": "Rendering XHTML Demo",          "file": "rendering-xhtml-demo.fhir.json",        "type": "questionnaire" }
+    ]
+  },
+  {
+    "id": "fhir-stu3",
+    "label": "FHIR STU3 Samples",
+    "items": [
+      { "label": "PHQ-9 Depression Screening", "file": "phq-9.stu3.fhir.json", "type": "questionnaire", "note": "STU3→R4" }
+    ]
+  },
+  {
+    "id": "patient-scenarios",
+    "label": "Patient Scenarios",
+    "items": [
+      { "label": "Eligibility Screen",      "file": "patient-scenario-eligibility.fhir.json",  "type": "questionnaire" },
+      { "label": "Pre-op Risk Assessment",  "file": "patient-scenario-risk.fhir.json",          "type": "questionnaire" },
+      { "label": "Risk Score Calc Chain",   "file": "patient-scenario-calc-chain.fhir.json",    "type": "questionnaire" }
+    ]
+  },
+  {
+    "id": "qr-responses",
+    "label": "Sample Responses",
+    "items": [
+      { "label": "PHQ-9 — Sample Response",      "file": "phq-9-response.qr.json",              "type": "qr" },
+      { "label": "Bariatric — Sample Response",  "file": "example-bariatric-response.qr.json",  "type": "qr" }
+    ]
+  }
+]

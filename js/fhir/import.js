@@ -4,6 +4,37 @@ import { renderTree } from '../render-builder.js';
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
 import { normaliseSTU3 } from './stu3-shim.js';
 
+// ── Known extension URLs — any item.extension[] entry NOT in this set is
+// collected into node._unknownExtensions for pass-through round-tripping.
+export const KNOWN_ITEM_EXTENSION_URLS = new Set([
+  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-unit',
+  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression',
+  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression',
+  'http://hl7.org/fhir/StructureDefinition/minLength',
+  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat',
+  'http://hl7.org/fhir/StructureDefinition/entryFormat',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory',
+  'http://hl7.org/fhir/StructureDefinition/minValue',
+  'http://hl7.org/fhir/StructureDefinition/maxValue',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink',
+  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden',
+  'http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay',
+]);
+
+function _collectUnknownExtensions(fhirItem) {
+  const unknown = (fhirItem.extension || []).filter(e => !KNOWN_ITEM_EXTENSION_URLS.has(e.url));
+  return unknown.length ? unknown.map(e => JSON.parse(JSON.stringify(e))) : null;
+}
+
 // Walk the tree and pre-populate values[] from node._initialValue / _initialValues
 function applyInitialValues(nodes) {
   for (const node of nodes) {
@@ -346,6 +377,9 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       }
     }
   }
+  // Preserve any unrecognised extensions for round-trip pass-through
+  const unknownExts = _collectUnknownExtensions(fhirItem);
+  if (unknownExts) node._unknownExtensions = unknownExts;
   return node;
 }
 
@@ -376,6 +410,9 @@ function fhirItemToNode(fhirItem, linkIdMap, contained) {
            e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden'
     );
     if (groupHiddenExt?.valueBoolean === true) node._hidden = true;
+    // Preserve any unrecognised extensions for round-trip pass-through
+    const groupUnknown = _collectUnknownExtensions(fhirItem);
+    if (groupUnknown) node._unknownExtensions = groupUnknown;
     for (const child of fhirItem.item || []) {
       const n = fhirItemToNode(child, linkIdMap, contained);
       if (n) node.children.push(n);
@@ -401,7 +438,7 @@ function fhirItemToNode(fhirItem, linkIdMap, contained) {
 }
 
 // Exported for unit testing
-export { fhirTypeToItemType, fhirOptsToStr, humanEnableWhen, applyVisibility };
+export { fhirTypeToItemType, fhirOptsToStr, humanEnableWhen, applyVisibility, _collectUnknownExtensions };
 
 // Main import entry point
 export function importFHIR(fhirJson, renderFn) {

@@ -1296,3 +1296,54 @@ describe('exportFHIR', () => {
     expect(mockRevokeObjectURL).toHaveBeenCalled();
   });
 });
+
+
+// ── _unknownExtensions pass-through ──────────────────────────────────────────
+describe('_unknownExtensions pass-through', () => {
+  it('writes unknown extensions to item.extension[]', () => {
+    const node = {
+      id: 'q1', title: 'Q1', type: 'item', itemType: 'text',
+      _unknownExtensions: [{ url: 'http://vendor.example.com/custom', valueString: 'val' }],
+    };
+    const q = build([node]);
+    const ext = q.item[0].extension;
+    expect(ext).toBeDefined();
+    const custom = ext.find(e => e.url === 'http://vendor.example.com/custom');
+    expect(custom).toBeDefined();
+    expect(custom.valueString).toBe('val');
+  });
+
+  it('appends unknown extensions after known ones', () => {
+    const node = {
+      id: 'q1', title: 'Q1', type: 'item', itemType: 'text',
+      _minLength: 3,
+      _unknownExtensions: [{ url: 'http://vendor.example.com/custom', valueBoolean: true }],
+    };
+    const q = build([node]);
+    const ext = q.item[0].extension;
+    expect(ext.length).toBeGreaterThanOrEqual(2);
+    const minLen = ext.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/minLength');
+    const custom = ext.find(e => e.url === 'http://vendor.example.com/custom');
+    expect(minLen).toBeDefined();
+    expect(custom).toBeDefined();
+    expect(custom.valueBoolean).toBe(true);
+  });
+
+  it('does not add extension[] when _unknownExtensions is empty', () => {
+    const node = { id: 'q1', title: 'Q1', type: 'item', itemType: 'text', _unknownExtensions: [] };
+    const q = build([node]);
+    expect(q.item[0].extension).toBeUndefined();
+  });
+
+  it('deep-clones unknown extensions (no shared references)', () => {
+    const src = { url: 'http://vendor.example.com/custom', valueString: 'val' };
+    const node = {
+      id: 'q1', title: 'Q1', type: 'item', itemType: 'text',
+      _unknownExtensions: [src],
+    };
+    const q = build([node]);
+    const exported = q.item[0].extension.find(e => e.url === 'http://vendor.example.com/custom');
+    expect(exported).not.toBe(src);
+    expect(exported.valueString).toBe('val');
+  });
+});

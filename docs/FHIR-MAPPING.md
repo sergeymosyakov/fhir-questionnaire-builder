@@ -285,6 +285,7 @@ Additional round-trip fields (stored opaquely; not editable in the builder):
 |---|---|---|
 | `_answerValueSet` | `item.answerValueSet` | URL preserved; not resolved to answer options |
 | `questContained[]` | `Questionnaire.contained[]` | Resources deep-copied on export; not otherwise processed |
+| `_unknownExtensions[]` | `item.extension[]` | Unrecognised extension objects preserved verbatim; editable via Props modal |
 
 ### QR answer encoding
 
@@ -352,7 +353,7 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 
 | FHIR field / extension | Status | Notes |
 |---|---|---|
-| Unknown extensions | ⚠️ Silently dropped | Any `item.extension[]` entry whose URL is not explicitly handled by the builder is discarded on import and will not appear in the exported JSON. |
+| Unknown extensions | ✅ Preserved round-trip | Any `item.extension[]` entry whose URL is not in the builder's known-URL set is stored in `_unknownExtensions[]` on import and written back verbatim on export. Editable via the **Props** button (Extensions collapsible section). |
 | `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
 | `item.answerValueSet` — external URL | 🔧 URL preserved round-trip | Not resolved to answer options; no FHIR terminology server integration. `#id` contained refs ARE resolved (see Round-Trip Safety) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |

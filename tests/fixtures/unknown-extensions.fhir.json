@@ -1,0 +1,46 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "unknown-ext-test",
+  "status": "draft",
+  "title": "Unknown Extensions Test",
+  "item": [
+    {
+      "linkId": "q1",
+      "text": "Question with custom extension",
+      "type": "string",
+      "extension": [
+        {
+          "url": "http://vendor.example.com/fhir/StructureDefinition/custom-field",
+          "valueString": "custom-value"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/minLength",
+          "valueInteger": 2
+        }
+      ]
+    },
+    {
+      "linkId": "q2",
+      "text": "Plain question",
+      "type": "string"
+    },
+    {
+      "linkId": "grp1",
+      "text": "Group with custom extension",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://vendor.example.com/fhir/StructureDefinition/custom-group-field",
+          "valueInteger": 42
+        }
+      ],
+      "item": [
+        {
+          "linkId": "q3",
+          "text": "Child item",
+          "type": "string"
+        }
+      ]
+    }
+  ]
+}
