@@ -27,6 +27,9 @@ export class ItemNode extends BaseNode {
     throw new Error(`buildControl() not implemented on ${this.constructor.name} (itemType: ${this.itemType})`);
   }
 
+  /** Whether this item type supports repeats. Overridden by CheckboxNode and DisplayNode. */
+  supportsRepeat() { return true; }
+
   // ── Condition icon logic for items ────────────────────────────────────────
   _evalCondition(res, rc) {
     const { ctx, cEnv } = rc;
@@ -146,9 +149,8 @@ export class ItemNode extends BaseNode {
     row.appendChild(ib);
   }
 
-  // Build interactive control (or repeat controls). Override in DisplayNode to skip.
+  // Build interactive control (or repeat controls).
   _buildControl(row, res, rc) {
-    if (this.itemType === 'display') return;
     if (this._readOnly || this._calculatedExpr) return;
     if (this.repeats && this.itemType !== 'checkbox') {
       row.appendChild(rc.buildRepeatControls(this, res._iconEl, () => rc.updateGroupIcons()));
@@ -437,7 +439,7 @@ export class ItemNode extends BaseNode {
     setActive(exprLink,       !!(node._calculatedExpr || node._initialExpr));
     setActive(statesLink,     node.mandatory === true || !!node._readOnly || !!node._hidden);
     setActive(repeatLink,     !!node.repeats);
-    if (node.itemType === 'checkbox' || node.itemType === 'display') repeatLink.style.display = 'none';
+    if (!node.supportsRepeat()) repeatLink.style.display = 'none';
     setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
     setActive(styleLink,      !!(node._renderStyle || node._renderXhtml));
     setActive(constraintLink, !!(node.constraint?.length));

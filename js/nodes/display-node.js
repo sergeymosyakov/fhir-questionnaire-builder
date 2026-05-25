@@ -18,6 +18,8 @@ export class DisplayNode extends ItemNode {
     return createWrap();
   }
 
+  supportsRepeat() { return false; }
+
   // ── Add displayCategory CSS class to the row ──────────────────────────────
   _initRowClass(row) {
     if (this._displayCategory) row.classList.add('lform-item--' + this._displayCategory);

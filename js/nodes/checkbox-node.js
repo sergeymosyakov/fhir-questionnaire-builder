@@ -11,6 +11,8 @@ export class CheckboxNode extends ItemNode {
     this.itemType = 'checkbox';
   }
 
+  supportsRepeat() { return false; }
+
   buildControl(ctx) {
     const node = this;
     const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
