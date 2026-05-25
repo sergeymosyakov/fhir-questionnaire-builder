@@ -52,7 +52,10 @@ export class BaseNode {
     if (!res.visible && !res.showDimmed) return;
     const isPatient = rc.previewMode === 'patient';
     if (res.hidden && (isPatient || !rc.viewPrefs.showHiddenItems)) return;
-    if (!res.visible && res.showDimmed) { this._renderDimmed(res, container, rc); return; }
+    if (!res.visible && res.showDimmed) {
+      if (!isPatient) this._renderDimmed(res, container, rc);
+      return;
+    }
     if (res.disabled)                   { this._renderDisabled(res, container, rc); return; }
 
     const row   = this._createBaseRow(res, rc);
