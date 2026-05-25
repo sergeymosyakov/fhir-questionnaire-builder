@@ -329,6 +329,7 @@ export class GroupNode extends BaseNode {
       'Appearance (rendering-style)',
       'Inline CSS applied to the group title in the preview. Stored in the standard FHIR rendering-style extension on the _text element.',
       'Questionnaire.item._text.extension[rendering-style]', 'R4 \u00B7 optional');
+    styleLink.onclick = () => MODAL_REGISTRY.get('appearance').open(node, styleLink, setActive);
 
     const propsLink = document.createElement('a');
     propsLink.textContent = 'Props';
