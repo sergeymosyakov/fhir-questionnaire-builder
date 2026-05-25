@@ -166,15 +166,17 @@ test.describe('maxSize — file-size validation', () => {
     await expect(nameTag).not.toHaveClass(/file-name-tag--error/);
   });
 
-  test.skip('file exceeding limit shows error tag', async ({ page }) => { // TODO: flaky – onchange fires but nameTag resets to "No file chosen" when run after other tests; investigate _formTick / DOM replacement
+  test('file exceeding limit shows error modal and resets nameTag', async ({ page }) => {
     await loadFixture(page);
     const row = page.locator('[data-preview-id="att-maxsize"]');
     const fileInput = row.locator('input[type="file"]');
     const bigBuf = Buffer.alloc(3 * 1024 * 1024, 'a'); // 3 MB > 2 MB limit
     await fileInput.setInputFiles({ name: 'big.pdf', mimeType: 'application/pdf', buffer: bigBuf });
+    // Error modal is the user-visible feedback; preview re-renders nameTag to default
+    await expect(page.locator('.notif--error .modal-body')).toContainText('File too large');
     const nameTag = row.locator('.file-name-tag');
-    await expect(nameTag).toHaveClass(/file-name-tag--error/);
-    await expect(nameTag).toContainText('Too large');
+    await expect(nameTag).toContainText('No file chosen');
+    await expect(nameTag).not.toHaveClass(/file-name-tag--error/);
   });
 
   test('att-none accepts any file size', async ({ page }) => {
