@@ -329,7 +329,7 @@ test.describe('Navigation', () => {
 test.describe('Load FHIR → both panels', () => {
   // TODO: builder renders children of collapsed groups in DOM (data-node-id present)
   // while preview skips them — counts diverge for default-closed groups.
-  test.skip('both panels render after sample load', { timeout: 60_000 }, async ({ page }) => {
+  test('both panels render after sample load', { timeout: 60_000 }, async ({ page }) => {
     await page.goto('/');
     await waitForLoad(page);
 
@@ -337,6 +337,11 @@ test.describe('Load FHIR → both panels', () => {
     await page.getByTestId('load-library-item').click();
     await page.locator('[data-sample="example-bariatric.fhir.json"]').waitFor({ timeout: 10_000 });
     await page.click('[data-sample="example-bariatric.fhir.json"]');
+
+    // Expand all builder groups so children get data-node-id in DOM,
+    // and wait for preview to follow suit.
+    await page.getByTestId('expand-all-btn').click();
+    await page.getByTestId('preview-expand-all-btn').click();
 
     // Wait until both async renders finish and counts are equal.
     // Every builder node must have a corresponding preview row.
