@@ -1347,3 +1347,33 @@ describe('_unknownExtensions pass-through', () => {
     expect(exported.valueString).toBe('val');
   });
 });
+
+// ── maxSize (attachment) ──────────────────────────────────────────────────────
+describe('buildFHIRObject — _maxFileSizeMB', () => {
+  const MS_URL = 'http://hl7.org/fhir/StructureDefinition/maxSize';
+
+  it('exports maxFileSizeMB as maxSize extension with valueDecimal', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment', _maxFileSizeMB: 5 }]);
+    const ext = q.item[0].extension || [];
+    const msExt = ext.find(e => e.url === MS_URL);
+    expect(msExt?.valueDecimal).toBe(5);
+  });
+
+  it('exports fractional maxFileSizeMB as valueDecimal', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment', _maxFileSizeMB: 2.5 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MS_URL)?.valueDecimal).toBe(2.5);
+  });
+
+  it('omits maxSize extension when _maxFileSizeMB is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.filter(e => e.url === MS_URL)).toHaveLength(0);
+  });
+
+  it('omits maxSize extension when _maxFileSizeMB is null', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment', _maxFileSizeMB: null }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.filter(e => e.url === MS_URL)).toHaveLength(0);
+  });
+});

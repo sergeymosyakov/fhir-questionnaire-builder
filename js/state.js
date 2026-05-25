@@ -190,10 +190,14 @@ export const calcFormOk = node => {
     if (!val || val === '') return !isMandatory(node);
     return _isValidUrl(val);
   }
-  // attachment: required means a file must be chosen
+  // attachment: required means a file must be chosen; also enforce maxFileSizeMB
   if (node.itemType === 'attachment') {
+    const val = getValue(node.id);
+    if (val && node._maxFileSizeMB !== undefined) {
+      if (val.size > node._maxFileSizeMB * 1024 * 1024) return false;
+    }
     if (!isMandatory(node)) return true;
-    return getValue(node.id) != null;
+    return val != null;
   }
   // integer/decimal/number: check min/max range (regardless of required)
   if (node.itemType === 'integer' || node.itemType === 'decimal' || node.itemType === 'number') {

@@ -29,6 +29,7 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden',
   'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden',
   'http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay',
+  'http://hl7.org/fhir/StructureDefinition/maxSize',
 ]);
 
 function _collectUnknownExtensions(fhirItem) {
@@ -307,6 +308,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     const v = sliderExt.valueDecimal ?? sliderExt.valueInteger;
     if (v !== undefined) node._sliderStep = v;
   }
+
+  // maxSize (attachment items only — maximum file size in MB)
+  const maxSizeExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxSize'
+  );
+  if (maxSizeExt?.valueDecimal !== undefined) node._maxFileSizeMB = maxSizeExt.valueDecimal;
 
   // questionnaire-supportLink (0..* URI links to external help/reference)
   const supportLinks = (fhirItem.extension || [])

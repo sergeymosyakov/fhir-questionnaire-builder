@@ -1088,6 +1088,40 @@ describe('importFHIR', () => {
     });
   });
 
+  // ── _maxFileSizeMB ────────────────────────────────────────────────────────
+  describe('_maxFileSizeMB', () => {
+    const MS_URL = 'http://hl7.org/fhir/StructureDefinition/maxSize';
+
+    it('reads maxSize valueDecimal into node._maxFileSizeMB', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'attachment', text: 'Q',
+        extension: [{ url: MS_URL, valueDecimal: 5 }],
+      }]));
+      expect(_tree[0]._maxFileSizeMB).toBe(5);
+    });
+
+    it('reads fractional maxSize into _maxFileSizeMB', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'attachment', text: 'Q',
+        extension: [{ url: MS_URL, valueDecimal: 2.5 }],
+      }]));
+      expect(_tree[0]._maxFileSizeMB).toBe(2.5);
+    });
+
+    it('does not set _maxFileSizeMB when extension is absent', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'attachment', text: 'Q' }]));
+      expect(_tree[0]._maxFileSizeMB).toBeUndefined();
+    });
+
+    it('does not collect maxSize as unknown extension', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'attachment', text: 'Q',
+        extension: [{ url: MS_URL, valueDecimal: 10 }],
+      }]));
+      expect(_tree[0]._unknownExtensions).toBeUndefined();
+    });
+  });
+
   // ── _optionOrdinals ───────────────────────────────────────────────────────
   describe('_optionOrdinals', () => {
     const ORD_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';

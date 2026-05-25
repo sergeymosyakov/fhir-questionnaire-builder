@@ -189,6 +189,11 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/minLength', valueInteger: node._minLength });
   }
 
+  // maxSize (attachment items only — maximum file size in MB)
+  if (node._maxFileSizeMB !== undefined && node._maxFileSizeMB !== null) {
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/maxSize', valueDecimal: node._maxFileSizeMB });
+  }
+
   // sdc-questionnaire-entryFormat
   if (node._entryFormat) {
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat', valueString: node._entryFormat });

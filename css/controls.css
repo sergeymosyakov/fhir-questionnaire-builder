@@ -220,6 +220,16 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointe
   margin-left: 6px;
   font-style: italic;
 }
+.file-name-tag--error {
+  color: var(--c-err, #d32f2f);
+  font-style: normal;
+  font-weight: 600;
+}
+.file-size-hint {
+  font-size: 10px;
+  color: var(--c-text-2);
+  margin-left: 6px;
+}
 
 /* === Read-only control (item.readOnly === true) ============================== */
 .ctrl-readonly {

@@ -120,6 +120,7 @@ export function open(node, typeLink, setActive) {
     draftEntryFormat:     node._entryFormat || '',
     draftOrientation:     node._choiceOrientation || '',
     draftDisplayCategory: node._displayCategory || '',
+    draftMaxFileSizeMB:   node._maxFileSizeMB !== undefined ? String(node._maxFileSizeMB) : '',
   };
 
   setModalTitle(_el.title, 'Answer Type', node.title || node.id || 'Item');
@@ -220,6 +221,14 @@ function _apply() {
     delete node._displayCategory;
   }
 
+  // maxFileSizeMB (attachment items only)
+  if (node.itemType === 'attachment' && _pending.draftMaxFileSizeMB !== '') {
+    const mb = parseFloat(_pending.draftMaxFileSizeMB);
+    if (!isNaN(mb) && mb > 0) node._maxFileSizeMB = mb; else delete node._maxFileSizeMB;
+  } else {
+    delete node._maxFileSizeMB;
+  }
+
   // Keep the repeatable link visible/hidden correctly
   const nodeEl = document.querySelector(`[data-node-id="${node.id}"]`);
   const rl = nodeEl?.querySelector('[data-testid="action-repeatable"]');
@@ -272,8 +281,9 @@ function _renderBody(container) {
       unitSection.style.display        = _pending.draftType === 'quantity'    ? 'block' : 'none';
       numericSection.style.display     = (_pending.draftType === 'integer' || _pending.draftType === 'decimal') ? 'block' : 'none';
       placeholderSection.style.display = ENTRY_FORMAT_TYPES.has(_pending.draftType) ? 'block' : 'none';
-      orientationSection.style.display  = _pending.draftType === 'radio'   ? 'block' : 'none';
-      displayCatSection.style.display   = _pending.draftType === 'display' ? 'block' : 'none';
+      orientationSection.style.display  = _pending.draftType === 'radio'      ? 'block' : 'none';
+      displayCatSection.style.display   = _pending.draftType === 'display'    ? 'block' : 'none';
+      attachSection.style.display       = _pending.draftType === 'attachment' ? 'block' : 'none';
     },
   });
   typeRow.appendChild(typeLbl);
@@ -612,4 +622,30 @@ function _renderBody(container) {
 
   displayCatSection.append(displayCatLbl, displayCatSel.el);
   container.appendChild(displayCatSection);
+
+  // ── Attachment: max file size ─────────────────────────────────────────────
+  const attachSection = document.createElement('div');
+  attachSection.className = 'at-modal-sub';
+  attachSection.style.display = _pending.draftType === 'attachment' ? 'block' : 'none';
+
+  const maxSizeLbl = document.createElement('div');
+  maxSizeLbl.className   = 'at-modal-sub-lbl at-modal-sub-lbl--tip';
+  maxSizeLbl.textContent = 'Max file size (MB):';
+  maxSizeLbl.dataset.tipTitle = 'Maximum file size';
+  maxSizeLbl.dataset.tipBody  = 'Maximum allowed file size in megabytes. Validated when the user selects a file in preview. Exported as the maxSize FHIR extension (valueDecimal).';
+  maxSizeLbl.dataset.tipFhir  = 'item.extension[maxSize].valueDecimal';
+  maxSizeLbl.dataset.tipSpec  = 'R4';
+
+  const maxSizeInp = document.createElement('input');
+  maxSizeInp.type = 'number';
+  maxSizeInp.min = '0.01';
+  maxSizeInp.step = 'any';
+  maxSizeInp.className = 'at-modal-num-inp';
+  maxSizeInp.dataset.testid = 'max-file-size-input';
+  maxSizeInp.value = _pending.draftMaxFileSizeMB;
+  maxSizeInp.placeholder = 'e.g. 5';
+  maxSizeInp.oninput = () => { _pending.draftMaxFileSizeMB = maxSizeInp.value; };
+
+  attachSection.append(maxSizeLbl, maxSizeInp);
+  container.appendChild(attachSection);
 }
