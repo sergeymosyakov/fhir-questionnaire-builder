@@ -393,6 +393,30 @@ async function _asyncRender(version) {
   const groupIconMap = new Map();
   _rc.ctx = ctx; _rc.resultMap = resultMap; _rc.cEnv = _cEnv; _rc.visible = visible; _rc.groupIconMap = groupIconMap; _rc.previewMode = _previewMode;
 
+  // Phase 2: render root nodes into a DocumentFragment for a single reflow
+  const frag = document.createDocumentFragment();
+  for (const node of tree) {
+    const res = resultMap.get(node.id);
+    if (res) renderPreviewNode(res, frag);
+  }
+  lform.appendChild(frag);
+
+  // Restore scroll position after DOM rebuild
+  if (_scrollPanel && _savedScroll) _scrollPanel.scrollTop = _savedScroll;
+
+  // Restore focus after DOM rebuild
+  if (_focusInfo) {
+    const row = lform.querySelector('[data-preview-id="' + _focusInfo.previewId + '"]');
+    if (row) {
+      const inputs = Array.from(row.querySelectorAll('input, textarea, select'));
+      const el = inputs[_focusInfo.inputIndex];
+      if (el) {
+        el.focus();
+        try { el.setSelectionRange(_focusInfo.selStart, _focusInfo.selEnd); } catch {}
+      }
+    }
+  }
+
   updateGroupIcons(); // sync group icons with initial values after full DOM build
   statusBadge.update({ anyVisible, hasCriteria: hasMandatory || hasCalc || hasConstraints || hasRange, finalOk, failingItems });
   search.refresh();
