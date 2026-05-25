@@ -23,7 +23,7 @@ import * as initialModal from './ui/initial-modal.js';
 import * as appearanceModal from './ui/appearance-modal.js';
 import * as repeatableModal from './ui/repeatable-modal.js';
 import * as statesModal from './ui/states-modal.js';
-import * as answerTypeModal from './ui/answer-type-modal.js';
+import * as answerTypeModal from './ui/answer-type/modal.js';
 import * as metadataModal from './ui/metadata-modal.js';
 import * as codesModal from './ui/codes-modal.js';
 import * as qrExportModal from './ui/qr-export-modal.js';
