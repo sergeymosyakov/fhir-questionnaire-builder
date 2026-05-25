@@ -10,8 +10,8 @@ import { renderGroup } from './node-group.js';
 // UI-only collapse state per node.id — not part of FHIR data, owned here
 const collapsed = new Map();
 
-// Inject reactive state into _shared (triggerCalcRecalc needs them)
-sharedInit({ tree, formTick: _formTick, rawFhir, values });
+// Inject reactive state into _shared (triggerCalcRecalc + renderTree need them)
+sharedInit({ tree, formTick: _formTick, rawFhir, values, renderTree });
 
 /**
  * @typedef {Object} BuilderCtx

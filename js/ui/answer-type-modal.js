@@ -11,13 +11,12 @@
 // init(elements)                       — wire DOM once at startup
 // open(node, typeLink, setActive)      — populate body + show
 
-import { questContained, values, deleteValue } from '../state.js';
+import { questContained, tree, values, deleteValue } from '../state.js';
 import { resolveContainedValueSet } from '../fhir/import.js';
-import { triggerCalcRecalc } from '../builder/_shared.js';
+import { triggerCalcRecalc, renderTree } from '../builder/_shared.js';
+import { createItemNode } from '../nodes/index.js';
 import { createCustomSelect } from './custom-select.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
-import { NODE_REGISTRY } from '../nodes/index.js';
-import { ItemNode } from '../nodes/item-node.js';
 import {
   CHOICE_TYPES, ENTRY_FORMAT_TYPES, NUMERIC_TYPES,
   ITEM_TYPES, FHIR_R4_TYPES, BUILDER_UNITS,
@@ -26,6 +25,15 @@ import {
 
 let _el      = null;
 let _pending = null;
+
+// Replace a node in the reactive tree array (recursive, in-place splice).
+function _replaceInTree(treeArr, nodeId, newNode) {
+  for (let i = 0; i < treeArr.length; i++) {
+    if (treeArr[i].id === nodeId) { treeArr.splice(i, 1, newNode); return true; }
+    if (treeArr[i].children && _replaceInTree(treeArr[i].children, nodeId, newNode)) return true;
+  }
+  return false;
+}
 
 // ── module API ────────────────────────────────────────────────────────────────
 
@@ -67,7 +75,7 @@ export function open(node, typeLink, setActive) {
 
 function _apply() {
   if (!_pending) return;
-  const { node, typeLink, setActive } = _pending;
+  let node = _pending.node;
 
   // Clear stored answers when type changes
   if (node.itemType !== _pending.draftType) {
@@ -78,9 +86,12 @@ function _apply() {
     delete values[id + '$$n'];
   }
 
-  node.itemType = _pending.draftType;
-  // Update prototype so node.buildControl() dispatches the correct implementation.
-  Object.setPrototypeOf(node, NODE_REGISTRY.get(node.itemType)?.prototype ?? ItemNode.prototype);
+  // Replace node in tree with a new instance of the correct class.
+  // Copies all own properties (id, title, enableWhen, etc.) then overrides itemType.
+  const newNode = createItemNode(_pending.draftType, { id: node.id });
+  Object.assign(newNode, node, { itemType: _pending.draftType });
+  _replaceInTree(tree, node.id, newNode);
+  node = newNode; // rebind to the new correctly-typed instance
 
   // checkbox / display cannot be repeatable
   if ((node.itemType === 'checkbox' || node.itemType === 'display') && node.repeats) {
@@ -191,15 +202,8 @@ function _apply() {
     delete node._openLabel;
   }
 
-  // Keep the repeatable link visible/hidden correctly
-  const nodeEl = document.querySelector(`[data-node-id="${node.id}"]`);
-  const rl = nodeEl?.querySelector('[data-testid="action-repeatable"]');
-  if (rl) {
-    const noRepeats = node.itemType === 'checkbox' || node.itemType === 'display';
-    rl.style.display = noRepeats ? 'none' : '';
-  }
-
-  setActive(typeLink, true);
+  // Re-render builder (creates correct row for new type; handles repeatLink visibility etc.)
+  renderTree();
   triggerCalcRecalc();
   _close();
 }

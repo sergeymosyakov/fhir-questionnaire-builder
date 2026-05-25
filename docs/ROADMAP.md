@@ -24,6 +24,4 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Technical Debt
 
-### `Object.setPrototypeOf` in `answer-type-modal.js`
-
-`answer-type-modal.js` mutates `node.itemType` and then patches the prototype with `Object.setPrototypeOf`. The proper fix is to replace the node in the reactive tree entirely (preserving `id`, `title`, `mandatory`, `enableWhen`, etc.) — but that requires reworking the tree-replacement helpers and all builder code that holds references to nodes. Lower priority; current solution is correct and tested.
+*No outstanding items.*

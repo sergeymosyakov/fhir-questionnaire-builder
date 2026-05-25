@@ -33,6 +33,11 @@ export function triggerCalcRecalc() {
   formTick.value++;
 }
 
+/** Re-render the builder tree (injected from builder/index.js to avoid circular imports). */
+export function renderTree() {
+  if (_deps?.renderTree) _deps.renderTree();
+}
+
 // Collect all item nodes as flat list with breadcrumb labels for dropdowns
 export function getAllItems(nodes, result = [], prefix = '') {
   for (const n of nodes) {
