@@ -446,7 +446,6 @@ export class GroupNode extends BaseNode {
     div.appendChild(header);
     div.appendChild(btnDel);
 
-    ctx.addPanel('style', p => ctx.buildStylePanel(node, p, styleLink, setActive, ctx), div, panels);
 
     setActive(visLink,    !!(node.enableWhen?.length) || !!node.enableWhenExpression);
     setActive(exprLink,   !!node._calculatedExpr);
