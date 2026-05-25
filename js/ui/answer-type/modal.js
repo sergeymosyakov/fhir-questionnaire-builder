@@ -12,17 +12,12 @@ import { MODAL_REGISTRY } from '../modal-registry.js';
 // init(elements)                       — wire DOM once at startup
 // open(node, typeLink, setActive)      — populate body + show
 
-import { questContained, tree, values, deleteValue } from '../../state.js';
-import { resolveContainedValueSet } from '../../fhir/import.js';
+import { tree, values, deleteValue } from '../../state.js';
 import { triggerCalcRecalc, renderTree } from '../../builder/_shared.js';
 import { createItemNode } from '../../nodes/index.js';
 import { createCustomSelect } from '../custom-select.js';
 import { initModal, setModalTitle, openModal, closeModal } from '../modal-base.js';
-import {
-  CHOICE_TYPES, ENTRY_FORMAT_TYPES, NUMERIC_TYPES,
-  ITEM_TYPES,
-  _optsWithOrdinals, _parseOptsWithOrdinals,
-} from './data.js';
+import { ITEM_TYPES, _optsWithOrdinals } from './data.js';
 import { SECTION_REGISTRY } from './sections.js';
 
 let _el      = null;
@@ -102,107 +97,7 @@ function _apply() {
     delete node._maxOccurs;
   }
 
-  if (CHOICE_TYPES.has(node.itemType)) {
-    if (_pending.draftAVS) {
-      node._answerValueSet = _pending.draftAVS;
-      // Resolve local #vs-id → options string for preview rendering
-      node.options = resolveContainedValueSet(questContained, _pending.draftAVS);
-      delete node._optionOrdinals;
-      delete node._optionPrefixes;
-    } else {
-      delete node._answerValueSet;
-      // Extract ordinals from draft, store clean "code=Label" in node.options
-      const _parsedOrds = _parseOptsWithOrdinals(_pending.draftOptions);
-      const _newOrdinals = {};
-      node.options = _parsedOrds.map(({ code, display, ordinal }) => {
-        if (ordinal !== undefined) _newOrdinals[code] = ordinal;
-        return code + '=' + display;
-      }).join(',');
-      if (Object.keys(_newOrdinals).length) node._optionOrdinals = _newOrdinals;
-      else delete node._optionOrdinals;
-
-      // option prefixes
-      const _newPrefixes = {};
-      (_pending.draftPrefixes || '').split(',').forEach(s => {
-        const idx = s.indexOf('=');
-        if (idx < 1) return;
-        const code = s.slice(0, idx).trim();
-        const pfx  = s.slice(idx + 1).trim();
-        if (code && pfx) _newPrefixes[code] = pfx;
-      });
-      if (Object.keys(_newPrefixes).length) node._optionPrefixes = _newPrefixes;
-      else delete node._optionPrefixes;
-    }
-  } else {
-    // Non-choice type: clear choice-specific state
-    delete node._answerValueSet;
-    delete node._optionOrdinals;
-    delete node._optionPrefixes;
-    node.options = '';
-  }
-
-  node.referenceResource = (node.itemType === 'reference' && _pending.draftRefRes) ? _pending.draftRefRes : undefined;
-  node.quantityUnit      = (node.itemType === 'quantity'  && _pending.draftUnit)   ? _pending.draftUnit   : undefined;
-
-  // Numeric constraints: min/max/slider step (integer and decimal only)
-  if (NUMERIC_TYPES.has(node.itemType)) {
-    const _pf    = s => { const n = parseFloat(s); return isNaN(n) ? undefined : n; };
-    const _round = node.itemType === 'integer';
-    const minV   = _pf(_pending.draftMinValue);
-    const maxV   = _pf(_pending.draftMaxValue);
-    const stepV  = _pf(_pending.draftSliderStep);
-    if (minV  !== undefined)              node._minValue   = _round ? Math.round(minV)  : minV;  else delete node._minValue;
-    if (maxV  !== undefined)              node._maxValue   = _round ? Math.round(maxV)  : maxV;  else delete node._maxValue;
-    if (stepV !== undefined && stepV > 0) node._sliderStep = _round ? Math.round(stepV) : stepV; else delete node._sliderStep;
-  } else {
-    delete node._minValue;
-    delete node._maxValue;
-    delete node._sliderStep;
-  }
-
-  // entryFormat placeholder hint (text-like types)
-  if (ENTRY_FORMAT_TYPES.has(node.itemType) && _pending.draftEntryFormat.trim()) {
-    node._entryFormat = _pending.draftEntryFormat.trim();
-  } else {
-    delete node._entryFormat;
-  }
-
-  // choiceOrientation (radio items only)
-  if (node.itemType === 'radio' && _pending.draftOrientation) {
-    node._choiceOrientation = _pending.draftOrientation;
-  } else {
-    delete node._choiceOrientation;
-  }
-
-  // displayCategory (display items only)
-  if (node.itemType === 'display' && _pending.draftDisplayCategory) {
-    node._displayCategory = _pending.draftDisplayCategory;
-  } else {
-    delete node._displayCategory;
-  }
-
-  // maxFileSizeMB (attachment items only)
-  if (node.itemType === 'attachment' && _pending.draftMaxFileSizeMB !== '') {
-    const mb = parseFloat(_pending.draftMaxFileSizeMB);
-    if (!isNaN(mb) && mb > 0) node._maxFileSizeMB = mb; else delete node._maxFileSizeMB;
-  } else {
-    delete node._maxFileSizeMB;
-  }
-
-  // mimeTypes (attachment items only)
-  if (node.itemType === 'attachment') {
-    const mimes = _pending.draftMimeTypes.split(',').map(s => s.trim()).filter(s => s.length > 0);
-    if (mimes.length) node._mimeTypes = mimes; else delete node._mimeTypes;
-  } else {
-    delete node._mimeTypes;
-  }
-
-  // openLabel (open-choice items only)
-  if (node.itemType === 'open-choice' && _pending.draftOpenLabel.trim()) {
-    node._openLabel = _pending.draftOpenLabel.trim();
-  } else {
-    delete node._openLabel;
-  }
+  SECTION_REGISTRY.forEach(s => s.commit(_pending, node));
 
   // Re-render builder (creates correct row for new type; handles repeatLink visibility etc.)
   renderTree();
