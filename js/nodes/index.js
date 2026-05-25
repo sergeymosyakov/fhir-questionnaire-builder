@@ -16,6 +16,7 @@ import { UrlNode }        from './url-node.js';
 import { AttachmentNode } from './attachment-node.js';
 import { ReferenceNode }  from './reference-node.js';
 import { QuantityNode }   from './quantity-node.js';
+import { DisplayNode }    from './display-node.js';
 
 // Maps itemType string → constructor
 export const NODE_REGISTRY = new Map([
@@ -34,6 +35,7 @@ export const NODE_REGISTRY = new Map([
   ['attachment',  AttachmentNode],
   ['reference',   ReferenceNode],
   ['quantity',    QuantityNode],
+  ['display',     DisplayNode],
 ]);
 
 /** Create a new GroupNode. Replaces makeGroup(title). */
@@ -66,6 +68,6 @@ export { GroupNode, TextNode, NumberNode,
          ChoiceNode, RadioNode, OpenChoiceNode,
          DateNode, DateTimeNode, TimeNode,
          CheckboxNode, UrlNode, AttachmentNode,
-         ReferenceNode, QuantityNode };
+         ReferenceNode, QuantityNode, DisplayNode };
 export { BaseNode }  from './base-node.js';
 export { ItemNode }  from './item-node.js';

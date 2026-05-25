@@ -287,6 +287,14 @@ _rc.collapsedGroups   = collapsedGroups;
 _rc.scrollToBuilder   = _scrollToBuilder;
 _rc.buildControl      = buildControl;
 _rc.buildRepeatControls = buildRepeatControls;
+_rc.formTick          = _formTick;
+// State helpers injected to break circular imports in node classes:
+_rc.isMandatory    = isMandatory;
+_rc.calcFormOk     = calcFormOk;
+_rc.evalConstraints = evalConstraints;
+_rc.getValue       = getValue;
+_rc.CHECKABLE_TYPES = CHECKABLE_TYPES;
+// renderNode is set by render-node.js after its module loads:
 
 // ── Async preview render with yield breaks ───────────────────────────────────
 // Splits heavy FHIRPath evaluation (Phase 1) from DOM rebuild (Phase 2) using
