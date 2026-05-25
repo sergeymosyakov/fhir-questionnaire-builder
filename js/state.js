@@ -3,7 +3,7 @@
 import { ref, reactive, effect as _effect } from 'https://unpkg.com/@vue/reactivity@3.5/dist/reactivity.esm-browser.js';
 import { createGroupNode, createItemNode, createItemNodeFromTemplate } from './nodes/index.js';
 export { _effect as effect };
-export { ref, reactive };
+export { ref };
 
 // ── Reactive state ────────────────────────────────────────────────────────────
 export const tree = reactive([]);
@@ -100,7 +100,7 @@ export const CHECKABLE_TYPES = new Set(['checkbox', 'text', 'number', 'date', 'd
 export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date', 'dateTime', 'time', 'open-choice', 'decimal', 'integer', 'radio', 'select']);
 
 // ── ID factory ────────────────────────────────────────────────────────────────
-export { nextId, resetSeq } from './id.js';
+export { resetSeq } from './id.js';
 
 // ── Data factories ────────────────────────────────────────────────────────────
 // mandatory: null = not set (acts as required), true = required, false = optional.

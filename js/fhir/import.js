@@ -4,26 +4,22 @@ import { _bulkUpdate } from '../render-bus.js';
 import { renderTree } from '../render-builder.js';
 import { normaliseSTU3 } from './stu3-shim.js';
 import {
-  KNOWN_ITEM_EXTENSION_URLS,
   buildLinkIdMap,
   fhirTypeToItemType,
   fhirOptsToStr,
   humanEnableWhen,
   applyVisibility,
   resolveContainedValueSet,
-  _collectUnknownExtensions,
 } from './import-helpers.js';
 import { fhirItemToNode } from './import-item.js';
 
 // Re-export helpers — consumed by answer-type-modal.js and unit tests.
 export {
-  KNOWN_ITEM_EXTENSION_URLS,
   fhirTypeToItemType,
   fhirOptsToStr,
   humanEnableWhen,
   applyVisibility,
   resolveContainedValueSet,
-  _collectUnknownExtensions,
 };
 
 // Walk the tree and pre-populate values[] from node._initialValue / _initialValues
