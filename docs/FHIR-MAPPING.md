@@ -368,6 +368,7 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | FHIR field | Status | Notes |
 |---|---|---|
 | `Questionnaire.implicitRules` | ⚠️ Silently dropped | Declares the rules set that constrains how the resource is used. Rare in practice. |
+| `replaces` extension | ⚠️ Silently dropped | Root-level extension (`http://hl7.org/fhir/StructureDefinition/replaces`) indicating this questionnaire supersedes a prior version. Not preserved on import. |
 
 ### Item-level — not implemented
 
@@ -386,6 +387,10 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `questionnaire-signatureRequired` | ❌ Not handled | Indicates that a digital signature is required for the item or group. |
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
 | `designNote` | ❌ Not handled | Author-facing design note text; not intended to be displayed to end users. Silently dropped. |
+| `questionnaire-optionExclusive` | ❌ Not handled | On `answerOption.extension`; marks an option as exclusive — if selected, all other options must be deselected (e.g., "None of the above"). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive`. |
+| `questionnaire-unitOption` | ❌ Not handled | Specifies a single allowed unit for `quantity` items (R4 core extension; multiple instances enumerate all allowed units). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption`. Distinct from `questionnaire-unitValueSet` (which references a ValueSet). |
+| `rendering-markdown` | ❌ Not handled | Markdown-formatted equivalent of `item.text` for clients that support markdown rendering. URL: `http://hl7.org/fhir/StructureDefinition/rendering-markdown`. Silently dropped on import (we support `rendering-xhtml` and `rendering-style` but not markdown). |
+| `questionnaire-itemControl` — non-radio codes | ❌ Not handled | Only the `radio-button` code is handled. The following itemControl codes are silently treated as the default control: `check-box` (multi-select choice), `autocomplete`, `lookup`, `slider` (control-driven), `spinner`, `text-area`, `text-box`. |
 
 ### SDC extensions — not implemented (no server required)
 
@@ -397,6 +402,9 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `sdc-questionnaire-shortText` | ❌ | Abbreviated label for summary views |
 | `sdc-questionnaire-collapsible` | ❌ | Group renders collapsed by default (`default-closed`) or expanded (`default-open`). Currently all groups start expanded. |
 | `sdc-questionnaire-openLabel` | ❌ | Custom label for the free-text "other" option in `open-choice` items (default: "Other"). |
+| `sdc-questionnaire-choiceColumn` | ❌ | Defines columns (FHIRPath expression, header label, forDisplay flag) for multi-column display of choice answer options in a dropdown. |
+| `sdc-questionnaire-itemMedia` / `sdc-questionnaire-answerMedia` | ❌ | Attaches media (image, audio, video) to an item or to a specific answer option. |
+| `sdc-questionnaire-preferredTerminologyServer` | ❌ | Hints at the preferred FHIR terminology server URL for ValueSet expansion for this item. |
 
 ### SDC extensions — population and extraction (out of scope)
 
