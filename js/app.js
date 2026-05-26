@@ -14,8 +14,8 @@ import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from '.
 import { navigateToPreview, initPreview } from './render-preview.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
-import * as containedPanel    from './ui/contained-panel.js';
-import * as answerValueSetPanel from './ui/answer-valueset-panel.js';
+import containedPanel        from './ui/panels/contained-panel.js';
+import answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
 import * as patientCtx        from './ui/patient-ctx.js';
 import { setFileName, navigateToNode } from './app-load.js';
 
