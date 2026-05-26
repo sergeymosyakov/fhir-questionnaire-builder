@@ -7,7 +7,10 @@
 
 ## 🚨 THE MUST — highest priority, no exceptions
 
-0. **Announce every step — wait for yes/no.** Before any action (edit, run, push, read, create) — state what you are about to do and wait for explicit confirmation. Do NOT proceed on assumption of approval. No silent multi-step execution.
+0. **Announce every step — wait for yes/no.** Before any action (edit, run, push, read, create) output:
+   > **Plan:** [numbered list of all steps you intend to take]
+   
+   Then **STOP** and wait for explicit "да" / "yes" / "go". Only after confirmation — execute step 1. If more steps remain — stop again after each one and wait. Do NOT chain actions silently. Do NOT proceed on assumption of approval.
 1. **Stop and ask after one failed attempt.** If a bug or issue is not resolved on the first real attempt — STOP immediately. Ask the user to reproduce manually and provide more details. Do NOT keep iterating or running more diagnostics.
 2. **Never guess. Never infer. Ask.** If any detail is unclear or missing — stop and ask exactly what information is needed. Do not proceed on assumptions.
 3. **Implemented = removed from Not Supported.** Once a FHIR field or feature is fully implemented, DELETE its row from all Not Supported / remaining-gaps tables in `docs/FHIR-MAPPING.md` and add it to the relevant supported table. A ✅ row must **never** remain in a Not Supported section.
@@ -16,8 +19,11 @@
 
 ## ⚠️ WORKFLOW RULES — MANDATORY
 
-1. **git commit/push only on explicit user instruction** ("push it", "пушай", "закоммить и запушить"). Never automatically.
-2. **Before every push** — run `npx vitest run` (must pass); update relevant `docs/` files: `docs/CONTEXT.md` (file table, UX features, architecture), `docs/FHIR-MAPPING.md` (if FHIR mapping changed), `docs/ROADMAP.md` (if features completed or new features planned). `README.md` — only update for major changes (running instructions, sample data list, tech stack summary). **E2E (Playwright) tests are on-demand only** — run only when user explicitly asks ("прогони e2e"). Do NOT run playwright as part of the default pre-push checklist.
+1. **git commit/push only on explicit user instruction** ("push it", "пушай"). Never automatically.
+   - `commit` and `push` are **two separate operations** — each requires explicit permission unless both are mentioned together.
+   - "commit and push" / "пушай" = permission for both in one step.
+   - "move / create / fix" without "push" = only edit files, do NOT commit or push.
+2. **Before every push** — announce "I'm about to push, running pre-push checklist first", then: run `npx vitest run` (must pass); update relevant `docs/` files: `docs/CONTEXT.md` (file table, UX features, architecture), `docs/FHIR-MAPPING.md` (if FHIR mapping changed), `docs/ROADMAP.md` (if features completed or new features planned). `README.md` — only update for major changes (running instructions, sample data list, tech stack summary). **E2E (Playwright) tests are on-demand only** — run only when user explicitly asks ("run e2e"). Do NOT run playwright as part of the default pre-push checklist.
 3. **Modularity** — new UI widget → `js/ui/<name>.js`; new control → `js/controls/<name>.js`; new CSS concern → `css/<name>.css` + `<link>` in index.html. Do not add logically separate code into existing modules.
    **500-line rule** — a file exceeding 500 lines is a signal that it needs logical splitting. Before adding more code to an oversized file, identify natural seams (independent concerns, repeated patterns, composable units) and extract them. This applies to JS modules, test specs, and CSS files alike. E2E specs should be split by feature area (one spec file per modal or feature cluster, not one mega-spec per page).
 4. **OOP / DRY** — when 2+ modules share the same behavioral pattern, extract a shared base/factory instead of copy-pasting. Example: every modal is `class XyzModal extends Modal` from `js/ui/modals/modal-base.js` — override `open()`, `_apply()`, `_cancel()` only; never monkey-patch `_modal._apply = fn` or inline lifecycle boilerplate.
