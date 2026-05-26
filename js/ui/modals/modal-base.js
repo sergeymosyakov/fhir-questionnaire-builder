@@ -10,7 +10,7 @@
 
 // Single shared Escape handler — closes the topmost open modal.
 const _registry = new Map(); // backdrop → cancel callback
-document.addEventListener('keydown', e => {
+if (typeof document !== 'undefined') document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   let topCancel = null, topZ = -1;
   for (const [backdrop, cancel] of _registry) {
