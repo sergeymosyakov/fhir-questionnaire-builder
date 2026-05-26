@@ -2,7 +2,7 @@ import { Section } from '../section.js';
 import { META_SECTIONS } from './registry.js';
 import { makeCollapsible, applyTip } from './helpers.js';
 import { renderCodesEditor } from '../codes-modal.js';
-import { questMeta } from '../../state.js';
+import { questMeta } from '../../../state.js';
 
 class ResourceMetaSection extends Section {
   build(pending) {

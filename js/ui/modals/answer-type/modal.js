@@ -12,10 +12,10 @@ import { MODAL_REGISTRY } from '../modal-registry.js';
 // init(elements)                       — wire DOM once at startup
 // open(node, typeLink, setActive)      — populate body + show
 
-import { tree, values, deleteValue } from '../../state.js';
-import { triggerCalcRecalc, renderTree } from '../../builder/_shared.js';
-import { createItemNode } from '../../nodes/index.js';
-import { createCustomSelect } from '../custom-select.js';
+import { tree, values, deleteValue } from '../../../state.js';
+import { triggerCalcRecalc, renderTree } from '../../../builder/_shared.js';
+import { createItemNode } from '../../../nodes/index.js';
+import { createCustomSelect } from '../../custom-select.js';
 import { initModal, setModalTitle, openModal, closeModal } from '../modal-base.js';
 import { ITEM_TYPES } from './data.js';
 import { SECTION_REGISTRY } from './sections.js';

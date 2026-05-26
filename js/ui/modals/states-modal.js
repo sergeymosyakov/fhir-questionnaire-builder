@@ -9,8 +9,8 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 // init(elements)                    — wire DOM once at startup
 // open(node, statesLink, setActive) — populate body + show
 
-import { triggerCalcRecalc } from '../builder/_shared.js';
-import { createCustomSelect } from './custom-select.js';
+import { triggerCalcRecalc } from '../../builder/_shared.js';
+import { createCustomSelect } from '../custom-select.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 
 let _el      = null;

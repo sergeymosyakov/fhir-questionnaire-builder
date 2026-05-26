@@ -1,6 +1,6 @@
 import { Section } from '../section.js';
 import { META_SECTIONS } from './registry.js';
-import { questMeta } from '../../state.js';
+import { questMeta } from '../../../state.js';
 
 class NarrativeSection extends Section {
   build(_pending) {

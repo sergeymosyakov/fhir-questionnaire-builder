@@ -1,4 +1,4 @@
-import { MODAL_REGISTRY } from '../ui/modal-registry.js';
+import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 // ── ItemNode ──────────────────────────────────────────────────────────────────
 // Abstract base for all question item nodes (type: 'item').
 // Concrete subclasses set `this.itemType` and may add type-specific defaults.
@@ -8,7 +8,7 @@ import { MODAL_REGISTRY } from '../ui/modal-registry.js';
 //   _enableWhenText, _unknownExtensions, _answerValueSet,
 //   _initialValue, _initialValues, _initialSelected
 import { BaseNode, applyRenderStyle } from './base-node.js';
-import * as explainModal from '../ui/explain-modal.js';
+import * as explainModal from '../ui/modals/explain-modal.js';
 
 export class ItemNode extends BaseNode {
   constructor(data = {}) {

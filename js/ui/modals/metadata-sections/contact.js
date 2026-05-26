@@ -1,7 +1,7 @@
 import { Section } from '../section.js';
 import { META_SECTIONS } from './registry.js';
 import { makeCollapsible } from './helpers.js';
-import { createCustomSelect } from '../custom-select.js';
+import { createCustomSelect } from '../../custom-select.js';
 import { TELECOM_SYSTEMS } from './data.js';
 
 class ContactSection extends Section {

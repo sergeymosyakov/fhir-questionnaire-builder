@@ -6,7 +6,7 @@
 //   explainModal.show(expr, fp, resource, env);
 //   explainModal.hide();
 
-import { parseExprTree, evaluateExprTree } from '../fhir/explain.js';
+import { parseExprTree, evaluateExprTree } from '../../fhir/explain.js';
 
 let _backdrop = null;
 let _body     = null;

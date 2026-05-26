@@ -1,4 +1,4 @@
-import { MODAL_REGISTRY } from '../ui/modal-registry.js';
+import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.

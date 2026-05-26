@@ -6,7 +6,7 @@
 
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
-import { triggerCalcRecalc } from '../builder/_shared.js';
+import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { ITEM_SECTIONS, renderItemSections } from './item-sections/index.js';
 
 let _el      = null;

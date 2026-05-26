@@ -2,7 +2,7 @@
 // Collapsible card (above tree) + edit modal for sdc-questionnaire-variable.
 // init(elements, variablesArray) — wire DOM and reactive array once at startup.
 // refresh() — re-render chip list and card visibility (call after import/reset).
-import { initModal, openModal, closeModal } from './modal-base.js';
+import { initModal, openModal, closeModal } from './modals/modal-base.js';
 
 let _el   = null;  // resolved DOM nodes
 let _vars = null;  // reference to reactive questVariables array

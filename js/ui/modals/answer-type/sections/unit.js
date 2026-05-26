@@ -1,5 +1,5 @@
 import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
-import { createCustomSelect } from '../../custom-select.js';
+import { createCustomSelect } from '../../../custom-select.js';
 import { BUILDER_UNITS } from '../data.js';
 
 class UnitSection extends AnswerTypeSection {

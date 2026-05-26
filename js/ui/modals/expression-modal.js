@@ -12,7 +12,7 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 //
 // openDual(node, link, setActive, onApply)
 
-import { refreshExprIcons } from '../render-preview.js';
+import { refreshExprIcons } from '../../render-preview.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 
 let _el      = null;

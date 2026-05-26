@@ -7,11 +7,11 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 // init(elements)                    — wire DOM once at startup
 // open(node, initLink, setActive)   — populate body + show
 
-import { parseOptions } from '../utils.js';
+import { parseOptions } from '../../utils.js';
 import { setValue, deleteValue } from '../state.js';
-import { triggerCalcRecalc } from '../builder/_shared.js';
-import { createCustomSelect } from './custom-select.js';
-import { createDatePicker } from './date-picker.js';
+import { triggerCalcRecalc } from '../../builder/_shared.js';
+import { createCustomSelect } from '../custom-select.js';
+import { createDatePicker } from '../date-picker.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 
 let _el      = null;

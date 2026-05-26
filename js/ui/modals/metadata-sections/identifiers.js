@@ -1,7 +1,7 @@
 import { Section } from '../section.js';
 import { META_SECTIONS } from './registry.js';
 import { makeCollapsible } from './helpers.js';
-import { createCustomSelect } from '../custom-select.js';
+import { createCustomSelect } from '../../custom-select.js';
 import { ID_USES, ID_USE_LABELS } from './data.js';
 
 class IdentifiersSection extends Section {

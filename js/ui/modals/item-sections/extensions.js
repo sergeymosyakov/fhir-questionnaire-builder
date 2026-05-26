@@ -1,7 +1,7 @@
 import { ItemSection } from './base-section.js';
 import { ITEM_SECTIONS } from './registry.js';
 import { makeCollapsible } from './helpers.js';
-import { createCustomSelect } from '../custom-select.js';
+import { createCustomSelect } from '../../custom-select.js';
 import {
   EXT_VALUE_TYPES, EXT_COMPLEX, EXT_BOOL, EXT_INT, EXT_DEC,
   extToDraft, draftToExt,

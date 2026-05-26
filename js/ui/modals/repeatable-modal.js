@@ -6,7 +6,7 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 // init(elements)                         — wire DOM once at startup
 // open(node, repeatLink, setActive)      — populate body + show
 
-import { triggerCalcRecalc } from '../builder/_shared.js';
+import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { getValue, setValue, deleteValue } from '../state.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 

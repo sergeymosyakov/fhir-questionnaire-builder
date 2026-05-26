@@ -2,7 +2,7 @@
 // Common properties shared by every node (group and all item types).
 // Subclasses must set `this.type` and optionally `this.itemType`.
 import { nextId } from '../id.js';
-import * as explainModal from '../ui/explain-modal.js';
+import * as explainModal from '../ui/modals/explain-modal.js';
 
 // Shared wrapper factory used by every buildControl() implementation.
 export function createWrap() {

@@ -8,10 +8,10 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 // open(node, visLink, setActive, ctx, buildVisFn) — populate body + show
 // close()                                         — cancel (discard draft)
 
-import { refreshExprIcons } from '../render-preview.js';
-import { triggerCalcRecalc } from '../builder/_shared.js';
+import { refreshExprIcons } from '../../render-preview.js';
+import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
-import { createCustomSelect } from './custom-select.js';
+import { createCustomSelect } from '../custom-select.js';
 
 let _el      = null;
 let _pending = null; // { node, visLink, setActive, draft }

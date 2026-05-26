@@ -1,5 +1,5 @@
 import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
-import { createCustomSelect } from '../../custom-select.js';
+import { createCustomSelect } from '../../../custom-select.js';
 
 class DisplayCatSection extends AnswerTypeSection {
   isVisible(type) { return type === 'display'; }

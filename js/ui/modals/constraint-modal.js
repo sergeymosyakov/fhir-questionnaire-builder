@@ -8,10 +8,10 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 // open(node, constraintLink, setActive)   — populate body + show
 // close()                                 — cancel (discard draft)
 
-import { triggerCalcRecalc } from '../builder/_shared.js';
+import { triggerCalcRecalc } from '../../builder/_shared.js';
 import * as explainModal from './explain-modal.js';
-import { getLastCtx } from '../render-preview.js';
-import { createCustomSelect } from './custom-select.js';
+import { getLastCtx } from '../../render-preview.js';
+import { createCustomSelect } from '../custom-select.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 
 let _el      = null;

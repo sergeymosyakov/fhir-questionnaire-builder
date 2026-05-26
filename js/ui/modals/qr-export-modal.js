@@ -6,9 +6,9 @@
 // init(elements)      — wire DOM once at startup
 // open(suggestedName) — show modal pre-filled with last loaded QR meta
 
-import { exportQR } from '../fhir/qr-export.js';
+import { exportQR } from '../../fhir/qr-export.js';
 import { initModal, openModal, closeModal } from './modal-base.js';
-import { createCustomSelect } from './custom-select.js';
+import { createCustomSelect } from '../custom-select.js';
 
 const QR_STATUSES = ['in-progress', 'completed', 'amended', 'entered-in-error', 'stopped'];
 

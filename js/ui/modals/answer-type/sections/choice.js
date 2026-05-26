@@ -1,9 +1,9 @@
 import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
-import { questContained } from '../../../state.js';
-import { resolveContainedValueSet } from '../../../fhir/import.js';
-import { createCustomSelect } from '../../custom-select.js';
+import { questContained } from '../../../../state.js';
+import { resolveContainedValueSet } from '../../../../fhir/import.js';
+import { createCustomSelect } from '../../../custom-select.js';
 import { CHOICE_TYPES } from '../data.js';
-import { parseOptions } from '../../../utils.js';
+import { parseOptions } from '../../../../utils.js';
 
 function _optsWithOrdinals(node) {
   if (!node.options) return '';

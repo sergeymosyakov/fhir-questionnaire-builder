@@ -3,7 +3,7 @@
 // init(els, questVariables, onAfterApply) — wire once at startup.
 import { tree, effect } from '../state.js';
 import { createCustomSelect } from './custom-select.js';
-import { initModal, openModal, closeModal } from './modal-base.js';
+import { initModal, openModal, closeModal } from './modals/modal-base.js';
 
 const PATIENT_APPLY_EVENT = 'patient-ctx-applied';
 
