@@ -4,6 +4,9 @@
 import { nextId } from '../id.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
 import * as dnd from '../builder/dnd.js';
+import { tree } from '../state.js';
+import { findAndRemove } from '../utils.js';
+import { confirmDelete } from '../builder/_shared.js';
 
 // Shared wrapper factory used by every buildControl() implementation.
 export function createWrap() {
@@ -420,5 +423,19 @@ export class BaseNode {
     div.textContent = 'Drop here';
     dnd.attachDropZone(div, this, 'before');
     return div;
+  }
+
+  // ── Builder event dispatch ─────────────────────────────────────────────────
+  // Breaks circular imports: index.js and render-preview.js both import nodes,
+  // so nodes cannot import back. Events decouple the call direction.
+
+  /** Triggers renderTree() in builder/index.js */
+  _dispatchRerender() {
+    document.dispatchEvent(new CustomEvent('builder:rerender'));
+  }
+
+  /** Navigates the right-panel preview to this node */
+  _dispatchNavigate() {
+    document.dispatchEvent(new CustomEvent('builder:navigate', { detail: { id: this.id } }));
   }
 }

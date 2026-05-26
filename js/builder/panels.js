@@ -1,12 +1,10 @@
 ﻿// ── Action panel builders ─────────────────────────────────────────────────────
-// buildXxxPanel(node, panelEl, linkEl, setActive, ctx: BuilderCtx)  — see ctx.js
-//
-// Each panel is keyed and toggled by the action links defined in node-item/group.
 import { parseOptions } from '../utils.js';
 import { getAllItems, triggerCalcRecalc } from './_shared.js';
 import { refreshExprIcons } from '../render-preview.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { createDatePicker } from '../ui/date-picker.js';
+import { tree } from '../state.js';
 
 // ── Panel factory helper ──────────────────────────────────────────────────────
 export function addPanel(key, buildFn, div, panels) {
@@ -116,12 +114,12 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
 }
 
 // ── Visibility panel (FHIR enableWhen) ───────────────────────────────────────
-export function buildVisPanel(node, p, visLink, setActive, ctx) {
+export function buildVisPanel(node, p, visLink, setActive) {
   if (!Array.isArray(node.enableWhen)) node.enableWhen = [];
   if (!node.enableBehavior) node.enableBehavior = 'all';
   if (node.enableWhenExpression === undefined) node.enableWhenExpression = '';
 
-  const allItems = getAllItems(ctx.tree).filter(it => it.id !== node.id);
+  const allItems = getAllItems(tree).filter(it => it.id !== node.id);
 
   const syncActive = () => {
     setActive(visLink, node.enableWhen.length > 0 || !!node.enableWhenExpression);

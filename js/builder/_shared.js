@@ -2,7 +2,7 @@
 import { buildQR } from '../fhir/qr-builder.js';
 import { evalCalcNodes } from '../fhir/calc.js';
 
-const fhirpath = window.fhirpath;
+const fhirpath = typeof window !== 'undefined' ? window.fhirpath : null;
 
 // Injected by index.js via init()
 let _deps = null;
@@ -20,7 +20,7 @@ function _toLetter(n) {
   let r = ''; while (n > 0) { r = String.fromCharCode(64 + ((n-1)%26+1)) + r; n = Math.floor((n-1)/26); } return r;
 }
 export function formatSeg(n) {
-  const fmt = document.getElementById('renumberFormat')?.value || 'numeric';
+  const fmt = (typeof document !== 'undefined' && document.getElementById('renumberFormat')?.value) || 'numeric';
   return fmt === 'roman' ? _toRoman(n) : fmt === 'letters' ? _toLetter(n) : String(n);
 }
 

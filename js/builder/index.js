@@ -1,42 +1,22 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
 import { tree, rawFhir, values } from '../state.js';
-import { createGroupNode, createItemNodeFromTemplate } from '../nodes/index.js';
 import { _formTick, _bulkUpdate } from '../render-bus.js';
-import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
+import { init as sharedInit, formatSeg } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
-import { buildVisPanel } from './panels.js';
-import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
-import { findAndRemove } from '../utils.js';
-import { createCustomSelect } from '../ui/custom-select.js';
-
-// UI-only collapse state per node.id — not part of FHIR data, owned here
-const collapsed = new Map();
+import { navigateToPreview } from '../render-preview.js';
+import { GroupNode } from '../nodes/group-node.js';
 
 // Inject reactive state into _shared (triggerCalcRecalc + renderTree need them)
 sharedInit({ tree, formTick: _formTick, rawFhir, values, renderTree });
 
-function _makeCtx() {
-  return {
-    renderTree,
-    renderNode,
-    tree,
-    formTick: _formTick,
-    collapsed,
-    buildVisPanel,
-    navigateToPreview,
-    refreshExprIcons,
-    findAndRemove,
-    confirmDelete,
-    formatSeg,
-    triggerCalcRecalc,
-    createGroupNode,
-    createItemNodeFromTemplate,
-    createCustomSelect,
-  };
-}
+// ── Event listeners ───────────────────────────────────────────────────────────
+// Nodes dispatch custom events instead of importing index.js/render-preview.js
+// (those modules import nodes — importing back would be circular).
+document.addEventListener('builder:rerender',  ()  => renderTree());
+document.addEventListener('builder:navigate',  e   => navigateToPreview(e.detail.id));
 
 function renderNode(node) {
-  return node.buildBuilder(_makeCtx());
+  return node.buildBuilder();
 }
 
 export function renderTree() {
@@ -71,7 +51,7 @@ dndInit(renderTree, tree, _formTick);
 function setCollapsedAll(nodes, value) {
   for (const n of nodes) {
     if (n.type === 'group') {
-      collapsed.set(n.id, value);
+      GroupNode._collapseMap.set(n.id, value);
       setCollapsedAll(n.children, value);
     }
   }

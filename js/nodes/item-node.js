@@ -9,6 +9,9 @@ import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 //   _initialValue, _initialValues, _initialSelected
 import { BaseNode, applyRenderStyle } from './base-node.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
+import { tree } from '../state.js';
+import { findAndRemove } from '../utils.js';
+import { confirmDelete, triggerCalcRecalc } from '../builder/_shared.js';
 
 export class ItemNode extends BaseNode {
   constructor(data = {}) {
@@ -209,9 +212,8 @@ export class ItemNode extends BaseNode {
   // ── Builder panel ─────────────────────────────────────────────────────────
   // Renders the left-panel (builder tree) row for this item node.
   // All external deps (modals, DnD, utils) are injected via ctx.
-  buildBuilder(ctx) {
+  buildBuilder() {
     const node = this;
-    const { renderTree } = ctx;
 
     const wrapper = document.createElement('div');
     wrapper.className = 'node-wrap';
@@ -246,7 +248,7 @@ export class ItemNode extends BaseNode {
 
     titleWrap.addEventListener('click', e => {
       if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput || e.target === prefixInput) return;
-      ctx.navigateToPreview(node.id);
+      node._dispatchNavigate();
     });
 
     const actions = document.createElement('div');
@@ -278,7 +280,7 @@ export class ItemNode extends BaseNode {
       fhir:  'Questionnaire.item.enableWhen[]',
       spec:  'R4 \u00B7 optional',
     }, actions);
-    visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive, ctx, ctx.buildVisPanel);
+    visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive);
 
     const exprLink = node._makeActionLink('Expression', 'expr', {
       title: 'FHIRPath Expressions',
@@ -286,7 +288,7 @@ export class ItemNode extends BaseNode {
       fhir:  'sdc-questionnaire-calculatedExpression / initialExpression',
       spec:  'SDC \u00B7 optional',
     }, actions);
-    exprLink.onclick = () => MODAL_REGISTRY.get('expression').openDual(node, exprLink, setActive, ctx.triggerCalcRecalc);
+    exprLink.onclick = () => MODAL_REGISTRY.get('expression').openDual(node, exprLink, setActive, triggerCalcRecalc);
 
     const repeatLink = node._makeActionLink('Repeatable', 'repeatable', {
       title: 'Repeatable',
@@ -365,8 +367,8 @@ export class ItemNode extends BaseNode {
     btnDel.dataset.testid = 'node-delete-btn';
     btnDel.dataset.tipTitle = 'Delete item';
     btnDel.onclick = async () => {
-      const ok = await ctx.confirmDelete(node.title || node.id);
-      if (ok) { ctx.findAndRemove(node.id, ctx.tree); renderTree(); }
+      const ok = await confirmDelete(node.title || node.id);
+      if (ok) { findAndRemove(node.id, tree); node._dispatchRerender(); }
     };
 
     div.appendChild(header);

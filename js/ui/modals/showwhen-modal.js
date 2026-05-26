@@ -6,6 +6,7 @@ import { Modal } from './modal-base.js';
 import { refreshExprIcons } from '../../render-preview.js';
 import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { createCustomSelect } from '../custom-select.js';
+import { buildVisPanel } from '../../builder/panels.js';
 
 class ShowWhenModal extends Modal {
   constructor() {
@@ -14,7 +15,7 @@ class ShowWhenModal extends Modal {
     MODAL_REGISTRY.set('showWhen', this);
   }
 
-  open(node, visLink, setActive, ctx, buildVisFn) {
+  open(node, visLink, setActive) {
     const draft = Object.assign({}, node, {
       enableWhen:           JSON.parse(JSON.stringify(node.enableWhen || [])),
       enableBehavior:       node.enableBehavior       || 'all',
@@ -25,7 +26,7 @@ class ShowWhenModal extends Modal {
 
     this.setTitle('Show When', node.title || node.id || 'Item');
     this.body.innerHTML = '';
-    buildVisFn(draft, this.body, visLink, () => {}, ctx);
+    buildVisPanel(draft, this.body, visLink, () => {});
 
     const ddRow = document.createElement('div');
     ddRow.className = 'sw-disabled-display-row';

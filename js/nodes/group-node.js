@@ -1,5 +1,12 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 import * as dnd from '../builder/dnd.js';
+import { tree } from '../state.js';
+import { _formTick } from '../render-bus.js';
+import { findAndRemove } from '../utils.js';
+import { confirmDelete, formatSeg, triggerCalcRecalc } from '../builder/_shared.js';
+import { createCustomSelect } from '../ui/custom-select.js';
+import { NODE_REGISTRY } from './registry.js';
+import { TextNode } from './text-node.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -11,6 +18,9 @@ import { isDescendant } from '../utils.js';
 import { NODE_REGISTRY } from './registry.js';
 
 export class GroupNode extends BaseNode {
+  /** Builder-only collapse state — keyed by node.id, not persisted to FHIR. */
+  static _collapseMap = new Map();
+
   constructor(data = {}) {
     super(data);
     this.type            = 'group';
@@ -186,9 +196,8 @@ export class GroupNode extends BaseNode {
     return div;
   }
 
-  buildBuilder(ctx) {
+  buildBuilder() {
     const node = this;
-    const { renderTree, renderNode } = ctx;
 
     const wrapper = document.createElement('div');
     wrapper.className = 'node-wrap';
@@ -205,7 +214,7 @@ export class GroupNode extends BaseNode {
     const titleWrap = document.createElement('div');
     titleWrap.className = 'node-title';
 
-    const collapsed = ctx.collapsed.get(node.id) || false;
+    const collapsed = GroupNode._collapseMap.get(node.id) || false;
     const toggleBtn = document.createElement('button');
     toggleBtn.type = 'button';
     toggleBtn.className = 'node-collapse-btn';
@@ -214,8 +223,8 @@ export class GroupNode extends BaseNode {
     toggleBtn.dataset.tipTitle = collapsed ? 'Expand' : 'Collapse';
     toggleBtn.onclick = e => {
       e.stopPropagation();
-      const isNowCollapsed = !(ctx.collapsed.get(node.id) || false);
-      ctx.collapsed.set(node.id, isNowCollapsed);
+      const isNowCollapsed = !(GroupNode._collapseMap.get(node.id) || false);
+      GroupNode._collapseMap.set(node.id, isNowCollapsed);
       toggleBtn.textContent = isNowCollapsed ? '\u25B6' : '\u25BC';
       toggleBtn.dataset.tipTitle = isNowCollapsed ? 'Expand' : 'Collapse';
       const body = div.querySelector('.node-body');
@@ -240,7 +249,7 @@ export class GroupNode extends BaseNode {
 
     titleWrap.addEventListener('click', e => {
       if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput || e.target === prefixInput) return;
-      ctx.navigateToPreview(node.id);
+      node._dispatchNavigate();
     });
 
     const actions = document.createElement('div');
@@ -262,7 +271,7 @@ export class GroupNode extends BaseNode {
       fhir:  'Questionnaire.item.enableWhen[]',
       spec:  'R4 \u00B7 optional',
     }, actions);
-    visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive, ctx, ctx.buildVisPanel);
+    visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive);
 
     const exprLink = node._makeActionLink('Expression', 'expr', {
       title: 'Calculated Expression',
@@ -276,7 +285,7 @@ export class GroupNode extends BaseNode {
       label:       'Calculated Expression',
       fhirLabel:   'FHIRPath calculatedExpression:',
       placeholder: "%resource.item.where(linkId='...')",
-      onApply:     ctx.triggerCalcRecalc,
+      onApply:     triggerCalcRecalc,
     });
 
     const styleLink = node._makeActionLink('Appearance', 'style', {
@@ -324,9 +333,9 @@ export class GroupNode extends BaseNode {
         addMenu.style.display = 'none';
         const newNode = factory();
         node.children.push(newNode);
-        ctx.formTick.value++;
-        ctx.collapsed.set(node.id, false);
-        renderTree();
+        _formTick.value++;
+        GroupNode._collapseMap.set(node.id, false);
+        node._dispatchRerender();
         requestAnimationFrame(() => {
           const el = document.querySelector('[data-node-id="' + CSS.escape(newNode.id) + '"]');
           if (el) {
@@ -340,15 +349,22 @@ export class GroupNode extends BaseNode {
     };
 
     addChild('Group', () => {
-      const n = ctx.createGroupNode({ title: 'New Group' });
-      n.id = node.id + '.' + ctx.formatSeg(node.children.length + 1);
+      const n = new GroupNode({ title: 'New Group' });
+      n.id = node.id + '.' + formatSeg(node.children.length + 1);
       return n;
     });
     addChild('Item', () => {
       const siblings = node.children.filter(c => c.type === 'item');
       const template = siblings.length > 0 ? siblings[siblings.length - 1] : null;
-      const n = ctx.createItemNodeFromTemplate('New Item', template);
-      n.id = node.id + '.' + ctx.formatSeg(node.children.length + 1);
+      const n = template
+        ? new (NODE_REGISTRY.get(template.itemType) ?? TextNode)({
+            title: 'New Item', itemType: template.itemType,
+            mandatory: template.mandatory, repeats: template.repeats || false,
+            options: template.options,
+            constraint: template.constraint ? template.constraint.map(c => ({ ...c })) : [],
+          })
+        : new TextNode({ title: 'New Item', itemType: 'text' });
+      n.id = node.id + '.' + formatSeg(node.children.length + 1);
       return n;
     });
 
@@ -390,8 +406,8 @@ export class GroupNode extends BaseNode {
     btnDel.dataset.testid = 'node-delete-btn';
     btnDel.dataset.tipTitle = 'Delete group';
     btnDel.onclick = async () => {
-      const ok = await ctx.confirmDelete(node.title || node.id);
-      if (ok) { ctx.findAndRemove(node.id, ctx.tree); renderTree(); }
+      const ok = await confirmDelete(node.title || node.id);
+      if (ok) { findAndRemove(node.id, tree); node._dispatchRerender(); }
     };
 
     div.appendChild(header);
@@ -406,12 +422,12 @@ export class GroupNode extends BaseNode {
 
     const body = document.createElement('div');
     body.className = 'node-body';
-    if (ctx.collapsed.get(node.id)) body.style.display = 'none';
+    if (GroupNode._collapseMap.get(node.id)) body.style.display = 'none';
 
     const logicRow = document.createElement('div');
     logicRow.className = 'logic-row';
     logicRow.textContent = 'Logic between children: ';
-    const logicSel = ctx.createCustomSelect({
+    const logicSel = createCustomSelect({
       items:    [{ value: 'AND', label: 'AND' }, { value: 'OR', label: 'OR' }],
       value:    node.logicWithParent || 'AND',
       className: 'sc-trigger--sm',
@@ -421,7 +437,7 @@ export class GroupNode extends BaseNode {
     body.appendChild(logicRow);
 
     for (let i = 0; i < node.children.length; i++) {
-      const childWrap = renderNode(node.children[i]);
+      const childWrap = node.children[i].buildBuilder();
       if (i === 0) {
         const firstDrop = childWrap.querySelector('.drop-zone-above');
         if (firstDrop) firstDrop.textContent = 'Drop here to add as first child';
