@@ -8,17 +8,19 @@
 // data-tip-fhir   — FHIR field path shown in the reference footer (optional)
 // data-tip-spec   — spec version label, e.g. "R4" (optional)
 
+import * as storage from '../storage/storage.js';
+
 const LS_KEY = 'tooltips-enabled';
-let _enabled = localStorage.getItem(LS_KEY) !== 'false';
+let _enabled = true; // initialised from storage in init()
 let _el = null;
 
 /** Returns current enabled state. */
 export function isEnabled() { return _enabled; }
 
-/** Enable or disable all rich tooltips; persists to localStorage. */
+/** Enable or disable all rich tooltips; persists to storage. */
 export function setEnabled(val) {
   _enabled = !!val;
-  localStorage.setItem(LS_KEY, _enabled ? 'true' : 'false');
+  storage.setItem(LS_KEY, _enabled ? 'true' : 'false');
   if (!_enabled) _hide();
 }
 
@@ -113,6 +115,7 @@ function _hide() {
 }
 
 export function init() {
+  _enabled = storage.getItem(LS_KEY) !== 'false';
   document.addEventListener('mouseover', e => {
     const t = e.target.closest('[data-tip-title],[data-tip-body]');
     if (t) _show(t);

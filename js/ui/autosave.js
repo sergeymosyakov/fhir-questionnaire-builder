@@ -1,5 +1,5 @@
 // ── Autosave ──────────────────────────────────────────────────────────────────
-// Saves the current questionnaire to a per-questionnaire localStorage slot.
+// Saves the current questionnaire to a per-questionnaire storage slot.
 // Key = Questionnaire.url  OR  identifier[fhir-qb.app/editor].value (auto-gen).
 //
 // API:
@@ -18,12 +18,12 @@ let _buildFn   = null;
 let _questMeta = null;
 let _timer     = null;
 let _onSaved   = null;
-let _enabled   = localStorage.getItem(LS_ENABLED_KEY) !== 'false';
+let _enabled   = true; // initialised from storage in init()
 
 export function isEnabled() { return _enabled; }
 export function setEnabled(val) {
   _enabled = !!val;
-  localStorage.setItem(LS_ENABLED_KEY, String(_enabled));
+  storage.setItem(LS_ENABLED_KEY, String(_enabled));
 }
 
 /** Compute the autosave slot key for the current questionnaire.
@@ -44,14 +44,14 @@ function _save() {
     const q = _buildFn();
     if (!q.item || q.item.length === 0) return;
     const key = _getKey(q);
-    localStorage.setItem(KEY_PREFIX  + key, JSON.stringify(q));
-    localStorage.setItem(META_PREFIX + key, JSON.stringify({
+    storage.setItem(KEY_PREFIX  + key, JSON.stringify(q));
+    storage.setItem(META_PREFIX + key, JSON.stringify({
       savedAt: new Date().toISOString(),
       title:   q.title || 'Untitled',
       key,
     }));
     if (_onSaved) _onSaved(new Date());
-  } catch (_) { /* localStorage full — fail silently */ }
+  } catch (_) { /* storage full — fail silently */ }
 }
 
 /** Start autosave interval. Call once after app is ready. */
@@ -59,9 +59,10 @@ export function init({ buildFn, questMeta, onSaved }) {
   _buildFn   = buildFn;
   _questMeta = questMeta;
   _onSaved   = onSaved ?? null;
+  _enabled   = storage.getItem(LS_ENABLED_KEY) !== 'false';
   // One-time cleanup of old single-slot keys from previous version
-  localStorage.removeItem('autosave-draft');
-  localStorage.removeItem('autosave-meta');
+  storage.removeItem('autosave-draft');
+  storage.removeItem('autosave-meta');
   if (_timer) clearInterval(_timer);
   _timer = setInterval(_save, INTERVAL_MS);
 }
@@ -70,10 +71,10 @@ export function init({ buildFn, questMeta, onSaved }) {
  *  or null if no drafts exist. */
 export function getMostRecentDraft() {
   let best = null;
-  for (const lsKey of Object.keys(localStorage)) {
+  for (const lsKey of storage.keys()) {
     if (!lsKey.startsWith(META_PREFIX)) continue;
     try {
-      const meta = JSON.parse(localStorage.getItem(lsKey));
+      const meta = JSON.parse(storage.getItem(lsKey));
       if (!best || meta.savedAt > best.meta.savedAt) best = { meta, key: meta.key };
     } catch (_) {}
   }
@@ -83,7 +84,7 @@ export function getMostRecentDraft() {
 /** Return a saved questionnaire as a parsed object, or null. */
 export function getDraftData(key) {
   try {
-    const raw = localStorage.getItem(KEY_PREFIX + key);
+    const raw = storage.getItem(KEY_PREFIX + key);
     return raw ? JSON.parse(raw) : null;
   } catch (_) { return null; }
 }
@@ -96,7 +97,7 @@ export function clearDraft() {
     const key = q.url
       || (_questMeta._rawIdentifier || []).find(i => i.system === EDITOR_SYSTEM)?.value;
     if (!key) return;
-    localStorage.removeItem(KEY_PREFIX  + key);
-    localStorage.removeItem(META_PREFIX + key);
+    storage.removeItem(KEY_PREFIX  + key);
+    storage.removeItem(META_PREFIX + key);
   } catch (_) {}
 }

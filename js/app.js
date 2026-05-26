@@ -1,4 +1,6 @@
 ﻿// Entry point: wires toolbar buttons and orchestrates UI modules.
+import * as storage from './storage/storage.js';
+import { LocalStorageAdapter } from './storage/local-storage.js';
 import { tree, values, rawFhir, effect, clearAllValues, questVariables, questContained, questMeta } from './state.js';
 import { buildFHIRObject, exportFHIR } from './fhir/export.js';
 import { validateTree } from './fhir/validate.js';
@@ -18,6 +20,9 @@ import { navigateToPreview, initPreview } from './render-preview.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
 import containedPanel        from './ui/panels/contained-panel.js';
+
+// Register storage adapter before any module that reads storage is initialised.
+storage.register(new LocalStorageAdapter());
 import answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
 import * as patientCtx        from './ui/patient-ctx.js';
 import { setFileName, navigateToNode } from './app-load.js';
@@ -335,7 +340,7 @@ document.addEventListener('click', () => {
 
   // Restore saved width
   let saved;
-  try { saved = localStorage.getItem(STORAGE_KEY); } catch { /* private mode / quota */ }
+  try { saved = storage.getItem(STORAGE_KEY); } catch { /* private mode / quota */ }
   if (saved) leftPanel.style.width = saved + 'px';
 
   let startX, startW;
@@ -358,7 +363,7 @@ document.addEventListener('click', () => {
     const onUp = () => {
       resizer.classList.remove('resizing');
       overlay.remove();
-      try { localStorage.setItem(STORAGE_KEY, parseInt(leftPanel.style.width)); } catch { /* ignore */ }
+      try { storage.setItem(STORAGE_KEY, parseInt(leftPanel.style.width)); } catch { /* ignore */ }
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     };
