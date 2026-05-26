@@ -107,22 +107,84 @@ const _el = {
   presetMenu: document.getElementById('patientPresetMenu'),
 };
 
-const _modal = new Modal({ cancelLabel: null });
-_modal.title.textContent = 'Patient Context';
-_modal.body.insertAdjacentHTML('beforebegin',
-  '<div class="patient-ctx-hint">Values are available in FHIRPath expressions as ' +
-  '<code>%age</code>, <code>%gender</code>, <code>%bmi</code>, ' +
-  '<code>%pregnant</code>, <code>%smoker</code>, <code>%proc</code>, <code>%comorb</code>.</div>');
-_modal._apply  = _applyPatientModal;
-_modal._cancel = _cancelPatientModal;
+class PatientModal extends Modal {
+  constructor() {
+    super({ cancelLabel: null });
+    this.title.textContent = 'Patient Context';
+    this.body.insertAdjacentHTML('beforebegin',
+      '<div class="patient-ctx-hint">Values are available in FHIRPath expressions as ' +
+      '<code>%age</code>, <code>%gender</code>, <code>%bmi</code>, ' +
+      '<code>%pregnant</code>, <code>%smoker</code>, <code>%proc</code>, <code>%comorb</code>.</div>');
+  }
 
+  open() {
+    this.body.innerHTML = '';
+    _inputs = {};
+    for (const def of PATIENT_VARS) {
+      const row = document.createElement('div');
+      row.className = 'patient-ctx-row';
+      const lbl = document.createElement('span');
+      lbl.className = 'patient-ctx-lbl';
+      lbl.textContent = def.label;
+      const entry = getEntry(_questVariables, def.name);
+      const current = entry ? fromExpr(def.type, entry.expression) : def.default;
+      let inp;
+      if (def.type === 'checkbox') {
+        inp = document.createElement('input');
+        inp.type = 'checkbox';
+        inp.className = 'patient-ctx-cb';
+        inp.checked = !!current;
+      } else if (def.type === 'select') {
+        const csel = createCustomSelect({
+          items:     def.options.map(([val, label]) => ({ value: val, label })),
+          value:     current,
+          className: 'patient-ctx-sel sc-trigger--full',
+          onChange:  () => {},
+        });
+        inp = csel.el;
+        inp._csel = csel;
+      } else {
+        inp = document.createElement('input');
+        inp.type = def.type === 'number' ? 'number' : 'text';
+        inp.className = 'patient-ctx-inp';
+        inp.value = current;
+        if (def.name === 'comorb') inp.placeholder = 'e.g. diabetes, hypertension';
+      }
+      _inputs[def.name] = { inp, def };
+      row.appendChild(lbl);
+      row.appendChild(inp);
+      this.body.appendChild(row);
+    }
+    super.open();
+  }
+
+  _apply() {
+    if (!_inputs) return;
+    for (const [name, { inp, def }] of Object.entries(_inputs)) {
+      let raw;
+      if (def.type === 'checkbox') raw = inp.checked;
+      else if (inp._csel)          raw = inp._csel.getValue();
+      else                          raw = inp.value;
+      setEntry(_questVariables, name, toExpr(def.type, raw));
+    }
+    _inputs = null;
+    this.close();
+    _doAfterApply();
+  }
+
+  _cancel() {
+    _inputs = null;
+    this.close();
+  }
+}
+
+const _modal = new PatientModal();
 
 // ── Preset dropdown ─────────────────────────────────────────────
 if (_el.presetBtn && _el.presetMenu) {
   _el.presetBtn.addEventListener('click', e => {
     e.stopPropagation();
     if (_el.presetMenu.style.display !== 'none') { _el.presetMenu.style.display = 'none'; return; }
-    // Position with fixed coords — top-panel has overflow-x:auto which clips absolute children
     const rect = _el.presetBtn.getBoundingClientRect();
     _el.presetMenu.style.position = 'fixed';
     _el.presetMenu.style.top  = (rect.bottom + 2) + 'px';
@@ -135,7 +197,7 @@ if (_el.presetBtn && _el.presetMenu) {
     if (!item) return;
     const presetId = item.dataset.preset;
     _el.presetMenu.style.display = 'none';
-    if (presetId === 'custom') { _openPatientModal(); return; }
+    if (presetId === 'custom') { _modal.open(); return; }
     const preset = PATIENT_PRESETS.find(p => p.id === presetId);
     if (!preset) return;
     applyPreset(preset, _questVariables);
@@ -143,7 +205,6 @@ if (_el.presetBtn && _el.presetMenu) {
     _doAfterApply();
   });
 
-  // Close on outside click
   document.addEventListener('click', () => { _el.presetMenu.style.display = 'none'; });
 }
 
@@ -151,69 +212,3 @@ const _doAfterApply = () => {
   document.dispatchEvent(new CustomEvent('reinit-form'));
   document.dispatchEvent(new CustomEvent(PATIENT_APPLY_EVENT));
 };
-
-function _openPatientModal() {
-  _modal.body.innerHTML = '';
-  _inputs = {};
-
-  for (const def of PATIENT_VARS) {
-    const row = document.createElement('div');
-    row.className = 'patient-ctx-row';
-
-    const lbl = document.createElement('span');
-    lbl.className = 'patient-ctx-lbl';
-    lbl.textContent = def.label;
-
-  const entry = getEntry(_questVariables, def.name);
-    const current = entry ? fromExpr(def.type, entry.expression) : def.default;
-
-    let inp;
-    if (def.type === 'checkbox') {
-      inp = document.createElement('input');
-      inp.type = 'checkbox';
-      inp.className = 'patient-ctx-cb';
-      inp.checked = !!current;
-    } else if (def.type === 'select') {
-      const csel = createCustomSelect({
-        items:     def.options.map(([val, label]) => ({ value: val, label })),
-        value:     current,
-        className: 'patient-ctx-sel sc-trigger--full',
-        onChange:  () => {},  // value read back via csel.getValue() on apply
-      });
-      inp = csel.el;
-      inp._csel = csel;  // stash for value retrieval
-    } else {
-      inp = document.createElement('input');
-      inp.type = def.type === 'number' ? 'number' : 'text';
-      inp.className = 'patient-ctx-inp';
-      inp.value = current;
-      if (def.name === 'comorb') inp.placeholder = 'e.g. diabetes, hypertension';
-    }
-
-    _inputs[def.name] = { inp, def };
-    row.appendChild(lbl);
-    row.appendChild(inp);
-    _modal.body.appendChild(row);
-  }
-
-  _modal.open();
-}
-
-function _applyPatientModal() {
-  if (!_inputs) return;
-  for (const [name, { inp, def }] of Object.entries(_inputs)) {
-    let raw;
-    if (def.type === 'checkbox') raw = inp.checked;
-    else if (inp._csel)          raw = inp._csel.getValue();
-    else                          raw = inp.value;
-    setEntry(_questVariables, name, toExpr(def.type, raw));
-  }
-  _inputs = null;
-  _modal.close();
-  _doAfterApply();
-}
-
-function _cancelPatientModal() {
-  _inputs = null;
-  _modal.close();
-}
