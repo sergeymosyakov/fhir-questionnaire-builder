@@ -1608,3 +1608,40 @@ describe('buildFHIRObject — designNote', () => {
     expect(ext?.valueMarkdown).toBe('Round-trip note.');
   });
 });
+
+// ── answerExpression export ───────────────────────────────────────────────────
+describe('buildFHIRObject — answerExpression', () => {
+  const AE_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression';
+  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _rawFhir.value = { title: 'T' }; return buildFHIRObject(); };
+
+  it('exports _answerExpression as valueExpression extension', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: '', _answerExpression: "'a' | 'b'" }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === AE_URL);
+    expect(ext?.valueExpression?.expression).toBe("'a' | 'b'");
+    expect(ext?.valueExpression?.language).toBe('text/fhirpath');
+  });
+
+  it('omits answerOption when _answerExpression is set', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A,b=B', _answerExpression: "'a' | 'b'" }]);
+    expect(q.item[0].answerOption).toBeUndefined();
+  });
+
+  it('does not export answerExpression extension when _answerExpression is absent', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === AE_URL);
+    expect(ext).toBeUndefined();
+  });
+
+  it('round-trips: node with _answerExpression exports correct extension and no answerOption', () => {
+    const expr = "%resource.item.where(linkId='score').answer.valueInteger >= 10";
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: '', _answerExpression: expr }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === AE_URL);
+    expect(ext?.valueExpression?.expression).toBe(expr);
+    expect(q.item[0].answerOption).toBeUndefined();
+  });
+
+  it('still exports answerOption when _answerExpression is absent but options exist', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A,b=B' }]);
+    expect(q.item[0].answerOption).toHaveLength(2);
+  });
+});

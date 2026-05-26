@@ -225,7 +225,7 @@ function buildControl(node, iconEl, onAfterChange) {
   // Wrap _reCalc so calc badges update in-place after every oninput.
   const reCalcAndRefresh = () => { _reCalc(); refreshCalcBadges(); };
 
-  const ctx = { getValue, setValue, onChange, _reCalc: reCalcAndRefresh, _formTick };
+  const ctx = { getValue, setValue, onChange, _reCalc: reCalcAndRefresh, _formTick, _fpCtx: _lastCtx };
   return node.buildControl(ctx);
 }
 

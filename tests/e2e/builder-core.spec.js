@@ -116,12 +116,12 @@ test.describe('FHIR export', () => {
     await node.getByTestId('node-title-input').fill('My Question');
     await node.getByTestId('node-title-input').blur();
 
-    page.once('dialog', d => d.accept());
-
     await page.getByTestId('export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click(),
+      page.getByTestId('export-fhir-item').click().then(() =>
+        page.getByTestId('prompt-save').click()
+      ),
     ]);
 
     expect(download.suggestedFilename()).toMatch(/\.json$/);

@@ -156,6 +156,9 @@ function nodeToFHIRItem(node) {
   // initialExpression
   if (node._initialExpr)
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression', valueExpression: { language: 'text/fhirpath', expression: node._initialExpr } });
+  // answerExpression (SDC) — dynamic answer options
+  if (node._answerExpression)
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression', valueExpression: { language: 'text/fhirpath', expression: node._answerExpression } });
   // radio-button itemControl
   if (node.itemType === 'radio')
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'radio-button' }] } });
@@ -168,7 +171,7 @@ function nodeToFHIRItem(node) {
 
   if (node.type === 'group') {
     fhirItem.item = node.children.map(nodeToFHIRItem);
-  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice') && node.options && !node._answerValueSet) {
+  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice') && node.options && !node._answerValueSet && !node._answerExpression) {
     fhirItem.answerOption = parseOptions(node.options)
       .map(({ code, display }) => {
         const coding = { code, display };

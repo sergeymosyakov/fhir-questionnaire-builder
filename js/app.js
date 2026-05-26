@@ -11,6 +11,7 @@ import * as progress from './ui/progress.js';
 import * as search from './ui/search.js';
 import * as tooltip from './ui/tooltip.js';
 import * as autosave from './ui/autosave.js';
+import { showPrompt } from './ui/toast.js';
 import * as statusBadge from './ui/status-badge.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './builder/index.js';
 import { importFHIR } from './fhir/import.js';
@@ -116,12 +117,13 @@ initPreview({
 // Prompt for filename then export
 function _promptExport(afterExport) {
   const suggested = document.getElementById('loadedFileName')?.textContent.trim() || 'questionnaire';
-  const name = window.prompt('Save as:', suggested + '.json');
-  if (name === null) return; // cancelled
-  const trimmed = (name.trim() || suggested).replace(/\.json$/i, '');
-  exportFHIR(trimmed + '.json');
-  setFileName(trimmed);
-  if (afterExport) afterExport();
+  showPrompt('Save as:', suggested + '.json', name => {
+    if (name === null) return; // cancelled
+    const trimmed = name.replace(/\.json$/i, '');
+    exportFHIR(trimmed + '.json');
+    setFileName(trimmed);
+    if (afterExport) afterExport();
+  });
 }
 
 // ── Validate button ──────────────────────────────────────────────────────────

@@ -7,6 +7,31 @@ import { NODE_REGISTRY } from './registry.js';
 import { createWrap } from './base-node.js';
 import { parseOptions } from '../utils.js';
 
+// Evaluate answerExpression (SDC) against the current FHIRPath context.
+// Returns [{code, display}] from the expression result, or falls back to
+// parseOptions(node.options) if the expression is absent, empty, or errors.
+function _evalAnswerOpts(node, fpCtx) {
+  if (!node._answerExpression) return parseOptions(node.options);
+  if (!fpCtx || !fpCtx.fp || !fpCtx.qr) return parseOptions(node.options);
+  try {
+    const raw = fpCtx.fp.evaluate(fpCtx.qr, node._answerExpression, fpCtx.env || {});
+    if (!raw || !raw.length) return parseOptions(node.options);
+    return raw.map(v => {
+      if (v === null || v === undefined) return null;
+      if (typeof v === 'string')  return { code: v, display: v };
+      if (typeof v === 'number')  return { code: String(v), display: String(v) };
+      if (typeof v === 'boolean') return { code: String(v), display: v ? 'Yes' : 'No' };
+      if (typeof v === 'object') {
+        if (v.code  !== undefined) return { code: String(v.code),  display: v.display || String(v.code) };
+        if (v.value !== undefined) return { code: String(v.value), display: v.display || String(v.value) };
+      }
+      return { code: String(v), display: String(v) };
+    }).filter(Boolean);
+  } catch {
+    return parseOptions(node.options);
+  }
+}
+
 export class ChoiceNode extends ItemNode {
   constructor(data = {}) {
     super(data);
@@ -18,7 +43,7 @@ export class ChoiceNode extends ItemNode {
     const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
     const wrap = createWrap();
 
-    const opts   = parseOptions(node.options);
+    const opts   = _evalAnswerOpts(node, ctx._fpCtx);
     let selected = getValue(node.id) || '';
 
     const trigger = document.createElement('div');
@@ -130,7 +155,7 @@ export class RadioNode extends ItemNode {
     const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
     const wrap = createWrap();
 
-    const opts = parseOptions(node.options);
+    const opts = _evalAnswerOpts(node, ctx._fpCtx);
     if (!opts.length) {
       const msg = document.createElement('span');
       msg.className = 'radio-no-opts';
@@ -182,7 +207,7 @@ export class OpenChoiceNode extends ItemNode {
     const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
     const wrap = createWrap();
 
-    const parsed = parseOptions(node.options);
+    const parsed = _evalAnswerOpts(node, ctx._fpCtx);
 
     const box = document.createElement('div');
     box.className = 'oc-wrap';

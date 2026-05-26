@@ -84,3 +84,73 @@ export function showToast(message, type = 'error') {
 export const showError = msg => showToast(msg, 'error');
 export const showWarn  = msg => showToast(msg, 'warn');
 export const showInfo  = msg => showToast(msg, 'info');
+
+/**
+ * Show a prompt dialog (replaces window.prompt).
+ * @param {string} label       — dialog title
+ * @param {string} defaultValue — pre-filled input value
+ * @param {(value: string|null) => void} onConfirm — called with trimmed value or null on cancel
+ */
+export function showPrompt(label, defaultValue, onConfirm) {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.style.opacity = '0';
+
+  const box = document.createElement('div');
+  box.className = 'modal-box';
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+
+  const header = document.createElement('div');
+  header.className = 'modal-header';
+  const titleEl = document.createElement('span');
+  titleEl.className = 'modal-title-label';
+  titleEl.textContent = label;
+  header.appendChild(titleEl);
+
+  const body = document.createElement('div');
+  body.className = 'modal-body';
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = defaultValue;
+  input.className = 'modal-text-input';
+  body.appendChild(input);
+
+  const footer = document.createElement('div');
+  footer.className = 'modal-footer';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'modal-btn';
+  cancelBtn.textContent = 'Cancel';
+  const applyBtn = document.createElement('button');
+  applyBtn.type = 'button';
+  applyBtn.className = 'modal-btn modal-btn--apply';
+  applyBtn.textContent = 'Save';
+  applyBtn.dataset.testid = 'prompt-save';
+  footer.append(cancelBtn, applyBtn);
+
+  box.append(header, body, footer);
+  backdrop.appendChild(box);
+  document.body.appendChild(backdrop);
+
+  backdrop.getBoundingClientRect(); // force reflow
+  backdrop.style.opacity = '1';
+  input.select();
+
+  const close = () => {
+    document.removeEventListener('keydown', onKey, true);
+    backdrop.style.opacity = '0';
+    backdrop.addEventListener('transitionend', () => backdrop.remove(), { once: true });
+  };
+  const confirm = () => { close(); onConfirm(input.value.trim() || defaultValue); };
+  const cancel  = () => { close(); onConfirm(null); };
+
+  const onKey = e => {
+    if (e.key === 'Enter')  { e.preventDefault(); confirm(); }
+    if (e.key === 'Escape') cancel();
+  };
+  document.addEventListener('keydown', onKey, true);
+  applyBtn.onclick  = confirm;
+  cancelBtn.onclick = cancel;
+  backdrop.addEventListener('click', e => { if (e.target === backdrop) cancel(); });
+}

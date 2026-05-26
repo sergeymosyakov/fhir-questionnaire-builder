@@ -103,6 +103,14 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     node._initialExpr = initExpr.valueExpression.expression || '';
   }
 
+  // SDC answerExpression — dynamic answer options computed via FHIRPath
+  const answerExprExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression'
+  );
+  if (answerExprExt?.valueExpression) {
+    node._answerExpression = answerExprExt.valueExpression.expression || '';
+  }
+
   // maxLength
   if (fhirItem.maxLength) node._maxLength = fhirItem.maxLength;
 

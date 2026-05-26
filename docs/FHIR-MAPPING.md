@@ -57,6 +57,7 @@ Every node in the tree is either a **group** or an **item**:
   _minOccurs:          integer,          // questionnaire-minOccurs extension (when repeats: true)
   _maxOccurs:          integer,          // questionnaire-maxOccurs extension (when repeats: true; enforced in preview)
   _answerValueSet:     string,           // FHIR item.answerValueSet URL — preserved round-trip; not resolved to options
+  _answerExpression:   string,           // SDC sdc-questionnaire-answerExpression — FHIRPath expression evaluated at render time; result replaces answerOption[] in preview
   _minValue:           number,           // questionnaire-minValue extension value (decimal or integer)
   _maxValue:           number,           // questionnaire-maxValue extension value (decimal or integer)
   _optionOrdinals:     object,           // map of option code → ordinalValue (from ordinalValue extension on answerOption.extension or valueCoding.extension fallback)
@@ -213,6 +214,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `_minOccurs` | `questionnaire-minOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true` |
 | `_maxOccurs` | `questionnaire-maxOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true`; enforced in preview — add button disabled at limit |
 | `_answerValueSet` | `item.answerValueSet` | imported → `node._answerValueSet`; exported back unchanged; URL not resolved — items show no selectable options in the builder |
+| `_answerExpression` | SDC `sdc-questionnaire-answerExpression` extension (`valueExpression.expression`) | FHIRPath evaluated at render time; result replaces static `answerOption[]` in preview; `answerOption[]` is suppressed on export when set; editable in Answer Type modal (Expression source radio) |
 | `_initialValue` | `item.initial[0]` value | imported from `initial[0]`; exported as `initial: [entry]`; pre-fills `values[]` on import |
 | `_initialValues` | `item.initial[]` all values | set only for repeating items with >1 initial value; exported as `initial: [entry, …]`; `_initialValue` holds `initial[0]` for backwards compat |
 | `_initialSelected` | `answerOption[].initialSelected` | code of the initially-selected option; preserved round-trip; if no `item.initial[]` exists, also used to pre-fill `_initialValue` |
@@ -256,6 +258,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/rendering-xhtml` | standard | `_renderXhtml` | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression` | SDC | `_calculatedExpr` | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression` | SDC | `_initialExpr` | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression` | SDC | `_answerExpression` (dynamic answer options for choice/radio/open-choice) | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable` | SDC | `questVariables[]` on root | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression` | SDC | `enableWhenExpression` | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-constraint` | standard | `constraint[]` | Yes |
@@ -399,7 +402,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 
 | Extension | Status | Notes |
 |---|---|---|
-| `sdc-questionnaire-answerExpression` | ❌ | Dynamic answer options derived from FHIRPath over form values (no server needed) |
 | `sdc-questionnaire-itemWeight` | ❌ | Per-option weight for scoring (analogous to `ordinalValue` at item level) |
 | `sdc-questionnaire-unitOption[]` | ❌ | Multiple selectable units for `quantity` items |
 | `sdc-questionnaire-shortText` | ❌ | Abbreviated label for summary views |

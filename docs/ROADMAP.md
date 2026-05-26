@@ -10,13 +10,11 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 - [ ] **Supabase + GitHub OAuth** — user accounts (GitHub login); per-user questionnaire storage in Supabase (save / load / list); user settings (default FHIR server URL); no anonymous data; enables sharing questionnaires via URL slug. Unblocks the tool from being a REPL-only prototype into a real product.
 - [ ] **More sample data** — 2–3 additional questionnaires covering different complexity levels, with documented expected PASS/FAIL outcomes per patient profile
-- [ ] **`sdc-questionnaire-answerExpression`** — dynamic answer options derived from FHIRPath over current form values (no server required); SDC extension
 - [ ] **tx.fhir.org ValueSet expansion** — call HL7's public terminology server directly from the browser (`$expand` operation); user pastes an external ValueSet URL and gets live answer options without any backend; biggest UX gap vs. commercial tools
 - [ ] **Copy / paste nodes** — duplicate a question or an entire group (with children) anywhere in the tree
 
 ## Later
 
-- [ ] **`sdc-questionnaire-answerExpression`** — dynamic answer options derived from FHIRPath over current form values (no server required); SDC extension
 - [ ] **tx.fhir.org ValueSet expansion** — call HL7's public terminology server directly from the browser (`$expand` operation); user pastes an external ValueSet URL and gets live answer options without any backend; biggest UX gap vs. commercial tools
 - [ ] **More sample data** — 2–3 additional questionnaires covering different complexity levels, with documented expected PASS/FAIL outcomes per patient profile
 - [ ] **External validator integration** — link to HL7 / Simplifier validator or call a local FHIR validation API; surface results as item-level badges
@@ -25,6 +23,7 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Completed
 
+- [x] **`sdc-questionnaire-answerExpression`** — dynamic answer options for `choice`/`radio`/`open-choice` items derived from FHIRPath evaluated at render time; editable in Answer Type modal (Expression source); `answerOption[]` suppressed on export; falls back to static options on error; sample questionnaire `answer-expression-demo.fhir.json`
 - [x] **View Options menu** — consolidated linkId, prefix, badges, and hidden item toggles into a single dropdown menu next to Preview button; menu stays open when clicking checkboxes; CSS modifier classes (`.preview--no-linkid`, `.preview--no-prefix`, `.preview--no-badges`, `.preview--no-hidden`) control visibility; comprehensive e2e test coverage (12 tests)
 - [x] **Undo / redo** — Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z; debounced 400ms snapshots via `js/ui/history.js`; buttons in left-panel-header; max 50 entries; resets on load/clear
 - [x] **Load confirm dialog** — `_askBeforeLoad()` in `app-load.js`; shown when tree non-empty before any load operation; Cancel/Escape keeps current tree

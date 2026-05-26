@@ -1,0 +1,59 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "answer-expression-e2e",
+  "title": "Answer Expression E2E Test",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "q-expr",
+      "text": "Dynamic options via expression",
+      "type": "choice",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "'alpha' | 'beta' | 'gamma'"
+          }
+        }
+      ],
+      "answerOption": [
+        { "valueCoding": { "code": "alpha", "display": "Alpha" } },
+        { "valueCoding": { "code": "beta",  "display": "Beta"  } },
+        { "valueCoding": { "code": "gamma", "display": "Gamma" } }
+      ]
+    },
+    {
+      "linkId": "q-radio-expr",
+      "text": "Radio with expression",
+      "type": "choice",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": { "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "radio-button" }] }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "'yes' | 'no' | 'maybe'"
+          }
+        }
+      ],
+      "answerOption": [
+        { "valueCoding": { "code": "yes",   "display": "Yes"   } },
+        { "valueCoding": { "code": "no",    "display": "No"    } },
+        { "valueCoding": { "code": "maybe", "display": "Maybe" } }
+      ]
+    },
+    {
+      "linkId": "q-plain",
+      "text": "Plain options (no expression)",
+      "type": "choice",
+      "answerOption": [
+        { "valueCoding": { "code": "x", "display": "Option X" } },
+        { "valueCoding": { "code": "y", "display": "Option Y" } }
+      ]
+    }
+  ]
+}

@@ -42,3 +42,12 @@
 .notif--error .notif-title-icon { background: #b91c1c; color: #fff; }
 .notif--warn  .notif-title-icon { background: #d97706; color: #fff; }
 .notif--info  .notif-title-icon { background: #2563eb; color: #fff; }
+
+/* Input used in showPrompt() dialog */
+.modal-text-input {
+  width: 100%; box-sizing: border-box;
+  height: 32px; padding: 0 8px;
+  border: 1px solid var(--c-border); border-radius: 4px;
+  font-size: 13px; background: var(--c-bg); color: var(--c-text);
+}
+.modal-text-input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 2px var(--c-primary-lt); }

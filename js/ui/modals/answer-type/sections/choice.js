@@ -51,18 +51,20 @@ class ChoiceSection extends AnswerTypeSection {
     const sourceRow = document.createElement('div');
     sourceRow.className = 'at-modal-source-row';
 
-    const optRadio = Object.assign(document.createElement('input'), { type: 'radio', name: '_at_src', id: '_at_src_opt', value: 'options', checked: !pending.draftAVS });
-    const avsRadio = Object.assign(document.createElement('input'), { type: 'radio', name: '_at_src', id: '_at_src_avs', value: 'valueset', checked: !!pending.draftAVS });
-    const optLbl   = Object.assign(document.createElement('label'), { htmlFor: '_at_src_opt', textContent: 'Options list', className: 'at-modal-src-lbl' });
-    const avsLbl   = Object.assign(document.createElement('label'), { htmlFor: '_at_src_avs', textContent: 'ValueSet (answerValueSet)', className: 'at-modal-src-lbl' });
+    const optRadio  = Object.assign(document.createElement('input'), { type: 'radio', name: '_at_src', id: '_at_src_opt',  value: 'options',     checked: pending.draftSrc === 'options' });
+    const avsRadio  = Object.assign(document.createElement('input'), { type: 'radio', name: '_at_src', id: '_at_src_avs',  value: 'valueset',    checked: pending.draftSrc === 'valueset' });
+    const exprRadio = Object.assign(document.createElement('input'), { type: 'radio', name: '_at_src', id: '_at_src_expr', value: 'expression',  checked: pending.draftSrc === 'expression' });
+    const optLbl    = Object.assign(document.createElement('label'), { htmlFor: '_at_src_opt',  textContent: 'Options list',               className: 'at-modal-src-lbl' });
+    const avsLbl    = Object.assign(document.createElement('label'), { htmlFor: '_at_src_avs',  textContent: 'ValueSet (answerValueSet)',   className: 'at-modal-src-lbl' });
+    const exprLbl   = Object.assign(document.createElement('label'), { htmlFor: '_at_src_expr', textContent: 'Expression (answerExpression)', className: 'at-modal-src-lbl' });
 
-    sourceRow.append(optRadio, optLbl, avsRadio, avsLbl);
+    sourceRow.append(optRadio, optLbl, avsRadio, avsLbl, exprRadio, exprLbl);
     section.appendChild(sourceRow);
 
     // ── Options sub-section ──────────────────────────────────────────────────
     const optSection = document.createElement('div');
     optSection.className     = 'at-modal-sub';
-    optSection.style.display = !pending.draftAVS ? 'block' : 'none';
+    optSection.style.display = pending.draftSrc === 'options' ? 'block' : 'none';
 
     const optSubLbl = document.createElement('div');
     optSubLbl.className        = 'at-modal-sub-lbl';
@@ -102,7 +104,7 @@ class ChoiceSection extends AnswerTypeSection {
     // ── ValueSet sub-section ─────────────────────────────────────────────────
     const avsSection = document.createElement('div');
     avsSection.className     = 'at-modal-sub';
-    avsSection.style.display = pending.draftAVS ? 'block' : 'none';
+    avsSection.style.display = pending.draftSrc === 'valueset' ? 'block' : 'none';
 
     const avsSubLbl = document.createElement('div');
     avsSubLbl.className        = 'at-modal-sub-lbl';
@@ -149,6 +151,30 @@ class ChoiceSection extends AnswerTypeSection {
     avsSection.append(avsSubLbl, avsDrop.el, avsUrlInp);
     section.appendChild(avsSection);
 
+    // ── answerExpression sub-section ─────────────────────────────────────────
+    const exprSection = document.createElement('div');
+    exprSection.className     = 'at-modal-sub';
+    exprSection.style.display = pending.draftSrc === 'expression' ? 'block' : 'none';
+
+    const exprSubLbl = document.createElement('div');
+    exprSubLbl.className        = 'at-modal-sub-lbl';
+    exprSubLbl.textContent      = 'FHIRPath expression (sdc-questionnaire-answerExpression):';
+    exprSubLbl.dataset.tipTitle = 'Answer Expression';
+    exprSubLbl.dataset.tipBody  = 'FHIRPath expression evaluated against the current QuestionnaireResponse. Must return a collection of strings, numbers, or Coding objects — each becomes an answer option. Falls back to the static options list if evaluation fails or returns empty.';
+    exprSubLbl.dataset.tipFhir  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression';
+    exprSubLbl.dataset.tipSpec  = 'SDC';
+
+    const exprInp = document.createElement('textarea');
+    exprInp.className      = 'at-modal-opt-inp';
+    exprInp.dataset.testid = 'answer-expr-input';
+    exprInp.value          = pending.draftAnswerExpr;
+    exprInp.placeholder    = "e.g. %resource.item.where(linkId='category').answer.valueCoding.code";
+    exprInp.rows           = 3;
+    exprInp.oninput = () => { pending.draftAnswerExpr = exprInp.value; };
+
+    exprSection.append(exprSubLbl, exprInp);
+    section.appendChild(exprSection);
+
     // ── openLabel sub-section (open-choice only) ─────────────────────────────
     const openLabelSection = document.createElement('div');
     openLabelSection.className     = 'at-modal-sub';
@@ -175,17 +201,16 @@ class ChoiceSection extends AnswerTypeSection {
     this._openLabelEl = openLabelSection;
 
     // ── Wire radio toggles ───────────────────────────────────────────────────
-    optRadio.onchange = () => {
-      if (optRadio.checked) {
-        optSection.style.display = 'block';
-        avsSection.style.display = 'none';
-        pending.draftAVS = '';
-      }
+    const _showOnly = which => {
+      optSection.style.display  = which === 'options'     ? 'block' : 'none';
+      avsSection.style.display  = which === 'valueset'    ? 'block' : 'none';
+      exprSection.style.display = which === 'expression'  ? 'block' : 'none';
+      pending.draftSrc = which;
     };
-    avsRadio.onchange = () => {
+    optRadio.onchange  = () => { if (optRadio.checked)  { pending.draftAVS = ''; _showOnly('options'); } };
+    avsRadio.onchange  = () => {
       if (avsRadio.checked) {
-        optSection.style.display = 'none';
-        avsSection.style.display = 'block';
+        _showOnly('valueset');
         if (!pending.draftAVS) {
           if (containedVS.length) {
             pending.draftAVS = '#' + containedVS[0].id;
@@ -198,19 +223,26 @@ class ChoiceSection extends AnswerTypeSection {
         }
       }
     };
+    exprRadio.onchange = () => { if (exprRadio.checked) { pending.draftAVS = ''; _showOnly('expression'); } };
 
     return section;
   }
 
   commit(pending, node) {
     if (CHOICE_TYPES.has(node.itemType)) {
-      if (pending.draftAVS) {
+      if (pending.draftSrc === 'expression') {
+        node._answerExpression = pending.draftAnswerExpr.trim();
+        delete node._answerValueSet;
+        delete node._optionOrdinals;
+        delete node._optionPrefixes;
+      } else if (pending.draftAVS) {
         node._answerValueSet = pending.draftAVS;
         node.options = resolveContainedValueSet(Modal._svc.questContained, pending.draftAVS);
         delete node._optionOrdinals;
         delete node._optionPrefixes;
       } else {
         delete node._answerValueSet;
+        delete node._answerExpression;
         const _parsedOrds  = _parseOptsWithOrdinals(pending.draftOptions);
         const _newOrdinals = {};
         node.options = _parsedOrds.map(({ code, display, ordinal }) => {
@@ -233,6 +265,7 @@ class ChoiceSection extends AnswerTypeSection {
       }
     } else {
       delete node._answerValueSet;
+      delete node._answerExpression;
       delete node._optionOrdinals;
       delete node._optionPrefixes;
       node.options = '';
@@ -247,12 +280,14 @@ class ChoiceSection extends AnswerTypeSection {
 
   initPending(node) {
     return {
-      draftOptions:   _optsWithOrdinals(node),
-      draftAVS:       node._answerValueSet || '',
-      draftPrefixes:  node._optionPrefixes
+      draftOptions:     _optsWithOrdinals(node),
+      draftAVS:         node._answerValueSet || '',
+      draftPrefixes:    node._optionPrefixes
         ? Object.entries(node._optionPrefixes).map(([code, pfx]) => `${code}=${pfx}`).join(',')
         : '',
-      draftOpenLabel: node._openLabel || '',
+      draftOpenLabel:   node._openLabel || '',
+      draftAnswerExpr:  node._answerExpression || '',
+      draftSrc:         node._answerExpression ? 'expression' : (node._answerValueSet ? 'valueset' : 'options'),
     };
   }
 }
