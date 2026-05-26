@@ -59,11 +59,16 @@ export function confirmDelete(label) {
     box.className = 'clear-confirm-box';
     box.innerHTML =
       '<div class="clear-confirm-title">Delete node?</div>' +
-      '<div class=\"clear-confirm-msg\"></div>' +
-      '<div class=\"clear-confirm-btns\">' +
-        '<button class=\"btn-fhir btn-danger\" id=\"_cdDel\" data-testid=\"delete-confirm-del-btn\">Delete</button>' +
-        '<button class=\"btn-fhir\" id=\"_cdCancel\" data-testid=\"delete-confirm-cancel-btn\">Cancel</button>' +
-      '</div>';\n    const msg = box.querySelector('.clear-confirm-msg');\n    const strong = document.createElement('strong');\n    strong.textContent = label;\n    msg.appendChild(strong);\n    msg.appendChild(document.createTextNode(' and all its children will be permanently removed.'));
+      '<div class="clear-confirm-msg"></div>' +
+      '<div class="clear-confirm-btns">' +
+        '<button class="btn-fhir btn-danger" id="_cdDel" data-testid="delete-confirm-del-btn">Delete</button>' +
+        '<button class="btn-fhir" id="_cdCancel" data-testid="delete-confirm-cancel-btn">Cancel</button>' +
+      '</div>';
+    const msg = box.querySelector('.clear-confirm-msg');
+    const strong = document.createElement('strong');
+    strong.textContent = label;
+    msg.appendChild(strong);
+    msg.appendChild(document.createTextNode(' and all its children will be permanently removed.'));
     backdrop.appendChild(box);
     document.body.appendChild(backdrop);
     const esc = e => { if (e.key === 'Escape') close(false); };

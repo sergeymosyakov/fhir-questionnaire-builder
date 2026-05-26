@@ -1,6 +1,6 @@
 ﻿// Entry point: wires toolbar buttons, patient context popup, and loads the built-in example.
 import { tree, values, rawFhir, effect, clearAllValues } from './state.js';
-import { showError, showWarn } from './ui/toast.js';
+import { showError } from './ui/toast.js';
 import { _formTick } from './render-bus.js';
 import { importFHIR } from './fhir/import.js';
 import { buildFHIRObject, exportFHIR } from './fhir/export.js';

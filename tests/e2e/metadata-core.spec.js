@@ -30,7 +30,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
-import { freshStart, loadFixture, openModal, exportFHIR } from './helpers/metadata.js';
+import { loadFixture, openModal, exportFHIR } from './helpers/metadata.js';
 
 // ── Modal open / close ────────────────────────────────────────────────────────
 
