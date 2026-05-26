@@ -89,7 +89,7 @@ test('QR repeat round-trip: fill 3 rows per field, export, reload, import, verif
   await expect(page.locator('[data-testid="qrExportModal"]')).toBeVisible({ timeout: 5_000 });
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByTestId('qr-export-apply').click(),
+    page.getByTestId('qrExportModalApply').click(),
   ]);
   const qrPath = await download.path();
   expect(qrPath).toBeTruthy();

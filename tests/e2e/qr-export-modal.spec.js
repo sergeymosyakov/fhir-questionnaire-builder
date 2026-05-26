@@ -11,11 +11,9 @@
 //   qr-export-status       status custom-select trigger inside the modal
 //   qr-export-subject      subject reference input
 //   qr-export-author       author reference input
-//   qr-export-apply        "⬇ Export" button in modal footer
-//
-// ── element IDs ──────────────────────────────────────────────────────────────
-//   qrExportModal          backdrop (display:flex when open)
-//   qrExportModalCancel    Cancel button
+//   qrExportModalApply     "Apply" button in modal footer
+//   qrExportModalCancel    "Cancel" button in modal footer
+//   qrExportModal          modal backdrop (display:flex when open)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { readFileSync } from 'node:fs';
@@ -112,7 +110,7 @@ test('Export button triggers JSON download', async ({ page }) => {
   await loadSampleAndOpenExportModal(page);
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByTestId('qr-export-apply').click(),
+    page.getByTestId('qrExportModalApply').click(),
   ]);
   expect(download.suggestedFilename()).toMatch(/\.json$/);
 });
@@ -123,7 +121,7 @@ test('downloaded JSON has the user-specified status', async ({ page }) => {
   await page.locator('[data-testid="csel-drop"] [data-val="completed"]').click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByTestId('qr-export-apply').click(),
+    page.getByTestId('qrExportModalApply').click(),
   ]);
   const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
   expect(qr.status).toBe('completed');
@@ -134,7 +132,7 @@ test('downloaded JSON has subject when user enters one', async ({ page }) => {
   await page.getByTestId('qr-export-subject').fill('Patient/99');
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByTestId('qr-export-apply').click(),
+    page.getByTestId('qrExportModalApply').click(),
   ]);
   const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
   expect(qr.subject?.reference).toBe('Patient/99');
@@ -145,7 +143,7 @@ test('downloaded JSON has no subject when field is empty', async ({ page }) => {
   await page.getByTestId('qr-export-subject').fill('');
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByTestId('qr-export-apply').click(),
+    page.getByTestId('qrExportModalApply').click(),
   ]);
   const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
   expect(qr.subject).toBeUndefined();
