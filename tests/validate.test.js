@@ -106,6 +106,22 @@ describe('validateTree — FHIRPath expression', () => {
     const issues = validateTree([makeItem({ id: 'q1', _calculatedExpr: '%bmiCalc' })]);
     expect(errIds(issues)).toHaveLength(0);
   });
+
+  it('errors on invalid answerExpression', () => {
+    const issues = validateTree([makeItem({ id: 'q1', itemType: 'select', options: '', _answerExpression: 'INVALID expression' })]);
+    expect(errIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.severity === 'error').message).toMatch(/Answer expression error/);
+  });
+
+  it('no error for valid answerExpression', () => {
+    const issues = validateTree([makeItem({ id: 'q1', itemType: 'select', options: '', _answerExpression: "'a' | 'b' | 'c'" })]);
+    expect(errIds(issues)).toHaveLength(0);
+  });
+
+  it('no error when answerExpression is absent', () => {
+    const issues = validateTree([makeItem({ id: 'q1', itemType: 'select', options: 'a=A,b=B' })]);
+    expect(errIds(issues)).toHaveLength(0);
+  });
 });
 
 // ── reference item ──────────────────────────────────────────────────────────

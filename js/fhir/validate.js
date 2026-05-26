@@ -82,6 +82,9 @@ export function validateTree(tree, _values = {}) {
     const fhirPathErr = _checkFhirPath(node._calculatedExpr);
     if (fhirPathErr) issues.push({ severity: 'error', nodeId: id, message: `Calculated expression error: ${fhirPathErr}` });
 
+    const fhirPathAeErr = _checkFhirPath(node._answerExpression);
+    if (fhirPathAeErr) issues.push({ severity: 'error', nodeId: id, message: `Answer expression error: ${fhirPathAeErr}` });
+
     const fhirPathEwErr = _checkFhirPath(node.enableWhenExpression);
     if (fhirPathEwErr) issues.push({ severity: 'error', nodeId: id, message: `enableWhenExpression error: ${fhirPathEwErr}` });
 
