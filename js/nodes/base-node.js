@@ -322,4 +322,80 @@ export class BaseNode {
 
   // Render children into target. No-op in base; overridden in GroupNode.
   _renderChildren(_res, _target, _rc) { /* no-op */ }
+
+  // ── Shared builder-panel helpers ──────────────────────────────────────────
+  // Used by both ItemNode.buildBuilder() and GroupNode.buildBuilder().
+
+  /** Returns a <div class="node-title-row"> with a click-to-edit title field. */
+  _buildInlineTitleEditor() {
+    const titleRow = document.createElement('div');
+    titleRow.className = 'node-title-row';
+    const titleDisplay = document.createElement('span');
+    titleDisplay.className = 'node-title-display';
+    titleDisplay.dataset.testid = 'node-title-display';
+    titleDisplay.textContent = this.title || '(no title)';
+    const titleTextarea = document.createElement('textarea');
+    titleTextarea.className = 'node-title-textarea';
+    titleTextarea.dataset.testid = 'node-title-input';
+    titleTextarea.value = this.title;
+    titleTextarea.style.display = 'none';
+    titleTextarea.oninput = () => { this.title = titleTextarea.value; titleDisplay.textContent = titleTextarea.value || '(no title)'; };
+    titleTextarea.onblur  = () => { titleTextarea.style.display = 'none'; titleDisplay.style.display = ''; };
+    titleDisplay.addEventListener('click', e => {
+      e.stopPropagation();
+      const h = titleDisplay.offsetHeight;
+      titleDisplay.style.display = 'none';
+      titleTextarea.style.display = '';
+      titleTextarea.style.height = Math.max(h, 48) + 'px';
+      titleTextarea.focus();
+      titleTextarea.setSelectionRange(titleTextarea.value.length, titleTextarea.value.length);
+    });
+    titleRow.append(titleDisplay, titleTextarea);
+    return { titleRow, titleDisplay, titleTextarea };
+  }
+
+  /** Returns a linkId <input> wired to this.id. */
+  _buildLinkIdInput() {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.value = this.id;
+    inp.className = 'node-linkid-input';
+    inp.dataset.tipTitle = 'FHIR linkId';
+    inp.dataset.tipBody  = 'Editable. Must be unique within the questionnaire.';
+    inp.oninput = () => { this.id = inp.value.trim() || this.id; };
+    return inp;
+  }
+
+  /** Returns a prefix <input> wired to this._prefix. */
+  _buildPrefixInput(placeholder = '\u2014') {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.value = this._prefix || '';
+    inp.className = 'node-prefix-input';
+    inp.placeholder = placeholder;
+    inp.dataset.tipTitle = 'Display prefix';
+    inp.dataset.tipBody  = 'Cosmetic only \u2014 e.g. "1.". Does not affect logic or linkId.';
+    inp.oninput = () => { this._prefix = inp.value.trim() || undefined; };
+    return inp;
+  }
+
+  /**
+   * Creates an action <a> element, appends it to container, returns it.
+   * @param {string} label
+   * @param {string} key        — used for data-testid="action-{key}"
+   * @param {{ title?, body?, fhir?, spec? }} tip
+   * @param {HTMLElement} container
+   */
+  _makeActionLink(label, key, tip, container) {
+    const a = document.createElement('a');
+    a.textContent    = label;
+    a.className      = 'action-edit';
+    a.dataset.testid = 'action-' + key;
+    if (tip?.title) a.dataset.tipTitle = tip.title;
+    if (tip?.body)  a.dataset.tipBody  = tip.body;
+    if (tip?.fhir)  a.dataset.tipFhir  = tip.fhir;
+    if (tip?.spec)  a.dataset.tipSpec  = tip.spec;
+    container.appendChild(a);
+    return a;
+  }
 }

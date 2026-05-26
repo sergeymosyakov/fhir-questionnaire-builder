@@ -225,47 +225,11 @@ export class GroupNode extends BaseNode {
     typeLabel.textContent = isEmptyGroupNode ? '[Info]' : '[Group]';
     titleWrap.appendChild(typeLabel);
 
-    const linkIdInput = document.createElement('input');
-    linkIdInput.type = 'text';
-    linkIdInput.value = node.id;
-    linkIdInput.className = 'node-linkid-input';
-    linkIdInput.dataset.tipTitle = 'FHIR linkId';
-    linkIdInput.dataset.tipBody  = 'Editable. Must be unique within the questionnaire.';
-    linkIdInput.oninput = () => { node.id = linkIdInput.value.trim() || node.id; };
+    const linkIdInput = node._buildLinkIdInput();
 
-    const prefixInput = document.createElement('input');
-    prefixInput.type = 'text';
-    prefixInput.value = node._prefix || '';
-    prefixInput.className = 'node-prefix-input';
-    prefixInput.placeholder = '\u2014';
-    prefixInput.dataset.tipTitle = 'Display prefix';
-    prefixInput.dataset.tipBody  = 'Cosmetic only \u2014 e.g. "1.". Does not affect logic or linkId.';
-    prefixInput.oninput = () => { node._prefix = prefixInput.value.trim() || undefined; };
+    const prefixInput = node._buildPrefixInput('\u2014');
 
-    const titleRow = document.createElement('div');
-    titleRow.className = 'node-title-row';
-    const titleDisplay = document.createElement('span');
-    titleDisplay.className = 'node-title-display';
-    titleDisplay.dataset.testid = 'node-title-display';
-    titleDisplay.textContent = node.title || '(no title)';
-    const titleTextarea = document.createElement('textarea');
-    titleTextarea.className = 'node-title-textarea';
-    titleTextarea.dataset.testid = 'node-title-input';
-    titleTextarea.value = node.title;
-    titleTextarea.style.display = 'none';
-    titleTextarea.oninput = () => { node.title = titleTextarea.value; titleDisplay.textContent = titleTextarea.value || '(no title)'; };
-    titleTextarea.onblur = () => { titleTextarea.style.display = 'none'; titleDisplay.style.display = ''; };
-    titleDisplay.addEventListener('click', e => {
-      e.stopPropagation();
-      const h = titleDisplay.offsetHeight;
-      titleDisplay.style.display = 'none';
-      titleTextarea.style.display = '';
-      titleTextarea.style.height = Math.max(h, 48) + 'px';
-      titleTextarea.focus();
-      titleTextarea.setSelectionRange(titleTextarea.value.length, titleTextarea.value.length);
-    });
-    titleRow.appendChild(titleDisplay);
-    titleRow.appendChild(titleTextarea);
+    const { titleRow, titleDisplay, titleTextarea } = node._buildInlineTitleEditor();
 
     titleWrap.addEventListener('click', e => {
       if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput || e.target === prefixInput) return;
@@ -275,41 +239,30 @@ export class GroupNode extends BaseNode {
     const actions = document.createElement('div');
     actions.className = 'node-actions';
 
-    const addToggle = (label, key, tipTitle, tipBody, tipFhir, tipSpec) => {
-      const a = document.createElement('a');
-      a.textContent = label;
-      a.className = 'action-edit';
-      a.dataset.testid = 'action-' + key;
-      if (tipTitle) a.dataset.tipTitle = tipTitle;
-      if (tipBody)  a.dataset.tipBody  = tipBody;
-      if (tipFhir)  a.dataset.tipFhir  = tipFhir;
-      if (tipSpec)  a.dataset.tipSpec  = tipSpec;
-      actions.appendChild(a);
-      return a;
-    };
     const setActive = (el, active) => el.classList.toggle('action-edit--active', active);
 
-    const statesLink = document.createElement('a');
-    statesLink.textContent = 'States';
-    statesLink.className = 'action-edit';
-    statesLink.dataset.tipTitle = 'Item / group states';
-    statesLink.dataset.tipBody  = 'Required \u2014 must be answered to pass validation.\nHidden \u2014 excluded from patient view; participates in logic.\nCollapsible \u2014 group starts collapsed or expanded in patient view.';
-    statesLink.dataset.tipFhir  = 'item.required / sdc-questionnaire-hidden / sdc-questionnaire-collapsible';
-    statesLink.dataset.tipSpec  = 'R4 \u00B7 SDC';
-    statesLink.dataset.testid   = 'action-states';
+    const statesLink = node._makeActionLink('States', 'states', {
+      title: 'Item / group states',
+      body:  'Required \u2014 must be answered to pass validation.\nHidden \u2014 excluded from patient view; participates in logic.\nCollapsible \u2014 group starts collapsed or expanded in patient view.',
+      fhir:  'item.required / sdc-questionnaire-hidden / sdc-questionnaire-collapsible',
+      spec:  'R4 \u00B7 SDC',
+    }, actions);
     statesLink.onclick = () => MODAL_REGISTRY.get('states').open(node, statesLink, setActive);
-    actions.appendChild(statesLink);
 
-    const visLink = addToggle('Show When', 'vis',
-      'Show When (enableWhen)',
-      'Add enableWhen conditions to control when this group is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden groups are dimmed \uD83D\uDD12 in the preview.',
-      'Questionnaire.item.enableWhen[]', 'R4 \u00B7 optional');
+    const visLink = node._makeActionLink('Show When', 'vis', {
+      title: 'Show When (enableWhen)',
+      body:  'Add enableWhen conditions to control when this group is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden groups are dimmed \uD83D\uDD12 in the preview.',
+      fhir:  'Questionnaire.item.enableWhen[]',
+      spec:  'R4 \u00B7 optional',
+    }, actions);
     visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive, ctx, ctx.buildVisPanel);
 
-    const exprLink = addToggle('Expression', 'expr',
-      'Calculated Expression',
-      'SDC FHIRPath calculatedExpression on this group item. Evaluated on Test click. Supports questionnaire-level %variables.',
-      'sdc-questionnaire-calculatedExpression', 'SDC \u00B7 optional');
+    const exprLink = node._makeActionLink('Expression', 'expr', {
+      title: 'Calculated Expression',
+      body:  'SDC FHIRPath calculatedExpression on this group item. Evaluated on Test click. Supports questionnaire-level %variables.',
+      fhir:  'sdc-questionnaire-calculatedExpression',
+      spec:  'SDC \u00B7 optional',
+    }, actions);
     exprLink.onclick = () => MODAL_REGISTRY.get('expression').open({
       node, link: exprLink, setActive,
       field:       '_calculatedExpr',
@@ -319,34 +272,30 @@ export class GroupNode extends BaseNode {
       onApply:     ctx.triggerCalcRecalc,
     });
 
-    const styleLink = addToggle('Appearance', 'style',
-      'Appearance (rendering-style)',
-      'Inline CSS applied to the group title in the preview. Stored in the standard FHIR rendering-style extension on the _text element.',
-      'Questionnaire.item._text.extension[rendering-style]', 'R4 \u00B7 optional');
+    const styleLink = node._makeActionLink('Appearance', 'style', {
+      title: 'Appearance (rendering-style)',
+      body:  'Inline CSS applied to the group title in the preview. Stored in the standard FHIR rendering-style extension on the _text element.',
+      fhir:  'Questionnaire.item._text.extension[rendering-style]',
+      spec:  'R4 \u00B7 optional',
+    }, actions);
     styleLink.onclick = () => MODAL_REGISTRY.get('appearance').open(node, styleLink, setActive);
 
-    const propsLink = document.createElement('a');
-    propsLink.textContent = 'Props';
-    propsLink.className = 'action-edit';
-    propsLink.dataset.tipTitle = 'Group Properties';
-    propsLink.dataset.tipBody  = 'Edit group-level metadata: definition URL, terminology codes (item.code[]) and support links (questionnaire-supportLink).';
-    propsLink.dataset.tipFhir  = 'Questionnaire.item.definition / item.code[] / questionnaire-supportLink';
-    propsLink.dataset.tipSpec  = 'R4 \u00B7 optional';
-    propsLink.dataset.testid   = 'action-codes';
+    const propsLink = node._makeActionLink('Props', 'codes', {
+      title: 'Group Properties',
+      body:  'Edit group-level metadata: definition URL, terminology codes (item.code[]) and support links (questionnaire-supportLink).',
+      fhir:  'Questionnaire.item.definition / item.code[] / questionnaire-supportLink',
+      spec:  'R4 \u00B7 optional',
+    }, actions);
     propsLink.onclick = () => MODAL_REGISTRY.get('codes').open(node, propsLink, setActive);
-    actions.appendChild(propsLink);
 
-    const noteLink = document.createElement('a');
-    noteLink.textContent = 'Note';
-    noteLink.className = 'action-edit';
-    noteLink.dataset.tipTitle = 'Design Note';
-    noteLink.dataset.tipBody  = 'Internal author note \u2014 stored as FHIR designNote extension. Never shown to patients.';
-    noteLink.dataset.tipFhir  = 'http://hl7.org/fhir/StructureDefinition/designNote';
-    noteLink.dataset.tipSpec  = 'R4 \u00B7 optional';
-    noteLink.dataset.testid   = 'action-note';
+    const noteLink = node._makeActionLink('Note', 'note', {
+      title: 'Design Note',
+      body:  'Internal author note \u2014 stored as FHIR designNote extension. Never shown to patients.',
+      fhir:  'http://hl7.org/fhir/StructureDefinition/designNote',
+      spec:  'R4 \u00B7 optional',
+    }, actions);
     noteLink.onclick = () => MODAL_REGISTRY.get('note').open(node, noteLink, setActive);
     setActive(noteLink, !!node._designNote);
-    actions.appendChild(noteLink);
 
     // ⊕ Add ▾ dropdown
     const addWrap = document.createElement('div');

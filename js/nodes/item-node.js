@@ -239,49 +239,13 @@ export class ItemNode extends BaseNode {
     typeLabel.textContent = '[Item]';
     titleWrap.appendChild(typeLabel);
 
-    const prefixInput = document.createElement('input');
-    prefixInput.type = 'text';
-    prefixInput.value = node._prefix || '';
-    prefixInput.className = 'node-prefix-input';
-    prefixInput.placeholder = 'prefix';
-    prefixInput.dataset.tipTitle = 'Display prefix';
-    prefixInput.dataset.tipBody  = 'Cosmetic only \u2014 e.g. "1.2". Does not affect logic or linkId.';
-    prefixInput.oninput = () => { node._prefix = prefixInput.value.trim() || undefined; };
+    const prefixInput = node._buildPrefixInput('prefix');
     titleWrap.appendChild(prefixInput);
 
-    const linkIdInput = document.createElement('input');
-    linkIdInput.type = 'text';
-    linkIdInput.value = node.id;
-    linkIdInput.className = 'node-linkid-input';
-    linkIdInput.dataset.tipTitle = 'FHIR linkId';
-    linkIdInput.dataset.tipBody  = 'Editable. Must be unique within the questionnaire.';
-    linkIdInput.oninput = () => { node.id = linkIdInput.value.trim() || node.id; };
+    const linkIdInput = node._buildLinkIdInput();
     titleWrap.appendChild(linkIdInput);
 
-    const titleRow = document.createElement('div');
-    titleRow.className = 'node-title-row';
-    const titleDisplay = document.createElement('span');
-    titleDisplay.className = 'node-title-display';
-    titleDisplay.dataset.testid = 'node-title-display';
-    titleDisplay.textContent = node.title || '(no title)';
-    const titleTextarea = document.createElement('textarea');
-    titleTextarea.className = 'node-title-textarea';
-    titleTextarea.dataset.testid = 'node-title-input';
-    titleTextarea.value = node.title;
-    titleTextarea.style.display = 'none';
-    titleTextarea.oninput = () => { node.title = titleTextarea.value; titleDisplay.textContent = titleTextarea.value || '(no title)'; };
-    titleTextarea.onblur = () => { titleTextarea.style.display = 'none'; titleDisplay.style.display = ''; };
-    titleDisplay.addEventListener('click', e => {
-      e.stopPropagation();
-      const h = titleDisplay.offsetHeight;
-      titleDisplay.style.display = 'none';
-      titleTextarea.style.display = '';
-      titleTextarea.style.height = Math.max(h, 48) + 'px';
-      titleTextarea.focus();
-      titleTextarea.setSelectionRange(titleTextarea.value.length, titleTextarea.value.length);
-    });
-    titleRow.appendChild(titleDisplay);
-    titleRow.appendChild(titleTextarea);
+    const { titleRow, titleDisplay, titleTextarea } = node._buildInlineTitleEditor();
 
     titleWrap.addEventListener('click', e => {
       if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput || e.target === prefixInput) return;
@@ -291,105 +255,90 @@ export class ItemNode extends BaseNode {
     const actions = document.createElement('div');
     actions.className = 'node-actions';
 
-    const addToggle = (label, key, tipTitle, tipBody, tipFhir, tipSpec) => {
-      const a = document.createElement('a');
-      a.textContent = label;
-      a.className = 'action-edit';
-      if (tipTitle) a.dataset.tipTitle = tipTitle;
-      if (tipBody)  a.dataset.tipBody  = tipBody;
-      if (tipFhir)  a.dataset.tipFhir  = tipFhir;
-      if (tipSpec)  a.dataset.tipSpec  = tipSpec;
-      actions.appendChild(a);
-      return a;
-    };
     const setActive = (el, active) => el.classList.toggle('action-edit--active', active);
 
-    const typeLink = addToggle('Answer Type', 'type',
-      'Answer Type',
-      'Sets the FHIR item type (boolean, decimal, string, choice, date, url, attachment, reference, quantity, display). Controls which input control is rendered in the preview.',
-      'Questionnaire.item.type', 'R4 \u00B7 required');
-    typeLink.dataset.testid = 'action-type';
+    const typeLink = node._makeActionLink('Answer Type', 'type', {
+      title: 'Answer Type',
+      body:  'Sets the FHIR item type (boolean, decimal, string, choice, date, url, attachment, reference, quantity, display). Controls which input control is rendered in the preview.',
+      fhir:  'Questionnaire.item.type',
+      spec:  'R4 \u00B7 required',
+    }, actions);
     typeLink.onclick = () => MODAL_REGISTRY.get('answerType').open(node, typeLink, setActive);
 
-    const statesLink = document.createElement('a');
-    statesLink.textContent = 'States';
-    statesLink.className = 'action-edit';
-    statesLink.dataset.tipTitle = 'Item / group states';
-    statesLink.dataset.tipBody  = 'Required \u2014 must be answered to pass validation.\nRead-only \u2014 value set programmatically, not editable (items only).\nHidden \u2014 excluded from patient view; participates in logic.';
-    statesLink.dataset.tipFhir  = 'item.required / item.readOnly / sdc-questionnaire-hidden';
-    statesLink.dataset.tipSpec  = 'R4 \u00B7 SDC';
+    const statesLink = node._makeActionLink('States', 'states', {
+      title: 'Item / group states',
+      body:  'Required \u2014 must be answered to pass validation.\nRead-only \u2014 value set programmatically, not editable (items only).\nHidden \u2014 excluded from patient view; participates in logic.',
+      fhir:  'item.required / item.readOnly / sdc-questionnaire-hidden',
+      spec:  'R4 \u00B7 SDC',
+    }, actions);
     statesLink.dataset.testid   = 'action-states';
     statesLink.onclick = () => MODAL_REGISTRY.get('states').open(node, statesLink, setActive);
     actions.appendChild(statesLink);
 
-    const visLink = addToggle('Show When', 'vis',
-      'Show When (enableWhen)',
-      'Add enableWhen conditions to control when this item is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden items are dimmed \uD83D\uDD12 in the preview.',
-      'Questionnaire.item.enableWhen[]', 'R4 \u00B7 optional');
-    visLink.dataset.testid = 'action-vis';
+    const visLink = node._makeActionLink('Show When', 'vis', {
+      title: 'Show When (enableWhen)',
+      body:  'Add enableWhen conditions to control when this item is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden items are dimmed \uD83D\uDD12 in the preview.',
+      fhir:  'Questionnaire.item.enableWhen[]',
+      spec:  'R4 \u00B7 optional',
+    }, actions);
     visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive, ctx, ctx.buildVisPanel);
 
-    const exprLink = addToggle('Expression', 'expr',
-      'FHIRPath Expressions',
-      'Edit both FHIRPath expression fields: calculatedExpression (evaluated on every preview render) and initialExpression (evaluated once on load or re-init). Both support questionnaire-level %variables.',
-      'sdc-questionnaire-calculatedExpression / initialExpression', 'SDC \u00B7 optional');
-    exprLink.dataset.testid = 'action-expr';
+    const exprLink = node._makeActionLink('Expression', 'expr', {
+      title: 'FHIRPath Expressions',
+      body:  'Edit both FHIRPath expression fields: calculatedExpression (evaluated on every preview render) and initialExpression (evaluated once on load or re-init). Both support questionnaire-level %variables.',
+      fhir:  'sdc-questionnaire-calculatedExpression / initialExpression',
+      spec:  'SDC \u00B7 optional',
+    }, actions);
     exprLink.onclick = () => MODAL_REGISTRY.get('expression').openDual(node, exprLink, setActive, ctx.triggerCalcRecalc);
 
-    const repeatLink = document.createElement('a');
-    repeatLink.textContent = 'Repeatable';
-    repeatLink.className = 'action-edit';
-    repeatLink.dataset.tipTitle = 'Repeatable';
-    repeatLink.dataset.tipBody  = 'Allow multiple answers for this item. Opens a dialog to configure item.repeats and optional cardinality (minOccurs / maxOccurs extensions).';
-    repeatLink.dataset.tipFhir  = 'Questionnaire.item.repeats';
-    repeatLink.dataset.tipSpec  = 'R4';
-    repeatLink.dataset.testid   = 'action-repeatable';
+    const repeatLink = node._makeActionLink('Repeatable', 'repeatable', {
+      title: 'Repeatable',
+      body:  'Allow multiple answers for this item. Opens a dialog to configure item.repeats and optional cardinality (minOccurs / maxOccurs extensions).',
+      fhir:  'Questionnaire.item.repeats',
+      spec:  'R4',
+    }, actions);
     repeatLink.onclick = () => MODAL_REGISTRY.get('repeatable').open(node, repeatLink, setActive);
-    actions.appendChild(repeatLink);
 
-    const initLink = addToggle('Default', 'init',
-      'Default Value (initial)',
-      'Pre-fills the answer when the form loads. The user can change it unless readOnly is set. Only the first entry (initial[0]) is used. Supports all item types.',
-      'Questionnaire.item.initial[]', 'R4 \u00B7 optional');
-    initLink.dataset.testid = 'action-default';
+    const initLink = node._makeActionLink('Default', 'default', {
+      title: 'Default Value (initial)',
+      body:  'Pre-fills the answer when the form loads. The user can change it unless readOnly is set. Only the first entry (initial[0]) is used. Supports all item types.',
+      fhir:  'Questionnaire.item.initial[]',
+      spec:  'R4 \u00B7 optional',
+    }, actions);
     initLink.onclick = () => MODAL_REGISTRY.get('initial').open(node, initLink, setActive);
 
-    const constraintLink = addToggle('Constraint', 'constraint',
-      'Validation Constraints (questionnaire-constraint)',
-      'FHIR questionnaire-constraint extensions on this item. Each entry has a FHIRPath expression, human-readable message, and severity. Error-severity constraints must pass for the item to show \u2714 in the preview.',
-      'Questionnaire.item.extension[questionnaire-constraint]', 'R4 \u00B7 optional');
-    constraintLink.dataset.testid = 'action-constraint';
+    const constraintLink = node._makeActionLink('Constraint', 'constraint', {
+      title: 'Validation Constraints (questionnaire-constraint)',
+      body:  'FHIR questionnaire-constraint extensions on this item. Each entry has a FHIRPath expression, human-readable message, and severity. Error-severity constraints must pass for the item to show \u2714 in the preview.',
+      fhir:  'Questionnaire.item.extension[questionnaire-constraint]',
+      spec:  'R4 \u00B7 optional',
+    }, actions);
     constraintLink.onclick = () => MODAL_REGISTRY.get('constraint').open(node, constraintLink, setActive);
 
-    const styleLink = addToggle('Appearance', 'style',
-      'Appearance (rendering-style)',
-      'Inline CSS applied to the item title in the preview. Supports bold, italic, text colour, and raw CSS. Stored in the standard FHIR rendering-style extension on the _text element.',
-      'Questionnaire.item._text.extension[rendering-style]', 'R4 \u00B7 optional');
-    styleLink.dataset.testid = 'action-appearance';
+    const styleLink = node._makeActionLink('Appearance', 'appearance', {
+      title: 'Appearance (rendering-style)',
+      body:  'Inline CSS applied to the item title in the preview. Supports bold, italic, text colour, and raw CSS. Stored in the standard FHIR rendering-style extension on the _text element.',
+      fhir:  'Questionnaire.item._text.extension[rendering-style]',
+      spec:  'R4 \u00B7 optional',
+    }, actions);
     styleLink.onclick = () => MODAL_REGISTRY.get('appearance').open(node, styleLink, setActive);
 
-    const codesLink = document.createElement('a');
-    codesLink.textContent = 'Props';
-    codesLink.className = 'action-edit';
-    codesLink.dataset.tipTitle = 'Item Properties';
-    codesLink.dataset.tipBody  = 'Edit item-level metadata: definition URL (item.definition \u2014 points to a StructureDefinition element) and terminology codes (item.code[] \u2014 LOINC, SNOMED, etc.).';
-    codesLink.dataset.tipFhir  = 'Questionnaire.item.definition / item.code[]';
-    codesLink.dataset.tipSpec  = 'R4 \u00B7 optional';
-    codesLink.dataset.testid   = 'action-codes';
+    const codesLink = node._makeActionLink('Props', 'codes', {
+      title: 'Item Properties',
+      body:  'Edit item-level metadata: definition URL (item.definition \u2014 points to a StructureDefinition element) and terminology codes (item.code[] \u2014 LOINC, SNOMED, etc.).',
+      fhir:  'Questionnaire.item.definition / item.code[]',
+      spec:  'R4 \u00B7 optional',
+    }, actions);
     codesLink.onclick = () => MODAL_REGISTRY.get('codes').open(node, codesLink, setActive);
-    actions.appendChild(codesLink);
 
-    const noteLink = document.createElement('a');
-    noteLink.textContent = 'Note';
-    noteLink.className = 'action-edit';
-    noteLink.dataset.tipTitle = 'Design Note';
-    noteLink.dataset.tipBody  = 'Internal author note \u2014 stored as FHIR designNote extension. Never shown to patients.';
-    noteLink.dataset.tipFhir  = 'http://hl7.org/fhir/StructureDefinition/designNote';
-    noteLink.dataset.tipSpec  = 'R4 \u00B7 optional';
-    noteLink.dataset.testid   = 'action-note';
+    const noteLink = node._makeActionLink('Note', 'note', {
+      title: 'Design Note',
+      body:  'Internal author note \u2014 stored as FHIR designNote extension. Never shown to patients.',
+      fhir:  'http://hl7.org/fhir/StructureDefinition/designNote',
+      spec:  'R4 \u00B7 optional',
+    }, actions);
     noteLink.onclick = () => MODAL_REGISTRY.get('note').open(node, noteLink, setActive);
     setActive(noteLink, !!node._designNote);
-    actions.appendChild(noteLink);
 
     const headerTop = document.createElement('div');
     headerTop.className = 'node-header-top';
