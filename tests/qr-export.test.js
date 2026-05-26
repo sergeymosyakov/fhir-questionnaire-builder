@@ -42,6 +42,10 @@ beforeEach(() => {
 
   vi.stubGlobal('document', {
     createElement: vi.fn(() => mockAnchor),
+    body: {
+      appendChild: vi.fn(),
+      removeChild: vi.fn(),
+    },
   });
   vi.stubGlobal('Blob', class MockBlob {
     constructor(parts, opts) { this.parts = parts; this.type = opts?.type; }

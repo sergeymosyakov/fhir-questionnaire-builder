@@ -43,20 +43,7 @@ document.getElementById('addRootGroupBtn').onclick = () => {
   if (!document.getElementById('loadedFileName').textContent) setFileName('New Questionnaire');
 };
 document.getElementById('collapseAllBtn').onclick  = collapseAll;
-
-// Wire a toggle button: click flips stateRef.value and updates active class.
-function wireToggle(btnId, prefKey) {
-  const btn = document.getElementById(btnId);
-  btn.onclick = () => {
-    const newVal = !btn.classList.contains('btn-fhir--active');
-    btn.classList.toggle('btn-fhir--active', newVal);
-    document.dispatchEvent(new CustomEvent('view-pref-change', { detail: { key: prefKey, value: newVal } }));
-  };
-}
-wireToggle('showLinkIdBtn',  'showLinkId');
-wireToggle('showPrefixBtn',  'showPrefix');
-wireToggle('showBadgesBtn',  'showBadges');
-wireToggle('showHiddenBtn',  'showHiddenItems');
+// View options moved to dropdown menu (see viewOptionsBtn section below)
 document.getElementById('expandAllBtn').onclick    = expandAll;
 document.getElementById('renumberBtn').onclick = async () => {
   const btn = document.getElementById('renumberBtn');
@@ -119,10 +106,7 @@ initPreview({
   lform:                 document.getElementById('lform'),
   fhirJsonView:          document.getElementById('fhirJsonView'),
   leftPanelBody:         document.querySelector('.left-panel-body'),
-  showLinkIdBtn:         document.getElementById('showLinkIdBtn'),
-  showPrefixBtn:         document.getElementById('showPrefixBtn'),
-  showBadgesBtn:         document.getElementById('showBadgesBtn'),
-  showHiddenBtn:         document.getElementById('showHiddenBtn'),
+  viewOptionsWrap:       document.getElementById('viewOptionsWrap'),
   previewModeWrap:       document.getElementById('previewModeWrap'),
   previewCollapseAllBtn: document.getElementById('previewCollapseAllBtn'),
   previewExpandAllBtn:   document.getElementById('previewExpandAllBtn'),
@@ -296,6 +280,8 @@ document.addEventListener('click', () => {
   if (ppMenu) ppMenu.style.display = 'none';
   const pmMenu = document.getElementById('previewModeMenu');
   if (pmMenu) pmMenu.style.display = 'none';
+  const voMenu = document.getElementById('viewOptionsMenu');
+  if (voMenu) voMenu.style.display = 'none';
 });
 
 // ── Preview mode dropdown ─────────────────────────────────────────────────────
@@ -329,6 +315,39 @@ document.addEventListener('click', () => {
   });
   // Set initial active state
   _applyPreviewMode('preview');
+}
+
+// ── View Options dropdown (id, prefix, badges, hidden) ───────────────────────
+{
+  const _voMenu = document.getElementById('viewOptionsMenu');
+  const _voBtn  = document.getElementById('viewOptionsBtn');
+  const _checkboxes = [
+    { id: 'viewOptionLinkId', key: 'showLinkId' },
+    { id: 'viewOptionPrefix', key: 'showPrefix' },
+    { id: 'viewOptionBadges', key: 'showBadges' },
+    { id: 'viewOptionHidden', key: 'showHiddenItems' },
+  ];
+
+  _voBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('loadMenu').style.display    = 'none';
+    document.getElementById('answersMenu').style.display = 'none';
+    document.getElementById('exportMenu').style.display  = 'none';
+    document.getElementById('previewModeMenu').style.display = 'none';
+    _voMenu.style.display = _voMenu.style.display === 'none' ? 'block' : 'none';
+  });
+
+  // Prevent menu from closing when clicking inside it
+  _voMenu.addEventListener('click', e => {
+    e.stopPropagation();
+  });
+
+  _checkboxes.forEach(({ id, key }) => {
+    const checkbox = document.getElementById(id);
+    checkbox.addEventListener('change', () => {
+      document.dispatchEvent(new CustomEvent('view-pref-change', { detail: { key, value: checkbox.checked } }));
+    });
+  });
 }
 
 // ── Panel resize drag ─────────────────────────────────────────────────────────

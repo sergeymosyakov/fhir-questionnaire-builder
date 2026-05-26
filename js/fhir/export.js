@@ -363,8 +363,10 @@ export function exportFHIR(fileName) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = fileName || 'questionnaire.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
+  if (typeof document !== 'undefined' && document.body) {
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
 }

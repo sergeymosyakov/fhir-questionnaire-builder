@@ -1338,7 +1338,13 @@ describe('exportFHIR', () => {
     const mockCreateObjectURL = vi.fn(() => 'blob:mock');
     const mockRevokeObjectURL = vi.fn();
     vi.stubGlobal('URL', { createObjectURL: mockCreateObjectURL, revokeObjectURL: mockRevokeObjectURL });
-    vi.stubGlobal('document', { createElement: vi.fn(() => anchor) });
+    vi.stubGlobal('document', {
+      createElement: vi.fn(() => anchor),
+      body: {
+        appendChild: vi.fn(),
+        removeChild: vi.fn(),
+      },
+    });
     vi.stubGlobal('Blob', class MockBlob { constructor(parts, opts) { this.parts = parts; this.type = opts?.type; } });
 
     exportFHIR('my-questionnaire.json');

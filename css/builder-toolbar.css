@@ -179,4 +179,17 @@
   user-select: none;
 }
 .load-menu-item--indented { padding-left: 22px; }
+.load-menu-item--checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+.load-menu-item--checkbox input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+.load-menu-item--checkbox:hover input[type="checkbox"] {
+  accent-color: var(--c-primary);
+}
 

@@ -470,10 +470,7 @@ export function initPreview(elements) {
   // Show toolbar controls only when tree has content
   effect(() => {
     const d = tree.length > 0 ? '' : 'none';
-    elements.showLinkIdBtn.style.display         = d;
-    elements.showPrefixBtn.style.display         = d;
-    elements.showBadgesBtn.style.display         = d;
-    elements.showHiddenBtn.style.display         = d;
+    elements.viewOptionsWrap.style.display       = d;
     elements.previewCollapseAllBtn.style.display = d;
     elements.previewExpandAllBtn.style.display   = d;
     elements.searchWrap.style.display            = d;

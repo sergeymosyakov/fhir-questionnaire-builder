@@ -181,6 +181,29 @@
               <div class="load-menu-item" id="previewModeItemJson" data-mode="json" data-testid="preview-mode-json">&#x7B;&#x7D; FHIR JSON</div>
             </div>
           </div>
+          <div class="load-wrap" id="viewOptionsWrap" style="display:none">
+            <button type="button" id="viewOptionsBtn" class="btn-fhir" data-testid="view-options-btn"
+              data-tip-title="View Options"
+              data-tip-body="Toggle display of preview elements: linkId, prefix, badges, and hidden items.">&#x2699;&#xFE0F; View &#x25BE;</button>
+            <div class="load-menu" id="viewOptionsMenu" style="display:none">
+              <label class="load-menu-item load-menu-item--checkbox" data-testid="view-option-linkid">
+                <input type="checkbox" id="viewOptionLinkId" checked>
+                <span>Show linkId</span>
+              </label>
+              <label class="load-menu-item load-menu-item--checkbox" data-testid="view-option-prefix">
+                <input type="checkbox" id="viewOptionPrefix" checked>
+                <span>Show prefix</span>
+              </label>
+              <label class="load-menu-item load-menu-item--checkbox" data-testid="view-option-badges">
+                <input type="checkbox" id="viewOptionBadges" checked>
+                <span>Show badges</span>
+              </label>
+              <label class="load-menu-item load-menu-item--checkbox" data-testid="view-option-hidden">
+                <input type="checkbox" id="viewOptionHidden" checked>
+                <span>Show hidden</span>
+              </label>
+            </div>
+          </div>
           <button id="validateBtn" class="btn-validate" style="display:none"
             data-testid="validate-btn"
             data-tip-title="Validate questionnaire"
@@ -236,28 +259,6 @@
           <span id="searchCounter" class="search-counter"></span>
         </div>
         <span class="fhir-toolbar-sep"></span>
-        <button id="showLinkIdBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--active" data-testid="show-linkid-btn"
-          data-tip-title="FHIR linkId"
-          data-tip-body="Unique identifier for each item. Used in visibility rules as values['linkId'] and in enableWhen conditions. Every item must have a unique linkId within the questionnaire."
-          data-tip-fhir="Questionnaire.item.linkId"
-          data-tip-spec="R4 · required"
-          style="display:none">id</button>
-        <button id="showPrefixBtn" type="button" class="btn-fhir btn-fhir--amber btn-fhir--toggle btn-fhir--active" data-testid="show-prefix-btn"
-          data-tip-title="item.prefix"
-          data-tip-body="Optional display label shown before the item text (e.g. &quot;1.1&quot;, &quot;Q3.&quot;). Purely cosmetic — does not affect visibility rules, enableWhen, or any logic. Set manually or via Renumber."
-          data-tip-fhir="Questionnaire.item.prefix"
-          data-tip-spec="R4 · optional"
-          style="display:none">prefix</button>
-        <button id="showBadgesBtn" type="button" class="btn-fhir btn-fhir--toggle btn-fhir--active" data-testid="show-badges-btn"
-          data-tip-title="Toggle badges"
-          data-tip-body="Show or hide metadata badges (optional, required, logic, calc). When hidden, calculated fields display as plain text — useful for a clean questionnaire view."
-          style="display:none">badges</button>
-        <button id="showHiddenBtn" type="button" class="btn-fhir btn-fhir--purple btn-fhir--toggle btn-fhir--active" data-testid="show-hidden-btn"
-          data-tip-title="Hidden items (sdc-questionnaire-hidden)"
-          data-tip-body="Show or hide items marked as sdc-questionnaire-hidden. Hidden items never appear to patients but participate in calculatedExpression logic. Controls inside are disabled."
-          data-tip-fhir="sdc-questionnaire-hidden"
-          data-tip-spec="SDC"
-          style="display:none">hidden</button>
         <button id="previewCollapseAllBtn" type="button" class="btn-fhir btn-fhir--icon" data-testid="preview-collapse-all-btn"
           data-tip-title="Collapse all groups"
           data-tip-body="Hides child items under every group header. Useful for a high-level overview of the questionnaire structure."
