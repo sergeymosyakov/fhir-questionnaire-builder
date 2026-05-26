@@ -5,7 +5,14 @@ import { Panel } from './panel-base.js';
 
 class ContainedPanel extends Panel {
   constructor() {
-    super('containedCard', 'containedCardToggle', 'containedCardChips', 'containedCardCount');
+    super({
+      mod:      'contained',
+      label:    'Contained',
+      tipTitle: 'Contained Resources',
+      tipBody:  'Questionnaire.contained[] — inline FHIR resources bundled inside the questionnaire (e.g. ValueSet definitions). Imported and exported unchanged. Click a chip to view the raw JSON.',
+      tipFhir:  'Questionnaire.contained[]',
+      tipSpec:  'R4 · optional',
+    });
     this._questContained = null;
   }
 
@@ -22,7 +29,7 @@ class ContainedPanel extends Panel {
   }
 
   _renderChips() {
-    this._el.chipList.innerHTML = '';
+    this._chipList.innerHTML = '';
     for (const resource of this._questContained) {
       const rType = resource.resourceType || 'Resource';
       const rId   = resource.id           || '';
@@ -36,7 +43,7 @@ class ContainedPanel extends Panel {
       chip.addEventListener('click', () => {
         document.dispatchEvent(new CustomEvent('show-json', { detail: { title: label, data: resource } }));
       });
-      this._el.chipList.appendChild(chip);
+      this._chipList.appendChild(chip);
     }
   }
 }

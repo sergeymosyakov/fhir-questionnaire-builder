@@ -6,6 +6,7 @@ import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { navigateToPreview, refreshExprIcons, getLastCtx } from '../render-preview.js';
 import { findAndRemove } from '../utils.js';
 import { GroupNode } from '../nodes/group-node.js';
+import { createGroupNode } from '../nodes/index.js';
 import { BaseNode } from '../nodes/base-node.js';
 import { Modal } from '../ui/modals/modal-base.js';
 

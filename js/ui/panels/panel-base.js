@@ -1,16 +1,59 @@
 // ── Base collapsible resource card panel ──────────────────────────────────────
-// Shared DOM wiring, collapse/expand, count badge, and questionnaire event hooks.
+// Each subclass builds its own card DOM and self-inserts before .left-panel-body.
 // Subclasses override configure(services) and refresh() + _renderChips().
+
+const _SVG = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>`;
+
+function _mk(tag, className) {
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  return el;
+}
+
 export class Panel {
-  constructor(cardId, toggleId, chipListId, countId) {
-    this._el = {
-      card:     document.getElementById(cardId),
-      toggle:   document.getElementById(toggleId),
-      chipList: document.getElementById(chipListId),
-      count:    document.getElementById(countId),
-    };
+  /**
+   * @param {object} cfg
+   * @param {string} cfg.mod       — CSS modifier suffix, e.g. 'contained' | 'avs'
+   * @param {string} cfg.label     — visible card title text
+   * @param {string} cfg.tipTitle  — tooltip title on the title span
+   * @param {string} cfg.tipBody   — tooltip body on the title span
+   * @param {string} cfg.tipFhir   — data-tip-fhir attribute value
+   * @param {string} cfg.tipSpec   — data-tip-spec attribute value
+   */
+  constructor({ mod, label, tipTitle, tipBody, tipFhir, tipSpec }) {
+    this._card = _mk('div', 'fhir-res-card');
+    this._card.style.display = 'none';
+
+    const header = _mk('div', 'fhir-res-card-header');
+
+    this._toggle = _mk('button', 'fhir-res-card-toggle');
+    this._toggle.type = 'button';
+    this._toggle.setAttribute('aria-expanded', 'true');
+    this._toggle.dataset.tipTitle = 'Collapse / expand';
+    this._toggle.dataset.tipBody  = `Toggle the ${label} card open or closed.`;
+    this._toggle.innerHTML = _SVG;
+
+    const titleEl = _mk('span', `fhir-res-card-title fhir-res-card-title--${mod}`);
+    titleEl.dataset.tipTitle = tipTitle;
+    titleEl.dataset.tipBody  = tipBody;
+    titleEl.dataset.tipFhir  = tipFhir;
+    titleEl.dataset.tipSpec  = tipSpec;
+    titleEl.textContent = label;
+
+    this._count = _mk('span', `fhir-res-card-count fhir-res-card-count--${mod}`);
+
+    header.append(this._toggle, titleEl, this._count);
+
+    this._chipList = _mk('div', 'fhir-res-card-chips');
+
+    this._card.append(header, this._chipList);
+
+    // Self-insert before .left-panel-body (same parent as variables card)
+    const anchor = document.querySelector('.left-panel-body');
+    anchor.parentElement.insertBefore(this._card, anchor);
+
     this._collapsed = false;
-    this._el.toggle.addEventListener('click', () => this._toggleCollapse());
+    this._toggle.addEventListener('click', () => this._toggleCollapse());
     document.addEventListener('questionnaire-loaded',  () => this.refresh());
     document.addEventListener('questionnaire-cleared', () => this.refresh());
   }
@@ -23,14 +66,14 @@ export class Panel {
 
   _toggleCollapse() {
     this._collapsed = !this._collapsed;
-    this._el.toggle.setAttribute('aria-expanded', String(!this._collapsed));
-    this._el.chipList.style.display = this._collapsed ? 'none' : '';
-    this._el.toggle.classList.toggle('fhir-res-card-toggle--collapsed', this._collapsed);
+    this._toggle.setAttribute('aria-expanded', String(!this._collapsed));
+    this._chipList.style.display = this._collapsed ? 'none' : '';
+    this._toggle.classList.toggle('fhir-res-card-toggle--collapsed', this._collapsed);
   }
 
   _showCount(count) {
-    this._el.card.style.display  = count > 0 ? '' : 'none';
-    this._el.count.textContent   = count > 0 ? String(count) : '';
-    this._el.count.style.display = count > 0 ? '' : 'none';
+    this._card.style.display  = count > 0 ? '' : 'none';
+    this._count.textContent   = count > 0 ? String(count) : '';
+    this._count.style.display = count > 0 ? '' : 'none';
   }
 }

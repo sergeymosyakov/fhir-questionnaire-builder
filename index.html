@@ -147,36 +147,6 @@
       </div>
       <div id="variablesCardChips" class="variables-card-chips"></div>
     </div>
-    <!-- Contained resources card (shown when imported questionnaire has contained[]) -->
-    <div id="containedCard" class="fhir-res-card" style="display:none">
-      <div class="fhir-res-card-header">
-        <button id="containedCardToggle" type="button" class="fhir-res-card-toggle" aria-expanded="true" data-tip-title="Collapse / expand" data-tip-body="Toggle the Contained Resources card open or closed.">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
-        </button>
-        <span class="fhir-res-card-title fhir-res-card-title--contained"
-          data-tip-title="Contained Resources"
-          data-tip-body="Questionnaire.contained[] — inline FHIR resources bundled inside the questionnaire (e.g. ValueSet definitions). Imported and exported unchanged. Click a chip to view the raw JSON."
-          data-tip-fhir="Questionnaire.contained[]"
-          data-tip-spec="R4 · optional">Contained</span>
-        <span id="containedCardCount" class="fhir-res-card-count fhir-res-card-count--contained"></span>
-      </div>
-      <div id="containedCardChips" class="fhir-res-card-chips"></div>
-    </div>
-    <!-- Answer ValueSet card (shown when any item uses answerValueSet) -->
-    <div id="answerValueSetCard" class="fhir-res-card" style="display:none">
-      <div class="fhir-res-card-header">
-        <button id="answerValueSetCardToggle" type="button" class="fhir-res-card-toggle" aria-expanded="true" data-tip-title="Collapse / expand" data-tip-body="Toggle the Answer ValueSets card open or closed.">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
-        </button>
-        <span class="fhir-res-card-title fhir-res-card-title--avs"
-          data-tip-title="Answer Value Sets"
-          data-tip-body="Items that reference an external ValueSet via answerValueSet. The URL is preserved on import and exported unchanged. Click a chip to see which items use it."
-          data-tip-fhir="Questionnaire.item.answerValueSet"
-          data-tip-spec="R4 · optional">Answer ValueSets</span>
-        <span id="answerValueSetCardCount" class="fhir-res-card-count fhir-res-card-count--avs"></span>
-      </div>
-      <div id="answerValueSetCardChips" class="fhir-res-card-chips"></div>
-    </div>
     <div class="left-panel-body">
       <div id="treeContainer" data-testid="tree-container"></div>
     </div>

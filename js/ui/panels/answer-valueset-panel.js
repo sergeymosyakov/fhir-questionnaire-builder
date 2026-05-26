@@ -5,7 +5,14 @@ import { Panel } from './panel-base.js';
 
 class AnswerValueSetPanel extends Panel {
   constructor() {
-    super('answerValueSetCard', 'answerValueSetCardToggle', 'answerValueSetCardChips', 'answerValueSetCardCount');
+    super({
+      mod:      'avs',
+      label:    'Answer ValueSets',
+      tipTitle: 'Answer Value Sets',
+      tipBody:  'Items that reference an external ValueSet via answerValueSet. The URL is preserved on import and exported unchanged. Click a chip to see which items use it.',
+      tipFhir:  'Questionnaire.item.answerValueSet',
+      tipSpec:  'R4 · optional',
+    });
     this._tree = null;
   }
 
@@ -33,7 +40,7 @@ class AnswerValueSetPanel extends Panel {
   }
 
   _renderChips(urlMap) {
-    this._el.chipList.innerHTML = '';
+    this._chipList.innerHTML = '';
     for (const [url, items] of urlMap) {
       const label = url.split('/').filter(Boolean).pop() || url;
 
@@ -45,7 +52,7 @@ class AnswerValueSetPanel extends Panel {
       chip.addEventListener('click', () =>
         document.dispatchEvent(new CustomEvent('show-json', { detail: { title: label, data: { answerValueSet: url, usedByItems: items } } }))
       );
-      this._el.chipList.appendChild(chip);
+      this._chipList.appendChild(chip);
     }
   }
 }
