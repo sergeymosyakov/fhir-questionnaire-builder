@@ -15,8 +15,15 @@ import { GroupNode } from './nodes/group-node.js';
 const _viewPrefs = { showLinkId: true, showPrefix: true, showBadges: true, showHiddenItems: true };
 document.addEventListener('view-pref-change', e => {
   _viewPrefs[e.detail.key] = e.detail.value;
+  if (!_previewElements.lform) return;
   if (e.detail.key === 'showBadges') {
-    _previewElements.lform?.classList.toggle('preview--no-badges', !e.detail.value);
+    _previewElements.lform.classList.toggle('preview--no-badges', !e.detail.value);
+  } else if (e.detail.key === 'showLinkId') {
+    _previewElements.lform.classList.toggle('preview--no-linkid', !e.detail.value);
+  } else if (e.detail.key === 'showPrefix') {
+    _previewElements.lform.classList.toggle('preview--no-prefix', !e.detail.value);
+  } else if (e.detail.key === 'showHiddenItems') {
+    _previewElements.lform.classList.toggle('preview--no-hidden', !e.detail.value);
   }
   _formTick.value++;
 });
@@ -478,8 +485,11 @@ export function initPreview(elements) {
   });
 
   // Toggle CSS display modes on the lform container
-  // preview--no-badges initial state (default: badges visible)
+  // Initial class states (all view options start as checked/visible)
   elements.lform.classList.toggle('preview--no-badges', !_viewPrefs.showBadges);
+  elements.lform.classList.toggle('preview--no-linkid', !_viewPrefs.showLinkId);
+  elements.lform.classList.toggle('preview--no-prefix', !_viewPrefs.showPrefix);
+  elements.lform.classList.toggle('preview--no-hidden', !_viewPrefs.showHiddenItems);
   // Initial display state (preview mode starts as 'preview')
   elements.lform.classList.toggle('patient-view', _previewMode === 'patient');
   elements.lform.style.display        = _previewMode === 'json' ? 'none' : '';

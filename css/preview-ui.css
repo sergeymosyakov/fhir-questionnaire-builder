@@ -231,6 +231,22 @@
   border-radius: 0;
 }
 
+/* === View options (independent toggles) ===================================== */
+/* Hide linkId when option is unchecked */
+.preview--no-linkid .preview-linkid {
+  display: none;
+}
+
+/* Hide prefix when option is unchecked */
+.preview--no-prefix .preview-prefix {
+  display: none;
+}
+
+/* Hide hidden items when option is unchecked */
+.preview--no-hidden [data-hidden="true"] {
+  display: none;
+}
+
 /* === FHIR JSON view ========================================================= */
 .fhir-json-view {
   margin: 0;
