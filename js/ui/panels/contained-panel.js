@@ -39,7 +39,10 @@ class ContainedPanel extends Panel {
       chip.type = 'button';
       chip.className = 'fhir-res-chip fhir-res-chip--contained';
       chip.textContent = label;
-      chip.dataset.tipTitle = 'View JSON';
+      chip.dataset.tipTitle = label;
+      chip.dataset.tipBody  = 'Inline FHIR resource bundled inside the questionnaire. Click to inspect raw JSON.';
+      chip.dataset.tipFhir  = 'Questionnaire.contained[]';
+      chip.dataset.tipSpec  = 'R4 · optional';
       chip.addEventListener('click', () => {
         document.dispatchEvent(new CustomEvent('show-json', { detail: { title: label, data: resource } }));
       });
