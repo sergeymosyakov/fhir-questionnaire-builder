@@ -56,9 +56,9 @@ test.describe('Repeatable toggle — builder', () => {
     await freshStart(page);
     await addTextItem(page);
     await repeatableLink(page).click();
-    await expect(page.locator('#repeatableModal')).toBeVisible();
-    await page.locator('#repeatableModalCancel').click();
-    await expect(page.locator('#repeatableModal')).not.toBeVisible();
+    await expect(page.locator('[data-testid="repeatableModal"]')).toBeVisible();
+    await page.locator('[data-testid="repeatableModalCancel"]').click();
+    await expect(page.locator('[data-testid="repeatableModal"]')).not.toBeVisible();
   });
 
   test('enabling repeats in modal activates the link', async ({ page }) => {
@@ -66,7 +66,7 @@ test.describe('Repeatable toggle — builder', () => {
     await addTextItem(page);
     await repeatableLink(page).click();
     await page.locator('[data-testid="repeat-modal-toggle"]').check();
-    await page.locator('#repeatableModalApply').click();
+    await page.locator('[data-testid="repeatableModalApply"]').click();
     await expect(repeatableLink(page)).toHaveClass(/action-edit--active/);
   });
 
@@ -76,12 +76,12 @@ test.describe('Repeatable toggle — builder', () => {
     // Enable first
     await repeatableLink(page).click();
     await page.locator('[data-testid="repeat-modal-toggle"]').check();
-    await page.locator('#repeatableModalApply').click();
+    await page.locator('[data-testid="repeatableModalApply"]').click();
     await expect(repeatableLink(page)).toHaveClass(/action-edit--active/);
     // Disable
     await repeatableLink(page).click();
     await page.locator('[data-testid="repeat-modal-toggle"]').uncheck();
-    await page.locator('#repeatableModalApply').click();
+    await page.locator('[data-testid="repeatableModalApply"]').click();
     await expect(repeatableLink(page)).not.toHaveClass(/action-edit--active/);
   });
 });
@@ -93,7 +93,7 @@ test.describe('Repeatable toggle — preview', () => {
     await expect(page.getByTestId('repeat-add-btn')).not.toBeVisible();
     await repeatableLink(page).click();
     await page.locator('[data-testid="repeat-modal-toggle"]').check();
-    await page.locator('#repeatableModalApply').click();
+    await page.locator('[data-testid="repeatableModalApply"]').click();
     await expect(page.getByTestId('repeat-add-btn')).toBeVisible();
   });
 
@@ -103,12 +103,12 @@ test.describe('Repeatable toggle — preview', () => {
     // Enable
     await repeatableLink(page).click();
     await page.locator('[data-testid="repeat-modal-toggle"]').check();
-    await page.locator('#repeatableModalApply').click();
+    await page.locator('[data-testid="repeatableModalApply"]').click();
     await expect(page.getByTestId('repeat-add-btn')).toBeVisible();
     // Disable
     await repeatableLink(page).click();
     await page.locator('[data-testid="repeat-modal-toggle"]').uncheck();
-    await page.locator('#repeatableModalApply').click();
+    await page.locator('[data-testid="repeatableModalApply"]').click();
     await expect(page.getByTestId('repeat-add-btn')).not.toBeVisible();
   });
 });

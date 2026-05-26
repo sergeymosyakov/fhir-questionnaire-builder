@@ -116,7 +116,7 @@ test.describe('support-link — patient view', () => {
 test.describe('support-link — Props modal', () => {
   async function openPropsModal(page, nodeId) {
     await page.locator(`[data-node-id="${nodeId}"] [data-testid="action-codes"]`).click();
-    await expect(page.locator('#codesModal')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('[data-testid="codesModal"]')).toBeVisible({ timeout: 3000 });
     // Expand the Support Links section if not already open
     const addBtn = page.getByTestId('support-link-add');
     if (!await addBtn.isVisible()) {
@@ -162,7 +162,7 @@ test.describe('support-link — Props modal', () => {
     await openPropsModal(page, 'q-multi');
     // q-multi has 2 links — remove first
     await page.getByTestId('support-link-rm').first().click();
-    await page.locator('#codesModalApply').click();
+    await page.locator('[data-testid="codesModalApply"]').click();
     // Preview should now show 1 icon
     await expect(
       page.locator('[data-preview-id="q-multi"]').getByTestId('support-link-icon')

@@ -5,6 +5,7 @@
 import { Modal } from './modal-base.js';
 
 class ValidateModal extends Modal {
+  getName() { return 'validateModal'; }
   constructor() {
     super({ cancelLabel: null, applyLabel: null });
   }

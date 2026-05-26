@@ -5,6 +5,7 @@ import { Modal } from './modal-base.js';
 import { ITEM_SECTIONS, renderItemSections } from './item-sections/index.js';
 
 class CodesModal extends Modal {
+  getName() { return 'codesModal'; }
   constructor() {
     super();
     this._pending = null;

@@ -54,11 +54,11 @@ async function selectCustomOpt(page, triggerLoc, value) {
   await page.locator(`[data-testid="csel-drop"] [data-val="${value}"]`).click();
 }
 
-const modal       = (page) => page.locator('#statesModal');
-const modalTitle  = (page) => page.locator('#statesModalTitle');
-const modalClose  = (page) => page.locator('#statesModalClose');
-const modalCancel = (page) => page.locator('#statesModalCancel');
-const modalApply  = (page) => page.locator('#statesModalApply');
+const modal       = (page) => page.locator('[data-testid="statesModal"]');
+const modalTitle  = (page) => page.locator('[data-testid="statesModalTitle"]');
+const modalClose  = (page) => page.locator('[data-testid="statesModalClose"]');
+const modalCancel = (page) => page.locator('[data-testid="statesModalCancel"]');
+const modalApply  = (page) => page.locator('[data-testid="statesModalApply"]');
 const reqSel      = (page) => page.locator('[data-testid="states-required-sel"]');
 const roChk       = (page) => page.locator('[data-testid="states-readonly-chk"]');
 const hidChk      = (page) => page.locator('[data-testid="states-hidden-chk"]');

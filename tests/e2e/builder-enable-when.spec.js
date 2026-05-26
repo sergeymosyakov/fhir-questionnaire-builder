@@ -48,23 +48,23 @@ test.describe('enableWhen (standard)', () => {
 
     // Open Show When modal on dependent item
     await page.locator('[data-node-id="1.2"]').getByTestId('action-vis').click();
-    await expect(page.locator('#showWhenModal')).toBeVisible();
+    await expect(page.locator('[data-testid="showWhenModal"]')).toBeVisible();
 
     // Add a condition row
-    await page.locator('#showWhenModalBody .vis-add-btn').click();
+    await page.locator('[data-testid="showWhenModalBody"] .vis-add-btn').click();
 
     // Open the question picker dropdown
-    await page.locator('#showWhenModalBody .vis-q-sel-trigger').click();
+    await page.locator('[data-testid="showWhenModalBody"] .vis-q-sel-trigger').click();
     await page.waitForSelector('.vis-q-sel-drop', { timeout: 3000 });
 
     // Select "1.1 — Trigger" from the portal dropdown
     await page.locator('.vis-q-sel-opt[data-id="1.1"]').click();
 
     // Operator defaults to "=" for text type; fill the answer value
-    await page.locator('#showWhenModalBody .vis-cond-val-inp').fill('yes');
+    await page.locator('[data-testid="showWhenModalBody"] .vis-cond-val-inp').fill('yes');
 
     // Apply the condition
-    await page.locator('#showWhenModalApply').click();
+    await page.locator('[data-testid="showWhenModalApply"]').click();
 
     // Dependent item must now be dimmed in preview (answer "yes" not yet given)
     await expect(page.locator('[data-preview-id="1.2"]')).toHaveClass(/lform-waiting/);

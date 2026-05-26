@@ -62,22 +62,22 @@ async function addDisplayItem(page) {
 
 async function openAnswerTypeModal(page, itemId) {
   await page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type').click();
-  await expect(page.locator('#answerTypeModal')).toBeVisible();
+  await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
 }
 
 async function changeType(page, typeValue) {
-  await page.locator('#answerTypeModal').getByTestId('type-select').click();
+  await page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select').click();
   await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
 }
 
 async function changeDisplayCategory(page, catValue) {
-  await page.locator('#answerTypeModal').getByTestId('display-category-select').click();
+  await page.locator('[data-testid="answerTypeModal"]').getByTestId('display-category-select').click();
   await page.locator(`[data-testid="csel-drop"] [data-val="${catValue}"]`).click();
 }
 
 async function applyModal(page) {
-  await page.locator('#answerTypeModalApply').click();
-  await expect(page.locator('#answerTypeModal')).not.toBeVisible();
+  await page.locator('[data-testid="answerTypeModalApply"]').click();
+  await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
 }
 
 // ── 1. Fixture import — CSS class and elements from FHIR extension ────────────
@@ -145,7 +145,7 @@ test.describe('displayCategory — Answer Type modal UI', () => {
     const itemId = await addDisplayItem(page);
     await openAnswerTypeModal(page, itemId);
     // Default type is text — category select must be hidden
-    await expect(page.locator('#answerTypeModal').getByTestId('display-category-select')).not.toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('display-category-select')).not.toBeVisible();
   });
 
   test('display-category-select is visible when type is display', async ({ page }) => {
@@ -153,7 +153,7 @@ test.describe('displayCategory — Answer Type modal UI', () => {
     const itemId = await addDisplayItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'display');
-    await expect(page.locator('#answerTypeModal').getByTestId('display-category-select')).toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('display-category-select')).toBeVisible();
   });
 
   test('display-category-select is hidden for radio type', async ({ page }) => {
@@ -161,7 +161,7 @@ test.describe('displayCategory — Answer Type modal UI', () => {
     const itemId = await addDisplayItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'radio');
-    await expect(page.locator('#answerTypeModal').getByTestId('display-category-select')).not.toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('display-category-select')).not.toBeVisible();
   });
 
   test('display-category-select hides when switching from display to integer', async ({ page }) => {
@@ -169,9 +169,9 @@ test.describe('displayCategory — Answer Type modal UI', () => {
     const itemId = await addDisplayItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'display');
-    await expect(page.locator('#answerTypeModal').getByTestId('display-category-select')).toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('display-category-select')).toBeVisible();
     await changeType(page, 'integer');
-    await expect(page.locator('#answerTypeModal').getByTestId('display-category-select')).not.toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('display-category-select')).not.toBeVisible();
   });
 });
 

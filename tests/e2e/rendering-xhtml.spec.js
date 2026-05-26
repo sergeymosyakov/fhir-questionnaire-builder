@@ -78,12 +78,12 @@ test.describe('rendering-xhtml round-trip via Appearance modal', () => {
 
     // Open Appearance modal
     await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
-    await expect(page.locator('#appearanceModal')).toBeVisible();
+    await expect(page.locator('[data-testid="appearanceModal"]')).toBeVisible();
 
     // Type XHTML into the xhtml textarea
     await page.getByTestId('appearance-xhtml-input').fill('<strong>Rich text</strong>');
-    await page.locator('#appearanceModalApply').click();
-    await expect(page.locator('#appearanceModal')).not.toBeVisible();
+    await page.locator('[data-testid="appearanceModalApply"]').click();
+    await expect(page.locator('[data-testid="appearanceModal"]')).not.toBeVisible();
 
     // Preview should render <strong>
     await expect(page.locator('[data-preview-id="1.1"] strong')).toBeVisible();

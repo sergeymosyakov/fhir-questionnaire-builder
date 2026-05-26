@@ -45,7 +45,7 @@ async function loadFixture(page) {
 
 async function openAnswerTypeModal(page, nodeId) {
   await page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type').click();
-  await expect(page.locator('#answerTypeModal')).toBeVisible();
+  await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
 }
 
 // ── Answer Type modal — maxSize field ────────────────────────────────────────
@@ -54,27 +54,27 @@ test.describe('maxSize — Answer Type modal', () => {
   test('max-file-size-input shows imported maxSize value', async ({ page }) => {
     await loadFixture(page);
     await openAnswerTypeModal(page, 'att-maxsize');
-    const inp = page.locator('#answerTypeModal').getByTestId('max-file-size-input');
+    const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('max-file-size-input');
     await expect(inp).toBeVisible();
     await expect(inp).toHaveValue('2');
-    await page.locator('#answerTypeModal .modal-close').click();
+    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
   });
 
   test('max-file-size-input is empty for item without maxSize', async ({ page }) => {
     await loadFixture(page);
     await openAnswerTypeModal(page, 'att-none');
-    const inp = page.locator('#answerTypeModal').getByTestId('max-file-size-input');
+    const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('max-file-size-input');
     await expect(inp).toBeVisible();
     await expect(inp).toHaveValue('');
-    await page.locator('#answerTypeModal .modal-close').click();
+    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
   });
 
   test('max-file-size-input shows value for att-both (5 MB)', async ({ page }) => {
     await loadFixture(page);
     await openAnswerTypeModal(page, 'att-both');
-    const inp = page.locator('#answerTypeModal').getByTestId('max-file-size-input');
+    const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('max-file-size-input');
     await expect(inp).toHaveValue('5');
-    await page.locator('#answerTypeModal .modal-close').click();
+    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
   });
 });
 
@@ -84,27 +84,27 @@ test.describe('mimeType — Answer Type modal', () => {
   test('mime-types-input shows imported MIME types as comma-separated string', async ({ page }) => {
     await loadFixture(page);
     await openAnswerTypeModal(page, 'att-mimetypes');
-    const inp = page.locator('#answerTypeModal').getByTestId('mime-types-input');
+    const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('mime-types-input');
     await expect(inp).toBeVisible();
     await expect(inp).toHaveValue('image/jpeg, application/pdf');
-    await page.locator('#answerTypeModal .modal-close').click();
+    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
   });
 
   test('mime-types-input is empty for item without mimeType', async ({ page }) => {
     await loadFixture(page);
     await openAnswerTypeModal(page, 'att-none');
-    const inp = page.locator('#answerTypeModal').getByTestId('mime-types-input');
+    const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('mime-types-input');
     await expect(inp).toBeVisible();
     await expect(inp).toHaveValue('');
-    await page.locator('#answerTypeModal .modal-close').click();
+    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
   });
 
   test('mime-types-input shows single mimeType for att-both', async ({ page }) => {
     await loadFixture(page);
     await openAnswerTypeModal(page, 'att-both');
-    const inp = page.locator('#answerTypeModal').getByTestId('mime-types-input');
+    const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('mime-types-input');
     await expect(inp).toHaveValue('image/*');
-    await page.locator('#answerTypeModal .modal-close').click();
+    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
   });
 });
 

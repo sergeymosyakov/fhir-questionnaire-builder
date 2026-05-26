@@ -183,11 +183,11 @@ test.describe('Builder → preview: item type changes', () => {
   async function changeType(page, itemId, typeValue) {
     const node = page.locator(`[data-node-id="${itemId}"]`);
     await node.getByTestId('action-type').click();
-    const modal = page.locator('#answerTypeModal');
+    const modal = page.locator('[data-testid="answerTypeModal"]');
     await expect(modal).toBeVisible();
     await modal.getByTestId('type-select').click();
     await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
-    await page.locator('#answerTypeModalApply').click();
+    await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(modal).not.toBeVisible();
   }
 
@@ -338,11 +338,11 @@ test.describe('Builder creates items → preview reacts', () => {
 
     const node = page.locator(`[data-node-id="${itemId}"]`);
     await node.getByTestId('action-type').click();
-    const atModal = page.locator('#answerTypeModal');
+    const atModal = page.locator('[data-testid="answerTypeModal"]');
     await expect(atModal).toBeVisible();
     await atModal.getByTestId('type-select').click();
     await page.locator('[data-testid="csel-drop"] [data-val="decimal"]').click();
-    await page.locator('#answerTypeModalApply').click();
+    await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(atModal).not.toBeVisible();
 
     await expect(page.locator(`[data-preview-id="${itemId}"] input[type="number"]`))
@@ -360,12 +360,12 @@ test.describe('Builder creates items → preview reacts', () => {
     await expect(previewRow.getByTestId('preview-required-star')).toBeVisible();
 
     await node.getByTestId('action-states').click();
-    const reqModal = page.locator('#statesModal');
+    const reqModal = page.locator('[data-testid="statesModal"]');
     await expect(reqModal).toBeVisible();
 
     await reqModal.locator('[data-testid="states-required-sel"]').click();
     await page.locator('[data-testid="csel-drop"] [data-val="false"]').click();
-    await page.locator('#statesModalApply').click();
+    await page.locator('[data-testid="statesModalApply"]').click();
 
     await expect(previewRow.getByTestId('preview-optional-badge')).toBeVisible();
     await expect(previewRow.getByTestId('preview-required-star')).not.toBeVisible();

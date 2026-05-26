@@ -52,11 +52,11 @@ async function addTextItem(page, title = 'My Question') {
   return { groupId: '1', itemId: '1.1' };
 }
 
-const appearanceModal       = (page) => page.locator('#appearanceModal');
-const appearanceModalTitle  = (page) => page.locator('#appearanceModalTitle');
-const appearanceModalClose  = (page) => page.locator('#appearanceModalClose');
-const appearanceModalCancel = (page) => page.locator('#appearanceModalCancel');
-const appearanceModalApply  = (page) => page.locator('#appearanceModalApply');
+const appearanceModal       = (page) => page.locator('[data-testid="appearanceModal"]');
+const appearanceModalTitle  = (page) => page.locator('[data-testid="appearanceModalTitle"]');
+const appearanceModalClose  = (page) => page.locator('[data-testid="appearanceModalClose"]');
+const appearanceModalCancel = (page) => page.locator('[data-testid="appearanceModalCancel"]');
+const appearanceModalApply  = (page) => page.locator('[data-testid="appearanceModalApply"]');
 const rawInput              = (page) => page.getByTestId('appearance-raw-input');
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
@@ -180,7 +180,7 @@ test.describe('Appearance modal — draft pattern', () => {
     await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
 
     // Click the Bold checkbox (use click to trigger DOM change event)
-    const boldCb = page.locator('#appearanceModalBody input[type="checkbox"]').first();
+    const boldCb = page.locator('[data-testid="appearanceModalBody"] input[type="checkbox"]').first();
     await boldCb.click();
 
     // Raw CSS textarea .value must reflect bold — use toHaveValue, not toContainText

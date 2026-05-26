@@ -5,6 +5,7 @@ import * as explainModal from './explain-modal.js';
 import { createCustomSelect } from '../custom-select.js';
 
 class ConstraintModal extends Modal {
+  getName() { return 'constraintModal'; }
   constructor() {
     super();
     this._pending = null;

@@ -47,6 +47,9 @@ export class Modal {
     Object.assign(Modal._svc, services);
   }
 
+  /** Override in subclass to assign data-testid attributes to modal DOM elements. */
+  getName() { return null; }
+
   constructor({ cancelLabel = 'Cancel', applyLabel = 'Apply', maxWidth = null, bodyClass = null } = {}) {
     this.backdrop = _mk('div', 'modal-backdrop');
     this.backdrop.style.display = 'none';
@@ -83,6 +86,16 @@ export class Modal {
 
     box.append(header, this.body, this.footer);
     this.backdrop.appendChild(box);
+
+    const n = this.getName();
+    if (n) {
+      this.backdrop.dataset.testid = n;
+      this.title.dataset.testid    = n + 'Title';
+      this.closeBtn.dataset.testid = n + 'Close';
+      this.body.dataset.testid     = n + 'Body';
+      if (this.cancelBtn) this.cancelBtn.dataset.testid = n + 'Cancel';
+      if (this.applyBtn)  this.applyBtn.dataset.testid  = n + 'Apply';
+    }
 
     this.closeBtn.addEventListener('click',  () => this._cancel());
     if (this.cancelBtn) this.cancelBtn.addEventListener('click', () => this._cancel());

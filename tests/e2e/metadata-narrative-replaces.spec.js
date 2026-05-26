@@ -26,14 +26,14 @@ test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-narrative-status')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('narrative status row shows correct status value', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-narrative-status')).toHaveText('preserved · status: generated');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('narrative div block is visible below the status row', async ({ page }) => {
@@ -42,7 +42,7 @@ test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
     const pre = page.locator('.meta-modal-narrative');
     await expect(pre).toBeVisible();
     await expect(pre).toContainText('<div xmlns');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('narrative row is visible even when questionnaire has no imported text', async ({ page }) => {
@@ -51,7 +51,7 @@ test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
     await openModal(page);
     await expect(page.getByTestId('meta-narrative-status')).toBeVisible();
     await expect(page.getByTestId('meta-narrative-status')).toContainText('generated on export');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('text field round-trips through export unchanged', async ({ page }) => {
@@ -91,14 +91,14 @@ test.describe('metadata modal — Replaces section', () => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-replaces-toggle')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('Replaces section is expanded when questionnaire has replaces extensions', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-replaces-url-0')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('Replaces inputs are pre-populated from imported extensions', async ({ page }) => {
@@ -106,14 +106,14 @@ test.describe('metadata modal — Replaces section', () => {
     await openModal(page);
     await expect(page.getByTestId('meta-replaces-url-0')).toHaveValue('http://example.org/fhir/Questionnaire/meta-test|1.0');
     await expect(page.getByTestId('meta-replaces-url-1')).toHaveValue('http://example.org/fhir/Questionnaire/meta-test|0.9');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('toggle label shows count of replaces URLs', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-replaces-toggle')).toContainText('(2)');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('Add URL button appends a new empty input', async ({ page }) => {
@@ -123,7 +123,7 @@ test.describe('metadata modal — Replaces section', () => {
     await page.getByTestId('meta-replaces-toggle').click();
     await page.getByTestId('meta-replaces-add-btn').click();
     await expect(page.getByTestId('meta-replaces-url-0')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('remove button deletes a replaces URL row', async ({ page }) => {
@@ -131,7 +131,7 @@ test.describe('metadata modal — Replaces section', () => {
     await openModal(page);
     await page.getByTestId('meta-replaces-remove-1').click();
     await expect(page.getByTestId('meta-replaces-url-1')).not.toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('replaces URLs round-trip through export as extension entries', async ({ page }) => {
@@ -147,7 +147,7 @@ test.describe('metadata modal — Replaces section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-replaces-url-0').fill('http://example.org/fhir/Questionnaire/updated|2.0');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
     expect(entries[0].valueCanonical).toBe('http://example.org/fhir/Questionnaire/updated|2.0');

@@ -53,11 +53,11 @@ const avsCard            = (page) => page.locator('#answerValueSetCard');
 const avsChips           = (page) => page.locator('#answerValueSetCardChips');
 const avsCount           = (page) => page.locator('#answerValueSetCardCount');
 
-const jsonModal          = (page) => page.locator('#fhirJsonModal');
-const jsonModalTitle     = (page) => page.locator('#fhirJsonModalTitle');
-const jsonModalPre       = (page) => page.locator('#fhirJsonModalPre');
-const jsonModalClose     = (page) => page.locator('#fhirJsonModalClose');
-const jsonModalCloseBtn  = (page) => page.locator('#fhirJsonModalCloseBtn');
+const jsonModal          = (page) => page.locator('[data-testid="fhirJsonModal"]');
+const jsonModalTitle     = (page) => page.locator('[data-testid="fhirJsonModalTitle"]');
+const jsonModalPre       = (page) => page.locator('[data-testid="fhirJsonModalPre"]');
+const jsonModalClose     = (page) => page.locator('[data-testid="fhirJsonModalClose"]');
+const jsonModalCloseBtn  = (page) => page.locator('[data-testid="fhirJsonModalCloseBtn"]');
 
 // ── Contained Resources card ──────────────────────────────────────────────────
 

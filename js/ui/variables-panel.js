@@ -22,6 +22,7 @@ const _el = {
 };
 
 class VariablesModal extends Modal {
+  getName() { return 'variablesModal'; }
   constructor() {
     super();
     this.setTitle('Questionnaire Variables');

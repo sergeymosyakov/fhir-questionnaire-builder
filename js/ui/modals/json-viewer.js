@@ -4,11 +4,15 @@
 import { Modal } from './modal-base.js';
 
 class JsonViewerModal extends Modal {
+  getName() { return 'fhirJsonModal'; }
   constructor() {
     super({ cancelLabel: 'Close', applyLabel: null, bodyClass: 'fhir-json-modal-body' });
     this.pre = document.createElement('pre');
     this.pre.className = 'fhir-json-pre';
+    this.pre.dataset.testid = 'fhirJsonModalPre';
     this.body.appendChild(this.pre);
+    // alias: tests use fhirJsonModalCloseBtn for the footer Close button
+    if (this.cancelBtn) this.cancelBtn.dataset.testid = 'fhirJsonModalCloseBtn';
     document.addEventListener('show-json', e => this.show(e.detail.title, e.detail.data));
   }
 

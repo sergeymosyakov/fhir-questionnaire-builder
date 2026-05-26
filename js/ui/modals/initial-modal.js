@@ -4,6 +4,7 @@ import { Modal } from './modal-base.js';
 import { INITIAL_SECTIONS, renderInitialSections } from './initial-sections/index.js';
 
 class InitialModal extends Modal {
+  getName() { return 'initialModal'; }
   constructor() {
     super();
     this._pending = null;

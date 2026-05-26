@@ -40,11 +40,11 @@ async function freshStartWithGroup(page) {
 
 const variablesCard   = (page) => page.locator('#variablesCard');
 const variablesEditBtn = (page) => page.locator('#variablesEditBtn');
-const variablesModal  = (page) => page.locator('#variablesModal');
-const variablesModalBody   = (page) => page.locator('#variablesModalBody');
-const variablesModalClose  = (page) => page.locator('#variablesModalClose');
-const variablesModalCancel = (page) => page.locator('#variablesModalCancel');
-const variablesModalApply  = (page) => page.locator('#variablesModalApply');
+const variablesModal  = (page) => page.locator('[data-testid="variablesModal"]');
+const variablesModalBody   = (page) => page.locator('[data-testid="variablesModalBody"]');
+const variablesModalClose  = (page) => page.locator('[data-testid="variablesModalClose"]');
+const variablesModalCancel = (page) => page.locator('[data-testid="variablesModalCancel"]');
+const variablesModalApply  = (page) => page.locator('[data-testid="variablesModalApply"]');
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
 

@@ -38,14 +38,14 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-resource-meta-toggle')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('section is auto-expanded when fixture has meta content', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-version-id')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('section is collapsed by default on a fresh questionnaire', async ({ page }) => {
@@ -53,7 +53,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await page.getByTestId('add-root-group-btn').click();
     await openModal(page);
     await expect(page.getByTestId('meta-version-id')).not.toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('clicking toggle expands and collapses the section', async ({ page }) => {
@@ -64,7 +64,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await expect(page.getByTestId('meta-version-id')).toBeVisible();
     await page.getByTestId('meta-resource-meta-toggle').click();
     await expect(page.getByTestId('meta-version-id')).not.toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   // ── versionId ───────────────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-version-id')).toHaveValue('42');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('Generate button sets a UUID v4 in the versionId input', async ({ page }) => {
@@ -82,14 +82,14 @@ test.describe('metadata modal — Resource Meta section', () => {
     await page.getByTestId('meta-version-id-generate').click();
     const value = await page.getByTestId('meta-version-id').inputValue();
     expect(value).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('versionId is written to export JSON on Apply', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-version-id').fill('99');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.meta.versionId).toBe('99');
   });
@@ -98,10 +98,10 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-version-id').fill('changed');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
     await openModal(page);
     await expect(page.getByTestId('meta-version-id')).toHaveValue('42');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   // ── source ──────────────────────────────────────────────────────────────────
@@ -110,14 +110,14 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-source')).toHaveValue('https://example.org/systems/test-builder');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('source is written to export JSON on Apply', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-source').fill('https://example.org/new-source');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.meta.source).toBe('https://example.org/new-source');
   });
@@ -126,17 +126,17 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-source').fill('https://changed.example.org');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
     await openModal(page);
     await expect(page.getByTestId('meta-source')).toHaveValue('https://example.org/systems/test-builder');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('clearing source omits meta.source from export', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-source').fill('');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.meta.source).toBeUndefined();
   });
@@ -147,7 +147,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-last-updated')).toContainText('2024-03-15T10:00:00.000Z');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('meta.lastUpdated in export is always a fresh ISO timestamp', async ({ page }) => {
@@ -175,7 +175,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await expect(page.getByTestId('meta-profile-url-0')).toHaveValue(
       'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire'
     );
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('Add Profile URL appends a new empty input', async ({ page }) => {
@@ -183,7 +183,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await openModal(page);
     await page.getByTestId('meta-profile-add-btn').click();
     await expect(page.getByTestId('meta-profile-url-1')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('profile remove button deletes the row', async ({ page }) => {
@@ -191,7 +191,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await openModal(page);
     await page.getByTestId('meta-profile-remove-0').click();
     await expect(page.getByTestId('meta-profile-url-0')).not.toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('profile[] round-trips through export', async ({ page }) => {
@@ -207,7 +207,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await openModal(page);
     await page.getByTestId('meta-profile-add-btn').click();
     await page.getByTestId('meta-profile-url-1').fill('http://example.org/custom-profile');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.meta.profile).toHaveLength(2);
     expect(q.meta.profile[1]).toBe('http://example.org/custom-profile');
@@ -217,7 +217,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-profile-remove-0').click();
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.meta.profile).toBeUndefined();
   });
@@ -230,7 +230,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await expect(page.getByTestId('meta-tag-system-0')).toHaveValue('http://example.org/tags');
     await expect(page.getByTestId('meta-tag-code-0')).toHaveValue('reviewed');
     await expect(page.getByTestId('meta-tag-display-0')).toHaveValue('Reviewed');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('Add tag button appends a new empty row', async ({ page }) => {
@@ -238,7 +238,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await openModal(page);
     await page.getByTestId('meta-tags-add-btn').click();
     await expect(page.getByTestId('meta-tag-code-1')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('tag[] round-trips through export', async ({ page }) => {
@@ -253,7 +253,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-tag-code-0').fill('approved');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.meta.tag[0].code).toBe('approved');
   });
@@ -262,10 +262,10 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-tag-code-0').fill('CHANGED');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
     await openModal(page);
     await expect(page.getByTestId('meta-tag-code-0')).toHaveValue('reviewed');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   // ── security[] ──────────────────────────────────────────────────────────────
@@ -278,7 +278,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     );
     await expect(page.getByTestId('meta-security-code-0')).toHaveValue('N');
     await expect(page.getByTestId('meta-security-display-0')).toHaveValue('Normal');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('Add security label button appends a new empty row', async ({ page }) => {
@@ -286,7 +286,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await openModal(page);
     await page.getByTestId('meta-securitys-add-btn').click();
     await expect(page.getByTestId('meta-security-code-1')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('security[] round-trips through export', async ({ page }) => {
@@ -305,7 +305,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-security-code-0').fill('R');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.meta.security[0].code).toBe('R');
   });
@@ -317,6 +317,6 @@ test.describe('metadata modal — Resource Meta section', () => {
     await openModal(page);
     // fixture: versionId(1) + source(1) + profile[1](1) + tag[code](1) + security[code](1) = 5
     await expect(page.getByTestId('meta-resource-meta-toggle')).toContainText('(5)');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 });

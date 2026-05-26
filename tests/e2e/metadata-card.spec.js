@@ -73,6 +73,6 @@ test.describe('metadata card — reset on clear', () => {
     await expect(page.getByTestId('meta-id')).toHaveValue('');
     await expect(page.getByTestId('meta-url')).toHaveValue('');
     await expect(page.getByTestId('meta-title')).toHaveValue('');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 });

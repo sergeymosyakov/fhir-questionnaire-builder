@@ -7,6 +7,7 @@ import { Modal } from './modal-base.js';
 import { EXPR_SECTIONS, makeExprField, renderExprSections } from './expression-sections/index.js';
 
 class ExpressionModal extends Modal {
+  getName() { return 'expressionModal'; }
   constructor() {
     super();
     this._pending = null;

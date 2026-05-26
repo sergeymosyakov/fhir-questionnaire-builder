@@ -59,22 +59,22 @@ async function addRadioItem(page) {
 
 async function openAnswerTypeModal(page, itemId) {
   await page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type').click();
-  await expect(page.locator('#answerTypeModal')).toBeVisible();
+  await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
 }
 
 async function changeType(page, typeValue) {
-  await page.locator('#answerTypeModal').getByTestId('type-select').click();
+  await page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select').click();
   await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
 }
 
 async function changeOrientation(page, orientValue) {
-  await page.locator('#answerTypeModal').getByTestId('orientation-select').click();
+  await page.locator('[data-testid="answerTypeModal"]').getByTestId('orientation-select').click();
   await page.locator(`[data-testid="csel-drop"] [data-val="${orientValue}"]`).click();
 }
 
 async function applyModal(page) {
-  await page.locator('#answerTypeModalApply').click();
-  await expect(page.locator('#answerTypeModal')).not.toBeVisible();
+  await page.locator('[data-testid="answerTypeModalApply"]').click();
+  await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
 }
 
 // ── 1. Fixture import — CSS class from FHIR extension ────────────────────────
@@ -111,7 +111,7 @@ test.describe('choiceOrientation — Answer Type modal UI', () => {
     const itemId = await addRadioItem(page);
     await openAnswerTypeModal(page, itemId);
     // Default type is text — orientation section must be hidden
-    await expect(page.locator('#answerTypeModal').getByTestId('orientation-select')).not.toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('orientation-select')).not.toBeVisible();
   });
 
   test('orientation-select is visible for radio type', async ({ page }) => {
@@ -119,7 +119,7 @@ test.describe('choiceOrientation — Answer Type modal UI', () => {
     const itemId = await addRadioItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'radio');
-    await expect(page.locator('#answerTypeModal').getByTestId('orientation-select')).toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('orientation-select')).toBeVisible();
   });
 
   test('orientation-select is hidden for select type', async ({ page }) => {
@@ -127,7 +127,7 @@ test.describe('choiceOrientation — Answer Type modal UI', () => {
     const itemId = await addRadioItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'select');
-    await expect(page.locator('#answerTypeModal').getByTestId('orientation-select')).not.toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('orientation-select')).not.toBeVisible();
   });
 
   test('orientation-select hides when switching from radio to integer', async ({ page }) => {
@@ -135,9 +135,9 @@ test.describe('choiceOrientation — Answer Type modal UI', () => {
     const itemId = await addRadioItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'radio');
-    await expect(page.locator('#answerTypeModal').getByTestId('orientation-select')).toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('orientation-select')).toBeVisible();
     await changeType(page, 'integer');
-    await expect(page.locator('#answerTypeModal').getByTestId('orientation-select')).not.toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('orientation-select')).not.toBeVisible();
   });
 });
 
@@ -149,7 +149,7 @@ test.describe('choiceOrientation — builder to preview round-trip', () => {
     const itemId = await addRadioItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'radio');
-    await page.locator('#answerTypeModal').getByTestId('options-input').fill('a=Option A,b=Option B');
+    await page.locator('[data-testid="answerTypeModal"]').getByTestId('options-input').fill('a=Option A,b=Option B');
     await changeOrientation(page, 'vertical');
     await applyModal(page);
     await expect(page.locator(`[data-preview-id="${itemId}"] .ctrl-wrap`)).toHaveClass(/ctrl-wrap--vertical/);
@@ -160,7 +160,7 @@ test.describe('choiceOrientation — builder to preview round-trip', () => {
     const itemId = await addRadioItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'radio');
-    await page.locator('#answerTypeModal').getByTestId('options-input').fill('a=Option A,b=Option B');
+    await page.locator('[data-testid="answerTypeModal"]').getByTestId('options-input').fill('a=Option A,b=Option B');
     await changeOrientation(page, 'horizontal');
     await applyModal(page);
     await expect(page.locator(`[data-preview-id="${itemId}"] .ctrl-wrap`)).toHaveClass(/ctrl-wrap--horizontal/);
@@ -171,7 +171,7 @@ test.describe('choiceOrientation — builder to preview round-trip', () => {
     const itemId = await addRadioItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'radio');
-    await page.locator('#answerTypeModal').getByTestId('options-input').fill('a=Option A,b=Option B');
+    await page.locator('[data-testid="answerTypeModal"]').getByTestId('options-input').fill('a=Option A,b=Option B');
     // Set vertical first, then clear it
     await changeOrientation(page, 'vertical');
     await applyModal(page);

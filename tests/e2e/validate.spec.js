@@ -57,10 +57,10 @@ async function addValidItem(page) {
 
 // ── Helpers: modal state ───────────────────────────────────────────────────────
 
-const validateModal      = (page) => page.locator('#validateModal');
-const validateModalTitle = (page) => page.locator('#validateModalTitle');
-const validateModalClose = (page) => page.locator('#validateModalClose');
-const validateModalBody  = (page) => page.locator('#validateModalBody');
+const validateModal      = (page) => page.locator('[data-testid="validateModal"]');
+const validateModalTitle = (page) => page.locator('[data-testid="validateModalTitle"]');
+const validateModalClose = (page) => page.locator('[data-testid="validateModalClose"]');
+const validateModalBody  = (page) => page.locator('[data-testid="validateModalBody"]');
 const validateBtn        = (page) => page.getByTestId('validate-btn');
 
 async function openValidateModal(page) {
@@ -101,7 +101,7 @@ test.describe('Validate modal — all good', () => {
 
     await openValidateModal(page);
 
-    await page.locator('#validateModal .btn-fhir').click();
+    await page.locator('[data-testid="validateModal"] .btn-fhir').click();
     await expect(validateModal(page)).not.toBeVisible();
   });
 });
@@ -148,7 +148,7 @@ test.describe('Validate modal — issues', () => {
 
     await openValidateModal(page);
 
-    await page.locator('#validateModal .btn-fhir').click();
+    await page.locator('[data-testid="validateModal"] .btn-fhir').click();
     await expect(validateModal(page)).not.toBeVisible();
   });
 });
@@ -242,7 +242,7 @@ test.describe('Validate modal — export mode', () => {
     await expect(validateModal(page)).toBeVisible();
     await expect(validateModalTitle(page)).toContainText('Export');
 
-    const buttons = page.locator('#validateModal .btn-fhir');
+    const buttons = page.locator('[data-testid="validateModal"] .btn-fhir');
     const texts = await buttons.allInnerTexts();
     expect(texts).toContain('Fix first');
     expect(texts).toContain('Export anyway');
@@ -262,7 +262,7 @@ test.describe('Validate modal — export mode', () => {
     await page.getByTestId('export-fhir-item').click();
     await expect(validateModal(page)).toBeVisible();
 
-    await page.locator('#validateModal').getByText('Fix first').click();
+    await page.locator('[data-testid="validateModal"]').getByText('Fix first').click();
     await expect(validateModal(page)).not.toBeVisible();
   });
 
@@ -285,7 +285,7 @@ test.describe('Validate modal — export mode', () => {
 
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.locator('#validateModal').getByText('Export anyway').click(),
+      page.locator('[data-testid="validateModal"]').getByText('Export anyway').click(),
     ]);
 
     expect(download.suggestedFilename()).toMatch(/\.json$/);

@@ -20,6 +20,7 @@ document.addEventListener('qr-loaded', e => {
 });
 
 class QrExportModal extends Modal {
+  getName() { return 'qrExportModal'; }
   constructor() {
     super();
     this._state = null;

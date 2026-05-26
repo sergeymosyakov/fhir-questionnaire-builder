@@ -151,7 +151,7 @@ test.describe('builder UI', () => {
     // Check "Render as slider" — step field appears with default value 1
     await page.getByTestId('slider-toggle').check();
     await expect(page.getByTestId('slider-step-input')).toBeVisible();
-    await page.locator('#answerTypeModalApply').click();
+    await page.locator('[data-testid="answerTypeModalApply"]').click();
     // Just verify the modal Apply succeeded without error
     await expect(page.locator('[data-node-id="general-notes"]')).toBeVisible();
   });
@@ -178,7 +178,7 @@ test.describe('builder UI', () => {
     await page.locator('[data-node-id="general-notes"]').getByTestId('action-vis').click();
     await page.getByTestId('disabled-display-select').click();
     await page.locator('.oc-opt[data-val="hidden"]').click();
-    await page.locator('#showWhenModalApply').click();
+    await page.locator('[data-testid="showWhenModalApply"]').click();
     // After applying, general-notes should no longer be in the DOM (condition still not met)
     await expect(page.locator('[data-preview-id="general-notes"]')).toHaveCount(0);
   });

@@ -58,11 +58,11 @@ async function addTextItem(page, title = 'My Question') {
   }
 }
 
-const modal       = (page) => page.locator('#statesModal');
-const modalTitle  = (page) => page.locator('#statesModalTitle');
-const modalClose  = (page) => page.locator('#statesModalClose');
-const modalCancel = (page) => page.locator('#statesModalCancel');
-const modalApply  = (page) => page.locator('#statesModalApply');
+const modal       = (page) => page.locator('[data-testid="statesModal"]');
+const modalTitle  = (page) => page.locator('[data-testid="statesModalTitle"]');
+const modalClose  = (page) => page.locator('[data-testid="statesModalClose"]');
+const modalCancel = (page) => page.locator('[data-testid="statesModalCancel"]');
+const modalApply  = (page) => page.locator('[data-testid="statesModalApply"]');
 const requiredSel = (page) => page.locator('[data-testid="states-required-sel"]');
 
 // ── Open / close ──────────────────────────────────────────────────────────────

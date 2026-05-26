@@ -4,6 +4,7 @@ import { Modal } from './modal-base.js';
 import { STATES_SECTIONS, renderStatesSections } from './states-sections/index.js';
 
 class StatesModal extends Modal {
+  getName() { return 'statesModal'; }
   constructor() {
     super({ maxWidth: '380px' });
     this._pending = null;

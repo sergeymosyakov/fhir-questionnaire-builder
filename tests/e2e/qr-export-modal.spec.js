@@ -38,14 +38,14 @@ async function loadSampleAndOpenExportModal(page) {
   await page.getByTestId('export-btn').click();
   await page.getByTestId('export-qr-item').click();
   // Wait for modal
-  await expect(page.locator('#qrExportModal')).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('[data-testid="qrExportModal"]')).toBeVisible({ timeout: 5_000 });
 }
 
 // ── modal opens ───────────────────────────────────────────────────────────────
 
 test('QR export modal opens when Export→QR clicked', async ({ page }) => {
   await loadSampleAndOpenExportModal(page);
-  await expect(page.locator('#qrExportModal')).toBeVisible();
+  await expect(page.locator('[data-testid="qrExportModal"]')).toBeVisible();
 });
 
 // ── fields present ────────────────────────────────────────────────────────────
@@ -95,15 +95,15 @@ test('Cancel closes the modal without downloading', async ({ page }) => {
   await loadSampleAndOpenExportModal(page);
   const downloads = [];
   page.on('download', d => downloads.push(d));
-  await page.locator('#qrExportModalCancel').click();
-  await expect(page.locator('#qrExportModal')).toBeHidden();
+  await page.locator('[data-testid="qrExportModalCancel"]').click();
+  await expect(page.locator('[data-testid="qrExportModal"]')).toBeHidden();
   expect(downloads).toHaveLength(0);
 });
 
 test('Escape key closes the modal', async ({ page }) => {
   await loadSampleAndOpenExportModal(page);
   await page.keyboard.press('Escape');
-  await expect(page.locator('#qrExportModal')).toBeHidden();
+  await expect(page.locator('[data-testid="qrExportModal"]')).toBeHidden();
 });
 
 // ── export triggers download ──────────────────────────────────────────────────

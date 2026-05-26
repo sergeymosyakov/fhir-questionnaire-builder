@@ -4,6 +4,7 @@ import { Modal } from './modal-base.js';
 import { REPEATABLE_SECTIONS, renderRepeatableSections } from './repeatable-sections/index.js';
 
 class RepeatableModal extends Modal {
+  getName() { return 'repeatableModal'; }
   constructor() {
     super();
     this._pending = null;

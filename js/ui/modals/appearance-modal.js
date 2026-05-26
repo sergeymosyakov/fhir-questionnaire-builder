@@ -4,6 +4,7 @@ import { Modal } from './modal-base.js';
 import { APPEARANCE_SECTIONS, renderAppearanceSections } from './appearance-sections/index.js';
 
 class AppearanceModal extends Modal {
+  getName() { return 'appearanceModal'; }
   constructor() {
     super();
     this._pending = null;

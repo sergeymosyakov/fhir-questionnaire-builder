@@ -7,6 +7,7 @@ import { createCustomSelect } from '../custom-select.js';
 import { buildVisPanel } from '../../builder/panels.js';
 
 class ShowWhenModal extends Modal {
+  getName() { return 'showWhenModal'; }
   constructor() {
     super();
     this._pending = null;

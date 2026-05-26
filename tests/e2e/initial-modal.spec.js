@@ -53,11 +53,11 @@ async function addTextItem(page, title = 'My Question') {
   return { groupId: '1', itemId: '1.1' };
 }
 
-const initialModal      = (page) => page.locator('#initialModal');
-const initialModalTitle = (page) => page.locator('#initialModalTitle');
-const initialModalClose = (page) => page.locator('#initialModalClose');
-const initialModalCancel = (page) => page.locator('#initialModalCancel');
-const initialModalApply  = (page) => page.locator('#initialModalApply');
+const initialModal      = (page) => page.locator('[data-testid="initialModal"]');
+const initialModalTitle = (page) => page.locator('[data-testid="initialModalTitle"]');
+const initialModalClose = (page) => page.locator('[data-testid="initialModalClose"]');
+const initialModalCancel = (page) => page.locator('[data-testid="initialModalCancel"]');
+const initialModalApply  = (page) => page.locator('[data-testid="initialModalApply"]');
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
@@ -129,13 +129,13 @@ test.describe('Default Value modal — draft pattern', () => {
     await item.getByTestId('action-default').click();
 
     // Type a value and cancel
-    const input = page.locator('#initialModalBody input, #initialModalBody textarea').first();
+    const input = page.locator('[data-testid="initialModalBody"] input, [data-testid="initialModalBody"] textarea').first();
     await input.fill('hello world');
     await initialModalCancel(page).click();
 
     // Re-open: the value must not be persisted
     await item.getByTestId('action-default').click();
-    await expect(page.locator('#initialModalBody input, #initialModalBody textarea').first()).toHaveValue('');
+    await expect(page.locator('[data-testid="initialModalBody"] input, [data-testid="initialModalBody"] textarea').first()).toHaveValue('');
   });
 
   test('Apply saves the value and preview shows it pre-filled', async ({ page }) => {
@@ -144,7 +144,7 @@ test.describe('Default Value modal — draft pattern', () => {
 
     await page.locator('[data-node-id="1.1"]').getByTestId('action-default').click();
 
-    const input = page.locator('#initialModalBody input, #initialModalBody textarea').first();
+    const input = page.locator('[data-testid="initialModalBody"] input, [data-testid="initialModalBody"] textarea').first();
     await input.fill('hello world');
     await initialModalApply(page).click();
 
@@ -166,7 +166,7 @@ test.describe('Default Value modal — draft pattern', () => {
     await expect(defaultLink).not.toHaveClass(/action-edit--active/);
 
     await defaultLink.click();
-    const input = page.locator('#initialModalBody input, #initialModalBody textarea').first();
+    const input = page.locator('[data-testid="initialModalBody"] input, [data-testid="initialModalBody"] textarea').first();
     await input.fill('pre-filled');
     await initialModalApply(page).click();
 
@@ -183,13 +183,13 @@ test.describe('Default Value modal — draft pattern', () => {
 
     // Set a default first
     await defaultLink.click();
-    await page.locator('#initialModalBody input, #initialModalBody textarea').first().fill('initial value');
+    await page.locator('[data-testid="initialModalBody"] input, [data-testid="initialModalBody"] textarea').first().fill('initial value');
     await initialModalApply(page).click();
     await expect(defaultLink).toHaveClass(/action-edit--active/);
 
     // Now clear it
     await defaultLink.click();
-    await page.locator('#initialModalBody input, #initialModalBody textarea').first().fill('');
+    await page.locator('[data-testid="initialModalBody"] input, [data-testid="initialModalBody"] textarea').first().fill('');
     await initialModalApply(page).click();
 
     // Must be deactivated
@@ -204,11 +204,11 @@ test.describe('Default Value modal — not applicable types', () => {
   async function changeType(page, itemId, typeValue) {
     const node = page.locator(`[data-node-id="${itemId}"]`);
     await node.getByTestId('action-type').click();
-    const modal = page.locator('#answerTypeModal');
+    const modal = page.locator('[data-testid="answerTypeModal"]');
     await expect(modal).toBeVisible();
     await modal.getByTestId('type-select').click();
     await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
-    await page.locator('#answerTypeModalApply').click();
+    await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(modal).not.toBeVisible();
   }
 
@@ -219,7 +219,7 @@ test.describe('Default Value modal — not applicable types', () => {
 
     await page.locator('[data-node-id="1.1"]').getByTestId('action-default').click();
     await expect(initialModal(page)).toBeVisible();
-    await expect(page.locator('#initialModalBody')).toContainText('Not applicable');
+    await expect(page.locator('[data-testid="initialModalBody"]')).toContainText('Not applicable');
     await initialModalApply(page).click();
     await expect(initialModal(page)).not.toBeVisible();
   });

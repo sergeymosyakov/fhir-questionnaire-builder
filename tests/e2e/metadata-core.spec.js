@@ -38,21 +38,21 @@ test.describe('metadata modal — open/close', () => {
   test('Edit button opens the modal', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await expect(page.locator('#metadataModal')).toBeVisible();
+    await expect(page.locator('[data-testid="metadataModal"]')).toBeVisible();
   });
 
   test('× button closes the modal', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await page.locator('#metadataModalClose').click();
-    await expect(page.locator('#metadataModal')).not.toBeVisible();
+    await page.locator('[data-testid="metadataModalClose"]').click();
+    await expect(page.locator('[data-testid="metadataModal"]')).not.toBeVisible();
   });
 
   test('Cancel button closes the modal', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await page.locator('#metadataModalCancel').click();
-    await expect(page.locator('#metadataModal')).not.toBeVisible();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
+    await expect(page.locator('[data-testid="metadataModal"]')).not.toBeVisible();
   });
 });
 
@@ -110,8 +110,8 @@ test.describe('metadata modal — apply', () => {
     await openModal(page);
     await page.getByTestId('meta-status').click();
     await page.locator('.oc-opt[data-val="retired"]').click();
-    await page.locator('#metadataModalApply').click();
-    await expect(page.locator('#metadataModal')).not.toBeVisible();
+    await page.locator('[data-testid="metadataModalApply"]').click();
+    await expect(page.locator('[data-testid="metadataModal"]')).not.toBeVisible();
     await expect(page.getByTestId('quest-meta-status')).toHaveText('retired');
   });
 
@@ -120,7 +120,7 @@ test.describe('metadata modal — apply', () => {
     await openModal(page);
     await page.getByTestId('meta-status').click();
     await page.locator('.oc-opt[data-val="retired"]').click();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
     await expect(page.getByTestId('quest-meta-status')).toHaveText('active');
   });
 
@@ -128,7 +128,7 @@ test.describe('metadata modal — apply', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-title').fill('Updated Title');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.title).toBe('Updated Title');
   });
@@ -176,7 +176,7 @@ test.describe('metadata modal — Advanced section', () => {
     await openModal(page);
     await page.getByTestId('meta-advanced-toggle').click();
     await page.getByTestId('meta-subject-type').fill('Patient, RelatedPerson');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.subjectType).toEqual(['Patient', 'RelatedPerson']);
   });
@@ -203,7 +203,7 @@ test.describe('metadata modal — effectivePeriod', () => {
     await page.getByTestId('meta-advanced-toggle').click();
     await expect(page.getByTestId('meta-effective-start')).toHaveValue('2024-01-01');
     await expect(page.getByTestId('meta-effective-end')).toHaveValue('2025-12-31');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('effectivePeriod round-trips through export', async ({ page }) => {
@@ -217,11 +217,11 @@ test.describe('metadata modal — effectivePeriod', () => {
     await openModal(page);
     await page.getByTestId('meta-advanced-toggle').click();
     await page.getByTestId('meta-effective-start').fill('2025-03-01');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     await openModal(page);
     await page.getByTestId('meta-advanced-toggle').click();
     await expect(page.getByTestId('meta-effective-start')).toHaveValue('2025-03-01');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('effectivePeriod cleared when form is cleared', async ({ page }) => {
@@ -235,6 +235,6 @@ test.describe('metadata modal — effectivePeriod', () => {
     await page.getByTestId('meta-advanced-toggle').click();
     await expect(page.getByTestId('meta-effective-start')).toHaveValue('');
     await expect(page.getByTestId('meta-effective-end')).toHaveValue('');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 });

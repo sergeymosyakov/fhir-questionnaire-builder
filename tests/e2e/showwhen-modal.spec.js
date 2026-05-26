@@ -50,12 +50,12 @@ async function addTextItem(page, title = 'My Question') {
   }
 }
 
-const showWhenModal       = (page) => page.locator('#showWhenModal');
-const showWhenModalTitle  = (page) => page.locator('#showWhenModalTitle');
-const showWhenModalClose  = (page) => page.locator('#showWhenModalClose');
-const showWhenModalCancel = (page) => page.locator('#showWhenModalCancel');
-const showWhenModalApply  = (page) => page.locator('#showWhenModalApply');
-const showWhenModalBody   = (page) => page.locator('#showWhenModalBody');
+const showWhenModal       = (page) => page.locator('[data-testid="showWhenModal"]');
+const showWhenModalTitle  = (page) => page.locator('[data-testid="showWhenModalTitle"]');
+const showWhenModalClose  = (page) => page.locator('[data-testid="showWhenModalClose"]');
+const showWhenModalCancel = (page) => page.locator('[data-testid="showWhenModalCancel"]');
+const showWhenModalApply  = (page) => page.locator('[data-testid="showWhenModalApply"]');
+const showWhenModalBody   = (page) => page.locator('[data-testid="showWhenModalBody"]');
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
 

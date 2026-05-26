@@ -26,7 +26,7 @@ export async function loadFixture(page) {
 
 export async function openModal(page) {
   await page.getByTestId('properties-btn').click();
-  await expect(page.locator('#metadataModal')).toBeVisible();
+  await expect(page.locator('[data-testid="metadataModal"]')).toBeVisible();
 }
 
 export async function exportFHIR(page) {

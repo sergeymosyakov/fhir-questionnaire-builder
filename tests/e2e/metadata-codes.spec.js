@@ -23,14 +23,14 @@ test.describe('metadata modal — Questionnaire codes', () => {
     await openModal(page);
     await expect(page.getByTestId('meta-codes-toggle')).toBeVisible();
     await expect(page.getByTestId('meta-code-code-0')).not.toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('Codes toggle shows count badge when codes are present', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-codes-toggle')).toContainText('(1)');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('expanding Codes section shows imported code row', async ({ page }) => {
@@ -40,7 +40,7 @@ test.describe('metadata modal — Questionnaire codes', () => {
     await expect(page.getByTestId('meta-code-code-0')).toHaveValue('44249-1');
     await expect(page.getByTestId('meta-code-system-0')).toHaveValue('http://loinc.org');
     await expect(page.getByTestId('meta-code-display-0')).toHaveValue('PHQ-9 total score');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('Add code button appends a new empty row', async ({ page }) => {
@@ -49,7 +49,7 @@ test.describe('metadata modal — Questionnaire codes', () => {
     await page.getByTestId('meta-codes-toggle').click();
     await page.getByTestId('meta-codes-add-btn').click();
     await expect(page.getByTestId('meta-code-code-1')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('edited codes are committed on Apply and round-trip through export', async ({ page }) => {
@@ -60,7 +60,7 @@ test.describe('metadata modal — Questionnaire codes', () => {
     await page.getByTestId('meta-code-system-1').fill('http://snomed.info/sct');
     await page.getByTestId('meta-code-code-1').fill('44054006');
     await page.getByTestId('meta-code-display-1').fill('Type 2 diabetes');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.code).toHaveLength(2);
     expect(q.code[1].code).toBe('44054006');
@@ -71,11 +71,11 @@ test.describe('metadata modal — Questionnaire codes', () => {
     await openModal(page);
     await page.getByTestId('meta-codes-toggle').click();
     await page.getByTestId('meta-code-remove-0').click();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
     await openModal(page);
     await page.getByTestId('meta-codes-toggle').click();
     await expect(page.getByTestId('meta-code-code-0')).toHaveValue('44249-1');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('removing all codes omits code[] from export', async ({ page }) => {
@@ -83,7 +83,7 @@ test.describe('metadata modal — Questionnaire codes', () => {
     await openModal(page);
     await page.getByTestId('meta-codes-toggle').click();
     await page.getByTestId('meta-code-remove-0').click();
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.code).toBeUndefined();
   });

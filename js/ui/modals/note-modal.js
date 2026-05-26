@@ -4,6 +4,7 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 
 class NoteModal extends Modal {
+  getName() { return 'designNoteModal'; }
   constructor() {
     super();
     this._pending = null;

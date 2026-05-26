@@ -23,14 +23,14 @@ test.describe('metadata modal — Identifiers section', () => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-identifiers-toggle')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('section is auto-expanded when fixture has identifiers', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-identifier-system-0')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('section is collapsed by default on a fresh questionnaire', async ({ page }) => {
@@ -38,7 +38,7 @@ test.describe('metadata modal — Identifiers section', () => {
     await page.getByTestId('add-root-group-btn').click();
     await openModal(page);
     await expect(page.getByTestId('meta-identifier-add-btn')).not.toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('clicking toggle expands the section', async ({ page }) => {
@@ -47,14 +47,14 @@ test.describe('metadata modal — Identifiers section', () => {
     await openModal(page);
     await page.getByTestId('meta-identifiers-toggle').click();
     await expect(page.getByTestId('meta-identifier-add-btn')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('toggle badge shows count of non-empty identifiers', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-identifiers-toggle')).toContainText('(1)');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('imported identifier row has correct system, value and use', async ({ page }) => {
@@ -63,7 +63,7 @@ test.describe('metadata modal — Identifiers section', () => {
     await expect(page.getByTestId('meta-identifier-use-0')).toHaveAttribute('data-value', 'official');
     await expect(page.getByTestId('meta-identifier-system-0')).toHaveValue('http://example.org/questionnaire-ids');
     await expect(page.getByTestId('meta-identifier-value-0')).toHaveValue('Q-2024-001');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('Add Identifier button appends a new empty row', async ({ page }) => {
@@ -71,7 +71,7 @@ test.describe('metadata modal — Identifiers section', () => {
     await openModal(page);
     await page.getByTestId('meta-identifier-add-btn').click();
     await expect(page.getByTestId('meta-identifier-system-1')).toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('remove button deletes the identifier row', async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe('metadata modal — Identifiers section', () => {
     await openModal(page);
     await page.getByTestId('meta-identifier-remove-0').click();
     await expect(page.getByTestId('meta-identifier-system-0')).not.toBeVisible();
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('identifier[] round-trips through export', async ({ page }) => {
@@ -94,7 +94,7 @@ test.describe('metadata modal — Identifiers section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-identifier-value-0').fill('Q-2025-999');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.identifier[0].value).toBe('Q-2025-999');
   });
@@ -103,7 +103,7 @@ test.describe('metadata modal — Identifiers section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-identifier-system-0').fill('http://new.example.org/ids');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.identifier[0].system).toBe('http://new.example.org/ids');
   });
@@ -112,10 +112,10 @@ test.describe('metadata modal — Identifiers section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-identifier-value-0').fill('CHANGED');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
     await openModal(page);
     await expect(page.getByTestId('meta-identifier-value-0')).toHaveValue('Q-2024-001');
-    await page.locator('#metadataModalCancel').click();
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('added identifier is written to export JSON', async ({ page }) => {
@@ -124,7 +124,7 @@ test.describe('metadata modal — Identifiers section', () => {
     await page.getByTestId('meta-identifier-add-btn').click();
     await page.getByTestId('meta-identifier-system-1').fill('http://acme.org/ids');
     await page.getByTestId('meta-identifier-value-1').fill('ACME-007');
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.identifier).toHaveLength(2);
     expect(q.identifier[1]).toMatchObject({ system: 'http://acme.org/ids', value: 'ACME-007' });
@@ -134,7 +134,7 @@ test.describe('metadata modal — Identifiers section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-identifier-remove-0').click();
-    await page.locator('#metadataModalApply').click();
+    await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.identifier).toBeUndefined();
   });

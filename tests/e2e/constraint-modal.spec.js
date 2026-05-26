@@ -50,12 +50,12 @@ async function addTextItem(page, title = 'My Question') {
   }
 }
 
-const constraintModal       = (page) => page.locator('#constraintModal');
-const constraintModalTitle  = (page) => page.locator('#constraintModalTitle');
-const constraintModalClose  = (page) => page.locator('#constraintModalClose');
-const constraintModalCancel = (page) => page.locator('#constraintModalCancel');
-const constraintModalApply  = (page) => page.locator('#constraintModalApply');
-const constraintModalBody   = (page) => page.locator('#constraintModalBody');
+const constraintModal       = (page) => page.locator('[data-testid="constraintModal"]');
+const constraintModalTitle  = (page) => page.locator('[data-testid="constraintModalTitle"]');
+const constraintModalClose  = (page) => page.locator('[data-testid="constraintModalClose"]');
+const constraintModalCancel = (page) => page.locator('[data-testid="constraintModalCancel"]');
+const constraintModalApply  = (page) => page.locator('[data-testid="constraintModalApply"]');
+const constraintModalBody   = (page) => page.locator('[data-testid="constraintModalBody"]');
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
 

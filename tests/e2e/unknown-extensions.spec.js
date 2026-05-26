@@ -113,7 +113,7 @@ test.describe('Remove unknown extension via Props modal', () => {
     await loadFixture(page);
     await page.locator('[data-testid="action-codes"]').first().click();
     await page.locator('[data-testid="item-props-ext-rm-0"]').click();
-    await page.locator('#codesModalApply').click();
+    await page.locator('[data-testid="codesModalApply"]').click();
     const q = await exportFHIR(page);
     const ext = (q.item[0].extension || []);
     const custom = ext.find(e => e.url === CUSTOM_URL);
@@ -135,7 +135,7 @@ test.describe('Add unknown extension via Props modal', () => {
     await page.locator('[data-testid="csel-drop"] [data-val="valueBoolean"]').click();
     await page.locator('[data-testid="item-props-ext-val-0"]').click();
     await page.locator('[data-testid="csel-drop"] [data-val="true"]').click();
-    await page.locator('#codesModalApply').click();
+    await page.locator('[data-testid="codesModalApply"]').click();
     const q = await exportFHIR(page);
     const ext = (q.item[1].extension || []);
     const added = ext.find(e => e.url === 'http://new.example.com/ext');

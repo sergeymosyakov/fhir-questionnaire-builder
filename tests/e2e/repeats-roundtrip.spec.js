@@ -86,7 +86,7 @@ test('QR repeat round-trip: fill 3 rows per field, export, reload, import, verif
   // ── 3. Export QR (via modal) ──
   await page.getByTestId('export-btn').click();
   await page.getByTestId('export-qr-item').click();
-  await expect(page.locator('#qrExportModal')).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('[data-testid="qrExportModal"]')).toBeVisible({ timeout: 5_000 });
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByTestId('qr-export-apply').click(),

@@ -53,17 +53,17 @@ async function addTextItem(page) {
 
 async function openAnswerTypeModal(page, itemId) {
   await page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type').click();
-  await expect(page.locator('#answerTypeModal')).toBeVisible();
+  await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
 }
 
 async function changeType(page, typeValue) {
-  await page.locator('#answerTypeModal').getByTestId('type-select').click();
+  await page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select').click();
   await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
 }
 
 async function applyModal(page) {
-  await page.locator('#answerTypeModalApply').click();
-  await expect(page.locator('#answerTypeModal')).not.toBeVisible();
+  await page.locator('[data-testid="answerTypeModalApply"]').click();
+  await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
 }
 
 // ── 1. Fixture load — placeholder from FHIR extension ────────────────────────
@@ -108,7 +108,7 @@ test.describe('entryFormat — Answer Type modal UI', () => {
     await openAnswerTypeModal(page, itemId);
 
     // Default type is text — placeholder section must be visible
-    const efInput = page.locator('#answerTypeModal').getByTestId('entry-format-input');
+    const efInput = page.locator('[data-testid="answerTypeModal"]').getByTestId('entry-format-input');
     await expect(efInput).toBeVisible();
   });
 
@@ -118,11 +118,11 @@ test.describe('entryFormat — Answer Type modal UI', () => {
     await openAnswerTypeModal(page, itemId);
 
     // Visible for text initially
-    await expect(page.locator('#answerTypeModal').getByTestId('entry-format-input')).toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('entry-format-input')).toBeVisible();
 
     // Change to select — placeholder section should hide
     await changeType(page, 'select');
-    await expect(page.locator('#answerTypeModal').getByTestId('entry-format-input')).not.toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('entry-format-input')).not.toBeVisible();
   });
 
   test('entry-format-input is visible for integer type', async ({ page }) => {
@@ -130,7 +130,7 @@ test.describe('entryFormat — Answer Type modal UI', () => {
     const itemId = await addTextItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'integer');
-    await expect(page.locator('#answerTypeModal').getByTestId('entry-format-input')).toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('entry-format-input')).toBeVisible();
   });
 
   test('entry-format-input is hidden for display type', async ({ page }) => {
@@ -138,7 +138,7 @@ test.describe('entryFormat — Answer Type modal UI', () => {
     const itemId = await addTextItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'display');
-    await expect(page.locator('#answerTypeModal').getByTestId('entry-format-input')).not.toBeVisible();
+    await expect(page.locator('[data-testid="answerTypeModal"]').getByTestId('entry-format-input')).not.toBeVisible();
   });
 });
 
@@ -150,7 +150,7 @@ test.describe('entryFormat — builder to preview round-trip', () => {
     const itemId = await addTextItem(page);
     await openAnswerTypeModal(page, itemId);
 
-    const efInput = page.locator('#answerTypeModal').getByTestId('entry-format-input');
+    const efInput = page.locator('[data-testid="answerTypeModal"]').getByTestId('entry-format-input');
     await efInput.fill('MM/DD/YYYY');
     await applyModal(page);
 
@@ -164,13 +164,13 @@ test.describe('entryFormat — builder to preview round-trip', () => {
 
     // Set a format first
     await openAnswerTypeModal(page, itemId);
-    await page.locator('#answerTypeModal').getByTestId('entry-format-input').fill('MM/DD/YYYY');
+    await page.locator('[data-testid="answerTypeModal"]').getByTestId('entry-format-input').fill('MM/DD/YYYY');
     await applyModal(page);
     await expect(page.locator(`[data-preview-id="${itemId}"] textarea`)).toHaveAttribute('placeholder', 'MM/DD/YYYY');
 
     // Now clear it
     await openAnswerTypeModal(page, itemId);
-    await page.locator('#answerTypeModal').getByTestId('entry-format-input').clear();
+    await page.locator('[data-testid="answerTypeModal"]').getByTestId('entry-format-input').clear();
     await applyModal(page);
     // Placeholder should revert to empty (no format set)
     await expect(page.locator(`[data-preview-id="${itemId}"] textarea`)).not.toHaveAttribute('placeholder', 'MM/DD/YYYY');

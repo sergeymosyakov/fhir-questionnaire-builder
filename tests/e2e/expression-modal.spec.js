@@ -50,12 +50,12 @@ async function addTextItem(page, title = 'My Question') {
   }
 }
 
-const exprModal       = (page) => page.locator('#expressionModal');
-const exprModalTitle  = (page) => page.locator('#exprModalTitle');
-const exprModalClose  = (page) => page.locator('#exprModalClose');
-const exprModalCancel = (page) => page.locator('#exprModalCancel');
-const exprModalApply  = (page) => page.locator('#exprModalApply');
-const exprModalBody   = (page) => page.locator('#exprModalBody');
+const exprModal       = (page) => page.locator('[data-testid="expressionModal"]');
+const exprModalTitle  = (page) => page.locator('[data-testid="expressionModalTitle"]');
+const exprModalClose  = (page) => page.locator('[data-testid="expressionModalClose"]');
+const exprModalCancel = (page) => page.locator('[data-testid="expressionModalCancel"]');
+const exprModalApply  = (page) => page.locator('[data-testid="expressionModalApply"]');
+const exprModalBody   = (page) => page.locator('[data-testid="expressionModalBody"]');
 
 // ── Calculated Expression ──────────────────────────────────────────────────────
 

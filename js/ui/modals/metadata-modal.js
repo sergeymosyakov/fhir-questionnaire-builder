@@ -3,6 +3,7 @@ import { Modal } from './modal-base.js';
 import { renderMetaSections } from './metadata-sections/index.js';
 
 class MetadataModal extends Modal {
+  getName() { return 'metadataModal'; }
   constructor() {
     super();
     this._pending = null;

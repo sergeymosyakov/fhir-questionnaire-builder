@@ -71,7 +71,7 @@ test.describe('Codes modal open/close', () => {
   test('opens on click and shows existing codes', async ({ page }) => {
     await loadFixture(page);
     await page.locator('[data-testid="action-codes"]').first().click();
-    await expect(page.locator('#codesModal')).toBeVisible();
+    await expect(page.locator('[data-testid="codesModal"]')).toBeVisible();
     // The pre-existing LOINC code should be in the first row
     await expect(page.locator('[data-testid="code-code-0"]')).toHaveValue('44250-9');
     await expect(page.locator('[data-testid="code-system-0"]')).toHaveValue('http://loinc.org');
@@ -81,16 +81,16 @@ test.describe('Codes modal open/close', () => {
   test('closes on Cancel without changes', async ({ page }) => {
     await loadFixture(page);
     await page.locator('[data-testid="action-codes"]').first().click();
-    await expect(page.locator('#codesModal')).toBeVisible();
-    await page.locator('#codesModalCancel').click();
-    await expect(page.locator('#codesModal')).toBeHidden();
+    await expect(page.locator('[data-testid="codesModal"]')).toBeVisible();
+    await page.locator('[data-testid="codesModalCancel"]').click();
+    await expect(page.locator('[data-testid="codesModal"]')).toBeHidden();
   });
 
   test('closes on × button', async ({ page }) => {
     await loadFixture(page);
     await page.locator('[data-testid="action-codes"]').first().click();
-    await page.locator('#codesModalClose').click();
-    await expect(page.locator('#codesModal')).toBeHidden();
+    await page.locator('[data-testid="codesModalClose"]').click();
+    await expect(page.locator('[data-testid="codesModal"]')).toBeHidden();
   });
 });
 
@@ -117,11 +117,11 @@ test.describe('Codes modal editing', () => {
     await loadFixture(page);
     await page.locator('[data-testid="action-codes"]').first().click();
     await page.locator('[data-testid="code-code-0"]').fill('CHANGED');
-    await page.locator('#codesModalCancel').click();
+    await page.locator('[data-testid="codesModalCancel"]').click();
     // Re-open and check original value still there
     await page.locator('[data-testid="action-codes"]').first().click();
     await expect(page.locator('[data-testid="code-code-0"]')).toHaveValue('44250-9');
-    await page.locator('#codesModalCancel').click();
+    await page.locator('[data-testid="codesModalCancel"]').click();
   });
 
   test('Apply commits new code and highlights button', async ({ page }) => {
@@ -132,7 +132,7 @@ test.describe('Codes modal editing', () => {
     await page.locator('[data-testid="code-system-0"]').fill('http://snomed.info/sct');
     await page.locator('[data-testid="code-code-0"]').fill('720433000');
     await page.locator('[data-testid="code-display-0"]').fill('PHQ-9');
-    await page.locator('#codesModalApply').click();
+    await page.locator('[data-testid="codesModalApply"]').click();
     // Button should now be active
     await expect(page.locator('[data-testid="action-codes"]').nth(1)).toHaveClass(/action-edit--active/);
   });
@@ -141,7 +141,7 @@ test.describe('Codes modal editing', () => {
     await loadFixture(page);
     await page.locator('[data-testid="action-codes"]').first().click();
     await page.locator('[data-testid="code-remove-0"]').click();
-    await page.locator('#codesModalApply').click();
+    await page.locator('[data-testid="codesModalApply"]').click();
     await expect(page.locator('[data-testid="action-codes"]').first()).not.toHaveClass(/action-edit--active/);
   });
 });

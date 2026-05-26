@@ -17,6 +17,7 @@ function _replaceInTree(treeArr, nodeId, newNode) {
 }
 
 class AnswerTypeModal extends Modal {
+  getName() { return 'answerTypeModal'; }
   constructor() {
     super();
     this._pending = null;

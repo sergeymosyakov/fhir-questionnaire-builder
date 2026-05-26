@@ -44,11 +44,11 @@ async function addItem(page) {
   return { groupId: '1', itemId: '1.1' };
 }
 
-const noteModal   = (page) => page.locator('#designNoteModal');
-const noteTitle   = (page) => page.locator('#designNoteModalTitle');
-const noteClose   = (page) => page.locator('#designNoteModalClose');
-const noteCancel  = (page) => page.locator('#designNoteModalCancel');
-const noteApply   = (page) => page.locator('#designNoteModalApply');
+const noteModal   = (page) => page.locator('[data-testid="designNoteModal"]');
+const noteTitle   = (page) => page.locator('[data-testid="designNoteModalTitle"]');
+const noteClose   = (page) => page.locator('[data-testid="designNoteModalClose"]');
+const noteCancel  = (page) => page.locator('[data-testid="designNoteModalCancel"]');
+const noteApply   = (page) => page.locator('[data-testid="designNoteModalApply"]');
 const noteInput   = (page) => page.getByTestId('design-note-input');
 
 // ── Open / close ──────────────────────────────────────────────────────────────
