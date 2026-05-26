@@ -1,4 +1,5 @@
-import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
+import { AnswerTypeSection } from '../base-section.js';
+import { ANSWER_TYPE_SECTIONS } from '../registry.js';
 import { createCustomSelect } from '../../../custom-select.js';
 
 class OrientationSection extends AnswerTypeSection {
@@ -40,9 +41,9 @@ class OrientationSection extends AnswerTypeSection {
     }
   }
 
-  initDraft(node) {
+  initPending(node) {
     return { draftOrientation: node._choiceOrientation || '' };
   }
 }
 
-SECTION_REGISTRY.push(new OrientationSection());
+ANSWER_TYPE_SECTIONS.push(new OrientationSection());

@@ -1,4 +1,5 @@
-import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
+import { AnswerTypeSection } from '../base-section.js';
+import { ANSWER_TYPE_SECTIONS } from '../registry.js';
 import { createCustomSelect } from '../../../custom-select.js';
 import { FHIR_R4_TYPES } from '../data.js';
 
@@ -36,9 +37,9 @@ class ReferenceSection extends AnswerTypeSection {
     node.referenceResource = (node.itemType === 'reference' && pending.draftRefRes) ? pending.draftRefRes : undefined;
   }
 
-  initDraft(node) {
+  initPending(node) {
     return { draftRefRes: node.referenceResource || '' };
   }
 }
 
-SECTION_REGISTRY.push(new ReferenceSection());
+ANSWER_TYPE_SECTIONS.push(new ReferenceSection());

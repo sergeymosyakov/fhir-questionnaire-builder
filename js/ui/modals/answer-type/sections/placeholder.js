@@ -1,4 +1,5 @@
-import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
+import { AnswerTypeSection } from '../base-section.js';
+import { ANSWER_TYPE_SECTIONS } from '../registry.js';
 import { ENTRY_FORMAT_TYPES } from '../data.js';
 
 class PlaceholderSection extends AnswerTypeSection {
@@ -36,9 +37,9 @@ class PlaceholderSection extends AnswerTypeSection {
     }
   }
 
-  initDraft(node) {
+  initPending(node) {
     return { draftEntryFormat: node._entryFormat || '' };
   }
 }
 
-SECTION_REGISTRY.push(new PlaceholderSection());
+ANSWER_TYPE_SECTIONS.push(new PlaceholderSection());

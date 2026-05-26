@@ -1,4 +1,5 @@
-import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
+import { AnswerTypeSection } from '../base-section.js';
+import { ANSWER_TYPE_SECTIONS } from '../registry.js';
 import { createCustomSelect } from '../../../custom-select.js';
 import { BUILDER_UNITS } from '../data.js';
 
@@ -36,9 +37,9 @@ class UnitSection extends AnswerTypeSection {
     node.quantityUnit = (node.itemType === 'quantity' && pending.draftUnit) ? pending.draftUnit : undefined;
   }
 
-  initDraft(node) {
+  initPending(node) {
     return { draftUnit: node.quantityUnit || '' };
   }
 }
 
-SECTION_REGISTRY.push(new UnitSection());
+ANSWER_TYPE_SECTIONS.push(new UnitSection());

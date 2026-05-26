@@ -1,4 +1,5 @@
-import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
+import { AnswerTypeSection } from '../base-section.js';
+import { ANSWER_TYPE_SECTIONS } from '../registry.js';
 import { questContained } from '../../../../state.js';
 import { resolveContainedValueSet } from '../../../../fhir/import.js';
 import { createCustomSelect } from '../../../custom-select.js';
@@ -244,7 +245,7 @@ class ChoiceSection extends AnswerTypeSection {
     }
   }
 
-  initDraft(node) {
+  initPending(node) {
     return {
       draftOptions:   _optsWithOrdinals(node),
       draftAVS:       node._answerValueSet || '',
@@ -256,4 +257,4 @@ class ChoiceSection extends AnswerTypeSection {
   }
 }
 
-SECTION_REGISTRY.push(new ChoiceSection());
+ANSWER_TYPE_SECTIONS.push(new ChoiceSection());

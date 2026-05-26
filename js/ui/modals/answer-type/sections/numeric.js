@@ -1,4 +1,5 @@
-import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
+import { AnswerTypeSection } from '../base-section.js';
+import { ANSWER_TYPE_SECTIONS } from '../registry.js';
 import { NUMERIC_TYPES } from '../data.js';
 
 function _numField(lbl, tid, initVal, onInput) {
@@ -99,7 +100,7 @@ class NumericSection extends AnswerTypeSection {
     }
   }
 
-  initDraft(node) {
+  initPending(node) {
     return {
       draftMinValue:   node._minValue   !== undefined ? String(node._minValue)   : '',
       draftMaxValue:   node._maxValue   !== undefined ? String(node._maxValue)   : '',
@@ -108,4 +109,4 @@ class NumericSection extends AnswerTypeSection {
   }
 }
 
-SECTION_REGISTRY.push(new NumericSection());
+ANSWER_TYPE_SECTIONS.push(new NumericSection());

@@ -1,4 +1,5 @@
-import { SECTION_REGISTRY, AnswerTypeSection } from '../base-section.js';
+import { AnswerTypeSection } from '../base-section.js';
+import { ANSWER_TYPE_SECTIONS } from '../registry.js';
 
 class AttachSection extends AnswerTypeSection {
   isVisible(type) { return type === 'attachment'; }
@@ -61,7 +62,7 @@ class AttachSection extends AnswerTypeSection {
     }
   }
 
-  initDraft(node) {
+  initPending(node) {
     return {
       draftMaxFileSizeMB: node._maxFileSizeMB !== undefined ? String(node._maxFileSizeMB) : '',
       draftMimeTypes:     node._mimeTypes ? node._mimeTypes.join(', ') : '',
@@ -69,4 +70,4 @@ class AttachSection extends AnswerTypeSection {
   }
 }
 
-SECTION_REGISTRY.push(new AttachSection());
+ANSWER_TYPE_SECTIONS.push(new AttachSection());

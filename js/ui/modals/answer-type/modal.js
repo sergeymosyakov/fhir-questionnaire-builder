@@ -18,7 +18,7 @@ import { createItemNode } from '../../../nodes/index.js';
 import { createCustomSelect } from '../../custom-select.js';
 import { initModal, setModalTitle, openModal, closeModal } from '../modal-base.js';
 import { ITEM_TYPES } from './data.js';
-import { SECTION_REGISTRY } from './sections.js';
+import { ANSWER_TYPE_SECTIONS } from './index.js';
 
 let _el      = null;
 let _pending = null;
@@ -42,7 +42,7 @@ export function init(elements) {
 export function open(node, typeLink, setActive) {
   _pending = Object.assign(
     { node, typeLink, setActive, draftType: node.itemType },
-    ...SECTION_REGISTRY.map(s => s.initDraft(node)),
+    ...ANSWER_TYPE_SECTIONS.map(s => s.initPending(node)),
   );
 
   setModalTitle(_el.title, 'Answer Type', node.title || node.id || 'Item');
@@ -81,7 +81,7 @@ function _apply() {
     delete node._maxOccurs;
   }
 
-  SECTION_REGISTRY.forEach(s => s.commit(_pending, node));
+  ANSWER_TYPE_SECTIONS.forEach(s => s.commit(_pending, node));
 
   // Re-render builder (creates correct row for new type; handles repeatLink visibility etc.)
   renderTree();
@@ -116,7 +116,7 @@ function _renderBody(container) {
   typeLbl.dataset.tipSpec  = 'R4';
 
   // Build all sections up-front; type selector onChange updates their visibility
-  const built = SECTION_REGISTRY.map(s => ({ s, el: s.build(_pending) }));
+  const built = ANSWER_TYPE_SECTIONS.map(s => ({ s, el: s.build(_pending) }));
 
   const typeSel = createCustomSelect({
     items:     ITEM_TYPES.map(t => ({ value: t, label: t })),
