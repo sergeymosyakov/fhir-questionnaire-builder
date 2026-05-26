@@ -1,9 +1,5 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 import * as dnd from '../builder/dnd.js';
-import { tree } from '../state.js';
-import { _formTick } from '../render-bus.js';
-import { findAndRemove } from '../utils.js';
-import { confirmDelete, formatSeg, triggerCalcRecalc } from '../builder/_shared.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { NODE_REGISTRY } from './registry.js';
 import { TextNode } from './text-node.js';
@@ -15,7 +11,6 @@ import { TextNode } from './text-node.js';
 //   _codes, _supportLinks, _hidden, _designNote, _unknownExtensions
 import { BaseNode } from './base-node.js';
 import { isDescendant } from '../utils.js';
-import { NODE_REGISTRY } from './registry.js';
 
 export class GroupNode extends BaseNode {
   /** Builder-only collapse state — keyed by node.id, not persisted to FHIR. */
@@ -285,7 +280,7 @@ export class GroupNode extends BaseNode {
       label:       'Calculated Expression',
       fhirLabel:   'FHIRPath calculatedExpression:',
       placeholder: "%resource.item.where(linkId='...')",
-      onApply:     triggerCalcRecalc,
+      onApply:     BaseNode._svc.triggerCalcRecalc,
     });
 
     const styleLink = node._makeActionLink('Appearance', 'style', {
@@ -333,7 +328,7 @@ export class GroupNode extends BaseNode {
         addMenu.style.display = 'none';
         const newNode = factory();
         node.children.push(newNode);
-        _formTick.value++;
+        BaseNode._svc.tickForm();
         GroupNode._collapseMap.set(node.id, false);
         node._dispatchRerender();
         requestAnimationFrame(() => {
@@ -350,7 +345,7 @@ export class GroupNode extends BaseNode {
 
     addChild('Group', () => {
       const n = new GroupNode({ title: 'New Group' });
-      n.id = node.id + '.' + formatSeg(node.children.length + 1);
+      n.id = node.id + '.' + BaseNode._svc.formatSeg(node.children.length + 1);
       return n;
     });
     addChild('Item', () => {
@@ -364,7 +359,7 @@ export class GroupNode extends BaseNode {
             constraint: template.constraint ? template.constraint.map(c => ({ ...c })) : [],
           })
         : new TextNode({ title: 'New Item', itemType: 'text' });
-      n.id = node.id + '.' + formatSeg(node.children.length + 1);
+      n.id = node.id + '.' + BaseNode._svc.formatSeg(node.children.length + 1);
       return n;
     });
 
@@ -406,8 +401,8 @@ export class GroupNode extends BaseNode {
     btnDel.dataset.testid = 'node-delete-btn';
     btnDel.dataset.tipTitle = 'Delete group';
     btnDel.onclick = async () => {
-      const ok = await confirmDelete(node.title || node.id);
-      if (ok) { findAndRemove(node.id, tree); node._dispatchRerender(); }
+      const ok = await BaseNode._svc.confirmDelete(node.title || node.id);
+      if (ok) { BaseNode._svc.findAndRemove(node.id, BaseNode._svc.tree); node._dispatchRerender(); }
     };
 
     div.appendChild(header);

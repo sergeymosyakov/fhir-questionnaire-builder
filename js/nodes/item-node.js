@@ -9,9 +9,6 @@ import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 //   _initialValue, _initialValues, _initialSelected
 import { BaseNode, applyRenderStyle } from './base-node.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
-import { tree } from '../state.js';
-import { findAndRemove } from '../utils.js';
-import { confirmDelete, triggerCalcRecalc } from '../builder/_shared.js';
 
 export class ItemNode extends BaseNode {
   constructor(data = {}) {
@@ -288,7 +285,7 @@ export class ItemNode extends BaseNode {
       fhir:  'sdc-questionnaire-calculatedExpression / initialExpression',
       spec:  'SDC \u00B7 optional',
     }, actions);
-    exprLink.onclick = () => MODAL_REGISTRY.get('expression').openDual(node, exprLink, setActive, triggerCalcRecalc);
+    exprLink.onclick = () => MODAL_REGISTRY.get('expression').openDual(node, exprLink, setActive, BaseNode._svc.triggerCalcRecalc);
 
     const repeatLink = node._makeActionLink('Repeatable', 'repeatable', {
       title: 'Repeatable',
@@ -367,8 +364,8 @@ export class ItemNode extends BaseNode {
     btnDel.dataset.testid = 'node-delete-btn';
     btnDel.dataset.tipTitle = 'Delete item';
     btnDel.onclick = async () => {
-      const ok = await confirmDelete(node.title || node.id);
-      if (ok) { findAndRemove(node.id, tree); node._dispatchRerender(); }
+      const ok = await BaseNode._svc.confirmDelete(node.title || node.id);
+      if (ok) { BaseNode._svc.findAndRemove(node.id, BaseNode._svc.tree); node._dispatchRerender(); }
     };
 
     div.appendChild(header);

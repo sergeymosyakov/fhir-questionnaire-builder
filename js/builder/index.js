@@ -1,13 +1,26 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
 import { tree, rawFhir, values } from '../state.js';
 import { _formTick, _bulkUpdate } from '../render-bus.js';
-import { init as sharedInit, formatSeg } from './_shared.js';
+import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { navigateToPreview } from '../render-preview.js';
+import { findAndRemove } from '../utils.js';
 import { GroupNode } from '../nodes/group-node.js';
+import { BaseNode } from '../nodes/base-node.js';
 
 // Inject reactive state into _shared (triggerCalcRecalc + renderTree need them)
 sharedInit({ tree, formTick: _formTick, rawFhir, values, renderTree });
+
+// ── Inject builder services into node layer ───────────────────────────────────
+// Nodes must not import state or services directly — they receive them here.
+BaseNode.configure({
+  tree,
+  findAndRemove,
+  confirmDelete,
+  triggerCalcRecalc,
+  tickForm:   () => _formTick.value++,
+  formatSeg,
+});
 
 // ── Event listeners ───────────────────────────────────────────────────────────
 // Nodes dispatch custom events instead of importing index.js/render-preview.js

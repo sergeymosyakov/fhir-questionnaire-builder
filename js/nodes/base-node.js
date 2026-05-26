@@ -4,9 +4,6 @@
 import { nextId } from '../id.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
 import * as dnd from '../builder/dnd.js';
-import { tree } from '../state.js';
-import { findAndRemove } from '../utils.js';
-import { confirmDelete } from '../builder/_shared.js';
 
 // Shared wrapper factory used by every buildControl() implementation.
 export function createWrap() {
@@ -36,6 +33,22 @@ export class BaseNode {
     this.enableBehavior       = data.enableBehavior       ?? 'all';
     this.enableWhenExpression = data.enableWhenExpression ?? '';
     this.mandatory            = data.mandatory            ?? null;
+  }
+
+  // ── Builder service injection ─────────────────────────────────────────────
+  // Nodes must not import application state or services directly.
+  // Call BaseNode.configure() once at app startup (builder/index.js).
+  static _svc = {
+    tree:              null,  // reactive tree array (state.js)
+    findAndRemove:     null,  // (id, nodes) => void
+    confirmDelete:     null,  // (label) => Promise<boolean>
+    triggerCalcRecalc: null,  // () => void
+    tickForm:          null,  // () => void — increments formTick
+    formatSeg:         null,  // (n) => string
+  };
+
+  static configure(services) {
+    Object.assign(BaseNode._svc, services);
   }
 
   // ── Static dispatcher ────────────────────────────────────────────────────
