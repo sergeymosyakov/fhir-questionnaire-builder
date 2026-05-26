@@ -43,7 +43,7 @@ import { buildFHIRObject } from './fhir/export.js';
 
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
-import './ui/explain-modal.js';
+import './ui/modals/explain-modal.js';
 import * as progress from './ui/progress.js';
 
 const fhirpath  = window.fhirpath;

@@ -15,7 +15,7 @@
 // open()          — populate body + show
 
 
-import { questMeta } from '../state.js';
+import { questMeta } from '../../state.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 import { renderMetaSections } from './metadata-sections/index.js';
 
