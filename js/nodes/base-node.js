@@ -244,6 +244,8 @@ export class BaseNode {
     const validLinks = this._supportLinks.filter(u => u && u.trim());
     const isPatient = rc.previewMode === 'patient';
     for (const url of validLinks) {
+      // Block javascript: and other dangerous URI schemes — only allow http(s) and mailto
+      if (!/^https?:|^mailto:/i.test(url.trim())) continue;
       if (isPatient) {
         const btn = document.createElement('a');
         btn.className = 'support-link-patient-btn';

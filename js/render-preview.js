@@ -102,7 +102,7 @@ export function navigateToPreview(id) {
 }
 
 function _scrollToBuilder(nodeId) {
-  const target = document.querySelector('[data-node-id="' + nodeId + '"]');
+  const target = document.querySelector('[data-node-id="' + CSS.escape(nodeId) + '"]');
   if (!target) return;
   const panel = _previewElements.leftPanelBody;
   if (panel) {
@@ -116,7 +116,7 @@ function _scrollToBuilder(nodeId) {
 }
 
 function _scrollToPreview(id) {
-  const target = document.querySelector('[data-preview-id="' + id + '"]');
+  const target = document.querySelector('[data-preview-id="' + CSS.escape(id) + '"]');
   if (!target) return;
   target.scrollIntoView({ behavior: 'smooth', block: 'center' });
   target.classList.add('preview-flash');
@@ -417,7 +417,7 @@ async function _asyncRender(version) {
 
   // Restore focus after DOM rebuild
   if (_focusInfo) {
-    const row = lform.querySelector('[data-preview-id="' + _focusInfo.previewId + '"]');
+    const row = lform.querySelector('[data-preview-id="' + CSS.escape(_focusInfo.previewId) + '"]');
     if (row) {
       const inputs = Array.from(row.querySelectorAll('input, textarea, select'));
       const el = inputs[_focusInfo.inputIndex];

@@ -63,7 +63,7 @@ function _onDragStart(e, node) {
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', node.id);
   setTimeout(() => {
-    const el = document.querySelector('[data-node-id="' + node.id + '"]');
+    const el = document.querySelector('[data-node-id="' + CSS.escape(node.id) + '"]');
     if (el) el.classList.add('node-dragging');
     document.body.classList.add('dragging');
   }, 0);

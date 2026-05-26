@@ -1,5 +1,6 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
 import { tree, resetSeq, rawFhir, questVariables, questContained, questMeta, setValue, clearAllValues } from '../state.js';
+import { showError } from '../ui/toast.js';
 import { _bulkUpdate } from '../render-bus.js';
 import { renderTree } from '../render-builder.js';
 import { normaliseSTU3 } from './stu3-shim.js';
@@ -42,10 +43,10 @@ function applyInitialValues(nodes) {
 export function importFHIR(fhirJson, renderFn) {
   let q = fhirJson;
   if (typeof q === 'string') {
-    try { q = JSON.parse(q); } catch (e) { alert('Invalid JSON:\n' + e.message); return; }
+    try { q = JSON.parse(q); } catch (e) { showError('Invalid JSON:\n' + e.message); return; }
   }
   if (!q || q.resourceType !== 'Questionnaire') {
-    alert('Not a FHIR Questionnaire resource (resourceType must be "Questionnaire").');
+    showError('Not a FHIR Questionnaire resource (resourceType must be "Questionnaire").');
     return;
   }
   q = normaliseSTU3(q); // no-op for R4; converts STU3 fields to R4 equivalents

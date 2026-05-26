@@ -27,7 +27,7 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
   trigger.className = 'vis-q-sel-trigger';
   const found = allItems.find(it => it.id === selectedId);
   trigger.textContent = found ? found.label : '\u2014 question \u2014';
-  trigger.title = found ? found.id : '';
+  trigger.dataset.tipTitle = found ? found.id : '';
 
   let dropEl = null;
 
@@ -75,7 +75,7 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
       opt.dataset.id = it.id;
       opt.addEventListener('mousedown', () => {
         trigger.textContent = it.label;
-        trigger.title = it.id;
+        trigger.dataset.tipTitle = it.id;
         onSelect(it.id, it);
         close();
       });
@@ -391,92 +391,4 @@ export function buildVisPanel(node, p, visLink, setActive, ctx) {
 
 // ── Expression panel ──────────────────────────────────────────────────────────
 // ── Style / Appearance panel ──────────────────────────────────────────────────
-export function buildStylePanel(node, p, styleLink, setActive, ctx) {
-  const styleRow = (label, fn) => {
-    const row = document.createElement('div');
-    row.className = 'panel-style-row';
-    const lbl = document.createElement('label');
-    lbl.className = 'panel-style-lbl';
-    lbl.textContent = label;
-    row.appendChild(lbl);
-    row.appendChild(fn());
-    p.appendChild(row);
-  };
 
-  const parseStyle = () => {
-    const s = node._renderStyle || '';
-    return {
-      bold:   /font-weight\s*:\s*bold/i.test(s),
-      italic: /font-style\s*:\s*italic/i.test(s),
-      color:  (s.match(/(?:^|;)\s*color\s*:\s*([^;]+)/i) || [])[1]?.trim() || '',
-    };
-  };
-
-  const buildStyle = (bold, italic, color) => [
-    'font-weight: ' + (bold   ? 'bold'   : 'normal'),
-    'font-style: '  + (italic ? 'italic' : 'normal'),
-    ...(color ? ['color: ' + color] : []),
-  ].join('; ');
-
-  const cur = parseStyle();
-  const boldCb   = Object.assign(document.createElement('input'), { type: 'checkbox', checked: cur.bold });
-  const italicCb = Object.assign(document.createElement('input'), { type: 'checkbox', checked: cur.italic });
-  const colorInp = Object.assign(document.createElement('input'), {
-    type: 'color',
-    value: cur.color?.startsWith('#') ? cur.color : '#000000',
-    className: 'panel-color-inp',
-  });
-  const colorClear = Object.assign(document.createElement('button'), {
-    type: 'button', textContent: '\u2715',
-    className: 'panel-color-clear',
-    title: 'Remove color',
-  });
-
-  const rawInp = document.createElement('input');
-  rawInp.type = 'text';
-  rawInp.value = node._renderStyle || '';
-  rawInp.placeholder = 'e.g. font-weight: bold; color: blue';
-  rawInp.className = 'panel-raw-inp';
-
-  const sync = () => {
-    const color = colorClear._cleared ? '' : (cur.color || colorInp.value);
-    const s = buildStyle(boldCb.checked, italicCb.checked, color);
-    node._renderStyle = s;
-    rawInp.value = s;
-    ctx.formTick.value++;
-  };
-  const syncAndMark = () => { sync(); setActive(styleLink, !!node._renderStyle); };
-
-  boldCb.onchange   = syncAndMark;
-  italicCb.onchange = syncAndMark;
-  colorInp.oninput  = () => { cur.color = colorInp.value; colorClear._cleared = false; syncAndMark(); };
-  colorClear.onclick = () => { colorClear._cleared = true; cur.color = ''; colorInp.value = '#000000'; sync(); };
-  rawInp.oninput = () => {
-    node._renderStyle = rawInp.value;
-    const p2 = parseStyle();
-    boldCb.checked   = p2.bold;
-    italicCb.checked = p2.italic;
-    if (p2.color?.startsWith('#')) colorInp.value = p2.color;
-    setActive(styleLink, !!rawInp.value);
-    ctx.formTick.value++;
-  };
-
-  styleRow('Bold',   () => boldCb);
-  styleRow('Italic', () => italicCb);
-
-  const colorRow = document.createElement('div');
-  colorRow.className = 'panel-style-row';
-  const colorLbl = document.createElement('label');
-  colorLbl.className = 'panel-style-lbl';
-  colorLbl.textContent = 'Color';
-  colorRow.appendChild(colorLbl);
-  colorRow.appendChild(colorInp);
-  colorRow.appendChild(colorClear);
-  p.appendChild(colorRow);
-
-  const rawLbl = document.createElement('div');
-  rawLbl.className = 'panel-raw-lbl panel-raw-lbl--sm';
-  rawLbl.textContent = 'raw CSS:';
-  p.appendChild(rawLbl);
-  p.appendChild(rawInp);
-}

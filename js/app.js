@@ -1,5 +1,6 @@
 ﻿// Entry point: wires toolbar buttons, patient context popup, and loads the built-in example.
 import { tree, values, rawFhir, effect, clearAllValues } from './state.js';
+import { showError, showWarn } from './ui/toast.js';
 import { _formTick } from './render-bus.js';
 import { importFHIR } from './fhir/import.js';
 import { buildFHIRObject, exportFHIR } from './fhir/export.js';
@@ -59,9 +60,9 @@ function _readFileAsJSON(e, onData) {
   const reader = new FileReader();
   reader.onload  = ev => {
     try { onData(JSON.parse(ev.target.result), file.name); }
-    catch (err) { alert('Parse error: ' + err.message); }
+    catch (err) { showError('Parse error: ' + err.message); }
   };
-  reader.onerror = () => { alert('Error reading file.'); };
+  reader.onerror = () => { showError('Error reading file.'); };
   reader.readAsText(file);
   e.target.value = '';
 }
@@ -472,6 +473,7 @@ function _doReset() {
   questMeta.approvalDate = ''; questMeta.lastReviewDate = '';
   questMeta.effectivePeriodStart = ''; questMeta.effectivePeriodEnd = '';
   questMeta.experimental = null; questMeta.language = ''; questMeta.derivedFrom = [];
+  questMeta.replaces = [];
   questMeta._rawIdentifier = [];
   questMeta._rawText = null;
   questMeta._rawContact = null; questMeta._rawUseContext = null; questMeta._rawJurisdiction = null;
@@ -510,7 +512,9 @@ function _askBeforeClear() {
     backdrop.appendChild(box);
     document.body.appendChild(backdrop);
 
-    const close = (result) => { backdrop.remove(); resolve(result); };
+    const esc = e => { if (e.key === 'Escape') close('cancel'); };
+    document.addEventListener('keydown', esc);
+    const close = (result) => { document.removeEventListener('keydown', esc); backdrop.remove(); resolve(result); };
     box.querySelector('#_ccExport').onclick  = () => close('export');
     box.querySelector('#_ccClear').onclick   = () => close('clear');
     box.querySelector('#_ccCancel').onclick  = () => close('cancel');
@@ -534,14 +538,14 @@ async function _importAndValidate(data, fileName) {
     _setFileName(fileName || '');
     if (issues.length > 0) validateModal.show('Import — Validation Report', issues, 'import', { onNavigate: _navigateToNode });
   } catch (err) {
-    alert('Import error: ' + err.message);
+    showError('Import error: ' + err.message);
   } finally {
     progress.hide();
   }
 }
 
 function _navigateToNode(nodeId) {
-  const target = document.querySelector(`[data-node-id="${nodeId}"]`);
+  const target = document.querySelector(`[data-node-id="${CSS.escape(nodeId)}"]`);
   if (!target) return;
   const panel = document.querySelector('.left-panel-body');
   if (panel) {
@@ -601,7 +605,7 @@ document.getElementById('loadLibraryItem').onclick = () => {
     fetch('sampledata/' + item.file)
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(data => { progress.update(0, 1); _importAndValidate(data, item.label); })
-      .catch(err => { progress.hide(); alert('Could not load sample: ' + err.message); });
+      .catch(err => { progress.hide(); showError('Could not load sample: ' + err.message); });
   }, 'questionnaire');
 };
 document.getElementById('fhirFileInput').onchange = e => {
@@ -633,13 +637,13 @@ document.getElementById('loadAnswersLibraryItem').onclick = () => {
     fetch('sampledata/' + item.file)
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(data => _applyQRAnswers(data))
-      .catch(err => alert('Could not load sample response: ' + err.message));
+      .catch(err => showError('Could not load sample response: ' + err.message));
   }, 'qr');
 };
 
 function _applyQRAnswers(qr) {
   const result = importQRAnswers(qr, values, tree);
-  if (!result.ok) { alert('Cannot load answers: ' + result.error); return; }
+  if (!result.ok) { showError('Cannot load answers: ' + result.error); return; }
   // Dispatch qr-loaded so qr-export-modal can pre-fill its fields
   document.dispatchEvent(new CustomEvent('qr-loaded', { detail: {
     status:  result.meta.status,

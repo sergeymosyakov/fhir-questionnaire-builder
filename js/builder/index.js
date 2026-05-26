@@ -129,7 +129,7 @@ export function addRootGroup() {
   _formTick.value++;
   renderTree();
   requestAnimationFrame(() => {
-    const el = document.querySelector('[data-node-id="' + node.id + '"]');
+    const el = document.querySelector('[data-node-id="' + CSS.escape(node.id) + '"]');
     if (el) {
       const panel = document.querySelector('.left-panel-body');
       if (panel) {

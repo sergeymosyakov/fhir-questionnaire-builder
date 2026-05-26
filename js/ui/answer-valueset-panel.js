@@ -56,7 +56,7 @@ function _renderChips(urlMap) {
     chip.type = 'button';
     chip.className = 'fhir-res-chip fhir-res-chip--avs';
     chip.textContent = label;
-    chip.title = url;
+    chip.dataset.tipTitle = url;
     chip.addEventListener('click', () =>
       document.dispatchEvent(new CustomEvent('show-json', { detail: { title: label, data: { answerValueSet: url, usedByItems: items } } }))
     );

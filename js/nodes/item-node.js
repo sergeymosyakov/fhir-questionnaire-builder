@@ -107,7 +107,6 @@ export class ItemNode extends BaseNode {
     cb.className = 'preview-constraint-badge' + (constraintOk ? '' : ' preview-constraint-badge--fail');
     const msgs = this.constraint.filter(c => c.severity === 'error').map(c => c.human || c.expression || c.key).filter(Boolean);
     cb.textContent = constraintOk ? '\u26A0\uFE0F constraint' : '\u2718 constraint';
-    cb.title = msgs.length ? msgs.join('\n') : 'questionnaire-constraint';
     cb.dataset.tipTitle = constraintOk ? 'Has constraint' : 'Constraint: FAIL';
     cb.dataset.tipBody  = msgs.length ? msgs.join('\n') : 'questionnaire-constraint on this item';
     cb.dataset.tipFhir  = 'Questionnaire.item.extension[questionnaire-constraint]';
@@ -291,8 +290,6 @@ export class ItemNode extends BaseNode {
 
     const actions = document.createElement('div');
     actions.className = 'node-actions';
-    const panels = {};
-    let openKey = null;
 
     const addToggle = (label, key, tipTitle, tipBody, tipFhir, tipSpec) => {
       const a = document.createElement('a');
@@ -302,11 +299,6 @@ export class ItemNode extends BaseNode {
       if (tipBody)  a.dataset.tipBody  = tipBody;
       if (tipFhir)  a.dataset.tipFhir  = tipFhir;
       if (tipSpec)  a.dataset.tipSpec  = tipSpec;
-      a.onclick = () => {
-        openKey = openKey === key ? null : key;
-        for (const k of Object.keys(panels)) panels[k].style.display = openKey === k ? 'block' : 'none';
-        ctx.refreshExprIcons();
-      };
       actions.appendChild(a);
       return a;
     };

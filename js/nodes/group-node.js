@@ -99,7 +99,7 @@ export class GroupNode extends BaseNode {
       const toggle = document.createElement('span');
       toggle.className = 'preview-collapse-toggle';
       toggle.textContent = collapsed ? '\u25B6' : '\u25BC';
-      toggle.title = collapsed ? 'Expand section' : 'Collapse section';
+      toggle.dataset.tipTitle = collapsed ? 'Expand section' : 'Collapse section';
       const nodeId = this.id;
       toggle.addEventListener('click', e => {
         e.stopPropagation();
@@ -134,7 +134,7 @@ export class GroupNode extends BaseNode {
   // ── Children: register groupIconMap, render expanded children with separators ─
   _renderChildren(res, target, rc) {
     if (this.children.length === 0) return;
-    const { iconEl } = res;
+    const iconEl = res._iconEl;
 
     // Register this group in groupIconMap for icon refresh on value change.
     const descendants = rc.visible.filter(r =>
@@ -205,13 +205,13 @@ export class GroupNode extends BaseNode {
     toggleBtn.className = 'node-collapse-btn';
     toggleBtn.dataset.testid = 'group-collapse-btn';
     toggleBtn.textContent = collapsed ? '\u25B6' : '\u25BC';
-    toggleBtn.title = collapsed ? 'Expand' : 'Collapse';
+    toggleBtn.dataset.tipTitle = collapsed ? 'Expand' : 'Collapse';
     toggleBtn.onclick = e => {
       e.stopPropagation();
       const isNowCollapsed = !(ctx.collapsed.get(node.id) || false);
       ctx.collapsed.set(node.id, isNowCollapsed);
       toggleBtn.textContent = isNowCollapsed ? '\u25B6' : '\u25BC';
-      toggleBtn.title = isNowCollapsed ? 'Expand' : 'Collapse';
+      toggleBtn.dataset.tipTitle = isNowCollapsed ? 'Expand' : 'Collapse';
       const body = div.querySelector('.node-body');
       if (body) body.style.display = isNowCollapsed ? 'none' : '';
     };
@@ -274,8 +274,6 @@ export class GroupNode extends BaseNode {
 
     const actions = document.createElement('div');
     actions.className = 'node-actions';
-    const panels = {};
-    let openKey = null;
 
     const addToggle = (label, key, tipTitle, tipBody, tipFhir, tipSpec) => {
       const a = document.createElement('a');
@@ -286,10 +284,6 @@ export class GroupNode extends BaseNode {
       if (tipBody)  a.dataset.tipBody  = tipBody;
       if (tipFhir)  a.dataset.tipFhir  = tipFhir;
       if (tipSpec)  a.dataset.tipSpec  = tipSpec;
-      a.onclick = () => {
-        openKey = openKey === key ? null : key;
-        for (const k of Object.keys(panels)) panels[k].style.display = openKey === k ? 'block' : 'none';
-      };
       actions.appendChild(a);
       return a;
     };
@@ -378,7 +372,7 @@ export class GroupNode extends BaseNode {
         ctx.collapsed.set(node.id, false);
         renderTree();
         requestAnimationFrame(() => {
-          const el = document.querySelector('[data-node-id="' + newNode.id + '"]');
+          const el = document.querySelector('[data-node-id="' + CSS.escape(newNode.id) + '"]');
           if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             el.classList.add('node-flash');

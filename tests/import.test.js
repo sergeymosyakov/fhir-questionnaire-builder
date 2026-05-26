@@ -37,6 +37,9 @@ const { fhirTypeToItemType, fhirOptsToStr, humanEnableWhen, applyVisibility, imp
 
 vi.stubGlobal('alert', vi.fn());
 
+const _showErrorMock = vi.fn();
+vi.mock('../js/ui/toast.js', () => ({ showError: (...a) => _showErrorMock(...a), showWarn: vi.fn() }));
+
 // ── fhirTypeToItemType ────────────────────────────────────────────────────────────
 describe('fhirTypeToItemType', () => {
   const cases = [
@@ -317,7 +320,7 @@ describe('importFHIR', () => {
       name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
       effectivePeriodStart: '', effectivePeriodEnd: '',
       _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null });
-    vi.mocked(alert).mockClear();
+    vi.mocked(_showErrorMock).mockClear();
   });
 
   const minQ = (items = [], ext = []) => ({
@@ -327,15 +330,15 @@ describe('importFHIR', () => {
     item: items,
   });
 
-  it('rejects non-Questionnaire JSON and calls alert', () => {
+  it('rejects non-Questionnaire JSON and calls showError', () => {
     importFHIR({ resourceType: 'Patient' });
-    expect(alert).toHaveBeenCalled();
+    expect(_showErrorMock).toHaveBeenCalled();
     expect(_tree).toHaveLength(0);
   });
 
-  it('rejects invalid JSON string and calls alert', () => {
+  it('rejects invalid JSON string and calls showError', () => {
     importFHIR('{ not valid json }');
-    expect(alert).toHaveBeenCalled();
+    expect(_showErrorMock).toHaveBeenCalled();
     expect(_tree).toHaveLength(0);
   });
 
