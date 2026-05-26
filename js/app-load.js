@@ -94,6 +94,38 @@ function _readFileAsJSON(e, onData) {
   e.target.value = '';
 }
 
+// ── Confirm before load ───────────────────────────────────────────────────────
+/** Returns promise resolving to 'proceed' | 'cancel'.
+ *  Only shows the dialog when the tree has items (undo history would be lost). */
+function _askBeforeLoad() {
+  if (tree.length === 0) return Promise.resolve('proceed');
+  return new Promise(resolve => {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'clear-confirm-backdrop';
+
+    const box = document.createElement('div');
+    box.className = 'clear-confirm-box';
+    box.innerHTML =
+      '<div class="clear-confirm-title">Load new questionnaire?</div>' +
+      '<div class="clear-confirm-msg">This will replace the current questionnaire.' +
+        ' The undo history will also be lost and cannot be recovered.</div>' +
+      '<div class="clear-confirm-btns">' +
+        '<button class="btn-fhir" id="_lcProceed" data-testid="load-confirm-proceed-btn">Load anyway</button>' +
+        '<button class="btn-fhir" id="_lcCancel"  data-testid="load-confirm-cancel-btn">Cancel</button>' +
+      '</div>';
+
+    backdrop.appendChild(box);
+    document.body.appendChild(backdrop);
+
+    const esc = e => { if (e.key === 'Escape') close('cancel'); };
+    document.addEventListener('keydown', esc);
+    const close = result => { document.removeEventListener('keydown', esc); backdrop.remove(); resolve(result); };
+    box.querySelector('#_lcProceed').onclick = () => close('proceed');
+    box.querySelector('#_lcCancel').onclick  = () => close('cancel');
+    backdrop.addEventListener('click', e => { if (e.target === backdrop) close('cancel'); });
+  });
+}
+
 // ── Load dropdown ─────────────────────────────────────────────────────────────
 const _loadMenu       = document.getElementById('loadMenu');
 const _loadRecentItem = document.getElementById('loadRecentItem');
@@ -122,8 +154,9 @@ document.getElementById('loadFhirBtn').onclick = e => {
   _loadMenu.style.display = _loadMenu.style.display === 'none' ? 'block' : 'none';
 };
 
-_loadRecentItem.onclick = () => {
+_loadRecentItem.onclick = async () => {
   _loadMenu.style.display = 'none';
+  if (await _askBeforeLoad() !== 'proceed') return;
   const key = _loadRecentItem.dataset.draftKey;
   if (!key) return;
   const data = autosave.getDraftData(key);
@@ -133,13 +166,15 @@ _loadRecentItem.onclick = () => {
   importAndValidate(data, label);
 };
 
-document.getElementById('loadFromFileItem').onclick = () => {
+document.getElementById('loadFromFileItem').onclick = async () => {
   _loadMenu.style.display = 'none';
+  if (await _askBeforeLoad() !== 'proceed') return;
   document.getElementById('fhirFileInput').click();
 };
 
-document.getElementById('loadLibraryItem').onclick = () => {
+document.getElementById('loadLibraryItem').onclick = async () => {
   _loadMenu.style.display = 'none';
+  if (await _askBeforeLoad() !== 'proceed') return;
   libraryModal.open('fhir-r4', item => {
     progress.show('Loading ' + item.label + '\u2026');
     fetch('sampledata/' + item.file)
@@ -149,9 +184,13 @@ document.getElementById('loadLibraryItem').onclick = () => {
   }, 'questionnaire');
 };
 
-document.getElementById('fhirFileInput').onchange = e => {
+document.getElementById('fhirFileInput').onchange = async e => {
   const fileName = e.target.files[0]?.name;
   if (!fileName) return;
+  if (await _askBeforeLoad() !== 'proceed') {
+    e.target.value = ''; // reset so the same file can be chosen again
+    return;
+  }
   progress.show('Loading ' + fileName + '\u2026');
   _readFileAsJSON(e, (data, name) => { progress.update(0, 1); importAndValidate(data, name); });
 };

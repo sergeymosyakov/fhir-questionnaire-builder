@@ -14,20 +14,23 @@ export class Panel {
   /**
    * @param {object} cfg
    * @param {string} cfg.mod       — CSS modifier suffix, e.g. 'contained' | 'avs'
+   * @param {string} cfg.idPrefix  — base string for element IDs, e.g. 'containedCard' | 'answerValueSetCard'
    * @param {string} cfg.label     — visible card title text
    * @param {string} cfg.tipTitle  — tooltip title on the title span
    * @param {string} cfg.tipBody   — tooltip body on the title span
    * @param {string} cfg.tipFhir   — data-tip-fhir attribute value
    * @param {string} cfg.tipSpec   — data-tip-spec attribute value
    */
-  constructor({ mod, label, tipTitle, tipBody, tipFhir, tipSpec }) {
+  constructor({ mod, idPrefix, label, tipTitle, tipBody, tipFhir, tipSpec }) {
     this._card = _mk('div', 'fhir-res-card');
     this._card.style.display = 'none';
+    if (idPrefix) this._card.id = idPrefix;
 
     const header = _mk('div', 'fhir-res-card-header');
 
     this._toggle = _mk('button', 'fhir-res-card-toggle');
     this._toggle.type = 'button';
+    if (idPrefix) this._toggle.id = idPrefix + 'Toggle';
     this._toggle.setAttribute('aria-expanded', 'true');
     this._toggle.dataset.tipTitle = 'Collapse / expand';
     this._toggle.dataset.tipBody  = `Toggle the ${label} card open or closed.`;
@@ -41,10 +44,12 @@ export class Panel {
     titleEl.textContent = label;
 
     this._count = _mk('span', `fhir-res-card-count fhir-res-card-count--${mod}`);
+    if (idPrefix) this._count.id = idPrefix + 'Count';
 
     header.append(this._toggle, titleEl, this._count);
 
     this._chipList = _mk('div', 'fhir-res-card-chips');
+    if (idPrefix) this._chipList.id = idPrefix + 'Chips';
 
     this._card.append(header, this._chipList);
 

@@ -59,6 +59,9 @@ export function init({ buildFn, importFn, renderFn, formTick, effect, onChange }
   _renderFn = renderFn;
   _onChange = onChange ?? null;
 
+  // Take an initial snapshot so the first real change has something to undo to
+  _ric(() => { _push(JSON.stringify(_buildFn())); });
+
   // Reset stack when a new questionnaire is loaded (not during undo/redo)
   document.addEventListener('questionnaire-loaded', () => {
     if (_restoring) return;

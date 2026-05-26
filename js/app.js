@@ -385,7 +385,6 @@ const _syncAutosaveState = (enabled, lastSaveDate) => {
     _autosaveToggleBtn.textContent = 'autosave off';
   }
 };
-_syncAutosaveState(autosave.isEnabled(), null);
 _autosaveToggleBtn.addEventListener('click', () => {
   const next = !autosave.isEnabled();
   autosave.setEnabled(next);
@@ -394,6 +393,8 @@ _autosaveToggleBtn.addEventListener('click', () => {
 autosave.init({ buildFn: buildFHIRObject, questMeta, onSaved: (date) => {
   _syncAutosaveState(autosave.isEnabled(), date);
 } });
+// Sync button after init() has read the persisted enabled state from storage
+_syncAutosaveState(autosave.isEnabled(), null);
 
 // ── Undo / Redo ───────────────────────────────────────────────────────────────
 const _undoBtn = document.getElementById('undoBtn');

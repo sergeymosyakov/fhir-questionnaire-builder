@@ -7,6 +7,7 @@ class AnswerValueSetPanel extends Panel {
   constructor() {
     super({
       mod:      'avs',
+      idPrefix: 'answerValueSetCard',
       label:    'Answer ValueSets',
       tipTitle: 'Answer Value Sets',
       tipBody:  'Items that reference an external ValueSet via answerValueSet. The URL is preserved on import and exported unchanged. Click a chip to see which items use it.',

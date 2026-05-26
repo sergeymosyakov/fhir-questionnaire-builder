@@ -12,17 +12,24 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 - [ ] **More sample data** — 2–3 additional questionnaires covering different complexity levels, with documented expected PASS/FAIL outcomes per patient profile
 - [ ] **`sdc-questionnaire-answerExpression`** — dynamic answer options derived from FHIRPath over current form values (no server required); SDC extension
 - [ ] **tx.fhir.org ValueSet expansion** — call HL7's public terminology server directly from the browser (`$expand` operation); user pastes an external ValueSet URL and gets live answer options without any backend; biggest UX gap vs. commercial tools
-- [ ] **Undo / redo** — Ctrl+Z / Ctrl+Y over the node tree; store snapshots in a fixed-size history stack
+- [x] **Undo / redo** — Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z; debounced 400ms snapshots via `js/ui/history.js`; buttons in left-panel-header; max 50 entries; resets on load/clear
 - [ ] **Copy / paste nodes** — duplicate a question or an entire group (with children) anywhere in the tree
 
 ## Later
 
-- [x] **FHIR STU3 import compatibility shim** — `js/fhir/stu3-shim.js` normalises STU3 fields to R4 on load: `option[]`→`answerOption[]`, `options`→`answerValueSet`, `enableWhen.hasAnswer`→`operator:exists`, `initial<Type>`→`initial[{value<Type>}]`; export always produces R4
+- [ ] **`sdc-questionnaire-answerExpression`** — dynamic answer options derived from FHIRPath over current form values (no server required); SDC extension
+- [ ] **tx.fhir.org ValueSet expansion** — call HL7's public terminology server directly from the browser (`$expand` operation); user pastes an external ValueSet URL and gets live answer options without any backend; biggest UX gap vs. commercial tools
+- [ ] **More sample data** — 2–3 additional questionnaires covering different complexity levels, with documented expected PASS/FAIL outcomes per patient profile
 - [ ] **External validator integration** — link to HL7 / Simplifier validator or call a local FHIR validation API; surface results as item-level badges
 
 ---
 
-## Technical Debt
+## Completed
 
+- [x] **Undo / redo** — Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z; debounced 400ms snapshots via `js/ui/history.js`; buttons in left-panel-header; max 50 entries; resets on load/clear
+- [x] **Load confirm dialog** — `_askBeforeLoad()` in `app-load.js`; shown when tree non-empty before any load operation; Cancel/Escape keeps current tree
+- [x] **Per-questionnaire autosave slots** — each questionnaire saves to its own key (`url` or auto-generated UUID identifier) instead of a single slot; prevents accidental overwrite
+- [x] **Storage abstraction layer** — `js/storage/storage.js` adapter interface; `LocalStorageAdapter` in `js/storage/local-storage.js`; all modules (`autosave`, `tooltip`, `app`, `app-load`) read/write through `StorageAdapter`; enables swapping to Supabase/IndexedDB with zero caller changes
+- [x] **FHIR STU3 import compatibility shim** — `js/fhir/stu3-shim.js` normalises STU3 fields to R4 on load: `option[]`→`answerOption[]`, `options`→`answerValueSet`, `enableWhen.hasAnswer`→`operator:exists`, `initial<Type>`→`initial[{value<Type>}]`; export always produces R4
 - [x] **Migrate all modals to the Section pattern** — `appearance-modal.js`, `states-modal.js`, `repeatable-modal.js`, `expression-modal.js`, `initial-modal.js` each reduced to ~38 lines (lifecycle wrapper only). Each section owns `initPending(node)`, `build(pending)`, `commit(pending, node)`. `makeCollapsible` + `applyTip` live in `section.js` as the single canonical source. `StatesSection` adds `isVisible(node)` for node-type-specific rows. `expression-sections/` handles both single and dual-field modes. `constraint-modal.js` intentionally left as a list renderer (Section pattern does not fit).
 - [x] **Reorganize all modal code into `js/ui/modals/`** — all `*-modal.js`, `modal-base.js`, `modal-registry.js`, `section.js` and all section subdirectories moved under `js/ui/modals/`. Non-modal UI utilities (`custom-select`, `date-picker`, `toast`, etc.) remain in `js/ui/` as they are used by `nodes/` and `builder/` too.

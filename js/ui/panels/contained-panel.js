@@ -7,6 +7,7 @@ class ContainedPanel extends Panel {
   constructor() {
     super({
       mod:      'contained',
+      idPrefix: 'containedCard',
       label:    'Contained',
       tipTitle: 'Contained Resources',
       tipBody:  'Questionnaire.contained[] — inline FHIR resources bundled inside the questionnaire (e.g. ValueSet definitions). Imported and exported unchanged. Click a chip to view the raw JSON.',

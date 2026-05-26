@@ -1,5 +1,7 @@
 // ── Autosave ──────────────────────────────────────────────────────────────────
 // Saves the current questionnaire to a per-questionnaire storage slot.
+
+import * as storage from '../storage/storage.js';
 // Key = Questionnaire.url  OR  identifier[fhir-qb.app/editor].value (auto-gen).
 //
 // API:
@@ -76,7 +78,7 @@ export function getMostRecentDraft() {
     try {
       const meta = JSON.parse(storage.getItem(lsKey));
       if (!best || meta.savedAt > best.meta.savedAt) best = { meta, key: meta.key };
-    } catch (_) {}
+    } catch (_) { /* malformed meta — skip */ }
   }
   return best;
 }
@@ -99,5 +101,5 @@ export function clearDraft() {
     if (!key) return;
     storage.removeItem(KEY_PREFIX  + key);
     storage.removeItem(META_PREFIX + key);
-  } catch (_) {}
+  } catch (_) { /* key may not exist */ }
 }
