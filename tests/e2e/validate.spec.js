@@ -276,16 +276,15 @@ test.describe('Validate modal — export mode', () => {
     await group.getByTestId('node-title-input').first().fill('');
     await group.getByTestId('node-title-input').first().blur();
 
-    // Handle the filename prompt that appears on export.
-    page.once('dialog', d => d.accept());
-
     await page.getByTestId('export-btn').click();
     await page.getByTestId('export-fhir-item').click();
     await expect(validateModal(page)).toBeVisible();
 
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.locator('[data-testid="validateModal"]').getByText('Export anyway').click(),
+      page.locator('[data-testid="validateModal"]').getByText('Export anyway').click().then(() =>
+        page.getByTestId('prompt-save').click()
+      ),
     ]);
 
     expect(download.suggestedFilename()).toMatch(/\.json$/);
