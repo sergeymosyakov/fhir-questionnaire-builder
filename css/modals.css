@@ -29,6 +29,7 @@
   flex-direction: column;
   overflow: hidden;
   max-height: 88vh;
+  min-width: 500px;
 }
 .modal-header {
   display: flex;
