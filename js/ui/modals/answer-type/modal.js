@@ -16,7 +16,7 @@ import { tree, values, deleteValue } from '../../../state.js';
 import { triggerCalcRecalc, renderTree } from '../../../builder/_shared.js';
 import { createItemNode } from '../../../nodes/index.js';
 import { createCustomSelect } from '../../custom-select.js';
-import { initModal, setModalTitle, openModal, closeModal } from '../modal-base.js';
+import { initModal, setModalTitle, openModal, closeModal, createModalElements } from '../modal-base.js';
 import { ITEM_TYPES } from './data.js';
 import { ANSWER_TYPE_SECTIONS } from './index.js';
 
@@ -31,14 +31,7 @@ function _replaceInTree(treeArr, nodeId, newNode) {
   return false;
 }
 
-const _el = {
-  modal:     document.getElementById('answerTypeModal'),
-  title:     document.getElementById('answerTypeModalTitle'),
-  body:      document.getElementById('answerTypeModalBody'),
-  closeBtn:  document.getElementById('answerTypeModalClose'),
-  cancelBtn: document.getElementById('answerTypeModalCancel'),
-  applyBtn:  document.getElementById('answerTypeModalApply'),
-};
+const _el = createModalElements('answerTypeModal');
 initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 // ── module API ─────────────────────────────────────────────────────────────

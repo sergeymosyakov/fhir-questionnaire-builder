@@ -1,19 +1,12 @@
 // ── Default Value (initial[]) edit modal ─────────────────────────────────────
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { triggerCalcRecalc } from '../../builder/_shared.js';
-import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { initModal, setModalTitle, openModal, closeModal, createModalElements } from './modal-base.js';
 import { INITIAL_SECTIONS, renderInitialSections } from './initial-sections/index.js';
 
 let _pending = null;
 
-const _el = {
-  modal:     document.getElementById('initialModal'),
-  title:     document.getElementById('initialModalTitle'),
-  body:      document.getElementById('initialModalBody'),
-  closeBtn:  document.getElementById('initialModalClose'),
-  cancelBtn: document.getElementById('initialModalCancel'),
-  applyBtn:  document.getElementById('initialModalApply'),
-};
+const _el = createModalElements('initialModal');
 initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, initLink, setActive) {

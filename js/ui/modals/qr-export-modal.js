@@ -7,7 +7,7 @@
 // open(suggestedName) — show modal pre-filled with last loaded QR meta
 
 import { exportQR } from '../../fhir/qr-export.js';
-import { initModal, openModal, closeModal } from './modal-base.js';
+import { initModal, openModal, closeModal, createModalElements } from './modal-base.js';
 import { createCustomSelect } from '../custom-select.js';
 
 const QR_STATUSES = ['in-progress', 'completed', 'amended', 'entered-in-error', 'stopped'];
@@ -27,14 +27,7 @@ document.addEventListener('qr-loaded', e => {
 
 let _state = null; // { fileName, status, subject, author }
 
-const _el = {
-  modal:     document.getElementById('qrExportModal'),
-  title:     document.getElementById('qrExportModalTitle'),
-  body:      document.getElementById('qrExportModalBody'),
-  closeBtn:  document.getElementById('qrExportModalClose'),
-  cancelBtn: document.getElementById('qrExportModalCancel'),
-  applyBtn:  document.getElementById('qrExportModalApply'),
-};
+const _el = createModalElements('qrExportModal');
 initModal(_el, { onApply: _export, onCancel: _cancel });
 
 // ── module API ─────────────────────────────────────────────────────────────

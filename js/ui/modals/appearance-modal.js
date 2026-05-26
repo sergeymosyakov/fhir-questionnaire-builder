@@ -1,19 +1,12 @@
 // ── Appearance (rendering-style) edit modal ───────────────────────────────────
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { triggerCalcRecalc } from '../../builder/_shared.js';
-import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { initModal, setModalTitle, openModal, closeModal, createModalElements } from './modal-base.js';
 import { APPEARANCE_SECTIONS, renderAppearanceSections } from './appearance-sections/index.js';
 
 let _pending = null;
 
-const _el = {
-  modal:     document.getElementById('appearanceModal'),
-  title:     document.getElementById('appearanceModalTitle'),
-  body:      document.getElementById('appearanceModalBody'),
-  closeBtn:  document.getElementById('appearanceModalClose'),
-  cancelBtn: document.getElementById('appearanceModalCancel'),
-  applyBtn:  document.getElementById('appearanceModalApply'),
-};
+const _el = createModalElements('appearanceModal');
 initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, styleLink, setActive) {

@@ -10,19 +10,12 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 
 import { refreshExprIcons } from '../../render-preview.js';
 import { triggerCalcRecalc } from '../../builder/_shared.js';
-import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { initModal, setModalTitle, openModal, closeModal, createModalElements } from './modal-base.js';
 import { createCustomSelect } from '../custom-select.js';
 
 let _pending = null; // { node, visLink, setActive, draft }
 
-const _el = {
-  modal:     document.getElementById('showWhenModal'),
-  title:     document.getElementById('showWhenModalTitle'),
-  body:      document.getElementById('showWhenModalBody'),
-  closeBtn:  document.getElementById('showWhenModalClose'),
-  cancelBtn: document.getElementById('showWhenModalCancel'),
-  applyBtn:  document.getElementById('showWhenModalApply'),
-};
+const _el = createModalElements('showWhenModal');
 initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, visLink, setActive, ctx, buildVisFn) {

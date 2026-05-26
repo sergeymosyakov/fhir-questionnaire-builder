@@ -1,19 +1,12 @@
 // ── Repeatable (item.repeats + cardinality) edit modal ───────────────────────
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { triggerCalcRecalc } from '../../builder/_shared.js';
-import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { initModal, setModalTitle, openModal, closeModal, createModalElements } from './modal-base.js';
 import { REPEATABLE_SECTIONS, renderRepeatableSections } from './repeatable-sections/index.js';
 
 let _pending = null;
 
-const _el = {
-  modal:     document.getElementById('repeatableModal'),
-  title:     document.getElementById('repeatableModalTitle'),
-  body:      document.getElementById('repeatableModalBody'),
-  closeBtn:  document.getElementById('repeatableModalClose'),
-  cancelBtn: document.getElementById('repeatableModalCancel'),
-  applyBtn:  document.getElementById('repeatableModalApply'),
-};
+const _el = createModalElements('repeatableModal');
 initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, repeatLink, setActive) {

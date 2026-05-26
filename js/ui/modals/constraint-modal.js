@@ -12,18 +12,11 @@ import { triggerCalcRecalc } from '../../builder/_shared.js';
 import * as explainModal from './explain-modal.js';
 import { getLastCtx } from '../../render-preview.js';
 import { createCustomSelect } from '../custom-select.js';
-import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { initModal, setModalTitle, openModal, closeModal, createModalElements } from './modal-base.js';
 
 let _pending = null; // { node, constraintLink, setActive, draft }
 
-const _el = {
-  modal:     document.getElementById('constraintModal'),
-  title:     document.getElementById('constraintModalTitle'),
-  body:      document.getElementById('constraintModalBody'),
-  closeBtn:  document.getElementById('constraintModalClose'),
-  cancelBtn: document.getElementById('constraintModalCancel'),
-  applyBtn:  document.getElementById('constraintModalApply'),
-};
+const _el = createModalElements('constraintModal');
 initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, constraintLink, setActive) {

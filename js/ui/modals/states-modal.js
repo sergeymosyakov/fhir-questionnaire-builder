@@ -1,19 +1,12 @@
 // ── States modal (Required / Read-only / Hidden / Collapsible) ───────────────
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { triggerCalcRecalc } from '../../builder/_shared.js';
-import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { initModal, setModalTitle, openModal, closeModal, createModalElements } from './modal-base.js';
 import { STATES_SECTIONS, renderStatesSections } from './states-sections/index.js';
 
 let _pending = null;
 
-const _el = {
-  modal:     document.getElementById('statesModal'),
-  title:     document.getElementById('statesModalTitle'),
-  body:      document.getElementById('statesModalBody'),
-  closeBtn:  document.getElementById('statesModalClose'),
-  cancelBtn: document.getElementById('statesModalCancel'),
-  applyBtn:  document.getElementById('statesModalApply'),
-};
+const _el = createModalElements('statesModal');
 initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, statesLink, setActive) {

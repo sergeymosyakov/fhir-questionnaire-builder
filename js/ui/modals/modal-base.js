@@ -63,3 +63,20 @@ export function openModal(modalEl)  { modalEl.style.display = 'flex'; }
 
 /** Hide the modal (sets display to none). */
 export function closeModal(modalEl) { modalEl.style.display = 'none'; }
+
+/**
+ * Resolve the standard set of modal DOM elements by naming convention.
+ * All child IDs are derived as `{childPrefix}{Key}` (Title, Body, Close, Cancel, Apply).
+ * @param {string} prefix      — ID of the modal root element, e.g. 'codesModal'
+ * @param {string} [childPrefix=prefix] — prefix for child IDs when it differs, e.g. 'exprModal'
+ */
+export function createModalElements(prefix, childPrefix = prefix) {
+  return {
+    modal:     document.getElementById(prefix),
+    title:     document.getElementById(childPrefix + 'Title'),
+    body:      document.getElementById(childPrefix + 'Body'),
+    closeBtn:  document.getElementById(childPrefix + 'Close'),
+    cancelBtn: document.getElementById(childPrefix + 'Cancel'),
+    applyBtn:  document.getElementById(childPrefix + 'Apply'),
+  };
+}

@@ -5,20 +5,13 @@
 // open(node, link, setActive)  — populate body + show modal
 
 import { MODAL_REGISTRY } from './modal-registry.js';
-import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { initModal, setModalTitle, openModal, closeModal, createModalElements } from './modal-base.js';
 import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { ITEM_SECTIONS, renderItemSections } from './item-sections/index.js';
 
 let _pending = null;
 
-const _el = {
-  modal:     document.getElementById('codesModal'),
-  title:     document.getElementById('codesModalTitle'),
-  body:      document.getElementById('codesModalBody'),
-  closeBtn:  document.getElementById('codesModalClose'),
-  cancelBtn: document.getElementById('codesModalCancel'),
-  applyBtn:  document.getElementById('codesModalApply'),
-};
+const _el = createModalElements('codesModal');
 initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, link, setActive) {

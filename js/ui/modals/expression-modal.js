@@ -4,19 +4,12 @@
 //   openDual(node, link, setActive, cb)   — dual-field (items: calc + init in one modal)
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { refreshExprIcons } from '../../render-preview.js';
-import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { initModal, setModalTitle, openModal, closeModal, createModalElements } from './modal-base.js';
 import { EXPR_SECTIONS, makeExprField, renderExprSections } from './expression-sections/index.js';
 
 let _pending = null;
 
-const _el = {
-  modal:     document.getElementById('expressionModal'),
-  title:     document.getElementById('exprModalTitle'),
-  body:      document.getElementById('exprModalBody'),
-  closeBtn:  document.getElementById('exprModalClose'),
-  cancelBtn: document.getElementById('exprModalCancel'),
-  applyBtn:  document.getElementById('exprModalApply'),
-};
+const _el = createModalElements('expressionModal', 'exprModal');
 initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(cfg) {

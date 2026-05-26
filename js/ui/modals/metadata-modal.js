@@ -16,19 +16,12 @@
 
 
 import { questMeta } from '../../state.js';
-import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
+import { initModal, setModalTitle, openModal, closeModal, createModalElements } from './modal-base.js';
 import { renderMetaSections } from './metadata-sections/index.js';
 
 let _pending = null;
 
-const _el = {
-  modal:     document.getElementById('metadataModal'),
-  title:     document.getElementById('metadataModalTitle'),
-  body:      document.getElementById('metadataModalBody'),
-  closeBtn:  document.getElementById('metadataModalClose'),
-  cancelBtn: document.getElementById('metadataModalCancel'),
-  applyBtn:  document.getElementById('metadataModalApply'),
-};
+const _el = createModalElements('metadataModal');
 initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 // ── module API ─────────────────────────────────────────────────────────────
