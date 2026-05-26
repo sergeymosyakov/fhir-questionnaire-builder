@@ -3,7 +3,7 @@ import { tree, rawFhir, values } from '../state.js';
 import { createGroupNode, createItemNodeFromTemplate } from '../nodes/index.js';
 import { _formTick, _bulkUpdate } from '../render-bus.js';
 import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
-import { init as dndInit, makeRootDropZone, makeDragHandle, attachDropZone } from './dnd.js';
+import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { buildVisPanel } from './panels.js';
 import { navigateToPreview, refreshExprIcons } from '../render-preview.js';
 import { findAndRemove } from '../utils.js';
@@ -22,8 +22,6 @@ function _makeCtx() {
     tree,
     formTick: _formTick,
     collapsed,
-    makeDragHandle,
-    attachDropZone,
     buildVisPanel,
     navigateToPreview,
     refreshExprIcons,

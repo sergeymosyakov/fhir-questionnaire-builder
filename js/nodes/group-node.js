@@ -1,4 +1,5 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
+import * as dnd from '../builder/dnd.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -175,7 +176,16 @@ export class GroupNode extends BaseNode {
 
   // ── Builder panel ─────────────────────────────────────────────────────────
   // Renders the left-panel (builder tree) row for this group node.
-  // All external deps (modals, DnD, utils) are injected via ctx.
+
+  /** Returns a <div class="drop-zone drop-zone-inside"> wired for drop-inside-last. */
+  _buildDropZoneInside() {
+    const div = document.createElement('div');
+    div.className   = 'drop-zone drop-zone-inside';
+    div.textContent = 'Drop here to add as last child';
+    dnd.attachDropZone(div, this, 'inside-last');
+    return div;
+  }
+
   buildBuilder(ctx) {
     const node = this;
     const { renderTree, renderNode } = ctx;
@@ -187,11 +197,7 @@ export class GroupNode extends BaseNode {
     div.className = 'node node-group';
     div.dataset.nodeId = node.id;
 
-    const dropAbove = document.createElement('div');
-    dropAbove.className = 'drop-zone drop-zone-above';
-    dropAbove.textContent = 'Drop here';
-    ctx.attachDropZone(dropAbove, node, 'before');
-    wrapper.appendChild(dropAbove);
+    wrapper.appendChild(node._buildDropZoneAbove());
 
     const header = document.createElement('div');
     header.className = 'node-header';
@@ -216,7 +222,8 @@ export class GroupNode extends BaseNode {
       if (body) body.style.display = isNowCollapsed ? 'none' : '';
     };
     titleWrap.appendChild(toggleBtn);
-    titleWrap.insertBefore(ctx.makeDragHandle(node), titleWrap.firstChild);
+    const dragHandle = node._buildDragHandle();
+    if (dragHandle) titleWrap.insertBefore(dragHandle, titleWrap.firstChild);
 
     const isEmptyGroupNode = node.children.length === 0;
     const typeLabel = document.createElement('span');
@@ -422,11 +429,7 @@ export class GroupNode extends BaseNode {
       body.appendChild(childWrap);
     }
 
-    const dropInside = document.createElement('div');
-    dropInside.className = 'drop-zone drop-zone-inside';
-    dropInside.textContent = 'Drop here to add as last child';
-    ctx.attachDropZone(dropInside, node, 'inside-last');
-    body.appendChild(dropInside);
+    body.appendChild(node._buildDropZoneInside());
 
     div.appendChild(body);
     wrapper.appendChild(div);

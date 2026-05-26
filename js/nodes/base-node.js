@@ -3,6 +3,7 @@
 // Subclasses must set `this.type` and optionally `this.itemType`.
 import { nextId } from '../id.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
+import * as dnd from '../builder/dnd.js';
 
 // Shared wrapper factory used by every buildControl() implementation.
 export function createWrap() {
@@ -397,5 +398,27 @@ export class BaseNode {
     if (tip?.spec)  a.dataset.tipSpec  = tip.spec;
     container.appendChild(a);
     return a;
+  }
+
+  // ── DnD ownership ─────────────────────────────────────────────────────────
+  // Each node declares its own drag/drop behaviour.
+  // Override isDraggable() in a subclass to opt out (e.g. a locked template).
+
+  /** Whether this node can be dragged. Override to return false to lock. */
+  isDraggable() { return true; }
+
+  /** Returns a draggable ⠿ handle element. Returns null when !isDraggable(). */
+  _buildDragHandle() {
+    if (!this.isDraggable()) return null;
+    return dnd.makeDragHandle(this);
+  }
+
+  /** Returns a <div class="drop-zone drop-zone-above"> wired for drop-before. */
+  _buildDropZoneAbove() {
+    const div = document.createElement('div');
+    div.className   = 'drop-zone drop-zone-above';
+    div.textContent = 'Drop here';
+    dnd.attachDropZone(div, this, 'before');
+    return div;
   }
 }

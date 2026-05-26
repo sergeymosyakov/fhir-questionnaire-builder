@@ -220,18 +220,15 @@ export class ItemNode extends BaseNode {
     div.className = 'node node-item';
     div.dataset.nodeId = node.id;
 
-    const dropAbove = document.createElement('div');
-    dropAbove.className = 'drop-zone drop-zone-above';
-    dropAbove.textContent = 'Drop here';
-    ctx.attachDropZone(dropAbove, node, 'before');
-    wrapper.appendChild(dropAbove);
+    wrapper.appendChild(node._buildDropZoneAbove());
 
     const header = document.createElement('div');
     header.className = 'node-header';
 
     const titleWrap = document.createElement('div');
     titleWrap.className = 'node-title';
-    titleWrap.insertBefore(ctx.makeDragHandle(node), titleWrap.firstChild);
+    const dragHandle = node._buildDragHandle();
+    if (dragHandle) titleWrap.insertBefore(dragHandle, titleWrap.firstChild);
 
     const typeLabel = document.createElement('span');
     typeLabel.className = 'node-type-label lbl-item';
