@@ -13,7 +13,7 @@
       "valueExpression": {
         "name": "phq2_score",
         "language": "text/fhirpath",
-        "expression": "(%resource.item.where(linkId='phq-q1').answer.valueCoding.extension.where(url='http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal | 0).first() + (%resource.item.where(linkId='phq-q2').answer.valueCoding.extension.where(url='http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal | 0).first()"
+        "expression": "(%resource.item.where(linkId='phq-group').item.where(linkId='phq-q1').answer.valueCoding.extension.where(url='http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal | 0).first() + (%resource.item.where(linkId='phq-group').item.where(linkId='phq-q2').answer.valueCoding.extension.where(url='http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal | 0).first()"
       }
     }
   ],
