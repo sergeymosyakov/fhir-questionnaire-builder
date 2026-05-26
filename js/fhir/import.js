@@ -2,7 +2,7 @@
 import { tree, resetSeq, rawFhir, questVariables, questContained, questMeta, setValue, clearAllValues } from '../state.js';
 import { showError } from '../ui/toast.js';
 import { _bulkUpdate } from '../render-bus.js';
-import { renderTree } from '../render-builder.js';
+import { renderTree } from '../builder/index.js';
 import { normaliseSTU3 } from './stu3-shim.js';
 import {
   buildLinkIdMap,

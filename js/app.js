@@ -10,7 +10,7 @@ import * as search from './ui/search.js';
 import * as tooltip from './ui/tooltip.js';
 import * as autosave from './ui/autosave.js';
 import * as statusBadge from './ui/status-badge.js';
-import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './render-builder.js';
+import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './builder/index.js';
 import { navigateToPreview, initPreview } from './render-preview.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';

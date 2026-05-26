@@ -10,7 +10,7 @@ import * as validateModal from './ui/modals/validate-modal.js';
 import * as libraryModal from './ui/modals/library-modal.js';
 import * as progress from './ui/progress.js';
 import * as autosave from './ui/autosave.js';
-import { expandAll, renderTreeAsync } from './render-builder.js';
+import { expandAll, renderTreeAsync } from './builder/index.js';
 import { reinitForm, resetCollapsedFromTree } from './render-preview.js';
 
 // ── File name display ─────────────────────────────────────────────────────────

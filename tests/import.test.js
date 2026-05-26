@@ -31,7 +31,7 @@ vi.mock('../js/state.js', () => ({
   clearAllValues: () => { Object.keys(_values).forEach(k => delete _values[k]); },
 }));
 
-vi.mock('../js/render-builder.js', () => ({ renderTree: vi.fn() }));
+vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
 const { fhirTypeToItemType, fhirOptsToStr, humanEnableWhen, applyVisibility, importFHIR } = await import('../js/fhir/import.js');
 
