@@ -11,6 +11,9 @@ import * as tooltip from './ui/tooltip.js';
 import * as autosave from './ui/autosave.js';
 import * as statusBadge from './ui/status-badge.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './builder/index.js';
+import { importFHIR } from './fhir/import.js';
+import { _formTick } from './render-bus.js';
+import * as history from './ui/history.js';
 import { navigateToPreview, initPreview } from './render-preview.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
@@ -383,6 +386,38 @@ _autosaveToggleBtn.addEventListener('click', () => {
   autosave.setEnabled(next);
   _syncAutosaveState(next, null);
 });
-autosave.init(buildFHIRObject, (date) => {
+autosave.init({ buildFn: buildFHIRObject, questMeta, onSaved: (date) => {
   _syncAutosaveState(autosave.isEnabled(), date);
+} });
+
+// ── Undo / Redo ───────────────────────────────────────────────────────────────
+const _undoBtn = document.getElementById('undoBtn');
+const _redoBtn = document.getElementById('redoBtn');
+
+function _syncUndoRedo() {
+  _undoBtn.disabled = !history.canUndo();
+  _redoBtn.disabled = !history.canRedo();
+}
+
+history.init({
+  buildFn:  buildFHIRObject,
+  importFn: importFHIR,
+  renderFn: renderTree,
+  formTick: _formTick,
+  effect,
+  onChange: _syncUndoRedo,
+});
+
+_undoBtn.addEventListener('click', () => { history.undo(); _syncUndoRedo(); });
+_redoBtn.addEventListener('click', () => { history.redo(); _syncUndoRedo(); });
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
+    e.preventDefault(); history.undo(); _syncUndoRedo();
+  } else if (
+    ((e.ctrlKey || e.metaKey) && e.key === 'y') ||
+    ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z')
+  ) {
+    e.preventDefault(); history.redo(); _syncUndoRedo();
+  }
 });

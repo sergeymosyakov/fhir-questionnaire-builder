@@ -100,11 +100,12 @@ const _loadRecentItem = document.getElementById('loadRecentItem');
 const _loadRecentSep  = document.getElementById('loadRecentSep');
 
 function _syncRecentItem() {
-  const meta = autosave.getDraftMeta();
-  if (meta) {
-    const d = new Date(meta.savedAt);
+  const recent = autosave.getMostRecentDraft();
+  if (recent) {
+    const d = new Date(recent.meta.savedAt);
     const ts = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    _loadRecentItem.textContent = '\uD83D\uDD52 Recent: ' + (meta.title || 'draft') + ' (' + ts + ')';
+    _loadRecentItem.textContent = '\uD83D\uDD52 Recent: ' + (recent.meta.title || 'draft') + ' (' + ts + ')';
+    _loadRecentItem.dataset.draftKey = recent.key;
     _loadRecentItem.style.display = '';
     _loadRecentSep.style.display  = '';
   } else {
@@ -123,10 +124,11 @@ document.getElementById('loadFhirBtn').onclick = e => {
 
 _loadRecentItem.onclick = () => {
   _loadMenu.style.display = 'none';
-  const data = autosave.getDraftData();
+  const key = _loadRecentItem.dataset.draftKey;
+  if (!key) return;
+  const data = autosave.getDraftData(key);
   if (!data) return;
-  const meta = autosave.getDraftMeta();
-  const label = (meta && meta.title) ? meta.title : 'autosave-draft';
+  const label = data.title || 'autosave-draft';
   progress.show('Loading recent draft\u2026');
   importAndValidate(data, label);
 };
