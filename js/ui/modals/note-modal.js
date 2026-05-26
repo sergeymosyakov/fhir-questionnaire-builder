@@ -1,61 +1,52 @@
-import { MODAL_REGISTRY } from './modal-registry.js';
 // ── Design Note modal ─────────────────────────────────────────────────────────
 // Centered modal for editing node._designNote (FHIR designNote extension).
-// Text is author-facing only — never shown to end users.
-//
-// init(elements)                    — wire DOM once at startup
-// open(node, noteLink, setActive)   — populate + show
+import { MODAL_REGISTRY } from './modal-registry.js';
+import { Modal } from './modal-base.js';
 
-import { initModal, setModalTitle, openModal, closeModal, createModalElements } from './modal-base.js';
+class NoteModal extends Modal {
+  constructor() {
+    super();
+    this._pending = null;
+    MODAL_REGISTRY.set('note', this);
+  }
 
-let _pending = null; // { node, noteLink, setActive, draftNote }
+  open(node, noteLink, setActive) {
+    this._pending = { node, noteLink, setActive, draftNote: node._designNote || '' };
+    this.setTitle('Design Note', node.title || node.id || 'Item');
+    this.body.innerHTML = '';
+    this._renderBody();
+    super.open();
+    this.body.querySelector('textarea')?.focus();
+  }
 
-const _el = createModalElements('designNoteModal');
-initModal(_el, { onApply: _apply, onCancel: _cancel });
+  _apply() {
+    if (!this._pending) return;
+    const { node, noteLink, setActive } = this._pending;
+    const v = this._pending.draftNote.trim();
+    if (v) node._designNote = v;
+    else   delete node._designNote;
+    setActive(noteLink, !!node._designNote);
+    this._cancel();
+  }
 
-// ── module API ─────────────────────────────────────────────────────────────
+  _cancel() {
+    this._pending = null;
+    this.close();
+  }
 
-export function open(node, noteLink, setActive) {
-  _pending = { node, noteLink, setActive, draftNote: node._designNote || '' };
-  setModalTitle(_el.title, 'Design Note', node.title || node.id || 'Item');
-  _el.body.innerHTML = '';
-  _renderBody(_el.body);
-  openModal(_el.modal);
-  _el.body.querySelector('textarea')?.focus();
+  _renderBody() {
+    const hint = document.createElement('div');
+    hint.className = 'panel-hint';
+    hint.textContent = 'Internal note for questionnaire authors. Stored as the FHIR designNote extension — never displayed to patients.';
+    this.body.appendChild(hint);
+
+    const ta = document.createElement('textarea');
+    ta.className = 'note-modal-textarea';
+    ta.dataset.testid = 'design-note-input';
+    ta.placeholder = 'e.g. "Discuss with clinical lead — threshold may change."';
+    ta.value = this._pending.draftNote;
+    ta.oninput = () => { this._pending.draftNote = ta.value; };
+    this.body.appendChild(ta);
+  }
 }
-
-// ── internals ─────────────────────────────────────────────────────────────────
-
-function _apply() {
-  if (!_pending) return;
-  const { node, noteLink, setActive } = _pending;
-  const v = _pending.draftNote.trim();
-  if (v) node._designNote = v;
-  else   delete node._designNote;
-  setActive(noteLink, !!node._designNote);
-  _close();
-}
-
-function _cancel() { _close(); }
-
-function _close() {
-  _pending = null;
-  closeModal(_el.modal);
-}
-
-function _renderBody(container) {
-  const hint = document.createElement('div');
-  hint.className = 'panel-hint';
-  hint.textContent = 'Internal note for questionnaire authors. Stored as the FHIR designNote extension — never displayed to patients.';
-  container.appendChild(hint);
-
-  const ta = document.createElement('textarea');
-  ta.className = 'note-modal-textarea';
-  ta.dataset.testid = 'design-note-input';
-  ta.placeholder = 'e.g. "Discuss with clinical lead — threshold may change."';
-  ta.value = _pending.draftNote;
-  ta.oninput = () => { _pending.draftNote = ta.value; };
-  container.appendChild(ta);
-}
-
-MODAL_REGISTRY.set('note', { open });
+new NoteModal();

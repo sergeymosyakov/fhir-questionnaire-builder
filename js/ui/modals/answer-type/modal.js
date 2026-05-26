@@ -1,26 +1,13 @@
-import { MODAL_REGISTRY } from '../modal-registry.js';
 // ── Answer Type edit modal ────────────────────────────────────────────────────
 // Centered modal for editing item type, options, and answerValueSet.
-// For choice types (select / radio / open-choice) the user picks the answer
-// source: either a plain "options list" or a ValueSet reference.  When a local
-// #vs-id is chosen the resolved concepts are stored in node.options so the
-// preview can render real answers; export.js skips answerOption when
-// _answerValueSet is present.
-//
-// Uses draft pattern — changes are only committed on Apply. Cancel discards.
-//
-// init(elements)                       — wire DOM once at startup
-// open(node, typeLink, setActive)      — populate body + show
-
+import { MODAL_REGISTRY } from '../modal-registry.js';
+import { Modal } from '../modal-base.js';
 import { tree, values, deleteValue } from '../../../state.js';
 import { triggerCalcRecalc, renderTree } from '../../../builder/_shared.js';
 import { createItemNode } from '../../../nodes/index.js';
 import { createCustomSelect } from '../../custom-select.js';
-import { initModal, setModalTitle, openModal, closeModal, createModalElements } from '../modal-base.js';
 import { ITEM_TYPES } from './data.js';
 import { ANSWER_TYPE_SECTIONS } from './index.js';
-
-let _pending = null;
 
 // Replace a node in the reactive tree array (recursive, in-place splice).
 function _replaceInTree(treeArr, nodeId, newNode) {
@@ -31,112 +18,97 @@ function _replaceInTree(treeArr, nodeId, newNode) {
   return false;
 }
 
-const _el = createModalElements('answerTypeModal');
-initModal(_el, { onApply: _apply, onCancel: _cancel });
-
-// ── module API ─────────────────────────────────────────────────────────────
-
-export function open(node, typeLink, setActive) {
-  _pending = Object.assign(
-    { node, typeLink, setActive, draftType: node.itemType },
-    ...ANSWER_TYPE_SECTIONS.map(s => s.initPending(node)),
-  );
-
-  setModalTitle(_el.title, 'Answer Type', node.title || node.id || 'Item');
-
-  _el.body.innerHTML = '';
-  _renderBody(_el.body);
-  openModal(_el.modal);
-}
-
-// ── internals ─────────────────────────────────────────────────────────────────
-
-function _apply() {
-  if (!_pending) return;
-  let node = _pending.node;
-
-  // Clear stored answers when type changes
-  if (node.itemType !== _pending.draftType) {
-    const id = node.id;
-    deleteValue(id);
-    const n = values[id + '$$n'] || 0;
-    for (let i = 1; i <= n; i++) deleteValue(id + '$$' + i);
-    delete values[id + '$$n'];
+class AnswerTypeModal extends Modal {
+  constructor() {
+    super();
+    this._pending = null;
+    MODAL_REGISTRY.set('answerType', this);
   }
 
-  // Replace node in tree with a new instance of the correct class.
-  // Copies all own properties (id, title, enableWhen, etc.) then overrides itemType.
-  const newNode = createItemNode(_pending.draftType, { id: node.id });
-  Object.assign(newNode, node, { itemType: _pending.draftType });
-  _replaceInTree(tree, node.id, newNode);
-  node = newNode; // rebind to the new correctly-typed instance
-
-  // checkbox / display cannot be repeatable
-  if (!node.supportsRepeat() && node.repeats) {
-    node.repeats = false;
-    delete node._minOccurs;
-    delete node._maxOccurs;
+  open(node, typeLink, setActive) {
+    this._pending = Object.assign(
+      { node, typeLink, setActive, draftType: node.itemType },
+      ...ANSWER_TYPE_SECTIONS.map(s => s.initPending(node)),
+    );
+    this.setTitle('Answer Type', node.title || node.id || 'Item');
+    this.body.innerHTML = '';
+    this._renderBody();
+    super.open();
   }
 
-  ANSWER_TYPE_SECTIONS.forEach(s => s.commit(_pending, node));
+  _apply() {
+    if (!this._pending) return;
+    let node = this._pending.node;
 
-  // Re-render builder (creates correct row for new type; handles repeatLink visibility etc.)
-  renderTree();
-  triggerCalcRecalc();
-  _close();
+    if (node.itemType !== this._pending.draftType) {
+      const id = node.id;
+      deleteValue(id);
+      const n = values[id + '$$n'] || 0;
+      for (let i = 1; i <= n; i++) deleteValue(id + '$$' + i);
+      delete values[id + '$$n'];
+    }
+
+    const newNode = createItemNode(this._pending.draftType, { id: node.id });
+    Object.assign(newNode, node, { itemType: this._pending.draftType });
+    _replaceInTree(tree, node.id, newNode);
+    node = newNode;
+
+    if (!node.supportsRepeat() && node.repeats) {
+      node.repeats = false;
+      delete node._minOccurs;
+      delete node._maxOccurs;
+    }
+
+    ANSWER_TYPE_SECTIONS.forEach(s => s.commit(this._pending, node));
+    renderTree();
+    triggerCalcRecalc();
+    this._cancel();
+  }
+
+  _cancel() {
+    this._pending = null;
+    this.close();
+  }
+
+  _renderBody() {
+    const container = this.body;
+    const hint = document.createElement('div');
+    hint.className   = 'panel-hint';
+    hint.textContent = 'Sets the FHIR item type. For coded-answer types you can supply a plain options list or link to a contained[] ValueSet.';
+    container.appendChild(hint);
+
+    const typeRow = document.createElement('div');
+    typeRow.className = 'at-modal-type-row';
+    const typeLbl = document.createElement('label');
+    typeLbl.className        = 'at-modal-lbl';
+    typeLbl.textContent      = 'Type:';
+    typeLbl.dataset.tipTitle = 'Item type';
+    typeLbl.dataset.tipBody  = 'The FHIR data type for answers to this item. Determines which control is rendered in the preview.';
+    typeLbl.dataset.tipFhir  = 'Questionnaire.item.type';
+    typeLbl.dataset.tipSpec  = 'R4';
+
+    const built = ANSWER_TYPE_SECTIONS.map(s => ({ s, el: s.build(this._pending) }));
+
+    const typeSel = createCustomSelect({
+      items:     ITEM_TYPES.map(t => ({ value: t, label: t })),
+      value:     this._pending.draftType,
+      className: 'at-modal-type-sel sc-trigger--full',
+      testid:    'type-select',
+      onChange:  v => {
+        this._pending.draftType = v;
+        built.forEach(({ s, el }) => {
+          el.style.display = s.isVisible(v) ? '' : 'none';
+          s.onTypeChange(v);
+        });
+      },
+    });
+    typeRow.append(typeLbl, typeSel.el);
+    container.appendChild(typeRow);
+
+    built.forEach(({ s, el }) => {
+      el.style.display = s.isVisible(this._pending.draftType) ? '' : 'none';
+      container.appendChild(el);
+    });
+  }
 }
-
-function _cancel() { _close(); }
-
-function _close() {
-  _pending = null;
-  closeModal(_el.modal);
-}
-
-// ── body renderer ─────────────────────────────────────────────────────────────────
-
-function _renderBody(container) {
-  const hint = document.createElement('div');
-  hint.className   = 'panel-hint';
-  hint.textContent = 'Sets the FHIR item type. For coded-answer types you can supply a plain options list or link to a contained[] ValueSet.';
-  container.appendChild(hint);
-
-  // ── Type selector ─────────────────────────────────────────────────────────
-  const typeRow = document.createElement('div');
-  typeRow.className = 'at-modal-type-row';
-  const typeLbl = document.createElement('label');
-  typeLbl.className        = 'at-modal-lbl';
-  typeLbl.textContent      = 'Type:';
-  typeLbl.dataset.tipTitle = 'Item type';
-  typeLbl.dataset.tipBody  = 'The FHIR data type for answers to this item. Determines which control is rendered in the preview.';
-  typeLbl.dataset.tipFhir  = 'Questionnaire.item.type';
-  typeLbl.dataset.tipSpec  = 'R4';
-
-  // Build all sections up-front; type selector onChange updates their visibility
-  const built = ANSWER_TYPE_SECTIONS.map(s => ({ s, el: s.build(_pending) }));
-
-  const typeSel = createCustomSelect({
-    items:     ITEM_TYPES.map(t => ({ value: t, label: t })),
-    value:     _pending.draftType,
-    className: 'at-modal-type-sel sc-trigger--full',
-    testid:    'type-select',
-    onChange:  v => {
-      _pending.draftType = v;
-      built.forEach(({ s, el }) => {
-        el.style.display = s.isVisible(v) ? '' : 'none';
-        s.onTypeChange(v);
-      });
-    },
-  });
-  typeRow.appendChild(typeLbl);
-  typeRow.appendChild(typeSel.el);
-  container.appendChild(typeRow);
-
-  // ── Sections (self-registered) ──────────────────────────────────────────────
-  built.forEach(({ s, el }) => {
-    el.style.display = s.isVisible(_pending.draftType) ? '' : 'none';
-    container.appendChild(el);
-  });
-}
-
-MODAL_REGISTRY.set('answerType', { open });
+new AnswerTypeModal();

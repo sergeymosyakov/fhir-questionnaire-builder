@@ -1,7 +1,7 @@
 // ── Questionnaire Variables panel ─────────────────────────────────────────────
 // Collapsible card (above tree) + edit modal for sdc-questionnaire-variable.
 // refresh() — re-render chip list and card visibility (call after import/reset).
-import { initModal, openModal, closeModal } from './modals/modal-base.js';
+import { Modal } from './modals/modal-base.js';
 import { questVariables } from '../state.js';
 
 let _collapsed = false;
@@ -14,24 +14,18 @@ const _el = {
   count:     document.getElementById('variablesCardCount'),
   editBtn:   document.getElementById('variablesEditBtn'),
   reinitBtn: document.getElementById('variablesReinitBtn'),
-  modal:     document.getElementById('variablesModal'),
-  modalBody: document.getElementById('variablesModalBody'),
-  closeBtn:  document.getElementById('variablesModalClose'),
-  applyBtn:  document.getElementById('variablesModalApply'),
-  cancelBtn: document.getElementById('variablesModalCancel'),
 };
+
+const _modal = new Modal();
+_modal.title.textContent = 'Questionnaire Variables';
+_modal._apply  = _applyModal;
+_modal._cancel = _closeModal;
 
 _el.toggle.addEventListener('click', _toggleCollapse);
 _el.editBtn.addEventListener('click', _openModal);
 if (_el.reinitBtn) _el.reinitBtn.addEventListener('click', () => {
   document.dispatchEvent(new CustomEvent('reinit-form'));
 });
-initModal({
-  modal:     _el.modal,
-  closeBtn:  _el.closeBtn,
-  cancelBtn: _el.cancelBtn,
-  applyBtn:  _el.applyBtn,
-}, { onApply: _applyModal, onCancel: _closeModal });
 
 document.addEventListener('questionnaire-loaded', refresh);
 document.addEventListener('questionnaire-cleared', refresh);
@@ -76,13 +70,13 @@ function _openModal() {
   // Deep-copy current vars into draft; all edits go to draft until Apply.
   _draft = questVariables.map(v => ({ name: v.name, expression: v.expression }));
   _renderModalBody();
-  openModal(_el.modal);
+  _modal.open();
 }
 
 function _closeModal() {
   // Cancel: discard draft, close without touching questVariables.
   _draft = null;
-  closeModal(_el.modal);
+  _modal.close();
 }
 
 function _applyModal() {
@@ -99,23 +93,23 @@ function _applyModal() {
   // Commit draft → reactive questVariables.
   questVariables.splice(0, questVariables.length, ..._draft.map(v => ({ name: v.name, expression: v.expression })));
   _draft = null;
-  closeModal(_el.modal);
+  _modal.close();
   refresh();
   document.dispatchEvent(new CustomEvent('reinit-form'));
 }
 
 function _renderModalBody(showErrors = false) {
-  _el.modalBody.innerHTML = '';
+  _modal.body.innerHTML = '';
 
   if (_draft.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'variables-modal-empty';
     empty.textContent = 'No variables defined. Use "+ Add Variable" to create one.';
-    _el.modalBody.appendChild(empty);
+    _modal.body.appendChild(empty);
   }
 
   for (let i = 0; i < _draft.length; i++) {
-    _el.modalBody.appendChild(_makeRow(i, showErrors));
+    _modal.body.appendChild(_makeRow(i, showErrors));
   }
 
   const addBtn = document.createElement('button');
@@ -123,10 +117,10 @@ function _renderModalBody(showErrors = false) {
   addBtn.className = 'variables-add-btn';
   addBtn.textContent = '+ Add Variable';
   addBtn.addEventListener('click', () => {
-      _draft.push({ name: '', expression: '' });
-      _renderModalBody();
-    });
-  _el.modalBody.appendChild(addBtn);
+    _draft.push({ name: '', expression: '' });
+    _renderModalBody();
+  });
+  _modal.body.appendChild(addBtn);
 }
 
 function _makeRow(index, showErrors = false) {

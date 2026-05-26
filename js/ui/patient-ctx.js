@@ -3,7 +3,7 @@
 // init(els, questVariables, onAfterApply) — wire once at startup.
 import { tree, effect, questVariables } from '../state.js';
 import { createCustomSelect } from './custom-select.js';
-import { initModal, openModal, closeModal } from './modals/modal-base.js';
+import { Modal } from './modals/modal-base.js';
 
 const PATIENT_APPLY_EVENT = 'patient-ctx-applied';
 
@@ -90,11 +90,16 @@ let _inputs = null;
 const _el = {
   presetBtn:  document.getElementById('patientPresetBtn'),
   presetMenu: document.getElementById('patientPresetMenu'),
-  modal:      document.getElementById('patientCtxModal'),
-  closeBtn:   document.getElementById('patientCtxClose'),
-  applyBtn:   document.getElementById('patientCtxApply'),
-  body:       document.getElementById('patientCtxBody'),
 };
+
+const _modal = new Modal({ cancelLabel: null });
+_modal.title.textContent = 'Patient Context';
+_modal.body.insertAdjacentHTML('beforebegin',
+  '<div class="patient-ctx-hint">Values are available in FHIRPath expressions as ' +
+  '<code>%age</code>, <code>%gender</code>, <code>%bmi</code>, ' +
+  '<code>%pregnant</code>, <code>%smoker</code>, <code>%proc</code>, <code>%comorb</code>.</div>');
+_modal._apply  = _applyPatientModal;
+_modal._cancel = _cancelPatientModal;
 
 // Seed defaults for any patient vars not yet present
 for (const def of PATIENT_VARS) {
@@ -102,12 +107,6 @@ for (const def of PATIENT_VARS) {
     setEntry(questVariables, def.name, toExpr(def.type, def.default));
   }
 }
-
-initModal({
-  modal:    _el.modal,
-  closeBtn: _el.closeBtn,
-  applyBtn: _el.applyBtn,
-}, { onApply: _applyPatientModal, onCancel: _cancelPatientModal });
 
 // ── Preset dropdown ─────────────────────────────────────────────
 if (_el.presetBtn && _el.presetMenu) {
@@ -151,7 +150,7 @@ const _doAfterApply = () => {
 };
 
 function _openPatientModal() {
-  _el.body.innerHTML = '';
+  _modal.body.innerHTML = '';
   _inputs = {};
 
   for (const def of PATIENT_VARS) {
@@ -191,10 +190,10 @@ function _openPatientModal() {
     _inputs[def.name] = { inp, def };
     row.appendChild(lbl);
     row.appendChild(inp);
-    _el.body.appendChild(row);
+    _modal.body.appendChild(row);
   }
 
-  openModal(_el.modal);
+  _modal.open();
 }
 
 function _applyPatientModal() {
@@ -207,11 +206,11 @@ function _applyPatientModal() {
     setEntry(questVariables, name, toExpr(def.type, raw));
   }
   _inputs = null;
-  closeModal(_el.modal);
+  _modal.close();
   _doAfterApply();
 }
 
 function _cancelPatientModal() {
   _inputs = null;
-  closeModal(_el.modal);
+  _modal.close();
 }

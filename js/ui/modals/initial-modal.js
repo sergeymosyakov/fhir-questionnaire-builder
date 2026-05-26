@@ -1,36 +1,36 @@
-// ── Default Value (initial[]) edit modal ─────────────────────────────────────
+// ── Default Value (initial[]) edit modal ──────────────────────────────────────
 import { MODAL_REGISTRY } from './modal-registry.js';
+import { Modal } from './modal-base.js';
 import { triggerCalcRecalc } from '../../builder/_shared.js';
-import { initModal, setModalTitle, openModal, closeModal, createModalElements } from './modal-base.js';
 import { INITIAL_SECTIONS, renderInitialSections } from './initial-sections/index.js';
 
-let _pending = null;
+class InitialModal extends Modal {
+  constructor() {
+    super();
+    this._pending = null;
+    MODAL_REGISTRY.set('initial', this);
+  }
 
-const _el = createModalElements('initialModal');
-initModal(_el, { onApply: _apply, onCancel: _cancel });
+  open(node, initLink, setActive) {
+    this._pending = { node, initLink, setActive,
+      ...Object.assign({}, ...INITIAL_SECTIONS.map(s => s.initPending(node))) };
+    this.setTitle('Default Value', node.title || node.id || 'Item');
+    renderInitialSections(this.body, this._pending);
+    super.open();
+  }
 
-export function open(node, initLink, setActive) {
-  _pending = { node, initLink, setActive,
-    ...Object.assign({}, ...INITIAL_SECTIONS.map(s => s.initPending(node))) };
-  setModalTitle(_el.title, 'Default Value', node.title || node.id || 'Item');
-  renderInitialSections(_el.body, _pending);
-  openModal(_el.modal);
+  _apply() {
+    if (!this._pending) return;
+    const { node, initLink, setActive } = this._pending;
+    INITIAL_SECTIONS.forEach(s => s.commit(this._pending, node));
+    setActive(initLink, node._initialValue !== undefined && node._initialValue !== '');
+    triggerCalcRecalc();
+    this._cancel();
+  }
+
+  _cancel() {
+    this._pending = null;
+    this.close();
+  }
 }
-
-function _apply() {
-  if (!_pending) return;
-  const { node, initLink, setActive } = _pending;
-  INITIAL_SECTIONS.forEach(s => s.commit(_pending, node));
-  setActive(initLink, node._initialValue !== undefined && node._initialValue !== '');
-  triggerCalcRecalc();
-  _close();
-}
-
-function _cancel() { _close(); }
-
-function _close() {
-  _pending = null;
-  closeModal(_el.modal);
-}
-
-MODAL_REGISTRY.set('initial', { open });
+new InitialModal();

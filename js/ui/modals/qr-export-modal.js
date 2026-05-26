@@ -1,13 +1,7 @@
-// ── QR Export modal ────────────────────────────────────────────────────────────
+// ── QR Export modal ───────────────────────────────────────────────────────────
 // Shown before downloading a QuestionnaireResponse.
-// Pre-populated via 'qr-loaded' event (preserved when a QR was loaded); editable.
-// Resets via 'questionnaire-loaded' event (new questionnaire clears QR context).
-//
-// init(elements)      — wire DOM once at startup
-// open(suggestedName) — show modal pre-filled with last loaded QR meta
-
+import { Modal } from './modal-base.js';
 import { exportQR } from '../../fhir/qr-export.js';
-import { initModal, openModal, closeModal, createModalElements } from './modal-base.js';
 import { createCustomSelect } from '../custom-select.js';
 
 const QR_STATUSES = ['in-progress', 'completed', 'amended', 'entered-in-error', 'stopped'];
@@ -25,25 +19,80 @@ document.addEventListener('qr-loaded', e => {
   _qrMeta.author  = e.detail.author  || '';
 });
 
-let _state = null; // { fileName, status, subject, author }
+class QrExportModal extends Modal {
+  constructor() {
+    super();
+    this._state = null;
+  }
 
-const _el = createModalElements('qrExportModal');
-initModal(_el, { onApply: _export, onCancel: _cancel });
+  open(suggestedName) {
+    this._state = {
+      fileName: suggestedName || 'questionnaire-response.json',
+      status:   _qrMeta.status,
+      subject:  _qrMeta.subject,
+      author:   _qrMeta.author,
+    };
+    this._renderBody();
+    super.open();
+  }
 
-// ── module API ─────────────────────────────────────────────────────────────
+  _apply() {
+    const base = (this._state.fileName || 'questionnaire-response').replace(/\.json$/i, '');
+    exportQR(base + '.json', {
+      status:  this._state.status  || 'in-progress',
+      subject: this._state.subject,
+      author:  this._state.author,
+    });
+    this.close();
+  }
 
-export function open(suggestedName) {
-  _state = {
-    fileName: suggestedName || 'questionnaire-response.json',
-    status:   _qrMeta.status,
-    subject:  _qrMeta.subject,
-    author:   _qrMeta.author,
-  };
-  _renderBody();
-  openModal(_el.modal);
+  _cancel() {
+    this.close();
+  }
+
+  _renderBody() {
+    this.body.innerHTML = '';
+    const s = this._state;
+
+    const nameInp = document.createElement('input');
+    nameInp.type  = 'text';
+    nameInp.id    = 'qrExportFileName';
+    nameInp.className   = 'meta-modal-inp';
+    nameInp.value       = s.fileName;
+    nameInp.dataset.testid = 'qr-export-filename';
+    nameInp.oninput = () => { s.fileName = nameInp.value; };
+    this.body.appendChild(_fieldRow('File name:', nameInp));
+
+    const statusSel = createCustomSelect({
+      items:     QR_STATUSES.map(v => ({ value: v, label: v })),
+      value:     s.status,
+      testid:    'qr-export-status',
+      className: 'sc-trigger--sm',
+      onChange:  v => { s.status = v; },
+    });
+    this.body.appendChild(_fieldRow('Status:', statusSel.el));
+
+    const subjectInp = document.createElement('input');
+    subjectInp.type  = 'text';
+    subjectInp.id    = 'qrExportSubject';
+    subjectInp.className   = 'meta-modal-inp';
+    subjectInp.placeholder = 'Patient/123';
+    subjectInp.value       = s.subject;
+    subjectInp.dataset.testid = 'qr-export-subject';
+    subjectInp.oninput = () => { s.subject = subjectInp.value; };
+    this.body.appendChild(_fieldRow('Subject:', subjectInp));
+
+    const authorInp = document.createElement('input');
+    authorInp.type  = 'text';
+    authorInp.id    = 'qrExportAuthor';
+    authorInp.className   = 'meta-modal-inp';
+    authorInp.placeholder = 'Practitioner/456';
+    authorInp.value       = s.author;
+    authorInp.dataset.testid = 'qr-export-author';
+    authorInp.oninput = () => { s.author = authorInp.value; };
+    this.body.appendChild(_fieldRow('Author:', authorInp));
+  }
 }
-
-// ── private ───────────────────────────────────────────────────────────────────
 
 function _fieldRow(labelText, inputEl) {
   const row = document.createElement('div');
@@ -56,62 +105,5 @@ function _fieldRow(labelText, inputEl) {
   return row;
 }
 
-function _renderBody() {
-  _el.body.innerHTML = '';
-
-  // File name
-  const nameInp = document.createElement('input');
-  nameInp.type  = 'text';
-  nameInp.id    = 'qrExportFileName';
-  nameInp.className   = 'meta-modal-inp';
-  nameInp.value       = _state.fileName;
-  nameInp.dataset.testid = 'qr-export-filename';
-  nameInp.oninput = () => { _state.fileName = nameInp.value; };
-  _el.body.appendChild(_fieldRow('File name:', nameInp));
-
-  // Status
-  const statusSel = createCustomSelect({
-    items:     QR_STATUSES.map(v => ({ value: v, label: v })),
-    value:     _state.status,
-    testid:    'qr-export-status',
-    className: 'sc-trigger--sm',
-    onChange:  v => { _state.status = v; },
-  });
-  _el.body.appendChild(_fieldRow('Status:', statusSel.el));
-
-  // Subject reference
-  const subjectInp = document.createElement('input');
-  subjectInp.type  = 'text';
-  subjectInp.id    = 'qrExportSubject';
-  subjectInp.className   = 'meta-modal-inp';
-  subjectInp.placeholder = 'Patient/123';
-  subjectInp.value       = _state.subject;
-  subjectInp.dataset.testid = 'qr-export-subject';
-  subjectInp.oninput = () => { _state.subject = subjectInp.value; };
-  _el.body.appendChild(_fieldRow('Subject:', subjectInp));
-
-  // Author reference
-  const authorInp = document.createElement('input');
-  authorInp.type  = 'text';
-  authorInp.id    = 'qrExportAuthor';
-  authorInp.className   = 'meta-modal-inp';
-  authorInp.placeholder = 'Practitioner/456';
-  authorInp.value       = _state.author;
-  authorInp.dataset.testid = 'qr-export-author';
-  authorInp.oninput = () => { _state.author = authorInp.value; };
-  _el.body.appendChild(_fieldRow('Author:', authorInp));
-}
-
-function _export() {
-  const base = (_state.fileName || 'questionnaire-response').replace(/\.json$/i, '');
-  exportQR(base + '.json', {
-    status:  _state.status  || 'in-progress',
-    subject: _state.subject,
-    author:  _state.author,
-  });
-  closeModal(_el.modal);
-}
-
-function _cancel() {
-  closeModal(_el.modal);
-}
+const _modal = new QrExportModal();
+export const open = (suggestedName) => _modal.open(suggestedName);

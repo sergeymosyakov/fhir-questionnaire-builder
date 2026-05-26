@@ -1,25 +1,23 @@
 // ── Shared read-only FHIR JSON viewer modal ───────────────────────────────────
 // Shows any JSON object as formatted, scrollable, read-only text.
-// init(elements) — wire DOM once at startup (called from app.js).
-// show(title, data) — open modal with given title and data.
-// close() — close modal.
+// Listens for the 'show-json' custom event from anywhere in the app.
+import { Modal } from './modal-base.js';
 
-import { initModal, openModal, closeModal, createModalElements } from './modal-base.js';
+class JsonViewerModal extends Modal {
+  constructor() {
+    super({ cancelLabel: 'Close', applyLabel: null, bodyClass: 'fhir-json-modal-body' });
+    this.pre = document.createElement('pre');
+    this.pre.className = 'fhir-json-pre';
+    this.body.appendChild(this.pre);
+    document.addEventListener('show-json', e => this.show(e.detail.title, e.detail.data));
+  }
 
-const _el = {
-  ...createModalElements('fhirJsonModal'),
-  pre:       document.getElementById('fhirJsonModalPre'),
-  cancelBtn: document.getElementById('fhirJsonModalCloseBtn'),
-};
-initModal(_el, { onCancel: close });
-document.addEventListener('show-json', e => show(e.detail.title, e.detail.data));
+  show(title, data) {
+    this.title.textContent = title;
+    this.pre.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    super.open();
+  }
 
-export function show(title, data) {
-  _el.title.textContent = title;
-  _el.pre.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-  openModal(_el.modal);
+  _cancel() { this.close(); }
 }
-
-export function close() {
-  closeModal(_el.modal);
-}
+new JsonViewerModal();
