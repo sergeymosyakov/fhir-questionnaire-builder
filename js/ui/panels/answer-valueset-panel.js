@@ -48,8 +48,8 @@ class AnswerValueSetPanel extends Panel {
       chip.type = 'button';
       chip.className = 'fhir-res-chip fhir-res-chip--avs';
       chip.textContent = label;
-      chip.dataset.tipTitle = 'Answer ValueSet';
-      chip.dataset.tipBody  = url + '\n\nUsed by ' + items.length + (items.length === 1 ? ' item' : ' items') + '. Click to see details.';
+      chip.dataset.tipTitle = url;
+      chip.dataset.tipBody  = `Used by ${items.length} item${items.length === 1 ? '' : 's'}. The URL is preserved on import and written back on export unchanged.`;
       chip.dataset.tipFhir  = 'Questionnaire.item.answerValueSet';
       chip.dataset.tipSpec  = 'R4 · optional';
       chip.addEventListener('click', () =>
