@@ -7,7 +7,7 @@
 // onSelect(item) is called with { label, file, type } when user clicks an entry.
 // The modal closes automatically before calling onSelect.
 
-import { initModal, openModal, closeModal } from './modal-base.js';
+import { initModal, openModal, closeModal, createModalElements } from './modal-base.js';
 
 const LIBRARY_URL = 'sampledata/library.json';
 
@@ -29,10 +29,8 @@ let _cache    = null; // fetched library data
 let _onSelect = null;
 
 const _el = {
-  modal:     document.getElementById('libraryModal'),
-  closeBtn:  document.getElementById('libraryModalClose'),
+  ...createModalElements('libraryModal'),
   cancelBtn: document.getElementById('libraryModalCloseBtn'),
-  body:      document.getElementById('libraryModalBody'),
 };
 initModal(_el, { onCancel: _close });
 

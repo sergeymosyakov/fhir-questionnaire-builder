@@ -5,14 +5,11 @@
 //         'import' → "OK" only
 //   onNavigate(nodeId) — called when user clicks the ↗ link next to an issue
 
-import { initModal, openModal, closeModal } from './modal-base.js';
+import { initModal, openModal, closeModal, createModalElements } from './modal-base.js';
 
 const _el = {
-  modal:    document.getElementById('validateModal'),
-  title:    document.getElementById('validateModalTitle'),
-  body:     document.getElementById('validateModalBody'),
-  footer:   document.getElementById('validateModalFooter'),
-  closeBtn: document.getElementById('validateModalClose'),
+  ...createModalElements('validateModal'),
+  footer: document.getElementById('validateModalFooter'),
 };
 initModal(_el, { onCancel: _close });
 

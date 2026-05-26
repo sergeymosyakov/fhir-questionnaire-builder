@@ -4,13 +4,11 @@
 // show(title, data) — open modal with given title and data.
 // close() — close modal.
 
-import { initModal, openModal, closeModal } from './modal-base.js';
+import { initModal, openModal, closeModal, createModalElements } from './modal-base.js';
 
 const _el = {
-  modal:     document.getElementById('fhirJsonModal'),
-  title:     document.getElementById('fhirJsonModalTitle'),
+  ...createModalElements('fhirJsonModal'),
   pre:       document.getElementById('fhirJsonModalPre'),
-  closeBtn:  document.getElementById('fhirJsonModalClose'),
   cancelBtn: document.getElementById('fhirJsonModalCloseBtn'),
 };
 initModal(_el, { onCancel: close });
