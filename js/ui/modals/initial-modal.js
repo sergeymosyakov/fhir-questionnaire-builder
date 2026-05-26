@@ -4,13 +4,17 @@ import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 import { INITIAL_SECTIONS, renderInitialSections } from './initial-sections/index.js';
 
-let _el      = null;
 let _pending = null;
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onApply: _apply, onCancel: _cancel });
-}
+const _el = {
+  modal:     document.getElementById('initialModal'),
+  title:     document.getElementById('initialModalTitle'),
+  body:      document.getElementById('initialModalBody'),
+  closeBtn:  document.getElementById('initialModalClose'),
+  cancelBtn: document.getElementById('initialModalCancel'),
+  applyBtn:  document.getElementById('initialModalApply'),
+};
+initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, initLink, setActive) {
   _pending = { node, initLink, setActive,

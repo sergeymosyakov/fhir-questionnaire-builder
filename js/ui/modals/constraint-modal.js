@@ -14,13 +14,17 @@ import { getLastCtx } from '../../render-preview.js';
 import { createCustomSelect } from '../custom-select.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 
-let _el      = null;
 let _pending = null; // { node, constraintLink, setActive, draft }
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onApply: _apply, onCancel: _cancel });
-}
+const _el = {
+  modal:     document.getElementById('constraintModal'),
+  title:     document.getElementById('constraintModalTitle'),
+  body:      document.getElementById('constraintModalBody'),
+  closeBtn:  document.getElementById('constraintModalClose'),
+  cancelBtn: document.getElementById('constraintModalCancel'),
+  applyBtn:  document.getElementById('constraintModalApply'),
+};
+initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, constraintLink, setActive) {
   if (!Array.isArray(node.constraint)) node.constraint = [];

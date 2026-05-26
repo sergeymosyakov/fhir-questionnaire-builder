@@ -6,13 +6,15 @@
 
 import { initModal, openModal, closeModal } from './modal-base.js';
 
-let _el = null;
-
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onCancel: close });
-  document.addEventListener('show-json', e => show(e.detail.title, e.detail.data));
-}
+const _el = {
+  modal:     document.getElementById('fhirJsonModal'),
+  title:     document.getElementById('fhirJsonModalTitle'),
+  pre:       document.getElementById('fhirJsonModalPre'),
+  closeBtn:  document.getElementById('fhirJsonModalClose'),
+  cancelBtn: document.getElementById('fhirJsonModalCloseBtn'),
+};
+initModal(_el, { onCancel: close });
+document.addEventListener('show-json', e => show(e.detail.title, e.detail.data));
 
 export function show(title, data) {
   _el.title.textContent = title;

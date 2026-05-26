@@ -12,7 +12,11 @@ import * as autosave from './ui/autosave.js';
 import * as statusBadge from './ui/status-badge.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './render-builder.js';
 import { navigateToPreview, initPreview } from './render-preview.js';
-import './app-modals.js';
+import './ui/modals/index.js';
+import './ui/variables-panel.js';
+import './ui/contained-panel.js';
+import './ui/answer-valueset-panel.js';
+import './ui/patient-ctx.js';
 import { setFileName, navigateToNode } from './app-load.js';
 
 // Buttons

@@ -4,13 +4,17 @@ import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 import { REPEATABLE_SECTIONS, renderRepeatableSections } from './repeatable-sections/index.js';
 
-let _el      = null;
 let _pending = null;
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onApply: _apply, onCancel: _cancel });
-}
+const _el = {
+  modal:     document.getElementById('repeatableModal'),
+  title:     document.getElementById('repeatableModalTitle'),
+  body:      document.getElementById('repeatableModalBody'),
+  closeBtn:  document.getElementById('repeatableModalClose'),
+  cancelBtn: document.getElementById('repeatableModalCancel'),
+  applyBtn:  document.getElementById('repeatableModalApply'),
+};
+initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, repeatLink, setActive) {
   _pending = { node, repeatLink, setActive,

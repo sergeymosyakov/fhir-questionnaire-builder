@@ -4,13 +4,17 @@ import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 import { STATES_SECTIONS, renderStatesSections } from './states-sections/index.js';
 
-let _el      = null;
 let _pending = null;
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onApply: _apply, onCancel: _cancel });
-}
+const _el = {
+  modal:     document.getElementById('statesModal'),
+  title:     document.getElementById('statesModalTitle'),
+  body:      document.getElementById('statesModalBody'),
+  closeBtn:  document.getElementById('statesModalClose'),
+  cancelBtn: document.getElementById('statesModalCancel'),
+  applyBtn:  document.getElementById('statesModalApply'),
+};
+initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, statesLink, setActive) {
   _pending = { node, statesLink, setActive,

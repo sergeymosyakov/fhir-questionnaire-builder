@@ -4,13 +4,17 @@ import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 import { APPEARANCE_SECTIONS, renderAppearanceSections } from './appearance-sections/index.js';
 
-let _el      = null;
 let _pending = null;
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onApply: _apply, onCancel: _cancel });
-}
+const _el = {
+  modal:     document.getElementById('appearanceModal'),
+  title:     document.getElementById('appearanceModalTitle'),
+  body:      document.getElementById('appearanceModalBody'),
+  closeBtn:  document.getElementById('appearanceModalClose'),
+  cancelBtn: document.getElementById('appearanceModalCancel'),
+  applyBtn:  document.getElementById('appearanceModalApply'),
+};
+initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, styleLink, setActive) {
   _pending = { node, styleLink, setActive,

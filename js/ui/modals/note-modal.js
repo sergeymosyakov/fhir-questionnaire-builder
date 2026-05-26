@@ -8,15 +8,19 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 
-let _el      = null;
 let _pending = null; // { node, noteLink, setActive, draftNote }
 
-// ── module API ────────────────────────────────────────────────────────────────
+const _el = {
+  modal:     document.getElementById('designNoteModal'),
+  title:     document.getElementById('designNoteModalTitle'),
+  body:      document.getElementById('designNoteModalBody'),
+  closeBtn:  document.getElementById('designNoteModalClose'),
+  cancelBtn: document.getElementById('designNoteModalCancel'),
+  applyBtn:  document.getElementById('designNoteModalApply'),
+};
+initModal(_el, { onApply: _apply, onCancel: _cancel });
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onApply: _apply, onCancel: _cancel });
-}
+// ── module API ─────────────────────────────────────────────────────────────
 
 export function open(node, noteLink, setActive) {
   _pending = { node, noteLink, setActive, draftNote: node._designNote || '' };

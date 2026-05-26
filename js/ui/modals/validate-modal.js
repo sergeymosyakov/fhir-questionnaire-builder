@@ -7,12 +7,14 @@
 
 import { initModal, openModal, closeModal } from './modal-base.js';
 
-let _el = null;
-
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onCancel: _close });
-}
+const _el = {
+  modal:    document.getElementById('validateModal'),
+  title:    document.getElementById('validateModalTitle'),
+  body:     document.getElementById('validateModalBody'),
+  footer:   document.getElementById('validateModalFooter'),
+  closeBtn: document.getElementById('validateModalClose'),
+};
+initModal(_el, { onCancel: _close });
 
 export function show(title, issues, mode, { onExport, onNavigate } = {}) {
   _el.title.textContent = issues.length === 0 ? 'Validate — All good' : title;

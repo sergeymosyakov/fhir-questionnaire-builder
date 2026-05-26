@@ -20,7 +20,6 @@ import { initModal, setModalTitle, openModal, closeModal } from '../modal-base.j
 import { ITEM_TYPES } from './data.js';
 import { ANSWER_TYPE_SECTIONS } from './index.js';
 
-let _el      = null;
 let _pending = null;
 
 // Replace a node in the reactive tree array (recursive, in-place splice).
@@ -32,12 +31,17 @@ function _replaceInTree(treeArr, nodeId, newNode) {
   return false;
 }
 
-// ── module API ────────────────────────────────────────────────────────────────
+const _el = {
+  modal:     document.getElementById('answerTypeModal'),
+  title:     document.getElementById('answerTypeModalTitle'),
+  body:      document.getElementById('answerTypeModalBody'),
+  closeBtn:  document.getElementById('answerTypeModalClose'),
+  cancelBtn: document.getElementById('answerTypeModalCancel'),
+  applyBtn:  document.getElementById('answerTypeModalApply'),
+};
+initModal(_el, { onApply: _apply, onCancel: _cancel });
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onApply: _apply, onCancel: _cancel });
-}
+// ── module API ─────────────────────────────────────────────────────────────
 
 export function open(node, typeLink, setActive) {
   _pending = Object.assign(

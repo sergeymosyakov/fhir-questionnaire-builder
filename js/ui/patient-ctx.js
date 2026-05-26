@@ -1,7 +1,7 @@
 // Patient context — preset profiles and manual edit modal.
 // Manages SDC variables: %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb
 // init(els, questVariables, onAfterApply) — wire once at startup.
-import { tree, effect } from '../state.js';
+import { tree, effect, questVariables } from '../state.js';
 import { createCustomSelect } from './custom-select.js';
 import { initModal, openModal, closeModal } from './modals/modal-base.js';
 
@@ -85,9 +85,65 @@ function applyPreset(preset, questVariables) {
 }
 
 // ── Module-level state ────────────────────────────────────────────────────────
-let _el = null;
-let _questVariables = null;
 let _inputs = null;
+
+const _el = {
+  presetBtn:  document.getElementById('patientPresetBtn'),
+  presetMenu: document.getElementById('patientPresetMenu'),
+  modal:      document.getElementById('patientCtxModal'),
+  closeBtn:   document.getElementById('patientCtxClose'),
+  applyBtn:   document.getElementById('patientCtxApply'),
+  body:       document.getElementById('patientCtxBody'),
+};
+
+// Seed defaults for any patient vars not yet present
+for (const def of PATIENT_VARS) {
+  if (!getEntry(questVariables, def.name)) {
+    setEntry(questVariables, def.name, toExpr(def.type, def.default));
+  }
+}
+
+initModal({
+  modal:    _el.modal,
+  closeBtn: _el.closeBtn,
+  applyBtn: _el.applyBtn,
+}, { onApply: _applyPatientModal, onCancel: _cancelPatientModal });
+
+// ── Preset dropdown ─────────────────────────────────────────────
+if (_el.presetBtn && _el.presetMenu) {
+  _el.presetBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (_el.presetMenu.style.display !== 'none') { _el.presetMenu.style.display = 'none'; return; }
+    // Position with fixed coords — top-panel has overflow-x:auto which clips absolute children
+    const rect = _el.presetBtn.getBoundingClientRect();
+    _el.presetMenu.style.position = 'fixed';
+    _el.presetMenu.style.top  = (rect.bottom + 2) + 'px';
+    _el.presetMenu.style.left = rect.left + 'px';
+    _el.presetMenu.style.display = 'block';
+  });
+
+  _el.presetMenu.addEventListener('click', e => {
+    const item = e.target.closest('[data-preset]');
+    if (!item) return;
+    const presetId = item.dataset.preset;
+    _el.presetMenu.style.display = 'none';
+    if (presetId === 'custom') { _openPatientModal(); return; }
+    const preset = PATIENT_PRESETS.find(p => p.id === presetId);
+    if (!preset) return;
+    applyPreset(preset, questVariables);
+    _el.presetBtn.textContent = '\uD83D\uDC64 ' + preset.shortLabel + ' \u25BE';
+    _doAfterApply();
+  });
+
+  // Close on outside click
+  document.addEventListener('click', () => { _el.presetMenu.style.display = 'none'; });
+}
+
+// Disable when no questionnaire loaded
+effect(() => {
+  const disabled = tree.length === 0;
+  if (_el.presetBtn) _el.presetBtn.disabled = disabled;
+});
 
 const _doAfterApply = () => {
   document.dispatchEvent(new CustomEvent('reinit-form'));
@@ -106,7 +162,7 @@ function _openPatientModal() {
     lbl.className = 'patient-ctx-lbl';
     lbl.textContent = def.label;
 
-    const entry = getEntry(_questVariables, def.name);
+    const entry = getEntry(questVariables, def.name);
     const current = entry ? fromExpr(def.type, entry.expression) : def.default;
 
     let inp;
@@ -148,7 +204,7 @@ function _applyPatientModal() {
     if (def.type === 'checkbox') raw = inp.checked;
     else if (inp._csel)          raw = inp._csel.getValue();
     else                          raw = inp.value;
-    setEntry(_questVariables, name, toExpr(def.type, raw));
+    setEntry(questVariables, name, toExpr(def.type, raw));
   }
   _inputs = null;
   closeModal(_el.modal);
@@ -159,58 +215,3 @@ function _cancelPatientModal() {
   _inputs = null;
   closeModal(_el.modal);
 }
-
-export function init(els, questVariables) {
-  _el = els;
-  _questVariables = questVariables;
-
-  // Seed defaults for any patient vars not yet present
-  for (const def of PATIENT_VARS) {
-    if (!getEntry(questVariables, def.name)) {
-      setEntry(questVariables, def.name, toExpr(def.type, def.default));
-    }
-  }
-
-  initModal({
-    modal:    _el.modal,
-    closeBtn: _el.closeBtn,
-    applyBtn: _el.applyBtn,
-  }, { onApply: _applyPatientModal, onCancel: _cancelPatientModal });
-
-  // ── Preset dropdown ───────────────────────────────────────────────────────
-  if (_el.presetBtn && _el.presetMenu) {
-    _el.presetBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      if (_el.presetMenu.style.display !== 'none') { _el.presetMenu.style.display = 'none'; return; }
-      // Position with fixed coords — top-panel has overflow-x:auto which clips absolute children
-      const rect = _el.presetBtn.getBoundingClientRect();
-      _el.presetMenu.style.position = 'fixed';
-      _el.presetMenu.style.top  = (rect.bottom + 2) + 'px';
-      _el.presetMenu.style.left = rect.left + 'px';
-      _el.presetMenu.style.display = 'block';
-    });
-
-    _el.presetMenu.addEventListener('click', e => {
-      const item = e.target.closest('[data-preset]');
-      if (!item) return;
-      const presetId = item.dataset.preset;
-      _el.presetMenu.style.display = 'none';
-      if (presetId === 'custom') { _openPatientModal(); return; }
-      const preset = PATIENT_PRESETS.find(p => p.id === presetId);
-      if (!preset) return;
-      applyPreset(preset, questVariables);
-      _el.presetBtn.textContent = '\uD83D\uDC64 ' + preset.shortLabel + ' \u25BE';
-      _doAfterApply();
-    });
-
-    // Close on outside click
-    document.addEventListener('click', () => { _el.presetMenu.style.display = 'none'; });
-  }
-
-  // Disable when no questionnaire loaded
-  effect(() => {
-    const disabled = tree.length === 0;
-    if (_el.presetBtn) _el.presetBtn.disabled = disabled;
-  });
-}
-

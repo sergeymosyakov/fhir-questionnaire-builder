@@ -9,13 +9,17 @@ import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js
 import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { ITEM_SECTIONS, renderItemSections } from './item-sections/index.js';
 
-let _el      = null;
 let _pending = null;
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onApply: _apply, onCancel: _cancel });
-}
+const _el = {
+  modal:     document.getElementById('codesModal'),
+  title:     document.getElementById('codesModalTitle'),
+  body:      document.getElementById('codesModalBody'),
+  closeBtn:  document.getElementById('codesModalClose'),
+  cancelBtn: document.getElementById('codesModalCancel'),
+  applyBtn:  document.getElementById('codesModalApply'),
+};
+initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, link, setActive) {
   _pending = Object.assign(

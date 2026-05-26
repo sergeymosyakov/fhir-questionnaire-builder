@@ -7,13 +7,17 @@ import { refreshExprIcons } from '../../render-preview.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 import { EXPR_SECTIONS, makeExprField, renderExprSections } from './expression-sections/index.js';
 
-let _el      = null;
 let _pending = null;
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onApply: _apply, onCancel: _cancel });
-}
+const _el = {
+  modal:     document.getElementById('expressionModal'),
+  title:     document.getElementById('exprModalTitle'),
+  body:      document.getElementById('exprModalBody'),
+  closeBtn:  document.getElementById('exprModalClose'),
+  cancelBtn: document.getElementById('exprModalCancel'),
+  applyBtn:  document.getElementById('exprModalApply'),
+};
+initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(cfg) {
   _pending = { mode: 'single', cfg, draft: cfg.node[cfg.field] || '' };

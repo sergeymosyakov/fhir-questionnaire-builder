@@ -25,15 +25,16 @@ const TYPE_ICONS = {
   'qr':            '\u1F4CB', // 📋
 };
 
-let _el       = null;
 let _cache    = null; // fetched library data
 let _onSelect = null;
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onCancel: _close });
-  _el.closeBtn.addEventListener('click', _close);
-}
+const _el = {
+  modal:     document.getElementById('libraryModal'),
+  closeBtn:  document.getElementById('libraryModalClose'),
+  cancelBtn: document.getElementById('libraryModalCloseBtn'),
+  body:      document.getElementById('libraryModalBody'),
+};
+initModal(_el, { onCancel: _close });
 
 /**
  * Open the library modal.

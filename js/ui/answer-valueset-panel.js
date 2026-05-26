@@ -1,24 +1,25 @@
 // ── Answer ValueSet panel ─────────────────────────────────────────────────────
 // Collapsible read-only card showing all answerValueSet URLs referenced by items.
 // Each chip opens a read-only JSON viewer with the URL and which items use it.
-// init(elements, treeRef, showJsonFn) — wire DOM once at startup.
 // refresh() — walk tree, collect unique URLs, re-render chips.
+import { tree } from '../state.js';
 
-let _el       = null;
-let _tree     = null;
 let _collapsed = false;
 
-export function init(elements, treeRef) {
-  _el       = elements;
-  _tree     = treeRef;
-  _el.toggle.addEventListener('click', _toggleCollapse);
-  document.addEventListener('questionnaire-loaded', refresh);
-  document.addEventListener('questionnaire-cleared', refresh);
-  refresh();
-}
+const _el = {
+  card:     document.getElementById('answerValueSetCard'),
+  toggle:   document.getElementById('answerValueSetCardToggle'),
+  chipList: document.getElementById('answerValueSetCardChips'),
+  count:    document.getElementById('answerValueSetCardCount'),
+};
+
+_el.toggle.addEventListener('click', _toggleCollapse);
+document.addEventListener('questionnaire-loaded', refresh);
+document.addEventListener('questionnaire-cleared', refresh);
+refresh();
 
 export function refresh() {
-  const urlMap = _collectUrls(_tree);
+  const urlMap = _collectUrls(tree);
   const count  = urlMap.size;
   _el.card.style.display  = count > 0 ? '' : 'none';
   _el.count.textContent   = count > 0 ? String(count) : '';

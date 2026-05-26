@@ -13,13 +13,17 @@ import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { initModal, setModalTitle, openModal, closeModal } from './modal-base.js';
 import { createCustomSelect } from '../custom-select.js';
 
-let _el      = null;
 let _pending = null; // { node, visLink, setActive, draft }
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onApply: _apply, onCancel: _cancel });
-}
+const _el = {
+  modal:     document.getElementById('showWhenModal'),
+  title:     document.getElementById('showWhenModalTitle'),
+  body:      document.getElementById('showWhenModalBody'),
+  closeBtn:  document.getElementById('showWhenModalClose'),
+  cancelBtn: document.getElementById('showWhenModalCancel'),
+  applyBtn:  document.getElementById('showWhenModalApply'),
+};
+initModal(_el, { onApply: _apply, onCancel: _cancel });
 
 export function open(node, visLink, setActive, ctx, buildVisFn) {
   // Deep-clone only the fields that buildVisPanel can mutate

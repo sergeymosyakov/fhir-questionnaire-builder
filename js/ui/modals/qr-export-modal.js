@@ -25,15 +25,19 @@ document.addEventListener('qr-loaded', e => {
   _qrMeta.author  = e.detail.author  || '';
 });
 
-let _el    = null;
 let _state = null; // { fileName, status, subject, author }
 
-// ── module API ────────────────────────────────────────────────────────────────
+const _el = {
+  modal:     document.getElementById('qrExportModal'),
+  title:     document.getElementById('qrExportModalTitle'),
+  body:      document.getElementById('qrExportModalBody'),
+  closeBtn:  document.getElementById('qrExportModalClose'),
+  cancelBtn: document.getElementById('qrExportModalCancel'),
+  applyBtn:  document.getElementById('qrExportModalApply'),
+};
+initModal(_el, { onApply: _export, onCancel: _cancel });
 
-export function init(elements) {
-  _el = elements;
-  initModal(elements, { onApply: _export, onCancel: _cancel });
-}
+// ── module API ─────────────────────────────────────────────────────────────
 
 export function open(suggestedName) {
   _state = {

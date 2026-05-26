@@ -497,3 +497,4 @@ export function initPreview(elements) {
     search.refresh(); // re-apply search marks if a query is active
   });
 }
+document.addEventListener('reinit-form', reinitForm);
