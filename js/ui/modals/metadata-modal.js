@@ -1,6 +1,5 @@
 // ── Questionnaire Properties (metadata) modal ────────────────────────────────
 import { Modal } from './modal-base.js';
-import { questMeta } from '../../state.js';
 import { renderMetaSections } from './metadata-sections/index.js';
 
 class MetadataModal extends Modal {
@@ -10,6 +9,7 @@ class MetadataModal extends Modal {
   }
 
   open() {
+    const questMeta = Modal._svc.questMeta;
     this._pending = {
       id:            questMeta.id,
       url:           questMeta.url,
@@ -50,6 +50,7 @@ class MetadataModal extends Modal {
   _apply() {
     if (!this._pending) return;
     const p = this._pending;
+    const questMeta = Modal._svc.questMeta;
     questMeta.id            = p.id.trim();
     questMeta.url           = p.url.trim();
     questMeta.version       = p.version.trim();

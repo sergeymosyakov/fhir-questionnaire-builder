@@ -1,12 +1,13 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
-import { tree, rawFhir, values } from '../state.js';
+import { tree, rawFhir, values, questMeta } from '../state.js';
 import { _formTick, _bulkUpdate } from '../render-bus.js';
 import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
-import { navigateToPreview } from '../render-preview.js';
+import { navigateToPreview, refreshExprIcons, getLastCtx } from '../render-preview.js';
 import { findAndRemove } from '../utils.js';
 import { GroupNode } from '../nodes/group-node.js';
 import { BaseNode } from '../nodes/base-node.js';
+import { Modal } from '../ui/modals/modal-base.js';
 
 // Inject reactive state into _shared (triggerCalcRecalc + renderTree need them)
 sharedInit({ tree, formTick: _formTick, rawFhir, values, renderTree });
@@ -20,6 +21,14 @@ BaseNode.configure({
   triggerCalcRecalc,
   tickForm:   () => _formTick.value++,
   formatSeg,
+});
+
+// ── Inject app services into modal layer ──────────────────────────────────────
+Modal.configure({
+  triggerCalcRecalc,
+  refreshExprIcons,
+  getLastCtx,
+  questMeta,
 });
 
 // ── Event listeners ───────────────────────────────────────────────────────────

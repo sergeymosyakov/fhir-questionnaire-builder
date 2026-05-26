@@ -1,9 +1,7 @@
 // ── Constraint edit modal ─────────────────────────────────────────────────────
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
-import { triggerCalcRecalc } from '../../builder/_shared.js';
 import * as explainModal from './explain-modal.js';
-import { getLastCtx } from '../../render-preview.js';
 import { createCustomSelect } from '../custom-select.js';
 
 class ConstraintModal extends Modal {
@@ -28,7 +26,7 @@ class ConstraintModal extends Modal {
     const { node, draft, constraintLink, setActive } = this._pending;
     node.constraint = draft;
     setActive(constraintLink, draft.length > 0);
-    triggerCalcRecalc();
+    Modal._svc.triggerCalcRecalc();
     this._cancel();
   }
 
@@ -110,7 +108,7 @@ class ConstraintModal extends Modal {
       explainBtn.dataset.tipBody  = 'Evaluate the FHIRPath expression and show the result tree';
       explainBtn.onclick = () => {
         const fp = window.fhirpath;
-        const { qr, env } = getLastCtx();
+        const { qr, env } = Modal._svc.getLastCtx();
         if (fp && exprInp.value.trim()) explainModal.show(exprInp.value.trim(), fp, qr, env);
       };
 

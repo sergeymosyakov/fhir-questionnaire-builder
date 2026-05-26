@@ -1,7 +1,6 @@
 // ── Repeatable (item.repeats + cardinality) edit modal ────────────────────────
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
-import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { REPEATABLE_SECTIONS, renderRepeatableSections } from './repeatable-sections/index.js';
 
 class RepeatableModal extends Modal {
@@ -24,7 +23,7 @@ class RepeatableModal extends Modal {
     const { node, repeatLink, setActive } = this._pending;
     REPEATABLE_SECTIONS.forEach(s => s.commit(this._pending, node));
     setActive(repeatLink, !!node.repeats);
-    triggerCalcRecalc();
+    Modal._svc.triggerCalcRecalc();
     this._cancel();
   }
 

@@ -2,7 +2,6 @@
 // Sections live in item-sections/; this file is a thin lifecycle wrapper.
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
-import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { ITEM_SECTIONS, renderItemSections } from './item-sections/index.js';
 
 class CodesModal extends Modal {
@@ -29,7 +28,7 @@ class CodesModal extends Modal {
     const isActive = !!(node._codes?.length) || !!node._definition ||
                      !!(node._supportLinks?.length) || !!(node._unknownExtensions?.length);
     setActive(link, isActive);
-    triggerCalcRecalc();
+    Modal._svc.triggerCalcRecalc();
     this._cancel();
   }
 

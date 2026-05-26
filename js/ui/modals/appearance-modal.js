@@ -1,7 +1,6 @@
 // ── Appearance (rendering-style) edit modal ───────────────────────────────────
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
-import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { APPEARANCE_SECTIONS, renderAppearanceSections } from './appearance-sections/index.js';
 
 class AppearanceModal extends Modal {
@@ -24,7 +23,7 @@ class AppearanceModal extends Modal {
     const { node, styleLink, setActive } = this._pending;
     APPEARANCE_SECTIONS.forEach(s => s.commit(this._pending, node));
     setActive(styleLink, !!(node._renderStyle || node._renderXhtml));
-    triggerCalcRecalc();
+    Modal._svc.triggerCalcRecalc();
     this._cancel();
   }
 

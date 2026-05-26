@@ -28,6 +28,19 @@ function _mk(tag, className) {
 }
 
 export class Modal {
+  /** Builder services injected at app startup via Modal.configure(). */
+  static _svc = {
+    triggerCalcRecalc: null,  // () => void — recalculates computed values
+    refreshExprIcons:  null,  // () => void — refreshes expression icons in preview
+    getLastCtx:        null,  // () => {qr, env} — last preview render context
+    questMeta:         null,  // reactive metadata object (state.js)
+  };
+
+  /** Called once at startup (builder/index.js) to inject app-layer services. */
+  static configure(services) {
+    Object.assign(Modal._svc, services);
+  }
+
   constructor({ cancelLabel = 'Cancel', applyLabel = 'Apply', maxWidth = null, bodyClass = null } = {}) {
     this.backdrop = _mk('div', 'modal-backdrop');
     this.backdrop.style.display = 'none';

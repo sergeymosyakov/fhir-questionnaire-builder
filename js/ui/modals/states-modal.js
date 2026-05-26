@@ -1,7 +1,6 @@
 // ── States modal (Required / Read-only / Hidden / Collapsible) ───────────────
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
-import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { STATES_SECTIONS, renderStatesSections } from './states-sections/index.js';
 
 class StatesModal extends Modal {
@@ -25,7 +24,7 @@ class StatesModal extends Modal {
     STATES_SECTIONS.forEach(s => s.commit(this._pending, node));
     const anyActive = node.mandatory === true || !!node._readOnly || !!node._hidden || !!node._collapsible;
     setActive(statesLink, anyActive);
-    triggerCalcRecalc();
+    Modal._svc.triggerCalcRecalc();
     this._cancel();
   }
 

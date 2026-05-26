@@ -3,8 +3,6 @@
 // enableWhenExpression. Uses a draft pattern — changes are only committed on Apply.
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
-import { refreshExprIcons } from '../../render-preview.js';
-import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { createCustomSelect } from '../custom-select.js';
 import { buildVisPanel } from '../../builder/panels.js';
 
@@ -50,7 +48,7 @@ class ShowWhenModal extends Modal {
     this.body.appendChild(ddRow);
 
     super.open();
-    refreshExprIcons();
+    Modal._svc.refreshExprIcons();
   }
 
   _apply() {
@@ -65,7 +63,7 @@ class ShowWhenModal extends Modal {
       delete node._disabledDisplay;
     }
     setActive(visLink, node.enableWhen.length > 0 || !!node.enableWhenExpression);
-    triggerCalcRecalc();
+    Modal._svc.triggerCalcRecalc();
     this._cancel();
   }
 

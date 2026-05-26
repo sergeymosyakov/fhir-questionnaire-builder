@@ -1,7 +1,6 @@
 // ── Default Value (initial[]) edit modal ──────────────────────────────────────
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
-import { triggerCalcRecalc } from '../../builder/_shared.js';
 import { INITIAL_SECTIONS, renderInitialSections } from './initial-sections/index.js';
 
 class InitialModal extends Modal {
@@ -24,7 +23,7 @@ class InitialModal extends Modal {
     const { node, initLink, setActive } = this._pending;
     INITIAL_SECTIONS.forEach(s => s.commit(this._pending, node));
     setActive(initLink, node._initialValue !== undefined && node._initialValue !== '');
-    triggerCalcRecalc();
+    Modal._svc.triggerCalcRecalc();
     this._cancel();
   }
 

@@ -4,7 +4,6 @@
 //   openDual(node, link, setActive, cb) — dual-field (items: calc + init in one modal)
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
-import { refreshExprIcons } from '../../render-preview.js';
 import { EXPR_SECTIONS, makeExprField, renderExprSections } from './expression-sections/index.js';
 
 class ExpressionModal extends Modal {
@@ -55,7 +54,7 @@ class ExpressionModal extends Modal {
       setActive(link, !!(node._calculatedExpr || node._initialExpr));
       if (onApply) onApply();
     }
-    refreshExprIcons();
+    Modal._svc.refreshExprIcons();
     this._cancel();
   }
 
