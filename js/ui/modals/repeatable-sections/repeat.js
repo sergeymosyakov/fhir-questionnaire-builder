@@ -1,6 +1,6 @@
 import { RepeatableSection } from './base-section.js';
 import { REPEATABLE_SECTIONS } from './registry.js';
-import { getValue, setValue, deleteValue } from '../../../state.js';
+import { Modal } from '../modal-base.js';
 
 class RepeatSection extends RepeatableSection {
   initPending(node) {
@@ -137,11 +137,11 @@ class RepeatSection extends RepeatableSection {
         node._maxOccurs = max;
         // Trim extra rows that now exceed maxOccurs
         const id       = node.id;
-        const currentN = getValue(id + '$$n') || 0;
+        const currentN = Modal._svc.getValue(id + '$$n') || 0;
         if (currentN + 1 > max) {
           const keepN = max - 1;
-          for (let i = keepN + 1; i <= currentN; i++) deleteValue(id + '$$' + i);
-          if (keepN <= 0) deleteValue(id + '$$n'); else setValue(id + '$$n', keepN);
+          for (let i = keepN + 1; i <= currentN; i++) Modal._svc.deleteValue(id + '$$' + i);
+          if (keepN <= 0) Modal._svc.deleteValue(id + '$$n'); else Modal._svc.setValue(id + '$$n', keepN);
         }
       } else {
         delete node._maxOccurs;

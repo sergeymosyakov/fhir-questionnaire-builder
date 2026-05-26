@@ -1,7 +1,7 @@
 import { InitialSection } from './base-section.js';
 import { INITIAL_SECTIONS } from './registry.js';
 import { parseOptions } from '../../../utils.js';
-import { setValue, deleteValue } from '../../../state.js';
+import { Modal } from '../modal-base.js';
 import { createCustomSelect } from '../../custom-select.js';
 import { createDatePicker } from '../../date-picker.js';
 
@@ -128,10 +128,10 @@ class InitValueSection extends InitialSection {
     const v = pending.draftValue;
     if (v !== undefined && v !== '') {
       node._initialValue = v;
-      setValue(node.id, v);
+      Modal._svc.setValue(node.id, v);
     } else {
       delete node._initialValue;
-      deleteValue(node.id);
+      Modal._svc.deleteValue(node.id);
     }
   }
 }

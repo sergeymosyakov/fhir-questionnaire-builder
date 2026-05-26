@@ -1,8 +1,13 @@
 // ── Questionnaire Variables panel ─────────────────────────────────────────────
 // Collapsible card (above tree) + edit modal for sdc-questionnaire-variable.
-// refresh() — re-render chip list and card visibility (call after import/reset).
+// configure({questVariables}) — call once at startup; then refresh() on events.
 import { Modal } from './modals/modal-base.js';
-import { questVariables } from '../state.js';
+
+let _questVariables = null;
+export function configure({ questVariables }) {
+  _questVariables = questVariables;
+  refresh();
+}
 
 let _collapsed = false;
 let _draft     = null; // working copy while modal is open; null when closed
@@ -31,11 +36,10 @@ document.addEventListener('questionnaire-loaded', refresh);
 document.addEventListener('questionnaire-cleared', refresh);
 document.addEventListener('patient-ctx-applied', refresh);
 
-refresh();
-
 export function refresh() {
-  _el.count.textContent = questVariables.length > 0 ? String(questVariables.length) : '';
-  _el.count.style.display = questVariables.length > 0 ? '' : 'none';
+  if (!_questVariables) return;
+  _el.count.textContent = _questVariables.length > 0 ? String(_questVariables.length) : '';
+  _el.count.style.display = _questVariables.length > 0 ? '' : 'none';
   _renderChips();
 }
 
@@ -51,7 +55,7 @@ function _toggleCollapse() {
 
 function _renderChips() {
   _el.chipList.innerHTML = '';
-  for (const v of questVariables) {
+  for (const v of _questVariables) {
     if (!v.name) continue;
     const chip = document.createElement('span');
     chip.className = 'variables-chip';
@@ -68,7 +72,7 @@ function _renderChips() {
 
 function _openModal() {
   // Deep-copy current vars into draft; all edits go to draft until Apply.
-  _draft = questVariables.map(v => ({ name: v.name, expression: v.expression }));
+  _draft = _questVariables.map(v => ({ name: v.name, expression: v.expression }));
   _renderModalBody();
   _modal.open();
 }
@@ -90,8 +94,8 @@ function _applyModal() {
     _renderModalBody(true);
     return;
   }
-  // Commit draft → reactive questVariables.
-  questVariables.splice(0, questVariables.length, ..._draft.map(v => ({ name: v.name, expression: v.expression })));
+  // Commit draft → reactive _questVariables.
+  _questVariables.splice(0, _questVariables.length, ..._draft.map(v => ({ name: v.name, expression: v.expression })));
   _draft = null;
   _modal.close();
   refresh();

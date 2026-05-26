@@ -1,9 +1,24 @@
 // Patient context — preset profiles and manual edit modal.
 // Manages SDC variables: %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb
-// init(els, questVariables, onAfterApply) — wire once at startup.
-import { tree, effect, questVariables } from '../state.js';
+// configure({tree, effect, questVariables}) — call once at startup.
 import { createCustomSelect } from './custom-select.js';
 import { Modal } from './modals/modal-base.js';
+
+let _tree = null, _effect = null, _questVariables = null;
+export function configure({ tree, effect, questVariables }) {
+  _tree = tree; _effect = effect; _questVariables = questVariables;
+  // Seed defaults for any patient vars not yet present
+  for (const def of PATIENT_VARS) {
+    if (!getEntry(_questVariables, def.name)) {
+      setEntry(_questVariables, def.name, toExpr(def.type, def.default));
+    }
+  }
+  // Disable preset button reactively when no questionnaire is loaded
+  _effect(() => {
+    const disabled = _tree.length === 0;
+    if (_el.presetBtn) _el.presetBtn.disabled = disabled;
+  });
+}
 
 const PATIENT_APPLY_EVENT = 'patient-ctx-applied';
 
@@ -101,12 +116,6 @@ _modal.body.insertAdjacentHTML('beforebegin',
 _modal._apply  = _applyPatientModal;
 _modal._cancel = _cancelPatientModal;
 
-// Seed defaults for any patient vars not yet present
-for (const def of PATIENT_VARS) {
-  if (!getEntry(questVariables, def.name)) {
-    setEntry(questVariables, def.name, toExpr(def.type, def.default));
-  }
-}
 
 // ── Preset dropdown ─────────────────────────────────────────────
 if (_el.presetBtn && _el.presetMenu) {
@@ -129,7 +138,7 @@ if (_el.presetBtn && _el.presetMenu) {
     if (presetId === 'custom') { _openPatientModal(); return; }
     const preset = PATIENT_PRESETS.find(p => p.id === presetId);
     if (!preset) return;
-    applyPreset(preset, questVariables);
+    applyPreset(preset, _questVariables);
     _el.presetBtn.textContent = '\uD83D\uDC64 ' + preset.shortLabel + ' \u25BE';
     _doAfterApply();
   });
@@ -137,12 +146,6 @@ if (_el.presetBtn && _el.presetMenu) {
   // Close on outside click
   document.addEventListener('click', () => { _el.presetMenu.style.display = 'none'; });
 }
-
-// Disable when no questionnaire loaded
-effect(() => {
-  const disabled = tree.length === 0;
-  if (_el.presetBtn) _el.presetBtn.disabled = disabled;
-});
 
 const _doAfterApply = () => {
   document.dispatchEvent(new CustomEvent('reinit-form'));
@@ -161,7 +164,7 @@ function _openPatientModal() {
     lbl.className = 'patient-ctx-lbl';
     lbl.textContent = def.label;
 
-    const entry = getEntry(questVariables, def.name);
+  const entry = getEntry(_questVariables, def.name);
     const current = entry ? fromExpr(def.type, entry.expression) : def.default;
 
     let inp;
@@ -203,7 +206,7 @@ function _applyPatientModal() {
     if (def.type === 'checkbox') raw = inp.checked;
     else if (inp._csel)          raw = inp._csel.getValue();
     else                          raw = inp.value;
-    setEntry(questVariables, name, toExpr(def.type, raw));
+    setEntry(_questVariables, name, toExpr(def.type, raw));
   }
   _inputs = null;
   _modal.close();

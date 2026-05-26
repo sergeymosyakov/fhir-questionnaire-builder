@@ -13,11 +13,17 @@ import * as statusBadge from './ui/status-badge.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './render-builder.js';
 import { navigateToPreview, initPreview } from './render-preview.js';
 import './ui/modals/index.js';
-import './ui/variables-panel.js';
-import './ui/contained-panel.js';
-import './ui/answer-valueset-panel.js';
-import './ui/patient-ctx.js';
+import * as variablesPanel    from './ui/variables-panel.js';
+import * as containedPanel    from './ui/contained-panel.js';
+import * as answerValueSetPanel from './ui/answer-valueset-panel.js';
+import * as patientCtx        from './ui/patient-ctx.js';
 import { setFileName, navigateToNode } from './app-load.js';
+
+// ── Inject state into UI panels ─────────────────────────────────────────
+containedPanel.configure({ questContained });
+answerValueSetPanel.configure({ tree });
+variablesPanel.configure({ questVariables });
+patientCtx.configure({ tree, effect, questVariables });
 
 // Buttons
 document.getElementById('clearFormBtn').onclick    = _clearForm;

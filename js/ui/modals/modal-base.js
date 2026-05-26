@@ -30,10 +30,16 @@ function _mk(tag, className) {
 export class Modal {
   /** Builder services injected at app startup via Modal.configure(). */
   static _svc = {
-    triggerCalcRecalc: null,  // () => void — recalculates computed values
-    refreshExprIcons:  null,  // () => void — refreshes expression icons in preview
-    getLastCtx:        null,  // () => {qr, env} — last preview render context
-    questMeta:         null,  // reactive metadata object (state.js)
+    triggerCalcRecalc: null,  // () => void
+    refreshExprIcons:  null,  // () => void
+    getLastCtx:        null,  // () => {qr, env}
+    questMeta:         null,  // reactive metadata object
+    tree:              null,  // reactive tree array
+    values:            null,  // reactive values map
+    getValue:          null,  // (key) => any
+    setValue:          null,  // (key, val) => void
+    deleteValue:       null,  // (key) => void
+    questContained:    null,  // reactive contained[] array
   };
 
   /** Called once at startup (builder/index.js) to inject app-layer services. */

@@ -1,5 +1,5 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
-import { tree, rawFhir, values, questMeta } from '../state.js';
+import { tree, rawFhir, values, questMeta, questContained, getValue, setValue, deleteValue } from '../state.js';
 import { _formTick, _bulkUpdate } from '../render-bus.js';
 import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
@@ -29,6 +29,12 @@ Modal.configure({
   refreshExprIcons,
   getLastCtx,
   questMeta,
+  tree,
+  values,
+  getValue,
+  setValue,
+  deleteValue,
+  questContained,
 });
 
 // ── Event listeners ───────────────────────────────────────────────────────────

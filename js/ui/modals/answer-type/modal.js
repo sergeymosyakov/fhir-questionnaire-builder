@@ -2,8 +2,6 @@
 // Centered modal for editing item type, options, and answerValueSet.
 import { MODAL_REGISTRY } from '../modal-registry.js';
 import { Modal } from '../modal-base.js';
-import { tree, values, deleteValue } from '../../../state.js';
-import { triggerCalcRecalc, renderTree } from '../../../builder/_shared.js';
 import { createItemNode } from '../../../nodes/index.js';
 import { createCustomSelect } from '../../custom-select.js';
 import { ITEM_TYPES } from './data.js';
@@ -42,15 +40,15 @@ class AnswerTypeModal extends Modal {
 
     if (node.itemType !== this._pending.draftType) {
       const id = node.id;
-      deleteValue(id);
-      const n = values[id + '$$n'] || 0;
-      for (let i = 1; i <= n; i++) deleteValue(id + '$$' + i);
-      delete values[id + '$$n'];
+      Modal._svc.deleteValue(id);
+      const n = Modal._svc.values[id + '$$n'] || 0;
+      for (let i = 1; i <= n; i++) Modal._svc.deleteValue(id + '$$' + i);
+      delete Modal._svc.values[id + '$$n'];
     }
 
     const newNode = createItemNode(this._pending.draftType, { id: node.id });
     Object.assign(newNode, node, { itemType: this._pending.draftType });
-    _replaceInTree(tree, node.id, newNode);
+    _replaceInTree(Modal._svc.tree, node.id, newNode);
     node = newNode;
 
     if (!node.supportsRepeat() && node.repeats) {
@@ -60,8 +58,8 @@ class AnswerTypeModal extends Modal {
     }
 
     ANSWER_TYPE_SECTIONS.forEach(s => s.commit(this._pending, node));
-    renderTree();
-    triggerCalcRecalc();
+    document.dispatchEvent(new CustomEvent('builder:rerender'));
+    Modal._svc.triggerCalcRecalc();
     this._cancel();
   }
 

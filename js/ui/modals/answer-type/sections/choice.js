@@ -1,8 +1,8 @@
 import { AnswerTypeSection } from '../base-section.js';
 import { ANSWER_TYPE_SECTIONS } from '../registry.js';
-import { questContained } from '../../../../state.js';
 import { resolveContainedValueSet } from '../../../../fhir/import.js';
 import { createCustomSelect } from '../../../custom-select.js';
+import { Modal } from '../../modal-base.js';
 import { CHOICE_TYPES } from '../data.js';
 import { parseOptions } from '../../../../utils.js';
 
@@ -112,7 +112,7 @@ class ChoiceSection extends AnswerTypeSection {
     avsSubLbl.dataset.tipFhir  = 'Questionnaire.item.answerValueSet';
     avsSubLbl.dataset.tipSpec  = 'R4';
 
-    const containedVS = [...questContained].filter(r => r.resourceType === 'ValueSet');
+    const containedVS = [...Modal._svc.questContained].filter(r => r.resourceType === 'ValueSet');
     const avsItems = [
       { value: '', label: '\u2014 none \u2014' },
       ...containedVS.map(vs => ({ value: '#' + vs.id, label: '#' + vs.id + (vs.title ? ' \u2014 ' + vs.title : '') })),
@@ -206,7 +206,7 @@ class ChoiceSection extends AnswerTypeSection {
     if (CHOICE_TYPES.has(node.itemType)) {
       if (pending.draftAVS) {
         node._answerValueSet = pending.draftAVS;
-        node.options = resolveContainedValueSet(questContained, pending.draftAVS);
+        node.options = resolveContainedValueSet(Modal._svc.questContained, pending.draftAVS);
         delete node._optionOrdinals;
         delete node._optionPrefixes;
       } else {

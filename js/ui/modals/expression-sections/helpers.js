@@ -1,4 +1,4 @@
-import { refreshExprIcons } from '../../../render-preview.js';
+import { Modal } from '../modal-base.js';
 
 /**
  * Build a label-row + auto-resize textarea for a FHIRPath expression.
@@ -32,7 +32,7 @@ export function makeExprField(labelText, exprValue, testid, placeholder, onInput
   ta.oninput = () => {
     icon.dataset.exprIcon = ta.value.trim();
     clearTimeout(ta._d);
-    ta._d = setTimeout(refreshExprIcons, 400);
+    ta._d = setTimeout(() => Modal._svc.refreshExprIcons(), 400);
     onInput(ta.value);
   };
   frag.appendChild(ta);
