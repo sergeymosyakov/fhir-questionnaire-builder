@@ -12,7 +12,6 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 - [ ] **More sample data** — 2–3 additional questionnaires covering different complexity levels, with documented expected PASS/FAIL outcomes per patient profile
 - [ ] **`sdc-questionnaire-answerExpression`** — dynamic answer options derived from FHIRPath over current form values (no server required); SDC extension
 - [ ] **tx.fhir.org ValueSet expansion** — call HL7's public terminology server directly from the browser (`$expand` operation); user pastes an external ValueSet URL and gets live answer options without any backend; biggest UX gap vs. commercial tools
-- [x] **Undo / redo** — Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z; debounced 400ms snapshots via `js/ui/history.js`; buttons in left-panel-header; max 50 entries; resets on load/clear
 - [ ] **Copy / paste nodes** — duplicate a question or an entire group (with children) anywhere in the tree
 
 ## Later
@@ -26,6 +25,7 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Completed
 
+- [x] **View Options menu** — consolidated linkId, prefix, badges, and hidden item toggles into a single dropdown menu next to Preview button; menu stays open when clicking checkboxes; CSS modifier classes (`.preview--no-linkid`, `.preview--no-prefix`, `.preview--no-badges`, `.preview--no-hidden`) control visibility; comprehensive e2e test coverage (12 tests)
 - [x] **Undo / redo** — Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z; debounced 400ms snapshots via `js/ui/history.js`; buttons in left-panel-header; max 50 entries; resets on load/clear
 - [x] **Load confirm dialog** — `_askBeforeLoad()` in `app-load.js`; shown when tree non-empty before any load operation; Cancel/Escape keeps current tree
 - [x] **Per-questionnaire autosave slots** — each questionnaire saves to its own key (`url` or auto-generated UUID identifier) instead of a single slot; prevents accidental overwrite
