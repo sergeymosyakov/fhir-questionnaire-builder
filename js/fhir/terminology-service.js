@@ -155,6 +155,23 @@ class TerminologyService {
   }
 
   /**
+   * Test whether a specific ValueSet URL can be expanded by a terminology server.
+   * Returns the number of codes on success, or an error message on failure.
+   * @param {string} vsUrl      Canonical ValueSet URL to expand.
+   * @param {string} [serverUrl] Terminology server base URL (falls back to default).
+   * @returns {Promise<{ok: boolean, message: string, count?: number}>}
+   */
+  async testExpand(vsUrl, serverUrl) {
+    if (!vsUrl) return { ok: false, message: 'No URL provided' };
+    try {
+      const codes = await this.expandValueSet(vsUrl, serverUrl || DEFAULT_TERMINOLOGY_SERVER);
+      return { ok: true, message: `${codes.length} code${codes.length !== 1 ? 's' : ''}`, count: codes.length };
+    } catch (err) {
+      return { ok: false, message: err.message };
+    }
+  }
+
+  /**
    * Expand all external answerValueSets in the tree and cache results on each node.
    * Results are stored in node._vsCache (array of options, empty on failure).
    * @param {Array}  treeNodes  Root nodes of the questionnaire tree.

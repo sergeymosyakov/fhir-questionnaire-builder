@@ -80,6 +80,8 @@
 .modal-btn--cancel:hover { background: var(--c-hover); }
 .modal-btn--apply  { background: var(--c-accent); color: #fff; border-color: var(--c-accent); font-weight: 600; }
 .modal-btn--apply:hover  { opacity: .85; }
+.modal-btn--secondary { color: var(--c-accent); border-color: var(--c-accent); background: color-mix(in srgb, var(--c-accent) 8%, transparent); }
+.modal-btn--secondary:hover { background: color-mix(in srgb, var(--c-accent) 16%, transparent); }
 .modal-title-label   { font-weight: 700; }
 .modal-title-subject { font-weight: 400; color: var(--c-text-2); margin-left: 4px; }
 
@@ -218,6 +220,7 @@
 [data-testid="metadataModal"] .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
 [data-testid="codesModal"] .modal-body    { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
 [data-testid="qrExportModal"] .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+[data-testid="terminologyModal"] .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
 .meta-modal-row      { display: flex; align-items: flex-end; gap: 8px; }
 .meta-modal-lbl      { flex: 0 0 90px; font-size: 13px; font-weight: 500; line-height: 26px; padding-bottom: 1px; }
 .meta-modal-inp      { flex: 1; height: 26px; padding: 0 6px; font-size: 13px;
@@ -232,6 +235,7 @@
 
 /* Terminology modal — Test connection */
 .term-test-wrap        { display: flex; align-items: center; gap: 8px; }
+.at-modal-sub .term-test-wrap { margin-top: 6px; }
 .term-test-status      { font-size: 12px; color: var(--c-muted); }
 .term-test-status--loading { color: var(--c-muted); font-style: italic; }
 .term-test-status--ok  { color: #2a9d2a; }

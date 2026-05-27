@@ -6,6 +6,7 @@ import { Modal } from '../../modal-base.js';
 import { CHOICE_TYPES } from '../data.js';
 import { parseOptions } from '../../../../utils.js';
 import { createOptionsEditor } from '../../../answer-options-editor.js';
+import { terminologyService } from '../../../../fhir/terminology-service.js';
 
 function _buildRows(node) {
   const ords    = node._optionOrdinals || {};
@@ -97,6 +98,42 @@ class ChoiceSection extends AnswerTypeSection {
     avsUrlInp.style.display  = isExternalAVS ? 'block' : 'none';
     avsUrlInp.oninput = () => { pending.draftAVS = avsUrlInp.value.trim(); };
 
+    // ── Test expansion button ────────────────────────────────────────────────
+    const avsTestWrap = document.createElement('div');
+    avsTestWrap.className    = 'term-test-wrap';
+    avsTestWrap.style.display = isExternalAVS ? 'flex' : 'none';
+
+    const avsTestBtn = document.createElement('button');
+    avsTestBtn.type          = 'button';
+    avsTestBtn.className     = 'modal-btn modal-btn--secondary';
+    avsTestBtn.textContent   = 'Test expansion';
+    avsTestBtn.dataset.testid = 'avs-test-btn';
+
+    const avsTestStatus = document.createElement('span');
+    avsTestStatus.className     = 'term-test-status';
+    avsTestStatus.dataset.testid = 'avs-test-status';
+
+    avsTestBtn.addEventListener('click', async () => {
+      const url = pending.draftAVS;
+      if (!url) {
+        avsTestStatus.className   = 'term-test-status term-test-status--err';
+        avsTestStatus.textContent = '\u2717 No URL entered';
+        return;
+      }
+      avsTestStatus.className   = 'term-test-status term-test-status--loading';
+      avsTestStatus.textContent = 'Expanding\u2026';
+      avsTestBtn.disabled = true;
+      const result = await terminologyService.testExpand(
+        url,
+        Modal._svc.questMeta?.preferredTermServer,
+      );
+      avsTestBtn.disabled = false;
+      avsTestStatus.className   = `term-test-status term-test-status--${result.ok ? 'ok' : 'err'}`;
+      avsTestStatus.textContent = (result.ok ? '\u2713 ' : '\u2717 ') + result.message;
+    });
+
+    avsTestWrap.append(avsTestBtn, avsTestStatus);
+
     const avsDrop = createCustomSelect({
       items:     avsItems,
       value:     avsInitVal,
@@ -104,16 +141,19 @@ class ChoiceSection extends AnswerTypeSection {
       testid:    'avs-select',
       onChange:  v => {
         if (v === '__ext__') {
-          avsUrlInp.style.display = 'block';
+          avsUrlInp.style.display  = 'block';
+          avsTestWrap.style.display = 'flex';
           pending.draftAVS = avsUrlInp.value.trim();
         } else {
-          avsUrlInp.style.display = 'none';
+          avsUrlInp.style.display  = 'none';
+          avsTestWrap.style.display = 'none';
+          avsTestStatus.textContent = '';
           pending.draftAVS = v;
         }
       },
     });
 
-    avsSection.append(avsSubLbl, avsDrop.el, avsUrlInp);
+    avsSection.append(avsSubLbl, avsDrop.el, avsUrlInp, avsTestWrap);
     section.appendChild(avsSection);
 
     // ── answerExpression sub-section ─────────────────────────────────────────

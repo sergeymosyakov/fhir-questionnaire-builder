@@ -82,7 +82,7 @@ class TerminologyModal extends Modal {
 
     const testBtn = document.createElement('button');
     testBtn.type      = 'button';
-    testBtn.className = 'modal-btn';
+    testBtn.className = 'modal-btn modal-btn--secondary';
     testBtn.textContent = 'Test connection';
     testBtn.dataset.testid = 'terminology-test-btn';
 
