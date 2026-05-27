@@ -86,6 +86,8 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   if (rs) node._renderStyle = rs.valueString || '';
   const rx = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-xhtml'));
   if (rx) node._renderXhtml = rx.valueString || '';
+  const rm = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-markdown'));
+  if (rm) node._renderMarkdown = rm.valueMarkdown || rm.valueString || '';
 
   // SDC calculatedExpression
   const calcExpr = (fhirItem.extension || []).find(
@@ -300,6 +302,8 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     if (rs) node._renderStyle = rs.valueString || '';
     const rx = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-xhtml'));
     if (rx) node._renderXhtml = rx.valueString || '';
+    const rm = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-markdown'));
+    if (rm) node._renderMarkdown = rm.valueMarkdown || rm.valueString || '';
     if (fhirItem.prefix) node._prefix = fhirItem.prefix;
     if (fhirItem.definition) node._definition = fhirItem.definition;
     if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;

@@ -1,6 +1,7 @@
 export { APPEARANCE_SECTIONS } from './registry.js';
 import './style.js';
 import './xhtml.js';
+import './markdown.js';
 import { APPEARANCE_SECTIONS } from './registry.js';
 
 export function renderAppearanceSections(container, pending) {

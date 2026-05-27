@@ -238,11 +238,14 @@ export class BaseNode {
     return tag;
   }
 
-  // Apply XHTML or plain text to label element.
+  // Apply XHTML / markdown / plain text to label element.
+  // Priority: rendering-xhtml > rendering-markdown > plain text.
   _applyLabelContent(el) {
-    const dp = window.DOMPurify;
-    if (this._renderXhtml && dp) {
-      el.innerHTML = dp.sanitize(this._renderXhtml);
+    const { domPurify, marked } = BaseNode._svc;
+    if (this._renderXhtml && domPurify) {
+      el.innerHTML = domPurify.sanitize(this._renderXhtml);
+    } else if (this._renderMarkdown && domPurify && marked) {
+      el.innerHTML = domPurify.sanitize(marked.parse(this._renderMarkdown));
     } else {
       el.textContent = this.title;
     }

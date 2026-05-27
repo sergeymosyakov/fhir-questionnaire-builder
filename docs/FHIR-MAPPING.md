@@ -43,6 +43,7 @@ Every node in the tree is either a **group** or an **item**:
   repeats:             boolean,          // FHIR item.repeats — multi-row input in preview
   _renderStyle:        string,           // inline CSS (from rendering-style extension)
   _renderXhtml:        string,           // raw XHTML markup (from rendering-xhtml extension; sanitized via DOMPurify and rendered as innerHTML in preview)
+  _renderMarkdown:     string,           // Markdown text (from rendering-markdown extension; parsed by marked.js + sanitized via DOMPurify; rendering-xhtml takes priority)
   _calculatedExpr:     string,           // FHIRPath expression (SDC calculatedExpression)
   _initialExpr:        string,           // FHIRPath expression (SDC initialExpression) — evaluated once on import + Re-init
   _readOnly:           boolean,          // FHIR item.readOnly
@@ -256,6 +257,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-style` | standard | `_renderStyle` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-xhtml` | standard | `_renderXhtml` | Yes |
+| `http://hl7.org/fhir/StructureDefinition/rendering-markdown` | standard | `_renderMarkdown` | Yes (parsed by marked.js + DOMPurify; xhtml takes priority) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression` | SDC | `_calculatedExpr` | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression` | SDC | `_initialExpr` | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression` | SDC | `_answerExpression` (dynamic answer options for choice/radio/open-choice) | Yes (SDC) |
@@ -395,7 +397,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
 | `questionnaire-optionExclusive` | ❌ Not handled | On `answerOption.extension`; marks an option as exclusive — if selected, all other options must be deselected (e.g., "None of the above"). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive`. |
 | `questionnaire-unitOption` | ❌ Not handled | Specifies a single allowed unit for `quantity` items (R4 core extension; multiple instances enumerate all allowed units). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption`. Distinct from `questionnaire-unitValueSet` (which references a ValueSet). |
-| `rendering-markdown` | ❌ Not handled | Markdown-formatted equivalent of `item.text` for clients that support markdown rendering. URL: `http://hl7.org/fhir/StructureDefinition/rendering-markdown`. Silently dropped on import (we support `rendering-xhtml` and `rendering-style` but not markdown). |
 | `questionnaire-itemControl` — non-radio codes | ❌ Not handled | Only the `radio-button` code is handled. The following itemControl codes are silently treated as the default control: `check-box` (multi-select choice), `autocomplete`, `lookup`, `slider` (control-driven), `spinner`, `text-area`, `text-box`. |
 
 ### SDC extensions — not implemented (no server required)

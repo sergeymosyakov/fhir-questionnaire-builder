@@ -163,10 +163,11 @@ function nodeToFHIRItem(node) {
   if (node.itemType === 'radio')
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'radio-button' }] } });
 
-  // _renderStyle / _renderXhtml → _text.extension[]
+  // _renderStyle / _renderXhtml / _renderMarkdown → _text.extension[]
   const _textExts = [];
-  if (node._renderStyle) _textExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/rendering-style', valueString: node._renderStyle });
-  if (node._renderXhtml)  _textExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/rendering-xhtml',  valueString: node._renderXhtml });
+  if (node._renderStyle)    _textExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/rendering-style',    valueString:   node._renderStyle });
+  if (node._renderXhtml)    _textExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/rendering-xhtml',    valueString:   node._renderXhtml });
+  if (node._renderMarkdown) _textExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/rendering-markdown', valueMarkdown: node._renderMarkdown });
   if (_textExts.length) fhirItem._text = { extension: _textExts };
 
   if (node.type === 'group') {

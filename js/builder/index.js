@@ -22,6 +22,8 @@ BaseNode.configure({
   triggerCalcRecalc,
   tickForm:   () => _formTick.value++,
   formatSeg,
+  domPurify:  window.DOMPurify,
+  marked:     window.marked,
 });
 
 // ── Inject app services into modal layer ──────────────────────────────────────
