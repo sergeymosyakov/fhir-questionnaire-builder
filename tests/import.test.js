@@ -25,8 +25,8 @@ vi.mock('../js/state.js', () => ({
   questMeta:      _questMeta,
   _bulkUpdate:    _bulkUpdate,
   resetSeq:       vi.fn(),
-  makeGroup:      vi.fn(title => ({ type: 'group', id: 'g', title, children: [], enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', mandatory: null, logicWithParent: 'AND' })),
-  makeItem:       vi.fn(title => ({ type: 'item',  id: 'i', title, itemType: 'text', options: '', mandatory: null, enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', constraint: [] })),
+  makeGroup:      vi.fn(title => ({ type: 'group', id: 'g', title, children: [], enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', mandatory: false, logicWithParent: 'AND' })),
+  makeItem:       vi.fn(title => ({ type: 'item',  id: 'i', title, itemType: 'text', options: '', mandatory: false, enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', constraint: [] })),
   setValue:       (id, val) => { _values[id] = val; },
   clearAllValues: () => { Object.keys(_values).forEach(k => delete _values[k]); },
 }));

@@ -83,7 +83,6 @@ function nodeToFHIRItem(node) {
   if (node._definition) fhirItem.definition = node._definition;
   if (node._codes && node._codes.length) fhirItem.code = node._codes;
   if (node.mandatory === true)  fhirItem.required = true;
-  else if (node.mandatory === false) fhirItem.required = false;
 
   // item.initial[] — multi-value for repeating items; single value otherwise
   if (node.type === 'item') {

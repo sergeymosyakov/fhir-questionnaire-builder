@@ -357,12 +357,24 @@ test.describe('Builder creates items → preview reacts', () => {
     const node       = page.locator(`[data-node-id="${itemId}"]`);
     const previewRow = page.locator(`[data-preview-id="${itemId}"]`);
 
-    await expect(previewRow.getByTestId('preview-required-star')).toBeVisible();
+    // new items default to optional (mandatory: false per FHIR spec)
+    await expect(previewRow.getByTestId('preview-optional-badge')).toBeVisible();
+    await expect(previewRow.getByTestId('preview-required-star')).not.toBeVisible();
 
+    // mark as required
     await node.getByTestId('action-states').click();
     const reqModal = page.locator('[data-testid="statesModal"]');
     await expect(reqModal).toBeVisible();
+    await reqModal.locator('[data-testid="states-required-sel"]').click();
+    await page.locator('[data-testid="csel-drop"] [data-val="true"]').click();
+    await page.locator('[data-testid="statesModalApply"]').click();
 
+    await expect(previewRow.getByTestId('preview-required-star')).toBeVisible();
+    await expect(previewRow.getByTestId('preview-optional-badge')).not.toBeVisible();
+
+    // mark back as optional
+    await node.getByTestId('action-states').click();
+    await expect(reqModal).toBeVisible();
     await reqModal.locator('[data-testid="states-required-sel"]').click();
     await page.locator('[data-testid="csel-drop"] [data-val="false"]').click();
     await page.locator('[data-testid="statesModalApply"]').click();

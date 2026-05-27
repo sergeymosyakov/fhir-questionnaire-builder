@@ -102,13 +102,8 @@ describe('buildFHIRObject — required', () => {
     expect(q.item[0].required).toBe(true);
   });
 
-  it('exports required:false when mandatory=false', () => {
+  it('omits required when mandatory=false', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', mandatory: false }]);
-    expect(q.item[0].required).toBe(false);
-  });
-
-  it('omits required when mandatory=null', () => {
-    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', mandatory: null }]);
     expect(q.item[0].required).toBeUndefined();
   });
 });
@@ -413,7 +408,7 @@ describe('buildFHIRObject — answerValueSet', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Diet', itemType: 'select',
       _answerValueSet: 'http://example.org/vs/diet',
-      enableWhen: [], constraint: [], options: '', mandatory: null,
+      enableWhen: [], constraint: [], options: '', mandatory: false,
     }]);
     expect(q.item[0].answerValueSet).toBe('http://example.org/vs/diet');
   });
@@ -421,7 +416,7 @@ describe('buildFHIRObject — answerValueSet', () => {
   it('does not emit answerValueSet when not set on node', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Procedure', itemType: 'select',
-      enableWhen: [], constraint: [], options: 'a=Alpha', mandatory: null,
+      enableWhen: [], constraint: [], options: 'a=Alpha', mandatory: false,
     }]);
     expect(q.item[0].answerValueSet).toBeUndefined();
   });
@@ -431,7 +426,7 @@ describe('buildFHIRObject — answerValueSet', () => {
       id: 'q1', type: 'item', title: 'Diet', itemType: 'select',
       _answerValueSet: '#vs-diet',
       options: 'veg=Vegetarian,omn=Omnivore',
-      enableWhen: [], constraint: [], mandatory: null,
+      enableWhen: [], constraint: [], mandatory: false,
     }]);
     expect(q.item[0].answerValueSet).toBe('#vs-diet');
     expect(q.item[0].answerOption).toBeUndefined();

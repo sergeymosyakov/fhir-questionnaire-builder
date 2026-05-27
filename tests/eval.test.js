@@ -98,7 +98,7 @@ describe('evaluateNode — _hidden', () => {
 // ── evaluateNode — no enableWhen (always visible) ─────────────────────────────
 describe('evaluateNode — no conditions', () => {
   it('item with no enableWhen is always visible', () => {
-    const node = { id: 'q1', type: 'item', mandatory: null, enableWhen: [], enableWhenExpression: '' };
+    const node = { id: 'q1', type: 'item', mandatory: false, enableWhen: [], enableWhenExpression: '' };
     const results = [];
     const r = evaluateNode(node, {}, results);
     expect(r.visible).toBe(true);
@@ -107,7 +107,7 @@ describe('evaluateNode — no conditions', () => {
   });
 
   it('group with no enableWhen is always visible', () => {
-    const node = { id: 'g1', type: 'group', enableWhen: [], enableWhenExpression: '', mandatory: null, logicWithParent: 'AND', children: [] };
+    const node = { id: 'g1', type: 'group', enableWhen: [], enableWhenExpression: '', mandatory: false, logicWithParent: 'AND', children: [] };
     const results = [];
     const r = evaluateNode(node, {}, results);
     expect(r.visible).toBe(true);
@@ -118,7 +118,7 @@ describe('evaluateNode — no conditions', () => {
 describe('evaluateNode — enableWhen single condition', () => {
   it('hides item when answerBoolean condition not met', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q0', operator: '=', answerBoolean: true }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -130,7 +130,7 @@ describe('evaluateNode — enableWhen single condition', () => {
 
   it('shows item when answerBoolean condition met', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q0', operator: '=', answerBoolean: true }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -142,7 +142,7 @@ describe('evaluateNode — enableWhen single condition', () => {
 
   it('hides item when answerString condition not met', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q0', operator: '=', answerString: 'male' }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -154,7 +154,7 @@ describe('evaluateNode — enableWhen single condition', () => {
 
   it('shows item when answerString condition met', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q0', operator: '=', answerString: 'male' }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -166,7 +166,7 @@ describe('evaluateNode — enableWhen single condition', () => {
 
   it('handles != operator', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q0', operator: '!=', answerString: 'no' }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -177,7 +177,7 @@ describe('evaluateNode — enableWhen single condition', () => {
 
   it('handles >= operator with integer', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [{ question: 'age', operator: '>=', answerInteger: 18 }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -189,7 +189,7 @@ describe('evaluateNode — enableWhen single condition', () => {
 
   it('handles exists:true operator', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q0', operator: 'exists', answerBoolean: true }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -201,7 +201,7 @@ describe('evaluateNode — enableWhen single condition', () => {
 
   it('handles exists:false operator', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q0', operator: 'exists', answerBoolean: false }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -213,7 +213,7 @@ describe('evaluateNode — enableWhen single condition', () => {
 
   it('handles answerCoding by code', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q0', operator: '=', answerCoding: { code: 'y', display: 'Yes' } }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -228,7 +228,7 @@ describe('evaluateNode — enableWhen single condition', () => {
 describe('evaluateNode — enableBehavior AND / OR', () => {
   it('ALL (AND): hides when any condition not met', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [
         { question: 'q0', operator: '=', answerBoolean: true },
         { question: 'q2', operator: '=', answerString: 'yes' },
@@ -242,7 +242,7 @@ describe('evaluateNode — enableBehavior AND / OR', () => {
 
   it('ALL (AND): shows when all conditions met', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [
         { question: 'q0', operator: '=', answerBoolean: true },
         { question: 'q2', operator: '=', answerString: 'yes' },
@@ -256,7 +256,7 @@ describe('evaluateNode — enableBehavior AND / OR', () => {
 
   it('ANY (OR): shows when any one condition met', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [
         { question: 'q0', operator: '=', answerBoolean: true },
         { question: 'q2', operator: '=', answerString: 'yes' },
@@ -270,7 +270,7 @@ describe('evaluateNode — enableBehavior AND / OR', () => {
 
   it('ANY (OR): hides when no condition met', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [
         { question: 'q0', operator: '=', answerBoolean: true },
         { question: 'q2', operator: '=', answerString: 'yes' },
@@ -287,7 +287,7 @@ describe('evaluateNode — enableBehavior AND / OR', () => {
 describe('evaluateNode — showDimmed', () => {
   it('sets showDimmed when enableWhen conditions not met', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q0', operator: '=', answerBoolean: true }],
       enableBehavior: 'all', enableWhenExpression: '',
       _enableWhenText: 'Diet program = Yes',
@@ -302,7 +302,7 @@ describe('evaluateNode — showDimmed', () => {
 
   it('showDimmed false when no enableWhen', () => {
     const node = {
-      id: 'q1', type: 'item', mandatory: null,
+      id: 'q1', type: 'item', mandatory: false,
       enableWhen: [], enableBehavior: 'all', enableWhenExpression: '',
     };
     const results = [];
@@ -317,7 +317,7 @@ describe('evaluateNode — group', () => {
   it('group with all visible children → visible', () => {
     const node = {
       id: 'g1', type: 'group', enableWhen: [], enableWhenExpression: '',
-      mandatory: null, logicWithParent: 'AND',
+      mandatory: false, logicWithParent: 'AND',
       children: [
         { id: 'c1', type: 'item', mandatory: false, enableWhen: [], enableWhenExpression: '' },
         { id: 'c2', type: 'item', mandatory: false, enableWhen: [], enableWhenExpression: '' },
@@ -334,8 +334,8 @@ describe('evaluateNode — group', () => {
       id: 'g1', type: 'group',
       enableWhen: [{ question: 'q0', operator: '=', answerBoolean: true }],
       enableBehavior: 'all', enableWhenExpression: '',
-      mandatory: null, logicWithParent: 'AND',
-      children: [{ id: 'c1', type: 'item', mandatory: null, enableWhen: [], enableWhenExpression: '' }],
+      mandatory: false, logicWithParent: 'AND',
+      children: [{ id: 'c1', type: 'item', mandatory: false, enableWhen: [], enableWhenExpression: '' }],
     };
     _values['q0'] = false;
     const results = [];
@@ -349,7 +349,7 @@ describe('evaluateNode — group', () => {
   it('AND group ok only when all visible children ok', () => {
     const node = {
       id: 'g1', type: 'group', enableWhen: [], enableWhenExpression: '',
-      mandatory: null, logicWithParent: 'AND',
+      mandatory: false, logicWithParent: 'AND',
       children: [
         { id: 'c1', type: 'item', mandatory: true, enableWhen: [], enableWhenExpression: '' },
         { id: 'c2', type: 'item', mandatory: false, enableWhen: [], enableWhenExpression: '' },
@@ -364,7 +364,7 @@ describe('evaluateNode — group', () => {
     // logicWithParent controls group-level pass/fail aggregation, not visibility
     const node = {
       id: 'g1', type: 'group', enableWhen: [], enableWhenExpression: '',
-      mandatory: null, logicWithParent: 'OR',
+      mandatory: false, logicWithParent: 'OR',
       children: [
         { id: 'c1', type: 'item', mandatory: false, enableWhen: [], enableWhenExpression: '' },
       ],
@@ -378,7 +378,7 @@ describe('evaluateNode — group', () => {
 describe('evaluateNode — enableWhen with repeat values', () => {
   it('hidden when primary empty and no repeat rows', () => {
     const node = {
-      id: 'q2', type: 'item', mandatory: null,
+      id: 'q2', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q1', operator: '=', answerString: 'yes' }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -387,7 +387,7 @@ describe('evaluateNode — enableWhen with repeat values', () => {
 
   it('visible when condition met by primary value', () => {
     const node = {
-      id: 'q2', type: 'item', mandatory: null,
+      id: 'q2', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q1', operator: '=', answerString: 'yes' }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -397,7 +397,7 @@ describe('evaluateNode — enableWhen with repeat values', () => {
 
   it('visible when condition met by a repeat row (not primary)', () => {
     const node = {
-      id: 'q2', type: 'item', mandatory: null,
+      id: 'q2', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q1', operator: '=', answerString: 'yes' }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -409,7 +409,7 @@ describe('evaluateNode — enableWhen with repeat values', () => {
 
   it('hidden when no repeat row satisfies condition', () => {
     const node = {
-      id: 'q2', type: 'item', mandatory: null,
+      id: 'q2', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q1', operator: '=', answerString: 'yes' }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
@@ -422,7 +422,7 @@ describe('evaluateNode — enableWhen with repeat values', () => {
 
   it('exists:true satisfied by any repeat row', () => {
     const node = {
-      id: 'q2', type: 'item', mandatory: null,
+      id: 'q2', type: 'item', mandatory: false,
       enableWhen: [{ question: 'q1', operator: 'exists', answerBoolean: true }],
       enableBehavior: 'all', enableWhenExpression: '',
     };

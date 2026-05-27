@@ -24,7 +24,7 @@ describe('Node class shapes', () => {
     expect(n.repeats).toBe(false);
     expect(n.constraint).toEqual([]);
     expect(n.enableWhen).toEqual([]);
-    expect(n.mandatory).toBeNull();
+    expect(n.mandatory).toBe(false);
   });
 
   test('GroupNode has correct type and children', () => {

@@ -32,7 +32,7 @@ export class BaseNode {
     this.enableWhen           = data.enableWhen           ?? [];
     this.enableBehavior       = data.enableBehavior       ?? 'all';
     this.enableWhenExpression = data.enableWhenExpression ?? '';
-    this.mandatory            = data.mandatory            ?? null;
+    this.mandatory            = data.mandatory            ?? false;
   }
 
   // ── Builder service injection ─────────────────────────────────────────────

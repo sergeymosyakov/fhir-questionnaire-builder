@@ -17,7 +17,7 @@ const { validateTree } = await import('../js/fhir/validate.js');
 // ── helpers ───────────────────────────────────────────────────────────────────
 const makeItem = (overrides = {}) => ({
   id: 'q1', type: 'item', title: 'Question 1',
-  itemType: 'text', options: '', mandatory: null,
+  itemType: 'text', options: '', mandatory: false,
   ...overrides,
 });
 const makeGroup = (overrides = {}) => ({

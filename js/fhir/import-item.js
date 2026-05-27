@@ -27,7 +27,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   const node = createItemNode(itemType, {
     id:        fhirItem.linkId,
     title:     fhirItem.text || fhirItem.linkId || 'Item',
-    mandatory: fhirItem.required === undefined ? null : !!fhirItem.required,
+    mandatory: !!fhirItem.required,
   });
 
   node.options = fhirOptsToStr(fhirItem.answerOption);
@@ -299,7 +299,7 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     const node = createGroupNode({
       id:        fhirItem.linkId,
       title:     fhirItem.text || fhirItem.linkId || 'Group',
-      mandatory: fhirItem.required === undefined ? null : !!fhirItem.required,
+      mandatory: !!fhirItem.required,
     });
     applyVisibility(node, fhirItem, linkIdMap);
     const hasOrGroup = applyConstraints(node, fhirItem);
@@ -353,7 +353,7 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     const wrapper = createGroupNode({
       id:        fhirItem.linkId ? fhirItem.linkId + '-grp' : undefined,
       title:     fhirItem.text || fhirItem.linkId || 'Group',
-      mandatory: fhirItem.required === undefined ? null : !!fhirItem.required,
+      mandatory: !!fhirItem.required,
     });
     applyVisibility(wrapper, fhirItem, linkIdMap);
     wrapper.children.push(fhirQuestionToItem(fhirItem, linkIdMap, contained));
