@@ -10,6 +10,7 @@ import './contact.js';
 import './jurisdiction.js';
 import './resource-meta.js';
 import './codes.js';
+import './terminology-server.js';
 import { META_SECTIONS } from './registry.js';
 
 export function renderMetaSections(container, pending) {

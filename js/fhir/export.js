@@ -242,6 +242,11 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel', valueString: node._openLabel });
   }
 
+  // sdc-questionnaire-preferredTerminologyServer — per-item terminology server override
+  if (node._preferredTermServer) {
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer', valueUrl: node._preferredTermServer });
+  }
+
   // designNote — author-facing internal note (not shown to end users)
   if (node._designNote) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/designNote', valueMarkdown: node._designNote });
@@ -339,6 +344,10 @@ export function buildFHIRObject() {
       url: REPLACES_EXT_URL,
       valueCanonical: u.trim()
     })),
+    ...(questMeta.preferredTermServer?.trim() ? [{
+      url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer',
+      valueUrl: questMeta.preferredTermServer.trim()
+    }] : []),
     ...(questMeta._rawQuestExtensions || []).map(e => JSON.parse(JSON.stringify(e))),
   ];
   if (questExt.length) q.extension = questExt;

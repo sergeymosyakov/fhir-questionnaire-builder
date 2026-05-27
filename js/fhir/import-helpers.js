@@ -32,6 +32,7 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/StructureDefinition/mimeType',
   'http://hl7.org/fhir/StructureDefinition/designNote',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression',
+  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer',
 ]);
 
 export function _collectUnknownExtensions(fhirItem) {

@@ -87,6 +87,7 @@ export const questMeta = reactive({
   _rawMetaTag:      [],       // meta.tag[] — Coding[]; editable system/code/display rows
   _rawMetaSecurity: [],       // meta.security[] — Coding[]; editable system/code/display rows
   _rawQuestExtensions: [],    // Questionnaire.extension[] — non-variable extensions, preserved for round-trip
+  preferredTermServer: '',    // Questionnaire.extension[sdc-questionnaire-preferredTerminologyServer].valueUrl
 });
 
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.

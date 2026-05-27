@@ -41,6 +41,7 @@ class MetadataModal extends Modal {
       identifiers:    JSON.parse(JSON.stringify(questMeta._rawIdentifier   || [])),
       contacts:       JSON.parse(JSON.stringify(questMeta._rawContact      || [])),
       jurisdictions:  JSON.parse(JSON.stringify(questMeta._rawJurisdiction || [])),
+      preferredTermServer: questMeta.preferredTermServer || '',
     };
     this.setTitle('Questionnaire Properties', '');
     this.body.innerHTML = '';
@@ -84,6 +85,7 @@ class MetadataModal extends Modal {
     questMeta._rawContact = filteredContacts.length ? filteredContacts : null;
     const filteredJur = p.jurisdictions.filter(jur => jur.coding?.[0]?.code?.trim());
     questMeta._rawJurisdiction = filteredJur.length ? filteredJur : null;
+    questMeta.preferredTermServer = p.preferredTermServer.trim();
     this._cancel();
   }
 

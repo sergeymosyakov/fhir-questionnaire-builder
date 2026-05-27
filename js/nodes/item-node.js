@@ -336,6 +336,15 @@ export class ItemNode extends BaseNode {
     noteLink.onclick = () => MODAL_REGISTRY.get('note').open(node, noteLink, setActive);
     setActive(noteLink, !!node._designNote);
 
+    const termLink = node._makeActionLink('Terminology', 'terminology', {
+      title: 'Preferred Terminology Server',
+      body:  'Per-item override for the FHIR terminology server used to expand ValueSets. Falls back to the Questionnaire-level default.',
+      fhir:  'item.extension[sdc-questionnaire-preferredTerminologyServer].valueUrl',
+      spec:  'SDC',
+    }, actions);
+    termLink.onclick = () => MODAL_REGISTRY.get('terminology').open(node, termLink, setActive);
+    setActive(termLink, !!node._preferredTermServer);
+
     const headerTop = document.createElement('div');
     headerTop.className = 'node-header-top';
     headerTop.appendChild(titleWrap);
@@ -381,6 +390,7 @@ export class ItemNode extends BaseNode {
     setActive(styleLink,      !!(node._renderStyle || node._renderXhtml));
     setActive(constraintLink, !!(node.constraint?.length));
     setActive(codesLink,      !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.some(u => u)));
+    setActive(termLink,        !!node._preferredTermServer);
 
     wrapper.appendChild(div);
     return wrapper;

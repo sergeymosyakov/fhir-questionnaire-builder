@@ -285,6 +285,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/minLength` | standard | `_minLength` (minimum character count for `text`/`url` items; `minlength` HTML attribute enforced in preview; inline error `Min N chars` on blur when value is non-empty but shorter than limit; clears when limit is reached) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/maxSize` | standard | `_maxFileSizeMB` (maximum file size in MB for `attachment` items; validated on file selection; error tag shown when exceeded; `calcFormOk` returns `false`; hint shown below file button; editable in Answer Type modal) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/mimeType` | standard | `_mimeTypes` (0..* allowed MIME types for `attachment` items; sets `accept` attribute on file input; hint shown below file button; editable in Answer Type modal as comma-separated list) | Yes |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer` | SDC | `_preferredTermServer` — per-item preferred FHIR terminology server URL; editable via **Terminology** action on each item/group card; exported as `valueUrl`; Questionnaire-level default editable in Properties modal | Yes (SDC) |
 
 ---
 
@@ -408,7 +409,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `sdc-questionnaire-shortText` | ❌ | Abbreviated label for summary views |
 | `sdc-questionnaire-choiceColumn` | ❌ | Defines columns (FHIRPath expression, header label, forDisplay flag) for multi-column display of choice answer options in a dropdown. |
 | `sdc-questionnaire-itemMedia` / `sdc-questionnaire-answerMedia` | ❌ | Attaches media (image, audio, video) to an item or to a specific answer option. |
-| `sdc-questionnaire-preferredTerminologyServer` | ❌ | Hints at the preferred FHIR terminology server URL for ValueSet expansion for this item. |
 
 ### SDC extensions — population and extraction (out of scope)
 

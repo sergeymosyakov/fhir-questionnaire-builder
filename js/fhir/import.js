@@ -109,7 +109,10 @@ export function importFHIR(fhirJson, renderFn) {
       });
     }
   }
-  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL);
+  const PREF_TERM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer';
+  const prefTermQuestExt = (q.extension || []).find(e => e.url === PREF_TERM_URL);
+  questMeta.preferredTermServer = prefTermQuestExt?.valueUrl || '';
+  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL);
   questMeta._rawQuestExtensions = nonVarExts.length ? JSON.parse(JSON.stringify(nonVarExts)) : [];
 
   _bulkUpdate.value = true;

@@ -8,6 +8,7 @@ import './initial-modal.js';
 import './repeatable-modal.js';
 import './states-modal.js';
 import './note-modal.js';
+import './terminology-modal.js';
 import './answer-type/modal.js';
 import './metadata-modal.js';
 import './appearance-modal.js';

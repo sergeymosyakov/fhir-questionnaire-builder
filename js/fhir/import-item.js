@@ -212,6 +212,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     if (openLabelExt?.valueString) node._openLabel = openLabelExt.valueString;
   }
 
+  // sdc-questionnaire-preferredTerminologyServer — per-item terminology server override
+  const prefTermExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer'
+  );
+  if (prefTermExt?.valueUrl) node._preferredTermServer = prefTermExt.valueUrl;
+
   // designNote — author-facing internal note
   const designNoteExt = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/designNote'
@@ -321,6 +327,11 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
       e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible'
     );
     if (collapsibleExt?.valueCode) node._collapsible = collapsibleExt.valueCode;
+    // sdc-questionnaire-preferredTerminologyServer — per-item terminology server override (groups)
+    const groupPrefTermExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer'
+    );
+    if (groupPrefTermExt?.valueUrl) node._preferredTermServer = groupPrefTermExt.valueUrl;
     // designNote — author-facing internal note (groups)
     const groupDesignNoteExt = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/designNote'
