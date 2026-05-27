@@ -193,80 +193,9 @@
               data-tip-body="Removes the current questionnaire from the builder. You will be asked whether to export first.">&times;</button>
           </span>
         </span>
-        <span class="preview-header-actions">
-          <div class="load-wrap">
-            <button id="loadFhirBtn" type="button" class="btn-fhir" data-testid="load-fhir-btn"
-              data-tip-title="Load questionnaire"
-              data-tip-body="Open a FHIR R4 Questionnaire JSON from a file or pick one of the built-in samples. Replaces the current questionnaire (you will be asked to export first if unsaved changes exist)."
-              data-tip-fhir="Questionnaire (FHIR R4)"
-              data-tip-spec="R4">Questionnaires &#x25BE;</button>
-            <div class="load-menu" id="loadMenu" style="display:none">
-              <div class="load-menu-item" id="loadRecentItem" style="display:none">&#x1F552; Recent draft&#x2026;</div>
-              <div id="loadRecentSep" class="load-menu-sep" style="display:none"></div>
-              <div class="load-menu-item" id="loadFromFileItem">&#x1F4C2; From file&#x2026;</div>
-              <div class="load-menu-sep"></div>
-              <div class="load-menu-item" id="loadLibraryItem" data-testid="load-library-item">&#x1F4DA; From Library&#x2026;</div>
-              <div id="loadCloudSep" class="load-menu-sep" style="display:none"></div>
-              <div class="load-menu-item" id="loadCloudItem" data-testid="load-cloud-item" style="display:none">&#x2601;&#xFE0F; From Cloud&hellip;</div>
-            </div>
-          </div>
-          <div class="load-wrap" id="answersWrap" style="display:none">
-            <button id="answersBtn" type="button" class="btn-fhir" data-testid="answers-btn"
-              data-tip-title="Load Answers"
-              data-tip-body="Load answers from a QuestionnaireResponse file, or pick a sample response for the current questionnaire.">&#x1F4E5; Answers &#x25BE;</button>
-            <div class="load-menu" id="answersMenu" style="display:none">
-              <div class="load-menu-item" id="loadAnswersItem" data-testid="load-answers-from-file">&#x1F4C2; From file&#x2026;</div>
-              <div class="load-menu-sep"></div>
-              <div class="load-menu-item" id="loadAnswersLibraryItem" data-testid="load-answers-library-item">&#x1F4DA; From Library&#x2026;</div>
-            </div>
-          </div>
-          <div class="load-wrap" id="exportWrap" style="display:none">
-            <button id="exportBtn" type="button" class="btn-fhir btn-fhir-export" data-testid="export-btn"
-              data-tip-title="Save / Export"
-              data-tip-body="Save to cloud or export the questionnaire as FHIR R4 JSON, or download current answers as a QuestionnaireResponse.">&#x2B07; Save &#x25BE;</button>
-            <div class="load-menu" id="exportMenu" style="display:none">
-              <div class="load-menu-item" id="cloudSaveBtn" data-testid="cloud-save-btn" style="display:none">&#x2601;&#xFE0F; Cloud</div>
-              <div id="cloudSaveSep" class="load-menu-sep" style="display:none"></div>
-              <div class="load-menu-item" id="exportFhirItem" data-testid="export-fhir-item">&#x1F4C4; Questionnaire &middot; JSON file</div>
-              <div class="load-menu-item" id="exportQrItem" data-testid="export-qr-item">&#x1F4CB; QuestionnaireResponse &middot; JSON file</div>
-            </div>
-          </div>
-          <div class="load-wrap" id="previewModeWrap" style="display:none">
-            <button type="button" id="previewModeBtn" class="btn-fhir preview-mode-btn" data-testid="preview-mode-btn">&#x1F441;&#xFE0F; Preview &#x25BE;</button>
-            <div class="load-menu" id="previewModeMenu" style="display:none">
-              <div class="load-menu-item" id="previewModeItemPreview" data-mode="preview" data-testid="preview-mode-preview">&#x1F441;&#xFE0F; Preview</div>
-              <div class="load-menu-item" id="previewModeItemPatient" data-mode="patient" data-testid="preview-mode-patient">&#x1F464; Patient View</div>
-              <div class="load-menu-item" id="previewModeItemJson" data-mode="json" data-testid="preview-mode-json">&#x7B;&#x7D; FHIR JSON</div>
-            </div>
-          </div>
-          <div class="load-wrap" id="viewOptionsWrap" style="display:none">
-            <button type="button" id="viewOptionsBtn" class="btn-fhir" data-testid="view-options-btn"
-              data-tip-title="View Options"
-              data-tip-body="Toggle display of preview elements: linkId, prefix, badges, and hidden items.">&#x2699;&#xFE0F; View &#x25BE;</button>
-            <div class="load-menu" id="viewOptionsMenu" style="display:none">
-              <label class="load-menu-item load-menu-item--checkbox" data-testid="view-option-linkid">
-                <input type="checkbox" id="viewOptionLinkId" checked>
-                <span>Show linkId</span>
-              </label>
-              <label class="load-menu-item load-menu-item--checkbox" data-testid="view-option-prefix">
-                <input type="checkbox" id="viewOptionPrefix" checked>
-                <span>Show prefix</span>
-              </label>
-              <label class="load-menu-item load-menu-item--checkbox" data-testid="view-option-badges">
-                <input type="checkbox" id="viewOptionBadges" checked>
-                <span>Show badges</span>
-              </label>
-              <label class="load-menu-item load-menu-item--checkbox" data-testid="view-option-hidden">
-                <input type="checkbox" id="viewOptionHidden" checked>
-                <span>Show hidden</span>
-              </label>
-            </div>
-          </div>
-        </span>
+        <span id="headerActions" class="preview-header-actions"></span>
       </div>
       <div class="fhir-toolbar">
-        <input type="file" id="fhirFileInput" accept=".json,application/json" style="display:none">
-        <input type="file" id="qrFileInput" accept=".json,application/json" style="display:none">
         <div class="search-wrap" id="searchWrap" style="display:none">
           <input type="search" id="searchInput" class="search-input" placeholder="&#x1F50D; Search&hellip;" autocomplete="off">
           <button id="searchPrevBtn" type="button" class="search-nav-btn" data-tip-title="Previous match" data-tip-body="Jump to the previous search result. Keyboard shortcut: ↑ while search is focused.">&#x2191;</button>
@@ -274,24 +203,10 @@
           <span id="searchCounter" class="search-counter"></span>
         </div>
         <span class="fhir-toolbar-sep"></span>
-        <button id="validateBtn" class="btn-validate" style="display:none"
-          data-testid="validate-btn"
-          data-tip-title="Validate questionnaire"
-          data-tip-body="Checks for FHIR R4 issues: duplicate linkIds, empty titles, missing answer options, broken JS/FHIRPath expressions. Same check runs automatically on Export."
-          data-tip-fhir="Questionnaire (FHIR R4)"
-          data-tip-spec="R4">Validate</button>
         <span id="statusBadgeWrap" class="status-badge-wrap" style="display:none">
           <button id="statusBadgeBtn" type="button" class="status-badge" data-testid="status-badge-btn"></button>
           <div id="statusDropdown" class="status-dropdown" style="display:none"></div>
         </span>
-        <button id="previewCollapseAllBtn" type="button" class="btn-fhir btn-fhir--icon" data-testid="preview-collapse-all-btn"
-          data-tip-title="Collapse all groups"
-          data-tip-body="Hides child items under every group header. Useful for a high-level overview of the questionnaire structure."
-          style="display:none"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 L6 6 L2 6 M10 2 L10 6 L14 6 M14 10 L10 10 L10 14 M6 14 L6 10 L2 10"/></svg></button>
-        <button id="previewExpandAllBtn" type="button" class="btn-fhir btn-fhir--icon" data-testid="preview-expand-all-btn"
-          data-tip-title="Expand all groups"
-          data-tip-body="Shows all child items under every group header."
-          style="display:none"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10"/></svg></button>
       </div>
     </div>
     <div class="right-panel-body">

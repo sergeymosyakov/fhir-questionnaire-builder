@@ -182,7 +182,7 @@ class TerminologyService {
     const nodes = _collectExternalVsNodes(treeNodes);
     if (!nodes.length) return [];
     const failures = [];
-    await Promise.allSettled(nodes.map(async node => {
+    for (const node of nodes) {
       const server = this.getServer(node, questMeta);
       try {
         node._vsCache = await this.expandValueSet(node._answerValueSet, server);
@@ -194,7 +194,7 @@ class TerminologyService {
           : err.message;
         failures.push({ node, vsUrl: node._answerValueSet, server, error: msg });
       }
-    }));
+    }
     return failures;
   }
 }

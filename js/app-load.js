@@ -13,12 +13,34 @@ import * as autosave from './ui/autosave.js';
 import { expandAll, renderTreeAsync } from './builder/index.js';
 import { reinitForm, resetCollapsedFromTree } from './render-preview.js';
 import { terminologyService } from './fhir/terminology-service.js';
+import { answersMenu, saveMenu, toolsMenu } from './ui/header-actions.js';
+
 
 // ── File name display ─────────────────────────────────────────────────────────
-const _fileNameWrap = document.getElementById('loadedFileNameWrap');
-const _fileNameEl   = document.getElementById('loadedFileName');
+let _fileNameWrap, _fileNameEl;
+window.addEventListener('DOMContentLoaded', () => {
+  _fileNameWrap = document.getElementById('loadedFileNameWrap');
+  _fileNameEl   = document.getElementById('loadedFileName');
+
+  // Show toolbar sections and file name whenever the tree has nodes
+  effect(() => {
+    const hasNodes = tree.length > 0;
+    document.getElementById('variablesCard').style.display = hasNodes ? '' : 'none';
+    document.getElementById('questMetaCard').style.display = hasNodes ? '' : 'none';
+    answersMenu.el.style.display = hasNodes ? '' : 'none';
+    saveMenu.el.style.display    = hasNodes ? '' : 'none';
+    toolsMenu.el.style.display   = hasNodes ? '' : 'none';
+    if (hasNodes) {
+      _fileNameWrap.style.display = 'inline-flex';
+    } else {
+      _fileNameEl.textContent = '';
+      _fileNameWrap.style.display = 'none';
+    }
+  });
+});
 
 export function setFileName(name) {
+  if (!_fileNameEl || !_fileNameWrap) return;
   if (name) {
     _fileNameEl.textContent = name;
     _fileNameWrap.style.display = 'inline-flex';
@@ -27,22 +49,6 @@ export function setFileName(name) {
     _fileNameWrap.style.display = 'none';
   }
 }
-
-// Show toolbar sections and file name whenever the tree has nodes
-effect(() => {
-  const hasNodes = tree.length > 0;
-  document.getElementById('variablesCard').style.display = hasNodes ? '' : 'none';
-  document.getElementById('validateBtn').style.display   = hasNodes ? '' : 'none';
-  document.getElementById('exportWrap').style.display    = hasNodes ? '' : 'none';
-  document.getElementById('questMetaCard').style.display = hasNodes ? '' : 'none';
-  document.getElementById('answersWrap').style.display   = hasNodes ? '' : 'none';
-  if (hasNodes) {
-    _fileNameWrap.style.display = 'inline-flex';
-  } else {
-    _fileNameEl.textContent = '';
-    _fileNameWrap.style.display = 'none';
-  }
-});
 
 // ── Navigate builder to node ──────────────────────────────────────────────────
 export function navigateToNode(nodeId) {
@@ -105,7 +111,7 @@ export async function importAndValidate(data, fileName) {
 }
 
 // ── Read JSON file helper ─────────────────────────────────────────────────────
-function _readFileAsJSON(e, onData) {
+export function _readFileAsJSON(e, onData) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -121,7 +127,7 @@ function _readFileAsJSON(e, onData) {
 // ── Confirm before load ───────────────────────────────────────────────────────
 /** Returns promise resolving to 'proceed' | 'cancel'.
  *  Only shows the dialog when the tree has items (undo history would be lost). */
-function _askBeforeLoad() {
+export function _askBeforeLoad() {
   if (tree.length === 0) return Promise.resolve('proceed');
   return new Promise(resolve => {
     const backdrop = document.createElement('div');
@@ -150,105 +156,7 @@ function _askBeforeLoad() {
   });
 }
 
-// ── Load dropdown ─────────────────────────────────────────────────────────────
-const _loadMenu       = document.getElementById('loadMenu');
-const _loadRecentItem = document.getElementById('loadRecentItem');
-const _loadRecentSep  = document.getElementById('loadRecentSep');
-
-async function _syncRecentItem() {
-  const recent = await autosave.getMostRecentDraft();
-  if (recent) {
-    const d = new Date(recent.meta.savedAt);
-    const ts = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    _loadRecentItem.textContent = '\uD83D\uDD52 Recent: ' + (recent.meta.title || 'draft') + ' (' + ts + ')';
-    _loadRecentItem.dataset.draftKey = recent.key;
-    _loadRecentItem.style.display = '';
-    _loadRecentSep.style.display  = '';
-  } else {
-    _loadRecentItem.style.display = 'none';
-    _loadRecentSep.style.display  = 'none';
-  }
-}
-
-document.getElementById('loadFhirBtn').onclick = e => {
-  e.stopPropagation();
-  document.getElementById('exportMenu').style.display  = 'none';
-  document.getElementById('answersMenu').style.display = 'none';
-  if (_loadMenu.style.display === 'none') _syncRecentItem();
-  _loadMenu.style.display = _loadMenu.style.display === 'none' ? 'block' : 'none';
-};
-
-_loadRecentItem.onclick = async () => {
-  _loadMenu.style.display = 'none';
-  if (await _askBeforeLoad() !== 'proceed') return;
-  const key = _loadRecentItem.dataset.draftKey;
-  if (!key) return;
-  const data = await autosave.getDraftData(key);
-  if (!data) return;
-  const label = data.title || 'autosave-draft';
-  progress.show('Loading recent draft\u2026');
-  importAndValidate(data, label);
-};
-
-document.getElementById('loadFromFileItem').onclick = async () => {
-  _loadMenu.style.display = 'none';
-  if (await _askBeforeLoad() !== 'proceed') return;
-  document.getElementById('fhirFileInput').click();
-};
-
-document.getElementById('loadLibraryItem').onclick = async () => {
-  _loadMenu.style.display = 'none';
-  if (await _askBeforeLoad() !== 'proceed') return;
-  libraryModal.open('fhir-r4', item => {
-    progress.show('Loading ' + item.label + '\u2026');
-    fetch('sampledata/' + item.file)
-      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(data => { progress.update(0, 1); importAndValidate(data, item.label); })
-      .catch(err => { progress.hide(); showError('Could not load sample: ' + err.message); });
-  }, 'questionnaire');
-};
-
-document.getElementById('fhirFileInput').onchange = async e => {
-  const fileName = e.target.files[0]?.name;
-  if (!fileName) return;
-  if (await _askBeforeLoad() !== 'proceed') {
-    e.target.value = ''; // reset so the same file can be chosen again
-    return;
-  }
-  progress.show('Loading ' + fileName + '\u2026');
-  _readFileAsJSON(e, (data, name) => { progress.update(0, 1); importAndValidate(data, name); });
-};
-
-// ── Answers (QuestionnaireResponse) ──────────────────────────────────────────
-const _answersMenu = document.getElementById('answersMenu');
-
-document.getElementById('answersBtn').onclick = e => {
-  e.stopPropagation();
-  _loadMenu.style.display = 'none';
-  document.getElementById('exportMenu').style.display = 'none';
-  _answersMenu.style.display = _answersMenu.style.display === 'none' ? 'block' : 'none';
-};
-
-document.getElementById('loadAnswersItem').onclick = () => {
-  _answersMenu.style.display = 'none';
-  document.getElementById('qrFileInput').click();
-};
-
-document.getElementById('qrFileInput').onchange = e => {
-  _readFileAsJSON(e, data => _applyQRAnswers(data));
-};
-
-document.getElementById('loadAnswersLibraryItem').onclick = () => {
-  _answersMenu.style.display = 'none';
-  libraryModal.open('qr-responses', item => {
-    fetch('sampledata/' + item.file)
-      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(data => _applyQRAnswers(data))
-      .catch(err => showError('Could not load sample response: ' + err.message));
-  }, 'qr');
-};
-
-function _applyQRAnswers(qr) {
+export function _applyQRAnswers(qr) {
   const result = importQRAnswers(qr, values, tree);
   if (!result.ok) { showError('Cannot load answers: ' + result.error); return; }
   document.dispatchEvent(new CustomEvent('qr-loaded', { detail: {

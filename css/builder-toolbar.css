@@ -158,6 +158,8 @@
   min-width: 230px;
   overflow: hidden;
 }
+.load-menu--right { left: auto; right: 0; }
+.load-menu--right { left: auto; right: 0; }
 .load-menu-item {
   padding: 8px 14px;
   font-size: 12px;

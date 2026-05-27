@@ -13,7 +13,8 @@
 //   export-btn           "⬇ Export ▾" dropdown trigger
 //   export-fhir-item     "Questionnaire (FHIR R4)" item in export dropdown
 //   expand-all-btn       expand-all builder button
-//   preview-expand-all-btn expand-all preview button
+//   tools-btn            "🛠️ Tools ▾" dropdown trigger
+//   expand-all-item      "Expand all" item in Tools dropdown (expands preview groups)
 //   tree-container       <div> wrapping the entire builder node tree
 //   status-badge-btn     coloured status badge in the preview header
 //   preview-panel        <div> wrapping the entire questionnaire preview
@@ -259,7 +260,8 @@ test.describe('Load FHIR → both panels', () => {
     await page.click('[data-sample="example-bariatric.fhir.json"]');
 
     await page.getByTestId('expand-all-btn').click();
-    await page.getByTestId('preview-expand-all-btn').click();
+    await page.getByTestId('tools-btn').click();
+    await page.getByTestId('expand-all-item').click();
 
     await page.waitForFunction(() => {
       const nodes = document.querySelectorAll('[data-testid="tree-container"] [data-node-id]').length;

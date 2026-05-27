@@ -462,26 +462,25 @@ function _collectGroupIds(nodes, out = []) {
 }
 
 // ── Preview DOM init (called once from app.js) ────────────────────────────────
+export function collapseAllPreview() {
+  for (const id of _collectGroupIds(tree)) collapsedGroups.add(id);
+  _formTick.value++;
+}
+
+export function expandAllPreview() {
+  collapsedGroups.clear();
+  _formTick.value++;
+}
+
 export function initPreview(elements) {
   _previewElements = elements;
-
-  elements.previewCollapseAllBtn.addEventListener('click', () => {
-    for (const id of _collectGroupIds(tree)) collapsedGroups.add(id);
-    _formTick.value++;
-  });
-  elements.previewExpandAllBtn.addEventListener('click', () => {
-    collapsedGroups.clear();
-    _formTick.value++;
-  });
 
   // Show toolbar controls only when tree has content
   effect(() => {
     const d = tree.length > 0 ? '' : 'none';
-    elements.viewOptionsWrap.style.display       = d;
-    elements.previewCollapseAllBtn.style.display = d;
-    elements.previewExpandAllBtn.style.display   = d;
-    elements.searchWrap.style.display            = d;
-    elements.previewModeWrap.style.display        = d;
+    elements.viewOptionsWrap.style.display = d;
+    elements.searchWrap.style.display      = d;
+    elements.previewModeWrap.style.display = d;
   });
 
   // Toggle CSS display modes on the lform container

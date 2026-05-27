@@ -22,7 +22,8 @@ import { importFHIR } from './fhir/import.js';
 import { _formTick } from './render-bus.js';
 import * as history from './ui/history.js';
 import * as helpModal from './ui/modals/help-modal.js';
-import { navigateToPreview, initPreview } from './render-preview.js';
+import { navigateToPreview, initPreview, collapseAllPreview, expandAllPreview } from './render-preview.js';
+import { saveMenu, toolsMenu } from './ui/header-actions.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
 import containedPanel        from './ui/panels/contained-panel.js';
@@ -111,14 +112,12 @@ search.init({
 
 // ── Preview module init ──────────────────────────────────────────────────────
 initPreview({
-  lform:                 document.getElementById('lform'),
-  fhirJsonView:          document.getElementById('fhirJsonView'),
-  leftPanelBody:         document.querySelector('.left-panel-body'),
-  viewOptionsWrap:       document.getElementById('viewOptionsWrap'),
-  previewModeWrap:       document.getElementById('previewModeWrap'),
-  previewCollapseAllBtn: document.getElementById('previewCollapseAllBtn'),
-  previewExpandAllBtn:   document.getElementById('previewExpandAllBtn'),
-  searchWrap:            document.getElementById('searchWrap'),
+  lform:           document.getElementById('lform'),
+  fhirJsonView:    document.getElementById('fhirJsonView'),
+  leftPanelBody:   document.querySelector('.left-panel-body'),
+  viewOptionsWrap: document.getElementById('viewOptionsWrap'),
+  previewModeWrap: document.getElementById('previewModeWrap'),
+  searchWrap:      document.getElementById('searchWrap'),
 });
 
 // Prompt for filename then export
@@ -133,11 +132,30 @@ function _promptExport(afterExport) {
   });
 }
 
+// ── Save/Export menu handlers ─────────────────────────────────────────────────
+saveMenu.setHandlers({
+  onExportFhir: () => {
+    const issues = validateTree(tree, values);
+    if (issues.length === 0) { _promptExport(); return; }
+    validateModal.show('Export \u2014 Validation Report', issues, 'export', { onExport: () => _promptExport(), onNavigate: navigateToNode });
+  },
+  onExportQr: () => {
+    const suggested = document.getElementById('loadedFileName')?.textContent.trim() || 'questionnaire';
+    qrExportModal.open(suggested + '-response.json');
+  },
+});
+
+// ── Tools menu handlers ───────────────────────────────────────────────────────
+toolsMenu.setHandlers({
+  onValidate: () => {
+    const issues = validateTree(tree, values);
+    validateModal.show('Validate \u2014 Report', issues, 'import', { onNavigate: navigateToNode });
+  },
+  onExpand: () => expandAllPreview(),
+  onCollapse: () => collapseAllPreview(),
+});
+
 // ── Validate button ──────────────────────────────────────────────────────────
-document.getElementById('validateBtn').onclick = () => {
-  const issues = validateTree(tree, values);
-  validateModal.show('Validate \u2014 Report', issues, 'import', { onNavigate: navigateToNode });
-};
 
 // ── Properties button ────────────────────────────────────────────────────────
 document.getElementById('propertiesBtn').onclick = () => metadataModal.open();
@@ -170,27 +188,6 @@ document.addEventListener('keydown', e => {
     }
   }
 });
-
-// ── Export dropdown ──────────────────────────────────────────────────────────
-const exportMenu = document.getElementById('exportMenu');
-document.getElementById('exportBtn').onclick = e => {
-  e.stopPropagation();
-  document.getElementById('loadMenu').style.display = 'none';
-  document.getElementById('answersMenu').style.display = 'none';
-  exportMenu.style.display = exportMenu.style.display === 'none' ? 'block' : 'none';
-};
-document.getElementById('exportFhirItem').onclick = () => {
-  exportMenu.style.display = 'none';
-  const issues = validateTree(tree, values);
-  if (issues.length === 0) { _promptExport(); return; }
-  validateModal.show('Export \u2014 Validation Report', issues, 'export', { onExport: () => _promptExport(), onNavigate: navigateToNode });
-};
-document.getElementById('exportQrItem').onclick = () => {
-  exportMenu.style.display = 'none';
-  const suggested = document.getElementById('loadedFileName')?.textContent.trim() || 'questionnaire';
-  qrExportModal.open(suggested + '-response.json');
-};
-
 
 async function _clearForm() {
   if (tree.length > 0) {
@@ -310,84 +307,12 @@ function _askConfirm(title, msg, okLabel = 'OK', cancelLabel = 'Cancel') {
 // Close any open ⊕ Add dropdown when clicking outside
 document.addEventListener('click', () => {
   document.querySelectorAll('.action-add-menu').forEach(m => { m.style.display = 'none'; });
-  document.getElementById('loadMenu').style.display    = 'none';
-  document.getElementById('exportMenu').style.display  = 'none';
-  document.getElementById('answersMenu').style.display = 'none';
+  document.dispatchEvent(new CustomEvent('close-dropdowns'));
   const ppMenu = document.getElementById('patientPresetMenu');
   if (ppMenu) ppMenu.style.display = 'none';
   const umMenu = document.getElementById('userMenu');
   if (umMenu) umMenu.style.display = 'none';
-  const pmMenu = document.getElementById('previewModeMenu');
-  if (pmMenu) pmMenu.style.display = 'none';
-  const voMenu = document.getElementById('viewOptionsMenu');
-  if (voMenu) voMenu.style.display = 'none';
 });
-
-// ── Preview mode dropdown ─────────────────────────────────────────────────────
-{
-  const _modeMenu = document.getElementById('previewModeMenu');
-  const _modeBtn  = document.getElementById('previewModeBtn');
-  const _modeLabels = {
-    preview: '\uD83D\uDC41\uFE0F Preview \u25BE',
-    patient: '\uD83D\uDC64 Patient \u25BE',
-    json:    '{} FHIR JSON \u25BE',
-  };
-  function _applyPreviewMode(mode) {
-    document.dispatchEvent(new CustomEvent('preview-mode-change', { detail: { mode } }));
-    _modeBtn.textContent = _modeLabels[mode];
-    document.querySelectorAll('#previewModeMenu .load-menu-item').forEach(item => {
-      item.classList.toggle('load-menu-item--checked', item.dataset.mode === mode);
-    });
-  }
-  _modeBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    document.getElementById('loadMenu').style.display    = 'none';
-    document.getElementById('answersMenu').style.display = 'none';
-    document.getElementById('exportMenu').style.display  = 'none';
-    _modeMenu.style.display = _modeMenu.style.display === 'none' ? 'block' : 'none';
-  });
-  document.querySelectorAll('#previewModeMenu .load-menu-item').forEach(item => {
-    item.addEventListener('click', () => {
-      _modeMenu.style.display = 'none';
-      _applyPreviewMode(item.dataset.mode);
-    });
-  });
-  // Set initial active state
-  _applyPreviewMode('preview');
-}
-
-// ── View Options dropdown (id, prefix, badges, hidden) ───────────────────────
-{
-  const _voMenu = document.getElementById('viewOptionsMenu');
-  const _voBtn  = document.getElementById('viewOptionsBtn');
-  const _checkboxes = [
-    { id: 'viewOptionLinkId', key: 'showLinkId' },
-    { id: 'viewOptionPrefix', key: 'showPrefix' },
-    { id: 'viewOptionBadges', key: 'showBadges' },
-    { id: 'viewOptionHidden', key: 'showHiddenItems' },
-  ];
-
-  _voBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    document.getElementById('loadMenu').style.display    = 'none';
-    document.getElementById('answersMenu').style.display = 'none';
-    document.getElementById('exportMenu').style.display  = 'none';
-    document.getElementById('previewModeMenu').style.display = 'none';
-    _voMenu.style.display = _voMenu.style.display === 'none' ? 'block' : 'none';
-  });
-
-  // Prevent menu from closing when clicking inside it
-  _voMenu.addEventListener('click', e => {
-    e.stopPropagation();
-  });
-
-  _checkboxes.forEach(({ id, key }) => {
-    const checkbox = document.getElementById(id);
-    checkbox.addEventListener('change', () => {
-      document.dispatchEvent(new CustomEvent('view-pref-change', { detail: { key, value: checkbox.checked } }));
-    });
-  });
-}
 
 // ── Panel resize drag ─────────────────────────────────────────────────────────
 {
@@ -568,7 +493,7 @@ document.addEventListener('keydown', e => {
   });
 
   _cloudSaveBtn.addEventListener('click', async () => {
-    document.getElementById('exportMenu').style.display = 'none';
+    document.dispatchEvent(new CustomEvent('close-dropdowns'));
     _cloudSaveBtn.classList.add('load-menu-item--loading');
     try {
       const fhirJson = buildFHIRObject();
@@ -588,7 +513,7 @@ document.addEventListener('keydown', e => {
   });
 
   _loadCloudItem.addEventListener('click', async () => {
-    document.getElementById('loadMenu').style.display = 'none';
+    document.dispatchEvent(new CustomEvent('close-dropdowns'));
     const { importAndValidate } = await import('./app-load.js');
     cloudModal.open(async id => {
       try {

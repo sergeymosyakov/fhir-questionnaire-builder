@@ -4,7 +4,8 @@
 // Run: npx playwright test tests/e2e/validate.spec.js
 //
 // ── data-testid used in this suite ───────────────────────────────────────────
-//   validate-btn        "Validate" button in the builder toolbar
+//   tools-btn           "🛠️ Tools ▾" dropdown trigger button
+//   validate-item       "Validate" item in the Tools dropdown
 //   export-btn          "⬇ Export ▾" dropdown trigger button
 //   export-fhir-item    "Questionnaire (FHIR R4)" item in the export dropdown
 //
@@ -61,26 +62,28 @@ const validateModal      = (page) => page.locator('[data-testid="validateModal"]
 const validateModalTitle = (page) => page.locator('[data-testid="validateModalTitle"]');
 const validateModalClose = (page) => page.locator('[data-testid="validateModalClose"]');
 const validateModalBody  = (page) => page.locator('[data-testid="validateModalBody"]');
-const validateBtn        = (page) => page.getByTestId('validate-btn');
+const toolsMenuBtn       = (page) => page.getByTestId('tools-btn');
+const validateMenuItem   = (page) => page.getByTestId('validate-item');
 
 async function openValidateModal(page) {
-  await validateBtn(page).click();
+  await toolsMenuBtn(page).click();
+  await validateMenuItem(page).click();
   await expect(validateModal(page)).toBeVisible();
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
-test.describe('Validate button visibility', () => {
+test.describe('Tools menu visibility', () => {
   test('hidden on empty questionnaire', async ({ page }) => {
     await freshStart(page);
-    await expect(validateBtn(page)).not.toBeVisible();
+    await expect(toolsMenuBtn(page)).not.toBeVisible();
   });
 
   test('appears after adding a node', async ({ page }) => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
-    await expect(validateBtn(page)).toBeVisible();
+    await expect(toolsMenuBtn(page)).toBeVisible();
   });
 });
 
