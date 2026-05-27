@@ -38,10 +38,20 @@ async function freshStart(page) {
   await waitForLoad(page);
 }
 
-/** Load the contained-valueset fixture via the hidden file input. */
+/** Load the contained-valueset fixture via the hidden file input.
+ *  The fixture has an external answerValueSet URL that always fails expansion
+ *  (fake domain). We wait for and dismiss the resulting error modal so tests
+ *  that cover the contained panel are not blocked by it. */
 async function loadFixture(page) {
   await page.locator('#fhirFileInput').setInputFiles(FIXTURE);
   await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 8_000 });
+  // Async expansion fires after render; wait up to 5 s for the error modal.
+  const validateBackdrop = page.locator('[data-testid="validateModal"]');
+  await validateBackdrop.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
+  if (await validateBackdrop.isVisible()) {
+    await page.locator('[data-testid="validateModalApply"]').click();
+    await validateBackdrop.waitFor({ state: 'hidden', timeout: 3_000 });
+  }
 }
 
 const containedCard      = (page) => page.locator('#containedCard');
