@@ -4,6 +4,7 @@
 // for this specific item. Falls back to the Questionnaire-level setting.
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
+import { terminologyService } from '../../fhir/terminology-service.js';
 
 const PREF_TERM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer';
 
@@ -69,6 +70,45 @@ class TerminologyModal extends Modal {
 
     row.append(lbl, inp);
     this.body.appendChild(row);
+
+    // ── Test button + status ──────────────────────────────────────────────────
+    const testRow = document.createElement('div');
+    testRow.className = 'meta-modal-row';
+    const testSpacer = document.createElement('div');
+    testSpacer.className = 'meta-modal-lbl';
+
+    const testWrap = document.createElement('div');
+    testWrap.className = 'term-test-wrap';
+
+    const testBtn = document.createElement('button');
+    testBtn.type      = 'button';
+    testBtn.className = 'modal-btn';
+    testBtn.textContent = 'Test connection';
+    testBtn.dataset.testid = 'terminology-test-btn';
+
+    const statusEl = document.createElement('span');
+    statusEl.className = 'term-test-status';
+    statusEl.dataset.testid = 'terminology-test-status';
+
+    testBtn.addEventListener('click', async () => {
+      const url = this._pending.draftUrl.trim();
+      statusEl.className   = 'term-test-status term-test-status--loading';
+      statusEl.textContent = 'Connecting…';
+      testBtn.disabled = true;
+      const result = await terminologyService.testServer(url);
+      testBtn.disabled = false;
+      if (result.ok) {
+        statusEl.className   = 'term-test-status term-test-status--ok';
+        statusEl.textContent = '\u2713 ' + result.message;
+      } else {
+        statusEl.className   = 'term-test-status term-test-status--err';
+        statusEl.textContent = '\u2717 ' + result.message;
+      }
+    });
+
+    testWrap.append(testBtn, statusEl);
+    testRow.append(testSpacer, testWrap);
+    this.body.appendChild(testRow);
 
     const extRow = document.createElement('div');
     extRow.className = 'panel-hint';

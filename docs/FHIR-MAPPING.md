@@ -57,7 +57,7 @@ Every node in the tree is either a **group** or an **item**:
   _mimeTypes:          string[],         // http://hl7.org/fhir/StructureDefinition/mimeType — 0..* allowed MIME types for attachment items
   _minOccurs:          integer,          // questionnaire-minOccurs extension (when repeats: true)
   _maxOccurs:          integer,          // questionnaire-maxOccurs extension (when repeats: true; enforced in preview)
-  _answerValueSet:     string,           // FHIR item.answerValueSet URL — preserved round-trip; not resolved to options
+  _answerValueSet:     string,           // FHIR item.answerValueSet URL — preserved round-trip; external URLs expanded via terminologyService on load
   _answerExpression:   string,           // SDC sdc-questionnaire-answerExpression — FHIRPath expression evaluated at render time; result replaces answerOption[] in preview
   _minValue:           number,           // questionnaire-minValue extension value (decimal or integer)
   _maxValue:           number,           // questionnaire-maxValue extension value (decimal or integer)
@@ -214,7 +214,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `_disabledDisplay` | `item.disabledDisplay` (R4B native field) + R4 backport extension `extension-Questionnaire.item.disabledDisplay` | `'hidden'` → item removed from DOM when not visible; `'protected'` (default) → grayed row; editable in Show When modal |
 | `_minOccurs` | `questionnaire-minOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true` |
 | `_maxOccurs` | `questionnaire-maxOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true`; enforced in preview — add button disabled at limit |
-| `_answerValueSet` | `item.answerValueSet` | imported → `node._answerValueSet`; exported back unchanged; URL not resolved — items show no selectable options in the builder |
+| `_answerValueSet` | `item.answerValueSet` | imported → `node._answerValueSet`; exported back unchanged; external URLs expanded via `terminologyService.expandAll()` on questionnaire load — options cached in `node._vsCache` and rendered in preview; server resolved via per-item `_preferredTermServer` → questionnaire-level default → `https://tx.fhir.org/r4`; expansion failures shown in validateModal |
 | `_answerExpression` | SDC `sdc-questionnaire-answerExpression` extension (`valueExpression.expression`) | FHIRPath evaluated at render time; result replaces static `answerOption[]` in preview; `answerOption[]` is suppressed on export when set; editable in Answer Type modal (Expression source radio) |
 | `_initialValue` | `item.initial[0]` value | imported from `initial[0]`; exported as `initial: [entry]`; pre-fills `values[]` on import |
 | `_initialValues` | `item.initial[]` all values | set only for repeating items with >1 initial value; exported as `initial: [entry, …]`; `_initialValue` holds `initial[0]` for backwards compat |
@@ -303,7 +303,7 @@ Additional round-trip fields (stored opaquely; not editable in the builder):
 
 | Field | FHIR field | Notes |
 |---|---|---|
-| `_answerValueSet` | `item.answerValueSet` | URL preserved; not resolved to answer options |
+| `_answerValueSet` | `item.answerValueSet` | URL preserved; expanded via `terminologyService` on load |
 | `questContained[]` | `Questionnaire.contained[]` | Resources deep-copied on export; not otherwise processed |
 | `_unknownExtensions[]` | `item.extension[]` | Unrecognised extension objects preserved verbatim; editable via Props modal |
 
@@ -385,7 +385,7 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | FHIR field / extension | Status | Notes |
 |---|---|---|
 | `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
-| `item.answerValueSet` — external URL | 🔧 URL preserved round-trip | Not resolved to answer options; no FHIR terminology server integration. `#id` contained refs ARE resolved (see Round-Trip Safety) |
+| `item.answerValueSet` — external URL | ✅ URL preserved + expanded | External URLs fetched via `ValueSet/$expand` on questionnaire load; `#id` contained refs resolved locally |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
 | `maxDecimalPlaces` | ❌ Not handled | Maximum number of decimal places for `decimal` items (`http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces`). |

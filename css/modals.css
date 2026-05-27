@@ -230,6 +230,13 @@
                         background: var(--c-bg); color: var(--c-text); min-height: 54px; }
 .meta-modal-inp:focus, .meta-modal-sel:focus, .meta-modal-textarea:focus { outline: 1px solid var(--c-accent); }
 
+/* Terminology modal — Test connection */
+.term-test-wrap        { display: flex; align-items: center; gap: 8px; }
+.term-test-status      { font-size: 12px; color: var(--c-muted); }
+.term-test-status--loading { color: var(--c-muted); font-style: italic; }
+.term-test-status--ok  { color: #2a9d2a; }
+.term-test-status--err { color: var(--c-danger, #c0392b); }
+
 .meta-modal-advanced   { border-top: 1px solid var(--c-border); margin-top: 4px; padding-top: 6px; }
 .meta-modal-adv-toggle { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 600;
                           color: var(--c-accent); padding: 0; letter-spacing: .02em; }

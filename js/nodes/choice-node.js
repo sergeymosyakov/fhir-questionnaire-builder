@@ -10,8 +10,15 @@ import { parseOptions } from '../utils.js';
 // Evaluate answerExpression (SDC) against the current FHIRPath context.
 // Returns [{code, display}] from the expression result, or falls back to
 // parseOptions(node.options) if the expression is absent, empty, or errors.
+// For external answerValueSet items, reads node._vsCache populated by
+// terminologyService.expandAll() — returns [] if expansion not yet done.
 function _evalAnswerOpts(node, fpCtx) {
-  if (!node._answerExpression) return parseOptions(node.options);
+  if (!node._answerExpression) {
+    if (node._answerValueSet && !node._answerValueSet.startsWith('#')) {
+      return node._vsCache ?? [];
+    }
+    return parseOptions(node.options);
+  }
   if (!fpCtx || !fpCtx.fp || !fpCtx.qr) return parseOptions(node.options);
   try {
     const raw = fpCtx.fp.evaluate(fpCtx.qr, node._answerExpression, fpCtx.env || {});

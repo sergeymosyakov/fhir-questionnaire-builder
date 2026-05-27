@@ -1,6 +1,6 @@
 // File loading, QR answers, import pipeline, and filename display.
 // Exports: setFileName, navigateToNode, importAndValidate
-import { tree, values, rawFhir, effect } from './state.js';
+import { tree, values, rawFhir, effect, questMeta } from './state.js';
 import { _formTick } from './render-bus.js';
 import { showError } from './ui/toast.js';
 import { importFHIR } from './fhir/import.js';
@@ -12,6 +12,7 @@ import * as progress from './ui/progress.js';
 import * as autosave from './ui/autosave.js';
 import { expandAll, renderTreeAsync } from './builder/index.js';
 import { reinitForm, resetCollapsedFromTree } from './render-preview.js';
+import { terminologyService } from './fhir/terminology-service.js';
 
 // ── File name display ─────────────────────────────────────────────────────────
 const _fileNameWrap = document.getElementById('loadedFileNameWrap');
@@ -58,6 +59,20 @@ export function navigateToNode(nodeId) {
   setTimeout(() => target.classList.remove('node-flash'), 1000);
 }
 
+// ── ValueSet expansion ────────────────────────────────────────────────────────
+async function _expandValueSets() {
+  const failures = await terminologyService.expandAll(tree, questMeta.value);
+  if (failures.length) {
+    const issues = failures.map(f => ({
+      severity: 'error',
+      nodeId:   f.node?.id || '(unknown)',
+      message:  ` \u2014 ValueSet ${f.vsUrl} from ${f.server}: ${f.error}`,
+    }));
+    validateModal.show('ValueSet Expansion Errors', issues, 'import');
+  }
+  reinitForm();
+}
+
 // ── Import + render + validate pipeline ──────────────────────────────────────
 export async function importAndValidate(data, fileName) {
   try {
@@ -73,6 +88,9 @@ export async function importAndValidate(data, fileName) {
     document.querySelector('.right-panel-body')?.scrollTo({ top: 0 });
     setFileName(fileName || '');
     if (issues.length > 0) validateModal.show('Import \u2014 Validation Report', issues, 'import', { onNavigate: navigateToNode });
+
+    // Expand external answerValueSets in the background; re-render preview when done.
+    _expandValueSets();
   } catch (err) {
     showError('Import error: ' + err.message);
   } finally {
