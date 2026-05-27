@@ -108,6 +108,7 @@ const _el = {
 };
 
 class PatientModal extends Modal {
+  getName() { return 'patientCtxModal'; }
   constructor() {
     super({ cancelLabel: null });
     this.title.textContent = 'Patient Context';

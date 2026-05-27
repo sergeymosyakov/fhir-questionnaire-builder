@@ -13,6 +13,7 @@ const TYPE_ICONS = {
 };
 
 class LibraryModal extends Modal {
+  getName() { return 'libraryModal'; }
   constructor() {
     super({ cancelLabel: 'Close', applyLabel: null });
     this._cache    = null;

@@ -9,6 +9,7 @@ import { Modal } from './modal-base.js';
 import { parseExprTree, evaluateExprTree } from '../../fhir/explain.js';
 
 class ExplainModal extends Modal {
+  getName() { return 'explainModal'; }
   constructor() {
     super({ cancelLabel: 'Close', applyLabel: null });
     this.setTitle('Expression Explain');

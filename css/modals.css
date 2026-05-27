@@ -84,19 +84,19 @@
 .modal-title-subject { font-weight: 400; color: var(--c-text-2); margin-left: 4px; }
 
 /* === Per-modal sizes ========================================================= */
-#variablesModal .modal-box  { width: min(600px, 94vw); max-height: 80vh; }
-#validateModal .modal-box   { width: 560px; max-width: 94vw; max-height: 80vh; }
-#showWhenModal .modal-box   { width: min(680px, 92vw); }
-#constraintModal .modal-box { width: min(560px, 94vw); }
-#expressionModal .modal-box { width: min(560px, 94vw); }
-#initialModal .modal-box    { width: min(420px, 94vw); }
-#appearanceModal .modal-box { width: min(380px, 94vw); }
-#designNoteModal .modal-box { width: min(560px, 94vw); }
-#answerTypeModal .modal-box { width: min(480px, 94vw); }
-#repeatableModal .modal-box { width: min(360px, 94vw); }
-#patientCtxModal .modal-box { width: 380px; max-width: 94vw; max-height: none; overflow: visible; }
-#explainModal .modal-box    { width: min(640px, 94vw); }
-#fhirJsonModal .modal-box   { width: min(700px, 94vw); max-height: 80vh; display: flex; flex-direction: column; }
+[data-testid="variablesModal"] .modal-box  { width: min(600px, 94vw); max-height: 80vh; }
+[data-testid="validateModal"] .modal-box   { width: 560px; max-width: 94vw; max-height: 80vh; }
+[data-testid="showWhenModal"] .modal-box   { width: min(680px, 92vw); }
+[data-testid="constraintModal"] .modal-box { width: min(560px, 94vw); }
+[data-testid="expressionModal"] .modal-box { width: min(560px, 94vw); }
+[data-testid="initialModal"] .modal-box    { width: min(420px, 94vw); }
+[data-testid="appearanceModal"] .modal-box { width: min(380px, 94vw); }
+[data-testid="designNoteModal"] .modal-box { width: min(560px, 94vw); }
+[data-testid="answerTypeModal"] .modal-box { width: min(480px, 94vw); }
+[data-testid="repeatableModal"] .modal-box { width: min(360px, 94vw); }
+[data-testid="patientCtxModal"] .modal-box { width: 380px; max-width: 94vw; max-height: none; overflow: visible; }
+[data-testid="explainModal"] .modal-box    { width: min(640px, 94vw); }
+[data-testid="fhirJsonModal"] .modal-box   { width: min(700px, 94vw); max-height: 80vh; display: flex; flex-direction: column; }
 
 /* === Per-modal body overrides ================================================ */
 /* Help modal — iframe wrapper */
@@ -117,15 +117,15 @@
 
 /* === Per-modal body overrides ================================================ */
 /* Variables — flex column with gap for variable rows */
-#variablesModal .modal-body { display: flex; flex-direction: column; gap: 10px; }
+[data-testid="variablesModal"] .modal-body { display: flex; flex-direction: column; gap: 10px; }
 /* Explain — zero horizontal padding so tree rows span full width */
-#explainModal .modal-body   { padding: 0; }
+[data-testid="explainModal"] .modal-body   { padding: 0; }
 /* Show When — extra padding for the condition editor */
-#showWhenModal .modal-body  { padding: 16px 20px 20px; }
+[data-testid="showWhenModal"] .modal-body  { padding: 16px 20px 20px; }
 /* Constraint — padding for the card list */
-#constraintModal .modal-body { padding: 12px 16px 16px; }
+[data-testid="constraintModal"] .modal-body { padding: 12px 16px 16px; }
 /* Expression — padding for the textarea */
-#expressionModal .modal-body { padding: 12px 16px 16px; }
+[data-testid="expressionModal"] .modal-body { padding: 12px 16px 16px; }
 .expr-modal-sep  { border-top: 1px solid var(--c-border); margin: 12px 0 6px; }
 .expr-section-hdr {
   display: flex;
@@ -147,12 +147,12 @@
   font-family: var(--f-mono, monospace);
 }
 /* Initial — padding for the control */
-#initialModal .modal-body    { padding: 12px 16px 16px; }
+[data-testid="initialModal"] .modal-body    { padding: 12px 16px 16px; }
 /* Appearance — padding for the style controls */
-#appearanceModal .modal-body { padding: 12px 16px 16px; }
-#answerTypeModal .modal-body { padding: 12px 16px 16px; }
+[data-testid="appearanceModal"] .modal-body { padding: 12px 16px 16px; }
+[data-testid="answerTypeModal"] .modal-body { padding: 12px 16px 16px; }
 /* Repeatable — padding */
-#repeatableModal .modal-body { padding: 12px 16px 16px; }
+[data-testid="repeatableModal"] .modal-body { padding: 12px 16px 16px; }
 .repeat-modal-toggle-row   { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .repeat-modal-cb           { width: 16px; height: 16px; cursor: pointer; }
 .repeat-modal-cb-label     { font-size: 13px; font-weight: 500; cursor: pointer; }
@@ -186,10 +186,10 @@
                           margin-top: 4px; padding: 3px 5px; }
 .initial-modal-label         { display: block; font-size: 12px; font-weight: 600; color: var(--c-text-2); margin-bottom: 6px; }
 /* Show When — widen condition row widgets */
-#showWhenModal .vis-q-sel        { min-width: 180px; max-width: 300px; }
-#showWhenModal .vis-cond-val-inp { max-width: 180px; }
+[data-testid="showWhenModal"] .vis-q-sel        { min-width: 180px; max-width: 300px; }
+[data-testid="showWhenModal"] .vis-cond-val-inp { max-width: 180px; }
 /* Patient context — compact body */
-#patientCtxModal .modal-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+[data-testid="patientCtxModal"] .modal-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
 
 /* === Patient context — specific internal styles ============================== */
 .patient-ctx-hint {
@@ -213,11 +213,11 @@
 
 /* === Questionnaire Properties (metadata) modal ============================== */
 [data-testid="metadataModal"] .modal-box { width: min(900px, 94vw); min-width: min(60vw, 94vw); }
-#codesModal .modal-box    { width: min(480px, 94vw); }
-#qrExportModal .modal-box { width: min(380px, 94vw); }
+[data-testid="codesModal"] .modal-box    { width: min(480px, 94vw); }
+[data-testid="qrExportModal"] .modal-box { width: min(380px, 94vw); }
 [data-testid="metadataModal"] .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
-#codesModal .modal-body    { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
-#qrExportModal .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+[data-testid="codesModal"] .modal-body    { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+[data-testid="qrExportModal"] .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
 .meta-modal-row      { display: flex; align-items: flex-end; gap: 8px; }
 .meta-modal-lbl      { flex: 0 0 90px; font-size: 13px; font-weight: 500; line-height: 26px; padding-bottom: 1px; }
 .meta-modal-inp      { flex: 1; height: 26px; padding: 0 6px; font-size: 13px;
@@ -241,7 +241,7 @@
 .meta-modal-adv-toggle { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 600;
                           color: var(--c-accent); padding: 0; letter-spacing: .02em; }
 .meta-modal-adv-toggle:hover { opacity: .75; }
-.meta-modal-adv-body   { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+.meta-modal-adv-body   { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; padding-left: 10px; }
 
 /* meta-modal helpers for Resource Meta section */
 .meta-modal-inp-group  { flex: 1; display: flex; gap: 6px; }
@@ -412,8 +412,8 @@
 .ext-val-textarea:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 2px var(--c-primary-lt); }
 
 /* === Library modal ========================================================== */
-#libraryModal .modal-box  { max-width: 640px; width: 90vw; }
-#libraryModal .modal-body { padding: 6px 0; max-height: 65vh; overflow-y: auto; }
+[data-testid="libraryModal"] .modal-box  { max-width: 640px; width: 90vw; }
+[data-testid="libraryModal"] .modal-body { padding: 6px 0; max-height: 65vh; overflow-y: auto; }
 
 .lib-group + .lib-group   { border-top: 1px solid var(--c-border); }
 
