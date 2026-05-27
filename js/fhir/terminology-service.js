@@ -10,10 +10,22 @@
 
 export const DEFAULT_TERMINOLOGY_SERVER = 'https://tx.fhir.org/r4';
 
-// Cloudflare Worker CORS proxy URL. Deploy scripts/cors-proxy.worker.js to
-// Cloudflare Workers and set the URL here. Leave empty to disable the proxy
-// (requests will fail with CORS errors in browser environments).
-const CORS_PROXY_URL = 'https://fhir-cors-proxy.sergeymosyakov.workers.dev';
+// CORS proxy URL is read from /config.json at runtime (key: corsProxyUrl).
+// See scripts/cors-proxy.worker.js for the Cloudflare Worker implementation.
+let _corsProxyUrl = '';
+let _configLoaded = false;
+let _configPromise = null;
+
+function _loadConfig() {
+  if (_configLoaded) return Promise.resolve();
+  if (_configPromise) return _configPromise;
+  _configPromise = fetch('/config.json')
+    .then(r => r.json())
+    .then(cfg => { _corsProxyUrl = (cfg.corsProxyUrl || '').replace(/\/$/, ''); })
+    .catch(() => {})
+    .finally(() => { _configLoaded = true; });
+  return _configPromise;
+}
 
 const EXPAND_COUNT  = 500;
 const FETCH_TIMEOUT = 15_000;
@@ -30,8 +42,7 @@ function _collectExternalVsNodes(nodes, out = []) {
 class TerminologyService {
   /** Wrap a target URL through the CORS proxy if configured. */
   _proxyUrl(url) {
-    if (!CORS_PROXY_URL) return url;
-    return `${CORS_PROXY_URL.replace(/\/$/, '')}?url=${encodeURIComponent(url)}`;
+    return _corsProxyUrl ? `${_corsProxyUrl}?url=${encodeURIComponent(url)}` : url;
   }
 
   /** Resolve the server URL for a node using the full fallback chain. */
@@ -49,6 +60,7 @@ class TerminologyService {
    * @returns {Promise<Array<{code: string, display: string, system: string}>>}
    */
   async expandValueSet(vsUrl, serverUrl) {
+    await _loadConfig();
     const base   = (serverUrl || DEFAULT_TERMINOLOGY_SERVER).replace(/\/$/, '');
     const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?url=${encodeURIComponent(vsUrl)}&_count=${EXPAND_COUNT}`);
     const res = await fetch(reqUrl, {
@@ -71,6 +83,7 @@ class TerminologyService {
    * @returns {Promise<{ok: boolean, message: string}>}
    */
   async testServer(serverUrl) {
+    await _loadConfig();
     const base = (serverUrl || '').trim().replace(/\/$/, '');
     if (!base) return { ok: false, message: 'No URL provided' };
     try {
