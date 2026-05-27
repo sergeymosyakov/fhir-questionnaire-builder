@@ -57,11 +57,11 @@ function _save() {
 }
 
 /** Start autosave interval. Call once after app is ready. */
-export function init({ buildFn, questMeta, onSaved }) {
+export async function init({ buildFn, questMeta, onSaved }) {
   _buildFn   = buildFn;
   _questMeta = questMeta;
   _onSaved   = onSaved ?? null;
-  _enabled   = storage.getItem(LS_ENABLED_KEY) !== 'false';
+  _enabled   = await storage.getItem(LS_ENABLED_KEY) !== 'false';
   // One-time cleanup of old single-slot keys from previous version
   storage.removeItem('autosave-draft');
   storage.removeItem('autosave-meta');
@@ -71,12 +71,12 @@ export function init({ buildFn, questMeta, onSaved }) {
 
 /** Return { meta, key } for the most recently saved draft across all slots,
  *  or null if no drafts exist. */
-export function getMostRecentDraft() {
+export async function getMostRecentDraft() {
   let best = null;
-  for (const lsKey of storage.keys()) {
+  for (const lsKey of await storage.keys()) {
     if (!lsKey.startsWith(META_PREFIX)) continue;
     try {
-      const meta = JSON.parse(storage.getItem(lsKey));
+      const meta = JSON.parse(await storage.getItem(lsKey));
       if (!best || meta.savedAt > best.meta.savedAt) best = { meta, key: meta.key };
     } catch (_) { /* malformed meta — skip */ }
   }
@@ -84,9 +84,9 @@ export function getMostRecentDraft() {
 }
 
 /** Return a saved questionnaire as a parsed object, or null. */
-export function getDraftData(key) {
+export async function getDraftData(key) {
   try {
-    const raw = storage.getItem(KEY_PREFIX + key);
+    const raw = await storage.getItem(KEY_PREFIX + key);
     return raw ? JSON.parse(raw) : null;
   } catch (_) { return null; }
 }

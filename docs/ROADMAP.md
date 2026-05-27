@@ -8,7 +8,7 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Next
 
-- [ ] **Supabase + GitHub OAuth** — user accounts (GitHub login); per-user questionnaire storage in Supabase (save / load / list); user settings (default FHIR server URL); no anonymous data; enables sharing questionnaires via URL slug. Unblocks the tool from being a REPL-only prototype into a real product.
+- [x] **Supabase + GitHub OAuth** — GitHub login via Supabase Auth; per-user questionnaire storage in Supabase (`questionnaires` table with RLS); Save dropdown: ☁ Cloud (logged-in + tree non-empty) / Questionnaire JSON / QuestionnaireResponse JSON; From Cloud… in Questionnaires menu; user avatar+name dropdown in top panel; sign out with unsaved work prompts confirmation
 - [ ] **More sample data** — 2–3 additional questionnaires covering different complexity levels, with documented expected PASS/FAIL outcomes per patient profile
 - [ ] **tx.fhir.org ValueSet expansion** — call HL7's public terminology server directly from the browser (`$expand` operation); user pastes an external ValueSet URL and gets live answer options without any backend; biggest UX gap vs. commercial tools
 - [ ] **Copy / paste nodes** — duplicate a question or an entire group (with children) anywhere in the tree

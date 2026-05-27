@@ -165,7 +165,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 /* === Two-column layout ======================================================= */
@@ -236,6 +237,13 @@
   font-size: 11px;
 }
 .top-panel-github-link:hover { color: #fff !important; }
+
+.top-panel-auth {
+  margin-left: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
 .left-panel-body {
   flex: 1;
   overflow-y: auto;

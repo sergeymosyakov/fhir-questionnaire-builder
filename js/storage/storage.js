@@ -35,14 +35,34 @@ function _check() {
   if (!_adapter) throw new Error('[storage] No adapter registered. Call storage.register() at app startup.');
 }
 
-/** @param {string} key @returns {string|null} */
-export function getItem(key)         { _check(); return _adapter.getItem(key); }
+/** @param {string} key @returns {Promise<string|null>} */
+export async function getItem(key)         { _check(); return _adapter.getItem(key); }
 
-/** @param {string} key @param {string} value */
-export function setItem(key, value)  { _check(); _adapter.setItem(key, value); }
+/** @param {string} key @param {string} value @returns {Promise<void>} */
+export async function setItem(key, value)  { _check(); return _adapter.setItem(key, value); }
 
-/** @param {string} key */
-export function removeItem(key)      { _check(); _adapter.removeItem(key); }
+/** @param {string} key @returns {Promise<void>} */
+export async function removeItem(key)      { _check(); return _adapter.removeItem(key); }
 
-/** @returns {string[]} */
-export function keys()               { _check(); return _adapter.keys(); }
+/** @returns {Promise<string[]>} */
+export async function keys()               { _check(); return _adapter.keys(); }
+
+// ── Cloud methods (only available when a SupabaseAdapter is registered) ───────
+
+/** @param {object} fhirJson @returns {Promise<{ id: string, title: string, updated_at: string }>} */
+export async function cloudSave(fhirJson)  { _check(); return _adapter.cloudSave?.(fhirJson); }
+
+/** @param {string} id @param {object} fhirJson @returns {Promise<object>} */
+export async function cloudUpdate(id, fhirJson) { _check(); return _adapter.cloudUpdate?.(id, fhirJson); }
+
+/** @returns {Promise<Array<{ id: string, title: string, url: string|null, updated_at: string }>>} */
+export async function cloudList()          { _check(); return _adapter.cloudList?.() ?? []; }
+
+/** @param {string} id @returns {Promise<object>} FHIR JSON */
+export async function cloudLoad(id)        { _check(); return _adapter.cloudLoad?.(id); }
+
+/** @param {string} id @returns {Promise<void>} */
+export async function cloudDelete(id)      { _check(); return _adapter.cloudDelete?.(id); }
+
+/** Returns true when the registered adapter supports cloud operations. */
+export function hasCloud()                 { return !!(_adapter?.cloudSave); }

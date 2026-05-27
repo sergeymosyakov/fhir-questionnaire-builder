@@ -1,0 +1,128 @@
+/* === Auth UI ================================================================= */
+
+/* Sign-in button (shown when logged out) */
+.auth-signin-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  background: var(--c-primary-lt);
+  color: var(--c-primary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+}
+.auth-signin-btn:hover { background: #bbdefb; }
+
+/* User dropdown button */
+.auth-user-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 160px;
+}
+.auth-user-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: block;
+  flex-shrink: 0;
+}
+.auth-user-name {
+  font-weight: 600;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* User dropdown menu — fixed so top-panel overflow:auto doesn't clip it */
+#userMenu {
+  position: fixed;
+  left: auto;
+  min-width: 140px;
+}
+
+/* Cloud save button in toolbar */
+.btn-fhir--cloud {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #a5d6a7;
+}
+.btn-fhir--cloud:hover { background: #c8e6c9; }
+.btn-fhir--cloud:disabled { opacity: .4; pointer-events: none; }
+
+/* === Cloud modal list ======================================================= */
+
+.cloud-list-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--c-text-secondary, #888);
+  font-size: 13px;
+}
+.cloud-list-error {
+  color: var(--c-danger, #dc2626);
+}
+.cloud-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--c-border, #e5e7eb);
+}
+.cloud-list-item:last-child { border-bottom: none; }
+.cloud-list-info { flex: 1; min-width: 0; }
+.cloud-list-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text, #1f2937);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cloud-list-meta {
+  font-size: 11px;
+  color: var(--c-text-secondary, #888);
+  margin-top: 2px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.cloud-list-url {
+  font-family: monospace;
+  font-size: 10px;
+  color: var(--c-primary, #1976d2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  display: inline-block;
+}
+.cloud-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.cloud-list-load-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+}
+.cloud-list-del-btn {
+  font-size: 14px;
+  padding: 2px 7px;
+  line-height: 1;
+  color: var(--c-text-secondary, #888);
+  border-color: transparent;
+  background: transparent;
+}
+.cloud-list-del-btn:hover {
+  color: var(--c-danger, #dc2626);
+  border-color: var(--c-danger, #dc2626);
+  background: #fef2f2;
+}

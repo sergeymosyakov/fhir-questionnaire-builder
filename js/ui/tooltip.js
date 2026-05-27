@@ -114,8 +114,8 @@ function _hide() {
   if (_el) _el.style.display = 'none';
 }
 
-export function init() {
-  _enabled = storage.getItem(LS_KEY) !== 'false';
+export async function init() {
+  _enabled = await storage.getItem(LS_KEY) !== 'false';
   document.addEventListener('mouseover', e => {
     const t = e.target.closest('[data-tip-title],[data-tip-body]');
     if (t) _show(t);

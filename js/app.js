@@ -1,6 +1,10 @@
 ﻿// Entry point: wires toolbar buttons and orchestrates UI modules.
 import * as storage from './storage/storage.js';
 import { LocalStorageAdapter } from './storage/local-storage.js';
+import { SupabaseAdapter } from './storage/supabase-adapter.js';
+import { supabase } from './auth/supabase-client.js';
+import * as auth from './auth/auth.js';
+import * as cloudModal from './ui/modals/cloud-modal.js';
 import { tree, values, rawFhir, effect, clearAllValues, questVariables, questContained, questMeta } from './state.js';
 import { buildFHIRObject, exportFHIR } from './fhir/export.js';
 import { validateTree } from './fhir/validate.js';
@@ -24,7 +28,7 @@ import * as variablesPanel    from './ui/variables-panel.js';
 import containedPanel        from './ui/panels/contained-panel.js';
 
 // Register storage adapter before any module that reads storage is initialised.
-storage.register(new LocalStorageAdapter());
+storage.register(new SupabaseAdapter(supabase));
 import answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
 import * as patientCtx        from './ui/patient-ctx.js';
 import { setFileName, navigateToNode } from './app-load.js';
@@ -275,6 +279,34 @@ function _askBeforeClear() {
   });
 }
 
+// Returns promise resolving to 'ok' | 'cancel'
+function _askConfirm(title, msg, okLabel = 'OK', cancelLabel = 'Cancel') {
+  return new Promise(resolve => {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'clear-confirm-backdrop';
+
+    const box = document.createElement('div');
+    box.className = 'clear-confirm-box';
+    box.innerHTML =
+      `<div class="clear-confirm-title">${title}</div>` +
+      `<div class="clear-confirm-msg">${msg}</div>` +
+      '<div class="clear-confirm-btns">' +
+        `<button class="btn-fhir" id="_acOk">${okLabel}</button>` +
+        `<button class="btn-fhir" id="_acCancel">${cancelLabel}</button>` +
+      '</div>';
+
+    backdrop.appendChild(box);
+    document.body.appendChild(backdrop);
+
+    const esc = e => { if (e.key === 'Escape') close('cancel'); };
+    document.addEventListener('keydown', esc);
+    const close = r => { document.removeEventListener('keydown', esc); backdrop.remove(); resolve(r); };
+    box.querySelector('#_acOk').onclick     = () => close('ok');
+    box.querySelector('#_acCancel').onclick = () => close('cancel');
+    backdrop.addEventListener('click', e => { if (e.target === backdrop) close('cancel'); });
+  });
+}
+
 // Close any open ⊕ Add dropdown when clicking outside
 document.addEventListener('click', () => {
   document.querySelectorAll('.action-add-menu').forEach(m => { m.style.display = 'none'; });
@@ -283,6 +315,8 @@ document.addEventListener('click', () => {
   document.getElementById('answersMenu').style.display = 'none';
   const ppMenu = document.getElementById('patientPresetMenu');
   if (ppMenu) ppMenu.style.display = 'none';
+  const umMenu = document.getElementById('userMenu');
+  if (umMenu) umMenu.style.display = 'none';
   const pmMenu = document.getElementById('previewModeMenu');
   if (pmMenu) pmMenu.style.display = 'none';
   const voMenu = document.getElementById('viewOptionsMenu');
@@ -364,7 +398,7 @@ document.addEventListener('click', () => {
 
   // Restore saved width
   let saved;
-  try { saved = storage.getItem(STORAGE_KEY); } catch { /* private mode / quota */ }
+  try { saved = await storage.getItem(STORAGE_KEY); } catch { /* private mode / quota */ }
   if (saved) leftPanel.style.width = saved + 'px';
 
   let startX, startW;
@@ -451,3 +485,126 @@ document.addEventListener('keydown', e => {
     e.preventDefault(); history.redo(); _syncUndoRedo();
   }
 });
+
+// ── Auth + Cloud ──────────────────────────────────────────────────────────────
+{
+  const _signInBtn    = document.getElementById('signInBtn');
+  const _userChip     = document.getElementById('userChip');
+  const _userMenuBtn  = document.getElementById('userMenuBtn');
+  const _userMenu     = document.getElementById('userMenu');
+  const _userAvatar   = document.getElementById('userAvatar');
+  const _userName     = document.getElementById('userName');
+  const _signOutBtn   = document.getElementById('signOutBtn');
+  const _cloudSaveBtn  = document.getElementById('cloudSaveBtn');
+  const _cloudSaveSep  = document.getElementById('cloudSaveSep');
+  const _loadCloudItem = document.getElementById('loadCloudItem');
+  const _loadCloudSep  = document.getElementById('loadCloudSep');
+
+  // Track the cloud row id of the currently open questionnaire (for updates)
+  let _currentCloudId = null;
+
+  function _setAuthUI(user) {
+    if (user) {
+      _signInBtn.style.display  = 'none';
+      _userChip.style.display   = 'inline-flex';
+      _userAvatar.src           = user.user_metadata?.avatar_url || '';
+      _userName.textContent     = user.user_metadata?.user_name || user.email || '';
+      _loadCloudItem.style.display = '';
+      _loadCloudSep.style.display  = '';
+    } else {
+      _signInBtn.style.display  = '';
+      _userChip.style.display   = 'none';
+      _loadCloudItem.style.display = 'none';
+      _loadCloudSep.style.display  = 'none';
+      _cloudSaveBtn.style.display = 'none';
+      _cloudSaveSep.style.display = 'none';
+      _currentCloudId = null;
+    }
+  }
+
+  // Sync cloud save item visibility with login + tree state
+  effect(() => {
+    const loggedIn = _userChip.style.display !== 'none';
+    const hasNodes = tree.length > 0;
+    const show = loggedIn && hasNodes ? '' : 'none';
+    _cloudSaveBtn.style.display = show;
+    _cloudSaveSep.style.display = show;
+  });
+
+  // Reset cloud id when questionnaire is cleared
+  document.addEventListener('questionnaire-cleared', () => { _currentCloudId = null; });
+
+  _signInBtn.addEventListener('click', async () => {
+    try { await auth.signInWithGitHub(); }
+    catch (err) { import('./ui/toast.js').then(m => m.showError('Sign in failed: ' + err.message)); }
+  });
+
+  _userMenuBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (_userMenu.style.display === 'none') {
+      const r = _userMenuBtn.getBoundingClientRect();
+      _userMenu.style.top      = (r.bottom + 4) + 'px';
+      _userMenu.style.right    = (window.innerWidth - r.right) + 'px';
+      _userMenu.style.minWidth = r.width + 'px';
+      _userMenu.style.display  = 'block';
+    } else {
+      _userMenu.style.display = 'none';
+    }
+  });
+
+  _signOutBtn.addEventListener('click', async () => {
+    _userMenu.style.display = 'none';
+    if (tree.length > 0) {
+      const answer = await _askConfirm(
+        'Sign out?',
+        'Your unsaved work will be lost. Sign out anyway?',
+        'Sign out', 'Cancel'
+      );
+      if (answer !== 'ok') return;
+      _doReset();
+    }
+    try { await auth.signOut(); }
+    catch (err) { import('./ui/toast.js').then(m => m.showError('Sign out failed: ' + err.message)); }
+  });
+
+  _cloudSaveBtn.addEventListener('click', async () => {
+    document.getElementById('exportMenu').style.display = 'none';
+    _cloudSaveBtn.classList.add('load-menu-item--loading');
+    try {
+      const fhirJson = buildFHIRObject();
+      let row;
+      if (_currentCloudId) {
+        row = await storage.cloudUpdate(_currentCloudId, fhirJson);
+      } else {
+        row = await storage.cloudSave(fhirJson);
+        _currentCloudId = row.id;
+      }
+      import('./ui/toast.js').then(m => m.showInfo('Saved to cloud'));
+    } catch (err) {
+      import('./ui/toast.js').then(m => m.showError('Cloud save failed: ' + err.message));
+    } finally {
+      _cloudSaveBtn.classList.remove('load-menu-item--loading');
+    }
+  });
+
+  _loadCloudItem.addEventListener('click', async () => {
+    document.getElementById('loadMenu').style.display = 'none';
+    const { importAndValidate } = await import('./app-load.js');
+    cloudModal.open(async id => {
+      try {
+        progress.show('Loading from cloud\u2026');
+        const fhirJson = await storage.cloudLoad(id);
+        _currentCloudId = id;
+        await importAndValidate(fhirJson, fhirJson.title || 'Cloud questionnaire');
+      } catch (err) {
+        progress.hide();
+        import('./ui/toast.js').then(m => m.showError('Cloud load failed: ' + err.message));
+      }
+    });
+  });
+
+  // Subscribe to auth state — fires immediately with current session
+  auth.onAuthChange((event, user) => {
+    _setAuthUI(user);
+  });
+}

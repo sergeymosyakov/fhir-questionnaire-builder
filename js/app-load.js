@@ -155,8 +155,8 @@ const _loadMenu       = document.getElementById('loadMenu');
 const _loadRecentItem = document.getElementById('loadRecentItem');
 const _loadRecentSep  = document.getElementById('loadRecentSep');
 
-function _syncRecentItem() {
-  const recent = autosave.getMostRecentDraft();
+async function _syncRecentItem() {
+  const recent = await autosave.getMostRecentDraft();
   if (recent) {
     const d = new Date(recent.meta.savedAt);
     const ts = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -183,7 +183,7 @@ _loadRecentItem.onclick = async () => {
   if (await _askBeforeLoad() !== 'proceed') return;
   const key = _loadRecentItem.dataset.draftKey;
   if (!key) return;
-  const data = autosave.getDraftData(key);
+  const data = await autosave.getDraftData(key);
   if (!data) return;
   const label = data.title || 'autosave-draft';
   progress.show('Loading recent draft\u2026');
