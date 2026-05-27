@@ -76,6 +76,22 @@
     {
       "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
       "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "weightKg",
+        "language": "text/fhirpath",
+        "expression": "item.where(linkId='1').item.where(linkId='1.1').item.where(linkId='1.1.8').answer.select(iif($this.item.where(linkId='1.1.8.1.1').answer.first().valueCoding.code = '[lb_av]', $this.valueDecimal * 0.453592, $this.valueDecimal)).first()"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "heightM",
+        "language": "text/fhirpath",
+        "expression": "item.where(linkId='1').item.where(linkId='1.1').item.where(linkId='1.1.7').answer.select(iif($this.item.where(linkId='1.1.7.1.1').answer.first().valueCoding.code = '[in_i]', $this.valueDecimal * 0.0254, $this.valueDecimal / 100)).first()"
+      }
     }
   ],
   "url": "http://hl7.org/fhir/us/sdc/Questionnaire/54127-6",
@@ -293,7 +309,16 @@
               ],
               "text": "Body mass index (BMI) [Ratio]",
               "type": "decimal",
-              "readOnly": true
+              "readOnly": true,
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "(%weightKg / (%heightM * %heightM)).round(1)"
+                  }
+                }
+              ]
             },
             {
               "linkId": "1.1.10",

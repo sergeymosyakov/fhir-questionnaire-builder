@@ -103,8 +103,8 @@ export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date', 'dateTime', 't
 export { resetSeq } from './id.js';
 
 
-// Helper: null mandatory behaves as true (required unless explicitly set false)
-export const isMandatory = node => node.mandatory !== false;
+// Helper: follows FHIR spec — required defaults to false; only true when explicitly set
+export const isMandatory = node => node.mandatory === true;
 
 // ── Form-value success check ──────────────────────────────────────────────────
 function _isValidUrl(s) {
