@@ -6,7 +6,6 @@
 //
 // Fixture: tests/fixtures/answer-options-editor.fhir.json
 //   q-opts  — choice with 3 options (low/moderate/high) + ordinals + prefixes
-//   q-empty — choice with no options
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
 //   action-type         Answer Type action link (ItemNode)
@@ -89,9 +88,12 @@ test.describe('answer options editor — pre-population', () => {
     await expect(page.getByTestId('opt-prefix-2')).toHaveValue('C.');
   });
 
-  test('empty item shows "No options yet" message', async ({ page }) => {
+  test('removing all rows shows "No options yet" message', async ({ page }) => {
     await freshLoad(page);
-    await openModal(page, 'q-empty');
+    await openModal(page);
+    await page.getByTestId('opt-rm-2').click();
+    await page.getByTestId('opt-rm-1').click();
+    await page.getByTestId('opt-rm-0').click();
     await expect(page.locator('.opt-editor__empty')).toBeVisible();
     await expect(page.locator('.opt-editor__empty')).toContainText('No options yet');
   });
@@ -117,9 +119,12 @@ test.describe('answer options editor — add/remove', () => {
     await expect(page.locator('[data-testid="opt-code-2"]')).toBeHidden();
   });
 
-  test('removing all rows shows empty message', async ({ page }) => {
+  test('adding then removing a row shows empty message', async ({ page }) => {
     await freshLoad(page);
-    await openModal(page, 'q-empty');
+    await openModal(page);
+    await page.getByTestId('opt-rm-2').click();
+    await page.getByTestId('opt-rm-1').click();
+    await page.getByTestId('opt-rm-0').click();
     await page.getByTestId('opt-add-btn').click();
     await page.getByTestId('opt-rm-0').click();
     await expect(page.locator('.opt-editor__empty')).toBeVisible();

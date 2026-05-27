@@ -31,11 +31,6 @@
           ]
         }
       ]
-    },
-    {
-      "linkId": "q-empty",
-      "type": "choice",
-      "text": "Pick one"
     }
   ]
 }
