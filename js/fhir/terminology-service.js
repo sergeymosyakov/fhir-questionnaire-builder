@@ -10,6 +10,11 @@
 
 export const DEFAULT_TERMINOLOGY_SERVER = 'https://tx.fhir.org/r4';
 
+// Cloudflare Worker CORS proxy URL. Deploy scripts/cors-proxy.worker.js to
+// Cloudflare Workers and set the URL here. Leave empty to disable the proxy
+// (requests will fail with CORS errors in browser environments).
+const CORS_PROXY_URL = 'https://fhir-cors-proxy.sergeymosyakov.workers.dev';
+
 const EXPAND_COUNT  = 500;
 const FETCH_TIMEOUT = 15_000;
 const TEST_TIMEOUT  = 8_000;
@@ -23,6 +28,12 @@ function _collectExternalVsNodes(nodes, out = []) {
 }
 
 class TerminologyService {
+  /** Wrap a target URL through the CORS proxy if configured. */
+  _proxyUrl(url) {
+    if (!CORS_PROXY_URL) return url;
+    return `${CORS_PROXY_URL.replace(/\/$/, '')}?url=${encodeURIComponent(url)}`;
+  }
+
   /** Resolve the server URL for a node using the full fallback chain. */
   getServer(node, questMeta) {
     const url = node?._preferredTermServer
@@ -39,7 +50,7 @@ class TerminologyService {
    */
   async expandValueSet(vsUrl, serverUrl) {
     const base   = (serverUrl || DEFAULT_TERMINOLOGY_SERVER).replace(/\/$/, '');
-    const reqUrl = `${base}/ValueSet/$expand?url=${encodeURIComponent(vsUrl)}&_count=${EXPAND_COUNT}`;
+    const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?url=${encodeURIComponent(vsUrl)}&_count=${EXPAND_COUNT}`);
     const res = await fetch(reqUrl, {
       headers: { Accept: 'application/fhir+json' },
       signal:  AbortSignal.timeout(FETCH_TIMEOUT),
@@ -63,7 +74,7 @@ class TerminologyService {
     const base = (serverUrl || '').trim().replace(/\/$/, '');
     if (!base) return { ok: false, message: 'No URL provided' };
     try {
-      const res = await fetch(`${base}/metadata`, {
+      const res = await fetch(this._proxyUrl(`${base}/metadata`), {
         headers: { Accept: 'application/fhir+json' },
         signal:  AbortSignal.timeout(TEST_TIMEOUT),
       });
