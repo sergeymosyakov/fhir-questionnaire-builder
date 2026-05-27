@@ -77,7 +77,7 @@ progress.init({
 });
 
 // ── Tooltip init ─────────────────────────────────────────────────────────
-tooltip.init();
+tooltip.init().then(() => _syncTooltipState(tooltip.isEnabled()));
 
 statusBadge.init({
   btn:      document.getElementById('statusBadgeBtn'),
@@ -375,9 +375,8 @@ _autosaveToggleBtn.addEventListener('click', () => {
 });
 autosave.init({ buildFn: buildFHIRObject, questMeta, onSaved: (date) => {
   _syncAutosaveState(autosave.isEnabled(), date);
-} });
-// Sync button after init() has read the persisted enabled state from storage
-_syncAutosaveState(autosave.isEnabled(), null);
+} }).then(() => _syncAutosaveState(autosave.isEnabled(), null));
+
 
 // ── Undo / Redo ───────────────────────────────────────────────────────────────
 const _undoBtn = document.getElementById('undoBtn');
