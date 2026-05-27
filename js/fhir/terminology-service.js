@@ -27,9 +27,30 @@ function _loadConfig() {
   return _configPromise;
 }
 
-const EXPAND_COUNT  = 500;
-const FETCH_TIMEOUT = 15_000;
-const TEST_TIMEOUT  = 8_000;
+const EXPAND_COUNT   = 500;
+const FETCH_TIMEOUT  = 15_000;
+const TEST_TIMEOUT   = 8_000;
+const RETRY_STATUSES = new Set([429, 500, 503, 504]);
+const RETRY_DELAY_MS = 700;
+const MAX_RETRIES    = 2;
+
+/** Fetch with automatic retry on transient server errors (503, 500, 429, 504). */
+async function _fetchWithRetry(url, options) {
+  let lastErr;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 0) await new Promise(r => setTimeout(r, RETRY_DELAY_MS * attempt));
+    let res;
+    try {
+      res = await fetch(url, options);
+    } catch (err) {
+      lastErr = err;
+      continue;
+    }
+    if (!RETRY_STATUSES.has(res.status)) return res;
+    lastErr = new Error(`HTTP ${res.status} ${res.statusText}`);
+  }
+  throw lastErr;
+}
 
 function _collectExternalVsNodes(nodes, out = []) {
   for (const node of nodes) {
@@ -63,7 +84,7 @@ class TerminologyService {
     await _loadConfig();
     const base   = (serverUrl || DEFAULT_TERMINOLOGY_SERVER).replace(/\/$/, '');
     const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?url=${encodeURIComponent(vsUrl)}&_count=${EXPAND_COUNT}`);
-    const res = await fetch(reqUrl, {
+    const res = await _fetchWithRetry(reqUrl, {
       headers: { Accept: 'application/fhir+json' },
       signal:  AbortSignal.timeout(FETCH_TIMEOUT),
     });
@@ -87,7 +108,7 @@ class TerminologyService {
     const base = (serverUrl || '').trim().replace(/\/$/, '');
     if (!base) return { ok: false, message: 'No URL provided' };
     try {
-      const res = await fetch(this._proxyUrl(`${base}/metadata`), {
+      const res = await _fetchWithRetry(this._proxyUrl(`${base}/metadata`), {
         headers: { Accept: 'application/fhir+json' },
         signal:  AbortSignal.timeout(TEST_TIMEOUT),
       });
