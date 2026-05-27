@@ -14,3 +14,4 @@ import './appearance-modal.js';
 import './qr-export-modal.js';
 import './library-modal.js';
 import './json-viewer.js';
+import './help-modal.js';

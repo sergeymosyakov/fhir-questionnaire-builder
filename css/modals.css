@@ -99,6 +99,10 @@
 #fhirJsonModal .modal-box   { width: min(700px, 94vw); max-height: 80vh; display: flex; flex-direction: column; }
 
 /* === Per-modal body overrides ================================================ */
+/* Help modal — iframe wrapper */
+.help-modal-body { padding: 0; overflow: hidden; }
+.help-iframe { display: block; width: 100%; height: 65vh; border: none; }
+
 /* JSON viewer — scrollable pre */
 .fhir-json-modal-body { overflow: auto; flex: 1; }
 .fhir-json-pre {

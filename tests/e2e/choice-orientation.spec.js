@@ -18,7 +18,9 @@
 //   action-type           "Answer Type" action link on an item node
 //   type-select           custom type dropdown in Answer Type modal
 //   orientation-select    custom select for choiceOrientation (radio type only)
-//   options-input         textarea for options list in Answer Type modal
+//   opt-add-btn           "+ Add option" button in the Answer Type options editor
+//   opt-code-{i}          Code input for row i in the options editor
+//   opt-label-{i}         Label input for row i in the options editor
 //   csel-drop             dropdown panel of any custom select
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -75,6 +77,16 @@ async function changeOrientation(page, orientValue) {
 async function applyModal(page) {
   await page.locator('[data-testid="answerTypeModalApply"]').click();
   await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
+}
+
+// Add two options via the row-based options editor (Code / Label)
+async function addTwoOptions(page) {
+  await page.getByTestId('opt-add-btn').click();
+  await page.getByTestId('opt-code-0').fill('a');
+  await page.getByTestId('opt-label-0').fill('Option A');
+  await page.getByTestId('opt-add-btn').click();
+  await page.getByTestId('opt-code-1').fill('b');
+  await page.getByTestId('opt-label-1').fill('Option B');
 }
 
 // ── 1. Fixture import — CSS class from FHIR extension ────────────────────────
@@ -149,7 +161,7 @@ test.describe('choiceOrientation — builder to preview round-trip', () => {
     const itemId = await addRadioItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'radio');
-    await page.locator('[data-testid="answerTypeModal"]').getByTestId('options-input').fill('a=Option A,b=Option B');
+    await addTwoOptions(page);
     await changeOrientation(page, 'vertical');
     await applyModal(page);
     await expect(page.locator(`[data-preview-id="${itemId}"] .ctrl-wrap`)).toHaveClass(/ctrl-wrap--vertical/);
@@ -160,7 +172,7 @@ test.describe('choiceOrientation — builder to preview round-trip', () => {
     const itemId = await addRadioItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'radio');
-    await page.locator('[data-testid="answerTypeModal"]').getByTestId('options-input').fill('a=Option A,b=Option B');
+    await addTwoOptions(page);
     await changeOrientation(page, 'horizontal');
     await applyModal(page);
     await expect(page.locator(`[data-preview-id="${itemId}"] .ctrl-wrap`)).toHaveClass(/ctrl-wrap--horizontal/);
@@ -171,7 +183,7 @@ test.describe('choiceOrientation — builder to preview round-trip', () => {
     const itemId = await addRadioItem(page);
     await openAnswerTypeModal(page, itemId);
     await changeType(page, 'radio');
-    await page.locator('[data-testid="answerTypeModal"]').getByTestId('options-input').fill('a=Option A,b=Option B');
+    await addTwoOptions(page);
     // Set vertical first, then clear it
     await changeOrientation(page, 'vertical');
     await applyModal(page);

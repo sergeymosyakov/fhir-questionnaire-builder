@@ -17,6 +17,7 @@ import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from '.
 import { importFHIR } from './fhir/import.js';
 import { _formTick } from './render-bus.js';
 import * as history from './ui/history.js';
+import * as helpModal from './ui/modals/help-modal.js';
 import { navigateToPreview, initPreview } from './render-preview.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
@@ -91,6 +92,8 @@ _tooltipToggleBtn.addEventListener('click', () => {
   tooltip.setEnabled(next);
   _syncTooltipState(next);
 });
+
+document.getElementById('helpBtn').addEventListener('click', () => helpModal.open());
 
 // ── Search init ───────────────────────────────────────────────────────────
 search.init({

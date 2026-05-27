@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FHIR Field Reference — Logic Builder</title>
+  <link rel="stylesheet" href="css/help.css">
+</head>
+<body>
+  <div class="help-header">
+    <div class="help-header-top">
+      <h1>FHIR Field Reference</h1>
+      <a href="index.html" class="help-back-link" target="_parent">← Back to Builder</a>
+    </div>
+    <p class="help-subtitle">Find any FHIR R4 / SDC field and where to configure it in the Logic Builder UI.</p>
+    <input type="search" id="helpSearch" class="help-search" placeholder="Search by field name, extension, or keyword…" autocomplete="off">
+    <div id="helpCount" class="help-count"></div>
+  </div>
+
+  <div class="help-wrap">
+    <table id="helpTable">
+      <thead>
+        <tr>
+          <th class="col-field">FHIR Field / Extension</th>
+          <th class="col-desc">Description</th>
+          <th class="col-where">Where in UI</th>
+          <th class="col-how">How to access</th>
+        </tr>
+      </thead>
+      <tbody id="helpBody"></tbody>
+    </table>
+    <div id="helpEmpty" class="help-empty" style="display:none">No fields match your search.</div>
+  </div>
+
+  <script>
+  // ── Field reference data ────────────────────────────────────────────────────
+  const HELP_DATA = [
+    // ── Questionnaire root level ──────────────────────────────────────────────
+    { cat: 'Questionnaire', field: 'Questionnaire.title', desc: 'Human-readable name displayed in the builder toolbar', where: 'Properties modal', how: 'Click ⚙ Properties in the left panel toolbar' },
+    { cat: 'Questionnaire', field: 'Questionnaire.id', desc: 'Logical resource ID', where: 'Properties modal', how: 'Click ⚙ Properties → Identifiers & Publication section' },
+    { cat: 'Questionnaire', field: 'Questionnaire.url', desc: 'Canonical URL uniquely identifying this questionnaire', where: 'Properties modal', how: 'Click ⚙ Properties → Identifiers & Publication section' },
+    { cat: 'Questionnaire', field: 'Questionnaire.version', desc: 'Business version string', where: 'Properties modal', how: 'Click ⚙ Properties → Identifiers & Publication section' },
+    { cat: 'Questionnaire', field: 'Questionnaire.name', desc: 'Computer-friendly name (PascalCase, no spaces)', where: 'Properties modal', how: 'Click ⚙ Properties → Identifiers & Publication section' },
+    { cat: 'Questionnaire', field: 'Questionnaire.status', desc: 'Publication lifecycle status: draft / active / retired / unknown', where: 'Status badge — left panel header', how: 'Click the status badge in the left panel header toolbar' },
+    { cat: 'Questionnaire', field: 'Questionnaire.experimental', desc: 'Marks this as a test resource, not for production use', where: 'Properties modal', how: 'Click ⚙ Properties → Identifiers & Publication section' },
+    { cat: 'Questionnaire', field: 'Questionnaire.date', desc: 'Date this version was published', where: 'Properties modal', how: 'Click ⚙ Properties' },
+    { cat: 'Questionnaire', field: 'Questionnaire.publisher', desc: 'Name of the organisation that published this questionnaire', where: 'Properties modal', how: 'Click ⚙ Properties' },
+    { cat: 'Questionnaire', field: 'Questionnaire.description', desc: 'Natural language description of the questionnaire', where: 'Properties modal', how: 'Click ⚙ Properties' },
+    { cat: 'Questionnaire', field: 'Questionnaire.purpose', desc: 'Why this questionnaire was created', where: 'Properties modal', how: 'Click ⚙ Properties → Purpose & Copyright section' },
+    { cat: 'Questionnaire', field: 'Questionnaire.copyright', desc: 'Use and publishing restrictions', where: 'Properties modal', how: 'Click ⚙ Properties → Purpose & Copyright section' },
+    { cat: 'Questionnaire', field: 'Questionnaire.approvalDate', desc: 'When approved by the publisher', where: 'Properties modal', how: 'Click ⚙ Properties → Lifecycle Dates section' },
+    { cat: 'Questionnaire', field: 'Questionnaire.lastReviewDate', desc: 'When content was last reviewed', where: 'Properties modal', how: 'Click ⚙ Properties → Lifecycle Dates section' },
+    { cat: 'Questionnaire', field: 'Questionnaire.effectivePeriod', desc: 'Period when the questionnaire is expected to be in active use', where: 'Properties modal', how: 'Click ⚙ Properties → Lifecycle Dates section' },
+    { cat: 'Questionnaire', field: 'Questionnaire.subjectType', desc: 'Resource type the questionnaire collects data about (e.g. Patient)', where: 'Properties modal', how: 'Click ⚙ Properties' },
+    { cat: 'Questionnaire', field: 'Questionnaire.language', desc: 'BCP-47 language code for the resource content', where: 'Properties modal', how: 'Click ⚙ Properties' },
+    { cat: 'Questionnaire', field: 'Questionnaire.derivedFrom', desc: 'Canonical URL(s) this questionnaire is based on', where: 'Properties modal', how: 'Click ⚙ Properties → Relationships section' },
+    { cat: 'Questionnaire', field: 'Questionnaire.contained[]', desc: 'Inline resources (e.g. ValueSets) bundled with the questionnaire', where: 'Contained panel — left panel', how: 'Scroll to the Contained section in the left panel' },
+    { cat: 'Questionnaire', field: 'variable (extension)', desc: 'FHIRPath variables scoped to the whole questionnaire (SDC)', where: 'Variables panel — left panel', how: 'Scroll to the Variables section in the left panel' },
+
+    // ── Item — core FHIR fields ───────────────────────────────────────────────
+    { cat: 'Item — Core', field: 'item.linkId', desc: 'Unique identifier for the item within the questionnaire tree', where: 'Item row — ID badge', how: 'Visible as a small badge on each item; click the badge to edit' },
+    { cat: 'Item — Core', field: 'item.text', desc: 'Primary label shown to the user filling the form', where: 'Item row — title field', how: 'Click the item title directly to edit inline' },
+    { cat: 'Item — Core', field: 'item.type', desc: 'Data type of the answer: boolean, string, integer, decimal, date, choice, reference, attachment, quantity, display, etc.', where: 'Answer Type modal', how: 'Click "Answer Type" action link on the item row' },
+    { cat: 'Item — Core', field: 'item.required', desc: 'Whether an answer is mandatory', where: 'States modal', how: 'Click "Required" or "States" action link on the item row' },
+    { cat: 'Item — Core', field: 'item.repeats', desc: 'Whether the item can be answered more than once (multi-row input)', where: 'States modal', how: 'Click "States" action link → Repeatable toggle' },
+    { cat: 'Item — Core', field: 'item.readOnly', desc: 'Whether the answer cannot be changed by the user', where: 'States modal', how: 'Click "States" action link → Read-only toggle' },
+    { cat: 'Item — Core', field: 'item.prefix', desc: 'Short label prefix displayed before the item text (e.g. "1.", "a.")', where: 'Item Properties', how: 'Click "Props" action link on the item → Prefix field' },
+    { cat: 'Item — Core', field: 'item.maxLength', desc: 'Maximum allowed character count for text / string / url answers', where: 'Entry Format modal', how: 'Click "Format" action link on the item → Max Length field' },
+    { cat: 'Item — Core', field: 'item.answerOption[]', desc: 'Fixed list of answer choices (code, display, score, prefix per option)', where: 'Answer Type modal → Options editor', how: 'Click "Answer Type" → select "Options" source → edit the Code / Label / Score / Prefix table' },
+    { cat: 'Item — Core', field: 'item.answerValueSet', desc: 'URL of a ValueSet that provides the answer choices', where: 'Answer Type modal → ValueSet source', how: 'Click "Answer Type" → select "ValueSet" source → enter the ValueSet URL' },
+    { cat: 'Item — Core', field: 'item.initial[]', desc: 'Default answer value(s) pre-filled before user interaction', where: 'Entry Format modal', how: 'Click "Format" action link → Initial Value field' },
+    { cat: 'Item — Core', field: 'item.enableWhen[]', desc: 'Conditions under which this item is visible / enabled', where: 'Condition modal', how: 'Click "Condition" action link on the item row' },
+    { cat: 'Item — Core', field: 'item.enableBehavior', desc: 'How multiple enableWhen conditions are combined: all (AND) or any (OR)', where: 'Condition modal', how: 'Click "Condition" → AND / OR selector at the top of the modal' },
+    { cat: 'Item — Core', field: 'item.disabledDisplay', desc: "How to show items when their enableWhen condition is false: 'hidden' removes the item; 'protected' shows it greyed-out", where: 'States modal', how: 'Click "States" → Disabled Display dropdown' },
+    { cat: 'Item — Core', field: 'item.definition', desc: 'URL pointing to an ElementDefinition that provides additional meaning', where: 'Item Properties', how: 'Click "Props" action link on the item → Definition field' },
+    { cat: 'Item — Core', field: 'item.code[]', desc: 'Formal coding identifiers for the item (e.g. LOINC code)', where: 'Codes modal', how: 'Click "Codes" action link on the item row' },
+
+    // ── Item — standard FHIR extensions ──────────────────────────────────────
+    { cat: 'Item — Extensions', field: 'rendering-style', desc: 'Inline CSS to apply to the rendered item text (bold, colour, etc.)', where: 'Entry Format modal', how: 'Click "Format" action link → Rendering Style field' },
+    { cat: 'Item — Extensions', field: 'rendering-xhtml', desc: 'XHTML markup shown instead of plain item.text when the client supports rich rendering', where: 'Entry Format modal', how: 'Click "Format" action link → Rendering XHTML field' },
+    { cat: 'Item — Extensions', field: 'entryFormat', desc: 'Placeholder hint shown inside the input field (e.g. "MM/DD/YYYY")', where: 'Entry Format modal', how: 'Click "Format" action link → Entry Format hint field' },
+    { cat: 'Item — Extensions', field: 'minLength', desc: 'Minimum number of characters required for string / text / url answers', where: 'Entry Format modal', how: 'Click "Format" action link → Min Length field' },
+    { cat: 'Item — Extensions', field: 'minValue / maxValue', desc: 'Minimum and maximum numeric or date constraint on the answer value', where: 'Entry Format modal', how: 'Click "Format" action link → Min Value / Max Value fields' },
+    { cat: 'Item — Extensions', field: 'questionnaire-sliderStepValue', desc: 'Step increment for slider rendering of integer / decimal items', where: 'Entry Format modal', how: 'Click "Format" action link → Slider Step field (integer / decimal items only)' },
+    { cat: 'Item — Extensions', field: 'questionnaire-hidden', desc: 'Hides the item from the patient UI; item still participates in calculations', where: 'States modal', how: 'Click "States" action link → Hidden toggle' },
+    { cat: 'Item — Extensions', field: 'questionnaire-supportLink', desc: 'One or more URIs linking to supporting information for this item', where: 'Support Link modal', how: 'Click "Links" action link on the item row' },
+    { cat: 'Item — Extensions', field: 'questionnaire-constraint', desc: 'FHIRPath invariant constraints: expression + human-readable message + severity', where: 'Constraint modal', how: 'Click "Constraint" action link on the item row' },
+    { cat: 'Item — Extensions', field: 'ordinalValue (on answerOption)', desc: 'Numeric score / weight assigned to a specific answer option', where: 'Answer Type modal → Options editor → Score column', how: 'Click "Answer Type" → edit the Score column in the options table' },
+    { cat: 'Item — Extensions', field: 'questionnaire-optionPrefix (on answerOption)', desc: 'Display prefix shown before a specific answer option label (e.g. "A.", "1.")', where: 'Answer Type modal → Options editor → Prefix column', how: 'Click "Answer Type" → edit the Prefix column in the options table' },
+    { cat: 'Item — Extensions', field: 'questionnaire-itemControl (radio-button)', desc: 'Renders a choice item as a vertical radio button list', where: 'Answer Type modal', how: 'Click "Answer Type" → select item type "radio"' },
+    { cat: 'Item — Extensions', field: 'questionnaire-referenceResource', desc: 'Resource type(s) that are valid targets for reference items', where: 'Answer Type modal — reference items', how: 'Click "Answer Type" when type is reference → Resource Type dropdown' },
+    { cat: 'Item — Extensions', field: 'maxSize (attachment)', desc: 'Maximum allowed file size in MB for attachment items', where: 'Entry Format modal', how: 'Click "Format" action link → Max File Size field (attachment items only)' },
+    { cat: 'Item — Extensions', field: 'mimeType (attachment)', desc: 'Allowed MIME type(s) for attachment items', where: 'Entry Format modal', how: 'Click "Format" action link → MIME Types field (attachment items only)' },
+    { cat: 'Item — Extensions', field: 'minOccurs / maxOccurs', desc: 'Minimum and maximum number of repetitions for repeating items', where: 'Entry Format modal', how: 'Click "Format" action link → Min / Max Occurrences fields (visible when repeats = true)' },
+
+    // ── Item — SDC extensions ─────────────────────────────────────────────────
+    { cat: 'Item — SDC', field: 'sdc-questionnaire-calculatedExpression', desc: 'FHIRPath expression evaluated continuously; its result is written into the item answer (read-only computed field)', where: 'Expression modal', how: 'Click "Expression" action link on the item → Calculated Expression tab' },
+    { cat: 'Item — SDC', field: 'sdc-questionnaire-initialExpression', desc: 'FHIRPath expression evaluated once on form load to pre-populate the item', where: 'Expression modal', how: 'Click "Expression" action link on the item → Initial Expression tab' },
+    { cat: 'Item — SDC', field: 'sdc-questionnaire-enableWhenExpression', desc: 'FHIRPath expression used instead of enableWhen[] rules to control item visibility', where: 'Condition modal', how: 'Click "Condition" action link → Expression tab' },
+    { cat: 'Item — SDC', field: 'sdc-questionnaire-answerExpression', desc: 'FHIRPath expression evaluated at render time to dynamically produce the answer option list', where: 'Answer Type modal → Expression source', how: 'Click "Answer Type" → select "Expression" source → enter a FHIRPath expression' },
+    { cat: 'Item — SDC', field: 'sdc-questionnaire-hidden', desc: 'Hides the item from the patient UI (same effect as questionnaire-hidden; SDC variant)', where: 'States modal', how: 'Click "States" action link → Hidden toggle' },
+    { cat: 'Item — SDC', field: 'sdc-questionnaire-designNote', desc: 'Internal developer / designer note attached to an item; not shown to patients', where: 'Design Note modal', how: 'Click "Note" action link on the item row' },
+
+    // ── Not supported ─────────────────────────────────────────────────────────
+    { cat: 'Not Supported', field: 'maxDecimalPlaces', desc: 'Maximum decimal places for decimal items', where: '— not implemented', how: 'Preserved on round-trip if present in the imported file' },
+    { cat: 'Not Supported', field: 'regex', desc: 'Validation regex pattern for string / text / url items', where: '— not implemented', how: 'Not preserved on round-trip' },
+    { cat: 'Not Supported', field: 'questionnaire-usageMode', desc: "Controls when item is relevant: capture / display / display-non-empty / capture-display", where: '— not implemented', how: 'Not preserved on round-trip' },
+    { cat: 'Not Supported', field: 'answerConstraint (R4B/R5)', desc: 'Constrains answer values: optionsOnly / optionsOrType / optionsOrString', where: '— not implemented', how: 'Not preserved on round-trip' },
+    { cat: 'Not Supported', field: 'questionnaire-unitOption', desc: 'Single allowed unit for quantity items (multiple extensions enumerate all units)', where: '— not implemented', how: 'Not preserved on round-trip' },
+    { cat: 'Not Supported', field: 'rendering-markdown', desc: 'Markdown-formatted alternative to item.text', where: '— not implemented', how: 'Dropped on import (rendering-xhtml is supported instead)' },
+    { cat: 'Not Supported', field: 'questionnaire-optionExclusive', desc: 'Marks an answer option as exclusive (e.g. "None of the above")', where: '— not implemented', how: 'Not preserved on round-trip' },
+    { cat: 'Not Supported', field: 'sdc-questionnaire-shortText', desc: 'Abbreviated item label for summary views', where: '— not implemented', how: 'Not preserved on round-trip' },
+    { cat: 'Not Supported', field: 'questionnaire-referenceFilter', desc: 'FHIRPath expression to filter valid reference targets', where: '— not implemented', how: 'Not preserved on round-trip' },
+    { cat: 'Not Supported', field: 'questionnaire-signatureRequired', desc: 'Indicates a digital signature is required', where: '— not implemented', how: 'Not preserved on round-trip' },
+  ];
+
+  // ── Category badge colors ─────────────────────────────────────────────────
+  const CAT_CLASS = {
+    'Questionnaire':     'cat-quest',
+    'Item — Core':       'cat-core',
+    'Item — Extensions': 'cat-ext',
+    'Item — SDC':        'cat-sdc',
+    'Not Supported':     'cat-ns',
+  };
+
+  // ── Render table ──────────────────────────────────────────────────────────
+  const tbody = document.getElementById('helpBody');
+  let lastCat = null;
+
+  function renderRows(data) {
+    tbody.innerHTML = '';
+    lastCat = null;
+    let count = 0;
+    data.forEach(row => {
+      if (row.cat !== lastCat) {
+        const sep = document.createElement('tr');
+        sep.className = 'help-cat-sep';
+        sep.innerHTML = `<td colspan="4"><span class="help-cat-badge ${CAT_CLASS[row.cat] || ''}">${row.cat}</span></td>`;
+        tbody.appendChild(sep);
+        lastCat = row.cat;
+      }
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        `<td class="col-field"><code>${escHtml(row.field)}</code></td>` +
+        `<td class="col-desc">${escHtml(row.desc)}</td>` +
+        `<td class="col-where">${escHtml(row.where)}</td>` +
+        `<td class="col-how">${escHtml(row.how)}</td>`;
+      tbody.appendChild(tr);
+      count++;
+    });
+    return count;
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Search ────────────────────────────────────────────────────────────────
+  const searchInput = document.getElementById('helpSearch');
+  const helpEmpty   = document.getElementById('helpEmpty');
+  const helpCount   = document.getElementById('helpCount');
+  const table       = document.getElementById('helpTable');
+
+  function update(query) {
+    const q = query.trim().toLowerCase();
+    const filtered = q
+      ? HELP_DATA.filter(r =>
+          r.field.toLowerCase().includes(q) ||
+          r.desc.toLowerCase().includes(q) ||
+          r.where.toLowerCase().includes(q) ||
+          r.how.toLowerCase().includes(q) ||
+          r.cat.toLowerCase().includes(q))
+      : HELP_DATA;
+
+    const count = renderRows(filtered);
+    helpEmpty.style.display = count === 0 ? 'block' : 'none';
+    table.style.display     = count === 0 ? 'none'  : '';
+    helpCount.textContent   = q ? `${count} of ${HELP_DATA.length} fields` : `${HELP_DATA.length} fields`;
+  }
+
+  searchInput.addEventListener('input', () => update(searchInput.value));
+  update('');
+  </script>
+</body>
+</html>
