@@ -49,7 +49,7 @@ async function loadFixture(page) {
   const validateBackdrop = page.locator('[data-testid="validateModal"]');
   await validateBackdrop.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
   if (await validateBackdrop.isVisible()) {
-    await page.locator('[data-testid="validateModalApply"]').click();
+    await page.locator('[data-testid="validateModalClose"]').click();
     await validateBackdrop.waitFor({ state: 'hidden', timeout: 3_000 });
   }
 }
