@@ -205,3 +205,53 @@ test.describe('Terminology server — export JSON', () => {
     expect(ext?.valueUrl).toBe('https://tx.fhir.org/r4');
   });
 });
+
+// ── Test connection button ────────────────────────────────────────────────────
+test.describe('Terminology modal — Test connection button', () => {
+  test('Test connection button is present in the modal', async ({ page }) => {
+    await freshStart(page);
+    const item = await addItem(page);
+    await item.getByTestId('action-terminology').click();
+    await expect(modal(page)).toBeVisible();
+    await expect(page.getByTestId('terminology-test-btn')).toBeVisible();
+  });
+
+  test('clicking Test connection shows a status result', async ({ page }) => {
+    await freshStart(page);
+    const item = await addItem(page);
+    await item.getByTestId('action-terminology').click();
+    await urlInput(page).fill('https://tx.fhir.org/r4');
+    await page.getByTestId('terminology-test-btn').click();
+    // Status element should become non-empty (either ok or error — network may be unavailable in CI)
+    await expect(page.getByTestId('terminology-test-status')).not.toBeEmpty({ timeout: 20_000 });
+  });
+
+  test('status resets when modal is reopened', async ({ page }) => {
+    await freshStart(page);
+    const item = await addItem(page);
+    await item.getByTestId('action-terminology').click();
+    await urlInput(page).fill('https://tx.fhir.org/r4');
+    await cancelBtn(page).click();
+    await item.getByTestId('action-terminology').click();
+    // On reopen, status should be empty (no stale result)
+    await expect(page.getByTestId('terminology-test-status')).toBeEmpty();
+  });
+});
+
+// ── Properties modal section order ───────────────────────────────────────────
+test.describe('Properties modal — section order', () => {
+  test('Terminology Server field appears before any collapsible section', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await page.getByTestId('properties-btn').click();
+    await expect(page.locator('[data-testid="metadataModal"]')).toBeVisible();
+
+    const termPos = await page.evaluate(() => {
+      const inp = document.querySelector('[data-testid="meta-preferred-term-server"]');
+      const collapsible = document.querySelector('[data-testid="meta-advanced-toggle"]');
+      if (!inp || !collapsible) return null;
+      return inp.compareDocumentPosition(collapsible) & Node.DOCUMENT_POSITION_FOLLOWING ? 'before' : 'after';
+    });
+    expect(termPos).toBe('before');
+  });
+});

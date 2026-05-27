@@ -160,12 +160,6 @@
                                       "linkId":  "q-occupation",
                                       "text":  "Occupation type",
                                       "type":  "choice",
-                                      "extension":  [
-                                          {
-                                              "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer",
-                                              "valueUrl":  "https://r4.ontoserver.csiro.au/fhir"
-                                          }
-                                      ],
                                       "answerValueSet":  "http://hl7.org/fhir/ValueSet/occupation-snomed-ct"
                                   }
                               ]

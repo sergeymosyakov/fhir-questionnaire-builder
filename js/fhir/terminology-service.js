@@ -96,7 +96,11 @@ class TerminologyService {
         node._vsCache = await this.expandValueSet(node._answerValueSet, server);
       } catch (err) {
         node._vsCache = [];
-        failures.push({ node, vsUrl: node._answerValueSet, server, error: err.message });
+        const isCors = err instanceof TypeError && err.message.includes('fetch');
+        const msg = isCors
+          ? `Network error (possible CORS restriction — the server may not allow browser requests): ${err.message}`
+          : err.message;
+        failures.push({ node, vsUrl: node._answerValueSet, server, error: msg });
       }
     }));
     return failures;
