@@ -74,7 +74,7 @@ async function _expandValueSets(seq) {
       nodeId:   f.node?.id || '(unknown)',
       message:  ` \u2014 ValueSet ${f.vsUrl} from ${f.server}: ${f.error}`,
     }));
-    validateModal.show('ValueSet Expansion Errors', issues, 'import');
+    validateModal.show('ValueSet Expansion Errors', issues, 'import', { onNavigate: navigateToNode });
   }
   reinitForm();
 }
