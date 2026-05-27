@@ -46,7 +46,7 @@ export function fhirTypeToItemType(t) {
   if (t === 'integer')                                        return 'integer';
   if (t === 'decimal')                                         return 'decimal';
   if (t === 'quantity')                                 return 'quantity';
-  if (t === 'choice')                                   return 'select';
+  if (t === 'choice' || t === 'coding')                  return 'select'; // 'coding' = DSTU2 legacy
   if (t === 'open-choice')                              return 'open-choice';
   if (t === 'display')                                  return 'display';
   if (t === 'date')              return 'date';

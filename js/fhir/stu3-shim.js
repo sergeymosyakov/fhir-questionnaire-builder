@@ -127,7 +127,13 @@ function _convertInitial(item) {
 
 // ── Recursive item normalisation ──────────────────────────────────────────────
 
+// DSTU2 used 'coding' as the item type; STU3+ uses 'choice'.
+function _convertItemType(item) {
+  if (item.type === 'coding') item.type = 'choice';
+}
+
 function _normaliseItem(item) {
+  _convertItemType(item);
   _convertOptions(item);
   _convertOptionsRef(item);
   if (item.enableWhen) item.enableWhen = _convertEnableWhen(item.enableWhen);
