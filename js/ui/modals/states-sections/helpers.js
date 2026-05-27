@@ -2,19 +2,16 @@ export { applyTip, makeCollapsible } from '../section.js';
 export { createCustomSelect } from '../../custom-select.js';
 
 export function toKey(v) {
-  if (v === true)  return 'true';
-  if (v === false) return 'false';
-  return 'null';
+  if (v === true) return 'true';
+  return 'false';
 }
 
 export function fromKey(k) {
-  if (k === 'true')  return true;
-  if (k === 'false') return false;
-  return null;
+  if (k === 'true') return true;
+  return false;
 }
 
 export const REQUIRED_OPTIONS = [
-  { value: 'null',  label: 'Not set' },
   { value: 'true',  label: 'Yes \u2014 required' },
   { value: 'false', label: 'No \u2014 optional' },
 ];
