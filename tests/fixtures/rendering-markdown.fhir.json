@@ -1,0 +1,69 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "rendering-markdown-test",
+  "title": "Rendering Markdown Test",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "q-bold",
+      "text": "Plain bold question",
+      "type": "string",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-markdown",
+            "valueMarkdown": "**Bold question**"
+          }
+        ]
+      }
+    },
+    {
+      "linkId": "q-italic",
+      "text": "Plain italic question",
+      "type": "string",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-markdown",
+            "valueMarkdown": "_Italic question_"
+          }
+        ]
+      }
+    },
+    {
+      "linkId": "q-xss",
+      "text": "XSS test question",
+      "type": "string",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-markdown",
+            "valueMarkdown": "**Safe content** <img src=x onerror=\"window.__mdxss=1\">"
+          }
+        ]
+      }
+    },
+    {
+      "linkId": "q-xhtml-wins",
+      "text": "XHTML + Markdown — xhtml should take priority",
+      "type": "string",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml",
+            "valueString": "<b>XHTML wins</b>"
+          },
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-markdown",
+            "valueMarkdown": "**Markdown loses**"
+          }
+        ]
+      }
+    },
+    {
+      "linkId": "q-plain",
+      "text": "Plain question (no markdown)",
+      "type": "string"
+    }
+  ]
+}

@@ -245,7 +245,7 @@ export class BaseNode {
     if (this._renderXhtml && domPurify) {
       el.innerHTML = domPurify.sanitize(this._renderXhtml);
     } else if (this._renderMarkdown && domPurify && marked) {
-      el.innerHTML = domPurify.sanitize(marked.parse(this._renderMarkdown));
+      el.innerHTML = domPurify.sanitize(marked.parseInline(this._renderMarkdown));
     } else {
       el.textContent = this.title;
     }
