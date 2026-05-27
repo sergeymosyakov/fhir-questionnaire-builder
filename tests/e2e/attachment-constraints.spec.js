@@ -196,11 +196,10 @@ test.describe('maxSize — file-size validation', () => {
 test.describe('attachment constraints — export round-trip', () => {
   test('maxSize exported as maxSize extension with valueDecimal', async ({ page }) => {
     await loadFixture(page);
-    page.once('dialog', d => d.accept());
     await page.getByTestId('export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click(),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');
@@ -212,11 +211,10 @@ test.describe('attachment constraints — export round-trip', () => {
 
   test('mimeType exported as one extension entry per type', async ({ page }) => {
     await loadFixture(page);
-    page.once('dialog', d => d.accept());
     await page.getByTestId('export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click(),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');
@@ -230,11 +228,10 @@ test.describe('attachment constraints — export round-trip', () => {
 
   test('att-both exports both maxSize and mimeType', async ({ page }) => {
     await loadFixture(page);
-    page.once('dialog', d => d.accept());
     await page.getByTestId('export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click(),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');
@@ -248,11 +245,10 @@ test.describe('attachment constraints — export round-trip', () => {
 
   test('att-none exports no maxSize or mimeType extensions', async ({ page }) => {
     await loadFixture(page);
-    page.once('dialog', d => d.accept());
     await page.getByTestId('export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click(),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');

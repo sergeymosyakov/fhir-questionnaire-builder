@@ -151,11 +151,10 @@ test.describe('Codes modal editing', () => {
 test.describe('Codes export round-trip', () => {
   test('item.code[] preserved in exported FHIR JSON', async ({ page }) => {
     await loadFixture(page);
-    page.once('dialog', d => d.accept());
     await page.locator('[data-testid="export-btn"]').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.locator('[data-testid="export-fhir-item"]').click(),
+      page.locator('[data-testid="export-fhir-item"]').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');

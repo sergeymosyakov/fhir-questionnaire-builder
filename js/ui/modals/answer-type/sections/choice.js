@@ -5,34 +5,17 @@ import { createCustomSelect } from '../../../custom-select.js';
 import { Modal } from '../../modal-base.js';
 import { CHOICE_TYPES } from '../data.js';
 import { parseOptions } from '../../../../utils.js';
+import { createOptionsEditor } from '../../../answer-options-editor.js';
 
-function _optsWithOrdinals(node) {
-  if (!node.options) return '';
-  const ords = node._optionOrdinals || {};
-  return parseOptions(node.options)
-    .map(({ code, display }) => {
-      const o = ords[code];
-      return o !== undefined ? `${code}=${display}=${o}` : `${code}=${display}`;
-    })
-    .join(',');
-}
-
-function _parseOptsWithOrdinals(str) {
-  return (str || '').split(',').map(s => s.trim()).filter(Boolean).map(s => {
-    const eq = s.indexOf('=');
-    if (eq === -1) return { code: s, display: s };
-    const code = s.slice(0, eq).trim();
-    const rest = s.slice(eq + 1);
-    const lastEq = rest.lastIndexOf('=');
-    if (lastEq !== -1) {
-      const maybeOrd = rest.slice(lastEq + 1).trim();
-      const ordVal = Number(maybeOrd);
-      if (!isNaN(ordVal) && maybeOrd !== '') {
-        return { code, display: rest.slice(0, lastEq).trim(), ordinal: ordVal };
-      }
-    }
-    return { code, display: rest.trim() };
-  });
+function _buildRows(node) {
+  const ords    = node._optionOrdinals || {};
+  const prefixes = node._optionPrefixes || {};
+  return parseOptions(node.options || '').map(({ code, display }) => ({
+    code,
+    label:  display,
+    score:  ords[code] !== undefined ? String(ords[code]) : '',
+    prefix: prefixes[code] || '',
+  }));
 }
 
 class ChoiceSection extends AnswerTypeSection {
@@ -68,37 +51,19 @@ class ChoiceSection extends AnswerTypeSection {
 
     const optSubLbl = document.createElement('div');
     optSubLbl.className        = 'at-modal-sub-lbl';
-    optSubLbl.textContent      = 'Options (code=Label or code=Label=score, comma-separated):';
+    optSubLbl.textContent      = 'Answer options:';
     optSubLbl.dataset.tipTitle = 'Answer options';
-    optSubLbl.dataset.tipBody  = 'Coded answer choices. Format: code=Label or code=Label=score (ordinal value). Comma-separated. Exported as item.answerOption[].';
+    optSubLbl.dataset.tipBody  = 'Coded answer choices. Code and Label are required. Score (ordinal value) and Prefix are optional. Exported as item.answerOption[].';
     optSubLbl.dataset.tipFhir  = 'Questionnaire.item.answerOption[].valueCoding';
     optSubLbl.dataset.tipSpec  = 'R4';
 
-    const optInp = document.createElement('textarea');
-    optInp.className      = 'at-modal-opt-inp';
-    optInp.dataset.testid = 'options-input';
-    optInp.value          = pending.draftOptions;
-    optInp.placeholder    = 'e.g. la1=Not at all=0,la2=Several days=1,la3=Always=2';
-    optInp.rows           = 1;
-    optInp.oninput = () => { pending.draftOptions = optInp.value; };
+    const optEditor = createOptionsEditor({
+      rows:         pending.draftOptionRows,
+      testidPrefix: 'opt',
+      onchange:     rows => { pending.draftOptionRows = rows; },
+    });
 
-    const pfxSubLbl = document.createElement('div');
-    pfxSubLbl.className        = 'at-modal-sub-lbl';
-    pfxSubLbl.textContent      = 'Prefixes (code=Prefix, ...)';
-    pfxSubLbl.dataset.tipTitle = 'Option prefixes';
-    pfxSubLbl.dataset.tipBody  = 'Display prefix shown before each answer label (e.g. A., 1.). Exported as questionnaire-optionPrefix extension on each answerOption.';
-    pfxSubLbl.dataset.tipFhir  = 'Questionnaire.item.answerOption[].extension[questionnaire-optionPrefix]';
-    pfxSubLbl.dataset.tipSpec  = 'R4';
-
-    const pfxInp = document.createElement('input');
-    pfxInp.type           = 'text';
-    pfxInp.className      = 'at-modal-opt-inp';
-    pfxInp.dataset.testid = 'option-prefix-input';
-    pfxInp.value          = pending.draftPrefixes;
-    pfxInp.placeholder    = 'e.g. la1=A.,la2=B.,la3=C.';
-    pfxInp.oninput = () => { pending.draftPrefixes = pfxInp.value; };
-
-    optSection.append(optSubLbl, optInp, pfxSubLbl, pfxInp);
+    optSection.append(optSubLbl, optEditor.el);
     section.appendChild(optSection);
 
     // ── ValueSet sub-section ─────────────────────────────────────────────────
@@ -243,24 +208,21 @@ class ChoiceSection extends AnswerTypeSection {
       } else {
         delete node._answerValueSet;
         delete node._answerExpression;
-        const _parsedOrds  = _parseOptsWithOrdinals(pending.draftOptions);
-        const _newOrdinals = {};
-        node.options = _parsedOrds.map(({ code, display, ordinal }) => {
-          if (ordinal !== undefined) _newOrdinals[code] = ordinal;
-          return code + '=' + display;
-        }).join(',');
-        if (Object.keys(_newOrdinals).length) node._optionOrdinals = _newOrdinals;
-        else delete node._optionOrdinals;
 
-        const _newPrefixes = {};
-        (pending.draftPrefixes || '').split(',').forEach(s => {
-          const idx = s.indexOf('=');
-          if (idx < 1) return;
-          const code = s.slice(0, idx).trim();
-          const pfx  = s.slice(idx + 1).trim();
-          if (code && pfx) _newPrefixes[code] = pfx;
+        const rows = (pending.draftOptionRows || []).filter(r => r.code.trim());
+        node.options = rows.map(r => r.code.trim() + '=' + r.label.trim()).join(',');
+
+        const newOrdinals = {};
+        const newPrefixes = {};
+        rows.forEach(r => {
+          const code = r.code.trim();
+          const score = r.score.trim();
+          if (score !== '' && !isNaN(Number(score))) newOrdinals[code] = Number(score);
+          if (r.prefix.trim()) newPrefixes[code] = r.prefix.trim();
         });
-        if (Object.keys(_newPrefixes).length) node._optionPrefixes = _newPrefixes;
+        if (Object.keys(newOrdinals).length) node._optionOrdinals = newOrdinals;
+        else delete node._optionOrdinals;
+        if (Object.keys(newPrefixes).length) node._optionPrefixes = newPrefixes;
         else delete node._optionPrefixes;
       }
     } else {
@@ -280,11 +242,8 @@ class ChoiceSection extends AnswerTypeSection {
 
   initPending(node) {
     return {
-      draftOptions:     _optsWithOrdinals(node),
+      draftOptionRows:  _buildRows(node),
       draftAVS:         node._answerValueSet || '',
-      draftPrefixes:    node._optionPrefixes
-        ? Object.entries(node._optionPrefixes).map(([code, pfx]) => `${code}=${pfx}`).join(',')
-        : '',
       draftOpenLabel:   node._openLabel || '',
       draftAnswerExpr:  node._answerExpression || '',
       draftSrc:         node._answerExpression ? 'expression' : (node._answerValueSet ? 'valueset' : 'options'),

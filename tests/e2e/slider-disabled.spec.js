@@ -59,11 +59,10 @@ test.describe('slider rendering', () => {
 
   test('round-trip: sliderStepValue exported in FHIR JSON', async ({ page }) => {
     await loadFixture(page);
-    page.once('dialog', d => d.accept());
     await page.getByTestId('export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click(),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
@@ -104,11 +103,10 @@ test.describe('disabledDisplay', () => {
 
   test('round-trip: disabledDisplay exported in FHIR JSON', async ({ page }) => {
     await loadFixture(page);
-    page.once('dialog', d => d.accept());
     await page.getByTestId('export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click(),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));

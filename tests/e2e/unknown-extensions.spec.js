@@ -44,11 +44,10 @@ async function loadFixture(page) {
 }
 
 async function exportFHIR(page) {
-  page.once('dialog', d => d.accept());
   await page.locator('[data-testid="export-btn"]').click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.locator('[data-testid="export-fhir-item"]').click(),
+    page.locator('[data-testid="export-fhir-item"]').click().then(() => page.getByTestId('prompt-save').click()),
   ]);
   const filePath = await download.path();
   const { readFileSync } = await import('node:fs');

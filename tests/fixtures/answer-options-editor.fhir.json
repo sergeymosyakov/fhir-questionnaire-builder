@@ -1,0 +1,41 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "answer-options-editor-test",
+  "status": "draft",
+  "title": "Answer Options Editor Test",
+  "item": [
+    {
+      "linkId": "q-opts",
+      "type": "choice",
+      "text": "Severity",
+      "answerOption": [
+        {
+          "valueCoding": { "code": "low", "display": "Low" },
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 1 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix", "valueString": "A." }
+          ]
+        },
+        {
+          "valueCoding": { "code": "moderate", "display": "Moderate" },
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 2 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix", "valueString": "B." }
+          ]
+        },
+        {
+          "valueCoding": { "code": "high", "display": "High" },
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 3 },
+            { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix", "valueString": "C." }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "q-empty",
+      "type": "choice",
+      "text": "Pick one"
+    }
+  ]
+}

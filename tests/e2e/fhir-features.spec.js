@@ -185,11 +185,10 @@ test.describe('minValue / maxValue enforcement', () => {
 
   test('round-trip: minValue/maxValue exported in FHIR JSON', async ({ page }) => {
     await loadFixture(page);
-    page.once('dialog', d => d.accept());
     await page.getByTestId('export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click(),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');
@@ -241,11 +240,10 @@ test.describe('ordinalValue display', () => {
 
   test('ordinalValue round-trips through export', async ({ page }) => {
     await loadFixture(page);
-    page.once('dialog', d => d.accept());
     await page.getByTestId('export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click(),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');
@@ -303,11 +301,10 @@ test.describe('minLength enforcement', () => {
 
   test('minLength round-trips through export', async ({ page }) => {
     await loadFixture(page);
-    page.once('dialog', d => d.accept());
     await page.getByTestId('export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click(),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');

@@ -104,14 +104,11 @@ test.describe('STU3 import', () => {
   test('exported questionnaire from STU3 import is valid R4', async ({ page }) => {
     await loadFixture(page, 'phq-9.stu3.fhir.json');
 
-    // Accept the filename prompt that appears before download
-    page.on('dialog', dialog => dialog.accept());
-
     // Trigger export and capture the downloaded JSON
     await page.locator('[data-testid="export-btn"]').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.locator('[data-testid="export-fhir-item"]').click(),
+      page.locator('[data-testid="export-fhir-item"]').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
 
     const stream = await download.createReadStream();

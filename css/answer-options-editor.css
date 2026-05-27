@@ -1,0 +1,97 @@
+/* ── Answer Options Editor ──────────────────────────────────────────────────── */
+
+.opt-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.opt-editor__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.opt-editor__empty {
+  font-size: 12px;
+  color: var(--c-text-3);
+  padding: 6px 2px;
+}
+
+/* header + data rows share the same 4-column + remove-btn grid */
+.opt-editor__header,
+.opt-editor__row {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr 0.6fr 0.8fr 24px;
+  gap: 4px;
+  align-items: center;
+}
+
+.opt-editor__hcell {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0 2px;
+}
+
+.opt-editor__cell input {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 12px;
+  padding: 3px 6px;
+  border: 1px solid var(--c-border);
+  border-radius: 4px;
+  background: var(--c-surface);
+  color: var(--c-text-1);
+  outline: none;
+}
+
+.opt-editor__cell input:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-accent) 20%, transparent);
+}
+
+.opt-editor__cell--rm {
+  display: flex;
+  justify-content: center;
+}
+
+.opt-editor__rm-btn {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--c-text-3);
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opt-editor__rm-btn:hover {
+  background: var(--c-danger-bg, #fee2e2);
+  color: var(--c-danger, #dc2626);
+}
+
+.opt-editor__add-btn {
+  align-self: flex-start;
+  font-size: 12px;
+  padding: 4px 10px;
+  border: 1px dashed var(--c-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--c-accent);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.opt-editor__add-btn:hover {
+  background: color-mix(in srgb, var(--c-accent) 8%, transparent);
+  border-color: var(--c-accent);
+}
