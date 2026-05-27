@@ -14,6 +14,8 @@
 1. **Stop and ask after one failed attempt.** If a bug or issue is not resolved on the first real attempt — STOP immediately. Ask the user to reproduce manually and provide more details. Do NOT keep iterating or running more diagnostics.
 2. **Never guess. Never infer. Ask.** If any detail is unclear or missing — stop and ask exactly what information is needed. Do not proceed on assumptions.
 3. **Implemented = removed from Not Supported.** Once a FHIR field or feature is fully implemented, DELETE its row from all Not Supported / remaining-gaps tables in `docs/FHIR-MAPPING.md` and add it to the relevant supported table. A ✅ row must **never** remain in a Not Supported section.
+4. **Keep `help.html` in sync with FHIR support.** Whenever a FHIR field, extension, or SDC feature is added, removed, or renamed in the builder — update the corresponding row(s) in the `HELP_DATA` array in `help.html`. Adding a new field → new row; removing support → delete the row or move it to the "Not Supported" category; changing where/how a field is configured → update the `where` and `how` columns. `help.html` must always reflect the actual current state of the builder UI.
+5. **FHIR tooltips are mandatory.** Every UI label or input that controls a FHIR field or extension must have `data-tip-title`, `data-tip-body`, `data-tip-fhir`, and `data-tip-spec` set. `data-tip-fhir` must contain the exact FHIR path (e.g. `Questionnaire.item.required`, `item.extension[questionnaire-hidden].valueBoolean`). `data-tip-spec` must be `'R4'` or `'SDC'`. No FHIR-mapped control may ship without all four attributes.
 
 ---
 

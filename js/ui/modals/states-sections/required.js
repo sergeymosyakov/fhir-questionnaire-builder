@@ -12,8 +12,12 @@ class RequiredSection extends StatesSection {
     row.className = 'states-modal-row';
 
     const lbl = document.createElement('label');
-    lbl.className   = 'states-modal-label';
-    lbl.textContent = 'Required:';
+    lbl.className        = 'states-modal-label';
+    lbl.textContent      = 'Required:';
+    lbl.dataset.tipTitle = 'item.required';
+    lbl.dataset.tipBody  = 'Whether an answer is mandatory. When true, the QuestionnaireResponse is invalid if this item has no answer.';
+    lbl.dataset.tipFhir  = 'Questionnaire.item.required';
+    lbl.dataset.tipSpec  = 'R4';
 
     const sel = createCustomSelect({
       items:     REQUIRED_OPTIONS,

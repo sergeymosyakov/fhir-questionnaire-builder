@@ -18,9 +18,13 @@ class HiddenSection extends StatesSection {
     chk.addEventListener('change', () => { pending.draftHidden = chk.checked; });
 
     const lbl = document.createElement('label');
-    lbl.htmlFor     = 'statesHidden';
-    lbl.className   = 'states-modal-chk-label';
-    lbl.textContent = 'Hidden';
+    lbl.htmlFor          = 'statesHidden';
+    lbl.className        = 'states-modal-chk-label';
+    lbl.textContent      = 'Hidden';
+    lbl.dataset.tipTitle = 'sdc-questionnaire-hidden';
+    lbl.dataset.tipBody  = 'Excluded from the patient-facing view. The item still participates in calculatedExpression and enableWhen logic.';
+    lbl.dataset.tipFhir  = 'item.extension[sdc-questionnaire-hidden].valueBoolean';
+    lbl.dataset.tipSpec  = 'SDC';
 
     const hint = document.createElement('span');
     hint.className   = 'states-modal-chk-hint';

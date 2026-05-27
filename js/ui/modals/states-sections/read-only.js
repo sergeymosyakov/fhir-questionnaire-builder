@@ -20,9 +20,13 @@ class ReadOnlySection extends StatesSection {
     chk.addEventListener('change', () => { pending.draftReadOnly = chk.checked; });
 
     const lbl = document.createElement('label');
-    lbl.htmlFor     = 'statesReadOnly';
-    lbl.className   = 'states-modal-chk-label';
-    lbl.textContent = 'Read-only';
+    lbl.htmlFor          = 'statesReadOnly';
+    lbl.className        = 'states-modal-chk-label';
+    lbl.textContent      = 'Read-only';
+    lbl.dataset.tipTitle = 'item.readOnly';
+    lbl.dataset.tipBody  = 'Prevents the user from editing this field. Typically combined with a calculatedExpression that writes the value programmatically.';
+    lbl.dataset.tipFhir  = 'Questionnaire.item.readOnly';
+    lbl.dataset.tipSpec  = 'R4';
 
     const hint = document.createElement('span');
     hint.className   = 'states-modal-chk-hint';

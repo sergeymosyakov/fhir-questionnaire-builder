@@ -379,6 +379,8 @@ export class BaseNode {
     inp.className = 'node-linkid-input';
     inp.dataset.tipTitle = 'FHIR linkId';
     inp.dataset.tipBody  = 'Editable. Must be unique within the questionnaire.';
+    inp.dataset.tipFhir  = 'Questionnaire.item.linkId';
+    inp.dataset.tipSpec  = 'R4';
     inp.oninput = () => { this.id = inp.value.trim() || this.id; };
     return inp;
   }
@@ -392,6 +394,8 @@ export class BaseNode {
     inp.placeholder = placeholder;
     inp.dataset.tipTitle = 'Display prefix';
     inp.dataset.tipBody  = 'Cosmetic only \u2014 e.g. "1.". Does not affect logic or linkId.';
+    inp.dataset.tipFhir  = 'Questionnaire.item.prefix';
+    inp.dataset.tipSpec  = 'R4';
     inp.oninput = () => { this._prefix = inp.value.trim() || undefined; };
     return inp;
   }
