@@ -17,6 +17,7 @@ function _isStu3Version(ver) {
 
 function _itemHasStu3Fields(item) {
   if (!item) return false;
+  if (item.type === 'coding') return true; // DSTU2 legacy type; not valid in STU3+
   if (Array.isArray(item.option) && item.option.length) return true;
   if (item.options) return true;
   for (const ew of item.enableWhen || []) {

@@ -95,7 +95,9 @@ class TerminologyModal extends Modal {
       statusEl.className   = 'term-test-status term-test-status--loading';
       statusEl.textContent = 'Connecting…';
       testBtn.disabled = true;
-      const result = await terminologyService.testServer(url);
+      const result = await terminologyService.testServer(url, {
+        onRetry: () => { statusEl.textContent = 'Retrying…'; },
+      });
       testBtn.disabled = false;
       if (result.ok) {
         statusEl.className   = 'term-test-status term-test-status--ok';

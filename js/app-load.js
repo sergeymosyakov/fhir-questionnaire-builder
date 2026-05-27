@@ -60,8 +60,14 @@ export function navigateToNode(nodeId) {
 }
 
 // ── ValueSet expansion ────────────────────────────────────────────────────────
-async function _expandValueSets() {
-  const failures = await terminologyService.expandAll(tree, questMeta.value);
+// Each import increments this counter. _expandValueSets checks it on completion
+// to guard against re-rendering a stale questionnaire if the user loads another
+// file while expansion is still in flight.
+let _importSeq = 0;
+
+async function _expandValueSets(seq) {
+  const failures = await terminologyService.expandAll(tree, questMeta);
+  if (_importSeq !== seq) return; // user loaded a different questionnaire — discard
   if (failures.length) {
     const issues = failures.map(f => ({
       severity: 'error',
@@ -90,7 +96,7 @@ export async function importAndValidate(data, fileName) {
     if (issues.length > 0) validateModal.show('Import \u2014 Validation Report', issues, 'import', { onNavigate: navigateToNode });
 
     // Expand external answerValueSets in the background; re-render preview when done.
-    _expandValueSets();
+    _expandValueSets(++_importSeq);
   } catch (err) {
     showError('Import error: ' + err.message);
   } finally {

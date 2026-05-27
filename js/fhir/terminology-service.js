@@ -27,27 +27,59 @@ function _loadConfig() {
   return _configPromise;
 }
 
-const EXPAND_COUNT   = 500;
-const FETCH_TIMEOUT  = 15_000;
-const TEST_TIMEOUT   = 8_000;
-const RETRY_STATUSES = new Set([429, 500, 503, 504]);
-const RETRY_DELAY_MS = 700;
-const MAX_RETRIES    = 2;
+const EXPAND_COUNT        = 500;
+const FETCH_TIMEOUT       = 15_000;
+const TEST_TIMEOUT        = 8_000;
+const RETRY_STATUSES      = new Set([429, 500, 503, 504]);
+const RETRY_DELAY_MS      = 700;
+const MAX_RETRIES         = 2;
+const MAX_RETRY_AFTER_MS  = 30_000;
 
-/** Fetch with automatic retry on transient server errors (503, 500, 429, 504). */
-async function _fetchWithRetry(url, options) {
+/**
+ * Resolve the delay before the next retry attempt.
+ * Honours the Retry-After response header (RFC 7231) if present, capped at 30s.
+ * Falls back to exponential backoff (700ms, 1400ms, …).
+ */
+function _retryDelayMs(res, attempt) {
+  const header = res.headers.get('Retry-After');
+  if (header) {
+    const secs = Number(header);
+    if (!isNaN(secs) && secs > 0) return Math.min(secs * 1000, MAX_RETRY_AFTER_MS);
+    const date = new Date(header);
+    if (!isNaN(date.getTime())) return Math.min(Math.max(0, date - Date.now()), MAX_RETRY_AFTER_MS);
+  }
+  return RETRY_DELAY_MS * (attempt + 1);
+}
+
+/**
+ * Fetch with automatic retry on transient server errors (503, 500, 429, 504).
+ * Creates a fresh AbortSignal per attempt so a timeout on one try does not
+ * abort subsequent retries.
+ * @param {string}   url
+ * @param {object}   options   fetch options WITHOUT a signal (signal is managed internally)
+ * @param {number}   timeout   per-attempt timeout in ms
+ * @param {Function} [onRetry] called before each retry (after the delay)
+ */
+async function _fetchWithRetry(url, options, timeout, onRetry) {
   let lastErr;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    if (attempt > 0) await new Promise(r => setTimeout(r, RETRY_DELAY_MS * attempt));
     let res;
     try {
-      res = await fetch(url, options);
+      res = await fetch(url, { ...options, signal: AbortSignal.timeout(timeout) });
     } catch (err) {
       lastErr = err;
+      if (attempt < MAX_RETRIES) {
+        await new Promise(r => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+        onRetry?.();
+      }
       continue;
     }
     if (!RETRY_STATUSES.has(res.status)) return res;
     lastErr = new Error(`HTTP ${res.status} ${res.statusText}`);
+    if (attempt < MAX_RETRIES) {
+      await new Promise(r => setTimeout(r, _retryDelayMs(res, attempt)));
+      onRetry?.();
+    }
   }
   throw lastErr;
 }
@@ -86,8 +118,7 @@ class TerminologyService {
     const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?url=${encodeURIComponent(vsUrl)}&_count=${EXPAND_COUNT}`);
     const res = await _fetchWithRetry(reqUrl, {
       headers: { Accept: 'application/fhir+json' },
-      signal:  AbortSignal.timeout(FETCH_TIMEOUT),
-    });
+    }, FETCH_TIMEOUT);
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
     const body = await res.json();
     if (body.resourceType !== 'ValueSet') throw new Error('Response is not a FHIR ValueSet');
@@ -103,15 +134,14 @@ class TerminologyService {
    * Fetches /metadata and checks for a CapabilityStatement response.
    * @returns {Promise<{ok: boolean, message: string}>}
    */
-  async testServer(serverUrl) {
+  async testServer(serverUrl, { onRetry } = {}) {
     await _loadConfig();
     const base = (serverUrl || '').trim().replace(/\/$/, '');
     if (!base) return { ok: false, message: 'No URL provided' };
     try {
       const res = await _fetchWithRetry(this._proxyUrl(`${base}/metadata`), {
         headers: { Accept: 'application/fhir+json' },
-        signal:  AbortSignal.timeout(TEST_TIMEOUT),
-      });
+      }, TEST_TIMEOUT, onRetry);
       if (!res.ok) return { ok: false, message: `HTTP ${res.status} ${res.statusText}` };
       const body = await res.json();
       if (body.resourceType !== 'CapabilityStatement') {
