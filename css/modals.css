@@ -212,10 +212,10 @@
 .patient-ctx-cb { width: 16px; height: 16px; }
 
 /* === Questionnaire Properties (metadata) modal ============================== */
-#metadataModal .modal-box { width: min(520px, 94vw); }
+#metadataModal .modal-box { width: min(900px, 94vw); min-width: min(60vw, 94vw); }
 #codesModal .modal-box    { width: min(480px, 94vw); }
 #qrExportModal .modal-box { width: min(380px, 94vw); }
-#metadataModal .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+#metadataModal .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
 #codesModal .modal-body    { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
 #qrExportModal .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
 .meta-modal-row      { display: flex; align-items: flex-end; gap: 8px; }
@@ -241,7 +241,7 @@
 .meta-modal-adv-toggle { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 600;
                           color: var(--c-accent); padding: 0; letter-spacing: .02em; }
 .meta-modal-adv-toggle:hover { opacity: .75; }
-.meta-modal-adv-body   { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.meta-modal-adv-body   { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
 
 /* meta-modal helpers for Resource Meta section */
 .meta-modal-inp-group  { flex: 1; display: flex; gap: 6px; }
