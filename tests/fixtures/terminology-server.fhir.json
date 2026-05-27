@@ -1,0 +1,37 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "terminology-server-test",
+  "title": "Terminology Server Test",
+  "status": "draft",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer",
+      "valueUrl": "https://tx.fhir.org/r4"
+    }
+  ],
+  "item": [
+    {
+      "linkId": "q-item-server",
+      "text": "Item with per-item server override",
+      "type": "choice",
+      "answerValueSet": "http://hl7.org/fhir/ValueSet/yesnodontknow",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer",
+          "valueUrl": "https://r4.ontoserver.csiro.au/fhir"
+        }
+      ]
+    },
+    {
+      "linkId": "q-no-server",
+      "text": "Item without per-item override (uses questionnaire default)",
+      "type": "choice",
+      "answerValueSet": "http://hl7.org/fhir/ValueSet/administrative-gender"
+    },
+    {
+      "linkId": "q-text",
+      "text": "Plain text item (no answerValueSet)",
+      "type": "string"
+    }
+  ]
+}

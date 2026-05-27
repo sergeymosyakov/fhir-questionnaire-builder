@@ -7,6 +7,12 @@
     "copyright":  "© 2026 Sergey Mosyakov",
     "date":  "2024-01-01",
     "description":  "Demonstrates answerValueSet round-trip: contained[] ValueSets referenced via \u0027#id\u0027, and one external URL. Items render as select, radio, and open-choice.",
+    "extension":  [
+        {
+            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer",
+            "valueUrl":  "https://tx.fhir.org/r4"
+        }
+    ],
     "contained":  [
                       {
                           "resourceType":  "ValueSet",
@@ -154,6 +160,12 @@
                                       "linkId":  "q-occupation",
                                       "text":  "Occupation type",
                                       "type":  "choice",
+                                      "extension":  [
+                                          {
+                                              "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer",
+                                              "valueUrl":  "https://r4.ontoserver.csiro.au/fhir"
+                                          }
+                                      ],
                                       "answerValueSet":  "http://hl7.org/fhir/ValueSet/occupation-snomed-ct"
                                   }
                               ]
