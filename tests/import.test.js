@@ -11,7 +11,7 @@ const _values         = {};
 const _rawFhir        = { value: null };
 const _bulkUpdate     = { value: false };
 const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
-  name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
+  name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
   effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [],
   _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
@@ -317,7 +317,7 @@ describe('importFHIR', () => {
     Object.keys(_values).forEach(k => delete _values[k]);
     _rawFhir.value = null;
     Object.assign(_questMeta, { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
-      name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
+      name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
       effectivePeriodStart: '', effectivePeriodEnd: '',
       _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null });
     vi.mocked(_showErrorMock).mockClear();
@@ -518,14 +518,14 @@ describe('importFHIR', () => {
     expect(_questMeta.date).toBe('2024-03-15');
   });
 
-  it('populates questMeta.subjectType as comma-separated string', () => {
+  it('populates questMeta.subjectType as array', () => {
     importFHIR({ resourceType: 'Questionnaire', subjectType: ['Patient', 'Practitioner'], item: [] });
-    expect(_questMeta.subjectType).toBe('Patient, Practitioner');
+    expect(_questMeta.subjectType).toEqual(['Patient', 'Practitioner']);
   });
 
-  it('defaults questMeta.subjectType to Patient when not present', () => {
+  it('defaults questMeta.subjectType to empty array when not present', () => {
     importFHIR({ resourceType: 'Questionnaire', item: [] });
-    expect(_questMeta.subjectType).toBe('Patient');
+    expect(_questMeta.subjectType).toEqual([]);
   });
 
   it('populates questMeta.purpose from the questionnaire', () => {

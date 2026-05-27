@@ -66,8 +66,8 @@ export function importFHIR(fhirJson, renderFn) {
   questMeta.name        = q.name        || '';
   questMeta.date        = q.date        || '';
   questMeta.subjectType = Array.isArray(q.subjectType) && q.subjectType.length
-    ? q.subjectType.join(', ')
-    : 'Patient';
+    ? [...q.subjectType]
+    : [];
   questMeta.purpose        = q.purpose        || '';
   questMeta.copyright      = q.copyright      || '';
   questMeta.approvalDate   = q.approvalDate   || '';

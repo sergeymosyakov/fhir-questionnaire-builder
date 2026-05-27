@@ -123,12 +123,12 @@ test.describe('States modal — item layout', () => {
     await expect(hidChk(page)).toBeVisible();
   });
 
-  test('Required select has 3 options', async ({ page }) => {
+  test('Required select has 2 options (Yes/No)', async ({ page }) => {
     await freshStart(page);
     await addGroupAndItem(page);
     await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
     await reqSel(page).click();
-    await expect(page.locator('[data-testid="csel-drop"] [data-val]')).toHaveCount(3);
+    await expect(page.locator('[data-testid="csel-drop"] [data-val]')).toHaveCount(2);
     await page.keyboard.press('Escape');
   });
 });
@@ -283,7 +283,7 @@ test.describe('States modal — combined states', () => {
 
     // Clear both
     await actionLink.click();
-    await selectCustomOpt(page, reqSel(page), 'null');
+    await selectCustomOpt(page, reqSel(page), 'false');
     await hidChk(page).uncheck();
     await modalApply(page).click();
     await expect(actionLink).not.toHaveClass(/action-edit--active/);

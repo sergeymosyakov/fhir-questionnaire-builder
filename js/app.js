@@ -221,7 +221,7 @@ function _doReset() {
   questMeta.id = ''; questMeta.url = ''; questMeta.version = '';
   questMeta.title = ''; questMeta.status = 'draft';
   questMeta.publisher = ''; questMeta.description = ''; questMeta.name = '';
-  questMeta.date = ''; questMeta.subjectType = 'Patient';
+  questMeta.date = ''; questMeta.subjectType = [];
   questMeta.purpose = ''; questMeta.copyright = '';
   questMeta.approvalDate = ''; questMeta.lastReviewDate = '';
   questMeta.effectivePeriodStart = ''; questMeta.effectivePeriodEnd = '';

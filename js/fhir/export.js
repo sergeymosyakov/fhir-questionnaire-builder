@@ -313,9 +313,7 @@ export function buildFHIRObject() {
   if (questMeta.approvalDate)   q.approvalDate   = questMeta.approvalDate;
   if (questMeta.lastReviewDate) q.lastReviewDate = questMeta.lastReviewDate;
   q.date = questMeta.date || new Date().toISOString().split('T')[0];
-  q.subjectType = questMeta.subjectType
-    ? questMeta.subjectType.split(',').map(s => s.trim()).filter(Boolean)
-    : ['Patient'];
+  if (questMeta.subjectType?.length) q.subjectType = [...questMeta.subjectType];
   if (questMeta._rawIdentifier?.length) q.identifier = JSON.parse(JSON.stringify(questMeta._rawIdentifier));
   // Narrative — always written: preserved from import if available, otherwise auto-generated
   q.text = questMeta._rawText

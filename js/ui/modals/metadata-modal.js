@@ -21,7 +21,7 @@ class MetadataModal extends Modal {
       description:   questMeta.description,
       name:          questMeta.name,
       date:          questMeta.date,
-      subjectType:   questMeta.subjectType,
+      subjectType:   [...(questMeta.subjectType || [])],
       purpose:       questMeta.purpose,
       copyright:     questMeta.copyright,
       approvalDate:  questMeta.approvalDate,
@@ -62,7 +62,7 @@ class MetadataModal extends Modal {
     questMeta.description   = p.description.trim();
     questMeta.name          = p.name.trim();
     questMeta.date          = p.date.trim();
-    questMeta.subjectType   = p.subjectType.trim();
+    questMeta.subjectType   = p.subjectType.filter(t => t.trim());
     questMeta.purpose       = p.purpose.trim();
     questMeta.copyright     = p.copyright.trim();
     questMeta.approvalDate  = p.approvalDate.trim();

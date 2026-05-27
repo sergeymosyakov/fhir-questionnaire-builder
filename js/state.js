@@ -60,7 +60,7 @@ export const questMeta = reactive({
   name:          '',
   // Advanced (collapsible section in Properties modal)
   date:          '',          // Questionnaire.date — last changed; exported as-is (today if blank)
-  subjectType:   'Patient',   // comma-separated, e.g. 'Patient, Practitioner'
+  subjectType:   [],           // Questionnaire.subjectType — array of resource type codes; empty = unrestricted
   purpose:       '',
   copyright:     '',
   approvalDate:  '',

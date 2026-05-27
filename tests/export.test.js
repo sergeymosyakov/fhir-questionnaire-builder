@@ -9,7 +9,7 @@ const _questVariables = [];
 const _questContained = [];
 let _rawFhir = { value: null };
 const _questMeta = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
-  name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
+  name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
   effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [], _rawQuestExtensions: [],
   _rawText: null,
   _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
@@ -54,7 +54,20 @@ describe('buildFHIRObject — structure', () => {
     const q = build([]);
     expect(q.resourceType).toBe('Questionnaire');
     expect(q.status).toBe('draft');
-    expect(q.subjectType).toEqual(['Patient']);
+    expect(q.subjectType).toBeUndefined();
+  });
+
+  it('exports subjectType when set', () => {
+    _questMeta.subjectType = ['Patient', 'Practitioner'];
+    const q = buildFHIRObject();
+    expect(q.subjectType).toEqual(['Patient', 'Practitioner']);
+    _questMeta.subjectType = [];
+  });
+
+  it('omits subjectType when empty', () => {
+    _questMeta.subjectType = [];
+    const q = buildFHIRObject();
+    expect(q.subjectType).toBeUndefined();
   });
 
   it('uses title from rawFhir', () => {
@@ -486,7 +499,7 @@ describe('buildFHIRObject — _initialValue export', () => {
 // ── questMeta round-trip ──────────────────────────────────────────────────────
 describe('buildFHIRObject — questMeta', () => {
   const EMPTY_META = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
-    name: '', date: '', subjectType: 'Patient', purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
+    name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
     effectivePeriodStart: '', effectivePeriodEnd: '',
     _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
@@ -585,16 +598,16 @@ describe('buildFHIRObject — questMeta', () => {
     expect(q.name).toBeUndefined();
   });
 
-  it('exports subjectType from questMeta.subjectType (comma-separated string)', () => {
-    _questMeta.subjectType = 'Patient, Practitioner';
+  it('exports subjectType when questMeta.subjectType is set', () => {
+    _questMeta.subjectType = ['Patient', 'Practitioner'];
     const q = buildFHIRObject();
     expect(q.subjectType).toEqual(['Patient', 'Practitioner']);
   });
 
-  it('defaults subjectType to [Patient] when questMeta.subjectType is empty', () => {
-    _questMeta.subjectType = '';
+  it('omits subjectType when questMeta.subjectType is empty', () => {
+    _questMeta.subjectType = [];
     const q = buildFHIRObject();
-    expect(q.subjectType).toEqual(['Patient']);
+    expect(q.subjectType).toBeUndefined();
   });
 
   it('exports questMeta.date when set (preserves imported date)', () => {

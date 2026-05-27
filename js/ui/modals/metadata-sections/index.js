@@ -4,6 +4,7 @@ import './core-fields.js';
 import './narrative.js';
 import './terminology-server.js';
 import './advanced.js';
+import './subject-type.js';
 import './derived-from.js';
 import './replaces.js';
 import './identifiers.js';

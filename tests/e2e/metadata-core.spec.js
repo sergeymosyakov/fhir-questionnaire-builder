@@ -18,8 +18,13 @@
 //   meta-status            status custom-select
 //   meta-publisher         publisher input
 //   meta-advanced-toggle   Advanced section toggle button
+//   meta-subject-type-toggle Subject Type section toggle button
+//   subject-type-chip-0    first chip in subject type section
+//   subject-type-sel       custom-select trigger to add a type
+//   subject-type-remove-0  × button on first chip
+//   subject-type-custom-inp custom type text input
+//   subject-type-custom-add custom type Add button
 //   meta-date              date input (Advanced)
-//   meta-subject-type      subjectType input (Advanced)
 //   meta-purpose           purpose textarea (Advanced)
 //   meta-effective-start   effectivePeriod.start input (Advanced)
 //   meta-effective-end     effectivePeriod.end input (Advanced)
@@ -30,7 +35,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
-import { loadFixture, openModal, exportFHIR } from './helpers/metadata.js';
+import { loadFixture, freshStart, openModal, exportFHIR } from './helpers/metadata.js';
 
 // ── Modal open / close ────────────────────────────────────────────────────────
 
@@ -157,11 +162,14 @@ test.describe('metadata modal — Advanced section', () => {
     await expect(page.getByTestId('meta-date')).toHaveValue('2024-03-15');
   });
 
-  test('subjectType field shows comma-separated types after expanding', async ({ page }) => {
+  test('Subject Type section shows chips for imported types', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await page.getByTestId('meta-advanced-toggle').click();
-    await expect(page.getByTestId('meta-subject-type')).toHaveValue('Patient, Practitioner');
+    // Section auto-opens because fixture has subjectType
+    await expect(page.getByTestId('subject-type-chip-0')).toBeVisible();
+    await expect(page.getByTestId('subject-type-chip-0')).toHaveAttribute('data-value', 'Patient');
+    await expect(page.getByTestId('subject-type-chip-1')).toHaveAttribute('data-value', 'Practitioner');
+    await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
   test('purpose field shows questionnaire purpose after expanding', async ({ page }) => {
@@ -174,11 +182,20 @@ test.describe('metadata modal — Advanced section', () => {
   test('Advanced fields round-trip through export', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await page.getByTestId('meta-advanced-toggle').click();
-    await page.getByTestId('meta-subject-type').fill('Patient, RelatedPerson');
+    // Remove Practitioner chip, add RelatedPerson via dropdown
+    await page.getByTestId('subject-type-remove-1').click();
+    await page.getByTestId('subject-type-sel').click();
+    await page.locator('[data-testid="csel-drop"] [data-val="RelatedPerson"]').click();
     await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.subjectType).toEqual(['Patient', 'RelatedPerson']);
+  });
+
+  test('empty subjectType is omitted from export', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    const q = await exportFHIR(page);
+    expect(q.subjectType).toBeUndefined();
   });
 
   test('date is preserved in export round-trip', async ({ page }) => {
