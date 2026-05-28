@@ -170,6 +170,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (maxOccExt?.valueInteger !== undefined) node._maxOccurs = maxOccExt.valueInteger;
 
+  // maxDecimalPlaces
+  const maxDecExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces'
+  );
+  if (maxDecExt?.valueInteger !== undefined) node._maxDecimalPlaces = maxDecExt.valueInteger;
+
   // questionnaire-sliderStepValue
   const sliderExt = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue'

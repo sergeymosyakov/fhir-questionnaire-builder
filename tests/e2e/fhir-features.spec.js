@@ -316,3 +316,54 @@ test.describe('minLength enforcement', () => {
     expect(minLenExt?.valueInteger).toBe(5);
   });
 });
+
+// ── maxDecimalPlaces ──────────────────────────────────────────────────────────
+test.describe('maxDecimalPlaces', () => {
+  test('shows error when too many decimal places entered', async ({ page }) => {
+    await loadFixture(page);
+    const row = page.locator('[data-preview-id="decimal-places"]');
+    const input = row.locator('input[type="number"]');
+    await input.fill('72.123');
+    await input.press('Tab');
+    const err = row.locator('[data-testid="numeric-err"]');
+    await expect(err).toBeVisible();
+    await expect(err).toContainText('Max 2 decimal place');
+  });
+
+  test('no error when decimal places within limit', async ({ page }) => {
+    await loadFixture(page);
+    const row = page.locator('[data-preview-id="decimal-places"]');
+    const input = row.locator('input[type="number"]');
+    await input.fill('72.12');
+    await input.press('Tab');
+    const err = row.locator('[data-testid="numeric-err"]');
+    await expect(err).toBeHidden();
+  });
+
+  test('no error for integer value (no decimal point)', async ({ page }) => {
+    await loadFixture(page);
+    const row = page.locator('[data-preview-id="decimal-places"]');
+    const input = row.locator('input[type="number"]');
+    await input.fill('72');
+    await input.press('Tab');
+    const err = row.locator('[data-testid="numeric-err"]');
+    await expect(err).toBeHidden();
+  });
+
+  test('maxDecimalPlaces round-trips through export', async ({ page }) => {
+    await loadFixture(page);
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+    ]);
+    const filePath = await download.path();
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(filePath, 'utf8'));
+    const item = q.item.find(i => i.linkId === 'decimal-places');
+    const mdpExt = (item.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces'
+    );
+    expect(mdpExt?.valueInteger).toBe(2);
+  });
+});

@@ -279,6 +279,10 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs', valueInteger: node._minOccurs });
   if (node.repeats && node._maxOccurs !== undefined)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs', valueInteger: node._maxOccurs });
+  // maxDecimalPlaces
+  if (node._maxDecimalPlaces !== undefined) {
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces', valueInteger: node._maxDecimalPlaces });
+  }
   // questionnaire-sliderStepValue
   if (node._sliderStep !== undefined) {
     const isInt = Number.isInteger(node._sliderStep);

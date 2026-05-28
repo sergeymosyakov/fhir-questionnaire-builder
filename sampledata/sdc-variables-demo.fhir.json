@@ -45,13 +45,25 @@
                      "linkId":  "weight",
                      "text":  "Weight (kg)",
                      "type":  "decimal",
-                     "required":  true
+                     "required":  true,
+                     "extension":  [
+                                       {
+                                           "url":  "http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces",
+                                           "valueInteger":  1
+                                       }
+                                   ]
                  },
                  {
                      "linkId":  "height",
                      "text":  "Height (cm)",
                      "type":  "decimal",
-                     "required":  true
+                     "required":  true,
+                     "extension":  [
+                                       {
+                                           "url":  "http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces",
+                                           "valueInteger":  1
+                                       }
+                                   ]
                  },
                  {
                      "linkId":  "bmi",

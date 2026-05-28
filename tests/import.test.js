@@ -1091,6 +1091,32 @@ describe('importFHIR', () => {
     });
   });
 
+  // ── _maxDecimalPlaces ─────────────────────────────────────────────────────
+  describe('_maxDecimalPlaces', () => {
+    const MDP_URL = 'http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces';
+
+    it('reads maxDecimalPlaces valueInteger into _maxDecimalPlaces', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'decimal', text: 'Q',
+        extension: [{ url: MDP_URL, valueInteger: 2 }],
+      }]));
+      expect(_tree[0]._maxDecimalPlaces).toBe(2);
+    });
+
+    it('reads maxDecimalPlaces = 0', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'decimal', text: 'Q',
+        extension: [{ url: MDP_URL, valueInteger: 0 }],
+      }]));
+      expect(_tree[0]._maxDecimalPlaces).toBe(0);
+    });
+
+    it('does not set _maxDecimalPlaces when extension is absent', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'decimal', text: 'Q' }]));
+      expect(_tree[0]._maxDecimalPlaces).toBeUndefined();
+    });
+  });
+
   // ── _maxFileSizeMB ────────────────────────────────────────────────────────
   describe('_maxFileSizeMB', () => {
     const MS_URL = 'http://hl7.org/fhir/StructureDefinition/maxSize';

@@ -163,6 +163,10 @@ export const calcFormOk = node => {
       if (!isFinite(num)) return false; // non-numeric input is always invalid
       if (node._minValue !== undefined && num < Number(node._minValue)) return false;
       if (node._maxValue !== undefined && num > Number(node._maxValue)) return false;
+      if (node._maxDecimalPlaces !== undefined) {
+        const parts = String(val).split('.');
+        if (parts.length > 1 && parts[1].length > node._maxDecimalPlaces) return false;
+      }
     }
     if (isMandatory(node)) return val !== undefined && val !== '' && val !== null;
     return true;

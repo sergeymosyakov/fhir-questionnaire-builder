@@ -39,7 +39,8 @@ export class ItemNode extends BaseNode {
       (rc.CHECKABLE_TYPES.has(this.itemType) && (rc.isMandatory(this) || this.itemType === 'url')) ||
       (this._calculatedExpr && this._readOnly && this.itemType === 'checkbox') ||
       (this.constraint?.length > 0) ||
-      (this._minValue !== undefined || this._maxValue !== undefined)
+      (this._minValue !== undefined || this._maxValue !== undefined) ||
+      (this._maxDecimalPlaces !== undefined)
     );
     const displayOk = res.ok && rc.calcFormOk(this) && constraintPass;
     return { hasCondition, displayOk };

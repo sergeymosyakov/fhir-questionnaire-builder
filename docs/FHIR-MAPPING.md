@@ -220,6 +220,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `_initialValues` | `item.initial[]` all values | set only for repeating items with >1 initial value; exported as `initial: [entry, …]`; `_initialValue` holds `initial[0]` for backwards compat |
 | `_initialSelected` | `answerOption[].initialSelected` | code of the initially-selected option; preserved round-trip; if no `item.initial[]` exists, also used to pre-fill `_initialValue` |
 | `_definition` | `item.definition` | URL pointing to a StructureDefinition element; stored as `node._definition`; editable via **Props** button (codes-modal); round-trip safe; also supported on groups (see Group-specific) |
+| `_maxDecimalPlaces` | `maxDecimalPlaces` ext (`valueInteger`) | Maximum decimal places for `decimal` items; enforced in preview (error message + `step` attribute); editable in Answer Type modal; round-trip safe |
 ---
 
 ## Show When (enableWhen)
@@ -273,6 +274,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/ordinalValue` | standard | `_optionOrdinals[code]` (score per answer option; on `answerOption.extension`; displayed in preview; editable in builder) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix` | standard | `_optionPrefixes[code]` (display prefix per answer option e.g. `'A.'`; prepended to label in select/radio preview; editable in Answer Type modal; exported to `answerOption.extension`) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue` | standard | `_sliderStep` (step for range slider; triggers slider rendering) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces` | standard | `_maxDecimalPlaces` (max decimal digits for `decimal` items; enforced in preview; editable in Answer Type modal) | Yes |
 | `http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay` | R4 backport | `_disabledDisplay` (hidden/protected; also read from native `item.disabledDisplay` field) | Yes (R4B/R5 backport) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` | SDC | `_entryFormat` (placeholder hint text shown on text/url/number/quantity controls; editable in Answer Type modal); **on import also reads** `http://hl7.org/fhir/StructureDefinition/entryFormat` (R4 element-definition alias); SDC URL takes precedence when both are present | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation` | standard | `_choiceOrientation` (`vertical` / `horizontal`; controls layout of radio button groups; editable in Answer Type modal for `radio` items) | Yes |
@@ -385,10 +387,8 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | FHIR field / extension | Status | Notes |
 |---|---|---|
 | `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
-| `item.answerValueSet` — external URL | ✅ URL preserved + expanded | External URLs fetched via `ValueSet/$expand` on questionnaire load; `#id` contained refs resolved locally |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
-| `maxDecimalPlaces` | ❌ Not handled | Maximum number of decimal places for `decimal` items (`http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces`). |
 | `regex` | ❌ Not handled | Regular expression validation pattern for `string` / `text` / `url` items (`http://hl7.org/fhir/StructureDefinition/regex`). |
 | `questionnaire-unitValueSet` | ❌ Not handled | ValueSet of selectable units for `quantity` items (alternative to `questionnaire-unitOption` / `sdc-questionnaire-unitOption`). |
 | `questionnaire-usageMode` | ❌ Not handled | Controls when the item is relevant: `capture` / `display` / `display-non-empty` / `capture-display` / `capture-display-non-empty`. |

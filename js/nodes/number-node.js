@@ -49,10 +49,12 @@ export class NumberNode extends ItemNode {
 
     if (node._minValue !== undefined) el.min = String(node._minValue);
     if (node._maxValue !== undefined) el.max = String(node._maxValue);
+    if (node._maxDecimalPlaces !== undefined) el.step = String(Math.pow(10, -node._maxDecimalPlaces));
     if (node._entryFormat) el.placeholder = node._entryFormat;
 
     const errMsg = document.createElement('span');
     errMsg.className = 'ctrl-err ctrl-err--ml';
+    errMsg.dataset.testid = 'numeric-err';
     errMsg.style.display = 'none';
 
     const validate = v => {
@@ -62,6 +64,14 @@ export class NumberNode extends ItemNode {
         errMsg.textContent = 'Min: ' + node._minValue; errMsg.style.display = 'inline';
       } else if (node._maxValue !== undefined && num > node._maxValue) {
         errMsg.textContent = 'Max: ' + node._maxValue; errMsg.style.display = 'inline';
+      } else if (node._maxDecimalPlaces !== undefined) {
+        const parts = String(v).split('.');
+        if (parts.length > 1 && parts[1].length > node._maxDecimalPlaces) {
+          errMsg.textContent = 'Max ' + node._maxDecimalPlaces + ' decimal place' + (node._maxDecimalPlaces !== 1 ? 's' : '');
+          errMsg.style.display = 'inline';
+        } else {
+          errMsg.style.display = 'none';
+        }
       } else {
         errMsg.style.display = 'none';
       }
@@ -73,7 +83,7 @@ export class NumberNode extends ItemNode {
     validate(getValue(node.id));
 
     wrap.appendChild(el);
-    if (node._minValue !== undefined || node._maxValue !== undefined) wrap.appendChild(errMsg);
+    if (node._minValue !== undefined || node._maxValue !== undefined || node._maxDecimalPlaces !== undefined) wrap.appendChild(errMsg);
     return wrap;
   }
 }

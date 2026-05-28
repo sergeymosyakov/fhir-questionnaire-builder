@@ -1114,6 +1114,31 @@ describe('buildFHIRObject — _sliderStep', () => {
   });
 });
 
+// ── maxDecimalPlaces ──────────────────────────────────────────────────────────
+describe('buildFHIRObject — _maxDecimalPlaces', () => {
+  const MDP_URL = 'http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces';
+
+  it('exports maxDecimalPlaces as valueInteger', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _maxDecimalPlaces: 2 }]);
+    const ext = q.item[0].extension || [];
+    const mdpExt = ext.find(e => e.url === MDP_URL);
+    expect(mdpExt?.valueInteger).toBe(2);
+  });
+
+  it('exports maxDecimalPlaces = 0', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _maxDecimalPlaces: 0 }]);
+    const ext = q.item[0].extension || [];
+    const mdpExt = ext.find(e => e.url === MDP_URL);
+    expect(mdpExt?.valueInteger).toBe(0);
+  });
+
+  it('omits maxDecimalPlaces when undefined', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MDP_URL)).toBeUndefined();
+  });
+});
+
 // ── contained resources ───────────────────────────────────────────────────────
 describe('buildFHIRObject — contained', () => {
   afterEach(() => { _questContained.splice(0); });

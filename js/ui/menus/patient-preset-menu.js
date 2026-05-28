@@ -35,6 +35,17 @@ export class PatientPresetMenu extends DropdownMenu {
     customItem.dataset.preset = 'custom';
     customItem.addEventListener('click', () => { this.close(); this._onCustom?.(); });
     this._menu.appendChild(customItem);
+
+    // The menu lives inside .top-panel which has overflow-x:auto.
+    // Use position:fixed so the dropdown escapes the overflow clipping.
+    this._menu.style.position = 'fixed';
+  }
+
+  /** Position the fixed menu below the button on every open. */
+  _onOpen() {
+    const r = this._btn.getBoundingClientRect();
+    this._menu.style.top  = (r.bottom + 4) + 'px';
+    this._menu.style.left = r.left + 'px';
   }
 
   /** @param {{ onPreset(preset): void, onCustom(): void }} handlers */

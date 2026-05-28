@@ -40,6 +40,22 @@ class NumericSection extends AnswerTypeSection {
     numericGrid.appendChild(_numField('Min', 'min-value-input', pending.draftMinValue, v => { pending.draftMinValue = v; }));
     numericGrid.appendChild(_numField('Max', 'max-value-input', pending.draftMaxValue, v => { pending.draftMaxValue = v; }));
 
+    // ── Max decimal places (decimal only) ────────────────────────────────────
+    const decPlacesField = _numField('Decimal places', 'max-decimal-places-input',
+      pending.draftMaxDecimalPlaces, v => { pending.draftMaxDecimalPlaces = v; });
+    decPlacesField.dataset.tipTitle = 'Max decimal places';
+    decPlacesField.dataset.tipBody  = 'Maximum number of digits after the decimal point. Violations show an error in preview.';
+    decPlacesField.dataset.tipFhir  = 'item.extension[maxDecimalPlaces].valueInteger';
+    decPlacesField.dataset.tipSpec  = 'R4';
+    const decInp = decPlacesField.querySelector('input');
+    decInp.min = '0';
+    decInp.step = '1';
+    decPlacesField.style.display = pending.draftType === 'decimal' ? 'flex' : 'none';
+    numericGrid.appendChild(decPlacesField);
+
+    // Track the element so onTypeChange can toggle visibility
+    this._decPlacesField = decPlacesField;
+
     // ── "Render as slider" toggle + step field ───────────────────────────────
     const sliderRow = document.createElement('div');
     sliderRow.className = 'at-modal-slider-row';
@@ -86,25 +102,36 @@ class NumericSection extends AnswerTypeSection {
   commit(pending, node) {
     if (NUMERIC_TYPES.has(node.itemType)) {
       const _pf    = s => { const n = parseFloat(s); return isNaN(n) ? undefined : n; };
+      const _pi    = s => { const n = parseInt(s, 10); return isNaN(n) ? undefined : n; };
       const _round = node.itemType === 'integer';
       const minV   = _pf(pending.draftMinValue);
       const maxV   = _pf(pending.draftMaxValue);
       const stepV  = _pf(pending.draftSliderStep);
+      const decP   = _pi(pending.draftMaxDecimalPlaces);
       if (minV  !== undefined)              node._minValue   = _round ? Math.round(minV)  : minV;  else delete node._minValue;
       if (maxV  !== undefined)              node._maxValue   = _round ? Math.round(maxV)  : maxV;  else delete node._maxValue;
       if (stepV !== undefined && stepV > 0) node._sliderStep = _round ? Math.round(stepV) : stepV; else delete node._sliderStep;
+      if (node.itemType === 'decimal' && decP !== undefined && decP >= 0) node._maxDecimalPlaces = decP; else delete node._maxDecimalPlaces;
     } else {
       delete node._minValue;
       delete node._maxValue;
       delete node._sliderStep;
+      delete node._maxDecimalPlaces;
+    }
+  }
+
+  onTypeChange(type) {
+    if (this._decPlacesField) {
+      this._decPlacesField.style.display = type === 'decimal' ? 'flex' : 'none';
     }
   }
 
   initPending(node) {
     return {
-      draftMinValue:   node._minValue   !== undefined ? String(node._minValue)   : '',
-      draftMaxValue:   node._maxValue   !== undefined ? String(node._maxValue)   : '',
-      draftSliderStep: node._sliderStep !== undefined ? String(node._sliderStep) : '',
+      draftMinValue:          node._minValue          !== undefined ? String(node._minValue)          : '',
+      draftMaxValue:          node._maxValue          !== undefined ? String(node._maxValue)          : '',
+      draftSliderStep:        node._sliderStep        !== undefined ? String(node._sliderStep)        : '',
+      draftMaxDecimalPlaces:  node._maxDecimalPlaces  !== undefined ? String(node._maxDecimalPlaces)  : '',
     };
   }
 }

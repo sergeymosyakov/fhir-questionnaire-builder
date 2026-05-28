@@ -95,6 +95,17 @@
           "valueInteger": 5
         }
       ]
+    },
+    {
+      "linkId": "decimal-places",
+      "text": "Weight (kg)",
+      "type": "decimal",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces",
+          "valueInteger": 2
+        }
+      ]
     }
   ]
 }

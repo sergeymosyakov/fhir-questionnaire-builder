@@ -94,6 +94,7 @@
     { cat: 'Item — Extensions', field: 'maxSize (attachment)', desc: 'Maximum allowed file size in MB for attachment items', where: 'Answer Type modal', how: 'Click "Answer Type" action link → Max File Size field (attachment items only)' },
     { cat: 'Item — Extensions', field: 'mimeType (attachment)', desc: 'Allowed MIME type(s) for attachment items', where: 'Answer Type modal', how: 'Click "Answer Type" action link → Allowed MIME types field (attachment items only)' },
     { cat: 'Item — Extensions', field: 'minOccurs / maxOccurs', desc: 'Minimum and maximum number of repetitions for repeating items', where: 'Repeatable modal', how: 'Click "Repeatable" action link → Min / Max Occurrences fields' },
+    { cat: 'Item — Extensions', field: 'maxDecimalPlaces', desc: 'Maximum number of decimal places for decimal items; enforced in preview with error badge', where: 'Answer Type modal', how: 'Click "Answer Type" action link → Decimal places field (decimal items only)' },
 
     // ── Item — SDC extensions ─────────────────────────────────────────────────
     { cat: 'Item — SDC', field: 'sdc-questionnaire-calculatedExpression', desc: 'FHIRPath expression evaluated continuously; its result is written into the item answer (read-only computed field)', where: 'Expression modal', how: 'Click "Expression" action link on the item → Calculated Expression tab' },
@@ -105,7 +106,6 @@
     { cat: 'Item — SDC', field: 'sdc-questionnaire-preferredTerminologyServer', desc: 'Per-item preferred FHIR terminology server URL for ValueSet expansion. Overrides the Questionnaire-level default.', where: 'Terminology modal', how: 'Click "Terminology" action link on the item row → enter server URL' },
 
     // ── Not supported ─────────────────────────────────────────────────────────
-    { cat: 'Not Supported', field: 'maxDecimalPlaces', desc: 'Maximum decimal places for decimal items', where: '— not implemented', how: 'Preserved on round-trip if present in the imported file' },
     { cat: 'Not Supported', field: 'regex', desc: 'Validation regex pattern for string / text / url items', where: '— not implemented', how: 'Not preserved on round-trip' },
     { cat: 'Not Supported', field: 'questionnaire-usageMode', desc: "Controls when item is relevant: capture / display / display-non-empty / capture-display", where: '— not implemented', how: 'Not preserved on round-trip' },
     { cat: 'Not Supported', field: 'answerConstraint (R4B/R5)', desc: 'Constrains answer values: optionsOnly / optionsOrType / optionsOrString', where: '— not implemented', how: 'Not preserved on round-trip' },
