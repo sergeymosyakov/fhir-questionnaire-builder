@@ -152,10 +152,65 @@ export class ItemNode extends BaseNode {
   _buildControl(row, res, rc) {
     if (this._readOnly || this._calculatedExpr) return;
     if (this.repeats && this.itemType !== 'checkbox') {
-      row.appendChild(rc.buildRepeatControls(this, res._iconEl, () => rc.updateGroupIcons()));
+      row.appendChild(this._buildRepeatContainer(res._iconEl, () => rc.updateGroupIcons(), rc));
     } else {
       row.appendChild(rc.buildControl(this, res._iconEl, () => rc.updateGroupIcons()));
     }
+  }
+
+  // Render N+1 repeat rows with add/remove buttons.
+  _buildRepeatContainer(iconEl, onAfterChange, rc) {
+    const id     = this.id;
+    const rowKey = i => i === 0 ? id : id + '$$' + i;
+    const n      = rc.values[id + '$$n'] || 0;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'repeat-wrap';
+
+    for (let i = 0; i <= n; i++) {
+      const rk       = rowKey(i);
+      const fakeNode = i === 0 ? this : Object.assign(Object.create(Object.getPrototypeOf(this)), this, { id: rk });
+      const rowEl    = document.createElement('div');
+      rowEl.className = 'repeat-row';
+
+      rowEl.appendChild(rc.buildControl(fakeNode, i === 0 ? iconEl : null, onAfterChange));
+
+      if (n > 0) {
+        const rm = document.createElement('button');
+        rm.type = 'button';
+        rm.className = 'repeat-remove-btn';
+        rm.textContent = '\xD7';
+        rm.dataset.tipTitle = 'Remove this answer';
+        rm.dataset.testid = 'repeat-remove-btn';
+        const _i = i;
+        rm.onclick = () => {
+          for (let j = _i; j < n; j++) rc.values[rowKey(j)] = rc.values[rowKey(j + 1)];
+          delete rc.values[rowKey(n)];
+          rc.values[id + '$$n'] = n - 1;
+          rc.formTick.value++;
+        };
+        rowEl.appendChild(rm);
+      }
+
+      wrap.appendChild(rowEl);
+    }
+
+    const maxOccurs = this._maxOccurs;
+    const atMax = maxOccurs !== undefined && (n + 1) >= maxOccurs;
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'repeat-add-btn';
+    addBtn.textContent = '+ Add another';
+    addBtn.dataset.testid = 'repeat-add-btn';
+    if (atMax) {
+      addBtn.disabled = true;
+      addBtn.dataset.tipTitle = 'Maximum ' + maxOccurs + ' answer' + (maxOccurs === 1 ? '' : 's') + ' reached';
+    }
+    addBtn.onclick = () => { if (!atMax) { rc.values[id + '$$n'] = n + 1; rc.formTick.value++; } };
+    wrap.appendChild(addBtn);
+
+    return wrap;
   }
 
   _buildReadOnlyValue(row, rc) {
@@ -195,6 +250,18 @@ export class ItemNode extends BaseNode {
       badge.className = 'preview-calc-value';
       badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
     }
+    // Store updater closure — called on REFRESH_CALC_BADGES without full DOM rebuild.
+    this._refreshCalcBadge = () => {
+      if (this.itemType === 'checkbox') {
+        const v = rc.getValue(this.id);
+        badge.className = 'calc-badge ' + (v ? 'calc-true' : 'calc-false') + ' calc-badge--explain';
+        badge.textContent = v ? '\u2713 true' : '\u2717 false';
+      } else {
+        const s = rc.getValue(this.id);
+        badge.className = 'preview-calc-value';
+        badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
+      }
+    };
     row.appendChild(badge);
   }
 

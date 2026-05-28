@@ -4,6 +4,7 @@
 
 import { Modal } from './modal-base.js';
 import * as storage from '../../storage/storage.js';
+import { showError } from '../toast.js';
 
 /** Format an ISO date string as a human-readable relative time label. */
 function _relTime(isoStr) {
@@ -111,7 +112,7 @@ class CloudModal extends Modal {
     delBtn.type = 'button';
     delBtn.className = 'modal-btn cloud-list-del-btn';
     delBtn.textContent = '\u00D7';
-    delBtn.title = 'Delete from cloud';
+    delBtn.dataset.tipTitle = 'Delete from cloud';
     delBtn.dataset.testid = 'cloud-delete-' + row.id;
     delBtn.addEventListener('click', async () => {
       if (!confirm(`Delete "${row.title}" from the cloud?`)) return;
@@ -127,7 +128,7 @@ class CloudModal extends Modal {
         }
       } catch (err) {
         delBtn.disabled = false;
-        alert('Delete failed: ' + err.message);
+        showError('Delete failed: ' + err.message);
       }
     });
 

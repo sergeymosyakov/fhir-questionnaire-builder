@@ -6,6 +6,7 @@
 //   QUESTIONNAIRE_LOADED         detail: { fileName? }
 //   BUILDER_NAVIGATE             detail: { id }       — preview row → builder node
 //   BUILDER_NAVIGATE_TO          detail: { nodeId }   — scroll builder node into view
+//   PREVIEW_NAVIGATE_TO          detail: { id }       — scroll & flash preview row for node
 //   VIEW_PREF_CHANGE             detail: { key, value }
 //   PREVIEW_MODE_CHANGE          detail: { mode }
 //   QR_LOADED                    detail: { status, subject, author }
@@ -27,6 +28,7 @@ export const AppEvents = Object.freeze({
   BUILDER_NAVIGATE_TO: 'builder:navigate-to',
 
   // ── Preview / form ────────────────────────────────────────────────────────
+  PREVIEW_NAVIGATE_TO: 'preview:navigate-to',
   REINIT_FORM:         'reinit-form',
   SHOW_JSON:           'show-json',
   VIEW_PREF_CHANGE:    'view-pref-change',
@@ -35,6 +37,15 @@ export const AppEvents = Object.freeze({
   // ── Patient / QR ─────────────────────────────────────────────────────────
   PATIENT_CTX_APPLIED: 'patient-ctx-applied',
   QR_LOADED:           'qr-loaded',
+
+  // ── UI utilities ───────────────────────────────────────────────────────────
+  CLOSE_DROPDOWNS:       'close-dropdowns',
+
+  // ── Builder utilities ──────────────────────────────────────────────────────
+  REFRESH_EXPR_ICONS:    'refresh-expr-icons',
+  REFRESH_CALC_BADGES:   'refresh-calc-badges',
+  COLLAPSE_ALL_PREVIEW:  'collapse-all-preview',
+  EXPAND_ALL_PREVIEW:    'expand-all-preview',
 
   // ── Renumber progress ─────────────────────────────────────────────────────
   RENUMBER_PROGRESS:   'renumber-progress',

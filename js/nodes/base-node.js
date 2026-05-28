@@ -3,7 +3,7 @@
 // Subclasses must set `this.type` and optionally `this.itemType`.
 import { nextId } from '../id.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
-import * as dnd from '../builder/dnd.js';
+import * as bh from './builder-helpers.js';
 import { AppEvents } from '../events.js';
 
 // Shared wrapper factory used by every buildControl() implementation.
@@ -34,7 +34,15 @@ export class BaseNode {
     this.enableBehavior       = data.enableBehavior       ?? 'all';
     this.enableWhenExpression = data.enableWhenExpression ?? '';
     this.mandatory            = data.mandatory            ?? false;
+    if (typeof document !== 'undefined') {
+      this._ac = new AbortController();
+      this._initPreviewNavListener();
+      document.addEventListener(AppEvents.REFRESH_CALC_BADGES, () => this._refreshCalcBadge?.(), { signal: this._ac.signal });
+    }
   }
+
+  /** Abort all document listeners owned by this node. */
+  destroy() { this._ac?.abort(); }
 
   // ── Builder service injection ─────────────────────────────────────────────
   // Nodes must not import application state or services directly.
@@ -84,11 +92,9 @@ export class BaseNode {
   // ── Dimmed state (enableWhen condition not yet met) ───────────────────────
   _renderDimmed(res, container, rc) {
     if (this._disabledDisplay === 'hidden') return;
-    const row = document.createElement('div');
-    row.className = 'lform-item lform-waiting preview-row--pointer';
-    row.dataset.previewId = this.id;
+    const row = this._makePreviewRow('lform-item lform-waiting preview-row--pointer');
     row.dataset.tipTitle = 'Click to navigate to builder node';
-    row.addEventListener('click', () => rc.scrollToBuilder(this.id));
+    row.addEventListener('click', () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: this.id } })));
     const ph = document.createElement('span');
     ph.className = 'preview-icon-ph';
     row.appendChild(ph);
@@ -128,10 +134,8 @@ export class BaseNode {
   // ── Disabled state (group conditionRule not met → N/A) ───────────────────
   _renderDisabled(res, container, rc) {
     if (rc.previewMode === 'patient') return;
-    const row = document.createElement('div');
-    row.className = 'lform-item lform-disabled preview-row--pointer';
-    row.dataset.previewId = this.id;
-    row.addEventListener('click', () => rc.scrollToBuilder(this.id));
+    const row = this._makePreviewRow('lform-item lform-disabled preview-row--pointer');
+    row.addEventListener('click', () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: this.id } })));
     const naIcon = document.createElement('span');
     naIcon.className = 'icon-na';
     row.appendChild(naIcon);
@@ -149,9 +153,7 @@ export class BaseNode {
   // ── Base row: nav btn + icon/ph + linkId + hidden badge + prefix ──────────
   _createBaseRow(res, rc) {
     const isPatient = rc.previewMode === 'patient';
-    const row = document.createElement('div');
-    row.className = 'lform-item';
-    row.dataset.previewId = this.id;
+    const row = this._makePreviewRow('lform-item');
     if (res.hiddenRoot) row.classList.add('lform-item--hidden');
 
     if (!isPatient) {
@@ -161,7 +163,7 @@ export class BaseNode {
       navBtn.textContent = '\u2197';
       navBtn.dataset.tipTitle = 'Go to builder node';
       navBtn.dataset.tipBody  = 'Scroll and highlight the corresponding node in the builder panel.';
-      navBtn.addEventListener('click', e => { e.stopPropagation(); rc.scrollToBuilder(this.id); });
+      navBtn.addEventListener('click', e => { e.stopPropagation(); document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: this.id } })); });
       row.appendChild(navBtn);
     }
 
@@ -230,7 +232,6 @@ export class BaseNode {
       '\nClick to copy linkId to clipboard.';
     tag.dataset.tipFhir = 'Questionnaire.item.linkId';
     tag.dataset.tipSpec  = 'R4';
-    tag.style.cursor = 'pointer';
     tag.addEventListener('click', e => {
       e.stopPropagation();
       navigator.clipboard.writeText(this.id).catch(() => {});
@@ -346,106 +347,17 @@ export class BaseNode {
   _renderChildren(_res, _target, _rc) { /* no-op */ }
 
   // ── Shared builder-panel helpers ──────────────────────────────────────────
-  // Used by both ItemNode.buildBuilder() and GroupNode.buildBuilder().
-
-  /** Returns a <div class="node-title-row"> with a click-to-edit title field. */
-  _buildInlineTitleEditor() {
-    const titleRow = document.createElement('div');
-    titleRow.className = 'node-title-row';
-    const titleDisplay = document.createElement('span');
-    titleDisplay.className = 'node-title-display';
-    titleDisplay.dataset.testid = 'node-title-display';
-    titleDisplay.textContent = this.title || '(no title)';
-    const titleTextarea = document.createElement('textarea');
-    titleTextarea.className = 'node-title-textarea';
-    titleTextarea.dataset.testid = 'node-title-input';
-    titleTextarea.value = this.title;
-    titleTextarea.style.display = 'none';
-    titleTextarea.oninput = () => { this.title = titleTextarea.value; titleDisplay.textContent = titleTextarea.value || '(no title)'; };
-    titleTextarea.onblur  = () => { titleTextarea.style.display = 'none'; titleDisplay.style.display = ''; };
-    titleDisplay.addEventListener('click', e => {
-      e.stopPropagation();
-      const h = titleDisplay.offsetHeight;
-      titleDisplay.style.display = 'none';
-      titleTextarea.style.display = '';
-      titleTextarea.style.height = Math.max(h, 48) + 'px';
-      titleTextarea.focus();
-      titleTextarea.setSelectionRange(titleTextarea.value.length, titleTextarea.value.length);
-    });
-    titleRow.append(titleDisplay, titleTextarea);
-    return { titleRow, titleDisplay, titleTextarea };
-  }
-
-  /** Returns a linkId <input> wired to this.id. */
-  _buildLinkIdInput() {
-    const inp = document.createElement('input');
-    inp.type = 'text';
-    inp.value = this.id;
-    inp.className = 'node-linkid-input';
-    inp.dataset.tipTitle = 'FHIR linkId';
-    inp.dataset.tipBody  = 'Editable. Must be unique within the questionnaire.';
-    inp.dataset.tipFhir  = 'Questionnaire.item.linkId';
-    inp.dataset.tipSpec  = 'R4';
-    inp.oninput = () => { this.id = inp.value.trim() || this.id; };
-    return inp;
-  }
-
-  /** Returns a prefix <input> wired to this._prefix. */
-  _buildPrefixInput(placeholder = '\u2014') {
-    const inp = document.createElement('input');
-    inp.type = 'text';
-    inp.value = this._prefix || '';
-    inp.className = 'node-prefix-input';
-    inp.placeholder = placeholder;
-    inp.dataset.tipTitle = 'Display prefix';
-    inp.dataset.tipBody  = 'Cosmetic only \u2014 e.g. "1.". Does not affect logic or linkId.';
-    inp.dataset.tipFhir  = 'Questionnaire.item.prefix';
-    inp.dataset.tipSpec  = 'R4';
-    inp.oninput = () => { this._prefix = inp.value.trim() || undefined; };
-    return inp;
-  }
-
-  /**
-   * Creates an action <a> element, appends it to container, returns it.
-   * @param {string} label
-   * @param {string} key        — used for data-testid="action-{key}"
-   * @param {{ title?, body?, fhir?, spec? }} tip
-   * @param {HTMLElement} container
-   */
-  _makeActionLink(label, key, tip, container) {
-    const a = document.createElement('a');
-    a.textContent    = label;
-    a.className      = 'action-edit';
-    a.dataset.testid = 'action-' + key;
-    if (tip?.title) a.dataset.tipTitle = tip.title;
-    if (tip?.body)  a.dataset.tipBody  = tip.body;
-    if (tip?.fhir)  a.dataset.tipFhir  = tip.fhir;
-    if (tip?.spec)  a.dataset.tipSpec  = tip.spec;
-    container.appendChild(a);
-    return a;
-  }
+  // Implementations live in builder-helpers.js; thin delegators here.
+  _buildInlineTitleEditor() { return bh.buildInlineTitleEditor(this); }
+  _buildLinkIdInput()       { return bh.buildLinkIdInput(this); }
+  _buildPrefixInput(ph)     { return bh.buildPrefixInput(this, ph); }
+  _makeActionLink(l, k, t, c) { return bh.makeActionLink(this, l, k, t, c); }
 
   // ── DnD ownership ─────────────────────────────────────────────────────────
-  // Each node declares its own drag/drop behaviour.
-  // Override isDraggable() in a subclass to opt out (e.g. a locked template).
-
   /** Whether this node can be dragged. Override to return false to lock. */
   isDraggable() { return true; }
-
-  /** Returns a draggable ⠿ handle element. Returns null when !isDraggable(). */
-  _buildDragHandle() {
-    if (!this.isDraggable()) return null;
-    return dnd.makeDragHandle(this);
-  }
-
-  /** Returns a <div class="drop-zone drop-zone-above"> wired for drop-before. */
-  _buildDropZoneAbove() {
-    const div = document.createElement('div');
-    div.className   = 'drop-zone drop-zone-above';
-    div.textContent = 'Drop here';
-    dnd.attachDropZone(div, this, 'before');
-    return div;
-  }
+  _buildDragHandle()    { return bh.buildDragHandle(this); }
+  _buildDropZoneAbove() { return bh.buildDropZoneAbove(this); }
 
   // ── Builder event dispatch ─────────────────────────────────────────────────
   // Breaks circular imports: index.js and render-preview.js both import nodes,
@@ -483,5 +395,49 @@ export class BaseNode {
   /** Navigates the right-panel preview to this node */
   _dispatchNavigate() {
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE, { detail: { id: this.id } }));
+  }
+
+  // ── Preview row factory & scroll-to listener ───────────────────────────────
+
+  /**
+   * Create a preview row div, register it as this._previewEl, and return it.
+   * All three render paths (_renderDimmed, _renderDisabled, _createBaseRow) go through
+   * here so _previewEl always points to the most-recently rendered element.
+   */
+  _makePreviewRow(className) {
+    const row = document.createElement('div');
+    row.className = className;
+    row.dataset.previewId = this.id;
+    this._previewEl = row;
+    if (this._scrollAfterRender) {
+      this._scrollAfterRender = false;
+      // rAF fires after lform.appendChild(frag) so the element is in the live DOM
+      requestAnimationFrame(() => this._scrollIntoView());
+    }
+    return row;
+  }
+
+  _scrollIntoView() {
+    if (!this._previewEl || !document.contains(this._previewEl)) return;
+    this._previewEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    this._previewEl.classList.add('preview-flash');
+    setTimeout(() => this._previewEl?.classList.remove('preview-flash'), 1000);
+  }
+
+  /**
+   * Wire the PREVIEW_NAVIGATE_TO listener for this node instance.
+   * Called once from the constructor (with a DOM guard for test environments).
+   * If _previewEl is already in DOM — scroll immediately.
+   * Otherwise set _scrollAfterRender so _makePreviewRow scrolls after the next render.
+   */
+  _initPreviewNavListener() {
+    document.addEventListener(AppEvents.PREVIEW_NAVIGATE_TO, e => {
+      if (e.detail?.id !== this.id) return;
+      if (this._previewEl && document.contains(this._previewEl)) {
+        this._scrollIntoView();
+      } else {
+        this._scrollAfterRender = true;
+      }
+    }, { signal: this._ac.signal });
   }
 }

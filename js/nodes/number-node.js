@@ -67,7 +67,7 @@ export class NumberNode extends ItemNode {
       }
     };
 
-    el.oninput  = () => { const v = el.value === '' ? undefined : parseFloat(el.value); setValue(node.id, v); validate(v); _reCalc(); onChange(); };
+    el.oninput  = () => { const v = el.value === '' ? undefined : (node.itemType === 'integer' ? parseInt(el.value, 10) : parseFloat(el.value)); setValue(node.id, v); validate(v); _reCalc(); onChange(); };
     el.onchange = () => { _formTick.value++; };
 
     validate(getValue(node.id));

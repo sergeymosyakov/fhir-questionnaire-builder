@@ -1,8 +1,9 @@
 // ── Status badge: live PASS / FAIL indicator with issue dropdown ──────────────
 // API:
 //   init(elements, navigateFn)  — wire up { btn, dropdown, wrap }; navigateFn(id)
-//   update(state)               — state: { anyVisible, hasCriteria, finalOk, failingItems }
-//                                 failingItems: [{ title, id }]
+//   update({ visible, ctx })    — visible: eval results; ctx: { fp, qr, envVars }
+//                                 Computes mandatory/calc/constraint/range criteria internally.
+import { isMandatory, calcFormOk, evalConstraints, getValue, CHECKABLE_TYPES } from '../state.js';
 
 let _btn        = null;
 let _dropdown   = null;
@@ -27,14 +28,60 @@ export function init(elements, navigateFn) {
   });
 }
 
-export function update({ anyVisible, hasCriteria, finalOk, failingItems }) {
+export function update({ visible, ctx }) {
   if (!_btn) return;
+
+  const anyVisible = visible.length > 0;
+  const fp   = ctx?.fp   ?? null;
+  const qr   = ctx?.qr   ?? null;
+  const cEnv = ctx?.envVars ?? {};
+
+  const activeItems = visible.filter(r => !r.disabled && !r.hidden && r.node.type === 'item');
+
+  const mandatoryItems = activeItems.filter(r =>
+    isMandatory(r.node) && CHECKABLE_TYPES.has(r.node.itemType)
+  );
+  const hasMandatory = mandatoryItems.length > 0;
+
+  const calcItems = activeItems.filter(r =>
+    r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox'
+  );
+  const hasCalc    = calcItems.length > 0;
+  const calcAllOk  = calcItems.every(r => getValue(r.node.id) === true);
+
+  const constraintItems   = activeItems.filter(r => r.node.constraint?.length);
+  const hasConstraints    = constraintItems.length > 0;
+  const constraintsAllOk  = constraintItems.every(r => evalConstraints(r.node, fp, qr, cEnv));
+
+  const rangeItems = activeItems.filter(r =>
+    !isMandatory(r.node) && (r.node._minValue !== undefined || r.node._maxValue !== undefined)
+  );
+  const hasRange   = rangeItems.length > 0;
+  const rangeAllOk = rangeItems.every(r => calcFormOk(r.node));
+
+  const hasCriteria = hasMandatory || hasCalc || hasConstraints || hasRange;
 
   if (!anyVisible || !hasCriteria) {
     _wrap.style.display = 'none';
     _close();
     return;
   }
+
+  const formItemsOk = visible.filter(r => !r.disabled && !r.hidden).every(res => {
+    if (res.node.type === 'item') return res.ok && calcFormOk(res.node);
+    return res.ok;
+  });
+  const finalOk = (hasMandatory ? formItemsOk : true) && (hasCalc ? calcAllOk : true) &&
+    (!hasConstraints || constraintsAllOk) &&
+    (!hasRange || rangeAllOk) &&
+    hasCriteria;
+
+  const failingItems = [
+    ...mandatoryItems.filter(r => !r.ok || !calcFormOk(r.node)).map(r => ({ title: r.node.title, id: r.node.id })),
+    ...calcItems.filter(r => getValue(r.node.id) !== true).map(r => ({ title: r.node.title, id: r.node.id })),
+    ...constraintItems.filter(r => !evalConstraints(r.node, fp, qr, cEnv)).map(r => ({ title: r.node.title, id: r.node.id })),
+    ...rangeItems.filter(r => !calcFormOk(r.node)).map(r => ({ title: r.node.title, id: r.node.id })),
+  ];
 
   _wrap.style.display = 'inline-flex';
 

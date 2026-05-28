@@ -14,10 +14,8 @@ export const _rc = {
   // Stable refs — set once by render-preview.js at module load time:
   viewPrefs:          null, // _viewPrefs object (mutated in-place on pref changes)
   lastCtx:            null, // _lastCtx object (mutated in-place by _reCalc)
-  collapsedGroups:    null, // collapsedGroups Set
-  scrollToBuilder:    null, // function(nodeId)
   buildControl:       null, // function(node, iconEl, onAfterChange)
-  buildRepeatControls: null, // function(node, iconEl, onAfterChange)
+  values:             null, // reactive values object (for repeat row mutations)
   formTick:           null, // _formTick ref (injected from render-preview.js)
   updateGroupIcons:   null, // function() — GroupNode.updateAll(_rc); used as callback in item-node.js
 

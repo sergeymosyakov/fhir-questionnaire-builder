@@ -3,6 +3,8 @@
 // configure({tree, effect, questVariables}) — call once at startup.
 import { createCustomSelect } from './custom-select.js';
 import { Modal } from './modals/modal-base.js';
+import { PatientPresetMenu } from './menus/patient-preset-menu.js';
+import { AppEvents } from '../events.js';
 
 let _tree = null, _effect = null, _questVariables = null;
 export function configure({ tree, effect, questVariables }) {
@@ -14,13 +16,13 @@ export function configure({ tree, effect, questVariables }) {
     }
   }
   // Disable preset button reactively when no questionnaire is loaded
-  _effect(() => {
-    const disabled = _tree.length === 0;
-    if (_el.presetBtn) _el.presetBtn.disabled = disabled;
+  _effect(() => presetMenu.setDisabled(_tree.length === 0));
+  // Wire preset handlers
+  presetMenu.setHandlers({
+    onPreset: preset => { applyPreset(preset, _questVariables); _doAfterApply(); },
+    onCustom: () => _modal.open(),
   });
 }
-
-import { AppEvents } from '../events.js';
 
 const PATIENT_VARS = [
   { name: 'age',      type: 'number',   label: 'Age (years)',    default: 30 },
@@ -102,11 +104,6 @@ function applyPreset(preset, questVariables) {
 // ── Module-level state ────────────────────────────────────────────────────────
 let _inputs = null;
 
-const _el = {
-  presetBtn:  document.getElementById('patientPresetBtn'),
-  presetMenu: document.getElementById('patientPresetMenu'),
-};
-
 class PatientModal extends Modal {
   getName() { return 'patientCtxModal'; }
   constructor() {
@@ -181,35 +178,11 @@ class PatientModal extends Modal {
 
 const _modal = new PatientModal();
 
-// ── Preset dropdown ─────────────────────────────────────────────
-if (_el.presetBtn && _el.presetMenu) {
-  _el.presetBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    if (_el.presetMenu.style.display !== 'none') { _el.presetMenu.style.display = 'none'; return; }
-    const rect = _el.presetBtn.getBoundingClientRect();
-    _el.presetMenu.style.position = 'fixed';
-    _el.presetMenu.style.top  = (rect.bottom + 2) + 'px';
-    _el.presetMenu.style.left = rect.left + 'px';
-    _el.presetMenu.style.display = 'block';
-  });
-
-  _el.presetMenu.addEventListener('click', e => {
-    const item = e.target.closest('[data-preset]');
-    if (!item) return;
-    const presetId = item.dataset.preset;
-    _el.presetMenu.style.display = 'none';
-    if (presetId === 'custom') { _modal.open(); return; }
-    const preset = PATIENT_PRESETS.find(p => p.id === presetId);
-    if (!preset) return;
-    applyPreset(preset, _questVariables);
-    _el.presetBtn.textContent = '\uD83D\uDC64 ' + preset.shortLabel + ' \u25BE';
-    _doAfterApply();
-  });
-
-  document.addEventListener('click', () => { _el.presetMenu.style.display = 'none'; });
-}
+// ── Preset dropdown ───────────────────────────────────────────────────────────
+export const presetMenu = new PatientPresetMenu(PATIENT_PRESETS);
+document.getElementById('patientPresetWrap')?.replaceWith(presetMenu.el);
 
 const _doAfterApply = () => {
-  document.dispatchEvent(new CustomEvent('reinit-form'));
+  document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
   document.dispatchEvent(new CustomEvent(AppEvents.PATIENT_CTX_APPLIED));
 };

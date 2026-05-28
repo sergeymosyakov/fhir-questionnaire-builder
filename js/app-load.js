@@ -7,14 +7,14 @@ import { importFHIR } from './fhir/import.js';
 import { importQRAnswers } from './fhir/qr-import.js';
 import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/modals/validate-modal.js';
-import * as libraryModal from './ui/modals/library-modal.js';
 import * as progress from './ui/progress.js';
-import * as autosave from './ui/autosave.js';
 import { expandAll, renderTreeAsync } from './builder/index.js';
-import { reinitForm, resetCollapsedFromTree } from './render-preview.js';
+import { reinitForm } from './render-preview.js';
+import { GroupNode } from './nodes/group-node.js';
 import { terminologyService } from './fhir/terminology-service.js';
 import { answersMenu, saveMenu, toolsMenu } from './ui/header-actions.js';
 import { AppEvents } from './events.js';
+import { loadConfirmModal } from './ui/modals/load-confirm-modal.js';
 
 
 // ── Toolbar section visibility ────────────────────────────────────────────────
@@ -54,7 +54,7 @@ async function _expandValueSets(seq) {
 export async function importAndValidate(data, fileName) {
   try {
     importFHIR(data, () => {}); // pass no-op renderFn — we render below
-    resetCollapsedFromTree(tree);
+    GroupNode.resetCollapsedFromTree(tree);
     reinitForm();
     document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOADED, { detail: { fileName: fileName || '' } }));
     const issues = validateTree(tree, values);
@@ -94,31 +94,7 @@ export function _readFileAsJSON(e, onData) {
  *  Only shows the dialog when the tree has items (undo history would be lost). */
 export function _askBeforeLoad() {
   if (tree.length === 0) return Promise.resolve('proceed');
-  return new Promise(resolve => {
-    const backdrop = document.createElement('div');
-    backdrop.className = 'clear-confirm-backdrop';
-
-    const box = document.createElement('div');
-    box.className = 'clear-confirm-box';
-    box.innerHTML =
-      '<div class="clear-confirm-title">Load new questionnaire?</div>' +
-      '<div class="clear-confirm-msg">This will replace the current questionnaire.' +
-        ' The undo history will also be lost and cannot be recovered.</div>' +
-      '<div class="clear-confirm-btns">' +
-        '<button class="btn-fhir" id="_lcProceed" data-testid="load-confirm-proceed-btn">Load anyway</button>' +
-        '<button class="btn-fhir" id="_lcCancel"  data-testid="load-confirm-cancel-btn">Cancel</button>' +
-      '</div>';
-
-    backdrop.appendChild(box);
-    document.body.appendChild(backdrop);
-
-    const esc = e => { if (e.key === 'Escape') close('cancel'); };
-    document.addEventListener('keydown', esc);
-    const close = result => { document.removeEventListener('keydown', esc); backdrop.remove(); resolve(result); };
-    box.querySelector('#_lcProceed').onclick = () => close('proceed');
-    box.querySelector('#_lcCancel').onclick  = () => close('cancel');
-    backdrop.addEventListener('click', e => { if (e.target === backdrop) close('cancel'); });
-  });
+  return loadConfirmModal.open();
 }
 
 export function _applyQRAnswers(qr) {

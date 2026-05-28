@@ -1,6 +1,7 @@
 ﻿// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
 import { tree, questVariables, questContained, rawFhir, questMeta } from '../state.js';
 import { parseOptions, ITLH_KEY_GROUP_OR } from '../utils.js';
+import { downloadJSON } from './download.js';
 
 // Escape text for embedding in XHTML
 function _esc(s) {
@@ -368,15 +369,5 @@ export function buildFHIRObject() {
 }
 
 export function exportFHIR(fileName) {
-  const q = buildFHIRObject();
-  const blob = new Blob([JSON.stringify(q, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = fileName || 'questionnaire.json';
-  if (typeof document !== 'undefined' && document.body) {
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
-  }
+  downloadJSON(buildFHIRObject(), fileName || 'questionnaire.json');
 }

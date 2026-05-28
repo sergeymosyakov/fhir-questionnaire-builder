@@ -7,6 +7,8 @@ const fhirpath = typeof window !== 'undefined' ? window.fhirpath : null;
 // Injected by index.js via init()
 let _deps = null;
 export function init(deps) { _deps = deps; }
+export function setRenumberGetter(fn) { _renumberGetter = fn; }
+let _renumberGetter = () => 'numbers';
 
 // UI-only collapse state is owned by index.js and passed via ctx.collapsed.
 
@@ -20,7 +22,7 @@ function _toLetter(n) {
   let r = ''; while (n > 0) { r = String.fromCharCode(64 + ((n-1)%26+1)) + r; n = Math.floor((n-1)/26); } return r;
 }
 export function formatSeg(n) {
-  const fmt = (typeof document !== 'undefined' && document.getElementById('renumberFormat')?.value) || 'numeric';
+  const fmt = _renumberGetter();
   return fmt === 'roman' ? _toRoman(n) : fmt === 'letters' ? _toLetter(n) : String(n);
 }
 

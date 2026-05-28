@@ -1,7 +1,9 @@
+import { AppEvents } from '../events.js';
+
 // ── DropdownMenu base class ───────────────────────────────────────────────────
 // Subclass this to build a .load-wrap button+menu dropdown.
-// Listens for 'close-dropdowns' CustomEvent to close itself.
-// Button click dispatches 'close-dropdowns' (closes all others) then opens own menu.
+// Listens for CLOSE_DROPDOWNS CustomEvent to close itself.
+// Button click dispatches CLOSE_DROPDOWNS (closes all others) then opens own menu.
 //
 // Constructor options:
 //   btnId, menuId     — HTML ids for button and menu div
@@ -41,14 +43,14 @@ export class DropdownMenu {
     this._btn.addEventListener('click', e => {
       e.stopPropagation();
       const wasOpen = this._menu.style.display !== 'none';
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       if (!wasOpen) {
         this._onOpen?.();
         this._menu.style.display = 'block';
       }
     });
 
-    document.addEventListener('close-dropdowns', () => this.close());
+    document.addEventListener(AppEvents.CLOSE_DROPDOWNS, () => this.close());
   }
 
   /** Root element to append to the DOM. */

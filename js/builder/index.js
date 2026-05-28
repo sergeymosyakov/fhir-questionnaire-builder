@@ -3,7 +3,7 @@ import { tree, rawFhir, values, questMeta, questContained, getValue, setValue, d
 import { _formTick, _bulkUpdate } from '../render-bus.js';
 import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
-import { navigateToPreview, refreshExprIcons, getLastCtx } from '../render-preview.js';
+import { getLastCtx } from '../render-preview.js';
 import { findAndRemove } from '../utils.js';
 import { GroupNode } from '../nodes/group-node.js';
 import { createGroupNode } from '../nodes/index.js';
@@ -31,7 +31,6 @@ BaseNode.configure({
 // ── Inject app services into modal layer ──────────────────────────────────────
 Modal.configure({
   triggerCalcRecalc,
-  refreshExprIcons,
   getLastCtx,
   questMeta,
   tree,
@@ -45,8 +44,7 @@ Modal.configure({
 // ── Event listeners ───────────────────────────────────────────────────────────
 // Nodes dispatch custom events instead of importing index.js/render-preview.js
 // (those modules import nodes — importing back would be circular).
-document.addEventListener(AppEvents.BUILDER_RERENDER, ()  => renderTree());
-document.addEventListener(AppEvents.BUILDER_NAVIGATE,  e   => navigateToPreview(e.detail.id));
+document.addEventListener(AppEvents.BUILDER_RERENDER, () => renderTree());
 
 function renderNode(node) {
   return node.buildBuilder();

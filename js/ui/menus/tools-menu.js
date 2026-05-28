@@ -1,4 +1,5 @@
 import { DropdownMenu } from '../dropdown-menu.js';
+import { AppEvents } from '../../events.js';
 
 export class ToolsMenu extends DropdownMenu {
   constructor() {
@@ -32,17 +33,17 @@ export class ToolsMenu extends DropdownMenu {
 
   setHandlers({ onValidate, onExpand, onCollapse }) {
     this._validateItem.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       onValidate();
     });
 
     this._expandItem.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       onExpand();
     });
 
     this._collapseItem.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       onCollapse();
     });
   }

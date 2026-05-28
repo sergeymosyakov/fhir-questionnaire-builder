@@ -117,7 +117,7 @@ const _modal = new VariablesModal();
 _el.toggle.addEventListener('click', _toggleCollapse);
 _el.editBtn.addEventListener('click', () => _modal.open());
 if (_el.reinitBtn) _el.reinitBtn.addEventListener('click', () => {
-  document.dispatchEvent(new CustomEvent('reinit-form'));
+  document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
 });
 
 document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, refresh);

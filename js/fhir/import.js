@@ -4,6 +4,7 @@ import { showError } from '../ui/toast.js';
 import { _bulkUpdate } from '../render-bus.js';
 import { renderTree } from '../builder/index.js';
 import { normaliseSTU3 } from './stu3-shim.js';
+import { destroyTree } from '../utils.js';
 import {
   buildLinkIdMap,
   fhirTypeToItemType,
@@ -50,7 +51,7 @@ export function importFHIR(fhirJson, renderFn) {
     return;
   }
   q = normaliseSTU3(q); // no-op for R4; converts STU3 fields to R4 equivalents
-  tree.splice(0);
+  destroyTree(tree);
   clearAllValues();
   rawFhir.value = q;
   resetSeq();

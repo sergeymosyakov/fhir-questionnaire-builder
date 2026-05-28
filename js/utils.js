@@ -14,10 +14,16 @@ export const escAttr = s => (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quo
 // Remove the node with the given id from a tree (mutates in place).
 export function findAndRemove(id, nodes) {
   for (let i = 0; i < nodes.length; i++) {
-    if (nodes[i].id === id) { nodes.splice(i, 1); return true; }
+    if (nodes[i].id === id) { const [n] = nodes.splice(i, 1); n.destroy?.(); return true; }
     if (nodes[i].type === 'group' && findAndRemove(id, nodes[i].children)) return true;
   }
   return false;
+}
+
+// Destroy all listeners on every node in the tree, then empty the array.
+export function destroyTree(nodes) {
+  nodes.forEach(n => n.destroy?.());
+  nodes.splice(0);
 }
 
 // Returns true if nodeId is anywhere inside group's subtree (recursive).

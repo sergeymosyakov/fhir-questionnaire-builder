@@ -31,7 +31,6 @@ export class Modal {
   /** Builder services injected at app startup via Modal.configure(). */
   static _svc = {
     triggerCalcRecalc: null,  // () => void
-    refreshExprIcons:  null,  // () => void
     getLastCtx:        null,  // () => {qr, env}
     questMeta:         null,  // reactive metadata object
     tree:              null,  // reactive tree array
@@ -61,7 +60,7 @@ export class Modal {
     this.title    = _mk('span');
     this.closeBtn = _mk('button', 'modal-close');
     this.closeBtn.type = 'button';
-    this.closeBtn.title = 'Close';
+    this.closeBtn.dataset.tipTitle = 'Close';
     this.closeBtn.textContent = '\u2715';
     header.append(this.title, this.closeBtn);
 

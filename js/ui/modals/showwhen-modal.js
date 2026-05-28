@@ -3,10 +3,11 @@
 // enableWhenExpression. Uses a draft pattern — changes are only committed on Apply.
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
+import { ExprAwareModal } from './expr-aware-modal.js';
 import { createCustomSelect } from '../custom-select.js';
 import { buildVisPanel } from '../../builder/panels.js';
 
-class ShowWhenModal extends Modal {
+class ShowWhenModal extends ExprAwareModal {
   getName() { return 'showWhenModal'; }
   constructor() {
     super();
@@ -49,7 +50,6 @@ class ShowWhenModal extends Modal {
     this.body.appendChild(ddRow);
 
     super.open();
-    Modal._svc.refreshExprIcons();
   }
 
   _apply() {

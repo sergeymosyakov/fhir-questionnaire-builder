@@ -1,4 +1,5 @@
 import { DropdownMenu } from '../dropdown-menu.js';
+import { AppEvents } from '../../events.js';
 
 export class SaveMenu extends DropdownMenu {
   constructor() {
@@ -37,12 +38,12 @@ export class SaveMenu extends DropdownMenu {
 
   setHandlers({ onExportFhir, onExportQr }) {
     this._exportFhirItem.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       onExportFhir();
     });
 
     this._exportQrItem.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       onExportQr();
     });
   }

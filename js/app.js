@@ -1,14 +1,14 @@
 ﻿// Entry point: wires toolbar buttons and orchestrates UI modules.
 import * as storage from './storage/storage.js';
-import { LocalStorageAdapter } from './storage/local-storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
 import { tree, values, rawFhir, effect, clearAllValues, questVariables, questContained, questMeta } from './state.js';
-import { buildFHIRObject, exportFHIR } from './fhir/export.js';
+import { exportFHIR } from './fhir/export.js';
 import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/modals/validate-modal.js';
 import * as metadataModal from './ui/modals/metadata-modal.js';
 import * as qrExportModal from './ui/modals/qr-export-modal.js';
+import { createCustomSelect } from './ui/custom-select.js';
 import * as progress from './ui/progress.js';
 import * as search from './ui/search.js';
 import * as tooltip from './ui/tooltip.js';
@@ -16,15 +16,13 @@ import * as autosave from './ui/autosave.js';
 import { showPrompt } from './ui/toast.js';
 import * as statusBadge from './ui/status-badge.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './builder/index.js';
+import { setRenumberGetter } from './builder/_shared.js';
 import * as helpModal from './ui/modals/help-modal.js';
-import { navigateToPreview, initPreview, collapseAllPreview, expandAllPreview } from './render-preview.js';
+import { initPreview, collapseAllPreview, expandAllPreview } from './render-preview.js';
 import { saveMenu, toolsMenu } from './ui/header-actions.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
 import containedPanel        from './ui/panels/contained-panel.js';
-
-// Register storage adapter before any module that reads storage is initialised.
-storage.register(new SupabaseAdapter(supabase));
 import answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
 import * as patientCtx        from './ui/patient-ctx.js';
 import { FileNameDisplay } from './ui/file-name.js';
@@ -34,8 +32,12 @@ import { AuthPanel } from './ui/auth-panel.js';
 import { PanelResizer } from './ui/panel-resizer.js';
 import { AutosaveToggle } from './ui/autosave-toggle.js';
 import { UndoRedo } from './ui/undo-redo.js';
+import { destroyTree } from './utils.js';
 
-// ── Inject state into UI panels ─────────────────────────────────────────
+// Register storage adapter before any module that reads storage is initialised.
+storage.register(new SupabaseAdapter(supabase));
+
+// ── Inject state into UI panels ────────────────────────────────────────
 containedPanel.configure({ questContained });
 answerValueSetPanel.configure({ tree });
 variablesPanel.configure({ questVariables });
@@ -63,6 +65,25 @@ document.getElementById('addRootGroupBtn').onclick = () => {
 document.getElementById('collapseAllBtn').onclick  = collapseAll;
 // View options moved to dropdown menu (see viewOptionsBtn section below)
 document.getElementById('expandAllBtn').onclick    = expandAll;
+
+// Renumber format custom select (replaces native <select>)
+const _renumberSel = createCustomSelect({
+  items: [
+    { value: 'numbers', label: '1 · 2 · 3' },
+    { value: 'roman',   label: 'I · II · III' },
+    { value: 'letters', label: 'A · B · C' },
+  ],
+  value: 'numbers',
+  className: 'sc-trigger--sm',
+  testid: 'renumber-format',
+});
+_renumberSel.el.dataset.tipTitle = 'Prefix format';
+_renumberSel.el.dataset.tipBody  = 'Format used by Renumber: numeric (1, 1.1), Roman numerals (I, I.I), or letters (A, A.A). Does not affect linkId — only item.prefix.';
+_renumberSel.el.dataset.tipFhir  = 'Questionnaire.item.prefix';
+_renumberSel.el.dataset.tipSpec  = 'R4 · optional';
+document.getElementById('renumberFormatWrap').appendChild(_renumberSel.el);
+setRenumberGetter(() => _renumberSel.getValue() || 'numbers');
+
 document.getElementById('renumberBtn').onclick = async () => {
   const btn = document.getElementById('renumberBtn');
   btn.disabled = true;
@@ -94,7 +115,9 @@ statusBadge.init({
   btn:      document.getElementById('statusBadgeBtn'),
   dropdown: document.getElementById('statusDropdown'),
   wrap:     document.getElementById('statusBadgeWrap'),
-}, navigateToPreview);
+}, (id) => {
+  document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE, { detail: { id } }));
+});
 
 const _tooltipToggleBtn  = document.getElementById('tooltipToggleBtn');
 const _tooltipsOffBadge  = document.getElementById('tooltipsOffBadge');
@@ -211,8 +234,8 @@ async function _clearForm() {
 }
 
 function _doReset() {
-  // Clear reactive tree
-  tree.splice(0, tree.length);
+  // Destroy listeners on old nodes and clear tree
+  destroyTree(tree);
   // Clear plain values store
   clearAllValues();
   // Clear rawFhir
@@ -244,12 +267,9 @@ function _doReset() {
   document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_CLEARED));
 }
 
-// Close any open ⊕ Add dropdown when clicking outside
+// Close any open dropdowns when clicking outside
 document.addEventListener('click', () => {
-  document.querySelectorAll('.action-add-menu').forEach(m => { m.style.display = 'none'; });
-  document.dispatchEvent(new CustomEvent('close-dropdowns'));
-  const ppMenu = document.getElementById('patientPresetMenu');
-  if (ppMenu) ppMenu.style.display = 'none';
+  document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
   const umMenu = document.getElementById('userMenu');
   if (umMenu) umMenu.style.display = 'none';
 });

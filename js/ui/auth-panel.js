@@ -3,12 +3,12 @@
 // Manages auth state changes and cloud save / load operations.
 // Mount: document.getElementById('authWrap') — an empty container in index.html.
 import * as auth from '../auth/auth.js';
+import { AppEvents } from '../events.js';
 import * as storage from '../storage/storage.js';
 import * as cloudModal from './modals/cloud-modal.js';
 import { confirmModal } from './modals/confirm-modal.js';
 import * as progress from './progress.js';
 import { buildFHIRObject } from '../fhir/export.js';
-import { AppEvents } from '../events.js';
 
 const _GITHUB_SVG = '<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">'
   + '<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38'
@@ -137,7 +137,7 @@ export class AuthPanel {
 
     // Cloud save — item owned by SaveMenu, logic lives here
     document.getElementById('cloudSaveBtn').addEventListener('click', async () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       const btn = document.getElementById('cloudSaveBtn');
       btn.classList.add('load-menu-item--loading');
       try {
@@ -159,8 +159,9 @@ export class AuthPanel {
 
     // Cloud load — item owned by QuestionnairesMenu, logic lives here
     document.getElementById('loadCloudItem').addEventListener('click', async () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
-      const { importAndValidate } = await import('../app-load.js');
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
+      const { importAndValidate, _askBeforeLoad } = await import('../app-load.js');
+      if (await _askBeforeLoad() !== 'proceed') return;
       cloudModal.open(async id => {
         try {
           progress.show('Loading from cloud\u2026');

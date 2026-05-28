@@ -2,6 +2,7 @@ import { DropdownMenu } from '../dropdown-menu.js';
 import { _applyQRAnswers, _readFileAsJSON } from '../../app-load.js';
 import * as libraryModal from '../modals/library-modal.js';
 import { showError } from '../toast.js';
+import { AppEvents } from '../../events.js';
 
 export class AnswersMenu extends DropdownMenu {
   constructor() {
@@ -41,7 +42,7 @@ export class AnswersMenu extends DropdownMenu {
 
   _bindHandlers() {
     this._loadAnswersItem.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       document.getElementById('qrFileInput').click();
     });
 
@@ -50,7 +51,7 @@ export class AnswersMenu extends DropdownMenu {
     });
 
     this._loadAnswersLibraryItem.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       libraryModal.open('qr-responses', item => {
         fetch('sampledata/' + item.file)
           .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })

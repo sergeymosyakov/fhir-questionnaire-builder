@@ -3,6 +3,7 @@ import { _askBeforeLoad, importAndValidate, _readFileAsJSON } from '../../app-lo
 import * as autosave from '../autosave.js';
 import * as libraryModal from '../modals/library-modal.js';
 import * as progress from '../progress.js';
+import { AppEvents } from '../../events.js';
 import { showError } from '../toast.js';
 
 export class QuestionnairesMenu extends DropdownMenu {
@@ -62,7 +63,7 @@ export class QuestionnairesMenu extends DropdownMenu {
 
   _bindHandlers() {
     this._recentItem.addEventListener('click', async () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       if (await _askBeforeLoad() !== 'proceed') return;
       const key = this._recentItem.dataset.draftKey;
       if (!key) return;
@@ -73,13 +74,13 @@ export class QuestionnairesMenu extends DropdownMenu {
     });
 
     this._loadFromFileItem.addEventListener('click', async () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       if (await _askBeforeLoad() !== 'proceed') return;
       document.getElementById('fhirFileInput').click();
     });
 
     this._loadLibraryItem.addEventListener('click', async () => {
-      document.dispatchEvent(new CustomEvent('close-dropdowns'));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       if (await _askBeforeLoad() !== 'proceed') return;
       libraryModal.open('fhir-r4', item => {
         progress.show('Loading ' + item.label + '\u2026');

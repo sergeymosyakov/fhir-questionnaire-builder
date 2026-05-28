@@ -4,6 +4,7 @@ import { createCustomSelect } from '../ui/custom-select.js';
 import { NODE_REGISTRY } from './registry.js';
 import { TextNode } from './text-node.js';
 import { AppEvents } from '../events.js';
+import { AddChildMenu } from '../ui/add-child-menu.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -22,6 +23,21 @@ export class GroupNode extends BaseNode {
     this.type            = 'group';
     this.logicWithParent = data.logicWithParent ?? 'AND';
     this.children        = data.children        ?? [];
+    if (typeof document !== 'undefined') {
+      document.addEventListener(AppEvents.BUILDER_NAVIGATE, e => {
+        if (!this._previewCollapsed) return;
+        if (!isDescendant(e.detail.id, this)) return;
+        this._previewCollapsed = false; // own state only — render-preview ticks _formTick
+      }, { signal: this._ac.signal });
+      document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._previewCollapsed = true; }, { signal: this._ac.signal });
+      document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._previewCollapsed = false; }, { signal: this._ac.signal });
+    }
+  }
+
+  /** Abort own listeners and recursively destroy children. */
+  destroy() {
+    super.destroy();
+    this.children.forEach(c => c.destroy());
   }
 
   // ── Condition icon logic for groups ──────────────────────────────────────
@@ -102,16 +118,15 @@ export class GroupNode extends BaseNode {
     }
 
     if (!isEmptyGroup) {
-      const collapsed = rc.collapsedGroups.has(this.id);
+      const collapsed = this._previewCollapsed;
       const toggle = document.createElement('span');
       toggle.className = 'preview-collapse-toggle';
       toggle.textContent = collapsed ? '\u25B6' : '\u25BC';
       toggle.dataset.tipTitle = collapsed ? 'Expand section' : 'Collapse section';
-      const nodeId = this.id;
+      const groupNode = this;
       toggle.addEventListener('click', e => {
         e.stopPropagation();
-        if (rc.collapsedGroups.has(nodeId)) rc.collapsedGroups.delete(nodeId);
-        else rc.collapsedGroups.add(nodeId);
+        groupNode._previewCollapsed = !groupNode._previewCollapsed;
         rc.formTick.value++;
       });
       row.insertBefore(toggle, row.firstChild);
@@ -149,7 +164,7 @@ export class GroupNode extends BaseNode {
     );
     if (iconEl) rc.groupIconMap.set(this.id, { icon: iconEl, descendants, node: this });
 
-    if (rc.collapsedGroups.has(this.id)) return;
+    if (this._previewCollapsed) return;
 
     const nested = document.createElement('div');
     nested.className = 'preview-nested';
@@ -177,6 +192,17 @@ export class GroupNode extends BaseNode {
   static updateAll(rc) {
     for (const [, { node }] of rc.groupIconMap.entries()) {
       node.refreshIcon(rc);
+    }
+  }
+
+  // Reset _previewCollapsed on every group node from its _collapsible FHIR value.
+  // Called after import / clear so runtime UI state matches the FHIR default.
+  static resetCollapsedFromTree(nodes) {
+    for (const n of nodes) {
+      if (n.type === 'group') {
+        n._previewCollapsed = n._collapsible === 'default-closed';
+        GroupNode.resetCollapsedFromTree(n.children || []);
+      }
     }
   }
 
@@ -311,23 +337,12 @@ export class GroupNode extends BaseNode {
     setActive(noteLink, !!node._designNote);
 
     // ⊕ Add ▾ dropdown
-    const addWrap = document.createElement('div');
-    addWrap.className = 'action-add-wrap';
-    const addBtn = document.createElement('button');
-    addBtn.className = 'action-add-btn';
-    addBtn.dataset.testid = 'group-add-btn';
-    addBtn.innerHTML = '&#x2295; Add &#x25BE;';
-    const addMenu = document.createElement('div');
-    addMenu.className = 'action-add-menu';
-    addMenu.style.display = 'none';
+    const addChild = new AddChildMenu();
 
-    const addChild = (label, factory) => {
-      const mi = document.createElement('div');
-      mi.className = 'action-add-menu-item';
-      mi.dataset.testid = 'add-menu-' + label.toLowerCase();
-      mi.textContent = label;
-      mi.onclick = () => {
-        addMenu.style.display = 'none';
+    const _addChild = (label, factory) => addChild.addItem(
+      label,
+      'add-menu-' + label.toLowerCase(),
+      () => {
         const newNode = factory();
         node.children.push(newNode);
         BaseNode._svc.tickForm();
@@ -336,16 +351,15 @@ export class GroupNode extends BaseNode {
         requestAnimationFrame(() => {
           document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: newNode.id } }));
         });
-      };
-      addMenu.appendChild(mi);
-    };
+      }
+    );
 
-    addChild('Group', () => {
+    _addChild('Group', () => {
       const n = new GroupNode({ title: 'New Group' });
       n.id = node.id + '.' + BaseNode._svc.formatSeg(node.children.length + 1);
       return n;
     });
-    addChild('Item', () => {
+    _addChild('Item', () => {
       const siblings = node.children.filter(c => c.type === 'item');
       const template = siblings.length > 0 ? siblings[siblings.length - 1] : null;
       const n = template
@@ -360,15 +374,7 @@ export class GroupNode extends BaseNode {
       return n;
     });
 
-    addBtn.onclick = e => {
-      e.stopPropagation();
-      const open = addMenu.style.display !== 'none';
-      document.querySelectorAll('.action-add-menu').forEach(m => { m.style.display = 'none'; });
-      addMenu.style.display = open ? 'none' : 'block';
-    };
-    addWrap.appendChild(addBtn);
-    addWrap.appendChild(addMenu);
-    actions.appendChild(addWrap);
+    actions.appendChild(addChild.el);
 
     const headerTop = document.createElement('div');
     headerTop.className = 'node-header-top';

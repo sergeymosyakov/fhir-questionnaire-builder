@@ -45,6 +45,7 @@ export class AttachmentNode extends ItemNode {
       const file = el.files[0] || null;
       if (file && node._maxFileSizeMB !== undefined && file.size > node._maxFileSizeMB * 1024 * 1024) {
         showError(`File too large \u2014 max ${node._maxFileSizeMB} MB allowed`);
+        el.value = '';
         setValue(node.id, null);
         _reCalc(); onChange(); _formTick.value++;
         return;

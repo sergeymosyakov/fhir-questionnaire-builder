@@ -7,7 +7,6 @@
 //   init({ buildFn, importFn, renderFn, formTick, effect, onChange })
 //   undo() / redo()
 //   canUndo() / canRedo()  → boolean
-
 import { AppEvents } from '../events.js';
 
 const MAX         = 50;
@@ -99,7 +98,7 @@ export function undo() {
   _restoring = true;
   try {
     _importFn(JSON.parse(_stack[_cursor]), _renderFn);
-    document.dispatchEvent(new CustomEvent('questionnaire-loaded'));
+    document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOADED));
   } finally {
     _restoring = false;
   }
@@ -112,7 +111,7 @@ export function redo() {
   _restoring = true;
   try {
     _importFn(JSON.parse(_stack[_cursor]), _renderFn);
-    document.dispatchEvent(new CustomEvent('questionnaire-loaded'));
+    document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOADED));
   } finally {
     _restoring = false;
   }
