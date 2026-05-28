@@ -8,7 +8,7 @@ import { importQRAnswers } from './fhir/qr-import.js';
 import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/modals/validate-modal.js';
 import * as progress from './ui/progress.js';
-import { expandAll, renderTreeAsync } from './builder/index.js';
+import { renderTreeAsync } from './builder/index.js';
 import { reinitForm } from './render-preview.js';
 import { GroupNode } from './nodes/group-node.js';
 import { terminologyService } from './fhir/terminology-service.js';
@@ -60,7 +60,7 @@ export async function importAndValidate(data, fileName) {
     const issues = validateTree(tree, values);
     progress.show('Rendering ' + tree.length + ' nodes\u2026');
     await renderTreeAsync((done, total) => progress.update(done, total));
-    expandAll();
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
     document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
     document.querySelector('.right-panel-body')?.scrollTo({ top: 0 });
 

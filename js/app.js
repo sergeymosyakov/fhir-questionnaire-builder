@@ -15,7 +15,7 @@ import * as tooltip from './ui/tooltip.js';
 import * as autosave from './ui/autosave.js';
 import { showPrompt } from './ui/toast.js';
 import * as statusBadge from './ui/status-badge.js';
-import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './builder/index.js';
+import { renderTree, renumberAll, addRootGroup } from './builder/index.js';
 import { setRenumberGetter } from './builder/_shared.js';
 import * as helpModal from './ui/modals/help-modal.js';
 import { initPreview, collapseAllPreview, expandAllPreview } from './render-preview.js';
@@ -62,9 +62,9 @@ document.getElementById('addRootGroupBtn').onclick = () => {
   // If no file is loaded yet, signal that a new questionnaire was started
   if (!fileNameDisplay.getName()) document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_NEW));
 };
-document.getElementById('collapseAllBtn').onclick  = collapseAll;
+document.getElementById('collapseAllBtn').onclick  = () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_COLLAPSE_ALL));
 // View options moved to dropdown menu (see viewOptionsBtn section below)
-document.getElementById('expandAllBtn').onclick    = expandAll;
+document.getElementById('expandAllBtn').onclick    = () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
 
 // Renumber format custom select (replaces native <select>)
 const _renumberSel = createCustomSelect({

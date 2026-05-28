@@ -45,6 +45,8 @@ Modal.configure({
 // Nodes dispatch custom events instead of importing index.js/render-preview.js
 // (those modules import nodes — importing back would be circular).
 document.addEventListener(AppEvents.BUILDER_RERENDER, () => renderTree());
+document.addEventListener(AppEvents.BUILDER_EXPAND_ALL, () => { setCollapsedAll(tree, false); renderTree(); });
+document.addEventListener(AppEvents.BUILDER_COLLAPSE_ALL, () => { setCollapsedAll(tree, true); renderTree(); });
 
 function renderNode(node) {
   return node.buildBuilder();
@@ -87,8 +89,7 @@ function setCollapsedAll(nodes, value) {
     }
   }
 }
-export function collapseAll() { setCollapsedAll(tree, true);  renderTree(); }
-export function expandAll()   { setCollapsedAll(tree, false); renderTree(); }
+// collapseAll / expandAll — driven by BUILDER_COLLAPSE_ALL / BUILDER_EXPAND_ALL events
 
 // ── Renumber ──────────────────────────────────────────────────────────────────
 // Renumber writes only node._prefix — node.id (FHIR linkId) is never touched,

@@ -23,9 +23,11 @@ export const AppEvents = Object.freeze({
   QUESTIONNAIRE_RESET:           'questionnaire-reset',
 
   // ── Builder ───────────────────────────────────────────────────────────────
-  BUILDER_RERENDER:    'builder:rerender',
-  BUILDER_NAVIGATE:    'builder:navigate',
-  BUILDER_NAVIGATE_TO: 'builder:navigate-to',
+  BUILDER_RERENDER:     'builder:rerender',
+  BUILDER_NAVIGATE:     'builder:navigate',
+  BUILDER_NAVIGATE_TO:  'builder:navigate-to',
+  BUILDER_EXPAND_ALL:   'builder:expand-all',
+  BUILDER_COLLAPSE_ALL: 'builder:collapse-all',
 
   // ── Preview / form ────────────────────────────────────────────────────────
   PREVIEW_NAVIGATE_TO: 'preview:navigate-to',
