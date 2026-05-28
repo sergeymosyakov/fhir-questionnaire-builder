@@ -1,0 +1,89 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "item-control-demo",
+  "status": "draft",
+  "title": "Item Control Demo",
+  "item": [
+    {
+      "linkId": "cb-multi",
+      "text": "Select all that apply",
+      "type": "choice",
+      "repeats": true,
+      "answerOption": [
+        { "valueCoding": { "code": "a", "display": "Alpha" } },
+        { "valueCoding": { "code": "b", "display": "Beta" } },
+        { "valueCoding": { "code": "c", "display": "Gamma" } }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "check-box" }]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "ac-search",
+      "text": "Search and pick",
+      "type": "choice",
+      "answerOption": [
+        { "valueCoding": { "code": "red", "display": "Red" } },
+        { "valueCoding": { "code": "green", "display": "Green" } },
+        { "valueCoding": { "code": "blue", "display": "Blue" } },
+        { "valueCoding": { "code": "yellow", "display": "Yellow" } }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "autocomplete" }]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "ta-multi",
+      "text": "Comments",
+      "type": "string",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "text-area" }]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "sp-num",
+      "text": "Quantity",
+      "type": "integer",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "spinner" }]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "dd-default",
+      "text": "Default dropdown",
+      "type": "choice",
+      "answerOption": [
+        { "valueCoding": { "code": "x", "display": "X-ray" } },
+        { "valueCoding": { "code": "y", "display": "Yankee" } }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "drop-down" }]
+          }
+        }
+      ]
+    }
+  ]
+}

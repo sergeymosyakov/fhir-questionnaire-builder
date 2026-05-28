@@ -1117,6 +1117,57 @@ describe('importFHIR', () => {
     });
   });
 
+  // ── questionnaire-itemControl ─────────────────────────────────────────────
+  describe('questionnaire-itemControl', () => {
+    const IC_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl';
+    const ic = code => ({ url: IC_URL, valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code }] } });
+
+    it('check-box on choice → checklist itemType', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', extension: [ic('check-box')] }]));
+      expect(_tree[0].itemType).toBe('checklist');
+    });
+
+    it('radio-button on choice → radio itemType', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', extension: [ic('radio-button')] }]));
+      expect(_tree[0].itemType).toBe('radio');
+    });
+
+    it('autocomplete on choice → select with _itemControl', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', extension: [ic('autocomplete')] }]));
+      expect(_tree[0].itemType).toBe('select');
+      expect(_tree[0]._itemControl).toBe('autocomplete');
+    });
+
+    it('drop-down on choice → select with _itemControl', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', extension: [ic('drop-down')] }]));
+      expect(_tree[0].itemType).toBe('select');
+      expect(_tree[0]._itemControl).toBe('drop-down');
+    });
+
+    it('text-area on string → text with _itemControl', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', extension: [ic('text-area')] }]));
+      expect(_tree[0].itemType).toBe('text');
+      expect(_tree[0]._itemControl).toBe('text-area');
+    });
+
+    it('text-box on string → text with _itemControl', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', extension: [ic('text-box')] }]));
+      expect(_tree[0].itemType).toBe('text');
+      expect(_tree[0]._itemControl).toBe('text-box');
+    });
+
+    it('spinner on integer → integer with _itemControl', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'integer', text: 'Q', extension: [ic('spinner')] }]));
+      expect(_tree[0].itemType).toBe('integer');
+      expect(_tree[0]._itemControl).toBe('spinner');
+    });
+
+    it('no itemControl extension → no _itemControl property', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q' }]));
+      expect(_tree[0]._itemControl).toBeUndefined();
+    });
+  });
+
   // ── _maxFileSizeMB ────────────────────────────────────────────────────────
   describe('_maxFileSizeMB', () => {
     const MS_URL = 'http://hl7.org/fhir/StructureDefinition/maxSize';

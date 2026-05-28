@@ -15,13 +15,19 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // Determine itemType before construction so the correct class is instantiated.
   let itemType = fhirTypeToItemType(fhirItem.type || 'string');
 
-  // questionnaire-itemControl: radio-button → 'radio' instead of 'select'
+  // questionnaire-itemControl: detect control code for all item types
+  const itemCtrl = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl'
+  );
+  const ctrlCode = itemCtrl?.valueCodeableConcept?.coding?.[0]?.code;
+
+  // Choice-type control variants
   if (itemType === 'select' || itemType === 'open-choice') {
-    const itemCtrl = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl'
-    );
-    const ctrlCode = itemCtrl?.valueCodeableConcept?.coding?.[0]?.code;
     if (ctrlCode === 'radio-button') itemType = 'radio';
+    else if (ctrlCode === 'check-box') itemType = 'checklist';
+    else if (ctrlCode === 'autocomplete' || ctrlCode === 'drop-down') {
+      // store for round-trip; rendering adapts in ChoiceNode
+    }
   }
 
   const node = createItemNode(itemType, {
@@ -31,6 +37,11 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   });
 
   node.options = fhirOptsToStr(fhirItem.answerOption);
+
+  // Preserve non-type-changing itemControl codes for round-trip + rendering
+  if (ctrlCode && ctrlCode !== 'radio-button' && ctrlCode !== 'check-box') {
+    node._itemControl = ctrlCode;
+  }
 
   // ordinalValue — may sit on answerOption.extension (FHIR R4) or on valueCoding.extension (older style)
   const ordinals = {};

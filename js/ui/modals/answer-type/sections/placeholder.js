@@ -26,7 +26,30 @@ class PlaceholderSection extends AnswerTypeSection {
     placeholderInp.oninput = () => { pending.draftEntryFormat = placeholderInp.value; };
 
     section.append(placeholderLbl, placeholderInp);
+
+    // ── Multi-line toggle (text/string type only) ────────────────────────────
+    const mlRow = document.createElement('label');
+    mlRow.className = 'at-modal-sub';
+    mlRow.style.display = pending.draftType === 'text' ? '' : 'none';
+    const mlCb = Object.assign(document.createElement('input'), { type: 'checkbox', checked: !!pending.draftTextArea });
+    mlCb.dataset.testid = 'text-area-toggle';
+    mlCb.onchange = () => { pending.draftTextArea = mlCb.checked; };
+    const mlLbl = document.createTextNode(' Multi-line (text-area control)');
+    mlRow.dataset.tipTitle = 'Multi-line text';
+    mlRow.dataset.tipBody  = 'Renders the text input as a multi-line textarea. Exports as questionnaire-itemControl = text-area.';
+    mlRow.dataset.tipFhir  = 'item.extension[questionnaire-itemControl].valueCodeableConcept.coding.code = text-area';
+    mlRow.dataset.tipSpec  = 'R4';
+    mlRow.append(mlCb, mlLbl);
+    section.appendChild(mlRow);
+    this._mlRowEl = mlRow;
+
     return section;
+  }
+
+  onTypeChange(type) {
+    if (this._mlRowEl) {
+      this._mlRowEl.style.display = type === 'text' ? '' : 'none';
+    }
   }
 
   commit(pending, node) {
@@ -35,10 +58,19 @@ class PlaceholderSection extends AnswerTypeSection {
     } else {
       delete node._entryFormat;
     }
+    // Multi-line (text-area itemControl)
+    if (node.itemType === 'text' && pending.draftTextArea) {
+      node._itemControl = 'text-area';
+    } else if (node._itemControl === 'text-area') {
+      delete node._itemControl;
+    }
   }
 
   initPending(node) {
-    return { draftEntryFormat: node._entryFormat || '' };
+    return {
+      draftEntryFormat: node._entryFormat || '',
+      draftTextArea:    node._itemControl === 'text-area',
+    };
   }
 }
 

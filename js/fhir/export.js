@@ -45,7 +45,7 @@ function itemTypeToFHIRType(t) {
   if (t === 'decimal')        return 'decimal';
   if (t === 'number')         return 'decimal'; // legacy fallback
   if (t === 'quantity')    return 'quantity';
-  if (t === 'select' || t === 'radio') return 'choice';
+  if (t === 'select' || t === 'radio' || t === 'checklist') return 'choice';
   if (t === 'open-choice') return 'open-choice';
   if (t === 'display')     return 'display';
   if (t === 'date')        return 'date';
@@ -159,9 +159,13 @@ function nodeToFHIRItem(node) {
   // answerExpression (SDC) — dynamic answer options
   if (node._answerExpression)
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression', valueExpression: { language: 'text/fhirpath', expression: node._answerExpression } });
-  // radio-button itemControl
+  // questionnaire-itemControl
   if (node.itemType === 'radio')
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'radio-button' }] } });
+  else if (node.itemType === 'checklist')
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'check-box' }] } });
+  else if (node._itemControl)
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: node._itemControl }] } });
 
   // _renderStyle / _renderXhtml / _renderMarkdown → _text.extension[]
   const _textExts = [];
@@ -172,7 +176,7 @@ function nodeToFHIRItem(node) {
 
   if (node.type === 'group') {
     fhirItem.item = node.children.map(nodeToFHIRItem);
-  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice') && node.options && !node._answerValueSet && !node._answerExpression) {
+  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice' || node.itemType === 'checklist') && node.options && !node._answerValueSet && !node._answerExpression) {
     fhirItem.answerOption = parseOptions(node.options)
       .map(({ code, display }) => {
         const coding = { code, display };
@@ -273,7 +277,7 @@ function nodeToFHIRItem(node) {
 
   if (node._readOnly) fhirItem.readOnly = true;
   if (node._disabledDisplay) fhirItem.disabledDisplay = node._disabledDisplay;
-  if (node.repeats)   fhirItem.repeats  = true;
+  if (node.repeats || node.itemType === 'checklist')   fhirItem.repeats  = true;
   // minOccurs / maxOccurs cardinality extensions
   if (node.repeats && node._minOccurs !== undefined)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs', valueInteger: node._minOccurs });

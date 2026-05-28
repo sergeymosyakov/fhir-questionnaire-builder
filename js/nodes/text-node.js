@@ -19,7 +19,7 @@ export class TextNode extends ItemNode {
 
     const el = document.createElement('textarea');
     el.className = 'ctrl-input--text';
-    el.rows = 1;
+    el.rows = node._itemControl === 'text-area' ? 3 : 1;
     el.value = getValue(node.id) !== undefined ? getValue(node.id) : '';
 
     if (node._maxLength) el.maxLength = node._maxLength;

@@ -8,8 +8,8 @@ import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/modals/validate-modal.js';
 import * as metadataModal from './ui/modals/metadata-modal.js';
 import * as qrExportModal from './ui/modals/qr-export-modal.js';
-import { createCustomSelect } from './ui/custom-select.js';
 import * as progress from './ui/progress.js';
+import { RenumberControl } from './ui/renumber-control.js';
 import * as search from './ui/search.js';
 import * as tooltip from './ui/tooltip.js';
 import * as autosave from './ui/autosave.js';
@@ -66,39 +66,11 @@ document.getElementById('collapseAllBtn').onclick  = () => document.dispatchEven
 // View options moved to dropdown menu (see viewOptionsBtn section below)
 document.getElementById('expandAllBtn').onclick    = () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
 
-// Renumber format custom select (replaces native <select>)
-const _renumberSel = createCustomSelect({
-  items: [
-    { value: 'numbers', label: '1 · 2 · 3' },
-    { value: 'roman',   label: 'I · II · III' },
-    { value: 'letters', label: 'A · B · C' },
-  ],
-  value: 'numbers',
-  className: 'sc-trigger--sm',
-  testid: 'renumber-format',
-});
-_renumberSel.el.dataset.tipTitle = 'Prefix format';
-_renumberSel.el.dataset.tipBody  = 'Format used by Renumber: numeric (1, 1.1), Roman numerals (I, I.I), or letters (A, A.A). Does not affect linkId — only item.prefix.';
-_renumberSel.el.dataset.tipFhir  = 'Questionnaire.item.prefix';
-_renumberSel.el.dataset.tipSpec  = 'R4 · optional';
-document.getElementById('renumberFormatWrap').appendChild(_renumberSel.el);
-setRenumberGetter(() => _renumberSel.getValue() || 'numbers');
-
-document.getElementById('renumberBtn').onclick = async () => {
-  const btn = document.getElementById('renumberBtn');
-  btn.disabled = true;
-  progress.show('Renumbering…');
-  const onProgress = e => progress.update(e.detail.done, e.detail.total);
-  const cleanup = () => {
-    progress.hide();
-    btn.disabled = false;
-    document.removeEventListener(AppEvents.RENUMBER_PROGRESS, onProgress);
-    document.removeEventListener(AppEvents.RENUMBER_DONE, cleanup);
-  };
-  document.addEventListener(AppEvents.RENUMBER_PROGRESS, onProgress);
-  document.addEventListener(AppEvents.RENUMBER_DONE, cleanup);
-  try { await renumberAll(); } catch { cleanup(); }
-};
+new RenumberControl(
+  document.getElementById('renumberFormatWrap'),
+  document.getElementById('renumberBtn'),
+  { renumberAll, setRenumberGetter },
+);
 
 // ── Global progress bar init ──────────────────────────────────────────────
 progress.init({

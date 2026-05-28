@@ -266,6 +266,69 @@ describe('buildFHIRObject — answerOption', () => {
     const ext = q.item[0].extension || [];
     expect(ext.some(e => e.url.includes('questionnaire-itemControl'))).toBe(true);
   });
+
+  it('exports check-box itemControl extension for checklist', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'checklist', options: 'a=A,b=B',
+    }]);
+    const ext = q.item[0].extension || [];
+    const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
+    expect(ic).toBeDefined();
+    expect(ic.valueCodeableConcept.coding[0].code).toBe('check-box');
+  });
+
+  it('checklist exports as FHIR type choice with repeats true', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'checklist', options: 'a=A,b=B',
+    }]);
+    expect(q.item[0].type).toBe('choice');
+    expect(q.item[0].repeats).toBe(true);
+  });
+
+  it('checklist exports answerOption', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'checklist', options: 'a=A,b=B',
+    }]);
+    expect(q.item[0].answerOption).toHaveLength(2);
+  });
+
+  it('exports _itemControl as itemControl extension (autocomplete)', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A', _itemControl: 'autocomplete',
+    }]);
+    const ext = q.item[0].extension || [];
+    const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
+    expect(ic).toBeDefined();
+    expect(ic.valueCodeableConcept.coding[0].code).toBe('autocomplete');
+  });
+
+  it('exports _itemControl as itemControl extension (text-area)', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'text', _itemControl: 'text-area',
+    }]);
+    const ext = q.item[0].extension || [];
+    const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
+    expect(ic).toBeDefined();
+    expect(ic.valueCodeableConcept.coding[0].code).toBe('text-area');
+  });
+
+  it('exports _itemControl as itemControl extension (spinner)', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'integer', _itemControl: 'spinner',
+    }]);
+    const ext = q.item[0].extension || [];
+    const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
+    expect(ic).toBeDefined();
+    expect(ic.valueCodeableConcept.coding[0].code).toBe('spinner');
+  });
+
+  it('does not export itemControl when _itemControl is absent and type is select', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A',
+    }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.some(e => e.url.includes('questionnaire-itemControl'))).toBe(false);
+  });
 });
 
 // ── groups ────────────────────────────────────────────────────────────────────

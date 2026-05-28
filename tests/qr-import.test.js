@@ -349,6 +349,51 @@ describe('importQRAnswers — repeat rows', () => {
   });
 });
 
+// ── checklist (check-box itemControl) — multi-answer merge ──────────────────
+
+describe('importQRAnswers — checklist merge', () => {
+  const checklistTree = [{ id: 'q-cl', itemType: 'checklist', children: [] }];
+
+  it('merges multiple answers into comma-separated value for checklist node', () => {
+    const values = {};
+    importQRAnswers(makeQR([{
+      linkId: 'q-cl',
+      answer: [
+        { valueCoding: { code: 'a' } },
+        { valueCoding: { code: 'b' } },
+        { valueCoding: { code: 'c' } },
+      ],
+    }]), values, checklistTree);
+    expect(values['q-cl']).toBe('a,b,c');
+    expect(values['q-cl$$1']).toBeUndefined();
+    expect(values['q-cl$$n']).toBeUndefined();
+  });
+
+  it('single answer for checklist remains as-is', () => {
+    const values = {};
+    importQRAnswers(makeQR([{
+      linkId: 'q-cl',
+      answer: [{ valueCoding: { code: 'x' } }],
+    }]), values, checklistTree);
+    expect(values['q-cl']).toBe('x');
+  });
+
+  it('regular (non-checklist) items are NOT merged', () => {
+    const regularTree = makeTree('q-reg');
+    const values = {};
+    importQRAnswers(makeQR([{
+      linkId: 'q-reg',
+      answer: [
+        { valueCoding: { code: 'a' } },
+        { valueCoding: { code: 'b' } },
+      ],
+    }]), values, regularTree);
+    expect(values['q-reg']).toBe('a');
+    expect(values['q-reg$$1']).toBe('b');
+    expect(values['q-reg$$n']).toBe(1);
+  });
+});
+
 // ── empty / missing answers ───────────────────────────────────────────────────
 
 describe('importQRAnswers — empty/missing answers', () => {

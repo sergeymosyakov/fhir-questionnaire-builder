@@ -128,8 +128,14 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `quantity` | `quantity` | UCUM unit dropdown; `questionnaire-unit` extension read/written |
 | `string`, `text` | `text` | |
 | `reference` | `reference` | dropdown (resource type) + id input; `questionnaire-referenceResource` extension locks dropdown to one type |
-| `choice` | `select` | unless `questionnaire-itemControl: radio-button` → `radio` |
+| `choice` | `select` | unless `questionnaire-itemControl: radio-button` → `radio` or `check-box` → `checklist` |
 | `choice` + itemControl `radio-button` | `radio` | see Extensions section |
+| `choice` + itemControl `check-box` | `checklist` | multi-select checkboxes; see Extensions section |
+| `choice` + itemControl `autocomplete` | `select` + `_itemControl:'autocomplete'` | searchable dropdown; see Extensions section |
+| `choice` + itemControl `drop-down` | `select` + `_itemControl:'drop-down'` | explicit dropdown (default) |
+| `string` + itemControl `text-area` | `text` + `_itemControl:'text-area'` | multi-line textarea |
+| `string` + itemControl `text-box` | `text` + `_itemControl:'text-box'` | explicit single-line (default) |
+| `integer` + itemControl `spinner` | `integer` + `_itemControl:'spinner'` | spinner control hint |
 | `open-choice` | `open-choice` | text input + `<datalist>` suggestions from `answerOption[]`; free-text allowed |
 | `display` | `display` | label only, no control, no pass/fail |
 | `date` | `date` | |
@@ -150,6 +156,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | `text` | `string` | |
 | `select` | `choice` | + `answerOption[]` |
 | `radio` | `choice` | + `answerOption[]` + `questionnaire-itemControl: radio-button` extension |
+| `checklist` | `choice` | + `answerOption[]` + `questionnaire-itemControl: check-box` extension + `repeats: true` |
 | `open-choice` | `open-choice` | + `answerOption[]` (used as datalist suggestions) |
 | `quantity` | `quantity` | + `questionnaire-unit` extension (default unit from builder) |
 | `reference` | `reference` | + `questionnaire-referenceResource` extension (if type is locked) |
@@ -255,7 +262,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 
 | Extension URL | Type | Field | Standard? |
 |---|---|---|---|
-| `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'` | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'`, `'checklist'`, or `_itemControl` string | Yes (codes: `radio-button`, `check-box`, `autocomplete`, `drop-down`, `text-area`, `text-box`, `spinner`) |
 | `http://hl7.org/fhir/StructureDefinition/rendering-style` | standard | `_renderStyle` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-xhtml` | standard | `_renderXhtml` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-markdown` | standard | `_renderMarkdown` | Yes (parsed by marked.js + DOMPurify; xhtml takes priority) |
@@ -398,7 +405,8 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
 | `questionnaire-optionExclusive` | ❌ Not handled | On `answerOption.extension`; marks an option as exclusive — if selected, all other options must be deselected (e.g., "None of the above"). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive`. |
 | `questionnaire-unitOption` | ❌ Not handled | Specifies a single allowed unit for `quantity` items (R4 core extension; multiple instances enumerate all allowed units). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption`. Distinct from `questionnaire-unitValueSet` (which references a ValueSet). |
-| `questionnaire-itemControl` — non-radio codes | ❌ Not handled | Only the `radio-button` code is handled. The following itemControl codes are silently treated as the default control: `check-box` (multi-select choice), `autocomplete`, `lookup`, `slider` (control-driven), `spinner`, `text-area`, `text-box`. |
+| `questionnaire-itemControl` — `lookup` code | ❌ Not handled | The `lookup` code (server-side search for choice items) is not implemented. |
+| `questionnaire-itemControl` — `slider` code | ❌ Not handled | The `slider` itemControl code is not handled (slider rendering is driven by `questionnaire-sliderStepValue` instead). |
 
 ### SDC extensions — not implemented (no server required)
 

@@ -46,6 +46,15 @@ function _flattenQR(items, out = {}) {
   return out;
 }
 
+// Collect checklist node linkIds from tree
+function _collectChecklistIds(nodes, set = new Set()) {
+  for (const n of nodes) {
+    if (n.itemType === 'checklist') set.add(n.id);
+    if (n.children) _collectChecklistIds(n.children, set);
+  }
+  return set;
+}
+
 /**
  * Load QR answers into the plain `values` object.
  * Only loads answers for linkIds that exist in the current questionnaire tree.
@@ -77,6 +86,22 @@ export function importQRAnswers(qrJson, values, tree) {
       loaded++;
     } else {
       unmatched.push(key);
+    }
+  }
+
+  // Merge multi-answer QR entries for checklist items into comma-separated values
+  const checklistIds = _collectChecklistIds(tree);
+  for (const id of checklistIds) {
+    const base = values[id];
+    const n = values[id + '$$n'];
+    if (base !== undefined && n > 0) {
+      const codes = [base];
+      for (let i = 1; i <= n; i++) {
+        const v = values[id + '$$' + i];
+        if (v !== undefined) { codes.push(v); delete values[id + '$$' + i]; }
+      }
+      delete values[id + '$$n'];
+      values[id] = codes.join(',');
     }
   }
 

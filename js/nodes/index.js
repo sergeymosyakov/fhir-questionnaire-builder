@@ -9,7 +9,7 @@
 import { GroupNode }      from './group-node.js';
 import { TextNode }       from './text-node.js';
 import { NumberNode }     from './number-node.js';
-import { ChoiceNode, RadioNode, OpenChoiceNode } from './choice-node.js';
+import { ChoiceNode, RadioNode, ChecklistNode, OpenChoiceNode } from './choice-node.js';
 import { DateNode, DateTimeNode, TimeNode }      from './date-node.js';
 import { CheckboxNode }   from './checkbox-node.js';
 import { UrlNode }        from './url-node.js';
@@ -52,7 +52,7 @@ export function createItemNodeFromTemplate(title, template) {
 
 // Re-export all node classes for convenience
 export { GroupNode, TextNode, NumberNode,
-         ChoiceNode, RadioNode, OpenChoiceNode,
+         ChoiceNode, RadioNode, ChecklistNode, OpenChoiceNode,
          DateNode, DateTimeNode, TimeNode,
          CheckboxNode, UrlNode, AttachmentNode,
          ReferenceNode, QuantityNode, DisplayNode };

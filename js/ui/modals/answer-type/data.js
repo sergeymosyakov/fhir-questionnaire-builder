@@ -2,7 +2,7 @@
 // Pure constants with no side-effects or module state.
 
 // Choice item types — drive answer-source visibility in the modal.
-export const CHOICE_TYPES = new Set(['select', 'radio', 'open-choice']);
+export const CHOICE_TYPES = new Set(['select', 'radio', 'open-choice', 'checklist']);
 
 // Types that support an entry-format (placeholder hint) extension.
 export const ENTRY_FORMAT_TYPES = new Set(['text', 'integer', 'decimal', 'date', 'dateTime', 'time', 'url', 'quantity']);
@@ -13,7 +13,7 @@ export const NUMERIC_TYPES = new Set(['integer', 'decimal']);
 // All item types the builder supports, in UI display order.
 export const ITEM_TYPES = [
   'text','integer','decimal','date','dateTime','time','url','attachment',
-  'checkbox','select','open-choice','radio',
+  'checkbox','select','open-choice','radio','checklist',
   'reference','quantity','display',
 ];
 

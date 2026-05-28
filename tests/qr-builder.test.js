@@ -337,6 +337,32 @@ describe('buildQR — ordinalValue in valueCoding answers', () => {
   });
 });
 
+// ── buildQR — checklist (check-box itemControl) ──────────────────────────────
+describe('buildQR — checklist multi-value', () => {
+  it('splits comma-separated value into multiple answers for repeating choice', () => {
+    const fhir = { item: [{ linkId: 'q', type: 'choice', repeats: true }] };
+    const qr = buildQR(fhir, { q: 'a,b,c' });
+    expect(qr.item[0].answer).toHaveLength(3);
+    expect(qr.item[0].answer[0].valueCoding.code).toBe('a');
+    expect(qr.item[0].answer[1].valueCoding.code).toBe('b');
+    expect(qr.item[0].answer[2].valueCoding.code).toBe('c');
+  });
+
+  it('single value for repeating choice produces one answer', () => {
+    const fhir = { item: [{ linkId: 'q', type: 'choice', repeats: true }] };
+    const qr = buildQR(fhir, { q: 'a' });
+    expect(qr.item[0].answer).toHaveLength(1);
+    expect(qr.item[0].answer[0].valueCoding.code).toBe('a');
+  });
+
+  it('non-repeating choice with comma is NOT split', () => {
+    const fhir = { item: [{ linkId: 'q', type: 'choice' }] };
+    const qr = buildQR(fhir, { q: 'a,b' });
+    expect(qr.item[0].answer).toHaveLength(1);
+    expect(qr.item[0].answer[0].valueCoding.code).toBe('a,b');
+  });
+});
+
 // ── buildQR — || fallback branches ────────────────────────────────────────────
 describe('buildQR — fallback branches', () => {
   it('questionnaire field falls back to empty string when url and id absent', () => {

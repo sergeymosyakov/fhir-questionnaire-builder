@@ -217,7 +217,7 @@ export function buildVisPanel(node, p, visLink, setActive) {
           ew.answerBoolean = boolStr === 'true';
           delete ew.answerString; delete ew.answerCoding; delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate;
         });
-      } else if (itype === 'select' || itype === 'radio' || itype === 'open-choice') {
+      } else if (itype === 'select' || itype === 'radio' || itype === 'open-choice' || itype === 'checklist') {
         const items = [{ value: '=', label: '=' }, { value: '!=', label: '\u2260' }];
         _addExistsOpts(items);
         opSel.setOptions(items);

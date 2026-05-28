@@ -26,6 +26,9 @@ class ChoiceSection extends AnswerTypeSection {
     if (this._openLabelEl) {
       this._openLabelEl.style.display = type === 'open-choice' ? '' : 'none';
     }
+    if (this._acRowEl) {
+      this._acRowEl.style.display = type === 'select' ? '' : 'none';
+    }
   }
 
   build(pending) {
@@ -205,6 +208,22 @@ class ChoiceSection extends AnswerTypeSection {
     section.appendChild(openLabelSection);
     this._openLabelEl = openLabelSection;
 
+    // ── Autocomplete toggle (select/checklist only) ──────────────────────────
+    const acRow = document.createElement('label');
+    acRow.className = 'at-modal-sub';
+    acRow.style.display = (pending.draftType === 'select') ? '' : 'none';
+    const acCb = Object.assign(document.createElement('input'), { type: 'checkbox', checked: !!pending.draftAutocomplete });
+    acCb.dataset.testid = 'autocomplete-toggle';
+    acCb.onchange = () => { pending.draftAutocomplete = acCb.checked; };
+    const acLbl = document.createTextNode(' Autocomplete (searchable dropdown)');
+    acRow.dataset.tipTitle = 'Autocomplete';
+    acRow.dataset.tipBody  = 'Adds a search/filter input at the top of the dropdown, allowing users to type and filter options. Exports as questionnaire-itemControl = autocomplete.';
+    acRow.dataset.tipFhir  = 'item.extension[questionnaire-itemControl].valueCodeableConcept.coding.code = autocomplete';
+    acRow.dataset.tipSpec  = 'R4';
+    acRow.append(acCb, acLbl);
+    section.appendChild(acRow);
+    this._acRowEl = acRow;
+
     // ── Wire radio toggles ───────────────────────────────────────────────────
     const _showOnly = which => {
       optSection.style.display  = which === 'options'     ? 'block' : 'none';
@@ -278,6 +297,13 @@ class ChoiceSection extends AnswerTypeSection {
     } else {
       delete node._openLabel;
     }
+
+    // Autocomplete itemControl (select only)
+    if (node.itemType === 'select' && pending.draftAutocomplete) {
+      node._itemControl = 'autocomplete';
+    } else if (node._itemControl === 'autocomplete') {
+      delete node._itemControl;
+    }
   }
 
   initPending(node) {
@@ -287,6 +313,7 @@ class ChoiceSection extends AnswerTypeSection {
       draftOpenLabel:   node._openLabel || '',
       draftAnswerExpr:  node._answerExpression || '',
       draftSrc:         node._answerExpression ? 'expression' : (node._answerValueSet ? 'valueset' : 'options'),
+      draftAutocomplete: node._itemControl === 'autocomplete',
     };
   }
 }

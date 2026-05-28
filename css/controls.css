@@ -198,6 +198,16 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointe
 }
 .oc-opt:hover    { background: #f0f4ff; }
 .oc-opt--sel     { background: #eef2ff; color: var(--c-primary); font-weight: 600; }
+.oc-search {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px 8px;
+  font-size: 13px;
+  border: none;
+  border-bottom: 1px solid var(--c-border);
+  outline: none;
+}
 
 /* === Attachment / file control =============================================== */
 .file-input-hidden { display: none; }

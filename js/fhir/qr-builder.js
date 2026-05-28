@@ -74,7 +74,12 @@ function buildQRItem(fhirItem, values) {
     qrItem.answer = [answerObj];
   } else {
     const vs = allVals();
-    if (vs.length > 0) qrItem.answer = vs.map(makeAnswer);
+    // Checklist (check-box itemControl): value is comma-separated codes → split into individual answers
+    if ((t === 'choice' || t === 'open-choice') && fhirItem.repeats && vs.length === 1 && typeof vs[0] === 'string' && vs[0].includes(',')) {
+      qrItem.answer = vs[0].split(',').map(makeAnswer);
+    } else if (vs.length > 0) {
+      qrItem.answer = vs.map(makeAnswer);
+    }
   }
 
   return qrItem;

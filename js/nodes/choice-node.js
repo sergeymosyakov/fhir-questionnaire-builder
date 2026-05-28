@@ -99,12 +99,11 @@ export class ChoiceNode extends ItemNode {
       trigger.focus();
     };
 
-    const openDrop = () => {
-      if (dropEl) { close(); return; }
-      dropEl = document.createElement('div');
-      dropEl.className = 'oc-drop';
+    const _buildOpts = (container, filter = '') => {
+      const q = filter.toLowerCase();
       for (const { code, display } of opts) {
         const label = display || code;
+        if (q && !label.toLowerCase().includes(q) && !code.toLowerCase().includes(q)) continue;
         const opt   = document.createElement('div');
         opt.className = 'oc-opt';
         if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
@@ -124,8 +123,35 @@ export class ChoiceNode extends ItemNode {
         }
         if (code === selected) opt.classList.add('oc-opt--sel');
         opt.addEventListener('mousedown', e => { e.preventDefault(); _pick(code); });
-        dropEl.appendChild(opt);
+        container.appendChild(opt);
       }
+    };
+
+    const openDrop = () => {
+      if (dropEl) { close(); return; }
+      dropEl = document.createElement('div');
+      dropEl.className = 'oc-drop';
+
+      if (node._itemControl === 'autocomplete') {
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.className = 'oc-search';
+        searchInput.placeholder = 'Search\u2026';
+        searchInput.dataset.testid = 'autocomplete-search';
+        const listBox = document.createElement('div');
+        _buildOpts(listBox);
+        searchInput.addEventListener('input', () => {
+          listBox.innerHTML = '';
+          _buildOpts(listBox, searchInput.value);
+        });
+        dropEl.appendChild(searchInput);
+        dropEl.appendChild(listBox);
+        // Focus the search input after dropdown is positioned
+        requestAnimationFrame(() => searchInput.focus());
+      } else {
+        _buildOpts(dropEl);
+      }
+
       document.body.appendChild(dropEl);
       _open = true;
       const rect = trigger.getBoundingClientRect();
@@ -300,6 +326,74 @@ export class OpenChoiceNode extends ItemNode {
   }
 }
 
+export class ChecklistNode extends ItemNode {
+  constructor(data = {}) {
+    super(data);
+    this.itemType = 'checklist';
+  }
+
+  supportsRepeat() { return false; }
+
+  buildControl(ctx) {
+    const node = this;
+    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const wrap = createWrap();
+
+    const opts = _evalAnswerOpts(node, ctx._fpCtx);
+    if (!opts.length) {
+      const msg = document.createElement('span');
+      msg.className = 'radio-no-opts';
+      msg.textContent = '(no options)';
+      wrap.appendChild(msg);
+      return wrap;
+    }
+
+    if (node._choiceOrientation === 'horizontal') wrap.classList.add('ctrl-wrap--horizontal');
+    else wrap.classList.add('ctrl-wrap--vertical');
+
+    // Value is a comma-separated string of selected codes
+    const parseSelected = () => {
+      const raw = getValue(node.id);
+      if (!raw || raw === '') return new Set();
+      return new Set(String(raw).split(','));
+    };
+    const serializeSelected = set => [...set].join(',');
+
+    for (const { code, display } of opts) {
+      const lbl = document.createElement('label');
+      lbl.className = 'radio-label';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = code;
+      cb.checked = parseSelected().has(code);
+      cb.onchange = () => {
+        const sel = parseSelected();
+        if (cb.checked) sel.add(code); else sel.delete(code);
+        const v = serializeSelected(sel);
+        setValue(node.id, v || undefined);
+        _reCalc(); onChange(); _formTick.value++;
+      };
+      lbl.appendChild(cb);
+      if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
+        const pfx = document.createElement('span');
+        pfx.className = 'option-prefix';
+        pfx.textContent = node._optionPrefixes[code] + '\u00A0';
+        lbl.appendChild(pfx);
+      }
+      lbl.appendChild(document.createTextNode(display));
+      if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
+        const ord = document.createElement('span');
+        ord.className = 'option-ordinal';
+        ord.textContent = '\u00A0(' + node._optionOrdinals[code] + ')';
+        lbl.appendChild(ord);
+      }
+      wrap.appendChild(lbl);
+    }
+    return wrap;
+  }
+}
+
 NODE_REGISTRY.set('select',      ChoiceNode);
 NODE_REGISTRY.set('radio',       RadioNode);
+NODE_REGISTRY.set('checklist',   ChecklistNode);
 NODE_REGISTRY.set('open-choice', OpenChoiceNode);
