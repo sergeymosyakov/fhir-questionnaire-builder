@@ -6,6 +6,7 @@
   overflow: hidden;
   box-shadow: var(--shadow);
 }
+.preview-card:empty { display: none; }
 .lform-item {
   display: flex;
   align-items: flex-start;

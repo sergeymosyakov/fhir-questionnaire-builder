@@ -1,3 +1,4 @@
+import { AppEvents } from '../../events.js';
 import { DropdownMenu } from '../dropdown-menu.js';
 
 const _LABELS = {
@@ -40,7 +41,7 @@ export class PreviewModeMenu extends DropdownMenu {
   }
 
   _applyMode(mode) {
-    document.dispatchEvent(new CustomEvent('preview-mode-change', { detail: { mode } }));
+    document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_MODE_CHANGE, { detail: { mode } }));
     this._btn.innerHTML = _LABELS[mode];
     this._menu.querySelectorAll('.load-menu-item').forEach(item => {
       item.classList.toggle('load-menu-item--checked', item.dataset.mode === mode);

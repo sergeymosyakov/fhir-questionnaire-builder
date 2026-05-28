@@ -4,6 +4,7 @@
 import { nextId } from '../id.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
 import * as dnd from '../builder/dnd.js';
+import { AppEvents } from '../events.js';
 
 // Shared wrapper factory used by every buildControl() implementation.
 export function createWrap() {
@@ -45,6 +46,7 @@ export class BaseNode {
     triggerCalcRecalc: null,  // () => void
     tickForm:          null,  // () => void — increments formTick
     formatSeg:         null,  // (n) => string
+    leftPanelBody:     null,  // scroll container for builder navigate-to
   };
 
   static configure(services) {
@@ -449,13 +451,37 @@ export class BaseNode {
   // Breaks circular imports: index.js and render-preview.js both import nodes,
   // so nodes cannot import back. Events decouple the call direction.
 
+  /**
+   * Wire the BUILDER_NAVIGATE_TO event for this node's root builder element.
+   * Call once at the start of buildBuilder(), passing the node div.
+   * Uses AbortController so each re-render cleanly replaces the previous listener.
+   */
+  _initNavListener(el) {
+    this._navAbort?.abort();
+    this._navAbort = new AbortController();
+    document.addEventListener(AppEvents.BUILDER_NAVIGATE_TO, e => {
+      if (e.detail?.nodeId !== this.id) return;
+      const panel = BaseNode._svc.leftPanelBody;
+      if (panel) {
+        const top = el.getBoundingClientRect().top
+          - panel.getBoundingClientRect().top
+          + panel.scrollTop - 10;
+        panel.scrollTo({ top, behavior: 'smooth' });
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      el.classList.add('node-flash');
+      setTimeout(() => el.classList.remove('node-flash'), 1000);
+    }, { signal: this._navAbort.signal });
+  }
+
   /** Triggers renderTree() in builder/index.js */
   _dispatchRerender() {
-    document.dispatchEvent(new CustomEvent('builder:rerender'));
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
   }
 
   /** Navigates the right-panel preview to this node */
   _dispatchNavigate() {
-    document.dispatchEvent(new CustomEvent('builder:navigate', { detail: { id: this.id } }));
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE, { detail: { id: this.id } }));
   }
 }

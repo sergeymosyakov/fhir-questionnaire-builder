@@ -8,6 +8,8 @@
 //   undo() / redo()
 //   canUndo() / canRedo()  → boolean
 
+import { AppEvents } from '../events.js';
+
 const MAX         = 50;
 const DEBOUNCE_MS = 400;
 const _ric        = cb => (window.requestIdleCallback ?? (fn => setTimeout(fn, 0)))(cb);
@@ -63,7 +65,7 @@ export function init({ buildFn, importFn, renderFn, formTick, effect, onChange }
   _ric(() => { _push(JSON.stringify(_buildFn())); });
 
   // Reset stack when a new questionnaire is loaded (not during undo/redo)
-  document.addEventListener('questionnaire-loaded', () => {
+  document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => {
     if (_restoring) return;
     clearTimeout(_timer);
     _pending = false;
@@ -72,7 +74,7 @@ export function init({ buildFn, importFn, renderFn, formTick, effect, onChange }
     _ric(() => { _push(JSON.stringify(_buildFn())); });
   });
 
-  document.addEventListener('questionnaire-cleared', () => {
+  document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => {
     if (_restoring) return;
     clearTimeout(_timer);
     _pending = false;

@@ -6,6 +6,7 @@ import { createItemNode } from '../../../nodes/index.js';
 import { createCustomSelect } from '../../custom-select.js';
 import { ITEM_TYPES } from './data.js';
 import { ANSWER_TYPE_SECTIONS } from './index.js';
+import { AppEvents } from '../../../events.js';
 
 // Replace a node in the reactive tree array (recursive, in-place splice).
 function _replaceInTree(treeArr, nodeId, newNode) {
@@ -59,7 +60,7 @@ class AnswerTypeModal extends Modal {
     }
 
     ANSWER_TYPE_SECTIONS.forEach(s => s.commit(this._pending, node));
-    document.dispatchEvent(new CustomEvent('builder:rerender'));
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     Modal._svc.triggerCalcRecalc();
     this._cancel();
   }

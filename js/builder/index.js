@@ -9,6 +9,7 @@ import { GroupNode } from '../nodes/group-node.js';
 import { createGroupNode } from '../nodes/index.js';
 import { BaseNode } from '../nodes/base-node.js';
 import { Modal } from '../ui/modals/modal-base.js';
+import { AppEvents } from '../events.js';
 
 // Inject reactive state into _shared (triggerCalcRecalc + renderTree need them)
 sharedInit({ tree, formTick: _formTick, rawFhir, values, renderTree });
@@ -20,10 +21,11 @@ BaseNode.configure({
   findAndRemove,
   confirmDelete,
   triggerCalcRecalc,
-  tickForm:   () => _formTick.value++,
+  tickForm:      () => _formTick.value++,
   formatSeg,
-  domPurify:  window.DOMPurify,
-  marked:     window.marked,
+  domPurify:     window.DOMPurify,
+  marked:        window.marked,
+  leftPanelBody: document.querySelector('.left-panel-body'),
 });
 
 // ── Inject app services into modal layer ──────────────────────────────────────
@@ -43,8 +45,8 @@ Modal.configure({
 // ── Event listeners ───────────────────────────────────────────────────────────
 // Nodes dispatch custom events instead of importing index.js/render-preview.js
 // (those modules import nodes — importing back would be circular).
-document.addEventListener('builder:rerender',  ()  => renderTree());
-document.addEventListener('builder:navigate',  e   => navigateToPreview(e.detail.id));
+document.addEventListener(AppEvents.BUILDER_RERENDER, ()  => renderTree());
+document.addEventListener(AppEvents.BUILDER_NAVIGATE,  e   => navigateToPreview(e.detail.id));
 
 function renderNode(node) {
   return node.buildBuilder();
@@ -120,14 +122,14 @@ export async function renumberAll() {
   const total = tree.length;
   for (let i = 0; i < tree.length; i++) {
     frag.appendChild(renderNode(tree[i]));
-    document.dispatchEvent(new CustomEvent('renumber-progress', { detail: { done: i + 1, total } }));
+    document.dispatchEvent(new CustomEvent(AppEvents.RENUMBER_PROGRESS, { detail: { done: i + 1, total } }));
     await raf();
   }
   frag.appendChild(makeRootDropZone());
   const container = document.getElementById('treeContainer');
   container.innerHTML = '';
   container.appendChild(frag);
-  document.dispatchEvent(new CustomEvent('renumber-done'));
+  document.dispatchEvent(new CustomEvent(AppEvents.RENUMBER_DONE));
 }
 
 // ── Root-level add buttons (wired in app.js via these exports) ────────────────

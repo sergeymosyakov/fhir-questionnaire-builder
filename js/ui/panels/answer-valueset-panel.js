@@ -1,6 +1,7 @@
 // ── Answer ValueSet panel ─────────────────────────────────────────────────────
 // Collapsible read-only card showing all answerValueSet URLs referenced by items.
 // Each chip fires 'show-json' event → handled by JsonViewerModal.
+import { AppEvents } from '../../events.js';
 import { Panel } from './panel-base.js';
 
 class AnswerValueSetPanel extends Panel {
@@ -54,7 +55,7 @@ class AnswerValueSetPanel extends Panel {
       chip.dataset.tipFhir  = 'Questionnaire.item.answerValueSet';
       chip.dataset.tipSpec  = 'R4 · optional';
       chip.addEventListener('click', () =>
-        document.dispatchEvent(new CustomEvent('show-json', { detail: { title: label, data: { answerValueSet: url, usedByItems: items } } }))
+        document.dispatchEvent(new CustomEvent(AppEvents.SHOW_JSON, { detail: { title: label, data: { answerValueSet: url, usedByItems: items } } }))
       );
       this._chipList.appendChild(chip);
     }

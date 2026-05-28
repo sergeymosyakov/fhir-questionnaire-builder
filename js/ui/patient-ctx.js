@@ -20,7 +20,7 @@ export function configure({ tree, effect, questVariables }) {
   });
 }
 
-const PATIENT_APPLY_EVENT = 'patient-ctx-applied';
+import { AppEvents } from '../events.js';
 
 const PATIENT_VARS = [
   { name: 'age',      type: 'number',   label: 'Age (years)',    default: 30 },
@@ -211,5 +211,5 @@ if (_el.presetBtn && _el.presetMenu) {
 
 const _doAfterApply = () => {
   document.dispatchEvent(new CustomEvent('reinit-form'));
-  document.dispatchEvent(new CustomEvent(PATIENT_APPLY_EVENT));
+  document.dispatchEvent(new CustomEvent(AppEvents.PATIENT_CTX_APPLIED));
 };

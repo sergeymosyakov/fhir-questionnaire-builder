@@ -3,6 +3,7 @@ import * as dnd from '../builder/dnd.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { NODE_REGISTRY } from './registry.js';
 import { TextNode } from './text-node.js';
+import { AppEvents } from '../events.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -200,6 +201,7 @@ export class GroupNode extends BaseNode {
     const div = document.createElement('div');
     div.className = 'node node-group';
     div.dataset.nodeId = node.id;
+    node._initNavListener(div);
 
     wrapper.appendChild(node._buildDropZoneAbove());
 
@@ -332,12 +334,7 @@ export class GroupNode extends BaseNode {
         GroupNode._collapseMap.set(node.id, false);
         node._dispatchRerender();
         requestAnimationFrame(() => {
-          const el = document.querySelector('[data-node-id="' + CSS.escape(newNode.id) + '"]');
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            el.classList.add('node-flash');
-            setTimeout(() => el.classList.remove('node-flash'), 1000);
-          }
+          document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: newNode.id } }));
         });
       };
       addMenu.appendChild(mi);

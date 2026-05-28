@@ -9,11 +9,12 @@ import { _formTick, _bulkUpdate } from './render-bus.js';
 import { _rc } from './preview/render-ctx.js';
 import { BaseNode } from './nodes/index.js';
 import { GroupNode } from './nodes/group-node.js';
+import { AppEvents } from './events.js';
 
 // View preferences — UI-only, not domain state.
 // Owned here; updated via 'view-pref-change' CustomEvent from app.js.
 const _viewPrefs = { showLinkId: true, showPrefix: true, showBadges: true, showHiddenItems: true };
-document.addEventListener('view-pref-change', e => {
+document.addEventListener(AppEvents.VIEW_PREF_CHANGE, e => {
   _viewPrefs[e.detail.key] = e.detail.value;
   if (!_previewElements.lform) return;
   if (e.detail.key === 'showBadges') {
@@ -31,7 +32,7 @@ document.addEventListener('view-pref-change', e => {
 // Preview mode — UI-only, not domain state.
 // Owned here; updated via 'preview-mode-change' CustomEvent from app.js.
 let _previewMode = 'preview';
-document.addEventListener('preview-mode-change', e => {
+document.addEventListener(AppEvents.PREVIEW_MODE_CHANGE, e => {
   _previewMode = e.detail.mode;
   _previewElements.lform?.classList.toggle('patient-view', _previewMode === 'patient');
   if (_previewElements.lform) {
@@ -503,4 +504,4 @@ export function initPreview(elements) {
     search.refresh(); // re-apply search marks if a query is active
   });
 }
-document.addEventListener('reinit-form', reinitForm);
+document.addEventListener(AppEvents.REINIT_FORM, reinitForm);

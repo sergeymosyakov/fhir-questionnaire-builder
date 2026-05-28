@@ -1,3 +1,4 @@
+import { AppEvents } from '../../events.js';
 import { DropdownMenu } from '../dropdown-menu.js';
 
 export class ViewOptionsMenu extends DropdownMenu {
@@ -29,7 +30,7 @@ export class ViewOptionsMenu extends DropdownMenu {
     checks.forEach(([inputId, label, testid, key]) => {
       const row = this._checkItem(inputId, label, testid);
       row.querySelector('input').addEventListener('change', e => {
-        document.dispatchEvent(new CustomEvent('view-pref-change', { detail: { key, value: e.target.checked } }));
+        document.dispatchEvent(new CustomEvent(AppEvents.VIEW_PREF_CHANGE, { detail: { key, value: e.target.checked } }));
       });
       this._menu.appendChild(row);
     });

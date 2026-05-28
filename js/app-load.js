@@ -1,5 +1,5 @@
-// File loading, QR answers, import pipeline, and filename display.
-// Exports: setFileName, navigateToNode, importAndValidate
+// File loading, QR answers, and import pipeline.
+// Exports: importAndValidate
 import { tree, values, rawFhir, effect, questMeta } from './state.js';
 import { _formTick } from './render-bus.js';
 import { showError } from './ui/toast.js';
@@ -14,15 +14,12 @@ import { expandAll, renderTreeAsync } from './builder/index.js';
 import { reinitForm, resetCollapsedFromTree } from './render-preview.js';
 import { terminologyService } from './fhir/terminology-service.js';
 import { answersMenu, saveMenu, toolsMenu } from './ui/header-actions.js';
+import { AppEvents } from './events.js';
 
 
-// ── File name display ─────────────────────────────────────────────────────────
-let _fileNameWrap, _fileNameEl;
+// ── Toolbar section visibility ────────────────────────────────────────────────
+// Show/hide left-panel cards and header menus when the tree has nodes.
 window.addEventListener('DOMContentLoaded', () => {
-  _fileNameWrap = document.getElementById('loadedFileNameWrap');
-  _fileNameEl   = document.getElementById('loadedFileName');
-
-  // Show toolbar sections and file name whenever the tree has nodes
   effect(() => {
     const hasNodes = tree.length > 0;
     document.getElementById('variablesCard').style.display = hasNodes ? '' : 'none';
@@ -30,40 +27,8 @@ window.addEventListener('DOMContentLoaded', () => {
     answersMenu.el.style.display = hasNodes ? '' : 'none';
     saveMenu.el.style.display    = hasNodes ? '' : 'none';
     toolsMenu.el.style.display   = hasNodes ? '' : 'none';
-    if (hasNodes) {
-      _fileNameWrap.style.display = 'inline-flex';
-    } else {
-      _fileNameEl.textContent = '';
-      _fileNameWrap.style.display = 'none';
-    }
   });
 });
-
-export function setFileName(name) {
-  if (!_fileNameEl || !_fileNameWrap) return;
-  if (name) {
-    _fileNameEl.textContent = name;
-    _fileNameWrap.style.display = 'inline-flex';
-  } else {
-    _fileNameEl.textContent = '';
-    _fileNameWrap.style.display = 'none';
-  }
-}
-
-// ── Navigate builder to node ──────────────────────────────────────────────────
-export function navigateToNode(nodeId) {
-  const target = document.querySelector(`[data-node-id="${CSS.escape(nodeId)}"]`);
-  if (!target) return;
-  const panel = document.querySelector('.left-panel-body');
-  if (panel) {
-    const top = target.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop - 10;
-    panel.scrollTo({ top, behavior: 'smooth' });
-  } else {
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-  target.classList.add('node-flash');
-  setTimeout(() => target.classList.remove('node-flash'), 1000);
-}
 
 // ── ValueSet expansion ────────────────────────────────────────────────────────
 // Each import increments this counter. _expandValueSets checks it on completion
@@ -80,7 +45,7 @@ async function _expandValueSets(seq) {
       nodeId:   f.node?.id || '(unknown)',
       message:  ` \u2014 ValueSet ${f.vsUrl} from ${f.server}: ${f.error}`,
     }));
-    validateModal.show('ValueSet Expansion Errors', issues, 'import', { onNavigate: navigateToNode });
+    validateModal.show('ValueSet Expansion Errors', issues, 'import');
   }
   reinitForm();
 }
@@ -91,15 +56,15 @@ export async function importAndValidate(data, fileName) {
     importFHIR(data, () => {}); // pass no-op renderFn — we render below
     resetCollapsedFromTree(tree);
     reinitForm();
-    document.dispatchEvent(new CustomEvent('questionnaire-loaded'));
+    document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOADED, { detail: { fileName: fileName || '' } }));
     const issues = validateTree(tree, values);
     progress.show('Rendering ' + tree.length + ' nodes\u2026');
     await renderTreeAsync((done, total) => progress.update(done, total));
     expandAll();
     document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
     document.querySelector('.right-panel-body')?.scrollTo({ top: 0 });
-    setFileName(fileName || '');
-    if (issues.length > 0) validateModal.show('Import \u2014 Validation Report', issues, 'import', { onNavigate: navigateToNode });
+
+    if (issues.length > 0) validateModal.show('Import — Validation Report', issues, 'import');
 
     // Expand external answerValueSets in the background; re-render preview when done.
     _expandValueSets(++_importSeq);
@@ -159,7 +124,7 @@ export function _askBeforeLoad() {
 export function _applyQRAnswers(qr) {
   const result = importQRAnswers(qr, values, tree);
   if (!result.ok) { showError('Cannot load answers: ' + result.error); return; }
-  document.dispatchEvent(new CustomEvent('qr-loaded', { detail: {
+  document.dispatchEvent(new CustomEvent(AppEvents.QR_LOADED, { detail: {
     status:  result.meta.status,
     subject: result.meta.subject,
     author:  result.meta.author,
@@ -184,6 +149,6 @@ export function _applyQRAnswers(qr) {
   _formTick.value++;
 
   if (issues.length > 0) {
-    validateModal.show('Load Answers \u2014 ' + result.loaded + ' loaded', issues, 'import', { onNavigate: navigateToNode });
+    validateModal.show('Load Answers — ' + result.loaded + ' loaded', issues, 'import');
   }
 }

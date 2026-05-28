@@ -11,6 +11,10 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 - [ ] **More sample data** — 2–3 additional questionnaires covering different complexity levels, with documented expected PASS/FAIL outcomes per patient profile
 - [ ] **Copy / paste nodes** — duplicate a question or an entire group (with children) anywhere in the tree
 
+## Technical Debt
+
+- [ ] **DropdownMenu mount point** — `DropdownMenu` subclasses (and other header menus) currently find their own container via `getElementById` inside the class. Should accept a `mountEl` parameter at instantiation (same pattern as `FileNameDisplay`) so the class does not hard-code its location.
+
 ## Later
 
 - [ ] **External validator integration** — link to HL7 / Simplifier validator or call a local FHIR validation API; surface results as item-level badges

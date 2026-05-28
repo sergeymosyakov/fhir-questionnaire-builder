@@ -1,6 +1,7 @@
 // ── Contained Resources panel ─────────────────────────────────────────────────
 // Collapsible read-only card showing Questionnaire.contained[] items.
 // Each chip fires 'show-json' event → handled by JsonViewerModal.
+import { AppEvents } from '../../events.js';
 import { Panel } from './panel-base.js';
 
 class ContainedPanel extends Panel {
@@ -45,7 +46,7 @@ class ContainedPanel extends Panel {
       chip.dataset.tipFhir  = rId ? `Questionnaire.contained[id="${rId}"]` : 'Questionnaire.contained[]';
       chip.dataset.tipSpec  = 'R4 · optional';
       chip.addEventListener('click', () => {
-        document.dispatchEvent(new CustomEvent('show-json', { detail: { title: label, data: resource } }));
+        document.dispatchEvent(new CustomEvent(AppEvents.SHOW_JSON, { detail: { title: label, data: resource } }));
       });
       this._chipList.appendChild(chip);
     }

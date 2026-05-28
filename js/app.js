@@ -3,8 +3,6 @@ import * as storage from './storage/storage.js';
 import { LocalStorageAdapter } from './storage/local-storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
-import * as auth from './auth/auth.js';
-import * as cloudModal from './ui/modals/cloud-modal.js';
 import { tree, values, rawFhir, effect, clearAllValues, questVariables, questContained, questMeta } from './state.js';
 import { buildFHIRObject, exportFHIR } from './fhir/export.js';
 import { validateTree } from './fhir/validate.js';
@@ -18,9 +16,6 @@ import * as autosave from './ui/autosave.js';
 import { showPrompt } from './ui/toast.js';
 import * as statusBadge from './ui/status-badge.js';
 import { renderTree, collapseAll, expandAll, renumberAll, addRootGroup } from './builder/index.js';
-import { importFHIR } from './fhir/import.js';
-import { _formTick } from './render-bus.js';
-import * as history from './ui/history.js';
 import * as helpModal from './ui/modals/help-modal.js';
 import { navigateToPreview, initPreview, collapseAllPreview, expandAllPreview } from './render-preview.js';
 import { saveMenu, toolsMenu } from './ui/header-actions.js';
@@ -32,22 +27,38 @@ import containedPanel        from './ui/panels/contained-panel.js';
 storage.register(new SupabaseAdapter(supabase));
 import answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
 import * as patientCtx        from './ui/patient-ctx.js';
-import { setFileName, navigateToNode } from './app-load.js';
+import { FileNameDisplay } from './ui/file-name.js';
+import { AppEvents } from './events.js';
+import { clearConfirmModal } from './ui/modals/clear-confirm-modal.js';
+import { AuthPanel } from './ui/auth-panel.js';
+import { PanelResizer } from './ui/panel-resizer.js';
+import { AutosaveToggle } from './ui/autosave-toggle.js';
+import { UndoRedo } from './ui/undo-redo.js';
 
 // ── Inject state into UI panels ─────────────────────────────────────────
 containedPanel.configure({ questContained });
 answerValueSetPanel.configure({ tree });
 variablesPanel.configure({ questVariables });
 patientCtx.configure({ tree, effect, questVariables });
+AuthPanel.configure({ tree, effect });
+AutosaveToggle.configure({ questMeta });
+UndoRedo.configure({ effect, formTick: (await import('./render-bus.js'))._formTick });
+
+// FileNameDisplay — mounts chip into preview section-title
+const fileNameDisplay = new FileNameDisplay(document.querySelector('.right-panel .section-title'));
+// AuthPanel — mounts sign-in / user chip into #authWrap, handles cloud ops
+new AuthPanel(document.getElementById('authWrap'));
+
+// questionnaire-clear-requested is dispatched by the × button in FileNameDisplay
+document.addEventListener(AppEvents.QUESTIONNAIRE_CLEAR_REQUESTED, _clearForm);
+// questionnaire-reset is dispatched by AuthPanel (sign-out with unsaved work)
+document.addEventListener(AppEvents.QUESTIONNAIRE_RESET, _doReset);
 
 // Buttons
-document.getElementById('clearFormBtn').onclick    = _clearForm;
-
-
 document.getElementById('addRootGroupBtn').onclick = () => {
   addRootGroup();
-  // If no file is loaded, show a default name so the × button makes sense
-  if (!document.getElementById('loadedFileName').textContent) setFileName('New Questionnaire');
+  // If no file is loaded yet, signal that a new questionnaire was started
+  if (!fileNameDisplay.getName()) document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_NEW));
 };
 document.getElementById('collapseAllBtn').onclick  = collapseAll;
 // View options moved to dropdown menu (see viewOptionsBtn section below)
@@ -60,11 +71,11 @@ document.getElementById('renumberBtn').onclick = async () => {
   const cleanup = () => {
     progress.hide();
     btn.disabled = false;
-    document.removeEventListener('renumber-progress', onProgress);
-    document.removeEventListener('renumber-done', cleanup);
+    document.removeEventListener(AppEvents.RENUMBER_PROGRESS, onProgress);
+    document.removeEventListener(AppEvents.RENUMBER_DONE, cleanup);
   };
-  document.addEventListener('renumber-progress', onProgress);
-  document.addEventListener('renumber-done', cleanup);
+  document.addEventListener(AppEvents.RENUMBER_PROGRESS, onProgress);
+  document.addEventListener(AppEvents.RENUMBER_DONE, cleanup);
   try { await renumberAll(); } catch { cleanup(); }
 };
 
@@ -108,6 +119,7 @@ search.init({
   counter:     document.getElementById('searchCounter'),
   lform:       document.getElementById('lform'),
   fhirJsonView: document.getElementById('fhirJsonView'),
+  searchWrap:  document.getElementById('searchWrap'),
 });
 
 // ── Preview module init ──────────────────────────────────────────────────────
@@ -122,12 +134,12 @@ initPreview({
 
 // Prompt for filename then export
 function _promptExport(afterExport) {
-  const suggested = document.getElementById('loadedFileName')?.textContent.trim() || 'questionnaire';
+  const suggested = fileNameDisplay.getName().trim() || 'questionnaire';
   showPrompt('Save as:', suggested + '.json', name => {
     if (name === null) return; // cancelled
     const trimmed = name.replace(/\.json$/i, '');
     exportFHIR(trimmed + '.json');
-    setFileName(trimmed);
+    fileNameDisplay.setName(trimmed);
     if (afterExport) afterExport();
   });
 }
@@ -137,10 +149,10 @@ saveMenu.setHandlers({
   onExportFhir: () => {
     const issues = validateTree(tree, values);
     if (issues.length === 0) { _promptExport(); return; }
-    validateModal.show('Export \u2014 Validation Report', issues, 'export', { onExport: () => _promptExport(), onNavigate: navigateToNode });
+    validateModal.show('Export — Validation Report', issues, 'export', { onExport: () => _promptExport() });
   },
   onExportQr: () => {
-    const suggested = document.getElementById('loadedFileName')?.textContent.trim() || 'questionnaire';
+    const suggested = fileNameDisplay.getName().trim() || 'questionnaire';
     qrExportModal.open(suggested + '-response.json');
   },
 });
@@ -149,7 +161,7 @@ saveMenu.setHandlers({
 toolsMenu.setHandlers({
   onValidate: () => {
     const issues = validateTree(tree, values);
-    validateModal.show('Validate \u2014 Report', issues, 'import', { onNavigate: navigateToNode });
+    validateModal.show('Validate — Report', issues, 'import');
   },
   onExpand: () => expandAllPreview(),
   onCollapse: () => collapseAllPreview(),
@@ -176,22 +188,10 @@ effect(() => {
   }
 });
 
-// ── Keyboard shortcuts ────────────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-    const searchWrap = document.getElementById('searchWrap');
-    const searchInput = document.getElementById('searchInput');
-    if (searchWrap && searchInput && searchWrap.style.display !== 'none') {
-      e.preventDefault();
-      searchInput.focus();
-      searchInput.select();
-    }
-  }
-});
 
 async function _clearForm() {
   if (tree.length > 0) {
-    const choice = await _askBeforeClear();
+    const choice = await clearConfirmModal.open();
     if (choice === 'cancel') return;
     if (choice === 'export') {
       const issues = validateTree(tree, values);
@@ -202,7 +202,6 @@ async function _clearForm() {
         // Show modal; after export (or skip) we do NOT auto-clear — user decides
         validateModal.show('Export — Validation Report', issues, 'export', {
           onExport: () => { _promptExport(_doReset); },
-          onNavigate: navigateToNode,
         });
         return;
       }
@@ -241,67 +240,8 @@ function _doReset() {
   questContained.splice(0);
   // Re-render empty builder
   renderTree();
-  setFileName('');
   autosave.clearDraft();
-  document.dispatchEvent(new CustomEvent('questionnaire-cleared'));
-}
-
-// Returns promise resolving to 'export' | 'clear' | 'cancel'
-function _askBeforeClear() {
-  return new Promise(resolve => {
-    const backdrop = document.createElement('div');
-    backdrop.className = 'clear-confirm-backdrop';
-
-    const box = document.createElement('div');
-    box.className = 'clear-confirm-box';
-    box.innerHTML =
-      '<div class="clear-confirm-title">Clear questionnaire?</div>' +
-      '<div class="clear-confirm-msg">You have unsaved changes. Do you want to export before clearing?</div>' +
-      '<div class="clear-confirm-btns">' +
-        '<button class="btn-fhir btn-fhir-export" id="_ccExport" data-testid="clear-confirm-export-btn">⬇ Export first</button>' +
-        '<button class="btn-fhir" id="_ccClear" data-testid="clear-confirm-clear-btn">Clear anyway</button>' +
-        '<button class="btn-fhir" id="_ccCancel" data-testid="clear-confirm-cancel-btn">Cancel</button>' +
-      '</div>';
-
-    backdrop.appendChild(box);
-    document.body.appendChild(backdrop);
-
-    const esc = e => { if (e.key === 'Escape') close('cancel'); };
-    document.addEventListener('keydown', esc);
-    const close = (result) => { document.removeEventListener('keydown', esc); backdrop.remove(); resolve(result); };
-    box.querySelector('#_ccExport').onclick  = () => close('export');
-    box.querySelector('#_ccClear').onclick   = () => close('clear');
-    box.querySelector('#_ccCancel').onclick  = () => close('cancel');
-    backdrop.addEventListener('click', e => { if (e.target === backdrop) close('cancel'); });
-  });
-}
-
-// Returns promise resolving to 'ok' | 'cancel'
-function _askConfirm(title, msg, okLabel = 'OK', cancelLabel = 'Cancel') {
-  return new Promise(resolve => {
-    const backdrop = document.createElement('div');
-    backdrop.className = 'clear-confirm-backdrop';
-
-    const box = document.createElement('div');
-    box.className = 'clear-confirm-box';
-    box.innerHTML =
-      `<div class="clear-confirm-title">${title}</div>` +
-      `<div class="clear-confirm-msg">${msg}</div>` +
-      '<div class="clear-confirm-btns">' +
-        `<button class="btn-fhir" id="_acOk">${okLabel}</button>` +
-        `<button class="btn-fhir" id="_acCancel">${cancelLabel}</button>` +
-      '</div>';
-
-    backdrop.appendChild(box);
-    document.body.appendChild(backdrop);
-
-    const esc = e => { if (e.key === 'Escape') close('cancel'); };
-    document.addEventListener('keydown', esc);
-    const close = r => { document.removeEventListener('keydown', esc); backdrop.remove(); resolve(r); };
-    box.querySelector('#_acOk').onclick     = () => close('ok');
-    box.querySelector('#_acCancel').onclick = () => close('cancel');
-    backdrop.addEventListener('click', e => { if (e.target === backdrop) close('cancel'); });
-  });
+  document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_CLEARED));
 }
 
 // Close any open ⊕ Add dropdown when clicking outside
@@ -315,220 +255,15 @@ document.addEventListener('click', () => {
 });
 
 // ── Panel resize drag ─────────────────────────────────────────────────────────
-{
-  const resizer   = document.getElementById('panelResizer');
-  const leftPanel = document.querySelector('.left-panel');
-  const STORAGE_KEY = 'leftPanelWidth';
-  const MIN = 200, MAX = () => window.innerWidth * 0.7;
+new PanelResizer({
+  resizer:    document.getElementById('panelResizer'),
+  panel:      document.querySelector('.left-panel'),
+  storageKey: 'leftPanelWidth',
+}).init();
 
-  // Restore saved width
-  let saved;
-  try { saved = await storage.getItem(STORAGE_KEY); } catch { /* private mode / quota */ }
-  if (saved) leftPanel.style.width = saved + 'px';
+new AutosaveToggle(document.getElementById('autosaveToggleBtn'));
 
-  let startX, startW;
-  resizer.addEventListener('mousedown', e => {
-    e.preventDefault();
-    startX = e.clientX;
-    startW = leftPanel.getBoundingClientRect().width;
-    resizer.classList.add('resizing');
-
-    // Overlay captures all pointer events and prevents text selection during drag
-    const overlay = document.createElement('div');
-    overlay.id = 'resize-overlay';
-    overlay.className = 'resize-overlay';
-    document.body.appendChild(overlay);
-
-    const onMove = e => {
-      const w = Math.min(MAX(), Math.max(MIN, startW + e.clientX - startX));
-      leftPanel.style.width = w + 'px';
-    };
-    const onUp = () => {
-      resizer.classList.remove('resizing');
-      overlay.remove();
-      try { storage.setItem(STORAGE_KEY, parseInt(leftPanel.style.width)); } catch { /* ignore */ }
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  });
-}
-
-// Start empty — use Example button or Load FHIR JSON to load data
-const _autosaveToggleBtn = document.getElementById('autosaveToggleBtn');
-const _syncAutosaveState = (enabled, lastSaveDate) => {
-  _autosaveToggleBtn.classList.toggle('btn-fhir--active', enabled);
-  if (enabled) {
-    const label = lastSaveDate
-      ? 'autosave · ' + String(lastSaveDate.getHours()).padStart(2,'0') + ':' + String(lastSaveDate.getMinutes()).padStart(2,'0')
-      : 'autosave';
-    _autosaveToggleBtn.textContent = label;
-  } else {
-    _autosaveToggleBtn.textContent = 'autosave off';
-  }
-};
-_autosaveToggleBtn.addEventListener('click', () => {
-  const next = !autosave.isEnabled();
-  autosave.setEnabled(next);
-  _syncAutosaveState(next, null);
-});
-autosave.init({ buildFn: buildFHIRObject, questMeta, onSaved: (date) => {
-  _syncAutosaveState(autosave.isEnabled(), date);
-} }).then(() => _syncAutosaveState(autosave.isEnabled(), null));
-
-
-// ── Undo / Redo ───────────────────────────────────────────────────────────────
-const _undoBtn = document.getElementById('undoBtn');
-const _redoBtn = document.getElementById('redoBtn');
-
-function _syncUndoRedo() {
-  _undoBtn.disabled = !history.canUndo();
-  _redoBtn.disabled = !history.canRedo();
-}
-
-history.init({
-  buildFn:  buildFHIRObject,
-  importFn: importFHIR,
-  renderFn: renderTree,
-  formTick: _formTick,
-  effect,
-  onChange: _syncUndoRedo,
-});
-
-_undoBtn.addEventListener('click', () => { history.undo(); _syncUndoRedo(); });
-_redoBtn.addEventListener('click', () => { history.redo(); _syncUndoRedo(); });
-
-document.addEventListener('keydown', e => {
-  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
-    e.preventDefault(); history.undo(); _syncUndoRedo();
-  } else if (
-    ((e.ctrlKey || e.metaKey) && e.key === 'y') ||
-    ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z')
-  ) {
-    e.preventDefault(); history.redo(); _syncUndoRedo();
-  }
-});
-
-// ── Auth + Cloud ──────────────────────────────────────────────────────────────
-{
-  const _signInBtn    = document.getElementById('signInBtn');
-  const _userChip     = document.getElementById('userChip');
-  const _userMenuBtn  = document.getElementById('userMenuBtn');
-  const _userMenu     = document.getElementById('userMenu');
-  const _userAvatar   = document.getElementById('userAvatar');
-  const _userName     = document.getElementById('userName');
-  const _signOutBtn   = document.getElementById('signOutBtn');
-  const _cloudSaveBtn  = document.getElementById('cloudSaveBtn');
-  const _cloudSaveSep  = document.getElementById('cloudSaveSep');
-  const _loadCloudItem = document.getElementById('loadCloudItem');
-  const _loadCloudSep  = document.getElementById('loadCloudSep');
-
-  // Track the cloud row id of the currently open questionnaire (for updates)
-  let _currentCloudId = null;
-
-  function _setAuthUI(user) {
-    if (user) {
-      _signInBtn.style.display  = 'none';
-      _userChip.style.display   = 'inline-flex';
-      _userAvatar.src           = user.user_metadata?.avatar_url || '';
-      _userName.textContent     = user.user_metadata?.user_name || user.email || '';
-      _loadCloudItem.style.display = '';
-      _loadCloudSep.style.display  = '';
-    } else {
-      _signInBtn.style.display  = '';
-      _userChip.style.display   = 'none';
-      _loadCloudItem.style.display = 'none';
-      _loadCloudSep.style.display  = 'none';
-      _cloudSaveBtn.style.display = 'none';
-      _cloudSaveSep.style.display = 'none';
-      _currentCloudId = null;
-    }
-  }
-
-  // Sync cloud save item visibility with login + tree state
-  effect(() => {
-    const loggedIn = _userChip.style.display !== 'none';
-    const hasNodes = tree.length > 0;
-    const show = loggedIn && hasNodes ? '' : 'none';
-    _cloudSaveBtn.style.display = show;
-    _cloudSaveSep.style.display = show;
-  });
-
-  // Reset cloud id when questionnaire is cleared
-  document.addEventListener('questionnaire-cleared', () => { _currentCloudId = null; });
-
-  _signInBtn.addEventListener('click', async () => {
-    try { await auth.signInWithGitHub(); }
-    catch (err) { import('./ui/toast.js').then(m => m.showError('Sign in failed: ' + err.message)); }
-  });
-
-  _userMenuBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    if (_userMenu.style.display === 'none') {
-      const r = _userMenuBtn.getBoundingClientRect();
-      _userMenu.style.top      = (r.bottom + 4) + 'px';
-      _userMenu.style.right    = (window.innerWidth - r.right) + 'px';
-      _userMenu.style.minWidth = r.width + 'px';
-      _userMenu.style.display  = 'block';
-    } else {
-      _userMenu.style.display = 'none';
-    }
-  });
-
-  _signOutBtn.addEventListener('click', async () => {
-    _userMenu.style.display = 'none';
-    if (tree.length > 0) {
-      const answer = await _askConfirm(
-        'Sign out?',
-        'Your unsaved work will be lost. Sign out anyway?',
-        'Sign out', 'Cancel'
-      );
-      if (answer !== 'ok') return;
-      _doReset();
-    }
-    try { await auth.signOut(); }
-    catch (err) { import('./ui/toast.js').then(m => m.showError('Sign out failed: ' + err.message)); }
-  });
-
-  _cloudSaveBtn.addEventListener('click', async () => {
-    document.dispatchEvent(new CustomEvent('close-dropdowns'));
-    _cloudSaveBtn.classList.add('load-menu-item--loading');
-    try {
-      const fhirJson = buildFHIRObject();
-      let row;
-      if (_currentCloudId) {
-        row = await storage.cloudUpdate(_currentCloudId, fhirJson);
-      } else {
-        row = await storage.cloudSave(fhirJson);
-        _currentCloudId = row.id;
-      }
-      import('./ui/toast.js').then(m => m.showInfo('Saved to cloud'));
-    } catch (err) {
-      import('./ui/toast.js').then(m => m.showError('Cloud save failed: ' + err.message));
-    } finally {
-      _cloudSaveBtn.classList.remove('load-menu-item--loading');
-    }
-  });
-
-  _loadCloudItem.addEventListener('click', async () => {
-    document.dispatchEvent(new CustomEvent('close-dropdowns'));
-    const { importAndValidate } = await import('./app-load.js');
-    cloudModal.open(async id => {
-      try {
-        progress.show('Loading from cloud\u2026');
-        const fhirJson = await storage.cloudLoad(id);
-        _currentCloudId = id;
-        await importAndValidate(fhirJson, fhirJson.title || 'Cloud questionnaire');
-      } catch (err) {
-        progress.hide();
-        import('./ui/toast.js').then(m => m.showError('Cloud load failed: ' + err.message));
-      }
-    });
-  });
-
-  // Subscribe to auth state — fires immediately with current session
-  auth.onAuthChange((event, user) => {
-    _setAuthUI(user);
-  });
-}
+new UndoRedo(
+  document.getElementById('undoBtn'),
+  document.getElementById('redoBtn'),
+);

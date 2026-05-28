@@ -4,16 +4,18 @@ import { Modal } from './modal-base.js';
 import { exportQR } from '../../fhir/qr-export.js';
 import { createCustomSelect } from '../custom-select.js';
 
+import { AppEvents } from '../../events.js';
+
 const QR_STATUSES = ['in-progress', 'completed', 'amended', 'entered-in-error', 'stopped'];
 
 // QR pre-fill state — owned here, not in state.js.
 const _qrMeta = { status: 'in-progress', subject: '', author: '' };
-document.addEventListener('questionnaire-loaded', () => {
+document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => {
   _qrMeta.status  = 'in-progress';
   _qrMeta.subject = '';
   _qrMeta.author  = '';
 });
-document.addEventListener('qr-loaded', e => {
+document.addEventListener(AppEvents.QR_LOADED, e => {
   _qrMeta.status  = e.detail.status  || 'in-progress';
   _qrMeta.subject = e.detail.subject || '';
   _qrMeta.author  = e.detail.author  || '';

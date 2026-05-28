@@ -174,12 +174,12 @@ test.describe('minValue / maxValue enforcement', () => {
     await loadFixture(page);
     const input = page.locator('[data-preview-id="score"] input[type="number"]');
     await input.fill('11');
-    await input.blur();
+    await input.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
     // Confirm error appears
     await expect(page.locator('[data-preview-id="score"] .ctrl-err')).toBeVisible();
     // Correct the value
     await input.fill('7');
-    await input.blur();
+    await input.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
     await expect(page.locator('[data-preview-id="score"] .ctrl-err')).toBeHidden();
   });
 

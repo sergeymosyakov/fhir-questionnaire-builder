@@ -2,6 +2,7 @@
 // Collapsible card (above tree) + edit modal for sdc-questionnaire-variable.
 // configure({questVariables}) — call once at startup; then refresh() on events.
 import { Modal } from './modals/modal-base.js';
+import { AppEvents } from '../events.js';
 
 let _questVariables = null;
 export function configure({ questVariables }) {
@@ -43,7 +44,7 @@ class VariablesModal extends Modal {
     _draft = null;
     this.close();
     refresh();
-    document.dispatchEvent(new CustomEvent('reinit-form'));
+    document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
   }
 
   _cancel() {
@@ -119,9 +120,9 @@ if (_el.reinitBtn) _el.reinitBtn.addEventListener('click', () => {
   document.dispatchEvent(new CustomEvent('reinit-form'));
 });
 
-document.addEventListener('questionnaire-loaded', refresh);
-document.addEventListener('questionnaire-cleared', refresh);
-document.addEventListener('patient-ctx-applied', refresh);
+document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, refresh);
+document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, refresh);
+document.addEventListener(AppEvents.PATIENT_CTX_APPLIED, refresh);
 
 export function refresh() {
   if (!_questVariables) return;

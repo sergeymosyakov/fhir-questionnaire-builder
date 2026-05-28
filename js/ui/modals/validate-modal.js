@@ -1,8 +1,9 @@
 // ── Validation Modal UI ───────────────────────────────────────────────────────
-// show(title, issues, mode, { onExport?, onNavigate? }) — render and open
+// show(title, issues, mode, { onExport? }) — render and open
 //   mode: 'export' → "Fix first" + "Export anyway"
 //         'import' → "OK" only
 import { Modal } from './modal-base.js';
+import { AppEvents } from '../../events.js';
 
 class ValidateModal extends Modal {
   getName() { return 'validateModal'; }
@@ -10,16 +11,16 @@ class ValidateModal extends Modal {
     super({ cancelLabel: null, applyLabel: null });
   }
 
-  show(title, issues, mode, { onExport, onNavigate } = {}) {
-    this.title.textContent = issues.length === 0 ? 'Validate \u2014 All good' : title;
-    this._renderBody(issues, onNavigate);
+  show(title, issues, mode, { onExport } = {}) {
+    this.title.textContent = issues.length === 0 ? 'Validate — All good' : title;
+    this._renderBody(issues);
     this._renderFooter(mode, onExport, issues.length === 0);
     super.open();
   }
 
   _cancel() { this.close(); }
 
-  _renderBody(issues, onNavigate) {
+  _renderBody(issues) {
     this.body.innerHTML = '';
 
     if (issues.length === 0) {
@@ -60,7 +61,7 @@ class ValidateModal extends Modal {
       content.appendChild(document.createTextNode(issue.message));
       row.appendChild(content);
 
-      if (onNavigate && issue.nodeId && issue.nodeId !== '(empty)') {
+      if (issue.nodeId && issue.nodeId !== '(empty)') {
         const navBtn = document.createElement('button');
         navBtn.type = 'button';
         navBtn.className = 'validate-nav-btn';
@@ -68,7 +69,7 @@ class ValidateModal extends Modal {
         navBtn.textContent = '\u2197';
         navBtn.addEventListener('click', () => {
           this.close();
-          onNavigate(issue.nodeId);
+          document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: issue.nodeId } }));
         });
         row.appendChild(navBtn);
       }

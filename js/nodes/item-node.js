@@ -218,6 +218,7 @@ export class ItemNode extends BaseNode {
     const div = document.createElement('div');
     div.className = 'node node-item';
     div.dataset.nodeId = node.id;
+    node._initNavListener(div);
 
     wrapper.appendChild(node._buildDropZoneAbove());
 

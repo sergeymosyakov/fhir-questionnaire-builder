@@ -4,8 +4,10 @@
 // init(elements) — wire DOM nodes once at startup (no getElementById inside)
 //   elements: { input, prevBtn, nextBtn, counter, lform, fhirJsonView }
 
+import { AppEvents } from '../events.js';
+
 let _previewMode = 'preview';
-document.addEventListener('preview-mode-change', e => { _previewMode = e.detail.mode; });
+document.addEventListener(AppEvents.PREVIEW_MODE_CHANGE, e => { _previewMode = e.detail.mode; });
 import { highlightJson, highlightJsonWithSearch } from '../utils.js';
 
 let _el      = null;
@@ -24,6 +26,15 @@ export function init(elements) {
   });
   _el.nextBtn.addEventListener('click', () => _navigate(+1));
   _el.prevBtn.addEventListener('click', () => _navigate(-1));
+
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      if (_el.searchWrap && _el.searchWrap.style.display === 'none') return;
+      e.preventDefault();
+      _el.input.focus();
+      _el.input.select();
+    }
+  });
 }
 
 // Called by render-preview.js after every re-render so stale references update.
