@@ -29,7 +29,7 @@ class PlaceholderSection extends AnswerTypeSection {
 
     // ── Multi-line toggle (text/string type only) ────────────────────────────
     const mlRow = document.createElement('label');
-    mlRow.className = 'at-modal-sub';
+    mlRow.className = 'at-modal-multiline-row';
     mlRow.style.display = pending.draftType === 'text' ? '' : 'none';
     const mlCb = Object.assign(document.createElement('input'), { type: 'checkbox', checked: !!pending.draftTextArea });
     mlCb.dataset.testid = 'text-area-toggle';
