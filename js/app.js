@@ -11,7 +11,7 @@ import * as qrExportModal from './ui/modals/qr-export-modal.js';
 import * as progress from './ui/progress.js';
 import { RenumberControl } from './ui/renumber-control.js';
 import * as search from './ui/search.js';
-import * as tooltip from './ui/tooltip.js';
+import { TooltipToggle } from './ui/tooltip-toggle.js';
 import * as autosave from './ui/autosave.js';
 import { showPrompt } from './ui/toast.js';
 import * as statusBadge from './ui/status-badge.js';
@@ -80,8 +80,11 @@ progress.init({
   blocker: document.getElementById('uiBlocker'),
 });
 
-// ── Tooltip init ─────────────────────────────────────────────────────────
-tooltip.init().then(() => _syncTooltipState(tooltip.isEnabled()));
+// ── Tooltip toggle ───────────────────────────────────────────────────────
+new TooltipToggle(
+  document.getElementById('tooltipToggleBtn'),
+  document.getElementById('tooltipsOffBadge'),
+);
 
 statusBadge.init({
   btn:      document.getElementById('statusBadgeBtn'),
@@ -89,19 +92,6 @@ statusBadge.init({
   wrap:     document.getElementById('statusBadgeWrap'),
 }, (id) => {
   document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE, { detail: { id } }));
-});
-
-const _tooltipToggleBtn  = document.getElementById('tooltipToggleBtn');
-const _tooltipsOffBadge  = document.getElementById('tooltipsOffBadge');
-const _syncTooltipState = (enabled) => {
-  _tooltipToggleBtn.classList.toggle('btn-fhir--active', enabled);
-  _tooltipsOffBadge.style.display = enabled ? 'none' : '';
-};
-_syncTooltipState(tooltip.isEnabled());
-_tooltipToggleBtn.addEventListener('click', () => {
-  const next = !tooltip.isEnabled();
-  tooltip.setEnabled(next);
-  _syncTooltipState(next);
 });
 
 document.getElementById('helpBtn').addEventListener('click', () => helpModal.open());
