@@ -37,7 +37,7 @@ export function init(elements) {
   });
 }
 
-// Called by render-preview.js after every re-render so stale references update.
+// Called by preview-form.js after every re-render so stale references update.
 export function refresh() {
   if (_el && _el.input.value.trim()) _onInput();
 }

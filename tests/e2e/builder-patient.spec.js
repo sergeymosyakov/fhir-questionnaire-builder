@@ -18,7 +18,7 @@ import { FIXTURES, waitForLoad } from './helpers/builder.js';
 async function loadEligibility(page) {
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('#fhirFileInput').setInputFiles(
+  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(
     path.join(FIXTURES, 'patient-scenario-eligibility.fhir.json')
   );
   // reinitForm() runs automatically on load; wait until profile-age is populated

@@ -12,7 +12,7 @@ import { test, expect } from '@playwright/test';
 const FIXTURE = path.resolve('tests/fixtures/all-types-repeatable.fhir.json');
 
 async function loadFixture(page) {
-  await page.locator('#fhirFileInput').setInputFiles(FIXTURE);
+  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
   await expect(page.locator('[data-preview-id="text-item"]')).toBeVisible({ timeout: 8_000 });
 }
 
@@ -106,7 +106,7 @@ test('QR repeat round-trip: fill 3 rows per field, export, reload, import, verif
   await expect(page.locator('[data-preview-id="text-item"] .repeat-row')).toHaveCount(1);
 
   // ── 6. Import QR ──
-  await page.locator('#qrFileInput').setInputFiles(qrPath);
+  await page.locator('[data-testid="qr-file-input"]').setInputFiles(qrPath);
 
   // Wait for re-render: text-item should now show 3 rows
   await expect(page.locator('[data-preview-id="text-item"] .repeat-row')).toHaveCount(3, { timeout: 8_000 });

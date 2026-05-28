@@ -60,6 +60,14 @@ export class DropdownMenu {
   show()  { this._wrap.style.display = ''; }
   hide()  { this._wrap.style.display = 'none'; }
 
+  /** Start hidden; show on QUESTIONNAIRE_LOADED / NEW, hide on CLEARED. */
+  _bindTreeVisibility() {
+    this.hide();
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => this.show());
+    document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,    () => this.show());
+    document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED,() => this.hide());
+  }
+
   // ── DOM helpers for subclasses ─────────────────────────────────────────────
 
   /** Plain text/HTML menu item div. */

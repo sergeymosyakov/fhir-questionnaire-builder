@@ -35,7 +35,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('#fhirFileInput').setInputFiles(FIXTURE);
+  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
   await expect(page.locator('[data-preview-id="q-single"]')).toBeVisible({ timeout: 8_000 });
 }
 

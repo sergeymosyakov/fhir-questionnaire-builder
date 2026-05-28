@@ -13,7 +13,7 @@
 // ── data-testid registry ─────────────────────────────────────────────────────
 // Selectors unique to this spec — all set via element.dataset.testid in JS sources.
 //
-//   preview-readonly-value    read-only value span (render-preview.js)
+//   preview-readonly-value    read-only value span (preview-form.js)
 //   char-counter              character counter span (controls/text.js, controls/url.js)
 //   preview-panel             preview panel wrapper (index.html)
 //
@@ -36,7 +36,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('#fhirFileInput').setInputFiles(FIXTURE);
+  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
   await expect(page.locator('[data-preview-id="readonly-text"]')).toBeVisible({ timeout: 8_000 });
 }
 
@@ -174,12 +174,8 @@ test.describe('minValue / maxValue enforcement', () => {
     await loadFixture(page);
     const input = page.locator('[data-preview-id="score"] input[type="number"]');
     await input.fill('11');
-    await input.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
-    // Confirm error appears
     await expect(page.locator('[data-preview-id="score"] .ctrl-err')).toBeVisible();
-    // Correct the value
     await input.fill('7');
-    await input.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
     await expect(page.locator('[data-preview-id="score"] .ctrl-err')).toBeHidden();
   });
 

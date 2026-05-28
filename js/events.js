@@ -40,6 +40,10 @@ export const AppEvents = Object.freeze({
   PATIENT_CTX_APPLIED: 'patient-ctx-applied',
   QR_LOADED:           'qr-loaded',
 
+  // ── Cloud ──────────────────────────────────────────────────────────────────
+  CLOUD_SAVE_REQUESTED:  'cloud-save-requested',
+  CLOUD_LOAD_REQUESTED:  'cloud-load-requested',
+
   // ── UI utilities ───────────────────────────────────────────────────────────
   CLOSE_DROPDOWNS:       'close-dropdowns',
 

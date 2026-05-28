@@ -27,7 +27,7 @@ export class GroupNode extends BaseNode {
       document.addEventListener(AppEvents.BUILDER_NAVIGATE, e => {
         if (!this._previewCollapsed) return;
         if (!isDescendant(e.detail.id, this)) return;
-        this._previewCollapsed = false; // own state only — render-preview ticks _formTick
+        this._previewCollapsed = false; // own state only — PreviewForm ticks _formTick
       }, { signal: this._ac.signal });
       document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._previewCollapsed = true; }, { signal: this._ac.signal });
       document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._previewCollapsed = false; }, { signal: this._ac.signal });
@@ -188,7 +188,7 @@ export class GroupNode extends BaseNode {
   }
 
   // Refresh pass/fail icons on every rendered group.
-  // Called from render-preview.js via _rc.updateGroupIcons after a value change.
+  // Called from preview-form.js via _rc.updateGroupIcons after a value change.
   static updateAll(rc) {
     for (const [, { node }] of rc.groupIconMap.entries()) {
       node.refreshIcon(rc);

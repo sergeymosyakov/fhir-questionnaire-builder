@@ -1,7 +1,8 @@
 // ── Auth + Cloud panel ────────────────────────────────────────────────────────
 // Owns the sign-in button and user chip DOM in the top bar.
 // Manages auth state changes and cloud save / load operations.
-// Mount: document.getElementById('authWrap') — an empty container in index.html.
+// Cloud save/load triggered via CLOUD_SAVE_REQUESTED / CLOUD_LOAD_REQUESTED events.
+// Mount: pass an empty container element from app.js.
 import * as auth from '../auth/auth.js';
 import { AppEvents } from '../events.js';
 import * as storage from '../storage/storage.js';
@@ -21,11 +22,17 @@ const _GITHUB_SVG = '<svg width="13" height="13" viewBox="0 0 16 16" fill="curre
   + '</svg>';
 
 export class AuthPanel {
-  static _svc = { tree: null, effect: null };
+  static _svc = { tree: null, effect: null, questLoader: null };
+  static _cloudEls = { saveBtn: null, saveSep: null, loadItem: null, loadSep: null };
 
   static configure({ tree, effect }) {
     AuthPanel._svc.tree = tree;
     AuthPanel._svc.effect = effect;
+  }
+
+  static configureCloudEls({ saveBtn, saveSep, loadItem, loadSep, questLoader }) {
+    AuthPanel._cloudEls = { saveBtn, saveSep, loadItem, loadSep };
+    AuthPanel._svc.questLoader = questLoader;
   }
 
   constructor(mountEl) {
@@ -46,27 +53,24 @@ export class AuthPanel {
   _buildDOM() {
     // Sign in button
     this._signInBtn = document.createElement('button');
-    this._signInBtn.id = 'signInBtn';
     this._signInBtn.type = 'button';
     this._signInBtn.className = 'auth-signin-btn';
+    this._signInBtn.dataset.testid = 'sign-in-btn';
     this._signInBtn.dataset.tipTitle = 'Sign in with GitHub';
     this._signInBtn.dataset.tipBody  = 'Save questionnaires to the cloud and access them from any device.';
     this._signInBtn.innerHTML = _GITHUB_SVG + ' Sign in';
 
     // User chip (hidden until signed in)
     this._userChip = document.createElement('div');
-    this._userChip.id = 'userChip';
     this._userChip.className = 'load-wrap top-panel-auth';
     this._userChip.style.display = 'none';
 
     // User menu toggle button
     this._userMenuBtn = document.createElement('button');
-    this._userMenuBtn.id = 'userMenuBtn';
     this._userMenuBtn.type = 'button';
     this._userMenuBtn.className = 'btn-fhir auth-user-btn';
 
     this._userAvatar = document.createElement('img');
-    this._userAvatar.id = 'userAvatar';
     this._userAvatar.className = 'auth-user-avatar';
     this._userAvatar.src = '';
     this._userAvatar.alt = '';
@@ -74,7 +78,6 @@ export class AuthPanel {
     this._userAvatar.height = 18;
 
     this._userName = document.createElement('span');
-    this._userName.id = 'userName';
     this._userName.className = 'auth-user-name';
 
     const chevron = document.createElement('span');
@@ -83,12 +86,10 @@ export class AuthPanel {
 
     // Dropdown menu
     this._userMenu = document.createElement('div');
-    this._userMenu.id = 'userMenu';
-    this._userMenu.className = 'load-menu';
+    this._userMenu.className = 'load-menu auth-user-menu';
     this._userMenu.style.display = 'none';
 
     this._signOutItem = document.createElement('div');
-    this._signOutItem.id = 'signOutBtn';
     this._signOutItem.className = 'load-menu-item';
     this._signOutItem.dataset.testid = 'sign-out-btn';
     this._signOutItem.textContent = 'Sign out';
@@ -134,45 +135,42 @@ export class AuthPanel {
       try { await auth.signOut(); }
       catch (err) { import('./toast.js').then(m => m.showError('Sign out failed: ' + err.message)); }
     });
+  }
 
-    // Cloud save — item owned by SaveMenu, logic lives here
-    document.getElementById('cloudSaveBtn').addEventListener('click', async () => {
-      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      const btn = document.getElementById('cloudSaveBtn');
-      btn.classList.add('load-menu-item--loading');
-      try {
-        const fhirJson = buildFHIRObject();
-        let row;
-        if (this._cloudId) {
-          row = await storage.cloudUpdate(this._cloudId, fhirJson);
-        } else {
-          row = await storage.cloudSave(fhirJson);
-          this._cloudId = row.id;
-        }
-        import('./toast.js').then(m => m.showInfo('Saved to cloud'));
-      } catch (err) {
-        import('./toast.js').then(m => m.showError('Cloud save failed: ' + err.message));
-      } finally {
-        btn.classList.remove('load-menu-item--loading');
+  // ── Cloud operations (triggered by menu events) ───────────────────────────
+
+  async _doCloudSave() {
+    const { saveBtn } = AuthPanel._cloudEls;
+    saveBtn.classList.add('load-menu-item--loading');
+    try {
+      const fhirJson = buildFHIRObject();
+      if (this._cloudId) {
+        await storage.cloudUpdate(this._cloudId, fhirJson);
+      } else {
+        const row = await storage.cloudSave(fhirJson);
+        this._cloudId = row.id;
       }
-    });
+      import('./toast.js').then(m => m.showInfo('Saved to cloud'));
+    } catch (err) {
+      import('./toast.js').then(m => m.showError('Cloud save failed: ' + err.message));
+    } finally {
+      saveBtn.classList.remove('load-menu-item--loading');
+    }
+  }
 
-    // Cloud load — item owned by QuestionnairesMenu, logic lives here
-    document.getElementById('loadCloudItem').addEventListener('click', async () => {
-      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      const { importAndValidate, _askBeforeLoad } = await import('../app-load.js');
-      if (await _askBeforeLoad() !== 'proceed') return;
-      cloudModal.open(async id => {
-        try {
-          progress.show('Loading from cloud\u2026');
-          const fhirJson = await storage.cloudLoad(id);
-          this._cloudId = id;
-          await importAndValidate(fhirJson, fhirJson.title || 'Cloud questionnaire');
-        } catch (err) {
-          progress.hide();
-          import('./toast.js').then(m => m.showError('Cloud load failed: ' + err.message));
-        }
-      });
+  async _doCloudLoad() {
+    const { questLoader } = AuthPanel._svc;
+    if (await questLoader.confirmBeforeLoad() !== 'proceed') return;
+    cloudModal.open(async id => {
+      try {
+        progress.show('Loading from cloud\u2026');
+        const fhirJson = await storage.cloudLoad(id);
+        this._cloudId = id;
+        await questLoader.load(fhirJson, fhirJson.title || 'Cloud questionnaire');
+      } catch (err) {
+        progress.hide();
+        import('./toast.js').then(m => m.showError('Cloud load failed: ' + err.message));
+      }
     });
   }
 
@@ -182,46 +180,47 @@ export class AuthPanel {
     document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => {
       this._cloudId = null;
     });
+    document.addEventListener(AppEvents.CLOSE_DROPDOWNS, () => {
+      this._userMenu.style.display = 'none';
+    });
+    document.addEventListener(AppEvents.CLOUD_SAVE_REQUESTED, () => this._doCloudSave());
+    document.addEventListener(AppEvents.CLOUD_LOAD_REQUESTED, () => this._doCloudLoad());
   }
 
   // ── Reactivity ────────────────────────────────────────────────────────────
 
   _initReactive() {
     const { tree, effect } = AuthPanel._svc;
+    const { saveBtn, saveSep } = AuthPanel._cloudEls;
     // Re-sync cloud save button visibility whenever the tree changes
     effect(() => {
       const loggedIn = this._userChip.style.display !== 'none';
       const hasNodes = tree.length > 0;
       const show = loggedIn && hasNodes ? '' : 'none';
-      const cloudSaveBtn = document.getElementById('cloudSaveBtn');
-      const cloudSaveSep = document.getElementById('cloudSaveSep');
-      if (cloudSaveBtn) cloudSaveBtn.style.display = show;
-      if (cloudSaveSep) cloudSaveSep.style.display = show;
+      if (saveBtn) saveBtn.style.display = show;
+      if (saveSep) saveSep.style.display = show;
     });
   }
 
   // ── Auth state ────────────────────────────────────────────────────────────
 
   _setAuthUI(user) {
-    const cloudSaveBtn  = document.getElementById('cloudSaveBtn');
-    const cloudSaveSep  = document.getElementById('cloudSaveSep');
-    const loadCloudItem = document.getElementById('loadCloudItem');
-    const loadCloudSep  = document.getElementById('loadCloudSep');
+    const { saveBtn, saveSep, loadItem, loadSep } = AuthPanel._cloudEls;
 
     if (user) {
       this._signInBtn.style.display  = 'none';
       this._userChip.style.display   = 'inline-flex';
       this._userAvatar.src           = user.user_metadata?.avatar_url || '';
       this._userName.textContent     = user.user_metadata?.user_name || user.email || '';
-      if (loadCloudItem) loadCloudItem.style.display = '';
-      if (loadCloudSep)  loadCloudSep.style.display  = '';
+      if (loadItem) loadItem.style.display = '';
+      if (loadSep)  loadSep.style.display  = '';
     } else {
       this._signInBtn.style.display  = '';
       this._userChip.style.display   = 'none';
-      if (loadCloudItem) loadCloudItem.style.display = 'none';
-      if (loadCloudSep)  loadCloudSep.style.display  = 'none';
-      if (cloudSaveBtn)  cloudSaveBtn.style.display  = 'none';
-      if (cloudSaveSep)  cloudSaveSep.style.display  = 'none';
+      if (loadItem) loadItem.style.display = 'none';
+      if (loadSep)  loadSep.style.display  = 'none';
+      if (saveBtn)  saveBtn.style.display  = 'none';
+      if (saveSep)  saveSep.style.display  = 'none';
       this._cloudId = null;
     }
   }

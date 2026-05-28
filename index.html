@@ -118,41 +118,10 @@
           data-tip-spec="R4 · optional">&#x21BA; Renumber</button>
       </div>
     </div>
-    <!-- Questionnaire metadata card (shown when tree has nodes) -->
-    <div id="questMetaCard" class="quest-meta-card" data-testid="quest-meta-card" style="display:none">
-      <span class="quest-meta-card-label">Questionnaire</span>
-      <span id="questMetaCardStatus" class="quest-meta-card-status" data-testid="quest-meta-status"
-        data-tip-title="Publication status"
-        data-tip-body="Lifecycle status of this questionnaire: draft (work in progress), active (published and in use), retired (no longer used), or unknown."
-        data-tip-fhir="Questionnaire.status"
-        data-tip-spec="R4 &middot; required"></span>
-      <span id="questMetaCardExperimental" class="quest-meta-card-experimental" data-testid="quest-meta-experimental"
-        data-tip-title="Experimental flag"
-        data-tip-body="experimental=true means this questionnaire is for testing only and should not be used in production. experimental=false means it is production-ready."
-        data-tip-fhir="Questionnaire.experimental"
-        data-tip-spec="R4 &middot; optional"
-        style="display:none"></span>
-      <button id="propertiesBtn" type="button" class="quest-meta-edit-btn" data-testid="properties-btn"
-        data-tip-title="Questionnaire Properties"
-        data-tip-body="Edit questionnaire-level metadata: id, url, version, title, status, publisher and description. These fields are preserved on import and written back on export.">Edit</button>
-    </div>
-    <!-- Questionnaire-level SDC variables card (shown when tree has nodes) -->
-    <div id="variablesCard" class="variables-card" style="display:none">
-      <div class="variables-card-header">
-        <button id="variablesCardToggle" type="button" class="variables-card-toggle" aria-expanded="true" data-tip-title="Collapse / expand" data-tip-body="Toggle the Variables card open or closed.">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
-        </button>
-        <span class="variables-card-title"
-          data-tip-title="Questionnaire Variables"
-          data-tip-body="SDC questionnaire-level FHIRPath variables. Defined once at the root and referenced as %varName inside any calculatedExpression. Imported and exported as sdc-questionnaire-variable extensions."
-          data-tip-fhir="Questionnaire.extension[sdc-questionnaire-variable]"
-          data-tip-spec="SDC · optional">Variables</span>
-        <span id="variablesCardCount" class="variables-card-count"></span>
-        <button id="variablesReinitBtn" data-testid="variables-reinit-btn" type="button" class="variables-reinit-btn" data-tip-title="Re-init" data-tip-body="Re-evaluate all questionnaire-level variables and item initialExpression fields.">&#x21BA; Re-init</button>
-        <button id="variablesEditBtn" type="button" class="variables-edit-btn">Edit</button>
-      </div>
-      <div id="variablesCardChips" class="variables-card-chips"></div>
-    </div>
+    <!-- Questionnaire metadata card (mount point for js/ui/metadata-card.js) -->
+    <div id="questMetaCardMount"></div>
+    <!-- Questionnaire-level SDC variables card (mount point for js/ui/variables-panel.js) -->
+    <div id="variablesCardMount"></div>
     <div class="left-panel-body">
       <div id="treeContainer" data-testid="tree-container"></div>
     </div>

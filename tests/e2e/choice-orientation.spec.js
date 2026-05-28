@@ -39,7 +39,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('#fhirFileInput').setInputFiles(FIXTURE);
+  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
   // Wait for a radio item from section 8 to appear in the preview
   await expect(page.locator('[data-preview-id="q-diet-type"]')).toBeVisible({ timeout: 8_000 });
 }

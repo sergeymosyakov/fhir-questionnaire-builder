@@ -42,7 +42,7 @@
 }
 
 /* User dropdown menu — fixed so top-panel overflow:auto doesn't clip it */
-#userMenu {
+.auth-user-menu {
   position: fixed;
   left: auto;
   min-width: 140px;

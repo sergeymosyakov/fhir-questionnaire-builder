@@ -27,7 +27,7 @@ async function loadFixture(page, filename) {
   await page.getByTestId('load-fhir-btn').click();
   const [fileChooser] = await Promise.all([
     page.waitForEvent('filechooser'),
-    page.locator('#loadFromFileItem').click(),
+    page.locator('[data-testid="load-from-file-item"]').click(),
   ]);
   await fileChooser.setFiles(path.join(FIXTURES, filename));
 }

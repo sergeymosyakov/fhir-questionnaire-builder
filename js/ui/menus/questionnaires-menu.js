@@ -1,5 +1,5 @@
 import { DropdownMenu } from '../dropdown-menu.js';
-import { _askBeforeLoad, importAndValidate, _readFileAsJSON } from '../../app-load.js';
+import { readFileAsJSON } from '../../utils.js';
 import * as autosave from '../autosave.js';
 import * as libraryModal from '../modals/library-modal.js';
 import * as progress from '../progress.js';
@@ -21,33 +21,53 @@ export class QuestionnairesMenu extends DropdownMenu {
 
     this._menu.classList.add('load-menu--right');
 
-    // Hidden file input for FHIR JSON files
+    this._loader = null;
+
+    // Hidden file input — closure keeps the reference, no instance property needed
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.id = 'fhirFileInput';
     fileInput.accept = '.json,application/json';
     fileInput.style.display = 'none';
+    fileInput.dataset.testid = 'fhir-file-input';
+    fileInput.addEventListener('change', async e => {
+      const fileName = e.target.files[0]?.name;
+      if (!fileName) return;
+      if (await this._loader.confirmBeforeLoad() !== 'proceed') {
+        e.target.value = '';
+        return;
+      }
+      progress.show('Loading ' + fileName + '\u2026');
+      readFileAsJSON(e)
+        .then(({ data, fileName }) => { progress.update(0, 1); this._loader.load(data, fileName); })
+        .catch(err => { progress.hide(); if (err) showError('Parse error: ' + err.message); });
+    });
     document.body.appendChild(fileInput);
+    this._pickFile = () => fileInput.click();
 
     this._buildMenu();
     this._bindHandlers();
     this._onOpen = () => this._syncRecentItem();
   }
 
+  configure({ questLoader }) { this._loader = questLoader; }
+
+  get cloudItem() { return this._cloudItem; }
+  get cloudSep() { return this._cloudSep; }
+
   _buildMenu() {
-    this._recentItem = this._item('loadRecentItem', '&#x1F552; Recent draft&hellip;');
+    this._recentItem = this._item('loadRecentItem', '&#x1F552; Recent draft&hellip;', 'load-recent-item');
     this._recentItem.style.display = 'none';
 
-    this._recentSep = this._sep('loadRecentSep');
+    this._recentSep = this._sep();
     this._recentSep.style.display = 'none';
 
-    const cloudSep = this._sep('loadCloudSep');
-    cloudSep.style.display = 'none';
+    this._cloudSep = this._sep();
+    this._cloudSep.style.display = 'none';
 
-    const cloudItem = this._item('loadCloudItem', '&#x2601;&#xFE0F; From Cloud&hellip;', 'load-cloud-item');
-    cloudItem.style.display = 'none';
+    this._cloudItem = this._item(null, '&#x2601;&#xFE0F; From Cloud&hellip;', 'load-cloud-item');
+    this._cloudItem.style.display = 'none';
 
-    this._loadFromFileItem = this._item('loadFromFileItem', '&#x1F4C2; From file&hellip;');
+    this._loadFromFileItem = this._item('loadFromFileItem', '&#x1F4C2; From file&hellip;', 'load-from-file-item');
     this._loadLibraryItem = this._item('loadLibraryItem', '&#x1F4DA; From Library&hellip;', 'load-library-item');
 
     this._menu.append(
@@ -56,50 +76,44 @@ export class QuestionnairesMenu extends DropdownMenu {
       this._loadFromFileItem,
       this._sep(),
       this._loadLibraryItem,
-      cloudSep,
-      cloudItem,
+      this._cloudSep,
+      this._cloudItem,
     );
+
+    this._cloudItem.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOUD_LOAD_REQUESTED));
+    });
   }
 
   _bindHandlers() {
     this._recentItem.addEventListener('click', async () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      if (await _askBeforeLoad() !== 'proceed') return;
+      if (await this._loader.confirmBeforeLoad() !== 'proceed') return;
       const key = this._recentItem.dataset.draftKey;
       if (!key) return;
       const data = await autosave.getDraftData(key);
       if (!data) return;
       progress.show('Loading recent draft\u2026');
-      importAndValidate(data, data.title || 'autosave-draft');
+      this._loader.load(data, data.title || 'autosave-draft');
     });
 
     this._loadFromFileItem.addEventListener('click', async () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      if (await _askBeforeLoad() !== 'proceed') return;
-      document.getElementById('fhirFileInput').click();
+      if (await this._loader.confirmBeforeLoad() !== 'proceed') return;
+      this._pickFile();
     });
 
     this._loadLibraryItem.addEventListener('click', async () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      if (await _askBeforeLoad() !== 'proceed') return;
+      if (await this._loader.confirmBeforeLoad() !== 'proceed') return;
       libraryModal.open('fhir-r4', item => {
         progress.show('Loading ' + item.label + '\u2026');
         fetch('sampledata/' + item.file)
           .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-          .then(data => { progress.update(0, 1); importAndValidate(data, item.label); })
+          .then(data => { progress.update(0, 1); this._loader.load(data, item.label); })
           .catch(err => { progress.hide(); showError('Could not load sample: ' + err.message); });
       }, 'questionnaire');
-    });
-
-    document.getElementById('fhirFileInput').addEventListener('change', async e => {
-      const fileName = e.target.files[0]?.name;
-      if (!fileName) return;
-      if (await _askBeforeLoad() !== 'proceed') {
-        e.target.value = '';
-        return;
-      }
-      progress.show('Loading ' + fileName + '\u2026');
-      _readFileAsJSON(e, (data, name) => { progress.update(0, 1); importAndValidate(data, name); });
     });
   }
 

@@ -43,7 +43,7 @@ async function freshStart(page) {
  *  (fake domain). We wait for and dismiss the resulting error modal so tests
  *  that cover the contained panel are not blocked by it. */
 async function loadFixture(page) {
-  await page.locator('#fhirFileInput').setInputFiles(FIXTURE);
+  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
   await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 8_000 });
   // Async expansion fires after render; wait up to 5 s for the error modal.
   const validateBackdrop = page.locator('[data-testid="validateModal"]');

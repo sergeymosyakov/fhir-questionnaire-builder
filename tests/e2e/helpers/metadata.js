@@ -20,7 +20,7 @@ export async function freshStart(page) {
 
 export async function loadFixture(page) {
   await freshStart(page);
-  await page.locator('#fhirFileInput').setInputFiles(FIXTURE);
+  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
   await expect(page.getByTestId('quest-meta-card')).toBeVisible({ timeout: 8_000 });
 }
 

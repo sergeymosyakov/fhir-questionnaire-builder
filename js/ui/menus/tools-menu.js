@@ -14,7 +14,7 @@ export class ToolsMenu extends DropdownMenu {
     });
 
     this._menu.className = 'load-menu load-menu--right';
-    this._wrap.style.display = 'none';
+    this._bindTreeVisibility();
     this._buildMenu();
   }
 

@@ -3,7 +3,7 @@ import { tree, rawFhir, values, questMeta, questContained, getValue, setValue, d
 import { _formTick, _bulkUpdate } from '../render-bus.js';
 import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
-import { getLastCtx } from '../render-preview.js';
+import { getLastCtx } from '../preview-form.js';
 import { findAndRemove } from '../utils.js';
 import { GroupNode } from '../nodes/group-node.js';
 import { createGroupNode } from '../nodes/index.js';
@@ -42,21 +42,32 @@ Modal.configure({
 });
 
 // ── Event listeners ───────────────────────────────────────────────────────────
-// Nodes dispatch custom events instead of importing index.js/render-preview.js
+// Nodes dispatch custom events instead of importing index.js/preview-form.js
 // (those modules import nodes — importing back would be circular).
 document.addEventListener(AppEvents.BUILDER_RERENDER, () => renderTree());
 document.addEventListener(AppEvents.BUILDER_EXPAND_ALL, () => { setCollapsedAll(tree, false); renderTree(); });
 document.addEventListener(AppEvents.BUILDER_COLLAPSE_ALL, () => { setCollapsedAll(tree, true); renderTree(); });
+document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => {
+  document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
+});
+
+// Builder toolbar buttons — wired via mount()
+let _container = null;
+
+export function mount({ collapseAllBtn, expandAllBtn, treeContainer }) {
+  _container = treeContainer;
+  collapseAllBtn.onclick = () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_COLLAPSE_ALL));
+  expandAllBtn.onclick   = () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
+}
 
 function renderNode(node) {
   return node.buildBuilder();
 }
 
 export function renderTree() {
-  const container = document.getElementById('treeContainer');
-  container.innerHTML = '';
-  for (const node of tree) container.appendChild(renderNode(node));
-  container.appendChild(makeRootDropZone());
+  _container.innerHTML = '';
+  for (const node of tree) _container.appendChild(renderNode(node));
+  _container.appendChild(makeRootDropZone());
 }
 
 export async function renderTreeAsync(onProgress) {
@@ -72,9 +83,8 @@ export async function renderTreeAsync(onProgress) {
     await raf();
   }
   frag.appendChild(makeRootDropZone());
-  const container = document.getElementById('treeContainer');
-  container.innerHTML = '';
-  container.appendChild(frag);
+  _container.innerHTML = '';
+  _container.appendChild(frag);
 }
 
 // Wire DnD re-render callback once
@@ -125,9 +135,8 @@ export async function renumberAll() {
     await raf();
   }
   frag.appendChild(makeRootDropZone());
-  const container = document.getElementById('treeContainer');
-  container.innerHTML = '';
-  container.appendChild(frag);
+  _container.innerHTML = '';
+  _container.appendChild(frag);
   document.dispatchEvent(new CustomEvent(AppEvents.RENUMBER_DONE));
 }
 

@@ -2,24 +2,21 @@
 import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
-import { tree, values, rawFhir, effect, clearAllValues, questVariables, questContained, questMeta } from './state.js';
-import { exportFHIR } from './fhir/export.js';
+import { tree, values, rawFhir, effect, clearAllValues, questVariables, questContained, questMeta, getValue, setValue, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './state.js';
 import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/modals/validate-modal.js';
 import * as metadataModal from './ui/modals/metadata-modal.js';
-import * as qrExportModal from './ui/modals/qr-export-modal.js';
 import * as progress from './ui/progress.js';
 import { RenumberControl } from './ui/renumber-control.js';
 import * as search from './ui/search.js';
 import { TooltipToggle } from './ui/tooltip-toggle.js';
 import * as autosave from './ui/autosave.js';
-import { showPrompt } from './ui/toast.js';
 import * as statusBadge from './ui/status-badge.js';
-import { renderTree, renumberAll, addRootGroup } from './builder/index.js';
+import { renderTree, renumberAll, addRootGroup, mount as mountBuilder } from './builder/index.js';
 import { setRenumberGetter } from './builder/_shared.js';
 import * as helpModal from './ui/modals/help-modal.js';
-import { initPreview, collapseAllPreview, expandAllPreview } from './render-preview.js';
-import { saveMenu, toolsMenu } from './ui/header-actions.js';
+import { PreviewForm } from './preview-form.js';
+import { saveMenu, toolsMenu, answersMenu, questionnairesMenu, mount as mountHeaderActions } from './ui/header-actions.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
 import containedPanel        from './ui/panels/contained-panel.js';
@@ -29,10 +26,14 @@ import { FileNameDisplay } from './ui/file-name.js';
 import { AppEvents } from './events.js';
 import { clearConfirmModal } from './ui/modals/clear-confirm-modal.js';
 import { AuthPanel } from './ui/auth-panel.js';
+import { MetadataCard } from './ui/metadata-card.js';
 import { PanelResizer } from './ui/panel-resizer.js';
 import { AutosaveToggle } from './ui/autosave-toggle.js';
 import { UndoRedo } from './ui/undo-redo.js';
 import { destroyTree } from './utils.js';
+import { _formTick, _bulkUpdate } from './render-bus.js';
+import { QRAnswersManager } from './fhir/qr-answers-manager.js';
+import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
 
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
@@ -40,15 +41,43 @@ storage.register(new SupabaseAdapter(supabase));
 // ── Inject state into UI panels ────────────────────────────────────────
 containedPanel.configure({ questContained });
 answerValueSetPanel.configure({ tree });
-variablesPanel.configure({ questVariables });
+variablesPanel.configure({ questVariables, mountEl: document.getElementById('variablesCardMount') });
 patientCtx.configure({ tree, effect, questVariables });
+patientCtx.mount(document.getElementById('patientPresetWrap'));
 AuthPanel.configure({ tree, effect });
 AutosaveToggle.configure({ questMeta });
-UndoRedo.configure({ effect, formTick: (await import('./render-bus.js'))._formTick });
+UndoRedo.configure({ effect, formTick: _formTick });
+
+// ── Manager singletons (DI from state) ─────────────────────────────────
+export const qrAnswers   = new QRAnswersManager({ values, tree, rawFhir, formTick: _formTick });
+export const questLoader = new QuestionnaireLoader({ tree, values, questMeta,
+  reinitForm: (opts) => previewForm.reinitForm(opts),
+});
+
+export const previewForm = new PreviewForm({
+  effect, tree, values, getValue, setValue, rawFhir, questVariables,
+  formTick: _formTick, bulkUpdate: _bulkUpdate,
+  calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES,
+});
+
+// Mount header action menus into toolbar
+mountHeaderActions(document.getElementById('headerActions'));
+
+// Inject manager singletons into menus (breaks circular app.js ← menu → app.js)
+answersMenu.configure({ qrAnswers });
+questionnairesMenu.configure({ questLoader });
 
 // FileNameDisplay — mounts chip into preview section-title
 const fileNameDisplay = new FileNameDisplay(document.querySelector('.right-panel .section-title'));
-// AuthPanel — mounts sign-in / user chip into #authWrap, handles cloud ops
+// Wire cloud elements from menus into AuthPanel (cross-component, no getElementById)
+AuthPanel.configureCloudEls({
+  saveBtn:  saveMenu.cloudSaveBtn,
+  saveSep:  saveMenu.cloudSaveSep,
+  loadItem: questionnairesMenu.cloudItem,
+  loadSep:  questionnairesMenu.cloudSep,
+  questLoader,
+});
+// AuthPanel — mounts sign-in / user chip into authWrap, handles cloud ops
 new AuthPanel(document.getElementById('authWrap'));
 
 // questionnaire-clear-requested is dispatched by the × button in FileNameDisplay
@@ -62,9 +91,13 @@ document.getElementById('addRootGroupBtn').onclick = () => {
   // If no file is loaded yet, signal that a new questionnaire was started
   if (!fileNameDisplay.getName()) document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_NEW));
 };
-document.getElementById('collapseAllBtn').onclick  = () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_COLLAPSE_ALL));
-// View options moved to dropdown menu (see viewOptionsBtn section below)
-document.getElementById('expandAllBtn').onclick    = () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
+
+// ── Builder toolbar + tree container ──────────────────────────────────────────
+mountBuilder({
+  collapseAllBtn: document.getElementById('collapseAllBtn'),
+  expandAllBtn:   document.getElementById('expandAllBtn'),
+  treeContainer:  document.getElementById('treeContainer'),
+});
 
 new RenumberControl(
   document.getElementById('renumberFormatWrap'),
@@ -108,7 +141,7 @@ search.init({
 });
 
 // ── Preview module init ──────────────────────────────────────────────────────
-initPreview({
+previewForm.mount({
   lform:           document.getElementById('lform'),
   fhirJsonView:    document.getElementById('fhirJsonView'),
   leftPanelBody:   document.querySelector('.left-panel-body'),
@@ -117,30 +150,8 @@ initPreview({
   searchWrap:      document.getElementById('searchWrap'),
 });
 
-// Prompt for filename then export
-function _promptExport(afterExport) {
-  const suggested = fileNameDisplay.getName().trim() || 'questionnaire';
-  showPrompt('Save as:', suggested + '.json', name => {
-    if (name === null) return; // cancelled
-    const trimmed = name.replace(/\.json$/i, '');
-    exportFHIR(trimmed + '.json');
-    fileNameDisplay.setName(trimmed);
-    if (afterExport) afterExport();
-  });
-}
-
-// ── Save/Export menu handlers ─────────────────────────────────────────────────
-saveMenu.setHandlers({
-  onExportFhir: () => {
-    const issues = validateTree(tree, values);
-    if (issues.length === 0) { _promptExport(); return; }
-    validateModal.show('Export — Validation Report', issues, 'export', { onExport: () => _promptExport() });
-  },
-  onExportQr: () => {
-    const suggested = fileNameDisplay.getName().trim() || 'questionnaire';
-    qrExportModal.open(suggested + '-response.json');
-  },
-});
+// ── Save/Export menu ──────────────────────────────────────────────────────────
+saveMenu.configure({ fileNameDisplay, tree, values });
 
 // ── Tools menu handlers ───────────────────────────────────────────────────────
 toolsMenu.setHandlers({
@@ -148,29 +159,15 @@ toolsMenu.setHandlers({
     const issues = validateTree(tree, values);
     validateModal.show('Validate — Report', issues, 'import');
   },
-  onExpand: () => expandAllPreview(),
-  onCollapse: () => collapseAllPreview(),
+  onExpand: () => previewForm.expandAll(),
+  onCollapse: () => previewForm.collapseAll(),
 });
 
-// ── Validate button ──────────────────────────────────────────────────────────
-
-// ── Properties button ────────────────────────────────────────────────────────
-document.getElementById('propertiesBtn').onclick = () => metadataModal.open();
-
-// Sync metadata card summary whenever questMeta changes
-const _metaCardStatus       = document.getElementById('questMetaCardStatus');
-const _metaCardExperimental = document.getElementById('questMetaCardExperimental');
-effect(() => {
-  _metaCardStatus.textContent    = questMeta.status || 'draft';
-  _metaCardStatus.dataset.status = questMeta.status || 'draft';
-  const exp = questMeta.experimental;
-  if (exp === null || exp === undefined) {
-    _metaCardExperimental.style.display = 'none';
-  } else {
-    _metaCardExperimental.style.display  = '';
-    _metaCardExperimental.textContent    = exp ? '⚗ experimental' : '✓ production';
-    _metaCardExperimental.dataset.exp    = String(exp);
-  }
+// ── Metadata card (status + experimental badge) ──────────────────────────────
+new MetadataCard({
+  effect, questMeta,
+  mountEl: document.getElementById('questMetaCardMount'),
+  onEdit: () => metadataModal.open(),
 });
 
 
@@ -181,12 +178,12 @@ async function _clearForm() {
     if (choice === 'export') {
       const issues = validateTree(tree, values);
       if (issues.length === 0) {
-        _promptExport(_doReset);
+        saveMenu.promptExport(_doReset);
         return;
       } else {
         // Show modal; after export (or skip) we do NOT auto-clear — user decides
-        validateModal.show('Export — Validation Report', issues, 'export', {
-          onExport: () => { _promptExport(_doReset); },
+        validateModal.show('Export \u2014 Validation Report', issues, 'export', {
+          onExport: () => { saveMenu.promptExport(_doReset); },
         });
         return;
       }
@@ -232,8 +229,6 @@ function _doReset() {
 // Close any open dropdowns when clicking outside
 document.addEventListener('click', () => {
   document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-  const umMenu = document.getElementById('userMenu');
-  if (umMenu) umMenu.style.display = 'none';
 });
 
 // ── Panel resize drag ─────────────────────────────────────────────────────────

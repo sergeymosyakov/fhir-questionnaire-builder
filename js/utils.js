@@ -110,3 +110,20 @@ export function highlightJsonWithSearch(raw, query) {
   html = html.split('\x02').join('</mark>');
   return { html, count: positions.length };
 }
+
+// Read a file-input change event as JSON. Returns Promise<{data, fileName}>.
+// Rejects with Error on parse/read failure; rejects with null if no file selected.
+export function readFileAsJSON(e) {
+  return new Promise((resolve, reject) => {
+    const file = e.target.files[0];
+    if (!file) { reject(null); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try { resolve({ data: JSON.parse(ev.target.result), fileName: file.name }); }
+      catch (err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('Error reading file'));
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+}

@@ -131,7 +131,7 @@ test.describe('Repeatable — import round-trip', () => {
     });
 
     // Inject directly via the hidden file input (same pattern as builder.spec.js)
-    await page.locator('#fhirFileInput').setInputFiles({
+    await page.locator('[data-testid="fhir-file-input"]').setInputFiles({
       name: 'repeats-test.json',
       mimeType: 'application/json',
       buffer: Buffer.from(fhirJson),

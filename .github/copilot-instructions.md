@@ -51,6 +51,6 @@
 - **Tech stack**: Vanilla JS ES Modules, @vue/reactivity (ref/reactive/effect), FHIRPath, Playwright e2e + Vitest unit tests
 - **Architecture**: OOP node rendering (BaseNode → GroupNode/ItemNode), modal registry pattern, dependency injection via `_rc` context
 - **Deployment**: GitHub Pages, CI runs tests on every push
-- **Main files**: `js/app.js` (entry), `js/state.js` (reactive model), `js/builder/index.js` (left panel), `js/render-preview.js` (right panel), `js/nodes/*.js` (preview rendering)
+- **Main files**: `js/app.js` (entry), `js/state.js` (reactive model), `js/builder/index.js` (left panel), `js/preview-form.js` (right panel), `js/nodes/*.js` (preview rendering)
 
 See `docs/CONTEXT.md` for full file manifest, architecture diagrams, and UX feature list.

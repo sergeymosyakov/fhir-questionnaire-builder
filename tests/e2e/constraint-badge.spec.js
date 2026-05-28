@@ -1,6 +1,6 @@
 // ── E2E: Status badge and group icon with constraint-only / range-only items ──
 //
-// Covers two render-preview.js regressions fixed in the same commit:
+// Covers two preview-form.js regressions fixed in the same commit:
 //   1. hasCriteria fix — badge was hidden when questionnaire had only constraints
 //      or only range items (no mandatory, no calc). Now includes hasConstraints
 //      and hasRange in the hasCriteria check.
@@ -32,7 +32,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('#fhirFileInput').setInputFiles(FIXTURE);
+  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
   // Wait until the preview renders the group
   await expect(page.locator('[data-preview-id="grp-constraint"]')).toBeVisible({ timeout: 8_000 });
 }

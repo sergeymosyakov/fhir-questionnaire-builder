@@ -45,7 +45,7 @@ test.describe('Autosave draft', () => {
     await freshStart(page);
 
     await page.locator('#loadFhirBtn').click();
-    await expect(page.locator('#loadRecentItem')).not.toBeVisible();
+    await expect(page.locator('[data-testid="load-recent-item"]')).not.toBeVisible();
   });
 
   test('"Recent draft" item is visible when a draft is stored', async ({ page }) => {
@@ -60,8 +60,8 @@ test.describe('Autosave draft', () => {
     await waitForLoad(page);
 
     await page.locator('#loadFhirBtn').click();
-    await expect(page.locator('#loadRecentItem')).toBeVisible();
-    await expect(page.locator('#loadRecentItem')).toContainText('E2E Draft');
+    await expect(page.locator('[data-testid="load-recent-item"]')).toBeVisible();
+    await expect(page.locator('[data-testid="load-recent-item"]')).toContainText('E2E Draft');
   });
 
   test('clicking "Recent draft" loads the questionnaire', async ({ page }) => {
@@ -76,7 +76,7 @@ test.describe('Autosave draft', () => {
     await waitForLoad(page);
 
     await page.locator('#loadFhirBtn').click();
-    await page.locator('#loadRecentItem').click();
+    await page.locator('[data-testid="load-recent-item"]').click();
 
     await expect(
       page.locator('[data-testid="tree-container"] [data-node-id]').first()
@@ -159,7 +159,7 @@ test.describe('Load confirm dialog', () => {
   test('no confirm shown when tree is empty (loads immediately)', async ({ page }) => {
     await freshStart(page);
     await page.locator('#loadFhirBtn').click();
-    await page.locator('#loadLibraryItem').click();
+    await page.locator('[data-testid="load-library-item"]').click();
     // library modal opens — confirm dialog should NOT appear
     await expect(page.getByTestId('load-confirm-proceed-btn')).not.toBeVisible();
   });
@@ -169,7 +169,7 @@ test.describe('Load confirm dialog', () => {
     await addRootGroup(page);
 
     await page.locator('#loadFhirBtn').click();
-    await page.locator('#loadLibraryItem').click();
+    await page.locator('[data-testid="load-library-item"]').click();
     await expect(page.getByTestId('load-confirm-proceed-btn')).toBeVisible();
   });
 
@@ -179,7 +179,7 @@ test.describe('Load confirm dialog', () => {
     const before = await page.locator('[data-testid="tree-container"] [data-node-id]').count();
 
     await page.locator('#loadFhirBtn').click();
-    await page.locator('#loadLibraryItem').click();
+    await page.locator('[data-testid="load-library-item"]').click();
     await page.getByTestId('load-confirm-cancel-btn').click();
 
     await expect(page.getByTestId('load-confirm-proceed-btn')).not.toBeVisible();
@@ -192,7 +192,7 @@ test.describe('Load confirm dialog', () => {
     const before = await page.locator('[data-testid="tree-container"] [data-node-id]').count();
 
     await page.locator('#loadFhirBtn').click();
-    await page.locator('#loadLibraryItem').click();
+    await page.locator('[data-testid="load-library-item"]').click();
     await page.keyboard.press('Escape');
 
     await expect(page.getByTestId('load-confirm-proceed-btn')).not.toBeVisible();
@@ -204,7 +204,7 @@ test.describe('Load confirm dialog', () => {
     await addRootGroup(page);
 
     await page.locator('#loadFhirBtn').click();
-    await page.locator('#loadLibraryItem').click();
+    await page.locator('[data-testid="load-library-item"]').click();
     await page.getByTestId('load-confirm-proceed-btn').click();
 
     // library modal should now be open

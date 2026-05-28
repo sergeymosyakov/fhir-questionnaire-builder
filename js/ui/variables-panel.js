@@ -1,26 +1,61 @@
 // ── Questionnaire Variables panel ─────────────────────────────────────────────
 // Collapsible card (above tree) + edit modal for sdc-questionnaire-variable.
-// configure({questVariables}) — call once at startup; then refresh() on events.
+// configure({questVariables, mountEl}) — call once at startup.
 import { Modal } from './modals/modal-base.js';
 import { AppEvents } from '../events.js';
 
-let _questVariables = null;
-export function configure({ questVariables }) {
-  _questVariables = questVariables;
-  refresh();
-}
+const _CARD_HTML = `
+<div class="variables-card-header">
+  <button type="button" class="variables-card-toggle" data-testid="variables-card-toggle" aria-expanded="true"
+    data-tip-title="Collapse / expand" data-tip-body="Toggle the Variables card open or closed.">
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor"
+      stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
+  </button>
+  <span class="variables-card-title"
+    data-tip-title="Questionnaire Variables"
+    data-tip-body="SDC questionnaire-level FHIRPath variables. Defined once at the root and referenced as %varName inside any calculatedExpression. Imported and exported as sdc-questionnaire-variable extensions."
+    data-tip-fhir="Questionnaire.extension[sdc-questionnaire-variable]"
+    data-tip-spec="SDC · optional">Variables</span>
+  <span class="variables-card-count" data-testid="variables-card-count"></span>
+  <button data-testid="variables-reinit-btn" type="button" class="variables-reinit-btn"
+    data-tip-title="Re-init" data-tip-body="Re-evaluate all questionnaire-level variables and item initialExpression fields.">&#x21BA; Re-init</button>
+  <button type="button" class="variables-edit-btn" data-testid="variables-edit-btn">Edit</button>
+</div>
+<div class="variables-card-chips" data-testid="variables-card-chips"></div>`;
 
+let _questVariables = null;
 let _collapsed = false;
 let _draft     = null; // working copy while modal is open; null when closed
+const _el = { card: null, toggle: null, chipList: null, count: null, editBtn: null, reinitBtn: null };
 
-const _el = {
-  card:      document.getElementById('variablesCard'),
-  toggle:    document.getElementById('variablesCardToggle'),
-  chipList:  document.getElementById('variablesCardChips'),
-  count:     document.getElementById('variablesCardCount'),
-  editBtn:   document.getElementById('variablesEditBtn'),
-  reinitBtn: document.getElementById('variablesReinitBtn'),
-};
+export function configure({ questVariables, mountEl }) {
+  _questVariables = questVariables;
+  // Build card DOM from template
+  const card = document.createElement('div');
+  card.className = 'variables-card';
+  card.dataset.testid = 'variables-card';
+  card.style.display = 'none';
+  card.innerHTML = _CARD_HTML;
+  mountEl.replaceWith(card);
+  _el.card      = card;
+  _el.toggle    = card.querySelector('.variables-card-toggle');
+  _el.chipList  = card.querySelector('.variables-card-chips');
+  _el.count     = card.querySelector('.variables-card-count');
+  _el.editBtn   = card.querySelector('.variables-edit-btn');
+  _el.reinitBtn = card.querySelector('.variables-reinit-btn');
+  // Wire listeners
+  const modal = new VariablesModal();
+  _el.toggle.addEventListener('click', _toggleCollapse);
+  _el.editBtn.addEventListener('click', () => modal.open());
+  _el.reinitBtn.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
+  });
+  document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => { _el.card.style.display = ''; refresh(); });
+  document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,    () => { _el.card.style.display = ''; });
+  document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => { _el.card.style.display = 'none'; refresh(); });
+  document.addEventListener(AppEvents.PATIENT_CTX_APPLIED, refresh);
+  refresh();
+}
 
 class VariablesModal extends Modal {
   getName() { return 'variablesModal'; }
@@ -112,17 +147,6 @@ class VariablesModal extends Modal {
     return row;
   }
 }
-
-const _modal = new VariablesModal();
-_el.toggle.addEventListener('click', _toggleCollapse);
-_el.editBtn.addEventListener('click', () => _modal.open());
-if (_el.reinitBtn) _el.reinitBtn.addEventListener('click', () => {
-  document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
-});
-
-document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, refresh);
-document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, refresh);
-document.addEventListener(AppEvents.PATIENT_CTX_APPLIED, refresh);
 
 export function refresh() {
   if (!_questVariables) return;

@@ -180,7 +180,10 @@ const _modal = new PatientModal();
 
 // ── Preset dropdown ───────────────────────────────────────────────────────────
 export const presetMenu = new PatientPresetMenu(PATIENT_PRESETS);
-document.getElementById('patientPresetWrap')?.replaceWith(presetMenu.el);
+
+export function mount(mountEl) {
+  mountEl.replaceWith(presetMenu.el);
+}
 
 const _doAfterApply = () => {
   document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));

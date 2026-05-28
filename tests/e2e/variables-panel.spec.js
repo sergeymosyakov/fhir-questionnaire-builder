@@ -4,11 +4,8 @@
 // Run: npx playwright test tests/e2e/variables-panel.spec.js
 //
 // ── element IDs ──────────────────────────────────────────────────────────────
-//   variablesCard         collapsible card (shown when any variable exists)
-//   variablesCardToggle   collapse/expand button
-//   variablesCardChips    chip list container
-//   variablesCardCount    count badge
-//   variablesEditBtn      "Edit" button that opens the modal
+//   variables-card        collapsible card (data-testid, shown when any variable exists)
+//   variables-edit-btn    "Edit" button (data-testid) that opens the modal
 //   variablesModal        backdrop (display:flex when open)
 //   variablesModalBody    scrollable body
 //   variablesModalClose   × close button
@@ -35,11 +32,11 @@ async function freshStartWithGroup(page) {
   await freshStart(page);
   await page.getByTestId('add-root-group-btn').click();
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
-  await expect(page.locator('#variablesCard')).toBeVisible();
+  await expect(page.getByTestId('variables-card')).toBeVisible();
 }
 
-const variablesCard   = (page) => page.locator('#variablesCard');
-const variablesEditBtn = (page) => page.locator('#variablesEditBtn');
+const variablesCard   = (page) => page.getByTestId('variables-card');
+const variablesEditBtn = (page) => page.getByTestId('variables-edit-btn');
 const variablesModal  = (page) => page.locator('[data-testid="variablesModal"]');
 const variablesModalBody   = (page) => page.locator('[data-testid="variablesModalBody"]');
 const variablesModalClose  = (page) => page.locator('[data-testid="variablesModalClose"]');
@@ -157,7 +154,7 @@ test.describe('Variables modal — draft pattern', () => {
     await expect(variablesModal(page)).not.toBeVisible();
 
     // Chip for the new variable must appear
-    await expect(page.locator('#variablesCardChips')).toContainText('%myVar');
+    await expect(page.locator('[data-testid="variables-card-chips"]')).toContainText('%myVar');
   });
 
   test('count badge increases after adding named variables', async ({ page }) => {
@@ -175,7 +172,7 @@ test.describe('Variables modal — draft pattern', () => {
 
     await variablesModalApply(page).click();
     // count badge = total named vars (pre-seeded + 2 new)
-    await expect(page.locator('#variablesCardCount')).toHaveText(String(rowsBefore + 2));
+    await expect(page.locator('[data-testid="variables-card-count"]')).toHaveText(String(rowsBefore + 2));
   });
 
   test('Cancel does not persist the typed variable name', async ({ page }) => {
@@ -195,7 +192,7 @@ test.describe('Variables modal — draft pattern', () => {
     const rowsAfter = await variablesModalBody(page).locator('input.variables-name-input').count();
     expect(rowsAfter).toBe(rowsBefore);
     // 'tempVar' chip must not appear
-    await expect(page.locator('#variablesCardChips')).not.toContainText('%tempVar');
+    await expect(page.locator('[data-testid="variables-card-chips"]')).not.toContainText('%tempVar');
   });
 });
 
@@ -211,13 +208,13 @@ test.describe('Variables panel — card collapse/expand', () => {
     await freshStartWithGroup(page);
     await addVariable(page, 'testVar');
 
-    const chipList = page.locator('#variablesCardChips');
+    const chipList = page.locator('[data-testid="variables-card-chips"]');
     await expect(chipList).toBeVisible();
 
-    await page.locator('#variablesCardToggle').click();
+    await page.locator('[data-testid="variables-card-toggle"]').click();
     await expect(chipList).not.toBeVisible();
 
-    await page.locator('#variablesCardToggle').click();
+    await page.locator('[data-testid="variables-card-toggle"]').click();
     await expect(chipList).toBeVisible();
   });
 });

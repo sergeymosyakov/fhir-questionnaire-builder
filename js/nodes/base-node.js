@@ -360,7 +360,7 @@ export class BaseNode {
   _buildDropZoneAbove() { return bh.buildDropZoneAbove(this); }
 
   // ── Builder event dispatch ─────────────────────────────────────────────────
-  // Breaks circular imports: index.js and render-preview.js both import nodes,
+  // Breaks circular imports: index.js and preview-form.js both import nodes,
   // so nodes cannot import back. Events decouple the call direction.
 
   /**
@@ -437,6 +437,13 @@ export class BaseNode {
         this._scrollIntoView();
       } else {
         this._scrollAfterRender = true;
+        // Fallback: element may be in a fragment about to be appended
+        requestAnimationFrame(() => {
+          if (this._scrollAfterRender && this._previewEl && document.contains(this._previewEl)) {
+            this._scrollAfterRender = false;
+            this._scrollIntoView();
+          }
+        });
       }
     }, { signal: this._ac.signal });
   }

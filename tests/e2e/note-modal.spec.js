@@ -179,7 +179,7 @@ test.describe('note modal — import', () => {
         }],
       }],
     };
-    await page.locator('#fhirFileInput').setInputFiles({
+    await page.locator('[data-testid="fhir-file-input"]').setInputFiles({
       name: 'test.json',
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(fixture)),
@@ -202,7 +202,7 @@ test.describe('note modal — import', () => {
         }],
       }],
     };
-    await page.locator('#fhirFileInput').setInputFiles({
+    await page.locator('[data-testid="fhir-file-input"]').setInputFiles({
       name: 'test.json',
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(fixture)),
