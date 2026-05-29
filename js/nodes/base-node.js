@@ -196,6 +196,17 @@ export class BaseNode {
       row.appendChild(b);
     }
 
+    if (this._shortText && !isPatient) {
+      const st = document.createElement('span');
+      st.className = 'preview-short-text-badge';
+      st.textContent = this._shortText;
+      st.dataset.tipTitle = 'sdc-questionnaire-shortText';
+      st.dataset.tipBody  = `Short Text: "${this._shortText}" — abbreviated label used in summary views.`;
+      st.dataset.tipFhir  = 'item.extension[sdc-questionnaire-shortText].valueString';
+      st.dataset.tipSpec  = 'SDC';
+      row.appendChild(st);
+    }
+
     if (this._prefix && rc.viewPrefs.showPrefix) {
       const pfx = document.createElement('span');
       pfx.className = 'preview-prefix';

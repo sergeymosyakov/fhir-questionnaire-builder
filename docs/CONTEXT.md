@@ -185,7 +185,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `tests/e2e/history.spec.js` | E2E tests (13) — undo/redo buttons disabled on fresh start; enabled after adding a group (debounce+ric); undo removes group; redo restores; Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z keyboard shortcuts; history reset after form clear |
 | `tests/e2e/autosave.spec.js` | E2E tests (13) — autosave draft "Recent" hidden/visible/loads; autosave toggle persist across reload; tooltip toggle persist across reload; panel width restore from storage; load-confirm dialog: no dialog on empty tree, shown with items, Cancel/Escape keeps tree, proceed opens library |
 | `tests/e2e/item-control.spec.js` | E2E tests (7) — `questionnaire-itemControl` builder UI: slider toggle (Answer Type modal numeric section, preview renders range input, round-trip), lookup checkbox (Answer Type modal choice section, preview renders search input, round-trip export); fixtures `tests/fixtures/item-control.fhir.json` |
-| `tests/fixtures/` | Frozen FHIR samples for e2e tests — do not edit. `example-bariatric.fhir.json`, `patient-scenario-eligibility.fhir.json`, `all-types-repeatable.fhir.json`, `contained-valueset.fhir.json`, `fhir-features.fhir.json`, `slider-disabled.fhir.json`, `meta-test.fhir.json`, `codes-ordinal.fhir.json`, `attachment-constraints.fhir.json`, `item-control.fhir.json` |
+| `tests/e2e/short-text.spec.js` | E2E tests (6) — `sdc-questionnaire-shortText`: blue badge visible in builder preview for items and groups, hidden in patient view, no badge for items without shortText, export round-trip preserves extension; fixture `tests/fixtures/short-text.fhir.json` |
+| `tests/fixtures/` | Frozen FHIR samples for e2e tests — do not edit. `example-bariatric.fhir.json`, `patient-scenario-eligibility.fhir.json`, `all-types-repeatable.fhir.json`, `contained-valueset.fhir.json`, `fhir-features.fhir.json`, `slider-disabled.fhir.json`, `meta-test.fhir.json`, `codes-ordinal.fhir.json`, `attachment-constraints.fhir.json`, `item-control.fhir.json`, `short-text.fhir.json` |
 | `tests/utils.test.js` | Unit tests for `js/utils.js` (38 tests) |
 | `tests/eval.test.js` | Unit tests for `js/eval.js` — `evaluateNode`, `markAllDisabled`, `enableWhen` AND/OR logic, `_hidden`/`hiddenRoot` marking (32 tests) |
 | `tests/calc.test.js` | Unit tests for `js/fhir/calc.js` — `buildVarEnv`, `evalCalcNodes` (23 tests) |
@@ -289,6 +290,7 @@ _sliderStep      // number — questionnaire-sliderStepValue ext; when set, inte
 _disabledDisplay // 'hidden'|'protected' — when not visible: 'hidden' removes item from DOM entirely, 'protected' shows grayed row (default); editable in Show When modal
 _choiceOrientation // 'vertical'|'horizontal' — questionnaire-choiceOrientation ext; controls layout of radio button groups (vertical: stacked column, horizontal: inline row); editable in Answer Type modal for radio items
 _displayCategory   // 'instructions'|'security'|'help' — questionnaire-displayCategory ext; applies colored bg + left border + icon (instructions/security) or collapsible help toggle (help) to display items in preview; editable in Answer Type modal for display items
+_shortText         // string — sdc-questionnaire-shortText ext; abbreviated label for summary views; shown as a small blue badge in builder preview row (not in patient view); round-trip safe; not editable in builder UI
 ```
 
 ---

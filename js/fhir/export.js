@@ -251,6 +251,11 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer', valueUrl: node._preferredTermServer });
   }
 
+  // sdc-questionnaire-shortText — abbreviated label for summary views
+  if (node._shortText) {
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText', valueString: node._shortText });
+  }
+
   // designNote — author-facing internal note (not shown to end users)
   if (node._designNote) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/designNote', valueMarkdown: node._designNote });

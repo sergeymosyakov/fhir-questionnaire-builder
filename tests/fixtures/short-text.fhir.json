@@ -1,0 +1,42 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "short-text-test",
+  "title": "Short Text Test",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "q-with-short",
+      "text": "What is your current level of pain on a scale from 0 to 10?",
+      "type": "integer",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText",
+          "valueString": "Pain level"
+        }
+      ]
+    },
+    {
+      "linkId": "q-no-short",
+      "text": "Please describe your symptoms in detail",
+      "type": "string"
+    },
+    {
+      "linkId": "grp-with-short",
+      "text": "Cardiovascular Risk Factors Assessment",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText",
+          "valueString": "CV Risk"
+        }
+      ],
+      "item": [
+        {
+          "linkId": "q-nested",
+          "text": "Do you have a history of hypertension?",
+          "type": "boolean"
+        }
+      ]
+    }
+  ]
+}

@@ -235,6 +235,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (prefTermExt?.valueUrl) node._preferredTermServer = prefTermExt.valueUrl;
 
+  // sdc-questionnaire-shortText — abbreviated label for summary views
+  const shortTextExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText'
+  );
+  if (shortTextExt?.valueString) node._shortText = shortTextExt.valueString;
+
   // designNote — author-facing internal note
   const designNoteExt = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/designNote'
@@ -349,6 +355,11 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
       e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer'
     );
     if (groupPrefTermExt?.valueUrl) node._preferredTermServer = groupPrefTermExt.valueUrl;
+    // sdc-questionnaire-shortText (groups)
+    const groupShortTextExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText'
+    );
+    if (groupShortTextExt?.valueString) node._shortText = groupShortTextExt.valueString;
     // designNote — author-facing internal note (groups)
     const groupDesignNoteExt = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/designNote'

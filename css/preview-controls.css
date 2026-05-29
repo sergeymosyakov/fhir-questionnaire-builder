@@ -149,3 +149,21 @@ div.lform-item--hidden {
   margin-right: 4px;
   vertical-align: middle;
 }
+
+.preview-short-text-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #7dd3fc;
+  margin-right: 4px;
+  vertical-align: middle;
+  cursor: default;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

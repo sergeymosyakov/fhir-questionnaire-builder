@@ -291,6 +291,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/designNote` | Core | `_designNote` — author-facing note; editable via "Note" action on each item/group card; exported as `valueMarkdown`; never rendered in preview | Yes (Core) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible` | SDC | `_collapsible` (`'default-closed'` / `'default-open'`; groups only; controls initial collapsed state in patient-facing preview; `default-closed` groups start collapsed on load; user can still expand/collapse; editable via **States** → **Collapsible** select in builder) | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel` | SDC | `_openLabel` (`open-choice` items only; replaces the default "Choose or type…" placeholder with a custom label; editable in **Answer Type** modal under "Open label"; exported as `valueString`) | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText` | SDC | `_shortText` — abbreviated label for summary views; shown as a small blue badge in the builder preview row (not visible in patient view); imported/exported as `valueString`; round-trip safe | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/minLength` | standard | `_minLength` (minimum character count for `text`/`url` items; `minlength` HTML attribute enforced in preview; inline error `Min N chars` on blur when value is non-empty but shorter than limit; clears when limit is reached) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/maxSize` | standard | `_maxFileSizeMB` (maximum file size in MB for `attachment` items; validated on file selection; error tag shown when exceeded; `calcFormOk` returns `false`; hint shown below file button; editable in Answer Type modal) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/mimeType` | standard | `_mimeTypes` (0..* allowed MIME types for `attachment` items; sets `accept` attribute on file input; hint shown below file button; editable in Answer Type modal as comma-separated list) | Yes |
@@ -412,7 +413,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 |---|---|---|
 | `sdc-questionnaire-itemWeight` | ❌ | Per-option weight for scoring (analogous to `ordinalValue` at item level) |
 | `sdc-questionnaire-unitOption[]` | ❌ | Multiple selectable units for `quantity` items |
-| `sdc-questionnaire-shortText` | ❌ | Abbreviated label for summary views |
 | `sdc-questionnaire-choiceColumn` | ❌ | Defines columns (FHIRPath expression, header label, forDisplay flag) for multi-column display of choice answer options in a dropdown. |
 | `sdc-questionnaire-itemMedia` / `sdc-questionnaire-answerMedia` | ❌ | Attaches media (image, audio, video) to an item or to a specific answer option. |
 
