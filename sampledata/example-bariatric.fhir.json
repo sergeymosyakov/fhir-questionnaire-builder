@@ -766,6 +766,10 @@
                 "code": "Cel",
                 "display": "°C"
               }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet",
+              "valueCanonical": "http://hl7.org/fhir/ValueSet/ucum-bodytemp"
             }
           ]
         },

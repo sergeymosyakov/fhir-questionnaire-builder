@@ -150,6 +150,9 @@ function nodeToFHIRItem(node) {
   // quantity unit
   if (node.itemType === 'quantity' && node.quantityUnit)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit', valueCoding: { system: 'http://unitsofmeasure.org', code: node.quantityUnit } });
+  // questionnaire-unitValueSet
+  if (node.itemType === 'quantity' && node._unitValueSet)
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet', valueCanonical: node._unitValueSet });
   // calculatedExpression
   if (node._calculatedExpr)
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression', valueExpression: { language: 'text/fhirpath', expression: node._calculatedExpr } });

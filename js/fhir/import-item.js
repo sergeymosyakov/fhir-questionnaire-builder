@@ -91,6 +91,11 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit'
     );
     if (unitExt?.valueCoding?.code) node.quantityUnit = unitExt.valueCoding.code;
+    // questionnaire-unitValueSet: ValueSet of selectable units
+    const unitVsExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet'
+    );
+    if (unitVsExt?.valueCanonical) node._unitValueSet = unitVsExt.valueCanonical;
   }
 
   const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));

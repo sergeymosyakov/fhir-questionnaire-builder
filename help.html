@@ -123,6 +123,8 @@
     { cat: 'Item — SDC', field: 'sdc-questionnaire-designNote', desc: 'Internal developer / designer note attached to an item; not shown to patients', where: 'Design Note modal', how: 'Click "Note" action link on the item row' },
     { cat: 'Item — SDC', field: 'sdc-questionnaire-openLabel', desc: 'Custom placeholder label for open-choice items (replaces default "Choose or type…")', where: 'Answer Type modal', how: 'Click "Answer Type" → Open label field (open-choice items only)' },
     { cat: 'Item — SDC', field: 'sdc-questionnaire-preferredTerminologyServer', desc: 'Per-item preferred FHIR terminology server URL for ValueSet expansion. Overrides the Questionnaire-level default.', where: 'Terminology modal', how: 'Click "Terminology" action link on the item row → enter server URL' },
+    { cat: 'Item — Extensions', field: 'questionnaire-unitValueSet', desc: 'Canonical URL of a ValueSet containing selectable UCUM units for quantity items. When set, the unit dropdown is populated from this ValueSet (falls back to built-in UCUM list if expansion unavailable).', where: 'Answer Type modal → Unit ValueSet URL field', how: 'Open Answer Type modal on a quantity item → enter the ValueSet canonical URL' },
+    { cat: 'Item — SDC', field: 'sdc-questionnaire-shortText', desc: 'Abbreviated item label shown in summary views and narrow-screen layouts. Shown as a small blue badge in the builder preview row.', where: 'Props modal → Short Text field', how: 'Click "Props" action link → enter Short Text' },
 
     // ── Not supported ─────────────────────────────────────────────────────────
     { cat: 'Not Supported', field: 'regex', desc: 'Validation regex pattern for string / text / url items', where: '— not implemented', how: 'Not preserved on round-trip' },
@@ -130,7 +132,6 @@
     { cat: 'Not Supported', field: 'answerConstraint (R4B/R5)', desc: 'Constrains answer values: optionsOnly / optionsOrType / optionsOrString', where: '— not implemented', how: 'Not preserved on round-trip' },
     { cat: 'Not Supported', field: 'questionnaire-unitOption', desc: 'Single allowed unit for quantity items (multiple extensions enumerate all units)', where: '— not implemented', how: 'Not preserved on round-trip' },
     { cat: 'Not Supported', field: 'questionnaire-optionExclusive', desc: 'Marks an answer option as exclusive (e.g. "None of the above")', where: '— not implemented', how: 'Not preserved on round-trip' },
-    { cat: 'Not Supported', field: 'sdc-questionnaire-shortText', desc: 'Abbreviated item label for summary views', where: '— not implemented', how: 'Not preserved on round-trip' },
     { cat: 'Not Supported', field: 'questionnaire-referenceFilter', desc: 'FHIRPath expression to filter valid reference targets', where: '— not implemented', how: 'Not preserved on round-trip' },
     { cat: 'Not Supported', field: 'questionnaire-signatureRequired', desc: 'Indicates a digital signature is required', where: '— not implemented', how: 'Not preserved on round-trip' },
   ];

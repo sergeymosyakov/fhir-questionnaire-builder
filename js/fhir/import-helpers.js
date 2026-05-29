@@ -10,6 +10,7 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl',
   'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource',
   'http://hl7.org/fhir/StructureDefinition/questionnaire-unit',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression',
   'http://hl7.org/fhir/StructureDefinition/minLength',

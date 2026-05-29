@@ -1,0 +1,38 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "unit-valueset-test",
+  "title": "Unit ValueSet Test",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "q-with-unit-vs",
+      "text": "Body weight",
+      "type": "quantity",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet",
+          "valueCanonical": "http://hl7.org/fhir/ValueSet/ucum-bodyweight"
+        }
+      ]
+    },
+    {
+      "linkId": "q-with-fixed-unit",
+      "text": "Body temperature",
+      "type": "quantity",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+          "valueCoding": {
+            "system": "http://unitsofmeasure.org",
+            "code": "Cel"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "q-no-unit",
+      "text": "Blood pressure value",
+      "type": "quantity"
+    }
+  ]
+}

@@ -10,6 +10,7 @@ class UnitSection extends AnswerTypeSection {
     const section = document.createElement('div');
     section.className = 'at-modal-sub';
 
+    // ── Default unit (fixed) ──────────────────────────────────────────────────
     const unitLbl = document.createElement('div');
     unitLbl.className        = 'at-modal-sub-lbl';
     unitLbl.textContent      = 'Default unit:';
@@ -29,16 +30,37 @@ class UnitSection extends AnswerTypeSection {
       onChange:  v => { pending.draftUnit = v; },
     });
 
-    section.append(unitLbl, unitSel.el);
+    // ── Unit ValueSet URL ─────────────────────────────────────────────────────
+    const vsLbl = document.createElement('div');
+    vsLbl.className        = 'at-modal-sub-lbl';
+    vsLbl.textContent      = 'Unit ValueSet URL:';
+    vsLbl.dataset.tipTitle = 'questionnaire-unitValueSet';
+    vsLbl.dataset.tipBody  = 'Canonical URL of a ValueSet containing selectable UCUM units. When set, a unit dropdown is rendered next to the number input. Overrides "Default unit" in the preview.';
+    vsLbl.dataset.tipFhir  = 'item.extension[questionnaire-unitValueSet].valueCanonical';
+    vsLbl.dataset.tipSpec  = 'R4';
+
+    const vsInp = document.createElement('textarea');
+    vsInp.rows             = 1;
+    vsInp.className        = 'at-modal-sub-inp';
+    vsInp.placeholder      = 'http://unitsofmeasure.org/vs/…';
+    vsInp.dataset.testid   = 'unit-valueset-url';
+    vsInp.value            = pending.draftUnitValueSet || '';
+    vsInp.oninput = () => { pending.draftUnitValueSet = vsInp.value.trim(); };
+
+    section.append(unitLbl, unitSel.el, vsLbl, vsInp);
     return section;
   }
 
   commit(pending, node) {
     node.quantityUnit = (node.itemType === 'quantity' && pending.draftUnit) ? pending.draftUnit : undefined;
+    if (node.itemType === 'quantity' && pending.draftUnitValueSet)
+      node._unitValueSet = pending.draftUnitValueSet;
+    else
+      delete node._unitValueSet;
   }
 
   initPending(node) {
-    return { draftUnit: node.quantityUnit || '' };
+    return { draftUnit: node.quantityUnit || '', draftUnitValueSet: node._unitValueSet || '' };
   }
 }
 

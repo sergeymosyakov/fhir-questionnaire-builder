@@ -93,6 +93,14 @@ function _collectExternalVsNodes(nodes, out = []) {
   return out;
 }
 
+function _collectUnitVsNodes(nodes, out = []) {
+  for (const node of nodes) {
+    if (node._unitValueSet) out.push(node);
+    if (node.children?.length) _collectUnitVsNodes(node.children, out);
+  }
+  return out;
+}
+
 class TerminologyService {
   /** Wrap a target URL through the CORS proxy if configured. */
   _proxyUrl(url) {
@@ -209,7 +217,8 @@ class TerminologyService {
    */
   async expandAll(treeNodes, questMeta) {
     const nodes = _collectExternalVsNodes(treeNodes);
-    if (!nodes.length) return [];
+    const unitNodes = _collectUnitVsNodes(treeNodes);
+    if (!nodes.length && !unitNodes.length) return [];
     const failures = [];
     for (const node of nodes) {
       const server = this.getServer(node, questMeta);
@@ -222,6 +231,19 @@ class TerminologyService {
           ? `Network error (possible CORS restriction — the server may not allow browser requests): ${err.message}`
           : err.message;
         failures.push({ node, vsUrl: node._answerValueSet, server, error: msg });
+      }
+    }
+    for (const node of unitNodes) {
+      const server = this.getServer(node, questMeta);
+      try {
+        node._unitVsCache = await this.expandValueSet(node._unitValueSet, server);
+      } catch (err) {
+        node._unitVsCache = [];
+        const isCors = err instanceof TypeError && err.message.includes('fetch');
+        const msg = isCors
+          ? `Network error (possible CORS restriction — the server may not allow browser requests): ${err.message}`
+          : err.message;
+        failures.push({ node, vsUrl: node._unitValueSet, server, error: msg });
       }
     }
     return failures;

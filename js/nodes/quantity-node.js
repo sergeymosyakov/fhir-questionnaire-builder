@@ -55,15 +55,28 @@ export class QuantityNode extends ItemNode {
     numInput.placeholder = node._entryFormat || '0';
     numInput.value       = initVal;
     numInput.className   = 'qty-num-input';
+    numInput.dataset.testid = 'qty-num-input';
 
-    const unitItems = [
-      { value: '', label: '\u2014 unit \u2014' },
-      ...QUANTITY_UNITS.filter(u => !u.disabled).map(u => ({ value: u.value, label: u.label })),
-    ];
+    // Build unit dropdown items: prefer _unitVsCache (from unitValueSet), else QUANTITY_UNITS
+    let unitItems;
+    if (node._unitValueSet) {
+      const cached = node._unitVsCache || [];
+      unitItems = [
+        { value: '', label: '\u2014 unit \u2014' },
+        ...cached.map(u => ({ value: u.code, label: u.display || u.code })),
+      ];
+    } else {
+      unitItems = [
+        { value: '', label: '\u2014 unit \u2014' },
+        ...QUANTITY_UNITS.filter(u => !u.disabled).map(u => ({ value: u.value, label: u.label })),
+      ];
+    }
+
     const unitSel = createCustomSelect({
       items:    unitItems,
       value:    initUnit || '',
       className: 'qty-unit-sel',
+      testid:   'qty-unit-sel',
       onChange: () => { update(); _formTick.value++; },
     });
 
