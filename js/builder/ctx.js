@@ -10,6 +10,5 @@
  * @property {() => void}              renderTree  - Re-renders the entire tree into #treeContainer
  * @property {(node: Object) => Element} renderNode - Renders a single node (dispatches group/item)
  * @property {Object[]}                tree        - The reactive root tree array (from state.js)
- * @property {{ value: number }}       formTick    - Reactive ref; increment to trigger preview re-eval
  * @property {Map<string, boolean>}    collapsed   - UI-only collapse state keyed by node.id
  */

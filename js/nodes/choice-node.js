@@ -265,7 +265,7 @@ export class RadioNode extends ItemNode {
 
   buildControl(ctx) {
     const node = this;
-    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
 
     const opts = _evalAnswerOpts(node, ctx._fpCtx);

@@ -35,7 +35,6 @@ export class PreviewForm {
    * @param {Function} deps.setValue
    * @param {object} deps.rawFhir
    * @param {Array} deps.questVariables
-   * @param {object} deps.formTick
    * @param {Function} deps.calcFormOk
    * @param {Function} deps.isMandatory
    * @param {Function} deps.evalConstraints
@@ -49,7 +48,6 @@ export class PreviewForm {
     this._setValue         = deps.setValue;
     this._rawFhir         = deps.rawFhir;
     this._questVariables  = deps.questVariables;
-    this._formTick        = deps.formTick;
     this._calcFormOk      = deps.calcFormOk;
     this._effect          = deps.effect;
 
@@ -83,14 +81,7 @@ export class PreviewForm {
     document.addEventListener(AppEvents.BUILDER_NAVIGATE,   e => {
       document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_NAVIGATE_TO, { detail: { id: e.detail.id } }));
     });
-    document.addEventListener(AppEvents.RESPONSE_CHANGED, () => { this._formTick.value++; });
-
-    // ── Reactive render loop ────────────────────────────────────────────────
-    this._effect(() => {
-      void this._formTick.value;
-
-      this._asyncRender(++this._renderVersion);
-    });
+    document.addEventListener(AppEvents.RESPONSE_CHANGED, () => this._asyncRender(++this._renderVersion));
   }
 
   // ── Public API ──────────────────────────────────────────────────────────────
@@ -99,12 +90,12 @@ export class PreviewForm {
 
   collapseAll() {
     document.dispatchEvent(new CustomEvent(AppEvents.COLLAPSE_ALL_PREVIEW));
-    this._formTick.value++;
+    this._asyncRender(++this._renderVersion);
   }
 
   expandAll() {
     document.dispatchEvent(new CustomEvent(AppEvents.EXPAND_ALL_PREVIEW));
-    this._formTick.value++;
+    this._asyncRender(++this._renderVersion);
   }
 
   mount(elements) {
@@ -125,13 +116,8 @@ export class PreviewForm {
     elements.lform.style.display        = this._previewMode === 'json' ? 'none' : '';
     elements.fhirJsonView.style.display = this._previewMode === 'json' ? '' : 'none';
 
-    this._effect(() => {
-      void this._formTick.value;
-      if (this._previewMode !== 'json') return;
-      const q = buildFHIRObject();
-      elements.fhirJsonView.innerHTML = highlightJson(JSON.stringify(q, null, 2));
-      search.refresh();
-    });
+    // Initial render (shows placeholder when tree is empty)
+    this._asyncRender(++this._renderVersion);
   }
 
   async reinitForm({ silent = false } = {}) {
@@ -152,7 +138,7 @@ export class PreviewForm {
     this._preEnvVars = envVars;
     if (!silent) progress.show('Refreshing preview\u2026');
     await _yield();
-    this._formTick.value++;
+    this._asyncRender(++this._renderVersion);
   }
 
   // ── Private ─────────────────────────────────────────────────────────────────
@@ -168,7 +154,7 @@ export class PreviewForm {
       showHiddenItems: 'preview--no-hidden',
     }[e.detail.key];
     if (cls) lform.classList.toggle(cls, !e.detail.value);
-    this._formTick.value++;
+    this._asyncRender(++this._renderVersion);
   }
 
   _onPreviewModeChange(e) {
@@ -180,7 +166,7 @@ export class PreviewForm {
       lform.style.display                    = isJson ? 'none' : '';
       this._els.fhirJsonView.style.display   = isJson ? '' : 'none';
     }
-    this._formTick.value++;
+    this._asyncRender(++this._renderVersion);
   }
 
   _reCalc() {
@@ -314,6 +300,15 @@ export class PreviewForm {
     GroupNode.updateAll(_rc);
     statusBadge.update({ visible, ctx });
     search.refresh();
+    this._updateJsonView();
     progress.hide();
+  }
+
+  _updateJsonView() {
+    if (this._previewMode !== 'json') return;
+    if (!this._els.fhirJsonView) return;
+    const q = buildFHIRObject();
+    this._els.fhirJsonView.innerHTML = highlightJson(JSON.stringify(q, null, 2));
+    search.refresh();
   }
 }
