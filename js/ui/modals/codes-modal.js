@@ -27,7 +27,8 @@ class CodesModal extends Modal {
     const { node, link, setActive } = this._pending;
     ITEM_SECTIONS.forEach(s => s.commit(this._pending, node));
     const isActive = !!(node._codes?.length) || !!node._definition ||
-                     !!(node._supportLinks?.length) || !!(node._unknownExtensions?.length);
+                     !!(node._supportLinks?.length) || !!(node._unknownExtensions?.length) ||
+                     !!node._shortText;
     setActive(link, isActive);
     Modal._svc.triggerCalcRecalc();
     this._cancel();

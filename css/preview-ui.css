@@ -217,6 +217,7 @@
 .preview--no-badges .preview-condition-hint,
 .preview--no-badges .preview-constraint-badge,
 .preview--no-badges .preview-meta-badge,
+.preview--no-badges .preview-short-text-badge,
 .preview--no-badges .auto-badge { display: none; }
 
 /* linkId and prefix: strip badge styling, show as plain text */

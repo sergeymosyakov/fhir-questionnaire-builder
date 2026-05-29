@@ -1,5 +1,6 @@
 export { ITEM_SECTIONS } from './registry.js';
 import './definition.js';
+import './short-text.js';
 import './codes.js';
 import './support-links.js';
 import './extensions.js';
