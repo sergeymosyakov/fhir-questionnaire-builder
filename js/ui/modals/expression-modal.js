@@ -3,7 +3,6 @@
 //   open(cfg)                           — single-field (groups: calculatedExpression only)
 //   openDual(node, link, setActive, cb) — dual-field (items: calc + init in one modal)
 import { MODAL_REGISTRY } from './modal-registry.js';
-import { Modal } from './modal-base.js';
 import { ExprAwareModal } from './expr-aware-modal.js';
 import { EXPR_SECTIONS, makeExprField, renderExprSections } from './expression-sections/index.js';
 

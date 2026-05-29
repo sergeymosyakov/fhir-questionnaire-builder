@@ -207,6 +207,14 @@ export class ChoiceNode extends ItemNode {
       requestAnimationFrame(() => { searchInput.focus(); _doLookup(''); });
     };
 
+    const _reposition = () => {
+      if (!dropEl) return;
+      const rect = trigger.getBoundingClientRect();
+      dropEl.style.left  = rect.left + window.scrollX + 'px';
+      dropEl.style.top   = rect.bottom + window.scrollY + 'px';
+      dropEl.style.width = rect.width + 'px';
+    };
+
     const openDrop = () => {
       if (dropEl) { close(); return; }
       dropEl = document.createElement('div');
