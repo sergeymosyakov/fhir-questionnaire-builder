@@ -3,7 +3,7 @@
 // Optional FHIR-imported: quantityUnit (default unit code)
 import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
-import { createWrap } from './base-node.js';
+import { BaseNode, createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 
 const QUANTITY_UNITS = [

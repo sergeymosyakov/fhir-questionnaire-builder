@@ -3,9 +3,8 @@
 // Optional FHIR-imported: referenceResource (allowed type, e.g. 'Patient')
 import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
-import { createWrap } from './base-node.js';
+import { BaseNode, createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
-import { AppEvents } from '../events.js';
 
 const FHIR_R4_RESOURCES = [
   'Account','ActivityDefinition','AdverseEvent','AllergyIntolerance','Appointment',

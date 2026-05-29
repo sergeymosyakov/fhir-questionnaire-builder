@@ -3,7 +3,7 @@
 // Optional FHIR-imported: _minValue, _maxValue, _sliderStep, _entryFormat
 import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
-import { createWrap } from './base-node.js';
+import { BaseNode, createWrap } from './base-node.js';
 
 export class NumberNode extends ItemNode {
   constructor(data = {}) {

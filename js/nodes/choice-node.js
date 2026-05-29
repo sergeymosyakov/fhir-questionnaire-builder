@@ -4,7 +4,7 @@
 //   _answerValueSet, _openLabel, _initialSelected
 import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
-import { createWrap } from './base-node.js';
+import { BaseNode, createWrap } from './base-node.js';
 import { parseOptions } from '../utils.js';
 import { terminologyService } from '../fhir/terminology-service.js';
 
