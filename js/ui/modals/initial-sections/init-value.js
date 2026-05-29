@@ -1,6 +1,6 @@
 import { InitialSection } from './base-section.js';
 import { INITIAL_SECTIONS } from './registry.js';
-import { parseOptions } from '../../../utils.js';
+import { parseOptions, rawOptsToPairs } from '../../../utils.js';
 import { Modal } from '../modal-base.js';
 import { createCustomSelect } from '../../custom-select.js';
 import { createDatePicker } from '../../date-picker.js';
@@ -62,7 +62,10 @@ class InitValueSection extends InitialSection {
       const optSel = createCustomSelect({
         items: [
           { value: '', label: '\u2014 none \u2014' },
-          ...parseOptions(pending.node.options || '').map(({ code, display }) => ({ value: code, label: display || code })),
+          ...(pending.node._rawAnswerOptions
+            ? rawOptsToPairs(pending.node._rawAnswerOptions)
+            : parseOptions(pending.node.options || '')
+          ).map(({ code, display }) => ({ value: code, label: display || code })),
         ],
         value:     pending.draftValue || '',
         className: 'sc-trigger--full',

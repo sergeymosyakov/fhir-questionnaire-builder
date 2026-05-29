@@ -9,6 +9,7 @@ import {
   buildLinkIdMap,
   fhirTypeToItemType,
   fhirOptsToStr,
+  hasNonCodingOpts,
   humanEnableWhen,
   applyVisibility,
   resolveContainedValueSet,
@@ -19,6 +20,7 @@ import { fhirItemToNode } from './import-item.js';
 export {
   fhirTypeToItemType,
   fhirOptsToStr,
+  hasNonCodingOpts,
   humanEnableWhen,
   applyVisibility,
   resolveContainedValueSet,

@@ -5,25 +5,30 @@
 import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
-import { parseOptions } from '../utils.js';
+import { parseOptions, rawOptsToPairs } from '../utils.js';
 import { terminologyService } from '../fhir/terminology-service.js';
 
 // Evaluate answerExpression (SDC) against the current FHIRPath context.
 // Returns [{code, display}] from the expression result, or falls back to
-// parseOptions(node.options) if the expression is absent, empty, or errors.
+// node options when the expression is absent, empty, or errors.
 // For external answerValueSet items, reads node._vsCache populated by
 // terminologyService.expandAll() — returns [] if expansion not yet done.
+function _nodeOpts(node) {
+  if (node._rawAnswerOptions) return rawOptsToPairs(node._rawAnswerOptions);
+  return parseOptions(node.options);
+}
+
 function _evalAnswerOpts(node, fpCtx) {
   if (!node._answerExpression) {
     if (node._answerValueSet && !node._answerValueSet.startsWith('#')) {
       return node._vsCache ?? [];
     }
-    return parseOptions(node.options);
+    return _nodeOpts(node);
   }
-  if (!fpCtx || !fpCtx.fp || !fpCtx.qr) return parseOptions(node.options);
+  if (!fpCtx || !fpCtx.fp || !fpCtx.qr) return _nodeOpts(node);
   try {
     const raw = fpCtx.fp.evaluate(fpCtx.qr, node._answerExpression, fpCtx.env || {});
-    if (!raw || !raw.length) return parseOptions(node.options);
+    if (!raw || !raw.length) return _nodeOpts(node);
     return raw.map(v => {
       if (v === null || v === undefined) return null;
       if (typeof v === 'string')  return { code: v, display: v };
@@ -36,7 +41,7 @@ function _evalAnswerOpts(node, fpCtx) {
       return { code: String(v), display: String(v) };
     }).filter(Boolean);
   } catch {
-    return parseOptions(node.options);
+    return _nodeOpts(node);
   }
 }
 

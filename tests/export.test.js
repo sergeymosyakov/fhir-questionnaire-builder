@@ -339,6 +339,72 @@ describe('buildFHIRObject — answerOption', () => {
   });
 });
 
+// ── answerOption _rawAnswerOptions round-trip ─────────────────────────────────
+describe('buildFHIRObject — _rawAnswerOptions round-trip', () => {
+  it('exports valueString options as valueString (not valueCoding)', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'Email, Phone',
+      _rawAnswerOptions: [{ valueString: 'Email' }, { valueString: 'Phone' }],
+    }]);
+    expect(q.item[0].answerOption[0].valueString).toBe('Email');
+    expect(q.item[0].answerOption[0].valueCoding).toBeUndefined();
+  });
+
+  it('exports valueInteger options as valueInteger', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: '0, 1',
+      _rawAnswerOptions: [{ valueInteger: 0 }, { valueInteger: 1 }],
+    }]);
+    expect(q.item[0].answerOption[0].valueInteger).toBe(0);
+    expect(q.item[0].answerOption[0].valueCoding).toBeUndefined();
+  });
+
+  it('exports valueDate options as valueDate', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: '2026-06-01',
+      _rawAnswerOptions: [{ valueDate: '2026-06-01' }],
+    }]);
+    expect(q.item[0].answerOption[0].valueDate).toBe('2026-06-01');
+    expect(q.item[0].answerOption[0].valueCoding).toBeUndefined();
+  });
+
+  it('exports valueTime options as valueTime', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: '09:00:00',
+      _rawAnswerOptions: [{ valueTime: '09:00:00' }],
+    }]);
+    expect(q.item[0].answerOption[0].valueTime).toBe('09:00:00');
+    expect(q.item[0].answerOption[0].valueCoding).toBeUndefined();
+  });
+
+  it('exports valueReference options as valueReference', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'Practitioner/p1',
+      _rawAnswerOptions: [{ valueReference: { reference: 'Practitioner/p1', display: 'Dr. A' } }],
+    }]);
+    expect(q.item[0].answerOption[0].valueReference?.reference).toBe('Practitioner/p1');
+    expect(q.item[0].answerOption[0].valueCoding).toBeUndefined();
+  });
+
+  it('preserves initialSelected on non-Coding round-trip', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'Email, Phone',
+      _rawAnswerOptions: [{ valueString: 'Email' }, { valueString: 'Phone' }],
+      _initialSelected: 'Phone',
+    }]);
+    const selected = q.item[0].answerOption.find(o => o.initialSelected);
+    expect(selected?.valueString).toBe('Phone');
+  });
+
+  it('uses options string path when _rawAnswerOptions absent', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=Alpha',
+    }]);
+    expect(q.item[0].answerOption[0].valueCoding?.code).toBe('a');
+  });
+});
+
 // ── groups ────────────────────────────────────────────────────────────────────
 describe('buildFHIRObject — groups', () => {
   it('exports group with children', () => {

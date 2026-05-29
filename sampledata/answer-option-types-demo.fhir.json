@@ -1,0 +1,141 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "answer-option-types-demo",
+  "status": "draft",
+  "title": "Answer Option Value Types Demo",
+  "description": "Demonstrates all six FHIR answerOption value[x] types: valueCoding, valueString, valueInteger, valueDate, valueTime, and valueReference.",
+  "item": [
+    {
+      "linkId": "section-coding",
+      "text": "valueCoding options",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "q-coding",
+          "text": "Select a blood type (valueCoding)",
+          "type": "choice",
+          "answerOption": [
+            { "valueCoding": { "system": "http://loinc.org", "code": "LA19710-5", "display": "A+" } },
+            { "valueCoding": { "system": "http://loinc.org", "code": "LA19709-7", "display": "A-" } },
+            { "valueCoding": { "system": "http://loinc.org", "code": "LA19712-1", "display": "B+" } },
+            { "valueCoding": { "system": "http://loinc.org", "code": "LA19711-3", "display": "B-" } },
+            { "valueCoding": { "system": "http://loinc.org", "code": "LA28449-9", "display": "O+" } },
+            { "valueCoding": { "system": "http://loinc.org", "code": "LA28448-1", "display": "O-" } },
+            { "valueCoding": { "system": "http://loinc.org", "code": "LA19714-7", "display": "AB+" } },
+            { "valueCoding": { "system": "http://loinc.org", "code": "LA19713-9", "display": "AB-" } }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "section-string",
+      "text": "valueString options",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "q-string",
+          "text": "Preferred contact method (valueString)",
+          "type": "choice",
+          "answerOption": [
+            { "valueString": "Email" },
+            { "valueString": "Phone" },
+            { "valueString": "SMS" },
+            { "valueString": "Post" }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "section-integer",
+      "text": "valueInteger options",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "q-integer",
+          "text": "How many times per week do you exercise? (valueInteger)",
+          "type": "choice",
+          "answerOption": [
+            { "valueInteger": 0 },
+            { "valueInteger": 1 },
+            { "valueInteger": 2 },
+            { "valueInteger": 3 },
+            { "valueInteger": 4 },
+            { "valueInteger": 5 },
+            { "valueInteger": 6 },
+            { "valueInteger": 7 }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "section-date",
+      "text": "valueDate options",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "q-date",
+          "text": "Select a follow-up date (valueDate)",
+          "type": "choice",
+          "answerOption": [
+            { "valueDate": "2026-06-01" },
+            { "valueDate": "2026-06-15" },
+            { "valueDate": "2026-07-01" },
+            { "valueDate": "2026-07-15" }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "section-time",
+      "text": "valueTime options",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "q-time",
+          "text": "Preferred appointment time (valueTime)",
+          "type": "choice",
+          "answerOption": [
+            { "valueTime": "09:00:00" },
+            { "valueTime": "10:30:00" },
+            { "valueTime": "14:00:00" },
+            { "valueTime": "15:30:00" }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "section-reference",
+      "text": "valueReference options",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "q-reference",
+          "text": "Assign to care team member (valueReference)",
+          "type": "choice",
+          "answerOption": [
+            { "valueReference": { "reference": "Practitioner/dr-smith",  "display": "Dr. Smith" } },
+            { "valueReference": { "reference": "Practitioner/dr-jones",  "display": "Dr. Jones" } },
+            { "valueReference": { "reference": "Practitioner/dr-patel",  "display": "Dr. Patel" } }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "section-mixed",
+      "text": "Mixed types in one item",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "q-initialselected",
+          "text": "Preferred notification channel (valueString, initialSelected)",
+          "type": "choice",
+          "answerOption": [
+            { "valueString": "Email" },
+            { "valueString": "Push notification", "initialSelected": true },
+            { "valueString": "In-app message" }
+          ]
+        }
+      ]
+    }
+  ]
+}

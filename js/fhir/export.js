@@ -182,7 +182,31 @@ function nodeToFHIRItem(node) {
 
   if (node.type === 'group') {
     fhirItem.item = node.children.map(nodeToFHIRItem);
-  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice' || node.itemType === 'checklist') && node.options && !node._answerValueSet && !node._answerExpression) {
+  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice' || node.itemType === 'checklist') && (node.options || node._rawAnswerOptions) && !node._answerValueSet && !node._answerExpression) {
+    if (node._rawAnswerOptions) {
+      // Round-trip: preserve the original non-valueCoding FHIR answerOption[] types
+      fhirItem.answerOption = node._rawAnswerOptions.map(opt => {
+        const key = opt.valueCoding
+          ? (opt.valueCoding.code || opt.valueCoding.display || '')
+          : opt.valueString  !== undefined ? opt.valueString
+          : opt.valueInteger !== undefined ? String(opt.valueInteger)
+          : opt.valueDate    !== undefined ? opt.valueDate
+          : opt.valueTime    !== undefined ? opt.valueTime
+          : opt.valueReference ? (typeof opt.valueReference === 'string' ? opt.valueReference : (opt.valueReference.reference || ''))
+          : '';
+        const optOut = { ...opt };
+        const optExts = [...(opt.extension || [])];
+        if (node._optionOrdinals?.[key] !== undefined) {
+          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/ordinalValue', valueDecimal: node._optionOrdinals[key] });
+        }
+        if (node._optionPrefixes?.[key]) {
+          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix', valueString: node._optionPrefixes[key] });
+        }
+        if (optExts.length) optOut.extension = optExts;
+        if (node._initialSelected === key) optOut.initialSelected = true;
+        return optOut;
+      });
+    } else {
     fhirItem.answerOption = parseOptions(node.options)
       .map(({ code, display }) => {
         const coding = { code, display };
@@ -198,6 +222,7 @@ function nodeToFHIRItem(node) {
         if (node._initialSelected === code) answerOpt.initialSelected = true;
         return answerOpt;
       });
+    }
   }
 
   // maxLength (text/url/open-choice types)

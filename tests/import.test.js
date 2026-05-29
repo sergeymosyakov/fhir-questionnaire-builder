@@ -37,7 +37,7 @@ vi.mock('../js/state.js', () => ({
 
 vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
-const { fhirTypeToItemType, fhirOptsToStr, humanEnableWhen, applyVisibility, importFHIR } = await import('../js/fhir/import.js');
+const { fhirTypeToItemType, fhirOptsToStr, hasNonCodingOpts, humanEnableWhen, applyVisibility, importFHIR } = await import('../js/fhir/import.js');
 
 vi.stubGlobal('alert', vi.fn());
 
@@ -112,6 +112,21 @@ describe('fhirOptsToStr', () => {
     expect(fhirOptsToStr(opts)).toBe('1, 2');
   });
 
+  it('handles valueDate options', () => {
+    const opts = [{ valueDate: '2026-06-01' }, { valueDate: '2026-07-01' }];
+    expect(fhirOptsToStr(opts)).toBe('2026-06-01, 2026-07-01');
+  });
+
+  it('handles valueTime options', () => {
+    const opts = [{ valueTime: '09:00:00' }, { valueTime: '14:00:00' }];
+    expect(fhirOptsToStr(opts)).toBe('09:00:00, 14:00:00');
+  });
+
+  it('handles valueReference options', () => {
+    const opts = [{ valueReference: { reference: 'Practitioner/p1', display: 'Dr. A' } }];
+    expect(fhirOptsToStr(opts)).toBe('Practitioner/p1');
+  });
+
   it('joins multiple options with comma-space', () => {
     const opts = [
       { valueCoding: { code: 'a', display: 'Alpha' } },
@@ -123,6 +138,34 @@ describe('fhirOptsToStr', () => {
   it('filters out blank entries', () => {
     const opts = [{ valueCoding: {} }, { valueCoding: { code: 'x' } }];
     expect(fhirOptsToStr(opts)).toBe('x');
+  });
+});
+
+// ── hasNonCodingOpts ───────────────────────────────────────────────────────────
+describe('hasNonCodingOpts', () => {
+  it('returns false for all-valueCoding array', () => {
+    expect(hasNonCodingOpts([{ valueCoding: { code: 'a' } }])).toBe(false);
+  });
+
+  it('returns true when any option is valueString', () => {
+    expect(hasNonCodingOpts([{ valueCoding: { code: 'a' } }, { valueString: 'b' }])).toBe(true);
+  });
+
+  it('returns true for valueInteger', () => {
+    expect(hasNonCodingOpts([{ valueInteger: 1 }])).toBe(true);
+  });
+
+  it('returns true for valueDate', () => {
+    expect(hasNonCodingOpts([{ valueDate: '2026-01-01' }])).toBe(true);
+  });
+
+  it('returns false for empty array', () => {
+    expect(hasNonCodingOpts([])).toBe(false);
+  });
+
+  it('returns false for null/undefined', () => {
+    expect(hasNonCodingOpts(null)).toBe(false);
+    expect(hasNonCodingOpts(undefined)).toBe(false);
   });
 });
 
@@ -700,7 +743,63 @@ describe('importFHIR', () => {
     });
   });
 
-  // ── item.initial[] multiple values for repeating items ─────────────────────
+  // ── _rawAnswerOptions (non-Coding round-trip) ──────────────────────────────
+  describe('_rawAnswerOptions', () => {
+    it('is set when any answerOption is valueString', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{ valueString: 'Email' }, { valueString: 'Phone' }],
+      }]));
+      expect(_tree[0]._rawAnswerOptions).toEqual([{ valueString: 'Email' }, { valueString: 'Phone' }]);
+    });
+
+    it('is set when any answerOption is valueInteger', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{ valueInteger: 0 }, { valueInteger: 1 }],
+      }]));
+      expect(_tree[0]._rawAnswerOptions).toEqual([{ valueInteger: 0 }, { valueInteger: 1 }]);
+    });
+
+    it('is set when any answerOption is valueDate', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{ valueDate: '2026-06-01' }],
+      }]));
+      expect(_tree[0]._rawAnswerOptions).toEqual([{ valueDate: '2026-06-01' }]);
+    });
+
+    it('is set when any answerOption is valueTime', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{ valueTime: '09:00:00' }],
+      }]));
+      expect(_tree[0]._rawAnswerOptions).toEqual([{ valueTime: '09:00:00' }]);
+    });
+
+    it('is set when mixed valueCoding + valueString', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [
+          { valueCoding: { code: 'a', display: 'A' } },
+          { valueString: 'b' },
+        ],
+      }]));
+      expect(_tree[0]._rawAnswerOptions).toHaveLength(2);
+    });
+
+    it('is NOT set when all answerOptions are valueCoding', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [
+          { valueCoding: { code: 'y', display: 'Yes' } },
+          { valueCoding: { code: 'n', display: 'No' } },
+        ],
+      }]));
+      expect(_tree[0]._rawAnswerOptions).toBeUndefined();
+    });
+
+    it('node.options string is still populated for display', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+        answerOption: [{ valueString: 'Email' }, { valueString: 'Phone' }],
+      }]));
+      expect(_tree[0].options).toBe('Email, Phone');
+    });
+  });
   describe('item.initial[] multi-value', () => {
     it('reads multiple initial values for a repeating item into _initialValues', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', repeats: true,

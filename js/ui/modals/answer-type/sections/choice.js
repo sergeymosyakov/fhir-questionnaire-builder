@@ -4,14 +4,17 @@ import { resolveContainedValueSet } from '../../../../fhir/import.js';
 import { createCustomSelect } from '../../../custom-select.js';
 import { Modal } from '../../modal-base.js';
 import { CHOICE_TYPES } from '../data.js';
-import { parseOptions } from '../../../../utils.js';
+import { parseOptions, rawOptsToPairs } from '../../../../utils.js';
 import { createOptionsEditor } from '../../../answer-options-editor.js';
 import { terminologyService } from '../../../../fhir/terminology-service.js';
 
 function _buildRows(node) {
   const ords    = node._optionOrdinals || {};
   const prefixes = node._optionPrefixes || {};
-  return parseOptions(node.options || '').map(({ code, display }) => ({
+  const pairs = node._rawAnswerOptions
+    ? rawOptsToPairs(node._rawAnswerOptions)
+    : parseOptions(node.options || '');
+  return pairs.map(({ code, display }) => ({
     code,
     label:  display,
     score:  ords[code] !== undefined ? String(ords[code]) : '',
@@ -302,6 +305,7 @@ class ChoiceSection extends AnswerTypeSection {
       } else {
         delete node._answerValueSet;
         delete node._answerExpression;
+        delete node._rawAnswerOptions;  // user edited inline → convert to valueCoding
 
         const rows = (pending.draftOptionRows || []).filter(r => r.code.trim());
         node.options = rows.map(r => r.code.trim() + '=' + r.label.trim()).join(',');

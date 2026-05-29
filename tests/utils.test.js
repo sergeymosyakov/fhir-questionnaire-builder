@@ -6,6 +6,7 @@ import {
   findAncestorGroupIds,
   parseOption,
   parseOptions,
+  rawOptsToPairs,
   highlightJson,
   highlightJsonWithSearch,
 } from '../js/utils.js';
@@ -211,5 +212,70 @@ describe('highlightJsonWithSearch', () => {
     const { html } = highlightJsonWithSearch('{"x": "<em>"}', '<em>');
     expect(html).not.toContain('<em>');
     expect(html).toContain('&lt;em&gt;');
+  });
+});
+
+// ── rawOptsToPairs ────────────────────────────────────────────────────────────
+describe('rawOptsToPairs', () => {
+  it('converts valueCoding to {code, display}', () => {
+    expect(rawOptsToPairs([{ valueCoding: { code: 'a', display: 'Alpha' } }]))
+      .toEqual([{ code: 'a', display: 'Alpha' }]);
+  });
+
+  it('uses display as code when code absent', () => {
+    expect(rawOptsToPairs([{ valueCoding: { display: 'Only display' } }]))
+      .toEqual([{ code: 'Only display', display: 'Only display' }]);
+  });
+
+  it('converts valueString', () => {
+    expect(rawOptsToPairs([{ valueString: 'Email' }]))
+      .toEqual([{ code: 'Email', display: 'Email' }]);
+  });
+
+  it('converts valueInteger', () => {
+    expect(rawOptsToPairs([{ valueInteger: 3 }]))
+      .toEqual([{ code: '3', display: '3' }]);
+  });
+
+  it('converts valueDate', () => {
+    expect(rawOptsToPairs([{ valueDate: '2026-06-01' }]))
+      .toEqual([{ code: '2026-06-01', display: '2026-06-01' }]);
+  });
+
+  it('converts valueTime', () => {
+    expect(rawOptsToPairs([{ valueTime: '09:00:00' }]))
+      .toEqual([{ code: '09:00:00', display: '09:00:00' }]);
+  });
+
+  it('converts valueReference object with display', () => {
+    expect(rawOptsToPairs([{ valueReference: { reference: 'Practitioner/p1', display: 'Dr. A' } }]))
+      .toEqual([{ code: 'Practitioner/p1', display: 'Dr. A' }]);
+  });
+
+  it('converts valueReference object without display', () => {
+    expect(rawOptsToPairs([{ valueReference: { reference: 'Practitioner/p1' } }]))
+      .toEqual([{ code: 'Practitioner/p1', display: 'Practitioner/p1' }]);
+  });
+
+  it('filters out unknown option shapes', () => {
+    expect(rawOptsToPairs([{}])).toEqual([]);
+  });
+
+  it('handles null/undefined input', () => {
+    expect(rawOptsToPairs(null)).toEqual([]);
+    expect(rawOptsToPairs(undefined)).toEqual([]);
+  });
+
+  it('handles mixed types in one array', () => {
+    const result = rawOptsToPairs([
+      { valueCoding: { code: 'c1', display: 'Coding' } },
+      { valueString: 'str' },
+      { valueInteger: 5 },
+    ]);
+    expect(result).toEqual([
+      { code: 'c1', display: 'Coding' },
+      { code: 'str', display: 'str' },
+      { code: '5', display: '5' },
+    ]);
   });
 });

@@ -201,7 +201,8 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 
 | Internal field | FHIR field / extension | Notes |
 |---|---|---|
-| `options` | `item.answerOption[]` | comma-split → `valueCoding.{code, display}` on export; reverse on import |
+| `options` | `item.answerOption[]` | comma-split → `valueCoding.{code, display}` on export (default path); see `_rawAnswerOptions` for non-Coding types |
+| `_rawAnswerOptions` | `item.answerOption[]` | set on import when any option uses a non-`valueCoding` type (`valueString`, `valueInteger`, `valueDate`, `valueTime`, `valueReference`); exported verbatim for full round-trip fidelity; overrides the `options` string path on export; cleared when user edits options via Answer Type modal (converting to `valueCoding`) |
 | `_renderStyle` | `item._text.extension[rendering-style]` | standard FHIR `rendering-style` extension |
 | `_renderXhtml` | `item._text.extension[rendering-xhtml]` | raw XHTML markup; sanitized via DOMPurify + rendered as `innerHTML` in preview; editable in Appearance modal |
 | `_calculatedExpr` | SDC `sdc-questionnaire-calculatedExpression` extension (`valueExpression.expression`) | FHIRPath |
@@ -405,7 +406,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `questionnaire-signatureRequired` | ❌ Not handled | Indicates that a digital signature is required for the item or group. |
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
 | `questionnaire-optionExclusive` | ❌ Not handled | On `answerOption.extension`; marks an option as exclusive — if selected, all other options must be deselected (e.g., "None of the above"). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive`. |
-| `answerOption.value[x]` types other than `valueCoding` | ⚠️ Round-trip unsafe | On import, only `answerOption[].valueCoding` entries are handled; `valueInteger`, `valueDate`, `valueTime`, `valueString`, and `valueReference` are silently dropped. On export, all options are always written as `valueCoding`. Per the FHIR spec all six types are valid in `answerOption`. |
 | `questionnaire-unitOption` | ❌ Not handled | Specifies a single allowed unit for `quantity` items (R4 core extension; multiple instances enumerate all allowed units). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption`. Distinct from `questionnaire-unitValueSet` (which references a ValueSet). |
 
 ### SDC extensions — not implemented (no server required)

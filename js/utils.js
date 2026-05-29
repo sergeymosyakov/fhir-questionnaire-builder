@@ -60,6 +60,30 @@ export function parseOptions(str) {
   return (str || '').split(',').map(s => s.trim()).filter(Boolean).map(parseOption);
 }
 
+// Convert FHIR answerOption[] → [{code, display}] for any value[x] type.
+// Used by choice-node preview and the answer-type modal when _rawAnswerOptions is present.
+export function rawOptsToPairs(rawOpts) {
+  return (rawOpts || []).map(o => {
+    if (o.valueCoding) {
+      const code    = o.valueCoding.code    || o.valueCoding.display || '';
+      const display = o.valueCoding.display || o.valueCoding.code    || '';
+      return { code, display };
+    }
+    if (o.valueString    !== undefined) return { code: o.valueString,              display: o.valueString };
+    if (o.valueInteger   !== undefined) return { code: String(o.valueInteger),     display: String(o.valueInteger) };
+    if (o.valueDate      !== undefined) return { code: o.valueDate,                display: o.valueDate };
+    if (o.valueTime      !== undefined) return { code: o.valueTime,                display: o.valueTime };
+    if (o.valueReference) {
+      const ref  = typeof o.valueReference === 'string'
+        ? o.valueReference
+        : (o.valueReference.reference || '');
+      const disp = (typeof o.valueReference === 'object' && o.valueReference.display) || ref;
+      return { code: ref, display: disp };
+    }
+    return null;
+  }).filter(Boolean);
+}
+
 // ── JSON syntax highlighter ───────────────────────────────────────────────────
 // Tokenises a pretty-printed JSON string and wraps each token in a <span>.
 // Safe: HTML special chars are escaped BEFORE the regex runs.

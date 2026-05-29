@@ -60,6 +60,7 @@ export function fhirTypeToItemType(t) {
 }
 
 // answerOption[] → comma-separated options string in "code=display" format.
+// For non-valueCoding types, produces a plain string so the editor shows something.
 export function fhirOptsToStr(opts) {
   return (opts || []).map(o => {
     if (o.valueCoding) {
@@ -68,8 +69,23 @@ export function fhirOptsToStr(opts) {
       if (code && display && code !== display) return code + '=' + display;
       return display || code;
     }
-    return o.valueString || (o.valueInteger !== undefined ? String(o.valueInteger) : '');
+    if (o.valueString    !== undefined) return o.valueString;
+    if (o.valueInteger   !== undefined) return String(o.valueInteger);
+    if (o.valueDate      !== undefined) return o.valueDate;
+    if (o.valueTime      !== undefined) return o.valueTime;
+    if (o.valueReference) {
+      return (typeof o.valueReference === 'string'
+        ? o.valueReference
+        : (o.valueReference.reference || ''));
+    }
+    return '';
   }).filter(Boolean).join(', ');
+}
+
+// Returns true if any option uses a non-Coding value type.
+// When true, _rawAnswerOptions must be stored on import for round-trip fidelity.
+export function hasNonCodingOpts(opts) {
+  return (opts || []).some(o => !o.valueCoding);
 }
 
 // Build linkId → question text map for human-friendly display

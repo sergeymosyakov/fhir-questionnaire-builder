@@ -4,6 +4,7 @@ import { createGroupNode, createItemNode } from '../nodes/index.js';
 import {
   fhirTypeToItemType,
   fhirOptsToStr,
+  hasNonCodingOpts,
   applyVisibility,
   applyConstraints,
   resolveContainedValueSet,
@@ -37,6 +38,13 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   });
 
   node.options = fhirOptsToStr(fhirItem.answerOption);
+
+  // When any answerOption uses a non-valueCoding type (valueString, valueInteger,
+  // valueDate, valueTime, valueReference), preserve the full FHIR array for
+  // round-trip fidelity. The options string above is kept for editor display.
+  if (hasNonCodingOpts(fhirItem.answerOption)) {
+    node._rawAnswerOptions = JSON.parse(JSON.stringify(fhirItem.answerOption));
+  }
 
   // Preserve non-type-changing itemControl codes for round-trip + rendering
   if (ctrlCode && ctrlCode !== 'radio-button' && ctrlCode !== 'check-box') {
