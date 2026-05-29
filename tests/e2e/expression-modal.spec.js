@@ -45,6 +45,7 @@ async function addTextItem(page, title = 'My Question') {
   if (title) {
     const item = page.locator('[data-node-id="1.1"]');
     await item.getByTestId('node-title-display').click();
+    await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
     await item.getByTestId('node-title-input').fill(title);
     await item.getByTestId('node-title-input').blur();
   }

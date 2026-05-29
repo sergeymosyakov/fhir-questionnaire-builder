@@ -109,11 +109,13 @@ test.describe('FHIR export', () => {
 
     const group = page.locator(`[data-node-id="${groupId}"]`);
     await group.getByTestId('node-title-display').first().click();
+    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
     await group.getByTestId('node-title-input').first().fill('My Group');
     await group.getByTestId('node-title-input').first().blur();
 
     const node = page.locator(`[data-node-id="${itemId}"]`);
     await node.getByTestId('node-title-display').click();
+    await expect(node.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
     await node.getByTestId('node-title-input').fill('My Question');
     await node.getByTestId('node-title-input').blur();
 
@@ -138,6 +140,7 @@ test.describe('Builder → preview: group title edit', () => {
 
     const group = page.locator(`[data-node-id="${groupId}"]`);
     await group.getByTestId('node-title-display').first().click();
+    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
     await group.getByTestId('node-title-input').first().fill('My Section');
     await group.getByTestId('node-title-input').first().blur();
 
@@ -290,6 +293,7 @@ test.describe('Preview answers → state', () => {
 
     const group = page.locator(`[data-node-id="${groupId}"]`);
     await group.getByTestId('node-title-display').first().click();
+    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
     await group.getByTestId('node-title-input').first().fill('Updated Title');
     await group.getByTestId('node-title-input').first().blur();
 

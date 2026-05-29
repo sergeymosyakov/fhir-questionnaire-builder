@@ -38,6 +38,7 @@ test.describe('enableWhen (standard)', () => {
     // Title the trigger so it appears by name in the question selector
     const triggerNode = page.locator('[data-node-id="1.1"]');
     await triggerNode.getByTestId('node-title-display').click();
+    await expect(triggerNode.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
     await triggerNode.getByTestId('node-title-input').fill('Trigger');
     await triggerNode.getByTestId('node-title-input').blur();
 
