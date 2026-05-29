@@ -39,11 +39,10 @@ async function loadFixture(page) {
 
 const badge = page => page.getByTestId('status-badge-btn');
 
-// Click the "Questionnaire Preview" title span (tabindex="-1") to move focus
-// away from the input, reliably firing blur+change → BaseNode.notifyChanged() → badge update
-async function commitInput(page, _input) {
-  await page.locator('span[tabindex="-1"]').click();
-  await page.waitForTimeout(200);
+// Press Tab to move focus away from the input, reliably firing blur+change
+// → BaseNode.notifyChanged() → RESPONSE_CHANGED → badge re-evaluates constraints
+async function commitInput(page, input) {
+  await input.press('Tab');
 }
 
 // ── 1. hasCriteria — badge visibility ─────────────────────────────────────────

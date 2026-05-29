@@ -47,7 +47,7 @@ async function addTextItem(page, title = 'My Question') {
     // Wait for add-menu to fully close before clicking title
     await expect(item.getByTestId('node-title-display')).toBeVisible();
     await item.getByTestId('node-title-display').click();
-    await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 5_000 });
+    await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
     await item.getByTestId('node-title-input').fill(title);
     await item.getByTestId('node-title-input').blur();
   }

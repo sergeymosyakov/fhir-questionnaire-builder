@@ -32,10 +32,6 @@ export class QuestionnairesMenu extends DropdownMenu {
     fileInput.addEventListener('change', async e => {
       const fileName = e.target.files[0]?.name;
       if (!fileName) return;
-      if (await this._loader.confirmBeforeLoad() !== 'proceed') {
-        e.target.value = '';
-        return;
-      }
       progress.show('Loading ' + fileName + '\u2026');
       readFileAsJSON(e)
         .then(({ data, fileName }) => { progress.update(0, 1); this._loader.load(data, fileName); })
