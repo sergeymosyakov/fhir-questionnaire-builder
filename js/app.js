@@ -30,7 +30,7 @@ import { MetadataCard } from './ui/metadata-card.js';
 import { PanelResizer } from './ui/panel-resizer.js';
 import { AutosaveToggle } from './ui/autosave-toggle.js';
 import { UndoRedo } from './ui/undo-redo.js';
-import { _formTick, _bulkUpdate } from './render-bus.js';
+import { _formTick } from './render-bus.js';
 import { QRAnswersManager } from './fhir/qr-answers-manager.js';
 import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
 
@@ -45,7 +45,6 @@ patientCtx.configure({ tree, effect, questVariables });
 patientCtx.mount(document.getElementById('patientPresetWrap'));
 AuthPanel.configure({ tree, effect });
 AutosaveToggle.configure({ questMeta });
-UndoRedo.configure({ effect, formTick: _formTick });
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
 export const qrAnswers   = new QRAnswersManager({ values, tree, rawFhir });
@@ -55,7 +54,7 @@ export const questLoader = new QuestionnaireLoader({ tree, values, questMeta, ra
 
 export const previewForm = new PreviewForm({
   effect, tree, values, getValue, setValue, rawFhir, questVariables,
-  formTick: _formTick, bulkUpdate: _bulkUpdate,
+  formTick: _formTick,
   calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES,
 });
 

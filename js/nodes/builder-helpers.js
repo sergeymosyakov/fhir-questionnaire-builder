@@ -3,6 +3,9 @@
 // Each function takes the node instance as its first argument.
 // Called via thin delegators on BaseNode: node._buildInlineTitleEditor(), etc.
 import * as dnd from '../builder/dnd.js';
+import { AppEvents } from '../events.js';
+
+const _notify = () => document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 
 /** Returns a <div class="node-title-row"> with a click-to-edit title field. */
 export function buildInlineTitleEditor(node) {
@@ -17,7 +20,7 @@ export function buildInlineTitleEditor(node) {
   titleTextarea.dataset.testid = 'node-title-input';
   titleTextarea.value = node.title;
   titleTextarea.style.display = 'none';
-  titleTextarea.oninput = () => { node.title = titleTextarea.value; titleDisplay.textContent = titleTextarea.value || '(no title)'; };
+  titleTextarea.oninput = () => { node.title = titleTextarea.value; titleDisplay.textContent = titleTextarea.value || '(no title)'; _notify(); };
   titleTextarea.onblur  = () => { titleTextarea.style.display = 'none'; titleDisplay.style.display = ''; };
   titleDisplay.addEventListener('click', e => {
     e.stopPropagation();
@@ -42,7 +45,7 @@ export function buildLinkIdInput(node) {
   inp.dataset.tipBody  = 'Editable. Must be unique within the questionnaire.';
   inp.dataset.tipFhir  = 'Questionnaire.item.linkId';
   inp.dataset.tipSpec  = 'R4';
-  inp.oninput = () => { node.id = inp.value.trim() || node.id; };
+  inp.oninput = () => { node.id = inp.value.trim() || node.id; _notify(); };
   return inp;
 }
 
@@ -57,7 +60,7 @@ export function buildPrefixInput(node, placeholder = '\u2014') {
   inp.dataset.tipBody  = 'Cosmetic only \u2014 e.g. "1.". Does not affect logic or linkId.';
   inp.dataset.tipFhir  = 'Questionnaire.item.prefix';
   inp.dataset.tipSpec  = 'R4';
-  inp.oninput = () => { node._prefix = inp.value.trim() || undefined; };
+  inp.oninput = () => { node._prefix = inp.value.trim() || undefined; _notify(); };
   return inp;
 }
 

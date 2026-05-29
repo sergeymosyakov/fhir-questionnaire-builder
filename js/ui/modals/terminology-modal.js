@@ -5,6 +5,7 @@
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import { terminologyService } from '../../fhir/terminology-service.js';
+import { AppEvents } from '../../events.js';
 
 const PREF_TERM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer';
 
@@ -32,6 +33,7 @@ class TerminologyModal extends Modal {
     if (v) node._preferredTermServer = v;
     else   delete node._preferredTermServer;
     setActive(link, !!node._preferredTermServer);
+    document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
     node._dispatchRerender();
     this._cancel();
   }

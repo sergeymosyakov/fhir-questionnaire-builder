@@ -7,13 +7,6 @@ import { importFHIR } from '../fhir/import.js';
 import { renderTree } from '../builder/index.js';
 
 export class UndoRedo {
-  static _svc = { effect: null, formTick: null };
-
-  static configure({ effect, formTick }) {
-    UndoRedo._svc.effect   = effect;
-    UndoRedo._svc.formTick = formTick;
-  }
-
   /**
    * @param {HTMLElement} undoBtn
    * @param {HTMLElement} redoBtn
@@ -26,8 +19,6 @@ export class UndoRedo {
       buildFn:  buildFHIRObject,
       importFn: importFHIR,
       renderFn: renderTree,
-      formTick: UndoRedo._svc.formTick,
-      effect:   UndoRedo._svc.effect,
       onChange: () => this._sync(),
     });
 

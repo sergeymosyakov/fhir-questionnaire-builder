@@ -36,7 +36,6 @@ export class PreviewForm {
    * @param {object} deps.rawFhir
    * @param {Array} deps.questVariables
    * @param {object} deps.formTick
-   * @param {object} deps.bulkUpdate
    * @param {Function} deps.calcFormOk
    * @param {Function} deps.isMandatory
    * @param {Function} deps.evalConstraints
@@ -51,7 +50,6 @@ export class PreviewForm {
     this._rawFhir         = deps.rawFhir;
     this._questVariables  = deps.questVariables;
     this._formTick        = deps.formTick;
-    this._bulkUpdate      = deps.bulkUpdate;
     this._calcFormOk      = deps.calcFormOk;
     this._effect          = deps.effect;
 
@@ -90,8 +88,7 @@ export class PreviewForm {
     // ── Reactive render loop ────────────────────────────────────────────────
     this._effect(() => {
       void this._formTick.value;
-      void this._rawFhir.value;
-      if (this._bulkUpdate.value) return;
+
       this._asyncRender(++this._renderVersion);
     });
   }
@@ -231,7 +228,7 @@ export class PreviewForm {
   async _asyncRender(version) {
     const ctx = this._reCalc();
     await _yield();
-    if (version !== this._renderVersion) return;
+    if (version !== this._renderVersion) { progress.hide(); return; }
 
     if (this._tree.length === 0) {
       const lform = this._els.lform;
@@ -243,7 +240,13 @@ export class PreviewForm {
         placeholder.innerHTML =
           '<div class="preview-placeholder-icon">\uD83D\uDCCB</div>' +
           '<div class="preview-placeholder-title">No questionnaire loaded</div>' +
-          '<div class="preview-placeholder-hint">Use <strong>\u2B06 Load \u25BE</strong> to open a sample or upload your own FHIR R4 Questionnaire JSON,<br>or build one from scratch using <strong>+ Add Root Group</strong> in the left panel.</div>';
+          '<div class="preview-placeholder-hint">' +
+            'Use <strong>Questionnaires \u25BE</strong> in the toolbar to load a questionnaire:<br>' +
+            '<strong>From file\u2026</strong> \u2014 upload a FHIR R4 JSON file from your computer,<br>' +
+            '<strong>From Library\u2026</strong> \u2014 pick one of the built-in samples,<br>' +
+            '<strong>From Cloud\u2026</strong> \u2014 access your saved questionnaires (sign in required).<br>' +
+            'Or start from scratch: click <strong>+ Add Root Group</strong> in the left panel.' +
+          '</div>';
         lform.appendChild(placeholder);
       }
       statusBadge.update({ visible: [], ctx: null });
@@ -258,7 +261,7 @@ export class PreviewForm {
     const _cEnv     = ctx.envVars || {};
 
     await _yield();
-    if (version !== this._renderVersion) return;
+    if (version !== this._renderVersion) { progress.hide(); return; }
 
     const lform = this._els.lform;
     if (!lform) { progress.hide(); return; }

@@ -346,6 +346,7 @@ export class GroupNode extends BaseNode {
         const newNode = factory();
         node.children.push(newNode);
         BaseNode._svc.tickForm();
+        BaseNode.notifyChanged();
         GroupNode._collapseMap.set(node.id, false);
         node._dispatchRerender();
         requestAnimationFrame(() => {
@@ -405,7 +406,7 @@ export class GroupNode extends BaseNode {
     btnDel.dataset.tipTitle = 'Delete group';
     btnDel.onclick = async () => {
       const ok = await BaseNode._svc.confirmDelete(node.title || node.id);
-      if (ok) { BaseNode._svc.findAndRemove(node.id, BaseNode._svc.tree); node._dispatchRerender(); }
+      if (ok) { BaseNode._svc.findAndRemove(node.id, BaseNode._svc.tree); BaseNode.notifyChanged(); node._dispatchRerender(); }
     };
 
     div.appendChild(header);

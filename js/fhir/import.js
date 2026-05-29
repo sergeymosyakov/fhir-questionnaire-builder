@@ -1,7 +1,7 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
 import { tree, resetSeq, rawFhir, questVariables, questContained, questMeta, setValue, clearAllValues } from '../state.js';
 import { showError } from '../ui/toast.js';
-import { _bulkUpdate } from '../render-bus.js';
+import { AppEvents } from '../events.js';
 import { renderTree } from '../builder/index.js';
 import { normaliseSTU3 } from './stu3-shim.js';
 import { destroyTree } from '../utils.js';
@@ -116,16 +116,16 @@ export function importFHIR(fhirJson, renderFn) {
   const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL);
   questMeta._rawQuestExtensions = nonVarExts.length ? JSON.parse(JSON.stringify(nonVarExts)) : [];
 
-  _bulkUpdate.value = true;
   try {
     const linkIdMap = buildLinkIdMap(q.item);
     for (const item of q.item || []) {
       const n = fhirItemToNode(item, linkIdMap, q.contained);
       if (n) tree.push(n);
     }
-    applyInitialValues(tree); // must run before _bulkUpdate=false so effect() sees filled values[]
+    applyInitialValues(tree);
   } finally {
-    _bulkUpdate.value = false;
+    // tree is fully built — notify preview to reinitialise
+    document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
   }
   if (renderFn) renderFn(); else renderTree();
 }

@@ -3,13 +3,18 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// DOM stub — import.js dispatches REINIT_FORM after tree is built
+globalThis.CustomEvent = class CustomEvent {
+  constructor(type, init) { this.type = type; this.detail = init?.detail; }
+};
+globalThis.document = { dispatchEvent: vi.fn(), addEventListener: vi.fn() };
+
 // Exposed so importFHIR tests can inspect state after import.
 const _tree           = [];
 const _questVariables = [];
 const _questContained = [];
 const _values         = {};
 const _rawFhir        = { value: null };
-const _bulkUpdate     = { value: false };
 const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
   effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [],
@@ -23,7 +28,6 @@ vi.mock('../js/state.js', () => ({
   questVariables: _questVariables,
   questContained: { splice: () => { _questContained.splice(0); }, push: (v) => _questContained.push(v) },
   questMeta:      _questMeta,
-  _bulkUpdate:    _bulkUpdate,
   resetSeq:       vi.fn(),
   makeGroup:      vi.fn(title => ({ type: 'group', id: 'g', title, children: [], enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', mandatory: false, logicWithParent: 'AND' })),
   makeItem:       vi.fn(title => ({ type: 'item',  id: 'i', title, itemType: 'text', options: '', mandatory: false, enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', constraint: [] })),

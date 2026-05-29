@@ -1,10 +1,11 @@
 // ── Undo / redo history ───────────────────────────────────────────────────────
-// Hooks into _formTick via effect() — debounced 400ms + requestIdleCallback.
+// Listens to AppEvents.RESPONSE_CHANGED (inline edits) and AppEvents.REINIT_FORM
+// (add/delete/move nodes) — debounced 400ms + requestIdleCallback.
 // Snapshots = FHIR JSON strings; restored via importFn(parsed, renderFn).
 // Stack resets automatically on questionnaire-loaded / questionnaire-cleared.
 //
 // API:
-//   init({ buildFn, importFn, renderFn, formTick, effect, onChange })
+//   init({ buildFn, importFn, renderFn, onChange })
 //   undo() / redo()
 //   canUndo() / canRedo()  → boolean
 import { AppEvents } from '../events.js';
@@ -54,7 +55,7 @@ function _schedule() {
 }
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
-export function init({ buildFn, importFn, renderFn, formTick, effect, onChange }) {
+export function init({ buildFn, importFn, renderFn, onChange }) {
   _buildFn  = buildFn;
   _importFn = importFn;
   _renderFn = renderFn;
@@ -82,13 +83,11 @@ export function init({ buildFn, importFn, renderFn, formTick, effect, onChange }
     _notify();
   });
 
-  // Watch formTick — any tree mutation schedules a snapshot
-  let _skipFirst = true;
-  effect(() => {
-    formTick.value; // subscribe
-    if (_skipFirst) { _skipFirst = false; return; }
-    _schedule();
-  });
+  // Track inline edits (title/linkId/prefix oninput, node value changes)
+  document.addEventListener(AppEvents.RESPONSE_CHANGED, () => _schedule());
+
+  // Track structural changes (add/delete/move/renumber nodes)
+  document.addEventListener(AppEvents.REINIT_FORM, () => _schedule());
 }
 
 // ── Undo / Redo ───────────────────────────────────────────────────────────────

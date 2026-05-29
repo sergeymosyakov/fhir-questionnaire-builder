@@ -1,6 +1,5 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
 import { tree, rawFhir, values, questMeta, questContained, getValue, setValue, deleteValue } from '../state.js';
-import { _bulkUpdate } from '../render-bus.js';
 import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { getLastCtx } from '../preview-form.js';
@@ -117,12 +116,7 @@ export async function renumberAll() {
   // Yield first so progress.show() has a chance to paint before any sync work
   await raf();
 
-  _bulkUpdate.value = true;
-  try {
-    _applyPrefixes(tree, '');
-  } finally {
-    _bulkUpdate.value = false;
-  }
+  _applyPrefixes(tree, '');
 
   // Build into a DocumentFragment off-screen so RAF yields update the progress bar
   // without touching the live DOM — no layout thrash or visual jitter in the left panel.

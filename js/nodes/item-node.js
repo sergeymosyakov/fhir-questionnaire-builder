@@ -443,7 +443,7 @@ export class ItemNode extends BaseNode {
     btnDel.dataset.tipTitle = 'Delete item';
     btnDel.onclick = async () => {
       const ok = await BaseNode._svc.confirmDelete(node.title || node.id);
-      if (ok) { BaseNode._svc.findAndRemove(node.id, BaseNode._svc.tree); node._dispatchRerender(); }
+      if (ok) { BaseNode._svc.findAndRemove(node.id, BaseNode._svc.tree); BaseNode.notifyChanged(); node._dispatchRerender(); }
     };
 
     div.appendChild(header);
