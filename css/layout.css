@@ -161,6 +161,7 @@
   margin-bottom: 6px;
 }
 .right-panel-header-top .section-title { margin-bottom: 0; }
+.right-panel-header-top .section-title [data-testid="preview-panel-title"]:focus { outline: none; }
 .preview-header-actions {
   display: flex;
   align-items: center;

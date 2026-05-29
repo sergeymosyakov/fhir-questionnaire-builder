@@ -39,10 +39,11 @@ async function loadFixture(page) {
 
 const badge = page => page.getByTestId('status-badge-btn');
 
-// Press Tab to move focus away from the input, reliably firing blur+change
-// → BaseNode.notifyChanged() → RESPONSE_CHANGED → badge re-evaluates constraints
-async function commitInput(page, input) {
-  await input.press('Tab');
+// Click the "Questionnaire Preview" title to move focus away from the input,
+// firing blur+change → BaseNode.notifyChanged() → RESPONSE_CHANGED → badge update.
+// Always use this pattern to commit preview inputs — never Tab, never waitForTimeout.
+async function commitInput(page, _input) {
+  await page.getByTestId('preview-panel-title').click();
 }
 
 // ── 1. hasCriteria — badge visibility ─────────────────────────────────────────

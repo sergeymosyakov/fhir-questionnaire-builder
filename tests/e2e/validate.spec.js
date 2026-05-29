@@ -44,12 +44,14 @@ async function addValidItem(page) {
 
   // Title the group
   await group.getByTestId('node-title-display').first().click();
+  await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
   await group.getByTestId('node-title-input').first().fill('My Section');
   await group.getByTestId('node-title-input').first().blur();
 
   // Title the item
   const item = page.locator('[data-node-id="1.1"]');
   await item.getByTestId('node-title-display').click();
+  await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
   await item.getByTestId('node-title-input').fill('My Question');
   await item.getByTestId('node-title-input').blur();
 
