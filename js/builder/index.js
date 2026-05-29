@@ -1,6 +1,6 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
 import { tree, rawFhir, values, questMeta, questContained, getValue, setValue, deleteValue } from '../state.js';
-import { _formTick, _bulkUpdate } from '../render-bus.js';
+import { _bulkUpdate } from '../render-bus.js';
 import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { getLastCtx } from '../preview-form.js';
@@ -12,7 +12,7 @@ import { Modal } from '../ui/modals/modal-base.js';
 import { AppEvents } from '../events.js';
 
 // Inject reactive state into _shared (triggerCalcRecalc + renderTree need them)
-sharedInit({ tree, formTick: _formTick, rawFhir, values, renderTree });
+sharedInit({ tree, rawFhir, values, renderTree });
 
 // ── Inject builder services into node layer ───────────────────────────────────
 // Nodes must not import state or services directly — they receive them here.
@@ -21,7 +21,7 @@ BaseNode.configure({
   findAndRemove,
   confirmDelete,
   triggerCalcRecalc,
-  tickForm:      () => _formTick.value++,
+  tickForm:      () => document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM)),
   formatSeg,
   domPurify:     window.DOMPurify,
   marked:        window.marked,
@@ -88,7 +88,7 @@ export async function renderTreeAsync(onProgress) {
 }
 
 // Wire DnD re-render callback once
-dndInit(renderTree, tree, _formTick);
+dndInit(renderTree, tree);
 
 // ── Collapse / expand all ─────────────────────────────────────────────────────
 function setCollapsedAll(nodes, value) {
@@ -145,7 +145,7 @@ export function addRootGroup() {
   const node = createGroupNode({ title: 'New Group' });
   node.id = formatSeg(tree.length + 1);
   tree.push(node);
-  _formTick.value++;
+  document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
   renderTree();
   requestAnimationFrame(() => {
     const el = document.querySelector('[data-node-id="' + CSS.escape(node.id) + '"]');

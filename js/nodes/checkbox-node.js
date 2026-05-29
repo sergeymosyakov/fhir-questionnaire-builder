@@ -15,7 +15,7 @@ export class CheckboxNode extends ItemNode {
 
   buildControl(ctx) {
     const node = this;
-    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
 
     const el = document.createElement('input');
@@ -33,7 +33,7 @@ export class CheckboxNode extends ItemNode {
       setValue(node.id, el.checked);
       _reCalc();
       onChange();
-      _formTick.value++;
+      BaseNode.notifyChanged();
     };
 
     wrap.appendChild(el);

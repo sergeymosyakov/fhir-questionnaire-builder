@@ -35,6 +35,9 @@ export const AppEvents = Object.freeze({
   SHOW_JSON:           'show-json',
   VIEW_PREF_CHANGE:    'view-pref-change',
   PREVIEW_MODE_CHANGE: 'preview-mode-change',
+  // Dispatched by any preview control when the user changes a response value.
+  // PreviewForm listens and triggers a reactive re-render via _formTick.
+  RESPONSE_CHANGED:    'preview:response-changed',
 
   // ── Patient / QR ─────────────────────────────────────────────────────────
   PATIENT_CTX_APPLIED: 'patient-ctx-applied',

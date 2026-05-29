@@ -13,7 +13,7 @@ export class UrlNode extends ItemNode {
 
   buildControl(ctx) {
     const node = this;
-    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
     wrap.className = 'ctrl-wrap ctrl-wrap--text';
 
@@ -62,7 +62,7 @@ export class UrlNode extends ItemNode {
       clearTimeout(_debounce);
       _debounce = setTimeout(() => { _reCalc(); onChange(); }, 200);
     };
-    el.onchange = () => { _formTick.value++; };
+    el.onchange = () => { BaseNode.notifyChanged(); };
     el.addEventListener('blur', () => { node._minLenInteracted = true; validateErr(); });
 
     wrap.appendChild(el);

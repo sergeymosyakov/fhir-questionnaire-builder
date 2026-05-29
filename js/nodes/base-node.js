@@ -52,13 +52,18 @@ export class BaseNode {
     findAndRemove:     null,  // (id, nodes) => void
     confirmDelete:     null,  // (label) => Promise<boolean>
     triggerCalcRecalc: null,  // () => void
-    tickForm:          null,  // () => void — increments formTick
+    tickForm:          null,  // () => void — dispatches REINIT_FORM
     formatSeg:         null,  // (n) => string
     leftPanelBody:     null,  // scroll container for builder navigate-to
   };
 
   static configure(services) {
     Object.assign(BaseNode._svc, services);
+  }
+
+  /** Dispatch a preview:response-changed event so PreviewForm re-renders. */
+  static notifyChanged() {
+    document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
   }
 
   // ── Static dispatcher ────────────────────────────────────────────────────

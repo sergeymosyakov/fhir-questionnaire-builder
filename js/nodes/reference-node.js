@@ -5,6 +5,7 @@ import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
+import { AppEvents } from '../events.js';
 
 const FHIR_R4_RESOURCES = [
   'Account','ActivityDefinition','AdverseEvent','AllergyIntolerance','Appointment',
@@ -44,7 +45,7 @@ export class ReferenceNode extends ItemNode {
 
   buildControl(ctx) {
     const node = this;
-    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
     wrap.classList.add('ctrl-wrap--joined');
 
@@ -62,7 +63,7 @@ export class ReferenceNode extends ItemNode {
       items:     typeItems,
       value:     initType || '',
       className: 'ref-type-sel',
-      onChange:  () => { update(); _formTick.value++; },
+      onChange:  () => { update(); BaseNode.notifyChanged(); },
     });
 
     const sep = document.createElement('span');
@@ -88,7 +89,7 @@ export class ReferenceNode extends ItemNode {
     };
 
     idInput.oninput  = update;
-    idInput.onchange = () => { _formTick.value++; };
+    idInput.onchange = () => { BaseNode.notifyChanged(); };
 
     wrap.appendChild(sel.el);
     wrap.appendChild(sep);

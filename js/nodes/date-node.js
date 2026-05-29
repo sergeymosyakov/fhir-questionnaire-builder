@@ -14,11 +14,11 @@ export class DateNode extends ItemNode {
 
   buildControl(ctx) {
     const node = this;
-    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
     const dp = createDatePicker({
       value:    getValue(node.id) || '',
-      onChange: v => { setValue(node.id, v || undefined); _reCalc(); onChange(); _formTick.value++; },
+      onChange: v => { setValue(node.id, v || undefined); _reCalc(); onChange(); BaseNode.notifyChanged(); },
       className: 'ctrl-input--date',
       testid:   'date-input',
     });
@@ -35,11 +35,11 @@ export class DateTimeNode extends ItemNode {
 
   buildControl(ctx) {
     const node = this;
-    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
     const dp = createDatePicker({
       value:    getValue(node.id) || '',
-      onChange: v => { setValue(node.id, v || undefined); _reCalc(); onChange(); _formTick.value++; },
+      onChange: v => { setValue(node.id, v || undefined); _reCalc(); onChange(); BaseNode.notifyChanged(); },
       withTime:  true,
       className: 'ctrl-input--date',
       testid:   'datetime-input',
@@ -57,7 +57,7 @@ export class TimeNode extends ItemNode {
 
   buildControl(ctx) {
     const node = this;
-    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
 
     const el = document.createElement('input');
@@ -70,7 +70,7 @@ export class TimeNode extends ItemNode {
     el.addEventListener('change', () => {
       const v = el.value;
       setValue(node.id, v ? v + ':00' : undefined);
-      _reCalc(); onChange(); _formTick.value++;
+      _reCalc(); onChange(); BaseNode.notifyChanged();
     });
 
     wrap.appendChild(el);

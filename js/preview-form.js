@@ -68,7 +68,6 @@ export class PreviewForm {
     _rc.lastCtx          = this._lastCtx;
     _rc.buildControl     = (node, iconEl, cb) => this._buildControl(node, iconEl, cb);
     _rc.values           = this._values;
-    _rc.formTick         = this._formTick;
     _rc.updateGroupIcons = () => GroupNode.updateAll(_rc);
     _rc.isMandatory      = deps.isMandatory;
     _rc.calcFormOk       = deps.calcFormOk;
@@ -86,6 +85,7 @@ export class PreviewForm {
     document.addEventListener(AppEvents.BUILDER_NAVIGATE,   e => {
       document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_NAVIGATE_TO, { detail: { id: e.detail.id } }));
     });
+    document.addEventListener(AppEvents.RESPONSE_CHANGED, () => { this._formTick.value++; });
 
     // ── Reactive render loop ────────────────────────────────────────────────
     this._effect(() => {
@@ -223,7 +223,7 @@ export class PreviewForm {
     const ctx = {
       getValue: this._getValue, setValue: this._setValue,
       onChange, _reCalc: reCalcAndRefresh,
-      _formTick: this._formTick, _fpCtx: this._lastCtx,
+      _fpCtx: this._lastCtx,
     };
     return node.buildControl(ctx);
   }

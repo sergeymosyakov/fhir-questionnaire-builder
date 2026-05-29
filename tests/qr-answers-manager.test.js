@@ -24,7 +24,6 @@ function makeManager(overrides = {}) {
     values:   {},
     tree:     [],
     rawFhir:  { value: null },
-    formTick: { value: 0 },
   };
   return new QRAnswersManager({ ...defaults, ...overrides });
 }
@@ -56,11 +55,10 @@ describe('QRAnswersManager.apply — import error', () => {
     expect(document.dispatchEvent).not.toHaveBeenCalled();
   });
 
-  it('does not increment formTick when ok:false', () => {
+  it('does not dispatch RESPONSE_CHANGED when ok:false', () => {
     importQRAnswers.mockReturnValue({ ok: false, error: 'bad format' });
-    const formTick = { value: 0 };
-    makeManager({ formTick }).apply({});
-    expect(formTick.value).toBe(0);
+    makeManager().apply({});
+    expect(document.dispatchEvent).not.toHaveBeenCalled();
   });
 });
 
@@ -69,9 +67,8 @@ describe('QRAnswersManager.apply — success', () => {
   it('dispatches QR_LOADED event', () => {
     importQRAnswers.mockReturnValue(SUCCESS);
     makeManager().apply({});
-    expect(document.dispatchEvent).toHaveBeenCalledTimes(1);
-    const evt = document.dispatchEvent.mock.calls[0][0];
-    expect(evt.type).toBe('qr-loaded');
+    const types = document.dispatchEvent.mock.calls.map(c => c[0].type);
+    expect(types).toContain('qr-loaded');
   });
 
   it('QR_LOADED detail has status, subject, author', () => {
@@ -86,11 +83,11 @@ describe('QRAnswersManager.apply — success', () => {
     expect(detail.author).toBe('Practitioner/2');
   });
 
-  it('increments formTick', () => {
+  it('dispatches RESPONSE_CHANGED event on success', () => {
     importQRAnswers.mockReturnValue(SUCCESS);
-    const formTick = { value: 5 };
-    makeManager({ formTick }).apply({});
-    expect(formTick.value).toBe(6);
+    makeManager().apply({});
+    const dispatchedTypes = document.dispatchEvent.mock.calls.map(c => c[0].type);
+    expect(dispatchedTypes).toContain('preview:response-changed');
   });
 
   it('does not call validateModal.show when no issues', () => {

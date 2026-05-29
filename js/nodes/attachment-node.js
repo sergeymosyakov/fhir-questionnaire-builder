@@ -14,7 +14,7 @@ export class AttachmentNode extends ItemNode {
 
   buildControl(ctx) {
     const node = this;
-    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
 
     const el = document.createElement('input');
@@ -47,13 +47,13 @@ export class AttachmentNode extends ItemNode {
         showError(`File too large \u2014 max ${node._maxFileSizeMB} MB allowed`);
         el.value = '';
         setValue(node.id, null);
-        _reCalc(); onChange(); _formTick.value++;
+        _reCalc(); onChange(); BaseNode.notifyChanged();
         return;
       }
       nameTag.classList.remove('file-name-tag--error');
       setValue(node.id, file ? { name: file.name, size: file.size, type: file.type } : null);
       nameTag.textContent = file ? file.name : 'No file chosen';
-      _reCalc(); onChange(); _formTick.value++;
+      _reCalc(); onChange(); BaseNode.notifyChanged();
     };
 
     wrap.appendChild(el);

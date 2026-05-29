@@ -9,7 +9,6 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 vi.mock('../js/state.js', () => ({
   values: {},
   previewMode: { value: 'preview' },
-  _formTick:   { value: 0 },
 }));
 
 vi.mock('../js/fhir/export.js', () => ({

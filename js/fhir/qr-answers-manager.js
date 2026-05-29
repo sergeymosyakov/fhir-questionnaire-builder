@@ -7,12 +7,11 @@ import * as validateModal from '../ui/modals/validate-modal.js';
 import { AppEvents } from '../events.js';
 
 export class QRAnswersManager {
-  /** @param {{ values, tree, rawFhir, formTick }} deps — reactive state refs */
-  constructor({ values, tree, rawFhir, formTick }) {
+  /** @param {{ values, tree, rawFhir }} deps — reactive state refs */
+  constructor({ values, tree, rawFhir }) {
     this._values   = values;
     this._tree     = tree;
     this._rawFhir  = rawFhir;
-    this._formTick = formTick;
   }
 
   apply(qr) {
@@ -47,7 +46,7 @@ export class QRAnswersManager {
       });
     }
 
-    this._formTick.value++;
+    document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 
     if (issues.length > 0) {
       validateModal.show('Load Answers \u2014 ' + result.loaded + ' loaded', issues, 'import');

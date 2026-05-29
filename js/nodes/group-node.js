@@ -1,9 +1,9 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 import * as dnd from '../builder/dnd.js';
 import { createCustomSelect } from '../ui/custom-select.js';
+import { AppEvents } from '../events.js';
 import { NODE_REGISTRY } from './registry.js';
 import { TextNode } from './text-node.js';
-import { AppEvents } from '../events.js';
 import { AddChildMenu } from '../ui/add-child-menu.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
@@ -127,7 +127,7 @@ export class GroupNode extends BaseNode {
       toggle.addEventListener('click', e => {
         e.stopPropagation();
         groupNode._previewCollapsed = !groupNode._previewCollapsed;
-        rc.formTick.value++;
+        BaseNode.notifyChanged();
       });
       row.insertBefore(toggle, row.firstChild);
     }

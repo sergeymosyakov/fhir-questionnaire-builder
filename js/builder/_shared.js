@@ -1,4 +1,5 @@
 // ── Builder shared state and utilities ───────────────────────────────────────
+import { AppEvents } from '../events.js';
 import { buildQR } from '../fhir/qr-builder.js';
 import { evalCalcNodes } from '../fhir/calc.js';
 
@@ -27,12 +28,12 @@ export function formatSeg(n) {
 }
 
 export function triggerCalcRecalc() {
-  const { tree, formTick, rawFhir, values } = _deps;
+  const { tree, rawFhir, values } = _deps;
   if (rawFhir.value && fhirpath) {
     const qr = buildQR(JSON.parse(JSON.stringify(rawFhir.value)), values);
     evalCalcNodes(tree, qr, fhirpath, values);
   }
-  formTick.value++;
+  document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 }
 
 /** Re-render the builder tree (injected from builder/index.js to avoid circular imports). */

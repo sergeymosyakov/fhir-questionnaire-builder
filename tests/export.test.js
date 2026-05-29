@@ -21,7 +21,6 @@ vi.mock('../js/state.js', () => ({
   questMeta:       _questMeta,
   rawFhir:         _rawFhir,
   values:          {},
-  _formTick:       { value: 0 },
   _bulkUpdate:     { value: false },
   ref:             v => ({ value: v }),
   reactive:        v => v,

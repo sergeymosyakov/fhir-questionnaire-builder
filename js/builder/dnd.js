@@ -1,11 +1,11 @@
 // ── Drag & Drop for the builder tree ─────────────────────────────────────────
 // Self-contained: all DnD state and logic lives here.
 // Connects to the tree via callbacks passed in init().
+import { AppEvents } from '../events.js';
 
 let _dragId = null;
 let _onDropCallback = null; // called after a successful drop to re-render
 let _tree = null;
-let _formTick = null;
 
 // ── Tree lookup ───────────────────────────────────────────────────────────────
 export function findNode(nodes, id, parent = null) {
@@ -54,7 +54,7 @@ function _doDrop(targetId, position) {
   }
 
   if (_onDropCallback) _onDropCallback();
-  _formTick.value++;
+  document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
 }
 
 // ── Event handlers ────────────────────────────────────────────────────────────
@@ -78,11 +78,10 @@ function _onDragEnd() {
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
-// Register the re-render callback, tree reference and formTick
-export function init(onDrop, tree, formTick) {
+// Register the re-render callback and tree reference
+export function init(onDrop, tree) {
   _onDropCallback = onDrop;
   _tree = tree;
-  _formTick = formTick;
 }
 
 // Returns a draggable ⠿ handle element wired to this node
@@ -138,7 +137,7 @@ export function makeRootDropZone() {
     src.arr.splice(src.idx, 1);
     _tree.push(src.node);
     if (_onDropCallback) _onDropCallback();
-    _formTick.value++;
+    document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
   });
   return rootDrop;
 }

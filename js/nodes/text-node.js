@@ -13,7 +13,7 @@ export class TextNode extends ItemNode {
 
   buildControl(ctx) {
     const node = this;
-    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
     wrap.className = 'ctrl-wrap ctrl-wrap--text';
 
@@ -61,7 +61,7 @@ export class TextNode extends ItemNode {
       clearTimeout(_debounce);
       _debounce = setTimeout(() => { _reCalc(); onChange(); }, 200);
     };
-    el.onchange = () => { _formTick.value++; };
+    el.onchange = () => { BaseNode.notifyChanged(); };
 
     wrap.appendChild(el);
     if (counter) wrap.appendChild(counter);

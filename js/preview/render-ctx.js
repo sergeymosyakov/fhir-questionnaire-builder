@@ -16,7 +16,6 @@ export const _rc = {
   lastCtx:            null, // _lastCtx object (mutated in-place by _reCalc)
   buildControl:       null, // function(node, iconEl, onAfterChange)
   values:             null, // reactive values object (for repeat row mutations)
-  formTick:           null, // _formTick ref (injected from preview-form.js)
   updateGroupIcons:   null, // function() — GroupNode.updateAll(_rc); used as callback in item-node.js
 
   // State helpers — injected from state.js to avoid circular imports in node classes:

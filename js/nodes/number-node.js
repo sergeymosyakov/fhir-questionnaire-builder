@@ -13,7 +13,7 @@ export class NumberNode extends ItemNode {
 
   buildControl(ctx) {
     const node = this;
-    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
 
     // ── Slider mode ──────────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ export class NumberNode extends ItemNode {
       valLabel.textContent = sl.value;
 
       sl.oninput  = () => { const v = parseFloat(sl.value); setValue(node.id, v); valLabel.textContent = sl.value; _reCalc(); onChange(); };
-      sl.onchange = () => { _formTick.value++; };
+      sl.onchange = () => { BaseNode.notifyChanged(); };
 
       wrap.appendChild(sl);
       wrap.appendChild(valLabel);
@@ -78,7 +78,7 @@ export class NumberNode extends ItemNode {
     };
 
     el.oninput  = () => { const v = el.value === '' ? undefined : (node.itemType === 'integer' ? parseInt(el.value, 10) : parseFloat(el.value)); setValue(node.id, v); validate(v); _reCalc(); onChange(); };
-    el.onchange = () => { _formTick.value++; };
+    el.onchange = () => { BaseNode.notifyChanged(); };
 
     validate(getValue(node.id));
 

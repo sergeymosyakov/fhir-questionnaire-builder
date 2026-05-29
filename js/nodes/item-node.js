@@ -21,7 +21,7 @@ export class ItemNode extends BaseNode {
 
   /** Build the interactive preview control element for this node.
    *  Overridden by every concrete subclass.
-   *  @param {object} ctx  — { getValue, setValue, onChange, _reCalc, _formTick }
+   *  @param {object} ctx  — { getValue, setValue, onChange, _reCalc }
    *  @returns {HTMLElement} wrapper span */
   buildControl(_ctx) {
     throw new Error(`buildControl() not implemented on ${this.constructor.name} (itemType: ${this.itemType})`);
@@ -188,7 +188,7 @@ export class ItemNode extends BaseNode {
           for (let j = _i; j < n; j++) rc.values[rowKey(j)] = rc.values[rowKey(j + 1)];
           delete rc.values[rowKey(n)];
           rc.values[id + '$$n'] = n - 1;
-          rc.formTick.value++;
+          BaseNode.notifyChanged();
         };
         rowEl.appendChild(rm);
       }
@@ -208,7 +208,7 @@ export class ItemNode extends BaseNode {
       addBtn.disabled = true;
       addBtn.dataset.tipTitle = 'Maximum ' + maxOccurs + ' answer' + (maxOccurs === 1 ? '' : 's') + ' reached';
     }
-    addBtn.onclick = () => { if (!atMax) { rc.values[id + '$$n'] = n + 1; rc.formTick.value++; } };
+    addBtn.onclick = () => { if (!atMax) { rc.values[id + '$$n'] = n + 1; BaseNode.notifyChanged(); } };
     wrap.appendChild(addBtn);
 
     return wrap;

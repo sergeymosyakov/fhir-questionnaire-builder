@@ -42,7 +42,7 @@ export class QuantityNode extends ItemNode {
 
   buildControl(ctx) {
     const node = this;
-    const { getValue, setValue, onChange, _reCalc, _formTick } = ctx;
+    const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
 
     const current  = getValue(node.id);
@@ -101,7 +101,7 @@ export class QuantityNode extends ItemNode {
     };
 
     numInput.oninput  = update;
-    numInput.onchange = () => { _formTick.value++; };
+    numInput.onchange = () => { BaseNode.notifyChanged(); };
 
     wrap.appendChild(numInput);
     wrap.appendChild(unitSel.el);

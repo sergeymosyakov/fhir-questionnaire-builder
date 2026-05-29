@@ -48,7 +48,7 @@ AutosaveToggle.configure({ questMeta });
 UndoRedo.configure({ effect, formTick: _formTick });
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
-export const qrAnswers   = new QRAnswersManager({ values, tree, rawFhir, formTick: _formTick });
+export const qrAnswers   = new QRAnswersManager({ values, tree, rawFhir });
 export const questLoader = new QuestionnaireLoader({ tree, values, questMeta, rawFhir,
   reinitForm: (opts) => previewForm.reinitForm(opts),
 });
