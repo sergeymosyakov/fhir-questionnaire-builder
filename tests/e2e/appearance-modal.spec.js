@@ -170,7 +170,7 @@ test.describe('Appearance modal — draft pattern', () => {
     await link.click();
     await rawInput(page).fill('font-weight: bold');
     await appearanceModalApply(page).click();
-
+    await expect(appearanceModal(page)).not.toBeVisible();
     await expect(link).toHaveClass(/action-edit--active/);
   });
 
@@ -187,6 +187,7 @@ test.describe('Appearance modal — draft pattern', () => {
     // Raw CSS textarea .value must reflect bold — use toHaveValue, not toContainText
     await expect(rawInput(page)).toHaveValue(/bold/);
     await appearanceModalApply(page).click();
+    await expect(appearanceModal(page)).not.toBeVisible();
 
     // Verify action link became active
     await expect(page.locator('[data-node-id="1.1"]').getByTestId('action-appearance'))
@@ -203,12 +204,14 @@ test.describe('Appearance modal — draft pattern', () => {
     await link.click();
     await rawInput(page).fill('font-style: italic');
     await appearanceModalApply(page).click();
+    await expect(appearanceModal(page)).not.toBeVisible();
     await expect(link).toHaveClass(/action-edit--active/);
 
     // Now clear it
     await link.click();
     await rawInput(page).fill('');
     await appearanceModalApply(page).click();
+    await expect(appearanceModal(page)).not.toBeVisible();
     await expect(link).not.toHaveClass(/action-edit--active/);
   });
 });
