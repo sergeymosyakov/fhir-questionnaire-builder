@@ -209,10 +209,24 @@ export class ChoiceNode extends ItemNode {
 
     const _reposition = () => {
       if (!dropEl) return;
-      const rect = trigger.getBoundingClientRect();
-      dropEl.style.left  = rect.left + window.scrollX + 'px';
-      dropEl.style.top   = rect.bottom + window.scrollY + 'px';
+      const rect       = trigger.getBoundingClientRect();
+      const vh         = window.innerHeight;
+      const spaceBelow = vh - rect.bottom - 4;
+      const spaceAbove = rect.top - 4;
+      const maxAllowed = 200;
+
+      dropEl.style.left  = rect.left + 'px';
       dropEl.style.width = rect.width + 'px';
+
+      if (spaceBelow >= Math.min(maxAllowed, spaceAbove)) {
+        const cap = Math.min(maxAllowed, Math.max(spaceBelow, 60));
+        dropEl.style.maxHeight = cap + 'px';
+        dropEl.style.top = (rect.bottom + 2) + 'px';
+      } else {
+        const cap = Math.min(maxAllowed, Math.max(spaceAbove, 60));
+        dropEl.style.maxHeight = cap + 'px';
+        dropEl.style.top = (rect.top - Math.min(cap, dropEl.offsetHeight || cap) - 2) + 'px';
+      }
     };
 
     const openDrop = () => {

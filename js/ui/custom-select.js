@@ -120,15 +120,25 @@ export function createCustomSelect({ items = [], value = '', onChange, className
   };
 
   const _position = () => {
-    const rect = trigger.getBoundingClientRect();
+    const rect       = trigger.getBoundingClientRect();
+    const vh         = window.innerHeight;
+    const spaceBelow = vh - rect.bottom - 4;
+    const spaceAbove = rect.top - 4;
+    const maxAllowed = 200; // matches CSS max-height
+
     dropEl.style.left     = rect.left + 'px';
     dropEl.style.minWidth = rect.width + 'px';
-    // Flip upward if needed
-    const dropH = dropEl.offsetHeight;
-    if (rect.bottom + dropH + 4 <= window.innerHeight) {
-      dropEl.style.top = (rect.bottom + 2) + 'px';
+
+    if (spaceBelow >= Math.min(maxAllowed, spaceAbove)) {
+      // Open downward — cap height to available space
+      const cap = Math.min(maxAllowed, Math.max(spaceBelow, 60));
+      dropEl.style.maxHeight = cap + 'px';
+      dropEl.style.top       = (rect.bottom + 2) + 'px';
     } else {
-      dropEl.style.top = Math.max(4, rect.top - dropH - 2) + 'px';
+      // Open upward — cap height to available space above
+      const cap = Math.min(maxAllowed, Math.max(spaceAbove, 60));
+      dropEl.style.maxHeight = cap + 'px';
+      dropEl.style.top       = (rect.top - Math.min(cap, dropEl.offsetHeight || cap) - 2) + 'px';
     }
   };
 
