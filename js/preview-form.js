@@ -242,7 +242,7 @@ export class PreviewForm {
           '<div class="preview-placeholder-title">No questionnaire loaded</div>' +
           '<div class="preview-placeholder-hint">' +
             'Use <strong>Questionnaires \u25BE</strong> in the toolbar to load a questionnaire:<br>' +
-            '<strong>From file\u2026</strong> \u2014 upload a FHIR R4 JSON file from your computer,<br>' +
+            '<strong>From file\u2026</strong> \u2014 upload a FHIR R4 or STU3 JSON file from your computer,<br>' +
             '<strong>From Library\u2026</strong> \u2014 pick one of the built-in samples,<br>' +
             '<strong>From Cloud\u2026</strong> \u2014 access your saved questionnaires (sign in required).<br>' +
             'Or start from scratch: click <strong>+ Add Root Group</strong> in the left panel.' +
