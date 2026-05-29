@@ -6,17 +6,19 @@ import { Modal } from './modals/modal-base.js';
 import { PatientPresetMenu } from './menus/patient-preset-menu.js';
 import { AppEvents } from '../events.js';
 
-let _tree = null, _effect = null, _questVariables = null;
-export function configure({ tree, effect, questVariables }) {
-  _tree = tree; _effect = effect; _questVariables = questVariables;
+let _tree = null, _questVariables = null;
+export function configure({ tree, questVariables }) {
+  _tree = tree; _questVariables = questVariables;
   // Seed defaults for any patient vars not yet present
   for (const def of PATIENT_VARS) {
     if (!getEntry(_questVariables, def.name)) {
       setEntry(_questVariables, def.name, toExpr(def.type, def.default));
     }
   }
-  // Disable preset button reactively when no questionnaire is loaded
-  _effect(() => presetMenu.setDisabled(_tree.length === 0));
+  // Disable preset button when no questionnaire is loaded
+  document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  () => presetMenu.setDisabled(false));
+  document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,     () => presetMenu.setDisabled(false));
+  document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => presetMenu.setDisabled(true));
   // Wire preset handlers
   presetMenu.setHandlers({
     onPreset: preset => { applyPreset(preset, _questVariables); _doAfterApply(); },

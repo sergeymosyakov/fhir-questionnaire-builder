@@ -22,12 +22,11 @@ const _GITHUB_SVG = '<svg width="13" height="13" viewBox="0 0 16 16" fill="curre
   + '</svg>';
 
 export class AuthPanel {
-  static _svc = { tree: null, effect: null, questLoader: null };
+  static _svc = { tree: null, questLoader: null };
   static _cloudEls = { saveBtn: null, saveSep: null, loadItem: null, loadSep: null };
 
-  static configure({ tree, effect }) {
+  static configure({ tree }) {
     AuthPanel._svc.tree = tree;
-    AuthPanel._svc.effect = effect;
   }
 
   static configureCloudEls({ saveBtn, saveSep, loadItem, loadSep, questLoader }) {
@@ -190,16 +189,17 @@ export class AuthPanel {
   // ── Reactivity ────────────────────────────────────────────────────────────
 
   _initReactive() {
-    const { tree, effect } = AuthPanel._svc;
-    const { saveBtn, saveSep } = AuthPanel._cloudEls;
-    // Re-sync cloud save button visibility whenever the tree changes
-    effect(() => {
+    const syncCloudSave = () => {
+      const { saveBtn, saveSep } = AuthPanel._cloudEls;
       const loggedIn = this._userChip.style.display !== 'none';
-      const hasNodes = tree.length > 0;
+      const hasNodes = AuthPanel._svc.tree.length > 0;
       const show = loggedIn && hasNodes ? '' : 'none';
       if (saveBtn) saveBtn.style.display = show;
       if (saveSep) saveSep.style.display = show;
-    });
+    };
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  syncCloudSave);
+    document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,     syncCloudSave);
+    document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, syncCloudSave);
   }
 
   // ── Auth state ────────────────────────────────────────────────────────────

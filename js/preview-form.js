@@ -28,7 +28,6 @@ export const getLastCtx = () => _instance?.getLastCtx();
 export class PreviewForm {
   /**
    * @param {object} deps — injected reactive state
-   * @param {Function} deps.effect
    * @param {Array} deps.tree
    * @param {object} deps.values
    * @param {Function} deps.getValue
@@ -49,7 +48,6 @@ export class PreviewForm {
     this._rawFhir         = deps.rawFhir;
     this._questVariables  = deps.questVariables;
     this._calcFormOk      = deps.calcFormOk;
-    this._effect          = deps.effect;
 
     this._viewPrefs     = { showLinkId: true, showPrefix: true, showBadges: true, showHiddenItems: true };
     this._previewMode   = 'preview';
@@ -101,12 +99,16 @@ export class PreviewForm {
   mount(elements) {
     this._els = elements;
 
-    this._effect(() => {
+    const syncToolbarVisibility = () => {
       const d = this._tree.length > 0 ? '' : 'none';
       elements.viewOptionsWrap.style.display = d;
       elements.searchWrap.style.display      = d;
       elements.previewModeWrap.style.display = d;
-    });
+    };
+    syncToolbarVisibility();
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  syncToolbarVisibility);
+    document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,     syncToolbarVisibility);
+    document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, syncToolbarVisibility);
 
     elements.lform.classList.toggle('preview--no-badges', !this._viewPrefs.showBadges);
     elements.lform.classList.toggle('preview--no-linkid', !this._viewPrefs.showLinkId);

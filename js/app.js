@@ -40,9 +40,9 @@ storage.register(new SupabaseAdapter(supabase));
 containedPanel.configure({ questContained });
 answerValueSetPanel.configure({ tree });
 variablesPanel.configure({ questVariables, mountEl: document.getElementById('variablesCardMount') });
-patientCtx.configure({ tree, effect, questVariables });
+patientCtx.configure({ tree, questVariables });
 patientCtx.mount(document.getElementById('patientPresetWrap'));
-AuthPanel.configure({ tree, effect });
+AuthPanel.configure({ tree });
 AutosaveToggle.configure({ questMeta });
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
@@ -52,7 +52,7 @@ export const questLoader = new QuestionnaireLoader({ tree, values, questMeta, ra
 });
 
 export const previewForm = new PreviewForm({
-  effect, tree, values, getValue, setValue, rawFhir, questVariables,
+  tree, values, getValue, setValue, rawFhir, questVariables,
   calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES,
 });
 

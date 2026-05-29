@@ -13,7 +13,7 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Technical Debt
 
-*(none currently)*
+- [ ] **Remove remaining `@vue/reactivity` usage** — `MetadataCard` still uses `effect()` to watch `questMeta.status/experimental`; replace with a named `AppEvents.QUEST_META_CHANGED` event dispatched from the metadata modal on apply. Once done, `effect` can be dropped from `app.js` imports entirely and `@vue/reactivity` reduced to `ref`/`reactive` for core state only (or replaced with plain objects + events).
 
 ## Later
 
