@@ -43,9 +43,11 @@ const badge = page => page.getByTestId('status-badge-btn');
 // firing blur+change → BaseNode.notifyChanged() → RESPONSE_CHANGED → badge update.
 // Always use this pattern to commit preview inputs — never Tab, never waitForTimeout.
 async function commitInput(page, _input) {
+  // Yield two rAF frames so the input value is committed to the DOM,
+  // then click the preview title to fire blur → notifyChanged → RESPONSE_CHANGED.
+  // Two frames mirrors _yield() in preview-form.js (_asyncRender guard).
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
   await page.getByTestId('preview-panel-title').click();
-  // _asyncRender() in preview-form.js awaits two rAF frames (_yield()).
-  // Mirror that here so the DOM is updated before the next assertion.
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
@@ -134,7 +136,6 @@ test.describe('group icon reflects constraint-only child state', () => {
     const groupOk   = page.locator('[data-preview-id="grp-constraint"] .icon-ok');
     const groupFail = page.locator('[data-preview-id="grp-constraint"] .icon-fail');
     await input.fill('21');
-    await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
     await commitInput(page, input);
     await expect(groupOk).toBeVisible();
     await expect(groupFail).toHaveCount(0);
