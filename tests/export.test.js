@@ -164,13 +164,22 @@ describe('buildFHIRObject — enableWhen', () => {
     expect(q.item[0].enableBehavior).toBe('any');
   });
 
-  it('omits enableBehavior when enableBehavior is all', () => {
+  it('writes enableBehavior:all when enableWhen has >1 condition (que-12)', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'text',
       enableWhen: [
         { question: 'q1', operator: '=', answerBoolean: true },
         { question: 'q2', operator: '=', answerString: 'yes' },
       ],
+      enableBehavior: 'all',
+    }]);
+    expect(q.item[0].enableBehavior).toBe('all');
+  });
+
+  it('omits enableBehavior when enableWhen has only 1 condition and behavior is all', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'text',
+      enableWhen: [{ question: 'q1', operator: '=', answerBoolean: true }],
       enableBehavior: 'all',
     }]);
     expect(q.item[0].enableBehavior).toBeUndefined();

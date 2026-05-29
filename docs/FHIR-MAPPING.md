@@ -186,7 +186,7 @@ Stored in `questMeta` (reactive object in `js/state.js`). Populated on import, w
 | Internal field | FHIR field | Notes |
 |---|---|---|
 | `enableWhen[]` | `item.enableWhen[]` | shallow-copied on export; re-parsed on import |
-| `enableBehavior: 'any'` | `item.enableBehavior: 'any'` | only written when `'any'`; default `'all'` is omitted |
+| `enableBehavior` | `item.enableBehavior` | written when `enableWhen.length > 1` (que-12 required) **or** when explicitly set to `'any'`; value is `'any'` or `'all'`; default `'all'` is omitted when only one `enableWhen` condition exists |
 | `enableWhenExpression` | SDC `sdc-questionnaire-enableWhenExpression` ext | FHIRPath string; omitted if empty |
 | `constraint[]` | `questionnaire-constraint` ext entries | round-trip safe |
 | `logicWithParent: 'OR'` | AND/OR preview badge | Exported as `questionnaire-constraint` (key `ITLH_NS:group-or`) with FHIRPath over child linkIds; restored on import |
@@ -246,7 +246,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 ### Export
 
 - `node.enableWhen[]` → `item.enableWhen[]` (shallow copy)
-- `node.enableBehavior === 'any'` → `item.enableBehavior: 'any'` (omitted otherwise)
+- `node.enableBehavior` → `item.enableBehavior` (`'any'` or `'all'`); **required (que-12) when `enableWhen.count() > 1`**; omitted when only one condition exists and value is `'all'`
 - `node.enableWhenExpression` → SDC `sdc-questionnaire-enableWhenExpression` extension
 
 ### Evaluation
@@ -405,6 +405,7 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `questionnaire-signatureRequired` | ❌ Not handled | Indicates that a digital signature is required for the item or group. |
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
 | `questionnaire-optionExclusive` | ❌ Not handled | On `answerOption.extension`; marks an option as exclusive — if selected, all other options must be deselected (e.g., "None of the above"). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive`. |
+| `answerOption.value[x]` types other than `valueCoding` | ⚠️ Round-trip unsafe | On import, only `answerOption[].valueCoding` entries are handled; `valueInteger`, `valueDate`, `valueTime`, `valueString`, and `valueReference` are silently dropped. On export, all options are always written as `valueCoding`. Per the FHIR spec all six types are valid in `answerOption`. |
 | `questionnaire-unitOption` | ❌ Not handled | Specifies a single allowed unit for `quantity` items (R4 core extension; multiple instances enumerate all allowed units). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption`. Distinct from `questionnaire-unitValueSet` (which references a ValueSet). |
 
 ### SDC extensions — not implemented (no server required)
@@ -430,5 +431,8 @@ These SDC extensions support advanced form pre-population from clinical data and
 | `sdc-questionnaire-targetStructureMap` | StructureMap used to transform a completed QR into other FHIR resources |
 | `sdc-questionnaire-sourceStructureMap` | StructureMap used to pre-populate the questionnaire from existing FHIR data |
 | `sdc-questionnaire-columnCount` / `sdc-questionnaire-width` | Grid layout: number of columns in a group and per-item width for multi-column display |
+| `sdc-questionnaire-candidateExpression` | FHIRPath expression that returns a list of candidate answer options for choice/open-choice items; evaluated at render time (similar to `answerExpression` but intended for lookup items) |
+| `sdc-questionnaire-lookupQuestionnaire` | Canonical reference to a Questionnaire used to produce candidate answers for `reference` items (for server-side lookup) |
+| `sdc-questionnaire-isSubject` | Marks the item whose answer identifies the subject of the questionnaire response (overrides `Questionnaire.subjectType` for the response) |
 
 

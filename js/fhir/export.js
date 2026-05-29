@@ -111,7 +111,10 @@ function nodeToFHIRItem(node) {
   // ── Standard R4 enableWhen[] ──────────────────────────────────────────────
   if (node.enableWhen && node.enableWhen.length) {
     fhirItem.enableWhen = node.enableWhen.map(ew => ({ ...ew }));
-    if (node.enableBehavior === 'any') fhirItem.enableBehavior = 'any';
+    // que-12: enableBehavior is required when enableWhen.count() > 1
+    if (node.enableWhen.length > 1 || node.enableBehavior === 'any') {
+      fhirItem.enableBehavior = node.enableBehavior === 'any' ? 'any' : 'all';
+    }
   }
 
   // ── SDC extensions ────────────────────────────────────────────────────────

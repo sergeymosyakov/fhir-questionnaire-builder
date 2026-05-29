@@ -40,7 +40,7 @@ async function loadFixture(page) {
 const badge = page => page.getByTestId('status-badge-btn');
 
 // Click the "Questionnaire Preview" title span (tabindex="-1") to move focus
-// away from the input, reliably firing blur+change — triggering _formTick++ and a badge re-render.
+// away from the input, reliably firing blur+change → BaseNode.notifyChanged() → badge update
 async function commitInput(page, _input) {
   await page.locator('span[tabindex="-1"]').click();
   await page.waitForTimeout(200);

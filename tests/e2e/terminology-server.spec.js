@@ -184,6 +184,8 @@ test.describe('Terminology server — export JSON', () => {
     await page.getByTestId('preview-mode-btn').click();
     await page.getByTestId('preview-mode-json').click();
     await expect(page.locator('#fhirJsonView')).toBeVisible();
+    // Wait for async render to populate JSON content
+    await expect(page.locator('#fhirJsonView')).toContainText('resourceType', { timeout: 8_000 });
     const json = await page.locator('#fhirJsonView').textContent();
     const q = JSON.parse(json);
     const ext = (q.item?.[0]?.item?.[0]?.extension || []).find(
@@ -197,6 +199,8 @@ test.describe('Terminology server — export JSON', () => {
     await page.getByTestId('preview-mode-btn').click();
     await page.getByTestId('preview-mode-json').click();
     await expect(page.locator('#fhirJsonView')).toBeVisible();
+    // Wait for async render to populate JSON content
+    await expect(page.locator('#fhirJsonView')).toContainText('resourceType', { timeout: 8_000 });
     const json = await page.locator('#fhirJsonView').textContent();
     const q = JSON.parse(json);
     const ext = (q.extension || []).find(
