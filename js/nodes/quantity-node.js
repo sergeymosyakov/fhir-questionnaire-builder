@@ -47,7 +47,11 @@ export class QuantityNode extends ItemNode {
 
     const current  = getValue(node.id);
     const initVal  = current ? (current.value  !== undefined ? current.value : '') : '';
-    const initUnit = current ? (current.unit   || node.quantityUnit || '') : (node.quantityUnit || '');
+    // When _unitValueSet is set, default unit comes only from saved answer (current.unit),
+    // not from node.quantityUnit — otherwise the fixed default always overrides the selection.
+    const initUnit = current
+      ? (current.unit || (!node._unitValueSet ? node.quantityUnit : '') || '')
+      : (!node._unitValueSet ? node.quantityUnit || '' : '');
 
     const numInput = document.createElement('input');
     numInput.type        = 'number';
@@ -77,7 +81,7 @@ export class QuantityNode extends ItemNode {
       value:    initUnit || '',
       className: 'qty-unit-sel',
       testid:   'qty-unit-sel',
-      onChange: () => { update(); _formTick.value++; },
+      onChange: () => { update(); },
     });
 
     const errMsg = document.createElement('span');

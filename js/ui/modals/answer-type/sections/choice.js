@@ -219,7 +219,7 @@ class ChoiceSection extends AnswerTypeSection {
     // ── Autocomplete toggle (select only) ────────────────────────────────────
     let lookupCb; // forward-declared — assigned when lookupRow is built below
     const acRow = document.createElement('label');
-    acRow.className = 'at-modal-sub';
+    acRow.className = 'at-modal-multiline-row';
     acRow.style.display = (pending.draftType === 'select') ? '' : 'none';
     const acCb = Object.assign(document.createElement('input'), { type: 'checkbox', checked: !!pending.draftAutocomplete });
     acCb.dataset.testid = 'autocomplete-toggle';

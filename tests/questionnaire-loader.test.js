@@ -17,6 +17,7 @@ vi.mock('../js/ui/modals/validate-modal.js', () => ({ show: vi.fn() }));
 vi.mock('../js/ui/progress.js', () => ({ show: vi.fn(), update: vi.fn(), hide: vi.fn() }));
 vi.mock('../js/builder/index.js', () => ({
   renderTreeAsync: vi.fn(() => Promise.resolve()),
+  renderTree: vi.fn(),
 }));
 vi.mock('../js/nodes/group-node.js', () => ({
   GroupNode: { resetCollapsedFromTree: vi.fn() },
@@ -26,6 +27,15 @@ vi.mock('../js/fhir/terminology-service.js', () => ({
 }));
 vi.mock('../js/ui/modals/load-confirm-modal.js', () => ({
   loadConfirmModal: { open: vi.fn(() => Promise.resolve('proceed')) },
+}));
+vi.mock('../js/utils.js', () => ({
+  destroyTree: vi.fn(),
+}));
+vi.mock('../js/state.js', () => ({
+  clearAllValues: vi.fn(),
+  resetQuestMeta: vi.fn(),
+  questVariables: [],
+  questContained: [],
 }));
 
 const { QuestionnaireLoader }    = await import('../js/fhir/questionnaire-loader.js');

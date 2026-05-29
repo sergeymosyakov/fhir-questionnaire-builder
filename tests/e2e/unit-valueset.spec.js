@@ -17,10 +17,10 @@
 // ── data-testid registry ──────────────────────────────────────────────────────
 //   fhir-file-input            hidden file input for import
 //   add-root-group-btn         button to add root group (signals page is ready)
-//   answer-type-btn            "Answer Type" action link on a preview row
+//   answer-type-btn → action-type  "Answer Type" action link on a builder node
 //   unit-valueset-url          textarea for unitValueSet canonical URL
 //   unit-sel                   custom select for default unit
-//   at-modal-apply             Apply button in Answer Type modal
+//   answerTypeModalApply         Apply button in Answer Type modal
 //   export-btn                 main Export dropdown button
 //   export-fhir-item           Export FHIR Questionnaire menu item
 //   prompt-save                confirm button in filename prompt dialog
@@ -115,8 +115,8 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
     await freshLoad(page);
 
     // Open Answer Type modal for q-with-unit-vs
-    const row = page.locator('[data-preview-id="q-with-unit-vs"]');
-    await row.locator('[data-testid="answer-type-btn"]').click();
+    const row = page.locator('[data-node-id="q-with-unit-vs"]');
+    await row.locator('[data-testid="action-type"]').click();
     await expect(page.locator('[data-testid="unit-valueset-url"]')).toBeVisible({ timeout: 5_000 });
     const val = await page.locator('[data-testid="unit-valueset-url"]').inputValue();
     expect(val).toBe(VS_URL);
@@ -125,8 +125,8 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
   test('Answer Type modal shows empty unitValueSet URL for item without it', async ({ page }) => {
     await freshLoad(page);
 
-    const row = page.locator('[data-preview-id="q-no-unit"]');
-    await row.locator('[data-testid="answer-type-btn"]').click();
+    const row = page.locator('[data-node-id="q-no-unit"]');
+    await row.locator('[data-testid="action-type"]').click();
     await expect(page.locator('[data-testid="unit-valueset-url"]')).toBeVisible({ timeout: 5_000 });
     const val = await page.locator('[data-testid="unit-valueset-url"]').inputValue();
     expect(val).toBe('');
@@ -136,12 +136,12 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
     await freshLoad(page);
 
     // Open and edit
-    const row = page.locator('[data-preview-id="q-no-unit"]');
-    await row.locator('[data-testid="answer-type-btn"]').click();
+    const row = page.locator('[data-node-id="q-no-unit"]');
+    await row.locator('[data-testid="action-type"]').click();
     const inp = page.locator('[data-testid="unit-valueset-url"]');
     await expect(inp).toBeVisible({ timeout: 5_000 });
     await inp.fill('http://example.com/vs/custom-units');
-    await page.locator('[data-testid="at-modal-apply"]').click();
+    await page.locator('[data-testid="answerTypeModalApply"]').click();
 
     // Export and verify
     await page.locator('[data-testid="export-btn"]').click();
@@ -163,12 +163,12 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
   test('clearing unitValueSet URL removes extension on export', async ({ page }) => {
     await freshLoad(page);
 
-    const row = page.locator('[data-preview-id="q-with-unit-vs"]');
-    await row.locator('[data-testid="answer-type-btn"]').click();
+    const row = page.locator('[data-node-id="q-with-unit-vs"]');
+    await row.locator('[data-testid="action-type"]').click();
     const inp = page.locator('[data-testid="unit-valueset-url"]');
     await expect(inp).toBeVisible({ timeout: 5_000 });
     await inp.fill('');
-    await page.locator('[data-testid="at-modal-apply"]').click();
+    await page.locator('[data-testid="answerTypeModalApply"]').click();
 
     await page.locator('[data-testid="export-btn"]').click();
     await page.locator('[data-testid="export-fhir-item"]').click();

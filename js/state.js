@@ -93,6 +93,28 @@ export const questMeta = reactive({
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.
 export const questContained = reactive([]);
 
+/** Reset all questMeta fields to their initial empty state. */
+export function resetQuestMeta() {
+  questMeta.id = ''; questMeta.url = ''; questMeta.version = '';
+  questMeta.title = ''; questMeta.status = 'draft';
+  questMeta.publisher = ''; questMeta.description = ''; questMeta.name = '';
+  questMeta.date = ''; questMeta.subjectType = [];
+  questMeta.purpose = ''; questMeta.copyright = '';
+  questMeta.approvalDate = ''; questMeta.lastReviewDate = '';
+  questMeta.effectivePeriodStart = ''; questMeta.effectivePeriodEnd = '';
+  questMeta.experimental = null; questMeta.language = ''; questMeta.derivedFrom = [];
+  questMeta.replaces = [];
+  questMeta._rawIdentifier = [];
+  questMeta._rawText = null;
+  questMeta._rawContact = null; questMeta._rawUseContext = null; questMeta._rawJurisdiction = null;
+  questMeta._rawCode = null;
+  questMeta._metaVersionId = ''; questMeta._metaSource = '';
+  questMeta._metaLastUpdated = ''; questMeta._rawMetaProfile = [];
+  questMeta._rawMetaTag = []; questMeta._rawMetaSecurity = [];
+  questMeta._rawQuestExtensions = [];
+  questMeta.preferredTermServer = '';
+}
+
 // Item types that have form-value validation logic in the preview.
 // CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
 // NONEMPTY_TYPES: mandatory → value must be non-empty (subset, excludes url/attachment).
