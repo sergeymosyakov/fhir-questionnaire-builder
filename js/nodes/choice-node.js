@@ -6,6 +6,7 @@ import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { createWrap } from './base-node.js';
 import { parseOptions } from '../utils.js';
+import { terminologyService } from '../fhir/terminology-service.js';
 
 // Evaluate answerExpression (SDC) against the current FHIRPath context.
 // Returns [{code, display}] from the expression result, or falls back to
@@ -52,6 +53,8 @@ export class ChoiceNode extends ItemNode {
 
     const opts   = _evalAnswerOpts(node, ctx._fpCtx);
     let selected = getValue(node.id) || '';
+    // display cache for codes selected via live lookup — stored on node to survive re-renders
+    if (!node._lookupDisplayCache) node._lookupDisplayCache = {};
 
     const trigger = document.createElement('div');
     trigger.className = 'sc-trigger';
@@ -70,10 +73,14 @@ export class ChoiceNode extends ItemNode {
         if (node._optionOrdinals && node._optionOrdinals[found.code] !== undefined)
           label += '\u00A0(' + node._optionOrdinals[found.code] + ')';
         textSpan.textContent = label;
+        trigger.classList.remove('sc-trigger--empty');
+      } else if (selected && node._lookupDisplayCache[selected]) {
+        textSpan.textContent = node._lookupDisplayCache[selected];
+        trigger.classList.remove('sc-trigger--empty');
       } else {
         textSpan.textContent = '\u2014 select \u2014';
+        trigger.classList.add('sc-trigger--empty');
       }
-      trigger.classList.toggle('sc-trigger--empty', !found);
     };
     setLabel();
 
@@ -127,42 +134,93 @@ export class ChoiceNode extends ItemNode {
       }
     };
 
+    const _fillDropDefault = () => {
+      _buildOpts(dropEl);
+    };
+
+    const _fillDropAutocomplete = () => {
+      const searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.className = 'oc-search';
+      searchInput.placeholder = 'Search\u2026';
+      searchInput.dataset.testid = 'autocomplete-search';
+      const listBox = document.createElement('div');
+      _buildOpts(listBox);
+      searchInput.addEventListener('input', () => {
+        listBox.innerHTML = '';
+        _buildOpts(listBox, searchInput.value);
+      });
+      dropEl.appendChild(searchInput);
+      dropEl.appendChild(listBox);
+      requestAnimationFrame(() => searchInput.focus());
+    };
+
+    const _fillDropLookup = () => {
+      const searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.className = 'oc-search';
+      searchInput.placeholder = 'Search codes\u2026';
+      searchInput.dataset.testid = 'lookup-search';
+      const statusEl = document.createElement('div');
+      statusEl.className = 'oc-lookup-status';
+      statusEl.dataset.testid = 'lookup-status';
+      statusEl.style.display = 'none';
+      const listBox = document.createElement('div');
+      let _lookupTimer = null;
+      const _doLookup = filter => {
+        clearTimeout(_lookupTimer);
+        statusEl.textContent = 'Searching\u2026';
+        statusEl.style.display = '';
+        listBox.innerHTML = '';
+        _lookupTimer = setTimeout(async () => {
+          if (!node._answerValueSet) { statusEl.textContent = 'No ValueSet configured'; statusEl.style.display = ''; return; }
+          try {
+            const serverUrl = terminologyService.getServer(node, null);
+            const results = await terminologyService.expandWithFilter(node._answerValueSet, serverUrl, filter);
+            statusEl.textContent = results.length ? '' : 'No results';
+            statusEl.style.display = results.length ? 'none' : '';
+            listBox.innerHTML = '';
+            for (const { code, display } of results) {
+              const opt = document.createElement('div');
+              opt.className = 'oc-opt';
+              opt.textContent = display || code;
+              if (code === selected) opt.classList.add('oc-opt--sel');
+                opt.addEventListener('mousedown', e => {
+                  e.preventDefault();
+                  node._lookupDisplayCache[code] = display || code;
+                  _pick(code);
+                });
+              listBox.appendChild(opt);
+            }
+            _reposition();
+          } catch (err) {
+            statusEl.textContent = '\u2717 ' + (err.message || 'Search failed');
+            statusEl.style.display = '';
+            listBox.innerHTML = '';
+          }
+        }, filter.trim() ? 300 : 0);
+      };
+      searchInput.addEventListener('input', () => _doLookup(searchInput.value));
+      dropEl.appendChild(searchInput);
+      dropEl.appendChild(statusEl);
+      dropEl.appendChild(listBox);
+      requestAnimationFrame(() => { searchInput.focus(); _doLookup(''); });
+    };
+
     const openDrop = () => {
       if (dropEl) { close(); return; }
       dropEl = document.createElement('div');
       dropEl.className = 'oc-drop';
 
-      if (node._itemControl === 'autocomplete') {
-        const searchInput = document.createElement('input');
-        searchInput.type = 'text';
-        searchInput.className = 'oc-search';
-        searchInput.placeholder = 'Search\u2026';
-        searchInput.dataset.testid = 'autocomplete-search';
-        const listBox = document.createElement('div');
-        _buildOpts(listBox);
-        searchInput.addEventListener('input', () => {
-          listBox.innerHTML = '';
-          _buildOpts(listBox, searchInput.value);
-        });
-        dropEl.appendChild(searchInput);
-        dropEl.appendChild(listBox);
-        // Focus the search input after dropdown is positioned
-        requestAnimationFrame(() => searchInput.focus());
-      } else {
-        _buildOpts(dropEl);
+      switch (node._itemControl) {
+        case 'autocomplete': _fillDropAutocomplete(); break;
+        case 'lookup':       _fillDropLookup();       break;
+        default:             _fillDropDefault();      break;
       }
 
       document.body.appendChild(dropEl);
       _open = true;
-      const rect = trigger.getBoundingClientRect();
-      dropEl.style.left     = rect.left + 'px';
-      dropEl.style.minWidth = rect.width + 'px';
-      const dropH = dropEl.offsetHeight;
-      if (rect.bottom + dropH + 4 <= window.innerHeight) {
-        dropEl.style.top = (rect.bottom + 2) + 'px';
-      } else {
-        dropEl.style.top = Math.max(4, rect.top - dropH - 2) + 'px';
-      }
+      _reposition();
       document.addEventListener('mousedown', _onOutside, true);
     };
 

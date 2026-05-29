@@ -86,7 +86,8 @@ async function _fetchWithRetry(url, options, timeout, onRetry) {
 
 function _collectExternalVsNodes(nodes, out = []) {
   for (const node of nodes) {
-    if (node._answerValueSet && !node._answerValueSet.startsWith('#')) out.push(node);
+    // Skip lookup items — they perform on-demand server-side search, not eager expansion
+    if (node._answerValueSet && !node._answerValueSet.startsWith('#') && node._itemControl !== 'lookup') out.push(node);
     if (node.children?.length) _collectExternalVsNodes(node.children, out);
   }
   return out;
@@ -116,6 +117,34 @@ class TerminologyService {
     await _loadConfig();
     const base   = (serverUrl || DEFAULT_TERMINOLOGY_SERVER).replace(/\/$/, '');
     const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?url=${encodeURIComponent(vsUrl)}&_count=${EXPAND_COUNT}`);
+    const res = await _fetchWithRetry(reqUrl, {
+      headers: { Accept: 'application/fhir+json' },
+    }, FETCH_TIMEOUT);
+    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    const body = await res.json();
+    if (body.resourceType !== 'ValueSet') throw new Error('Response is not a FHIR ValueSet');
+    return (body.expansion?.contains || []).map(c => ({
+      code:    c.code    ?? '',
+      display: c.display || c.code || '',
+      system:  c.system  || '',
+    }));
+  }
+
+  /**
+   * Expand a ValueSet with an optional text filter for live server-side lookup.
+   * Uses the FHIR $expand operation with a `filter` parameter.
+   * @param {string} vsUrl       Canonical ValueSet URL to expand.
+   * @param {string} serverUrl   Base URL of the FHIR terminology server.
+   * @param {string} [filter]    Optional search text (sent as $expand?filter=).
+   * @param {number} [count=50]  Max results to return.
+   * @returns {Promise<Array<{code: string, display: string, system: string}>>}
+   */
+  async expandWithFilter(vsUrl, serverUrl, filter = '', count = 50) {
+    await _loadConfig();
+    const base   = (serverUrl || DEFAULT_TERMINOLOGY_SERVER).replace(/\/$/, '');
+    const params = new URLSearchParams({ url: vsUrl, _count: String(count) });
+    if (filter && filter.trim()) params.set('filter', filter.trim());
+    const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?${params}`);
     const res = await _fetchWithRetry(reqUrl, {
       headers: { Accept: 'application/fhir+json' },
     }, FETCH_TIMEOUT);

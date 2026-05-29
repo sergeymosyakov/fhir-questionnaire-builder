@@ -5,6 +5,11 @@
 //   autocomplete-search  — search input inside autocomplete dropdown
 //   text-area-toggle     — multi-line checkbox in Answer Type modal
 //   autocomplete-toggle  — autocomplete checkbox in Answer Type modal
+//   lookup-toggle        — lookup checkbox in Answer Type modal
+//   lookup-search        — search input inside lookup dropdown
+//   lookup-status        — status line inside lookup dropdown
+//   slider-input         — <input type="range"> in slider control
+//   slider-value         — current value label next to the slider
 //   export-btn, export-fhir-item, prompt-save — export flow
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
@@ -164,5 +169,77 @@ test.describe('drop-down itemControl', () => {
     const item = q.item.find(i => i.linkId === 'dd-default');
     const ic = (item.extension || []).find(e => e.url.includes('questionnaire-itemControl'));
     expect(ic.valueCodeableConcept.coding[0].code).toBe('drop-down');
+  });
+});
+
+// ── slider itemControl ────────────────────────────────────────────────────────
+test.describe('slider itemControl', () => {
+  test('sl-integer renders as range input', async ({ page }) => {
+    await loadFixture(page);
+    const sl = page.locator('[data-preview-id="sl-integer"] [data-testid="slider-input"]');
+    await expect(sl).toBeVisible();
+  });
+
+  test('slider has correct min / max / step from imported extensions', async ({ page }) => {
+    await loadFixture(page);
+    const sl = page.locator('[data-preview-id="sl-integer"] [data-testid="slider-input"]');
+    await expect(sl).toHaveAttribute('min',  '0');
+    await expect(sl).toHaveAttribute('max',  '10');
+    await expect(sl).toHaveAttribute('step', '1');
+  });
+
+  test('value label updates when slider moves', async ({ page }) => {
+    await loadFixture(page);
+    await page.locator('[data-preview-id="sl-integer"] [data-testid="slider-input"]').evaluate(el => {
+      el.value = '7';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await expect(page.locator('[data-preview-id="sl-integer"] [data-testid="slider-value"]')).toHaveText('7');
+  });
+
+  test('round-trip exports both sliderStepValue and itemControl=slider', async ({ page }) => {
+    await loadFixture(page);
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+    ]);
+    const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
+    const item = q.item.find(i => i.linkId === 'sl-integer');
+    const stepExt = (item.extension || []).find(e => e.url.includes('questionnaire-sliderStepValue'));
+    expect(stepExt?.valueInteger).toBe(1);
+    const ic = (item.extension || []).find(e => e.url.includes('questionnaire-itemControl'));
+    expect(ic?.valueCodeableConcept.coding[0].code).toBe('slider');
+  });
+});
+
+// ── lookup itemControl ────────────────────────────────────────────────────────
+test.describe('lookup itemControl', () => {
+  test('lk-vs dropdown shows a search input', async ({ page }) => {
+    await loadFixture(page);
+    const trigger = page.locator('[data-preview-id="lk-vs"] .sc-trigger');
+    await trigger.click();
+    await expect(page.getByTestId('lookup-search')).toBeVisible();
+  });
+
+  test('lookup dropdown shows a status element', async ({ page }) => {
+    await loadFixture(page);
+    const trigger = page.locator('[data-preview-id="lk-vs"] .sc-trigger');
+    await trigger.click();
+    await expect(page.getByTestId('lookup-status')).toBeVisible();
+  });
+
+  test('round-trip exports itemControl=lookup', async ({ page }) => {
+    await loadFixture(page);
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+    ]);
+    const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
+    const item = q.item.find(i => i.linkId === 'lk-vs');
+    const ic = (item.extension || []).find(e => e.url.includes('questionnaire-itemControl'));
+    expect(ic?.valueCodeableConcept.coding[0].code).toBe('lookup');
+    expect(item.answerValueSet).toBe('http://hl7.org/fhir/ValueSet/administrative-gender');
   });
 });

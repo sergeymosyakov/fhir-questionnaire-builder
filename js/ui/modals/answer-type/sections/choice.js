@@ -23,15 +23,22 @@ class ChoiceSection extends AnswerTypeSection {
   isVisible(type) { return CHOICE_TYPES.has(type); }
 
   onTypeChange(type) {
+    if (this._pending) this._pending.draftType = type;
     if (this._openLabelEl) {
       this._openLabelEl.style.display = type === 'open-choice' ? '' : 'none';
     }
     if (this._acRowEl) {
       this._acRowEl.style.display = type === 'select' ? '' : 'none';
     }
+    if (this._lookupRowEl) {
+      const p = this._pending;
+      const isExtVS = p?.draftSrc === 'valueset' && p?.draftAVS && !p.draftAVS.startsWith('#');
+      this._lookupRowEl.style.display = (type === 'select' && !!isExtVS) ? '' : 'none';
+    }
   }
 
   build(pending) {
+    this._pending = pending;
     const section = document.createElement('div');
 
     // ── Answer source toggle ─────────────────────────────────────────────────
@@ -99,7 +106,7 @@ class ChoiceSection extends AnswerTypeSection {
     avsUrlInp.value          = isExternalAVS ? pending.draftAVS : '';
     avsUrlInp.placeholder    = 'http://terminology.hl7.org/ValueSet/...';
     avsUrlInp.style.display  = isExternalAVS ? 'block' : 'none';
-    avsUrlInp.oninput = () => { pending.draftAVS = avsUrlInp.value.trim(); };
+    avsUrlInp.oninput = () => { pending.draftAVS = avsUrlInp.value.trim(); _updateItemControlRows(); };
 
     // ── Test expansion button ────────────────────────────────────────────────
     const avsTestWrap = document.createElement('div');
@@ -153,6 +160,7 @@ class ChoiceSection extends AnswerTypeSection {
           avsTestStatus.textContent = '';
           pending.draftAVS = v;
         }
+        _updateItemControlRows();
       },
     });
 
@@ -208,13 +216,14 @@ class ChoiceSection extends AnswerTypeSection {
     section.appendChild(openLabelSection);
     this._openLabelEl = openLabelSection;
 
-    // ── Autocomplete toggle (select/checklist only) ──────────────────────────
+    // ── Autocomplete toggle (select only) ────────────────────────────────────
+    let lookupCb; // forward-declared — assigned when lookupRow is built below
     const acRow = document.createElement('label');
     acRow.className = 'at-modal-sub';
     acRow.style.display = (pending.draftType === 'select') ? '' : 'none';
     const acCb = Object.assign(document.createElement('input'), { type: 'checkbox', checked: !!pending.draftAutocomplete });
     acCb.dataset.testid = 'autocomplete-toggle';
-    acCb.onchange = () => { pending.draftAutocomplete = acCb.checked; };
+    acCb.onchange = () => { pending.draftAutocomplete = acCb.checked; if (acCb.checked && lookupCb) { lookupCb.checked = false; pending.draftLookup = false; } };
     const acLbl = document.createTextNode(' Autocomplete (searchable dropdown)');
     acRow.dataset.tipTitle = 'Autocomplete';
     acRow.dataset.tipBody  = 'Adds a search/filter input at the top of the dropdown, allowing users to type and filter options. Exports as questionnaire-itemControl = autocomplete.';
@@ -224,12 +233,38 @@ class ChoiceSection extends AnswerTypeSection {
     section.appendChild(acRow);
     this._acRowEl = acRow;
 
+    // ── Lookup toggle (select + external ValueSet only) ───────────────────────
+    const isExtVSInit = pending.draftSrc === 'valueset' && !!pending.draftAVS && !pending.draftAVS.startsWith('#');
+    const lookupRow = document.createElement('label');
+    lookupRow.className = 'at-modal-multiline-row';
+    lookupRow.style.display = (pending.draftType === 'select' && isExtVSInit) ? '' : 'none';
+    lookupCb = Object.assign(document.createElement('input'), { type: 'checkbox', checked: !!pending.draftLookup });
+    lookupCb.dataset.testid = 'lookup-toggle';
+    lookupCb.onchange = () => { pending.draftLookup = lookupCb.checked; if (lookupCb.checked) { acCb.checked = false; pending.draftAutocomplete = false; } };
+    const lookupLbl = document.createTextNode(' Lookup (server-side live search)');
+    lookupRow.dataset.tipTitle = 'Lookup';
+    lookupRow.dataset.tipBody  = 'Queries the terminology server live on each keystroke using ValueSet/$expand?filter=. Only available for items with an external answerValueSet. Exports as questionnaire-itemControl = lookup.';
+    lookupRow.dataset.tipFhir  = 'item.extension[questionnaire-itemControl].valueCodeableConcept.coding.code = lookup';
+    lookupRow.dataset.tipSpec  = 'R4';
+    lookupRow.append(lookupCb, lookupLbl);
+    section.appendChild(lookupRow);
+    this._lookupRowEl = lookupRow;
+
+    // ── _updateItemControlRows: sync acRow/lookupRow visibility ───────────────
+    const _updateItemControlRows = () => {
+      const isSelect = pending.draftType === 'select';
+      const isExtVS  = pending.draftSrc === 'valueset' && !!pending.draftAVS && !pending.draftAVS.startsWith('#');
+      acRow.style.display    = isSelect ? '' : 'none';
+      lookupRow.style.display = (isSelect && isExtVS) ? '' : 'none';
+    };
+
     // ── Wire radio toggles ───────────────────────────────────────────────────
     const _showOnly = which => {
       optSection.style.display  = which === 'options'     ? 'block' : 'none';
       avsSection.style.display  = which === 'valueset'    ? 'block' : 'none';
       exprSection.style.display = which === 'expression'  ? 'block' : 'none';
       pending.draftSrc = which;
+      _updateItemControlRows();
     };
     optRadio.onchange  = () => { if (optRadio.checked)  { pending.draftAVS = ''; _showOnly('options'); } };
     avsRadio.onchange  = () => {
@@ -298,10 +333,12 @@ class ChoiceSection extends AnswerTypeSection {
       delete node._openLabel;
     }
 
-    // Autocomplete itemControl (select only)
-    if (node.itemType === 'select' && pending.draftAutocomplete) {
+    // itemControl: autocomplete / lookup (select only, mutually exclusive)
+    if (node.itemType === 'select' && pending.draftLookup) {
+      node._itemControl = 'lookup';
+    } else if (node.itemType === 'select' && pending.draftAutocomplete) {
       node._itemControl = 'autocomplete';
-    } else if (node._itemControl === 'autocomplete') {
+    } else if (node._itemControl === 'autocomplete' || node._itemControl === 'lookup') {
       delete node._itemControl;
     }
   }
@@ -314,6 +351,7 @@ class ChoiceSection extends AnswerTypeSection {
       draftAnswerExpr:  node._answerExpression || '',
       draftSrc:         node._answerExpression ? 'expression' : (node._answerValueSet ? 'valueset' : 'options'),
       draftAutocomplete: node._itemControl === 'autocomplete',
+      draftLookup:       node._itemControl === 'lookup',
     };
   }
 }

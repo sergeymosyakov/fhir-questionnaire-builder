@@ -208,6 +208,12 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointe
   border-bottom: 1px solid var(--c-border);
   outline: none;
 }
+.oc-lookup-status {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--c-text-2);
+  min-height: 20px;
+}
 
 /* === Attachment / file control =============================================== */
 .file-input-hidden { display: none; }

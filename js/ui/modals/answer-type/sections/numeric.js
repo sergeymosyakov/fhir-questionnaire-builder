@@ -110,7 +110,7 @@ class NumericSection extends AnswerTypeSection {
       const decP   = _pi(pending.draftMaxDecimalPlaces);
       if (minV  !== undefined)              node._minValue   = _round ? Math.round(minV)  : minV;  else delete node._minValue;
       if (maxV  !== undefined)              node._maxValue   = _round ? Math.round(maxV)  : maxV;  else delete node._maxValue;
-      if (stepV !== undefined && stepV > 0) node._sliderStep = _round ? Math.round(stepV) : stepV; else delete node._sliderStep;
+      if (stepV !== undefined && stepV > 0) { node._sliderStep = _round ? Math.round(stepV) : stepV; node._itemControl = 'slider'; } else { delete node._sliderStep; if (node._itemControl === 'slider') delete node._itemControl; }
       if (node.itemType === 'decimal' && decP !== undefined && decP >= 0) node._maxDecimalPlaces = decP; else delete node._maxDecimalPlaces;
     } else {
       delete node._minValue;

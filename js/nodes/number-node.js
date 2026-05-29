@@ -17,7 +17,7 @@ export class NumberNode extends ItemNode {
     const wrap = createWrap();
 
     // ── Slider mode ──────────────────────────────────────────────────────────────
-    if (node._sliderStep !== undefined) {
+    if (node._sliderStep !== undefined || node._itemControl === 'slider') {
       const sl = document.createElement('input');
       sl.type  = 'range';
       sl.className = 'ctrl-input--slider';
