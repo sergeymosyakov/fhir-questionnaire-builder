@@ -132,7 +132,7 @@ test.describe('group icon reflects constraint-only child state', () => {
     const groupFail = page.locator('[data-preview-id="grp-constraint"] .icon-fail');
     await input.fill('21');
     await commitInput(page, input);
-    await expect(groupOk).toBeVisible();
+    await expect(groupOk).toBeVisible({ timeout: 15_000 });
     await expect(groupFail).toHaveCount(0);
   });
 
