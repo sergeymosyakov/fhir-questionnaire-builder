@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: './tests/e2e',
   timeout: 30_000,
   expect: { timeout: 8_000 },
+  workers: process.env.CI ? 2 : undefined,
 
   // Always generate HTML report (open: never so it doesn't auto-launch).
   // Add list reporter for readable CI logs.
