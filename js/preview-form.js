@@ -194,11 +194,17 @@ export class PreviewForm {
   }
 
   _buildControl(node, iconEl, onAfterChange) {
+    const isPatient = this._previewMode === 'patient';
     const updateOwnIcon = () => {
-      if (!iconEl) return;
-      const ok = this._calcFormOk(node);
-      iconEl.className   = ok ? 'icon-ok' : 'icon-fail';
-      iconEl.textContent = ok ? '\u2713' : '\u2717';
+      if (iconEl) {
+        const ok = this._calcFormOk(node);
+        iconEl.className   = ok ? 'icon-ok' : 'icon-fail';
+        iconEl.textContent = ok ? '\u2713' : '\u2717';
+      }
+      if (isPatient && node._previewEl) {
+        const ok = this._calcFormOk(node);
+        node._previewEl.classList.toggle('lform-item--invalid', !ok);
+      }
     };
     const onChange = () => { updateOwnIcon(); if (onAfterChange) onAfterChange(); };
     const reCalcAndRefresh = () => {

@@ -94,6 +94,29 @@ export class ReferenceNode extends ItemNode {
     wrap.appendChild(sep);
     wrap.appendChild(idInput);
     wrap.appendChild(errMsg);
+
+    if (node._referenceProfiles?.length) {
+      const info = document.createElement('span');
+      info.className = 'ctrl-ref-info';
+      info.textContent = 'Profile: ' + node._referenceProfiles.join(', ');
+      info.dataset.tipTitle = 'questionnaire-referenceProfile';
+      info.dataset.tipBody  = 'Allowed profiles:\n' + node._referenceProfiles.join('\n');
+      info.dataset.tipFhir  = 'item.extension[questionnaire-referenceProfile].valueCanonical';
+      info.dataset.tipSpec  = 'R4';
+      wrap.appendChild(info);
+    }
+
+    if (node._referenceFilter) {
+      const info = document.createElement('span');
+      info.className = 'ctrl-ref-info';
+      info.textContent = 'Filter: ' + node._referenceFilter;
+      info.dataset.tipTitle = 'questionnaire-referenceFilter';
+      info.dataset.tipBody  = 'Server-side filter expression:\n' + node._referenceFilter;
+      info.dataset.tipFhir  = 'item.extension[questionnaire-referenceFilter].valueString';
+      info.dataset.tipSpec  = 'R4';
+      wrap.appendChild(info);
+    }
+
     return wrap;
   }
 }

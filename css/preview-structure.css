@@ -153,6 +153,24 @@
   background: #e3f2fd;
   border-color: #90caf9;
 }
+.preview-meta-badge--sig {
+  color: #6a1b9a;
+  background: #f3e5f5;
+  border-color: #ce93d8;
+}
+
+/* Reference info hints (profile / filter) */
+.ctrl-ref-info {
+  display: block;
+  font-size: 11px;
+  color: #78909c;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 360px;
+  cursor: default;
+}
 
 /* Repeatable item UI */
 .repeat-wrap {

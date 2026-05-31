@@ -174,6 +174,9 @@ export class ItemNode extends BaseNode {
     } else {
       row.appendChild(rc.buildControl(this, res._iconEl, () => rc.updateGroupIcons()));
     }
+    if (rc.previewMode === 'patient' && this._previewEl) {
+      this._previewEl.classList.toggle('lform-item--invalid', !rc.calcFormOk(this));
+    }
   }
 
   // Render N+1 repeat rows with add/remove buttons.

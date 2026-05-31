@@ -232,6 +232,18 @@ export class BaseNode {
       row.appendChild(st);
     }
 
+    if (this._signatureRequired?.length) {
+      const labels = this._signatureRequired.map(s => s.display || s.code).join(', ');
+      const sb = document.createElement('span');
+      sb.className = 'preview-meta-badge preview-meta-badge--sig';
+      sb.textContent = '\uD83D\uDD0F ' + labels;
+      sb.dataset.tipTitle = 'Signature required';
+      sb.dataset.tipBody  = 'A digital signature is required for this item.\nType(s): ' + labels;
+      sb.dataset.tipFhir  = 'item.extension[questionnaire-signatureRequired].valueCodeableConcept';
+      sb.dataset.tipSpec  = 'R4';
+      row.appendChild(sb);
+    }
+
     if (this._prefix && rc.viewPrefs.showPrefix) {
       const pfx = document.createElement('span');
       pfx.className = 'preview-prefix';

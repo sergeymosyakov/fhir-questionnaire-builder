@@ -113,6 +113,11 @@
   cursor: default;
 }
 .patient-view .lform-item:hover { background: #fff; }
+.patient-view .lform-item--invalid {
+  border-left: 3px solid #ef4444;
+  background: #fef2f2;
+}
+.patient-view .lform-item--invalid:hover { background: #fef2f2; }
 .patient-view .lform-item.success,
 .patient-view .lform-item.error {
   background: #fff;
