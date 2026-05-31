@@ -138,6 +138,20 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource'
     );
     if (refResExt && refResExt.valueCode) node.referenceResource = refResExt.valueCode;
+
+    // questionnaire-referenceFilter — FHIRPath expression to filter valid references
+    const refFilterExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter'
+    );
+    if (refFilterExt?.valueString) node._referenceFilter = refFilterExt.valueString;
+
+    // questionnaire-referenceProfile — profile URL restricting valid reference targets
+    const refProfileExts = (fhirItem.extension || []).filter(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile'
+    );
+    if (refProfileExts.length) {
+      node._referenceProfiles = refProfileExts.map(e => e.valueCanonical).filter(Boolean);
+    }
   }
   // quantity: default unit from standard extension (questionnaire-unit)
   if (node.itemType === 'quantity') {
@@ -347,6 +361,19 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode'
   );
   if (usageModeExt?.valueCode) node._usageMode = usageModeExt.valueCode;
+
+  // questionnaire-signatureRequired — signature types required on item (repeats, valueCodeableConcept)
+  const sigExts = (fhirItem.extension || []).filter(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired'
+  );
+  if (sigExts.length) {
+    node._signatureRequired = sigExts
+      .filter(e => e.valueCodeableConcept?.coding?.[0])
+      .map(e => {
+        const c = e.valueCodeableConcept.coding[0];
+        return { system: c.system || '', code: c.code || '', display: c.display || '' };
+      });
+  }
 
   // sdc-questionnaire-itemMedia — media (image/audio/video) attached to the item question
   const itemMediaExt = (fhirItem.extension || []).find(

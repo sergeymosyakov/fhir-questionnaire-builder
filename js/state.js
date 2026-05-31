@@ -84,6 +84,7 @@ export const questMeta = {
   _rawMetaSecurity: [],       // meta.security[] — Coding[]; editable system/code/display rows
   _rawQuestExtensions: [],    // Questionnaire.extension[] — non-variable extensions, preserved for round-trip
   preferredTermServer: '',    // Questionnaire.extension[sdc-questionnaire-preferredTerminologyServer].valueUrl
+  _signatureRequired: [],     // questionnaire-signatureRequired — array of {system, code, display}
 };
 
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.
@@ -109,6 +110,7 @@ export function resetQuestMeta() {
   questMeta._rawMetaTag = []; questMeta._rawMetaSecurity = [];
   questMeta._rawQuestExtensions = [];
   questMeta.preferredTermServer = '';
+  questMeta._signatureRequired = [];
 }
 
 // Item types that have form-value validation logic in the preview.

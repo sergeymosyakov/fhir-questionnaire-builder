@@ -281,6 +281,9 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet` | standard | `_unitValueSet` — canonical URL of a ValueSet of selectable UCUM units; unit dropdown in preview uses `_unitVsCache` expanded on load; falls back to built-in list if offline | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption` | standard | `_unitOptions` — 0..* explicit selectable units for quantity items; each extension carries a `valueCoding` (system, code, display); when set, unit dropdown shows only these units; editable in **Answer Type** modal "Unit options" section; mutually exclusive with `unitValueSet` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource` | standard | `referenceResource` (reference type lock) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter` | standard | `_referenceFilter` (FHIRPath filter expression for reference targets) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile` | standard | `_referenceProfiles` (0..* canonical URLs restricting valid profiles for reference items) | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired` | standard | `_signatureRequired` (0..* CodeableConcept with Signature Type Codes; item-level and root-level) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs` | standard | `_minOccurs` (min repeat rows required) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs` | standard | `_maxOccurs` (max repeat rows; enforced in preview) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/minValue` | standard | `_minValue` (minimum value for numeric inputs; enforced in preview) | Yes |
@@ -411,9 +414,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
-| `questionnaire-referenceFilter` | ❌ Not handled | FHIRPath expression used to filter valid reference targets for `reference` items. |
-| `questionnaire-referenceProfile` | ❌ Not handled | Profile URL that restricts valid resource types for `reference` items (complementary to `questionnaire-referenceResource` which is supported). |
-| `questionnaire-signatureRequired` | ❌ Not handled | Indicates that a digital signature is required for the item or group. |
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
 
 ### SDC extensions — population and extraction (out of scope)

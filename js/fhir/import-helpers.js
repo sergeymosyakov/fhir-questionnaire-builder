@@ -38,6 +38,9 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption',
   'http://hl7.org/fhir/StructureDefinition/regex',
   'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia',
   'http://hl7.org/fhir/StructureDefinition/itemWeight',
 ]);

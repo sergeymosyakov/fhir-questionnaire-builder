@@ -115,7 +115,15 @@ export function importFHIR(fhirJson, renderFn) {
   const PREF_TERM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer';
   const prefTermQuestExt = (q.extension || []).find(e => e.url === PREF_TERM_URL);
   questMeta.preferredTermServer = prefTermQuestExt?.valueUrl || '';
-  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL);
+  const SIG_REQ_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired';
+  const sigReqExts = (q.extension || []).filter(e => e.url === SIG_REQ_URL);
+  questMeta._signatureRequired = sigReqExts.length
+    ? sigReqExts.filter(e => e.valueCodeableConcept?.coding?.[0]).map(e => {
+        const c = e.valueCodeableConcept.coding[0];
+        return { system: c.system || '', code: c.code || '', display: c.display || '' };
+      })
+    : [];
+  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL && e.url !== SIG_REQ_URL);
   questMeta._rawQuestExtensions = nonVarExts.length ? JSON.parse(JSON.stringify(nonVarExts)) : [];
 
   try {

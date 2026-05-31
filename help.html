@@ -106,6 +106,9 @@
     { cat: 'Item — Extensions', field: 'questionnaire-itemControl (slider)', desc: 'Renders an integer/decimal item as a range slider; requires a step value', where: 'Answer Type modal', how: 'Click "Answer Type" → Slider toggle (integer / decimal items only); step value required' },
     { cat: 'Item — Extensions', field: 'questionnaire-itemControl (lookup)', desc: 'Renders a choice item as a live-search input that queries a FHIR terminology server', where: 'Answer Type modal', how: 'Click "Answer Type" → Lookup checkbox (select type with ValueSet URL only)' },
     { cat: 'Item — Extensions', field: 'questionnaire-referenceResource', desc: 'Resource type(s) that are valid targets for reference items', where: 'Answer Type modal — reference items', how: 'Click "Answer Type" when type is reference → Resource Type dropdown' },
+    { cat: 'Item — Extensions', field: 'questionnaire-referenceFilter', desc: 'FHIRPath expression to filter valid reference targets at runtime', where: 'Answer Type modal — reference items', how: 'Click "Answer Type" when type is reference → Reference filter textarea' },
+    { cat: 'Item — Extensions', field: 'questionnaire-referenceProfile', desc: 'Profile URL(s) that restrict valid resource types for reference items', where: 'Answer Type modal — reference items', how: 'Click "Answer Type" when type is reference → Reference profiles textarea (one URL per line)' },
+    { cat: 'Item — Extensions', field: 'questionnaire-signatureRequired', desc: 'Indicates that a digital signature of the specified type is required. ValueCodeableConcept with Signature Type Codes binding.', where: 'States modal', how: 'Click "States" → Signature required chip selector' },
     { cat: 'Item — Extensions', field: 'maxSize (attachment)', desc: 'Maximum allowed file size in MB for attachment items', where: 'Answer Type modal', how: 'Click "Answer Type" action link → Max File Size field (attachment items only)' },
     { cat: 'Item — Extensions', field: 'mimeType (attachment)', desc: 'Allowed MIME type(s) for attachment items', where: 'Answer Type modal', how: 'Click "Answer Type" action link → Allowed MIME types field (attachment items only)' },
     { cat: 'Item — Extensions', field: 'minOccurs / maxOccurs', desc: 'Minimum and maximum number of repetitions for repeating items', where: 'Repeatable modal', how: 'Click "Repeatable" action link → Min / Max Occurrences fields' },
@@ -135,8 +138,6 @@
 
     // ── Not supported ─────────────────────────────────────────────────────────
     { cat: 'Not Supported', field: 'answerConstraint (R4B/R5)', desc: 'Constrains answer values: optionsOnly / optionsOrType / optionsOrString', where: '— not implemented', how: 'Not preserved on round-trip' },
-    { cat: 'Not Supported', field: 'questionnaire-referenceFilter', desc: 'FHIRPath expression to filter valid reference targets', where: '— not implemented', how: 'Not preserved on round-trip' },
-    { cat: 'Not Supported', field: 'questionnaire-signatureRequired', desc: 'Indicates a digital signature is required', where: '— not implemented', how: 'Not preserved on round-trip' },
   ];
 
   // ── Category badge colors ─────────────────────────────────────────────────

@@ -469,7 +469,7 @@ export class ItemNode extends BaseNode {
     setActive(typeLink,        true);
     setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
     setActive(exprLink,       !!(node._calculatedExpr || node._initialExpr));
-    setActive(statesLink,     node.mandatory === true || !!node._readOnly || !!node._hidden || !!node._usageMode);
+    setActive(statesLink,     node.mandatory === true || !!node._readOnly || !!node._hidden || !!node._usageMode || !!node._signatureRequired?.length);
     setActive(repeatLink,     !!node.repeats);
     if (!node.supportsRepeat()) repeatLink.style.display = 'none';
     setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');

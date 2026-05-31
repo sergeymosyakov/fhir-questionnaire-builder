@@ -150,6 +150,15 @@ function nodeToFHIRItem(node) {
   // reference resource type
   if (node.itemType === 'reference' && node.referenceResource)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource', valueCode: node.referenceResource });
+  // questionnaire-referenceFilter
+  if (node.itemType === 'reference' && node._referenceFilter)
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter', valueString: node._referenceFilter });
+  // questionnaire-referenceProfile (0..*)
+  if (node.itemType === 'reference' && node._referenceProfiles?.length) {
+    for (const url of node._referenceProfiles) {
+      ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile', valueCanonical: url });
+    }
+  }
   // quantity unit
   if (node.itemType === 'quantity' && node.quantityUnit)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit', valueCoding: { system: 'http://unitsofmeasure.org', code: node.quantityUnit } });
@@ -349,6 +358,16 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode', valueCode: node._usageMode });
   }
 
+  // questionnaire-signatureRequired (0..* valueCodeableConcept)
+  if (node._signatureRequired?.length) {
+    for (const sig of node._signatureRequired) {
+      ext.push({
+        url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired',
+        valueCodeableConcept: { coding: [{ system: sig.system, code: sig.code, display: sig.display }] },
+      });
+    }
+  }
+
   // sdc-questionnaire-itemMedia
   if (node._itemMedia) {
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia', valueAttachment: node._itemMedia });
@@ -452,6 +471,10 @@ export function buildFHIRObject() {
       url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer',
       valueUrl: questMeta.preferredTermServer.trim()
     }] : []),
+    ...(questMeta._signatureRequired || []).map(sig => ({
+      url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired',
+      valueCodeableConcept: { coding: [{ system: sig.system, code: sig.code, display: sig.display }] },
+    })),
     ...(questMeta._rawQuestExtensions || []).map(e => JSON.parse(JSON.stringify(e))),
   ];
   if (questExt.length) q.extension = questExt;

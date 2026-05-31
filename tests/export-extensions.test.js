@@ -884,3 +884,63 @@ describe('itemWeight export', () => {
     expect(amExt.valueAttachment.url).toBe('https://ex.com/a.jpg');
   });
 });
+
+// ── referenceFilter ───────────────────────────────────────────────────────────
+describe('referenceFilter export', () => {
+  const RF_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter';
+
+  it('exports _referenceFilter as extension', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference', _referenceFilter: "status = 'active'" }]);
+    const ext = q.item[0].extension.find(e => e.url === RF_URL);
+    expect(ext.valueString).toBe("status = 'active'");
+  });
+
+  it('does not export referenceFilter when absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === RF_URL);
+    expect(ext).toBeUndefined();
+  });
+});
+
+// ── referenceProfile ──────────────────────────────────────────────────────────
+describe('referenceProfile export', () => {
+  const RP_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile';
+
+  it('exports _referenceProfiles as repeating extension', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference', _referenceProfiles: ['http://ex.com/P1', 'http://ex.com/P2'] }]);
+    const exts = q.item[0].extension.filter(e => e.url === RP_URL);
+    expect(exts).toHaveLength(2);
+    expect(exts[0].valueCanonical).toBe('http://ex.com/P1');
+    expect(exts[1].valueCanonical).toBe('http://ex.com/P2');
+  });
+
+  it('does not export referenceProfile when absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference' }]);
+    const exts = (q.item[0].extension || []).filter(e => e.url === RP_URL);
+    expect(exts).toHaveLength(0);
+  });
+});
+
+// ── signatureRequired (item-level) ────────────────────────────────────────────
+describe('signatureRequired export (item)', () => {
+  const SIG_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired';
+
+  it('exports _signatureRequired as repeating extension', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'text',
+      _signatureRequired: [
+        { system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.1', display: "Author's Signature" },
+        { system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.5', display: 'Verification Signature' },
+      ],
+    }]);
+    const exts = q.item[0].extension.filter(e => e.url === SIG_URL);
+    expect(exts).toHaveLength(2);
+    expect(exts[0].valueCodeableConcept.coding[0].code).toBe('1.2.840.10065.1.12.1.1');
+  });
+
+  it('does not export signatureRequired when absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
+    const exts = (q.item[0].extension || []).filter(e => e.url === SIG_URL);
+    expect(exts).toHaveLength(0);
+  });
+});

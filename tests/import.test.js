@@ -17,7 +17,7 @@ const _values         = {};
 const _rawFhir        = { value: null };
 const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
-  effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [],
+  effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [], _signatureRequired: [],
   _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
 vi.mock('../js/state.js', () => ({
@@ -1522,6 +1522,28 @@ describe('importFHIR', () => {
       expect(_tree[0].id).toBe('q1-grp');
       expect(_tree[0].children).toHaveLength(2); // parent item + child
     });
+  });
+});
+
+// ── signatureRequired (root-level) ────────────────────────────────────────────
+describe('signatureRequired on Questionnaire root', () => {
+  const SIG_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired';
+  beforeEach(() => {
+    _tree.splice(0);
+    _questMeta._signatureRequired = [];
+  });
+
+  it('reads signatureRequired into questMeta._signatureRequired', () => {
+    importFHIR({
+      resourceType: 'Questionnaire', title: 'T',
+      extension: [{
+        url: SIG_URL,
+        valueCodeableConcept: { coding: [{ system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.1', display: "Author's Signature" }] },
+      }],
+      item: [],
+    });
+    expect(_questMeta._signatureRequired).toHaveLength(1);
+    expect(_questMeta._signatureRequired[0].code).toBe('1.2.840.10065.1.12.1.1');
   });
 });
 

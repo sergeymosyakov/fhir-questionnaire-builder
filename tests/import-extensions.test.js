@@ -511,3 +511,80 @@ describe('itemWeight', () => {
     expect(_tree[0]._optionWeights).toEqual({ x: 5 });
   });
 });
+
+// ── referenceFilter ───────────────────────────────────────────────────────────
+describe('referenceFilter', () => {
+  const RF_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter';
+  const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+  beforeEach(() => { _tree.splice(0); });
+
+  it('reads referenceFilter into _referenceFilter', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'reference', text: 'Ref',
+      extension: [{ url: RF_URL, valueString: "status = 'active'" }],
+    }]));
+    expect(_tree[0]._referenceFilter).toBe("status = 'active'");
+  });
+
+  it('does not set _referenceFilter when absent', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'reference', text: 'Ref' }]));
+    expect(_tree[0]._referenceFilter).toBeUndefined();
+  });
+});
+
+// ── referenceProfile ──────────────────────────────────────────────────────────
+describe('referenceProfile', () => {
+  const RP_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile';
+  const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+  beforeEach(() => { _tree.splice(0); });
+
+  it('reads referenceProfile into _referenceProfiles array', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'reference', text: 'Ref',
+      extension: [
+        { url: RP_URL, valueCanonical: 'http://example.com/Profile1' },
+        { url: RP_URL, valueCanonical: 'http://example.com/Profile2' },
+      ],
+    }]));
+    expect(_tree[0]._referenceProfiles).toEqual(['http://example.com/Profile1', 'http://example.com/Profile2']);
+  });
+
+  it('does not set _referenceProfiles when absent', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'reference', text: 'Ref' }]));
+    expect(_tree[0]._referenceProfiles).toBeUndefined();
+  });
+});
+
+// ── signatureRequired (item-level) ────────────────────────────────────────────
+describe('signatureRequired (item)', () => {
+  const SIG_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired';
+  const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+  beforeEach(() => { _tree.splice(0); });
+
+  it('reads signatureRequired into _signatureRequired array', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'string', text: 'Q',
+      extension: [{
+        url: SIG_URL,
+        valueCodeableConcept: { coding: [{ system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.1', display: "Author's Signature" }] },
+      }],
+    }]));
+    expect(_tree[0]._signatureRequired).toEqual([{ system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.1', display: "Author's Signature" }]);
+  });
+
+  it('reads multiple signatureRequired entries', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'string', text: 'Q',
+      extension: [
+        { url: SIG_URL, valueCodeableConcept: { coding: [{ system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.1', display: "Author's Signature" }] } },
+        { url: SIG_URL, valueCodeableConcept: { coding: [{ system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.5', display: 'Verification Signature' }] } },
+      ],
+    }]));
+    expect(_tree[0]._signatureRequired).toHaveLength(2);
+  });
+
+  it('does not set _signatureRequired when absent', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
+    expect(_tree[0]._signatureRequired).toBeUndefined();
+  });
+});
