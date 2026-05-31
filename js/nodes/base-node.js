@@ -84,10 +84,11 @@ export class BaseNode {
     if (res.hidden && (isPatient || !rc.viewPrefs.showHiddenItems)) return;
 
     // questionnaire-usageMode: filter items based on preview mode
-    if (this._usageMode && isPatient) {
-      // In patient view → only show items with 'capture' or 'capture-display' or 'capture-display-non-empty'
+    if (this._usageMode) {
       const m = this._usageMode;
-      if (m === 'display' || m === 'display-non-empty') return;
+      const hiddenInPatient = m === 'display' || m === 'display-non-empty';
+      if (isPatient && hiddenInPatient) return;           // patient view: hide display-only items
+      if (!isPatient && hiddenInPatient) res._usageModeHidden = true;  // builder: mark for hidden styling
     }
 
     if (!res.visible && res.showDimmed) {
@@ -167,7 +168,7 @@ export class BaseNode {
   _createBaseRow(res, rc) {
     const isPatient = rc.previewMode === 'patient';
     const row = this._makePreviewRow('lform-item');
-    if (res.hiddenRoot) row.classList.add('lform-item--hidden');
+    if (res.hiddenRoot || res._usageModeHidden) row.classList.add('lform-item--hidden');
 
     if (!isPatient) {
       const navBtn = document.createElement('span');
@@ -366,7 +367,7 @@ export class BaseNode {
 
   // Append row to container, handling hidden-group wrapper. Returns actual target element.
   _appendRow(row, res, container) {
-    if (res.hiddenRoot && this.type === 'group') {
+    if ((res.hiddenRoot || res._usageModeHidden) && this.type === 'group') {
       const wrap = document.createElement('div');
       wrap.className = 'lform-item--hidden';
       container.appendChild(wrap);
