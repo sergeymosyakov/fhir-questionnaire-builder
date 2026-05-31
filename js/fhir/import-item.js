@@ -99,14 +99,18 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   }
   if (Object.keys(exclusives).length) node._optionExclusives = exclusives;
 
-  // sdc-questionnaire-itemWeight — per-option scoring weight (on answerOption.extension)
+  // itemWeight — per-option scoring weight (on answerOption.extension or valueCoding.extension)
   const weights = {};
   for (const opt of fhirItem.answerOption || []) {
     if (opt.valueCoding) {
       const code = opt.valueCoding.code || opt.valueCoding.display || '';
-      const wExt = (opt.extension || []).find(
-        e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight'
-      );
+      const wExt =
+        (opt.extension || []).find(
+          e => e.url === 'http://hl7.org/fhir/StructureDefinition/itemWeight'
+        ) ||
+        (opt.valueCoding.extension || []).find(
+          e => e.url === 'http://hl7.org/fhir/StructureDefinition/itemWeight'
+        );
       if (wExt?.valueDecimal !== undefined && code) weights[code] = wExt.valueDecimal;
     }
   }

@@ -69,7 +69,7 @@ Every node in the tree is either a **group** or an **item**:
   _hidden:             true|undefined,   // sdc-questionnaire-hidden: never shown to patients; participates in calculatedExpression; controls disabled in preview
   _usageMode:          string,           // questionnaire-usageMode: 'capture'|'display'|'display-non-empty'|'capture-display'|'capture-display-non-empty' — controls item visibility per mode
   _itemMedia:          object,           // sdc-questionnaire-itemMedia valueAttachment: { url, contentType, title? } — media inline before the control
-  _optionWeights:      object,           // map of option code → weight (from sdc-questionnaire-itemWeight extension on answerOption)
+  _optionWeights:      object,           // map of option code → weight (from itemWeight extension on answerOption)
   _answerMedias:       object,           // map of option code → Attachment (from sdc-questionnaire-answerMedia extension on answerOption)
 }
 ```
@@ -308,7 +308,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive` | standard | `_optionExclusives` — on `answerOption.extension`; marks an option as exclusive (e.g. "None of the above"); selecting an exclusive option in a checklist deselects all other options; selecting a non-exclusive option deselects all exclusive ones; editable in **Answer Type** modal options editor "Excl" checkbox column | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode` | standard | `_usageMode` — `valueCode`: `capture` / `display` / `display-non-empty` / `capture-display` / `capture-display-non-empty`; controls item visibility in patient vs preview mode; `display` / `display-non-empty` items hidden in patient view; editable in **States** modal dropdown | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia` | SDC | `_itemMedia` — `valueAttachment` with `url`, `contentType`, optional `title`; renders image/audio/video inline before the control in preview; editable in **Answer Type** modal "Item media URL" section | Yes (SDC) |
-| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight` | SDC | `_optionWeights` — on `answerOption.extension`; per-option `valueDecimal` scoring weight; shown as `[w:N]` badge in preview; editable in **Answer Type** modal options editor "Weight" column | Yes (SDC) |
+| `http://hl7.org/fhir/StructureDefinition/itemWeight` | R4 | `_optionWeights` — on `answerOption.extension` (or `valueCoding.extension` fallback); per-option `valueDecimal` scoring weight; shown as `[w:N]` badge in preview; editable in **Answer Type** modal options editor "Weight" column | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia` | SDC | `_answerMedias` — on `answerOption.extension`; `valueAttachment` with `url`/`contentType`; renders media inline next to option label in preview; preserved on round-trip (no inline editor) | Yes (SDC) |
 
 ---

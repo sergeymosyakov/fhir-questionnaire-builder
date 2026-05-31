@@ -856,7 +856,7 @@ describe('itemMedia export', () => {
 
 // ── itemWeight (answerOption level) ────────────────────────────────────────
 describe('itemWeight export', () => {
-  const IW_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight';
+  const IW_URL = 'http://hl7.org/fhir/StructureDefinition/itemWeight';
 
   it('exports _optionWeights as itemWeight extension on answerOption', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A,b=B', _optionWeights: { a: 1.5, b: 3 } }]);

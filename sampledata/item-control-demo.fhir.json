@@ -184,19 +184,19 @@
         {
           "valueCoding": { "code": "never", "display": "Never" },
           "extension": [
-            { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight", "valueDecimal": 0 }
+            { "url": "http://hl7.org/fhir/StructureDefinition/itemWeight", "valueDecimal": 0 }
           ]
         },
         {
           "valueCoding": { "code": "weekly", "display": "1-2 times/week" },
           "extension": [
-            { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight", "valueDecimal": 1.5 }
+            { "url": "http://hl7.org/fhir/StructureDefinition/itemWeight", "valueDecimal": 1.5 }
           ]
         },
         {
           "valueCoding": { "code": "daily", "display": "Daily" },
           "extension": [
-            { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight", "valueDecimal": 3 }
+            { "url": "http://hl7.org/fhir/StructureDefinition/itemWeight", "valueDecimal": 3 }
           ]
         }
       ]

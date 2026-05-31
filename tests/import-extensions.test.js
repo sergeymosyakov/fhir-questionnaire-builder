@@ -481,7 +481,7 @@ describe('itemMedia', () => {
 
 // ── itemWeight (answerOption-level) ────────────────────────────────────────
 describe('itemWeight', () => {
-  const IW_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight';
+  const IW_URL = 'http://hl7.org/fhir/StructureDefinition/itemWeight';
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
   beforeEach(() => { _tree.splice(0); });
 
@@ -499,5 +499,15 @@ describe('itemWeight', () => {
   it('does not set _optionWeights when no option has itemWeight', () => {
     importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', answerOption: [{ valueCoding: { code: 'a', display: 'A' } }] }]));
     expect(_tree[0]._optionWeights).toBeUndefined();
+  });
+
+  it('reads itemWeight from valueCoding.extension fallback', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Q',
+      answerOption: [
+        { valueCoding: { code: 'x', display: 'X', extension: [{ url: IW_URL, valueDecimal: 5 }] } },
+      ],
+    }]));
+    expect(_tree[0]._optionWeights).toEqual({ x: 5 });
   });
 });

@@ -119,8 +119,8 @@ function _appendOptionExtras(lbl, node, code) {
     w.className = 'option-weight';
     w.textContent = '\u00A0[w:' + node._optionWeights[code] + ']';
     w.dataset.tipTitle = 'Item weight';
-    w.dataset.tipBody  = 'Scoring weight for this answer option (sdc-questionnaire-itemWeight).';
-    w.dataset.tipFhir  = 'answerOption.extension[sdc-questionnaire-itemWeight].valueDecimal';
+    w.dataset.tipBody  = 'Scoring weight for this answer option (itemWeight).';
+    w.dataset.tipFhir  = 'answerOption.extension[itemWeight].valueDecimal';
     w.dataset.tipSpec  = 'SDC';
     lbl.appendChild(w);
   }
@@ -234,6 +234,7 @@ export class ChoiceNode extends ItemNode {
           } else {
             opt.appendChild(document.createTextNode(label));
           }
+          _appendOptionExtras(opt, node, code);
           if (code === selected) opt.classList.add('oc-opt--sel');
           opt.addEventListener('mousedown', e => { e.preventDefault(); _pick(code); });
           container.appendChild(opt);

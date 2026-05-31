@@ -88,8 +88,8 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
       {
         text:     'Weight',
         tipTitle: 'Item weight',
-        tipBody:  'Optional scoring weight for this answer option (sdc-questionnaire-itemWeight). Used for advanced scoring beyond ordinalValue.',
-        tipFhir:  'Questionnaire.item.answerOption[].extension[sdc-questionnaire-itemWeight]',
+        tipBody:  'Optional scoring weight for this answer option (itemWeight). Used for advanced scoring beyond ordinalValue.',
+        tipFhir:  'Questionnaire.item.answerOption[].extension[itemWeight]',
         tipSpec:  'SDC',
       },
       { text: '' },

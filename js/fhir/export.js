@@ -209,7 +209,7 @@ function nodeToFHIRItem(node) {
           'http://hl7.org/fhir/StructureDefinition/ordinalValue',
           'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix',
           'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive',
-          'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight',
+          'http://hl7.org/fhir/StructureDefinition/itemWeight',
           'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia',
         ]);
         const optExts = (opt.extension || []).filter(e => !MANAGED_OPT_EXTS.has(e.url));
@@ -223,7 +223,7 @@ function nodeToFHIRItem(node) {
           optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive', valueBoolean: true });
         }
         if (node._optionWeights?.[key] !== undefined) {
-          optExts.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight', valueDecimal: node._optionWeights[key] });
+          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/itemWeight', valueDecimal: node._optionWeights[key] });
         }
         if (node._answerMedias?.[key]) {
           optExts.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia', valueAttachment: node._answerMedias[key] });
@@ -248,7 +248,7 @@ function nodeToFHIRItem(node) {
           optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive', valueBoolean: true });
         }
         if (node._optionWeights && node._optionWeights[code] !== undefined) {
-          optExts.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight', valueDecimal: node._optionWeights[code] });
+          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/itemWeight', valueDecimal: node._optionWeights[code] });
         }
         if (node._answerMedias && node._answerMedias[code]) {
           optExts.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia', valueAttachment: node._answerMedias[code] });
