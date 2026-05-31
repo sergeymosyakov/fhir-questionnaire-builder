@@ -209,6 +209,8 @@ function nodeToFHIRItem(node) {
           'http://hl7.org/fhir/StructureDefinition/ordinalValue',
           'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix',
           'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive',
+          'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight',
+          'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia',
         ]);
         const optExts = (opt.extension || []).filter(e => !MANAGED_OPT_EXTS.has(e.url));
         if (node._optionOrdinals?.[key] !== undefined) {
@@ -219,6 +221,12 @@ function nodeToFHIRItem(node) {
         }
         if (node._optionExclusives?.[key]) {
           optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive', valueBoolean: true });
+        }
+        if (node._optionWeights?.[key] !== undefined) {
+          optExts.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight', valueDecimal: node._optionWeights[key] });
+        }
+        if (node._answerMedias?.[key]) {
+          optExts.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia', valueAttachment: node._answerMedias[key] });
         }
         if (optExts.length) optOut.extension = optExts;
         if (node._initialSelected === key) optOut.initialSelected = true;
@@ -238,6 +246,12 @@ function nodeToFHIRItem(node) {
         }
         if (node._optionExclusives && node._optionExclusives[code]) {
           optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive', valueBoolean: true });
+        }
+        if (node._optionWeights && node._optionWeights[code] !== undefined) {
+          optExts.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight', valueDecimal: node._optionWeights[code] });
+        }
+        if (node._answerMedias && node._answerMedias[code]) {
+          optExts.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia', valueAttachment: node._answerMedias[code] });
         }
         if (optExts.length) answerOpt.extension = optExts;
         if (node._initialSelected === code) answerOpt.initialSelected = true;
@@ -328,6 +342,16 @@ function nodeToFHIRItem(node) {
   // designNote — author-facing internal note (not shown to end users)
   if (node._designNote) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/designNote', valueMarkdown: node._designNote });
+  }
+
+  // questionnaire-usageMode
+  if (node._usageMode) {
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode', valueCode: node._usageMode });
+  }
+
+  // sdc-questionnaire-itemMedia
+  if (node._itemMedia) {
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia', valueAttachment: node._itemMedia });
   }
 
   // questionnaire-displayCategory

@@ -14,6 +14,7 @@ import './sections/choice-columns.js';
 import './sections/display-cat.js';
 import './sections/attach.js';
 import './sections/regex.js';
+import './sections/item-media.js';
 import { ANSWER_TYPE_SECTIONS } from './registry.js';
 
 export function renderAnswerTypeSections(container, pending, type) {

@@ -12,6 +12,7 @@ function _buildRows(node) {
   const ords    = node._optionOrdinals || {};
   const prefixes = node._optionPrefixes || {};
   const exclusives = node._optionExclusives || {};
+  const weights = node._optionWeights || {};
   const pairs = node._rawAnswerOptions
     ? rawOptsToPairs(node._rawAnswerOptions)
     : parseOptions(node.options || '');
@@ -20,6 +21,7 @@ function _buildRows(node) {
     label:  display,
     score:  ords[code] !== undefined ? String(ords[code]) : '',
     prefix: prefixes[code] || '',
+    weight: weights[code] !== undefined ? String(weights[code]) : '',
     exclusive: !!exclusives[code],
   }));
 }
@@ -300,12 +302,16 @@ class ChoiceSection extends AnswerTypeSection {
         delete node._optionOrdinals;
         delete node._optionPrefixes;
         delete node._optionExclusives;
+        delete node._optionWeights;
+        delete node._answerMedias;
       } else if (pending.draftAVS) {
         node._answerValueSet = pending.draftAVS;
         node.options = resolveContainedValueSet(Modal._svc.questContained, pending.draftAVS);
         delete node._optionOrdinals;
         delete node._optionPrefixes;
         delete node._optionExclusives;
+        delete node._optionWeights;
+        delete node._answerMedias;
       } else {
         delete node._answerValueSet;
         delete node._answerExpression;
@@ -357,6 +363,15 @@ class ChoiceSection extends AnswerTypeSection {
         });
         if (Object.keys(newExclusives).length) node._optionExclusives = newExclusives;
         else delete node._optionExclusives;
+
+        const newWeights = {};
+        rows.forEach(r => {
+          const code = r.code.trim();
+          const w = (r.weight ?? '').toString().trim();
+          if (w !== '' && !isNaN(Number(w))) newWeights[code] = Number(w);
+        });
+        if (Object.keys(newWeights).length) node._optionWeights = newWeights;
+        else delete node._optionWeights;
       }
     } else {
       delete node._answerValueSet;
@@ -364,6 +379,7 @@ class ChoiceSection extends AnswerTypeSection {
       delete node._optionOrdinals;
       delete node._optionPrefixes;
       delete node._optionExclusives;
+      delete node._optionWeights;
       node.options = '';
     }
 

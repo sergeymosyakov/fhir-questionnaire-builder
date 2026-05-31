@@ -1,6 +1,6 @@
 // ── TextNode ──────────────────────────────────────────────────────────────────
 // Free-text single/multi-line input. itemType: 'text'
-// Optional FHIR-imported: _maxLength, _minLength, _entryFormat, _minLenInteracted
+// Optional FHIR-imported: _maxLength, _minLength, _entryFormat, _interacted
 import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
@@ -50,24 +50,31 @@ export class TextNode extends ItemNode {
       const validateMinLen = () => {
         errMinLen.style.display = (el.value.length > 0 && el.value.length < node._minLength) ? 'inline' : 'none';
       };
-      if (node._minLenInteracted) { validateMinLen(); } else { errMinLen.style.display = 'none'; }
-      el.addEventListener('blur', () => { node._minLenInteracted = true; validateMinLen(); });
+      if (node._interacted) { validateMinLen(); } else { errMinLen.style.display = 'none'; }
     }
 
     let errRegex = null;
+    const _re = node._regex ? (() => { try { return new RegExp(node._regex); } catch { return null; } })() : null;
     if (node._regex) {
       errRegex = document.createElement('span');
       errRegex.className = 'ctrl-err ctrl-err--regex';
       errRegex.dataset.testid = 'regex-err';
       errRegex.textContent = 'Does not match pattern';
-      errRegex.style.display = 'none';
-      const re = (() => { try { return new RegExp(node._regex); } catch { return null; } })();
-      if (re) {
-        el.addEventListener('blur', () => {
-          errRegex.style.display = (el.value.length > 0 && !re.test(el.value)) ? 'inline' : 'none';
-        });
-      }
+      const validateRegex = () => {
+        errRegex.style.display = (_re && el.value.length > 0 && !_re.test(el.value)) ? 'inline' : 'none';
+      };
+      if (node._interacted) { validateRegex(); } else { errRegex.style.display = 'none'; }
     }
+
+    el.addEventListener('blur', () => {
+      node._interacted = true;
+      if (errMinLen) {
+        errMinLen.style.display = (el.value.length > 0 && el.value.length < node._minLength) ? 'inline' : 'none';
+      }
+      if (errRegex) {
+        errRegex.style.display = (_re && el.value.length > 0 && !_re.test(el.value)) ? 'inline' : 'none';
+      }
+    });
 
     let _debounce = null;
     el.oninput  = () => {

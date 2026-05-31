@@ -1,7 +1,8 @@
 // Tests for buildFHIRObject — item-level extensions (renderXhtml, supportLinks, hidden,
 // minLength, slider, decimal, contained, meta, min/maxValue, occurs, ordinals, prefixes,
 // reference/quantity/expr, exportFHIR, unknown extensions, attachment, replaces,
-// collapsible, openLabel, designNote, answerExpression, regex, optionExclusives).
+// collapsible, openLabel, designNote, answerExpression, regex, optionExclusives,
+// usageMode, itemMedia, itemWeight).
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
@@ -822,5 +823,64 @@ describe('buildFHIRObject — _optionExclusives', () => {
       const oeExt = (opt.extension || []).find(e => e.url === OE_URL);
       expect(oeExt).toBeUndefined();
     }
+  });
+});
+
+// ── usageMode ──────────────────────────────────────────────────────────────
+describe('usageMode export', () => {
+  const UM_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode';
+
+  it('exports _usageMode as valueCode extension', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _usageMode: 'capture' }]);
+    const ext = q.item[0].extension.find(e => e.url === UM_URL);
+    expect(ext).toEqual({ url: UM_URL, valueCode: 'capture' });
+  });
+
+  it('does not export usageMode when absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === UM_URL);
+    expect(ext).toBeUndefined();
+  });
+});
+
+// ── itemMedia ──────────────────────────────────────────────────────────────
+describe('itemMedia export', () => {
+  const IM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia';
+
+  it('exports _itemMedia as valueAttachment', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _itemMedia: { url: 'https://ex.com/i.png', contentType: 'image/png' } }]);
+    const ext = q.item[0].extension.find(e => e.url === IM_URL);
+    expect(ext.valueAttachment).toEqual({ url: 'https://ex.com/i.png', contentType: 'image/png' });
+  });
+});
+
+// ── itemWeight (answerOption level) ────────────────────────────────────────
+describe('itemWeight export', () => {
+  const IW_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight';
+
+  it('exports _optionWeights as itemWeight extension on answerOption', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A,b=B', _optionWeights: { a: 1.5, b: 3 } }]);
+    const opts = q.item[0].answerOption;
+    const aExt = opts[0].extension.find(e => e.url === IW_URL);
+    expect(aExt.valueDecimal).toBe(1.5);
+    const bExt = opts[1].extension.find(e => e.url === IW_URL);
+    expect(bExt.valueDecimal).toBe(3);
+  });
+
+  it('does not export itemWeight when _optionWeights is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A' }]);
+    const ext = (q.item[0].answerOption[0].extension || []).find(e => e.url === IW_URL);
+    expect(ext).toBeUndefined();
+  });
+
+  it('exports answerMedia on raw answerOptions', () => {
+    const AM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia';
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A',
+      _rawAnswerOptions: [{ valueCoding: { code: 'a', display: 'A' } }],
+      _answerMedias: { a: { url: 'https://ex.com/a.jpg', contentType: 'image/jpeg' } },
+    }]);
+    const amExt = q.item[0].answerOption[0].extension.find(e => e.url === AM_URL);
+    expect(amExt.valueAttachment.url).toBe('https://ex.com/a.jpg');
   });
 });

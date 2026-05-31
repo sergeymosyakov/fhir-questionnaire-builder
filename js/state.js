@@ -162,7 +162,9 @@ export const calcFormOk = node => {
   if (node.itemType === 'url') {
     const val = getValue(node.id);
     if (!val || val === '') return !isMandatory(node);
-    return _isValidUrl(val);
+    if (!_isValidUrl(val)) return false;
+    if (node._regex) { try { if (!new RegExp(node._regex).test(val)) return false; } catch { /* invalid regex — skip */ } }
+    return true;
   }
   // attachment: required means a file must be chosen; also enforce maxFileSizeMB
   if (node.itemType === 'attachment') {
@@ -206,6 +208,11 @@ export const calcFormOk = node => {
   if (node._minLength) {
     const val = getValue(node.id);
     if (val && String(val).length > 0 && String(val).length < node._minLength) return false;
+  }
+  // regex: non-empty value must match pattern
+  if (node._regex) {
+    const val = getValue(node.id);
+    if (val && String(val).length > 0) { try { if (!new RegExp(node._regex).test(String(val))) return false; } catch { /* invalid regex — skip */ } }
   }
   // mandatory text/number/date/etc → must be non-empty
   if (isMandatory(node) && NONEMPTY_TYPES.has(node.itemType)) {

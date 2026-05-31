@@ -48,7 +48,7 @@ export class UrlNode extends ItemNode {
         errMsg.style.display = (el.value === '' || isValidUrl(el.value)) ? 'none' : 'inline';
       }
     };
-    if (node._minLenInteracted || (el.value && !isValidUrl(el.value))) validateErr();
+    if (node._interacted || (el.value && !isValidUrl(el.value))) validateErr();
 
     let counter = null;
     if (node._maxLength) {
@@ -68,7 +68,7 @@ export class UrlNode extends ItemNode {
       _debounce = setTimeout(() => { _reCalc(); onChange(); }, 200);
     };
     el.onchange = () => { BaseNode.notifyChanged(); };
-    el.addEventListener('blur', () => { node._minLenInteracted = true; validateErr(); });
+    el.addEventListener('blur', () => { node._interacted = true; validateErr(); });
 
     wrap.appendChild(el);
     wrap.appendChild(errMsg);

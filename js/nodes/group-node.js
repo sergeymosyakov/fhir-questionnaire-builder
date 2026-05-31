@@ -416,7 +416,7 @@ export class GroupNode extends BaseNode {
     setActive(visLink,    !!(node.enableWhen?.length) || !!node.enableWhenExpression);
     setActive(exprLink,   !!node._calculatedExpr);
     setActive(styleLink,  !!(node._renderStyle || node._renderXhtml));
-    setActive(statesLink, node.mandatory === true || !!node._hidden || !!node._collapsible);
+    setActive(statesLink, node.mandatory === true || !!node._hidden || !!node._collapsible || !!node._usageMode);
     setActive(propsLink,  !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length));
 
     const body = document.createElement('div');

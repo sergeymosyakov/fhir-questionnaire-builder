@@ -13,7 +13,7 @@
 
 export function createOptionsEditor({ rows = [], onchange = () => {}, testidPrefix = 'opt' } = {}) {
   // internal state — array of row objects (mutable)
-  let _rows = rows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', exclusive: !!r.exclusive }));
+  let _rows = rows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', weight: r.weight ?? '', exclusive: !!r.exclusive }));
 
   const wrap = document.createElement('div');
   wrap.className = 'opt-editor';
@@ -28,7 +28,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
   addBtn.textContent = '+ Add option';
   addBtn.dataset.testid = testidPrefix + '-add-btn';
   addBtn.addEventListener('click', () => {
-    _rows.push({ code: '', label: '', score: '', prefix: '', exclusive: false });
+    _rows.push({ code: '', label: '', score: '', prefix: '', weight: '', exclusive: false });
     _renderRows();
     onchange(_rows);
     // focus the code input of the new row
@@ -85,6 +85,13 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
         tipFhir:  'Questionnaire.item.answerOption[].extension[questionnaire-optionExclusive]',
         tipSpec:  'R4',
       },
+      {
+        text:     'Weight',
+        tipTitle: 'Item weight',
+        tipBody:  'Optional scoring weight for this answer option (sdc-questionnaire-itemWeight). Used for advanced scoring beyond ordinalValue.',
+        tipFhir:  'Questionnaire.item.answerOption[].extension[sdc-questionnaire-itemWeight]',
+        tipSpec:  'SDC',
+      },
       { text: '' },
     ];
 
@@ -113,6 +120,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
         { key: 'label',  placeholder: 'label',          testid: testidPrefix + '-label-' + idx },
         { key: 'score',  placeholder: 'score',          testid: testidPrefix + '-score-' + idx },
         { key: 'prefix', placeholder: 'prefix (e.g. A.)', testid: testidPrefix + '-prefix-' + idx },
+        { key: 'weight', placeholder: 'weight',            testid: testidPrefix + '-weight-' + idx },
       ];
 
       fields.forEach(({ key, placeholder, testid }) => {
@@ -173,7 +181,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
     el: wrap,
     getRows() { return _rows; },
     setRows(newRows) {
-      _rows = newRows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', exclusive: !!r.exclusive }));
+      _rows = newRows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', weight: r.weight ?? '', exclusive: !!r.exclusive }));
       _renderRows();
     },
   };

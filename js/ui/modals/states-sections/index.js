@@ -3,6 +3,7 @@ import './required.js';
 import './read-only.js';
 import './hidden.js';
 import './collapsible.js';
+import './usage-mode.js';
 import { STATES_SECTIONS } from './registry.js';
 
 export function renderStatesSections(container, pending) {

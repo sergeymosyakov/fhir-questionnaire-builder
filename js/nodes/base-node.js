@@ -82,6 +82,14 @@ export class BaseNode {
     if (!res.visible && !res.showDimmed) return;
     const isPatient = rc.previewMode === 'patient';
     if (res.hidden && (isPatient || !rc.viewPrefs.showHiddenItems)) return;
+
+    // questionnaire-usageMode: filter items based on preview mode
+    if (this._usageMode && isPatient) {
+      // In patient view → only show items with 'capture' or 'capture-display' or 'capture-display-non-empty'
+      const m = this._usageMode;
+      if (m === 'display' || m === 'display-non-empty') return;
+    }
+
     if (!res.visible && res.showDimmed) {
       if (!isPatient) this._renderDimmed(res, container, rc);
       return;
@@ -199,6 +207,17 @@ export class BaseNode {
       b.dataset.tipFhir  = 'sdc-questionnaire-hidden';
       b.dataset.tipSpec  = 'SDC';
       row.appendChild(b);
+    }
+
+    if (this._usageMode && !isPatient) {
+      const um = document.createElement('span');
+      um.className = 'preview-hidden-badge';
+      um.textContent = this._usageMode;
+      um.dataset.tipTitle = 'questionnaire-usageMode';
+      um.dataset.tipBody  = `Usage mode: "${this._usageMode}". Controls when this item is shown:\n\u2022 capture \u2014 only during data entry\n\u2022 display \u2014 only when displaying completed data\n\u2022 display-non-empty \u2014 display only if answered\n\u2022 capture-display \u2014 both modes\n\u2022 capture-display-non-empty \u2014 capture always, display only if answered`;
+      um.dataset.tipFhir  = 'item.extension[questionnaire-usageMode].valueCode';
+      um.dataset.tipSpec  = 'R4';
+      row.appendChild(um);
     }
 
     if (this._shortText && !isPatient) {

@@ -66,7 +66,11 @@ Every node in the tree is either a **group** or an **item**:
   _sliderStep:         number,           // questionnaire-sliderStepValue ext; when set, integer/decimal renders as <input type="range"> slider
   _disabledDisplay:    string,           // 'hidden'|'protected' — behaviour when enableWhen condition is not met; 'protected' is default (not persisted)
   _supportLinks:       string[],         // questionnaire-supportLink URIs (0..*); 🔗 icons in builder preview; "More info ↗" buttons in patient view
-  _hidden:             true|undefined    // sdc-questionnaire-hidden: never shown to patients; participates in calculatedExpression; controls disabled in preview
+  _hidden:             true|undefined,   // sdc-questionnaire-hidden: never shown to patients; participates in calculatedExpression; controls disabled in preview
+  _usageMode:          string,           // questionnaire-usageMode: 'capture'|'display'|'display-non-empty'|'capture-display'|'capture-display-non-empty' — controls item visibility per mode
+  _itemMedia:          object,           // sdc-questionnaire-itemMedia valueAttachment: { url, contentType, title? } — media inline before the control
+  _optionWeights:      object,           // map of option code → weight (from sdc-questionnaire-itemWeight extension on answerOption)
+  _answerMedias:       object,           // map of option code → Attachment (from sdc-questionnaire-answerMedia extension on answerOption)
 }
 ```
 
@@ -302,6 +306,10 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn` | SDC | `_choiceColumns` — 0..* complex extension defining multi-column display for choice/open-choice dropdowns; each column has `path` (FHIRPath), `label` (header text), optional `width` (Quantity), and `forDisplay` (boolean — which column shows in trigger after selection); editable in **Answer Type** modal "Choice columns" section; rendered as columned dropdown in preview | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/regex` | standard | `_regex` — regular expression pattern for `text`/`url` items; imported as `valueString`; validated on blur in preview (inline error "Does not match pattern"); editable in **Answer Type** modal "Regex validation pattern" field | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive` | standard | `_optionExclusives` — on `answerOption.extension`; marks an option as exclusive (e.g. "None of the above"); selecting an exclusive option in a checklist deselects all other options; selecting a non-exclusive option deselects all exclusive ones; editable in **Answer Type** modal options editor "Excl" checkbox column | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode` | standard | `_usageMode` — `valueCode`: `capture` / `display` / `display-non-empty` / `capture-display` / `capture-display-non-empty`; controls item visibility in patient vs preview mode; `display` / `display-non-empty` items hidden in patient view; editable in **States** modal dropdown | Yes |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia` | SDC | `_itemMedia` — `valueAttachment` with `url`, `contentType`, optional `title`; renders image/audio/video inline before the control in preview; editable in **Answer Type** modal "Item media URL" section | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight` | SDC | `_optionWeights` — on `answerOption.extension`; per-option `valueDecimal` scoring weight; shown as `[w:N]` badge in preview; editable in **Answer Type** modal options editor "Weight" column | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia` | SDC | `_answerMedias` — on `answerOption.extension`; `valueAttachment` with `url`/`contentType`; renders media inline next to option label in preview; preserved on round-trip (no inline editor) | Yes (SDC) |
 
 ---
 
@@ -403,18 +411,10 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
-| `questionnaire-usageMode` | ❌ Not handled | Controls when the item is relevant: `capture` / `display` / `display-non-empty` / `capture-display` / `capture-display-non-empty`. |
 | `questionnaire-referenceFilter` | ❌ Not handled | FHIRPath expression used to filter valid reference targets for `reference` items. |
 | `questionnaire-referenceProfile` | ❌ Not handled | Profile URL that restricts valid resource types for `reference` items (complementary to `questionnaire-referenceResource` which is supported). |
 | `questionnaire-signatureRequired` | ❌ Not handled | Indicates that a digital signature is required for the item or group. |
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
-
-### SDC extensions — not implemented (no server required)
-
-| Extension | Status | Notes |
-|---|---|---|
-| `sdc-questionnaire-itemWeight` | ❌ | Per-option weight for scoring (analogous to `ordinalValue` at item level) |
-| `sdc-questionnaire-itemMedia` / `sdc-questionnaire-answerMedia` | ❌ | Attaches media (image, audio, video) to an item or to a specific answer option. |
 
 ### SDC extensions — population and extraction (out of scope)
 

@@ -99,6 +99,32 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   }
   if (Object.keys(exclusives).length) node._optionExclusives = exclusives;
 
+  // sdc-questionnaire-itemWeight — per-option scoring weight (on answerOption.extension)
+  const weights = {};
+  for (const opt of fhirItem.answerOption || []) {
+    if (opt.valueCoding) {
+      const code = opt.valueCoding.code || opt.valueCoding.display || '';
+      const wExt = (opt.extension || []).find(
+        e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight'
+      );
+      if (wExt?.valueDecimal !== undefined && code) weights[code] = wExt.valueDecimal;
+    }
+  }
+  if (Object.keys(weights).length) node._optionWeights = weights;
+
+  // sdc-questionnaire-answerMedia — media attached to individual answer options
+  const answerMedias = {};
+  for (const opt of fhirItem.answerOption || []) {
+    if (opt.valueCoding) {
+      const code = opt.valueCoding.code || opt.valueCoding.display || '';
+      const amExt = (opt.extension || []).find(
+        e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia'
+      );
+      if (amExt?.valueAttachment && code) answerMedias[code] = amExt.valueAttachment;
+    }
+  }
+  if (Object.keys(answerMedias).length) node._answerMedias = answerMedias;
+
   applyVisibility(node, fhirItem, linkIdMap);
   applyConstraints(node, fhirItem);
 
@@ -311,6 +337,18 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (designNoteExt?.valueMarkdown) node._designNote = designNoteExt.valueMarkdown;
   else if (designNoteExt?.valueString) node._designNote = designNoteExt.valueString;
+
+  // questionnaire-usageMode — controls when the item is relevant: capture / display / display-non-empty / capture-display / capture-display-non-empty
+  const usageModeExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode'
+  );
+  if (usageModeExt?.valueCode) node._usageMode = usageModeExt.valueCode;
+
+  // sdc-questionnaire-itemMedia — media (image/audio/video) attached to the item question
+  const itemMediaExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia'
+  );
+  if (itemMediaExt?.valueAttachment) node._itemMedia = itemMediaExt.valueAttachment;
 
   // disabledDisplay (R4B native field or R4 extension backport)
   if (fhirItem.disabledDisplay) node._disabledDisplay = fhirItem.disabledDisplay;

@@ -18,11 +18,11 @@
   padding: 6px 2px;
 }
 
-/* header + data rows share the same 4-column + excl-checkbox + remove-btn grid */
+/* header + data rows share the same code/label/score/prefix/excl/weight + remove-btn grid */
 .opt-editor__header,
 .opt-editor__row {
   display: grid;
-  grid-template-columns: 1fr 1.6fr 0.6fr 0.8fr 36px 24px;
+  grid-template-columns: 1fr 1.6fr 0.6fr 0.8fr 0.6fr 36px 24px;
   gap: 4px;
   align-items: center;
 }

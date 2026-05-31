@@ -444,3 +444,60 @@ describe('_optionExclusives', () => {
     expect(_tree[0]._optionExclusives).toBeUndefined();
   });
 });
+
+// ── usageMode ──────────────────────────────────────────────────────────────
+describe('usageMode', () => {
+  const UM_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode';
+  const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+  beforeEach(() => { _tree.splice(0); });
+
+  it('reads usageMode valueCode into _usageMode', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', extension: [{ url: UM_URL, valueCode: 'capture' }] }]));
+    expect(_tree[0]._usageMode).toBe('capture');
+  });
+
+  it('does not set _usageMode when absent', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q' }]));
+    expect(_tree[0]._usageMode).toBeUndefined();
+  });
+
+  it('does not add usageMode URL to _unknownExtensions', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', extension: [{ url: UM_URL, valueCode: 'display' }] }]));
+    expect((_tree[0]._unknownExtensions || []).some(e => e.url === UM_URL)).toBe(false);
+  });
+});
+
+// ── itemMedia ──────────────────────────────────────────────────────────────
+describe('itemMedia', () => {
+  const IM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia';
+  const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+  beforeEach(() => { _tree.splice(0); });
+
+  it('reads itemMedia valueAttachment into _itemMedia', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'display', text: 'Q', extension: [{ url: IM_URL, valueAttachment: { url: 'https://ex.com/img.png', contentType: 'image/png' } }] }]));
+    expect(_tree[0]._itemMedia).toEqual({ url: 'https://ex.com/img.png', contentType: 'image/png' });
+  });
+});
+
+// ── itemWeight (answerOption-level) ────────────────────────────────────────
+describe('itemWeight', () => {
+  const IW_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemWeight';
+  const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+  beforeEach(() => { _tree.splice(0); });
+
+  it('reads itemWeight into _optionWeights map', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Q',
+      answerOption: [
+        { valueCoding: { code: 'a', display: 'A' }, extension: [{ url: IW_URL, valueDecimal: 1.5 }] },
+        { valueCoding: { code: 'b', display: 'B' }, extension: [{ url: IW_URL, valueDecimal: 3 }] },
+      ],
+    }]));
+    expect(_tree[0]._optionWeights).toEqual({ a: 1.5, b: 3 });
+  });
+
+  it('does not set _optionWeights when no option has itemWeight', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', answerOption: [{ valueCoding: { code: 'a', display: 'A' } }] }]));
+    expect(_tree[0]._optionWeights).toBeUndefined();
+  });
+});

@@ -23,7 +23,7 @@ class StatesModal extends Modal {
     if (!this._pending) return;
     const { node, statesLink, setActive } = this._pending;
     STATES_SECTIONS.forEach(s => s.commit(this._pending, node));
-    const anyActive = node.mandatory === true || !!node._readOnly || !!node._hidden || !!node._collapsible;
+    const anyActive = node.mandatory === true || !!node._readOnly || !!node._hidden || !!node._collapsible || !!node._usageMode;
     setActive(statesLink, anyActive);
     Modal._svc.triggerCalcRecalc();
     this._cancel();

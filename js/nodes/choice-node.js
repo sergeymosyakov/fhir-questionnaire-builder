@@ -1,6 +1,7 @@
 // ── ChoiceNode / RadioNode / OpenChoiceNode ───────────────────────────────────
 // Closed/open answer-list questions.
-// Optional FHIR-imported: _optionOrdinals, _optionPrefixes, _choiceOrientation,
+// Optional FHIR-imported: _optionOrdinals, _optionPrefixes, _optionExclusives,
+//   _optionWeights, _answerMedias, _choiceOrientation,
 //   _answerValueSet, _openLabel, _initialSelected, _choiceColumns
 import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
@@ -109,6 +110,31 @@ function _buildColRow(columns, rawOpt, code, display) {
     row.appendChild(cell);
   }
   return row;
+}
+
+/** Append weight badge and answerMedia image/audio/video to a choice label. */
+function _appendOptionExtras(lbl, node, code) {
+  if (node._optionWeights && node._optionWeights[code] !== undefined) {
+    const w = document.createElement('span');
+    w.className = 'option-weight';
+    w.textContent = '\u00A0[w:' + node._optionWeights[code] + ']';
+    w.dataset.tipTitle = 'Item weight';
+    w.dataset.tipBody  = 'Scoring weight for this answer option (sdc-questionnaire-itemWeight).';
+    w.dataset.tipFhir  = 'answerOption.extension[sdc-questionnaire-itemWeight].valueDecimal';
+    w.dataset.tipSpec  = 'SDC';
+    lbl.appendChild(w);
+  }
+  if (node._answerMedias && node._answerMedias[code]) {
+    const att = node._answerMedias[code];
+    const ct = att.contentType || '';
+    const el = ct.startsWith('audio/')
+      ? Object.assign(document.createElement('audio'), { src: att.url, controls: true })
+      : ct.startsWith('video/')
+        ? Object.assign(document.createElement('video'), { src: att.url, controls: true, style: 'max-width:200px;max-height:120px' })
+        : Object.assign(document.createElement('img'), { src: att.url, alt: att.title || '', style: 'max-width:120px;max-height:80px;vertical-align:middle;margin-left:6px' });
+    el.className = 'preview-answer-media';
+    lbl.appendChild(el);
+  }
 }
 
 export class ChoiceNode extends ItemNode {
@@ -389,6 +415,7 @@ export class RadioNode extends ItemNode {
         ord.textContent = '\u00A0(' + node._optionOrdinals[code] + ')';
         lbl.appendChild(ord);
       }
+      _appendOptionExtras(lbl, node, code);
       wrap.appendChild(lbl);
     }
     return wrap;
@@ -577,6 +604,7 @@ export class ChecklistNode extends ItemNode {
         ord.textContent = '\u00A0(' + node._optionOrdinals[code] + ')';
         lbl.appendChild(ord);
       }
+      _appendOptionExtras(lbl, node, code);
       wrap.appendChild(lbl);
     }
     return wrap;

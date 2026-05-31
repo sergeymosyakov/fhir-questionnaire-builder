@@ -40,7 +40,8 @@ export class ItemNode extends BaseNode {
       (this._calculatedExpr && this._readOnly && this.itemType === 'checkbox') ||
       (this.constraint?.length > 0) ||
       (this._minValue !== undefined || this._maxValue !== undefined) ||
-      (this._maxDecimalPlaces !== undefined)
+      (this._maxDecimalPlaces !== undefined) ||
+      (this._regex)
     );
     const displayOk = res.ok && rc.calcFormOk(this) && constraintPass;
     return { hasCondition, displayOk };
@@ -93,6 +94,7 @@ export class ItemNode extends BaseNode {
     this._buildConstraintBadge(row, rc);
     this._buildReadOnlyBadge(row, rc);
     this._buildInitialBadge(row, rc);
+    this._buildItemMedia(row);
     this._buildControl(row, res, rc);
     this._buildReadOnlyValue(row, rc);
     this._buildCalcBadge(row, res, rc);
@@ -147,6 +149,21 @@ export class ItemNode extends BaseNode {
     ib.dataset.tipFhir  = 'Questionnaire.item.initial[]';
     ib.dataset.tipSpec  = 'R4';
     row.appendChild(ib);
+  }
+
+  // Render itemMedia (image / audio / video) inline before the control.
+  _buildItemMedia(row) {
+    if (!this._itemMedia?.url) return;
+    const att = this._itemMedia;
+    const ct = att.contentType || '';
+    const el = ct.startsWith('audio/')
+      ? Object.assign(document.createElement('audio'), { src: att.url, controls: true })
+      : ct.startsWith('video/')
+        ? Object.assign(document.createElement('video'), { src: att.url, controls: true, style: 'max-width:100%;max-height:240px' })
+        : Object.assign(document.createElement('img'), { src: att.url, alt: att.title || '', style: 'max-width:100%;max-height:200px' });
+    el.className = 'preview-item-media';
+    el.dataset.testid = 'preview-item-media';
+    row.appendChild(el);
   }
 
   // Build interactive control (or repeat controls).
@@ -452,7 +469,7 @@ export class ItemNode extends BaseNode {
     setActive(typeLink,        true);
     setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
     setActive(exprLink,       !!(node._calculatedExpr || node._initialExpr));
-    setActive(statesLink,     node.mandatory === true || !!node._readOnly || !!node._hidden);
+    setActive(statesLink,     node.mandatory === true || !!node._readOnly || !!node._hidden || !!node._usageMode);
     setActive(repeatLink,     !!node.repeats);
     if (!node.supportsRepeat()) repeatLink.style.display = 'none';
     setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
