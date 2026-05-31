@@ -2,7 +2,7 @@
 import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
-import { tree, values, rawFhir, effect, questVariables, questContained, questMeta, getValue, setValue, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './state.js';
+import { tree, values, rawFhir, questVariables, questContained, questMeta, getValue, setValue, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './state.js';
 import { validateTree } from './fhir/validate.js';
 import * as validateModal from './ui/modals/validate-modal.js';
 import * as metadataModal from './ui/modals/metadata-modal.js';
@@ -161,8 +161,7 @@ toolsMenu.setHandlers({
 
 // ── Metadata card (status + experimental badge) ──────────────────────────────
 new MetadataCard({
-  effect, questMeta,
-  mountEl: document.getElementById('questMetaCardMount'),
+  questMeta,
   onEdit: () => metadataModal.open(),
 });
 

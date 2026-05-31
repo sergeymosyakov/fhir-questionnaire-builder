@@ -21,6 +21,7 @@ export const AppEvents = Object.freeze({
   QUESTIONNAIRE_NEW:             'questionnaire-new',
   QUESTIONNAIRE_CLEAR_REQUESTED: 'questionnaire-clear-requested',
   QUESTIONNAIRE_RESET:           'questionnaire-reset',
+  QUESTIONNAIRE_META_CHANGED:    'questionnaire-meta-changed',
 
   // ── Builder ───────────────────────────────────────────────────────────────
   BUILDER_RERENDER:     'builder:rerender',

@@ -1,7 +1,6 @@
 // ── Questionnaire Properties (metadata) modal ────────────────────────────────
 import { Modal } from './modal-base.js';
-import { renderMetaSections } from './metadata-sections/index.js';
-
+import { renderMetaSections } from './metadata-sections/index.js';import { AppEvents } from '../../events.js';
 class MetadataModal extends Modal {
   getName() { return 'metadataModal'; }
   constructor() {
@@ -87,6 +86,7 @@ class MetadataModal extends Modal {
     questMeta._rawJurisdiction = filteredJur.length ? filteredJur : null;
     questMeta.preferredTermServer = p.preferredTermServer.trim();
     this._cancel();
+    document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_META_CHANGED));
   }
 
   _cancel() {
