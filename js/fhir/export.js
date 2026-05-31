@@ -255,6 +255,18 @@ function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation', valueCode: node._choiceOrientation });
   }
 
+  // sdc-questionnaire-choiceColumn (0..* multi-column choice display)
+  if (node._choiceColumns && node._choiceColumns.length) {
+    for (const col of node._choiceColumns) {
+      const sub = [];
+      if (col.path)  sub.push({ url: 'path',  valueString: col.path });
+      if (col.label) sub.push({ url: 'label', valueString: col.label });
+      if (col.width) sub.push({ url: 'width', valueQuantity: col.width });
+      if (col.forDisplay !== undefined) sub.push({ url: 'forDisplay', valueBoolean: col.forDisplay });
+      ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn', extension: sub });
+    }
+  }
+
   // questionnaire-supportLink (0..* URI)
   if (node._supportLinks && node._supportLinks.length) {
     for (const uri of node._supportLinks) {

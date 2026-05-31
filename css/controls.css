@@ -198,6 +198,27 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointe
 }
 .oc-opt:hover    { background: #f0f4ff; }
 .oc-opt--sel     { background: #eef2ff; color: var(--c-primary); font-weight: 600; }
+
+/* choiceColumn multi-column dropdown */
+.oc-col-header {
+  display: flex;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-muted);
+  border-bottom: 1px solid var(--c-border);
+  background: var(--c-bg);
+}
+.oc-col-row { display: flex; gap: 6px; }
+.oc-col-cell {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .oc-search {
   display: block;
   width: 100%;

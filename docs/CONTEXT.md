@@ -111,6 +111,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/answer-type/sections/numeric.js` | `NumericSection` — min/max inputs + slider toggle+step + decimal places (decimal only); `commit()` writes `_minValue`, `_maxValue`, `_sliderStep`, `_maxDecimalPlaces` |
 | `js/ui/answer-type/sections/placeholder.js` | `PlaceholderSection` — entryFormat input; `commit()` writes `_entryFormat` |
 | `js/ui/answer-type/sections/orientation.js` | `OrientationSection` — choiceOrientation dropdown (radio only); `commit()` writes `_choiceOrientation` |
+| `js/ui/answer-type/sections/choice-columns.js` | `ChoiceColumnsSection` — editable list of choiceColumn rows (path, label, width, forDisplay); visible for choice/open-choice types; `commit()` writes `_choiceColumns` |
 | `js/ui/answer-type/sections/display-cat.js` | `DisplayCatSection` — display category dropdown (display items only); `commit()` writes `_displayCategory` |
 | `js/ui/answer-type/sections/attach.js` | `AttachSection` — max file size + MIME types inputs (attachment only); `commit()` writes `_maxFileSizeMB`, `_mimeTypes` |
 | `js/ui/repeatable-modal.js` | Repeatable edit modal — `init(elements)`, `open(node, repeatLink, setActive)`; draft pattern; toggle for `node.repeats` + cardinality card (`_minOccurs` / `_maxOccurs` integer inputs); Apply trims excess rows when maxOccurs reduced; calls `triggerCalcRecalc()` |
@@ -166,6 +167,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `sampledata/example-bariatric-response.qr.json` | Sample QuestionnaireResponse for example-bariatric (eligible male patient, BMI 41.5) — groups + nested items |
 | `sampledata/1776102565767-…json` | Real-world questionnaire snapshot for regression testing |
 | `sampledata/item-control-demo.fhir.json` | **Item Control Demo** — `questionnaire-itemControl` codes: `check-box` (checklist), `autocomplete` (searchable dropdown), `text-area` (multi-line string), `spinner` (integer), `drop-down` (explicit default), `slider` (integer range slider), `lookup` (choice live-search against FHIR terminology server) |
+| `sampledata/choice-column-demo.fhir.json` | **Choice Column Demo** — `sdc-questionnaire-choiceColumn`: multi-column dropdown display for choice items; medication selector (3 columns: code/display/system with widths) and condition selector (2 columns: ICD-10 code/description) |
 | `docs/ROADMAP.md` | Prioritized feature backlog |
 | `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
 | `package.json` | Node dev tooling — Vitest (`npm test`) + Playwright (`npm run test:e2e`); `serve` devDep used by Playwright webServer |

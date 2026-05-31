@@ -1079,6 +1079,36 @@ describe('buildFHIRObject — choiceOrientation', () => {
   });
 });
 
+// ── sdc-questionnaire-choiceColumn ───────────────────────────────────────────
+describe('buildFHIRObject — choiceColumn', () => {
+  const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn';
+
+  it('exports _choiceColumns as complex extensions', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A',
+      _choiceColumns: [
+        { path: 'code', label: 'Code', forDisplay: false },
+        { path: 'display', label: 'Name', width: { value: 60, unit: '%' }, forDisplay: true },
+      ],
+    }]);
+    const ext = q.item[0].extension || [];
+    const cols = ext.filter(e => e.url === CC_URL);
+    expect(cols).toHaveLength(2);
+    expect(cols[0].extension).toContainEqual({ url: 'path', valueString: 'code' });
+    expect(cols[0].extension).toContainEqual({ url: 'label', valueString: 'Code' });
+    expect(cols[0].extension).toContainEqual({ url: 'forDisplay', valueBoolean: false });
+    expect(cols[1].extension).toContainEqual({ url: 'path', valueString: 'display' });
+    expect(cols[1].extension).toContainEqual({ url: 'width', valueQuantity: { value: 60, unit: '%' } });
+    expect(cols[1].extension).toContainEqual({ url: 'forDisplay', valueBoolean: true });
+  });
+
+  it('does not emit choiceColumn extension when _choiceColumns is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.some(e => e.url === CC_URL)).toBe(false);
+  });
+});
+
 // ── questionnaire-displayCategory ────────────────────────────────────────────
 describe('buildFHIRObject — displayCategory', () => {
   const DC_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory';

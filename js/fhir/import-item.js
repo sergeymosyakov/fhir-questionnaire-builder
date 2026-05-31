@@ -39,10 +39,13 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   node.options = fhirOptsToStr(fhirItem.answerOption);
 
-  // When any answerOption uses a non-valueCoding type (valueString, valueInteger,
-  // valueDate, valueTime, valueReference), preserve the full FHIR array for
-  // round-trip fidelity. The options string above is kept for editor display.
-  if (hasNonCodingOpts(fhirItem.answerOption)) {
+  // Preserve full answerOption array when needed:
+  //  - non-valueCoding types (valueString, valueInteger, etc.) for round-trip
+  //  - choiceColumn requires access to full Coding properties (system, code, display)
+  const hasChoiceCol = (fhirItem.extension || []).some(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn'
+  );
+  if (fhirItem.answerOption && (hasNonCodingOpts(fhirItem.answerOption) || hasChoiceCol)) {
     node._rawAnswerOptions = JSON.parse(JSON.stringify(fhirItem.answerOption));
   }
 
@@ -158,6 +161,26 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation'
   );
   if (choiceOrientExt?.valueCode) node._choiceOrientation = choiceOrientExt.valueCode;
+
+  // sdc-questionnaire-choiceColumn (0..* — multi-column display for choice/open-choice/reference)
+  const choiceColExts = (fhirItem.extension || []).filter(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn'
+  );
+  if (choiceColExts.length) {
+    node._choiceColumns = choiceColExts.map(ext => {
+      const sub = ext.extension || [];
+      const col = {};
+      const pathExt = sub.find(s => s.url === 'path');
+      if (pathExt?.valueString) col.path = pathExt.valueString;
+      const labelExt = sub.find(s => s.url === 'label');
+      if (labelExt?.valueString) col.label = labelExt.valueString;
+      const widthExt = sub.find(s => s.url === 'width');
+      if (widthExt?.valueQuantity) col.width = widthExt.valueQuantity;
+      const forDisplayExt = sub.find(s => s.url === 'forDisplay');
+      if (forDisplayExt?.valueBoolean !== undefined) col.forDisplay = forDisplayExt.valueBoolean;
+      return col;
+    });
+  }
 
   // questionnaire-displayCategory (display items only)
   if (node.itemType === 'display') {

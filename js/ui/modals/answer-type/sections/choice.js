@@ -305,10 +305,33 @@ class ChoiceSection extends AnswerTypeSection {
       } else {
         delete node._answerValueSet;
         delete node._answerExpression;
-        delete node._rawAnswerOptions;  // user edited inline → convert to valueCoding
 
         const rows = (pending.draftOptionRows || []).filter(r => r.code.trim());
         node.options = rows.map(r => r.code.trim() + '=' + r.label.trim()).join(',');
+
+        // Sync _rawAnswerOptions: preserve extra Coding properties (system, etc.)
+        // that the options editor doesn't expose, so choiceColumn can resolve them.
+        if (node._rawAnswerOptions) {
+          const oldByCode = new Map();
+          for (const raw of node._rawAnswerOptions) {
+            const c = raw.valueCoding;
+            if (c) oldByCode.set(c.code || c.display || '', raw);
+          }
+          const synced = [];
+          for (const r of rows) {
+            const code = r.code.trim();
+            const label = r.label.trim();
+            const existing = oldByCode.get(code);
+            if (existing && existing.valueCoding) {
+              existing.valueCoding.code = code;
+              existing.valueCoding.display = label;
+              synced.push(existing);
+            } else {
+              synced.push({ valueCoding: { code, display: label } });
+            }
+          }
+          node._rawAnswerOptions = synced.length ? synced : undefined;
+        }
 
         const newOrdinals = {};
         const newPrefixes = {};

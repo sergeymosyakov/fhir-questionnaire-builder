@@ -1,7 +1,7 @@
 // ── ChoiceNode / RadioNode / OpenChoiceNode ───────────────────────────────────
 // Closed/open answer-list questions.
 // Optional FHIR-imported: _optionOrdinals, _optionPrefixes, _choiceOrientation,
-//   _answerValueSet, _openLabel, _initialSelected
+//   _answerValueSet, _openLabel, _initialSelected, _choiceColumns
 import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
@@ -45,6 +45,72 @@ function _evalAnswerOpts(node, fpCtx) {
   }
 }
 
+// ── choiceColumn helpers ──────────────────────────────────────────────────────
+// Resolve a choiceColumn path against a raw answer option or {code, display}.
+// For valueCoding options the path addresses Coding properties (code, display, system).
+function _resolveColValue(rawOpt, code, display, path) {
+  if (rawOpt) {
+    const obj = rawOpt.valueCoding || rawOpt.valueReference || rawOpt;
+    if (obj && obj[path] !== undefined) return String(obj[path]);
+  }
+  // Fallback: match path to the {code, display} pair
+  if (path === 'code')    return code;
+  if (path === 'display') return display || '';
+  return '';
+}
+
+// Find the raw answerOption that corresponds to a given code value.
+function _findRawOpt(node, code) {
+  if (!node._rawAnswerOptions) return null;
+  return node._rawAnswerOptions.find(o => {
+    const c = o.valueCoding || o.valueReference;
+    if (c && (c.code === code || c.reference === code)) return true;
+    if (o.valueString === code) return true;
+    if (o.valueInteger !== undefined && String(o.valueInteger) === code) return true;
+    if (o.valueDate === code) return true;
+    if (o.valueTime === code) return true;
+    return false;
+  }) || null;
+}
+
+// Get the display text using the forDisplay column if choiceColumns is set.
+function _getColDisplayLabel(node, code, displayFallback) {
+  if (!node._choiceColumns || !node._choiceColumns.length) return displayFallback;
+  const fdCol = node._choiceColumns.find(c => c.forDisplay);
+  if (!fdCol) return displayFallback;
+  const rawOpt = _findRawOpt(node, code);
+  const val = _resolveColValue(rawOpt, code, displayFallback, fdCol.path);
+  return val || displayFallback;
+}
+
+// Build a multi-column header row.
+function _buildColHeader(columns) {
+  const row = document.createElement('div');
+  row.className = 'oc-col-header';
+  for (const col of columns) {
+    const cell = document.createElement('span');
+    cell.className = 'oc-col-cell';
+    cell.textContent = col.label || col.path;
+    if (col.width) cell.style.width = col.width.value + (col.width.unit || col.width.code || '%');
+    row.appendChild(cell);
+  }
+  return row;
+}
+
+// Build a multi-column option row.
+function _buildColRow(columns, rawOpt, code, display) {
+  const row = document.createElement('div');
+  row.className = 'oc-opt oc-col-row';
+  for (const col of columns) {
+    const cell = document.createElement('span');
+    cell.className = 'oc-col-cell';
+    cell.textContent = _resolveColValue(rawOpt, code, display, col.path);
+    if (col.width) cell.style.width = col.width.value + (col.width.unit || col.width.code || '%');
+    row.appendChild(cell);
+  }
+  return row;
+}
+
 export class ChoiceNode extends ItemNode {
   constructor(data = {}) {
     super(data);
@@ -72,7 +138,7 @@ export class ChoiceNode extends ItemNode {
     const setLabel = () => {
       const found = opts.find(o => o.code === selected);
       if (found) {
-        let label = found.display || found.code;
+        let label = _getColDisplayLabel(node, found.code, found.display || found.code);
         if (node._optionPrefixes && node._optionPrefixes[found.code] !== undefined)
           label = node._optionPrefixes[found.code] + '\u00A0' + label;
         if (node._optionOrdinals && node._optionOrdinals[found.code] !== undefined)
@@ -112,30 +178,40 @@ export class ChoiceNode extends ItemNode {
     };
 
     const _buildOpts = (container, filter = '') => {
-      const q = filter.toLowerCase();
+      const q   = filter.toLowerCase();
+      const cols = node._choiceColumns;
+      if (cols && cols.length) container.appendChild(_buildColHeader(cols));
       for (const { code, display } of opts) {
         const label = display || code;
         if (q && !label.toLowerCase().includes(q) && !code.toLowerCase().includes(q)) continue;
-        const opt   = document.createElement('div');
-        opt.className = 'oc-opt';
-        if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
-          const pfx = document.createElement('span');
-          pfx.className = 'option-prefix';
-          pfx.textContent = node._optionPrefixes[code] + '\u00A0';
-          opt.appendChild(pfx);
-        }
-        if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
-          opt.appendChild(document.createTextNode(label));
-          const ord = document.createElement('span');
-          ord.className = 'option-ordinal';
-          ord.textContent = '\u00A0(' + node._optionOrdinals[code] + ')';
-          opt.appendChild(ord);
+        if (cols && cols.length) {
+          const rawOpt = _findRawOpt(node, code);
+          const row = _buildColRow(cols, rawOpt, code, display);
+          if (code === selected) row.classList.add('oc-opt--sel');
+          row.addEventListener('mousedown', e => { e.preventDefault(); _pick(code); });
+          container.appendChild(row);
         } else {
-          opt.appendChild(document.createTextNode(label));
+          const opt   = document.createElement('div');
+          opt.className = 'oc-opt';
+          if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
+            const pfx = document.createElement('span');
+            pfx.className = 'option-prefix';
+            pfx.textContent = node._optionPrefixes[code] + '\u00A0';
+            opt.appendChild(pfx);
+          }
+          if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
+            opt.appendChild(document.createTextNode(label));
+            const ord = document.createElement('span');
+            ord.className = 'option-ordinal';
+            ord.textContent = '\u00A0(' + node._optionOrdinals[code] + ')';
+            opt.appendChild(ord);
+          } else {
+            opt.appendChild(document.createTextNode(label));
+          }
+          if (code === selected) opt.classList.add('oc-opt--sel');
+          opt.addEventListener('mousedown', e => { e.preventDefault(); _pick(code); });
+          container.appendChild(opt);
         }
-        if (code === selected) opt.classList.add('oc-opt--sel');
-        opt.addEventListener('mousedown', e => { e.preventDefault(); _pick(code); });
-        container.appendChild(opt);
       }
     };
 
@@ -220,8 +296,13 @@ export class ChoiceNode extends ItemNode {
       const spaceAbove = rect.top - 4;
       const maxAllowed = 200;
 
-      dropEl.style.left  = rect.left + 'px';
-      dropEl.style.width = rect.width + 'px';
+      dropEl.style.left = rect.left + 'px';
+      if (node._choiceColumns && node._choiceColumns.length) {
+        dropEl.style.minWidth = rect.width + 'px';
+        dropEl.style.width = 'auto';
+      } else {
+        dropEl.style.width = rect.width + 'px';
+      }
 
       if (spaceBelow >= Math.min(maxAllowed, spaceAbove)) {
         const cap = Math.min(maxAllowed, Math.max(spaceBelow, 60));

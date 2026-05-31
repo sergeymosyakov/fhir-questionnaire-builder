@@ -940,6 +940,40 @@ describe('importFHIR', () => {
     });
   });
 
+  // ── sdc-questionnaire-choiceColumn ───────────────────────────────────────
+  describe('_choiceColumns', () => {
+    const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn';
+
+    it('reads multiple choiceColumn extensions into node._choiceColumns', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'choice', text: 'Pick',
+        answerOption: [{ valueCoding: { code: 'a', display: 'A' } }],
+        extension: [
+          { url: CC_URL, extension: [
+            { url: 'path', valueString: 'code' },
+            { url: 'label', valueString: 'Code' },
+            { url: 'forDisplay', valueBoolean: false },
+          ]},
+          { url: CC_URL, extension: [
+            { url: 'path', valueString: 'display' },
+            { url: 'label', valueString: 'Name' },
+            { url: 'width', valueQuantity: { value: 60, unit: '%' } },
+            { url: 'forDisplay', valueBoolean: true },
+          ]},
+        ],
+      }]));
+      expect(_tree[0]._choiceColumns).toHaveLength(2);
+      expect(_tree[0]._choiceColumns[0]).toEqual({ path: 'code', label: 'Code', forDisplay: false });
+      expect(_tree[0]._choiceColumns[1]).toEqual({ path: 'display', label: 'Name', width: { value: 60, unit: '%' }, forDisplay: true });
+    });
+
+    it('does not set _choiceColumns when extension is absent', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Pick',
+        answerOption: [{ valueCoding: { code: 'a', display: 'A' } }] }]));
+      expect(_tree[0]._choiceColumns).toBeUndefined();
+    });
+  });
+
   // ── questionnaire-displayCategory ────────────────────────────────────────
   describe('_displayCategory', () => {
     const DC_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory';

@@ -1,0 +1,35 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "title": "Choice Column Test",
+  "item": [
+    {
+      "linkId": "med",
+      "text": "Select medication",
+      "type": "choice",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn",
+          "extension": [
+            { "url": "path", "valueString": "code" },
+            { "url": "label", "valueString": "Code" },
+            { "url": "width", "valueQuantity": { "value": 30, "unit": "%" } },
+            { "url": "forDisplay", "valueBoolean": false }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn",
+          "extension": [
+            { "url": "path", "valueString": "display" },
+            { "url": "label", "valueString": "Name" },
+            { "url": "forDisplay", "valueBoolean": true }
+          ]
+        }
+      ],
+      "answerOption": [
+        { "valueCoding": { "system": "http://rxnorm", "code": "197361", "display": "Amlodipine 5 MG" } },
+        { "valueCoding": { "system": "http://rxnorm", "code": "200031", "display": "Carvedilol 25 MG" } }
+      ]
+    }
+  ]
+}

@@ -10,6 +10,7 @@ import './sections/unit.js';
 import './sections/numeric.js';
 import './sections/placeholder.js';
 import './sections/orientation.js';
+import './sections/choice-columns.js';
 import './sections/display-cat.js';
 import './sections/attach.js';
 import { ANSWER_TYPE_SECTIONS } from './registry.js';

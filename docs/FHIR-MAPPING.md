@@ -298,6 +298,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/maxSize` | standard | `_maxFileSizeMB` (maximum file size in MB for `attachment` items; validated on file selection; error tag shown when exceeded; `calcFormOk` returns `false`; hint shown below file button; editable in Answer Type modal) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/mimeType` | standard | `_mimeTypes` (0..* allowed MIME types for `attachment` items; sets `accept` attribute on file input; hint shown below file button; editable in Answer Type modal as comma-separated list) | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer` | SDC | `_preferredTermServer` — per-item preferred FHIR terminology server URL; editable via **Terminology** action on each item/group card; exported as `valueUrl`; Questionnaire-level default editable in Properties modal | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn` | SDC | `_choiceColumns` — 0..* complex extension defining multi-column display for choice/open-choice dropdowns; each column has `path` (FHIRPath), `label` (header text), optional `width` (Quantity), and `forDisplay` (boolean — which column shows in trigger after selection); editable in **Answer Type** modal "Choice columns" section; rendered as columned dropdown in preview | Yes (SDC) |
 
 ---
 
@@ -414,7 +415,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 |---|---|---|
 | `sdc-questionnaire-itemWeight` | ❌ | Per-option weight for scoring (analogous to `ordinalValue` at item level) |
 | `sdc-questionnaire-unitOption[]` | ❌ | Multiple selectable units for `quantity` items |
-| `sdc-questionnaire-choiceColumn` | ❌ | Defines columns (FHIRPath expression, header label, forDisplay flag) for multi-column display of choice answer options in a dropdown. |
 | `sdc-questionnaire-itemMedia` / `sdc-questionnaire-answerMedia` | ❌ | Attaches media (image, audio, video) to an item or to a specific answer option. |
 
 ### SDC extensions — population and extraction (out of scope)
