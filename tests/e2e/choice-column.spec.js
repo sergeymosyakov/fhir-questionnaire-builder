@@ -9,10 +9,11 @@
 // Run: npx playwright test tests/e2e/choice-column.spec.js
 //
 // ── data-testid registry ─────────────────────────────────────────────────────
-//   preview-panel, fhir-file-input, add-root-group-btn, show-json-btn
+//   preview-panel, fhir-file-input, add-root-group-btn, export-btn, export-fhir-item, prompt-save
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 
 const FIXTURE = path.resolve('tests/fixtures/choice-column.fhir.json');
@@ -67,12 +68,14 @@ test.describe('choiceColumn — multi-column dropdown', () => {
   test('round-trip: choiceColumn extensions preserved in export', async ({ page }) => {
     await loadFixture(page);
 
-    // Open JSON view
-    await page.locator('[data-testid="show-json-btn"]').click();
-    const jsonPanel = page.locator('[data-testid="json-panel"]');
-    await expect(jsonPanel).toBeVisible({ timeout: 5_000 });
-    const jsonText = await jsonPanel.textContent();
-    const exported = JSON.parse(jsonText);
+    // Export via download
+    await page.getByTestId('export-btn').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+    ]);
+    const filePath = await download.path();
+    const exported = JSON.parse(readFileSync(filePath, 'utf8'));
 
     const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn';
     const medItem = exported.item.find(i => i.linkId === 'med');

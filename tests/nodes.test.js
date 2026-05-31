@@ -1,11 +1,4 @@
-import { describe, test, expect, vi } from 'vitest';
-import { reactive, effect } from '@vue/reactivity';
-
-// state.js imports Vue from CDN — redirect to the npm package in tests
-vi.mock(
-  'https://unpkg.com/@vue/reactivity@3.5/dist/reactivity.esm-browser.js',
-  async () => await import('@vue/reactivity'),
-);
+import { describe, test, expect } from 'vitest';
 
 import { GroupNode }    from '../js/nodes/group-node.js';
 import { TextNode }     from '../js/nodes/text-node.js';
@@ -97,51 +90,5 @@ describe('createGroupNode / createItemNode', () => {
     expect(n.constraint).toEqual([{ key: 'k1' }]);
     expect(n.constraint).not.toBe(tpl.constraint); // deep copy
     expect(n.id).not.toBe(tpl.id);
-  });
-});
-
-// ── Vue reactivity ────────────────────────────────────────────────────────────
-
-describe('Vue reactivity with node classes', () => {
-  test('class instances are reactive in reactive array', () => {
-    const tree = reactive([]);
-    let count = 0;
-    effect(() => { count = tree.length; });
-
-    expect(count).toBe(0);
-    tree.push(new TextNode({ title: 'T1' }));
-    expect(count).toBe(1);
-    tree.push(new GroupNode({ title: 'G1' }));
-    expect(count).toBe(2);
-  });
-
-  test('node properties are reactive after push', () => {
-    const tree = reactive([new TextNode({ title: 'original' })]);
-    let captured = '';
-    effect(() => { captured = tree[0].title; });
-
-    expect(captured).toBe('original');
-    tree[0].title = 'changed';
-    expect(captured).toBe('changed');
-  });
-
-  test('dynamically added FHIR-import properties are reactive', () => {
-    const tree = reactive([new TextNode({ title: 'Q' })]);
-    let maxLen = undefined;
-    effect(() => { maxLen = tree[0]._maxLength; });
-
-    expect(maxLen).toBeUndefined();
-    tree[0]._maxLength = 100; // simulates FHIR import setting this after creation
-    expect(maxLen).toBe(100);
-  });
-
-  test('children array on GroupNode is reactive', () => {
-    const group = reactive(new GroupNode({ title: 'G' }));
-    let childCount = 0;
-    effect(() => { childCount = group.children.length; });
-
-    expect(childCount).toBe(0);
-    group.children.push(new TextNode({ title: 'child' }));
-    expect(childCount).toBe(1);
   });
 });

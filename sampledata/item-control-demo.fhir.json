@@ -114,6 +114,39 @@
           }
         }
       ]
+    },
+    {
+      "linkId": "regex-demo",
+      "text": "Product code (e.g. AB1234)",
+      "type": "string",
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/regex", "valueString": "^[A-Z]{2}\\d{4}$" }
+      ]
+    },
+    {
+      "linkId": "excl-demo",
+      "text": "Symptoms (check all that apply)",
+      "type": "choice",
+      "repeats": true,
+      "answerOption": [
+        { "valueCoding": { "code": "headache", "display": "Headache" } },
+        { "valueCoding": { "code": "fever", "display": "Fever" } },
+        { "valueCoding": { "code": "cough", "display": "Cough" } },
+        {
+          "valueCoding": { "code": "none", "display": "None of the above" },
+          "extension": [
+            { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive", "valueBoolean": true }
+          ]
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "check-box" }]
+          }
+        }
+      ]
     }
   ]
 }

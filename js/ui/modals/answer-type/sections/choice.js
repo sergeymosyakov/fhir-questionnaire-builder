@@ -11,6 +11,7 @@ import { terminologyService } from '../../../../fhir/terminology-service.js';
 function _buildRows(node) {
   const ords    = node._optionOrdinals || {};
   const prefixes = node._optionPrefixes || {};
+  const exclusives = node._optionExclusives || {};
   const pairs = node._rawAnswerOptions
     ? rawOptsToPairs(node._rawAnswerOptions)
     : parseOptions(node.options || '');
@@ -19,6 +20,7 @@ function _buildRows(node) {
     label:  display,
     score:  ords[code] !== undefined ? String(ords[code]) : '',
     prefix: prefixes[code] || '',
+    exclusive: !!exclusives[code],
   }));
 }
 
@@ -297,11 +299,13 @@ class ChoiceSection extends AnswerTypeSection {
         delete node._answerValueSet;
         delete node._optionOrdinals;
         delete node._optionPrefixes;
+        delete node._optionExclusives;
       } else if (pending.draftAVS) {
         node._answerValueSet = pending.draftAVS;
         node.options = resolveContainedValueSet(Modal._svc.questContained, pending.draftAVS);
         delete node._optionOrdinals;
         delete node._optionPrefixes;
+        delete node._optionExclusives;
       } else {
         delete node._answerValueSet;
         delete node._answerExpression;
@@ -345,12 +349,21 @@ class ChoiceSection extends AnswerTypeSection {
         else delete node._optionOrdinals;
         if (Object.keys(newPrefixes).length) node._optionPrefixes = newPrefixes;
         else delete node._optionPrefixes;
+
+        const newExclusives = {};
+        rows.forEach(r => {
+          const code = r.code.trim();
+          if (r.exclusive) newExclusives[code] = true;
+        });
+        if (Object.keys(newExclusives).length) node._optionExclusives = newExclusives;
+        else delete node._optionExclusives;
       }
     } else {
       delete node._answerValueSet;
       delete node._answerExpression;
       delete node._optionOrdinals;
       delete node._optionPrefixes;
+      delete node._optionExclusives;
       node.options = '';
     }
 

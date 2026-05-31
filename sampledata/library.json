@@ -15,7 +15,7 @@
       { "label": "Lifestyle & Social History",    "file": "valueset-demo.fhir.json",               "type": "questionnaire" },
       { "label": "Pain & Symptom Assessment",     "file": "slider-disabled-demo.fhir.json",        "type": "questionnaire" },
       { "label": "Rendering XHTML Demo",          "file": "rendering-xhtml-demo.fhir.json",        "type": "questionnaire" },
-      { "label": "Item Control Demo",              "file": "item-control-demo.fhir.json",           "type": "questionnaire", "note": "check-box, autocomplete, text-area, spinner, drop-down, slider, lookup" },
+      { "label": "Item Control Demo",              "file": "item-control-demo.fhir.json",           "type": "questionnaire", "note": "check-box, autocomplete, text-area, spinner, drop-down, slider, lookup, regex, optionExclusive" },
       { "label": "Answer Option Types Demo",        "file": "answer-option-types-demo.fhir.json",    "type": "questionnaire", "note": "All 6 answerOption value[x] types: valueCoding, valueString, valueInteger, valueDate, valueTime, valueReference" },
       { "label": "Choice Column Demo",              "file": "choice-column-demo.fhir.json",          "type": "questionnaire", "note": "sdc-questionnaire-choiceColumn: multi-column dropdown display" }
     ]

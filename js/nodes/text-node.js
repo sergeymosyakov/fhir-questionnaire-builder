@@ -54,6 +54,21 @@ export class TextNode extends ItemNode {
       el.addEventListener('blur', () => { node._minLenInteracted = true; validateMinLen(); });
     }
 
+    let errRegex = null;
+    if (node._regex) {
+      errRegex = document.createElement('span');
+      errRegex.className = 'ctrl-err ctrl-err--regex';
+      errRegex.dataset.testid = 'regex-err';
+      errRegex.textContent = 'Does not match pattern';
+      errRegex.style.display = 'none';
+      const re = (() => { try { return new RegExp(node._regex); } catch { return null; } })();
+      if (re) {
+        el.addEventListener('blur', () => {
+          errRegex.style.display = (el.value.length > 0 && !re.test(el.value)) ? 'inline' : 'none';
+        });
+      }
+    }
+
     let _debounce = null;
     el.oninput  = () => {
       setValue(node.id, el.value);
@@ -66,6 +81,7 @@ export class TextNode extends ItemNode {
     wrap.appendChild(el);
     if (counter) wrap.appendChild(counter);
     if (errMinLen) wrap.appendChild(errMinLen);
+    if (errRegex) wrap.appendChild(errRegex);
     if (el.value) requestAnimationFrame(autoResize);
     return wrap;
   }

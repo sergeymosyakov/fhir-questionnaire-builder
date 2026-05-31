@@ -13,7 +13,7 @@
 
 export function createOptionsEditor({ rows = [], onchange = () => {}, testidPrefix = 'opt' } = {}) {
   // internal state — array of row objects (mutable)
-  let _rows = rows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '' }));
+  let _rows = rows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', exclusive: !!r.exclusive }));
 
   const wrap = document.createElement('div');
   wrap.className = 'opt-editor';
@@ -28,7 +28,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
   addBtn.textContent = '+ Add option';
   addBtn.dataset.testid = testidPrefix + '-add-btn';
   addBtn.addEventListener('click', () => {
-    _rows.push({ code: '', label: '', score: '', prefix: '' });
+    _rows.push({ code: '', label: '', score: '', prefix: '', exclusive: false });
     _renderRows();
     onchange(_rows);
     // focus the code input of the new row
@@ -78,6 +78,13 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
         tipFhir:  'Questionnaire.item.answerOption[].extension[questionnaire-optionPrefix]',
         tipSpec:  'R4',
       },
+      {
+        text:     'Excl',
+        tipTitle: 'Option exclusive',
+        tipBody:  'When checked, selecting this option in a checklist deselects all other options (e.g. "None of the above"). Exported as the questionnaire-optionExclusive extension on answerOption.',
+        tipFhir:  'Questionnaire.item.answerOption[].extension[questionnaire-optionExclusive]',
+        tipSpec:  'R4',
+      },
       { text: '' },
     ];
 
@@ -125,6 +132,20 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
         rowEl.appendChild(cell);
       });
 
+      // exclusive checkbox cell
+      const exclCell = document.createElement('div');
+      exclCell.className = 'opt-editor__cell opt-editor__cell--excl';
+      const exclCb = document.createElement('input');
+      exclCb.type            = 'checkbox';
+      exclCb.checked         = !!row.exclusive;
+      exclCb.dataset.testid  = testidPrefix + '-excl-' + idx;
+      exclCb.addEventListener('change', () => {
+        _rows[idx].exclusive = exclCb.checked;
+        onchange(_rows);
+      });
+      exclCell.appendChild(exclCb);
+      rowEl.appendChild(exclCell);
+
       // remove button cell
       const rmCell = document.createElement('div');
       rmCell.className = 'opt-editor__cell opt-editor__cell--rm';
@@ -152,7 +173,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
     el: wrap,
     getRows() { return _rows; },
     setRows(newRows) {
-      _rows = newRows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '' }));
+      _rows = newRows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', exclusive: !!r.exclusive }));
       _renderRows();
     },
   };

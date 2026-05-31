@@ -18,11 +18,11 @@
   padding: 6px 2px;
 }
 
-/* header + data rows share the same 4-column + remove-btn grid */
+/* header + data rows share the same 4-column + excl-checkbox + remove-btn grid */
 .opt-editor__header,
 .opt-editor__row {
   display: grid;
-  grid-template-columns: 1fr 1.6fr 0.6fr 0.8fr 24px;
+  grid-template-columns: 1fr 1.6fr 0.6fr 0.8fr 36px 24px;
   gap: 4px;
   align-items: center;
 }
@@ -51,6 +51,11 @@
 .opt-editor__cell input:focus {
   border-color: var(--c-accent);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-accent) 20%, transparent);
+}
+
+.opt-editor__cell--excl {
+  display: flex;
+  justify-content: center;
 }
 
 .opt-editor__cell--rm {

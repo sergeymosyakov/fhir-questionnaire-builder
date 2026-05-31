@@ -525,6 +525,9 @@ export class ChecklistNode extends ItemNode {
     };
     const serializeSelected = set => [...set].join(',');
 
+    const exclusives = node._optionExclusives || {};
+    const allCheckboxes = [];
+
     for (const { code, display } of opts) {
       const lbl = document.createElement('label');
       lbl.className = 'radio-label';
@@ -532,9 +535,30 @@ export class ChecklistNode extends ItemNode {
       cb.type = 'checkbox';
       cb.value = code;
       cb.checked = parseSelected().has(code);
+      allCheckboxes.push(cb);
       cb.onchange = () => {
         const sel = parseSelected();
-        if (cb.checked) sel.add(code); else sel.delete(code);
+        if (cb.checked) {
+          if (exclusives[code]) {
+            // exclusive option: deselect everything else
+            sel.clear();
+            sel.add(code);
+            for (const other of allCheckboxes) {
+              other.checked = other.value === code;
+            }
+          } else {
+            // non-exclusive: deselect all exclusives
+            sel.add(code);
+            for (const exCode of Object.keys(exclusives)) {
+              sel.delete(exCode);
+            }
+            for (const other of allCheckboxes) {
+              if (exclusives[other.value]) other.checked = false;
+            }
+          }
+        } else {
+          sel.delete(code);
+        }
         const v = serializeSelected(sel);
         setValue(node.id, v || undefined);
         _reCalc(); onChange(); BaseNode.notifyChanged();

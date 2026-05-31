@@ -86,6 +86,19 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   }
   if (Object.keys(prefixes).length) node._optionPrefixes = prefixes;
 
+  // questionnaire-optionExclusive — marks an option as exclusive ("None of the above")
+  const exclusives = {};
+  for (const opt of fhirItem.answerOption || []) {
+    if (opt.valueCoding) {
+      const code = opt.valueCoding.code || opt.valueCoding.display || '';
+      const exclExt = (opt.extension || []).find(
+        e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive'
+      );
+      if (exclExt?.valueBoolean && code) exclusives[code] = true;
+    }
+  }
+  if (Object.keys(exclusives).length) node._optionExclusives = exclusives;
+
   applyVisibility(node, fhirItem, linkIdMap);
   applyConstraints(node, fhirItem);
 
@@ -157,6 +170,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/minLength'
   );
   if (minLenExt?.valueInteger !== undefined) node._minLength = minLenExt.valueInteger;
+
+  // regex validation pattern
+  const regexExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/regex'
+  );
+  if (regexExt?.valueString) node._regex = regexExt.valueString;
 
   // sdc-questionnaire-entryFormat (SDC) or entryFormat (R4 element-definition ext)
   const entryFmtExt = (fhirItem.extension || []).find(

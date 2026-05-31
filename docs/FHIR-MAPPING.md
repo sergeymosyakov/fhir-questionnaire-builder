@@ -300,6 +300,8 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/mimeType` | standard | `_mimeTypes` (0..* allowed MIME types for `attachment` items; sets `accept` attribute on file input; hint shown below file button; editable in Answer Type modal as comma-separated list) | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer` | SDC | `_preferredTermServer` — per-item preferred FHIR terminology server URL; editable via **Terminology** action on each item/group card; exported as `valueUrl`; Questionnaire-level default editable in Properties modal | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn` | SDC | `_choiceColumns` — 0..* complex extension defining multi-column display for choice/open-choice dropdowns; each column has `path` (FHIRPath), `label` (header text), optional `width` (Quantity), and `forDisplay` (boolean — which column shows in trigger after selection); editable in **Answer Type** modal "Choice columns" section; rendered as columned dropdown in preview | Yes (SDC) |
+| `http://hl7.org/fhir/StructureDefinition/regex` | standard | `_regex` — regular expression pattern for `text`/`url` items; imported as `valueString`; validated on blur in preview (inline error "Does not match pattern"); editable in **Answer Type** modal "Regex validation pattern" field | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive` | standard | `_optionExclusives` — on `answerOption.extension`; marks an option as exclusive (e.g. "None of the above"); selecting an exclusive option in a checklist deselects all other options; selecting a non-exclusive option deselects all exclusive ones; editable in **Answer Type** modal options editor "Excl" checkbox column | Yes |
 
 ---
 
@@ -401,13 +403,11 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
-| `regex` | ❌ Not handled | Regular expression validation pattern for `string` / `text` / `url` items (`http://hl7.org/fhir/StructureDefinition/regex`). |
 | `questionnaire-usageMode` | ❌ Not handled | Controls when the item is relevant: `capture` / `display` / `display-non-empty` / `capture-display` / `capture-display-non-empty`. |
 | `questionnaire-referenceFilter` | ❌ Not handled | FHIRPath expression used to filter valid reference targets for `reference` items. |
 | `questionnaire-referenceProfile` | ❌ Not handled | Profile URL that restricts valid resource types for `reference` items (complementary to `questionnaire-referenceResource` which is supported). |
 | `questionnaire-signatureRequired` | ❌ Not handled | Indicates that a digital signature is required for the item or group. |
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
-| `questionnaire-optionExclusive` | ❌ Not handled | On `answerOption.extension`; marks an option as exclusive — if selected, all other options must be deselected (e.g., "None of the above"). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive`. |
 
 ### SDC extensions — not implemented (no server required)
 

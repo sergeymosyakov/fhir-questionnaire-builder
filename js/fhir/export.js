@@ -205,12 +205,20 @@ function nodeToFHIRItem(node) {
           : opt.valueReference ? (typeof opt.valueReference === 'string' ? opt.valueReference : (opt.valueReference.reference || ''))
           : '';
         const optOut = { ...opt };
-        const optExts = [...(opt.extension || [])];
+        const MANAGED_OPT_EXTS = new Set([
+          'http://hl7.org/fhir/StructureDefinition/ordinalValue',
+          'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix',
+          'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive',
+        ]);
+        const optExts = (opt.extension || []).filter(e => !MANAGED_OPT_EXTS.has(e.url));
         if (node._optionOrdinals?.[key] !== undefined) {
           optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/ordinalValue', valueDecimal: node._optionOrdinals[key] });
         }
         if (node._optionPrefixes?.[key]) {
           optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix', valueString: node._optionPrefixes[key] });
+        }
+        if (node._optionExclusives?.[key]) {
+          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive', valueBoolean: true });
         }
         if (optExts.length) optOut.extension = optExts;
         if (node._initialSelected === key) optOut.initialSelected = true;
@@ -228,6 +236,9 @@ function nodeToFHIRItem(node) {
         if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
           optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix', valueString: node._optionPrefixes[code] });
         }
+        if (node._optionExclusives && node._optionExclusives[code]) {
+          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive', valueBoolean: true });
+        }
         if (optExts.length) answerOpt.extension = optExts;
         if (node._initialSelected === code) answerOpt.initialSelected = true;
         return answerOpt;
@@ -241,6 +252,11 @@ function nodeToFHIRItem(node) {
   // minLength (SDC extension)
   if (node._minLength !== undefined && node._minLength !== null) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/minLength', valueInteger: node._minLength });
+  }
+
+  // regex validation pattern
+  if (node._regex) {
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/regex', valueString: node._regex });
   }
 
   // maxSize (attachment items only — maximum file size in MB)
