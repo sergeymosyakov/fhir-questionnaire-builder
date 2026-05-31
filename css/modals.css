@@ -194,6 +194,7 @@
 .states-modal-label     { font-size: 13px; font-weight: 600; white-space: nowrap; min-width: 80px; }
 .states-modal-sel       { flex: 1; }
 .states-modal-check-row { display: flex; align-items: baseline; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+.states-modal-field-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
 .states-modal-chk-label { font-size: 13px; font-weight: 600; cursor: pointer; }
 .states-modal-chk-hint  { font-size: 11px; color: var(--c-text-2); flex-basis: 100%; padding-left: 18px; }
 .appearance-modal-form { margin-top: 10px; }

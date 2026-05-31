@@ -150,10 +150,10 @@
     },
     {
       "linkId": "usage-mode-demo",
-      "text": "Display-only summary (hidden during capture)",
-      "type": "display",
+      "text": "Physician notes (capture-only, hidden on printout)",
+      "type": "string",
       "extension": [
-        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode", "valueCode": "display" }
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode", "valueCode": "capture" }
       ]
     },
     {
@@ -169,8 +169,8 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia",
           "valueAttachment": {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Lichen_planus_interridge.jpg/200px-Lichen_planus_interridge.jpg",
-            "contentType": "image/jpeg",
+            "url": "sampledata/sample-rash.svg",
+            "contentType": "image/svg+xml",
             "title": "Skin rash example"
           }
         }
