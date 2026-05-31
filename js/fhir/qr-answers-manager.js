@@ -7,7 +7,7 @@ import * as validateModal from '../ui/modals/validate-modal.js';
 import { AppEvents } from '../events.js';
 
 export class QRAnswersManager {
-  /** @param {{ values, tree, rawFhir }} deps — reactive state refs */
+  /** @param {{ values, tree, rawFhir }} deps — state references */
   constructor({ values, tree, rawFhir }) {
     this._values   = values;
     this._tree     = tree;

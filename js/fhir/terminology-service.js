@@ -212,7 +212,7 @@ class TerminologyService {
    * Expand all external answerValueSets in the tree and cache results on each node.
    * Results are stored in node._vsCache (array of options, empty on failure).
    * @param {Array}  treeNodes  Root nodes of the questionnaire tree.
-   * @param {object} questMeta  Reactive questMeta object (for questionnaire-level server).
+   * @param {object} questMeta  questMeta object (for questionnaire-level server).
    * @returns {Promise<Array<{node, vsUrl, server, error}>>} List of failures (empty = all OK).
    */
   async expandAll(treeNodes, questMeta) {

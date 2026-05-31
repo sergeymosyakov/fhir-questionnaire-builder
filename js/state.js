@@ -1,14 +1,10 @@
-// ── Reactive state, factories, and pure utilities ────────────────────────────
-// Re-export effect so other modules don't need to know the CDN URL.
-import { ref, reactive, effect as _effect } from 'https://unpkg.com/@vue/reactivity@3.5/dist/reactivity.esm-browser.js';
-export { _effect as effect };
-export { ref };
+// ── State, factories, and pure utilities ───────────────────────────────────────────
 
-// ── Reactive state ────────────────────────────────────────────────────────────
-export const tree = reactive([]);
+// ── State ────────────────────────────────────────────────────────────────────────────
+export const tree = [];
 
 // Plain (non-reactive) store for current form values in preview.
-// Not reactive on purpose — avoids re-triggering effect() on every keystroke.
+// Not reactive on purpose — answer values never trigger re-renders.
 // Do not access this directly — use getValue / setValue / deleteValue / clearAllValues.
 export const values = {};
 
@@ -40,15 +36,15 @@ export function getAllValues(id) {
 }
 
 // FHIRPath: original FHIR Questionnaire JSON after import; null if not loaded.
-export const rawFhir = ref(null);
+export const rawFhir = { value: null };
 
 // Questionnaire-level SDC variables: [{name, expression}]
 // Populated from sdc-questionnaire-variable extensions on import.
 // Also used to store patient context variables (%age, %gender, %bmi, ...).
-export const questVariables = reactive([]);
+export const questVariables = [];
 
 // Questionnaire-level metadata — preserved across import/export and editable via Properties modal.
-export const questMeta = reactive({
+export const questMeta = {
   // Core (always visible in Properties modal)
   id:            '',
   url:           '',
@@ -88,10 +84,10 @@ export const questMeta = reactive({
   _rawMetaSecurity: [],       // meta.security[] — Coding[]; editable system/code/display rows
   _rawQuestExtensions: [],    // Questionnaire.extension[] — non-variable extensions, preserved for round-trip
   preferredTermServer: '',    // Questionnaire.extension[sdc-questionnaire-preferredTerminologyServer].valueUrl
-});
+};
 
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.
-export const questContained = reactive([]);
+export const questContained = [];
 
 /** Reset all questMeta fields to their initial empty state. */
 export function resetQuestMeta() {

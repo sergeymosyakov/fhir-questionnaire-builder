@@ -32,13 +32,13 @@ export class Modal {
   static _svc = {
     triggerCalcRecalc: null,  // () => void
     getLastCtx:        null,  // () => {qr, env}
-    questMeta:         null,  // reactive metadata object
-    tree:              null,  // reactive tree array
-    values:            null,  // reactive values map
+    questMeta:         null,  // questionnaire metadata object
+    tree:              null,  // tree array
+    values:            null,  // values map
     getValue:          null,  // (key) => any
     setValue:          null,  // (key, val) => void
     deleteValue:       null,  // (key) => void
-    questContained:    null,  // reactive contained[] array
+    questContained:    null,  // contained[] array
   };
 
   /** Called once at startup (builder/index.js) to inject app-layer services. */

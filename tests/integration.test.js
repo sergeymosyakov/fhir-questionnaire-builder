@@ -2,15 +2,8 @@
 // Tests the full chain: FHIR Questionnaire → QR → constraint evaluation.
 // Uses a minimal real-like fhirpath mock that evaluates numeric comparisons.
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { buildQR } from '../js/fhir/qr-builder.js';
-
-// Mock Vue reactivity CDN (state.js imports it at module level)
-vi.mock('https://unpkg.com/@vue/reactivity@3.5/dist/reactivity.esm-browser.js', () => ({
-  ref: v => ({ value: v }),
-  reactive: v => v,
-  effect: fn => fn(),
-}));
 
 const { evalConstraints } = await import('../js/state.js');
 

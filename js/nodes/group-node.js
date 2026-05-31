@@ -27,7 +27,7 @@ export class GroupNode extends BaseNode {
       document.addEventListener(AppEvents.BUILDER_NAVIGATE, e => {
         if (!this._previewCollapsed) return;
         if (!isDescendant(e.detail.id, this)) return;
-        this._previewCollapsed = false; // own state only — PreviewForm ticks _formTick
+        this._previewCollapsed = false; // own state only — PreviewForm triggers _asyncRender
       }, { signal: this._ac.signal });
       document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._previewCollapsed = true; }, { signal: this._ac.signal });
       document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._previewCollapsed = false; }, { signal: this._ac.signal });

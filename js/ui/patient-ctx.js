@@ -1,6 +1,6 @@
 // Patient context — preset profiles and manual edit modal.
 // Manages SDC variables: %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb
-// configure({tree, effect, questVariables}) — call once at startup.
+// configure({ tree, questVariables }) — call once at startup.
 import { createCustomSelect } from './custom-select.js';
 import { Modal } from './modals/modal-base.js';
 import { PatientPresetMenu } from './menus/patient-preset-menu.js';

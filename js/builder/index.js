@@ -10,7 +10,7 @@ import { BaseNode } from '../nodes/base-node.js';
 import { Modal } from '../ui/modals/modal-base.js';
 import { AppEvents } from '../events.js';
 
-// Inject reactive state into _shared (triggerCalcRecalc + renderTree need them)
+// Inject shared state into _shared (triggerCalcRecalc + renderTree need them)
 sharedInit({ tree, rawFhir, values, renderTree });
 
 // ── Inject builder services into node layer ───────────────────────────────────

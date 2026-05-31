@@ -15,7 +15,7 @@ export const _rc = {
   viewPrefs:          null, // _viewPrefs object (mutated in-place on pref changes)
   lastCtx:            null, // _lastCtx object (mutated in-place by _reCalc)
   buildControl:       null, // function(node, iconEl, onAfterChange)
-  values:             null, // reactive values object (for repeat row mutations)
+  values:             null, // values object (for repeat row mutations)
   updateGroupIcons:   null, // function() — GroupNode.updateAll(_rc); used as callback in item-node.js
 
   // State helpers — injected from state.js to avoid circular imports in node classes:

@@ -30,7 +30,7 @@ export class DisplayNode extends ItemNode {
     const cat = this._displayCategory;
     if (cat === 'help') {
       // Help items: collapsible toggle button
-      // Store toggle state on the instance so it survives reactive re-renders
+      // Store toggle state on the instance so it survives full re-renders
       const wrap = document.createElement('span');
       wrap.className = 'display-help-wrap';
       const toggle = document.createElement('button');

@@ -66,7 +66,7 @@ function isNodeVisible(node, ctx) {
 
 // evaluateNode handles external conditions (enableWhen / enableWhenExpression).
 // Form-value checks (calcFormOk) are applied separately in the preview renderer
-// so that typing in a control does NOT trigger a full DOM rebuild via effect().
+// so that typing in a control does NOT trigger a full DOM rebuild on each input event.
 // _insideHidden: true when a parent node carries sdc-questionnaire-hidden=true
 export function evaluateNode(node, ctx, results, _insideHidden = false) {
   // sdc-questionnaire-hidden: node (and all its descendants) are marked hidden.

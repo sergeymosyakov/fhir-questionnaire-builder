@@ -48,7 +48,7 @@ export class BaseNode {
   // Nodes must not import application state or services directly.
   // Call BaseNode.configure() once at app startup (builder/index.js).
   static _svc = {
-    tree:              null,  // reactive tree array (state.js)
+    tree:              null,  // tree array (state.js)
     findAndRemove:     null,  // (id, nodes) => void
     confirmDelete:     null,  // (label) => Promise<boolean>
     triggerCalcRecalc: null,  // () => void

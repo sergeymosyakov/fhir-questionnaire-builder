@@ -15,7 +15,7 @@ import { destroyTree } from '../utils.js';
 import { clearAllValues, resetQuestMeta, questVariables, questContained } from '../state.js';
 
 export class QuestionnaireLoader {
-  /** @param {{ tree, values, questMeta, reinitForm?, rawFhir? }} deps — reactive state refs */
+  /** @param {{ tree, values, questMeta, reinitForm?, rawFhir? }} deps — state references */
   constructor({ tree, values, questMeta, reinitForm, rawFhir }) {
     this._tree       = tree;
     this._values     = values;

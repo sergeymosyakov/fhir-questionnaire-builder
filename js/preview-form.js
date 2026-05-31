@@ -27,7 +27,7 @@ export const getLastCtx = () => _instance?.getLastCtx();
 
 export class PreviewForm {
   /**
-   * @param {object} deps — injected reactive state
+   * @param {object} deps — injected state
    * @param {Array} deps.tree
    * @param {object} deps.values
    * @param {Function} deps.getValue

@@ -8,7 +8,7 @@ import { ITEM_TYPES } from './data.js';
 import { ANSWER_TYPE_SECTIONS } from './index.js';
 import { AppEvents } from '../../../events.js';
 
-// Replace a node in the reactive tree array (recursive, in-place splice).
+// Replace a node in the tree array (recursive, in-place splice).
 function _replaceInTree(treeArr, nodeId, newNode) {
   for (let i = 0; i < treeArr.length; i++) {
     if (treeArr[i].id === nodeId) { treeArr.splice(i, 1, newNode); return true; }

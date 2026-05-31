@@ -60,7 +60,7 @@ function _collectChecklistIds(nodes, set = new Set()) {
  * Only loads answers for linkIds that exist in the current questionnaire tree.
  * @param {object} qrJson - Parsed QuestionnaireResponse JSON
  * @param {object} values - Plain values store (modified in-place)
- * @param {Array}  tree   - Current builder tree (reactive array is fine)
+ * @param {Array}  tree   - Current builder tree array
  * @returns {{ ok: boolean, error?: string, loaded: number, unmatched: string[], questionnaire: string }}
  */
 export function importQRAnswers(qrJson, values, tree) {

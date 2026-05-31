@@ -162,6 +162,7 @@ toolsMenu.setHandlers({
 // ── Metadata card (status + experimental badge) ──────────────────────────────
 new MetadataCard({
   questMeta,
+  mountEl: document.getElementById('questMetaCardMount'),
   onEdit: () => metadataModal.open(),
 });
 
