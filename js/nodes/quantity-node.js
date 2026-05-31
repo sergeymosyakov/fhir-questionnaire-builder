@@ -1,6 +1,6 @@
 // ── QuantityNode ──────────────────────────────────────────────────────────────
 // Numeric value + unit input. itemType: 'quantity'
-// Optional FHIR-imported: quantityUnit (default unit code)
+// Optional FHIR-imported: quantityUnit (default unit code), _unitOptions (explicit selectable units)
 import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
@@ -47,11 +47,12 @@ export class QuantityNode extends ItemNode {
 
     const current  = getValue(node.id);
     const initVal  = current ? (current.value  !== undefined ? current.value : '') : '';
-    // When _unitValueSet is set, default unit comes only from saved answer (current.unit),
+    // When _unitOptions or _unitValueSet is set, default unit comes only from saved answer,
     // not from node.quantityUnit — otherwise the fixed default always overrides the selection.
+    const hasCustomUnits = (node._unitOptions && node._unitOptions.length) || node._unitValueSet;
     const initUnit = current
-      ? (current.unit || (!node._unitValueSet ? node.quantityUnit : '') || '')
-      : (!node._unitValueSet ? node.quantityUnit || '' : '');
+      ? (current.unit || (!hasCustomUnits ? node.quantityUnit : '') || '')
+      : (!hasCustomUnits ? node.quantityUnit || '' : '');
 
     const numInput = document.createElement('input');
     numInput.type        = 'number';
@@ -61,9 +62,14 @@ export class QuantityNode extends ItemNode {
     numInput.className   = 'qty-num-input';
     numInput.dataset.testid = 'qty-num-input';
 
-    // Build unit dropdown items: prefer _unitVsCache (from unitValueSet), else QUANTITY_UNITS
+    // Build unit dropdown items: prefer _unitOptions (explicit), then _unitVsCache (from unitValueSet), else QUANTITY_UNITS
     let unitItems;
-    if (node._unitValueSet) {
+    if (node._unitOptions && node._unitOptions.length) {
+      unitItems = [
+        { value: '', label: '\u2014 unit \u2014' },
+        ...node._unitOptions.map(u => ({ value: u.code, label: u.display || u.code })),
+      ];
+    } else if (node._unitValueSet) {
       const cached = node._unitVsCache || [];
       unitItems = [
         { value: '', label: '\u2014 unit \u2014' },

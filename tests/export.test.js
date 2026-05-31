@@ -1516,6 +1516,29 @@ describe('buildFHIRObject — reference, quantity, expr extensions', () => {
     expect(ext.find(e => e.url === UNIT_URL)?.valueCoding?.code).toBe('kg');
   });
 
+  it('exports questionnaire-unitOption when _unitOptions is set', () => {
+    const UO_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption';
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'quantity',
+      _unitOptions: [
+        { system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' },
+        { system: 'http://unitsofmeasure.org', code: '[lb_av]', display: 'lb' },
+      ],
+    }]);
+    const ext = q.item[0].extension || [];
+    const uoExts = ext.filter(e => e.url === UO_URL);
+    expect(uoExts).toHaveLength(2);
+    expect(uoExts[0].valueCoding).toEqual({ system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' });
+    expect(uoExts[1].valueCoding).toEqual({ system: 'http://unitsofmeasure.org', code: '[lb_av]', display: 'lb' });
+  });
+
+  it('does not emit unitOption when _unitOptions is absent', () => {
+    const UO_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption';
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'quantity' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.some(e => e.url === UO_URL)).toBe(false);
+  });
+
   it('exports SDC calculatedExpression when _calculatedExpr is set', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _calculatedExpr: '%total * 2' }]);
     const ext = q.item[0].extension || [];

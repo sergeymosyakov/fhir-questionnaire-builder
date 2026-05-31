@@ -1198,6 +1198,25 @@ describe('importFHIR', () => {
       expect(_tree[0].quantityUnit).toBe('kg');
     });
 
+    it('reads _unitOptions from questionnaire-unitOption extensions', () => {
+      const UO_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption';
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'quantity', text: 'Q',
+        extension: [
+          { url: UO_URL, valueCoding: { system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' } },
+          { url: UO_URL, valueCoding: { system: 'http://unitsofmeasure.org', code: '[lb_av]', display: 'lb' } },
+        ],
+      }]));
+      expect(_tree[0]._unitOptions).toHaveLength(2);
+      expect(_tree[0]._unitOptions[0]).toEqual({ system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' });
+      expect(_tree[0]._unitOptions[1]).toEqual({ system: 'http://unitsofmeasure.org', code: '[lb_av]', display: 'lb' });
+    });
+
+    it('does not set _unitOptions when extension is absent', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'quantity', text: 'Q' }]));
+      expect(_tree[0]._unitOptions).toBeUndefined();
+    });
+
     it('reads _calculatedExpr from SDC calculatedExpression extension', () => {
       importFHIR(minQ([{
         linkId: 'q1', type: 'decimal', text: 'Q',

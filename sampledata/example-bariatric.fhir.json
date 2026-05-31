@@ -780,8 +780,24 @@
           "text": "ℹ️ All documents must be uploaded before submission. Incomplete applications will not be processed."
         },
         {
-          "linkId": "q-status-readonly",
+          "linkId": "q-weight-preop",
           "prefix": "9.8",
+          "type": "quantity",
+          "text": "Pre-operative weight",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": { "system": "http://unitsofmeasure.org", "code": "kg", "display": "kg" }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": { "system": "http://unitsofmeasure.org", "code": "[lb_av]", "display": "lb" }
+            }
+          ]
+        },
+        {
+          "linkId": "q-status-readonly",
+          "prefix": "9.9",
           "type": "string",
           "text": "Authorization status (system-assigned)",
           "readOnly": true,

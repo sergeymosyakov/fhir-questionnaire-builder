@@ -107,6 +107,15 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet'
     );
     if (unitVsExt?.valueCanonical) node._unitValueSet = unitVsExt.valueCanonical;
+    // questionnaire-unitOption: explicit list of selectable units (0..*)
+    const unitOptExts = (fhirItem.extension || []).filter(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption'
+    );
+    if (unitOptExts.length) {
+      node._unitOptions = unitOptExts
+        .filter(e => e.valueCoding)
+        .map(e => ({ system: e.valueCoding.system, code: e.valueCoding.code, display: e.valueCoding.display }));
+    }
   }
 
   const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));

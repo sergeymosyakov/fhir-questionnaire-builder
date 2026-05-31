@@ -156,6 +156,16 @@ function nodeToFHIRItem(node) {
   // questionnaire-unitValueSet
   if (node.itemType === 'quantity' && node._unitValueSet)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet', valueCanonical: node._unitValueSet });
+  // questionnaire-unitOption (0..* selectable units)
+  if (node.itemType === 'quantity' && node._unitOptions && node._unitOptions.length) {
+    for (const u of node._unitOptions) {
+      const coding = {};
+      if (u.system)  coding.system  = u.system;
+      if (u.code)    coding.code    = u.code;
+      if (u.display) coding.display = u.display;
+      ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption', valueCoding: coding });
+    }
+  }
   // calculatedExpression
   if (node._calculatedExpr)
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression', valueExpression: { language: 'text/fhirpath', expression: node._calculatedExpr } });

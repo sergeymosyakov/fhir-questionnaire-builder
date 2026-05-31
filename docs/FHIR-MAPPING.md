@@ -275,6 +275,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-constraint` | standard | `constraint[]` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-unit` | standard | `quantityUnit` (quantity default unit) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet` | standard | `_unitValueSet` — canonical URL of a ValueSet of selectable UCUM units; unit dropdown in preview uses `_unitVsCache` expanded on load; falls back to built-in list if offline | Yes |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption` | standard | `_unitOptions` — 0..* explicit selectable units for quantity items; each extension carries a `valueCoding` (system, code, display); when set, unit dropdown shows only these units; editable in **Answer Type** modal "Unit options" section; mutually exclusive with `unitValueSet` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource` | standard | `referenceResource` (reference type lock) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs` | standard | `_minOccurs` (min repeat rows required) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs` | standard | `_maxOccurs` (max repeat rows; enforced in preview) | Yes |
@@ -407,14 +408,12 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | `questionnaire-signatureRequired` | ❌ Not handled | Indicates that a digital signature is required for the item or group. |
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
 | `questionnaire-optionExclusive` | ❌ Not handled | On `answerOption.extension`; marks an option as exclusive — if selected, all other options must be deselected (e.g., "None of the above"). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive`. |
-| `questionnaire-unitOption` | ❌ Not handled | Specifies a single allowed unit for `quantity` items (R4 core extension; multiple instances enumerate all allowed units). URL: `http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption`. Distinct from `questionnaire-unitValueSet` (which references a ValueSet). |
 
 ### SDC extensions — not implemented (no server required)
 
 | Extension | Status | Notes |
 |---|---|---|
 | `sdc-questionnaire-itemWeight` | ❌ | Per-option weight for scoring (analogous to `ordinalValue` at item level) |
-| `sdc-questionnaire-unitOption[]` | ❌ | Multiple selectable units for `quantity` items |
 | `sdc-questionnaire-itemMedia` / `sdc-questionnaire-answerMedia` | ❌ | Attaches media (image, audio, video) to an item or to a specific answer option. |
 
 ### SDC extensions — population and extraction (out of scope)
