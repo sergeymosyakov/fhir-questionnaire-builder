@@ -446,6 +446,14 @@ export class OpenChoiceNode extends ItemNode {
     el.value       = getValue(node.id) !== undefined ? getValue(node.id) : '';
     el.autocomplete = 'off';
 
+    // optionsOnly: no free-text allowed — input is read-only, acts as display
+    const optionsOnly = node._answerConstraint === 'optionsOnly';
+    if (optionsOnly) {
+      el.readOnly = true;
+      el.placeholder = node._openLabel || 'Choose\u2026';
+      el.style.cursor = 'default';
+    }
+
     const btn = document.createElement('button');
     btn.type      = 'button';
     btn.className = 'oc-btn';
@@ -509,7 +517,7 @@ export class OpenChoiceNode extends ItemNode {
       document.addEventListener('mousedown', _onOutside, true);
     };
 
-    el.addEventListener('input', () => { setValue(node.id, el.value); _reCalc(); onChange(); openDrop(el.value); });
+    el.addEventListener('input', () => { if (optionsOnly) return; setValue(node.id, el.value); _reCalc(); onChange(); openDrop(el.value); });
     el.addEventListener('change', () => { BaseNode.notifyChanged(); });
     el.addEventListener('focus', () => { if (parsed.length) openDrop(el.value); });
     el.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
