@@ -326,6 +326,9 @@ test.describe('Builder creates items → preview reacts', () => {
     const groupId = await addRootGroup(page);
     const itemId  = await addItemToGroup(page, groupId);
 
+    // Wait for preview to render the item before interacting with the builder title
+    await expect(page.locator(`[data-preview-id="${itemId}"]`)).toBeVisible();
+
     const node = page.locator(`[data-node-id="${itemId}"]`);
     await node.getByTestId('node-title-display').click();
     const titleInput = node.getByTestId('node-title-input');
