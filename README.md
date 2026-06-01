@@ -69,11 +69,11 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 
 ## Tech Stack
 
-- **`@vue/reactivity`** (ESM CDN) — `ref`, `reactive`, `effect` only; no Vue components
 - **ES Modules** — `import/export` between files; requires HTTP server; no build step, no bundler
-- **Vanilla JS DOM** — builder rendered imperatively; preview rebuilt via `effect()`
+- **Vanilla JS DOM** — builder and preview rendered imperatively via OOP node classes; state propagated through `AppEvents` custom events
 - **FHIRPath** — `lib/fhirpath.min.js` (global); powers calc, visibility, and constraint expressions
-- **Vitest** — 474 unit tests across 10 files; CI via GitHub Actions (`npm test`)
+- **DOMPurify** — `lib/dompurify.min.js`; sanitizes XHTML content before rendering
+- **Vitest** — 989 unit tests across 20 files; CI via GitHub Actions (`npm test`)
 - **Playwright** — e2e tests (Chromium); CI + HTML report on GitHub Pages
 
 ---
