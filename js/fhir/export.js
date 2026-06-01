@@ -73,7 +73,7 @@ function buildConstraintExtensions(constraint) {
     }));
 }
 
-function nodeToFHIRItem(node) {
+export function nodeToFHIRItem(node) {
   const fhirItem = {
     linkId: node.id,
     text:   node.title,

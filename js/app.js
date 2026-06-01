@@ -32,6 +32,8 @@ import { AutosaveToggle } from './ui/autosave-toggle.js';
 import { UndoRedo } from './ui/undo-redo.js';
 import { QRAnswersManager } from './fhir/qr-answers-manager.js';
 import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
+import { CopyPaste } from './ui/copy-paste.js';
+import { BaseNode } from './nodes/base-node.js';
 
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
@@ -195,3 +197,15 @@ new UndoRedo(
   document.getElementById('undoBtn'),
   document.getElementById('redoBtn'),
 );
+
+// ── Copy / Paste ──────────────────────────────────────────────────────────────
+// Instantiated after builder/index.js so BaseNode._svc already exists.
+// Services are patched into BaseNode._svc here to avoid a circular import chain.
+CopyPaste.configure({ tree, questContained });
+const _copyPaste = new CopyPaste();
+BaseNode.configure({
+  copyNode:   (id) => _copyPaste.copy(id),
+  pasteAfter:  (id) => _copyPaste.paste(id),
+  pasteBefore: (id) => _copyPaste.pasteBefore(id),
+  hasPaste:   () => _copyPaste.hasPending(),
+});

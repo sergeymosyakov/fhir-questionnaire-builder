@@ -514,3 +514,36 @@
 }
 .telecom-row { padding-left: 12px; }
 .codes-add-btn--sub { margin-left: 12px; font-size: 11px; padding: 2px 8px; }
+
+/* ── Paste Warning modal ────────────────────────────────────────────────────── */
+.paste-warn-heading {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 12px 0 4px;
+  color: var(--c-text);
+}
+.paste-warn-heading:first-child { margin-top: 0; }
+.paste-warn-hint {
+  font-size: 12px;
+  color: var(--c-text-2);
+  margin: 0 0 8px;
+  line-height: 1.45;
+}
+.paste-warn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+.paste-warn-table thead tr { background: var(--c-surface-alt, #f4f4f4); }
+.paste-warn-table th,
+.paste-warn-table td {
+  padding: 5px 8px;
+  text-align: left;
+  border: 1px solid var(--c-border);
+  vertical-align: top;
+}
+.paste-warn-table th { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+.paste-warn-id   { font-family: monospace; white-space: nowrap; color: var(--c-accent); }
+.paste-warn-type { white-space: nowrap; font-style: italic; color: var(--c-text-2); }
+.paste-warn-expr { font-family: monospace; word-break: break-all; }

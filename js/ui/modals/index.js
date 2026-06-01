@@ -17,3 +17,4 @@ import './library-modal.js';
 import './json-viewer.js';
 import './help-modal.js';
 import './cloud-modal.js';
+import './paste-warning-modal.js';

@@ -69,6 +69,39 @@
 }
 .btn-node-delete:hover { color: #c62828; }
 
+.btn-node-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 3px;
+  cursor: pointer;
+  transition: color .15s;
+  vertical-align: middle;
+}
+.btn-node-copy:hover { color: #4527a0; }
+
+.btn-node-paste {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #4527a0;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+  transition: color .15s, opacity .15s;
+  vertical-align: middle;
+}
+.btn-node-paste:hover { color: #311b92; }
+.btn-node-paste--hidden { display: none; }
+
 /* === Collapsible action panels =============================================== */
 .node-body {
   margin-top: 8px;

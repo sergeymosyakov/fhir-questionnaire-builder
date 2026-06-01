@@ -264,6 +264,31 @@ export class GroupNode extends BaseNode {
     typeLabel.textContent = isEmptyGroupNode ? '[Info]' : '[Group]';
     titleWrap.appendChild(typeLabel);
 
+    const btnCopy = document.createElement('button');
+    btnCopy.type = 'button';
+    btnCopy.className = 'btn-node-copy';
+    btnCopy.dataset.testid = 'node-copy-btn';
+    btnCopy.textContent = '\u29c9';
+    btnCopy.dataset.tipTitle = 'Copy group';
+    btnCopy.dataset.tipBody  = 'Copies this group and all its children. Use Paste after on any node to insert the copy.';
+    btnCopy.onclick = e => { e.stopPropagation(); BaseNode._svc.copyNode?.(node.id); };
+    titleWrap.appendChild(btnCopy);
+
+    const _makePasteBtn = (icon, testid, tipTitle, tipBody, action) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-node-paste';
+      btn.dataset.testid = testid;
+      btn.textContent = icon;
+      btn.dataset.tipTitle = tipTitle;
+      btn.dataset.tipBody  = tipBody;
+      btn.classList.toggle('btn-node-paste--hidden', !BaseNode._svc.hasPaste?.());
+      btn.onclick = e => { e.stopPropagation(); action(); };
+      return btn;
+    };
+    titleWrap.appendChild(_makePasteBtn('\u2191\u29c9', 'node-paste-before-btn', 'Paste before', 'Insert copied node before this group.', () => BaseNode._svc.pasteBefore?.(node.id)));
+    titleWrap.appendChild(_makePasteBtn('\u2193\u29c9', 'node-paste-after-btn',  'Paste after',  'Insert copied node after this group.',  () => BaseNode._svc.pasteAfter?.(node.id)));
+
     const linkIdInput = node._buildLinkIdInput();
 
     const prefixInput = node._buildPrefixInput('\u2014');

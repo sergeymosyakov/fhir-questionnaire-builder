@@ -324,6 +324,31 @@ export class ItemNode extends BaseNode {
     typeLabel.textContent = '[Item]';
     titleWrap.appendChild(typeLabel);
 
+    const btnCopy = document.createElement('button');
+    btnCopy.type = 'button';
+    btnCopy.className = 'btn-node-copy';
+    btnCopy.dataset.testid = 'node-copy-btn';
+    btnCopy.textContent = '\u29c9';
+    btnCopy.dataset.tipTitle = 'Copy item';
+    btnCopy.dataset.tipBody  = 'Copies this item to the clipboard as FHIR JSON. Use Paste after on any node to insert the copy.';
+    btnCopy.onclick = e => { e.stopPropagation(); BaseNode._svc.copyNode?.(node.id); };
+    titleWrap.appendChild(btnCopy);
+
+    const _makePasteBtn = (icon, testid, tipTitle, tipBody, action) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-node-paste';
+      btn.dataset.testid = testid;
+      btn.textContent = icon;
+      btn.dataset.tipTitle = tipTitle;
+      btn.dataset.tipBody  = tipBody;
+      btn.classList.toggle('btn-node-paste--hidden', !BaseNode._svc.hasPaste?.());
+      btn.onclick = e => { e.stopPropagation(); action(); };
+      return btn;
+    };
+    titleWrap.appendChild(_makePasteBtn('\u2191\u29c9', 'node-paste-before-btn', 'Paste before', 'Insert copied node before this item.', () => BaseNode._svc.pasteBefore?.(node.id)));
+    titleWrap.appendChild(_makePasteBtn('\u2193\u29c9', 'node-paste-after-btn',  'Paste after',  'Insert copied node after this item.',  () => BaseNode._svc.pasteAfter?.(node.id)));
+
     const prefixInput = node._buildPrefixInput('prefix');
     titleWrap.appendChild(prefixInput);
 
@@ -433,6 +458,7 @@ export class ItemNode extends BaseNode {
     }, actions);
     termLink.onclick = () => MODAL_REGISTRY.get('terminology').open(node, termLink, setActive);
     setActive(termLink, !!node._preferredTermServer);
+
 
     const headerTop = document.createElement('div');
     headerTop.className = 'node-header-top';

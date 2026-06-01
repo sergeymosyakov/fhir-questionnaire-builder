@@ -15,6 +15,8 @@ sharedInit({ tree, rawFhir, values, renderTree });
 
 // ── Inject builder services into node layer ───────────────────────────────────
 // Nodes must not import state or services directly — they receive them here.
+// copyNode / pasteAfter / hasPaste are injected later by app.js once CopyPaste
+// is instantiated (avoids circular: builder/index.js ← app.js ← copy-paste.js).
 BaseNode.configure({
   tree,
   findAndRemove,
@@ -25,6 +27,11 @@ BaseNode.configure({
   domPurify:     window.DOMPurify,
   marked:        window.marked,
   leftPanelBody: document.querySelector('.left-panel-body'),
+  // placeholders — patched by app.js after CopyPaste instantiation
+  copyNode:   null,
+  pasteAfter:  null,
+  pasteBefore: null,
+  hasPaste:   null,
 });
 
 // ── Inject app services into modal layer ──────────────────────────────────────
