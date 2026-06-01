@@ -40,8 +40,19 @@ async function loadFixture(page) {
 }
 
 async function openPropsModal(page, nodeId) {
-  await page.locator(`[data-node-id="${nodeId}"] [data-testid="action-codes"]`).click();
+  await page.locator(`[data-node-id="${nodeId}"] [data-testid="action-codes"]`).first().click();
   await expect(page.locator('[data-testid="codesModal"]')).toBeVisible({ timeout: 3000 });
+}
+
+async function exportFHIR(page) {
+  await page.getByTestId('export-btn').click();
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+  ]);
+  const fp = await download.path();
+  const { readFileSync } = await import('node:fs');
+  return JSON.parse(readFileSync(fp, 'utf8'));
 }
 
 // ── import: fields pre-filled ─────────────────────────────────────────────────
@@ -108,15 +119,7 @@ test.describe('baseType / fhirType — edit and apply', () => {
 test.describe('baseType / fhirType — export round-trip', () => {
   test('exported JSON contains questionnaire-baseType extension for group', async ({ page }) => {
     await loadFixture(page);
-    // Trigger export download via Show JSON and inspect
-    const [download] = await Promise.all([
-      page.waitForEvent('download'),
-      page.locator('[data-testid="export-btn"]').click(),
-    ]);
-    const stream = await download.createReadStream();
-    const chunks = [];
-    for await (const chunk of stream) chunks.push(chunk);
-    const json = JSON.parse(Buffer.concat(chunks).toString());
+    const json = await exportFHIR(page);
     const group = json.item.find(i => i.linkId === 'name-group');
     const ext = (group.extension || []).find(e => e.url === BASE_TYPE_URL);
     expect(ext?.valueCode).toBe('HumanName');
@@ -124,14 +127,7 @@ test.describe('baseType / fhirType — export round-trip', () => {
 
   test('exported JSON contains questionnaire-fhirType extension for group', async ({ page }) => {
     await loadFixture(page);
-    const [download] = await Promise.all([
-      page.waitForEvent('download'),
-      page.locator('[data-testid="export-btn"]').click(),
-    ]);
-    const stream = await download.createReadStream();
-    const chunks = [];
-    for await (const chunk of stream) chunks.push(chunk);
-    const json = JSON.parse(Buffer.concat(chunks).toString());
+    const json = await exportFHIR(page);
     const group = json.item.find(i => i.linkId === 'name-group');
     const ext = (group.extension || []).find(e => e.url === FHIR_TYPE_URL);
     expect(ext?.valueCode).toBe('HumanName');
@@ -139,14 +135,7 @@ test.describe('baseType / fhirType — export round-trip', () => {
 
   test('exported JSON contains questionnaire-baseType for nested item', async ({ page }) => {
     await loadFixture(page);
-    const [download] = await Promise.all([
-      page.waitForEvent('download'),
-      page.locator('[data-testid="export-btn"]').click(),
-    ]);
-    const stream = await download.createReadStream();
-    const chunks = [];
-    for await (const chunk of stream) chunks.push(chunk);
-    const json = JSON.parse(Buffer.concat(chunks).toString());
+    const json = await exportFHIR(page);
     const group = json.item.find(i => i.linkId === 'name-group');
     const nested = group.item.find(i => i.linkId === 'family-name');
     const ext = (nested.extension || []).find(e => e.url === BASE_TYPE_URL);
