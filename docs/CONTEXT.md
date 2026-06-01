@@ -169,6 +169,9 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `sampledata/patient-scenario-eligibility.fhir.json` | Scenario: Bariatric Surgery Eligibility — `initialExpression` + `enableWhenExpression` pathways |
 | `sampledata/patient-scenario-risk.fhir.json` | Scenario: Pre-op Risk Assessment — readOnly `initialExpression` fields |
 | `sampledata/patient-scenario-calc-chain.fhir.json` | Scenario: Risk Score Calc Chain — `initialExpression` → `calculatedExpression` → `enableWhenExpression` pipeline; LOW/MODERATE/HIGH per preset |
+| `sampledata/patient-scenario-medication.fhir.json` | Scenario: Medication Review & Allergy Screen — repeating groups (medications, allergy details, OTC supplements), standard `enableWhen` on boolean gates, `required` fields, medication adherence |
+| `sampledata/patient-scenario-pediatric.fhir.json` | Scenario: Pediatric Well-Child Visit — `calculatedExpression` (BMI from height/weight), four age-conditional milestone sections via `enableWhenExpression` (infant/toddler/preschool/school-age), `subjectType: Patient` |
+| `sampledata/patient-scenario-diabetes.fhir.json` | Scenario: Diabetes Self-Management Check-in — full SDC variable chain: `%hba1c` → `%hba1cRisk` / `%hba1cRiskScore` → `calculatedExpression` risk score → `enableWhenExpression` risk-tier notes; insulin vs oral-meds section switching on `%onInsulin` |
 | `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all types |
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History (49 items, depth 5) |
 | `sampledata/prowl-ss.fhir.json` | PROWL-SS post-op pain assessment (44 items) |

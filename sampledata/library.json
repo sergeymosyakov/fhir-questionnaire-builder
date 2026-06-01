@@ -31,9 +31,12 @@
     "id": "patient-scenarios",
     "label": "Patient Scenarios",
     "items": [
-      { "label": "Eligibility Screen",      "file": "patient-scenario-eligibility.fhir.json",  "type": "questionnaire" },
-      { "label": "Pre-op Risk Assessment",  "file": "patient-scenario-risk.fhir.json",          "type": "questionnaire" },
-      { "label": "Risk Score Calc Chain",   "file": "patient-scenario-calc-chain.fhir.json",    "type": "questionnaire" }
+      { "label": "Eligibility Screen",           "file": "patient-scenario-eligibility.fhir.json",  "type": "questionnaire" },
+      { "label": "Pre-op Risk Assessment",       "file": "patient-scenario-risk.fhir.json",          "type": "questionnaire" },
+      { "label": "Risk Score Calc Chain",        "file": "patient-scenario-calc-chain.fhir.json",    "type": "questionnaire" },
+      { "label": "Medication Review & Allergy",  "file": "patient-scenario-medication.fhir.json",    "type": "questionnaire", "note": "repeating groups, enableWhen, required fields, medication reconciliation" },
+      { "label": "Pediatric Well-Child Visit",   "file": "patient-scenario-pediatric.fhir.json",     "type": "questionnaire", "note": "calculatedExpression (BMI), age-conditional milestones via enableWhenExpression" },
+      { "label": "Diabetes Self-Management",     "file": "patient-scenario-diabetes.fhir.json",      "type": "questionnaire", "note": "SDC variable chain: hba1c → risk tier → conditional insulin/oral-meds sections" }
     ]
   },
   {
