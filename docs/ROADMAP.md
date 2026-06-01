@@ -8,8 +8,7 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Next
 
-- [ ] **Copy / paste nodes** — duplicate a question or an entire group (with children) anywhere in the tree; Ctrl+C / Ctrl+V on a builder node
-- [ ] **More sample data** — 2–3 additional questionnaires covering different complexity levels, with documented expected PASS/FAIL outcomes per patient profile
+*(No current items.)*
 
 ## Near-term
 
