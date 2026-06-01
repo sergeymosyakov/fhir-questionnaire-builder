@@ -413,7 +413,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 
 | FHIR field | Status | Notes |
 |---|---|---|
-| `Questionnaire.implicitRules` | ✅ Fully implemented | Editable URI input in Properties modal — Resource Meta section; import + export |
 
 ### Item-level — not implemented
 
