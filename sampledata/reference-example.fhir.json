@@ -64,6 +64,52 @@
                                            }
                                        }
                                    ]
+                 },
+                 {
+                     "linkId":  "patient-name",
+                     "text":  "Patient name (derived from StructureDefinition)",
+                     "type":  "group",
+                     "definition":  "http://hl7.org/fhir/StructureDefinition/Patient#Patient.name",
+                     "extension":  [
+                                       {
+                                           "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-baseType",
+                                           "valueCode":  "HumanName"
+                                       },
+                                       {
+                                           "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType",
+                                           "valueCode":  "HumanName"
+                                       }
+                                   ],
+                     "item":  [
+                                  {
+                                      "linkId":  "patient-name-family",
+                                      "text":  "Family name",
+                                      "type":  "string",
+                                      "definition":  "http://hl7.org/fhir/StructureDefinition/Patient#Patient.name.family",
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-baseType",
+                                                            "valueCode":  "string"
+                                                        },
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType",
+                                                            "valueCode":  "string"
+                                                        }
+                                                    ]
+                                  },
+                                  {
+                                      "linkId":  "patient-name-given",
+                                      "text":  "Given name",
+                                      "type":  "string",
+                                      "definition":  "http://hl7.org/fhir/StructureDefinition/Patient#Patient.name.given",
+                                      "extension":  [
+                                                        {
+                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-baseType",
+                                                            "valueCode":  "string"
+                                                        }
+                                                    ]
+                                  }
+                              ]
                  }
              ]
 }

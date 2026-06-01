@@ -962,3 +962,40 @@ describe('answerConstraint export (item)', () => {
     expect(q.item[0].answerConstraint).toBeUndefined();
   });
 });
+
+// ── questionnaire-baseType / questionnaire-fhirType ───────────────────────────
+describe('buildFHIRObject — _baseType / _fhirType', () => {
+  const BASE_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType';
+  const FHIR_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType';
+
+  it('exports _baseType as questionnaire-baseType extension with valueCode', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string', _baseType: 'string' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === BASE_URL)?.valueCode).toBe('string');
+  });
+
+  it('exports _fhirType as questionnaire-fhirType extension with valueCode', () => {
+    const q = build([{ id: 'g1', type: 'group', title: 'G', children: [], _fhirType: 'HumanName' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === FHIR_URL)?.valueCode).toBe('HumanName');
+  });
+
+  it('exports both baseType and fhirType when both set', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string', _baseType: 'HumanName', _fhirType: 'HumanName' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === BASE_URL)?.valueCode).toBe('HumanName');
+    expect(ext.find(e => e.url === FHIR_URL)?.valueCode).toBe('HumanName');
+  });
+
+  it('omits questionnaire-baseType when _baseType is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.filter(e => e.url === BASE_URL)).toHaveLength(0);
+  });
+
+  it('omits questionnaire-fhirType when _fhirType is absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.filter(e => e.url === FHIR_URL)).toHaveLength(0);
+  });
+});

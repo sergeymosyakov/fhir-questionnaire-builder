@@ -23,6 +23,8 @@ Every node in the tree is either a **group** or an **item**:
   children:            Node[],
   // ── also possible on groups (imported/exported; editable via Props button) ──
   _definition:         string,          // item.definition URL
+  _baseType:           string,          // questionnaire-baseType extension valueCode
+  _fhirType:           string,          // questionnaire-fhirType extension valueCode
   _codes:              object[],        // item.code[] coding entries
   _supportLinks:       string[],        // questionnaire-supportLink URIs (0..*)
   _hidden:             true|undefined   // sdc-questionnaire-hidden: never shown to patients; participates in calculatedExpression
@@ -71,6 +73,9 @@ Every node in the tree is either a **group** or an **item**:
   _itemMedia:          object,           // sdc-questionnaire-itemMedia valueAttachment: { url, contentType, title? } — media inline before the control
   _optionWeights:      object,           // map of option code → weight (from itemWeight extension on answerOption)
   _answerMedias:       object,           // map of option code → Attachment (from sdc-questionnaire-answerMedia extension on answerOption)
+  _definition:         string,          // item.definition URL (also on groups)
+  _baseType:           string,          // questionnaire-baseType extension valueCode (also on groups)
+  _fhirType:           string,          // questionnaire-fhirType extension valueCode (also on groups)
 }
 ```
 
@@ -198,6 +203,8 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | `logicWithParent: 'AND'` | *(default)* | No constraint generated; restored as default on import |
 | `children` | `item.item[]` | recursive |
 | `_definition` | `item.definition` | URL pointing to a StructureDefinition element; round-trip safe; editable via **Props** button |
+| `_baseType` | `questionnaire-baseType` ext (`valueCode`) | base FHIR type for items derived from an ElementDefinition (e.g. `string`, `HumanName`); round-trip safe; editable via **Props** button — Base Type field |
+| `_fhirType` | `questionnaire-fhirType` ext (`valueCode`) | specific FHIR type for complex elements (e.g. `HumanName`, `ContactPoint`); round-trip safe; editable via **Props** button — FHIR Type field |
 | `_codes` | `item.code[]` | coding entries (system / code / display); round-trip safe; editable via **Props** button |
 | `_supportLinks` | `questionnaire-supportLink` ext (0..*) | help / documentation URIs; rendered as 🔗 icons in builder preview and "More info ↗" buttons in patient view; editable via **Props** button |
 | `_hidden` | `sdc-questionnaire-hidden` ext (`valueBoolean: true`) | item/group permanently hidden from patients; still participates in `calculatedExpression`; rendered with purple dashed border + **HIDDEN badge** in builder preview when **hidden** toggle is on; excluded from PASS/FAIL validation; controls disabled in preview; toggled via **Hidden** action button in builder; **on import also reads** `http://hl7.org/fhir/StructureDefinition/questionnaire-hidden` (R4 standard alias) | Yes |
@@ -234,6 +241,8 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | `_initialValues` | `item.initial[]` all values | set only for repeating items with >1 initial value; exported as `initial: [entry, …]`; `_initialValue` holds `initial[0]` for backwards compat |
 | `_initialSelected` | `answerOption[].initialSelected` | code of the initially-selected option; preserved round-trip; if no `item.initial[]` exists, also used to pre-fill `_initialValue` |
 | `_definition` | `item.definition` | URL pointing to a StructureDefinition element; stored as `node._definition`; editable via **Props** button (codes-modal); round-trip safe; also supported on groups (see Group-specific) |
+| `_baseType` | `questionnaire-baseType` ext (`valueCode`) | base FHIR type for items derived from an ElementDefinition; editable via **Props** button — Base Type field; round-trip safe; also supported on groups |
+| `_fhirType` | `questionnaire-fhirType` ext (`valueCode`) | specific FHIR type for complex structures; editable via **Props** button — FHIR Type field; round-trip safe; also supported on groups |
 | `_maxDecimalPlaces` | `maxDecimalPlaces` ext (`valueInteger`) | Maximum decimal places for `decimal` items; enforced in preview (error message + `step` attribute); editable in Answer Type modal; round-trip safe |
 ---
 
@@ -420,7 +429,7 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 |---|---|---|
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
-| `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
+
 
 ### SDC extensions — population and extraction (out of scope)
 

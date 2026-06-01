@@ -82,6 +82,8 @@
     { cat: 'Item — Core', field: 'item.enableBehavior', desc: 'How multiple enableWhen conditions are combined: all (AND) or any (OR)', where: 'Show When modal', how: 'Click "Show When" → AND / OR selector at the top of the modal' },
     { cat: 'Item — Core', field: 'item.disabledDisplay', desc: "How to show items when their enableWhen condition is false: 'hidden' removes the item; 'protected' shows it greyed-out", where: 'States modal', how: 'Click "States" → Disabled Display dropdown' },
     { cat: 'Item — Core', field: 'item.definition', desc: 'URL pointing to an ElementDefinition that provides additional meaning', where: 'Item Properties modal', how: 'Click "Props" action link on the item → Definition field' },
+    { cat: 'Item — Extensions', field: 'item.extension[questionnaire-baseType]', desc: 'Base FHIR type for items derived from an ElementDefinition (e.g. string, HumanName)', where: 'Item Properties modal', how: 'Click "Props" action link → Base Type field' },
+    { cat: 'Item — Extensions', field: 'item.extension[questionnaire-fhirType]', desc: 'Specific FHIR type for complex elements derived from an ElementDefinition (e.g. HumanName, ContactPoint)', where: 'Item Properties modal', how: 'Click "Props" action link → FHIR Type field' },
     { cat: 'Item — Core', field: 'item.code[]', desc: 'Formal coding identifiers for the item (e.g. LOINC code)', where: 'Item Properties modal', how: 'Click "Props" action link on the item → Codes section' },
 
     // ── Item — standard FHIR extensions ──────────────────────────────────────

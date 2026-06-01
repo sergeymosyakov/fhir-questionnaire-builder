@@ -395,6 +395,14 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   if (fhirItem.repeats) node.repeats = true;
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
   if (fhirItem.definition) node._definition = fhirItem.definition;
+  const baseTypeExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType'
+  );
+  if (baseTypeExt?.valueCode) node._baseType = baseTypeExt.valueCode;
+  const fhirTypeExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType'
+  );
+  if (fhirTypeExt?.valueCode) node._fhirType = fhirTypeExt.valueCode;
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
   if (fhirItem.answerValueSet) {
     node._answerValueSet = fhirItem.answerValueSet;
@@ -471,6 +479,14 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     if (rm) node._renderMarkdown = rm.valueMarkdown || rm.valueString || '';
     if (fhirItem.prefix) node._prefix = fhirItem.prefix;
     if (fhirItem.definition) node._definition = fhirItem.definition;
+    const grpBaseTypeExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType'
+    );
+    if (grpBaseTypeExt?.valueCode) node._baseType = grpBaseTypeExt.valueCode;
+    const grpFhirTypeExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType'
+    );
+    if (grpFhirTypeExt?.valueCode) node._fhirType = grpFhirTypeExt.valueCode;
     if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
     const groupSupportLinks = (fhirItem.extension || [])
       .filter(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink' && e.valueUri)

@@ -43,6 +43,8 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia',
   'http://hl7.org/fhir/StructureDefinition/itemWeight',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType',
+  'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType',
 ]);
 
 export function _collectUnknownExtensions(fhirItem) {

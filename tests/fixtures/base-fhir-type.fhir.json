@@ -1,0 +1,38 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "base-fhir-type-test",
+  "title": "Base/FHIR Type Test",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "name-group",
+      "text": "Patient name",
+      "type": "group",
+      "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient.name",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-baseType",
+          "valueCode": "HumanName"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType",
+          "valueCode": "HumanName"
+        }
+      ],
+      "item": [
+        {
+          "linkId": "family-name",
+          "text": "Family name",
+          "type": "string",
+          "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient.name.family",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-baseType",
+              "valueCode": "string"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

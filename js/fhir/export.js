@@ -82,6 +82,14 @@ function nodeToFHIRItem(node) {
 
   if (node._prefix) fhirItem.prefix = node._prefix;
   if (node._definition) fhirItem.definition = node._definition;
+  if (node._baseType) {
+    fhirItem.extension = fhirItem.extension || [];
+    fhirItem.extension.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType', valueCode: node._baseType });
+  }
+  if (node._fhirType) {
+    fhirItem.extension = fhirItem.extension || [];
+    fhirItem.extension.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType', valueCode: node._fhirType });
+  }
   if (node._codes && node._codes.length) fhirItem.code = node._codes;
   if (node.mandatory === true)  fhirItem.required = true;
 
