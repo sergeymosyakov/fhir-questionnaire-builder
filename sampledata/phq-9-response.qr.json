@@ -1,6 +1,12 @@
 {
   "resourceType": "QuestionnaireResponse",
   "id": "phq9-sample-mild-depression",
+  "language": "en",
+  "meta": {
+    "versionId": "1",
+    "source": "https://example.org/fhir/qr-source",
+    "profile": ["http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaireresponse"]
+  },
   "questionnaire": "http://hl7.org/fhir/us/core/Questionnaire/phq-9-example",
   "status": "completed",
   "authored": "2026-05-19T10:00:00Z",

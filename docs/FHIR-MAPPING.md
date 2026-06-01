@@ -352,10 +352,16 @@ This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR wit
 | `subject` | ← `subject.reference` in `qrMeta.subject` | → `subject.reference` when non-empty | Optional; editable in QR Export modal |
 | `author` | ← `author.reference` in `qrMeta.author` | → `author.reference` when non-empty | Optional; editable in QR Export modal |
 | `authored` | not stored | → `new Date().toISOString()` | Always set to current time on export |
+| `id` | ← `id` in `qrMeta.id` | → written when non-empty; editable in QR Export modal | Optional |
+| `language` | ← `language` in `qrMeta.language` | → written when non-empty; editable in QR Export modal | BCP-47 code |
+| `meta.versionId` | ← `meta.versionId` in `qrMeta.metaVersionId` | → written when non-empty; Generate UUID button available | Optional |
+| `meta.source` | ← `meta.source` in `qrMeta.metaSource` | → written when non-empty; editable in QR Export modal | Optional URI |
+| `meta.lastUpdated` | not stored | → `new Date().toISOString()` | Always set to current time on export |
+| `meta.profile[]` | ← `meta.profile` in `qrMeta.metaProfile[]` | → written when non-empty array; editable list in QR Export modal | Optional canonical URLs |
+| `meta.tag[]` | ← `meta.tag` in `qrMeta.metaTag[]` | → written when non-empty array | Round-trip preserved; no editing UI |
+| `meta.security[]` | ← `meta.security` in `qrMeta.metaSecurity[]` | → written when non-empty array | Round-trip preserved; no editing UI |
 
 `qrMeta` is reset to defaults when a new questionnaire is imported. When a QR is loaded via the Answers menu, `qrMeta` is updated from the loaded response and pre-populates the QR Export modal.
-
-**Minor gaps:** `id` is not preserved on import (generated fresh on export). `implicitRules`, `language`, and `meta` are not preserved — pass-through not implemented for QR-level meta.
 
 ---
 
@@ -364,7 +370,7 @@ This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR wit
 | Version | Status |
 |---|---|
 | R4 | ✅ Fully supported |
-| R4B / R5 | 🔧 Partial — most fields overlap; `answerConstraint` and `disabledDisplay` are R4B/R5 native (R4 backport extension handled for `disabledDisplay`) |
+| R4B / R5 | 🔧 Partial — most fields overlap; `disabledDisplay` is R4B/R5 native (R4 backport extension handled); `answerConstraint` is fully supported |
 | STU3 | ✅ Import shim — automatically normalised to R4 on load via `js/fhir/stu3-shim.js`; see table below |
 
 ### STU3 → R4 Normalisation (`js/fhir/stu3-shim.js`)
@@ -411,7 +417,7 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 
 | FHIR field / extension | Status | Notes |
 |---|---|---|
-| `answerConstraint` | ❌ Not handled | R4B/R5 field (`optionsOnly` / `optionsOrType` / `optionsOrString`) |
+| `answerConstraint` | ✅ Fully implemented | R4B/R5 field — import/export + Answer Type modal dropdown (optionsOnly / optionsOrType / optionsOrString) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |

@@ -19,9 +19,16 @@ export class QRAnswersManager {
     if (!result.ok) { showError('Cannot load answers: ' + result.error); return; }
 
     document.dispatchEvent(new CustomEvent(AppEvents.QR_LOADED, { detail: {
-      status:  result.meta.status,
-      subject: result.meta.subject,
-      author:  result.meta.author,
+      status:        result.meta.status,
+      subject:       result.meta.subject,
+      author:        result.meta.author,
+      id:            result.meta.id,
+      language:      result.meta.language,
+      metaVersionId: result.meta.metaVersionId,
+      metaSource:    result.meta.metaSource,
+      metaProfile:   result.meta.metaProfile,
+      metaTag:       result.meta.metaTag,
+      metaSecurity:  result.meta.metaSecurity,
     } }));
 
     const raw = this._rawFhir.value;

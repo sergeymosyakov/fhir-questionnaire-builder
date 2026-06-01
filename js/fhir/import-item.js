@@ -209,6 +209,9 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // maxLength
   if (fhirItem.maxLength) node._maxLength = fhirItem.maxLength;
 
+  // answerConstraint (R4B/R5 — optionsOnly | optionsOrType | optionsOrString)
+  if (fhirItem.answerConstraint) node._answerConstraint = fhirItem.answerConstraint;
+
   // minLength (SDC extension)
   const minLenExt = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/StructureDefinition/minLength'

@@ -9,7 +9,7 @@
 //   PREVIEW_NAVIGATE_TO          detail: { id }       — scroll & flash preview row for node
 //   VIEW_PREF_CHANGE             detail: { key, value }
 //   PREVIEW_MODE_CHANGE          detail: { mode }
-//   QR_LOADED                    detail: { status, subject, author }
+//   QR_LOADED                    detail: { status, subject, author, id, language, metaVersionId, metaSource, metaProfile, metaTag, metaSecurity }
 //   SHOW_JSON                    detail: { title, data }
 //   RENUMBER_PROGRESS            detail: { done, total }
 //   QUESTIONNAIRE_RESET          (no detail) — triggers _doReset() in app.js

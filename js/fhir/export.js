@@ -272,6 +272,9 @@ function nodeToFHIRItem(node) {
   // maxLength (text/url/open-choice types)
   if (node._maxLength !== undefined && node._maxLength !== null) fhirItem.maxLength = node._maxLength;
 
+  // answerConstraint (R4B/R5)
+  if (node._answerConstraint) fhirItem.answerConstraint = node._answerConstraint;
+
   // minLength (SDC extension)
   if (node._minLength !== undefined && node._minLength !== null) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/minLength', valueInteger: node._minLength });

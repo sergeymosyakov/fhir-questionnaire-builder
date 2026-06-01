@@ -588,3 +588,23 @@ describe('signatureRequired (item)', () => {
     expect(_tree[0]._signatureRequired).toBeUndefined();
   });
 });
+
+// ── answerConstraint (R4B/R5 item-level) ─────────────────────────────────────
+describe('import answerConstraint', () => {
+  const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+
+  it('reads answerConstraint from fhirItem', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', answerConstraint: 'optionsOnly' }]));
+    expect(_tree[0]._answerConstraint).toBe('optionsOnly');
+  });
+
+  it('reads optionsOrString value', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', answerConstraint: 'optionsOrString' }]));
+    expect(_tree[0]._answerConstraint).toBe('optionsOrString');
+  });
+
+  it('does not set _answerConstraint when absent', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q' }]));
+    expect(_tree[0]._answerConstraint).toBeUndefined();
+  });
+});

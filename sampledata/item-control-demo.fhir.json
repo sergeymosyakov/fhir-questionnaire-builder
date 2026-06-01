@@ -9,6 +9,7 @@
       "text": "Select all that apply",
       "type": "choice",
       "repeats": true,
+      "answerConstraint": "optionsOnly",
       "answerOption": [
         { "valueCoding": { "code": "a", "display": "Alpha" } },
         { "valueCoding": { "code": "b", "display": "Beta" } },

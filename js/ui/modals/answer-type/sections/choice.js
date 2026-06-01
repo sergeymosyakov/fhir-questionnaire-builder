@@ -291,6 +291,33 @@ class ChoiceSection extends AnswerTypeSection {
     };
     exprRadio.onchange = () => { if (exprRadio.checked) { pending.draftAVS = ''; _showOnly('expression'); } };
 
+    // ── answerConstraint (R4B/R5) ────────────────────────────────────────────
+    const aconstRow = document.createElement('div');
+    aconstRow.className = 'at-modal-multiline-row';
+    const aconstLbl = document.createElement('span');
+    aconstLbl.className        = 'at-modal-sub-lbl';
+    aconstLbl.style.marginBottom = '0';
+    aconstLbl.textContent      = 'Answer constraint:';
+    aconstLbl.dataset.tipTitle = 'answerConstraint';
+    aconstLbl.dataset.tipBody  = 'Controls how free-text answers are handled when options are defined.\n\u2022 optionsOnly \u2014 only coded options allowed\n\u2022 optionsOrType \u2014 option or any value of the answer type\n\u2022 optionsOrString \u2014 option or free-text string';
+    aconstLbl.dataset.tipFhir  = 'Questionnaire.item.answerConstraint';
+    aconstLbl.dataset.tipSpec  = 'R4';
+    const ACONST_ITEMS = [
+      { value: '',                label: '\u2014 not set \u2014' },
+      { value: 'optionsOnly',     label: 'optionsOnly' },
+      { value: 'optionsOrType',   label: 'optionsOrType' },
+      { value: 'optionsOrString', label: 'optionsOrString' },
+    ];
+    const aconstSel = createCustomSelect({
+      items:    ACONST_ITEMS,
+      value:    pending.draftAnswerConstraint || '',
+      testid:   'answer-constraint-select',
+      className: 'sc-trigger--sm',
+      onChange:  v => { pending.draftAnswerConstraint = v || undefined; },
+    });
+    aconstRow.append(aconstLbl, aconstSel.el);
+    section.appendChild(aconstRow);
+
     return section;
   }
 
@@ -397,6 +424,8 @@ class ChoiceSection extends AnswerTypeSection {
     } else if (node._itemControl === 'autocomplete' || node._itemControl === 'lookup') {
       delete node._itemControl;
     }
+    if (pending.draftAnswerConstraint) node._answerConstraint = pending.draftAnswerConstraint;
+    else delete node._answerConstraint;
   }
 
   initPending(node) {
@@ -406,8 +435,9 @@ class ChoiceSection extends AnswerTypeSection {
       draftOpenLabel:   node._openLabel || '',
       draftAnswerExpr:  node._answerExpression || '',
       draftSrc:         node._answerExpression ? 'expression' : (node._answerValueSet ? 'valueset' : 'options'),
-      draftAutocomplete: node._itemControl === 'autocomplete',
-      draftLookup:       node._itemControl === 'lookup',
+      draftAutocomplete:      node._itemControl === 'autocomplete',
+      draftLookup:            node._itemControl === 'lookup',
+      draftAnswerConstraint:  node._answerConstraint || '',
     };
   }
 }

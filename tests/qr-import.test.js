@@ -493,4 +493,55 @@ describe('importQRAnswers — meta', () => {
     const r = importQRAnswers({ resourceType: 'QuestionnaireResponse', item: [] }, {}, []);
     expect(r.meta.author).toBe('');
   });
+
+  it('returns meta.id when present', () => {
+    const qr = { resourceType: 'QuestionnaireResponse', id: 'resp-7', item: [] };
+    const r = importQRAnswers(qr, {}, []);
+    expect(r.meta.id).toBe('resp-7');
+  });
+
+  it('returns empty string for meta.id when absent', () => {
+    const r = importQRAnswers({ resourceType: 'QuestionnaireResponse', item: [] }, {}, []);
+    expect(r.meta.id).toBe('');
+  });
+
+  it('returns meta.language when present', () => {
+    const qr = { resourceType: 'QuestionnaireResponse', language: 'de', item: [] };
+    const r = importQRAnswers(qr, {}, []);
+    expect(r.meta.language).toBe('de');
+  });
+
+  it('returns empty string for meta.language when absent', () => {
+    const r = importQRAnswers({ resourceType: 'QuestionnaireResponse', item: [] }, {}, []);
+    expect(r.meta.language).toBe('');
+  });
+
+  it('returns meta.metaVersionId when present', () => {
+    const qr = { resourceType: 'QuestionnaireResponse', meta: { versionId: '3' }, item: [] };
+    const r = importQRAnswers(qr, {}, []);
+    expect(r.meta.metaVersionId).toBe('3');
+  });
+
+  it('returns empty string for meta.metaVersionId when absent', () => {
+    const r = importQRAnswers({ resourceType: 'QuestionnaireResponse', item: [] }, {}, []);
+    expect(r.meta.metaVersionId).toBe('');
+  });
+
+  it('returns meta.metaSource when present', () => {
+    const qr = { resourceType: 'QuestionnaireResponse', meta: { source: 'https://example.org' }, item: [] };
+    const r = importQRAnswers(qr, {}, []);
+    expect(r.meta.metaSource).toBe('https://example.org');
+  });
+
+  it('returns meta.metaProfile as array when present', () => {
+    const profile = ['http://hl7.org/fhir/StructureDefinition/MyProfile'];
+    const qr = { resourceType: 'QuestionnaireResponse', meta: { profile }, item: [] };
+    const r = importQRAnswers(qr, {}, []);
+    expect(r.meta.metaProfile).toEqual(profile);
+  });
+
+  it('returns empty array for meta.metaProfile when absent', () => {
+    const r = importQRAnswers({ resourceType: 'QuestionnaireResponse', item: [] }, {}, []);
+    expect(r.meta.metaProfile).toEqual([]);
+  });
 });

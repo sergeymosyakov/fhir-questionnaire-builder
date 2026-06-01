@@ -4,16 +4,24 @@
 // Run: npx playwright test tests/e2e/qr-export-modal.spec.js
 //
 // ── data-testid used in this suite ───────────────────────────────────────────
-//   add-root-group-btn     "+Add Root Group" toolbar button
-//   export-btn             "Export ▾" toolbar button
-//   export-qr-item         "QuestionnaireResponse" dropdown item
-//   qr-export-filename     file name input inside the modal
-//   qr-export-status       status custom-select trigger inside the modal
-//   qr-export-subject      subject reference input
-//   qr-export-author       author reference input
-//   qrExportModalApply     "Apply" button in modal footer
-//   qrExportModalCancel    "Cancel" button in modal footer
-//   qrExportModal          modal backdrop (display:flex when open)
+//   add-root-group-btn         "+Add Root Group" toolbar button
+//   export-btn                 "Export ▾" toolbar button
+//   export-qr-item             "QuestionnaireResponse" dropdown item
+//   qr-export-filename         file name input inside the modal
+//   qr-export-status           status custom-select trigger inside the modal
+//   qr-export-subject          subject reference input
+//   qr-export-author           author reference input
+//   qr-export-id               resource id input
+//   qr-export-language         language code input
+//   qr-export-version-id       meta.versionId input
+//   qr-export-version-id-generate  "Generate" UUID button
+//   qr-export-meta-source      meta.source input
+//   qr-export-profile-add      "Add profile URL" button
+//   qr-export-profile-url-{n}  nth profile URL input
+//   qr-export-profile-remove-{n}  remove nth profile button
+//   qrExportModalApply         "Apply" button in modal footer
+//   qrExportModalCancel        "Cancel" button in modal footer
+//   qrExportModal              modal backdrop (display:flex when open)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { readFileSync } from 'node:fs';
@@ -147,4 +155,80 @@ test('downloaded JSON has no subject when field is empty', async ({ page }) => {
   ]);
   const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
   expect(qr.subject).toBeUndefined();
+});
+
+// ── new fields: id, language, meta ────────────────────────────────────────────
+
+test('modal contains id, language, versionId, source and profile-add fields', async ({ page }) => {
+  await loadSampleAndOpenExportModal(page);
+  await expect(page.getByTestId('qr-export-id')).toBeVisible();
+  await expect(page.getByTestId('qr-export-language')).toBeVisible();
+  await expect(page.getByTestId('qr-export-version-id')).toBeVisible();
+  await expect(page.getByTestId('qr-export-meta-source')).toBeVisible();
+  await expect(page.getByTestId('qr-export-profile-add')).toBeVisible();
+});
+
+test('downloaded JSON contains user-specified resource id', async ({ page }) => {
+  await loadSampleAndOpenExportModal(page);
+  await page.getByTestId('qr-export-id').fill('my-resp-001');
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByTestId('qrExportModalApply').click(),
+  ]);
+  const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
+  expect(qr.id).toBe('my-resp-001');
+});
+
+test('downloaded JSON contains user-specified language', async ({ page }) => {
+  await loadSampleAndOpenExportModal(page);
+  await page.getByTestId('qr-export-language').fill('de');
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByTestId('qrExportModalApply').click(),
+  ]);
+  const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
+  expect(qr.language).toBe('de');
+});
+
+test('downloaded JSON meta contains versionId', async ({ page }) => {
+  await loadSampleAndOpenExportModal(page);
+  await page.getByTestId('qr-export-version-id').fill('5');
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByTestId('qrExportModalApply').click(),
+  ]);
+  const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
+  expect(qr.meta?.versionId).toBe('5');
+});
+
+test('Generate button fills versionId with a UUID', async ({ page }) => {
+  await loadSampleAndOpenExportModal(page);
+  const before = await page.getByTestId('qr-export-version-id').inputValue();
+  await page.getByTestId('qr-export-version-id-generate').click();
+  const after = await page.getByTestId('qr-export-version-id').inputValue();
+  expect(after).toMatch(/^[0-9a-f-]{36}$/i);
+  expect(after).not.toBe(before);
+});
+
+test('user can add a profile URL and it appears in download', async ({ page }) => {
+  await loadSampleAndOpenExportModal(page);
+  await page.getByTestId('qr-export-profile-add').click();
+  await page.getByTestId('qr-export-profile-url-0').fill('http://hl7.org/fhir/StructureDefinition/MyProfile');
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByTestId('qrExportModalApply').click(),
+  ]);
+  const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
+  expect(qr.meta?.profile).toContain('http://hl7.org/fhir/StructureDefinition/MyProfile');
+});
+
+test('downloaded JSON always has meta.lastUpdated', async ({ page }) => {
+  await loadSampleAndOpenExportModal(page);
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByTestId('qrExportModalApply').click(),
+  ]);
+  const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
+  expect(qr.meta?.lastUpdated).toBeDefined();
+  expect(new Date(qr.meta.lastUpdated).toISOString()).toBe(qr.meta.lastUpdated);
 });

@@ -159,3 +159,59 @@ describe('exportQR — file download', () => {
     expect(blobArg.parts[0]).toBe(JSON.stringify(qr, null, 2));
   });
 });
+
+// ── exportQR — new QR fields (id, language, meta) ────────────────────────────
+describe('exportQR — id, language and meta block', () => {
+  it('does not set id when meta.id is absent', () => {
+    exportQR('test.json');
+    expect(buildQR.mock.results[0].value.id).toBeUndefined();
+  });
+
+  it('sets id when meta.id is provided', () => {
+    exportQR('test.json', { id: 'my-response-42' });
+    expect(buildQR.mock.results[0].value.id).toBe('my-response-42');
+  });
+
+  it('does not set language when meta.language is absent', () => {
+    exportQR('test.json');
+    expect(buildQR.mock.results[0].value.language).toBeUndefined();
+  });
+
+  it('sets language when meta.language is provided', () => {
+    exportQR('test.json', { language: 'nl' });
+    expect(buildQR.mock.results[0].value.language).toBe('nl');
+  });
+
+  it('always writes meta.lastUpdated as an ISO date string', () => {
+    exportQR('test.json');
+    const { meta } = buildQR.mock.results[0].value;
+    expect(meta).toBeDefined();
+    expect(typeof meta.lastUpdated).toBe('string');
+    expect(new Date(meta.lastUpdated).toISOString()).toBe(meta.lastUpdated);
+  });
+
+  it('writes meta.versionId when provided', () => {
+    exportQR('test.json', { metaVersionId: '7' });
+    expect(buildQR.mock.results[0].value.meta.versionId).toBe('7');
+  });
+
+  it('omits meta.versionId when absent', () => {
+    exportQR('test.json');
+    expect(buildQR.mock.results[0].value.meta.versionId).toBeUndefined();
+  });
+
+  it('writes meta.source when provided', () => {
+    exportQR('test.json', { metaSource: 'https://example.org/qr' });
+    expect(buildQR.mock.results[0].value.meta.source).toBe('https://example.org/qr');
+  });
+
+  it('writes meta.profile when provided', () => {
+    exportQR('test.json', { metaProfile: ['http://hl7.org/fhir/StructureDefinition/qr-profile'] });
+    expect(buildQR.mock.results[0].value.meta.profile).toEqual(['http://hl7.org/fhir/StructureDefinition/qr-profile']);
+  });
+
+  it('omits meta.profile when empty array', () => {
+    exportQR('test.json', { metaProfile: [] });
+    expect(buildQR.mock.results[0].value.meta.profile).toBeUndefined();
+  });
+});

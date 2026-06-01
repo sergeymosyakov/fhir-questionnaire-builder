@@ -107,9 +107,16 @@ export function importQRAnswers(qrJson, values, tree) {
 
   return { ok: true, loaded, unmatched, questionnaire: qrJson.questionnaire || '',
     meta: {
-      status:  qrJson.status  || 'in-progress',
-      subject: qrJson.subject?.reference || '',
-      author:  qrJson.author?.reference  || '',
+      status:           qrJson.status  || 'in-progress',
+      subject:          qrJson.subject?.reference || '',
+      author:           qrJson.author?.reference  || '',
+      id:               qrJson.id || '',
+      language:         qrJson.language || '',
+      metaVersionId:    qrJson.meta?.versionId || '',
+      metaSource:       qrJson.meta?.source    || '',
+      metaProfile:      (qrJson.meta?.profile  || []).slice(),
+      metaTag:          (qrJson.meta?.tag       || []).map(c => ({ ...c })),
+      metaSecurity:     (qrJson.meta?.security  || []).map(c => ({ ...c })),
     },
   };
 }

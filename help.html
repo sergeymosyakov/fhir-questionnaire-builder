@@ -135,9 +135,21 @@
     { cat: 'Item — Extensions', field: 'sdc-questionnaire-itemMedia', desc: 'Attaches a media file (image, audio, video) to the question. The media is displayed inline in the preview before the answer control.', where: 'Answer Type modal → Item media URL', how: 'Click "Answer Type" → enter media URL and content type' },
     { cat: 'Item — Extensions', field: 'itemWeight (on answerOption)', desc: 'Scoring weight for an individual answer option. Used for advanced scoring beyond ordinalValue.', where: 'Answer Type modal → Options editor → Weight column', how: 'Click "Answer Type" → enter weight value in the Weight column' },
     { cat: 'Item — Extensions', field: 'sdc-questionnaire-answerMedia (on answerOption)', desc: 'Attaches a media file to a specific answer option. The media is shown inline next to the option label.', where: 'Imported and exported only (no inline editor)', how: 'Must be added via JSON import; preserved on round-trip' },
+    { cat: 'Item — Extensions', field: 'answerConstraint (R4B/R5)', desc: 'Constrains how answer values are validated: optionsOnly — only coded options; optionsOrType — option or any value of the answer type; optionsOrString — option or free-text string.', where: 'Answer Type modal → Answer Constraint dropdown', how: 'Click "Answer Type" on a choice/open-choice item → set Answer Constraint' },
+
+    // ── QR Export ─────────────────────────────────────────────────────────────
+    { cat: 'QR Export', field: 'QuestionnaireResponse.status', desc: 'Completion status of the response (in-progress, completed, amended, etc.)', where: 'Export → QuestionnaireResponse modal → Status field', how: 'Open Export menu → QuestionnaireResponse → pick status' },
+    { cat: 'QR Export', field: 'QuestionnaireResponse.subject', desc: 'Patient or subject the response is about (FHIR reference string)', where: 'Export → QuestionnaireResponse modal → Subject field', how: 'Enter a reference string, e.g. Patient/123' },
+    { cat: 'QR Export', field: 'QuestionnaireResponse.author', desc: 'Author of the response (FHIR reference string)', where: 'Export → QuestionnaireResponse modal → Author field', how: 'Enter a reference string, e.g. Practitioner/7' },
+    { cat: 'QR Export', field: 'QuestionnaireResponse.authored', desc: 'Auto-set to current UTC timestamp on every export', where: 'Automatic', how: 'Set automatically — no user input needed' },
+    { cat: 'QR Export', field: 'QuestionnaireResponse.id', desc: 'Resource logical id of the exported QR resource', where: 'Export → QuestionnaireResponse modal → Resource ID field', how: 'Enter any string; leave blank to omit' },
+    { cat: 'QR Export', field: 'QuestionnaireResponse.language', desc: 'BCP-47 language code for the response content', where: 'Export → QuestionnaireResponse modal → Language field', how: 'Enter language code, e.g. en, de, nl' },
+    { cat: 'QR Export', field: 'QuestionnaireResponse.meta.versionId', desc: 'Version identifier for the response resource', where: 'Export → QuestionnaireResponse modal → Version ID field', how: 'Enter manually or click Generate to create a UUID' },
+    { cat: 'QR Export', field: 'QuestionnaireResponse.meta.source', desc: 'URI identifying the source system that created the resource', where: 'Export → QuestionnaireResponse modal → Meta Source field', how: 'Enter a URI' },
+    { cat: 'QR Export', field: 'QuestionnaireResponse.meta.lastUpdated', desc: 'Auto-set to current UTC timestamp on every export', where: 'Automatic', how: 'Set automatically — no user input needed' },
+    { cat: 'QR Export', field: 'QuestionnaireResponse.meta.profile[]', desc: 'Canonical URLs of profiles this response claims to conform to', where: 'Export → QuestionnaireResponse modal → Profiles section', how: 'Click "+ Add Profile URL" and enter canonical URL(s)' },
 
     // ── Not supported ─────────────────────────────────────────────────────────
-    { cat: 'Not Supported', field: 'answerConstraint (R4B/R5)', desc: 'Constrains answer values: optionsOnly / optionsOrType / optionsOrString', where: '— not implemented', how: 'Not preserved on round-trip' },
   ];
 
   // ── Category badge colors ─────────────────────────────────────────────────
@@ -146,6 +158,7 @@
     'Item — Core':       'cat-core',
     'Item — Extensions': 'cat-ext',
     'Item — SDC':        'cat-sdc',
+    'QR Export':         'cat-qr',
     'Not Supported':     'cat-ns',
   };
 

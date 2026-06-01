@@ -944,3 +944,21 @@ describe('signatureRequired export (item)', () => {
     expect(exts).toHaveLength(0);
   });
 });
+
+// ── answerConstraint (R4B/R5 item-level) ─────────────────────────────────────
+describe('answerConstraint export (item)', () => {
+  it('exports answerConstraint when set to optionsOnly', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'choice', _answerConstraint: 'optionsOnly' }]);
+    expect(q.item[0].answerConstraint).toBe('optionsOnly');
+  });
+
+  it('exports answerConstraint when set to optionsOrType', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'choice', _answerConstraint: 'optionsOrType' }]);
+    expect(q.item[0].answerConstraint).toBe('optionsOrType');
+  });
+
+  it('does not export answerConstraint when absent', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'choice' }]);
+    expect(q.item[0].answerConstraint).toBeUndefined();
+  });
+});

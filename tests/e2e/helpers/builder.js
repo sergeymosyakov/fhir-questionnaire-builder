@@ -39,5 +39,6 @@ export async function addItemToGroup(page, groupNodeId) {
   await page.locator('[data-testid="add-menu-item"]').first().click();
   const itemId = groupNodeId + '.1';
   await expect(page.locator(`[data-node-id="${itemId}"]`)).toBeVisible();
+  await expect(page.locator(`[data-preview-id="${itemId}"]`)).toBeVisible();
   return itemId;
 }
