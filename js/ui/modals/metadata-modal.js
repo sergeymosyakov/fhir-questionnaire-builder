@@ -34,6 +34,7 @@ class MetadataModal extends Modal {
       codes: JSON.parse(JSON.stringify(questMeta._rawCode || [])),
       metaVersionId:  questMeta._metaVersionId  || '',
       metaSource:     questMeta._metaSource      || '',
+      implicitRules:  questMeta._implicitRules   || '',
       metaProfile:    [...(questMeta._rawMetaProfile  || [])],
       metaTag:        JSON.parse(JSON.stringify(questMeta._rawMetaTag      || [])),
       metaSecurity:   JSON.parse(JSON.stringify(questMeta._rawMetaSecurity || [])),
@@ -76,6 +77,7 @@ class MetadataModal extends Modal {
     questMeta._rawCode = filteredCodes.length ? filteredCodes : null;
     questMeta._metaVersionId   = p.metaVersionId.trim();
     questMeta._metaSource      = p.metaSource.trim();
+    questMeta._implicitRules   = p.implicitRules.trim();
     questMeta._rawMetaProfile  = p.metaProfile.filter(u => u.trim());
     questMeta._rawMetaTag      = p.metaTag.filter(c => c.code?.trim());
     questMeta._rawMetaSecurity = p.metaSecurity.filter(c => c.code?.trim());

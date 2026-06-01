@@ -9,7 +9,7 @@ const _questContained = [];
 let _rawFhir = { value: null };
 const _questMeta = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
-  effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [], _rawQuestExtensions: [],
+  effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [], _rawQuestExtensions: [], _implicitRules: '',
   _rawText: null,
   _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
@@ -261,6 +261,23 @@ describe('buildFHIRObject — questMeta', () => {
     _questMeta._rawJurisdiction = [{ coding: [{ system: 'urn:iso:std:iso:3166', code: 'US' }] }];
     const q = buildFHIRObject();
     expect(q.jurisdiction).toEqual([{ coding: [{ system: 'urn:iso:std:iso:3166', code: 'US' }] }]);
+  });
+});
+
+// ── implicitRules ─────────────────────────────────────────────────────────────
+describe('buildFHIRObject — implicitRules', () => {
+  afterEach(() => { _questMeta._implicitRules = ''; });
+
+  it('exports implicitRules when set', () => {
+    _questMeta._implicitRules = 'https://example.org/rules';
+    const q = buildFHIRObject();
+    expect(q.implicitRules).toBe('https://example.org/rules');
+  });
+
+  it('omits implicitRules when empty', () => {
+    _questMeta._implicitRules = '';
+    const q = buildFHIRObject();
+    expect(q.implicitRules).toBeUndefined();
   });
 });
 

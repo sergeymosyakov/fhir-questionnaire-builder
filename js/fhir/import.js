@@ -90,6 +90,7 @@ export function importFHIR(fhirJson, renderFn) {
   questMeta._metaSource      = q.meta?.source      || '';
   questMeta._metaLastUpdated = q.meta?.lastUpdated || '';
   questMeta._rawMetaProfile  = Array.isArray(q.meta?.profile)  ? [...q.meta.profile]  : [];
+  questMeta._implicitRules   = q.implicitRules || '';
   questMeta._rawMetaTag      = Array.isArray(q.meta?.tag)      ? JSON.parse(JSON.stringify(q.meta.tag))      : [];
   questMeta._rawMetaSecurity = Array.isArray(q.meta?.security) ? JSON.parse(JSON.stringify(q.meta.security)) : [];
 

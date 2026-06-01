@@ -6,6 +6,7 @@
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
 //   meta-resource-meta-toggle  Resource Meta section toggle button
+//   meta-implicit-rules        implicitRules URI input
 //   meta-version-id            meta.versionId text input
 //   meta-version-id-generate   Generate UUID button
 //   meta-source                meta.source URI input
@@ -310,13 +311,45 @@ test.describe('metadata modal — Resource Meta section', () => {
     expect(q.meta.security[0].code).toBe('R');
   });
 
+  // ── implicitRules ─────────────────────────────────────────────────────────
+
+  test('implicitRules field is visible in resource meta section', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-implicit-rules')).toBeVisible();
+  });
+
+  test('fixture implicitRules is pre-filled in the field', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await expect(page.getByTestId('meta-implicit-rules')).toHaveValue('https://example.org/fhir/implicit-rules');
+  });
+
+  test('edited implicitRules is written to export JSON', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-implicit-rules').fill('https://example.org/updated-rules');
+    await page.locator('[data-testid="metadataModalApply"]').click();
+    const q = await exportFHIR(page);
+    expect(q.implicitRules).toBe('https://example.org/updated-rules');
+  });
+
+  test('clearing implicitRules omits it from export', async ({ page }) => {
+    await loadFixture(page);
+    await openModal(page);
+    await page.getByTestId('meta-implicit-rules').fill('');
+    await page.locator('[data-testid="metadataModalApply"]').click();
+    const q = await exportFHIR(page);
+    expect(q.implicitRules).toBeUndefined();
+  });
+
   // ── Badge count ─────────────────────────────────────────────────────────────
 
   test('toggle badge reflects count of filled meta fields', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    // fixture: versionId(1) + source(1) + profile[1](1) + tag[code](1) + security[code](1) = 5
-    await expect(page.getByTestId('meta-resource-meta-toggle')).toContainText('(5)');
+    // fixture: implicitRules(1) + versionId(1) + source(1) + profile[1](1) + tag[code](1) + security[code](1) = 6
+    await expect(page.getByTestId('meta-resource-meta-toggle')).toContainText('(6)');
     await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 });

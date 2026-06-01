@@ -17,7 +17,7 @@ const _values         = {};
 const _rawFhir        = { value: null };
 const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
-  effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [], _signatureRequired: [],
+  effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [], _signatureRequired: [], _implicitRules: '',
   _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
 vi.mock('../js/state.js', () => ({
@@ -1544,6 +1544,19 @@ describe('signatureRequired on Questionnaire root', () => {
     });
     expect(_questMeta._signatureRequired).toHaveLength(1);
     expect(_questMeta._signatureRequired[0].code).toBe('1.2.840.10065.1.12.1.1');
+  });
+});
+
+// ── implicitRules ─────────────────────────────────────────────────────────────
+describe('importFHIR — implicitRules', () => {
+  it('stores implicitRules in questMeta._implicitRules', () => {
+    importFHIR({ resourceType: 'Questionnaire', title: 'T', implicitRules: 'https://example.org/rules', item: [] });
+    expect(_questMeta._implicitRules).toBe('https://example.org/rules');
+  });
+
+  it('sets _implicitRules to empty string when absent', () => {
+    importFHIR({ resourceType: 'Questionnaire', title: 'T', item: [] });
+    expect(_questMeta._implicitRules).toBe('');
   });
 });
 

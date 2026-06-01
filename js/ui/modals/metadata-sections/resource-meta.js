@@ -12,17 +12,35 @@ class ResourceMetaSection extends Section {
       tip:         { title: 'Questionnaire.meta', body: 'Resource-level metadata: server version ID, source URI, last-updated timestamp, profile declarations, workflow tags, and security labels.', fhir: 'Questionnaire.meta', spec: 'R4' },
       label:       'Resource Meta',
       countFn:     () =>
+        (pending.implicitRules ? 1 : 0) +
         (pending.metaVersionId ? 1 : 0) +
         (pending.metaSource    ? 1 : 0) +
         pending.metaProfile.filter(u => u.trim()).length +
         pending.metaTag.filter(c => c.code?.trim()).length +
         pending.metaSecurity.filter(c => c.code?.trim()).length,
       initialOpen: !!(
-        pending.metaVersionId || pending.metaSource || questMeta._metaLastUpdated ||
+        pending.implicitRules || pending.metaVersionId || pending.metaSource || questMeta._metaLastUpdated ||
         pending.metaProfile.length || pending.metaTag.length || pending.metaSecurity.length
       ),
       liveUpdate:  true,
       buildBody:   ({ el }) => {
+        // ── implicitRules ─────────────────────────────────────────────────────
+        const irRow = document.createElement('div');
+        irRow.className = 'meta-modal-row';
+        const irLbl = document.createElement('label');
+        irLbl.className   = 'meta-modal-lbl';
+        irLbl.textContent = 'Implicit Rules:';
+        applyTip(irLbl, { title: 'Questionnaire.implicitRules', body: 'A URI that declares the set of rules the resource was authored against. Servers that do not understand the rules MUST reject the resource. Rare in practice.', fhir: 'Questionnaire.implicitRules', spec: 'R4' });
+        const irInp = document.createElement('input');
+        irInp.type           = 'url';
+        irInp.className      = 'meta-modal-inp';
+        irInp.placeholder    = 'https://example.org/fhir/rules';
+        irInp.value          = pending.implicitRules || '';
+        irInp.dataset.testid = 'meta-implicit-rules';
+        irInp.oninput = () => { pending.implicitRules = irInp.value; };
+        irRow.append(irLbl, irInp);
+        el.appendChild(irRow);
+
         // ── versionId ─────────────────────────────────────────────────────────
         const versionIdRow = document.createElement('div');
         versionIdRow.className = 'meta-modal-row';

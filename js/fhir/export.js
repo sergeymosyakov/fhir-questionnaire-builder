@@ -436,6 +436,7 @@ export function buildFHIRObject() {
   if (questMeta.publisher)   q.publisher   = questMeta.publisher;
   if (questMeta.description) q.description = questMeta.description;
   if (questMeta.experimental !== null) q.experimental = questMeta.experimental;
+  if (questMeta._implicitRules) q.implicitRules = questMeta._implicitRules;
   if (questMeta.language)    q.language    = questMeta.language;
   if (questMeta.purpose)     q.purpose     = questMeta.purpose;
   if (questMeta.copyright)   q.copyright   = questMeta.copyright;

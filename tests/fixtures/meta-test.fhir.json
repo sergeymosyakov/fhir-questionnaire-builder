@@ -1,6 +1,7 @@
 {
   "resourceType": "Questionnaire",
   "id": "meta-test-id",
+  "implicitRules": "https://example.org/fhir/implicit-rules",
   "meta": {
     "versionId": "42",
     "source": "https://example.org/systems/test-builder",
