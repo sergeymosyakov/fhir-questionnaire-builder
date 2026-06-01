@@ -213,6 +213,7 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | `_initialExpr` | SDC `sdc-questionnaire-initialExpression` extension (`valueExpression.expression`) | FHIRPath; evaluated once on import and on Re-init; result pre-fills `values[]` |
 | `_readOnly` | `item.readOnly` | |
 | `_prefix` | `item.prefix` | imported and exported; displayed as amber badge in preview; editable in builder meta-row |
+| `_answerConstraint` | `item.answerConstraint` (R4B/R5) | `optionsOnly` / `optionsOrType` / `optionsOrString`; import + export + Answer Type modal dropdown; `optionsOnly` makes open-choice preview read-only |
 | `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); editable via **Props** button (codes-modal — system/code/display rows, draft pattern); also supported on groups (see Group-specific) |
 | `_maxLength` | `item.maxLength` | imported → `node._maxLength`; exported back when set; character counter + `maxlength` attribute enforced in preview |
 | `_minLength` | SDC ext `http://hl7.org/fhir/StructureDefinition/minLength` (`valueInteger`) | imported → `node._minLength`; exported back when set; `minlength` HTML attribute enforced in preview; inline error `Min N chars` shown on blur when value is non-empty but shorter than limit; clears when value reaches the limit |
@@ -417,7 +418,6 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 
 | FHIR field / extension | Status | Notes |
 |---|---|---|
-| `answerConstraint` | ✅ Fully implemented | R4B/R5 field — import/export + Answer Type modal dropdown (optionsOnly / optionsOrType / optionsOrString) |
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
 | Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
 | `questionnaire-baseType` / `questionnaire-fhirType` | ❌ Not handled | Base FHIR type for items derived from `ElementDefinition` (used with `item.definition`). |
