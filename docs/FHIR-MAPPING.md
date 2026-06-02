@@ -449,21 +449,9 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 
 ---
 
-## HAPI FHIR R4 Validator — Findings & Disposition
+## HAPI FHIR R4 Validator — Known Gaps & Limitations
 
-Results of running all `sampledata/*.fhir.json` files against `https://hapi.fhir.org/baseR4/Questionnaire/$validate` (June 2026).
-
-### Fixed in this release
-
-| Issue | Affected files | Fix applied |
-|---|---|---|
-| `questionnaire-fhirType` exported as `valueCode` — R4 extension spec requires `valueString` | `reference-example` sample | Changed export to `valueString`; sample patched |
-| `questionnaire-constraint` → `expression` sub-ext exported as `valueExpression` object — R4 expects `valueString` | `annual-health-check` sample | Export already used `valueString`; old sample regenerated |
-| `questionnaire-minOccurs` context invariant: extension only valid when `required=true` | `annual-health-check` sample | Export guard tightened (`required=true` required); `medications` item given `required: true`; validate.js warning updated |
-| `initial[]` present alongside `answerOption[]` (que-11 violation) | `example-bariatric` sample | Already fixed in prior release; sample regenerated |
-| `questionnaire-unit` on `quantity` type items — R4 only allows on `integer`/`decimal` | `example-bariatric` sample | Already fixed in prior release; auto-converted to `questionnaire-unitOption` on export |
-| FHIR `id` value `phq2_score` contains underscore — not valid per R4 id regex `[A-Za-z0-9\-.]{1,64}` | `answer-expression-demo` sample | Renamed variable to `phq2score`; all `%phq2_score` references updated |
-| `prowl-ss.fhir.json` — UTF-8 BOM + CRLF caused HAPI parse failure | `prowl-ss` sample | BOM stripped, CRLF→LF |
+Based on running all `sampledata/*.fhir.json` files against `https://hapi.fhir.org/baseR4/Questionnaire/$validate` (June 2026).
 
 ### R4B / R5-only features — exported by builder, flagged by HAPI R4 validator
 
