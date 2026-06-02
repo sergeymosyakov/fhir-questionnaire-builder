@@ -251,3 +251,114 @@ describe('validateTree — fhirpath unavailable', () => {
     globalThis.window = saved;
   });
 });
+
+// ── cross-field: required + hidden ───────────────────────────────────────────
+describe('validateTree — required + hidden', () => {
+  it('warns when item is both required and hidden', () => {
+    const item = makeItem({ id: 'q1', mandatory: true, _hidden: true });
+    const issues = validateTree([item]);
+    expect(warnIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/required and hidden/))).toBeTruthy();
+  });
+
+  it('no warning when required but not hidden', () => {
+    const item = makeItem({ id: 'q1', mandatory: true, _hidden: false });
+    expect(warnIds(validateTree([item]))).not.toContain('q1');
+  });
+
+  it('no warning when hidden but not required', () => {
+    const item = makeItem({ id: 'q1', mandatory: false, _hidden: true });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/required and hidden/))).toHaveLength(0);
+  });
+});
+
+// ── cross-field: calculatedExpression + not readOnly ─────────────────────────
+describe('validateTree — calculatedExpression without readOnly', () => {
+  it('warns when calculatedExpression set but readOnly is not true', () => {
+    const item = makeItem({ id: 'q1', _calculatedExpr: '%age * 2', _readOnly: false });
+    const issues = validateTree([item]);
+    expect(warnIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/calculatedExpression.*not read-only/))).toBeTruthy();
+  });
+
+  it('no warning when calculatedExpression set and readOnly is true', () => {
+    const item = makeItem({ id: 'q1', _calculatedExpr: '%age * 2', _readOnly: true });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/calculatedExpression/))).toHaveLength(0);
+  });
+
+  it('no warning when calculatedExpression is absent', () => {
+    const item = makeItem({ id: 'q1', _readOnly: false });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/calculatedExpression/))).toHaveLength(0);
+  });
+});
+
+// ── cross-field: answerExpression + answerOption[] ───────────────────────────
+describe('validateTree — answerExpression + answerOption co-presence', () => {
+  it('warns when both answerExpression and _rawAnswerOptions are set', () => {
+    const item = makeItem({ id: 'q1', _answerExpression: '%meds', _rawAnswerOptions: [{ valueCoding: { code: 'a' } }] });
+    const issues = validateTree([item]);
+    expect(warnIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/answerExpression.*answerOption/))).toBeTruthy();
+  });
+
+  it('warns when both answerExpression and options string are set', () => {
+    const item = makeItem({ id: 'q1', _answerExpression: '%meds', options: 'a,b,c' });
+    const issues = validateTree([item]);
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/answerExpression.*answerOption/))).toBeTruthy();
+  });
+
+  it('no warning when only answerExpression is set', () => {
+    const item = makeItem({ id: 'q1', _answerExpression: '%meds' });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/answerExpression/))).toHaveLength(0);
+  });
+});
+
+// ── cross-field: enableWhen + enableWhenExpression ───────────────────────────
+describe('validateTree — enableWhen + enableWhenExpression conflict', () => {
+  it('warns when both enableWhen[] and enableWhenExpression are set', () => {
+    const item = makeItem({ id: 'q2', enableWhen: [{ question: 'q1', operator: 'exists', answerBoolean: true }], enableWhenExpression: '%age > 18' });
+    const q1 = makeItem({ id: 'q1' });
+    const issues = validateTree([q1, item]);
+    expect(warnIds(issues)).toContain('q2');
+    expect(issues.find(i => i.nodeId === 'q2' && i.message.match(/enableWhen.*enableWhenExpression/))).toBeTruthy();
+  });
+
+  it('no warning when only enableWhen[] is set', () => {
+    const q1 = makeItem({ id: 'q1' });
+    const q2 = makeItem({ id: 'q2', enableWhen: [{ question: 'q1', operator: 'exists', answerBoolean: true }] });
+    const issues = validateTree([q1, q2]);
+    expect(issues.filter(i => i.nodeId === 'q2' && i.message.match(/enableWhenExpression/))).toHaveLength(0);
+  });
+
+  it('no warning when only enableWhenExpression is set', () => {
+    const item = makeItem({ id: 'q1', enableWhenExpression: '%age > 18' });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/enableWhen.*enableWhenExpression/))).toHaveLength(0);
+  });
+});
+
+// ── cross-field: repeats false + multiple initial values ─────────────────────
+describe('validateTree — repeats + initial values count', () => {
+  it('warns when repeats is not set but _initialValues has more than 1 entry', () => {
+    const item = makeItem({ id: 'q1', repeats: false, _initialValues: ['a', 'b'] });
+    const issues = validateTree([item]);
+    expect(warnIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/initial values/))).toBeTruthy();
+  });
+
+  it('no warning when repeats is true and multiple initial values', () => {
+    const item = makeItem({ id: 'q1', repeats: true, _initialValues: ['a', 'b'] });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/initial values/))).toHaveLength(0);
+  });
+
+  it('no warning when repeats is false but only 1 initial value', () => {
+    const item = makeItem({ id: 'q1', repeats: false, _initialValues: ['a'] });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/initial values/))).toHaveLength(0);
+  });
+});

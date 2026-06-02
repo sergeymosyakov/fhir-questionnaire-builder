@@ -115,6 +115,36 @@ export function validateTree(tree, _values = {}) {
       }
     }
 
+    // ── Cross-field semantic validation ──────────────────────────────────────
+
+    // required + hidden — item can never be answered
+    if (node.mandatory === true && node._hidden === true) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Item is both required and hidden — a hidden item can never receive an answer, so the required constraint can never be satisfied.' });
+    }
+
+    // calculatedExpression + readOnly: false — computed value will be overwritten
+    if (node._calculatedExpr && node._calculatedExpr.trim() && node._readOnly !== true) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Item has a calculatedExpression but is not read-only — the user can overwrite the computed value. Consider setting read-only.' });
+    }
+
+    // answerExpression + answerOption[] co-presence — mutually exclusive in SDC
+    const hasAnswerOptions = (node._rawAnswerOptions && node._rawAnswerOptions.length > 0) ||
+                             (node.options && node.options.trim());
+    if (node._answerExpression && node._answerExpression.trim() && hasAnswerOptions) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Item has both answerExpression and answerOption[] — these are mutually exclusive in SDC. answerOption[] will be ignored at runtime.' });
+    }
+
+    // enableWhen + enableWhenExpression conflict — only one should control visibility
+    const hasEnableWhen = Array.isArray(node.enableWhen) && node.enableWhen.length > 0;
+    if (hasEnableWhen && node.enableWhenExpression && node.enableWhenExpression.trim()) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Item has both enableWhen[] conditions and an enableWhenExpression — only one should control visibility. enableWhenExpression takes precedence in SDC.' });
+    }
+
+    // repeats: false + initial[] count > 1 — extra initial values will be ignored
+    if (!node.repeats && node._initialValues && node._initialValues.length > 1) {
+      issues.push({ severity: 'warning', nodeId: id, message: `Item has ${node._initialValues.length} initial values but repeats is not set — only the first initial value will be used.` });
+    }
+
     // ── Warnings ──────────────────────────────────────────────────────────────
     if (!node.title || !node.title.trim()) {
       issues.push({ severity: 'warning', nodeId: id || '(empty)', message: 'Empty item text (title) — FHIR R4 requires text on every item.' });
