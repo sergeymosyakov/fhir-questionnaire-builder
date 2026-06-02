@@ -14,13 +14,15 @@ function _buildRows(node) {
   const prefixes   = node._optionPrefixes  || {};
   const exclusives = node._optionExclusives || {};
   const weights    = node._optionWeights   || {};
+  const systems    = node._optionSystems   || {};
 
   if (node._rawAnswerOptions) {
     return node._rawAnswerOptions.map(o => {
-      let code = '', label = '', valueType = 'coding';
+      let code = '', label = '', valueType = 'coding', system = '';
       if (o.valueCoding) {
         code      = o.valueCoding.code    || o.valueCoding.display || '';
         label     = o.valueCoding.display || o.valueCoding.code    || '';
+        system    = o.valueCoding.system  || '';
         valueType = 'coding';
       } else if (o.valueString !== undefined) {
         code = label = o.valueString; valueType = 'string';
@@ -37,7 +39,7 @@ function _buildRows(node) {
       }
       const key = code || label;
       return {
-        code, label, valueType,
+        code, label, system, valueType,
         score:     ords[key]     !== undefined ? String(ords[key])     : '',
         prefix:    prefixes[key] || '',
         weight:    weights[key]  !== undefined ? String(weights[key])  : '',
@@ -50,6 +52,7 @@ function _buildRows(node) {
   return pairs.map(({ code, display }) => ({
     code,
     label:     display,
+    system:    systems[code] || '',
     score:     ords[code]     !== undefined ? String(ords[code])     : '',
     prefix:    prefixes[code] || '',
     weight:    weights[code]  !== undefined ? String(weights[code])  : '',
@@ -395,12 +398,16 @@ class ChoiceSection extends AnswerTypeSection {
             if (vt === 'date')      return { valueDate: code };
             if (vt === 'time')      return { valueTime: code };
             if (vt === 'reference') return { valueReference: { reference: code, ...(label && label !== code ? { display: label } : {}) } };
-            // coding: preserve existing entry (system, version, etc.) if available
+            // coding: preserve existing entry (system, version, etc.) but apply system/code/display from row
             const existing = oldByCode.get(code);
+            const newSys = (r.system || '').trim() || undefined;
             if (existing?.valueCoding) {
-              return { ...existing, valueCoding: { ...existing.valueCoding, code, display: label } };
+              const vCoding = { ...existing.valueCoding, code, display: label };
+              if (newSys) vCoding.system = newSys;
+              else delete vCoding.system;
+              return { ...existing, valueCoding: vCoding };
             }
-            return { valueCoding: { code, display: label } };
+            return { valueCoding: { ...(newSys ? { system: newSys } : {}), code, display: label } };
           });
           node._rawAnswerOptions = synced.length ? synced : undefined;
           // keep node.options in sync for builder display
@@ -436,6 +443,15 @@ class ChoiceSection extends AnswerTypeSection {
         });
         if (Object.keys(newWeights).length) node._optionWeights = newWeights;
         else delete node._optionWeights;
+
+        const newSystems = {};
+        rows.forEach(r => {
+          const code = r.code.trim();
+          const sys  = (r.system || '').trim();
+          if (sys) newSystems[code] = sys;
+        });
+        if (Object.keys(newSystems).length) node._optionSystems = newSystems;
+        else delete node._optionSystems;
       }
     } else {
       delete node._answerValueSet;
@@ -444,6 +460,7 @@ class ChoiceSection extends AnswerTypeSection {
       delete node._optionPrefixes;
       delete node._optionExclusives;
       delete node._optionWeights;
+      delete node._optionSystems;
       node.options = '';
     }
 

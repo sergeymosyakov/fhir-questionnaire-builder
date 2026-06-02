@@ -18,11 +18,11 @@
   padding: 6px 2px;
 }
 
-/* header + data rows share the same code/label/score/prefix/excl/weight + remove-btn grid */
+/* header + data rows share the same code/label/system/score/prefix/excl/weight + remove-btn grid */
 .opt-editor__header,
 .opt-editor__row {
   display: grid;
-  grid-template-columns: 1fr 1.6fr 0.6fr 0.8fr 0.6fr 36px 24px;
+  grid-template-columns: 1fr 1.4fr 1.1fr 0.6fr 0.8fr 0.6fr 36px 24px;
   gap: 4px;
   align-items: center;
 }
@@ -30,7 +30,7 @@
 /* when non-Coding types are present, prepend a Type column */
 .opt-editor--typed .opt-editor__header,
 .opt-editor--typed .opt-editor__row {
-  grid-template-columns: 0.85fr 1fr 1.4fr 0.55fr 0.7fr 0.5fr 36px 24px;
+  grid-template-columns: 0.85fr 0.9fr 1.2fr 0.9fr 0.55fr 0.7fr 0.5fr 36px 24px;
 }
 
 .opt-editor__cell--type {

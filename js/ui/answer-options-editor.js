@@ -25,7 +25,7 @@ const TYPE_ITEMS = [
 
 export function createOptionsEditor({ rows = [], onchange = () => {}, testidPrefix = 'opt', showType = false } = {}) {
   // internal state — array of row objects (mutable)
-  let _rows = rows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', weight: r.weight ?? '', exclusive: !!r.exclusive, ...(showType ? { valueType: r.valueType || 'coding' } : {}) }));
+  let _rows = rows.map(r => ({ code: r.code || '', label: r.label || '', system: r.system || '', score: r.score ?? '', prefix: r.prefix || '', weight: r.weight ?? '', exclusive: !!r.exclusive, ...(showType ? { valueType: r.valueType || 'coding' } : {}) }));
 
   const wrap = document.createElement('div');
   wrap.className = showType ? 'opt-editor opt-editor--typed' : 'opt-editor';
@@ -40,7 +40,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
   addBtn.textContent = '+ Add option';
   addBtn.dataset.testid = testidPrefix + '-add-btn';
   addBtn.addEventListener('click', () => {
-    _rows.push({ code: '', label: '', score: '', prefix: '', weight: '', exclusive: false, ...(showType ? { valueType: 'coding' } : {}) });
+    _rows.push({ code: '', label: '', system: '', score: '', prefix: '', weight: '', exclusive: false, ...(showType ? { valueType: 'coding' } : {}) });
     _renderRows();
     onchange(_rows);
     // focus the code input of the new row
@@ -81,6 +81,13 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
         tipTitle: 'Display label',
         tipBody:  'Human-readable text shown to the user for this answer choice. Maps to valueCoding.display.',
         tipFhir:  'Questionnaire.item.answerOption[].valueCoding.display',
+        tipSpec:  'R4',
+      },
+      {
+        text:     'System',
+        tipTitle: 'Coding system URI',
+        tipBody:  'Optional. The code system that defines this code, e.g. http://loinc.org or http://snomed.info/sct. Eliminates FHIR validator warnings about codes with no system.',
+        tipFhir:  'Questionnaire.item.answerOption[].valueCoding.system',
         tipSpec:  'R4',
       },
       {
@@ -152,6 +159,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
       const fields = [
         { key: 'code',   placeholder: 'code',           testid: testidPrefix + '-code-' + idx },
         { key: 'label',  placeholder: 'label',          testid: testidPrefix + '-label-' + idx },
+        { key: 'system', placeholder: 'http://…',       testid: testidPrefix + '-system-' + idx },
         { key: 'score',  placeholder: 'score',          testid: testidPrefix + '-score-' + idx },
         { key: 'prefix', placeholder: 'prefix (e.g. A.)', testid: testidPrefix + '-prefix-' + idx },
         { key: 'weight', placeholder: 'weight',            testid: testidPrefix + '-weight-' + idx },
@@ -215,7 +223,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
     el: wrap,
     getRows() { return _rows; },
     setRows(newRows) {
-      _rows = newRows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', weight: r.weight ?? '', exclusive: !!r.exclusive, ...(showType ? { valueType: r.valueType || 'coding' } : {}) }));
+      _rows = newRows.map(r => ({ code: r.code || '', label: r.label || '', system: r.system || '', score: r.score ?? '', prefix: r.prefix || '', weight: r.weight ?? '', exclusive: !!r.exclusive, ...(showType ? { valueType: r.valueType || 'coding' } : {}) }));
       _renderRows();
     },
   };

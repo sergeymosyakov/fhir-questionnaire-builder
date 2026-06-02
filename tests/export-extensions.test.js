@@ -419,6 +419,53 @@ describe('buildFHIRObject — _optionPrefixes', () => {
   });
 });
 
+// ── _optionSystems ────────────────────────────────────────────────────────────
+describe('buildFHIRObject — _optionSystems', () => {
+  it('includes system in valueCoding when _optionSystems is set', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'a=Option A,b=Option B',
+      _optionSystems: { a: 'http://example.org/codes', b: 'http://loinc.org' },
+    }]);
+    const opts = q.item[0].answerOption || [];
+    const optA = opts.find(o => o.valueCoding?.code === 'a');
+    const optB = opts.find(o => o.valueCoding?.code === 'b');
+    expect(optA?.valueCoding?.system).toBe('http://example.org/codes');
+    expect(optB?.valueCoding?.system).toBe('http://loinc.org');
+  });
+
+  it('omits system in valueCoding when _optionSystems is absent', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'a=Option A',
+    }]);
+    const opts = q.item[0].answerOption || [];
+    expect(opts[0].valueCoding?.system).toBeUndefined();
+  });
+
+  it('only includes system for codes present in _optionSystems', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'a=Option A,b=Option B',
+      _optionSystems: { a: 'http://example.org/codes' },
+    }]);
+    const opts = q.item[0].answerOption || [];
+    const optB = opts.find(o => o.valueCoding?.code === 'b');
+    expect(optB?.valueCoding?.system).toBeUndefined();
+  });
+
+  it('system appears before code in valueCoding (FHIR property order)', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'a=Option A',
+      _optionSystems: { a: 'http://example.org/codes' },
+    }]);
+    const coding = q.item[0].answerOption[0].valueCoding;
+    const keys = Object.keys(coding);
+    expect(keys.indexOf('system')).toBeLessThan(keys.indexOf('code'));
+  });
+});
+
 // ── referenceResource / quantityUnit / calculatedExpr / initialExpr ───────────
 describe('buildFHIRObject — reference, quantity, expr extensions', () => {
   const REF_URL      = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource';

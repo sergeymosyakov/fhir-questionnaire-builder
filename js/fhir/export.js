@@ -260,7 +260,7 @@ export function nodeToFHIRItem(node) {
     } else {
     fhirItem.answerOption = parseOptions(node.options)
       .map(({ code, display }) => {
-        const coding = { code, display };
+        const coding = { ...(node._optionSystems?.[code] ? { system: node._optionSystems[code] } : {}), code, display };
         const answerOpt = { valueCoding: coding };
         const optExts = [];
         if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
