@@ -99,9 +99,13 @@ test.describe('unit-valueset — export round-trip', () => {
     const json3 = JSON.parse(Buffer.concat(buffer3).toString());
 
     const item = json3.item.find(i => i.linkId === 'q-with-fixed-unit');
+    // quantity items: questionnaire-unit is auto-converted to questionnaire-unitOption on export (R4 invariant)
+    const unitOptExt = item?.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption');
+    expect(unitOptExt).toBeDefined();
+    expect(unitOptExt.valueCoding.code).toBe('Cel');
+
     const unitExt = item?.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit');
-    expect(unitExt).toBeDefined();
-    expect(unitExt.valueCoding.code).toBe('Cel');
+    expect(unitExt).toBeUndefined();
 
     const vsExt = item?.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet');
     expect(vsExt).toBeUndefined();

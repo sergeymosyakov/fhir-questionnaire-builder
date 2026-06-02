@@ -151,8 +151,13 @@ export function validateTree(tree, _values = {}) {
     }
 
     // que-11: initial[x] must be absent when answerOption[] is present
-    if (node.type === 'item' && (node._initialValue !== undefined || (node._initialValues && node._initialValues.length > 0))
-        && (node.options || node._rawAnswerOptions || node._answerValueSet || node._answerExpression)) {
+    // Exception: _initialValue derived solely from answerOption[].initialSelected is NOT a violation —
+    // it IS the correct R4 pattern. Only warn when _initialValue comes from item.initial[].
+    const hasInitial = node.type === 'item' && (
+      (node._initialValue !== undefined && node._initialValue !== node._initialSelected) ||
+      (node._initialValues && node._initialValues.length > 0)
+    );
+    if (hasInitial && (node.options || node._rawAnswerOptions || node._answerValueSet || node._answerExpression)) {
       issues.push({ severity: 'warning', nodeId: id, message: 'Initial value is set but the item has answer options — R4 invariant que-11 forbids initial[x] when answerOption[] is present. Use the answer option\'s "Initially selected" setting instead. The initial value will be omitted from the export.' });
     }
 

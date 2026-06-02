@@ -130,7 +130,7 @@ test.describe('baseType / fhirType — export round-trip', () => {
     const json = await exportFHIR(page);
     const group = json.item.find(i => i.linkId === 'name-group');
     const ext = (group.extension || []).find(e => e.url === FHIR_TYPE_URL);
-    expect(ext?.valueCode).toBe('HumanName');
+    expect(ext?.valueString).toBe('HumanName');
   });
 
   test('exported JSON contains questionnaire-baseType for nested item', async ({ page }) => {

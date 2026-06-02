@@ -416,6 +416,12 @@ describe('validateTree — que-11 initial + answerOption conflict', () => {
     expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toHaveLength(0);
   });
 
+  it('no warning when _initialValue equals _initialSelected (derived from answerOption.initialSelected — correct R4 pattern)', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', _initialValue: 'opt1', _initialSelected: 'opt1', _rawAnswerOptions: [{ valueCoding: { code: 'opt1' } }] });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toHaveLength(0);
+  });
+
   it('no warning when no _initialValue even with answerOptions', () => {
     const item = makeItem({ id: 'q1', itemType: 'select', options: 'opt1|opt2' });
     const issues = validateTree([item]);
