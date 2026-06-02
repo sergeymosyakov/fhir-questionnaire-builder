@@ -8,11 +8,14 @@
 //   terminologyService.testServer(serverUrl)             → Promise<{ok, message}>
 //   terminologyService.expandAll(treeNodes, questMeta)   → Promise<failure[]>
 
-export const DEFAULT_TERMINOLOGY_SERVER = 'https://tx.fhir.org/r4';
+// Default terminology server — loaded from /config.json (key: terminologyServer).
+// Falls back to the HL7 public server when config is unavailable.
+const FALLBACK_TERMINOLOGY_SERVER = 'https://tx.fhir.org/r4';
 
 // CORS proxy URL is read from /config.json at runtime (key: corsProxyUrl).
 // See scripts/cors-proxy.worker.js for the Cloudflare Worker implementation.
 let _corsProxyUrl = '';
+let _defaultTermServer = FALLBACK_TERMINOLOGY_SERVER;
 let _configLoaded = false;
 let _configPromise = null;
 
@@ -21,7 +24,10 @@ function _loadConfig() {
   if (_configPromise) return _configPromise;
   _configPromise = fetch('/config.json')
     .then(r => r.json())
-    .then(cfg => { _corsProxyUrl = (cfg.corsProxyUrl || '').replace(/\/$/, ''); })
+    .then(cfg => {
+      _corsProxyUrl      = (cfg.corsProxyUrl      || '').replace(/\/$/, '');
+      _defaultTermServer = (cfg.terminologyServer || FALLBACK_TERMINOLOGY_SERVER).replace(/\/$/, '');
+    })
     .catch(() => {})
     .finally(() => { _configLoaded = true; });
   return _configPromise;
@@ -111,7 +117,7 @@ class TerminologyService {
   getServer(node, questMeta) {
     const url = node?._preferredTermServer
       || questMeta?.preferredTermServer
-      || DEFAULT_TERMINOLOGY_SERVER;
+      || _defaultTermServer;
     return url.replace(/\/$/, '');
   }
 
@@ -123,7 +129,7 @@ class TerminologyService {
    */
   async expandValueSet(vsUrl, serverUrl) {
     await _loadConfig();
-    const base   = (serverUrl || DEFAULT_TERMINOLOGY_SERVER).replace(/\/$/, '');
+    const base   = (serverUrl || _defaultTermServer).replace(/\/$/, '');
     const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?url=${encodeURIComponent(vsUrl)}&_count=${EXPAND_COUNT}`);
     const res = await _fetchWithRetry(reqUrl, {
       headers: { Accept: 'application/fhir+json' },
@@ -149,7 +155,7 @@ class TerminologyService {
    */
   async expandWithFilter(vsUrl, serverUrl, filter = '', count = 50) {
     await _loadConfig();
-    const base   = (serverUrl || DEFAULT_TERMINOLOGY_SERVER).replace(/\/$/, '');
+    const base   = (serverUrl || _defaultTermServer).replace(/\/$/, '');
     const params = new URLSearchParams({ url: vsUrl, _count: String(count) });
     if (filter && filter.trim()) params.set('filter', filter.trim());
     const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?${params}`);
@@ -201,7 +207,7 @@ class TerminologyService {
   async testExpand(vsUrl, serverUrl) {
     if (!vsUrl) return { ok: false, message: 'No URL provided' };
     try {
-      const codes = await this.expandValueSet(vsUrl, serverUrl || DEFAULT_TERMINOLOGY_SERVER);
+      const codes = await this.expandValueSet(vsUrl, serverUrl || _defaultTermServer);
       return { ok: true, message: `${codes.length} code${codes.length !== 1 ? 's' : ''}`, count: codes.length };
     } catch (err) {
       return { ok: false, message: err.message };

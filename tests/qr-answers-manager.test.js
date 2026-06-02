@@ -113,7 +113,7 @@ describe('QRAnswersManager.apply — questionnaire mismatch', () => {
     const rawFhir = { value: { url: 'http://example.com/qs/current' } };
     makeManager({ rawFhir }).apply({});
     expect(validateModal.show).toHaveBeenCalledTimes(1);
-    const [, issues] = validateModal.show.mock.calls[0];
+    const [, , { extraIssues: issues }] = validateModal.show.mock.calls[0];
     expect(issues[0].severity).toBe('warning');
     expect(issues[0].message).toContain('other');
     expect(issues[0].message).toContain('current');
@@ -143,7 +143,7 @@ describe('QRAnswersManager.apply — unmatched items', () => {
     importQRAnswers.mockReturnValue({ ...SUCCESS, unmatched: ['q1', 'q2'] });
     makeManager().apply({});
     expect(validateModal.show).toHaveBeenCalledTimes(1);
-    const [, issues] = validateModal.show.mock.calls[0];
+    const [, , { extraIssues: issues }] = validateModal.show.mock.calls[0];
     const msg = issues[0].message;
     expect(issues[0].severity).toBe('warning');
     expect(msg).toContain('2');
@@ -157,7 +157,7 @@ describe('QRAnswersManager.apply — unmatched items', () => {
       unmatched: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
     });
     makeManager().apply({});
-    const [, issues] = validateModal.show.mock.calls[0];
+    const [, , { extraIssues: issues }] = validateModal.show.mock.calls[0];
     expect(issues[0].message).toContain('\u2026');
     // Items 6 and 7 ('f', 'g') must not appear as list entries
     expect(issues[0].message).not.toContain(', f');
@@ -170,7 +170,7 @@ describe('QRAnswersManager.apply — unmatched items', () => {
       unmatched: ['a', 'b', 'c', 'd', 'e'],
     });
     makeManager().apply({});
-    const [, issues] = validateModal.show.mock.calls[0];
+    const [, , { extraIssues: issues }] = validateModal.show.mock.calls[0];
     expect(issues[0].message).not.toContain('\u2026');
   });
 
@@ -192,7 +192,7 @@ describe('QRAnswersManager.apply — multiple issues', () => {
     });
     const rawFhir = { value: { url: 'http://current' } };
     makeManager({ rawFhir }).apply({});
-    const [, issues] = validateModal.show.mock.calls[0];
+    const [, , { extraIssues: issues }] = validateModal.show.mock.calls[0];
     expect(issues).toHaveLength(2);
   });
 });

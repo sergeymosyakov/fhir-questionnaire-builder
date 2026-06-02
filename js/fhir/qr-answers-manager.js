@@ -7,11 +7,12 @@ import * as validateModal from '../ui/modals/validate-modal.js';
 import { AppEvents } from '../events.js';
 
 export class QRAnswersManager {
-  /** @param {{ values, tree, rawFhir }} deps — state references */
-  constructor({ values, tree, rawFhir }) {
-    this._values   = values;
-    this._tree     = tree;
-    this._rawFhir  = rawFhir;
+  /** @param {{ values, tree, rawFhir, shouldValidate? }} deps — state references */
+  constructor({ values, tree, rawFhir, shouldValidate }) {
+    this._values          = values;
+    this._tree            = tree;
+    this._rawFhir         = rawFhir;
+    this._shouldValidate  = shouldValidate || (() => true);
   }
 
   apply(qr) {
@@ -55,8 +56,8 @@ export class QRAnswersManager {
 
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 
-    if (issues.length > 0) {
-      validateModal.show('Load Answers \u2014 ' + result.loaded + ' loaded', issues, 'import');
+    if (issues.length > 0 && this._shouldValidate()) {
+      validateModal.show('Load Answers \u2014 ' + result.loaded + ' loaded', 'import', { tree: this._tree, values: this._values, extraIssues: issues });
     }
   }
 }

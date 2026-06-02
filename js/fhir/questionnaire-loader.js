@@ -15,16 +15,17 @@ import { destroyTree } from '../utils.js';
 import { clearAllValues, resetQuestMeta, questVariables, questContained } from '../state.js';
 
 export class QuestionnaireLoader {
-  /** @param {{ tree, values, questMeta, reinitForm?, rawFhir? }} deps — state references */
-  constructor({ tree, values, questMeta, reinitForm, rawFhir }) {
-    this._tree       = tree;
-    this._values     = values;
-    this._questMeta  = questMeta;
-    this._rawFhir    = rawFhir || null;
-    this._reinitForm = reinitForm || null;
-    this._importSeq  = 0;
+  /** @param {{ tree, values, questMeta, reinitForm?, rawFhir?, shouldValidate? }} deps */
+  constructor({ tree, values, questMeta, reinitForm, rawFhir, shouldValidate }) {
+    this._tree          = tree;
+    this._values        = values;
+    this._questMeta     = questMeta;
+    this._rawFhir       = rawFhir || null;
+    this._reinitForm    = reinitForm || null;
+    this._importSeq     = 0;
+    this._shouldValidate = shouldValidate || (() => true);
     // Reset-flow callbacks — injected via configureResetFlow()
-    this._resetFlow  = null;
+    this._resetFlow     = null;
   }
 
   /**
@@ -64,14 +65,8 @@ export class QuestionnaireLoader {
       const choice = await confirmOpen();
       if (choice === 'cancel') return;
       if (choice === 'export') {
-        const issues = validateTree(this._tree, this._values);
-        if (issues.length === 0) {
-          promptExport(() => this.reset());
-          return;
-        } else {
-          showValidateExport(issues, () => { promptExport(() => this.reset()); });
-          return;
-        }
+        showValidateExport(() => { promptExport(() => this.reset()); });
+        return;
       }
     }
     this.reset();
@@ -96,13 +91,13 @@ export class QuestionnaireLoader {
       document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOADED, {
         detail: { fileName: fileName || '' },
       }));
-      const issues = validateTree(this._tree, this._values);
-      progress.show('Rendering ' + this._tree.length + ' nodes\u2026');
+      progress.show('Rendering ' + this._tree.length + ' nodes…');
       await renderTreeAsync((done, total) => progress.update(done, total));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
 
-      if (issues.length > 0) {
-        validateModal.show('Import \u2014 Validation Report', issues, 'import');
+      // Show import report only when local validator finds issues and validate is enabled
+      if (this._shouldValidate() && validateTree(this._tree, this._values).length > 0) {
+        validateModal.show('Import — Validation Report', 'import', { tree: this._tree, values: this._values });
       }
       this._expandValueSets(++this._importSeq);
     } catch (err) {
@@ -118,12 +113,7 @@ export class QuestionnaireLoader {
     const failures = await terminologyService.expandAll(this._tree, this._questMeta);
     if (this._importSeq !== seq) return;
     if (failures.length) {
-      const issues = failures.map(f => ({
-        severity: 'error',
-        nodeId:   f.node?.id || '(unknown)',
-        message:  ` \u2014 ValueSet ${f.vsUrl} from ${f.server}: ${f.error}`,
-      }));
-      validateModal.show('ValueSet Expansion Errors', issues, 'import');
+      validateModal.show('ValueSet Expansion Errors', 'import', { tree: this._tree, values: this._values });
     }
     if (this._reinitForm) {
       await this._reinitForm({ silent: true });

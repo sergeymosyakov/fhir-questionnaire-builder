@@ -1,7 +1,6 @@
 import { DropdownMenu } from '../dropdown-menu.js';
 import { AppEvents } from '../../events.js';
-import { exportFHIR } from '../../fhir/export.js';
-import { validateTree } from '../../fhir/validate.js';
+import { exportFHIR, buildFHIRObject } from '../../fhir/export.js';
 import * as validateModal from '../modals/validate-modal.js';
 import * as qrExportModal from '../modals/qr-export-modal.js';
 import { showPrompt } from '../toast.js';
@@ -28,11 +27,12 @@ export class SaveMenu extends DropdownMenu {
     this._bindHandlers();
   }
 
-  /** @param {{ fileNameDisplay, tree, values }} deps */
-  configure({ fileNameDisplay, tree, values }) {
+  /** @param {{ fileNameDisplay, tree, values, shouldValidate? }} deps */
+  configure({ fileNameDisplay, tree, values, shouldValidate }) {
     this._fileNameDisplay = fileNameDisplay;
-    this._tree   = tree;
-    this._values = values;
+    this._tree          = tree;
+    this._values        = values;
+    this._shouldValidate = shouldValidate || (() => true);
   }
 
   get cloudSaveBtn() { return this._cloudSaveBtn; }
@@ -76,11 +76,17 @@ export class SaveMenu extends DropdownMenu {
   _bindHandlers() {
     this._exportFhirItem.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      const issues = validateTree(this._tree, this._values);
-      if (issues.length === 0) { this.promptExport(); return; }
-      validateModal.show('Export \u2014 Validation Report', issues, 'export', {
-        onExport: () => this.promptExport(),
-      });
+      if (this._shouldValidate()) {
+        const questJson = buildFHIRObject();
+        validateModal.show('Export — Validation Report', 'export', {
+          questJson,
+          tree:   this._tree,
+          values: this._values,
+          onExport: () => this.promptExport(),
+        });
+      } else {
+        this.promptExport();
+      }
     });
 
     this._exportQrItem.addEventListener('click', () => {

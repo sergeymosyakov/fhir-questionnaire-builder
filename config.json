@@ -1,3 +1,8 @@
 {
-  "corsProxyUrl": "https://fhir-cors-proxy.sergeymosyakov.workers.dev"
+  "corsProxyUrl": "https://fhir-cors-proxy.sergeymosyakov.workers.dev",
+  "terminologyServer": "https://tx.fhir.org/r4",
+  "validators": [
+    { "type": "local",    "name": "Built-in" },
+    { "type": "external", "name": "HAPI FHIR R4", "url": "https://hapi.fhir.org/baseR4", "retries": 3 }
+  ]
 }

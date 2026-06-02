@@ -12,7 +12,7 @@
       "extension": [
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory",
-          "valueCodeableConcept": { "coding": [{ "code": "instructions" }] }
+          "valueCodeableConcept": { "coding": [{ "system": "http://hl7.org/fhir/questionnaire-display-category", "code": "instructions" }] }
         }
       ]
     },
@@ -23,7 +23,7 @@
       "extension": [
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory",
-          "valueCodeableConcept": { "coding": [{ "code": "security" }] }
+          "valueCodeableConcept": { "coding": [{ "system": "http://hl7.org/fhir/questionnaire-display-category", "code": "security" }] }
         }
       ]
     },
@@ -34,7 +34,7 @@
       "extension": [
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory",
-          "valueCodeableConcept": { "coding": [{ "code": "help" }] }
+          "valueCodeableConcept": { "coding": [{ "system": "http://hl7.org/fhir/questionnaire-display-category", "code": "help" }] }
         }
       ]
     },

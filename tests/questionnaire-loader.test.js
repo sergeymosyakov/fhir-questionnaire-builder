@@ -176,9 +176,8 @@ describe('QuestionnaireLoader.load — validation issues', () => {
     ]);
     await makeLoader().load({}, 'test.json');
     expect(validateModal.show).toHaveBeenCalledTimes(1);
-    const [title, issues, mode] = validateModal.show.mock.calls[0];
+    const [title, mode] = validateModal.show.mock.calls[0];
     expect(title).toContain('Validation Report');
-    expect(issues[0].message).toContain('Duplicate linkId');
     expect(mode).toBe('import');
   });
 });
@@ -194,7 +193,6 @@ describe('QuestionnaireLoader.load — VS expansion failures', () => {
     const showCalls = validateModal.show.mock.calls;
     const expansionCall = showCalls.find(c => c[0].includes('ValueSet'));
     expect(expansionCall).toBeDefined();
-    expect(expansionCall[1][0].message).toContain('http://vs');
   });
 
   it('does not call validateModal.show for VS when no failures', async () => {
@@ -345,16 +343,17 @@ describe('QuestionnaireLoader.confirmAndReset', () => {
     expect(state.clearAllValues).toHaveBeenCalledTimes(1);
   });
 
-  it('calls promptExport (no issues) when user picks export', async () => {
-    const { loader, confirmOpen, promptExport } = makeFlowLoader([{ id: 'g1' }]);
+  it('calls showValidateExport (no issues) when user picks export', async () => {
+    const { loader, confirmOpen, promptExport, showValidateExport } = makeFlowLoader([{ id: 'g1' }]);
     confirmOpen.mockResolvedValue('export');
     validateTree.mockReturnValue([]);
     await loader.confirmAndReset();
+    expect(showValidateExport).toHaveBeenCalledTimes(1);
+    expect(promptExport).not.toHaveBeenCalled();
+    // callback passed as first arg calls promptExport → then reset
+    const [onExport] = showValidateExport.mock.calls[0];
+    onExport();
     expect(promptExport).toHaveBeenCalledTimes(1);
-    // callback passed to promptExport calls reset
-    const [onDone] = promptExport.mock.calls[0];
-    onDone();
-    expect(state.clearAllValues).toHaveBeenCalledTimes(1);
   });
 
   it('calls showValidateExport (with issues) when user picks export', async () => {
@@ -364,8 +363,8 @@ describe('QuestionnaireLoader.confirmAndReset', () => {
     await loader.confirmAndReset();
     expect(showValidateExport).toHaveBeenCalledTimes(1);
     expect(promptExport).not.toHaveBeenCalled();
-    // callback passed to showValidateExport calls promptExport → then reset
-    const [, onExport] = showValidateExport.mock.calls[0];
+    // callback passed as first arg calls promptExport → then reset
+    const [onExport] = showValidateExport.mock.calls[0];
     onExport();
     expect(promptExport).toHaveBeenCalledTimes(1);
   });

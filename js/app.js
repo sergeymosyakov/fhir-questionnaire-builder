@@ -3,20 +3,19 @@ import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
 import { tree, values, rawFhir, questVariables, questContained, questMeta, getValue, setValue, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './state.js';
-import { validateTree } from './fhir/validate.js';
+import { buildFHIRObject } from './fhir/export.js';
+import { initValidators } from './fhir/validators/init.js';
 import * as validateModal from './ui/modals/validate-modal.js';
 import * as metadataModal from './ui/modals/metadata-modal.js';
 import * as progress from './ui/progress.js';
 import { RenumberControl } from './ui/renumber-control.js';
 import * as search from './ui/search.js';
-import { TooltipToggle } from './ui/tooltip-toggle.js';
-import * as autosave from './ui/autosave.js';
-import * as statusBadge from './ui/status-badge.js';
+import { UndoRedo } from './ui/undo-redo.js';
 import { renumberAll, addRootGroup, mount as mountBuilder } from './builder/index.js';
 import { setRenumberGetter } from './builder/_shared.js';
 import * as helpModal from './ui/modals/help-modal.js';
 import { PreviewForm } from './preview-form.js';
-import { saveMenu, toolsMenu, answersMenu, questionnairesMenu, mount as mountHeaderActions } from './ui/header-actions.js';
+import { saveMenu, settingsMenu, prefs, answersMenu, questionnairesMenu, mount as mountHeaderActions } from './ui/header-actions.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
 import containedPanel        from './ui/panels/contained-panel.js';
@@ -24,12 +23,12 @@ import answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
 import * as patientCtx        from './ui/patient-ctx.js';
 import { FileNameDisplay } from './ui/file-name.js';
 import { AppEvents } from './events.js';
+import { Modal } from './ui/modals/modal-base.js';
 import { clearConfirmModal } from './ui/modals/clear-confirm-modal.js';
 import { AuthPanel } from './ui/auth-panel.js';
 import { MetadataCard } from './ui/metadata-card.js';
 import { PanelResizer } from './ui/panel-resizer.js';
-import { AutosaveToggle } from './ui/autosave-toggle.js';
-import { UndoRedo } from './ui/undo-redo.js';
+import * as statusBadge from './ui/status-badge.js';
 import { QRAnswersManager } from './fhir/qr-answers-manager.js';
 import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
 import { CopyPaste } from './ui/copy-paste.js';
@@ -45,12 +44,12 @@ variablesPanel.configure({ questVariables, mountEl: document.getElementById('var
 patientCtx.configure({ tree, questVariables });
 patientCtx.mount(document.getElementById('patientPresetWrap'));
 AuthPanel.configure({ tree });
-AutosaveToggle.configure({ questMeta });
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
-export const qrAnswers   = new QRAnswersManager({ values, tree, rawFhir });
+export const qrAnswers   = new QRAnswersManager({ values, tree, rawFhir, shouldValidate: () => prefs.get('validate') });
 export const questLoader = new QuestionnaireLoader({ tree, values, questMeta, rawFhir,
-  reinitForm: (opts) => previewForm.reinitForm(opts),
+  reinitForm:      (opts) => previewForm.reinitForm(opts),
+  shouldValidate:  () => prefs.get('validate'),
 });
 
 export const previewForm = new PreviewForm({
@@ -111,11 +110,13 @@ progress.init({
   blocker: document.getElementById('uiBlocker'),
 });
 
-// ── Tooltip toggle ───────────────────────────────────────────────────────
-new TooltipToggle(
-  document.getElementById('tooltipToggleBtn'),
-  document.getElementById('tooltipsOffBadge'),
-);
+// ── Tooltip init (for tooltipsOffBadge and settingsMenu sync) ───────────────
+const _tooltipsOffBadge = document.getElementById('tooltipsOffBadge');
+import('./ui/tooltip.js').then(tt => {
+  tt.init().then(() => {
+    _tooltipsOffBadge.style.display = tt.isEnabled() ? 'none' : '';
+  });
+});
 
 statusBadge.init({
   btn:      document.getElementById('statusBadgeBtn'),
@@ -149,16 +150,46 @@ previewForm.mount({
 });
 
 // ── Save/Export menu ──────────────────────────────────────────────────────────
-saveMenu.configure({ fileNameDisplay, tree, values });
+saveMenu.configure({ fileNameDisplay, tree, values, shouldValidate: () => prefs.get('validate') });
 
-// ── Tools menu handlers ───────────────────────────────────────────────────────
-toolsMenu.setHandlers({
-  onValidate: () => {
-    const issues = validateTree(tree, values);
-    validateModal.show('Validate — Report', issues, 'import');
-  },
-  onExpand: () => previewForm.expandAll(),
-  onCollapse: () => previewForm.collapseAll(),
+// Patch Modal._svc with prefs-dependent callbacks (prefs not available in builder/index.js)
+Modal.configure({ shouldRunExternal: () => prefs.get('validateExternal') });
+
+// ── Settings menu handlers ────────────────────────────────────────────────────
+// Tips and Autosave initial states resolve asynchronously from storage —
+// we update the menu rows once each module finishes its init() call.
+Promise.all([
+  import('./ui/tooltip.js').then(async tt => { await tt.init(); return tt; }),
+  import('./ui/autosave.js').then(async as => {
+    await as.init({
+      buildFn:   buildFHIRObject,
+      questMeta: questMeta,
+      onSaved:   date => {
+        const label = date
+          ? 'Autosave \u00b7 ' + String(date.getHours()).padStart(2, '0') + ':' + String(date.getMinutes()).padStart(2, '0')
+          : 'Autosave';
+        settingsMenu.setAutosaveLabel(label);
+      },
+    });
+    return as;
+  }),
+]).then(([tt, as]) => {
+  settingsMenu.setHandlers({
+    initialTips:      tt.isEnabled(),
+    initialAutosave:  as.isEnabled(),
+    onTipsToggle:     (enabled) => {
+      tt.setEnabled(enabled);
+      const badge = document.getElementById('tooltipsOffBadge');
+      if (badge) badge.style.display = enabled ? 'none' : '';
+    },
+    onAutosaveToggle: (enabled) => as.setEnabled(enabled),
+    onValidateToggle: () => {},  // prefs already updated inside settings-menu
+    onValidate: () => {
+      validateModal.show('Validate \u2014 Report', 'validate', { questJson: buildFHIRObject(), tree, values });
+    },
+    onExpand:   () => previewForm.expandAll(),
+    onCollapse: () => previewForm.collapseAll(),
+  });
 });
 
 // ── Metadata card (status + experimental badge) ──────────────────────────────
@@ -173,10 +204,14 @@ new MetadataCard({
 questLoader.configureResetFlow({
   confirmOpen:        () => clearConfirmModal.open(),
   promptExport:       (onDone) => saveMenu.promptExport(onDone),
-  showValidateExport: (issues, onExport) => {
-    validateModal.show('Export \u2014 Validation Report', issues, 'export', { onExport });
+  showValidateExport: (onExport) => {
+    if (prefs.get('validate')) {
+      validateModal.show('Export — Validation Report', 'export', { questJson: buildFHIRObject(), tree, values, onExport });
+    } else {
+      onExport();
+    }
   },
-  clearDraft:         () => autosave.clearDraft(),
+  clearDraft: () => import('./ui/autosave.js').then(m => m.clearDraft()),
 });
 
 // Close any open dropdowns when clicking outside
@@ -190,8 +225,6 @@ new PanelResizer({
   panel:      document.querySelector('.left-panel'),
   storageKey: 'leftPanelWidth',
 }).init();
-
-new AutosaveToggle(document.getElementById('autosaveToggleBtn'));
 
 new UndoRedo(
   document.getElementById('undoBtn'),
@@ -209,3 +242,6 @@ BaseNode.configure({
   pasteBefore: (id) => _copyPaste.pasteBefore(id),
   hasPaste:   () => _copyPaste.hasPending(),
 });
+
+// Initialise validators from config.json (async — runs in background)
+initValidators();

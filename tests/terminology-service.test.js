@@ -47,8 +47,9 @@ const defaultImpl = (url) => {
 };
 mockFetch.mockImplementation(defaultImpl);
 
-const { terminologyService, DEFAULT_TERMINOLOGY_SERVER } =
+const { terminologyService } =
   await import('../js/fhir/terminology-service.js');
+const DEFAULT_TERMINOLOGY_SERVER = 'https://tx.fhir.org/r4';
 
 // Prime _configLoaded = true before any per-test mocks run.
 // The module fetches /config.json on the first real async call; after that

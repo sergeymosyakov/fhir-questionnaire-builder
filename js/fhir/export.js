@@ -388,7 +388,7 @@ export function nodeToFHIRItem(node) {
   if (node._displayCategory) {
     ext.push({
       url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory',
-      valueCodeableConcept: { coding: [{ code: node._displayCategory }] },
+      valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-display-category', code: node._displayCategory }] },
     });
   }
 

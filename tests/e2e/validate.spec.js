@@ -96,7 +96,7 @@ test.describe('Validate modal — all good', () => {
 
     await openValidateModal(page);
 
-    await expect(validateModalTitle(page)).toHaveText('Validate — All good');
+    await expect(validateModalTitle(page)).toHaveText('Validate — All good', { timeout: 10_000 });
     await expect(validateModalBody(page).locator('.validate-ok')).toBeVisible();
   });
 
@@ -106,7 +106,9 @@ test.describe('Validate modal — all good', () => {
 
     await openValidateModal(page);
 
-    await page.locator('[data-testid="validateModal"] .btn-fhir').click();
+    const greatBtn = page.locator('[data-testid="validateModal"] .btn-fhir');
+    await expect(greatBtn).toBeVisible({ timeout: 10_000 });
+    await greatBtn.click();
     await expect(validateModal(page)).not.toBeVisible();
   });
 });
@@ -155,7 +157,9 @@ test.describe('Validate modal — issues', () => {
 
     await openValidateModal(page);
 
-    await page.locator('[data-testid="validateModal"] .btn-fhir').click();
+    const okBtn = page.locator('[data-testid="validateModal"] .btn-fhir');
+    await expect(okBtn).toBeVisible({ timeout: 10_000 });
+    await okBtn.click();
     await expect(validateModal(page)).not.toBeVisible();
   });
 });
@@ -252,6 +256,10 @@ test.describe('Validate modal — export mode', () => {
     await expect(validateModal(page)).toBeVisible();
     await expect(validateModalTitle(page)).toContainText('Export');
 
+    // Wait for validators to finish (footer replaces "Validating…" with buttons)
+    const fixBtn = page.locator('[data-testid="validateModal"]').getByText('Fix first');
+    await expect(fixBtn).toBeVisible({ timeout: 10_000 });
+
     const buttons = page.locator('[data-testid="validateModal"] .btn-fhir');
     const texts = await buttons.allInnerTexts();
     expect(texts).toContain('Fix first');
@@ -273,7 +281,9 @@ test.describe('Validate modal — export mode', () => {
     await page.getByTestId('export-fhir-item').click();
     await expect(validateModal(page)).toBeVisible();
 
-    await page.locator('[data-testid="validateModal"]').getByText('Fix first').click();
+    const fixFirstBtn = page.locator('[data-testid="validateModal"]').getByText('Fix first');
+    await expect(fixFirstBtn).toBeVisible({ timeout: 10_000 });
+    await fixFirstBtn.click();
     await expect(validateModal(page)).not.toBeVisible();
   });
 
@@ -292,9 +302,12 @@ test.describe('Validate modal — export mode', () => {
     await page.getByTestId('export-fhir-item').click();
     await expect(validateModal(page)).toBeVisible();
 
+    const exportAnywayBtn = page.locator('[data-testid="validateModal"]').getByText('Export anyway');
+    await expect(exportAnywayBtn).toBeVisible({ timeout: 10_000 });
+
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.locator('[data-testid="validateModal"]').getByText('Export anyway').click().then(() =>
+      exportAnywayBtn.click().then(() =>
         page.getByTestId('prompt-save').click()
       ),
     ]);

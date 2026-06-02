@@ -7,9 +7,10 @@
 //
 // Run: npx playwright test tests/e2e/autosave.spec.js
 //
-// ── element IDs (no data-testid on these legacy buttons) ─────────────────────
-//   autosaveToggleBtn   enable/disable autosave; has class btn-fhir--active when on
-//   tooltipToggleBtn    enable/disable tooltips; has class btn-fhir--active when on
+// ── element IDs / testids ────────────────────────────────────────────────────
+//   tools-btn           Settings menu trigger (data-testid)
+//   autosave-row        Autosave toggle row in Settings menu (data-testid)
+//   tips-row            Tips toggle row in Settings menu (data-testid)
 //   loadFhirBtn         "Questionnaires ▾" dropdown trigger
 //   loadRecentItem      "Recent draft…" item (hidden when no draft)
 //   loadRecentSep       separator above recent item
@@ -17,6 +18,12 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, waitForLoad } from './helpers/builder.js';
+
+/** freshStart + add one root group so the Settings menu button becomes visible. */
+async function freshStartWithGroup(page) {
+  await freshStart(page);
+  await addRootGroup(page);
+}
 
 const AUTOSAVE_KEY_PREFIX = 'autosave:';
 const META_KEY_PREFIX     = 'autosave-meta:';
@@ -84,51 +91,86 @@ test.describe('Autosave draft', () => {
   });
 });
 
+// ── Helpers: Settings menu ────────────────────────────────────────────────────
+
+/** Open Settings menu and return the Autosave toggle row. */
+async function openSettingsAutosave(page) {
+  await page.getByTestId('tools-btn').click();
+  const row = page.locator('.settings-toggle-row').filter({ hasText: 'Autosave' });
+  await expect(row).toBeVisible({ timeout: 5_000 });
+  return row;
+}
+
+/** Open Settings menu and return the Tips toggle row. */
+async function openSettingsTips(page) {
+  await page.getByTestId('tools-btn').click();
+  const row = page.locator('.settings-toggle-row').filter({ hasText: 'Tips' });
+  await expect(row).toBeVisible({ timeout: 5_000 });
+  return row;
+}
+
+/** Whether the toggle row currently shows ✓ (active). */
+async function isToggleActive(row) {
+  const check = await row.locator('[data-role="check"]').textContent();
+  return check.trim() === '✓';
+}
+
 // ── Autosave toggle ───────────────────────────────────────────────────────────
 
 test.describe('Autosave toggle', () => {
-  test('autosave button is active (enabled) on first load', async ({ page }) => {
-    await freshStart(page);
-    await expect(page.locator('#autosaveToggleBtn')).toHaveClass(/btn-fhir--active/);
+  test('autosave is active (enabled) on first load', async ({ page }) => {
+    await freshStartWithGroup(page);
+    const row = await openSettingsAutosave(page);
+    expect(await isToggleActive(row)).toBe(true);
   });
 
-  test('clicking autosave toggle removes active class', async ({ page }) => {
-    await freshStart(page);
-    await page.locator('#autosaveToggleBtn').click();
-    await expect(page.locator('#autosaveToggleBtn')).not.toHaveClass(/btn-fhir--active/);
+  test('clicking autosave toggle disables it', async ({ page }) => {
+    await freshStartWithGroup(page);
+    const row = await openSettingsAutosave(page);
+    await row.click();
+    expect(await isToggleActive(row)).toBe(false);
   });
 
   test('autosave disabled state persists across reload', async ({ page }) => {
-    await freshStart(page);
+    await freshStartWithGroup(page);
 
-    // Disable autosave
-    await page.locator('#autosaveToggleBtn').click();
-    await expect(page.locator('#autosaveToggleBtn')).not.toHaveClass(/btn-fhir--active/);
+    // Disable autosave via Settings menu
+    let row = await openSettingsAutosave(page);
+    await row.click();
+    expect(await isToggleActive(row)).toBe(false);
+    await page.keyboard.press('Escape');
 
     // Reload and check state was remembered
     await page.reload();
     await waitForLoad(page);
-    await expect(page.locator('#autosaveToggleBtn')).not.toHaveClass(/btn-fhir--active/);
+    await addRootGroup(page);
+    row = await openSettingsAutosave(page);
+    expect(await isToggleActive(row)).toBe(false);
   });
 });
 
 // ── Tooltip toggle ────────────────────────────────────────────────────────────
 
 test.describe('Tooltip toggle', () => {
-  test('tooltip button is active on first load', async ({ page }) => {
-    await freshStart(page);
-    await expect(page.locator('#tooltipToggleBtn')).toHaveClass(/btn-fhir--active/);
+  test('tips toggle is active on first load', async ({ page }) => {
+    await freshStartWithGroup(page);
+    const row = await openSettingsTips(page);
+    expect(await isToggleActive(row)).toBe(true);
   });
 
-  test('tooltip disabled state persists across reload', async ({ page }) => {
-    await freshStart(page);
+  test('tips disabled state persists across reload', async ({ page }) => {
+    await freshStartWithGroup(page);
 
-    await page.locator('#tooltipToggleBtn').click();
-    await expect(page.locator('#tooltipToggleBtn')).not.toHaveClass(/btn-fhir--active/);
+    let row = await openSettingsTips(page);
+    await row.click();
+    expect(await isToggleActive(row)).toBe(false);
+    await page.keyboard.press('Escape');
 
     await page.reload();
     await waitForLoad(page);
-    await expect(page.locator('#tooltipToggleBtn')).not.toHaveClass(/btn-fhir--active/);
+    await addRootGroup(page);
+    row = await openSettingsTips(page);
+    expect(await isToggleActive(row)).toBe(false);
   });
 });
 
