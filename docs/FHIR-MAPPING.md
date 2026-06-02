@@ -412,6 +412,22 @@ Some capabilities exist as both a **standard R4 extension** and a separate **SDC
 
 ---
 
+## Semantic Validation
+
+The builder runs `validateTree()` (`js/fhir/validate.js`) automatically on import and when the **Validate** button is clicked. In addition to structural checks (duplicate linkIds, FHIRPath syntax, empty titles), the following **cross-field semantic warnings** are reported:
+
+| Combination | Severity | Message |
+|---|---|---|
+| `required: true` + `hidden: true` | warning | Item can never receive an answer — required constraint can never be satisfied |
+| `calculatedExpression` set + `readOnly` not `true` | warning | Computed value can be overwritten by the user — consider setting read-only |
+| `answerExpression` set + `answerOption[]` also present | warning | Mutually exclusive in SDC — `answerOption[]` is ignored at runtime |
+| `enableWhen[]` set + `enableWhenExpression` also set | warning | Both visibility controls are active — `enableWhenExpression` takes precedence in SDC |
+| `repeats: false` + `_initialValues` count > 1 | warning | Only the first initial value is used when repeats is not enabled |
+
+All five rules are tested in `tests/validate.test.js` (48 unit tests total).
+
+---
+
 ## Not Supported / Partial Support
 
 Legend: ⚠️ = silent data loss (field present in import file, ignored or overwritten on export); ❌ = not handled at all; 🔧 = partial support.
