@@ -65,6 +65,7 @@ test.describe('note modal — open / close', () => {
     await freshStart(page);
     const { itemId } = await addItem(page);
     await page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-note').click();
+    await expect(noteModal(page)).toBeVisible();
     await expect(noteTitle(page)).toContainText('Design Note');
   });
 
