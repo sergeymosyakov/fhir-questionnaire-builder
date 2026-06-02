@@ -195,20 +195,3 @@
   accent-color: var(--c-primary);
 }
 
-/* Settings menu: toggle rows */
-.settings-toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  cursor: pointer;
-  user-select: none;
-}
-.settings-toggle-label { flex: 1; }
-.settings-toggle-check {
-  width: 16px;
-  text-align: center;
-  font-weight: 600;
-  color: var(--c-primary);
-}
-

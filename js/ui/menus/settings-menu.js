@@ -31,10 +31,14 @@ export class SettingsMenu extends DropdownMenu {
 
   _buildMenu() {
     // Initial states: tips/autosave unknown until setHandlers(); validate from prefs
-    this._tipsRow             = this._toggleRow('Tips',               true);
-    this._autosaveRow         = this._toggleRow('Autosave',           true);
-    this._validateLocalRow    = this._toggleRow('Local validation',   this._prefs.get('validate'));
-    this._validateExternalRow = this._toggleRow('Server validation',  this._prefs.get('validateExternal'));
+    this._tipsRow             = this._checkItem('settings-tips-check',              'Tips');
+    this._autosaveRow         = this._checkItem('settings-autosave-check',          'Autosave');
+    this._validateLocalRow    = this._checkItem('settings-validate-local-check',    'Local validation');
+    this._validateExternalRow = this._checkItem('settings-validate-external-check', 'Server validation');
+
+    // Set initial checked states
+    this._inp(this._validateLocalRow).checked    = this._prefs.get('validate');
+    this._inp(this._validateExternalRow).checked = this._prefs.get('validateExternal');
 
     // ── Section label: Tools ───────────────────────────────────────────────
     this._validateItem = this._item('validateItem',
@@ -60,33 +64,12 @@ export class SettingsMenu extends DropdownMenu {
     );
   }
 
-  /** Build a toggle row: label text on left, ✓ on right when active. */
-  _toggleRow(label, checked) {
-    const el = document.createElement('div');
-    el.className = 'load-menu-item settings-toggle-row';
-    el.dataset.active = String(checked);
-
-    const labelEl = document.createElement('span');
-    labelEl.className = 'settings-toggle-label';
-    labelEl.textContent = label;
-
-    const check = document.createElement('span');
-    check.className = 'settings-toggle-check';
-    check.dataset.role = 'check';
-    check.textContent = checked ? '\u2713' : '';
-
-    el.append(labelEl, check);
-    return el;
-  }
-
-  _setToggle(row, value) {
-    row.dataset.active = String(value);
-    row.querySelector('[data-role="check"]').textContent = value ? '\u2713' : '';
-  }
+  /** Get the checkbox input inside a row built by _checkItem. */
+  _inp(row) { return row.querySelector('input'); }
 
   /** Update the autosave row label (e.g. "Autosave · 14:32") */
   setAutosaveLabel(text) {
-    this._autosaveRow.querySelector('.settings-toggle-label').textContent = text;
+    this._autosaveRow.querySelector('span').textContent = text;
   }
 
   /**
@@ -105,34 +88,23 @@ export class SettingsMenu extends DropdownMenu {
    * }} handlers
    */
   setHandlers({ initialTips, initialAutosave, onTipsToggle, onAutosaveToggle, onValidateToggle, onValidate, onExpand, onCollapse }) {
-    this._setToggle(this._tipsRow,     initialTips);
-    this._setToggle(this._autosaveRow, initialAutosave);
+    this._inp(this._tipsRow).checked     = initialTips;
+    this._inp(this._autosaveRow).checked = initialAutosave;
 
-    this._tipsRow.addEventListener('click', (e) => {
-      e.stopPropagation(); // keep menu open on pref toggle
-      const next = !this._isActive(this._tipsRow);
-      this._setToggle(this._tipsRow, next);
-      onTipsToggle(next);
+    // Keep menu open on checkbox toggle (stop click from bubbling to backdrop)
+    [this._tipsRow, this._autosaveRow, this._validateLocalRow, this._validateExternalRow]
+      .forEach(row => row.addEventListener('click', e => e.stopPropagation()));
+
+    this._inp(this._tipsRow).addEventListener('change', e => onTipsToggle(e.target.checked));
+    this._inp(this._autosaveRow).addEventListener('change', e => onAutosaveToggle(e.target.checked));
+
+    this._inp(this._validateLocalRow).addEventListener('change', e => {
+      this._prefs.set('validate', e.target.checked);
+      onValidateToggle(e.target.checked);
     });
 
-    this._autosaveRow.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const next = !this._isActive(this._autosaveRow);
-      this._setToggle(this._autosaveRow, next);
-      onAutosaveToggle(next);
-    });
-
-    this._validateLocalRow.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const next = this._prefs.toggle('validate');
-      this._setToggle(this._validateLocalRow, next);
-      onValidateToggle(next);
-    });
-
-    this._validateExternalRow.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const next = this._prefs.toggle('validateExternal');
-      this._setToggle(this._validateExternalRow, next);
+    this._inp(this._validateExternalRow).addEventListener('change', e => {
+      this._prefs.set('validateExternal', e.target.checked);
     });
 
     this._validateItem.addEventListener('click', () => {
@@ -152,6 +124,6 @@ export class SettingsMenu extends DropdownMenu {
   }
 
   _isActive(row) {
-    return row.dataset.active === 'true';
+    return this._inp(row).checked;
   }
 }

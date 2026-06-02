@@ -96,23 +96,18 @@ test.describe('Autosave draft', () => {
 /** Open Settings menu and return the Autosave toggle row. */
 async function openSettingsAutosave(page) {
   await page.getByTestId('tools-btn').click();
-  const row = page.locator('.settings-toggle-row').filter({ hasText: 'Autosave' });
-  await expect(row).toBeVisible({ timeout: 5_000 });
-  return row;
+  return page.locator('.load-menu-item--checkbox').filter({ hasText: 'Autosave' });
 }
 
 /** Open Settings menu and return the Tips toggle row. */
 async function openSettingsTips(page) {
   await page.getByTestId('tools-btn').click();
-  const row = page.locator('.settings-toggle-row').filter({ hasText: 'Tips' });
-  await expect(row).toBeVisible({ timeout: 5_000 });
-  return row;
+  return page.locator('.load-menu-item--checkbox').filter({ hasText: 'Tips' });
 }
 
-/** Whether the toggle row currently shows ✓ (active). */
+/** Whether the checkbox row is currently checked. */
 async function isToggleActive(row) {
-  const check = await row.locator('[data-role="check"]').textContent();
-  return check.trim() === '✓';
+  return row.locator('input[type="checkbox"]').isChecked();
 }
 
 // ── Autosave toggle ───────────────────────────────────────────────────────────
