@@ -12,7 +12,6 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Near-term
 
-- [ ] **answerOption non-Coding editing** — UI to edit `answerOption.valueString`, `valueInteger`, `valueDate`, `valueTime`, `valueReference` types; currently round-trip safe but locked to read-only display in Answer Type modal
 - [ ] **Performance regression test** — automated test with 200–300 item questionnaire covering deep nesting (depth 6–8), heavy `enableWhen`, and multiple `calculatedExpression` chains; assert render time stays under threshold
 
 ## Technical Debt

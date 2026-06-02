@@ -157,6 +157,11 @@ test.describe('answerOption types — export round-trip', () => {
 });
 
 // ── 4. Answer-type modal: rows show display values for non-Coding types ────────
+//
+// data-testid registry (additions for editing tests):
+//   opt-type-0           Type custom-select trigger for first row (shown when showType=true)
+//   csel-drop            dropdown list of the open custom-select
+//   answerTypeModalApply Apply / OK button in the answer-type modal
 
 test.describe('answerOption types — answer-type modal pre-population', () => {
   test('valueString options appear as code rows in the editor', async ({ page }) => {
@@ -174,5 +179,77 @@ test.describe('answerOption types — answer-type modal pre-population', () => {
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
     await expect(page.getByTestId('opt-code-0')).toHaveValue('0');
     await page.locator('[data-testid="answerTypeModalCancel"]').click();
+  });
+});
+
+// ── 5. Answer-type modal: Type column is shown for non-Coding options ─────────
+
+test.describe('answerOption types — Type column in editor', () => {
+  test('Type column is visible when item has non-Coding options', async ({ page }) => {
+    await loadFixture(page);
+    await page.locator('[data-node-id="q-string"] [data-testid="action-type"]').click();
+    await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
+    // Type select for first row should be visible with value "String"
+    const typeTrigger = page.getByTestId('opt-type-0');
+    await expect(typeTrigger).toBeVisible();
+    await expect(typeTrigger).toHaveAttribute('data-value', 'string');
+    await page.locator('[data-testid="answerTypeModalCancel"]').click();
+  });
+
+  test('Type column is NOT shown for pure valueCoding items (no non-Coding options)', async ({ page }) => {
+    await loadFixture(page);
+    await page.locator('[data-node-id="q-coding"] [data-testid="action-type"]').click();
+    await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
+    // q-coding has only valueCoding options → _rawAnswerOptions not set → no Type column
+    await expect(page.getByTestId('opt-type-0')).not.toBeVisible();
+    await page.locator('[data-testid="answerTypeModalCancel"]').click();
+  });
+
+  test('Type column shows correct type for valueDate item', async ({ page }) => {
+    await loadFixture(page);
+    await page.locator('[data-node-id="q-date"] [data-testid="action-type"]').click();
+    await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
+    await expect(page.getByTestId('opt-type-0')).toHaveAttribute('data-value', 'date');
+    await page.locator('[data-testid="answerTypeModalCancel"]').click();
+  });
+});
+
+// ── 6. Editing: change value type and verify export ───────────────────────────
+
+test.describe('answerOption types — edit type and save', () => {
+  test('changing valueString type to Coding exports as valueCoding', async ({ page }) => {
+    await loadFixture(page);
+    await page.locator('[data-node-id="q-string"] [data-testid="action-type"]').click();
+    await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
+
+    // Change type of first row from String to Coding
+    await page.getByTestId('opt-type-0').click();
+    await page.locator('[data-testid="csel-drop"] [data-val="coding"]').click();
+    await expect(page.getByTestId('opt-type-0')).toHaveAttribute('data-value', 'coding');
+
+    await page.getByTestId('answerTypeModalApply').click();
+    await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
+
+    const q = await getExportedJSON(page);
+    const item = findItem(q.item, 'q-string');
+    // First option should now be valueCoding (was valueString)
+    expect(item?.answerOption?.[0]?.valueCoding).toBeDefined();
+    expect(item?.answerOption?.[0]?.valueCoding?.code).toBe('Email');
+  });
+
+  test('keeping valueString type preserves valueString on save', async ({ page }) => {
+    await loadFixture(page);
+    await page.locator('[data-node-id="q-string"] [data-testid="action-type"]').click();
+    await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
+
+    // Apply without changing type — type column should stay "string"
+    await expect(page.getByTestId('opt-type-0')).toHaveAttribute('data-value', 'string');
+    await page.getByTestId('answerTypeModalApply').click();
+
+    const q = await getExportedJSON(page);
+    const item = findItem(q.item, 'q-string');
+    // Should still be valueString (type unchanged)
+    expect(item?.answerOption?.[0]?.valueString).toBe('Email');
+    expect(item?.answerOption?.[0]?.valueCoding).toBeUndefined();
   });
 });

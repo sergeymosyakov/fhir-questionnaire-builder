@@ -27,6 +27,16 @@
   align-items: center;
 }
 
+/* when non-Coding types are present, prepend a Type column */
+.opt-editor--typed .opt-editor__header,
+.opt-editor--typed .opt-editor__row {
+  grid-template-columns: 0.85fr 1fr 1.4fr 0.55fr 0.7fr 0.5fr 36px 24px;
+}
+
+.opt-editor__cell--type {
+  overflow: hidden;
+}
+
 .opt-editor__hcell {
   font-size: 11px;
   font-weight: 600;

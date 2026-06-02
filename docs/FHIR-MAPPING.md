@@ -214,7 +214,7 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | Internal field | FHIR field / extension | Notes |
 |---|---|---|
 | `options` | `item.answerOption[]` | comma-split → `valueCoding.{code, display}` on export (default path); see `_rawAnswerOptions` for non-Coding types |
-| `_rawAnswerOptions` | `item.answerOption[]` | set on import when any option uses a non-`valueCoding` type (`valueString`, `valueInteger`, `valueDate`, `valueTime`, `valueReference`); exported verbatim for full round-trip fidelity; overrides the `options` string path on export; cleared when user edits options via Answer Type modal (converting to `valueCoding`) |
+| `_rawAnswerOptions` | `item.answerOption[]` | set on import when any option uses a non-`valueCoding` type (`valueString`, `valueInteger`, `valueDate`, `valueTime`, `valueReference`); exported verbatim for full round-trip fidelity; overrides the `options` string path on export; **editable in Answer Type modal via the Type column** — user can change each row's value[x] type and save back correctly |
 | `_renderStyle` | `item._text.extension[rendering-style]` | standard FHIR `rendering-style` extension |
 | `_renderXhtml` | `item._text.extension[rendering-xhtml]` | raw XHTML markup; sanitized via DOMPurify + rendered as `innerHTML` in preview; editable in Appearance modal |
 | `_calculatedExpr` | SDC `sdc-questionnaire-calculatedExpression` extension (`valueExpression.expression`) | FHIRPath |

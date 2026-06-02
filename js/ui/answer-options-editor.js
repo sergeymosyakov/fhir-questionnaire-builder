@@ -1,22 +1,34 @@
 /**
  * createOptionsEditor — dynamic row-based editor for answer options.
  *
- * Each row holds: code | label | score (optional) | prefix (optional) | remove btn.
+ * Each row holds: [type] | code | label | score (optional) | prefix (optional) | weight | excl | remove btn.
+ * The "type" column is shown only when showType=true (non-Coding answerOption imports).
  * Used in the Answer Type modal (choice / radio / open-choice) to replace the
  * comma-separated plain-text inputs.
  *
  * API:
- *   const ed = createOptionsEditor({ rows, onchange, testidPrefix });
+ *   const ed = createOptionsEditor({ rows, onchange, testidPrefix, showType });
  *   container.appendChild(ed.el);
- *   const rows = ed.getRows(); // [{code, label, score, prefix}, ...]
+ *   const rows = ed.getRows(); // [{code, label, score, prefix, valueType?}, ...]
  */
 
-export function createOptionsEditor({ rows = [], onchange = () => {}, testidPrefix = 'opt' } = {}) {
+import { createCustomSelect } from './custom-select.js';
+
+const TYPE_ITEMS = [
+  { value: 'coding',    label: 'Coding' },
+  { value: 'string',    label: 'String' },
+  { value: 'integer',   label: 'Integer' },
+  { value: 'date',      label: 'Date' },
+  { value: 'time',      label: 'Time' },
+  { value: 'reference', label: 'Reference' },
+];
+
+export function createOptionsEditor({ rows = [], onchange = () => {}, testidPrefix = 'opt', showType = false } = {}) {
   // internal state — array of row objects (mutable)
-  let _rows = rows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', weight: r.weight ?? '', exclusive: !!r.exclusive }));
+  let _rows = rows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', weight: r.weight ?? '', exclusive: !!r.exclusive, ...(showType ? { valueType: r.valueType || 'coding' } : {}) }));
 
   const wrap = document.createElement('div');
-  wrap.className = 'opt-editor';
+  wrap.className = showType ? 'opt-editor opt-editor--typed' : 'opt-editor';
 
   const list = document.createElement('div');
   list.className = 'opt-editor__list';
@@ -28,7 +40,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
   addBtn.textContent = '+ Add option';
   addBtn.dataset.testid = testidPrefix + '-add-btn';
   addBtn.addEventListener('click', () => {
-    _rows.push({ code: '', label: '', score: '', prefix: '', weight: '', exclusive: false });
+    _rows.push({ code: '', label: '', score: '', prefix: '', weight: '', exclusive: false, ...(showType ? { valueType: 'coding' } : {}) });
     _renderRows();
     onchange(_rows);
     // focus the code input of the new row
@@ -50,6 +62,13 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
 
     // header row
     const HEADERS = [
+      ...(showType ? [{
+        text:     'Type',
+        tipTitle: 'Answer value type',
+        tipBody:  'The FHIR type of this answer option value.\n• Coding — valueCoding (most common)\n• String — valueString\n• Integer — valueInteger\n• Date — valueDate\n• Time — valueTime\n• Reference — valueReference',
+        tipFhir:  'Questionnaire.item.answerOption[].value[x]',
+        tipSpec:  'R4',
+      }] : []),
       {
         text:     'Code',
         tipTitle: 'Option code',
@@ -114,6 +133,21 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
     _rows.forEach((row, idx) => {
       const rowEl = document.createElement('div');
       rowEl.className = 'opt-editor__row';
+
+      // Type column (only when showType)
+      if (showType) {
+        const typeCell = document.createElement('div');
+        typeCell.className = 'opt-editor__cell opt-editor__cell--type';
+        const typeSel = createCustomSelect({
+          items:     TYPE_ITEMS,
+          value:     row.valueType || 'coding',
+          className: 'sc-trigger--sm',
+          testid:    testidPrefix + '-type-' + idx,
+          onChange:  v => { _rows[idx].valueType = v; onchange(_rows); },
+        });
+        typeCell.appendChild(typeSel.el);
+        rowEl.appendChild(typeCell);
+      }
 
       const fields = [
         { key: 'code',   placeholder: 'code',           testid: testidPrefix + '-code-' + idx },
@@ -181,7 +215,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
     el: wrap,
     getRows() { return _rows; },
     setRows(newRows) {
-      _rows = newRows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', weight: r.weight ?? '', exclusive: !!r.exclusive }));
+      _rows = newRows.map(r => ({ code: r.code || '', label: r.label || '', score: r.score ?? '', prefix: r.prefix || '', weight: r.weight ?? '', exclusive: !!r.exclusive, ...(showType ? { valueType: r.valueType || 'coding' } : {}) }));
       _renderRows();
     },
   };
