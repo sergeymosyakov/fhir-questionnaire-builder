@@ -97,7 +97,7 @@ export class QuestionnaireLoader {
 
       // Show import report only when local validator finds issues and validate is enabled
       if (this._shouldValidate() && validateTree(this._tree, this._values).length > 0) {
-        validateModal.show('Import — Validation Report', 'import', { tree: this._tree, values: this._values });
+        validateModal.show('Import — Validation Report', 'import', { questJson: data, tree: this._tree, values: this._values });
       }
       this._expandValueSets(++this._importSeq);
     } catch (err) {
