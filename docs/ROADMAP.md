@@ -12,7 +12,6 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Near-term
 
-- [ ] **Cross-field semantic validation** — warn on logically invalid combinations: `required + hidden` (item can never be answered), `calculatedExpression + readOnly: false` (value will be overwritten), `repeats + initialValues` count mismatch, `answerExpression + answerOption[]` co-presence (mutually exclusive in SDC), `enableWhen + enableWhenExpression` conflict; surface as import warnings and a pre-export check panel; extend `js/fhir/validate.js`
 - [ ] **answerOption non-Coding editing** — UI to edit `answerOption.valueString`, `valueInteger`, `valueDate`, `valueTime`, `valueReference` types; currently round-trip safe but locked to read-only display in Answer Type modal
 - [ ] **Performance regression test** — automated test with 200–300 item questionnaire covering deep nesting (depth 6–8), heavy `enableWhen`, and multiple `calculatedExpression` chains; assert render time stays under threshold
 
