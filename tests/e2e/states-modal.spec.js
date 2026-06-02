@@ -45,7 +45,7 @@ async function addGroupAndItem(page) {
   const group = page.locator('[data-node-id="1"]');
   await group.getByTestId('group-add-btn').click();
   await page.locator('[data-testid="add-menu-item"]').first().click();
-  await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
+  await expect(page.locator('[data-node-id="1.1"]').getByTestId('action-type')).toBeVisible();
   return ['1', '1.1'];
 }
 
