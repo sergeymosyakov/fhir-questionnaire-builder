@@ -3,7 +3,7 @@
   "id": "answer-expression-demo",
   "url": "http://example.org/fhir/Questionnaire/answer-expression-demo",
   "version": "1.0.0",
-  "title": "Answer Expression Demo — Dynamic Option Lists",
+  "title": "Answer Expression Demo \u2014 Dynamic Option Lists",
   "status": "draft",
   "publisher": "FHIR Questionnaire Builder",
   "description": "Demonstrates sdc-questionnaire-answerExpression: answer options computed at runtime via FHIRPath. The 'Recommended Action' and 'Severity Level' questions derive their options dynamically from the PHQ-2 score.",
@@ -31,47 +31,111 @@
       "item": [
         {
           "linkId": "phq-q1",
-          "text": "Over the last 2 weeks — little interest or pleasure in doing things?",
+          "text": "Over the last 2 weeks \u2014 little interest or pleasure in doing things?",
           "type": "choice",
           "answerOption": [
             {
-              "valueCoding": { "code": "la6568-5", "display": "Not at all" },
-              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 0 }]
+              "valueCoding": {
+                "code": "la6568-5",
+                "display": "Not at all"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ]
             },
             {
-              "valueCoding": { "code": "la6569-3", "display": "Several days" },
-              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 1 }]
+              "valueCoding": {
+                "code": "la6569-3",
+                "display": "Several days"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ]
             },
             {
-              "valueCoding": { "code": "la6570-1", "display": "More than half the days" },
-              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 2 }]
+              "valueCoding": {
+                "code": "la6570-1",
+                "display": "More than half the days"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 2
+                }
+              ]
             },
             {
-              "valueCoding": { "code": "la6571-9", "display": "Nearly every day" },
-              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 3 }]
+              "valueCoding": {
+                "code": "la6571-9",
+                "display": "Nearly every day"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 3
+                }
+              ]
             }
           ]
         },
         {
           "linkId": "phq-q2",
-          "text": "Over the last 2 weeks — feeling down, depressed, or hopeless?",
+          "text": "Over the last 2 weeks \u2014 feeling down, depressed, or hopeless?",
           "type": "choice",
           "answerOption": [
             {
-              "valueCoding": { "code": "la6568-5", "display": "Not at all" },
-              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 0 }]
+              "valueCoding": {
+                "code": "la6568-5",
+                "display": "Not at all"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ]
             },
             {
-              "valueCoding": { "code": "la6569-3", "display": "Several days" },
-              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 1 }]
+              "valueCoding": {
+                "code": "la6569-3",
+                "display": "Several days"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ]
             },
             {
-              "valueCoding": { "code": "la6570-1", "display": "More than half the days" },
-              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 2 }]
+              "valueCoding": {
+                "code": "la6570-1",
+                "display": "More than half the days"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 2
+                }
+              ]
             },
             {
-              "valueCoding": { "code": "la6571-9", "display": "Nearly every day" },
-              "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 3 }]
+              "valueCoding": {
+                "code": "la6571-9",
+                "display": "Nearly every day"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 3
+                }
+              ]
             }
           ]
         },
@@ -109,11 +173,6 @@
                 "expression": "iif(%phq2_score >= 3, 'high' | 'moderate', iif(%phq2_score >= 1, 'moderate' | 'low', 'low'))"
               }
             }
-          ],
-          "answerOption": [
-            { "valueCoding": { "code": "low",      "display": "Low" } },
-            { "valueCoding": { "code": "moderate",  "display": "Moderate" } },
-            { "valueCoding": { "code": "high",      "display": "High" } }
           ]
         },
         {
@@ -128,16 +187,6 @@
                 "expression": "iif(%phq2_score >= 3, 'refer-psychiatry' | 'start-antidepressant' | 'crisis-assessment', iif(%phq2_score >= 1, 'watchful-waiting' | 'counselling' | 'lifestyle-support', 'no-action-needed' | 'routine-follow-up'))"
               }
             }
-          ],
-          "answerOption": [
-            { "valueCoding": { "code": "no-action-needed",    "display": "No action needed" } },
-            { "valueCoding": { "code": "routine-follow-up",   "display": "Routine follow-up" } },
-            { "valueCoding": { "code": "watchful-waiting",    "display": "Watchful waiting" } },
-            { "valueCoding": { "code": "counselling",         "display": "Counselling" } },
-            { "valueCoding": { "code": "lifestyle-support",   "display": "Lifestyle support" } },
-            { "valueCoding": { "code": "start-antidepressant","display": "Start antidepressant" } },
-            { "valueCoding": { "code": "refer-psychiatry",    "display": "Refer to psychiatry" } },
-            { "valueCoding": { "code": "crisis-assessment",   "display": "Crisis assessment" } }
           ]
         },
         {

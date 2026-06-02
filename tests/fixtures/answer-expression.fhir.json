@@ -16,11 +16,6 @@
             "expression": "'alpha' | 'beta' | 'gamma'"
           }
         }
-      ],
-      "answerOption": [
-        { "valueCoding": { "code": "alpha", "display": "Alpha" } },
-        { "valueCoding": { "code": "beta",  "display": "Beta"  } },
-        { "valueCoding": { "code": "gamma", "display": "Gamma" } }
       ]
     },
     {
@@ -30,7 +25,14 @@
       "extension": [
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
-          "valueCodeableConcept": { "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "radio-button" }] }
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression",
@@ -39,11 +41,6 @@
             "expression": "'yes' | 'no' | 'maybe'"
           }
         }
-      ],
-      "answerOption": [
-        { "valueCoding": { "code": "yes",   "display": "Yes"   } },
-        { "valueCoding": { "code": "no",    "display": "No"    } },
-        { "valueCoding": { "code": "maybe", "display": "Maybe" } }
       ]
     },
     {
@@ -51,8 +48,18 @@
       "text": "Plain options (no expression)",
       "type": "choice",
       "answerOption": [
-        { "valueCoding": { "code": "x", "display": "Option X" } },
-        { "valueCoding": { "code": "y", "display": "Option Y" } }
+        {
+          "valueCoding": {
+            "code": "x",
+            "display": "Option X"
+          }
+        },
+        {
+          "valueCoding": {
+            "code": "y",
+            "display": "Option Y"
+          }
+        }
       ]
     }
   ]
