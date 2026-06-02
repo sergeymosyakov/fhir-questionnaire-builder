@@ -33,7 +33,7 @@ test.describe('enableWhen (standard)', () => {
     // Add trigger item → id "1.1"
     await group.getByTestId('group-add-btn').click();
     await page.locator('[data-testid="add-menu-item"]').first().click();
-    await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
+    await expect(page.locator('[data-node-id="1.1"]').getByTestId('action-type')).toBeVisible();
 
     // Title the trigger so it appears by name in the question selector
     const triggerNode = page.locator('[data-node-id="1.1"]');
@@ -45,7 +45,7 @@ test.describe('enableWhen (standard)', () => {
     // Add dependent item → id "1.2"
     await group.getByTestId('group-add-btn').click();
     await page.locator('[data-testid="add-menu-item"]').first().click();
-    await expect(page.locator('[data-node-id="1.2"]')).toBeVisible();
+    await expect(page.locator('[data-node-id="1.2"]').getByTestId('action-vis')).toBeVisible();
 
     // Open Show When modal on dependent item
     await page.locator('[data-node-id="1.2"]').getByTestId('action-vis').click();
