@@ -72,7 +72,7 @@ export class DisplayNode extends ItemNode {
       catIcon.dataset.tipTitle = cat === 'instructions' ? 'Instructions' : 'Security notice';
       catIcon.dataset.tipBody  = 'questionnaire-displayCategory: ' + cat;
       catIcon.dataset.tipFhir  = 'item.extension[questionnaire-displayCategory].valueCodeableConcept.coding[0].code';
-      catIcon.dataset.tipSpec  = 'R4';
+      catIcon.dataset.tipSpec  = 'R5';
       row.appendChild(catIcon);
     }
 

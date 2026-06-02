@@ -13,9 +13,9 @@ class DisplayCatSection extends AnswerTypeSection {
     displayCatLbl.className        = 'at-modal-sub-lbl at-modal-sub-lbl--tip';
     displayCatLbl.textContent      = 'Display category:';
     displayCatLbl.dataset.tipTitle = 'Display Category';
-    displayCatLbl.dataset.tipBody  = 'Controls the visual style of this display item. "Instructions" shows an info block, "Security" shows a warning notice, "Help" renders as a collapsible help toggle.';
+    displayCatLbl.dataset.tipBody  = 'Controls the visual style of this display item. "Instructions" shows an info block, "Security" shows a warning notice, "Help" renders as a collapsible help toggle. Note: this extension is valid in FHIR R5; R4 validators may flag it on display-type items.';
     displayCatLbl.dataset.tipFhir  = 'item.extension[questionnaire-displayCategory].valueCodeableConcept.coding[0].code';
-    displayCatLbl.dataset.tipSpec  = 'R4';
+    displayCatLbl.dataset.tipSpec  = 'R5';
 
     const displayCatSel = createCustomSelect({
       items: [
