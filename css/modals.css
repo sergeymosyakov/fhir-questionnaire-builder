@@ -94,7 +94,7 @@
 [data-testid="initialModal"] .modal-box    { width: min(420px, 94vw); }
 [data-testid="appearanceModal"] .modal-box { width: min(380px, 94vw); }
 [data-testid="designNoteModal"] .modal-box { width: min(560px, 94vw); }
-[data-testid="answerTypeModal"] .modal-box { width: min(480px, 94vw); }
+[data-testid="answerTypeModal"] .modal-box { width: clamp(480px, 60vw, 900px); }
 [data-testid="repeatableModal"] .modal-box { width: min(360px, 94vw); }
 [data-testid="patientCtxModal"] .modal-box { width: 380px; max-width: 94vw; max-height: none; overflow: visible; }
 [data-testid="explainModal"] .modal-box    { width: min(640px, 94vw); }

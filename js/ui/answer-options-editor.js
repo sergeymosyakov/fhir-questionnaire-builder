@@ -98,18 +98,18 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
         tipSpec:  'R4',
       },
       {
-        text:     'Excl',
-        tipTitle: 'Option exclusive',
-        tipBody:  'When checked, selecting this option in a checklist deselects all other options (e.g. "None of the above"). Exported as the questionnaire-optionExclusive extension on answerOption.',
-        tipFhir:  'Questionnaire.item.answerOption[].extension[questionnaire-optionExclusive]',
-        tipSpec:  'R4',
-      },
-      {
         text:     'Weight',
         tipTitle: 'Item weight',
         tipBody:  'Optional scoring weight for this answer option (itemWeight). Used for advanced scoring beyond ordinalValue.',
         tipFhir:  'Questionnaire.item.answerOption[].extension[itemWeight]',
         tipSpec:  'SDC',
+      },
+      {
+        text:     'Excl',
+        tipTitle: 'Option exclusive',
+        tipBody:  'When checked, selecting this option in a checklist deselects all other options (e.g. "None of the above"). Exported as the questionnaire-optionExclusive extension on answerOption.',
+        tipFhir:  'Questionnaire.item.answerOption[].extension[questionnaire-optionExclusive]',
+        tipSpec:  'R4',
       },
       { text: '' },
     ];
