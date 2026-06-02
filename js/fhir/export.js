@@ -88,13 +88,18 @@ export function nodeToFHIRItem(node) {
   }
   if (node._fhirType) {
     fhirItem.extension = fhirItem.extension || [];
-    fhirItem.extension.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType', valueCode: node._fhirType });
+    fhirItem.extension.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType', valueString: node._fhirType });
   }
   if (node._codes && node._codes.length) fhirItem.code = node._codes;
   if (node.mandatory === true)  fhirItem.required = true;
 
   // item.initial[] — multi-value for repeating items; single value otherwise
-  if (node.type === 'item') {
+  // que-11: must be absent when answerOption[] is present (use answerOption[].initialSelected instead)
+  // Also suppressed when answerValueSet or answerExpression is set (same constraint applies)
+  const hasAnswerOptions = node.type === 'item' && (
+    node.options || node._rawAnswerOptions || node._answerValueSet || node._answerExpression
+  );
+  if (node.type === 'item' && !hasAnswerOptions) {
     const t = itemTypeToFHIRType(node.itemType);
     const buildInitEntry = v => {
       if (t === 'boolean')  return { valueBoolean:  typeof v === 'boolean' ? v : v === 'true' };
@@ -167,9 +172,12 @@ export function nodeToFHIRItem(node) {
       ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile', valueCanonical: url });
     }
   }
-  // quantity unit
-  if (node.itemType === 'quantity' && node.quantityUnit)
+  // questionnaire-unit — only valid on integer and decimal (R4 invariant: type='integer' or type='decimal')
+  if ((node.itemType === 'integer' || node.itemType === 'decimal') && node.quantityUnit)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit', valueCoding: { system: 'http://unitsofmeasure.org', code: node.quantityUnit } });
+  // For quantity type: a single quantityUnit is exported as questionnaire-unitOption (R4 requires unitOption/unitValueSet for quantity)
+  if (node.itemType === 'quantity' && node.quantityUnit && !node._unitOptions?.length)
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption', valueCoding: { system: 'http://unitsofmeasure.org', code: node.quantityUnit } });
   // questionnaire-unitValueSet
   if (node.itemType === 'quantity' && node._unitValueSet)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet', valueCanonical: node._unitValueSet });
@@ -408,8 +416,9 @@ export function nodeToFHIRItem(node) {
   if (node.repeats || node.itemType === 'checklist')   fhirItem.repeats  = true;
   // minOccurs / maxOccurs cardinality extensions
   // R4 invariant: type!='display' and (required=true or valueInteger=0)
+  // minOccurs: only valid when item is required=true (R4 context invariant: que-minoccurs-1)
   if (node.repeats && node._minOccurs !== undefined && node.itemType !== 'display'
-      && (node.required || node._minOccurs === 0))
+      && node.required)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs', valueInteger: node._minOccurs });
   if (node.repeats && node._maxOccurs !== undefined)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs', valueInteger: node._maxOccurs });

@@ -92,6 +92,26 @@ describe('buildFHIRObject — _initialValue export', () => {
     const q = build([item('text', '')]);
     expect(q.item[0].initial).toBeUndefined();
   });
+
+  it('omits initial[] when item has answerOption (que-11)', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', _initialValue: 'opt1', options: 'opt1|opt2' }]);
+    expect(q.item[0].initial).toBeUndefined();
+  });
+
+  it('omits initial[] when item has _rawAnswerOptions (que-11)', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', _initialValue: 'opt1', _rawAnswerOptions: [{ valueCoding: { code: 'opt1' } }] }]);
+    expect(q.item[0].initial).toBeUndefined();
+  });
+
+  it('omits initial[] when item has _answerValueSet (que-11)', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', _initialValue: 'opt1', _answerValueSet: 'http://example.com/vs' }]);
+    expect(q.item[0].initial).toBeUndefined();
+  });
+
+  it('exports initial[] when item is text (no answer options, que-11 does not apply)', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _initialValue: 'hello' }]);
+    expect(q.item[0].initial?.[0]?.valueString).toBe('hello');
+  });
 });
 
 // ── questMeta round-trip ──────────────────────────────────────────────────────

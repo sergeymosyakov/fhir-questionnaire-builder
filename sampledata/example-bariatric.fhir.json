@@ -101,16 +101,9 @@
           "text": "BMI eligibility criterion",
           "type": "choice",
           "required": true,
-          "initial": [
-            {
-              "valueCoding": {
-                "code": "bmi40",
-                "display": "BMI ≥ 40 kg/m²"
-              }
-            }
-          ],
           "answerOption": [
             {
+              "initialSelected": true,
               "valueCoding": {
                 "code": "bmi40",
                 "display": "BMI ≥ 40 kg/m²"
@@ -760,7 +753,7 @@
           "required": true,
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
               "valueCoding": {
                 "system": "http://unitsofmeasure.org",
                 "code": "Cel",

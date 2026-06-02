@@ -22,7 +22,7 @@ import { ExternalValidator } from './external.js';
  */
 export async function initValidators({ localEnabled = true, externalEnabled = false } = {}) {
   try {
-    const cfg = await fetch('/config.json').then(r => r.json());
+    const cfg = await fetch('./config.json').then(r => r.json());
     const defs = cfg.validators || [{ type: 'local', name: 'Built-in' }];
 
     for (const def of defs) {

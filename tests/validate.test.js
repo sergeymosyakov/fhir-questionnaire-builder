@@ -365,8 +365,8 @@ describe('validateTree — repeats + initial values count', () => {
 
 // ── minOccurs R4 invariant ────────────────────────────────────────────────────
 describe('validateTree — minOccurs R4 invariant', () => {
-  it('warns when minOccurs > 0 and required is not set', () => {
-    const item = makeItem({ id: 'q1', repeats: true, _minOccurs: 2 });
+  it('warns when minOccurs=0 and required is not set (R4 context invariant: must be required=true)', () => {
+    const item = makeItem({ id: 'q1', repeats: true, _minOccurs: 0 });
     const issues = validateTree([item]);
     expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toBeTruthy();
   });
@@ -377,15 +377,48 @@ describe('validateTree — minOccurs R4 invariant', () => {
     expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toHaveLength(0);
   });
 
-  it('no warning when minOccurs = 0 (valueInteger=0 satisfies invariant)', () => {
-    const item = makeItem({ id: 'q1', repeats: true, _minOccurs: 0 });
-    const issues = validateTree([item]);
-    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toHaveLength(0);
+  it('warns when minOccurs > 0 and required is not set', () => {
+    const item = makeItem({ id: 'q1', repeats: true, _minOccurs: 2 });
+    const issues = validateTree([item], {});
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toBeTruthy();
   });
 
   it('no warning when minOccurs is not set', () => {
     const item = makeItem({ id: 'q1', repeats: true });
     const issues = validateTree([item]);
     expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toHaveLength(0);
+  });
+});
+
+// ── que-11: initial[] must be absent when answerOption[] present ──────────────
+describe('validateTree — que-11 initial + answerOption conflict', () => {
+  it('warns when _initialValue is set and item has options', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', _initialValue: 'opt1', options: 'opt1|opt2' });
+    const issues = validateTree([item]);
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toBeTruthy();
+  });
+
+  it('warns when _initialValue is set and item has _rawAnswerOptions', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', _initialValue: 'opt1', _rawAnswerOptions: [{ valueCoding: { code: 'opt1' } }] });
+    const issues = validateTree([item]);
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toBeTruthy();
+  });
+
+  it('warns when _initialValue is set and item has _answerValueSet', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', _initialValue: 'opt1', _answerValueSet: 'http://example.com/vs' });
+    const issues = validateTree([item]);
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toBeTruthy();
+  });
+
+  it('no warning when _initialValue is set on text item (no answer options)', () => {
+    const item = makeItem({ id: 'q1', itemType: 'text', _initialValue: 'hello' });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toHaveLength(0);
+  });
+
+  it('no warning when no _initialValue even with answerOptions', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', options: 'opt1|opt2' });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toHaveLength(0);
   });
 });

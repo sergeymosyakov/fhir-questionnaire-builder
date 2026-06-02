@@ -22,7 +22,7 @@ let _configPromise = null;
 function _loadConfig() {
   if (_configLoaded) return Promise.resolve();
   if (_configPromise) return _configPromise;
-  _configPromise = fetch('/config.json')
+  _configPromise = fetch('./config.json')
     .then(r => r.json())
     .then(cfg => {
       _corsProxyUrl      = (cfg.corsProxyUrl      || '').replace(/\/$/, '');

@@ -16,7 +16,7 @@ let _proxyPromise = null;
 function _loadProxy() {
   if (_proxyLoaded) return Promise.resolve();
   if (_proxyPromise) return _proxyPromise;
-  _proxyPromise = fetch('/config.json')
+  _proxyPromise = fetch('./config.json')
     .then(r => r.json())
     .then(cfg => { _proxyUrl = (cfg[CORS_PROXY_KEY] || '').replace(/\/$/, ''); })
     .catch(() => {})

@@ -8,7 +8,9 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Next
 
-*(No current items.)*
+- [ ] **[HIGH CRITICAL] Add `system` field to answer options** — FHIR `Coding.system` is optional but recommended; the builder currently stores only `code`+`display` for simple option lists. Every `answerOption` with a custom code produces a HAPI warning `"A code with no system has no defined meaning"`. Adding a `system` field to the Answer Options editor would eliminate this class of warnings and improve interoperability with FHIR servers that perform code validation.
+- [ ] **[HIGH CRITICAL] `questionnaire-sliderStepValue` R4 decimal constraint** — R4 extension definition only allows `valueInteger`; decimal step values (e.g. `0.1`, `0.5`) on `decimal`-type slider items are rejected by HAPI R4 validator. Options: (a) restrict slider step UI to integers when item type is decimal in R4 mode, (b) add a version-aware export (R4B/R5 uses `valueDecimal`), or (c) document as R5-only and warn in the local validator.
+- [ ] **[HIGH CRITICAL] `questionnaire-displayCategory` R4 context restriction** — In R4, this extension is only valid on `group`-type items; on `display` items it is only allowed in R5. The builder currently exports it on display items without restriction. Fix: local validator should warn when displayCategory is set on a display item in R4 mode; export should be suppressed for display items until R5 mode is added.
 
 ## Near-term
 

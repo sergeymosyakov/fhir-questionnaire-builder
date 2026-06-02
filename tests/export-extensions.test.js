@@ -292,10 +292,10 @@ describe('buildFHIRObject — minOccurs/maxOccurs', () => {
     expect(ext.find(e => e.url === MIN_OCC)?.valueInteger).toBe(2);
   });
 
-  it('exports minOccurs=0 when repeats=true and required is not set (valueInteger=0 satisfies invariant)', () => {
+  it('does not export minOccurs=0 when required is not set (R4 context invariant: only valid when required=true)', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: true, _minOccurs: 0 }]);
     const ext = q.item[0].extension || [];
-    expect(ext.find(e => e.url === MIN_OCC)?.valueInteger).toBe(0);
+    expect(ext.find(e => e.url === MIN_OCC)).toBeUndefined();
   });
 
   it('does not export minOccurs when repeats=true but required=false and valueInteger>0 (R4 invariant)', () => {
@@ -421,8 +421,9 @@ describe('buildFHIRObject — _optionPrefixes', () => {
 
 // ── referenceResource / quantityUnit / calculatedExpr / initialExpr ───────────
 describe('buildFHIRObject — reference, quantity, expr extensions', () => {
-  const REF_URL  = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource';
-  const UNIT_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit';
+  const REF_URL      = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource';
+  const UNIT_URL     = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit';
+  const UNIT_OPT_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption';
   const CALC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression';
   const INIT_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression';
 
@@ -432,14 +433,22 @@ describe('buildFHIRObject — reference, quantity, expr extensions', () => {
     expect(ext.find(e => e.url === REF_URL)?.valueCode).toBe('Patient');
   });
 
-  it('exports questionnaire-unit for quantity item type', () => {
+  it('exports questionnaire-unit for integer/decimal types (R4 invariant: only integer/decimal)', () => {
+    for (const itemType of ['integer', 'decimal']) {
+      const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType, quantityUnit: 'kg' }]);
+      const ext = q.item[0].extension || [];
+      expect(ext.find(e => e.url === UNIT_URL)?.valueCoding?.code).toBe('kg');
+    }
+  });
+
+  it('exports questionnaire-unitOption (not questionnaire-unit) for quantity with single quantityUnit (R4 invariant)', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'quantity', quantityUnit: 'kg' }]);
     const ext = q.item[0].extension || [];
-    expect(ext.find(e => e.url === UNIT_URL)?.valueCoding?.code).toBe('kg');
+    expect(ext.find(e => e.url === UNIT_URL)).toBeUndefined();
+    expect(ext.find(e => e.url === UNIT_OPT_URL)?.valueCoding?.code).toBe('kg');
   });
 
   it('exports questionnaire-unitOption when _unitOptions is set', () => {
-    const UO_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption';
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'quantity',
       _unitOptions: [
@@ -448,17 +457,16 @@ describe('buildFHIRObject — reference, quantity, expr extensions', () => {
       ],
     }]);
     const ext = q.item[0].extension || [];
-    const uoExts = ext.filter(e => e.url === UO_URL);
+    const uoExts = ext.filter(e => e.url === UNIT_OPT_URL);
     expect(uoExts).toHaveLength(2);
     expect(uoExts[0].valueCoding).toEqual({ system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' });
     expect(uoExts[1].valueCoding).toEqual({ system: 'http://unitsofmeasure.org', code: '[lb_av]', display: 'lb' });
   });
 
   it('does not emit unitOption when _unitOptions is absent', () => {
-    const UO_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption';
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'quantity' }]);
     const ext = q.item[0].extension || [];
-    expect(ext.some(e => e.url === UO_URL)).toBe(false);
+    expect(ext.some(e => e.url === UNIT_OPT_URL)).toBe(false);
   });
 
   it('exports SDC calculatedExpression when _calculatedExpr is set', () => {
@@ -992,17 +1000,17 @@ describe('buildFHIRObject — _baseType / _fhirType', () => {
     expect(ext.find(e => e.url === BASE_URL)?.valueCode).toBe('string');
   });
 
-  it('exports _fhirType as questionnaire-fhirType extension with valueCode', () => {
+  it('exports _fhirType as questionnaire-fhirType extension with valueString (R4 spec)', () => {
     const q = build([{ id: 'g1', type: 'group', title: 'G', children: [], _fhirType: 'HumanName' }]);
     const ext = q.item[0].extension || [];
-    expect(ext.find(e => e.url === FHIR_URL)?.valueCode).toBe('HumanName');
+    expect(ext.find(e => e.url === FHIR_URL)?.valueString).toBe('HumanName');
   });
 
   it('exports both baseType and fhirType when both set', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string', _baseType: 'HumanName', _fhirType: 'HumanName' }]);
     const ext = q.item[0].extension || [];
     expect(ext.find(e => e.url === BASE_URL)?.valueCode).toBe('HumanName');
-    expect(ext.find(e => e.url === FHIR_URL)?.valueCode).toBe('HumanName');
+    expect(ext.find(e => e.url === FHIR_URL)?.valueString).toBe('HumanName');
   });
 
   it('omits questionnaire-baseType when _baseType is absent', () => {

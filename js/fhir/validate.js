@@ -145,9 +145,21 @@ export function validateTree(tree, _values = {}) {
       issues.push({ severity: 'warning', nodeId: id, message: `Item has ${node._initialValues.length} initial values but repeats is not set — only the first initial value will be used.` });
     }
 
-    // minOccurs > 0 without required=true — R4 invariant: extension is only valid when required=true or valueInteger=0
-    if (node.repeats && node._minOccurs !== undefined && node._minOccurs > 0 && !node.required) {
-      issues.push({ severity: 'warning', nodeId: id, message: 'Min answers (questionnaire-minOccurs) is set but the item is not marked required — R4 invariant requires required=true when minOccurs > 0. The extension will be omitted from the export.' });
+    // minOccurs without required=true — R4 context invariant (que-minoccurs-1): extension is only valid when required=true
+    if (node.repeats && node._minOccurs !== undefined && !node.required) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Min answers (questionnaire-minOccurs) is set but the item is not marked required — R4 context invariant requires required=true. The extension will be omitted from the export.' });
+    }
+
+    // que-11: initial[x] must be absent when answerOption[] is present
+    if (node.type === 'item' && (node._initialValue !== undefined || (node._initialValues && node._initialValues.length > 0))
+        && (node.options || node._rawAnswerOptions || node._answerValueSet || node._answerExpression)) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Initial value is set but the item has answer options — R4 invariant que-11 forbids initial[x] when answerOption[] is present. Use the answer option\'s "Initially selected" setting instead. The initial value will be omitted from the export.' });
+    }
+
+    // questionnaire-unit not allowed on quantity type (R4 invariant: type='integer' or type='decimal')
+    if (node.type === 'item' && node.itemType === 'quantity' && node.quantityUnit
+        && !node._unitOptions?.length && !node._unitValueSet) {
+      // This is auto-fixed on export (converted to unitOption) — no warning needed, handled transparently
     }
 
     // ── Warnings ──────────────────────────────────────────────────────────────

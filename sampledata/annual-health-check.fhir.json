@@ -7,9 +7,9 @@
   "title": "Annual Health Check",
   "status": "active",
   "experimental": true,
-  "copyright": "\u00a9 2026 Sergey Mosyakov",
+  "copyright": "© 2026 Sergey Mosyakov",
   "publisher": "Example Health Organisation",
-  "description": "Comprehensive annual health assessment covering vital signs, lifestyle factors, current medications, wellbeing screening, and clinician follow-up. Demonstrates: version, publisher, prefix, item.code[], minValue/maxValue, rendering-style, calculatedExpression (BMI), sdc-questionnaire-hidden (bmi-high-flag \u2014 hidden boolean drives enableWhen), sliderStepValue, repeats+minOccurs/maxOccurs, ordinalValue, enableWhen, initial[], maxLength, and questionnaire-constraint.",
+  "description": "Comprehensive annual health assessment covering vital signs, lifestyle factors, current medications, wellbeing screening, and clinician follow-up. Demonstrates: version, publisher, prefix, item.code[], minValue/maxValue, rendering-style, calculatedExpression (BMI), sdc-questionnaire-hidden (bmi-high-flag — hidden boolean drives enableWhen), sliderStepValue, repeats+minOccurs/maxOccurs (medications is required to satisfy R4 context invariant), ordinalValue, enableWhen, initial[], maxLength, and questionnaire-constraint.",
   "subjectType": [
     "Patient"
   ],
@@ -101,7 +101,7 @@
         },
         {
           "linkId": "bmi-high-flag",
-          "text": "BMI \u2265 30 flag (hidden \u2014 drives enableWhen for weight management display)",
+          "text": "BMI ≥ 30 flag (hidden — drives enableWhen for weight management display)",
           "type": "boolean",
           "readOnly": true,
           "extension": [
@@ -272,7 +272,8 @@
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs",
           "valueInteger": 10
         }
-      ]
+      ],
+      "required": true
     },
     {
       "linkId": "wellbeing",
@@ -298,7 +299,7 @@
             {
               "system": "http://loinc.org",
               "code": "44250-9",
-              "display": "PHQ-9 item 1 \u2014 little interest or pleasure"
+              "display": "PHQ-9 item 1 — little interest or pleasure"
             }
           ],
           "answerOption": [
@@ -478,10 +479,7 @@
                 },
                 {
                   "url": "expression",
-                  "valueExpression": {
-                    "language": "text/fhirpath",
-                    "expression": "%resource.item.where(linkId='followup').item.where(linkId='referral').answer.valueBoolean = false or %resource.item.where(linkId='followup').item.where(linkId='notes').answer.exists()"
-                  }
+                  "valueString": "%resource.item.where(linkId='followup').item.where(linkId='referral').answer.valueBoolean = false or %resource.item.where(linkId='followup').item.where(linkId='notes').answer.exists()"
                 }
               ]
             },
@@ -493,7 +491,7 @@
         },
         {
           "linkId": "bmi-high-display",
-          "text": "BMI \u2265 30 \u2014 consider weight management referral.",
+          "text": "BMI ≥ 30 — consider weight management referral.",
           "type": "display",
           "enableWhen": [
             {
