@@ -10,10 +10,11 @@ export class LocalValidator extends Validator {
     this._name = name;
   }
 
+  get id()   { return 'local'; }
   get name() { return this._name; }
   get type() { return 'local'; }
 
-  async run(_questJson, tree, values = {}) {
+  async _run(_questJson, tree, values = {}) {
     return validateTree(tree, values);
   }
 }

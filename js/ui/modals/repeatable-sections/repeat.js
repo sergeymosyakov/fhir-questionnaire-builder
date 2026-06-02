@@ -70,7 +70,7 @@ class RepeatSection extends RepeatableSection {
     minLbl.textContent      = 'Min answers:';
     minLbl.className        = 'repeat-modal-lbl';
     minLbl.dataset.tipTitle = 'Minimum answers';
-    minLbl.dataset.tipBody  = 'Minimum number of answers required. 0 or empty means the item is optional.';
+    minLbl.dataset.tipBody  = 'Minimum number of answers required. R4 invariant: only exported when the item is also marked required (or value is 0). 0 or empty means the item is optional.';
     minLbl.dataset.tipFhir  = 'item.extension[questionnaire-minOccurs].valueInteger';
     minLbl.dataset.tipSpec  = 'SDC';
 

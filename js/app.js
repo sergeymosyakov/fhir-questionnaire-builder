@@ -23,7 +23,6 @@ import answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
 import * as patientCtx        from './ui/patient-ctx.js';
 import { FileNameDisplay } from './ui/file-name.js';
 import { AppEvents } from './events.js';
-import { Modal } from './ui/modals/modal-base.js';
 import { clearConfirmModal } from './ui/modals/clear-confirm-modal.js';
 import { AuthPanel } from './ui/auth-panel.js';
 import { MetadataCard } from './ui/metadata-card.js';
@@ -150,10 +149,7 @@ previewForm.mount({
 });
 
 // ── Save/Export menu ──────────────────────────────────────────────────────────
-saveMenu.configure({ fileNameDisplay, tree, values, shouldValidate: () => prefs.get('validate') });
-
-// Patch Modal._svc with prefs-dependent callbacks (prefs not available in builder/index.js)
-Modal.configure({ shouldRunExternal: () => prefs.get('validateExternal') });
+saveMenu.configure({ fileNameDisplay, tree, values });
 
 // ── Settings menu handlers ────────────────────────────────────────────────────
 // Tips and Autosave initial states resolve asynchronously from storage —
@@ -183,7 +179,6 @@ Promise.all([
       if (badge) badge.style.display = enabled ? 'none' : '';
     },
     onAutosaveToggle: (enabled) => as.setEnabled(enabled),
-    onValidateToggle: () => {},  // prefs already updated inside settings-menu
     onValidate: () => {
       validateModal.show('Validate \u2014 Report', 'validate', { questJson: buildFHIRObject(), tree, values });
     },
@@ -205,11 +200,7 @@ questLoader.configureResetFlow({
   confirmOpen:        () => clearConfirmModal.open(),
   promptExport:       (onDone) => saveMenu.promptExport(onDone),
   showValidateExport: (onExport) => {
-    if (prefs.get('validate')) {
-      validateModal.show('Export — Validation Report', 'export', { questJson: buildFHIRObject(), tree, values, onExport });
-    } else {
-      onExport();
-    }
+    validateModal.show('Export — Validation Report', 'export', { questJson: buildFHIRObject(), tree, values, onExport });
   },
   clearDraft: () => import('./ui/autosave.js').then(m => m.clearDraft()),
 });
@@ -244,4 +235,5 @@ BaseNode.configure({
 });
 
 // Initialise validators from config.json (async — runs in background)
-initValidators();
+// Pass initial enabled state from persisted prefs so validators start correctly
+initValidators({ localEnabled: prefs.get('validate'), externalEnabled: prefs.get('validateExternal') });

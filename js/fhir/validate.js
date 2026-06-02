@@ -145,6 +145,11 @@ export function validateTree(tree, _values = {}) {
       issues.push({ severity: 'warning', nodeId: id, message: `Item has ${node._initialValues.length} initial values but repeats is not set — only the first initial value will be used.` });
     }
 
+    // minOccurs > 0 without required=true — R4 invariant: extension is only valid when required=true or valueInteger=0
+    if (node.repeats && node._minOccurs !== undefined && node._minOccurs > 0 && !node.required) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Min answers (questionnaire-minOccurs) is set but the item is not marked required — R4 invariant requires required=true when minOccurs > 0. The extension will be omitted from the export.' });
+    }
+
     // ── Warnings ──────────────────────────────────────────────────────────────
     if (!node.title || !node.title.trim()) {
       issues.push({ severity: 'warning', nodeId: id || '(empty)', message: 'Empty item text (title) — FHIR R4 requires text on every item.' });

@@ -362,3 +362,30 @@ describe('validateTree — repeats + initial values count', () => {
     expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/initial values/))).toHaveLength(0);
   });
 });
+
+// ── minOccurs R4 invariant ────────────────────────────────────────────────────
+describe('validateTree — minOccurs R4 invariant', () => {
+  it('warns when minOccurs > 0 and required is not set', () => {
+    const item = makeItem({ id: 'q1', repeats: true, _minOccurs: 2 });
+    const issues = validateTree([item]);
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toBeTruthy();
+  });
+
+  it('no warning when minOccurs > 0 and required=true', () => {
+    const item = makeItem({ id: 'q1', repeats: true, required: true, _minOccurs: 2 });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toHaveLength(0);
+  });
+
+  it('no warning when minOccurs = 0 (valueInteger=0 satisfies invariant)', () => {
+    const item = makeItem({ id: 'q1', repeats: true, _minOccurs: 0 });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toHaveLength(0);
+  });
+
+  it('no warning when minOccurs is not set', () => {
+    const item = makeItem({ id: 'q1', repeats: true });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toHaveLength(0);
+  });
+});

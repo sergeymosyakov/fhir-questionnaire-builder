@@ -81,13 +81,12 @@ export class SettingsMenu extends DropdownMenu {
    *   initialAutosave:  boolean,
    *   onTipsToggle:     (enabled: boolean) => void,
    *   onAutosaveToggle: (enabled: boolean) => void,
-   *   onValidateToggle: (enabled: boolean) => void,
    *   onValidate:       () => void,
    *   onExpand:         () => void,
    *   onCollapse:       () => void,
    * }} handlers
    */
-  setHandlers({ initialTips, initialAutosave, onTipsToggle, onAutosaveToggle, onValidateToggle, onValidate, onExpand, onCollapse }) {
+  setHandlers({ initialTips, initialAutosave, onTipsToggle, onAutosaveToggle, onValidate, onExpand, onCollapse }) {
     this._inp(this._tipsRow).checked     = initialTips;
     this._inp(this._autosaveRow).checked = initialAutosave;
 
@@ -99,12 +98,15 @@ export class SettingsMenu extends DropdownMenu {
     this._inp(this._autosaveRow).addEventListener('change', e => onAutosaveToggle(e.target.checked));
 
     this._inp(this._validateLocalRow).addEventListener('change', e => {
-      this._prefs.set('validate', e.target.checked);
-      onValidateToggle(e.target.checked);
+      const enabled = e.target.checked;
+      this._prefs.set('validate', enabled);
+      document.dispatchEvent(new CustomEvent(AppEvents.VALIDATOR_TOGGLE, { detail: { id: 'local', enabled } }));
     });
 
     this._inp(this._validateExternalRow).addEventListener('change', e => {
-      this._prefs.set('validateExternal', e.target.checked);
+      const enabled = e.target.checked;
+      this._prefs.set('validateExternal', enabled);
+      document.dispatchEvent(new CustomEvent(AppEvents.VALIDATOR_TOGGLE, { detail: { id: 'external', enabled } }));
     });
 
     this._validateItem.addEventListener('click', () => {

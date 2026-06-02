@@ -407,7 +407,9 @@ export function nodeToFHIRItem(node) {
   if (node._disabledDisplay) fhirItem.disabledDisplay = node._disabledDisplay;
   if (node.repeats || node.itemType === 'checklist')   fhirItem.repeats  = true;
   // minOccurs / maxOccurs cardinality extensions
-  if (node.repeats && node._minOccurs !== undefined)
+  // R4 invariant: type!='display' and (required=true or valueInteger=0)
+  if (node.repeats && node._minOccurs !== undefined && node.itemType !== 'display'
+      && (node.required || node._minOccurs === 0))
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs', valueInteger: node._minOccurs });
   if (node.repeats && node._maxOccurs !== undefined)
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs', valueInteger: node._maxOccurs });

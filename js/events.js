@@ -60,4 +60,9 @@ export const AppEvents = Object.freeze({
   // ── Renumber progress ─────────────────────────────────────────────────────
   RENUMBER_PROGRESS:   'renumber-progress',
   RENUMBER_DONE:       'renumber-done',
+
+  // ── Validators ────────────────────────────────────────────────────────────
+  // detail: { id: string, enabled: boolean }
+  // 'id' matches Validator#id — dispatched by UI toggles; validators listen and set this.enabled
+  VALIDATOR_TOGGLE:    'validator-toggle',
 });

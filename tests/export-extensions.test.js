@@ -286,10 +286,28 @@ describe('buildFHIRObject — minOccurs/maxOccurs', () => {
   const MIN_OCC = 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs';
   const MAX_OCC = 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs';
 
-  it('exports minOccurs when repeats=true and _minOccurs is set', () => {
-    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: true, _minOccurs: 2 }]);
+  it('exports minOccurs when repeats=true, required=true, and _minOccurs is set', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: true, required: true, _minOccurs: 2 }]);
     const ext = q.item[0].extension || [];
     expect(ext.find(e => e.url === MIN_OCC)?.valueInteger).toBe(2);
+  });
+
+  it('exports minOccurs=0 when repeats=true and required is not set (valueInteger=0 satisfies invariant)', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: true, _minOccurs: 0 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MIN_OCC)?.valueInteger).toBe(0);
+  });
+
+  it('does not export minOccurs when repeats=true but required=false and valueInteger>0 (R4 invariant)', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: true, _minOccurs: 2 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MIN_OCC)).toBeUndefined();
+  });
+
+  it('does not export minOccurs on display-type items (R4 invariant)', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'display', repeats: true, required: true, _minOccurs: 1 }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === MIN_OCC)).toBeUndefined();
   });
 
   it('exports maxOccurs when repeats=true and _maxOccurs is set', () => {

@@ -1,13 +1,14 @@
 // ── Validation Modal UI ───────────────────────────────────────────────────────
 // show(title, mode, { questJson, tree, values, onExport? }) — open and run validators
-//   mode: 'export' → "Fix first" + "Export anyway"
-//         'import' → "OK" only
+//   mode: 'export' → run all validators first; if 0 issues call onExport silently (no modal)
+//                    if issues → open modal with pre-resolved results
+//         'import' / 'validate' → open modal with spinners; fill as each resolves
 //
-// Which validators run is controlled by Modal._svc:
-//   shouldRunLocal    — () => boolean  (default true)  — run local validators
-//   shouldRunExternal — () => boolean  (default false) — run server validators
+// Validators control themselves via VALIDATOR_TOGGLE events (see validators/base.js).
+// Disabled validators return [] automatically — no filtering needed here.
 //
-// Each validator gets its own section with a loading spinner → results or error.
+// Each validator gets its own section with a loading spinner (import/validate mode)
+// or pre-filled results (export mode).
 import { Modal } from './modal-base.js';
 import { AppEvents } from '../../events.js';
 import { validatorRegistry } from '../../fhir/validators/registry.js';
@@ -21,19 +22,32 @@ class ValidateModal extends Modal {
 
   /**
    * @param {string} title
-   * @param {'export'|'import'} mode
-   * @param {{ questJson?, tree?, values?, onExport? }} opts
+   * @param {'export'|'import'|'validate'} mode
+   * @param {{ questJson?, tree?, values?, onExport?, extraIssues? }} opts
    */
   show(title, mode, { questJson = null, tree = [], values = {}, onExport = null, extraIssues = [] } = {}) {
     this._onExport = onExport;
+
+    if (mode === 'export') {
+      // Run all validators first (disabled ones return [] automatically).
+      // Only open the modal if there are actual issues to show.
+      validatorRegistry.runAll(questJson, tree, values).then(results => {
+        const allIssues = results.flatMap(r => r.issues);
+        if (allIssues.length === 0 && extraIssues.length === 0) {
+          onExport?.();
+          return;
+        }
+        // Issues found — open modal with pre-resolved data (no spinners)
+        this._openPrefilled(title, mode, results, extraIssues);
+      });
+      return;
+    }
+
+    // import / validate modes: open immediately with spinners, fill as each resolves
+    const validators = validatorRegistry.getAll().filter(v => v.enabled);
     this.title.textContent = title;
     this.body.innerHTML = '';
     this.footer.innerHTML = '';
-
-    // Filter validators based on prefs: external validators only run if enabled
-    const runExternal = Modal._svc.shouldRunExternal?.() ?? false;
-    const validators = validatorRegistry.getAll()
-      .filter(v => v.type !== 'external' || runExternal);
 
     if (validators.length === 0 && extraIssues.length === 0) {
       this._renderEmpty();
@@ -42,10 +56,8 @@ class ValidateModal extends Modal {
       return;
     }
 
-    // Create one section per validator — show spinner immediately, fill in results
     const sectionEls = validators.map(v => this._renderSection(v.name, v.type));
 
-    // Render extraIssues (e.g. QR-specific warnings) as an inline section
     if (extraIssues.length > 0) {
       const extraSection = this._renderSection('Response check', 'local');
       const spinner = extraSection.querySelector('[data-role="spinner"]');
@@ -53,10 +65,9 @@ class ValidateModal extends Modal {
       this._fillSection(extraSection, extraIssues, null);
     }
 
-    this._renderFooter(mode, null /* unknown yet */);
+    this._renderFooter(mode, null /* loading */);
     super.open();
 
-    // Run all in parallel, update each section as it resolves
     let hasErrors = false;
     let hasIssues = false;
     let done = 0;
@@ -64,7 +75,7 @@ class ValidateModal extends Modal {
       v.run(questJson, tree, values)
         .then(issues => {
           if (issues.length > 0) hasIssues = true;
-          if (issues.some(i => i.severity === 'error')) hasErrors = true;
+          if (issues.some(iss => iss.severity === 'error')) hasErrors = true;
           this._fillSection(sectionEls[i], issues, null);
         })
         .catch(err => {
@@ -75,6 +86,35 @@ class ValidateModal extends Modal {
           if (done === validators.length) this._updateFooter(mode, hasErrors, hasIssues);
         });
     });
+  }
+
+  /** Open modal with already-resolved validator results (export mode). */
+  _openPrefilled(title, mode, results, extraIssues) {
+    this.title.textContent = title;
+    this.body.innerHTML = '';
+    this.footer.innerHTML = '';
+
+    const allIssues = results.flatMap(r => r.issues);
+    const hasErrors = allIssues.some(i => i.severity === 'error');
+    const hasIssues = allIssues.length > 0 || extraIssues.length > 0;
+
+    for (const { validator, issues, error } of results) {
+      if (!validator.enabled) continue; // skip disabled validators — they returned [] and don't need a section
+      const sectionEl = this._renderSection(validator.name, validator.type);
+      const spinner = sectionEl.querySelector('[data-role="spinner"]');
+      if (spinner) spinner.remove();
+      this._fillSection(sectionEl, issues, error);
+    }
+
+    if (extraIssues.length > 0) {
+      const extraSection = this._renderSection('Response check', 'local');
+      const spinner = extraSection.querySelector('[data-role="spinner"]');
+      if (spinner) spinner.remove();
+      this._fillSection(extraSection, extraIssues, null);
+    }
+
+    this._renderFooter(mode, hasErrors, hasIssues);
+    super.open();
   }
 
   _cancel() { this.close(); }

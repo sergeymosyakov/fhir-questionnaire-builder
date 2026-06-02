@@ -64,15 +64,17 @@ export class ExternalValidator extends Validator {
    */
   constructor({ name, url, retries = 3 }) {
     super();
+    this.enabled  = false; // off by default; toggled via VALIDATOR_TOGGLE event
     this._name    = name;
     this._url     = url.replace(/\/$/, '');
     this._retries = retries;
   }
 
+  get id()   { return 'external'; }
   get name() { return this._name; }
   get type() { return 'external'; }
 
-  async run(questJson) {
+  async _run(questJson) {
     await _loadProxy();
 
     const endpoint = _proxied(`${this._url}/Questionnaire/$validate`);
