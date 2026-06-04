@@ -114,6 +114,7 @@ test.describe('FHIR export', () => {
     await group.getByTestId('node-title-input').first().blur();
 
     const node = page.locator(`[data-node-id="${itemId}"]`);
+    await expect(node.getByTestId('node-title-display')).toBeVisible();
     await node.getByTestId('node-title-display').click();
     await expect(node.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
     await node.getByTestId('node-title-input').fill('My Question');
@@ -330,6 +331,7 @@ test.describe('Builder creates items → preview reacts', () => {
     await expect(page.locator(`[data-preview-id="${itemId}"]`)).toBeVisible();
 
     const node = page.locator(`[data-node-id="${itemId}"]`);
+    await expect(node.getByTestId('node-title-display')).toBeVisible();
     await node.getByTestId('node-title-display').click();
     const titleInput = node.getByTestId('node-title-input');
     await expect(titleInput).toBeVisible();

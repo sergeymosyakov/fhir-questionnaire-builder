@@ -50,6 +50,7 @@ async function addValidItem(page) {
 
   // Title the item
   const item = page.locator('[data-node-id="1.1"]');
+  await expect(item.getByTestId('node-title-display')).toBeVisible();
   await item.getByTestId('node-title-display').click();
   await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
   await item.getByTestId('node-title-input').fill('My Question');
@@ -213,6 +214,7 @@ test.describe('Validate modal — navigate to node', () => {
     await group.getByTestId('node-title-input').first().blur();
 
     const item = page.locator('[data-node-id="1.1"]');
+    await expect(item.getByTestId('node-title-display')).toBeVisible();
     await item.getByTestId('node-title-display').click();
     await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
     await item.getByTestId('node-title-input').fill('');
