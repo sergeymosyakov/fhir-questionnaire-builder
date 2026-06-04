@@ -17,7 +17,9 @@
       { "label": "Rendering XHTML Demo",          "file": "rendering-xhtml-demo.fhir.json",        "type": "questionnaire" },
       { "label": "Item Control Demo",              "file": "item-control-demo.fhir.json",           "type": "questionnaire", "note": "check-box, autocomplete, text-area, spinner, drop-down, slider, lookup, regex, optionExclusive, usageMode, itemMedia, itemWeight" },
       { "label": "Answer Option Types Demo",        "file": "answer-option-types-demo.fhir.json",    "type": "questionnaire", "note": "All 6 answerOption value[x] types: valueCoding, valueString, valueInteger, valueDate, valueTime, valueReference" },
-      { "label": "Choice Column Demo",              "file": "choice-column-demo.fhir.json",          "type": "questionnaire", "note": "sdc-questionnaire-choiceColumn: multi-column dropdown display" }
+      { "label": "Choice Column Demo",              "file": "choice-column-demo.fhir.json",          "type": "questionnaire", "note": "sdc-questionnaire-choiceColumn: multi-column dropdown display" },
+      { "label": "AHRQ Medication Safety Report",   "file": "ahrq-medication-safety.fhir.json",      "type": "questionnaire", "note": "Real LOINC form: contained ValueSets, itemControl (header/footer/gtable), enableWhen/enableBehavior, minLength, repeating groups, 30+ questions" },
+      { "label": "PRAPARE — Social Health Screening","file": "prapare-sdoh.fhir.json",               "type": "questionnaire", "note": "Real SDOH clinical form: LOINC-coded, drop-down itemControl, itemWeight, optionPrefix, StructureMap extraction" }
     ]
   },
   {

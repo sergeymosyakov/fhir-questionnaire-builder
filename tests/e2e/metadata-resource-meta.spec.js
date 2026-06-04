@@ -165,6 +165,8 @@ test.describe('metadata modal — Resource Meta section', () => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
     await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
     const q = await exportFHIR(page);
     expect(q.meta).toBeUndefined();
   });

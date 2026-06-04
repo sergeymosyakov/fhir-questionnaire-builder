@@ -145,6 +145,8 @@ test.describe('metadata modal — Identifiers section', () => {
     // Add a child item so the group is not empty (avoids que-1 warning on export
     // which would open validateModal instead of triggering the download directly)
     await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
     const q = await exportFHIR(page);
     expect(q.identifier).toBeUndefined();
   });

@@ -78,6 +78,16 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 
 ---
 
+## Third-party content notices
+
+This project includes sample questionnaire files that contain LOINC-coded content.
+
+This material contains content from LOINC (http://loinc.org). LOINC is copyright © Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the license at http://loinc.org/license. LOINC® is a registered United States trademark of Regenstrief Institute, Inc.
+
+Sample files sourced from HL7 Implementation Guides are published under Creative Commons Attribution 4.0 (CC BY 4.0). Source URLs are preserved in each file's `url` field.
+
+---
+
 ## Feedback welcome
 
 I built this to solve a real problem — we needed to edit FHIR R4 Questionnaires without a full EHR stack.

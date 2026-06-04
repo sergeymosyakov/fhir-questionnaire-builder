@@ -181,6 +181,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `sampledata/bariatric-extended.fhir.json` | Synthetic bariatric pre-auth — 87 items, 32 enableWhen, all types |
 | `sampledata/ussg-fht.fhir.json` | US Surgeon General Family Health History (49 items, depth 5) |
 | `sampledata/prowl-ss.fhir.json` | PROWL-SS post-op pain assessment (44 items) |
+| `sampledata/ahrq-medication-safety.fhir.json` | **AHRQ Medication or Other Substance** (HL7 SDC IG example) — 30+ clinical items, 11 contained ValueSets with LOINC codes, `itemControl` (header/footer/gtable), `enableWhen`/`enableBehavior`, `minLength`, `questionnaire-hidden`, `rendering-xhtml`, `rendering-style`, repeating groups, `questionnaire-maxOccurs` |
+| `sampledata/prapare-sdoh.fhir.json` | **PRAPARE Social Health Screening** (HL7 SDOH ClinicalCare IG) — 5 clinical groups, all LOINC-coded, `questionnaire-itemControl: drop-down`, `questionnaire-unit`, `questionnaire-optionPrefix`, `itemWeight`, `repeats: true`, `sdc-questionnaire-targetStructureMap` extraction extension |
 | `sampledata/phq-9.fhir.json` | PHQ-9 depression screening (11 items) |
 | `sampledata/phq-9.stu3.fhir.json` | PHQ-9 in **FHIR STU3** format (`meta.fhirVersion: "3.0.2"`); uses `item.option[]`, `enableWhen.hasAnswer`, `initialInteger`; normalised to R4 automatically on import via `stu3-shim.js`; frozen copy also in `tests/fixtures/` |
 | `sampledata/phq-9-response.qr.json` | Sample QuestionnaireResponse for PHQ-9 (mild depression, score 7) — 10 answered items with `valueCoding` (LOINC codes) |
