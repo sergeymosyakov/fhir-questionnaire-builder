@@ -95,8 +95,9 @@ export class QuestionnaireLoader {
       await renderTreeAsync((done, total) => progress.update(done, total));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
 
-      // Show import report only when local validator finds issues and validate is enabled
-      if (this._shouldValidate() && validateTree(this._tree, this._values).length > 0) {
+      // Show import report only when local validator finds errors and validate is enabled.
+      // Warnings are non-blocking — users can review them via Tools → Validate.
+      if (this._shouldValidate() && validateTree(this._tree, this._values).some(i => i.severity === 'error')) {
         validateModal.show('Import — Validation Report', 'import', { questJson: data, tree: this._tree, values: this._values });
       }
       this._expandValueSets(++this._importSeq);

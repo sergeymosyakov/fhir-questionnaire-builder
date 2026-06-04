@@ -42,6 +42,24 @@
       "linkId": "dc-plain",
       "text": "A plain display item with no category.",
       "type": "display"
+    },
+    {
+      "linkId": "dc-group-instructions",
+      "text": "Instructions Section",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory",
+          "valueCodeableConcept": { "coding": [{ "system": "http://hl7.org/fhir/questionnaire-display-category", "code": "instructions" }] }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "dc-group-item",
+          "text": "Name",
+          "type": "string"
+        }
+      ]
     }
   ]
 }

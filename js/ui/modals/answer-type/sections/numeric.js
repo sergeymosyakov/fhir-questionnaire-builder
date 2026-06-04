@@ -69,9 +69,9 @@ class NumericSection extends AnswerTypeSection {
     sliderChkLbl.className        = 'at-modal-slider-lbl';
     sliderChkLbl.textContent      = 'Render as slider';
     sliderChkLbl.dataset.tipTitle = 'Slider';
-    sliderChkLbl.dataset.tipBody  = 'Renders the numeric input as a range slider. The step value sets the slider increment. Exported as questionnaire-sliderStepValue.';
-    sliderChkLbl.dataset.tipFhir  = 'item.extension[questionnaire-sliderStepValue].valueDecimal';
-    sliderChkLbl.dataset.tipSpec  = 'SDC';
+    sliderChkLbl.dataset.tipBody  = 'Renders the numeric input as a range slider. The step value sets the slider increment. Exported as questionnaire-sliderStepValue (valueInteger in R4; decimal step values are rounded to integer and flagged by the local validator).';
+    sliderChkLbl.dataset.tipFhir  = 'item.extension[questionnaire-sliderStepValue].valueInteger';
+    sliderChkLbl.dataset.tipSpec  = 'R4';
 
     const stepWrap = _numField('Step', 'slider-step-input',
       pending.draftSliderStep !== '' ? pending.draftSliderStep : '1',

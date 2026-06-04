@@ -392,8 +392,8 @@ export function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia', valueAttachment: node._itemMedia });
   }
 
-  // questionnaire-displayCategory
-  if (node._displayCategory) {
+  // questionnaire-displayCategory — R4: only valid on group items; suppressed on display items
+  if (node._displayCategory && node.itemType !== 'display') {
     ext.push({
       url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory',
       valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-display-category', code: node._displayCategory }] },
@@ -426,10 +426,11 @@ export function nodeToFHIRItem(node) {
   if (node._maxDecimalPlaces !== undefined) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces', valueInteger: node._maxDecimalPlaces });
   }
-  // questionnaire-sliderStepValue
+  // questionnaire-sliderStepValue — R4 only allows valueInteger; decimal step rounded
   if (node._sliderStep !== undefined) {
     const isInt = Number.isInteger(node._sliderStep);
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue', [isInt ? 'valueInteger' : 'valueDecimal']: node._sliderStep });
+    const stepVal = isInt ? node._sliderStep : Math.round(node._sliderStep);
+    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue', valueInteger: stepVal });
   }
   // Pass-through: unknown extensions collected on import or added via Props modal
   if (node._unknownExtensions && node._unknownExtensions.length) {

@@ -167,6 +167,18 @@ export function validateTree(tree, _values = {}) {
       // This is auto-fixed on export (converted to unitOption) — no warning needed, handled transparently
     }
 
+    // questionnaire-sliderStepValue: R4 only allows valueInteger
+    // decimal step values require R5/R4B; warn and note the export will round
+    if (node._sliderStep !== undefined && !Number.isInteger(node._sliderStep)) {
+      issues.push({ severity: 'warning', nodeId: id, message: `Slider step value ${node._sliderStep} is a decimal — questionnaire-sliderStepValue only allows valueInteger in R4. The step will be rounded to ${Math.round(node._sliderStep)} on export. Use R5/R4B for decimal step values.` });
+    }
+
+    // questionnaire-displayCategory: in R4 this extension is only valid on group items
+    // On display items it is R5-only; the export suppresses it in R4 mode
+    if (node._displayCategory && node.itemType === 'display') {
+      issues.push({ severity: 'warning', nodeId: id, message: `questionnaire-displayCategory is only valid on group items in R4. On display items it is R5-only and will be omitted from the export.` });
+    }
+
     // ── Warnings ──────────────────────────────────────────────────────────────
     if (!node.title || !node.title.trim()) {
       issues.push({ severity: 'warning', nodeId: id || '(empty)', message: 'Empty item text (title) — FHIR R4 requires text on every item.' });

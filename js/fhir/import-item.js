@@ -257,7 +257,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     });
   }
 
-  // questionnaire-displayCategory (display items only)
+  // questionnaire-displayCategory (display items only; groups handled in the group branch above)
   if (node.itemType === 'display') {
     const dcExt = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory'
@@ -518,6 +518,12 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     );
     if (groupDesignNoteExt?.valueMarkdown) node._designNote = groupDesignNoteExt.valueMarkdown;
     else if (groupDesignNoteExt?.valueString) node._designNote = groupDesignNoteExt.valueString;
+    // questionnaire-displayCategory — valid on group items in R4
+    const groupDcExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory'
+    );
+    const groupDcCode = groupDcExt?.valueCodeableConcept?.coding?.[0]?.code;
+    if (groupDcCode) node._displayCategory = groupDcCode;
     // Preserve any unrecognised extensions for round-trip pass-through
     const groupUnknown = _collectUnknownExtensions(fhirItem);
     if (groupUnknown) node._unknownExtensions = groupUnknown;

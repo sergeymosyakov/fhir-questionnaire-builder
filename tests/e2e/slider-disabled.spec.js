@@ -181,3 +181,66 @@ test.describe('builder UI', () => {
     await expect(page.locator('[data-preview-id="general-notes"]')).toHaveCount(0);
   });
 });
+
+// ── sliderStepValue — R4 decimal constraint ────────────────────────────────────
+// The decimal-slider scenario is built from scratch (not loaded via fixture) because
+// a fixture with a decimal sliderStep would generate a validator warning on export,
+// causing the export validate modal to open and interfere with download tests.
+// Instead we create the item via UI and test export + validator directly.
+
+test.describe('sliderStepValue — R4 decimal constraint', () => {
+  async function buildDecimalSlider(page) {
+    await page.addInitScript(() => localStorage.clear());
+    await page.goto('/');
+    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+    // Add a root group then a decimal item
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
+    // Open Answer Type modal, switch to decimal, enable slider with step 0.5
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-type').click();
+    await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
+    await page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select').click();
+    await page.locator('[data-testid="csel-drop"] [data-val="decimal"]').click();
+    await page.getByTestId('slider-toggle').check();
+    await expect(page.getByTestId('slider-step-input')).toBeVisible();
+    await page.getByTestId('slider-step-input').fill('0.5');
+    await page.locator('[data-testid="answerTypeModalApply"]').click();
+    await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
+  }
+
+  test('decimal slider step is rounded to valueInteger on export', async ({ page }) => {
+    await buildDecimalSlider(page);
+    await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-fhir-item').click();
+    // Validate modal opens because of the decimal-step warning — click Export anyway
+    const modal = page.locator('[data-testid="validateModal"]');
+    await modal.waitFor({ state: 'visible', timeout: 5_000 });
+    await page.locator('[data-testid="validateModal"] .btn-fhir-export').click();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('prompt-save').click(),
+    ]);
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
+    // Find the item (it's nested under a group)
+    const ext = (q.item[0].item[0].extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue'
+    );
+    expect(ext?.valueInteger).toBe(1); // 0.5 rounded to 1
+    expect(ext?.valueDecimal).toBeUndefined();
+  });
+
+  test('decimal slider step triggers validator warning', async ({ page }) => {
+    await buildDecimalSlider(page);
+    await page.getByTestId('tools-btn').click();
+    await page.getByTestId('validate-item').click();
+    await expect(page.locator('[data-testid="validateModal"]')).toBeVisible();
+    const body = page.locator('[data-testid="validateModalBody"]');
+    await expect(body).toContainText('decimal');
+    await expect(body).toContainText('valueInteger');
+    await page.keyboard.press('Escape');
+  });
+});

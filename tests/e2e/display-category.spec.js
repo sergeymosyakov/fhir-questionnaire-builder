@@ -277,3 +277,79 @@ test.describe('displayCategory — help toggle interaction', () => {
     await expect(content).toHaveText('Enter your date of birth in YYYY-MM-DD format.');
   });
 });
+
+// ── 5. R4 export suppression on display items ─────────────────────────────────
+// Fixture has display items (dc-instructions etc.) with displayCategory set.
+// R4 only allows displayCategory on group items — export must suppress it on display items.
+// Fixture also has dc-group-instructions (group) — extension must be present in export.
+//
+// Note: loading the fixture generates validator warnings (displayCategory on display items
+// is R4-invalid). Those warnings are non-blocking on import (import modal only shows errors).
+// On export the validate modal does open due to warnings — exportAndDownload() handles it.
+
+const DC_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory';
+
+function findItemRecursive(items, linkId) {
+  for (const item of items) {
+    if (item.linkId === linkId) return item;
+    if (item.item) {
+      const found = findItemRecursive(item.item, linkId);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+/**
+ * Export FHIR JSON, handling the optional validate modal that opens when
+ * there are warnings (e.g. displayCategory on display items).
+ */
+async function exportAndDownload(page) {
+  await page.getByTestId('export-btn').click();
+  await page.getByTestId('export-fhir-item').click();
+  // Validate modal opens when questionnaire has warnings/errors
+  const modal = page.locator('[data-testid="validateModal"]');
+  await modal.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
+  if (await modal.isVisible()) {
+    await page.locator('[data-testid="validateModal"] .btn-fhir-export').click();
+  }
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByTestId('prompt-save').click(),
+  ]);
+  return download;
+}
+
+test.describe('displayCategory — R4 export suppression on display items', () => {
+  test('displayCategory is NOT exported for display-type items', async ({ page }) => {
+    await loadFixture(page);
+    const download = await exportAndDownload(page);
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
+    const item = findItemRecursive(q.item, 'dc-instructions');
+    const ext = (item.extension || []).find(e => e.url === DC_URL);
+    expect(ext).toBeUndefined();
+  });
+
+  test('displayCategory IS exported for group-type items', async ({ page }) => {
+    await loadFixture(page);
+    const download = await exportAndDownload(page);
+    const { readFileSync } = await import('node:fs');
+    const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
+    const item = findItemRecursive(q.item, 'dc-group-instructions');
+    const ext = (item.extension || []).find(e => e.url === DC_URL);
+    expect(ext).toBeDefined();
+    expect(ext?.valueCodeableConcept?.coding?.[0]?.code).toBe('instructions');
+  });
+
+  test('displayCategory on display item triggers validator warning', async ({ page }) => {
+    await loadFixture(page);
+    await page.getByTestId('tools-btn').click();
+    await page.getByTestId('validate-item').click();
+    await expect(page.locator('[data-testid="validateModal"]')).toBeVisible();
+    const body = page.locator('[data-testid="validateModalBody"]');
+    await expect(body).toContainText('displayCategory');
+    await expect(body).toContainText('group');
+    await page.keyboard.press('Escape');
+  });
+});

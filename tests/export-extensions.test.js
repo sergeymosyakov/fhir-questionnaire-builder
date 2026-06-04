@@ -176,12 +176,12 @@ describe('buildFHIRObject — _sliderStep', () => {
     expect(sliderExt?.valueDecimal).toBeUndefined();
   });
 
-  it('exports decimal slider step as valueDecimal', () => {
+  it('rounds decimal slider step to valueInteger (R4 constraint)', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _sliderStep: 0.5 }]);
     const ext = q.item[0].extension || [];
     const sliderExt = ext.find(e => e.url === SLIDER_URL);
-    expect(sliderExt?.valueDecimal).toBe(0.5);
-    expect(sliderExt?.valueInteger).toBeUndefined();
+    expect(sliderExt?.valueInteger).toBe(1); // 0.5 rounds to 1
+    expect(sliderExt?.valueDecimal).toBeUndefined();
   });
 });
 
