@@ -40,10 +40,11 @@ async function addTextItem(page, title = 'My Question') {
   const group = page.locator('[data-node-id="1"]');
   await group.getByTestId('group-add-btn').click();
   await page.locator('[data-testid="add-menu-item"]').first().click();
-  await expect(page.locator('[data-node-id="1.1"]').getByTestId('action-type')).toBeVisible();
+  await expect(page.locator('[data-node-id="1.1"]').getByTestId('action-vis')).toBeVisible();
 
   if (title) {
     const item = page.locator('[data-node-id="1.1"]');
+    await expect(item.getByTestId('node-title-display')).toBeVisible();
     await item.getByTestId('node-title-display').click();
     await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
     await item.getByTestId('node-title-input').fill(title);
