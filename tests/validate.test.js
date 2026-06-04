@@ -447,11 +447,12 @@ describe('validateTree — que-3 display item with code[]', () => {
 
 // ── que-4: answerOption[] and answerValueSet cannot both be present ────────────
 describe('validateTree — que-4 answerOption + answerValueSet conflict', () => {
-  it('errors when both options string and _answerValueSet are set', () => {
+  it('no error when only options string and _answerValueSet are set (options may come from contained VS resolution)', () => {
+    // node.options can be populated during import from a contained ValueSet — export already
+    // suppresses answerOption[] when _answerValueSet is set, so this is not a real que-4 violation.
     const item = makeItem({ id: 'q1', itemType: 'select', options: 'a=A,b=B', _answerValueSet: 'http://example.com/vs' });
     const issues = validateTree([item]);
-    expect(errIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-4/))).toBeTruthy();
+    expect(errIds(issues)).not.toContain('q1');
   });
 
   it('errors when both _rawAnswerOptions and _answerValueSet are set', () => {

@@ -198,8 +198,9 @@ export function validateTree(tree, _values = {}, questMeta = null) {
     }
 
     // que-4: answerOption[] and answerValueSet cannot both be present (R4 invariant)
-    const _hasOpts = (node.options && node.options.trim()) || (node._rawAnswerOptions && node._rawAnswerOptions.length > 0);
-    if (_hasOpts && node._answerValueSet) {
+    // Only check _rawAnswerOptions — node.options may be populated from contained ValueSet
+    // resolution during import (legitimate state; export already suppresses answerOption when VS set)
+    if (node._rawAnswerOptions && node._rawAnswerOptions.length > 0 && node._answerValueSet) {
       issues.push({ severity: 'error', nodeId: id, message: 'Item has both answerOption[] and answerValueSet — R4 invariant que-4 forbids both simultaneously. Remove one (answerOption[] will be used on export).' });
     }
 
