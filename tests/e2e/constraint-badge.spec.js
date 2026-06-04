@@ -39,15 +39,13 @@ async function loadFixture(page) {
 
 const badge = page => page.getByTestId('status-badge-btn');
 
-// Click the "Questionnaire Preview" title to move focus away from the input,
-// firing blur+change → BaseNode.notifyChanged() → RESPONSE_CHANGED → badge update.
-// Always use this pattern to commit preview inputs — never Tab, never waitForTimeout.
+// Click the search input to move focus away from the active preview input,
+// firing blur → BaseNode.notifyChanged() → RESPONSE_CHANGED → icon/badge update.
+// Using a real <input> (search box) is more reliable than a span (preview title)
+// because focus transfer to another input guarantees the blur event fires.
 async function commitInput(page, _input) {
-  // Yield two rAF frames so the input value is committed to the DOM,
-  // then click the preview title to fire blur → notifyChanged → RESPONSE_CHANGED.
-  // Two frames mirrors _yield() in preview-form.js (_asyncRender guard).
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-  await page.getByTestId('preview-panel-title').click();
+  await page.getByTestId('preview-search-input').click();
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
@@ -150,7 +148,6 @@ test.describe('group icon reflects constraint-only child state', () => {
     await commitInput(page, input);
     await expect(groupOk).toBeVisible();
     await input.fill('17');
-    await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
     await commitInput(page, input);
     await expect(groupOk).not.toBeVisible();
     await expect(page.locator('[data-preview-id="grp-constraint"] .icon-fail')).toBeVisible();
