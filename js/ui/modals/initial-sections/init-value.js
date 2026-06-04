@@ -22,8 +22,7 @@ class InitValueSection extends InitialSection {
 
     if (itype === 'display' || itype === 'attachment') {
       const na = document.createElement('div');
-      na.className       = 'panel-hint';
-      na.style.marginTop = '8px';
+      na.className       = 'panel-hint panel-hint--mt';
       na.textContent     = 'Not applicable for this item type.';
       frag.appendChild(na);
       return frag;

@@ -1,5 +1,6 @@
 import { StatesSection } from './base-section.js';
 import { STATES_SECTIONS } from './registry.js';
+import { createCustomSelect } from '../../custom-select.js';
 
 const SIG_TYPES = [
   { system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.1',  display: "Author's Signature" },
@@ -35,8 +36,7 @@ class SignatureSection extends StatesSection {
 
   build(pending) {
     const wrap = document.createElement('div');
-    wrap.className = 'states-modal-field-row';
-    wrap.style.flexWrap = 'wrap';
+    wrap.className = 'states-modal-field-row states-sig-wrap';
 
     const lbl = document.createElement('label');
     lbl.className        = 'states-modal-chk-label';
@@ -47,7 +47,7 @@ class SignatureSection extends StatesSection {
     lbl.dataset.tipSpec  = 'R4';
 
     const chipWrap = document.createElement('div');
-    chipWrap.style.cssText = 'flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px;margin-top:4px';
+    chipWrap.className = 'states-sig-chips';
 
     const _refresh = () => {
       chipWrap.innerHTML = '';
@@ -69,31 +69,27 @@ class SignatureSection extends StatesSection {
     _refresh();
 
     const addRow = document.createElement('div');
-    addRow.style.cssText = 'flex-basis:100%;margin-top:4px';
+    addRow.className = 'states-sig-add-row';
 
-    const sel = document.createElement('select');
-    sel.dataset.testid = 'sig-type-sel';
-    sel.style.cssText = 'font-size:12px;padding:2px 4px;max-width:300px';
-    const defOpt = document.createElement('option');
-    defOpt.value = '';
-    defOpt.textContent = '+ Add signature type…';
-    sel.appendChild(defOpt);
-    for (const t of SIG_TYPES) {
-      const opt = document.createElement('option');
-      opt.value = t.code;
-      opt.textContent = t.display;
-      sel.appendChild(opt);
-    }
-    sel.addEventListener('change', () => {
-      if (!sel.value) return;
-      const found = SIG_TYPES.find(t => t.code === sel.value);
-      if (found && !pending.draftSignatures.some(s => s.code === found.code)) {
-        pending.draftSignatures.push({ ...found });
-        _refresh();
-      }
-      sel.value = '';
+    const sigItems = [
+      { value: '', label: '+ Add signature type\u2026' },
+      ...SIG_TYPES.map(t => ({ value: t.code, label: t.display })),
+    ];
+    const csel = createCustomSelect({
+      items: sigItems,
+      value: '',
+      testid: 'sig-type-sel',
+      onChange: v => {
+        if (!v) return;
+        const found = SIG_TYPES.find(t => t.code === v);
+        if (found && !pending.draftSignatures.some(s => s.code === found.code)) {
+          pending.draftSignatures.push({ ...found });
+          _refresh();
+        }
+        csel.setValue('');
+      },
     });
-    addRow.appendChild(sel);
+    addRow.appendChild(csel.el);
 
     wrap.append(lbl, chipWrap, addRow);
     return wrap;

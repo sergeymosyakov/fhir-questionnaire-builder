@@ -330,8 +330,7 @@ class ChoiceSection extends AnswerTypeSection {
     const aconstRow = document.createElement('div');
     aconstRow.className = 'at-modal-multiline-row';
     const aconstLbl = document.createElement('span');
-    aconstLbl.className        = 'at-modal-sub-lbl';
-    aconstLbl.style.marginBottom = '0';
+    aconstLbl.className        = 'at-modal-sub-lbl at-modal-sub-lbl--mb0';
     aconstLbl.textContent      = 'Answer constraint:';
     aconstLbl.dataset.tipTitle = 'answerConstraint';
     aconstLbl.dataset.tipBody  = 'Controls how free-text answers are handled when options are defined.\n\u2022 optionsOnly \u2014 only coded options allowed\n\u2022 optionsOrType \u2014 option or any value of the answer type\n\u2022 optionsOrString \u2014 option or free-text string';

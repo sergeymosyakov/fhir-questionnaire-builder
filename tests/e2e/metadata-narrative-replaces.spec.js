@@ -81,6 +81,9 @@ test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
     await page.waitForSelector('.clear-confirm-backdrop');
     await page.getByTestId('clear-confirm-clear-btn').click();
     await page.getByTestId('add-root-group-btn').click();
+    await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
     const q = await exportFHIR(page);
     expect(q.text).toBeDefined();
     expect(q.text.status).toBe('generated');

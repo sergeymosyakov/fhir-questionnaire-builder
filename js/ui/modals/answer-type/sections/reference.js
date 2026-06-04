@@ -40,7 +40,6 @@ class ReferenceSection extends AnswerTypeSection {
     profLbl.dataset.tipBody  = 'Profile URLs that restrict valid resource types for reference items. One URL per line.';
     profLbl.dataset.tipFhir  = 'item.extension[questionnaire-referenceProfile].valueCanonical';
     profLbl.dataset.tipSpec  = 'R4';
-    profLbl.style.marginTop  = '10px';
 
     const profTa = document.createElement('textarea');
     profTa.rows            = 1;
@@ -62,7 +61,6 @@ class ReferenceSection extends AnswerTypeSection {
     filterLbl.dataset.tipBody  = 'FHIRPath expression used to filter valid reference targets at runtime.';
     filterLbl.dataset.tipFhir  = 'item.extension[questionnaire-referenceFilter].valueString';
     filterLbl.dataset.tipSpec  = 'R4';
-    filterLbl.style.marginTop  = '10px';
 
     const filterTa = document.createElement('textarea');
     filterTa.rows            = 1;
