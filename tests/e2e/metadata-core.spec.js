@@ -194,6 +194,7 @@ test.describe('metadata modal — Advanced section', () => {
   test('empty subjectType is omitted from export', async ({ page }) => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
+    await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
     const q = await exportFHIR(page);
     expect(q.subjectType).toBeUndefined();
   });

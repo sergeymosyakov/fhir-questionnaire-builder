@@ -8,6 +8,8 @@ function _close(backdrop, onKey) {
   document.removeEventListener('keydown', onKey, true);
   backdrop.style.opacity = '0'; // runtime: animate out
   backdrop.addEventListener('transitionend', () => backdrop.remove(), { once: true });
+  // Fallback: if no CSS transition is defined, transitionend never fires — remove manually.
+  setTimeout(() => { if (backdrop.isConnected) backdrop.remove(); }, 300);
 }
 
 /**
@@ -141,6 +143,8 @@ export function showPrompt(label, defaultValue, onConfirm) {
     document.removeEventListener('keydown', onKey, true);
     backdrop.style.opacity = '0';
     backdrop.addEventListener('transitionend', () => backdrop.remove(), { once: true });
+    // Fallback: if no CSS transition is defined, transitionend never fires — remove manually.
+    setTimeout(() => { if (backdrop.isConnected) backdrop.remove(); }, 300);
   };
   const confirm = () => { close(); onConfirm(input.value.trim() || defaultValue); };
   const cancel  = () => { close(); onConfirm(null); };

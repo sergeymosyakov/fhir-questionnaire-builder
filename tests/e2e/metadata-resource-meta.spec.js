@@ -164,6 +164,7 @@ test.describe('metadata modal — Resource Meta section', () => {
   test('clean questionnaire has no meta block in export', async ({ page }) => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
+    await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
     const q = await exportFHIR(page);
     expect(q.meta).toBeUndefined();
   });

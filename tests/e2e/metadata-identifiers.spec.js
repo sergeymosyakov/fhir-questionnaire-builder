@@ -142,6 +142,9 @@ test.describe('metadata modal — Identifiers section', () => {
   test('new questionnaire without identifiers has no identifier[] in export', async ({ page }) => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
+    // Add a child item so the group is not empty (avoids que-1 warning on export
+    // which would open validateModal instead of triggering the download directly)
+    await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
     const q = await exportFHIR(page);
     expect(q.identifier).toBeUndefined();
   });

@@ -66,6 +66,7 @@ test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
   test('text field is auto-generated in export when questionnaire had no imported text', async ({ page }) => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
+    await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
     const q = await exportFHIR(page);
     expect(q.text).toBeDefined();
     expect(q.text.status).toBe('generated');
