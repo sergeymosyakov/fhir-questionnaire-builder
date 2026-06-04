@@ -83,6 +83,7 @@ test.describe('hasCriteria: badge visible for constraint-only questionnaire', ()
     await commitInput(page, input);
     await expect(badge(page)).toContainText('PASS');
     await input.fill('5');
+    await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
     await commitInput(page, input);
     await expect(badge(page)).toContainText('FAIL');
   });
@@ -149,7 +150,9 @@ test.describe('group icon reflects constraint-only child state', () => {
     await commitInput(page, input);
     await expect(groupOk).toBeVisible();
     await input.fill('17');
+    await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
     await commitInput(page, input);
+    await expect(groupOk).not.toBeVisible();
     await expect(page.locator('[data-preview-id="grp-constraint"] .icon-fail')).toBeVisible();
   });
 });

@@ -216,6 +216,7 @@ test.describe('Terminology modal — Test connection button', () => {
   test('Test connection button is present in the modal', async ({ page }) => {
     await freshStart(page);
     const item = await addItem(page);
+    await expect(item.getByTestId('action-terminology')).toBeVisible();
     await item.getByTestId('action-terminology').click();
     await expect(modal(page)).toBeVisible();
     await expect(page.getByTestId('terminology-test-btn')).toBeVisible();
