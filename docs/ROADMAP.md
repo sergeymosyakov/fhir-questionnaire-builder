@@ -18,7 +18,6 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Later
 
-- [x] **External validator integration** — `ValidatorRegistry` + `LocalValidator` + `ExternalValidator` (HAPI FHIR `$validate`); async per-validator sections with spinners in validate modal; Local/Server validation toggles in Settings menu (server off by default)
 - [ ] **Sub-questionnaire / modular questionnaires** — SDC `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-subQuestionnaire`; requires FHIR server for resolution; out of scope until server integration exists
 - [ ] **item.definition + StructureDefinition auto-population** — resolve `item.definition` URL against a FHIR server and auto-fill `text`, `type`, `baseType`, `fhirType` from the element; prerequisite: server integration
 
