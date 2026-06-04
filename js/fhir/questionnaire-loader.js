@@ -12,20 +12,29 @@ import { terminologyService } from './terminology-service.js';
 import { AppEvents } from '../events.js';
 import { loadConfirmModal } from '../ui/modals/load-confirm-modal.js';
 import { destroyTree } from '../utils.js';
-import { clearAllValues, resetQuestMeta, questVariables, questContained } from '../state.js';
 
 export class QuestionnaireLoader {
-  /** @param {{ tree, values, questMeta, reinitForm?, rawFhir?, shouldValidate? }} deps */
-  constructor({ tree, values, questMeta, reinitForm, rawFhir, shouldValidate }) {
-    this._tree          = tree;
-    this._values        = values;
-    this._questMeta     = questMeta;
-    this._rawFhir       = rawFhir || null;
-    this._reinitForm    = reinitForm || null;
-    this._importSeq     = 0;
-    this._shouldValidate = shouldValidate || (() => true);
+  /** @param {{ tree, values, questMeta, reinitForm?, rawFhir?, shouldValidate?,
+   *            renderTree?, renderTreeAsync?,
+   *            clearAllValues?, resetQuestMeta?, questVariables?, questContained? }} deps */
+  constructor({ tree, values, questMeta, reinitForm, rawFhir, shouldValidate,
+                renderTree: renderTreeFn, renderTreeAsync: renderTreeAsyncFn,
+                clearAllValues, resetQuestMeta, questVariables, questContained }) {
+    this._tree             = tree;
+    this._values           = values;
+    this._questMeta        = questMeta;
+    this._rawFhir          = rawFhir || null;
+    this._reinitForm       = reinitForm || null;
+    this._importSeq        = 0;
+    this._shouldValidate   = shouldValidate || (() => true);
+    this._renderTree       = renderTreeFn       || renderTree;
+    this._renderTreeAsync  = renderTreeAsyncFn  || renderTreeAsync;
+    this._clearAllValues   = clearAllValues     || (() => {});
+    this._resetQuestMeta   = resetQuestMeta     || (() => {});
+    this._questVariables   = questVariables     || [];
+    this._questContained   = questContained     || [];
     // Reset-flow callbacks — injected via configureResetFlow()
-    this._resetFlow     = null;
+    this._resetFlow        = null;
   }
 
   /**
@@ -42,12 +51,12 @@ export class QuestionnaireLoader {
    */
   reset() {
     destroyTree(this._tree);
-    clearAllValues();
+    this._clearAllValues();
     if (this._rawFhir) this._rawFhir.value = null;
-    resetQuestMeta();
-    questVariables.splice(0);
-    questContained.splice(0);
-    renderTree();
+    this._resetQuestMeta();
+    this._questVariables.splice(0);
+    this._questContained.splice(0);
+    this._renderTree();
     if (this._resetFlow?.clearDraft) this._resetFlow.clearDraft();
     document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_CLEARED));
   }
@@ -92,7 +101,7 @@ export class QuestionnaireLoader {
         detail: { fileName: fileName || '' },
       }));
       progress.show('Rendering ' + this._tree.length + ' nodes…');
-      await renderTreeAsync((done, total) => progress.update(done, total));
+      await this._renderTreeAsync((done, total) => progress.update(done, total));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
 
       // Show import report only when local validator finds errors and validate is enabled.

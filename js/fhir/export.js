@@ -1,6 +1,8 @@
 ﻿// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
-import { tree, questVariables, questContained, rawFhir, questMeta } from '../state.js';
 import { parseOptions, ITLH_KEY_GROUP_OR } from '../utils.js';
+
+let _svc = {};
+export function configure(svc) { _svc = svc; }
 import { downloadJSON } from './download.js';
 
 // Escape text for embedding in XHTML
@@ -450,6 +452,7 @@ export function nodeToFHIRItem(node) {
 }
 
 export function buildFHIRObject() {
+  const { tree, questMeta, rawFhir, questVariables, questContained } = _svc;
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
   const q = {
     resourceType: 'Questionnaire',

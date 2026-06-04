@@ -37,7 +37,8 @@ vi.mock('../js/state.js', () => ({
 
 vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
-const { fhirTypeToItemType, fhirOptsToStr, hasNonCodingOpts, humanEnableWhen, applyVisibility, importFHIR } = await import('../js/fhir/import.js');
+const { fhirTypeToItemType, fhirOptsToStr, hasNonCodingOpts, humanEnableWhen, applyVisibility, importFHIR, configure: configureImport } = await import('../js/fhir/import.js');
+configureImport({ tree: _tree, resetSeq: vi.fn(), rawFhir: _rawFhir, questVariables: _questVariables, questContained: _questContained, questMeta: _questMeta, setValue: (id, val) => { _values[id] = val; }, clearAllValues: () => { Object.keys(_values).forEach(k => delete _values[k]); }, renderTree: vi.fn() });
 
 vi.stubGlobal('alert', vi.fn());
 

@@ -2,8 +2,10 @@
 import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
-import { tree, values, rawFhir, questVariables, questContained, questMeta, getValue, setValue, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './state.js';
-import { buildFHIRObject } from './fhir/export.js';
+import { tree, values, rawFhir, questVariables, questContained, questMeta, getValue, setValue, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES, clearAllValues, resetQuestMeta, resetSeq } from './state.js';
+import { buildFHIRObject, configure as configureExport } from './fhir/export.js';
+import { configure as configureImport } from './fhir/import.js';
+import { configure as configureQrExport } from './fhir/qr-export.js';
 import { initValidators } from './fhir/validators/init.js';
 import * as validateModal from './ui/modals/validate-modal.js';
 import * as metadataModal from './ui/modals/metadata-modal.js';
@@ -11,7 +13,7 @@ import * as progress from './ui/progress.js';
 import { RenumberControl } from './ui/renumber-control.js';
 import * as search from './ui/search.js';
 import { UndoRedo } from './ui/undo-redo.js';
-import { renumberAll, addRootGroup, mount as mountBuilder } from './builder/index.js';
+import { renumberAll, addRootGroup, mount as mountBuilder, renderTree, renderTreeAsync } from './builder/index.js';
 import { setRenumberGetter } from './builder/_shared.js';
 import * as helpModal from './ui/modals/help-modal.js';
 import { PreviewForm } from './preview-form.js';
@@ -44,11 +46,22 @@ patientCtx.configure({ tree, questVariables });
 patientCtx.mount(document.getElementById('patientPresetWrap'));
 AuthPanel.configure({ tree });
 
+// ── Inject state into FHIR modules ─────────────────────────────────────
+configureExport({ tree, questMeta, rawFhir, questVariables, questContained });
+configureImport({ tree, resetSeq, rawFhir, questVariables, questContained, questMeta, setValue, clearAllValues, renderTree });
+configureQrExport({ values });
+
 // ── Manager singletons (DI from state) ─────────────────────────────────
 export const qrAnswers   = new QRAnswersManager({ values, tree, rawFhir, shouldValidate: () => prefs.get('validate') });
 export const questLoader = new QuestionnaireLoader({ tree, values, questMeta, rawFhir,
-  reinitForm:      (opts) => previewForm.reinitForm(opts),
-  shouldValidate:  () => prefs.get('validate'),
+  reinitForm:       (opts) => previewForm.reinitForm(opts),
+  shouldValidate:   () => prefs.get('validate'),
+  renderTree,
+  renderTreeAsync,
+  clearAllValues,
+  resetQuestMeta,
+  questVariables,
+  questContained,
 });
 
 export const previewForm = new PreviewForm({

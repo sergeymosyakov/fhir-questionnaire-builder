@@ -36,7 +36,8 @@ vi.mock('../js/state.js', () => ({
   NONEMPTY_TYPES:  new Set(),
 }));
 
-const { buildFHIRObject } = await import('../js/fhir/export.js');
+const { buildFHIRObject, configure: configureExport } = await import('../js/fhir/export.js');
+configureExport({ tree: _tree, questMeta: _questMeta, rawFhir: _rawFhir, questVariables: _questVariables, questContained: _questContained });
 
 // Helper: reset tree and run buildFHIRObject
 function build(nodes, title = 'Test Q', vars = []) {

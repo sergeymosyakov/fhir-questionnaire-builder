@@ -54,10 +54,14 @@ const state                      = await import('../js/state.js');
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function makeLoader(overrides = {}) {
   const defaults = {
-    tree:       [],
-    values:     {},
-    questMeta:  {},
-    reinitForm: vi.fn(() => Promise.resolve()),
+    tree:            [],
+    values:          {},
+    questMeta:       {},
+    reinitForm:      vi.fn(() => Promise.resolve()),
+    clearAllValues:  state.clearAllValues,
+    resetQuestMeta:  state.resetQuestMeta,
+    questVariables:  state.questVariables,
+    questContained:  state.questContained,
   };
   return new QuestionnaireLoader({ ...defaults, ...overrides });
 }

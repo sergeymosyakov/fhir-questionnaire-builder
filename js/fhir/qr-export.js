@@ -1,8 +1,10 @@
 // Download current answers as a FHIR R4 QuestionnaireResponse JSON
-import { values } from '../state.js';
 import { buildFHIRObject } from './export.js';
 import { buildQR } from './qr-builder.js';
 import { downloadJSON } from './download.js';
+
+let _svc = {};
+export function configure(svc) { _svc = svc; }
 
 /**
  * Build and download a QuestionnaireResponse JSON.
@@ -10,6 +12,7 @@ import { downloadJSON } from './download.js';
  * @param {{ status?, subject?, author?, id?, language?, metaVersionId?, metaSource?, metaProfile?, metaTag?, metaSecurity? }} [meta]
  */
 export function exportQR(fileName, meta) {
+  const { values } = _svc;
   const fhirQ = buildFHIRObject();
   const qr    = buildQR(fhirQ, values);
   qr.status   = (meta && meta.status)  || 'in-progress';

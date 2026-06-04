@@ -35,8 +35,9 @@ vi.mock('../js/state.js', () => ({
   NONEMPTY_TYPES:  new Set(),
 }));
 
-const { buildFHIRObject } = await import('../js/fhir/export.js');
+const { buildFHIRObject, configure: configureExport } = await import('../js/fhir/export.js');
 const { generateNarrativeDiv } = await import('../js/fhir/export.js');
+configureExport({ tree: _tree, questMeta: _questMeta, rawFhir: _rawFhir, questVariables: _questVariables, questContained: _questContained });
 
 function build(nodes, title = 'Test Q', vars = []) {
   _tree.splice(0, _tree.length, ...nodes);

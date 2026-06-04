@@ -21,9 +21,12 @@ vi.mock('../js/fhir/qr-builder.js', () => ({
 
 // ── Imports (resolved AFTER vi.mock hoisting) ─────────────────────────────────
 
-import { exportQR }        from '../js/fhir/qr-export.js';
+import { exportQR, configure as configureQrExport } from '../js/fhir/qr-export.js';
 import { buildFHIRObject } from '../js/fhir/export.js';
 import { buildQR }         from '../js/fhir/qr-builder.js';
+
+// _svc injection — exportQR needs values from _svc, not state.js
+configureQrExport({ values: {} });
 
 // ── DOM stub helpers ──────────────────────────────────────────────────────────
 

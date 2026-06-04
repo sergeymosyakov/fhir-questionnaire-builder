@@ -1,10 +1,11 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
-import { tree, resetSeq, rawFhir, questVariables, questContained, questMeta, setValue, clearAllValues } from '../state.js';
 import { showError } from '../ui/toast.js';
 import { AppEvents } from '../events.js';
-import { renderTree } from '../builder/index.js';
 import { normaliseSTU3 } from './stu3-shim.js';
 import { destroyTree } from '../utils.js';
+
+let _svc = {};
+export function configure(svc) { _svc = svc; }
 import {
   buildLinkIdMap,
   fhirTypeToItemType,
@@ -28,6 +29,7 @@ export {
 
 // Walk the tree and pre-populate values[] from node._initialValue / _initialValues
 function applyInitialValues(nodes) {
+  const { setValue } = _svc;
   for (const node of nodes) {
     if (node.repeats && node._initialValues && node._initialValues.length > 1) {
       setValue(node.id, node._initialValues[0]);
@@ -44,6 +46,7 @@ function applyInitialValues(nodes) {
 
 // Main import entry point
 export function importFHIR(fhirJson, renderFn) {
+  const { tree, resetSeq, rawFhir, questVariables, questContained, questMeta, clearAllValues, renderTree } = _svc;
   let q = fhirJson;
   if (typeof q === 'string') {
     try { q = JSON.parse(q); } catch (e) { showError('Invalid JSON:\n' + e.message); return; }
