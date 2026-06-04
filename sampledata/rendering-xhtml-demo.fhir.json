@@ -110,5 +110,9 @@
       "text": "Any additional comments? (plain text, no XHTML)",
       "type": "text"
     }
-  ]
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Rendering XHTML Demo</div>"
+  }
 }

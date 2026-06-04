@@ -14,27 +14,66 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn",
           "extension": [
-            { "url": "path", "valueString": "code" },
-            { "url": "label", "valueString": "Code" },
-            { "url": "width", "valueQuantity": { "value": 25, "unit": "%" } },
-            { "url": "forDisplay", "valueBoolean": false }
+            {
+              "url": "path",
+              "valueString": "code"
+            },
+            {
+              "url": "label",
+              "valueString": "Code"
+            },
+            {
+              "url": "width",
+              "valueQuantity": {
+                "value": 25,
+                "unit": "%"
+              }
+            },
+            {
+              "url": "forDisplay",
+              "valueBoolean": false
+            }
           ]
         },
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn",
           "extension": [
-            { "url": "path", "valueString": "display" },
-            { "url": "label", "valueString": "Medication" },
-            { "url": "forDisplay", "valueBoolean": true }
+            {
+              "url": "path",
+              "valueString": "display"
+            },
+            {
+              "url": "label",
+              "valueString": "Medication"
+            },
+            {
+              "url": "forDisplay",
+              "valueBoolean": true
+            }
           ]
         },
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn",
           "extension": [
-            { "url": "path", "valueString": "system" },
-            { "url": "label", "valueString": "System" },
-            { "url": "width", "valueQuantity": { "value": 35, "unit": "%" } },
-            { "url": "forDisplay", "valueBoolean": false }
+            {
+              "url": "path",
+              "valueString": "system"
+            },
+            {
+              "url": "label",
+              "valueString": "System"
+            },
+            {
+              "url": "width",
+              "valueQuantity": {
+                "value": 35,
+                "unit": "%"
+              }
+            },
+            {
+              "url": "forDisplay",
+              "valueBoolean": false
+            }
           ]
         }
       ],
@@ -77,18 +116,42 @@
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn",
           "extension": [
-            { "url": "path", "valueString": "code" },
-            { "url": "label", "valueString": "ICD-10" },
-            { "url": "width", "valueQuantity": { "value": 20, "unit": "%" } },
-            { "url": "forDisplay", "valueBoolean": false }
+            {
+              "url": "path",
+              "valueString": "code"
+            },
+            {
+              "url": "label",
+              "valueString": "ICD-10"
+            },
+            {
+              "url": "width",
+              "valueQuantity": {
+                "value": 20,
+                "unit": "%"
+              }
+            },
+            {
+              "url": "forDisplay",
+              "valueBoolean": false
+            }
           ]
         },
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn",
           "extension": [
-            { "url": "path", "valueString": "display" },
-            { "url": "label", "valueString": "Description" },
-            { "url": "forDisplay", "valueBoolean": true }
+            {
+              "url": "path",
+              "valueString": "display"
+            },
+            {
+              "url": "label",
+              "valueString": "Description"
+            },
+            {
+              "url": "forDisplay",
+              "valueBoolean": true
+            }
           ]
         }
       ],
@@ -130,5 +193,9 @@
         }
       ]
     }
-  ]
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Choice Column Demo</div>"
+  }
 }

@@ -1,328 +1,452 @@
 {
-    "resourceType": "Questionnaire",
-    "id": "patient-scenario-medication",
-    "title": "Medication Review & Allergy Screen",
-    "status": "draft",
-    "experimental": true,
-    "copyright": "© 2026 Sergey Mosyakov",
-    "description": "Structured medication reconciliation driven by patient context. Demonstrates repeating groups, required fields, standard enableWhen, and answerOption choice items. Select a Patient preset and click ↺ Re-init to populate the profile. PASS: all required medication and allergy fields complete. FAIL: any required field empty.",
-    "extension": [
+  "resourceType": "Questionnaire",
+  "id": "patient-scenario-medication",
+  "title": "Medication Review & Allergy Screen",
+  "status": "draft",
+  "experimental": true,
+  "copyright": "© 2026 Sergey Mosyakov",
+  "description": "Structured medication reconciliation driven by patient context. Demonstrates repeating groups, required fields, standard enableWhen, and answerOption choice items. Select a Patient preset and click ↺ Re-init to populate the profile. PASS: all required medication and allergy fields complete. FAIL: any required field empty.",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "age",
+        "language": "text/fhirpath",
+        "expression": "45"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "gender",
+        "language": "text/fhirpath",
+        "expression": "'female'"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "medCount",
+        "language": "text/fhirpath",
+        "expression": "2"
+      }
+    }
+  ],
+  "item": [
+    {
+      "linkId": "how-to",
+      "text": "How to use: (1) Select a Patient preset from the Patient ▾ dropdown. (2) Click ↺ Re-init in the Variables panel. (3) The Patient Profile section fills automatically. (4) Complete the Medications and Allergy sections to reach PASS.",
+      "type": "display"
+    },
+    {
+      "linkId": "profile",
+      "text": "Patient Profile (auto-filled from context)",
+      "type": "group",
+      "item": [
         {
-            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-            "valueExpression": {
-                "name": "age",
+          "linkId": "profile-age",
+          "text": "Age",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
                 "language": "text/fhirpath",
-                "expression": "45"
+                "expression": "%age"
+              }
             }
+          ]
         },
         {
-            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-            "valueExpression": {
-                "name": "gender",
+          "linkId": "profile-gender",
+          "text": "Biological sex",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
                 "language": "text/fhirpath",
-                "expression": "'female'"
+                "expression": "%gender"
+              }
             }
+          ]
         },
         {
-            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-            "valueExpression": {
-                "name": "medCount",
+          "linkId": "profile-med-count",
+          "text": "Number of active medications (from record)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
                 "language": "text/fhirpath",
-                "expression": "2"
+                "expression": "%medCount"
+              }
             }
+          ]
         }
-    ],
-    "item": [
+      ]
+    },
+    {
+      "linkId": "medications",
+      "text": "Current Medications",
+      "type": "group",
+      "repeats": true,
+      "item": [
         {
-            "linkId": "how-to",
-            "text": "How to use: (1) Select a Patient preset from the Patient ▾ dropdown. (2) Click ↺ Re-init in the Variables panel. (3) The Patient Profile section fills automatically. (4) Complete the Medications and Allergy sections to reach PASS.",
-            "type": "display"
+          "linkId": "med-name",
+          "text": "Medication name",
+          "type": "string",
+          "required": true
         },
         {
-            "linkId": "profile",
-            "text": "Patient Profile (auto-filled from context)",
-            "type": "group",
-            "item": [
-                {
-                    "linkId": "profile-age",
-                    "text": "Age",
-                    "type": "decimal",
-                    "readOnly": true,
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%age"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "linkId": "profile-gender",
-                    "text": "Biological sex",
-                    "type": "string",
-                    "readOnly": true,
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%gender"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "linkId": "profile-med-count",
-                    "text": "Number of active medications (from record)",
-                    "type": "decimal",
-                    "readOnly": true,
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%medCount"
-                            }
-                        }
-                    ]
-                }
-            ]
+          "linkId": "med-dose",
+          "text": "Dose and strength (e.g. 10 mg)",
+          "type": "string",
+          "required": true
         },
         {
-            "linkId": "medications",
-            "text": "Current Medications",
-            "type": "group",
-            "repeats": true,
-            "item": [
-                {
-                    "linkId": "med-name",
-                    "text": "Medication name",
-                    "type": "string",
-                    "required": true
-                },
-                {
-                    "linkId": "med-dose",
-                    "text": "Dose and strength (e.g. 10 mg)",
-                    "type": "string",
-                    "required": true
-                },
-                {
-                    "linkId": "med-frequency",
-                    "text": "Frequency",
-                    "type": "choice",
-                    "required": true,
-                    "answerOption": [
-                        { "valueCoding": { "code": "once-daily",   "display": "Once daily" } },
-                        { "valueCoding": { "code": "twice-daily",  "display": "Twice daily" } },
-                        { "valueCoding": { "code": "three-daily",  "display": "Three times daily" } },
-                        { "valueCoding": { "code": "weekly",       "display": "Weekly" } },
-                        { "valueCoding": { "code": "as-needed",    "display": "As needed (PRN)" } }
-                    ]
-                },
-                {
-                    "linkId": "med-route",
-                    "text": "Route of administration",
-                    "type": "choice",
-                    "answerOption": [
-                        { "valueCoding": { "code": "oral",        "display": "Oral" } },
-                        { "valueCoding": { "code": "topical",     "display": "Topical" } },
-                        { "valueCoding": { "code": "inhaled",     "display": "Inhaled" } },
-                        { "valueCoding": { "code": "injection",   "display": "Injection" } },
-                        { "valueCoding": { "code": "sublingual",  "display": "Sublingual" } },
-                        { "valueCoding": { "code": "transdermal", "display": "Transdermal patch" } }
-                    ]
-                },
-                {
-                    "linkId": "med-prescriber",
-                    "text": "Prescribing provider",
-                    "type": "string"
-                },
-                {
-                    "linkId": "med-indication",
-                    "text": "Reason / indication",
-                    "type": "string"
-                }
-            ]
+          "linkId": "med-frequency",
+          "text": "Frequency",
+          "type": "choice",
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "once-daily",
+                "display": "Once daily"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "twice-daily",
+                "display": "Twice daily"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "three-daily",
+                "display": "Three times daily"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "weekly",
+                "display": "Weekly"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "as-needed",
+                "display": "As needed (PRN)"
+              }
+            }
+          ]
         },
         {
-            "linkId": "allergy-review",
-            "text": "Allergy Review",
-            "type": "group",
-            "item": [
-                {
-                    "linkId": "has-drug-allergies",
-                    "text": "Does the patient have known drug allergies?",
-                    "type": "boolean",
-                    "required": true
-                },
-                {
-                    "linkId": "drug-allergy-detail",
-                    "text": "Drug Allergy Details",
-                    "type": "group",
-                    "repeats": true,
-                    "enableWhen": [
-                        {
-                            "question": "has-drug-allergies",
-                            "operator": "=",
-                            "answerBoolean": true
-                        }
-                    ],
-                    "item": [
-                        {
-                            "linkId": "drug-allergen",
-                            "text": "Drug or substance",
-                            "type": "string",
-                            "required": true
-                        },
-                        {
-                            "linkId": "drug-reaction",
-                            "text": "Reaction type",
-                            "type": "choice",
-                            "answerOption": [
-                                { "valueCoding": { "code": "rash",          "display": "Rash / hives" } },
-                                { "valueCoding": { "code": "anaphylaxis",   "display": "Anaphylaxis" } },
-                                { "valueCoding": { "code": "gi",            "display": "GI upset (nausea/vomiting)" } },
-                                { "valueCoding": { "code": "respiratory",   "display": "Respiratory (wheezing/shortness of breath)" } },
-                                { "valueCoding": { "code": "angioedema",    "display": "Angioedema" } },
-                                { "valueCoding": { "code": "other",         "display": "Other" } }
-                            ]
-                        },
-                        {
-                            "linkId": "drug-severity",
-                            "text": "Severity",
-                            "type": "choice",
-                            "answerOption": [
-                                { "valueCoding": { "code": "mild",     "display": "Mild" } },
-                                { "valueCoding": { "code": "moderate", "display": "Moderate" } },
-                                { "valueCoding": { "code": "severe",   "display": "Severe / life-threatening" } }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "linkId": "has-food-allergies",
-                    "text": "Does the patient have known food allergies?",
-                    "type": "boolean",
-                    "required": true
-                },
-                {
-                    "linkId": "food-allergy-detail",
-                    "text": "Food Allergy Details",
-                    "type": "group",
-                    "repeats": true,
-                    "enableWhen": [
-                        {
-                            "question": "has-food-allergies",
-                            "operator": "=",
-                            "answerBoolean": true
-                        }
-                    ],
-                    "item": [
-                        {
-                            "linkId": "food-allergen",
-                            "text": "Food or substance",
-                            "type": "string",
-                            "required": true
-                        },
-                        {
-                            "linkId": "food-reaction",
-                            "text": "Reaction description",
-                            "type": "string"
-                        }
-                    ]
-                },
-                {
-                    "linkId": "nkda",
-                    "text": "No known drug allergies (NKDA) confirmed",
-                    "type": "boolean",
-                    "enableWhen": [
-                        {
-                            "question": "has-drug-allergies",
-                            "operator": "=",
-                            "answerBoolean": false
-                        }
-                    ]
-                }
-            ]
+          "linkId": "med-route",
+          "text": "Route of administration",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "oral",
+                "display": "Oral"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "topical",
+                "display": "Topical"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "inhaled",
+                "display": "Inhaled"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "injection",
+                "display": "Injection"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "sublingual",
+                "display": "Sublingual"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "transdermal",
+                "display": "Transdermal patch"
+              }
+            }
+          ]
         },
         {
-            "linkId": "otc-supplements",
-            "text": "OTC Medications & Supplements",
-            "type": "group",
-            "item": [
-                {
-                    "linkId": "taking-otc",
-                    "text": "Is the patient taking any OTC medications or dietary supplements?",
-                    "type": "boolean",
-                    "required": true
-                },
-                {
-                    "linkId": "otc-detail",
-                    "text": "OTC / Supplement Details",
-                    "type": "group",
-                    "repeats": true,
-                    "enableWhen": [
-                        {
-                            "question": "taking-otc",
-                            "operator": "=",
-                            "answerBoolean": true
-                        }
-                    ],
-                    "item": [
-                        {
-                            "linkId": "otc-name",
-                            "text": "Name",
-                            "type": "string",
-                            "required": true
-                        },
-                        {
-                            "linkId": "otc-dose",
-                            "text": "Dose",
-                            "type": "string"
-                        },
-                        {
-                            "linkId": "otc-reason",
-                            "text": "Reason / indication",
-                            "type": "string"
-                        }
-                    ]
-                }
-            ]
+          "linkId": "med-prescriber",
+          "text": "Prescribing provider",
+          "type": "string"
         },
         {
-            "linkId": "pharmacy",
-            "text": "Pharmacy & Provider",
-            "type": "group",
-            "item": [
-                {
-                    "linkId": "preferred-pharmacy",
-                    "text": "Preferred pharmacy",
-                    "type": "string"
-                },
-                {
-                    "linkId": "pcp-name",
-                    "text": "Primary care provider",
-                    "type": "string"
-                },
-                {
-                    "linkId": "last-med-review",
-                    "text": "Date of last medication review",
-                    "type": "date"
-                },
-                {
-                    "linkId": "adherence-overall",
-                    "text": "Overall medication adherence (patient-reported)",
-                    "type": "choice",
-                    "answerOption": [
-                        { "valueCoding": { "code": "always",     "display": "Always takes as prescribed" } },
-                        { "valueCoding": { "code": "mostly",     "display": "Mostly — misses occasionally" } },
-                        { "valueCoding": { "code": "sometimes",  "display": "Sometimes — frequent misses" } },
-                        { "valueCoding": { "code": "rarely",     "display": "Rarely takes as prescribed" } }
-                    ]
-                }
-            ]
+          "linkId": "med-indication",
+          "text": "Reason / indication",
+          "type": "string"
         }
-    ]
+      ]
+    },
+    {
+      "linkId": "allergy-review",
+      "text": "Allergy Review",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "has-drug-allergies",
+          "text": "Does the patient have known drug allergies?",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "linkId": "drug-allergy-detail",
+          "text": "Drug Allergy Details",
+          "type": "group",
+          "repeats": true,
+          "enableWhen": [
+            {
+              "question": "has-drug-allergies",
+              "operator": "=",
+              "answerBoolean": true
+            }
+          ],
+          "item": [
+            {
+              "linkId": "drug-allergen",
+              "text": "Drug or substance",
+              "type": "string",
+              "required": true
+            },
+            {
+              "linkId": "drug-reaction",
+              "text": "Reaction type",
+              "type": "choice",
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "rash",
+                    "display": "Rash / hives"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "anaphylaxis",
+                    "display": "Anaphylaxis"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "gi",
+                    "display": "GI upset (nausea/vomiting)"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "respiratory",
+                    "display": "Respiratory (wheezing/shortness of breath)"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "angioedema",
+                    "display": "Angioedema"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "other",
+                    "display": "Other"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "drug-severity",
+              "text": "Severity",
+              "type": "choice",
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "mild",
+                    "display": "Mild"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "moderate",
+                    "display": "Moderate"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "severe",
+                    "display": "Severe / life-threatening"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "linkId": "has-food-allergies",
+          "text": "Does the patient have known food allergies?",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "linkId": "food-allergy-detail",
+          "text": "Food Allergy Details",
+          "type": "group",
+          "repeats": true,
+          "enableWhen": [
+            {
+              "question": "has-food-allergies",
+              "operator": "=",
+              "answerBoolean": true
+            }
+          ],
+          "item": [
+            {
+              "linkId": "food-allergen",
+              "text": "Food or substance",
+              "type": "string",
+              "required": true
+            },
+            {
+              "linkId": "food-reaction",
+              "text": "Reaction description",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "linkId": "nkda",
+          "text": "No known drug allergies (NKDA) confirmed",
+          "type": "boolean",
+          "enableWhen": [
+            {
+              "question": "has-drug-allergies",
+              "operator": "=",
+              "answerBoolean": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "otc-supplements",
+      "text": "OTC Medications & Supplements",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "taking-otc",
+          "text": "Is the patient taking any OTC medications or dietary supplements?",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "linkId": "otc-detail",
+          "text": "OTC / Supplement Details",
+          "type": "group",
+          "repeats": true,
+          "enableWhen": [
+            {
+              "question": "taking-otc",
+              "operator": "=",
+              "answerBoolean": true
+            }
+          ],
+          "item": [
+            {
+              "linkId": "otc-name",
+              "text": "Name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "linkId": "otc-dose",
+              "text": "Dose",
+              "type": "string"
+            },
+            {
+              "linkId": "otc-reason",
+              "text": "Reason / indication",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "pharmacy",
+      "text": "Pharmacy & Provider",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "preferred-pharmacy",
+          "text": "Preferred pharmacy",
+          "type": "string"
+        },
+        {
+          "linkId": "pcp-name",
+          "text": "Primary care provider",
+          "type": "string"
+        },
+        {
+          "linkId": "last-med-review",
+          "text": "Date of last medication review",
+          "type": "date"
+        },
+        {
+          "linkId": "adherence-overall",
+          "text": "Overall medication adherence (patient-reported)",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "always",
+                "display": "Always takes as prescribed"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "mostly",
+                "display": "Mostly — misses occasionally"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "sometimes",
+                "display": "Sometimes — frequent misses"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "rarely",
+                "display": "Rarely takes as prescribed"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Medication Review & Allergy Screen</div>"
+  }
 }

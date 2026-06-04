@@ -8,7 +8,9 @@
   "status": "active",
   "copyright": "© 2026 Sergey Mosyakov",
   "experimental": true,
-  "subjectType": ["Patient"],
+  "subjectType": [
+    "Patient"
+  ],
   "date": "2024-01-01",
   "publisher": "Example Organization",
   "description": "Patient-reported outcome instrument for persistent post-surgical pain and functional impact at the surgical site (PROWL-SS).",
@@ -62,11 +64,36 @@
           "text": "Describe the predominant sensation at the surgical site",
           "type": "choice",
           "answerOption": [
-            { "valueCoding": { "code": "aching",   "display": "Aching" } },
-            { "valueCoding": { "code": "burning",  "display": "Burning" } },
-            { "valueCoding": { "code": "stabbing", "display": "Stabbing" } },
-            { "valueCoding": { "code": "throbbing","display": "Throbbing" } },
-            { "valueCoding": { "code": "none",     "display": "No sensation" } }
+            {
+              "valueCoding": {
+                "code": "aching",
+                "display": "Aching"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "burning",
+                "display": "Burning"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "stabbing",
+                "display": "Stabbing"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "throbbing",
+                "display": "Throbbing"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "none",
+                "display": "No sensation"
+              }
+            }
           ]
         }
       ]
@@ -82,11 +109,36 @@
           "type": "choice",
           "required": true,
           "answerOption": [
-            { "valueCoding": { "code": "not-at-all",  "display": "Not at all" } },
-            { "valueCoding": { "code": "a-little",    "display": "A little" } },
-            { "valueCoding": { "code": "moderately",  "display": "Moderately" } },
-            { "valueCoding": { "code": "quite-a-bit", "display": "Quite a bit" } },
-            { "valueCoding": { "code": "extremely",   "display": "Extremely" } }
+            {
+              "valueCoding": {
+                "code": "not-at-all",
+                "display": "Not at all"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "a-little",
+                "display": "A little"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "moderately",
+                "display": "Moderately"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "quite-a-bit",
+                "display": "Quite a bit"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "extremely",
+                "display": "Extremely"
+              }
+            }
           ]
         },
         {
@@ -95,11 +147,36 @@
           "type": "choice",
           "required": true,
           "answerOption": [
-            { "valueCoding": { "code": "not-at-all",  "display": "Not at all" } },
-            { "valueCoding": { "code": "a-little",    "display": "A little" } },
-            { "valueCoding": { "code": "moderately",  "display": "Moderately" } },
-            { "valueCoding": { "code": "quite-a-bit", "display": "Quite a bit" } },
-            { "valueCoding": { "code": "extremely",   "display": "Extremely" } }
+            {
+              "valueCoding": {
+                "code": "not-at-all",
+                "display": "Not at all"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "a-little",
+                "display": "A little"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "moderately",
+                "display": "Moderately"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "quite-a-bit",
+                "display": "Quite a bit"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "extremely",
+                "display": "Extremely"
+              }
+            }
           ]
         },
         {
@@ -107,10 +184,30 @@
           "text": "Have you been able to return to normal work or activities?",
           "type": "choice",
           "answerOption": [
-            { "valueCoding": { "code": "fully",       "display": "Yes, fully" } },
-            { "valueCoding": { "code": "partially",   "display": "Partially" } },
-            { "valueCoding": { "code": "not-yet",     "display": "Not yet" } },
-            { "valueCoding": { "code": "not-working", "display": "Not applicable" } }
+            {
+              "valueCoding": {
+                "code": "fully",
+                "display": "Yes, fully"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "partially",
+                "display": "Partially"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "not-yet",
+                "display": "Not yet"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "not-working",
+                "display": "Not applicable"
+              }
+            }
           ]
         }
       ]
@@ -126,11 +223,36 @@
           "type": "choice",
           "required": true,
           "answerOption": [
-            { "valueCoding": { "code": "very-satisfied",    "display": "Very satisfied" } },
-            { "valueCoding": { "code": "satisfied",         "display": "Satisfied" } },
-            { "valueCoding": { "code": "neutral",           "display": "Neutral" } },
-            { "valueCoding": { "code": "dissatisfied",      "display": "Dissatisfied" } },
-            { "valueCoding": { "code": "very-dissatisfied", "display": "Very dissatisfied" } }
+            {
+              "valueCoding": {
+                "code": "very-satisfied",
+                "display": "Very satisfied"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "satisfied",
+                "display": "Satisfied"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "neutral",
+                "display": "Neutral"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "dissatisfied",
+                "display": "Dissatisfied"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "very-dissatisfied",
+                "display": "Very dissatisfied"
+              }
+            }
           ]
         },
         {
@@ -140,5 +262,9 @@
         }
       ]
     }
-  ]
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">PROWL-SS — Post-Surgical Pain Assessment</div>"
+  }
 }

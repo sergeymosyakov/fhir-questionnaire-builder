@@ -117,5 +117,9 @@
         }
       ]
     }
-  ]
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Reference Type Demo</div>"
+  }
 }

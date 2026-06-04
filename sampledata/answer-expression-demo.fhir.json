@@ -3,7 +3,7 @@
   "id": "answer-expression-demo",
   "url": "http://example.org/fhir/Questionnaire/answer-expression-demo",
   "version": "1.0.0",
-  "title": "Answer Expression Demo \u2014 Dynamic Option Lists",
+  "title": "Answer Expression Demo — Dynamic Option Lists",
   "status": "draft",
   "publisher": "FHIR Questionnaire Builder",
   "description": "Demonstrates sdc-questionnaire-answerExpression: answer options computed at runtime via FHIRPath. The 'Recommended Action' and 'Severity Level' questions derive their options dynamically from the PHQ-2 score.",
@@ -31,7 +31,7 @@
       "item": [
         {
           "linkId": "phq-q1",
-          "text": "Over the last 2 weeks \u2014 little interest or pleasure in doing things?",
+          "text": "Over the last 2 weeks — little interest or pleasure in doing things?",
           "type": "choice",
           "answerOption": [
             {
@@ -86,7 +86,7 @@
         },
         {
           "linkId": "phq-q2",
-          "text": "Over the last 2 weeks \u2014 feeling down, depressed, or hopeless?",
+          "text": "Over the last 2 weeks — feeling down, depressed, or hopeless?",
           "type": "choice",
           "answerOption": [
             {
@@ -196,5 +196,9 @@
         }
       ]
     }
-  ]
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Answer Expression Demo — Dynamic Option Lists</div>"
+  }
 }

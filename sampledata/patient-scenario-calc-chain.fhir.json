@@ -1,433 +1,437 @@
 {
-    "resourceType":  "Questionnaire",
-    "id":  "patient-scenario-calc-chain",
-    "title":  "Risk Score Calculator — initialExpression + calculatedExpression Chain",
-    "status":  "draft",
-    "experimental":  true,
-    "copyright":  "© 2026 Sergey Mosyakov",
-    "description":  "Demonstrates the initialExpression → calculatedExpression → enableWhenExpression chain. Select a Patient preset, click ↺ Re-init, then observe: (1) Step 1 fields populate from patient context; (2) Step 2 risk scores recompute; (3) the matching Risk Level section appears.",
-    "extension":  [
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "age",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "30"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "gender",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "\u0027male\u0027"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "bmi",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "24"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "smoker",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "false"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "pregnant",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "false"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "ageRiskPts",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "iif(%age \u003e= 60, 3, iif(%age \u003e= 40, 2, 1))"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "bmiRiskPts",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "iif(%bmi \u003e= 40, 4, iif(%bmi \u003e= 35, 3, iif(%bmi \u003e= 30, 2, 1)))"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "smokerPts",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "iif(%smoker, 2, 0)"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "pregnancyPts",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "iif(%pregnant, 2, 0)"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "totalRisk",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "%ageRiskPts + %bmiRiskPts + %smokerPts + %pregnancyPts"
-                                              }
-                      }
-                  ],
-    "item":  [
-                 {
-                     "linkId":  "how-to",
-                     "text":  "How to use: (1) Load this questionnaire. (2) Select a patient profile from the Patient ▾ dropdown. (3) Click ↺ Re-init in the Variables panel. Watch Step 1 fill in, Step 2 recalculate, and the Risk Level section switch.",
-                     "type":  "display"
-                 },
-                 {
-                     "linkId":  "step1",
-                     "text":  "Step 1 — Patient Context (filled by initialExpression on ↺ Re-init)",
-                     "type":  "group",
-                     "item":  [
-                                  {
-                                      "linkId":  "ctx-age",
-                                      "text":  "Age",
-                                      "type":  "decimal",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%age"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "ctx-bmi",
-                                      "text":  "BMI (kg/m²)",
-                                      "type":  "decimal",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%bmi"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "ctx-smoker",
-                                      "text":  "Smoker",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%smoker"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "ctx-pregnant",
-                                      "text":  "Pregnant",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%pregnant"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "ctx-gender",
-                                      "text":  "Biological sex",
-                                      "type":  "string",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%gender"
-                                                                                }
-                                                        }
-                                                    ]
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "step2",
-                     "text":  "Step 2 — Risk Score Breakdown (calculatedExpression using questionnaire variables)",
-                     "type":  "group",
-                     "item":  [
-                                  {
-                                      "linkId":  "rs-age",
-                                      "text":  "Age risk points  (age<40→1, 40–59→2, ≥60→3)",
-                                      "type":  "decimal",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%ageRiskPts"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "rs-bmi",
-                                      "text":  "BMI risk points  (BMI<30→1, 30–34→2, 35–39→3, ≥40→4)",
-                                      "type":  "decimal",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%bmiRiskPts"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "rs-smoker",
-                                      "text":  "Smoking risk points  (non-smoker→0, smoker→2)",
-                                      "type":  "decimal",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%smokerPts"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "rs-pregnancy",
-                                      "text":  "Pregnancy risk points  (not pregnant→0, pregnant→2)",
-                                      "type":  "decimal",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%pregnancyPts"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "rs-total",
-                                      "text":  "TOTAL RISK SCORE",
-                                      "type":  "decimal",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%totalRisk"
-                                                                                }
-                                                        }
-                                                    ]
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "risk-low",
-                     "text":  "🟢 Risk Level: LOW (score ≤ 2)",
-                     "type":  "group",
-                     "extension":  [
-                                       {
-                                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                                           "valueExpression":  {
-                                                                   "language":  "text/fhirpath",
-                                                                   "expression":  "%totalRisk \u003c= 2"
-                                                               }
-                                       }
-                                   ],
-                     "item":  [
-                                  {
-                                      "linkId":  "low-note",
-                                      "text":  "Standard pre-operative pathway. No additional specialist review required.",
-                                      "type":  "display"
-                                  },
-                                  {
-                                      "linkId":  "low-standard-wp",
-                                      "text":  "Standard workup approved",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%totalRisk \u003c= 2"
-                                                                                }
-                                                        }
-                                                    ]
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "risk-moderate",
-                     "text":  "🟡 Risk Level: MODERATE (score 3–5)",
-                     "type":  "group",
-                     "extension":  [
-                                       {
-                                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                                           "valueExpression":  {
-                                                                   "language":  "text/fhirpath",
-                                                                   "expression":  "%totalRisk \u003e= 3 and %totalRisk \u003c= 5"
-                                                               }
-                                       }
-                                   ],
-                     "item":  [
-                                  {
-                                      "linkId":  "mod-note",
-                                      "text":  "Enhanced monitoring required. Cardiology review and anaesthetic pre-assessment recommended.",
-                                      "type":  "display"
-                                  },
-                                  {
-                                      "linkId":  "mod-cardio",
-                                      "text":  "Cardiology review required",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%totalRisk \u003e= 3"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "mod-anaes",
-                                      "text":  "Anaesthetic pre-assessment required",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%totalRisk \u003e= 3"
-                                                                                }
-                                                        }
-                                                    ]
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "risk-high",
-                     "text":  "🔴 Risk Level: HIGH (score ≥ 6)",
-                     "type":  "group",
-                     "extension":  [
-                                       {
-                                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                                           "valueExpression":  {
-                                                                   "language":  "text/fhirpath",
-                                                                   "expression":  "%totalRisk \u003e= 6"
-                                                               }
-                                       }
-                                   ],
-                     "item":  [
-                                  {
-                                      "linkId":  "high-note",
-                                      "text":  "High perioperative risk. Multi-disciplinary team conference required before proceeding.",
-                                      "type":  "display"
-                                  },
-                                  {
-                                      "linkId":  "high-mdt",
-                                      "text":  "MDT conference required",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%totalRisk \u003e= 6"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "high-icu",
-                                      "text":  "ICU bed pre-booking required",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%totalRisk \u003e= 6"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "high-defer",
-                                      "text":  "Consider procedure deferral and optimisation",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%totalRisk \u003e= 8"
-                                                                                }
-                                                        }
-                                                    ]
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "step3",
-                     "text":  "Step 3 — Clinician Sign-off",
-                     "type":  "group",
-                     "item":  [
-                                  {
-                                      "linkId":  "sign-proceed",
-                                      "text":  "Cleared to proceed",
-                                      "type":  "boolean",
-                                      "required":  true
-                                  },
-                                  {
-                                      "linkId":  "sign-notes",
-                                      "text":  "Clinician notes",
-                                      "type":  "text"
-                                  }
-                              ]
-                 }
-             ]
+  "resourceType": "Questionnaire",
+  "id": "patient-scenario-calc-chain",
+  "title": "Risk Score Calculator — initialExpression + calculatedExpression Chain",
+  "status": "draft",
+  "experimental": true,
+  "copyright": "© 2026 Sergey Mosyakov",
+  "description": "Demonstrates the initialExpression → calculatedExpression → enableWhenExpression chain. Select a Patient preset, click ↺ Re-init, then observe: (1) Step 1 fields populate from patient context; (2) Step 2 risk scores recompute; (3) the matching Risk Level section appears.",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "age",
+        "language": "text/fhirpath",
+        "expression": "30"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "gender",
+        "language": "text/fhirpath",
+        "expression": "'male'"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "bmi",
+        "language": "text/fhirpath",
+        "expression": "24"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "smoker",
+        "language": "text/fhirpath",
+        "expression": "false"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "pregnant",
+        "language": "text/fhirpath",
+        "expression": "false"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "ageRiskPts",
+        "language": "text/fhirpath",
+        "expression": "iif(%age >= 60, 3, iif(%age >= 40, 2, 1))"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "bmiRiskPts",
+        "language": "text/fhirpath",
+        "expression": "iif(%bmi >= 40, 4, iif(%bmi >= 35, 3, iif(%bmi >= 30, 2, 1)))"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "smokerPts",
+        "language": "text/fhirpath",
+        "expression": "iif(%smoker, 2, 0)"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "pregnancyPts",
+        "language": "text/fhirpath",
+        "expression": "iif(%pregnant, 2, 0)"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "totalRisk",
+        "language": "text/fhirpath",
+        "expression": "%ageRiskPts + %bmiRiskPts + %smokerPts + %pregnancyPts"
+      }
+    }
+  ],
+  "item": [
+    {
+      "linkId": "how-to",
+      "text": "How to use: (1) Load this questionnaire. (2) Select a patient profile from the Patient ▾ dropdown. (3) Click ↺ Re-init in the Variables panel. Watch Step 1 fill in, Step 2 recalculate, and the Risk Level section switch.",
+      "type": "display"
+    },
+    {
+      "linkId": "step1",
+      "text": "Step 1 — Patient Context (filled by initialExpression on ↺ Re-init)",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "ctx-age",
+          "text": "Age",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%age"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "ctx-bmi",
+          "text": "BMI (kg/m²)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%bmi"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "ctx-smoker",
+          "text": "Smoker",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%smoker"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "ctx-pregnant",
+          "text": "Pregnant",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%pregnant"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "ctx-gender",
+          "text": "Biological sex",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%gender"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "step2",
+      "text": "Step 2 — Risk Score Breakdown (calculatedExpression using questionnaire variables)",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "rs-age",
+          "text": "Age risk points  (age<40→1, 40–59→2, ≥60→3)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%ageRiskPts"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "rs-bmi",
+          "text": "BMI risk points  (BMI<30→1, 30–34→2, 35–39→3, ≥40→4)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%bmiRiskPts"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "rs-smoker",
+          "text": "Smoking risk points  (non-smoker→0, smoker→2)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%smokerPts"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "rs-pregnancy",
+          "text": "Pregnancy risk points  (not pregnant→0, pregnant→2)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%pregnancyPts"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "rs-total",
+          "text": "TOTAL RISK SCORE",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%totalRisk"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "risk-low",
+      "text": "🟢 Risk Level: LOW (score ≤ 2)",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%totalRisk <= 2"
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "low-note",
+          "text": "Standard pre-operative pathway. No additional specialist review required.",
+          "type": "display"
+        },
+        {
+          "linkId": "low-standard-wp",
+          "text": "Standard workup approved",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%totalRisk <= 2"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "risk-moderate",
+      "text": "🟡 Risk Level: MODERATE (score 3–5)",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%totalRisk >= 3 and %totalRisk <= 5"
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "mod-note",
+          "text": "Enhanced monitoring required. Cardiology review and anaesthetic pre-assessment recommended.",
+          "type": "display"
+        },
+        {
+          "linkId": "mod-cardio",
+          "text": "Cardiology review required",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%totalRisk >= 3"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "mod-anaes",
+          "text": "Anaesthetic pre-assessment required",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%totalRisk >= 3"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "risk-high",
+      "text": "🔴 Risk Level: HIGH (score ≥ 6)",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%totalRisk >= 6"
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "high-note",
+          "text": "High perioperative risk. Multi-disciplinary team conference required before proceeding.",
+          "type": "display"
+        },
+        {
+          "linkId": "high-mdt",
+          "text": "MDT conference required",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%totalRisk >= 6"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "high-icu",
+          "text": "ICU bed pre-booking required",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%totalRisk >= 6"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "high-defer",
+          "text": "Consider procedure deferral and optimisation",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%totalRisk >= 8"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "step3",
+      "text": "Step 3 — Clinician Sign-off",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "sign-proceed",
+          "text": "Cleared to proceed",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "linkId": "sign-notes",
+          "text": "Clinician notes",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Risk Score Calculator — initialExpression + calculatedExpression Chain</div>"
+  }
 }

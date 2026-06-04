@@ -780,11 +780,19 @@
           "extension": [
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
-              "valueCoding": { "system": "http://unitsofmeasure.org", "code": "kg", "display": "kg" }
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "kg",
+                "display": "kg"
+              }
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
-              "valueCoding": { "system": "http://unitsofmeasure.org", "code": "[lb_av]", "display": "lb" }
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "[lb_av]",
+                "display": "lb"
+              }
             }
           ]
         },
@@ -831,5 +839,9 @@
         }
       ]
     }
-  ]
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Bariatric Surgery Pre-Authorization Screening</div>"
+  }
 }

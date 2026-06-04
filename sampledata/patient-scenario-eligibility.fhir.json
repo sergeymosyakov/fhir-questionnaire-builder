@@ -1,357 +1,361 @@
 {
-    "resourceType":  "Questionnaire",
-    "id":  "patient-scenario-eligibility",
-    "title":  "Bariatric Surgery Eligibility Screen",
-    "status":  "draft",
-    "experimental":  true,
-    "copyright":  "© 2026 Sergey Mosyakov",
-    "description":  "Automated eligibility assessment driven by patient context. Select a Patient preset and click ↺ Re-init in the Variables panel to populate all auto-filled fields.",
-    "extension":  [
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "age",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "30"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "gender",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "\u0027male\u0027"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "bmi",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "42"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "pregnant",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "false"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "smoker",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "false"
-                                              }
-                      },
-                      {
-                          "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-                          "valueExpression":  {
-                                                  "name":  "comorb",
-                                                  "language":  "text/fhirpath",
-                                                  "expression":  "\u0027\u0027"
-                                              }
-                      }
-                  ],
-    "item":  [
-                 {
-                     "linkId":  "profile",
-                     "text":  "Patient Profile (auto-filled from context)",
-                     "type":  "group",
-                     "item":  [
-                                  {
-                                      "linkId":  "profile-age",
-                                      "text":  "Age",
-                                      "type":  "decimal",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%age"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "profile-gender",
-                                      "text":  "Biological sex",
-                                      "type":  "string",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%gender"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "profile-bmi",
-                                      "text":  "BMI (kg/m²)",
-                                      "type":  "decimal",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%bmi"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "profile-smoker",
-                                      "text":  "Smoker",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%smoker"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "profile-comorb",
-                                      "text":  "Comorbidities",
-                                      "type":  "string",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%comorb"
-                                                                                }
-                                                        }
-                                                    ]
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "adult-section",
-                     "text":  "Adult Pathway (age ≥ 18)",
-                     "type":  "group",
-                     "extension":  [
-                                       {
-                                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                                           "valueExpression":  {
-                                                                   "language":  "text/fhirpath",
-                                                                   "expression":  "%age \u003e= 18"
-                                                               }
-                                       }
-                                   ],
-                     "item":  [
-                                  {
-                                      "linkId":  "adult-obese",
-                                      "text":  "Obese (BMI ≥ 30)",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%bmi \u003e= 30"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "adult-severe-obese",
-                                      "text":  "Severely obese (BMI ≥ 35)",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%bmi \u003e= 35"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "adult-candidate",
-                                      "text":  "Bariatric surgery candidate (BMI ≥ 40)",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%bmi \u003e= 40"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "adult-smoker-risk",
-                                      "text":  "Elevated perioperative risk due to smoking",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%smoker"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "adult-refer",
-                                      "text":  "Refer to multidisciplinary bariatric team",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%bmi \u003e= 35"
-                                                                                }
-                                                        }
-                                                    ]
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "pediatric-section",
-                     "text":  "Pediatric Pathway (age \u003c 18)",
-                     "type":  "group",
-                     "extension":  [
-                                       {
-                                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                                           "valueExpression":  {
-                                                                   "language":  "text/fhirpath",
-                                                                   "expression":  "%age \u003c 18"
-                                                               }
-                                       }
-                                   ],
-                     "item":  [
-                                  {
-                                      "linkId":  "ped-note",
-                                      "text":  "Pediatric BMI is age- and sex-adjusted. Use standard growth charts for interpretation.",
-                                      "type":  "display"
-                                  },
-                                  {
-                                      "linkId":  "ped-elevated",
-                                      "text":  "Elevated weight flag (BMI \u003e 25)",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%bmi \u003e 25"
-                                                                                }
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "ped-referral",
-                                      "text":  "Refer to pediatric weight management specialist",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%bmi \u003e 25"
-                                                                                }
-                                                        }
-                                                    ]
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "pregnancy-section",
-                     "text":  "Pregnancy Considerations",
-                     "type":  "group",
-                     "extension":  [
-                                       {
-                                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                                           "valueExpression":  {
-                                                                   "language":  "text/fhirpath",
-                                                                   "expression":  "%pregnant"
-                                                               }
-                                       }
-                                   ],
-                     "item":  [
-                                  {
-                                      "linkId":  "preg-contraindicated",
-                                      "text":  "Bariatric surgery is contraindicated during pregnancy. Defer assessment.",
-                                      "type":  "display"
-                                  },
-                                  {
-                                      "linkId":  "preg-defer-flag",
-                                      "text":  "Procedure deferred (auto)",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%pregnant"
-                                                                                }
-                                                        }
-                                                    ]
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "smoker-section",
-                     "text":  "Smoking Cessation",
-                     "type":  "group",
-                     "extension":  [
-                                       {
-                                           "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                                           "valueExpression":  {
-                                                                   "language":  "text/fhirpath",
-                                                                   "expression":  "%smoker"
-                                                               }
-                                       }
-                                   ],
-                     "item":  [
-                                  {
-                                      "linkId":  "smoker-note",
-                                      "text":  "Smoking cessation is required before bariatric surgery. Minimum 6-week abstinence.",
-                                      "type":  "display"
-                                  },
-                                  {
-                                      "linkId":  "smoker-program",
-                                      "text":  "Enrol in cessation program",
-                                      "type":  "boolean",
-                                      "readOnly":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                                                            "valueExpression":  {
-                                                                                    "language":  "text/fhirpath",
-                                                                                    "expression":  "%smoker"
-                                                                                }
-                                                        }
-                                                    ]
-                                  }
-                              ]
-                 }
-             ]
+  "resourceType": "Questionnaire",
+  "id": "patient-scenario-eligibility",
+  "title": "Bariatric Surgery Eligibility Screen",
+  "status": "draft",
+  "experimental": true,
+  "copyright": "© 2026 Sergey Mosyakov",
+  "description": "Automated eligibility assessment driven by patient context. Select a Patient preset and click ↺ Re-init in the Variables panel to populate all auto-filled fields.",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "age",
+        "language": "text/fhirpath",
+        "expression": "30"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "gender",
+        "language": "text/fhirpath",
+        "expression": "'male'"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "bmi",
+        "language": "text/fhirpath",
+        "expression": "42"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "pregnant",
+        "language": "text/fhirpath",
+        "expression": "false"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "smoker",
+        "language": "text/fhirpath",
+        "expression": "false"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "comorb",
+        "language": "text/fhirpath",
+        "expression": "''"
+      }
+    }
+  ],
+  "item": [
+    {
+      "linkId": "profile",
+      "text": "Patient Profile (auto-filled from context)",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "profile-age",
+          "text": "Age",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%age"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "profile-gender",
+          "text": "Biological sex",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%gender"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "profile-bmi",
+          "text": "BMI (kg/m²)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%bmi"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "profile-smoker",
+          "text": "Smoker",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%smoker"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "profile-comorb",
+          "text": "Comorbidities",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%comorb"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "adult-section",
+      "text": "Adult Pathway (age ≥ 18)",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%age >= 18"
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "adult-obese",
+          "text": "Obese (BMI ≥ 30)",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%bmi >= 30"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "adult-severe-obese",
+          "text": "Severely obese (BMI ≥ 35)",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%bmi >= 35"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "adult-candidate",
+          "text": "Bariatric surgery candidate (BMI ≥ 40)",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%bmi >= 40"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "adult-smoker-risk",
+          "text": "Elevated perioperative risk due to smoking",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%smoker"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "adult-refer",
+          "text": "Refer to multidisciplinary bariatric team",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%bmi >= 35"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "pediatric-section",
+      "text": "Pediatric Pathway (age < 18)",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%age < 18"
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "ped-note",
+          "text": "Pediatric BMI is age- and sex-adjusted. Use standard growth charts for interpretation.",
+          "type": "display"
+        },
+        {
+          "linkId": "ped-elevated",
+          "text": "Elevated weight flag (BMI > 25)",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%bmi > 25"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "ped-referral",
+          "text": "Refer to pediatric weight management specialist",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%bmi > 25"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "pregnancy-section",
+      "text": "Pregnancy Considerations",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%pregnant"
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "preg-contraindicated",
+          "text": "Bariatric surgery is contraindicated during pregnancy. Defer assessment.",
+          "type": "display"
+        },
+        {
+          "linkId": "preg-defer-flag",
+          "text": "Procedure deferred (auto)",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%pregnant"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "smoker-section",
+      "text": "Smoking Cessation",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%smoker"
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "smoker-note",
+          "text": "Smoking cessation is required before bariatric surgery. Minimum 6-week abstinence.",
+          "type": "display"
+        },
+        {
+          "linkId": "smoker-program",
+          "text": "Enrol in cessation program",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%smoker"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Bariatric Surgery Eligibility Screen</div>"
+  }
 }

@@ -1,317 +1,321 @@
 {
-    "resourceType":  "Questionnaire",
-    "id":  "slider-disabled-demo",
-    "title":  "Slider \u0026 Disabled Display Demo",
-    "status":  "draft",
-    "experimental":  true,
-    "copyright":  "© 2026 Sergey Mosyakov",
-    "subjectType":  [
-                        "Patient"
-                    ],
-    "item":  [
-                 {
-                     "linkId":  "section-vitals",
-                     "text":  "Vital Signs",
-                     "type":  "group",
-                     "item":  [
-                                  {
-                                      "linkId":  "pain-score",
-                                      "text":  "Pain Score (0 – 10)",
-                                      "type":  "integer",
-                                      "required":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/minValue",
-                                                            "valueInteger":  0
-                                                        },
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/maxValue",
-                                                            "valueInteger":  10
-                                                        },
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue",
-                                                            "valueInteger":  1
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "temperature",
-                                      "text":  "Body Temperature (°C, 35 – 42)",
-                                      "type":  "decimal",
-                                      "required":  true,
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/minValue",
-                                                            "valueDecimal":  35.0
-                                                        },
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/maxValue",
-                                                            "valueDecimal":  42.0
-                                                        },
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue",
-                                                            "valueDecimal":  0.1
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "bmi-slider",
-                                      "text":  "BMI (15 – 60)",
-                                      "type":  "decimal",
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/minValue",
-                                                            "valueDecimal":  15.0
-                                                        },
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/maxValue",
-                                                            "valueDecimal":  60.0
-                                                        },
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue",
-                                                            "valueDecimal":  0.5
-                                                        }
-                                                    ]
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "section-pain-details",
-                     "text":  "Pain Details (visible only when pain score \u003e 3)",
-                     "type":  "group",
-                     "enableWhen":  [
-                                        {
-                                            "question":  "pain-score",
-                                            "operator":  "\u003e",
-                                            "answerInteger":  3
-                                        }
-                                    ],
-                     "item":  [
-                                  {
-                                      "linkId":  "pain-location",
-                                      "text":  "Pain Location",
-                                      "type":  "choice",
-                                      "answerOption":  [
-                                                           {
-                                                               "valueCoding":  {
-                                                                                   "code":  "head",
-                                                                                   "display":  "Head"
-                                                                               }
-                                                           },
-                                                           {
-                                                               "valueCoding":  {
-                                                                                   "code":  "chest",
-                                                                                   "display":  "Chest"
-                                                                               }
-                                                           },
-                                                           {
-                                                               "valueCoding":  {
-                                                                                   "code":  "abdomen",
-                                                                                   "display":  "Abdomen"
-                                                                               }
-                                                           },
-                                                           {
-                                                               "valueCoding":  {
-                                                                                   "code":  "back",
-                                                                                   "display":  "Back"
-                                                                               }
-                                                           },
-                                                           {
-                                                               "valueCoding":  {
-                                                                                   "code":  "limbs",
-                                                                                   "display":  "Limbs"
-                                                                               }
-                                                           }
-                                                       ]
-                                  },
-                                  {
-                                      "linkId":  "pain-duration",
-                                      "text":  "Duration of pain (hours, 0 – 72)",
-                                      "type":  "integer",
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/minValue",
-                                                            "valueInteger":  0
-                                                        },
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/maxValue",
-                                                            "valueInteger":  72
-                                                        },
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue",
-                                                            "valueInteger":  1
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "pain-notes-hidden",
-                                      "text":  "Additional Pain Notes (hidden when pain ≤ 3; remove from view)",
-                                      "type":  "string",
-                                      "enableWhen":  [
-                                                         {
-                                                             "question":  "pain-score",
-                                                             "operator":  "\u003e",
-                                                             "answerInteger":  3
-                                                         }
-                                                     ],
-                                      "disabledDisplay":  "hidden"
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "section-followup",
-                     "text":  "Follow-up (shown only when pain score \u003e 6)",
-                     "type":  "group",
-                     "enableWhen":  [
-                                        {
-                                            "question":  "pain-score",
-                                            "operator":  "\u003e",
-                                            "answerInteger":  6
-                                        }
-                                    ],
-                     "item":  [
-                                  {
-                                      "linkId":  "followup-required",
-                                      "text":  "Immediate follow-up required?",
-                                      "type":  "boolean"
-                                  },
-                                  {
-                                      "linkId":  "followup-notes",
-                                      "text":  "Follow-up Notes (protected when not needed, hidden when score ≤ 6)",
-                                      "type":  "string",
-                                      "enableWhen":  [
-                                                         {
-                                                             "question":  "pain-score",
-                                                             "operator":  "\u003e",
-                                                             "answerInteger":  6
-                                                         }
-                                                     ]
-                                  },
-                                  {
-                                      "linkId":  "specialist-referral",
-                                      "text":  "Specialist Referral Notes (hidden when score ≤ 6)",
-                                      "type":  "text",
-                                      "enableWhen":  [
-                                                         {
-                                                             "question":  "pain-score",
-                                                             "operator":  "\u003e",
-                                                             "answerInteger":  6
-                                                         }
-                                                     ],
-                                      "disabledDisplay":  "hidden"
-                                  }
-                              ]
-                 },
-                 {
-                     "linkId":  "section-general",
-                     "text":  "General",
-                     "type":  "group",
-                     "item":  [
-                                  {
-                                      "linkId":  "general-notes",
-                                      "text":  "General Notes",
-                                      "type":  "text"
-                                  },
-                                  {
-                                      "linkId":  "satisfaction",
-                                      "text":  "Patient Satisfaction (1 – 10)",
-                                      "type":  "integer",
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/minValue",
-                                                            "valueInteger":  1
-                                                        },
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/maxValue",
-                                                            "valueInteger":  10
-                                                        },
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue",
-                                                            "valueInteger":  1
-                                                        }
-                                                    ]
-                                  },
-                                  {
-                                      "linkId":  "pain-quality",
-                                      "text":  "Pain Quality — radio with ordinalValue scores",
-                                      "type":  "choice",
-                                      "extension":  [
-                                                        {
-                                                            "url":  "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
-                                                            "valueCodeableConcept":  {
-                                                                                         "coding":  [
-                                                                                                        {
-                                                                                                            "system":  "http://hl7.org/fhir/questionnaire-item-control",
-                                                                                                            "code":  "radio-button"
-                                                                                                        }
-                                                                                                    ]
-                                                                                     }
-                                                        }
-                                                    ],
-                                      "answerOption":  [
-                                                           {
-                                                               "valueCoding":  {
-                                                                                   "code":  "none",
-                                                                                   "display":  "No pain"
-                                                                               },
-                                                               "extension":  [
-                                                                                 {
-                                                                                     "url":  "http://hl7.org/fhir/StructureDefinition/ordinalValue",
-                                                                                     "valueDecimal":  0
-                                                                                 }
-                                                                             ]
-                                                           },
-                                                           {
-                                                               "valueCoding":  {
-                                                                                   "code":  "mild",
-                                                                                   "display":  "Mild"
-                                                                               },
-                                                               "extension":  [
-                                                                                 {
-                                                                                     "url":  "http://hl7.org/fhir/StructureDefinition/ordinalValue",
-                                                                                     "valueDecimal":  1
-                                                                                 }
-                                                                             ]
-                                                           },
-                                                           {
-                                                               "valueCoding":  {
-                                                                                   "code":  "moderate",
-                                                                                   "display":  "Moderate"
-                                                                               },
-                                                               "extension":  [
-                                                                                 {
-                                                                                     "url":  "http://hl7.org/fhir/StructureDefinition/ordinalValue",
-                                                                                     "valueDecimal":  2
-                                                                                 }
-                                                                             ]
-                                                           },
-                                                           {
-                                                               "valueCoding":  {
-                                                                                   "code":  "severe",
-                                                                                   "display":  "Severe"
-                                                                               },
-                                                               "extension":  [
-                                                                                 {
-                                                                                     "url":  "http://hl7.org/fhir/StructureDefinition/ordinalValue",
-                                                                                     "valueDecimal":  3
-                                                                                 }
-                                                                             ]
-                                                           },
-                                                           {
-                                                               "valueCoding":  {
-                                                                                   "code":  "unbearable",
-                                                                                   "display":  "Unbearable"
-                                                                               },
-                                                               "extension":  [
-                                                                                 {
-                                                                                     "url":  "http://hl7.org/fhir/StructureDefinition/ordinalValue",
-                                                                                     "valueDecimal":  4
-                                                                                 }
-                                                                             ]
-                                                           }
-                                                       ]
-                                  }
-                              ]
-                 }
-             ]
+  "resourceType": "Questionnaire",
+  "id": "slider-disabled-demo",
+  "title": "Slider & Disabled Display Demo",
+  "status": "draft",
+  "experimental": true,
+  "copyright": "© 2026 Sergey Mosyakov",
+  "subjectType": [
+    "Patient"
+  ],
+  "item": [
+    {
+      "linkId": "section-vitals",
+      "text": "Vital Signs",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "pain-score",
+          "text": "Pain Score (0 – 10)",
+          "type": "integer",
+          "required": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+              "valueInteger": 0
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+              "valueInteger": 10
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue",
+              "valueInteger": 1
+            }
+          ]
+        },
+        {
+          "linkId": "temperature",
+          "text": "Body Temperature (°C, 35 – 42)",
+          "type": "decimal",
+          "required": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+              "valueDecimal": 35.0
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+              "valueDecimal": 42.0
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue",
+              "valueDecimal": 0.1
+            }
+          ]
+        },
+        {
+          "linkId": "bmi-slider",
+          "text": "BMI (15 – 60)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+              "valueDecimal": 15.0
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+              "valueDecimal": 60.0
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue",
+              "valueDecimal": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "section-pain-details",
+      "text": "Pain Details (visible only when pain score > 3)",
+      "type": "group",
+      "enableWhen": [
+        {
+          "question": "pain-score",
+          "operator": ">",
+          "answerInteger": 3
+        }
+      ],
+      "item": [
+        {
+          "linkId": "pain-location",
+          "text": "Pain Location",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "head",
+                "display": "Head"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "chest",
+                "display": "Chest"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "abdomen",
+                "display": "Abdomen"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "back",
+                "display": "Back"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "limbs",
+                "display": "Limbs"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "pain-duration",
+          "text": "Duration of pain (hours, 0 – 72)",
+          "type": "integer",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+              "valueInteger": 0
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+              "valueInteger": 72
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue",
+              "valueInteger": 1
+            }
+          ]
+        },
+        {
+          "linkId": "pain-notes-hidden",
+          "text": "Additional Pain Notes (hidden when pain ≤ 3; remove from view)",
+          "type": "string",
+          "enableWhen": [
+            {
+              "question": "pain-score",
+              "operator": ">",
+              "answerInteger": 3
+            }
+          ],
+          "disabledDisplay": "hidden"
+        }
+      ]
+    },
+    {
+      "linkId": "section-followup",
+      "text": "Follow-up (shown only when pain score > 6)",
+      "type": "group",
+      "enableWhen": [
+        {
+          "question": "pain-score",
+          "operator": ">",
+          "answerInteger": 6
+        }
+      ],
+      "item": [
+        {
+          "linkId": "followup-required",
+          "text": "Immediate follow-up required?",
+          "type": "boolean"
+        },
+        {
+          "linkId": "followup-notes",
+          "text": "Follow-up Notes (protected when not needed, hidden when score ≤ 6)",
+          "type": "string",
+          "enableWhen": [
+            {
+              "question": "pain-score",
+              "operator": ">",
+              "answerInteger": 6
+            }
+          ]
+        },
+        {
+          "linkId": "specialist-referral",
+          "text": "Specialist Referral Notes (hidden when score ≤ 6)",
+          "type": "text",
+          "enableWhen": [
+            {
+              "question": "pain-score",
+              "operator": ">",
+              "answerInteger": 6
+            }
+          ],
+          "disabledDisplay": "hidden"
+        }
+      ]
+    },
+    {
+      "linkId": "section-general",
+      "text": "General",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "general-notes",
+          "text": "General Notes",
+          "type": "text"
+        },
+        {
+          "linkId": "satisfaction",
+          "text": "Patient Satisfaction (1 – 10)",
+          "type": "integer",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+              "valueInteger": 1
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+              "valueInteger": 10
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue",
+              "valueInteger": 1
+            }
+          ]
+        },
+        {
+          "linkId": "pain-quality",
+          "text": "Pain Quality — radio with ordinalValue scores",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "none",
+                "display": "No pain"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ]
+            },
+            {
+              "valueCoding": {
+                "code": "mild",
+                "display": "Mild"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ]
+            },
+            {
+              "valueCoding": {
+                "code": "moderate",
+                "display": "Moderate"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 2
+                }
+              ]
+            },
+            {
+              "valueCoding": {
+                "code": "severe",
+                "display": "Severe"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 3
+                }
+              ]
+            },
+            {
+              "valueCoding": {
+                "code": "unbearable",
+                "display": "Unbearable"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 4
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Slider & Disabled Display Demo</div>"
+  }
 }

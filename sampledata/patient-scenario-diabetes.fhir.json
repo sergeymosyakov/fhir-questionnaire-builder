@@ -1,518 +1,714 @@
 {
-    "resourceType": "Questionnaire",
-    "id": "patient-scenario-diabetes",
-    "title": "Diabetes Self-Management Check-in",
-    "status": "draft",
-    "experimental": true,
-    "copyright": "© 2026 Sergey Mosyakov",
-    "description": "Comprehensive diabetes self-management assessment with SDC-driven risk stratification. Demonstrates the full SDC variable chain: patient context variables → calculated risk tier → conditional clinical sections (insulin vs oral meds). Select a Patient preset and click ↺ Re-init. The HbA1c Risk Tier section and medication sections switch automatically. PASS: glucose log, medication adherence, and required lifestyle fields complete. FAIL: HbA1c Risk HIGH + any required field empty.",
-    "subjectType": ["Patient"],
-    "extension": [
+  "resourceType": "Questionnaire",
+  "id": "patient-scenario-diabetes",
+  "title": "Diabetes Self-Management Check-in",
+  "status": "draft",
+  "experimental": true,
+  "copyright": "© 2026 Sergey Mosyakov",
+  "description": "Comprehensive diabetes self-management assessment with SDC-driven risk stratification. Demonstrates the full SDC variable chain: patient context variables → calculated risk tier → conditional clinical sections (insulin vs oral meds). Select a Patient preset and click ↺ Re-init. The HbA1c Risk Tier section and medication sections switch automatically. PASS: glucose log, medication adherence, and required lifestyle fields complete. FAIL: HbA1c Risk HIGH + any required field empty.",
+  "subjectType": [
+    "Patient"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "age",
+        "language": "text/fhirpath",
+        "expression": "58"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "gender",
+        "language": "text/fhirpath",
+        "expression": "'male'"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "hba1c",
+        "language": "text/fhirpath",
+        "expression": "7.2"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "glucoseFasting",
+        "language": "text/fhirpath",
+        "expression": "145"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "diabetesType",
+        "language": "text/fhirpath",
+        "expression": "'type2'"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "onInsulin",
+        "language": "text/fhirpath",
+        "expression": "false"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "hba1cRisk",
+        "language": "text/fhirpath",
+        "expression": "iif(%hba1c >= 9, 'high', iif(%hba1c >= 7, 'moderate', 'low'))"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "hba1cRiskScore",
+        "language": "text/fhirpath",
+        "expression": "iif(%hba1c >= 9, 3, iif(%hba1c >= 7, 1, 0))"
+      }
+    }
+  ],
+  "item": [
+    {
+      "linkId": "how-to",
+      "text": "How to use: (1) Select a Patient preset from the Patient ▾ dropdown. (2) Click ↺ Re-init. (3) The patient snapshot and HbA1c Risk Tier fill automatically. (4) Insulin Management OR Oral Medications section appears based on the patient profile. (5) Complete all required sections to reach PASS.",
+      "type": "display"
+    },
+    {
+      "linkId": "snapshot",
+      "text": "Patient Snapshot (auto-filled from context)",
+      "type": "group",
+      "item": [
         {
-            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-            "valueExpression": {
-                "name": "age",
+          "linkId": "snap-age",
+          "text": "Age",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
                 "language": "text/fhirpath",
-                "expression": "58"
+                "expression": "%age"
+              }
             }
+          ]
         },
         {
-            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-            "valueExpression": {
-                "name": "gender",
+          "linkId": "snap-gender",
+          "text": "Sex",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
                 "language": "text/fhirpath",
-                "expression": "'male'"
+                "expression": "%gender"
+              }
             }
+          ]
         },
         {
-            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-            "valueExpression": {
-                "name": "hba1c",
+          "linkId": "snap-hba1c",
+          "text": "Most recent HbA1c (%)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
                 "language": "text/fhirpath",
-                "expression": "7.2"
+                "expression": "%hba1c"
+              }
             }
+          ]
         },
         {
-            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-            "valueExpression": {
-                "name": "glucoseFasting",
+          "linkId": "snap-glucose",
+          "text": "Most recent fasting glucose (mg/dL)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
                 "language": "text/fhirpath",
-                "expression": "145"
+                "expression": "%glucoseFasting"
+              }
             }
+          ]
         },
         {
-            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-            "valueExpression": {
-                "name": "diabetesType",
+          "linkId": "snap-diabetes-type",
+          "text": "Diabetes type",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
                 "language": "text/fhirpath",
-                "expression": "'type2'"
+                "expression": "%diabetesType"
+              }
             }
+          ]
         },
         {
-            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-            "valueExpression": {
-                "name": "onInsulin",
+          "linkId": "snap-on-insulin",
+          "text": "Currently on insulin",
+          "type": "boolean",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
                 "language": "text/fhirpath",
-                "expression": "false"
+                "expression": "%onInsulin"
+              }
             }
-        },
-        {
-            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-            "valueExpression": {
-                "name": "hba1cRisk",
-                "language": "text/fhirpath",
-                "expression": "iif(%hba1c >= 9, 'high', iif(%hba1c >= 7, 'moderate', 'low'))"
-            }
-        },
-        {
-            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
-            "valueExpression": {
-                "name": "hba1cRiskScore",
-                "language": "text/fhirpath",
-                "expression": "iif(%hba1c >= 9, 3, iif(%hba1c >= 7, 1, 0))"
-            }
+          ]
         }
-    ],
-    "item": [
+      ]
+    },
+    {
+      "linkId": "hba1c-risk",
+      "text": "HbA1c Risk Tier",
+      "type": "group",
+      "item": [
         {
-            "linkId": "how-to",
-            "text": "How to use: (1) Select a Patient preset from the Patient ▾ dropdown. (2) Click ↺ Re-init. (3) The patient snapshot and HbA1c Risk Tier fill automatically. (4) Insulin Management OR Oral Medications section appears based on the patient profile. (5) Complete all required sections to reach PASS.",
-            "type": "display"
+          "linkId": "risk-score",
+          "text": "Risk score (0 = low, 1 = moderate, 3 = high)",
+          "type": "integer",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%hba1cRiskScore"
+              }
+            }
+          ]
         },
         {
-            "linkId": "snapshot",
-            "text": "Patient Snapshot (auto-filled from context)",
-            "type": "group",
-            "item": [
-                {
-                    "linkId": "snap-age",
-                    "text": "Age",
-                    "type": "decimal",
-                    "readOnly": true,
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%age"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "linkId": "snap-gender",
-                    "text": "Sex",
-                    "type": "string",
-                    "readOnly": true,
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%gender"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "linkId": "snap-hba1c",
-                    "text": "Most recent HbA1c (%)",
-                    "type": "decimal",
-                    "readOnly": true,
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%hba1c"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "linkId": "snap-glucose",
-                    "text": "Most recent fasting glucose (mg/dL)",
-                    "type": "decimal",
-                    "readOnly": true,
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%glucoseFasting"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "linkId": "snap-diabetes-type",
-                    "text": "Diabetes type",
-                    "type": "string",
-                    "readOnly": true,
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%diabetesType"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "linkId": "snap-on-insulin",
-                    "text": "Currently on insulin",
-                    "type": "boolean",
-                    "readOnly": true,
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%onInsulin"
-                            }
-                        }
-                    ]
-                }
-            ]
+          "linkId": "risk-low-note",
+          "text": "✓ HbA1c is within target range (< 7%). Continue current management plan and annual monitoring.",
+          "type": "display",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%hba1c < 7"
+              }
+            }
+          ]
         },
         {
-            "linkId": "hba1c-risk",
-            "text": "HbA1c Risk Tier",
-            "type": "group",
-            "item": [
-                {
-                    "linkId": "risk-score",
-                    "text": "Risk score (0 = low, 1 = moderate, 3 = high)",
-                    "type": "integer",
-                    "readOnly": true,
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%hba1cRiskScore"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "linkId": "risk-low-note",
-                    "text": "✓ HbA1c is within target range (< 7%). Continue current management plan and annual monitoring.",
-                    "type": "display",
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%hba1c < 7"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "linkId": "risk-moderate-note",
-                    "text": "⚠ HbA1c is above target (7–8.9%). Consider medication review and intensified lifestyle coaching.",
-                    "type": "display",
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%hba1c >= 7 and %hba1c < 9"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "linkId": "risk-high-note",
-                    "text": "✕ HbA1c is significantly above target (≥ 9%). Urgent clinical review and therapy adjustment required.",
-                    "type": "display",
-                    "extension": [
-                        {
-                            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                            "valueExpression": {
-                                "language": "text/fhirpath",
-                                "expression": "%hba1c >= 9"
-                            }
-                        }
-                    ]
-                }
-            ]
+          "linkId": "risk-moderate-note",
+          "text": "⚠ HbA1c is above target (7–8.9%). Consider medication review and intensified lifestyle coaching.",
+          "type": "display",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%hba1c >= 7 and %hba1c < 9"
+              }
+            }
+          ]
         },
         {
-            "linkId": "glucose-log",
-            "text": "Weekly Glucose Log (patient-reported)",
-            "type": "group",
-            "item": [
-                {
-                    "linkId": "gl-fasting",
-                    "text": "Fasting glucose this morning (mg/dL)",
-                    "type": "decimal",
-                    "required": true
-                },
-                {
-                    "linkId": "gl-post-breakfast",
-                    "text": "Post-breakfast glucose (mg/dL)",
-                    "type": "decimal"
-                },
-                {
-                    "linkId": "gl-post-dinner",
-                    "text": "Post-dinner glucose (mg/dL)",
-                    "type": "decimal"
-                },
-                {
-                    "linkId": "gl-monitor-type",
-                    "text": "Glucose monitoring method",
-                    "type": "choice",
-                    "required": true,
-                    "answerOption": [
-                        { "valueCoding": { "code": "finger-prick", "display": "Finger-prick meter" } },
-                        { "valueCoding": { "code": "cgm",          "display": "Continuous glucose monitor (CGM)" } },
-                        { "valueCoding": { "code": "both",         "display": "Both" } },
-                        { "valueCoding": { "code": "none",         "display": "Not monitoring at home" } }
-                    ]
-                },
-                {
-                    "linkId": "gl-hypo-count",
-                    "text": "Number of hypoglycemia episodes in the past 7 days",
-                    "type": "integer"
-                }
-            ]
-        },
-        {
-            "linkId": "insulin-management",
-            "text": "Insulin Management",
-            "type": "group",
-            "extension": [
-                {
-                    "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                    "valueExpression": {
-                        "language": "text/fhirpath",
-                        "expression": "%onInsulin"
-                    }
-                }
-            ],
-            "item": [
-                {
-                    "linkId": "ins-type",
-                    "text": "Insulin regimen",
-                    "type": "choice",
-                    "required": true,
-                    "answerOption": [
-                        { "valueCoding": { "code": "basal-only",   "display": "Basal only (long-acting)" } },
-                        { "valueCoding": { "code": "bolus-only",   "display": "Bolus only (rapid-acting)" } },
-                        { "valueCoding": { "code": "basal-bolus",  "display": "Basal-bolus (both)" } },
-                        { "valueCoding": { "code": "premixed",     "display": "Premixed insulin" } },
-                        { "valueCoding": { "code": "pump",         "display": "Insulin pump (CSII)" } }
-                    ]
-                },
-                {
-                    "linkId": "ins-units-morning",
-                    "text": "Morning dose (units)",
-                    "type": "integer"
-                },
-                {
-                    "linkId": "ins-units-evening",
-                    "text": "Evening dose (units)",
-                    "type": "integer"
-                },
-                {
-                    "linkId": "ins-missed-week",
-                    "text": "Missed insulin doses in the past 7 days",
-                    "type": "integer",
-                    "required": true
-                },
-                {
-                    "linkId": "ins-injection-sites",
-                    "text": "Injection site rotation practiced?",
-                    "type": "boolean"
-                }
-            ]
-        },
-        {
-            "linkId": "oral-medications",
-            "text": "Oral Diabetes Medications",
-            "type": "group",
-            "extension": [
-                {
-                    "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
-                    "valueExpression": {
-                        "language": "text/fhirpath",
-                        "expression": "%onInsulin = false"
-                    }
-                }
-            ],
-            "item": [
-                {
-                    "linkId": "oral-med-name",
-                    "text": "Primary oral diabetes medication",
-                    "type": "string",
-                    "required": true
-                },
-                {
-                    "linkId": "oral-med-class",
-                    "text": "Medication class",
-                    "type": "choice",
-                    "answerOption": [
-                        { "valueCoding": { "code": "metformin",   "display": "Metformin (biguanide)" } },
-                        { "valueCoding": { "code": "sglt2",       "display": "SGLT-2 inhibitor" } },
-                        { "valueCoding": { "code": "glp1",        "display": "GLP-1 receptor agonist" } },
-                        { "valueCoding": { "code": "dpp4",        "display": "DPP-4 inhibitor" } },
-                        { "valueCoding": { "code": "sulfonylurea","display": "Sulfonylurea" } },
-                        { "valueCoding": { "code": "other",       "display": "Other" } }
-                    ]
-                },
-                {
-                    "linkId": "oral-adherent",
-                    "text": "Medication adherence",
-                    "type": "choice",
-                    "required": true,
-                    "answerOption": [
-                        { "valueCoding": { "code": "always",    "display": "Always takes as prescribed" } },
-                        { "valueCoding": { "code": "mostly",    "display": "Mostly — misses occasionally" } },
-                        { "valueCoding": { "code": "sometimes", "display": "Sometimes — frequent misses" } },
-                        { "valueCoding": { "code": "rarely",    "display": "Rarely takes as prescribed" } }
-                    ]
-                },
-                {
-                    "linkId": "oral-missed-week",
-                    "text": "Missed doses in the past 7 days",
-                    "type": "integer"
-                }
-            ]
-        },
-        {
-            "linkId": "symptoms",
-            "text": "Symptoms & Complications Screening",
-            "type": "group",
-            "item": [
-                {
-                    "linkId": "sym-thirst",
-                    "text": "Increased thirst (polydipsia)",
-                    "type": "boolean"
-                },
-                {
-                    "linkId": "sym-urination",
-                    "text": "Frequent urination (polyuria)",
-                    "type": "boolean"
-                },
-                {
-                    "linkId": "sym-blurred-vision",
-                    "text": "Blurred vision",
-                    "type": "boolean"
-                },
-                {
-                    "linkId": "sym-fatigue",
-                    "text": "Unusual fatigue",
-                    "type": "boolean"
-                },
-                {
-                    "linkId": "sym-foot-issues",
-                    "text": "Foot numbness, tingling, or pain",
-                    "type": "boolean"
-                },
-                {
-                    "linkId": "sym-foot-detail",
-                    "text": "Foot issue details",
-                    "type": "string",
-                    "enableWhen": [
-                        {
-                            "question": "sym-foot-issues",
-                            "operator": "=",
-                            "answerBoolean": true
-                        }
-                    ]
-                },
-                {
-                    "linkId": "sym-wound-healing",
-                    "text": "Poor wound healing or frequent infections",
-                    "type": "boolean"
-                }
-            ]
-        },
-        {
-            "linkId": "lifestyle",
-            "text": "Lifestyle & Self-Management",
-            "type": "group",
-            "item": [
-                {
-                    "linkId": "ls-exercise-days",
-                    "text": "Days of moderate exercise per week",
-                    "type": "integer",
-                    "required": true
-                },
-                {
-                    "linkId": "ls-diet",
-                    "text": "Adherence to diabetes-friendly eating plan",
-                    "type": "choice",
-                    "required": true,
-                    "answerOption": [
-                        { "valueCoding": { "code": "excellent", "display": "Excellent — strictly follows plan" } },
-                        { "valueCoding": { "code": "good",      "display": "Good — mostly follows plan" } },
-                        { "valueCoding": { "code": "fair",      "display": "Fair — occasional deviations" } },
-                        { "valueCoding": { "code": "poor",      "display": "Poor — frequently deviates" } }
-                    ]
-                },
-                {
-                    "linkId": "ls-alcohol",
-                    "text": "Regular alcohol use (> 14 units/week)",
-                    "type": "boolean"
-                },
-                {
-                    "linkId": "ls-smoking",
-                    "text": "Current smoker",
-                    "type": "boolean"
-                },
-                {
-                    "linkId": "ls-stress",
-                    "text": "Patient-reported stress level",
-                    "type": "choice",
-                    "answerOption": [
-                        { "valueCoding": { "code": "low",      "display": "Low" } },
-                        { "valueCoding": { "code": "moderate", "display": "Moderate" } },
-                        { "valueCoding": { "code": "high",     "display": "High" } }
-                    ]
-                }
-            ]
-        },
-        {
-            "linkId": "goals",
-            "text": "Patient Goals",
-            "type": "group",
-            "item": [
-                {
-                    "linkId": "goal-primary",
-                    "text": "Primary self-management goal for this visit",
-                    "type": "choice",
-                    "answerOption": [
-                        { "valueCoding": { "code": "lower-hba1c",         "display": "Lower HbA1c" } },
-                        { "valueCoding": { "code": "lose-weight",          "display": "Lose weight" } },
-                        { "valueCoding": { "code": "reduce-medications",   "display": "Reduce number of medications" } },
-                        { "valueCoding": { "code": "more-energy",          "display": "Improve energy levels" } },
-                        { "valueCoding": { "code": "prevent-complications","display": "Prevent long-term complications" } },
-                        { "valueCoding": { "code": "better-monitoring",    "display": "Better glucose monitoring habits" } }
-                    ]
-                },
-                {
-                    "linkId": "goal-barrier",
-                    "text": "Main barrier to self-management",
-                    "type": "choice",
-                    "answerOption": [
-                        { "valueCoding": { "code": "cost",          "display": "Medication or device cost" } },
-                        { "valueCoding": { "code": "time",          "display": "Lack of time" } },
-                        { "valueCoding": { "code": "knowledge",     "display": "Lack of knowledge or skills" } },
-                        { "valueCoding": { "code": "motivation",    "display": "Low motivation" } },
-                        { "valueCoding": { "code": "side-effects",  "display": "Medication side effects" } },
-                        { "valueCoding": { "code": "none",          "display": "No significant barriers" } }
-                    ]
-                },
-                {
-                    "linkId": "goal-notes",
-                    "text": "Additional notes or patient comments",
-                    "type": "text"
-                }
-            ]
+          "linkId": "risk-high-note",
+          "text": "✕ HbA1c is significantly above target (≥ 9%). Urgent clinical review and therapy adjustment required.",
+          "type": "display",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%hba1c >= 9"
+              }
+            }
+          ]
         }
-    ]
+      ]
+    },
+    {
+      "linkId": "glucose-log",
+      "text": "Weekly Glucose Log (patient-reported)",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "gl-fasting",
+          "text": "Fasting glucose this morning (mg/dL)",
+          "type": "decimal",
+          "required": true
+        },
+        {
+          "linkId": "gl-post-breakfast",
+          "text": "Post-breakfast glucose (mg/dL)",
+          "type": "decimal"
+        },
+        {
+          "linkId": "gl-post-dinner",
+          "text": "Post-dinner glucose (mg/dL)",
+          "type": "decimal"
+        },
+        {
+          "linkId": "gl-monitor-type",
+          "text": "Glucose monitoring method",
+          "type": "choice",
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "finger-prick",
+                "display": "Finger-prick meter"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "cgm",
+                "display": "Continuous glucose monitor (CGM)"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "both",
+                "display": "Both"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "none",
+                "display": "Not monitoring at home"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gl-hypo-count",
+          "text": "Number of hypoglycemia episodes in the past 7 days",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "linkId": "insulin-management",
+      "text": "Insulin Management",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%onInsulin"
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "ins-type",
+          "text": "Insulin regimen",
+          "type": "choice",
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "basal-only",
+                "display": "Basal only (long-acting)"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "bolus-only",
+                "display": "Bolus only (rapid-acting)"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "basal-bolus",
+                "display": "Basal-bolus (both)"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "premixed",
+                "display": "Premixed insulin"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "pump",
+                "display": "Insulin pump (CSII)"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "ins-units-morning",
+          "text": "Morning dose (units)",
+          "type": "integer"
+        },
+        {
+          "linkId": "ins-units-evening",
+          "text": "Evening dose (units)",
+          "type": "integer"
+        },
+        {
+          "linkId": "ins-missed-week",
+          "text": "Missed insulin doses in the past 7 days",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "linkId": "ins-injection-sites",
+          "text": "Injection site rotation practiced?",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "linkId": "oral-medications",
+      "text": "Oral Diabetes Medications",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%onInsulin = false"
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "oral-med-name",
+          "text": "Primary oral diabetes medication",
+          "type": "string",
+          "required": true
+        },
+        {
+          "linkId": "oral-med-class",
+          "text": "Medication class",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "metformin",
+                "display": "Metformin (biguanide)"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "sglt2",
+                "display": "SGLT-2 inhibitor"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "glp1",
+                "display": "GLP-1 receptor agonist"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "dpp4",
+                "display": "DPP-4 inhibitor"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "sulfonylurea",
+                "display": "Sulfonylurea"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "other",
+                "display": "Other"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "oral-adherent",
+          "text": "Medication adherence",
+          "type": "choice",
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "always",
+                "display": "Always takes as prescribed"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "mostly",
+                "display": "Mostly — misses occasionally"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "sometimes",
+                "display": "Sometimes — frequent misses"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "rarely",
+                "display": "Rarely takes as prescribed"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "oral-missed-week",
+          "text": "Missed doses in the past 7 days",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "linkId": "symptoms",
+      "text": "Symptoms & Complications Screening",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "sym-thirst",
+          "text": "Increased thirst (polydipsia)",
+          "type": "boolean"
+        },
+        {
+          "linkId": "sym-urination",
+          "text": "Frequent urination (polyuria)",
+          "type": "boolean"
+        },
+        {
+          "linkId": "sym-blurred-vision",
+          "text": "Blurred vision",
+          "type": "boolean"
+        },
+        {
+          "linkId": "sym-fatigue",
+          "text": "Unusual fatigue",
+          "type": "boolean"
+        },
+        {
+          "linkId": "sym-foot-issues",
+          "text": "Foot numbness, tingling, or pain",
+          "type": "boolean"
+        },
+        {
+          "linkId": "sym-foot-detail",
+          "text": "Foot issue details",
+          "type": "string",
+          "enableWhen": [
+            {
+              "question": "sym-foot-issues",
+              "operator": "=",
+              "answerBoolean": true
+            }
+          ]
+        },
+        {
+          "linkId": "sym-wound-healing",
+          "text": "Poor wound healing or frequent infections",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "linkId": "lifestyle",
+      "text": "Lifestyle & Self-Management",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "ls-exercise-days",
+          "text": "Days of moderate exercise per week",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "linkId": "ls-diet",
+          "text": "Adherence to diabetes-friendly eating plan",
+          "type": "choice",
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "excellent",
+                "display": "Excellent — strictly follows plan"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "good",
+                "display": "Good — mostly follows plan"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "fair",
+                "display": "Fair — occasional deviations"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "poor",
+                "display": "Poor — frequently deviates"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "ls-alcohol",
+          "text": "Regular alcohol use (> 14 units/week)",
+          "type": "boolean"
+        },
+        {
+          "linkId": "ls-smoking",
+          "text": "Current smoker",
+          "type": "boolean"
+        },
+        {
+          "linkId": "ls-stress",
+          "text": "Patient-reported stress level",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "low",
+                "display": "Low"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "moderate",
+                "display": "Moderate"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "high",
+                "display": "High"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "goals",
+      "text": "Patient Goals",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "goal-primary",
+          "text": "Primary self-management goal for this visit",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "lower-hba1c",
+                "display": "Lower HbA1c"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "lose-weight",
+                "display": "Lose weight"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "reduce-medications",
+                "display": "Reduce number of medications"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "more-energy",
+                "display": "Improve energy levels"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "prevent-complications",
+                "display": "Prevent long-term complications"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "better-monitoring",
+                "display": "Better glucose monitoring habits"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "goal-barrier",
+          "text": "Main barrier to self-management",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "cost",
+                "display": "Medication or device cost"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "time",
+                "display": "Lack of time"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "knowledge",
+                "display": "Lack of knowledge or skills"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "motivation",
+                "display": "Low motivation"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "side-effects",
+                "display": "Medication side effects"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "none",
+                "display": "No significant barriers"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "goal-notes",
+          "text": "Additional notes or patient comments",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Diabetes Self-Management Check-in</div>"
+  }
 }

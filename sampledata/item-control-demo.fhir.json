@@ -161,7 +161,7 @@
     },
     {
       "linkId": "sl-integer",
-      "text": "Satisfaction score (0\u201310)",
+      "text": "Satisfaction score (0–10)",
       "type": "integer",
       "extension": [
         {
@@ -359,5 +359,9 @@
         }
       ]
     }
-  ]
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Item Control Demo</div>"
+  }
 }
