@@ -56,7 +56,7 @@ async function addDisplayItem(page) {
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
   await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
   await page.locator('[data-testid="add-menu-item"]').first().click();
-  await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
+  await expect(page.locator('[data-node-id="1.1"]').getByTestId('action-type')).toBeVisible();
   return '1.1';
 }
 

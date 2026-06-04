@@ -99,6 +99,8 @@ function _buildRow(cols, idx, pending, rerender) {
   widthIn.dataset.testid = 'cc-width';
   widthIn.dataset.tipTitle = 'Column Width';
   widthIn.dataset.tipBody = 'Optional width with unit (e.g. 30%, 100px). Exported as a FHIR Quantity.';
+  widthIn.dataset.tipFhir = 'item.extension[sdc-questionnaire-choiceColumn].extension[width]';
+  widthIn.dataset.tipSpec = 'SDC';
   widthIn.oninput = () => {
     const raw = widthIn.value.trim();
     if (!raw) { delete col.width; return; }
@@ -110,6 +112,8 @@ function _buildRow(cols, idx, pending, rerender) {
   fdWrap.className = 'cc-fd-label';
   fdWrap.dataset.tipTitle = 'For Display';
   fdWrap.dataset.tipBody = 'When checked, this column\'s value is shown in the dropdown trigger after an option is selected.';
+  fdWrap.dataset.tipFhir = 'item.extension[sdc-questionnaire-choiceColumn].extension[forDisplay]';
+  fdWrap.dataset.tipSpec = 'SDC';
   const fdCb = document.createElement('input');
   fdCb.type = 'checkbox';
   fdCb.checked = !!col.forDisplay;
