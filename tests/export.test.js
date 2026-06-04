@@ -580,6 +580,24 @@ describe('buildFHIRObject — answerValueSet', () => {
     expect(q.item[0].answerValueSet).toBe('#vs-diet');
     expect(q.item[0].answerOption).toBeUndefined();
   });
+
+  it('que-5: suppresses answerValueSet on url item (type not in allowed list)', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'URL', itemType: 'url',
+      _answerValueSet: 'http://example.org/vs',
+      enableWhen: [], constraint: [], options: '', mandatory: false,
+    }]);
+    expect(q.item[0].answerValueSet).toBeUndefined();
+  });
+
+  it('que-5: suppresses answerValueSet on attachment item', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'File', itemType: 'attachment',
+      _answerValueSet: 'http://example.org/vs',
+      enableWhen: [], constraint: [], mandatory: false,
+    }]);
+    expect(q.item[0].answerValueSet).toBeUndefined();
+  });
 });
 
 // ── item.initial[] export ─────────────────────────────────────────────────────

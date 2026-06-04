@@ -58,8 +58,23 @@ function _checkFhirPath(expr) {
   }
 }
 
-export function validateTree(tree, _values = {}) {
+// Types allowed to have answerValueSet per R4 que-5
+const _ANSWER_VS_ALLOWED_TYPES = new Set([
+  'select', 'radio', 'checklist', 'open-choice', // choice, open-choice
+  'decimal', 'integer', 'number',                // decimal, integer
+  'text',                                        // string/text
+  'date', 'dateTime', 'time',                    // date/time variants
+  'quantity',                                    // quantity
+]);
+
+export function validateTree(tree, _values = {}, questMeta = null) {
   const issues = [];
+
+  // ── que-0: Questionnaire.name format (root-level, warning only) ───────────
+  if (questMeta?.name && !/^[A-Z][A-Za-z0-9_]{0,254}$/.test(questMeta.name)) {
+    issues.push({ severity: 'warning', nodeId: '(root)', message: `Questionnaire.name "${questMeta.name}" does not conform to R4 naming convention (que-0) — must start with an uppercase letter and contain only letters, digits, and underscores (max 255 chars).` });
+  }
+
   const all    = _collectNodes(tree);
   const allIds = all.map(n => n.id);
 
@@ -76,6 +91,16 @@ export function validateTree(tree, _values = {}) {
       issues.push({ severity: 'error', nodeId: '(empty)', message: 'Node has an empty linkId — linkId is required in FHIR R4.' });
     } else if (dupIds.has(id)) {
       issues.push({ severity: 'error', nodeId: id, message: `Duplicate linkId "${id}" — linkIds must be unique within a Questionnaire.` });
+    }
+
+    // que-1: group items must have nested items (R4 invariant)
+    if (node.type === 'group' && (!node.children || node.children.length === 0)) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Group item has no children — R4 invariant que-1 requires group items to contain nested items. The exported resource will fail FHIR validation.' });
+    }
+
+    // que-5: answerValueSet only valid for choice/open-choice/decimal/integer/date/dateTime/time/string/quantity
+    if (node._answerValueSet && node.type === 'item' && !_ANSWER_VS_ALLOWED_TYPES.has(node.itemType)) {
+      issues.push({ severity: 'error', nodeId: id, message: `answerValueSet is not valid for item type "${node.itemType}" — R4 invariant que-5 only allows it on choice, open-choice, decimal, integer, date, dateTime, time, string, and quantity items. It will be omitted from the export.` });
     }
 
     // FHIRPath expression errors
@@ -165,6 +190,45 @@ export function validateTree(tree, _values = {}) {
     if (node.type === 'item' && node.itemType === 'quantity' && node.quantityUnit
         && !node._unitOptions?.length && !node._unitValueSet) {
       // This is auto-fixed on export (converted to unitOption) — no warning needed, handled transparently
+    }
+
+    // que-3: display items cannot have code[] (R4 invariant)
+    if (node.itemType === 'display' && node._codes && node._codes.length) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Display items cannot have item.code[] — R4 invariant que-3. The codes will be omitted from the export.' });
+    }
+
+    // que-4: answerOption[] and answerValueSet cannot both be present (R4 invariant)
+    const _hasOpts = (node.options && node.options.trim()) || (node._rawAnswerOptions && node._rawAnswerOptions.length > 0);
+    if (_hasOpts && node._answerValueSet) {
+      issues.push({ severity: 'error', nodeId: id, message: 'Item has both answerOption[] and answerValueSet — R4 invariant que-4 forbids both simultaneously. Remove one (answerOption[] will be used on export).' });
+    }
+
+    // que-6: display items cannot have required or repeats (R4 invariant)
+    if (node.itemType === 'display' && node.mandatory === true) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Display items cannot be required — R4 invariant que-6. The required flag will be omitted from the export.' });
+    }
+    if (node.itemType === 'display' && node.repeats) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Display items cannot have repeats — R4 invariant que-6. The repeats flag will be omitted from the export.' });
+    }
+
+    // que-7: enableWhen operator 'exists' must have a boolean answer (R4 invariant)
+    if (Array.isArray(node.enableWhen)) {
+      for (const ew of node.enableWhen) {
+        if (ew.operator === 'exists' && typeof ew.answerBoolean !== 'boolean') {
+          issues.push({ severity: 'error', nodeId: id, message: 'A Show When condition uses operator "exists" but the answer is not a boolean — R4 invariant que-7 requires answerBoolean: true or false.' });
+        }
+      }
+    }
+
+    // que-9: display items cannot have readOnly (R4 invariant)
+    if (node.itemType === 'display' && node._readOnly === true) {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Display items cannot have readOnly — R4 invariant que-9. The readOnly flag will be omitted from the export.' });
+    }
+
+    // que-10: maxLength only valid for boolean/decimal/integer/string/text/url/open-choice (R4 invariant)
+    const _maxLengthAllowed = new Set(['checkbox', 'decimal', 'integer', 'number', 'text', 'url', 'open-choice']);
+    if (node._maxLength !== undefined && node.type === 'item' && !_maxLengthAllowed.has(node.itemType)) {
+      issues.push({ severity: 'warning', nodeId: id, message: `maxLength is not valid for item type "${node.itemType}" — R4 invariant que-10 only allows it on boolean/decimal/integer/string/text/url/open-choice. The maxLength will be omitted from the export.` });
     }
 
     // questionnaire-sliderStepValue: R4 only allows valueInteger

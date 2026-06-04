@@ -232,7 +232,7 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | `_optionOrdinals` | `ordinalValue` ext on `answerOption[].extension` (primary) or `valueCoding.extension` (fallback) | map of option code → numeric score; shown as `(N)` badge in radio/select; editable in Answer Type modal (`code=Label=score` format); exported to `answerOption.extension` |
 | `_optionSystems` | `answerOption[].valueCoding.system` | map of option code → system URI (e.g. `http://loinc.org`); optional per-option; editable in Answer Type modal **System** column; exported as `valueCoding.system` in the simple options path; preserved from `_rawAnswerOptions.valueCoding.system` in the raw path |
 | `_optionPrefixes` | `questionnaire-optionPrefix` ext on `answerOption[].extension` | map of option code → display prefix string (e.g. `'A.'`, `'1.'`); prepended to option label in select/radio preview; editable in Answer Type modal (`code=Prefix` format, comma-separated); exported to `answerOption.extension` alongside `ordinalValue` when present |
-| `_sliderStep` | `questionnaire-sliderStepValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; renders item as `<input type="range">` slider in preview; editable in Answer Type modal |
+| `_sliderStep` | `questionnaire-sliderStepValue` ext (`valueDecimal` or `valueInteger` on import; always `valueInteger` on export — decimal steps rounded; R4 constraint) | imported/exported for `integer`/`decimal` items; renders item as `<input type="range">` slider in preview; editable in Answer Type modal |
 | `_disabledDisplay` | `item.disabledDisplay` (R4B native field) + R4 backport extension `extension-Questionnaire.item.disabledDisplay` | `'hidden'` → item removed from DOM when not visible; `'protected'` (default) → grayed row; editable in Show When modal |
 | `_minOccurs` | `questionnaire-minOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true` |
 | `_maxOccurs` | `questionnaire-maxOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true`; enforced in preview — add button disabled at limit |
@@ -415,7 +415,30 @@ Some capabilities exist as both a **standard R4 extension** and a separate **SDC
 
 ## Semantic Validation
 
-The builder runs `validateTree()` (`js/fhir/validate.js`) automatically on import and when the **Validate** button is clicked. In addition to structural checks (duplicate linkIds, FHIRPath syntax, empty titles), the following **cross-field semantic warnings** are reported:
+The builder runs `validateTree()` (`js/fhir/validate.js`) automatically on import and when the **Validate** button is clicked. `validateTree(tree, values, questMeta)` accepts an optional `questMeta` object for root-level checks.
+
+### FHIR R4 formal invariants
+
+All R4 `Questionnaire` invariants (que-0 through que-13) are enforced by the local validator and/or suppressed silently on export:
+
+| Invariant | Rule | Validator | Export |
+|---|---|---|---|
+| que-0 | `Questionnaire.name` must match `[A-Z][A-Za-z0-9_]{0,254}` | ⚠️ warning | — |
+| que-1 | Group items must have nested items | ⚠️ warning | — |
+| que-2 | All `linkId` values must be unique | ❌ error | — |
+| que-3 | `display` items cannot have `item.code[]` | ⚠️ warning | ✅ suppressed |
+| que-4 | `answerOption[]` and `answerValueSet` are mutually exclusive | ❌ error | ✅ `answerOption[]` path skips when VS set |
+| que-5 | `answerValueSet` only valid on choice/open-choice/decimal/integer/date/dateTime/time/string/quantity | ❌ error | ✅ suppressed on disallowed types |
+| que-6 | `display` items cannot have `required` or `repeats` | ⚠️ warning | ✅ suppressed |
+| que-7 | `enableWhen.operator = 'exists'` must use `answerBoolean` | ❌ error | — |
+| que-8 | `display`/`group` items cannot have `initial[]` | ⚠️ (via que-11) | ✅ suppressed |
+| que-9 | `display` items cannot have `readOnly` | ⚠️ warning | ✅ suppressed |
+| que-10 | `maxLength` only valid for boolean/decimal/integer/string/text/url/open-choice | ⚠️ warning | ✅ suppressed on disallowed types |
+| que-11 | `initial[]` must be absent when `answerOption[]` present | ⚠️ warning | ✅ suppressed |
+| que-12 | `enableBehavior` required when `enableWhen.count() > 1` | ✅ auto-handled | ✅ auto-written |
+| que-13 | `repeats: false` → at most 1 initial value | ⚠️ warning | — |
+
+### Cross-field semantic warnings
 
 | Combination | Severity | Message |
 |---|---|---|
@@ -424,8 +447,10 @@ The builder runs `validateTree()` (`js/fhir/validate.js`) automatically on impor
 | `answerExpression` set + `answerOption[]` also present | warning | Mutually exclusive in SDC — `answerOption[]` is ignored at runtime |
 | `enableWhen[]` set + `enableWhenExpression` also set | warning | Both visibility controls are active — `enableWhenExpression` takes precedence in SDC |
 | `repeats: false` + `_initialValues` count > 1 | warning | Only the first initial value is used when repeats is not enabled |
+| `sliderStep` is a decimal | warning | R4 only allows `valueInteger`; step rounded on export |
+| `displayCategory` on a `display` item | warning | R4 only allows on group items; suppressed on export |
 
-All five rules are tested in `tests/validate.test.js` (48 unit tests total).
+All rules are tested in `tests/validate.test.js` (1064 unit tests total across all test files).
 
 ---
 

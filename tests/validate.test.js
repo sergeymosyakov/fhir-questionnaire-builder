@@ -428,3 +428,231 @@ describe('validateTree — que-11 initial + answerOption conflict', () => {
     expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toHaveLength(0);
   });
 });
+
+// ── que-3: display items cannot have code[] ───────────────────────────────────
+describe('validateTree — que-3 display item with code[]', () => {
+  it('warns when display item has _codes', () => {
+    const item = makeItem({ id: 'q1', itemType: 'display', _codes: [{ system: 'http://loinc.org', code: '1234-5' }] });
+    const issues = validateTree([item]);
+    expect(warnIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-3|code\[\]/))).toBeTruthy();
+  });
+
+  it('no warning when non-display item has _codes', () => {
+    const item = makeItem({ id: 'q1', itemType: 'text', _codes: [{ system: 'http://loinc.org', code: '1234-5' }] });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/que-3/))).toHaveLength(0);
+  });
+});
+
+// ── que-4: answerOption[] and answerValueSet cannot both be present ────────────
+describe('validateTree — que-4 answerOption + answerValueSet conflict', () => {
+  it('errors when both options string and _answerValueSet are set', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', options: 'a=A,b=B', _answerValueSet: 'http://example.com/vs' });
+    const issues = validateTree([item]);
+    expect(errIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-4/))).toBeTruthy();
+  });
+
+  it('errors when both _rawAnswerOptions and _answerValueSet are set', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', options: '', _rawAnswerOptions: [{ valueCoding: { code: 'a' } }], _answerValueSet: 'http://example.com/vs' });
+    const issues = validateTree([item]);
+    expect(errIds(issues)).toContain('q1');
+  });
+
+  it('no error when only _answerValueSet is set', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', options: '', _answerValueSet: 'http://example.com/vs' });
+    expect(errIds(validateTree([item]))).toHaveLength(0);
+  });
+
+  it('no error when only options is set', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', options: 'a=A,b=B' });
+    expect(errIds(validateTree([item]))).toHaveLength(0);
+  });
+});
+
+// ── que-6: display items cannot have required or repeats ─────────────────────
+describe('validateTree — que-6 display item required/repeats', () => {
+  it('warns when display item has required=true', () => {
+    const item = makeItem({ id: 'q1', itemType: 'display', mandatory: true });
+    const issues = validateTree([item]);
+    expect(warnIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-6|required/))).toBeTruthy();
+  });
+
+  it('warns when display item has repeats=true', () => {
+    const item = makeItem({ id: 'q1', itemType: 'display', repeats: true });
+    const issues = validateTree([item]);
+    expect(warnIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-6|repeats/))).toBeTruthy();
+  });
+
+  it('no que-6 warning for text item with required=true', () => {
+    const item = makeItem({ id: 'q1', itemType: 'text', mandatory: true });
+    expect(validateTree([item]).filter(i => i.message.match(/que-6/))).toHaveLength(0);
+  });
+});
+
+// ── que-7: enableWhen operator 'exists' must use answerBoolean ────────────────
+describe('validateTree — que-7 enableWhen exists operator', () => {
+  it('errors when operator=exists but answerBoolean is missing', () => {
+    const item = makeItem({ id: 'q2', enableWhen: [{ question: 'q1', operator: 'exists', answerString: 'anything' }] });
+    const q1 = makeItem({ id: 'q1' });
+    const issues = validateTree([q1, item]);
+    expect(errIds(issues)).toContain('q2');
+    expect(issues.find(i => i.nodeId === 'q2' && i.message.match(/que-7|exists.*boolean/))).toBeTruthy();
+  });
+
+  it('no error when operator=exists with answerBoolean=true', () => {
+    const q1 = makeItem({ id: 'q1' });
+    const item = makeItem({ id: 'q2', enableWhen: [{ question: 'q1', operator: 'exists', answerBoolean: true }] });
+    expect(errIds(validateTree([q1, item]))).toHaveLength(0);
+  });
+
+  it('no error when operator=exists with answerBoolean=false', () => {
+    const q1 = makeItem({ id: 'q1' });
+    const item = makeItem({ id: 'q2', enableWhen: [{ question: 'q1', operator: 'exists', answerBoolean: false }] });
+    expect(errIds(validateTree([q1, item]))).toHaveLength(0);
+  });
+
+  it('no que-7 error when operator is = with a string answer', () => {
+    const q1 = makeItem({ id: 'q1' });
+    const item = makeItem({ id: 'q2', enableWhen: [{ question: 'q1', operator: '=', answerString: 'yes' }] });
+    expect(validateTree([q1, item]).filter(i => i.message.match(/que-7/))).toHaveLength(0);
+  });
+});
+
+// ── que-9: display items cannot have readOnly ─────────────────────────────────
+describe('validateTree — que-9 display item readOnly', () => {
+  it('warns when display item has readOnly=true', () => {
+    const item = makeItem({ id: 'q1', itemType: 'display', _readOnly: true });
+    const issues = validateTree([item]);
+    expect(warnIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-9|readOnly/))).toBeTruthy();
+  });
+
+  it('no que-9 warning for text item with readOnly=true', () => {
+    const item = makeItem({ id: 'q1', itemType: 'text', _readOnly: true });
+    expect(validateTree([item]).filter(i => i.message.match(/que-9/))).toHaveLength(0);
+  });
+});
+
+// ── que-10: maxLength only valid for allowed types ────────────────────────────
+describe('validateTree — que-10 maxLength type restriction', () => {
+  it('warns when maxLength set on date item', () => {
+    const item = makeItem({ id: 'q1', itemType: 'date', _maxLength: 10 });
+    const issues = validateTree([item]);
+    expect(warnIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-10|maxLength/))).toBeTruthy();
+  });
+
+  it('warns when maxLength set on select item', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', options: 'a,b', _maxLength: 50 });
+    const issues = validateTree([item]);
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-10|maxLength/))).toBeTruthy();
+  });
+
+  it('no que-10 warning for text item with maxLength', () => {
+    const item = makeItem({ id: 'q1', itemType: 'text', _maxLength: 200 });
+    expect(validateTree([item]).filter(i => i.message.match(/que-10/))).toHaveLength(0);
+  });
+
+  it('no que-10 warning for url item with maxLength', () => {
+    const item = makeItem({ id: 'q1', itemType: 'url', _maxLength: 100 });
+    expect(validateTree([item]).filter(i => i.message.match(/que-10/))).toHaveLength(0);
+  });
+
+  it('no que-10 warning for open-choice item with maxLength', () => {
+    const item = makeItem({ id: 'q1', itemType: 'open-choice', options: 'a,b', _maxLength: 100 });
+    expect(validateTree([item]).filter(i => i.message.match(/que-10/))).toHaveLength(0);
+  });
+
+  it('no warning when maxLength is not set on a date item', () => {
+    const item = makeItem({ id: 'q1', itemType: 'date' });
+    expect(validateTree([item]).filter(i => i.message.match(/que-10/))).toHaveLength(0);
+  });
+});
+
+// ── que-0: Questionnaire.name format ─────────────────────────────────────────
+describe('validateTree — que-0 Questionnaire.name format', () => {
+  it('warns when name starts with lowercase', () => {
+    const issues = validateTree([], {}, { name: 'myQuestionnaire' });
+    expect(issues.find(i => i.nodeId === '(root)' && i.message.match(/que-0|naming/))).toBeTruthy();
+  });
+
+  it('warns when name contains spaces', () => {
+    const issues = validateTree([], {}, { name: 'My Questionnaire' });
+    expect(issues.find(i => i.nodeId === '(root)')).toBeTruthy();
+  });
+
+  it('no warning when name matches pattern', () => {
+    expect(validateTree([], {}, { name: 'MyQuestionnaire' })).toHaveLength(0);
+    expect(validateTree([], {}, { name: 'PHQ_9' })).toHaveLength(0);
+  });
+
+  it('no warning when questMeta is null', () => {
+    expect(validateTree([], {}, null)).toHaveLength(0);
+  });
+
+  it('no warning when name is absent', () => {
+    expect(validateTree([], {}, {})).toHaveLength(0);
+  });
+});
+
+// ── que-1: group must have children ──────────────────────────────────────────
+describe('validateTree — que-1 group must have children', () => {
+  it('warns when group has no children', () => {
+    const g = makeGroup({ id: 'g1', children: [] });
+    const issues = validateTree([g]);
+    expect(warnIds(issues)).toContain('g1');
+    expect(issues.find(i => i.nodeId === 'g1' && i.message.match(/que-1|no children/))).toBeTruthy();
+  });
+
+  it('no warning when group has children', () => {
+    const g = makeGroup({ id: 'g1', children: [makeItem({ id: 'q1' })] });
+    const issues = validateTree([g]);
+    expect(issues.filter(i => i.nodeId === 'g1' && i.message.match(/que-1/))).toHaveLength(0);
+  });
+});
+
+// ── que-5: answerValueSet only for allowed types ──────────────────────────────
+describe('validateTree — que-5 answerValueSet type restriction', () => {
+  it('errors when answerValueSet set on url item', () => {
+    const item = makeItem({ id: 'q1', itemType: 'url', _answerValueSet: 'http://example.com/vs' });
+    const issues = validateTree([item]);
+    expect(errIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-5/))).toBeTruthy();
+  });
+
+  it('errors when answerValueSet set on attachment item', () => {
+    const item = makeItem({ id: 'q1', itemType: 'attachment', _answerValueSet: 'http://example.com/vs' });
+    const issues = validateTree([item]);
+    expect(errIds(issues)).toContain('q1');
+  });
+
+  it('errors when answerValueSet set on checkbox (boolean) item', () => {
+    const item = makeItem({ id: 'q1', itemType: 'checkbox', _answerValueSet: 'http://example.com/vs' });
+    const issues = validateTree([item]);
+    expect(errIds(issues)).toContain('q1');
+  });
+
+  it('no error when answerValueSet set on select item', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', options: '', _answerValueSet: 'http://example.com/vs' });
+    expect(errIds(validateTree([item]))).toHaveLength(0);
+  });
+
+  it('no error when answerValueSet set on text item', () => {
+    const item = makeItem({ id: 'q1', itemType: 'text', _answerValueSet: 'http://example.com/vs' });
+    expect(errIds(validateTree([item]))).toHaveLength(0);
+  });
+
+  it('no error when answerValueSet set on decimal item', () => {
+    const item = makeItem({ id: 'q1', itemType: 'decimal', _answerValueSet: 'http://example.com/vs' });
+    expect(errIds(validateTree([item]))).toHaveLength(0);
+  });
+
+  it('no error when answerValueSet set on quantity item', () => {
+    const item = makeItem({ id: 'q1', itemType: 'quantity', _answerValueSet: 'http://example.com/vs' });
+    expect(errIds(validateTree([item]))).toHaveLength(0);
+  });
+});

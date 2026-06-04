@@ -90,8 +90,10 @@ export function nodeToFHIRItem(node) {
     fhirItem.extension = fhirItem.extension || [];
     fhirItem.extension.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType', valueString: node._fhirType });
   }
-  if (node._codes && node._codes.length) fhirItem.code = node._codes;
-  if (node.mandatory === true)  fhirItem.required = true;
+  // que-3: display items cannot have code[] (R4 invariant)
+  if (node._codes && node._codes.length && node.itemType !== 'display') fhirItem.code = node._codes;
+  // que-6: display items cannot have required or repeats (R4 invariant)
+  if (node.mandatory === true && node.itemType !== 'display') fhirItem.required = true;
 
   // item.initial[] — multi-value for repeating items; single value otherwise
   // que-11: must be absent when answerOption[] is present (use answerOption[].initialSelected instead)
@@ -99,7 +101,8 @@ export function nodeToFHIRItem(node) {
   const hasAnswerOptions = node.type === 'item' && (
     node.options || node._rawAnswerOptions || node._answerValueSet || node._answerExpression
   );
-  if (node.type === 'item' && !hasAnswerOptions) {
+  // que-8: display items cannot have initial[] (R4 invariant)
+  if (node.type === 'item' && node.itemType !== 'display' && !hasAnswerOptions) {
     const t = itemTypeToFHIRType(node.itemType);
     const buildInitEntry = v => {
       if (t === 'boolean')  return { valueBoolean:  typeof v === 'boolean' ? v : v === 'true' };
@@ -285,8 +288,9 @@ export function nodeToFHIRItem(node) {
     }
   }
 
-  // maxLength (text/url/open-choice types)
-  if (node._maxLength !== undefined && node._maxLength !== null) fhirItem.maxLength = node._maxLength;
+  // maxLength — que-10: only valid for boolean/decimal/integer/string/text/url/open-choice
+  const _maxLengthAllowed = new Set(['checkbox', 'decimal', 'integer', 'number', 'text', 'url', 'open-choice']);
+  if (node._maxLength !== undefined && node._maxLength !== null && _maxLengthAllowed.has(node.itemType)) fhirItem.maxLength = node._maxLength;
 
   // answerConstraint (R4B/R5)
   if (node._answerConstraint) fhirItem.answerConstraint = node._answerConstraint;
@@ -409,11 +413,15 @@ export function nodeToFHIRItem(node) {
     const isInt = Number.isInteger(node._maxValue);
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/maxValue', [isInt ? 'valueInteger' : 'valueDecimal']: node._maxValue });
   }
-  if (node.type === 'item' && node._answerValueSet) fhirItem.answerValueSet = node._answerValueSet;
+  // que-5: answerValueSet only valid for choice/open-choice/decimal/integer/date/dateTime/time/string/quantity
+  const _answerVsAllowed = new Set(['select','radio','checklist','open-choice','decimal','integer','number','text','date','dateTime','time','quantity']);
+  if (node.type === 'item' && node._answerValueSet && _answerVsAllowed.has(node.itemType)) fhirItem.answerValueSet = node._answerValueSet;
 
-  if (node._readOnly) fhirItem.readOnly = true;
+  // que-9: display items cannot have readOnly (R4 invariant)
+  if (node._readOnly && node.itemType !== 'display') fhirItem.readOnly = true;
   if (node._disabledDisplay) fhirItem.disabledDisplay = node._disabledDisplay;
-  if (node.repeats || node.itemType === 'checklist')   fhirItem.repeats  = true;
+  // que-6: display items cannot have repeats (R4 invariant)
+  if ((node.repeats || node.itemType === 'checklist') && node.itemType !== 'display') fhirItem.repeats = true;
   // minOccurs / maxOccurs cardinality extensions
   // R4 invariant: type!='display' and (required=true or valueInteger=0)
   // minOccurs: only valid when item is required=true (R4 context invariant: que-minoccurs-1)
