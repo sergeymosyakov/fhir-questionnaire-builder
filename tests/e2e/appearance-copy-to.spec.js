@@ -9,7 +9,8 @@
 //   add-menu-item             "Item" option in add-child menu
 //   node-title-display        read-only title span
 //   node-title-input          title textarea
-//   action-appearance         "Appearance" action link
+//   action-appearance         "Appearance" action link on an item node
+//   action-style              "Appearance" action link on a group node
 //   appearance-raw-input      raw CSS textarea
 //   appearance-copy-to-btn    "Copy to…" button in AppearanceModal footer
 //   nodePickerModal           Node Picker modal backdrop
@@ -285,7 +286,7 @@ test.describe('allowedType filtering', () => {
     await addItem(page, '2', 'Other'); // item id='2.1' — should be non-selectable
 
     // Open Appearance modal on the group
-    await page.locator('[data-node-id="1"]').getByTestId('action-appearance').click();
+    await page.locator('[data-node-id="1"]').getByTestId('action-style').click();
     await copyToBtn(page).click();
     await expect(nodePickerModal(page)).toBeVisible();
 
