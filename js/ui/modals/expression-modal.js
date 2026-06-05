@@ -4,7 +4,10 @@
 //   openDual(node, link, setActive, cb) — dual-field (items: calc + init in one modal)
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { ExprAwareModal } from './expr-aware-modal.js';
+import { Modal } from './modal-base.js';
 import { EXPR_SECTIONS, makeExprField, renderExprSections } from './expression-sections/index.js';
+import { nodePickerModal } from './node-picker-modal.js';
+import { AppEvents } from '../../events.js';
 
 class ExpressionModal extends ExprAwareModal {
   getName() { return 'expressionModal'; }
@@ -12,6 +15,14 @@ class ExpressionModal extends ExprAwareModal {
     super();
     this._pending = null;
     MODAL_REGISTRY.set('expression', this);
+
+    this._copyToBtn = document.createElement('button');
+    this._copyToBtn.type = 'button';
+    this._copyToBtn.className = 'modal-btn modal-btn--copy-to';
+    this._copyToBtn.textContent = 'Copy to\u2026';
+    this._copyToBtn.dataset.testid = 'expression-copy-to-btn';
+    this._copyToBtn.addEventListener('click', () => this._openCopyTo());
+    this.footer.insertBefore(this._copyToBtn, this.footer.firstChild);
   }
 
   open(cfg) {
@@ -39,6 +50,29 @@ class ExpressionModal extends ExprAwareModal {
     renderExprSections(this.body, this._pending);
     super.open();
     setTimeout(() => this.body.querySelector('textarea')?.focus(), 50);
+  }
+
+  _buildPayload() {
+    const p = this._pending;
+    if (p.mode === 'single') {
+      return { [p.cfg.field]: p.draft.trim() || null };
+    }
+    return Object.assign({}, ...EXPR_SECTIONS.map(s => s.buildPatch(p, p.node)));
+  }
+
+  _openCopyTo() {
+    if (!this._pending) return;
+    const patch = this._buildPayload();
+    const sourceNode = this._pending.mode === 'dual'
+      ? this._pending.node
+      : this._pending.cfg?.node;
+    const excludeId   = sourceNode?.id;
+    const allowedType = sourceNode?.type;
+    nodePickerModal.open(excludeId, (ids) => {
+      document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, { detail: { ids, patch, nodeType: allowedType } }));
+      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+    }, allowedType);
   }
 
   _apply() {

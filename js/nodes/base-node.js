@@ -39,7 +39,10 @@ export class BaseNode {
       this._initPreviewNavListener();
       document.addEventListener(AppEvents.REFRESH_CALC_BADGES, () => this._refreshCalcBadge?.(), { signal: this._ac.signal });
       document.addEventListener(AppEvents.COPY_TO_NODES, e => {
-        if (e.detail.ids.includes(this.id)) this.applyPatch(e.detail.patch);
+        const { ids, patch, nodeType } = e.detail;
+        if (!ids.includes(this.id)) return;
+        if (nodeType && this.type !== nodeType) return; // type mismatch — skip
+        this.applyPatch(patch);
       }, { signal: this._ac.signal });
     }
   }

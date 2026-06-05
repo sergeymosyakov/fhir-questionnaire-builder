@@ -67,8 +67,9 @@ export const AppEvents = Object.freeze({
   VALIDATOR_TOGGLE:    'validator-toggle',
 
   // ── Node patching ─────────────────────────────────────────────────────────
-  // detail: { ids: string[], patch: object }
+  // detail: { ids: string[], patch: object, nodeType?: 'group'|'item' }
   // Dispatched by modals to copy current settings to other nodes.
   // patch values: null = delete key from node, any other value = assign to node.
+  // nodeType: if set, BaseNode skips nodes whose type doesn't match (type safety).
   COPY_TO_NODES: 'copy-to-nodes',
 });

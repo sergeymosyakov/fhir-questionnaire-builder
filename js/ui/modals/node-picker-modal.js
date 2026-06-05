@@ -8,24 +8,27 @@
 import { Modal } from './modal-base.js';
 
 /** Recursively keep matching leaves + their ancestors.
- *  @param {object[]} nodes   — flat or nested tree array
- *  @param {string}   query   — lower-cased search string
- *  @param {string}   exclude — node id to exclude (currently being edited)
- *  @returns {{ node, children: []|null }[]}
+ *  @param {object[]} nodes       — flat or nested tree array
+ *  @param {string}   query       — lower-cased search string
+ *  @param {string}   exclude     — node id to exclude (currently being edited)
+ *  @param {string|null} allowedType — 'group'|'item'|null; nodes of other type are non-selectable
+ *  @returns {{ node, children: []|null, selectable: boolean }[]}
  */
-function _filterTree(nodes, query, exclude) {
+function _filterTree(nodes, query, exclude, allowedType) {
   const out = [];
   for (const node of nodes) {
     if (node.id === exclude) continue;
+    const selectable = !allowedType || node.type === allowedType;
     if (node.type === 'group') {
-      const filteredChildren = _filterTree(node.children || [], query, exclude);
+      const filteredChildren = _filterTree(node.children || [], query, exclude, allowedType);
       const selfMatch = !query || node.title?.toLowerCase().includes(query) || node.id?.toLowerCase().includes(query);
+      // Include group if it matches (or has matching descendants)
       if (selfMatch || filteredChildren.length > 0) {
-        out.push({ node, children: filteredChildren });
+        out.push({ node, children: filteredChildren, selectable });
       }
     } else {
       const match = !query || node.title?.toLowerCase().includes(query) || node.id?.toLowerCase().includes(query);
-      if (match) out.push({ node, children: null });
+      if (match) out.push({ node, children: null, selectable });
     }
   }
   return out;
@@ -36,10 +39,11 @@ class NodePickerModal extends Modal {
 
   constructor() {
     super({ applyLabel: null, cancelLabel: 'Cancel' });
-    this._excludeId  = null;
-    this._onConfirm  = null;
-    this._selected   = new Set();
-    this._treeEl     = null;
+    this._excludeId   = null;
+    this._onConfirm   = null;
+    this._selected    = new Set();
+    this._treeEl      = null;
+    this._allowedType = null; // 'group' | 'item' | null (both)
 
     // Dynamic confirm button — label updates as selection changes.
     this._confirmBtn = document.createElement('button');
@@ -53,12 +57,14 @@ class NodePickerModal extends Modal {
   }
 
   /**
-   * @param {string}   excludeId — id of the node being edited (excluded from list)
-   * @param {Function} onConfirm — called with string[] of selected ids
+   * @param {string}   excludeId   — id of the node being edited (excluded from list)
+   * @param {Function} onConfirm   — called with string[] of selected ids
+   * @param {string}   [allowedType] — 'group' | 'item' | null (show all)
    */
-  open(excludeId, onConfirm) {
-    this._excludeId = excludeId;
-    this._onConfirm = onConfirm;
+  open(excludeId, onConfirm, allowedType = null) {
+    this._excludeId   = excludeId;
+    this._onConfirm   = onConfirm;
+    this._allowedType = allowedType;
     this._selected.clear();
     this._updateConfirmBtn();
     this.setTitle('Copy to\u2026');
@@ -90,7 +96,7 @@ class NodePickerModal extends Modal {
   }
 
   _renderTree(query) {
-    const filtered = _filterTree(Modal._svc.tree || [], query, this._excludeId);
+    const filtered = _filterTree(Modal._svc.tree || [], query, this._excludeId, this._allowedType);
     this._treeEl.innerHTML = '';
 
     if (!filtered.length) {
@@ -105,31 +111,40 @@ class NodePickerModal extends Modal {
   }
 
   _buildRows(items, container, depth) {
-    for (const { node, children } of items) {
-      if (node.type === 'group') {
+    for (const { node, children, selectable } of items) {
+      const isGroup = node.type === 'group';
+
+      if (!selectable) {
+        // Non-selectable: render as a plain header row (no checkbox)
         const row = document.createElement('div');
-        row.className = 'node-picker-group';
+        row.dataset.testid = `node-picker-hdr-${node.id}`;
+        row.className = isGroup
+          ? 'node-picker-item node-picker-item--group node-picker-item--header'
+          : 'node-picker-item node-picker-item--header';
         row.style.paddingLeft = `${depth * 16 + 8}px`;
 
-        const icon = document.createElement('span');
-        icon.className = 'node-picker-group-icon';
-        icon.textContent = '\u25b8';
-
-        const label = document.createElement('span');
-        label.className = 'node-picker-group-label';
-        label.textContent = node.title || node.id;
+        const title = document.createElement('span');
+        title.className = 'node-picker-item-title';
+        if (isGroup) {
+          const icon = document.createElement('span');
+          icon.className = 'node-picker-group-icon';
+          icon.textContent = '\u25b8 ';
+          title.appendChild(icon);
+        }
+        title.appendChild(document.createTextNode(node.title || node.id));
 
         const linkId = document.createElement('span');
         linkId.className = 'node-picker-linkid';
         linkId.textContent = node.id;
 
-        row.append(icon, label, linkId);
+        row.append(title, linkId);
         container.appendChild(row);
-
-        if (children?.length) this._buildRows(children, container, depth + 1);
       } else {
+        // Selectable: render with checkbox
         const row = document.createElement('label');
-        row.className = 'node-picker-item';
+        row.className = isGroup
+          ? 'node-picker-item node-picker-item--group'
+          : 'node-picker-item';
         row.style.paddingLeft = `${depth * 16 + 8}px`;
 
         const cb = document.createElement('input');
@@ -145,7 +160,13 @@ class NodePickerModal extends Modal {
 
         const title = document.createElement('span');
         title.className = 'node-picker-item-title';
-        title.textContent = node.title || node.id;
+        if (isGroup) {
+          const icon = document.createElement('span');
+          icon.className = 'node-picker-group-icon';
+          icon.textContent = '\u25b8 ';
+          title.appendChild(icon);
+        }
+        title.appendChild(document.createTextNode(node.title || node.id));
 
         const linkId = document.createElement('span');
         linkId.className = 'node-picker-linkid';
@@ -154,6 +175,8 @@ class NodePickerModal extends Modal {
         row.append(cb, title, linkId);
         container.appendChild(row);
       }
+
+      if (isGroup && children?.length) this._buildRows(children, container, depth + 1);
     }
   }
 
@@ -171,8 +194,9 @@ class NodePickerModal extends Modal {
   }
 
   _cancel() {
-    this._onConfirm = null;
-    this._excludeId = null;
+    this._onConfirm  = null;
+    this._excludeId  = null;
+    this._allowedType = null;
     this._selected.clear();
     this._updateConfirmBtn();
     this.close();

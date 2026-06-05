@@ -1,7 +1,7 @@
-// ── E2E: Appearance modal — "Copy to…" feature ────────────────────────────────
-// Tests for the Node Picker modal triggered from AppearanceModal.
+// ── E2E: Expression modal — "Copy to…" feature ────────────────────────────────
+// Tests for the Node Picker modal triggered from ExpressionModal.
 //
-// Run: npx playwright test tests/e2e/appearance-copy-to.spec.js
+// Run: npx playwright test tests/e2e/expression-copy-to.spec.js
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
 //   add-root-group-btn        "+Add Root Group"
@@ -9,11 +9,13 @@
 //   add-menu-item             "Item" option in add-child menu
 //   node-title-display        read-only title span
 //   node-title-input          title textarea
-//   action-appearance         "Appearance" action link
-//   appearance-raw-input      raw CSS textarea
-//   appearance-copy-to-btn    "Copy to…" button in AppearanceModal footer
+//   action-expr               "Expression" action link on an item node
+//   expr-calc-ta              calc expression textarea in Expression modal
+//   expr-init-ta              init expression textarea in Expression modal
+//   expression-copy-to-btn    "Copy to…" button in ExpressionModal footer
+//   expressionModal           Expression modal backdrop
 //   nodePickerModal           Node Picker modal backdrop
-//   node-picker-search        search input
+//   node-picker-search        search input in Node Picker
 //   node-picker-confirm       "Copy to selected (N)" confirm button
 //   node-picker-cb-<id>       checkbox for node with given id
 //   node-picker-hdr-<id>      non-selectable header row for node with given id
@@ -41,11 +43,8 @@ async function addItem(page, groupNodeId, title) {
   const group = page.locator(`[data-node-id="${groupNodeId}"]`);
   await group.getByTestId('group-add-btn').click();
   await page.locator('[data-testid="add-menu-item"]').first().click();
-  // Wait for the item to appear — find the last child of the group
-  // (simple: just wait for any new node with data-node-id containing groupNodeId.)
   const nodeId = groupNodeId + '.1';
   await expect(page.locator(`[data-node-id="${nodeId}"]`)).toBeVisible();
-
   if (title) {
     const item = page.locator(`[data-node-id="${nodeId}"]`);
     await item.getByTestId('node-title-display').click();
@@ -56,14 +55,12 @@ async function addItem(page, groupNodeId, title) {
   return nodeId;
 }
 
-/** Add a second item to a group; returns its nodeId. */
 async function addSecondItem(page, groupNodeId, title) {
   const group = page.locator(`[data-node-id="${groupNodeId}"]`);
   await group.getByTestId('group-add-btn').click();
   await page.locator('[data-testid="add-menu-item"]').first().click();
   const nodeId = groupNodeId + '.2';
   await expect(page.locator(`[data-node-id="${nodeId}"]`)).toBeVisible();
-
   if (title) {
     const item = page.locator(`[data-node-id="${nodeId}"]`);
     await item.getByTestId('node-title-display').click();
@@ -79,23 +76,25 @@ async function addSecondGroup(page) {
   await expect(page.locator('[data-node-id="2"]')).toBeVisible();
 }
 
-const appearanceModal  = (page) => page.locator('[data-testid="appearanceModal"]');
-const nodePickerModal  = (page) => page.locator('[data-testid="nodePickerModal"]');
-const rawInput         = (page) => page.getByTestId('appearance-raw-input');
-const copyToBtn        = (page) => page.getByTestId('appearance-copy-to-btn');
-const pickerSearch     = (page) => page.getByTestId('node-picker-search');
-const pickerConfirm    = (page) => page.getByTestId('node-picker-confirm');
-const pickerCb         = (page, id) => page.getByTestId(`node-picker-cb-${id}`);
+const exprModal       = (page) => page.locator('[data-testid="expressionModal"]');
+const nodePickerModal = (page) => page.locator('[data-testid="nodePickerModal"]');
+const calcTa          = (page) => page.getByTestId('expr-calc-ta');
+const initTa          = (page) => page.getByTestId('expr-init-ta');
+const copyToBtn       = (page) => page.getByTestId('expression-copy-to-btn');
+const pickerSearch    = (page) => page.getByTestId('node-picker-search');
+const pickerConfirm   = (page) => page.getByTestId('node-picker-confirm');
+const pickerCb        = (page, id) => page.getByTestId(`node-picker-cb-${id}`);
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
 test.describe('"Copy to…" button', () => {
-  test('button is visible in Appearance modal footer', async ({ page }) => {
+  test('button is visible in Expression modal footer', async ({ page }) => {
     await freshStart(page);
     await addGroup(page);
     await addItem(page, '1', 'Source');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await expect(exprModal(page)).toBeVisible();
     await expect(copyToBtn(page)).toBeVisible();
     await expect(copyToBtn(page)).toHaveText('Copy to\u2026');
   });
@@ -105,22 +104,22 @@ test.describe('"Copy to…" button', () => {
     await addGroup(page);
     await addItem(page, '1', 'Source');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await copyToBtn(page).click();
     await expect(nodePickerModal(page)).toBeVisible();
   });
 
-  test('Node Picker modal is on top of Appearance modal', async ({ page }) => {
+  test('Node Picker modal is on top of Expression modal', async ({ page }) => {
     await freshStart(page);
     await addGroup(page);
     await addItem(page, '1', 'Source');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await copyToBtn(page).click();
 
     const pickerZ = await nodePickerModal(page).evaluate(el => parseInt(getComputedStyle(el).zIndex, 10));
-    const appearZ = await appearanceModal(page).evaluate(el => parseInt(getComputedStyle(el).zIndex, 10));
-    expect(pickerZ).toBeGreaterThan(appearZ);
+    const exprZ   = await exprModal(page).evaluate(el => parseInt(getComputedStyle(el).zIndex, 10));
+    expect(pickerZ).toBeGreaterThan(exprZ);
   });
 });
 
@@ -131,13 +130,10 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await copyToBtn(page).click();
-    await expect(nodePickerModal(page)).toBeVisible();
 
-    // Source node (1.1) must NOT have a checkbox
     await expect(pickerCb(page, '1.1')).not.toBeVisible();
-    // Target node (1.2) MUST have a checkbox
     await expect(pickerCb(page, '1.2')).toBeVisible();
   });
 
@@ -147,7 +143,7 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await copyToBtn(page).click();
 
     await expect(pickerConfirm(page)).toBeDisabled();
@@ -159,7 +155,7 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await copyToBtn(page).click();
 
     await pickerCb(page, '1.2').check();
@@ -173,11 +169,10 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Alpha');
     await addSecondItem(page, '1', 'Beta');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await copyToBtn(page).click();
 
     await pickerSearch(page).fill('beta');
-    // Beta checkbox visible, Alpha checkbox gone
     await expect(pickerCb(page, '1.2')).toBeVisible();
     await expect(pickerCb(page, '1.1')).not.toBeVisible();
   });
@@ -188,88 +183,108 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    const sourceLink = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
-    await sourceLink.click();
-    await rawInput(page).fill('font-weight: bold');
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await calcTa(page).fill("%resource.item.where(linkId='q1').answer.value");
     await copyToBtn(page).click();
 
     await page.getByTestId('nodePickerModalCancel').click();
     await expect(nodePickerModal(page)).not.toBeVisible();
-    // Appearance modal still open
-    await expect(appearanceModal(page)).toBeVisible();
-    // Target node action link must NOT be active
-    const targetLink = page.locator('[data-node-id="1.2"]').getByTestId('action-appearance');
+    await expect(exprModal(page)).toBeVisible();
+
+    const targetLink = page.locator('[data-node-id="1.2"]').getByTestId('action-expr');
     await expect(targetLink).not.toHaveClass(/action-edit--active/);
   });
 });
 
 test.describe('Copy to — apply behaviour', () => {
-  test('copies CSS style to selected node', async ({ page }) => {
+  test('copies calc expression to selected node', async ({ page }) => {
     await freshStart(page);
     await addGroup(page);
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    const sourceLink = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
-    await sourceLink.click();
-    await rawInput(page).fill('font-weight: bold');
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await calcTa(page).fill("%resource.item.where(linkId='q1').answer.value");
     await copyToBtn(page).click();
 
     await pickerCb(page, '1.2').check();
     await pickerConfirm(page).click();
     await expect(nodePickerModal(page)).not.toBeVisible();
 
-    // Target action link must now be active
-    const targetLink = page.locator('[data-node-id="1.2"]').getByTestId('action-appearance');
+    const targetLink = page.locator('[data-node-id="1.2"]').getByTestId('action-expr');
     await expect(targetLink).toHaveClass(/action-edit--active/);
   });
 
-  test('opening target Appearance modal shows copied style', async ({ page }) => {
+  test('opening target Expression modal shows copied calc expression', async ({ page }) => {
     await freshStart(page);
     await addGroup(page);
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    // Apply style to source, then copy to target
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
-    await rawInput(page).fill('font-style: italic');
+    const expr = "%resource.item.where(linkId='score').answer.value";
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await calcTa(page).fill(expr);
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();
     await pickerConfirm(page).click();
     await expect(nodePickerModal(page)).not.toBeVisible();
 
-    // Close appearance modal (or it's still open — just cancel)
-    await page.getByTestId('appearanceModalCancel').click();
+    await page.getByTestId('expressionModalCancel').click();
 
-    // Open target appearance modal and verify
-    await page.locator('[data-node-id="1.2"]').getByTestId('action-appearance').click();
-    await expect(rawInput(page)).toHaveValue(/italic/);
+    await page.locator('[data-node-id="1.2"]').getByTestId('action-expr').click();
+    await expect(calcTa(page)).toHaveValue(expr);
   });
 
-  test('source node style is not affected by Copy to', async ({ page }) => {
+  test('source node expression is not affected by Copy to', async ({ page }) => {
     await freshStart(page);
     await addGroup(page);
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
-    await rawInput(page).fill('font-weight: bold');
+    const expr = "%resource.item.where(linkId='q2').answer.value";
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await calcTa(page).fill(expr);
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();
     await pickerConfirm(page).click();
 
-    // Source modal still open — raw input unchanged
-    await expect(rawInput(page)).toHaveValue('font-weight: bold');
+    await expect(calcTa(page)).toHaveValue(expr);
+  });
+
+  test('clearing expression on source and copying removes expression on target', async ({ page }) => {
+    await freshStart(page);
+    await addGroup(page);
+    await addItem(page, '1', 'Source');
+    await addSecondItem(page, '1', 'Target');
+
+    const expr = "%resource.item.where(linkId='q3').answer.value";
+
+    // First copy expression to target
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await calcTa(page).fill(expr);
+    await copyToBtn(page).click();
+    await pickerCb(page, '1.2').check();
+    await pickerConfirm(page).click();
+    const targetLink = page.locator('[data-node-id="1.2"]').getByTestId('action-expr');
+    await expect(targetLink).toHaveClass(/action-edit--active/);
+
+    // Now clear source and copy again
+    await calcTa(page).fill('');
+    await copyToBtn(page).click();
+    await pickerCb(page, '1.2').check();
+    await pickerConfirm(page).click();
+
+    await expect(targetLink).not.toHaveClass(/action-edit--active/);
   });
 
 test.describe('allowedType filtering', () => {
   test('group has no checkbox when source is item', async ({ page }) => {
     await freshStart(page);
-    await addGroup(page);        // group id='1'
-    await addItem(page, '1', 'Source');  // item id='1.1'
-    await addSecondGroup(page);  // group id='2' — should be non-selectable
+    await addGroup(page);             // group id='1'
+    await addItem(page, '1', 'Source'); // item id='1.1'
+    await addSecondGroup(page);       // group id='2' — should be non-selectable
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
     await copyToBtn(page).click();
     await expect(nodePickerModal(page)).toBeVisible();
 
@@ -277,48 +292,29 @@ test.describe('allowedType filtering', () => {
     await expect(page.getByTestId('node-picker-hdr-2')).toBeVisible();
     await expect(page.getByTestId('node-picker-cb-2')).not.toBeVisible();
   });
-
-  test('item has no checkbox when source is group', async ({ page }) => {
-    await freshStart(page);
-    await addGroup(page);              // group id='1' — source
-    await addSecondGroup(page);        // group id='2'
-    await addItem(page, '2', 'Other'); // item id='2.1' — should be non-selectable
-
-    // Open Appearance modal on the group
-    await page.locator('[data-node-id="1"]').getByTestId('action-appearance').click();
-    await copyToBtn(page).click();
-    await expect(nodePickerModal(page)).toBeVisible();
-
-    // Item '2.1' must appear as non-selectable header, not a checkbox
-    await expect(page.getByTestId('node-picker-hdr-2.1')).toBeVisible();
-    await expect(page.getByTestId('node-picker-cb-2.1')).not.toBeVisible();
-    // Group '2' must have a checkbox (same type as source)
-    await expect(page.getByTestId('node-picker-cb-2')).toBeVisible();
-  });
 });
 
-  test('clearing style on source and copying removes style on target', async ({ page }) => {
+  test('copies both calc and init expressions together', async ({ page }) => {
     await freshStart(page);
     await addGroup(page);
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    // First copy a style to target
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
-    await rawInput(page).fill('font-weight: bold');
+    const calc = "%resource.item.where(linkId='q4').answer.value";
+    const init = '%age > 18';
+
+    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await calcTa(page).fill(calc);
+    await initTa(page).fill(init);
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();
     await pickerConfirm(page).click();
-    const targetLink = page.locator('[data-node-id="1.2"]').getByTestId('action-appearance');
-    await expect(targetLink).toHaveClass(/action-edit--active/);
+    await expect(nodePickerModal(page)).not.toBeVisible();
 
-    // Now clear source style and copy again
-    await rawInput(page).fill('');
-    await copyToBtn(page).click();
-    await pickerCb(page, '1.2').check();
-    await pickerConfirm(page).click();
+    await page.getByTestId('expressionModalCancel').click();
 
-    // Target action link must be inactive again
-    await expect(targetLink).not.toHaveClass(/action-edit--active/);
+    await page.locator('[data-node-id="1.2"]').getByTestId('action-expr').click();
+    await expect(calcTa(page)).toHaveValue(calc);
+    await expect(initTa(page)).toHaveValue(init);
   });
 });
