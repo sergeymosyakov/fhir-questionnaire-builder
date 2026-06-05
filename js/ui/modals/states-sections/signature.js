@@ -102,6 +102,14 @@ class SignatureSection extends StatesSection {
       delete node._signatureRequired;
     }
   }
+
+  buildPatch(pending, _node) {
+    return {
+      _signatureRequired: pending.draftSignatures.length
+        ? pending.draftSignatures.map(s => ({ ...s }))
+        : null,
+    };
+  }
 }
 
 STATES_SECTIONS.push(new SignatureSection());

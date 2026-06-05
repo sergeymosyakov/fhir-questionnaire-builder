@@ -22,6 +22,10 @@ class CalcSection extends ExpressionSection {
   commit(pending, node) {
     node._calculatedExpr = pending.calcExpr.trim() || undefined;
   }
+
+  buildPatch(pending, _node) {
+    return { _calculatedExpr: pending.calcExpr.trim() || null };
+  }
 }
 
 EXPR_SECTIONS.push(new CalcSection());

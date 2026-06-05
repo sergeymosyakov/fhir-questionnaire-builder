@@ -22,6 +22,10 @@ class InitSection extends ExpressionSection {
   commit(pending, node) {
     node._initialExpr = pending.initExpr.trim() || undefined;
   }
+
+  buildPatch(pending, _node) {
+    return { _initialExpr: pending.initExpr.trim() || null };
+  }
 }
 
 EXPR_SECTIONS.push(new InitSection());

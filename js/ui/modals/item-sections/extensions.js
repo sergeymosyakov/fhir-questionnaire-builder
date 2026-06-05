@@ -167,6 +167,11 @@ class ExtensionsSection extends ItemSection {
     if (parsedExts.length) node._unknownExtensions = parsedExts;
     else delete node._unknownExtensions;
   }
+
+  buildPatch(pending, _node) {
+    const parsedExts = pending.unknownExtensions.map(draftToExt).filter(Boolean);
+    return { _unknownExtensions: parsedExts.length ? parsedExts : null };
+  }
 }
 
 ITEM_SECTIONS.push(new ExtensionsSection());

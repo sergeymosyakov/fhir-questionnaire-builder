@@ -103,6 +103,10 @@ class StyleSection extends AppearanceSection {
   commit(pending, node) {
     node._renderStyle = pending.draftStyle || undefined;
   }
+
+  buildPatch(pending, _node) {
+    return { _renderStyle: pending.draftStyle || null };
+  }
 }
 
 APPEARANCE_SECTIONS.push(new StyleSection());

@@ -36,6 +36,10 @@ class ShortTextSection extends ItemSection {
     if (pending.shortText.trim()) node._shortText = pending.shortText.trim();
     else delete node._shortText;
   }
+
+  buildPatch(pending, _node) {
+    return { _shortText: pending.shortText.trim() || null };
+  }
 }
 
 ITEM_SECTIONS.push(new ShortTextSection());

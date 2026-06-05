@@ -41,6 +41,11 @@ class ReadOnlySection extends StatesSection {
   commit(pending, node) {
     if (node.type === 'item') node._readOnly = pending.draftReadOnly || undefined;
   }
+
+  buildPatch(pending, node) {
+    if (node.type !== 'item') return {};
+    return { _readOnly: pending.draftReadOnly || null };
+  }
 }
 
 STATES_SECTIONS.push(new ReadOnlySection());

@@ -24,8 +24,7 @@ class NoteModal extends Modal {
     if (!this._pending) return;
     const { node, noteLink, setActive } = this._pending;
     const v = this._pending.draftNote.trim();
-    if (v) node._designNote = v;
-    else   delete node._designNote;
+    node.applyPatch({ _designNote: v || null });
     setActive(noteLink, !!node._designNote);
     this._cancel();
   }

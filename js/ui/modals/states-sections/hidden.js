@@ -39,6 +39,10 @@ class HiddenSection extends StatesSection {
   commit(pending, node) {
     node._hidden = pending.draftHidden || undefined;
   }
+
+  buildPatch(pending, _node) {
+    return { _hidden: pending.draftHidden || null };
+  }
 }
 
 STATES_SECTIONS.push(new HiddenSection());

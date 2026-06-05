@@ -19,10 +19,15 @@ class StatesModal extends Modal {
     super.open();
   }
 
+  _buildPayload() {
+    const p = this._pending;
+    return Object.assign({}, ...STATES_SECTIONS.map(s => s.buildPatch(p, p.node)));
+  }
+
   _apply() {
     if (!this._pending) return;
     const { node, statesLink, setActive } = this._pending;
-    STATES_SECTIONS.forEach(s => s.commit(this._pending, node));
+    node.applyPatch(this._buildPayload());
     const anyActive = node.mandatory === true || !!node._readOnly || !!node._hidden || !!node._collapsible || !!node._usageMode || !!node._signatureRequired?.length;
     setActive(statesLink, anyActive);
     Modal._svc.triggerCalcRecalc();

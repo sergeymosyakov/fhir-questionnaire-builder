@@ -101,6 +101,14 @@ class DefinitionSection extends ItemSection {
     if (pending.fhirType.trim()) node._fhirType = pending.fhirType.trim();
     else delete node._fhirType;
   }
+
+  buildPatch(pending, _node) {
+    return {
+      _definition: pending.definition.trim() || null,
+      _baseType:   pending.baseType.trim()   || null,
+      _fhirType:   pending.fhirType.trim()   || null,
+    };
+  }
 }
 
 ITEM_SECTIONS.push(new DefinitionSection());

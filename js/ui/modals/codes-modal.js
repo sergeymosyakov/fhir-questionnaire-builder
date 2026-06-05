@@ -22,10 +22,15 @@ class CodesModal extends Modal {
     super.open();
   }
 
+  _buildPayload() {
+    const p = this._pending;
+    return Object.assign({}, ...ITEM_SECTIONS.map(s => s.buildPatch(p, p.node)));
+  }
+
   _apply() {
     if (!this._pending) return;
     const { node, link, setActive } = this._pending;
-    ITEM_SECTIONS.forEach(s => s.commit(this._pending, node));
+    node.applyPatch(this._buildPayload());
     const isActive = !!(node._codes?.length) || !!node._definition ||
                      !!(node._supportLinks?.length) || !!(node._unknownExtensions?.length) ||
                      !!node._shortText;

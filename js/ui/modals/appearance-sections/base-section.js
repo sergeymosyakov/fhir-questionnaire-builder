@@ -5,4 +5,6 @@ export class AppearanceSection extends Section {
   initPending(_node)      { return {}; }
   /** Write draft values back to the node on Apply. */
   commit(_pending, _node) {}
+  /** Return a patch object to apply to a node (null value = delete key). */
+  buildPatch(_pending, _node) { return {}; }
 }

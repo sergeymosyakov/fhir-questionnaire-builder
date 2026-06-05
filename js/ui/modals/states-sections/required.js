@@ -35,6 +35,10 @@ class RequiredSection extends StatesSection {
   commit(pending, node) {
     node.mandatory = pending.draftMandatory;
   }
+
+  buildPatch(pending, _node) {
+    return { mandatory: pending.draftMandatory };
+  }
 }
 
 STATES_SECTIONS.push(new RequiredSection());

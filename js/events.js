@@ -65,4 +65,10 @@ export const AppEvents = Object.freeze({
   // detail: { id: string, enabled: boolean }
   // 'id' matches Validator#id — dispatched by UI toggles; validators listen and set this.enabled
   VALIDATOR_TOGGLE:    'validator-toggle',
+
+  // ── Node patching ─────────────────────────────────────────────────────────
+  // detail: { ids: string[], patch: object }
+  // Dispatched by modals to copy current settings to other nodes.
+  // patch values: null = delete key from node, any other value = assign to node.
+  COPY_TO_NODES: 'copy-to-nodes',
 });

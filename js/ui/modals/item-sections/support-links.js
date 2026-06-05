@@ -63,6 +63,11 @@ class SupportLinksSection extends ItemSection {
     if (filtered.length) node._supportLinks = filtered;
     else delete node._supportLinks;
   }
+
+  buildPatch(pending, _node) {
+    const filtered = pending.supportLinks.filter(u => u.trim());
+    return { _supportLinks: filtered.length ? filtered : null };
+  }
 }
 
 ITEM_SECTIONS.push(new SupportLinksSection());

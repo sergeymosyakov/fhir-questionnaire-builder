@@ -24,6 +24,11 @@ class CodesSection extends ItemSection {
     if (filtered.length) node._codes = filtered;
     else delete node._codes;
   }
+
+  buildPatch(pending, _node) {
+    const filtered = pending.codes.filter(c => c.code.trim());
+    return { _codes: filtered.length ? filtered : null };
+  }
 }
 
 ITEM_SECTIONS.push(new CodesSection());

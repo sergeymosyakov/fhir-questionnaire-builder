@@ -37,6 +37,11 @@ class CollapsibleSection extends StatesSection {
   commit(pending, node) {
     if (node.type !== 'item') node._collapsible = pending.draftCollapsible || undefined;
   }
+
+  buildPatch(pending, node) {
+    if (node.type === 'item') return {};
+    return { _collapsible: pending.draftCollapsible || null };
+  }
 }
 
 STATES_SECTIONS.push(new CollapsibleSection());

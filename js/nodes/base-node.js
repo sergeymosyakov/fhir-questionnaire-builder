@@ -38,11 +38,25 @@ export class BaseNode {
       this._ac = new AbortController();
       this._initPreviewNavListener();
       document.addEventListener(AppEvents.REFRESH_CALC_BADGES, () => this._refreshCalcBadge?.(), { signal: this._ac.signal });
+      document.addEventListener(AppEvents.COPY_TO_NODES, e => {
+        if (e.detail.ids.includes(this.id)) this.applyPatch(e.detail.patch);
+      }, { signal: this._ac.signal });
     }
   }
 
   /** Abort all document listeners owned by this node. */
   destroy() { this._ac?.abort(); }
+
+  /**
+   * Apply a patch object to this node.
+   * null value = delete the key from node; any other value = assign to node.
+   */
+  applyPatch(patch) {
+    for (const [key, val] of Object.entries(patch)) {
+      if (val === null) delete this[key];
+      else this[key] = val;
+    }
+  }
 
   // ── Builder service injection ─────────────────────────────────────────────
   // Nodes must not import application state or services directly.

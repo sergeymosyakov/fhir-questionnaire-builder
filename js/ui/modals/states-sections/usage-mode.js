@@ -47,6 +47,10 @@ class UsageModeSection extends StatesSection {
       delete node._usageMode;
     }
   }
+
+  buildPatch(pending, _node) {
+    return { _usageMode: pending.draftUsageMode || null };
+  }
 }
 
 STATES_SECTIONS.push(new UsageModeSection());

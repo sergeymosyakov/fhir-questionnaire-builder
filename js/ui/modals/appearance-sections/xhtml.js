@@ -33,6 +33,10 @@ class XhtmlSection extends AppearanceSection {
   commit(pending, node) {
     node._renderXhtml = pending.draftXhtml || undefined;
   }
+
+  buildPatch(pending, _node) {
+    return { _renderXhtml: pending.draftXhtml || null };
+  }
 }
 
 APPEARANCE_SECTIONS.push(new XhtmlSection());

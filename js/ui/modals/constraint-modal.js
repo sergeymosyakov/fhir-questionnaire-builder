@@ -25,7 +25,7 @@ class ConstraintModal extends Modal {
   _apply() {
     if (!this._pending) return;
     const { node, draft, constraintLink, setActive } = this._pending;
-    node.constraint = draft;
+    node.applyPatch({ constraint: draft });
     setActive(constraintLink, draft.length > 0);
     Modal._svc.triggerCalcRecalc();
     this._cancel();

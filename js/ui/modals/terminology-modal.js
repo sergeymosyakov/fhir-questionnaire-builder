@@ -30,8 +30,7 @@ class TerminologyModal extends Modal {
     if (!this._pending) return;
     const { node, link, setActive } = this._pending;
     const v = this._pending.draftUrl.trim();
-    if (v) node._preferredTermServer = v;
-    else   delete node._preferredTermServer;
+    node.applyPatch({ _preferredTermServer: v || null });
     setActive(link, !!node._preferredTermServer);
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
     node._dispatchRerender();

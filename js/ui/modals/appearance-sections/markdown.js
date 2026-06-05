@@ -34,6 +34,10 @@ class MarkdownSection extends AppearanceSection {
     const v = pending.draftMarkdown.trim();
     if (v) node._renderMarkdown = v; else delete node._renderMarkdown;
   }
+
+  buildPatch(pending, _node) {
+    return { _renderMarkdown: pending.draftMarkdown.trim() || null };
+  }
 }
 
 APPEARANCE_SECTIONS.push(new MarkdownSection());
