@@ -65,7 +65,7 @@ const constraintModalBody   = (page) => page.locator('[data-testid="constraintMo
 test.describe('Constraint modal — open / close', () => {
   test('clicking "Constraint" action link opens the modal', async ({ page }) => {
     await freshStart(page);
-    await addTextItem(page);
+    await addTextItem(page, null);
 
     await page.locator('[data-node-id="1.1"]').getByTestId('action-constraint').click();
     await expect(constraintModal(page)).toBeVisible();
