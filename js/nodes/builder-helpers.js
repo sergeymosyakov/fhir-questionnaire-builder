@@ -28,10 +28,8 @@ export function buildInlineTitleEditor(node) {
     titleDisplay.style.display = 'none';
     titleTextarea.style.display = '';
     titleTextarea.style.height = Math.max(h, 48) + 'px';
-    requestAnimationFrame(() => {
-      titleTextarea.focus();
-      titleTextarea.setSelectionRange(titleTextarea.value.length, titleTextarea.value.length);
-    });
+    titleTextarea.focus();
+    titleTextarea.setSelectionRange(titleTextarea.value.length, titleTextarea.value.length);
   });
   titleRow.append(titleDisplay, titleTextarea);
   return { titleRow, titleDisplay, titleTextarea };

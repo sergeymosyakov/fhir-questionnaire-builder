@@ -443,9 +443,9 @@ export class BaseNode {
         const top = el.getBoundingClientRect().top
           - panel.getBoundingClientRect().top
           + panel.scrollTop - 10;
-        panel.scrollTo({ top, behavior: 'smooth' });
+        panel.scrollTo({ top, behavior: 'instant' });
       } else {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.scrollIntoView({ behavior: 'instant', block: 'start' });
       }
       el.classList.add('node-flash');
       setTimeout(() => el.classList.remove('node-flash'), 1000);
