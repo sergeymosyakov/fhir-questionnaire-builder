@@ -67,6 +67,13 @@ const modalCancel = (page) => page.locator('[data-testid="statesModalCancel"]');
 const modalApply  = (page) => page.locator('[data-testid="statesModalApply"]');
 const requiredSel = (page) => page.locator('[data-testid="states-required-sel"]');
 
+async function openStatesModal(page, nodeId = '1.1') {
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-states');
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(page.locator('[data-testid="statesModal"]')).toBeVisible();
+}
+
 // ── Open / close ──────────────────────────────────────────────────────────────
 
 test.describe('Required modal — open / close', () => {
@@ -74,7 +81,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await expect(modal(page)).toBeVisible();
   });
 
@@ -82,7 +89,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page, 'Smoking status');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await expect(modalTitle(page)).toContainText('States');
     await expect(modalTitle(page)).toContainText('Smoking status');
   });
@@ -91,7 +98,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await expect(requiredSel(page)).toBeVisible();
     await requiredSel(page).click();
     await expect(page.locator('[data-testid="csel-drop"] [data-val]')).toHaveCount(2);
@@ -102,7 +109,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await modalClose(page).click();
     await expect(modal(page)).toBeHidden();
   });
@@ -111,7 +118,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await modalCancel(page).click();
     await expect(modal(page)).toBeHidden();
   });
@@ -120,7 +127,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await page.keyboard.press('Escape');
     await expect(modal(page)).toBeHidden();
   });
@@ -129,7 +136,7 @@ test.describe('Required modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await modal(page).click({ position: { x: 5, y: 400 } });
     await expect(modal(page)).toBeHidden();
   });

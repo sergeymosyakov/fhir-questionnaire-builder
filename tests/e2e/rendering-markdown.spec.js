@@ -94,7 +94,9 @@ test.describe('rendering-markdown round-trip via Appearance modal', () => {
     await expect(page.locator('[data-node-id="1.1"]').getByTestId('action-type')).toBeVisible();
 
     // Open Appearance modal
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    const appLink = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
+    await expect(appLink).toBeVisible();
+    await appLink.click();
     await expect(page.locator('[data-testid="appearanceModal"]')).toBeVisible();
 
     // Fill markdown textarea
@@ -135,13 +137,17 @@ test.describe('rendering-markdown round-trip via Appearance modal', () => {
     await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
 
     // Set markdown
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    const appLink = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
+    await expect(appLink).toBeVisible();
+    await appLink.click();
     await page.getByTestId('appearance-markdown-input').fill('**Will be removed**');
     await page.locator('[data-testid="appearanceModalApply"]').click();
     await expect(page.locator('[data-preview-id="1.1"] strong')).toBeVisible();
 
     // Clear markdown
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    const appLink2 = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
+    await expect(appLink2).toBeVisible();
+    await appLink2.click();
     await page.getByTestId('appearance-markdown-input').fill('');
     await page.locator('[data-testid="appearanceModalApply"]').click();
     await expect(page.locator('[data-preview-id="1.1"] strong')).toHaveCount(0);

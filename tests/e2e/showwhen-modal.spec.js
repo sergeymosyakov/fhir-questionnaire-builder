@@ -59,6 +59,13 @@ const showWhenModalCancel = (page) => page.locator('[data-testid="showWhenModalC
 const showWhenModalApply  = (page) => page.locator('[data-testid="showWhenModalApply"]');
 const showWhenModalBody   = (page) => page.locator('[data-testid="showWhenModalBody"]');
 
+async function openShowWhenModal(page, nodeId = '1.1') {
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-vis');
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(page.locator('[data-testid="showWhenModal"]')).toBeVisible();
+}
+
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
 test.describe('Show When modal — open / close', () => {
@@ -66,7 +73,7 @@ test.describe('Show When modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-vis').click();
+    await openShowWhenModal(page);
     await expect(showWhenModal(page)).toBeVisible();
   });
 
@@ -74,7 +81,7 @@ test.describe('Show When modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page, 'Visible When');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-vis').click();
+    await openShowWhenModal(page);
     await expect(showWhenModalTitle(page)).toContainText('Show When');
     await expect(showWhenModalTitle(page)).toContainText('Visible When');
   });
@@ -83,7 +90,7 @@ test.describe('Show When modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-vis').click();
+    await openShowWhenModal(page);
     await expect(showWhenModal(page)).toBeVisible();
     await showWhenModalClose(page).click();
     await expect(showWhenModal(page)).not.toBeVisible();
@@ -93,7 +100,7 @@ test.describe('Show When modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-vis').click();
+    await openShowWhenModal(page);
     await expect(showWhenModal(page)).toBeVisible();
     await showWhenModalCancel(page).click();
     await expect(showWhenModal(page)).not.toBeVisible();
@@ -103,7 +110,7 @@ test.describe('Show When modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-vis').click();
+    await openShowWhenModal(page);
     await expect(showWhenModal(page)).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(showWhenModal(page)).not.toBeVisible();
@@ -113,7 +120,7 @@ test.describe('Show When modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-vis').click();
+    await openShowWhenModal(page);
     await expect(showWhenModal(page)).toBeVisible();
     await showWhenModal(page).click({ position: { x: 5, y: 5 } });
     await expect(showWhenModal(page)).not.toBeVisible();
@@ -125,7 +132,7 @@ test.describe('Show When modal — draft pattern', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-vis').click();
+    await openShowWhenModal(page);
     await expect(showWhenModalBody(page).getByText('+ Add condition')).toBeVisible();
   });
 

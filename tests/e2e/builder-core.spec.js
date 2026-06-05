@@ -187,6 +187,7 @@ test.describe('Builder → preview: delete group with children', () => {
 test.describe('Builder → preview: item type changes', () => {
   async function changeType(page, itemId, typeValue) {
     const node = page.locator(`[data-node-id="${itemId}"]`);
+    await expect(node.getByTestId('action-type')).toBeVisible();
     await node.getByTestId('action-type').click();
     const modal = page.locator('[data-testid="answerTypeModal"]');
     await expect(modal).toBeVisible();
@@ -348,6 +349,7 @@ test.describe('Builder creates items → preview reacts', () => {
     const itemId  = await addItemToGroup(page, groupId);
 
     const node = page.locator(`[data-node-id="${itemId}"]`);
+    await expect(node.getByTestId('action-type')).toBeVisible();
     await node.getByTestId('action-type').click();
     const atModal = page.locator('[data-testid="answerTypeModal"]');
     await expect(atModal).toBeVisible();
@@ -373,6 +375,7 @@ test.describe('Builder creates items → preview reacts', () => {
     await expect(previewRow.getByTestId('preview-required-star')).not.toBeVisible();
 
     // mark as required
+    await expect(node.getByTestId('action-states')).toBeVisible();
     await node.getByTestId('action-states').click();
     const reqModal = page.locator('[data-testid="statesModal"]');
     await expect(reqModal).toBeVisible();
@@ -384,6 +387,7 @@ test.describe('Builder creates items → preview reacts', () => {
     await expect(previewRow.getByTestId('preview-optional-badge')).not.toBeVisible();
 
     // mark back as optional
+    await expect(node.getByTestId('action-states')).toBeVisible();
     await node.getByTestId('action-states').click();
     await expect(reqModal).toBeVisible();
     await reqModal.locator('[data-testid="states-required-sel"]').click();

@@ -40,7 +40,9 @@ async function loadFixture(page) {
 }
 
 async function openPropsModal(page, nodeId) {
-  await page.locator(`[data-node-id="${nodeId}"] [data-testid="action-codes"]`).first().click();
+  const link = page.locator(`[data-node-id="${nodeId}"] [data-testid="action-codes"]`).first();
+  await expect(link).toBeVisible();
+  await link.click();
   await expect(page.locator('[data-testid="codesModal"]')).toBeVisible({ timeout: 3000 });
 }
 

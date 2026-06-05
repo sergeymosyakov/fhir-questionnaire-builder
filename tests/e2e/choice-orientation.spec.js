@@ -60,7 +60,9 @@ async function addRadioItem(page) {
 }
 
 async function openAnswerTypeModal(page, itemId) {
-  await page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type').click();
+  const link = page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type');
+  await expect(link).toBeVisible();
+  await link.click();
   await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
 }
 

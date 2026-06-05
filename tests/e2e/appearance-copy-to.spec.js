@@ -49,6 +49,7 @@ async function addItem(page, groupNodeId, title) {
 
   if (title) {
     const item = page.locator(`[data-node-id="${nodeId}"]`);
+    await expect(item.getByTestId('node-title-display')).toBeVisible();
     await item.getByTestId('node-title-display').click();
     await expect(item.getByTestId('node-title-input')).toBeVisible();
     await item.getByTestId('node-title-input').fill(title);
@@ -67,6 +68,7 @@ async function addSecondItem(page, groupNodeId, title) {
 
   if (title) {
     const item = page.locator(`[data-node-id="${nodeId}"]`);
+    await expect(item.getByTestId('node-title-display')).toBeVisible();
     await item.getByTestId('node-title-display').click();
     await expect(item.getByTestId('node-title-input')).toBeVisible();
     await item.getByTestId('node-title-input').fill(title);
@@ -88,6 +90,15 @@ const pickerSearch     = (page) => page.getByTestId('node-picker-search');
 const pickerConfirm    = (page) => page.getByTestId('node-picker-confirm');
 const pickerCb         = (page, id) => page.getByTestId(`node-picker-cb-${id}`);
 
+
+async function openAppearanceModal(page, nodeId = '1.1') {
+  const key = nodeId === '1' ? 'action-style' : 'action-appearance';
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId(key);
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(appearanceModal(page)).toBeVisible();
+}
+
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
 test.describe('"Copy to…" button', () => {
@@ -96,7 +107,7 @@ test.describe('"Copy to…" button', () => {
     await addGroup(page);
     await addItem(page, '1', 'Source');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await expect(copyToBtn(page)).toBeVisible();
     await expect(copyToBtn(page)).toHaveText('Copy to\u2026');
   });
@@ -106,7 +117,7 @@ test.describe('"Copy to…" button', () => {
     await addGroup(page);
     await addItem(page, '1', 'Source');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await copyToBtn(page).click();
     await expect(nodePickerModal(page)).toBeVisible();
   });
@@ -116,7 +127,7 @@ test.describe('"Copy to…" button', () => {
     await addGroup(page);
     await addItem(page, '1', 'Source');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await copyToBtn(page).click();
 
     const pickerZ = await nodePickerModal(page).evaluate(el => parseInt(getComputedStyle(el).zIndex, 10));
@@ -132,7 +143,7 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await copyToBtn(page).click();
     await expect(nodePickerModal(page)).toBeVisible();
 
@@ -148,7 +159,7 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await copyToBtn(page).click();
 
     await expect(pickerConfirm(page)).toBeDisabled();
@@ -160,7 +171,7 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await copyToBtn(page).click();
 
     await pickerCb(page, '1.2').check();
@@ -174,7 +185,7 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Alpha');
     await addSecondItem(page, '1', 'Beta');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await copyToBtn(page).click();
 
     await pickerSearch(page).fill('beta');
@@ -190,7 +201,9 @@ test.describe('Node Picker modal UI', () => {
     await addSecondItem(page, '1', 'Target');
 
     const sourceLink = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
+    await expect(sourceLink).toBeVisible();
     await sourceLink.click();
+    await expect(appearanceModal(page)).toBeVisible();
     await rawInput(page).fill('font-weight: bold');
     await copyToBtn(page).click();
 
@@ -212,7 +225,9 @@ test.describe('Copy to — apply behaviour', () => {
     await addSecondItem(page, '1', 'Target');
 
     const sourceLink = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
+    await expect(sourceLink).toBeVisible();
     await sourceLink.click();
+    await expect(appearanceModal(page)).toBeVisible();
     await rawInput(page).fill('font-weight: bold');
     await copyToBtn(page).click();
 
@@ -232,7 +247,7 @@ test.describe('Copy to — apply behaviour', () => {
     await addSecondItem(page, '1', 'Target');
 
     // Apply style to source, then copy to target
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await rawInput(page).fill('font-style: italic');
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();
@@ -243,7 +258,7 @@ test.describe('Copy to — apply behaviour', () => {
     await page.getByTestId('appearanceModalCancel').click();
 
     // Open target appearance modal and verify
-    await page.locator('[data-node-id="1.2"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page, '1.2');
     await expect(rawInput(page)).toHaveValue(/italic/);
   });
 
@@ -253,7 +268,7 @@ test.describe('Copy to — apply behaviour', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await rawInput(page).fill('font-weight: bold');
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();
@@ -270,7 +285,7 @@ test.describe('allowedType filtering', () => {
     await addItem(page, '1', 'Source');  // item id='1.1'
     await addSecondGroup(page);  // group id='2' — should be non-selectable
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await copyToBtn(page).click();
     await expect(nodePickerModal(page)).toBeVisible();
 
@@ -286,7 +301,7 @@ test.describe('allowedType filtering', () => {
     await addItem(page, '2', 'Other'); // item id='2.1' — should be non-selectable
 
     // Open Appearance modal on the group
-    await page.locator('[data-node-id="1"]').getByTestId('action-style').click();
+    await openAppearanceModal(page, '1');
     await copyToBtn(page).click();
     await expect(nodePickerModal(page)).toBeVisible();
 
@@ -305,7 +320,7 @@ test.describe('allowedType filtering', () => {
     await addSecondItem(page, '1', 'Target');
 
     // First copy a style to target
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await rawInput(page).fill('font-weight: bold');
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();

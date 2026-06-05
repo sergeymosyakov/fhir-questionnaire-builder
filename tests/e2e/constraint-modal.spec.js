@@ -60,6 +60,13 @@ const constraintModalCancel = (page) => page.locator('[data-testid="constraintMo
 const constraintModalApply  = (page) => page.locator('[data-testid="constraintModalApply"]');
 const constraintModalBody   = (page) => page.locator('[data-testid="constraintModalBody"]');
 
+async function openConstraintModal(page, nodeId = '1.1') {
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-constraint');
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(constraintModal(page)).toBeVisible();
+}
+
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
 test.describe('Constraint modal — open / close', () => {
@@ -67,7 +74,7 @@ test.describe('Constraint modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page, null);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-constraint').click();
+    await openConstraintModal(page);
     await expect(constraintModal(page)).toBeVisible();
   });
 
@@ -75,7 +82,7 @@ test.describe('Constraint modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page, 'Allergy Check');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-constraint').click();
+    await openConstraintModal(page);
     await expect(constraintModalTitle(page)).toContainText('Constraints');
     await expect(constraintModalTitle(page)).toContainText('Allergy Check');
   });
@@ -84,7 +91,7 @@ test.describe('Constraint modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-constraint').click();
+    await openConstraintModal(page);
     await expect(constraintModalBody(page)).toContainText('No constraints');
   });
 
@@ -92,7 +99,7 @@ test.describe('Constraint modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-constraint').click();
+    await openConstraintModal(page);
     await expect(constraintModal(page)).toBeVisible();
     await constraintModalClose(page).click();
     await expect(constraintModal(page)).not.toBeVisible();
@@ -102,7 +109,7 @@ test.describe('Constraint modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-constraint').click();
+    await openConstraintModal(page);
     await expect(constraintModal(page)).toBeVisible();
     await constraintModalCancel(page).click();
     await expect(constraintModal(page)).not.toBeVisible();
@@ -112,7 +119,7 @@ test.describe('Constraint modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-constraint').click();
+    await openConstraintModal(page);
     await expect(constraintModal(page)).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(constraintModal(page)).not.toBeVisible();
@@ -122,7 +129,7 @@ test.describe('Constraint modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-constraint').click();
+    await openConstraintModal(page);
     await expect(constraintModal(page)).toBeVisible();
     await constraintModal(page).click({ position: { x: 5, y: 5 } });
     await expect(constraintModal(page)).not.toBeVisible();
@@ -134,7 +141,7 @@ test.describe('Constraint modal — draft pattern', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-constraint').click();
+    await openConstraintModal(page);
     await constraintModalBody(page).getByText('+ Add constraint').click();
     await expect(constraintModalBody(page).locator('.constraint-card')).toHaveCount(1);
   });
@@ -144,7 +151,9 @@ test.describe('Constraint modal — draft pattern', () => {
     await addTextItem(page);
 
     const item = page.locator('[data-node-id="1.1"]');
+    await expect(item.getByTestId('action-constraint')).toBeVisible();
     await item.getByTestId('action-constraint').click();
+    await expect(constraintModal(page)).toBeVisible();
     await constraintModalBody(page).getByText('+ Add constraint').click();
     await constraintModalCancel(page).click();
 

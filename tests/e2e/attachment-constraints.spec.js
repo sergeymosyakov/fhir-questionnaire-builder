@@ -44,7 +44,9 @@ async function loadFixture(page) {
 }
 
 async function openAnswerTypeModal(page, nodeId) {
-  await page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type').click();
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type');
+  await expect(link).toBeVisible();
+  await link.click();
   await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
 }
 

@@ -115,7 +115,9 @@ test.describe('support-link — patient view', () => {
 
 test.describe('support-link — Props modal', () => {
   async function openPropsModal(page, nodeId) {
-    await page.locator(`[data-node-id="${nodeId}"] [data-testid="action-codes"]`).click();
+    const link = page.locator(`[data-node-id="${nodeId}"] [data-testid="action-codes"]`);
+    await expect(link).toBeVisible();
+    await link.click();
     await expect(page.locator('[data-testid="codesModal"]')).toBeVisible({ timeout: 3000 });
     // Expand the Support Links section if not already open
     const addBtn = page.getByTestId('support-link-add');

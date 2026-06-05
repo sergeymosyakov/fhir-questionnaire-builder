@@ -52,20 +52,27 @@ const noteCancel  = (page) => page.locator('[data-testid="designNoteModalCancel"
 const noteApply   = (page) => page.locator('[data-testid="designNoteModalApply"]');
 const noteInput   = (page) => page.getByTestId('design-note-input');
 
+async function openNoteModal(page, nodeId) {
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-note');
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(noteModal(page)).toBeVisible();
+}
+
 // ── Open / close ──────────────────────────────────────────────────────────────
 
 test.describe('note modal — open / close', () => {
   test('Note link opens the modal on an item', async ({ page }) => {
     await freshStart(page);
     const { itemId } = await addItem(page);
-    await page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-note').click();
+    await openNoteModal(page, itemId);
     await expect(noteModal(page)).toBeVisible();
   });
 
   test('modal title contains "Design Note"', async ({ page }) => {
     await freshStart(page);
     const { itemId } = await addItem(page);
-    await page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-note').click();
+    await openNoteModal(page, itemId);
     await expect(noteModal(page)).toBeVisible();
     await expect(noteTitle(page)).toContainText('Design Note');
   });
@@ -73,7 +80,7 @@ test.describe('note modal — open / close', () => {
   test('× button closes the modal', async ({ page }) => {
     await freshStart(page);
     const { itemId } = await addItem(page);
-    await page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-note').click();
+    await openNoteModal(page, itemId);
     await noteClose(page).click();
     await expect(noteModal(page)).toBeHidden();
   });
@@ -81,7 +88,7 @@ test.describe('note modal — open / close', () => {
   test('Cancel button closes the modal', async ({ page }) => {
     await freshStart(page);
     const { itemId } = await addItem(page);
-    await page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-note').click();
+    await openNoteModal(page, itemId);
     await noteCancel(page).click();
     await expect(noteModal(page)).toBeHidden();
   });
@@ -150,7 +157,7 @@ test.describe('note modal — export round-trip', () => {
   test('saved note is exported as designNote extension with valueMarkdown', async ({ page }) => {
     await freshStart(page);
     const { itemId } = await addItem(page);
-    await page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-note').click();
+    await openNoteModal(page, itemId);
     await noteInput(page).fill('Export test note.');
     await noteApply(page).click();
 
@@ -210,7 +217,10 @@ test.describe('note modal — import', () => {
       buffer: Buffer.from(JSON.stringify(fixture)),
     });
     await expect(page.locator('[data-node-id="q1"]')).toBeVisible({ timeout: 8_000 });
-    await page.locator('[data-node-id="q1"]').getByTestId('action-note').click();
+    const q1Link = page.locator('[data-node-id="q1"]').getByTestId('action-note');
+    await expect(q1Link).toBeVisible();
+    await q1Link.click();
+    await expect(noteModal(page)).toBeVisible();
     await expect(noteInput(page)).toHaveValue('Imported note text.');
     await noteCancel(page).click();
   });

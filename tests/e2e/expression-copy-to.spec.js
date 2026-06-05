@@ -47,6 +47,7 @@ async function addItem(page, groupNodeId, title) {
   await expect(page.locator(`[data-node-id="${nodeId}"]`)).toBeVisible();
   if (title) {
     const item = page.locator(`[data-node-id="${nodeId}"]`);
+    await expect(item.getByTestId('node-title-display')).toBeVisible();
     await item.getByTestId('node-title-display').click();
     await expect(item.getByTestId('node-title-input')).toBeVisible();
     await item.getByTestId('node-title-input').fill(title);
@@ -63,6 +64,7 @@ async function addSecondItem(page, groupNodeId, title) {
   await expect(page.locator(`[data-node-id="${nodeId}"]`)).toBeVisible();
   if (title) {
     const item = page.locator(`[data-node-id="${nodeId}"]`);
+    await expect(item.getByTestId('node-title-display')).toBeVisible();
     await item.getByTestId('node-title-display').click();
     await expect(item.getByTestId('node-title-input')).toBeVisible();
     await item.getByTestId('node-title-input').fill(title);
@@ -85,6 +87,13 @@ const pickerSearch    = (page) => page.getByTestId('node-picker-search');
 const pickerConfirm   = (page) => page.getByTestId('node-picker-confirm');
 const pickerCb        = (page, id) => page.getByTestId(`node-picker-cb-${id}`);
 
+async function openExprModal(page, nodeId = '1.1') {
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-expr');
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(exprModal(page)).toBeVisible();
+}
+
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
 test.describe('"Copy to…" button', () => {
@@ -93,7 +102,7 @@ test.describe('"Copy to…" button', () => {
     await addGroup(page);
     await addItem(page, '1', 'Source');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await expect(exprModal(page)).toBeVisible();
     await expect(copyToBtn(page)).toBeVisible();
     await expect(copyToBtn(page)).toHaveText('Copy to\u2026');
@@ -104,7 +113,7 @@ test.describe('"Copy to…" button', () => {
     await addGroup(page);
     await addItem(page, '1', 'Source');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await copyToBtn(page).click();
     await expect(nodePickerModal(page)).toBeVisible();
   });
@@ -114,7 +123,7 @@ test.describe('"Copy to…" button', () => {
     await addGroup(page);
     await addItem(page, '1', 'Source');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await copyToBtn(page).click();
 
     const pickerZ = await nodePickerModal(page).evaluate(el => parseInt(getComputedStyle(el).zIndex, 10));
@@ -130,7 +139,7 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await copyToBtn(page).click();
 
     await expect(pickerCb(page, '1.1')).not.toBeVisible();
@@ -143,7 +152,7 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await copyToBtn(page).click();
 
     await expect(pickerConfirm(page)).toBeDisabled();
@@ -155,7 +164,7 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await copyToBtn(page).click();
 
     await pickerCb(page, '1.2').check();
@@ -169,7 +178,7 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Alpha');
     await addSecondItem(page, '1', 'Beta');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await copyToBtn(page).click();
 
     await pickerSearch(page).fill('beta');
@@ -183,7 +192,7 @@ test.describe('Node Picker modal UI', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await calcTa(page).fill("%resource.item.where(linkId='q1').answer.value");
     await copyToBtn(page).click();
 
@@ -203,7 +212,7 @@ test.describe('Copy to — apply behaviour', () => {
     await addItem(page, '1', 'Source');
     await addSecondItem(page, '1', 'Target');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await calcTa(page).fill("%resource.item.where(linkId='q1').answer.value");
     await copyToBtn(page).click();
 
@@ -222,7 +231,7 @@ test.describe('Copy to — apply behaviour', () => {
     await addSecondItem(page, '1', 'Target');
 
     const expr = "%resource.item.where(linkId='score').answer.value";
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await calcTa(page).fill(expr);
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();
@@ -231,7 +240,7 @@ test.describe('Copy to — apply behaviour', () => {
 
     await page.getByTestId('expressionModalCancel').click();
 
-    await page.locator('[data-node-id="1.2"]').getByTestId('action-expr').click();
+    await openExprModal(page, '1.2');
     await expect(calcTa(page)).toHaveValue(expr);
   });
 
@@ -242,7 +251,7 @@ test.describe('Copy to — apply behaviour', () => {
     await addSecondItem(page, '1', 'Target');
 
     const expr = "%resource.item.where(linkId='q2').answer.value";
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await calcTa(page).fill(expr);
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();
@@ -260,7 +269,7 @@ test.describe('Copy to — apply behaviour', () => {
     const expr = "%resource.item.where(linkId='q3').answer.value";
 
     // First copy expression to target
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await calcTa(page).fill(expr);
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();
@@ -284,7 +293,7 @@ test.describe('allowedType filtering', () => {
     await addItem(page, '1', 'Source'); // item id='1.1'
     await addSecondGroup(page);       // group id='2' — should be non-selectable
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await copyToBtn(page).click();
     await expect(nodePickerModal(page)).toBeVisible();
 
@@ -303,7 +312,7 @@ test.describe('allowedType filtering', () => {
     const calc = "%resource.item.where(linkId='q4').answer.value";
     const init = '%age > 18';
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-expr').click();
+    await openExprModal(page);
     await calcTa(page).fill(calc);
     await initTa(page).fill(init);
     await copyToBtn(page).click();
@@ -313,7 +322,7 @@ test.describe('allowedType filtering', () => {
 
     await page.getByTestId('expressionModalCancel').click();
 
-    await page.locator('[data-node-id="1.2"]').getByTestId('action-expr').click();
+    await openExprModal(page, '1.2');
     await expect(calcTa(page)).toHaveValue(calc);
     await expect(initTa(page)).toHaveValue(init);
   });

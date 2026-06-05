@@ -63,13 +63,20 @@ const reqSel      = (page) => page.locator('[data-testid="states-required-sel"]'
 const roChk       = (page) => page.locator('[data-testid="states-readonly-chk"]');
 const hidChk      = (page) => page.locator('[data-testid="states-hidden-chk"]');
 
+async function openStatesModal(page, nodeId = '1.1') {
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-states');
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(page.locator('[data-testid="statesModal"]')).toBeVisible();
+}
+
 // ── open / close ──────────────────────────────────────────────────────────────
 
 test.describe('States modal — open / close', () => {
   test('clicking "States" on an item opens the modal', async ({ page }) => {
     await freshStart(page);
     await addGroupAndItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await expect(modal(page)).toBeVisible();
   });
 
@@ -83,15 +90,16 @@ test.describe('States modal — open / close', () => {
     await item.getByTestId('node-title-input').fill('Blood pressure');
     await item.getByTestId('node-title-input').blur();
 
+    await expect(item.getByTestId('action-states')).toBeVisible();
     await item.getByTestId('action-states').click();
-    await expect(modalTitle(page)).toContainText('States');
+    await expect(modal(page)).toBeVisible();
     await expect(modalTitle(page)).toContainText('Blood pressure');
   });
 
   test('close via × button hides the modal', async ({ page }) => {
     await freshStart(page);
     await addGroupAndItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await modalClose(page).click();
     await expect(modal(page)).toBeHidden();
   });
@@ -99,7 +107,7 @@ test.describe('States modal — open / close', () => {
   test('close via Cancel hides the modal', async ({ page }) => {
     await freshStart(page);
     await addGroupAndItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await modalCancel(page).click();
     await expect(modal(page)).toBeHidden();
   });
@@ -107,7 +115,7 @@ test.describe('States modal — open / close', () => {
   test('close via Escape hides the modal', async ({ page }) => {
     await freshStart(page);
     await addGroupAndItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await page.keyboard.press('Escape');
     await expect(modal(page)).toBeHidden();
   });
@@ -119,7 +127,7 @@ test.describe('States modal — item layout', () => {
   test('shows Required select, Read-only checkbox, and Hidden checkbox for items', async ({ page }) => {
     await freshStart(page);
     await addGroupAndItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await expect(modal(page)).toBeVisible();
     await expect(reqSel(page)).toBeVisible();
     await expect(roChk(page)).toBeVisible();
@@ -129,7 +137,7 @@ test.describe('States modal — item layout', () => {
   test('Required select has 2 options (Yes/No)', async ({ page }) => {
     await freshStart(page);
     await addGroupAndItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await openStatesModal(page);
     await expect(modal(page)).toBeVisible();
     await reqSel(page).click();
     await expect(page.locator('[data-testid="csel-drop"] [data-val]')).toHaveCount(2);
@@ -145,7 +153,9 @@ test.describe('States modal — group layout', () => {
     await page.getByTestId('add-root-group-btn').click();
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
-    await page.locator('[data-node-id="1"]').getByTestId('action-states').click();
+    const groupLink = page.locator('[data-node-id="1"]').getByTestId('action-states');
+    await expect(groupLink).toBeVisible();
+    await groupLink.click();
     await expect(modal(page)).toBeVisible();
     await expect(reqSel(page)).toBeVisible();
     await expect(hidChk(page)).toBeVisible();

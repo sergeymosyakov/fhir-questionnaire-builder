@@ -61,6 +61,13 @@ const appearanceModalCancel = (page) => page.locator('[data-testid="appearanceMo
 const appearanceModalApply  = (page) => page.locator('[data-testid="appearanceModalApply"]');
 const rawInput              = (page) => page.getByTestId('appearance-raw-input');
 
+async function openAppearanceModal(page, nodeId = '1.1') {
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-appearance');
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(appearanceModal(page)).toBeVisible();
+}
+
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
 test.describe('Appearance modal — open / close', () => {
@@ -68,7 +75,7 @@ test.describe('Appearance modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await expect(appearanceModal(page)).toBeVisible();
   });
 
@@ -76,7 +83,7 @@ test.describe('Appearance modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page, 'Question Title');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await expect(appearanceModalTitle(page)).toContainText('Appearance');
     await expect(appearanceModalTitle(page)).toContainText('Question Title');
   });
@@ -84,7 +91,7 @@ test.describe('Appearance modal — open / close', () => {
   test('× button closes the modal', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await appearanceModalClose(page).click();
     await expect(appearanceModal(page)).not.toBeVisible();
   });
@@ -92,7 +99,7 @@ test.describe('Appearance modal — open / close', () => {
   test('Cancel closes the modal', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await appearanceModalCancel(page).click();
     await expect(appearanceModal(page)).not.toBeVisible();
   });
@@ -100,7 +107,7 @@ test.describe('Appearance modal — open / close', () => {
   test('Escape closes the modal', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await page.keyboard.press('Escape');
     await expect(appearanceModal(page)).not.toBeVisible();
   });
@@ -108,7 +115,7 @@ test.describe('Appearance modal — open / close', () => {
   test('backdrop click closes the modal', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
     await appearanceModal(page).click({ position: { x: 5, y: 5 } });
     await expect(appearanceModal(page)).not.toBeVisible();
   });
@@ -118,7 +125,7 @@ test.describe('Appearance modal — raw CSS textarea', () => {
   test('raw CSS textarea is rendered as <textarea>', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
 
     const el = rawInput(page);
     await expect(el).toBeVisible();
@@ -130,7 +137,7 @@ test.describe('Appearance modal — raw CSS textarea', () => {
   test('raw CSS textarea has rows=1 by default', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
 
     const rows = await rawInput(page).evaluate(n => n.rows);
     expect(rows).toBe(1);
@@ -139,7 +146,7 @@ test.describe('Appearance modal — raw CSS textarea', () => {
   test('raw CSS textarea is resizable', async ({ page }) => {
     await freshStart(page);
     await addTextItem(page);
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
 
     const resize = await rawInput(page).evaluate(n => getComputedStyle(n).resize);
     expect(resize).not.toBe('none');
@@ -152,7 +159,9 @@ test.describe('Appearance modal — draft pattern', () => {
     await addTextItem(page);
 
     const link = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
+    await expect(link).toBeVisible();
     await link.click();
+    await expect(appearanceModal(page)).toBeVisible();
     await rawInput(page).fill('font-weight: bold');
     await appearanceModalCancel(page).click();
 
@@ -166,6 +175,7 @@ test.describe('Appearance modal — draft pattern', () => {
     await addTextItem(page);
 
     const link = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
+    await expect(link).toBeVisible();
     await expect(link).not.toHaveClass(/action-edit--active/);
 
     await link.click();
@@ -179,7 +189,7 @@ test.describe('Appearance modal — draft pattern', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    await openAppearanceModal(page);
 
     // Click the Bold checkbox (use click to trigger DOM change event)
     const boldCb = page.locator('[data-testid="appearanceModalBody"] input[type="checkbox"]').first();
@@ -200,6 +210,7 @@ test.describe('Appearance modal — draft pattern', () => {
     await addTextItem(page);
 
     const link = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
+    await expect(link).toBeVisible();
 
     // Set a style first
     await link.click();

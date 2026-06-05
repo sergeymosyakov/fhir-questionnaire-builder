@@ -77,7 +77,9 @@ test.describe('rendering-xhtml round-trip via Appearance modal', () => {
     await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
 
     // Open Appearance modal
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-appearance').click();
+    const appLink = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
+    await expect(appLink).toBeVisible();
+    await appLink.click();
     await expect(page.locator('[data-testid="appearanceModal"]')).toBeVisible();
 
     // Type XHTML into the xhtml textarea

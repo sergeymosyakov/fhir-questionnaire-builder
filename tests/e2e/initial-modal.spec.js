@@ -61,6 +61,13 @@ const initialModalClose = (page) => page.locator('[data-testid="initialModalClos
 const initialModalCancel = (page) => page.locator('[data-testid="initialModalCancel"]');
 const initialModalApply  = (page) => page.locator('[data-testid="initialModalApply"]');
 
+async function openInitialModal(page, nodeId = '1.1') {
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-default');
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(page.locator('[data-testid="initialModal"]')).toBeVisible();
+}
+
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
 test.describe('Default Value modal — open / close', () => {
@@ -68,7 +75,7 @@ test.describe('Default Value modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-default').click();
+    await openInitialModal(page);
     await expect(initialModal(page)).toBeVisible();
   });
 
@@ -76,7 +83,7 @@ test.describe('Default Value modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page, 'Birth Date');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-default').click();
+    await openInitialModal(page);
     await expect(initialModalTitle(page)).toContainText('Default Value');
     await expect(initialModalTitle(page)).toContainText('Birth Date');
   });
@@ -85,7 +92,7 @@ test.describe('Default Value modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-default').click();
+    await openInitialModal(page);
     await expect(initialModal(page)).toBeVisible();
     await initialModalClose(page).click();
     await expect(initialModal(page)).not.toBeVisible();
@@ -95,7 +102,7 @@ test.describe('Default Value modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-default').click();
+    await openInitialModal(page);
     await expect(initialModal(page)).toBeVisible();
     await initialModalCancel(page).click();
     await expect(initialModal(page)).not.toBeVisible();
@@ -105,7 +112,7 @@ test.describe('Default Value modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-default').click();
+    await openInitialModal(page);
     await expect(initialModal(page)).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(initialModal(page)).not.toBeVisible();
@@ -115,7 +122,7 @@ test.describe('Default Value modal — open / close', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-default').click();
+    await openInitialModal(page);
     await expect(initialModal(page)).toBeVisible();
     await initialModal(page).click({ position: { x: 5, y: 5 } });
     await expect(initialModal(page)).not.toBeVisible();
@@ -128,7 +135,9 @@ test.describe('Default Value modal — draft pattern', () => {
     await addTextItem(page);
 
     const item = page.locator('[data-node-id="1.1"]');
+    await expect(item.getByTestId('action-default')).toBeVisible();
     await item.getByTestId('action-default').click();
+    await expect(page.locator('[data-testid="initialModal"]')).toBeVisible();
 
     // Type a value and cancel
     const input = page.locator('[data-testid="initialModalBody"] input, [data-testid="initialModalBody"] textarea').first();
@@ -144,7 +153,7 @@ test.describe('Default Value modal — draft pattern', () => {
     await freshStart(page);
     await addTextItem(page);
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-default').click();
+    await openInitialModal(page);
 
     const input = page.locator('[data-testid="initialModalBody"] input, [data-testid="initialModalBody"] textarea').first();
     await input.fill('hello world');
@@ -219,7 +228,7 @@ test.describe('Default Value modal — not applicable types', () => {
     await addTextItem(page);
     await changeType(page, '1.1', 'display');
 
-    await page.locator('[data-node-id="1.1"]').getByTestId('action-default').click();
+    await openInitialModal(page);
     await expect(initialModal(page)).toBeVisible();
     await expect(page.locator('[data-testid="initialModalBody"]')).toContainText('Not applicable');
     await initialModalApply(page).click();
