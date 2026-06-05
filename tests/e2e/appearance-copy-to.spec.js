@@ -40,7 +40,7 @@ async function addGroup(page) {
 async function addItem(page, groupNodeId, title) {
   const group = page.locator(`[data-node-id="${groupNodeId}"]`);
   await group.getByTestId('group-add-btn').click();
-  await page.locator('[data-testid="add-menu-item"]').first().click();
+  await page.locator('[data-testid="add-menu-item"]').filter({ visible: true }).first().click();
   // Wait for the item to appear — find the last child of the group
   // (simple: just wait for any new node with data-node-id containing groupNodeId.)
   const nodeId = groupNodeId + '.1';
@@ -60,7 +60,7 @@ async function addItem(page, groupNodeId, title) {
 async function addSecondItem(page, groupNodeId, title) {
   const group = page.locator(`[data-node-id="${groupNodeId}"]`);
   await group.getByTestId('group-add-btn').click();
-  await page.locator('[data-testid="add-menu-item"]').first().click();
+  await page.locator('[data-testid="add-menu-item"]').filter({ visible: true }).first().click();
   const nodeId = groupNodeId + '.2';
   await expect(page.locator(`[data-node-id="${nodeId}"]`)).toBeVisible();
 
