@@ -120,6 +120,7 @@ test.describe('States modal — item layout', () => {
     await freshStart(page);
     await addGroupAndItem(page);
     await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await expect(modal(page)).toBeVisible();
     await expect(reqSel(page)).toBeVisible();
     await expect(roChk(page)).toBeVisible();
     await expect(hidChk(page)).toBeVisible();
@@ -129,6 +130,7 @@ test.describe('States modal — item layout', () => {
     await freshStart(page);
     await addGroupAndItem(page);
     await page.locator('[data-node-id="1.1"]').getByTestId('action-states').click();
+    await expect(modal(page)).toBeVisible();
     await reqSel(page).click();
     await expect(page.locator('[data-testid="csel-drop"] [data-val]')).toHaveCount(2);
     await page.keyboard.press('Escape');
@@ -159,6 +161,7 @@ test.describe('States modal — Read-only', () => {
     await addGroupAndItem(page);
     const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await roChk(page).check();
     await modalApply(page).click();
     await expect(modal(page)).toBeHidden();
@@ -170,6 +173,7 @@ test.describe('States modal — Read-only', () => {
     await addGroupAndItem(page);
     const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await roChk(page).check();
     await modalCancel(page).click();
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
@@ -181,10 +185,12 @@ test.describe('States modal — Read-only', () => {
     const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
 
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await roChk(page).check();
     await modalApply(page).click();
 
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await expect(roChk(page)).toBeChecked();
     await modalCancel(page).click();
   });
@@ -196,12 +202,14 @@ test.describe('States modal — Read-only', () => {
 
     // First: set Read-only
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await roChk(page).check();
     await modalApply(page).click();
     await expect(actionLink).toHaveClass(/action-edit--active/);
 
     // Then: uncheck Read-only
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await roChk(page).uncheck();
     await modalApply(page).click();
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
@@ -216,6 +224,7 @@ test.describe('States modal — Hidden', () => {
     await addGroupAndItem(page);
     const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await hidChk(page).check();
     await modalApply(page).click();
     await expect(modal(page)).toBeHidden();
@@ -227,6 +236,7 @@ test.describe('States modal — Hidden', () => {
     await addGroupAndItem(page);
     const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await hidChk(page).check();
     await modalCancel(page).click();
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
@@ -238,10 +248,12 @@ test.describe('States modal — Hidden', () => {
     const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
 
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await hidChk(page).check();
     await modalApply(page).click();
 
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await expect(hidChk(page)).toBeChecked();
     await modalCancel(page).click();
   });
@@ -251,6 +263,7 @@ test.describe('States modal — Hidden', () => {
     await addGroupAndItem(page);
     const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await hidChk(page).check();
     await modalApply(page).click();
     await expect(page.locator('[data-preview-id="1.1"]')).toHaveClass(/lform-item--hidden/);
@@ -265,6 +278,7 @@ test.describe('States modal — combined states', () => {
     await addGroupAndItem(page);
     const actionLink = page.locator('[data-node-id="1.1"]').getByTestId('action-states');
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await selectCustomOpt(page, reqSel(page), 'true');
     await hidChk(page).check();
     await modalApply(page).click();
@@ -278,6 +292,7 @@ test.describe('States modal — combined states', () => {
 
     // Set Required=true and Hidden
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await selectCustomOpt(page, reqSel(page), 'true');
     await hidChk(page).check();
     await modalApply(page).click();
@@ -285,6 +300,7 @@ test.describe('States modal — combined states', () => {
 
     // Clear both
     await actionLink.click();
+    await expect(modal(page)).toBeVisible();
     await selectCustomOpt(page, reqSel(page), 'false');
     await hidChk(page).uncheck();
     await modalApply(page).click();
