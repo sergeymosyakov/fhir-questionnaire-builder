@@ -374,9 +374,7 @@ export class GroupNode extends BaseNode {
         BaseNode.notifyChanged();
         GroupNode._collapseMap.set(node.id, false);
         node._dispatchRerender();
-        requestAnimationFrame(() => {
-          document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: newNode.id } }));
-        });
+        document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: newNode.id } }));
       }
     );
 
