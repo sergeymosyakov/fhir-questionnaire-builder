@@ -48,7 +48,7 @@ async function addItem(page, groupNodeId, title) {
     const item = page.locator(`[data-node-id="${nodeId}"]`);
     await expect(item.getByTestId('node-title-display')).toBeVisible();
     await item.getByTestId('node-title-display').click();
-    await expect(item.getByTestId('node-title-input')).toBeVisible();
+    await expect(item.getByTestId('node-title-display')).not.toBeVisible();
     await item.getByTestId('node-title-input').fill(title);
     await item.getByTestId('node-title-input').blur();
   }
@@ -65,7 +65,7 @@ async function addSecondItem(page, groupNodeId, title) {
     const item = page.locator(`[data-node-id="${nodeId}"]`);
     await expect(item.getByTestId('node-title-display')).toBeVisible();
     await item.getByTestId('node-title-display').click();
-    await expect(item.getByTestId('node-title-input')).toBeVisible();
+    await expect(item.getByTestId('node-title-display')).not.toBeVisible();
     await item.getByTestId('node-title-input').fill(title);
     await item.getByTestId('node-title-input').blur();
   }

@@ -12,11 +12,17 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 - [ ] **Performance regression test** — automated test with 200–300 item questionnaire covering deep nesting (depth 6–8), heavy `enableWhen`, and multiple `calculatedExpression` chains; assert render time stays under threshold
 
+- [ ] **FHIR R4 / R5 target selection** — `questMeta.fhirTarget: 'R4' | 'R5'` toggle in Properties modal; export writes `disabledDisplay` and `answerConstraint` as native fields (R5) or extension backports (R4); `meta.fhirVersion` set to `"5.0.0"` when R5; SDC profile URL versioned accordingly; import auto-detects from `meta.fhirVersion`; HAPI validator switches endpoint to `baseR5` when R5 target active. Approach: option (A) — clean per-spec, no double-writing.
+
 ## Technical Debt
 
 *(No current items.)*
 
 ## Later
+
+- [ ] **FHIR R4 / R5 target selection** — `questMeta.fhirTarget: 'R4' | 'R5'` toggle in Properties modal; export writes `disabledDisplay` and `answerConstraint` as native fields (R5) or extension backports (R4); `meta.fhirVersion` set to `"5.0.0"` when R5; SDC profile URL versioned accordingly; import auto-detects from `meta.fhirVersion`; HAPI validator switches endpoint to `baseR5` when R5 target active. Approach: option (A) — clean per-spec, no double-writing.
+
+- [ ] **REDCap import → FHIR** — convert REDCap Data Dictionary CSV to FHIR Questionnaire; client-side only; targets clinical research community (REDCap is dominant in trials); no server required.
 
 - [ ] **Sub-questionnaire / modular questionnaires** — SDC `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-subQuestionnaire`; requires FHIR server for resolution; out of scope until server integration exists
 - [ ] **item.definition + StructureDefinition auto-population** — resolve `item.definition` URL against a FHIR server and auto-fill `text`, `type`, `baseType`, `fhirType` from the element; prerequisite: server integration
