@@ -504,7 +504,7 @@ export class ItemNode extends BaseNode {
     setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
     setActive(styleLink,      !!(node._renderStyle || node._renderXhtml));
     setActive(constraintLink, !!(node.constraint?.length));
-    setActive(codesLink,      !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.some(u => u)));
+    setActive(codesLink,      !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.some(u => u)) || !!node._shortText);
     setActive(termLink,        !!node._preferredTermServer);
 
     wrapper.appendChild(div);

@@ -440,7 +440,7 @@ export class GroupNode extends BaseNode {
     setActive(exprLink,   !!node._calculatedExpr);
     setActive(styleLink,  !!(node._renderStyle || node._renderXhtml));
     setActive(statesLink, node.mandatory === true || !!node._hidden || !!node._collapsible || !!node._usageMode || !!node._signatureRequired?.length);
-    setActive(propsLink,  !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length));
+    setActive(propsLink,  !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length) || !!node._shortText);
 
     const body = document.createElement('div');
     body.className = 'node-body';
