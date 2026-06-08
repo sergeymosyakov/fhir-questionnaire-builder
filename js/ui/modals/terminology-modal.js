@@ -6,6 +6,7 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import { terminologyService } from '../../fhir/terminology-service.js';
 import { AppEvents } from '../../events.js';
+import { nodePickerModal } from './node-picker-modal.js';
 
 const PREF_TERM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer';
 
@@ -15,6 +16,14 @@ class TerminologyModal extends Modal {
     super();
     this._pending = null;
     MODAL_REGISTRY.set('terminology', this);
+
+    this._copyToBtn = document.createElement('button');
+    this._copyToBtn.type = 'button';
+    this._copyToBtn.className = 'modal-btn modal-btn--copy-to';
+    this._copyToBtn.textContent = 'Copy to\u2026';
+    this._copyToBtn.dataset.testid = 'terminology-copy-to-btn';
+    this._copyToBtn.addEventListener('click', () => this._openCopyTo());
+    this.footer.insertBefore(this._copyToBtn, this.footer.firstChild);
   }
 
   open(node, link, setActive) {
@@ -35,6 +44,23 @@ class TerminologyModal extends Modal {
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
     node._dispatchRerender();
     this._cancel();
+  }
+
+  _buildPayload() {
+    return { _preferredTermServer: this._pending.draftUrl.trim() || null };
+  }
+
+  _openCopyTo() {
+    if (!this._pending) return;
+    const patch = this._buildPayload();
+    const { node } = this._pending;
+    // allowedType='item' — terminology server is an item-only action
+    nodePickerModal.open(node.id, (ids) => {
+      document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
+        detail: { ids, patch, nodeType: 'item' },
+      }));
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+    }, 'item');
   }
 
   _cancel() {

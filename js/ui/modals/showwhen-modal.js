@@ -6,6 +6,8 @@ import { Modal } from './modal-base.js';
 import { ExprAwareModal } from './expr-aware-modal.js';
 import { createCustomSelect } from '../custom-select.js';
 import { buildVisPanel } from '../../builder/panels.js';
+import { nodePickerModal } from './node-picker-modal.js';
+import { AppEvents } from '../../events.js';
 
 class ShowWhenModal extends ExprAwareModal {
   getName() { return 'showWhenModal'; }
@@ -13,6 +15,14 @@ class ShowWhenModal extends ExprAwareModal {
     super();
     this._pending = null;
     MODAL_REGISTRY.set('showWhen', this);
+
+    this._copyToBtn = document.createElement('button');
+    this._copyToBtn.type = 'button';
+    this._copyToBtn.className = 'modal-btn modal-btn--copy-to';
+    this._copyToBtn.textContent = 'Copy to\u2026';
+    this._copyToBtn.dataset.testid = 'showwhen-copy-to-btn';
+    this._copyToBtn.addEventListener('click', () => this._openCopyTo());
+    this.footer.insertBefore(this._copyToBtn, this.footer.firstChild);
   }
 
   open(node, visLink, setActive) {
@@ -66,6 +76,32 @@ class ShowWhenModal extends ExprAwareModal {
     setActive(visLink, node.enableWhen.length > 0 || !!node.enableWhenExpression);
     Modal._svc.triggerCalcRecalc();
     this._cancel();
+  }
+
+  _buildPayload() {
+    const { draft } = this._pending;
+    return {
+      enableWhen:           JSON.parse(JSON.stringify(draft.enableWhen)),
+      enableBehavior:       draft.enableBehavior,
+      enableWhenExpression: draft.enableWhenExpression || null,
+      _disabledDisplay:     (draft._disabledDisplay && draft._disabledDisplay !== 'protected')
+        ? draft._disabledDisplay
+        : null,
+    };
+  }
+
+  _openCopyTo() {
+    if (!this._pending) return;
+    const patch = this._buildPayload();
+    const { node } = this._pending;
+    // allowedType=null — enableWhen applies to both items and groups
+    nodePickerModal.open(node.id, (ids) => {
+      document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
+        detail: { ids, patch, nodeType: null },
+      }));
+      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+    }, null);
   }
 
   _cancel() {
