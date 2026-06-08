@@ -3,6 +3,8 @@
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import { ITEM_SECTIONS, renderItemSections } from './item-sections/index.js';
+import { nodePickerModal } from './node-picker-modal.js';
+import { AppEvents } from '../../events.js';
 
 class CodesModal extends Modal {
   getName() { return 'codesModal'; }
@@ -10,6 +12,14 @@ class CodesModal extends Modal {
     super();
     this._pending = null;
     MODAL_REGISTRY.set('codes', this);
+
+    this._copyToBtn = document.createElement('button');
+    this._copyToBtn.type = 'button';
+    this._copyToBtn.className = 'modal-btn modal-btn--copy-to';
+    this._copyToBtn.textContent = 'Copy to\u2026';
+    this._copyToBtn.dataset.testid = 'codes-copy-to-btn';
+    this._copyToBtn.addEventListener('click', () => this._openCopyTo());
+    this.footer.insertBefore(this._copyToBtn, this.footer.firstChild);
   }
 
   open(node, link, setActive) {
@@ -25,6 +35,19 @@ class CodesModal extends Modal {
   _buildPayload() {
     const p = this._pending;
     return Object.assign({}, ...ITEM_SECTIONS.map(s => s.buildPatch(p, p.node)));
+  }
+
+  _openCopyTo() {
+    if (!this._pending) return;
+    const patch = this._buildPayload();
+    const { node } = this._pending;
+    nodePickerModal.open(node.id, (ids) => {
+      document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
+        detail: { ids, patch, nodeType: node.type },
+      }));
+      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+    }, node.type);
   }
 
   _apply() {

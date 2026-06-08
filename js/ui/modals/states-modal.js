@@ -2,6 +2,8 @@
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import { STATES_SECTIONS, renderStatesSections } from './states-sections/index.js';
+import { nodePickerModal } from './node-picker-modal.js';
+import { AppEvents } from '../../events.js';
 
 class StatesModal extends Modal {
   getName() { return 'statesModal'; }
@@ -9,6 +11,14 @@ class StatesModal extends Modal {
     super({ maxWidth: '380px' });
     this._pending = null;
     MODAL_REGISTRY.set('states', this);
+
+    this._copyToBtn = document.createElement('button');
+    this._copyToBtn.type = 'button';
+    this._copyToBtn.className = 'modal-btn modal-btn--copy-to';
+    this._copyToBtn.textContent = 'Copy to\u2026';
+    this._copyToBtn.dataset.testid = 'states-copy-to-btn';
+    this._copyToBtn.addEventListener('click', () => this._openCopyTo());
+    this.footer.insertBefore(this._copyToBtn, this.footer.firstChild);
   }
 
   open(node, statesLink, setActive) {
@@ -22,6 +32,19 @@ class StatesModal extends Modal {
   _buildPayload() {
     const p = this._pending;
     return Object.assign({}, ...STATES_SECTIONS.map(s => s.buildPatch(p, p.node)));
+  }
+
+  _openCopyTo() {
+    if (!this._pending) return;
+    const patch = this._buildPayload();
+    const { node } = this._pending;
+    nodePickerModal.open(node.id, (ids) => {
+      document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
+        detail: { ids, patch, nodeType: node.type },
+      }));
+      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+    }, node.type);
   }
 
   _apply() {

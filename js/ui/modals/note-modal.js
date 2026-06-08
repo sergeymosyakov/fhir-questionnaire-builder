@@ -2,6 +2,8 @@
 // Centered modal for editing node._designNote (FHIR designNote extension).
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
+import { nodePickerModal } from './node-picker-modal.js';
+import { AppEvents } from '../../events.js';
 
 class NoteModal extends Modal {
   getName() { return 'designNoteModal'; }
@@ -9,6 +11,14 @@ class NoteModal extends Modal {
     super();
     this._pending = null;
     MODAL_REGISTRY.set('note', this);
+
+    this._copyToBtn = document.createElement('button');
+    this._copyToBtn.type = 'button';
+    this._copyToBtn.className = 'modal-btn modal-btn--copy-to';
+    this._copyToBtn.textContent = 'Copy to\u2026';
+    this._copyToBtn.dataset.testid = 'note-copy-to-btn';
+    this._copyToBtn.addEventListener('click', () => this._openCopyTo());
+    this.footer.insertBefore(this._copyToBtn, this.footer.firstChild);
   }
 
   open(node, noteLink, setActive) {
@@ -18,6 +28,24 @@ class NoteModal extends Modal {
     this._renderBody();
     super.open();
     this.body.querySelector('textarea')?.focus();
+  }
+
+  _buildPayload() {
+    const v = this._pending.draftNote.trim();
+    return { _designNote: v || null };
+  }
+
+  _openCopyTo() {
+    if (!this._pending) return;
+    const patch = this._buildPayload();
+    const { node } = this._pending;
+    // allowedType=null — design notes apply to both items and groups
+    nodePickerModal.open(node.id, (ids) => {
+      document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
+        detail: { ids, patch, nodeType: null },
+      }));
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+    }, null);
   }
 
   _apply() {
