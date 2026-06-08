@@ -3,6 +3,8 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import * as explainModal from './explain-modal.js';
 import { createCustomSelect } from '../custom-select.js';
+import { nodePickerModal } from './node-picker-modal.js';
+import { AppEvents } from '../../events.js';
 
 class ConstraintModal extends Modal {
   getName() { return 'constraintModal'; }
@@ -10,6 +12,14 @@ class ConstraintModal extends Modal {
     super();
     this._pending = null;
     MODAL_REGISTRY.set('constraint', this);
+
+    this._copyToBtn = document.createElement('button');
+    this._copyToBtn.type = 'button';
+    this._copyToBtn.className = 'modal-btn modal-btn--copy-to';
+    this._copyToBtn.textContent = 'Copy to\u2026';
+    this._copyToBtn.dataset.testid = 'constraint-copy-to-btn';
+    this._copyToBtn.addEventListener('click', () => this._openCopyTo());
+    this.footer.insertBefore(this._copyToBtn, this.footer.firstChild);
   }
 
   open(node, constraintLink, setActive) {
@@ -20,6 +30,23 @@ class ConstraintModal extends Modal {
     this.body.innerHTML = '';
     this._renderBody(draft);
     super.open();
+  }
+
+  _buildPayload() {
+    return { constraint: JSON.parse(JSON.stringify(this._pending.draft)) };
+  }
+
+  _openCopyTo() {
+    if (!this._pending) return;
+    const patch = this._buildPayload();
+    const { node } = this._pending;
+    nodePickerModal.open(node.id, (ids) => {
+      document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
+        detail: { ids, patch, nodeType: 'item' },
+      }));
+      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+    }, 'item');
   }
 
   _apply() {
