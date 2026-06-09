@@ -48,7 +48,7 @@ export class BaseNode {
   }
 
   /** Abort all document listeners owned by this node. */
-  destroy() { this._ac?.abort(); }
+  destroy() { this._ac?.abort(); this._navAbort?.abort(); }
 
   /**
    * Apply a patch object to this node.
