@@ -4,7 +4,6 @@
 import * as history from './history.js';
 import { buildFHIRObject } from '../fhir/export.js';
 import { importFHIR } from '../fhir/import.js';
-import { renderTree } from '../builder/index.js';
 
 export class UndoRedo {
   /**
@@ -18,7 +17,6 @@ export class UndoRedo {
     history.init({
       buildFn:  buildFHIRObject,
       importFn: importFHIR,
-      renderFn: renderTree,
       onChange: () => this._sync(),
     });
 

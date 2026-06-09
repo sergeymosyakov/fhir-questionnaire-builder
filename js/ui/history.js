@@ -1,11 +1,11 @@
 // ── Undo / redo history ───────────────────────────────────────────────────────
 // Listens to AppEvents.RESPONSE_CHANGED (inline edits) and AppEvents.REINIT_FORM
 // (add/delete/move nodes) — debounced 400ms + requestIdleCallback.
-// Snapshots = FHIR JSON strings; restored via importFn(parsed, renderFn).
+// Snapshots = FHIR JSON strings; restored via importFn(parsed).
 // Stack resets automatically on questionnaire-loaded / questionnaire-cleared.
 //
 // API:
-//   init({ buildFn, importFn, renderFn, onChange })
+//   init({ buildFn, importFn, onChange })
 //   undo() / redo()
 //   canUndo() / canRedo()  → boolean
 import { AppEvents } from '../events.js';
@@ -16,7 +16,6 @@ const _ric        = cb => (window.requestIdleCallback ?? (fn => setTimeout(fn, 0
 
 let _buildFn   = null;
 let _importFn  = null;
-let _renderFn  = null;
 let _onChange  = null;
 let _stack     = [];   // JSON strings, oldest first
 let _cursor    = -1;   // index of current state
@@ -55,10 +54,9 @@ function _schedule() {
 }
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
-export function init({ buildFn, importFn, renderFn, onChange }) {
+export function init({ buildFn, importFn, onChange }) {
   _buildFn  = buildFn;
   _importFn = importFn;
-  _renderFn = renderFn;
   _onChange = onChange ?? null;
 
   // Take an initial snapshot so the first real change has something to undo to
@@ -96,7 +94,7 @@ export function undo() {
   _cursor--;
   _restoring = true;
   try {
-    _importFn(JSON.parse(_stack[_cursor]), _renderFn);
+    _importFn(JSON.parse(_stack[_cursor]));
     document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOADED));
   } finally {
     _restoring = false;
@@ -109,7 +107,7 @@ export function redo() {
   _cursor++;
   _restoring = true;
   try {
-    _importFn(JSON.parse(_stack[_cursor]), _renderFn);
+    _importFn(JSON.parse(_stack[_cursor]));
     document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOADED));
   } finally {
     _restoring = false;
