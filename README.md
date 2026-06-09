@@ -4,6 +4,8 @@ A prototype **visual logic builder** for medical prior authorization questionnai
 
 Lets you build questionnaire logic visually, test it against patient data, and import/export valid FHIR R4 JSON.
 
+The right-side **preview panel is a live SDC-compliant runtime**: it executes FHIRPath expressions, resolves `enableWhen` / `enableWhenExpression`, evaluates `calculatedExpression` and `initialExpression` chains against an injected Patient resource, and produces a valid `QuestionnaireResponse`. Import an existing QR to resume a partially-filled session. The builder and the runtime are always in sync — edits to item logic are immediately reflected in the live form.
+
 > © 2026 [Sergey Mosyakov](https://github.com/sergeymosyakov) / [Roko Labs Inc.](https://www.rokolabs.com) — Non-commercial use with attribution. Commercial use requires prior written permission.
 
 ---
@@ -34,7 +36,7 @@ https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ### Tests
 ```powershell
-npm test             # unit tests — single run (Vitest, 474 tests)
+npm test             # unit tests — single run (Vitest, 1178 tests)
 npm run test:watch   # unit tests — watch mode
 npm run test:e2e     # e2e tests — Playwright/Chromium
 npm run test:e2e:ui  # e2e tests — Playwright UI mode
@@ -64,6 +66,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 | `valueset-demo.fhir.json` | 4 | Contained ValueSets, local `#vs-id` refs, external URL, rendering-style. |
 | `slider-disabled-demo.fhir.json` | ~12 | Sliders, `disabledDisplay` (hidden/protected), ordinalValue radios. |
 | `patient-scenario-*.fhir.json` | — | Load + select preset + Re-init to test `initialExpression` / `enableWhenExpression` pipelines. |
+| `redcap-clinical-demo.fhir.json` | 30 | Converted from REDCap Data Dictionary. Includes branching logic, calc expressions (BMI via FHIRPath), slider, radio, checkbox fields. |
 
 ---
 
@@ -73,7 +76,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **Vanilla JS DOM** — builder and preview rendered imperatively via OOP node classes; state propagated through `AppEvents` custom events
 - **FHIRPath** — `lib/fhirpath.min.js` (global); powers calc, visibility, and constraint expressions
 - **DOMPurify** — `lib/dompurify.min.js`; sanitizes XHTML content before rendering
-- **Vitest** — 989 unit tests across 20 files; CI via GitHub Actions (`npm test`)
+- **Vitest** — 1178 unit tests across 25 files; CI via GitHub Actions (`npm test`)
 - **Playwright** — e2e tests (Chromium); CI + HTML report on GitHub Pages
 
 ---
