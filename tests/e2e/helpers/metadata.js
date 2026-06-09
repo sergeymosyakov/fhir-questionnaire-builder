@@ -31,9 +31,11 @@ export async function openModal(page) {
 
 export async function exportFHIR(page) {
   await page.getByTestId('export-btn').click();
+  await page.getByTestId('export-quest-item').click();
+  await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+    page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
   ]);
   const fp = await download.path();
   const { readFileSync } = await import('node:fs');

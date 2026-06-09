@@ -1,0 +1,821 @@
+{
+  "resourceType": "Questionnaire",
+  "title": "REDCap Clinical Demo",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "demographics",
+      "text": "demographics",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "record_id",
+          "text": "Record ID",
+          "type": "string",
+          "required": true,
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/field-note",
+              "valueString": "Auto-assigned"
+            }
+          ]
+        },
+        {
+          "linkId": "demographics__section__patient_information",
+          "text": "Patient Information",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "first_name",
+              "text": "First Name",
+              "type": "string",
+              "required": true,
+              "extension": [
+                {
+                  "url": "http://fhir-qb.app/redcap/identifier",
+                  "valueBoolean": true
+                }
+              ]
+            },
+            {
+              "linkId": "last_name",
+              "text": "Last Name",
+              "type": "string",
+              "required": true,
+              "extension": [
+                {
+                  "url": "http://fhir-qb.app/redcap/identifier",
+                  "valueBoolean": true
+                }
+              ]
+            },
+            {
+              "linkId": "dob",
+              "text": "Date of Birth",
+              "type": "date",
+              "required": true
+            },
+            {
+              "linkId": "age",
+              "text": "Age (years)",
+              "type": "integer",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+                  "valueInteger": 0
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+                  "valueInteger": 120
+                },
+                {
+                  "url": "http://fhir-qb.app/redcap/field-note",
+                  "valueString": "Calculated from DOB"
+                }
+              ]
+            },
+            {
+              "linkId": "gender",
+              "text": "Gender",
+              "type": "choice",
+              "required": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "1",
+                    "display": "Male"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "2",
+                    "display": "Female"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "3",
+                    "display": "Non-binary"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "4",
+                    "display": "Prefer not to say"
+                  }
+                }
+              ]
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/section-header",
+              "valueString": "Patient Information"
+            }
+          ]
+        },
+        {
+          "linkId": "demographics__section__contact",
+          "text": "Contact",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "email",
+              "text": "Email Address",
+              "type": "string"
+            },
+            {
+              "linkId": "phone",
+              "text": "Phone Number",
+              "type": "string"
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/section-header",
+              "valueString": "Contact"
+            }
+          ]
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://fhir-qb.app/redcap/form-name",
+          "valueString": "demographics"
+        }
+      ]
+    },
+    {
+      "linkId": "screening",
+      "text": "screening",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "consent",
+          "text": "Has the patient provided written informed consent?",
+          "type": "boolean",
+          "required": true,
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/annotation",
+              "valueString": "@REQUIRED"
+            }
+          ]
+        },
+        {
+          "linkId": "screening__section__eligibility",
+          "text": "Eligibility",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "eligible_age",
+              "text": "Age at enrollment",
+              "type": "integer",
+              "required": true,
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+                  "valueInteger": 18
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+                  "valueInteger": 99
+                }
+              ]
+            },
+            {
+              "linkId": "diagnosis",
+              "text": "Primary Diagnosis",
+              "type": "choice",
+              "required": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "1",
+                    "display": "Type 2 Diabetes"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "2",
+                    "display": "Hypertension"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "3",
+                    "display": "Heart Disease"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "4",
+                    "display": "COPD"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "5",
+                    "display": "Other"
+                  }
+                }
+              ],
+              "enableWhen": [
+                {
+                  "question": "consent",
+                  "operator": "equal",
+                  "answerCoding": {
+                    "code": "1"
+                  }
+                }
+              ],
+              "enableBehavior": "all",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "drop-down"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "url": "http://fhir-qb.app/redcap/branching-logic",
+                  "valueString": "[consent] = '1'"
+                }
+              ]
+            },
+            {
+              "linkId": "other_diagnosis",
+              "text": "Specify other diagnosis",
+              "type": "string",
+              "enableWhen": [
+                {
+                  "question": "diagnosis",
+                  "operator": "equal",
+                  "answerCoding": {
+                    "code": "5"
+                  }
+                }
+              ],
+              "enableBehavior": "all",
+              "extension": [
+                {
+                  "url": "http://fhir-qb.app/redcap/branching-logic",
+                  "valueString": "[diagnosis] = '5'"
+                }
+              ]
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/section-header",
+              "valueString": "Eligibility"
+            }
+          ]
+        },
+        {
+          "linkId": "screening__section__medications",
+          "text": "Medications",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "medications",
+              "text": "Current Medications",
+              "type": "choice",
+              "repeats": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "1",
+                    "display": "Metformin"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "2",
+                    "display": "Insulin"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "3",
+                    "display": "ACE Inhibitor"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "4",
+                    "display": "Beta Blocker"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "5",
+                    "display": "Statin"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "6",
+                    "display": "None"
+                  }
+                }
+              ],
+              "enableWhen": [
+                {
+                  "question": "diagnosis",
+                  "operator": "not-equal",
+                  "answerCoding": {
+                    "code": ""
+                  }
+                }
+              ],
+              "enableBehavior": "all",
+              "extension": [
+                {
+                  "url": "http://fhir-qb.app/redcap/branching-logic",
+                  "valueString": "[diagnosis] <> ''"
+                },
+                {
+                  "url": "http://fhir-qb.app/redcap/annotation",
+                  "valueString": "@HIDDEN-SURVEY"
+                }
+              ]
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/section-header",
+              "valueString": "Medications"
+            }
+          ]
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://fhir-qb.app/redcap/form-name",
+          "valueString": "screening"
+        }
+      ]
+    },
+    {
+      "linkId": "health_history",
+      "text": "health_history",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "smoking_status",
+          "text": "Smoking Status",
+          "type": "choice",
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "0",
+                "display": "Never smoked"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "1",
+                "display": "Former smoker"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "2",
+                "display": "Current smoker"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "pack_years",
+          "text": "Pack Years",
+          "type": "decimal",
+          "enableWhen": [
+            {
+              "question": "smoking_status",
+              "operator": "not-equal",
+              "answerCoding": {
+                "code": "0"
+              }
+            }
+          ],
+          "enableBehavior": "all",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+              "valueDecimal": 0
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+              "valueDecimal": 200
+            },
+            {
+              "url": "http://fhir-qb.app/redcap/branching-logic",
+              "valueString": "[smoking_status] <> '0'"
+            },
+            {
+              "url": "http://fhir-qb.app/redcap/field-note",
+              "valueString": "Number of packs per day × years smoked"
+            }
+          ]
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://fhir-qb.app/redcap/form-name",
+          "valueString": "health_history"
+        }
+      ]
+    },
+    {
+      "linkId": "vitals",
+      "text": "vitals",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "vitals__section__measurements",
+          "text": "Measurements",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "systolic_bp",
+              "text": "Systolic Blood Pressure (mmHg)",
+              "type": "integer",
+              "required": true,
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+                  "valueInteger": 60
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+                  "valueInteger": 300
+                }
+              ]
+            },
+            {
+              "linkId": "diastolic_bp",
+              "text": "Diastolic Blood Pressure (mmHg)",
+              "type": "integer",
+              "required": true,
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+                  "valueInteger": 40
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+                  "valueInteger": 200
+                }
+              ]
+            },
+            {
+              "linkId": "weight_kg",
+              "text": "Weight (kg)",
+              "type": "decimal",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+                  "valueDecimal": 20
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+                  "valueDecimal": 400
+                }
+              ]
+            },
+            {
+              "linkId": "height_cm",
+              "text": "Height (cm)",
+              "type": "integer",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+                  "valueInteger": 50
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+                  "valueInteger": 300
+                }
+              ]
+            },
+            {
+              "linkId": "bmi",
+              "text": "BMI",
+              "type": "decimal",
+              "extension": [
+                {
+                  "url": "http://fhir-qb.app/redcap/calc-expression",
+                  "valueString": "round([weight_kg] / ([height_cm] / 100)^2, 1)"
+                },
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "(%resource.repeat(item).where(linkId='weight_kg').answer.first().valueDecimal / (%resource.repeat(item).where(linkId='height_cm').answer.first().valueDecimal / 100).power(2)).round(1)"
+                  }
+                },
+                {
+                  "url": "http://fhir-qb.app/redcap/annotation",
+                  "valueString": "@CALCTEXT"
+                },
+                {
+                  "url": "http://fhir-qb.app/redcap/field-note",
+                  "valueString": "Auto-calculated"
+                }
+              ]
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/section-header",
+              "valueString": "Measurements"
+            }
+          ]
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://fhir-qb.app/redcap/form-name",
+          "valueString": "vitals"
+        }
+      ]
+    },
+    {
+      "linkId": "symptoms",
+      "text": "symptoms",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "pain_scale",
+          "text": "Current Pain Level",
+          "type": "integer",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "slider"
+                  }
+                ]
+              }
+            },
+            {
+              "url": "http://fhir-qb.app/redcap/slider-labels",
+              "valueString": "0, No Pain | 5, Moderate | 10, Worst Possible"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+              "valueInteger": 0
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+              "valueInteger": 10
+            },
+            {
+              "url": "http://fhir-qb.app/redcap/field-note",
+              "valueString": "Visual analogue scale"
+            }
+          ]
+        },
+        {
+          "linkId": "fatigue",
+          "text": "Fatigue Level",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "0",
+                "display": "None"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "1",
+                "display": "Mild"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "2",
+                "display": "Moderate"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "3",
+                "display": "Severe"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "4",
+                "display": "Very Severe"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "notes",
+          "text": "Additional Clinical Notes",
+          "type": "text",
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/field-note",
+              "valueString": "Free text field for additional observations"
+            }
+          ]
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://fhir-qb.app/redcap/form-name",
+          "valueString": "symptoms"
+        }
+      ]
+    },
+    {
+      "linkId": "laboratory",
+      "text": "laboratory",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "laboratory__section__lab_results",
+          "text": "Lab Results",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "lab_date",
+              "text": "Date of Lab Tests",
+              "type": "date"
+            },
+            {
+              "linkId": "hba1c",
+              "text": "HbA1c (%)",
+              "type": "decimal",
+              "enableWhen": [
+                {
+                  "question": "diagnosis",
+                  "operator": "equal",
+                  "answerCoding": {
+                    "code": "1"
+                  }
+                }
+              ],
+              "enableBehavior": "all",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+                  "valueDecimal": 3
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+                  "valueDecimal": 20
+                },
+                {
+                  "url": "http://fhir-qb.app/redcap/branching-logic",
+                  "valueString": "[diagnosis] = '1'"
+                }
+              ]
+            },
+            {
+              "linkId": "glucose_fasting",
+              "text": "Fasting Glucose (mmol/L)",
+              "type": "decimal",
+              "enableWhen": [
+                {
+                  "question": "diagnosis",
+                  "operator": "equal",
+                  "answerCoding": {
+                    "code": "1"
+                  }
+                }
+              ],
+              "enableBehavior": "all",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+                  "valueDecimal": 0
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+                  "valueDecimal": 50
+                },
+                {
+                  "url": "http://fhir-qb.app/redcap/branching-logic",
+                  "valueString": "[diagnosis] = '1'"
+                }
+              ]
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/section-header",
+              "valueString": "Lab Results"
+            }
+          ]
+        },
+        {
+          "linkId": "laboratory__section__documents",
+          "text": "Documents",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "report_upload",
+              "text": "Upload Lab Report",
+              "type": "attachment",
+              "extension": [
+                {
+                  "url": "http://fhir-qb.app/redcap/field-note",
+                  "valueString": "PDF or image files accepted"
+                }
+              ]
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/section-header",
+              "valueString": "Documents"
+            }
+          ]
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://fhir-qb.app/redcap/form-name",
+          "valueString": "laboratory"
+        }
+      ]
+    },
+    {
+      "linkId": "follow_up",
+      "text": "follow_up",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "follow_up_needed",
+          "text": "Is follow-up required?",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "linkId": "follow_up_date",
+          "text": "Follow-up Date",
+          "type": "date",
+          "enableWhen": [
+            {
+              "question": "follow_up_needed",
+              "operator": "equal",
+              "answerCoding": {
+                "code": "1"
+              }
+            }
+          ],
+          "enableBehavior": "all",
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/branching-logic",
+              "valueString": "[follow_up_needed] = '1'"
+            }
+          ]
+        },
+        {
+          "linkId": "follow_up_notes",
+          "text": "Follow-up Instructions",
+          "type": "text",
+          "enableWhen": [
+            {
+              "question": "follow_up_needed",
+              "operator": "equal",
+              "answerCoding": {
+                "code": "1"
+              }
+            }
+          ],
+          "enableBehavior": "all",
+          "extension": [
+            {
+              "url": "http://fhir-qb.app/redcap/branching-logic",
+              "valueString": "[follow_up_needed] = '1'"
+            }
+          ]
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://fhir-qb.app/redcap/form-name",
+          "valueString": "follow_up"
+        }
+      ]
+    }
+  ]
+}

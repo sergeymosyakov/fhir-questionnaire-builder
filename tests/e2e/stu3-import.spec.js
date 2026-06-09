@@ -106,9 +106,11 @@ test.describe('STU3 import', () => {
 
     // Trigger export and capture the downloaded JSON
     await page.locator('[data-testid="export-btn"]').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.locator('[data-testid="export-fhir-item"]').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
 
     const stream = await download.createReadStream();

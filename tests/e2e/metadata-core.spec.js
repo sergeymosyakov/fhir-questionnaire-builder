@@ -29,7 +29,7 @@
 //   meta-effective-start   effectivePeriod.start input (Advanced)
 //   meta-effective-end     effectivePeriod.end input (Advanced)
 //   export-btn             toolbar export button
-//   export-fhir-item       FHIR export menu item
+//   export-quest-item    "Questionnaire…" item in export dropdown (opens saveFormatModal)
 //   clear-form-btn         clear/reset button
 //   clear-confirm-clear-btn confirm clear button
 // ─────────────────────────────────────────────────────────────────────────────

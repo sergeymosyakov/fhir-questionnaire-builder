@@ -11,7 +11,7 @@
 //   load-library-item    "Library" item in load dropdown
 //   clear-form-btn       "×" button that opens the clear-confirm dialog
 //   export-btn           "⬇ Export ▾" dropdown trigger
-//   export-fhir-item     "Questionnaire (FHIR R4)" item in export dropdown
+//   export-quest-item     "Questionnaire2026" item in export dropdown (opens saveFormatModal)
 //   expand-all-btn       expand-all builder button
 //   tools-btn            "🛠️ Tools ▾" dropdown trigger
 //   expand-all-item      "Expand all" item in Tools dropdown (expands preview groups)
@@ -121,9 +121,11 @@ test.describe('FHIR export', () => {
     await node.getByTestId('node-title-input').blur();
 
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.getByTestId('saveFormatModal')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() =>
+      page.getByTestId('saveFormatModalApply').click().then(() =>
         page.getByTestId('prompt-save').click()
       ),
     ]);

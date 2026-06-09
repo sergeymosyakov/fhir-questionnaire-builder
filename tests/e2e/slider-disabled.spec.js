@@ -60,9 +60,11 @@ test.describe('slider rendering', () => {
   test('round-trip: sliderStepValue exported in FHIR JSON', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
@@ -104,9 +106,11 @@ test.describe('disabledDisplay', () => {
   test('round-trip: disabledDisplay exported in FHIR JSON', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
@@ -214,7 +218,9 @@ test.describe('sliderStepValue — R4 decimal constraint', () => {
   test('decimal slider step is rounded to valueInteger on export', async ({ page }) => {
     await buildDecimalSlider(page);
     await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-fhir-item').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
+    await page.getByTestId('saveFormatModalApply').click();
     // Validate modal opens because of the decimal-step warning — click Export anyway
     const modal = page.locator('[data-testid="validateModal"]');
     await modal.waitFor({ state: 'visible', timeout: 5_000 });

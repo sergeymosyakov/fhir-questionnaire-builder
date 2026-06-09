@@ -20,7 +20,7 @@
 //   csel-drop                 Dropdown panel of any custom select
 //   codesModalApply           Apply button
 //   export-btn                Export dropdown button
-//   export-fhir-item          Export FHIR Questionnaire menu item
+//   export-quest-item    "Questionnaire2026" item in export dropdown (opens saveFormatModal)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -45,9 +45,11 @@ async function loadFixture(page) {
 
 async function exportFHIR(page) {
   await page.locator('[data-testid="export-btn"]').click();
+  await page.locator('[data-testid="export-quest-item"]').click();
+  await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.locator('[data-testid="export-fhir-item"]').click().then(() => page.getByTestId('prompt-save').click()),
+    page.locator('[data-testid="saveFormatModalApply"]').click().then(() => page.getByTestId('prompt-save').click()),
   ]);
   const filePath = await download.path();
   const { readFileSync } = await import('node:fs');

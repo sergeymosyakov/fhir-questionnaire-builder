@@ -308,7 +308,9 @@ function findItemRecursive(items, linkId) {
  */
 async function exportAndDownload(page) {
   await page.getByTestId('export-btn').click();
-  await page.getByTestId('export-fhir-item').click();
+  await page.getByTestId('export-quest-item').click();
+  await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
+  await page.getByTestId('saveFormatModalApply').click();
   // Validate modal opens when questionnaire has warnings/errors
   const modal = page.locator('[data-testid="validateModal"]');
   await modal.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});

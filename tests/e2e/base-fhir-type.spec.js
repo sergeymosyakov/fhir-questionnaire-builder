@@ -50,7 +50,7 @@ async function exportFHIR(page) {
   await page.getByTestId('export-btn').click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+    page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
   ]);
   const fp = await download.path();
   const { readFileSync } = await import('node:fs');

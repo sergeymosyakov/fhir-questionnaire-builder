@@ -1,10 +1,10 @@
 import { DropdownMenu } from '../dropdown-menu.js';
-import { readFileAsJSON } from '../../utils.js';
 import * as autosave from '../autosave.js';
 import * as libraryModal from '../modals/library-modal.js';
 import * as progress from '../progress.js';
 import { AppEvents } from '../../events.js';
 import { showError } from '../toast.js';
+import { loadFormatModal } from '../modals/load-format-modal.js';
 
 export class QuestionnairesMenu extends DropdownMenu {
   constructor() {
@@ -22,23 +22,6 @@ export class QuestionnairesMenu extends DropdownMenu {
     this._menu.classList.add('load-menu--right');
 
     this._loader = null;
-
-    // Hidden file input — closure keeps the reference, no instance property needed
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '.json,application/json';
-    fileInput.style.display = 'none';
-    fileInput.dataset.testid = 'fhir-file-input';
-    fileInput.addEventListener('change', async e => {
-      const fileName = e.target.files[0]?.name;
-      if (!fileName) return;
-      progress.show('Loading ' + fileName + '\u2026');
-      readFileAsJSON(e)
-        .then(({ data, fileName }) => { progress.update(0, 1); this._loader.load(data, fileName); })
-        .catch(err => { progress.hide(); if (err) showError('Parse error: ' + err.message); });
-    });
-    document.body.appendChild(fileInput);
-    this._pickFile = () => fileInput.click();
 
     this._buildMenu();
     this._bindHandlers();
@@ -97,7 +80,12 @@ export class QuestionnairesMenu extends DropdownMenu {
     this._loadFromFileItem.addEventListener('click', async () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       if (await this._loader.confirmBeforeLoad() !== 'proceed') return;
-      this._pickFile();
+      loadFormatModal.open((data, fileName) => {
+        progress.show('Loading ' + fileName + '\u2026');
+        // data is already parsed (JSON object or converted FHIR Questionnaire)
+        progress.update(0, 1);
+        this._loader.load(data, fileName);
+      });
     });
 
     this._loadLibraryItem.addEventListener('click', async () => {

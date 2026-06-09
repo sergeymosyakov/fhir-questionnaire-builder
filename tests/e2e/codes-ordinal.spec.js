@@ -22,7 +22,7 @@
 //   codesModalCancel    Cancel button (index.html, id)
 //   codesModalClose     × button (index.html, id)
 //   export-btn          main Export dropdown button
-//   export-fhir-item    Export FHIR Questionnaire item in dropdown
+// export-quest-item    "Questionnaire…" item in export dropdown (opens saveFormatModal)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -152,9 +152,11 @@ test.describe('Codes export round-trip', () => {
   test('item.code[] preserved in exported FHIR JSON', async ({ page }) => {
     await loadFixture(page);
     await page.locator('[data-testid="export-btn"]').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.locator('[data-testid="export-fhir-item"]').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');

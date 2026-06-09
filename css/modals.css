@@ -234,6 +234,13 @@
 [data-testid="metadataModal"] .modal-box { width: min(900px, 94vw); min-width: min(60vw, 94vw); }
 [data-testid="codesModal"] .modal-box    { width: min(480px, 94vw); }
 [data-testid="qrExportModal"] .modal-box { width: min(380px, 94vw); }
+/* ── Load / Save format modals ─────────────────────────────────────────────── */
+[data-testid="loadFormatModal"] .modal-body,
+[data-testid="saveFormatModal"] .modal-body { padding: 20px 20px 8px; }
+.lf-format-row   { display: flex; align-items: center; gap: 12px; }
+.lf-format-label { flex: 0 0 56px; font-size: 13px; font-weight: 500; }
+.lf-format-row .sc-trigger { flex: 1; }
+
 [data-testid="metadataModal"] .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
 [data-testid="codesModal"] .modal-body    { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
 [data-testid="qrExportModal"] .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }

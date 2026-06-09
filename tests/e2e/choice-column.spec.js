@@ -9,7 +9,7 @@
 // Run: npx playwright test tests/e2e/choice-column.spec.js
 //
 // ── data-testid registry ─────────────────────────────────────────────────────
-//   preview-panel, fhir-file-input, add-root-group-btn, export-btn, export-fhir-item, prompt-save
+//   preview-panel, fhir-file-input, add-root-group-btn, export-btn, export-quest-item, prompt-save
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -70,9 +70,11 @@ test.describe('choiceColumn — multi-column dropdown', () => {
 
     // Export via download
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const exported = JSON.parse(readFileSync(filePath, 'utf8'));

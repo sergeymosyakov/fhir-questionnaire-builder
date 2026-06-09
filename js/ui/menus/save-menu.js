@@ -1,9 +1,7 @@
 import { DropdownMenu } from '../dropdown-menu.js';
 import { AppEvents } from '../../events.js';
-import { exportFHIR, buildFHIRObject } from '../../fhir/export.js';
-import * as validateModal from '../modals/validate-modal.js';
 import * as qrExportModal from '../modals/qr-export-modal.js';
-import { showPrompt } from '../toast.js';
+import { saveFormatModal } from '../modals/save-format-modal.js';
 
 export class SaveMenu extends DropdownMenu {
   constructor() {
@@ -37,15 +35,12 @@ export class SaveMenu extends DropdownMenu {
   get cloudSaveBtn() { return this._cloudSaveBtn; }
   get cloudSaveSep() { return this._cloudSaveSep; }
 
-  /** Prompt for filename then export. Calls afterExport on success. */
-  promptExport(afterExport) {
-    const suggested = this._fileNameDisplay.getName().trim() || 'questionnaire';
-    showPrompt('Save as:', suggested + '.json', name => {
-      if (name === null) return;
-      const trimmed = name.replace(/\.json$/i, '');
-      exportFHIR(trimmed + '.json');
-      this._fileNameDisplay.setName(trimmed);
-      if (afterExport) afterExport();
+  /** Prompt for filename then export FHIR JSON via saveFormatModal. */
+  promptExport() {
+    saveFormatModal.open({
+      fileNameDisplay: this._fileNameDisplay,
+      tree:   this._tree,
+      values: this._values,
     });
   }
 
@@ -56,13 +51,13 @@ export class SaveMenu extends DropdownMenu {
     this._cloudSaveSep = this._sep();
     this._cloudSaveSep.style.display = 'none';
 
-    this._exportFhirItem = this._item(null, '&#x1F4C4; Questionnaire &middot; JSON file', 'export-fhir-item');
-    this._exportQrItem = this._item(null, '&#x1F4CB; QuestionnaireResponse &middot; JSON file', 'export-qr-item');
+    this._exportQuestItem = this._item(null, '&#x1F4C4; Questionnaire&hellip;', 'export-quest-item');
+    this._exportQrItem    = this._item(null, '&#x1F4CB; QuestionnaireResponse &middot; JSON file', 'export-qr-item');
 
     this._menu.append(
       this._cloudSaveBtn,
       this._cloudSaveSep,
-      this._exportFhirItem,
+      this._exportQuestItem,
       this._exportQrItem,
     );
 
@@ -73,14 +68,12 @@ export class SaveMenu extends DropdownMenu {
   }
 
   _bindHandlers() {
-    this._exportFhirItem.addEventListener('click', () => {
+    this._exportQuestItem.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      // Always run validators first; validate-modal skips UI if 0 issues
-      validateModal.show('Export — Validation Report', 'export', {
-        questJson: buildFHIRObject(),
-        tree:      this._tree,
-        values:    this._values,
-        onExport:  () => this.promptExport(),
+      saveFormatModal.open({
+        fileNameDisplay: this._fileNameDisplay,
+        tree:   this._tree,
+        values: this._values,
       });
     });
 

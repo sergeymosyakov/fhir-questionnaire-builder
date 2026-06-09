@@ -10,7 +10,7 @@
 //   lookup-status        — status line inside lookup dropdown
 //   slider-input         — <input type="range"> in slider control
 //   slider-value         — current value label next to the slider
-//   export-btn, export-fhir-item, prompt-save — export flow
+//   export-btn, export-quest-item, saveFormatModalApply, prompt-save — export flow
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
@@ -60,9 +60,11 @@ test.describe('check-box itemControl (checklist)', () => {
   test('checklist round-trips through export with check-box itemControl', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const q = JSON.parse(readFileSync(filePath, 'utf8'));
@@ -100,9 +102,11 @@ test.describe('autocomplete itemControl', () => {
   test('autocomplete round-trips through export', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const q = JSON.parse(readFileSync(filePath, 'utf8'));
@@ -126,9 +130,11 @@ test.describe('text-area itemControl', () => {
   test('text-area round-trips through export', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const q = JSON.parse(readFileSync(filePath, 'utf8'));
@@ -143,9 +149,11 @@ test.describe('spinner itemControl', () => {
   test('spinner round-trips through export', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const q = JSON.parse(readFileSync(filePath, 'utf8'));
@@ -160,9 +168,11 @@ test.describe('drop-down itemControl', () => {
   test('drop-down round-trips through export', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const q = JSON.parse(readFileSync(filePath, 'utf8'));
@@ -200,9 +210,11 @@ test.describe('slider itemControl', () => {
   test('round-trip exports both sliderStepValue and itemControl=slider', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
     const item = q.item.find(i => i.linkId === 'sl-integer');
@@ -232,9 +244,11 @@ test.describe('lookup itemControl', () => {
   test('round-trip exports itemControl=lookup', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
     const item = q.item.find(i => i.linkId === 'lk-vs');

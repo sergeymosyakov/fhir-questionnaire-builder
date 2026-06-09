@@ -137,9 +137,11 @@ test.describe('answer-expression — export round-trip', () => {
   test('exported JSON contains answerExpression extension for q-expr', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() =>
+      page.getByTestId('saveFormatModalApply').click().then(() =>
         page.getByTestId('prompt-save').click()
       ),
     ]);
@@ -162,9 +164,11 @@ test.describe('answer-expression — export round-trip', () => {
   test('exported JSON preserves plain answerOption for q-plain', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() =>
+      page.getByTestId('saveFormatModalApply').click().then(() =>
         page.getByTestId('prompt-save').click()
       ),
     ]);

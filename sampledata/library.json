@@ -48,5 +48,13 @@
       { "label": "PHQ-9 — Sample Response",      "file": "phq-9-response.qr.json",              "type": "qr" },
       { "label": "Bariatric — Sample Response",  "file": "example-bariatric-response.qr.json",  "type": "qr" }
     ]
+  },
+  {
+    "id": "redcap",
+    "label": "REDCap Examples",
+    "items": [
+      { "label": "Clinical Study (REDCap CSV)",  "file": "redcap-clinical-demo.csv",             "type": "redcap", "note": "30-field clinical study instrument: demographics, screening, vitals, labs, follow-up. Import via Open → REDCap CSV." },
+      { "label": "Clinical Study (FHIR R4)",     "file": "redcap-clinical-demo.fhir.json",       "type": "questionnaire", "note": "Same instrument converted to FHIR R4 — demonstrates REDCap → FHIR mapping with round-trip extensions." }
+    ]
   }
 ]

@@ -20,7 +20,7 @@
 //   mime-types-input     Allowed MIME types text input in Answer Type modal
 //   mime-hint            Span showing accepted MIME types below file button
 //   export-btn           Export dropdown trigger (toolbar)
-//   export-fhir-item     "Export FHIR Questionnaire" item in export dropdown
+// export-quest-item    "Questionnaire…" item in export dropdown (opens saveFormatModal)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -199,9 +199,11 @@ test.describe('attachment constraints — export round-trip', () => {
   test('maxSize exported as maxSize extension with valueDecimal', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');
@@ -214,9 +216,11 @@ test.describe('attachment constraints — export round-trip', () => {
   test('mimeType exported as one extension entry per type', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');
@@ -231,9 +235,11 @@ test.describe('attachment constraints — export round-trip', () => {
   test('att-both exports both maxSize and mimeType', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');
@@ -248,9 +254,11 @@ test.describe('attachment constraints — export round-trip', () => {
   test('att-none exports no maxSize or mimeType extensions', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('export-btn').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const filePath = await download.path();
     const { readFileSync } = await import('node:fs');

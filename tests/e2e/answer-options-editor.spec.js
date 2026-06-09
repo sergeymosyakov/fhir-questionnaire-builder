@@ -19,7 +19,7 @@
 //   opt-prefix-{i}      Prefix input for row i
 //   opt-rm-{i}          Remove button for row i
 //   export-btn          toolbar Export dropdown
-//   export-fhir-item    Export FHIR Questionnaire item
+// export-quest-item    "Questionnaire…" item in export dropdown (opens saveFormatModal)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -172,9 +172,11 @@ test.describe('answer options editor — export round-trip', () => {
   test('answerOption[].valueCoding preserved in exported FHIR JSON', async ({ page }) => {
     await freshLoad(page);
     await page.locator('[data-testid="export-btn"]').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
@@ -188,9 +190,11 @@ test.describe('answer options editor — export round-trip', () => {
   test('ordinalValue extension round-trips correctly', async ({ page }) => {
     await freshLoad(page);
     await page.locator('[data-testid="export-btn"]').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
@@ -204,9 +208,11 @@ test.describe('answer options editor — export round-trip', () => {
   test('questionnaire-optionPrefix extension round-trips correctly', async ({ page }) => {
     await freshLoad(page);
     await page.locator('[data-testid="export-btn"]').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
@@ -227,9 +233,11 @@ test.describe('answer options editor — export round-trip', () => {
     await applyModal(page);
 
     await page.locator('[data-testid="export-btn"]').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByTestId('export-fhir-item').click().then(() => page.getByTestId('prompt-save').click()),
+      page.getByTestId('saveFormatModalApply').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));

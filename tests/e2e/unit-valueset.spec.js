@@ -22,7 +22,7 @@
 //   unit-sel                   custom select for default unit
 //   answerTypeModalApply         Apply button in Answer Type modal
 //   export-btn                 main Export dropdown button
-//   export-fhir-item           Export FHIR Questionnaire menu item
+//   export-quest-item    "Questionnaire2026" item in export dropdown (opens saveFormatModal)
 //   prompt-save                confirm button in filename prompt dialog
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -48,7 +48,9 @@ test.describe('unit-valueset — export round-trip', () => {
 
     // Open export dialog
     await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-fhir-item"]').click();
+    await page.locator('[data-testid="export-quest-item"]').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
+    await page.locator('[data-testid="saveFormatModalApply"]').click();
 
     page.once('dialog', async dlg => { await dlg.accept('unit-vs-test'); });
     const [download] = await Promise.all([
@@ -69,7 +71,9 @@ test.describe('unit-valueset — export round-trip', () => {
     await freshLoad(page);
 
     await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-fhir-item"]').click();
+    await page.locator('[data-testid="export-quest-item"]').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
+    await page.locator('[data-testid="saveFormatModalApply"]').click();
 
     page.once('dialog', async dlg => { await dlg.accept('unit-vs-test'); });
     const [download2] = await Promise.all([
@@ -88,7 +92,9 @@ test.describe('unit-valueset — export round-trip', () => {
     await freshLoad(page);
 
     await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-fhir-item"]').click();
+    await page.locator('[data-testid="export-quest-item"]').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
+    await page.locator('[data-testid="saveFormatModalApply"]').click();
 
     page.once('dialog', async dlg => { await dlg.accept('unit-vs-test'); });
     const [download3] = await Promise.all([
@@ -149,7 +155,9 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
 
     // Export and verify
     await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-fhir-item"]').click();
+    await page.locator('[data-testid="export-quest-item"]').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
+    await page.locator('[data-testid="saveFormatModalApply"]').click();
 
     page.once('dialog', async dlg => { await dlg.accept('unit-vs-edit-test'); });
     const [download] = await Promise.all([
@@ -175,7 +183,9 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
     await page.locator('[data-testid="answerTypeModalApply"]').click();
 
     await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-fhir-item"]').click();
+    await page.locator('[data-testid="export-quest-item"]').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
+    await page.locator('[data-testid="saveFormatModalApply"]').click();
 
     page.once('dialog', async dlg => { await dlg.accept('unit-vs-clear-test'); });
     const [download] = await Promise.all([

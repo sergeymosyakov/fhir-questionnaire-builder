@@ -162,9 +162,11 @@ test.describe('note modal — export round-trip', () => {
     await noteApply(page).click();
 
     await page.getByTestId('export-btn').click();
+    await page.locator('[data-testid="export-quest-item"]').click();
+    await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.locator('[data-testid="export-fhir-item"]').click().then(() => page.getByTestId('prompt-save').click()),
+      page.locator('[data-testid="saveFormatModalApply"]').click().then(() => page.getByTestId('prompt-save').click()),
     ]);
     const text = await (await download.createReadStream()).toArray().then(chunks => Buffer.concat(chunks).toString());
     const q = JSON.parse(text);

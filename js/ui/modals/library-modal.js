@@ -9,7 +9,8 @@ const LIBRARY_URL = 'sampledata/library.json';
 
 const TYPE_ICONS = {
   'questionnaire': '\u2605',  // ★
-  'qr':            '\u1F4CB', // 📋
+  'qr':            '\uD83D\uDCCB', // 📋
+  'redcap':        '\uD83D\uDCCA', // 📊
 };
 
 class LibraryModal extends Modal {
@@ -27,7 +28,9 @@ class LibraryModal extends Modal {
 
     const render = data => {
       const groups = typeFilter
-        ? data.filter(g => g.items.some(i => i.type === typeFilter))
+        ? data
+            .map(g => ({ ...g, items: g.items.filter(i => i.type === typeFilter) }))
+            .filter(g => g.items.length > 0)
         : data;
       this._render(groups, focusGroupId);
     };

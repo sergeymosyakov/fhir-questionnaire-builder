@@ -7,7 +7,7 @@
 //   tools-btn           "🛠️ Tools ▾" dropdown trigger button
 //   validate-item       "Validate" item in the Tools dropdown
 //   export-btn          "⬇ Export ▾" dropdown trigger button
-//   export-fhir-item    "Questionnaire (FHIR R4)" item in the export dropdown
+//   export-quest-item     "Questionnaire2026" item in export dropdown (opens saveFormatModal)
 //
 // ── element IDs used in this suite ───────────────────────────────────────────
 //   validateModal       backdrop <div>  (display:flex when open)
@@ -252,7 +252,9 @@ test.describe('Validate modal — export mode', () => {
     await expect(group.getByTestId('node-title-display').first()).toHaveText('(no title)');
 
     await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-fhir-item').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.getByTestId('saveFormatModal')).toBeVisible();
+    await page.getByTestId('saveFormatModalApply').click();
 
     // Validate modal opens in export mode.
     await expect(validateModal(page)).toBeVisible();
@@ -280,7 +282,9 @@ test.describe('Validate modal — export mode', () => {
     await group.getByTestId('node-title-input').first().blur();
 
     await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-fhir-item').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.getByTestId('saveFormatModal')).toBeVisible();
+    await page.getByTestId('saveFormatModalApply').click();
     await expect(validateModal(page)).toBeVisible();
 
     const fixFirstBtn = page.locator('[data-testid="validateModal"]').getByText('Fix first');
@@ -301,7 +305,9 @@ test.describe('Validate modal — export mode', () => {
     await group.getByTestId('node-title-input').first().blur();
 
     await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-fhir-item').click();
+    await page.getByTestId('export-quest-item').click();
+    await expect(page.getByTestId('saveFormatModal')).toBeVisible();
+    await page.getByTestId('saveFormatModalApply').click();
     await expect(validateModal(page)).toBeVisible();
 
     const exportAnywayBtn = page.locator('[data-testid="validateModal"]').getByText('Export anyway');
