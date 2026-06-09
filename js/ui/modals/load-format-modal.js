@@ -33,8 +33,9 @@ class LoadFormatModal extends Modal {
 
   constructor() {
     super({ applyLabel: 'Choose file\u2026', cancelLabel: 'Cancel', maxWidth: '400px' });
-    this._onLoaded = null;
-    this._format   = _savedFormat();
+    this._onLoaded     = null;
+    this._defaultOnLoaded = null;
+    this._format       = _savedFormat();
 
     // ── Body ──────────────────────────────────────────────────────────────────
     const row = document.createElement('div');
@@ -71,6 +72,11 @@ class LoadFormatModal extends Modal {
     return inp;
   }
 
+  /** Set a persistent default loader used when the modal is bypassed (e.g. E2E tests calling setInputFiles directly). */
+  configure(defaultOnLoaded) {
+    this._defaultOnLoaded = defaultOnLoaded;
+  }
+
   /** Open the modal. `onLoaded(fhirJson, fileName)` is called after successful parse. */
   open(onLoaded) {
     this._onLoaded = onLoaded;
@@ -104,7 +110,8 @@ class LoadFormatModal extends Modal {
     readFileAsJSON(e)
       .then(({ data, fileName: fn }) => {
         progress.update(0, 1);
-        this._onLoaded?.(data, fn);
+        const loader = this._onLoaded ?? this._defaultOnLoaded;
+        loader?.(data, fn);
       })
       .catch(err => {
         progress.hide();

@@ -28,7 +28,15 @@ export class QuestionnairesMenu extends DropdownMenu {
     this._onOpen = () => this._syncRecentItem();
   }
 
-  configure({ questLoader }) { this._loader = questLoader; }
+  configure({ questLoader }) {
+    this._loader = questLoader;
+    // Set default loader for programmatic file input (e.g. E2E tests bypassing modal)
+    loadFormatModal.configure((data, fileName) => {
+      progress.show('Loading ' + fileName + '\u2026');
+      progress.update(0, 1);
+      this._loader.load(data, fileName);
+    });
+  }
 
   get cloudItem() { return this._cloudItem; }
   get cloudSep() { return this._cloudSep; }
