@@ -14,6 +14,7 @@ export function buildInlineTitleEditor(node) {
   const titleDisplay = document.createElement('span');
   titleDisplay.className = 'node-title-display';
   titleDisplay.dataset.testid = 'node-title-display';
+  titleDisplay.tabIndex = 0;
   titleDisplay.textContent = node.title || '(no title)';
   const titleTextarea = document.createElement('textarea');
   titleTextarea.className = 'node-title-textarea';
