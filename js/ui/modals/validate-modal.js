@@ -39,8 +39,8 @@ class ValidateModal extends Modal {
       const activeValidators = validatorRegistry.getAll().filter(_filter);
       Promise.all(activeValidators.map(v =>
         v.run(questJson, tree, values)
-          .then(issues => ({ name: v.name, type: v.type, issues }))
-          .catch(() => ({ name: v.name, type: v.type, issues: [] }))
+          .then(issues => ({ validator: v, issues, error: null }))
+          .catch(error => ({ validator: v, issues: [], error }))
       )).then(results => {
         const allIssues = results.flatMap(r => r.issues);
         if (allIssues.length === 0 && extraIssues.length === 0) {

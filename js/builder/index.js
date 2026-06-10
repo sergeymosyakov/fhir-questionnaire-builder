@@ -76,10 +76,7 @@ document.addEventListener(AppEvents.FHIR_VERSION_CHANGED, e => {
     if (source === 'user' && tree.length > 0) {
       versionCompatRegistry.runAll(fromVersionId ?? questMeta.fhirTarget, versionId, tree)
         .then(msgs => {
-          const text = msgs.length > 0
-            ? msgs.join('\n')
-            : 'Switching FHIR version may affect compatibility of some fields or item types in the current questionnaire.';
-          showWarn(text);
+          if (msgs.length > 0) showWarn(msgs.join('\n'));
         });
     }
     questMeta.fhirTarget = versionId;

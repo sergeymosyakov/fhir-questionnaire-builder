@@ -1,6 +1,6 @@
 // ── E2E: FHIR Version Compat Warnings ────────────────────────────────────────
 // Tests that cover the version-compat-registry warning system:
-//   1. Generic fallback warning shown when switching version with a plain tree
+//   1. No warning when switching version with no applicable compat issue
 //   2. open-choice specific warning when switching R4 → R5 with open-choice item
 //   3. answerConstraint downgrade warning when switching R5 → R4
 //   4. No warning when tree is empty
@@ -66,12 +66,14 @@ async function addGroupAndItem(page) {
 
 /** Set an item's type to open-choice via Answer Type modal. */
 async function setTypeOpenChoice(page, nodeId) {
-  await page.locator(`[data-node-id="${nodeId}"]`).getByTestId('node-type-btn').click();
-  await expect(page.getByTestId('modal-answer-type')).toBeVisible({ timeout: 5_000 });
-  await page.getByTestId('type-select').click();
+  const typeLink = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type');
+  await expect(typeLink).toBeVisible();
+  await typeLink.click();
+  await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible({ timeout: 5_000 });
+  await page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select').click();
   await page.locator('[data-testid="csel-drop"] [data-val="open-choice"]').click();
-  await page.getByTestId('modal-answer-type-apply').click();
-  await expect(page.getByTestId('modal-answer-type')).not.toBeVisible({ timeout: 3_000 });
+  await page.getByTestId('answerTypeModalApply').click();
+  await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible({ timeout: 3_000 });
 }
 
 // ── 1. No warning on empty tree ───────────────────────────────────────────────
@@ -86,18 +88,17 @@ test.describe('no warning when tree is empty', () => {
   });
 });
 
-// ── 2. Generic fallback warning (no compat-specific messages) ─────────────────
+// ── 2. No warning when no compat-specific messages apply ──────────────────────
 
-test.describe('generic fallback warning', () => {
-  test('switching R4 → R4B with a plain text item shows generic warning', async ({ page }) => {
+test.describe('no warning without specific compat issues', () => {
+  test('switching R4 → R4B with a plain text item shows no warning', async ({ page }) => {
     await freshStart(page);
     await addGroupAndItem(page);
 
     await selectVersion(page, 'R4B');
-    // Wait for and verify the warning toast
-    await expect(warnToast(page)).toBeVisible({ timeout: 3_000 });
-    await expect(warnToastBody(page)).toContainText('Switching FHIR version');
-    await dismissWarn(page);
+    await expect(page.getByTestId('fhir-version-select')).toHaveAttribute('data-value', 'R4B');
+    // No compat issue applies → no warning toast
+    await expect(warnToast(page)).not.toBeVisible();
   });
 });
 
@@ -116,17 +117,15 @@ test.describe('open-choice warning on upgrade to R5', () => {
     await dismissWarn(page);
   });
 
-  test('switching R4 → R5 with a plain item shows generic warning (not open-choice specific)', async ({ page }) => {
+  test('switching R4 → R5 with a plain item shows no warning', async ({ page }) => {
     await freshStart(page);
     await addGroupAndItem(page);
     // item is default 'text' type — no open-choice
 
     await selectVersion(page, 'R5');
-    await expect(warnToast(page)).toBeVisible({ timeout: 3_000 });
-    // Should be the generic message, not open-choice specific
-    await expect(warnToastBody(page)).toContainText('Switching FHIR version');
-    await expect(warnToastBody(page)).not.toContainText('open-choice');
-    await dismissWarn(page);
+    await expect(page.getByTestId('fhir-version-select')).toHaveAttribute('data-value', 'R5');
+    // No open-choice item → no warning
+    await expect(warnToast(page)).not.toBeVisible();
   });
 });
 
