@@ -22,12 +22,24 @@ async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
 }
 
-/** Upload a fixture file via the hidden file input. */
+/** Upload a fixture file via the Questionnaires menu → From file… → FHIR JSON format. */
 async function loadFixture(page, filename) {
   await page.getByTestId('load-fhir-btn').click();
+  await expect(page.getByTestId('load-from-file-item')).toBeVisible();
+  await page.getByTestId('load-from-file-item').click();
+
+  // Confirm-before-load dialog (only when a questionnaire is already loaded)
+  const confirmModal = page.getByTestId('loadConfirmModal');
+  await confirmModal.waitFor({ state: 'visible', timeout: 2_000 }).catch(() => {});
+  if (await confirmModal.isVisible()) {
+    await page.getByTestId('load-confirm-proceed-btn').click();
+  }
+
+  // Format picker modal — keep default FHIR JSON selection
+  await expect(page.getByTestId('loadFormatModal')).toBeVisible();
   const [fileChooser] = await Promise.all([
     page.waitForEvent('filechooser'),
-    page.locator('[data-testid="load-from-file-item"]').click(),
+    page.getByTestId('loadFormatModalApply').click(),
   ]);
   await fileChooser.setFiles(path.join(FIXTURES, filename));
 }
