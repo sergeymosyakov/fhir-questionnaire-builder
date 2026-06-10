@@ -314,7 +314,10 @@ test.describe('allowedType filtering', () => {
 
     await openExprModal(page);
     await calcTa(page).fill(calc);
+    await expect(calcTa(page)).toHaveValue(calc);
+    await initTa(page).click();
     await initTa(page).fill(init);
+    await expect(initTa(page)).toHaveValue(init);
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();
     await pickerConfirm(page).click();
