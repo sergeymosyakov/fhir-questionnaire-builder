@@ -93,11 +93,11 @@ export class QuestionnaireLoader {
   async load(data, fileName) {
     try {
       importFHIR(data, () => {});
-      // Auto-detect FHIR version from meta.fhirVersion
+      // Auto-detect FHIR version from meta.fhirVersion; fall back to R4 when absent
       const _importedVersion = data?.meta?.fhirVersion
         ? versionRegistry.detectFromMeta(data.meta.fhirVersion)
-        : null;
-      if (_importedVersion && this._questMeta.fhirTarget !== _importedVersion) {
+        : 'R4';
+      if (this._questMeta.fhirTarget !== _importedVersion) {
         this._questMeta.fhirTarget = _importedVersion;
         document.dispatchEvent(new CustomEvent(AppEvents.FHIR_VERSION_CHANGED, {
           detail: { versionId: _importedVersion },
