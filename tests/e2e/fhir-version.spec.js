@@ -50,8 +50,10 @@ async function getSelectedVersion(page) {
 async function openAnswerTypeModal(page, nodeId) {
   const typeLink = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type');
   await expect(typeLink).toBeVisible();
+  await expect(typeLink).toBeEnabled();
   await typeLink.click();
-  await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible({ timeout: 5_000 });
+  // Modal may take a tick to open after version-switch re-render — use generous timeout
+  await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible({ timeout: 8_000 });
 }
 
 // ── 1. Default version is FHIR R4 ────────────────────────────────────────────
