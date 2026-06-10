@@ -72,4 +72,9 @@ export const AppEvents = Object.freeze({
   // patch values: null = delete key from node, any other value = assign to node.
   // nodeType: if set, BaseNode skips nodes whose type doesn't match (type safety).
   COPY_TO_NODES: 'copy-to-nodes',
+  // ── FHIR version ─────────────────────────────────────────────────────────
+  // detail: { versionId: 'R4' | 'R4B' | 'R5' }
+  // Dispatched by FhirVersionSelect when the user changes the target FHIR version,
+  // and by questionnaire-loader.js when a loaded file has meta.fhirVersion set.
+  FHIR_VERSION_CHANGED: 'fhir-version-changed',
 });

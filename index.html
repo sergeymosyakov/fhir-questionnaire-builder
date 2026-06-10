@@ -75,6 +75,11 @@
     <div class="left-panel-header">
       <div class="left-panel-title-row">
         <span class="section-title">Logic Builder<span id="tooltipsOffBadge" class="tips-off-badge" style="display:none">tooltips off</span></span>
+        <span id="fhirVersionSelectMount" class="fhir-version-select-mount"
+          data-tip-title="FHIR Target Version"
+          data-tip-body="Select the FHIR version this questionnaire targets. Affects which item types and fields are available in the builder, and sets meta.fhirVersion on export."
+          data-tip-fhir="Questionnaire.meta.fhirVersion"
+          data-tip-spec="R4 · R4B · R5"></span>
         <span class="left-panel-header-right">
           <button id="undoBtn" type="button" class="btn-fhir btn-fhir--toggle" data-testid="undo-btn" disabled
             data-tip-title="Undo"
@@ -101,7 +106,6 @@
         <button id="expandAllBtn"   type="button" class="btn-icon-ctrl" data-testid="expand-all-btn"
           data-tip-title="Expand all"
           data-tip-body="Shows all children under every group in the builder tree."><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10"/></svg></button>
-        <span class="tree-toolbar-sep"></span>
         <span id="renumberFormatWrap" class="renumber-format-wrap"></span>
         <button id="renumberBtn" type="button" class="btn-tree-ctrl"
           data-tip-title="Renumber"

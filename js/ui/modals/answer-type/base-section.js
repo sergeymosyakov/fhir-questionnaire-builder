@@ -12,9 +12,8 @@
 import { Section } from '../section.js';
 
 export class AnswerTypeSection extends Section {
-  isVisible(type)       { return false; }                          // eslint-disable-line no-unused-vars
-  onTypeChange(type)    {}                                         // eslint-disable-line no-unused-vars
-  commit(pending, node) {}                                         // eslint-disable-line no-unused-vars
-  initPending(node)     { return {}; }                             // eslint-disable-line no-unused-vars
+  isVisible(_type)        { return false; }
+  onTypeChange(_type)     {}
+  commit(_pending, _node) {}
+  initPending(_node)      { return {}; }
 }
-

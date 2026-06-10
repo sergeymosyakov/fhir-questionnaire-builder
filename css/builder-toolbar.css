@@ -195,3 +195,25 @@
   accent-color: var(--c-primary);
 }
 
+
+/* ── FHIR Version Select ──────────────────────────────────────────────────── */
+.fhir-version-select-mount {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 4px;
+}
+.fhir-version-select-mount .sc-trigger--sm {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--c-primary);
+  background: color-mix(in srgb, var(--c-primary) 8%, transparent);
+  border-color: color-mix(in srgb, var(--c-primary) 25%, transparent);
+  border-radius: 4px;
+  min-width: 60px;
+}
+.fhir-version-select-mount .sc-trigger--sm:hover {
+  background: color-mix(in srgb, var(--c-primary) 15%, transparent);
+}

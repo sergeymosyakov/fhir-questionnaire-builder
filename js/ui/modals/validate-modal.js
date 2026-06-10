@@ -1,8 +1,12 @@
 // ── Validation Modal UI ───────────────────────────────────────────────────────
-// show(title, mode, { questJson, tree, values, onExport? }) — open and run validators
+// show(title, mode, { questJson, tree, values, onExport?, validatorFilter? }) — open and run validators
 //   mode: 'export' → run all validators first; if 0 issues call onExport silently (no modal)
 //                    if issues → open modal with pre-resolved results
 //         'import' / 'validate' → open modal with spinners; fill as each resolves
+//
+// validatorFilter: optional (validator) => boolean — called after the enabled check;
+//   use to exclude validators that are irrelevant for the export format
+//   (e.g. external FHIR server validator is meaningless for REDCap CSV output).
 //
 // Validators control themselves via VALIDATOR_TOGGLE events (see validators/base.js).
 // Disabled validators return [] automatically — no filtering needed here.
@@ -25,13 +29,19 @@ class ValidateModal extends Modal {
    * @param {'export'|'import'|'validate'} mode
    * @param {{ questJson?, tree?, values?, onExport?, extraIssues? }} opts
    */
-  show(title, mode, { questJson = null, tree = [], values = {}, onExport = null, extraIssues = [] } = {}) {
+  show(title, mode, { questJson = null, tree = [], values = {}, onExport = null, extraIssues = [], validatorFilter = null } = {}) {
     this._onExport = onExport;
+    const _filter = v => v.enabled && (!validatorFilter || validatorFilter(v));
 
     if (mode === 'export') {
       // Run all validators first (disabled ones return [] automatically).
       // Only open the modal if there are actual issues to show.
-      validatorRegistry.runAll(questJson, tree, values).then(results => {
+      const activeValidators = validatorRegistry.getAll().filter(_filter);
+      Promise.all(activeValidators.map(v =>
+        v.run(questJson, tree, values)
+          .then(issues => ({ name: v.name, type: v.type, issues }))
+          .catch(() => ({ name: v.name, type: v.type, issues: [] }))
+      )).then(results => {
         const allIssues = results.flatMap(r => r.issues);
         if (allIssues.length === 0 && extraIssues.length === 0) {
           onExport?.();
@@ -44,7 +54,7 @@ class ValidateModal extends Modal {
     }
 
     // import / validate modes: open immediately with spinners, fill as each resolves
-    const validators = validatorRegistry.getAll().filter(v => v.enabled);
+    const validators = validatorRegistry.getAll().filter(_filter);
     this.title.textContent = title;
     this.body.innerHTML = '';
     this.footer.innerHTML = '';

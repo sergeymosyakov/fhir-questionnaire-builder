@@ -86,6 +86,8 @@ export const questMeta = {
   preferredTermServer: '',    // Questionnaire.extension[sdc-questionnaire-preferredTerminologyServer].valueUrl
   _signatureRequired: [],     // questionnaire-signatureRequired — array of {system, code, display}
   _implicitRules:     '',     // Questionnaire.implicitRules — URI; editable in Properties modal
+  // Target FHIR version — drives UI gates and export meta.fhirVersion
+  fhirTarget: 'R4',
 };
 
 // Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.
@@ -113,6 +115,7 @@ export function resetQuestMeta() {
   questMeta.preferredTermServer = '';
   questMeta._signatureRequired = [];
   questMeta._implicitRules = '';
+  questMeta.fhirTarget = 'R4';
 }
 
 // Item types that have form-value validation logic in the preview.

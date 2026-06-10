@@ -20,7 +20,7 @@ import { ANSWER_TYPE_SECTIONS } from './registry.js';
 export function renderAnswerTypeSections(container, pending, type) {
   container.innerHTML = '';
   for (const s of ANSWER_TYPE_SECTIONS) {
-    if (s.isVisible(type)) container.appendChild(s.build(pending));
+    if (s.isVersionVisible() && s.isVisible(type)) container.appendChild(s.build(pending));
   }
 }
 

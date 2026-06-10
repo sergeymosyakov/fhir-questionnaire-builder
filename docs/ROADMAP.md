@@ -12,8 +12,6 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 - [ ] **Performance regression test** — automated test with 200–300 item questionnaire covering deep nesting (depth 6–8), heavy `enableWhen`, and multiple `calculatedExpression` chains; assert render time stays under threshold
 
-- [ ] **FHIR R4 / R5 target selection** — `questMeta.fhirTarget: 'R4' | 'R5'` toggle in Properties modal; export writes `disabledDisplay` and `answerConstraint` as native fields (R5) or extension backports (R4); `meta.fhirVersion` set to `"5.0.0"` when R5; SDC profile URL versioned accordingly; import auto-detects from `meta.fhirVersion`; HAPI validator switches endpoint to `baseR5` when R5 target active. Approach: option (A) — clean per-spec, no double-writing.
-
 ## Technical Debt
 
 *(No current items.)*

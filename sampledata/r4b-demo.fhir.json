@@ -1,0 +1,68 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "r4b-demo",
+  "meta": {
+    "fhirVersion": "4.3.0"
+  },
+  "url": "http://example.org/fhir/Questionnaire/r4b-demo",
+  "version": "1.0",
+  "title": "FHIR R4B Feature Demo",
+  "status": "draft",
+  "date": "2025-01-01",
+  "description": "Demonstrates FHIR R4B features: answerConstraint on choice items (introduced in R4B), and meta.fhirVersion 4.3.0. Loading this questionnaire automatically switches the builder to R4B mode.",
+  "item": [
+    {
+      "linkId": "intro",
+      "type": "display",
+      "text": "This questionnaire uses FHIR R4B features. The builder auto-detected the target version from meta.fhirVersion: 4.3.0."
+    },
+    {
+      "linkId": "preferred-transport",
+      "type": "choice",
+      "text": "Preferred mode of transport (R4B answerConstraint: optionsOrString)",
+      "answerConstraint": "optionsOrString",
+      "answerOption": [
+        { "valueCoding": { "code": "car",    "display": "Car"    } },
+        { "valueCoding": { "code": "bus",    "display": "Bus"    } },
+        { "valueCoding": { "code": "bike",   "display": "Bike"   } },
+        { "valueCoding": { "code": "walk",   "display": "Walk"   } }
+      ]
+    },
+    {
+      "linkId": "diet",
+      "type": "choice",
+      "text": "Dietary preference (R4B answerConstraint: optionsOnly)",
+      "answerConstraint": "optionsOnly",
+      "answerOption": [
+        { "valueCoding": { "code": "omnivore",   "display": "Omnivore"   } },
+        { "valueCoding": { "code": "vegetarian", "display": "Vegetarian" } },
+        { "valueCoding": { "code": "vegan",      "display": "Vegan"      } },
+        { "valueCoding": { "code": "other",      "display": "Other"      } }
+      ]
+    },
+    {
+      "linkId": "demographics",
+      "type": "group",
+      "text": "Demographics",
+      "item": [
+        {
+          "linkId": "age",
+          "type": "integer",
+          "text": "Age (years)",
+          "required": true
+        },
+        {
+          "linkId": "city",
+          "type": "string",
+          "text": "City of residence"
+        }
+      ]
+    },
+    {
+      "linkId": "notes",
+      "type": "text",
+      "text": "Additional notes",
+      "disabledDisplay": "protected"
+    }
+  ]
+}

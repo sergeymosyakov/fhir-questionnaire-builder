@@ -1,0 +1,66 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "r5-demo",
+  "meta": {
+    "fhirVersion": "5.0.0"
+  },
+  "url": "http://example.org/fhir/Questionnaire/r5-demo",
+  "version": "1.0",
+  "title": "FHIR R5 Feature Demo",
+  "status": "draft",
+  "date": "2025-01-01",
+  "description": "Demonstrates FHIR R5 native fields: answerConstraint (replacing open-choice), disabledDisplay, and meta.fhirVersion. Load this questionnaire and the version selector will automatically switch to R5.",
+  "item": [
+    {
+      "linkId": "intro",
+      "type": "display",
+      "text": "This questionnaire uses FHIR R5 features. The builder automatically detected the target version from meta.fhirVersion."
+    },
+    {
+      "linkId": "preferred-drink",
+      "type": "choice",
+      "text": "What is your favourite drink? (R5 choice + answerConstraint)",
+      "answerConstraint": "optionsOrString",
+      "answerOption": [
+        { "valueCoding": { "code": "coffee", "display": "Coffee" } },
+        { "valueCoding": { "code": "tea",    "display": "Tea"    } },
+        { "valueCoding": { "code": "water",  "display": "Water"  } }
+      ]
+    },
+    {
+      "linkId": "occupation",
+      "type": "choice",
+      "text": "Select your occupation (options only, R5 answerConstraint)",
+      "answerConstraint": "optionsOnly",
+      "answerOption": [
+        { "valueCoding": { "code": "student",  "display": "Student"   } },
+        { "valueCoding": { "code": "employed", "display": "Employed"  } },
+        { "valueCoding": { "code": "retired",  "display": "Retired"   } }
+      ]
+    },
+    {
+      "linkId": "contact-info",
+      "type": "group",
+      "text": "Contact Information",
+      "item": [
+        {
+          "linkId": "email",
+          "type": "string",
+          "text": "Email address",
+          "required": true
+        },
+        {
+          "linkId": "phone",
+          "type": "string",
+          "text": "Phone number"
+        }
+      ]
+    },
+    {
+      "linkId": "notes",
+      "type": "text",
+      "text": "Additional notes",
+      "disabledDisplay": "hidden"
+    }
+  ]
+}

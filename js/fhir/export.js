@@ -1,5 +1,10 @@
 ﻿// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
 import { parseOptions, ITLH_KEY_GROUP_OR } from '../utils.js';
+import { formatRegistry } from './format-registry.js';
+import './formats/r4.js';
+import './formats/r4b.js';
+import './formats/r5.js';
+import './formats/redcap.js';
 
 let _svc = {};
 export function configure(svc) { _svc = svc; }
@@ -530,6 +535,18 @@ export function buildFHIRObject() {
   }
 
   return q;
+}
+
+/**
+ * Build a version-stamped FHIR Questionnaire for the given target version.
+ * Falls back to plain buildFHIRObject() if no exporter is registered.
+ * @param {string} [fhirTarget='R4'] - version id, e.g. 'R4', 'R4B', 'R5'
+ */
+export function buildFHIRObjectVersioned(fhirTarget = 'R4') {
+  const base = buildFHIRObject();
+  const fmt  = formatRegistry.get(fhirTarget);
+  if (!fmt?.isBuilderVersion || !fmt.build) return base;
+  return fmt.build(base);
 }
 
 export function exportFHIR(fileName) {

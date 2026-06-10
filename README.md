@@ -1,8 +1,8 @@
 # QuestionaryPrototype — FHIR Questionnaire Logic Builder
 
-A prototype **visual logic builder** for medical prior authorization questionnaires based on [FHIR R4 Questionnaire](https://hl7.org/fhir/R4/questionnaire.html).
+A prototype **visual logic builder** for medical prior authorization questionnaires based on [FHIR R4 / R4B / R5 Questionnaire](https://hl7.org/fhir/R4/questionnaire.html).
 
-Lets you build questionnaire logic visually, test it against patient data, and import/export valid FHIR R4 JSON.
+Lets you build questionnaire logic visually, test it against patient data, and import/export FHIR R4/R4B/R5 JSON or REDCap CSV. The target version is set from a dropdown in the builder toolbar; version is auto-detected on import from `meta.fhirVersion`.
 
 The right-side **preview panel is a live SDC-compliant runtime**: it executes FHIRPath expressions, resolves `enableWhen` / `enableWhenExpression`, evaluates `calculatedExpression` and `initialExpression` chains against an injected Patient resource, and produces a valid `QuestionnaireResponse`. Import an existing QR to resume a partially-filled session. The builder and the runtime are always in sync — edits to item logic are immediately reflected in the live form.
 
@@ -67,6 +67,8 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 | `slider-disabled-demo.fhir.json` | ~12 | Sliders, `disabledDisplay` (hidden/protected), ordinalValue radios. |
 | `patient-scenario-*.fhir.json` | — | Load + select preset + Re-init to test `initialExpression` / `enableWhenExpression` pipelines. |
 | `redcap-clinical-demo.fhir.json` | 30 | Converted from REDCap Data Dictionary. Includes branching logic, calc expressions (BMI via FHIRPath), slider, radio, checkbox fields. |
+| `r4b-demo.fhir.json` | ~10 | FHIR R4B — `answerConstraint`, native `disabledDisplay`; auto-detected as R4B on import. |
+| `r5-demo.fhir.json` | ~10 | FHIR R5 — `answerConstraint`, native `disabledDisplay`; exported with `meta.fhirVersion: 5.0.0`. |
 
 ---
 
@@ -76,7 +78,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **Vanilla JS DOM** — builder and preview rendered imperatively via OOP node classes; state propagated through `AppEvents` custom events
 - **FHIRPath** — `lib/fhirpath.min.js` (global); powers calc, visibility, and constraint expressions
 - **DOMPurify** — `lib/dompurify.min.js`; sanitizes XHTML content before rendering
-- **Vitest** — 1178 unit tests across 25 files; CI via GitHub Actions (`npm test`)
+- **Vitest** — 1197 unit tests across 26 files; CI via GitHub Actions (`npm test`)
 - **Playwright** — e2e tests (Chromium); CI + HTML report on GitHub Pages
 
 ---

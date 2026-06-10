@@ -10,6 +10,27 @@
 // import from one place instead of duplicating or cross-importing helpers.
 
 export class Section {
+  /** @type {string[] | null} Allowed FHIR version ids; null = all versions. */
+  fhirVersions = null;
+
+  /**
+   * Inject shared services used by version-gated sections.
+   * Called once by builder/index.js after Modal.configure().
+   * @param {{ getFhirTarget: () => string }} svc
+   */
+  static _svc = {};
+  static configure(svc) { Object.assign(Section._svc, svc); }
+
+  /**
+   * Returns true if the section should be shown for the current FHIR version.
+   * Override isVisible() in subclasses — call super.isVersionVisible() first.
+   */
+  isVersionVisible() {
+    if (!this.fhirVersions) return true;
+    const target = Section._svc.getFhirTarget?.() ?? 'R4';
+    return this.fhirVersions.includes(target);
+  }
+
   /** Build and return the DOM element (or fragment) for this section.
    *  @param {object} _pending — the modal's shared draft/data object
    *  @returns {HTMLElement | DocumentFragment} */

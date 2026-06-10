@@ -8,7 +8,13 @@ import { GroupNode } from '../nodes/group-node.js';
 import { createGroupNode } from '../nodes/index.js';
 import { BaseNode } from '../nodes/base-node.js';
 import { Modal } from '../ui/modals/modal-base.js';
+import { Section } from '../ui/modals/section.js';
 import { AppEvents } from '../events.js';
+import { showWarn } from '../ui/toast.js';
+import '../fhir/formats/r4.js';
+import '../fhir/formats/r4b.js';
+import '../fhir/formats/r5.js';
+import '../fhir/formats/redcap.js';
 
 // Inject shared state into _shared (triggerCalcRecalc + renderTree need them)
 sharedInit({ tree, rawFhir, values, renderTree });
@@ -27,6 +33,7 @@ BaseNode.configure({
   domPurify:     window.DOMPurify,
   marked:        window.marked,
   leftPanelBody: document.querySelector('.left-panel-body'),
+  getFhirTarget: () => questMeta.fhirTarget,
   // placeholders — patched by app.js after CopyPaste instantiation
   copyNode:   null,
   pasteAfter:  null,
@@ -45,7 +52,10 @@ Modal.configure({
   setValue,
   deleteValue,
   questContained,
+  getFhirTarget: () => questMeta.fhirTarget,
 });
+
+Section.configure({ getFhirTarget: () => questMeta.fhirTarget });
 
 // ── Event listeners ───────────────────────────────────────────────────────────
 // Nodes dispatch custom events instead of importing index.js/preview-form.js
@@ -55,6 +65,18 @@ document.addEventListener(AppEvents.BUILDER_EXPAND_ALL, () => { setCollapsedAll(
 document.addEventListener(AppEvents.BUILDER_COLLAPSE_ALL, () => { setCollapsedAll(tree, true); renderTree(); });
 document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => {
   document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
+});
+// When FHIR version changes: update questMeta and trigger rerender
+document.addEventListener(AppEvents.FHIR_VERSION_CHANGED, e => {
+  const versionId = e.detail?.versionId;
+  if (versionId && questMeta.fhirTarget !== versionId) {
+    if (e.detail?.source === 'user' && tree.length > 0) {
+      showWarn('Switching FHIR version may affect compatibility of some fields or item types in the current questionnaire.');
+    }
+    questMeta.fhirTarget = versionId;
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+    document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
+  }
 });
 
 // Builder toolbar buttons — wired via mount()

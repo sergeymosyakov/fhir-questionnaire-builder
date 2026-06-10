@@ -3,7 +3,7 @@ import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
 import { tree, values, rawFhir, questVariables, questContained, questMeta, getValue, setValue, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES, clearAllValues, resetQuestMeta, resetSeq } from './state.js';
-import { buildFHIRObject, configure as configureExport } from './fhir/export.js';
+import { buildFHIRObject, buildFHIRObjectVersioned, configure as configureExport } from './fhir/export.js';
 import { configure as configureImport } from './fhir/import.js';
 import { configure as configureQrExport } from './fhir/qr-export.js';
 import { initValidators } from './fhir/validators/init.js';
@@ -25,6 +25,7 @@ import answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
 import * as patientCtx        from './ui/patient-ctx.js';
 import { FileNameDisplay } from './ui/file-name.js';
 import { AppEvents } from './events.js';
+import { FhirVersionSelect } from './ui/fhir-version-select.js';
 import { clearConfirmModal } from './ui/modals/clear-confirm-modal.js';
 import { AuthPanel } from './ui/auth-panel.js';
 import { MetadataCard } from './ui/metadata-card.js';
@@ -107,6 +108,12 @@ mountBuilder({
   expandAllBtn:   document.getElementById('expandAllBtn'),
   treeContainer:  document.getElementById('treeContainer'),
 });
+
+// Mount FHIR version selector
+new FhirVersionSelect(
+  document.getElementById('fhirVersionSelectMount'),
+  () => questMeta.fhirTarget,
+).mount();
 
 new RenumberControl(
   document.getElementById('renumberFormatWrap'),
@@ -193,7 +200,7 @@ Promise.all([
     },
     onAutosaveToggle: (enabled) => as.setEnabled(enabled),
     onValidate: () => {
-      validateModal.show('Validate \u2014 Report', 'validate', { questJson: buildFHIRObject(), tree, values });
+      validateModal.show('Validate \u2014 Report', 'validate', { questJson: buildFHIRObjectVersioned(questMeta.fhirTarget), tree, values });
     },
     onExpand:   () => previewForm.expandAll(),
     onCollapse: () => previewForm.collapseAll(),
@@ -213,7 +220,7 @@ questLoader.configureResetFlow({
   confirmOpen:        () => clearConfirmModal.open(),
   promptExport:       (onDone) => saveMenu.promptExport(onDone),
   showValidateExport: (onExport) => {
-    validateModal.show('Export — Validation Report', 'export', { questJson: buildFHIRObject(), tree, values, onExport });
+    validateModal.show('Export — Validation Report', 'export', { questJson: buildFHIRObjectVersioned(questMeta.fhirTarget), tree, values, onExport });
   },
   clearDraft: () => import('./ui/autosave.js').then(m => m.clearDraft()),
 });

@@ -10,6 +10,8 @@ import { renderTreeAsync, renderTree } from '../builder/index.js';
 import { GroupNode } from '../nodes/group-node.js';
 import { terminologyService } from './terminology-service.js';
 import { AppEvents } from '../events.js';
+import { versionRegistry } from './version-registry.js';
+// Format registrations are handled by js/fhir/formats/*.js, imported via export.js
 import { loadConfirmModal } from '../ui/modals/load-confirm-modal.js';
 import { destroyTree } from '../utils.js';
 
@@ -91,6 +93,16 @@ export class QuestionnaireLoader {
   async load(data, fileName) {
     try {
       importFHIR(data, () => {});
+      // Auto-detect FHIR version from meta.fhirVersion
+      const _importedVersion = data?.meta?.fhirVersion
+        ? versionRegistry.detectFromMeta(data.meta.fhirVersion)
+        : null;
+      if (_importedVersion && this._questMeta.fhirTarget !== _importedVersion) {
+        this._questMeta.fhirTarget = _importedVersion;
+        document.dispatchEvent(new CustomEvent(AppEvents.FHIR_VERSION_CHANGED, {
+          detail: { versionId: _importedVersion },
+        }));
+      }
       GroupNode.resetCollapsedFromTree(this._tree);
       if (this._reinitForm) {
         await this._reinitForm();

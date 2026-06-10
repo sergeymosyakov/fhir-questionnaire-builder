@@ -89,15 +89,19 @@ class AnswerTypeModal extends Modal {
 
     const built = ANSWER_TYPE_SECTIONS.map(s => ({ s, el: s.build(this._pending) }));
 
+    const fhirTarget = Modal._svc.getFhirTarget?.() ?? 'R4';
+    const filteredTypes = fhirTarget === 'R5'
+      ? ITEM_TYPES.filter(t => t !== 'open-choice')
+      : ITEM_TYPES;
     const typeSel = createCustomSelect({
-      items:     ITEM_TYPES.map(t => ({ value: t, label: t })),
+      items:     filteredTypes.map(t => ({ value: t, label: t })),
       value:     this._pending.draftType,
       className: 'at-modal-type-sel sc-trigger--full',
       testid:    'type-select',
       onChange:  v => {
         this._pending.draftType = v;
         built.forEach(({ s, el }) => {
-          el.style.display = s.isVisible(v) ? '' : 'none';
+          el.style.display = (s.isVersionVisible() && s.isVisible(v)) ? '' : 'none';
           s.onTypeChange(v);
         });
       },
@@ -106,7 +110,7 @@ class AnswerTypeModal extends Modal {
     container.appendChild(typeRow);
 
     built.forEach(({ s, el }) => {
-      el.style.display = s.isVisible(this._pending.draftType) ? '' : 'none';
+      el.style.display = (s.isVersionVisible() && s.isVisible(this._pending.draftType)) ? '' : 'none';
       container.appendChild(el);
     });
   }
