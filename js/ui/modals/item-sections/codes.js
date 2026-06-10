@@ -1,6 +1,7 @@
 import { ItemSection } from './base-section.js';
 import { ITEM_SECTIONS } from './registry.js';
 import { makeCollapsible } from './helpers.js';
+import { TermSearch } from '../../term-search.js';
 
 class CodesSection extends ItemSection {
   initPending(node) {
@@ -94,4 +95,45 @@ export function renderCodesEditor(draft, container, prefix = 'code', label = 'co
     renderCodesEditor(draft, container, prefix, label);
   };
   container.appendChild(addBtn);
+
+  // ── LOINC / SNOMED term search ──────────────────────────────────────────
+  // Preserve open/closed state across re-renders (e.g. after user picks a term)
+  const wasOpen = container.dataset.termSearchOpen === '1';
+
+  const searchToggle = document.createElement('button');
+  searchToggle.type = 'button';
+  searchToggle.className = 'codes-search-btn';
+  searchToggle.dataset.testid = `${prefix}s-search-btn`;
+
+  const searchWrap = document.createElement('div');
+  searchWrap.className = 'codes-search-wrap';
+  let _searchWidget = null;
+
+  const openSearch = () => {
+    container.dataset.termSearchOpen = '1';
+    searchToggle.textContent = 'Close term search';
+    _searchWidget = new TermSearch(searchWrap, {
+      onSelect: ({ system, code, display }) => {
+        draft.push({ system, code, display });
+        renderCodesEditor(draft, container, prefix, label);
+      },
+      testid: `${prefix}s-term-search`,
+    });
+  };
+
+  const closeSearch = () => {
+    container.dataset.termSearchOpen = '0';
+    searchToggle.textContent = 'Search LOINC / SNOMED\u2026';
+    _searchWidget?.destroy();
+    _searchWidget = null;
+    searchWrap.innerHTML = '';
+  };
+
+  searchToggle.textContent = 'Search LOINC / SNOMED\u2026';
+  searchToggle.addEventListener('click', () => {
+    if (_searchWidget) closeSearch(); else openSearch();
+  });
+
+  container.append(searchToggle, searchWrap);
+  if (wasOpen) openSearch();
 }

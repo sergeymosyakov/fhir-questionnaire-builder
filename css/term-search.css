@@ -1,0 +1,137 @@
+/* ── TermSearch widget ───────────────────────────────────────────────────────
+   Styles for js/ui/term-search.js
+   Used inside the Codes editor (item-sections/codes.js) and anywhere else
+   a TermSearch instance is mounted.
+──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Toggle button (Search LOINC / SNOMED) ─────────────────────────────── */
+.codes-search-btn {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--c-accent);
+  background: none;
+  border: 1px dashed var(--c-border);
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+}
+.codes-search-btn:hover {
+  background: var(--c-hover);
+}
+
+/* ── Widget wrapper ─────────────────────────────────────────────────────── */
+.ts-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Terms of Use panel ─────────────────────────────────────────────────── */
+.ts-tou {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 6px;
+}
+.ts-tou-text {
+  margin: 0;
+  font-size: 11px;
+  color: var(--c-text-2);
+  line-height: 1.5;
+}
+.ts-tou-text a {
+  color: var(--c-accent);
+  text-decoration: underline;
+}
+.ts-tou-accept {
+  align-self: flex-start;
+  font-size: 11px;
+}
+
+/* ── Search row (system selector + input) ───────────────────────────────── */
+.ts-search-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.ts-sys-sel {
+  flex-shrink: 0;
+  min-width: 110px;
+}
+.ts-inp {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid var(--c-border);
+  border-radius: 4px;
+  background: var(--c-surface);
+  color: var(--c-text);
+  outline: none;
+}
+.ts-inp:focus {
+  border-color: var(--c-accent);
+}
+.ts-loading .ts-inp {
+  opacity: 0.6;
+}
+
+/* ── Results list ───────────────────────────────────────────────────────── */
+.ts-results:empty {
+  display: none;
+}
+.ts-results {
+  border: 1px solid var(--c-border);
+  border-radius: 4px;
+  max-height: 180px;
+  overflow-y: auto;
+  background: var(--c-surface);
+}
+.ts-result-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 8px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--c-border);
+  cursor: pointer;
+  text-align: left;
+}
+.ts-result-row:last-child {
+  border-bottom: none;
+}
+.ts-result-row:hover {
+  background: var(--c-hover);
+}
+.ts-result-code {
+  flex-shrink: 0;
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--c-accent);
+}
+.ts-result-display {
+  font-size: 12px;
+  color: var(--c-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Status messages ────────────────────────────────────────────────────── */
+.ts-no-results,
+.ts-error {
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--c-text-2);
+}
+.ts-error {
+  color: #c0392b;
+}

@@ -84,7 +84,7 @@
     { cat: 'Item — Core', field: 'item.definition', desc: 'URL pointing to an ElementDefinition that provides additional meaning', where: 'Item Properties modal', how: 'Click "Props" action link on the item → Definition field' },
     { cat: 'Item — Extensions', field: 'item.extension[questionnaire-baseType]', desc: 'Base FHIR type for items derived from an ElementDefinition (e.g. string, HumanName)', where: 'Item Properties modal', how: 'Click "Props" action link → Base Type field' },
     { cat: 'Item — Extensions', field: 'item.extension[questionnaire-fhirType]', desc: 'Specific FHIR type for complex elements derived from an ElementDefinition (e.g. HumanName, ContactPoint)', where: 'Item Properties modal', how: 'Click "Props" action link → FHIR Type field' },
-    { cat: 'Item — Core', field: 'item.code[]', desc: 'Formal coding identifiers for the item (e.g. LOINC code)', where: 'Item Properties modal', how: 'Click "Props" action link on the item → Codes section' },
+    { cat: 'Item — Core', field: 'item.code[]', desc: 'Formal coding identifiers for the item (e.g. LOINC code)', where: 'Item Properties modal', how: 'Click "Props" action link on the item → Codes section. Use "Search LOINC / SNOMED…" to autocomplete codes from the NLM Clinical Tables API (free, no key needed; LOINC Terms of Use acceptance required on first use)' },
 
     // ── Item — standard FHIR extensions ──────────────────────────────────────
     { cat: 'Item — Extensions', field: 'rendering-style', desc: 'Inline CSS to apply to the rendered item text (bold, colour, etc.)', where: 'Appearance modal', how: 'Click "Appearance" action link on the item row' },
