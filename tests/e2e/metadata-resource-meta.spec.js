@@ -161,14 +161,20 @@ test.describe('metadata modal — Resource Meta section', () => {
     expect(exported).toBeLessThanOrEqual(after);
   });
 
-  test('clean questionnaire has no meta block in export', async ({ page }) => {
+  test('clean questionnaire has no user-set meta fields in export', async ({ page }) => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
     await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
     await page.locator('[data-testid="add-menu-item"]').first().click();
     await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
     const q = await exportFHIR(page);
-    expect(q.meta).toBeUndefined();
+    // R4 format always stamps meta.fhirVersion and meta.lastUpdated;
+    // verify no user-set fields leaked into a clean questionnaire
+    expect(q.meta?.profile).toBeUndefined();
+    expect(q.meta?.tag).toBeUndefined();
+    expect(q.meta?.security).toBeUndefined();
+    expect(q.meta?.versionId).toBeUndefined();
+    expect(q.meta?.source).toBeUndefined();
   });
 
   // ── profile[] ───────────────────────────────────────────────────────────────
