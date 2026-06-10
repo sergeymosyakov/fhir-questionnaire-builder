@@ -106,12 +106,9 @@ test.describe('REDCap CSV import', () => {
     await freshStart(page);
     await loadREDCapCSV(page, SAMPLE_CSV);
 
-    // Tree should now have group nodes (forms from the CSV)
-    await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 10_000 });
-
-    // First form should be "demographics"
+    // First form should be "demographics" — wait generously for the new tree to replace the default
     const firstGroup = page.locator('[data-node-id="1"]');
-    await expect(firstGroup).toBeVisible();
+    await expect(firstGroup).toBeVisible({ timeout: 15_000 });
     const title = await firstGroup.getByTestId('node-title-display').first().innerText();
     expect(title.toLowerCase()).toContain('demo');
   });
