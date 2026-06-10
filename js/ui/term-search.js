@@ -10,19 +10,26 @@
 // Acceptance is stored in localStorage so it only shows once per browser.
 
 import { createCustomSelect } from './custom-select.js';
+import { terminologyService } from '../fhir/terminology-service.js';
 
 const LOINC_TOU_KEY  = 'loinc-tou-accepted';
 const LOINC_SYSTEM   = 'http://loinc.org';
+const ICD10_SYSTEM   = 'http://hl7.org/fhir/sid/icd-10-cm';
 const SNOMED_SYSTEM  = 'http://snomed.info/sct';
+// ValueSet URL that expands all active SNOMED CT concepts (via FHIR $expand + filter).
+const SNOMED_VS_URL  = 'http://snomed.info/sct?fhir_vs';
 
+// Paths are relative to the NLM API base URL (configured in config.json).
+// terminologyService.nlmUrl(path) returns the proxied full URL at call time.
+// Systems with fhirExpand:true use terminologyService.expandWithFilter() instead
+// (routes through corsProxyUrl configured in config.json).
 const SYSTEM_DEFS = {
   loinc: {
-    label:  'LOINC',
-    system: LOINC_SYSTEM,
-    url: q =>
-      `https://clinicaltables.nlm.nih.gov/api/loinc_items/v3/search` +
-      `?type=question&terms=${encodeURIComponent(q)}&df=text,LOINC_NUM` +
-      `&sf=text,CONSUMER_NAME,RELATEDNAMES2,SHORTNAME&maxList=10`,
+    label:   'LOINC',
+    system:  LOINC_SYSTEM,
+    nlmPath: q =>
+      `loinc_items/v3/search?type=question&terms=${encodeURIComponent(q)}` +
+      `&df=text,LOINC_NUM&sf=text,CONSUMER_NAME,RELATEDNAMES2,SHORTNAME&maxList=10`,
     parse: ([, codes,, displays]) =>
       (codes || []).map((code, i) => ({
         code,
@@ -31,17 +38,26 @@ const SYSTEM_DEFS = {
       })),
   },
   snomed: {
-    label:  'SNOMED CT',
-    system: SNOMED_SYSTEM,
-    url: q =>
-      `https://clinicaltables.nlm.nih.gov/api/snomed_codes/v3/search` +
-      `?terms=${encodeURIComponent(q)}&df=text&maxList=10`,
-    parse: ([, codes,, displays]) =>
-      (codes || []).map((code, i) => ({
-        code,
-        display: displays?.[i]?.[0] ?? code,
-        system:  SNOMED_SYSTEM,
-      })),
+    label:       'SNOMED CT',
+    system:      SNOMED_SYSTEM,
+    fhirExpand:  true,
+    vsUrl:       SNOMED_VS_URL,
+    minChars:    4,  // tx.fhir.org rejects $expand?filter= shorter than 4 chars (HTTP 422)
+  },
+  icd10: {
+    label:   'ICD-10-CM',
+    system:  ICD10_SYSTEM,
+    nlmPath: q =>
+      `conditions/v3/search?terms=${encodeURIComponent(q)}&df=consumer_name&ef=icd10cm&maxList=10`,
+    parse: ([, , extra, displays]) => {
+      const icd10List = extra?.icd10cm ?? [];
+      return (displays || []).map((d, i) => {
+        const firstCode = icd10List[i]?.[0];
+        return firstCode
+          ? { code: firstCode.code, display: firstCode.name || d?.[0] || firstCode.code, system: ICD10_SYSTEM }
+          : null;
+      }).filter(Boolean);
+    },
   },
 };
 
@@ -51,12 +67,13 @@ export class TermSearch {
    * @param {{ onSelect: function({ system: string, code: string, display: string }): void, testid?: string }} opts
    */
   constructor(container, { onSelect, testid = 'term-search' } = {}) {
-    this._onSelect  = onSelect;
-    this._debounce  = null;
-    this._results   = [];
-    this._system    = 'loinc';
-    this._resultBox = null;
-    this._abortCtrl = null;
+    this._onSelect   = onSelect;
+    this._debounce   = null;
+    this._results    = [];
+    this._system     = 'loinc';
+    this._resultBox  = null;
+    this._abortCtrl  = null;
+    this._searchGen  = 0;  // incremented on each search; used to discard stale fhirExpand results
 
     this.el = document.createElement('div');
     this.el.className = 'ts-wrap';
@@ -86,7 +103,7 @@ export class TermSearch {
     const p = document.createElement('p');
     p.className = 'ts-tou-text';
     p.appendChild(document.createTextNode(
-      'LOINC and SNOMED CT search uses the free '
+      'LOINC and ICD-10-CM search uses the free '
     ));
     const apiLink = document.createElement('a');
     apiLink.href   = 'https://clinicaltables.nlm.nih.gov/';
@@ -95,7 +112,7 @@ export class TermSearch {
     apiLink.textContent = 'NLM Clinical Tables API';
     p.appendChild(apiLink);
     p.appendChild(document.createTextNode(
-      '. By proceeding you agree to the '
+      '. SNOMED CT search queries a public FHIR terminology server. By proceeding you agree to the '
     ));
     const touLink = document.createElement('a');
     touLink.href   = 'https://loinc.org/license/';
@@ -103,7 +120,16 @@ export class TermSearch {
     touLink.rel    = 'noopener noreferrer';
     touLink.textContent = 'LOINC Terms of Use';
     p.appendChild(touLink);
-    p.appendChild(document.createTextNode('.'));
+    p.appendChild(document.createTextNode(
+      '. SNOMED CT use is subject to '
+    ));
+    const snomedLink = document.createElement('a');
+    snomedLink.href   = 'https://www.snomed.org/get-snomed';
+    snomedLink.target = '_blank';
+    snomedLink.rel    = 'noopener noreferrer';
+    snomedLink.textContent = 'SNOMED International licensing';
+    p.appendChild(snomedLink);
+    p.appendChild(document.createTextNode(' (free in member countries).'));
 
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -136,7 +162,8 @@ export class TermSearch {
         this._system = v;
         this._clearResults();
         const q = inp.value.trim();
-        if (q.length >= 2) this._doSearch(q);
+        const min = SYSTEM_DEFS[v]?.minChars ?? 2;
+        if (q.length >= min) this._doSearch(q);
       },
     });
     this._sysSel = sysSel;
@@ -152,7 +179,8 @@ export class TermSearch {
     inp.addEventListener('input', () => {
       clearTimeout(this._debounce);
       const q = inp.value.trim();
-      if (q.length < 2) { this._clearResults(); return; }
+      const min = SYSTEM_DEFS[this._system]?.minChars ?? 2;
+      if (q.length < min) { this._clearResults(); return; }
       this._debounce = setTimeout(() => this._doSearch(q), 350);
     });
     inp.addEventListener('keydown', e => {
@@ -178,17 +206,26 @@ export class TermSearch {
     this._abortCtrl = new AbortController();
     this._setLoading(true);
 
+    const gen = ++this._searchGen;
     try {
-      const res = await fetch(def.url(terms), { signal: this._abortCtrl.signal });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      this._results = def.parse(data);
+      let results;
+      if (def.fhirExpand) {
+        results = await terminologyService.expandWithFilter(def.vsUrl, null, terms, 10);
+        if (gen !== this._searchGen) return; // superseded by a newer search
+      } else {
+        const url = await terminologyService.nlmUrl(def.nlmPath(terms));
+        const res = await fetch(url, { signal: this._abortCtrl.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        results = def.parse(data);
+      }
+      this._results = results;
       this._renderResults();
     } catch (err) {
       if (err.name === 'AbortError') return;
       this._showStatus('error', 'Search failed. Check your connection.');
     } finally {
-      this._setLoading(false);
+      if (gen === this._searchGen) this._setLoading(false);
     }
   }
 

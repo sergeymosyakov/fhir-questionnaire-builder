@@ -1,4 +1,4 @@
-// ── E2E: LOINC / SNOMED term search in Item Properties modal ─────────────────
+// ── E2E: LOINC / SNOMED / ICD-10-CM term search in Item Properties modal ─────
 // Tests for TermSearch widget mounted inside the Codes section of CodesModal.
 // Network requests to clinicaltables.nlm.nih.gov are intercepted / mocked so
 // tests are deterministic and work without internet access.
@@ -15,7 +15,7 @@
 //   codesModalCancel            Cancel button
 //   codes-search-btn            "Search LOINC / SNOMED…" toggle button (prefix=code)
 //   term-search-tou-accept      "Accept & enable search" button in ToU banner
-//   term-search-system          custom select trigger for system choice
+//   term-search-system          custom select trigger for system choice (values: loinc | snomed | icd10)
 //   term-search-input           search text input
 //   term-search-results         results container
 //   term-search-result          individual result row button
@@ -37,12 +37,23 @@ const MOCK_LOINC_RESPONSE = [
   [['Systolic blood pressure'], ['Blood pressure panel with all children optional']],
 ];
 
-const MOCK_SNOMED_RESPONSE = [
+// conditions API returns [total, key_ids[], {icd10cm: [[{code,name}],...]}, displays[]]
+const MOCK_ICD10_RESPONSE = [
   1,
-  ['73211009'],
-  {},
-  [['Diabetes mellitus']],
+  ['2143'],
+  { icd10cm: [[{ code: 'E11.9', name: 'Type 2 diabetes mellitus without complications' }]] },
+  [['Diabetes mellitus (DM)']],
 ];
+
+// FHIR ValueSet $expand response (used for SNOMED CT)
+const MOCK_SNOMED_FHIR_RESPONSE = {
+  resourceType: 'ValueSet',
+  expansion: {
+    contains: [
+      { system: 'http://snomed.info/sct', code: '73211009', display: 'Diabetes mellitus' },
+    ],
+  },
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -81,10 +92,29 @@ async function addItemAndOpenCodesModal(page) {
 async function mockNlm(page) {
   await page.route('**/clinicaltables.nlm.nih.gov/**', async route => {
     const url = route.request().url();
-    if (url.includes('snomed')) {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_SNOMED_RESPONSE) });
+    if (url.includes('conditions')) {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_ICD10_RESPONSE) });
     } else {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_LOINC_RESPONSE) });
+    }
+  });
+}
+
+/**
+ * Route SNOMED FHIR $expand requests (direct or via CORS proxy) to mock data.
+ * Matches both https://tx.fhir.org/... and https://fhir-cors-proxy...?url=...tx.fhir.org...
+ */
+async function mockSnomed(page) {
+  await page.route(url => url.toString().includes('tx.fhir.org') || url.toString().includes('fhir-cors-proxy'), async route => {
+    const reqUrl = route.request().url();
+    if (reqUrl.includes('ValueSet') || reqUrl.includes('snomed')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/fhir+json',
+        body: JSON.stringify(MOCK_SNOMED_FHIR_RESPONSE),
+      });
+    } else {
+      await route.continue();
     }
   });
 }
@@ -181,12 +211,23 @@ test.describe('Search UI', () => {
     await expect(searchInput(page)).toHaveValue('');
   });
 
-  test('switching system to SNOMED fetches SNOMED results', async ({ page }) => {
+  test('switching system to ICD-10-CM fetches condition results', async ({ page }) => {
+    await systemSelect(page).click();
+    await page.locator('[data-testid="csel-drop"] [data-val="icd10"]').click();
+    await expect(systemSelect(page)).toHaveAttribute('data-value', 'icd10');
+    await searchInput(page).fill('diab');
+    await expect(resultRows(page).first()).toBeVisible({ timeout: 5_000 });
+    await expect(resultRows(page).first()).toContainText('E11.9');
+    await expect(resultRows(page).first()).toContainText('Type 2 diabetes');
+  });
+
+  test('switching system to SNOMED CT fetches FHIR $expand results', async ({ page }) => {
+    await mockSnomed(page);
     await systemSelect(page).click();
     await page.locator('[data-testid="csel-drop"] [data-val="snomed"]').click();
     await expect(systemSelect(page)).toHaveAttribute('data-value', 'snomed');
     await searchInput(page).fill('diab');
-    await expect(resultRows(page).first()).toBeVisible({ timeout: 5_000 });
+    await expect(resultRows(page).first()).toBeVisible({ timeout: 8_000 });
     await expect(resultRows(page).first()).toContainText('73211009');
     await expect(resultRows(page).first()).toContainText('Diabetes mellitus');
   });

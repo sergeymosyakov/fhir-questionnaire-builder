@@ -16,6 +16,7 @@ const FALLBACK_TERMINOLOGY_SERVER = 'https://tx.fhir.org/r4';
 // See scripts/cors-proxy.worker.js for the Cloudflare Worker implementation.
 let _corsProxyUrl = '';
 let _defaultTermServer = FALLBACK_TERMINOLOGY_SERVER;
+let _nlmApiBaseUrl = 'https://clinicaltables.nlm.nih.gov/api';
 let _configLoaded = false;
 let _configPromise = null;
 
@@ -27,6 +28,7 @@ function _loadConfig() {
     .then(cfg => {
       _corsProxyUrl      = (cfg.corsProxyUrl      || '').replace(/\/$/, '');
       _defaultTermServer = (cfg.terminologyServer || FALLBACK_TERMINOLOGY_SERVER).replace(/\/$/, '');
+      _nlmApiBaseUrl     = (cfg.nlmApiBaseUrl     || 'https://clinicaltables.nlm.nih.gov/api').replace(/\/$/, '');
     })
     .catch(() => {})
     .finally(() => { _configLoaded = true; });
@@ -111,6 +113,19 @@ class TerminologyService {
   /** Wrap a target URL through the CORS proxy if configured. */
   _proxyUrl(url) {
     return _corsProxyUrl ? `${_corsProxyUrl}?url=${encodeURIComponent(url)}` : url;
+  }
+
+  /**
+   * Return a direct (non-proxied) URL for an NLM Clinical Tables API path.
+   * clinicaltables.nlm.nih.gov already sends Access-Control-Allow-Origin: *,
+   * so routing through the CORS proxy is unnecessary and causes 403 errors.
+   * The base URL is read from config.json (key: nlmApiBaseUrl).
+   * @param {string} relativePath  Path + query string relative to the NLM API base (no leading slash).
+   * @returns {Promise<string>}
+   */
+  async nlmUrl(relativePath) {
+    await _loadConfig();
+    return `${_nlmApiBaseUrl}/${relativePath}`;
   }
 
   /** Resolve the server URL for a node using the full fallback chain. */

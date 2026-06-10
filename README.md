@@ -89,6 +89,12 @@ This project includes sample questionnaire files that contain LOINC-coded conten
 
 This material contains content from LOINC (http://loinc.org). LOINC is copyright © Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the license at http://loinc.org/license. LOINC® is a registered United States trademark of Regenstrief Institute, Inc.
 
+The builder's code search feature retrieves SNOMED CT concepts via the public FHIR terminology server (tx.fhir.org). SNOMED CT® is a registered trademark of SNOMED International. Use of SNOMED CT content is subject to the [SNOMED CT Affiliate License](https://www.snomed.org/get-snomed). Use in SNOMED International member countries is free; use in non-member countries may require a fee. This application does not distribute or embed SNOMED CT content — codes are fetched live from a licensed FHIR terminology server at the user's request.
+
+ICD-10-CM codes are retrieved via the NLM Clinical Tables API (https://clinicaltables.nlm.nih.gov/). ICD-10-CM is maintained by the U.S. Centers for Disease Control and Prevention (CDC) and is in the public domain.
+
+The NLM Clinical Tables Search Service is provided free of charge by the U.S. National Library of Medicine. Neither NLM, LHNCBC, NIH, nor any contributor's name may be used to endorse products derived from this service without prior written permission.
+
 Sample files sourced from HL7 Implementation Guides are published under Creative Commons Attribution 4.0 (CC BY 4.0). Source URLs are preserved in each file's `url` field.
 
 ---
