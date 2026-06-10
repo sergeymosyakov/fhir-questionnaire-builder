@@ -27,7 +27,7 @@ class ValidateModal extends Modal {
   /**
    * @param {string} title
    * @param {'export'|'import'|'validate'} mode
-   * @param {{ questJson?, tree?, values?, onExport?, extraIssues? }} opts
+   * @param {{ questJson?, tree?, values?, onExport?, extraIssues?, validatorFilter? }} opts
    */
   show(title, mode, { questJson = null, tree = [], values = {}, onExport = null, extraIssues = [], validatorFilter = null } = {}) {
     this._onExport = onExport;

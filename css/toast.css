@@ -18,6 +18,9 @@
 .notif-box.notif--warn  { border-top: 3px solid #d97706; }
 .notif-box.notif--info  { border-top: 3px solid #2563eb; }
 
+/* Preserve newlines so multi-line messages (joined with \n) wrap per line */
+.notif-box .modal-body { white-space: pre-line; }
+
 /* Header row: icon + title */
 .notif-header-title {
   display: flex;

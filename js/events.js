@@ -73,8 +73,11 @@ export const AppEvents = Object.freeze({
   // nodeType: if set, BaseNode skips nodes whose type doesn't match (type safety).
   COPY_TO_NODES: 'copy-to-nodes',
   // ── FHIR version ─────────────────────────────────────────────────────────
-  // detail: { versionId: 'R4' | 'R4B' | 'R5' }
-  // Dispatched by FhirVersionSelect when the user changes the target FHIR version,
-  // and by questionnaire-loader.js when a loaded file has meta.fhirVersion set.
+  // detail: { versionId: 'R4'|'R4B'|'R5', fromVersionId?: 'R4'|'R4B'|'R5', source?: 'user' }
+  // Dispatched by FhirVersionSelect when the user changes the target FHIR version
+  // (source:'user', fromVersionId = previous version), and by
+  // questionnaire-loader.js when a loaded file has meta.fhirVersion set (no source).
+  // When source:'user' and the tree is non-empty, version-compat checkers run and
+  // a warning toast is shown only if any checker produces a message.
   FHIR_VERSION_CHANGED: 'fhir-version-changed',
 });
