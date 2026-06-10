@@ -120,8 +120,8 @@ test.describe('REDCap CSV import', () => {
     await freshStart(page);
     await loadREDCapCSV(page, SAMPLE_CSV);
 
-    // First form should be "demographics" — wait generously for the new tree to replace the default
-    const firstGroup = page.locator('[data-node-id="1"]');
+    // The REDCap converter uses linkId as node id ("demographics", not "1")
+    const firstGroup = page.locator('[data-node-id="demographics"]');
     await expect(firstGroup).toBeVisible({ timeout: 15_000 });
     const title = await firstGroup.getByTestId('node-title-display').first().innerText();
     expect(title.toLowerCase()).toContain('demo');
@@ -132,8 +132,8 @@ test.describe('REDCap CSV import', () => {
     await loadREDCapCSV(page, SAMPLE_CSV);
     await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 10_000 });
 
-    // The demo CSV has 7 forms → 7 root groups
-    const rootGroups = page.locator('[data-node-depth="0"]');
+    // The demo CSV has 7 forms → 7 root groups (direct children of the tree container)
+    const rootGroups = page.getByTestId('tree-container').locator(':scope > .node-wrap');
     await expect(rootGroups).toHaveCount(7, { timeout: 10_000 });
   });
 
@@ -141,8 +141,8 @@ test.describe('REDCap CSV import', () => {
     await freshStart(page);
     await loadFHIRJSON(page, SAMPLE_FHIR);
     await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 10_000 });
-    // Should have the same 7 groups as the CSV import
-    const rootGroups = page.locator('[data-node-depth="0"]');
+    // Should have the same 7 groups as the CSV import (direct children of the tree container)
+    const rootGroups = page.getByTestId('tree-container').locator(':scope > .node-wrap');
     await expect(rootGroups).toHaveCount(7, { timeout: 10_000 });
   });
 });
@@ -151,8 +151,8 @@ test.describe('REDCap CSV import', () => {
 
 test.describe('REDCap CSV export', () => {
   test('save format modal opens on "Questionnaire…" click', async ({ page }) => {
-    await freshStart(page);
-    await page.getByTestId('export-btn').click();
+    await freshStart(page);    // export-btn is hidden until a questionnaire is loaded/started
+    await page.getByTestId('add-root-group-btn').click();    await page.getByTestId('export-btn').click();
     await expect(page.getByTestId('export-quest-item')).toBeVisible();
     await page.getByTestId('export-quest-item').click();
     await expect(page.getByTestId('saveFormatModal')).toBeVisible();

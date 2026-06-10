@@ -422,7 +422,7 @@
             },
             {
               "url": "http://fhir-qb.app/redcap/field-note",
-              "valueString": "Number of packs per day × years smoked"
+              "valueString": "Number of packs per day \u00d7 years smoked"
             }
           ]
         }
@@ -530,7 +530,8 @@
                   "url": "http://fhir-qb.app/redcap/field-note",
                   "valueString": "Auto-calculated"
                 }
-              ]
+              ],
+              "readOnly": true
             }
           ],
           "extension": [
