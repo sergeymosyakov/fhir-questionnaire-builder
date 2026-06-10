@@ -19,6 +19,7 @@
 //   saveFormatModalApply   "Export" button
 //   saveFormatModalCancel  Cancel button
 //   save-format-select     custom select inside save modal
+//   prompt-save            "Save" button in the filename prompt modal
 //   validateModal          backdrop <div> (display:flex when open)
 //   validateModalTitle     <span> in validate modal header
 //   validateModalBody      scrollable body
@@ -177,6 +178,9 @@ test.describe('REDCap CSV export', () => {
         await page.getByTestId('save-format-select').click();
         await page.locator('[data-testid="csel-drop"] [data-val="redcap"]').click();
         await page.getByTestId('saveFormatModalApply').click();
+        // No compat issues → validate modal skipped; filename prompt appears
+        await expect(page.getByTestId('prompt-save')).toBeVisible({ timeout: 8_000 });
+        await page.getByTestId('prompt-save').click();
       })(),
     ]);
 
