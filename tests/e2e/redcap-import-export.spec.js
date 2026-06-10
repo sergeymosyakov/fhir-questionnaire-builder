@@ -50,6 +50,13 @@ async function loadREDCapCSV(page, filePath) {
   await expect(page.getByTestId('load-from-file-item')).toBeVisible();
   await page.getByTestId('load-from-file-item').click();
 
+  // If existing questionnaire is loaded, confirm dialog appears first
+  const confirmModal = page.getByTestId('loadConfirmModal');
+  await confirmModal.waitFor({ state: 'visible', timeout: 2_000 }).catch(() => {});
+  if (await confirmModal.isVisible()) {
+    await page.getByTestId('load-confirm-proceed-btn').click();
+  }
+
   // Format picker modal should open
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
 
@@ -70,6 +77,13 @@ async function loadFHIRJSON(page, filePath) {
   await page.getByTestId('load-fhir-btn').click();
   await expect(page.getByTestId('load-from-file-item')).toBeVisible();
   await page.getByTestId('load-from-file-item').click();
+
+  // If existing questionnaire is loaded, confirm dialog appears first
+  const confirmModal2 = page.getByTestId('loadConfirmModal');
+  await confirmModal2.waitFor({ state: 'visible', timeout: 2_000 }).catch(() => {});
+  if (await confirmModal2.isVisible()) {
+    await page.getByTestId('load-confirm-proceed-btn').click();
+  }
 
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
 
