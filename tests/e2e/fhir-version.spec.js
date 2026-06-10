@@ -48,9 +48,10 @@ async function getSelectedVersion(page) {
 
 /** Open the Answer Type modal for an existing item. */
 async function openAnswerTypeModal(page, nodeId) {
-  const node = page.locator(`[data-node-id="${nodeId}"]`);
-  await node.getByTestId('node-type-btn').click();
-  await expect(page.getByTestId('modal-answer-type')).toBeVisible({ timeout: 5_000 });
+  const typeLink = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type');
+  await expect(typeLink).toBeVisible();
+  await typeLink.click();
+  await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible({ timeout: 5_000 });
 }
 
 // ── 1. Default version is FHIR R4 ────────────────────────────────────────────
@@ -113,9 +114,9 @@ test.describe('R5 version gate: open-choice hidden', () => {
     await expect(
       page.locator('[data-testid="csel-drop"] [data-val="open-choice"]')
     ).not.toBeVisible();
-    // R5-valid type like 'choice' should still be present
+    // R5-valid type like 'select' (choice) should still be present
     await expect(
-      page.locator('[data-testid="csel-drop"] [data-val="choice"]')
+      page.locator('[data-testid="csel-drop"] [data-val="select"]')
     ).toBeVisible();
     await page.keyboard.press('Escape');
     await page.keyboard.press('Escape');
