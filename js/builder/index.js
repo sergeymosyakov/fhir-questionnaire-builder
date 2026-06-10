@@ -11,6 +11,9 @@ import { Modal } from '../ui/modals/modal-base.js';
 import { Section } from '../ui/modals/section.js';
 import { AppEvents } from '../events.js';
 import { showWarn } from '../ui/toast.js';
+import { versionCompatRegistry } from '../fhir/version-compat-registry.js';
+import '../fhir/version-compat/open-choice.js';
+import '../fhir/version-compat/r5-downgrade.js';
 import '../fhir/formats/r4.js';
 import '../fhir/formats/r4b.js';
 import '../fhir/formats/r5.js';
@@ -68,10 +71,16 @@ document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => {
 });
 // When FHIR version changes: update questMeta and trigger rerender
 document.addEventListener(AppEvents.FHIR_VERSION_CHANGED, e => {
-  const versionId = e.detail?.versionId;
+  const { versionId, fromVersionId, source } = e.detail ?? {};
   if (versionId && questMeta.fhirTarget !== versionId) {
-    if (e.detail?.source === 'user' && tree.length > 0) {
-      showWarn('Switching FHIR version may affect compatibility of some fields or item types in the current questionnaire.');
+    if (source === 'user' && tree.length > 0) {
+      versionCompatRegistry.runAll(fromVersionId ?? questMeta.fhirTarget, versionId, tree)
+        .then(msgs => {
+          const text = msgs.length > 0
+            ? msgs.join('\n')
+            : 'Switching FHIR version may affect compatibility of some fields or item types in the current questionnaire.';
+          showWarn(text);
+        });
     }
     questMeta.fhirTarget = versionId;
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));

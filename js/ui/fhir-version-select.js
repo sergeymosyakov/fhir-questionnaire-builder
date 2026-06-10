@@ -44,7 +44,7 @@ export class FhirVersionSelect {
       testid:    'fhir-version-select',
       onChange:  v => {
         document.dispatchEvent(new CustomEvent(AppEvents.FHIR_VERSION_CHANGED, {
-          detail: { versionId: v, source: 'user' },
+          detail: { versionId: v, fromVersionId: this._getFhirTarget(), source: 'user' },
         }));
       },
     });
