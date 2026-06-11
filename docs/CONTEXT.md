@@ -266,6 +266,9 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `tests/stu3-shim.test.js` | Unit tests for `js/fhir/stu3-shim.js` — `isSTU3`, `normaliseSTU3`, `option[]`→`answerOption[]`, `hasAnswer`→`operator:exists`, all `initial<Type>`→`initial[]` conversions (incl. Attachment/Reference), STU3 detection heuristics, immutability (35 tests) |
 | `tests/state.test.js` | Unit tests for `evalConstraints` in `js/state.js` — severity filtering, empty/false/throw results, varEnv passing (21 tests) |
 | `tests/integration.test.js` | Integration tests for `buildQR` + `evalConstraints` pipeline — decimal/integer pass/fail, wrong key regression, warning-only, nested groups (7 tests) |
+| `tests/external-validator.test.js` | Unit tests for `js/fhir/validators/external.js` — version routing (baseR4/R4B/R5), display name, builder-target-version payload stripping, no-base-segment fallback; OperationOutcome parsing (severity mapping, message fallbacks, `item[]` path→linkId, `(external)` fallback); error handling (413/4xx fatal, 5xx + network retry, retry-then-success via fake timers); CORS proxy wrapping (16 tests) |
+| `tests/validators.test.js` | Unit tests for the validator framework — `Validator` base (disabled short-circuit, `_run` delegation, name-not-implemented throw, defaults), `LocalValidator` (id/name/type, que-0 surfacing), `ValidatorRegistry` (register/getAll, parallel run, per-validator error capture), `initValidators` (config registration, offline fallback, url-less external skip) (12 tests) |
+| `tests/version-compat.test.js` | Unit tests for `js/fhir/version-compat/*` checkers via `versionCompatRegistry.runAll` — `R5DowngradeChecker` (applies matrix, recursive count, R4 backport vs R4B native message, 3-item truncation, no-linkId fallback) and `OpenChoiceToR5Checker` (applies matrix, recursive open-choice count, singular/plural) (14 tests) |
 | `.github/workflows/test.yml` | GitHub Actions CI — `test` job: Vitest; `e2e` job: Playwright (uploads `playwright-report/` artifact); `deploy` job: bundles app + report into `_site/`, deploys to GitHub Pages (`/playwright-report/` = latest test report); both `test`/`e2e` triggered on every push/PR to main |
 
 ---
@@ -279,7 +282,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **Playwright** — E2E test suite; **604 tests** across 48 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
 - **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
 - **`ctx` object** — `{ renderTree, renderNode, tree, collapsed }` passed down to renderers and panels
-- **Vitest** — unit test suite for pure-function modules; **1064 tests** across 20 files; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules; **1274 tests** across 30 files; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---

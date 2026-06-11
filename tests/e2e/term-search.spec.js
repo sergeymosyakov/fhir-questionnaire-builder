@@ -105,7 +105,7 @@ async function mockNlm(page) {
  * Matches both https://tx.fhir.org/... and https://fhir-cors-proxy...?url=...tx.fhir.org...
  */
 async function mockSnomed(page) {
-  await page.route(url => url.toString().includes('tx.fhir.org') || url.toString().includes('fhir-cors-proxy'), async route => {
+  await page.route(url => url.hostname === 'tx.fhir.org' || url.hostname === 'fhir-cors-proxy.sergeymosyakov.workers.dev', async route => {
     const reqUrl = route.request().url();
     if (reqUrl.includes('ValueSet') || reqUrl.includes('snomed')) {
       await route.fulfill({
