@@ -4,11 +4,11 @@
  * Deploy: https://dash.cloudflare.com → Workers → Create → paste this file.
  * Usage:  GET https://<your-worker>.workers.dev/?url=<encoded-fhir-url>
  *
- * Only proxies HTTPS requests to FHIR server paths (/$expand, /metadata).
- * Refuses to proxy arbitrary URLs to prevent misuse.
+ * Only proxies HTTPS requests to FHIR server paths (/$expand, /metadata,
+ * /$validate). Refuses to proxy arbitrary URLs to prevent misuse.
  */
 
-const ALLOWED_PATHS = ['/ValueSet/$expand', '/metadata', '/ValueSet/'];
+const ALLOWED_PATHS = ['/ValueSet/$expand', '/metadata', '/ValueSet/', '/Questionnaire/$validate'];
 
 export default {
   async fetch(request) {
@@ -41,9 +41,16 @@ export default {
     }
 
     try {
+      const isBodyMethod = request.method !== 'GET' && request.method !== 'HEAD';
       const upstream = await fetch(targetUrl.toString(), {
         method:  request.method,
-        headers: { Accept: 'application/fhir+json' },
+        headers: {
+          Accept: 'application/fhir+json',
+          ...(isBodyMethod
+            ? { 'Content-Type': request.headers.get('Content-Type') || 'application/fhir+json' }
+            : {}),
+        },
+        body: isBodyMethod ? request.body : undefined,
       });
 
       const body        = await upstream.arrayBuffer();
@@ -62,7 +69,7 @@ export default {
 function corsHeaders() {
   return {
     'Access-Control-Allow-Origin':  '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Accept, Content-Type',
   };
 }

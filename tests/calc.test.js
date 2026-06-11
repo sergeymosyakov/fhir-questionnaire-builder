@@ -138,6 +138,37 @@ describe('evalCalcNodes', () => {
     evalCalcNodes(nodes, {}, fpScalar, values);
     expect(values.q1).toBe(''); // 42[0] is undefined → falls through to ''
   });
+
+  it('resolves a calc chain in topological order regardless of tree order', () => {
+    // FHIRPath stub: reads valueDecimal of a referenced item from the live QR.
+    const fpChain = {
+      evaluate: (qr, expr) => {
+        const readDec = (lid) => {
+          const it = (qr.item || []).find(i => i.linkId === lid);
+          return it?.answer?.[0]?.valueDecimal;
+        };
+        if (expr.includes("linkId='a'")) { const v = readDec('a'); return v !== undefined ? [v * 2] : []; }
+        if (expr.includes("linkId='b'")) { const v = readDec('b'); return v !== undefined ? [v + 1] : []; }
+        return [];
+      },
+    };
+    // Tree order is reversed (c before b) to prove topo ordering is applied.
+    const nodes = [
+      { id: 'c', type: 'item', itemType: 'decimal', _readOnly: true, _calculatedExpr: "item.where(linkId='b').answer.valueDecimal + 1" },
+      { id: 'b', type: 'item', itemType: 'decimal', _readOnly: true, _calculatedExpr: "item.where(linkId='a').answer.valueDecimal * 2" },
+      { id: 'a', type: 'item', itemType: 'decimal' },
+    ];
+    const base = { resourceType: 'Questionnaire', item: [
+      { linkId: 'c', type: 'decimal' }, { linkId: 'b', type: 'decimal' }, { linkId: 'a', type: 'decimal' },
+    ] };
+    const qr = { resourceType: 'QuestionnaireResponse', item: [
+      { linkId: 'c' }, { linkId: 'b' }, { linkId: 'a', answer: [{ valueDecimal: 10 }] },
+    ] };
+    const values = {};
+    evalCalcNodes(nodes, qr, fpChain, values, {}, base);
+    expect(values.b).toBe('20'); // a(10) * 2
+    expect(values.c).toBe('21'); // b(20) + 1
+  });
 });
 
 // ── evalInitialExprNodes ──────────────────────────────────────────────────────

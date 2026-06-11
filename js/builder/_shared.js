@@ -30,8 +30,9 @@ export function formatSeg(n) {
 export function triggerCalcRecalc() {
   const { tree, rawFhir, values } = _deps;
   if (rawFhir.value && fhirpath) {
-    const qr = buildQR(JSON.parse(JSON.stringify(rawFhir.value)), values);
-    evalCalcNodes(tree, qr, fhirpath, values);
+    const base = JSON.parse(JSON.stringify(rawFhir.value));
+    const qr = buildQR(base, values);
+    evalCalcNodes(tree, qr, fhirpath, values, {}, base);
   }
   document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 }

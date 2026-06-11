@@ -9,6 +9,42 @@
 
 const ORDINAL_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
 
+// Build a single QR answer object for one value, typed by the FHIR item's type.
+// Exported so calculatedExpression evaluation can write results back into the QR
+// using the exact same value-mapping rules as the initial QR build.
+export function buildAnswer(fhirItem, v) {
+  const t = fhirItem.type || 'string';
+  if (t === 'boolean')  return { valueBoolean: v === true };
+  if (t === 'date')     return { valueDate: String(v) };
+  if (t === 'dateTime') return { valueDateTime: String(v) };
+  if (t === 'time')     return { valueTime: String(v) };
+  if (t === 'choice' || t === 'open-choice') {
+    const codeStr = String(v);
+    const coding  = { code: codeStr };
+    // Enrich from answerOption: system, display, ordinalValue extension
+    const opt = (fhirItem.answerOption || []).find(o =>
+      (o.valueCoding && o.valueCoding.code === codeStr) ||
+      (o.valueString !== undefined && String(o.valueString) === codeStr)
+    );
+    if (opt && opt.valueCoding) {
+      if (opt.valueCoding.system)  coding.system  = opt.valueCoding.system;
+      if (opt.valueCoding.display) coding.display = opt.valueCoding.display;
+      const ordExt =
+        (opt.extension        || []).find(e => e.url === ORDINAL_URL) ||
+        (opt.valueCoding.extension || []).find(e => e.url === ORDINAL_URL);
+      if (ordExt !== undefined)
+        coding.extension = [{ url: ORDINAL_URL, valueDecimal: ordExt.valueDecimal }];
+    }
+    return { valueCoding: coding };
+  }
+  if (t === 'integer')  return { valueInteger: parseInt(v, 10) || 0 };
+  if (t === 'decimal')   return { valueDecimal: parseFloat(v) || 0 };
+  if (t === 'quantity')  return { valueQuantity: { value: parseFloat(v?.value) || 0, unit: v?.unit || '' } };
+  if (t === 'url')       return { valueUri: String(v) };
+  if (t === 'reference') return { valueReference: { reference: String(v?.reference || '') } };
+  return { valueString: String(v) };
+}
+
 function buildQRItem(fhirItem, values) {
   const qrItem = { linkId: fhirItem.linkId };
   const children = fhirItem.item || [];
@@ -27,37 +63,7 @@ function buildQRItem(fhirItem, values) {
     return vs;
   }
 
-  function makeAnswer(v) {
-    if (t === 'boolean')  return { valueBoolean: v === true };
-    if (t === 'date')     return { valueDate: String(v) };
-    if (t === 'dateTime') return { valueDateTime: String(v) };
-    if (t === 'time')     return { valueTime: String(v) };
-    if (t === 'choice' || t === 'open-choice') {
-      const codeStr = String(v);
-      const coding  = { code: codeStr };
-      // Enrich from answerOption: system, display, ordinalValue extension
-      const opt = (fhirItem.answerOption || []).find(o =>
-        (o.valueCoding && o.valueCoding.code === codeStr) ||
-        (o.valueString !== undefined && String(o.valueString) === codeStr)
-      );
-      if (opt && opt.valueCoding) {
-        if (opt.valueCoding.system)  coding.system  = opt.valueCoding.system;
-        if (opt.valueCoding.display) coding.display = opt.valueCoding.display;
-        const ordExt =
-          (opt.extension        || []).find(e => e.url === ORDINAL_URL) ||
-          (opt.valueCoding.extension || []).find(e => e.url === ORDINAL_URL);
-        if (ordExt !== undefined)
-          coding.extension = [{ url: ORDINAL_URL, valueDecimal: ordExt.valueDecimal }];
-      }
-      return { valueCoding: coding };
-    }
-    if (t === 'integer')  return { valueInteger: parseInt(v, 10) || 0 };
-    if (t === 'decimal')   return { valueDecimal: parseFloat(v) || 0 };
-    if (t === 'quantity')  return { valueQuantity: { value: parseFloat(v?.value) || 0, unit: v?.unit || '' } };
-    if (t === 'url')       return { valueUri: String(v) };
-    if (t === 'reference') return { valueReference: { reference: String(v?.reference || '') } };
-    return { valueString: String(v) };
-  }
+  const makeAnswer = (v) => buildAnswer(fhirItem, v);
 
   if (t === 'group') {
     if (children.length > 0) {

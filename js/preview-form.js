@@ -174,17 +174,17 @@ export class PreviewForm {
   _reCalc() {
     if (fhirpath) {
       let qr, envVars;
+      const base = this._rawFhir.value
+        ? JSON.parse(JSON.stringify(this._rawFhir.value))
+        : buildFHIRObject();
       if (this._preQR) {
         qr = this._preQR; envVars = this._preEnvVars;
         this._preQR = null; this._preEnvVars = null;
       } else {
-        const base = this._rawFhir.value
-          ? JSON.parse(JSON.stringify(this._rawFhir.value))
-          : buildFHIRObject();
         qr = buildQR(base, this._values);
         envVars = buildVarEnv(this._questVariables, qr, fhirpath);
       }
-      evalCalcNodes(this._tree, qr, fhirpath, this._values, envVars);
+      evalCalcNodes(this._tree, qr, fhirpath, this._values, envVars, base);
       const env = { resource: qr, ...envVars };
       this._lastCtx.fp = fhirpath; this._lastCtx.qr = qr; this._lastCtx.env = env;
       document.dispatchEvent(new CustomEvent(AppEvents.REFRESH_EXPR_ICONS));

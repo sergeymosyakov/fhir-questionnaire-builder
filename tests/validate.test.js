@@ -657,3 +657,36 @@ describe('validateTree — que-5 answerValueSet type restriction', () => {
     expect(errIds(validateTree([item]))).toHaveLength(0);
   });
 });
+
+// ── circular dependency detection ─────────────────────────────────────────────
+describe('validateTree — circular dependency detection', () => {
+  it('errors on a two-node calculatedExpression cycle', () => {
+    const a = makeItem({ id: 'a', itemType: 'decimal', _readOnly: true, _calculatedExpr: "item.where(linkId='b').answer.valueDecimal" });
+    const b = makeItem({ id: 'b', itemType: 'decimal', _readOnly: true, _calculatedExpr: "item.where(linkId='a').answer.valueDecimal" });
+    const issues = validateTree([a, b]);
+    const cycleErr = issues.find(i => i.severity === 'error' && /Circular dependency/.test(i.message));
+    expect(cycleErr).toBeTruthy();
+  });
+
+  it('errors on an enableWhen cycle', () => {
+    const a = makeItem({ id: 'a', enableWhen: [{ question: 'b', operator: 'exists', answerBoolean: true }] });
+    const b = makeItem({ id: 'b', enableWhen: [{ question: 'a', operator: 'exists', answerBoolean: true }] });
+    const issues = validateTree([a, b]);
+    expect(issues.find(i => /Circular dependency/.test(i.message))).toBeTruthy();
+  });
+
+  it('reports a cycle only once', () => {
+    const a = makeItem({ id: 'a', itemType: 'decimal', _readOnly: true, _calculatedExpr: "item.where(linkId='b').answer.valueDecimal" });
+    const b = makeItem({ id: 'b', itemType: 'decimal', _readOnly: true, _calculatedExpr: "item.where(linkId='a').answer.valueDecimal" });
+    const issues = validateTree([a, b]);
+    expect(issues.filter(i => /Circular dependency/.test(i.message))).toHaveLength(1);
+  });
+
+  it('no cycle error for a linear calc chain', () => {
+    const a = makeItem({ id: 'a', itemType: 'decimal' });
+    const b = makeItem({ id: 'b', itemType: 'decimal', _readOnly: true, _calculatedExpr: "item.where(linkId='a').answer.valueDecimal * 2" });
+    const c = makeItem({ id: 'c', itemType: 'decimal', _readOnly: true, _calculatedExpr: "item.where(linkId='b').answer.valueDecimal + 1" });
+    const issues = validateTree([a, b, c]);
+    expect(issues.filter(i => /Circular dependency/.test(i.message))).toHaveLength(0);
+  });
+});

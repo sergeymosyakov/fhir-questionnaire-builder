@@ -2,6 +2,8 @@
 // Pure function — no DOM, no side effects.
 // Returns an array of { severity: 'error'|'warning', nodeId, message }.
 
+import { buildDepGraph, detectCycles } from './dep-graph.js';
+
 // System-generated constraint key (must match ITLH_KEY_GROUP_OR in utils.js)
 const _ITLH_KEY_GROUP_OR = 'e3a8c2f1-6b4d-4e9a-87c5:group-or';
 
@@ -267,6 +269,25 @@ export function validateTree(tree, _values = {}, questMeta = null) {
       }
     }
 
+  }
+
+  // ── Circular dependency detection ─────────────────────────────────────────
+  // Build a dependency graph across enableWhen / enableWhenExpression /
+  // calculatedExpression / initialExpression references and report any cycles.
+  // A circular dependency causes calculatedExpression chains to never converge.
+  const cycles = detectCycles(buildDepGraph(tree, questMeta?.variables || []));
+  const seenCycles = new Set();
+  for (const cycle of cycles) {
+    // Normalize the cycle to a canonical key so the same loop isn't reported twice.
+    const ring = cycle.slice(0, -1); // drop the repeated entry point
+    const key = [...ring].sort().join('|');
+    if (seenCycles.has(key)) continue;
+    seenCycles.add(key);
+    issues.push({
+      severity: 'error',
+      nodeId: cycle[0],
+      message: `Circular dependency between items: ${cycle.join(' → ')}. Calculated/conditional expressions that reference each other in a loop can never be resolved.`,
+    });
   }
 
   return issues;
