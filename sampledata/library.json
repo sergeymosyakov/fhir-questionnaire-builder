@@ -117,13 +117,13 @@
         "label": "FHIR R4B Demo",
         "file": "r4b-demo.fhir.json",
         "type": "questionnaire",
-        "note": "Demonstrates FHIR R4B: answerConstraint on choice items, meta.fhirVersion 4.3.0. Loading auto-switches the builder to R4B mode."
+        "note": "Demonstrates FHIR R4B: answerConstraint on choice items (introduced in R4B). Loading auto-switches the builder to R4B mode."
       },
       {
         "label": "FHIR R5 Demo",
         "file": "r5-demo.fhir.json",
         "type": "questionnaire",
-        "note": "Demonstrates FHIR R5 native fields: answerConstraint (replaces open-choice), disabledDisplay, and meta.fhirVersion. Loading auto-switches the builder to R5 mode."
+        "note": "Demonstrates FHIR R5 native fields: answerConstraint (replaces open-choice) and disabledDisplay. Loading auto-switches the builder to R5 mode."
       }
     ]
   },

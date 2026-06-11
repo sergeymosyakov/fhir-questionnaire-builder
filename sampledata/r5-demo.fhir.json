@@ -1,20 +1,23 @@
 {
   "resourceType": "Questionnaire",
   "id": "r5-demo",
-  "meta": {
-    "fhirVersion": "5.0.0"
-  },
+  "extension": [
+    {
+      "url": "https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/builder-target-version",
+      "valueCode": "5.0.0"
+    }
+  ],
   "url": "http://example.org/fhir/Questionnaire/r5-demo",
   "version": "1.0",
   "title": "FHIR R5 Feature Demo",
   "status": "draft",
   "date": "2025-01-01",
-  "description": "Demonstrates FHIR R5 native fields: answerConstraint (replacing open-choice), disabledDisplay, and meta.fhirVersion. Load this questionnaire and the version selector will automatically switch to R5.",
+  "description": "Demonstrates FHIR R5 native fields: answerConstraint (replacing open-choice) and disabledDisplay. Load this questionnaire and the version selector will automatically switch to R5.",
   "item": [
     {
       "linkId": "intro",
       "type": "display",
-      "text": "This questionnaire uses FHIR R5 features. The builder automatically detected the target version from meta.fhirVersion."
+      "text": "This questionnaire uses FHIR R5 features. The builder automatically detected the target version R5."
     },
     {
       "linkId": "preferred-drink",

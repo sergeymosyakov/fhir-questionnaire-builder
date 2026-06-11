@@ -2,8 +2,9 @@
 // Tests that cover:
 //   1. Version selector renders as FHIR R4 on fresh load
 //   2. Switching to R5 hides open-choice in the Answer Type modal type dropdown
-//   3. Loading a file with meta.fhirVersion: '5.0.0' auto-switches to R5
-//   4. Exporting with R5 active stamps meta.fhirVersion in the downloaded JSON
+//   3. Loading an R5 file (builder-target-version extension / R5 features)
+//      auto-switches the selector to R5
+//   4. Exporting with R5 active stamps the builder-target-version extension
 //
 // Fixture used: sampledata/r5-demo.fhir.json (loaded via fhir-file-input)
 //
@@ -125,7 +126,7 @@ test.describe('R5 version gate: open-choice hidden', () => {
   });
 });
 
-// ── 3. Auto-detect version from meta.fhirVersion on load ─────────────────────
+// ── 3. Auto-detect version on load (extension + feature heuristics) ───────────────────
 
 test.describe('auto-detect version on import', () => {
   test('loading an R5 file switches version selector to R5', async ({ page }) => {
@@ -144,10 +145,10 @@ test.describe('auto-detect version on import', () => {
   });
 });
 
-// ── 4. Export stamps meta.fhirVersion ────────────────────────────────────────
+// ── 4. Export stamps builder-target-version extension ─────────────────────
 
-test.describe('R5 export stamps meta.fhirVersion', () => {
-  test('exported JSON has meta.fhirVersion 5.0.0 when R5 is active', async ({ page }) => {
+test.describe('R5 export stamps builder-target-version', () => {
+  test('exported JSON has the builder-target-version extension when R5 is active', async ({ page }) => {
     await freshStart(page);
     await selectVersion(page, 'R5');
 

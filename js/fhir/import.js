@@ -16,6 +16,7 @@ import {
   resolveContainedValueSet,
 } from './import-helpers.js';
 import { fhirItemToNode } from './import-item.js';
+import { BUILDER_VERSION_EXTENSION_URL } from './format-registry.js';
 
 // Re-export helpers — consumed by answer-type-modal.js and unit tests.
 export {
@@ -127,7 +128,7 @@ export function importFHIR(fhirJson, renderFn) {
         return { system: c.system || '', code: c.code || '', display: c.display || '' };
       })
     : [];
-  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL && e.url !== SIG_REQ_URL);
+  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL && e.url !== SIG_REQ_URL && e.url !== BUILDER_VERSION_EXTENSION_URL);
   questMeta._rawQuestExtensions = nonVarExts.length ? JSON.parse(JSON.stringify(nonVarExts)) : [];
 
   try {

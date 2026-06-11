@@ -10,5 +10,5 @@ import { formatRegistry } from './format-registry.js';
 export const versionRegistry = {
   get: (id)           => formatRegistry.get(id),
   getAll: ()          => formatRegistry.getBuilderVersions(),
-  detectFromMeta: (v) => formatRegistry.detectFromMeta(v),
+  detectVersion: (data) => formatRegistry.detectVersion(data),
 };

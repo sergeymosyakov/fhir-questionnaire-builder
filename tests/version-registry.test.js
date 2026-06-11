@@ -1,6 +1,13 @@
 // ── Unit tests: format registry (versionRegistry facade + per-format builds) ─
 import { describe, it, expect, beforeEach } from 'vitest';
 
+const VERSION_EXT_URL =
+  'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/builder-target-version';
+/** Read the builder-target-version code from a built Questionnaire. */
+function versionCode(q) {
+  return (q.extension || []).find(e => e.url === VERSION_EXT_URL)?.valueCode;
+}
+
 // ── versionRegistry facade ─────────────────────────────────────────────────
 describe('versionRegistry facade', () => {
   let registry;
@@ -43,23 +50,44 @@ describe('versionRegistry facade', () => {
     expect(ids).not.toContain('redcap');
   });
 
-  it('detectFromMeta matches exact metaVersion strings', () => {
-    expect(registry.detectFromMeta('4.0.1')).toBe('R4');
-    expect(registry.detectFromMeta('4.3.0')).toBe('R4B');
-    expect(registry.detectFromMeta('5.0.0')).toBe('R5');
+  it('detectVersion reads the builder-target-version extension', () => {
+    const mk = (code) => ({
+      resourceType: 'Questionnaire',
+      extension: [{
+        url: 'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/builder-target-version',
+        valueCode: code,
+      }],
+      item: [],
+    });
+    expect(registry.detectVersion(mk('4.0.1'))).toBe('R4');
+    expect(registry.detectVersion(mk('4.3.0'))).toBe('R4B');
+    expect(registry.detectVersion(mk('5.0.0'))).toBe('R5');
   });
 
-  it('detectFromMeta does prefix matching for unknown patch versions', () => {
-    expect(registry.detectFromMeta('4.0.9')).toBe('R4');
-    expect(registry.detectFromMeta('4.3.99')).toBe('R4B');
-    expect(registry.detectFromMeta('5.1.0')).toBe('R5');
+  it('detectVersion falls back to feature heuristics when no extension', () => {
+    // disabledDisplay → R5 (added in R5)
+    expect(registry.detectVersion({
+      resourceType: 'Questionnaire',
+      item: [{ linkId: 'q1', type: 'choice', disabledDisplay: 'hidden' }],
+    })).toBe('R5');
+    // answerConstraint → R4B (added in R4B)
+    expect(registry.detectVersion({
+      resourceType: 'Questionnaire',
+      item: [{ linkId: 'q1', type: 'choice', answerConstraint: 'optionsOrString' }],
+    })).toBe('R4B');
   });
 
-  it('detectFromMeta returns null for unrecognised version strings', () => {
-    expect(registry.detectFromMeta('3.0.0')).toBeNull();
-    expect(registry.detectFromMeta('')).toBeNull();
-    expect(registry.detectFromMeta(null)).toBeNull();
-    expect(registry.detectFromMeta(undefined)).toBeNull();
+  it('detectVersion finds heuristic fields in nested items', () => {
+    expect(registry.detectVersion({
+      resourceType: 'Questionnaire',
+      item: [{ linkId: 'g1', type: 'group', item: [{ linkId: 'q1', type: 'choice', disabledDisplay: 'protected' }] }],
+    })).toBe('R5');
+  });
+
+  it('detectVersion defaults to R4 when nothing matches', () => {
+    expect(registry.detectVersion({ resourceType: 'Questionnaire', item: [{ linkId: 'q1', type: 'string' }] })).toBe('R4');
+    expect(registry.detectVersion({})).toBe('R4');
+    expect(registry.detectVersion(null)).toBe('R4');
   });
 });
 
@@ -99,10 +127,11 @@ describe('R4 format', () => {
     fmt = formatRegistry.get('R4');
   });
 
-  it('stamps meta.fhirVersion: 4.0.1', () => {
+  it('stamps builder-target-version: 4.0.1', () => {
     const base = { resourceType: 'Questionnaire', id: 'test', item: [] };
     const result = fmt.build(base);
-    expect(result.meta.fhirVersion).toBe('4.0.1');
+    expect(versionCode(result)).toBe('4.0.1');
+    expect(result.meta.fhirVersion).toBeUndefined();
   });
 
   it('preserves existing meta fields', () => {
@@ -113,7 +142,7 @@ describe('R4 format', () => {
     };
     const result = fmt.build(base);
     expect(result.meta.versionId).toBe('v1');
-    expect(result.meta.fhirVersion).toBe('4.0.1');
+    expect(versionCode(result)).toBe('4.0.1');
   });
 
   it('does not mutate the original base object', () => {
@@ -125,12 +154,13 @@ describe('R4 format', () => {
 
 // ── R4B format build() ─────────────────────────────────────────────────────
 describe('R4B format', () => {
-  it('stamps meta.fhirVersion: 4.3.0', async () => {
+  it('stamps builder-target-version: 4.3.0', async () => {
     const { formatRegistry } = await import('../js/fhir/format-registry.js');
     await import('../js/fhir/formats/r4b.js');
     const fmt = formatRegistry.get('R4B');
     const result = fmt.build({ resourceType: 'Questionnaire', item: [] });
-    expect(result.meta.fhirVersion).toBe('4.3.0');
+    expect(versionCode(result)).toBe('4.3.0');
+    expect(result.meta.fhirVersion).toBeUndefined();
   });
 });
 
@@ -144,10 +174,11 @@ describe('R5 format', () => {
     fmt = formatRegistry.get('R5');
   });
 
-  it('stamps meta.fhirVersion: 5.0.0', () => {
+  it('stamps builder-target-version: 5.0.0', () => {
     const base = { resourceType: 'Questionnaire', item: [] };
     const result = fmt.build(base);
-    expect(result.meta.fhirVersion).toBe('5.0.0');
+    expect(versionCode(result)).toBe('5.0.0');
+    expect(result.meta.fhirVersion).toBeUndefined();
   });
 
   it('converts open-choice items to type=choice + answerConstraint=optionsOrString', () => {

@@ -1,20 +1,23 @@
 {
   "resourceType": "Questionnaire",
   "id": "r4b-demo",
-  "meta": {
-    "fhirVersion": "4.3.0"
-  },
+  "extension": [
+    {
+      "url": "https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/builder-target-version",
+      "valueCode": "4.3.0"
+    }
+  ],
   "url": "http://example.org/fhir/Questionnaire/r4b-demo",
   "version": "1.0",
   "title": "FHIR R4B Feature Demo",
   "status": "draft",
   "date": "2025-01-01",
-  "description": "Demonstrates FHIR R4B features: answerConstraint on choice items (introduced in R4B), and meta.fhirVersion 4.3.0. Loading this questionnaire automatically switches the builder to R4B mode.",
+  "description": "Demonstrates FHIR R4B features: answerConstraint on choice items (introduced in R4B). Loading this questionnaire automatically switches the builder to R4B mode.",
   "item": [
     {
       "linkId": "intro",
       "type": "display",
-      "text": "This questionnaire uses FHIR R4B features. The builder auto-detected the target version from meta.fhirVersion: 4.3.0."
+      "text": "This questionnaire uses FHIR R4B features. The builder auto-detected the target version R4B."
     },
     {
       "linkId": "preferred-transport",

@@ -168,8 +168,8 @@ test.describe('metadata modal — Resource Meta section', () => {
     await page.locator('[data-testid="add-menu-item"]').first().click();
     await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
     const q = await exportFHIR(page);
-    // R4 format always stamps meta.fhirVersion and meta.lastUpdated;
-    // verify no user-set fields leaked into a clean questionnaire
+    // R4 format always stamps meta.lastUpdated and the builder-target-version
+    // extension; verify no user-set fields leaked into a clean questionnaire
     expect(q.meta?.profile).toBeUndefined();
     expect(q.meta?.tag).toBeUndefined();
     expect(q.meta?.security).toBeUndefined();

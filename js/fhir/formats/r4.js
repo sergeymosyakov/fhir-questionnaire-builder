@@ -1,4 +1,4 @@
-import { formatRegistry } from '../format-registry.js';
+import { formatRegistry, setBuilderVersion } from '../format-registry.js';
 
 formatRegistry.register({
   id:               'R4',
@@ -12,7 +12,7 @@ formatRegistry.register({
   build(baseQ) {
     const q = JSON.parse(JSON.stringify(baseQ));
     q.meta = q.meta ?? { lastUpdated: new Date().toISOString() };
-    q.meta.fhirVersion = '4.0.1';
+    setBuilderVersion(q, '4.0.1');
     return q;
   },
 });

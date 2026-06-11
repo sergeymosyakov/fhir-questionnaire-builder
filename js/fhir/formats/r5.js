@@ -1,4 +1,4 @@
-import { formatRegistry } from '../format-registry.js';
+import { formatRegistry, setBuilderVersion } from '../format-registry.js';
 
 /** Recursively convert open-choice items to R5 native representation. */
 function _convertItems(items) {
@@ -25,7 +25,7 @@ formatRegistry.register({
     const q = JSON.parse(JSON.stringify(baseQ));
     if (q.item) _convertItems(q.item);
     q.meta = q.meta ?? { lastUpdated: new Date().toISOString() };
-    q.meta.fhirVersion = '5.0.0';
+    setBuilderVersion(q, '5.0.0');
     return q;
   },
 });

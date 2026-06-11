@@ -79,8 +79,8 @@
         <span class="section-title">Logic Builder<span id="tooltipsOffBadge" class="tips-off-badge" style="display:none">tooltips off</span></span>
         <span id="fhirVersionSelectMount" class="fhir-version-select-mount"
           data-tip-title="FHIR Target Version"
-          data-tip-body="Select the FHIR version this questionnaire targets. Affects which item types and fields are available in the builder, and sets meta.fhirVersion on export."
-          data-tip-fhir="Questionnaire.meta.fhirVersion"
+          data-tip-body="Select the FHIR version this questionnaire targets. Affects which item types and fields are available in the builder, and is recorded in a builder-target-version extension on export (FHIR's Meta type has no fhirVersion field)."
+          data-tip-fhir="Questionnaire.extension[builder-target-version]"
           data-tip-spec="R4 · R4B · R5"></span>
         <span class="left-panel-header-right">
           <button id="undoBtn" type="button" class="btn-fhir btn-fhir--toggle" data-testid="undo-btn" disabled
