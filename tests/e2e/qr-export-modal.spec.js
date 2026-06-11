@@ -26,6 +26,7 @@
 
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
@@ -35,14 +36,12 @@ async function loadSampleAndOpenExportModal(page) {
   await page.goto('/');
   await waitForLoad(page);
   // Load PHQ-9 sample questionnaire so Export → QR becomes available
-  await page.getByTestId('load-fhir-btn').click();
-  await page.getByTestId('load-library-item').click();
+  await openDropdownItem(page, 'load-fhir-btn', 'load-library-item');
   await page.locator('[data-sample="phq-9.fhir.json"]').waitFor({ timeout: 10_000 });
   await page.locator('[data-sample="phq-9.fhir.json"]').click();
   await page.waitForSelector('[data-testid="export-btn"]', { state: 'visible', timeout: 10_000 });
   // Open Export menu → QR item
-  await page.getByTestId('export-btn').click();
-  await page.getByTestId('export-qr-item').click();
+  await openDropdownItem(page, 'export-btn', 'export-qr-item');
   // Wait for modal
   await expect(page.locator('[data-testid="qrExportModal"]')).toBeVisible({ timeout: 5_000 });
 }

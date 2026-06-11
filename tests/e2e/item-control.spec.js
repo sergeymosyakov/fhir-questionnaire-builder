@@ -13,6 +13,7 @@
 //   export-btn, export-quest-item, saveFormatModalApply, prompt-save — export flow
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 import { readFileSync } from 'node:fs';
 
 const FIXTURE = path.resolve('tests/fixtures/item-control.fhir.json');
@@ -59,8 +60,7 @@ test.describe('check-box itemControl (checklist)', () => {
 
   test('checklist round-trips through export with check-box itemControl', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -101,8 +101,7 @@ test.describe('autocomplete itemControl', () => {
 
   test('autocomplete round-trips through export', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -129,8 +128,7 @@ test.describe('text-area itemControl', () => {
 
   test('text-area round-trips through export', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -148,8 +146,7 @@ test.describe('text-area itemControl', () => {
 test.describe('spinner itemControl', () => {
   test('spinner round-trips through export', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -167,8 +164,7 @@ test.describe('spinner itemControl', () => {
 test.describe('drop-down itemControl', () => {
   test('drop-down round-trips through export', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -209,8 +205,7 @@ test.describe('slider itemControl', () => {
 
   test('round-trip exports both sliderStepValue and itemControl=slider', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -243,8 +238,7 @@ test.describe('lookup itemControl', () => {
 
   test('round-trip exports itemControl=lookup', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),

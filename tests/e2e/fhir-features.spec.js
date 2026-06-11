@@ -23,6 +23,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/fhir-features.fhir.json');
 
@@ -181,8 +182,7 @@ test.describe('minValue / maxValue enforcement', () => {
 
   test('round-trip: minValue/maxValue exported in FHIR JSON', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -238,8 +238,7 @@ test.describe('ordinalValue display', () => {
 
   test('ordinalValue round-trips through export', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -301,8 +300,7 @@ test.describe('minLength enforcement', () => {
 
   test('minLength round-trips through export', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -354,8 +352,7 @@ test.describe('maxDecimalPlaces', () => {
 
   test('maxDecimalPlaces round-trips through export', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),

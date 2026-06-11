@@ -20,6 +20,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const DN_URL    = 'http://hl7.org/fhir/StructureDefinition/designNote';
 const _FIXTURE  = path.resolve('tests/fixtures/meta-test.fhir.json');
@@ -161,8 +162,7 @@ test.describe('note modal — export round-trip', () => {
     await noteInput(page).fill('Export test note.');
     await noteApply(page).click();
 
-    await page.getByTestId('export-btn').click();
-    await page.locator('[data-testid="export-quest-item"]').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),

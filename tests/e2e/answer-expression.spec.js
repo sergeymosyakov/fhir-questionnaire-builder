@@ -18,6 +18,7 @@
 //   answerTypeModal     Answer Type modal backdrop
 
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'node:path';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/answer-expression.fhir.json');
@@ -136,8 +137,7 @@ test.describe('answer-expression — preview rendering', () => {
 test.describe('answer-expression — export round-trip', () => {
   test('exported JSON contains answerExpression extension for q-expr', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -163,8 +163,7 @@ test.describe('answer-expression — export round-trip', () => {
 
   test('exported JSON preserves plain answerOption for q-plain', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),

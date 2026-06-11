@@ -40,6 +40,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup, waitForLoad } from './helpers/builder.js';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 // ── App boot ──────────────────────────────────────────────────────────────────
 
@@ -48,8 +49,7 @@ test.describe('App boot', () => {
     await page.goto('/');
     await waitForLoad(page);
 
-    await page.getByTestId('load-fhir-btn').click();
-    await page.getByTestId('load-library-item').click();
+    await openDropdownItem(page, 'load-fhir-btn', 'load-library-item');
     await page.locator('[data-sample="example-bariatric.fhir.json"]').waitFor({ timeout: 10_000 });
     await page.click('[data-sample="example-bariatric.fhir.json"]');
 
@@ -66,8 +66,7 @@ test.describe('Clear form', () => {
     await page.goto('/');
     await waitForLoad(page);
 
-    await page.getByTestId('load-fhir-btn').click();
-    await page.getByTestId('load-library-item').click();
+    await openDropdownItem(page, 'load-fhir-btn', 'load-library-item');
     await page.locator('[data-sample="example-bariatric.fhir.json"]').waitFor({ timeout: 10_000 });
     await page.click('[data-sample="example-bariatric.fhir.json"]');
     await expect(page.locator('[data-testid="preview-panel"] [data-preview-id]').first()).toBeVisible();
@@ -120,8 +119,7 @@ test.describe('FHIR export', () => {
     await node.getByTestId('node-title-input').fill('My Question');
     await node.getByTestId('node-title-input').blur();
 
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.getByTestId('saveFormatModal')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -261,14 +259,12 @@ test.describe('Load FHIR → both panels', () => {
     await page.goto('/');
     await waitForLoad(page);
 
-    await page.getByTestId('load-fhir-btn').click();
-    await page.getByTestId('load-library-item').click();
+    await openDropdownItem(page, 'load-fhir-btn', 'load-library-item');
     await page.locator('[data-sample="example-bariatric.fhir.json"]').waitFor({ timeout: 10_000 });
     await page.click('[data-sample="example-bariatric.fhir.json"]');
 
     await page.getByTestId('expand-all-btn').click();
-    await page.getByTestId('tools-btn').click();
-    await page.getByTestId('expand-all-item').click();
+    await openDropdownItem(page, 'tools-btn', 'expand-all-item');
 
     await page.waitForFunction(() => {
       const nodes = document.querySelectorAll('[data-testid="tree-container"] [data-node-id]').length;

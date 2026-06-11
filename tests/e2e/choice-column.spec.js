@@ -15,6 +15,7 @@
 import path from 'node:path';
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/choice-column.fhir.json');
 
@@ -69,8 +70,7 @@ test.describe('choiceColumn — multi-column dropdown', () => {
     await loadFixture(page);
 
     // Export via download
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),

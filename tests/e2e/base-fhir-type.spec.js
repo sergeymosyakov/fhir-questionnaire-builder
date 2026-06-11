@@ -22,6 +22,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/base-fhir-type.fhir.json');
 const BASE_TYPE_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType';
@@ -47,8 +48,7 @@ async function openPropsModal(page, nodeId) {
 }
 
 async function exportFHIR(page) {
-  await page.getByTestId('export-btn').click();
-  await page.getByTestId('export-quest-item').click();
+  await openDropdownItem(page, 'export-btn', 'export-quest-item');
   await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
   const [download] = await Promise.all([
     page.waitForEvent('download'),

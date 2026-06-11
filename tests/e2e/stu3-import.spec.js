@@ -13,6 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -24,9 +25,7 @@ async function waitForLoad(page) {
 
 /** Upload a fixture file via the Questionnaires menu → From file… → FHIR JSON format. */
 async function loadFixture(page, filename) {
-  await page.getByTestId('load-fhir-btn').click();
-  await expect(page.getByTestId('load-from-file-item')).toBeVisible();
-  await page.getByTestId('load-from-file-item').click();
+  await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
 
   // Confirm-before-load dialog (only when a questionnaire is already loaded)
   const confirmModal = page.getByTestId('loadConfirmModal');

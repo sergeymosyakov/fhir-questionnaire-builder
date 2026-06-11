@@ -17,6 +17,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
@@ -251,8 +252,7 @@ test.describe('Validate modal — export mode', () => {
     // Wait for UI to reflect cleared title before clicking export.
     await expect(group.getByTestId('node-title-display').first()).toHaveText('(no title)');
 
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.getByTestId('saveFormatModal')).toBeVisible();
     await page.getByTestId('saveFormatModalApply').click();
 
@@ -281,8 +281,7 @@ test.describe('Validate modal — export mode', () => {
     await group.getByTestId('node-title-input').first().fill('');
     await group.getByTestId('node-title-input').first().blur();
 
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.getByTestId('saveFormatModal')).toBeVisible();
     await page.getByTestId('saveFormatModalApply').click();
     await expect(validateModal(page)).toBeVisible();
@@ -304,8 +303,7 @@ test.describe('Validate modal — export mode', () => {
     await group.getByTestId('node-title-input').first().fill('');
     await group.getByTestId('node-title-input').first().blur();
 
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.getByTestId('saveFormatModal')).toBeVisible();
     await page.getByTestId('saveFormatModalApply').click();
     await expect(validateModal(page)).toBeVisible();

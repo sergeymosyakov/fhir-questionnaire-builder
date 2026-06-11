@@ -5,6 +5,7 @@
 
 import path from 'node:path';
 import { expect } from '@playwright/test';
+import { openDropdownItem } from './dropdown.js';
 
 export const FIXTURE = path.resolve('tests/fixtures/meta-test.fhir.json');
 
@@ -30,8 +31,7 @@ export async function openModal(page) {
 }
 
 export async function exportFHIR(page) {
-  await page.getByTestId('export-btn').click();
-  await page.getByTestId('export-quest-item').click();
+  await openDropdownItem(page, 'export-btn', 'export-quest-item');
   await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
   const [download] = await Promise.all([
     page.waitForEvent('download'),

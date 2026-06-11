@@ -14,6 +14,7 @@
 //   slider-step-input       Step field in Answer Type modal (visible only when slider-toggle is checked)
 
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'node:path';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/slider-disabled.fhir.json');
@@ -59,8 +60,7 @@ test.describe('slider rendering', () => {
 
   test('round-trip: sliderStepValue exported in FHIR JSON', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -105,8 +105,7 @@ test.describe('disabledDisplay', () => {
 
   test('round-trip: disabledDisplay exported in FHIR JSON', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -217,8 +216,7 @@ test.describe('sliderStepValue — R4 decimal constraint', () => {
 
   test('decimal slider step is rounded to valueInteger on export', async ({ page }) => {
     await buildDecimalSlider(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     await page.getByTestId('saveFormatModalApply').click();
     // Validate modal opens because of the decimal-step warning — click Export anyway
@@ -241,8 +239,7 @@ test.describe('sliderStepValue — R4 decimal constraint', () => {
 
   test('decimal slider step triggers validator warning', async ({ page }) => {
     await buildDecimalSlider(page);
-    await page.getByTestId('tools-btn').click();
-    await page.getByTestId('validate-item').click();
+    await openDropdownItem(page, 'tools-btn', 'validate-item');
     await expect(page.locator('[data-testid="validateModal"]')).toBeVisible();
     const body = page.locator('[data-testid="validateModalBody"]');
     await expect(body).toContainText('decimal');

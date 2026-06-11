@@ -48,6 +48,16 @@
    await item.getByTestId('node-title-input').fill(title);
    await item.getByTestId('node-title-input').blur();
    ```
+   **Dropdown-menu open pattern** — `DropdownMenu` toggle buttons (`export-btn`, `tools-btn`, `load-btn`, `save-btn`, etc.) flip the menu: clicking while open *closes* it. Never click the toggle then immediately click a menu item — if the first click is missed (or a `CLOSE_DROPDOWNS` race fires), the item stays `display:none` and the test hangs to timeout (flaky). Open the menu retry-safely by clicking the toggle only when the target item is not yet visible:
+   ```js
+   await expect(async () => {
+     if (!(await page.getByTestId('export-quest-item').isVisible())) {
+       await page.getByTestId('export-btn').click();
+     }
+     await expect(page.getByTestId('export-quest-item')).toBeVisible();
+   }).toPass();
+   await page.getByTestId('export-quest-item').click();
+   ```
 15. **E2E fixture validity** — test fixtures must not trigger side-effects unrelated to the test. If loading a fixture causes a warning/error modal to auto-open (e.g. import validate modal), fix the fixture — do NOT dismiss the modal silently in `loadFixture`/`freshLoad`. A `choice` item in a fixture must have at least 1 `answerOption` to avoid triggering the import validation warning. Empty-state UI scenarios must be reached by removing rows in the test, not by having a broken fixture item.
 16. **No silent workarounds in test helpers** — `if (await modal.isVisible()) { await modal.close() }` in a setup helper is forbidden unless the test explicitly covers that modal. If something unexpected opens during test setup, fix the root cause. Exception: if the test IS asserting on the modal (e.g. checking its content, verifying it opened), dismissing it at the end of the assertion block is correct and expected.
 17. **Rules go into `.github/copilot-instructions.md`** — whenever a new rule is established (in conversation, from a bug, from a lesson learned), add it here immediately without asking. Do not store rules only in local memory.

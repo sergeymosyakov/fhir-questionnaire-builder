@@ -25,6 +25,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/attachment-constraints.fhir.json');
 
@@ -198,8 +199,7 @@ test.describe('maxSize — file-size validation', () => {
 test.describe('attachment constraints — export round-trip', () => {
   test('maxSize exported as maxSize extension with valueDecimal', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -215,8 +215,7 @@ test.describe('attachment constraints — export round-trip', () => {
 
   test('mimeType exported as one extension entry per type', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -234,8 +233,7 @@ test.describe('attachment constraints — export round-trip', () => {
 
   test('att-both exports both maxSize and mimeType', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -253,8 +251,7 @@ test.describe('attachment constraints — export round-trip', () => {
 
   test('att-none exports no maxSize or mimeType extensions', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('export-btn').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),

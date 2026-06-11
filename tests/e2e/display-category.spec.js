@@ -28,6 +28,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/display-category.fhir.json');
 
@@ -307,8 +308,7 @@ function findItemRecursive(items, linkId) {
  * there are warnings (e.g. displayCategory on display items).
  */
 async function exportAndDownload(page) {
-  await page.getByTestId('export-btn').click();
-  await page.getByTestId('export-quest-item').click();
+  await openDropdownItem(page, 'export-btn', 'export-quest-item');
   await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
   await page.getByTestId('saveFormatModalApply').click();
   // Validate modal opens when questionnaire has warnings/errors
@@ -348,8 +348,7 @@ test.describe('displayCategory — R4 export suppression on display items', () =
 
   test('displayCategory on display item triggers validator warning', async ({ page }) => {
     await loadFixture(page);
-    await page.getByTestId('tools-btn').click();
-    await page.getByTestId('validate-item').click();
+    await openDropdownItem(page, 'tools-btn', 'validate-item');
     await expect(page.locator('[data-testid="validateModal"]')).toBeVisible();
     const body = page.locator('[data-testid="validateModalBody"]');
     await expect(body).toContainText('displayCategory');

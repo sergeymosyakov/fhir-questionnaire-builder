@@ -8,6 +8,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/all-types-repeatable.fhir.json');
 
@@ -84,8 +85,7 @@ test('QR repeat round-trip: fill 3 rows per field, export, reload, import, verif
   await fillSelectRows(page, 'select-item', ['Option A', 'Option B', 'Option C']);
 
   // ── 3. Export QR (via modal) ──
-  await page.getByTestId('export-btn').click();
-  await page.getByTestId('export-qr-item').click();
+  await openDropdownItem(page, 'export-btn', 'export-qr-item');
   await expect(page.locator('[data-testid="qrExportModal"]')).toBeVisible({ timeout: 5_000 });
   const [download] = await Promise.all([
     page.waitForEvent('download'),

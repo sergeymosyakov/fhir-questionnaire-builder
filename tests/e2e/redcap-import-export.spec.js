@@ -27,6 +27,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -47,9 +48,7 @@ async function freshStart(page) {
 
 /** Open "From file…" → select REDCap format in modal → choose file. */
 async function loadREDCapCSV(page, filePath) {
-  await page.getByTestId('load-fhir-btn').click();
-  await expect(page.getByTestId('load-from-file-item')).toBeVisible();
-  await page.getByTestId('load-from-file-item').click();
+  await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
 
   // If existing questionnaire is loaded, confirm dialog appears first
   const confirmModal = page.getByTestId('loadConfirmModal');
@@ -75,9 +74,7 @@ async function loadREDCapCSV(page, filePath) {
 
 /** Open "From file…" → keep FHIR JSON format (default) → choose file. */
 async function loadFHIRJSON(page, filePath) {
-  await page.getByTestId('load-fhir-btn').click();
-  await expect(page.getByTestId('load-from-file-item')).toBeVisible();
-  await page.getByTestId('load-from-file-item').click();
+  await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
 
   // If existing questionnaire is loaded, confirm dialog appears first
   const confirmModal2 = page.getByTestId('loadConfirmModal');
@@ -109,8 +106,7 @@ const validateModalClose = (page) => page.locator('[data-testid="validateModalCl
 test.describe('REDCap CSV import', () => {
   test('format picker modal opens on "From file…" click', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('load-fhir-btn').click();
-    await page.getByTestId('load-from-file-item').click();
+    await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
     await expect(page.getByTestId('loadFormatModal')).toBeVisible();
     await expect(page.getByTestId('load-format-select')).toBeVisible();
     await page.getByTestId('loadFormatModalCancel').click();
@@ -153,9 +149,7 @@ test.describe('REDCap CSV import', () => {
 test.describe('REDCap CSV export', () => {
   test('save format modal opens on "Questionnaire…" click', async ({ page }) => {
     await freshStart(page);    // export-btn is hidden until a questionnaire is loaded/started
-    await page.getByTestId('add-root-group-btn').click();    await page.getByTestId('export-btn').click();
-    await expect(page.getByTestId('export-quest-item')).toBeVisible();
-    await page.getByTestId('export-quest-item').click();
+    await page.getByTestId('add-root-group-btn').click();    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.getByTestId('saveFormatModal')).toBeVisible();
     await expect(page.getByTestId('save-format-select')).toBeVisible();
     await page.getByTestId('saveFormatModalCancel').click();
@@ -171,9 +165,7 @@ test.describe('REDCap CSV export', () => {
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 12_000 }),
       (async () => {
-        await page.getByTestId('export-btn').click();
-        await expect(page.getByTestId('export-quest-item')).toBeVisible();
-        await page.getByTestId('export-quest-item').click();
+        await openDropdownItem(page, 'export-btn', 'export-quest-item');
         await expect(page.getByTestId('saveFormatModal')).toBeVisible();
         await page.getByTestId('save-format-select').click();
         await page.locator('[data-testid="csel-drop"] [data-val="redcap"]').click();
@@ -194,9 +186,7 @@ test.describe('REDCap CSV export', () => {
     await loadFHIRJSON(page, answerExprPath);
     await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 10_000 });
 
-    await page.getByTestId('export-btn').click();
-    await expect(page.getByTestId('export-quest-item')).toBeVisible();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.getByTestId('saveFormatModal')).toBeVisible();
     await page.getByTestId('save-format-select').click();
     await page.locator('[data-testid="csel-drop"] [data-val="redcap"]').click();
