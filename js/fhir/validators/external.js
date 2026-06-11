@@ -7,8 +7,9 @@
 // /config.json via the shared _loadConfig helper).
 
 import { Validator } from './base.js';
-
-const CORS_PROXY_KEY = '_corsProxyUrl';
+/** Thrown for non-retryable validation failures (e.g. HTTP 413 / 4xx). */
+class ValidatorFatalError extends Error {}
+const CORS_PROXY_KEY = 'corsProxyUrl';
 let _proxyUrl = '';
 let _proxyLoaded = false;
 let _proxyPromise = null;
@@ -89,9 +90,31 @@ export class ExternalValidator extends Validator {
           body,
         });
 
+        // 413 Payload Too Large: the questionnaire exceeds the server's request
+        // size limit. Retrying will not help — surface a clear, actionable error.
+        if (resp.status === 413) {
+          const sizeKb = Math.round(body.length / 1024);
+          throw new ValidatorFatalError(
+            `Questionnaire is too large (${sizeKb} KB) for the external validator ` +
+            `(${this._name}). The public server rejected it with HTTP 413. ` +
+            `Use the built-in validator, or point to a self-hosted FHIR server with a higher request limit.`,
+          );
+        }
+
+        if (!resp.ok) {
+          // Other client errors (4xx) are not retryable; server errors (5xx) are.
+          const text = await resp.text().catch(() => '');
+          const snippet = text.trim().slice(0, 200);
+          const msg = `External validator returned HTTP ${resp.status} ${resp.statusText}${snippet ? ` — ${snippet}` : ''}`;
+          if (resp.status >= 400 && resp.status < 500) throw new ValidatorFatalError(msg);
+          throw new Error(msg);
+        }
+
         const outcome = await resp.json();
         return _parseOutcome(outcome, questJson);
       } catch (err) {
+        // Fatal errors (413, other 4xx) are not retryable — rethrow immediately.
+        if (err instanceof ValidatorFatalError) throw err;
         lastErr = err;
         if (attempt < this._retries) {
           await new Promise(r => setTimeout(r, 800 * attempt));
