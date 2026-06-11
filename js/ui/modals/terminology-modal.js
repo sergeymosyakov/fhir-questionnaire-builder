@@ -140,8 +140,7 @@ class TerminologyModal extends Modal {
     this.body.appendChild(testRow);
 
     const extRow = document.createElement('div');
-    extRow.className = 'panel-hint';
-    extRow.style.marginTop = '6px';
+    extRow.className = 'panel-hint panel-hint--mt';
     extRow.textContent = `Extension URL: ${PREF_TERM_URL}`;
     this.body.appendChild(extRow);
   }

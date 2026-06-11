@@ -191,7 +191,6 @@ function _profileSection(s) {
   wrap.appendChild(lbl);
 
   const listWrap = document.createElement('div');
-  listWrap.style.minHeight = '0';
 
   const render = () => {
     listWrap.innerHTML = '';

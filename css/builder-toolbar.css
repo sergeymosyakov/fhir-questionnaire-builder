@@ -181,6 +181,7 @@
   user-select: none;
 }
 .load-menu-item--indented { padding-left: 22px; }
+.menu-item-icon { vertical-align: -1px; margin-right: 5px; }
 .load-menu-item--checkbox {
   display: flex;
   align-items: center;

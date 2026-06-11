@@ -451,7 +451,7 @@ export class OpenChoiceNode extends ItemNode {
     if (optionsOnly) {
       el.readOnly = true;
       el.placeholder = node._openLabel || 'Choose\u2026';
-      el.style.cursor = 'default';
+      el.classList.add('choice-open-readonly');
     }
 
     const btn = document.createElement('button');
