@@ -9,6 +9,8 @@
 //   enableWhen answer[x]   → enableWhen.operator: '=' + answer[x]  (STU3 implicit equality)
 //   item.initial<Type>     → item.initial: [{ value<Type>: ... }]
 
+import { BUILDER_VERSION_EXTENSION_URL } from './format-registry.js';
+
 // ── Detection ─────────────────────────────────────────────────────────────────
 
 function _isStu3Version(ver) {
@@ -48,6 +50,11 @@ function _hasStu3InitialField(item) {
 
 export function isSTU3(fhirJson) {
   if (!fhirJson || fhirJson.resourceType !== 'Questionnaire') return false;
+  // Files exported by this builder carry an explicit target-version extension
+  // (R4/R4B/R5). Their presence means the resource is a modern (R4+) document,
+  // so STU3 normalisation must be skipped — this also disambiguates the `coding`
+  // item type, which is DSTU2-legacy in old files but the native R5 choice type.
+  if ((fhirJson.extension || []).some(e => e?.url === BUILDER_VERSION_EXTENSION_URL)) return false;
   if (_isStu3Version(fhirJson.fhirVersion)) return true;
   if (_isStu3Version(fhirJson.meta?.fhirVersion)) return true;
   for (const item of fhirJson.item || []) {

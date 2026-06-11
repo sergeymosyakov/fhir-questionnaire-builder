@@ -44,9 +44,8 @@ class FormatRegistry {
    *   1. The builder-target-version extension on the Questionnaire (our own
    *      round-trip marker — FHIR's Meta type has no fhirVersion field, so the
    *      target version is carried in an extension instead).
-   *   2. Feature-based heuristics: a native `disabledDisplay` field implies R5
-   *      (added in R5); a native `answerConstraint` field implies R4B
-   *      (added in R4B). Checked deepest-version-first.
+   *   2. Feature-based heuristics: a native `disabledDisplay` or `answerConstraint`
+   *      field implies R5 (both were added in R5).
    *   3. Fallback: R4.
    *
    * @param {object} data - parsed FHIR Questionnaire JSON
@@ -59,8 +58,9 @@ class FormatRegistry {
         if (def.metaVersion && def.metaVersion === ext.valueCode) return def.id;
       }
     }
-    if (_treeHasField(data?.item, 'disabledDisplay') && this._map.has('R5'))  return 'R5';
-    if (_treeHasField(data?.item, 'answerConstraint') && this._map.has('R4B')) return 'R4B';
+    if (this._map.has('R5') &&
+        (_treeHasField(data?.item, 'disabledDisplay') || _treeHasField(data?.item, 'answerConstraint')))
+      return 'R5';
     return 'R4';
   }
 }
@@ -68,6 +68,20 @@ class FormatRegistry {
 /** URL of the extension that records the builder's target FHIR version. */
 export const BUILDER_VERSION_EXTENSION_URL =
   'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/builder-target-version';
+
+/**
+ * URLs for builder-private extensions that carry R5-only Questionnaire.item
+ * fields in an R4/R4B export. The official HL7 cross-version extension URLs
+ * (`.../fhir/5.0/StructureDefinition/...`) are rejected by some validators
+ * (e.g. public HAPI cannot resolve them), so we use our own canonical URLs.
+ * Validators emit at most an informational "unknown extension" warning, the
+ * document stays valid, and our importer reads these back for a loss-less
+ * downgrade round-trip.
+ */
+export const ITEM_ANSWER_CONSTRAINT_EXTENSION_URL =
+  'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-answerConstraint';
+export const ITEM_DISABLED_DISPLAY_EXTENSION_URL =
+  'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-disabledDisplay';
 
 /**
  * Set (or replace) the builder-target-version extension on a Questionnaire.

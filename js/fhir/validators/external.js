@@ -7,12 +7,16 @@
 // /config.json via the shared _loadConfig helper).
 
 import { Validator } from './base.js';
+import { BUILDER_VERSION_EXTENSION_URL } from '../format-registry.js';
 /** Thrown for non-retryable validation failures (e.g. HTTP 413 / 4xx). */
 class ValidatorFatalError extends Error {}
 const CORS_PROXY_KEY = 'corsProxyUrl';
 let _proxyUrl = '';
 let _proxyLoaded = false;
 let _proxyPromise = null;
+
+/** Map a builder version id to the matching HAPI public-server base path. */
+const _HAPI_BASE_BY_VERSION = { R4: 'baseR4', R4B: 'baseR4B', R5: 'baseR5' };
 
 function _loadProxy() {
   if (_proxyLoaded) return Promise.resolve();
@@ -61,25 +65,50 @@ function _parseOutcome(outcome, questJson) {
 
 export class ExternalValidator extends Validator {
   /**
-   * @param {{ name: string, url: string, retries?: number }} cfg
+   * @param {{ name: string, url: string, retries?: number, getFhirTarget?: () => string }} cfg
    */
-  constructor({ name, url, retries = 3 }) {
+  constructor({ name, url, retries = 3, getFhirTarget = () => 'R4' }) {
     super();
     this.enabled  = false; // off by default; toggled via VALIDATOR_TOGGLE event
     this._name    = name;
     this._url     = url.replace(/\/$/, '');
     this._retries = retries;
+    this._getFhirTarget = getFhirTarget;
   }
 
   get id()   { return 'external'; }
-  get name() { return this._name; }
+  get name() {
+    const target = this._getFhirTarget();
+    return target ? `${this._name} ${target}` : this._name;
+  }
   get type() { return 'external'; }
+
+  /** Build the version-specific base URL for the active FHIR target. */
+  _baseUrl() {
+    const target = this._getFhirTarget();
+    const base = _HAPI_BASE_BY_VERSION[target];
+    // Swap a trailing /baseRxx segment for the target version's base; if the
+    // configured URL has no recognised base segment, use it unchanged.
+    if (base && /\/baseR[0-9A-Z]+$/.test(this._url)) {
+      return this._url.replace(/\/baseR[0-9A-Z]+$/, `/${base}`);
+    }
+    return this._url;
+  }
 
   async _run(questJson) {
     await _loadProxy();
 
-    const endpoint = _proxied(`${this._url}/Questionnaire/$validate`);
-    const body     = JSON.stringify(questJson);
+    const endpoint = _proxied(`${this._baseUrl()}/Questionnaire/$validate`);
+    // Strip the builder-target-version extension — it is a builder-internal
+    // round-trip marker that the FHIR server does not recognise (would produce
+    // a spurious "Unknown extension" warning). The exported file keeps it.
+    const payload = { ...questJson };
+    if (Array.isArray(payload.extension)) {
+      const filtered = payload.extension.filter(e => e?.url !== BUILDER_VERSION_EXTENSION_URL);
+      if (filtered.length) payload.extension = filtered;
+      else delete payload.extension;
+    }
+    const body = JSON.stringify(payload);
 
     let lastErr;
     for (let attempt = 1; attempt <= this._retries; attempt++) {

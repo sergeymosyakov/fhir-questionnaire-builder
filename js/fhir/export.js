@@ -299,7 +299,7 @@ export function nodeToFHIRItem(node) {
   const _maxLengthAllowed = new Set(['checkbox', 'decimal', 'integer', 'number', 'text', 'url', 'open-choice']);
   if (node._maxLength !== undefined && node._maxLength !== null && _maxLengthAllowed.has(node.itemType)) fhirItem.maxLength = node._maxLength;
 
-  // answerConstraint (R4B/R5)
+  // answerConstraint (R5 native; downgraded to a cross-version extension for R4/R4B)
   if (node._answerConstraint) fhirItem.answerConstraint = node._answerConstraint;
 
   // minLength (SDC extension)

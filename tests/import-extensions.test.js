@@ -590,9 +590,13 @@ describe('signatureRequired (item)', () => {
   });
 });
 
-// ── answerConstraint (R4B/R5 item-level) ─────────────────────────────────────
+// ── answerConstraint (R5 native + R4/R4B builder-private extension) ───────────
 describe('import answerConstraint', () => {
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+  const AC_EXT_URL =
+    'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-answerConstraint';
+  const DD_EXT_URL =
+    'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-disabledDisplay';
 
   it('reads answerConstraint from fhirItem', () => {
     importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', answerConstraint: 'optionsOnly' }]));
@@ -607,6 +611,22 @@ describe('import answerConstraint', () => {
   it('does not set _answerConstraint when absent', () => {
     importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q' }]));
     expect(_tree[0]._answerConstraint).toBeUndefined();
+  });
+
+  it('reads answerConstraint from the builder-private downgrade extension', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Q',
+      extension: [{ url: AC_EXT_URL, valueCode: 'optionsOrType' }],
+    }]));
+    expect(_tree[0]._answerConstraint).toBe('optionsOrType');
+  });
+
+  it('reads disabledDisplay from the builder-private downgrade extension', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Q',
+      extension: [{ url: DD_EXT_URL, valueCode: 'hidden' }],
+    }]));
+    expect(_tree[0]._disabledDisplay).toBe('hidden');
   });
 });
 

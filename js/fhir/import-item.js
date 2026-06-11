@@ -2,6 +2,10 @@
 // Converts FHIR Questionnaire.item into our internal node tree.
 import { createGroupNode, createItemNode } from '../nodes/index.js';
 import {
+  ITEM_ANSWER_CONSTRAINT_EXTENSION_URL,
+  ITEM_DISABLED_DISPLAY_EXTENSION_URL,
+} from './format-registry.js';
+import {
   fhirTypeToItemType,
   fhirOptsToStr,
   hasNonCodingOpts,
@@ -209,8 +213,13 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // maxLength
   if (fhirItem.maxLength) node._maxLength = fhirItem.maxLength;
 
-  // answerConstraint (R4B/R5 — optionsOnly | optionsOrType | optionsOrString)
+  // answerConstraint (R5 native field, or R4/R4B builder-private extension backport
+  //  — optionsOnly | optionsOrType | optionsOrString)
   if (fhirItem.answerConstraint) node._answerConstraint = fhirItem.answerConstraint;
+  const acExt = (fhirItem.extension || []).find(
+    e => e.url === ITEM_ANSWER_CONSTRAINT_EXTENSION_URL
+  );
+  if (acExt?.valueCode) node._answerConstraint = acExt.valueCode;
 
   // minLength (SDC extension)
   const minLenExt = (fhirItem.extension || []).find(
@@ -384,10 +393,10 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (itemMediaExt?.valueAttachment) node._itemMedia = itemMediaExt.valueAttachment;
 
-  // disabledDisplay (R4B native field or R4 extension backport)
+  // disabledDisplay (R5 native field, or R4/R4B builder-private extension backport)
   if (fhirItem.disabledDisplay) node._disabledDisplay = fhirItem.disabledDisplay;
   const ddExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay'
+    e => e.url === ITEM_DISABLED_DISPLAY_EXTENSION_URL
   );
   if (ddExt?.valueCode) node._disabledDisplay = ddExt.valueCode;
 

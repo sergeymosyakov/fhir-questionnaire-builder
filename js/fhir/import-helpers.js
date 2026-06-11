@@ -1,7 +1,9 @@
 // ── FHIR import: pure helper functions ───────────────────────────────────────
 // No side-effects, no state imports. Used by import-item.js and import.js.
-import { ITLH_KEY_GROUP_OR } from '../utils.js';
-
+import { ITLH_KEY_GROUP_OR } from '../utils.js';import {
+  ITEM_ANSWER_CONSTRAINT_EXTENSION_URL,
+  ITEM_DISABLED_DISPLAY_EXTENSION_URL,
+} from './format-registry.js';
 // ── Known extension URLs — any item.extension[] entry NOT in this set is
 // collected into node._unknownExtensions for pass-through round-tripping.
 export const KNOWN_ITEM_EXTENSION_URLS = new Set([
@@ -28,7 +30,8 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel',
-  'http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay',
+  ITEM_DISABLED_DISPLAY_EXTENSION_URL,
+  ITEM_ANSWER_CONSTRAINT_EXTENSION_URL,
   'http://hl7.org/fhir/StructureDefinition/maxSize',
   'http://hl7.org/fhir/StructureDefinition/mimeType',
   'http://hl7.org/fhir/StructureDefinition/designNote',

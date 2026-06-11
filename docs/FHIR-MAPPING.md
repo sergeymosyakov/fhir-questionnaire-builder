@@ -221,7 +221,7 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | `_initialExpr` | SDC `sdc-questionnaire-initialExpression` extension (`valueExpression.expression`) | FHIRPath; evaluated once on import and on Re-init; result pre-fills `values[]` |
 | `_readOnly` | `item.readOnly` | |
 | `_prefix` | `item.prefix` | imported and exported; displayed as amber badge in preview; editable in builder meta-row |
-| `_answerConstraint` | `item.answerConstraint` (R4B/R5) | `optionsOnly` / `optionsOrType` / `optionsOrString`; import + export + Answer Type modal dropdown; `optionsOnly` makes open-choice preview read-only |
+| `_answerConstraint` | `item.answerConstraint` (R5 native) | `optionsOnly` / `optionsOrType` / `optionsOrString`; import + export + Answer Type modal dropdown; `optionsOnly` makes open-choice preview read-only; on R4/R4B export it is downgraded to the builder-private extension `item-answerConstraint` (field is absent from R4/R4B) |
 | `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); editable via **Props** button (codes-modal — system/code/display rows, draft pattern); also supported on groups (see Group-specific) |
 | `_maxLength` | `item.maxLength` | imported → `node._maxLength`; exported back when set; character counter + `maxlength` attribute enforced in preview |
 | `_minLength` | SDC ext `http://hl7.org/fhir/StructureDefinition/minLength` (`valueInteger`) | imported → `node._minLength`; exported back when set; `minlength` HTML attribute enforced in preview; inline error `Min N chars` shown on blur when value is non-empty but shorter than limit; clears when value reaches the limit |
@@ -233,7 +233,7 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | `_optionSystems` | `answerOption[].valueCoding.system` | map of option code → system URI (e.g. `http://loinc.org`); optional per-option; editable in Answer Type modal **System** column; exported as `valueCoding.system` in the simple options path; preserved from `_rawAnswerOptions.valueCoding.system` in the raw path |
 | `_optionPrefixes` | `questionnaire-optionPrefix` ext on `answerOption[].extension` | map of option code → display prefix string (e.g. `'A.'`, `'1.'`); prepended to option label in select/radio preview; editable in Answer Type modal (`code=Prefix` format, comma-separated); exported to `answerOption.extension` alongside `ordinalValue` when present |
 | `_sliderStep` | `questionnaire-sliderStepValue` ext (`valueDecimal` or `valueInteger` on import; always `valueInteger` on export — decimal steps rounded; R4 constraint) | imported/exported for `integer`/`decimal` items; renders item as `<input type="range">` slider in preview; editable in Answer Type modal |
-| `_disabledDisplay` | `item.disabledDisplay` (R4B native field) + R4 backport extension `extension-Questionnaire.item.disabledDisplay` | `'hidden'` → item removed from DOM when not visible; `'protected'` (default) → grayed row; editable in Show When modal |
+| `_disabledDisplay` | `item.disabledDisplay` (R5 native field) + R4/R4B downgrade extension `item-disabledDisplay` | `'hidden'` → item removed from DOM when not visible; `'protected'` (default) → grayed row; editable in Show When modal; on R4/R4B export the native field is downgraded to the builder-private extension (field is absent from R4/R4B) |
 | `_minOccurs` | `questionnaire-minOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true` |
 | `_maxOccurs` | `questionnaire-maxOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true`; enforced in preview — add button disabled at limit |
 | `_answerValueSet` | `item.answerValueSet` | imported → `node._answerValueSet`; exported back unchanged; external URLs expanded via `terminologyService.expandAll()` on questionnaire load — options cached in `node._vsCache` and rendered in preview; server resolved via per-item `_preferredTermServer` → questionnaire-level default → `https://tx.fhir.org/r4`; expansion failures shown in validateModal |
@@ -304,7 +304,8 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix` | standard | `_optionPrefixes[code]` (display prefix per answer option e.g. `'A.'`; prepended to label in select/radio preview; editable in Answer Type modal; exported to `answerOption.extension`) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue` | standard | `_sliderStep` (step for range slider; triggers slider rendering); also sets `_itemControl = 'slider'` on export and recognises imported `questionnaire-itemControl = slider`; **R4 note:** export always uses `valueInteger` (decimal steps are rounded; local validator warns) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces` | standard | `_maxDecimalPlaces` (max decimal digits for `decimal` items; enforced in preview; editable in Answer Type modal) | Yes |
-| `http://hl7.org/fhir/5.0/StructureDefinition/extension-Questionnaire.item.disabledDisplay` | R4 backport | `_disabledDisplay` (hidden/protected; also read from native `item.disabledDisplay` field) | Yes (R4B/R5 backport) |
+| `https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-disabledDisplay` | builder-private | `_disabledDisplay` (hidden/protected; also read from native `item.disabledDisplay` R5 field) | Yes (R4/R4B downgrade of the R5-only field) |
+| `https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-answerConstraint` | builder-private | `_answerConstraint` (optionsOnly/optionsOrType/optionsOrString; also read from native `item.answerConstraint` R5 field) | Yes (R4/R4B downgrade of the R5-only field) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` | SDC | `_entryFormat` (placeholder hint text shown on text/url/number/quantity controls; editable in Answer Type modal); **on import also reads** `http://hl7.org/fhir/StructureDefinition/entryFormat` (R4 element-definition alias); SDC URL takes precedence when both are present | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation` | standard | `_choiceOrientation` (`vertical` / `horizontal`; controls layout of radio button groups; editable in Answer Type modal for `radio` items) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory` | standard | `_displayCategory` (`instructions` / `security` / `help`; applies visual category styling to `display` items in preview; editable in Answer Type modal); exported with `system: 'http://hl7.org/fhir/questionnaire-display-category'` in coding; **R4 note:** only exported for `group` items (R4 context invariant); suppressed on `display` items with local validator warning | Yes |
@@ -382,7 +383,8 @@ This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR wit
 | Version | Status |
 |---|---|
 | R4 | ✅ Fully supported |
-| R4B / R5 | 🔧 Partial — most fields overlap; `disabledDisplay` is R4B/R5 native (R4 backport extension handled); `answerConstraint` is fully supported |
+| R4B | ✅ Fully supported — schema overlaps R4; R5-only fields are downgraded to builder-private extensions on export |
+| R5 | ✅ Fully supported — `disabledDisplay` and `answerConstraint` are R5 native fields; `choice`/`open-choice` exported as `coding` |
 | STU3 | ✅ Import shim — automatically normalised to R4 on load via `js/fhir/stu3-shim.js`; see table below |
 
 ### STU3 → R4 Normalisation (`js/fhir/stu3-shim.js`)
@@ -479,14 +481,14 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 
 Based on running all `sampledata/*.fhir.json` files against `https://hapi.fhir.org/baseR4/Questionnaire/$validate` (June 2026).
 
-### R4B / R5-only features — exported by builder, flagged by HAPI R4 validator
+### R5-only features — downgraded to builder-private extensions on R4/R4B export
 
-These extensions are **fully supported in R4B or R5** and exported by the builder when the user configures them. An HAPI R4 validator will flag them as unknown/invalid. This is expected and acceptable — users targeting R4 should avoid these fields.
+These fields are **native in R5 only**. On R4/R4B export the builder moves them into builder-private extensions (the official HL7 cross-version extension URLs are rejected by public HAPI) so the document stays schema-valid and round-trips losslessly on re-import. A validator may emit an informational "unknown extension" warning.
 
-| Feature | Extension / property | Available in | Notes |
+| Feature | Native property | Downgrade extension (R4/R4B) | Available natively in |
 |---|---|---|---|
-| `disabledDisplay` | `Questionnaire.item.disabledDisplay` | R4B, R5 | Controls how a disabled item is shown; absent from R4 Questionnaire profile |
-| `answerConstraint` | `Questionnaire.item.answerConstraint` | R4B, R5 | Restricts whether answers must come from the answer list; absent from R4 |
+| `disabledDisplay` | `Questionnaire.item.disabledDisplay` | `.../StructureDefinition/item-disabledDisplay` | R5 |
+| `answerConstraint` | `Questionnaire.item.answerConstraint` | `.../StructureDefinition/item-answerConstraint` | R5 |
 | SDC extensions (`calculatedExpression`, `enableWhenExpression`, `collapsible`, `openLabel`, etc.) | Various `http://hl7.org/fhir/uv/sdc/...` URLs | SDC IG (any FHIR version) | HAPI R4 server doesn't load SDC IG definitions; validator flags them as unknown |
 | SDC profile reference (`meta.profile`) | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire` | SDC IG | HAPI R4 server does not host SDC profiles; flagged as unresolvable |
 

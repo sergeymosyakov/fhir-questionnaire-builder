@@ -3,9 +3,17 @@ import { describe, it, expect, beforeEach } from 'vitest';
 
 const VERSION_EXT_URL =
   'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/builder-target-version';
+const ANSWER_CONSTRAINT_EXT_URL =
+  'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-answerConstraint';
+const DISABLED_DISPLAY_EXT_URL =
+  'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-disabledDisplay';
 /** Read the builder-target-version code from a built Questionnaire. */
 function versionCode(q) {
   return (q.extension || []).find(e => e.url === VERSION_EXT_URL)?.valueCode;
+}
+/** Read a builder-private item extension valueCode. */
+function itemExtCode(item, url) {
+  return (item.extension || []).find(e => e.url === url)?.valueCode;
 }
 
 // ── versionRegistry facade ─────────────────────────────────────────────────
@@ -70,11 +78,11 @@ describe('versionRegistry facade', () => {
       resourceType: 'Questionnaire',
       item: [{ linkId: 'q1', type: 'choice', disabledDisplay: 'hidden' }],
     })).toBe('R5');
-    // answerConstraint → R4B (added in R4B)
+    // answerConstraint → R5 (added in R5)
     expect(registry.detectVersion({
       resourceType: 'Questionnaire',
       item: [{ linkId: 'q1', type: 'choice', answerConstraint: 'optionsOrString' }],
-    })).toBe('R4B');
+    })).toBe('R5');
   });
 
   it('detectVersion finds heuristic fields in nested items', () => {
@@ -150,6 +158,28 @@ describe('R4 format', () => {
     fmt.build(base);
     expect(base.meta).toBeUndefined();
   });
+
+  it('downgrades R5-only item fields to builder-private extensions', () => {
+    const base = {
+      resourceType: 'Questionnaire',
+      item: [{ linkId: 'q1', type: 'choice', answerConstraint: 'optionsOrString', disabledDisplay: 'hidden' }],
+    };
+    const result = fmt.build(base);
+    expect(result.item[0].answerConstraint).toBeUndefined();
+    expect(result.item[0].disabledDisplay).toBeUndefined();
+    expect(itemExtCode(result.item[0], ANSWER_CONSTRAINT_EXT_URL)).toBe('optionsOrString');
+    expect(itemExtCode(result.item[0], DISABLED_DISPLAY_EXT_URL)).toBe('hidden');
+  });
+
+  it('downgrades R5-only fields recursively in nested items', () => {
+    const base = {
+      resourceType: 'Questionnaire',
+      item: [{ linkId: 'g1', type: 'group', item: [{ linkId: 'q1', type: 'choice', disabledDisplay: 'protected' }] }],
+    };
+    const result = fmt.build(base);
+    expect(result.item[0].item[0].disabledDisplay).toBeUndefined();
+    expect(itemExtCode(result.item[0].item[0], DISABLED_DISPLAY_EXT_URL)).toBe('protected');
+  });
 });
 
 // ── R4B format build() ─────────────────────────────────────────────────────
@@ -161,6 +191,18 @@ describe('R4B format', () => {
     const result = fmt.build({ resourceType: 'Questionnaire', item: [] });
     expect(versionCode(result)).toBe('4.3.0');
     expect(result.meta.fhirVersion).toBeUndefined();
+  });
+
+  it('downgrades R5-only item fields to builder-private extensions', async () => {
+    const { formatRegistry } = await import('../js/fhir/format-registry.js');
+    await import('../js/fhir/formats/r4b.js');
+    const fmt = formatRegistry.get('R4B');
+    const result = fmt.build({
+      resourceType: 'Questionnaire',
+      item: [{ linkId: 'q1', type: 'choice', answerConstraint: 'optionsOnly' }],
+    });
+    expect(result.item[0].answerConstraint).toBeUndefined();
+    expect(itemExtCode(result.item[0], ANSWER_CONSTRAINT_EXT_URL)).toBe('optionsOnly');
   });
 });
 
@@ -181,24 +223,34 @@ describe('R5 format', () => {
     expect(result.meta.fhirVersion).toBeUndefined();
   });
 
-  it('converts open-choice items to type=choice + answerConstraint=optionsOrString', () => {
+  it('converts open-choice items to type=coding + answerConstraint=optionsOrString', () => {
     const base = {
       resourceType: 'Questionnaire',
       item: [{ linkId: 'q1', type: 'open-choice', text: 'Pick one' }],
     };
     const result = fmt.build(base);
-    expect(result.item[0].type).toBe('choice');
+    expect(result.item[0].type).toBe('coding');
     expect(result.item[0].answerConstraint).toBe('optionsOrString');
   });
 
-  it('does not touch items with type other than open-choice', () => {
+  it('converts choice items to type=coding (R5 renamed choice to coding)', () => {
     const base = {
       resourceType: 'Questionnaire',
-      item: [{ linkId: 'q1', type: 'text' }, { linkId: 'q2', type: 'choice' }],
+      item: [{ linkId: 'q1', type: 'choice', text: 'Pick one' }],
+    };
+    const result = fmt.build(base);
+    expect(result.item[0].type).toBe('coding');
+    expect(result.item[0].answerConstraint).toBeUndefined();
+  });
+
+  it('does not touch items with a non-choice type', () => {
+    const base = {
+      resourceType: 'Questionnaire',
+      item: [{ linkId: 'q1', type: 'text' }, { linkId: 'q2', type: 'boolean' }],
     };
     const result = fmt.build(base);
     expect(result.item[0].type).toBe('text');
-    expect(result.item[1].type).toBe('choice');
+    expect(result.item[1].type).toBe('boolean');
     expect(result.item[1].answerConstraint).toBeUndefined();
   });
 
@@ -212,7 +264,7 @@ describe('R5 format', () => {
       }],
     };
     const result = fmt.build(base);
-    expect(result.item[0].item[0].type).toBe('choice');
+    expect(result.item[0].item[0].type).toBe('coding');
     expect(result.item[0].item[0].answerConstraint).toBe('optionsOrString');
   });
 

@@ -9,7 +9,7 @@
 //   {
 //     "validators": [
 //       { "type": "local",    "name": "Built-in" },
-//       { "type": "external", "name": "HAPI FHIR R4", "url": "https://hapi.fhir.org/baseR4" }
+//       { "type": "external", "name": "HAPI FHIR", "url": "https://hapi.fhir.org/baseR4" }
 //     ]
 //   }
 
@@ -18,9 +18,9 @@ import { LocalValidator }    from './local.js';
 import { ExternalValidator } from './external.js';
 
 /**
- * @param {{ localEnabled?: boolean, externalEnabled?: boolean }} opts
+ * @param {{ localEnabled?: boolean, externalEnabled?: boolean, getFhirTarget?: () => string }} opts
  */
-export async function initValidators({ localEnabled = true, externalEnabled = false } = {}) {
+export async function initValidators({ localEnabled = true, externalEnabled = false, getFhirTarget = () => 'R4' } = {}) {
   try {
     const cfg = await fetch('./config.json').then(r => r.json());
     const defs = cfg.validators || [{ type: 'local', name: 'Built-in' }];
@@ -31,7 +31,7 @@ export async function initValidators({ localEnabled = true, externalEnabled = fa
         v.enabled = localEnabled;
         validatorRegistry.register(v);
       } else if (def.type === 'external' && def.url) {
-        const v = new ExternalValidator({ name: def.name || def.url, url: def.url, retries: def.retries ?? 3 });
+        const v = new ExternalValidator({ name: def.name || def.url, url: def.url, retries: def.retries ?? 3, getFhirTarget });
         v.enabled = externalEnabled;
         validatorRegistry.register(v);
       }

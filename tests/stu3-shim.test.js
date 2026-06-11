@@ -36,6 +36,22 @@ describe('isSTU3 — detection', () => {
     expect(isSTU3(qv('4.0.1'))).toBe(false);
   });
 
+  it('does not flag a builder-exported R5 file (coding type) as STU3', () => {
+    const VERSION_EXT_URL =
+      'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/builder-target-version';
+    const json = {
+      resourceType: 'Questionnaire',
+      extension: [{ url: VERSION_EXT_URL, valueCode: '5.0.0' }],
+      item: [{ linkId: 'q1', type: 'coding', answerOption: [{ valueCoding: { code: 'a' } }] }],
+    };
+    expect(isSTU3(json)).toBe(false);
+  });
+
+  it('still detects a legacy coding item as STU3 when no version marker is present', () => {
+    const json = q([{ linkId: 'q1', type: 'coding', option: [{ valueCoding: { code: 'a' } }] }]);
+    expect(isSTU3(json)).toBe(true);
+  });
+
   it('detects STU3 by item.option[]', () => {
     const json = q([{ linkId: 'q1', type: 'choice', option: [{ valueCoding: { code: 'a' } }] }]);
     expect(isSTU3(json)).toBe(true);

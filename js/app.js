@@ -256,4 +256,8 @@ BaseNode.configure({
 
 // Initialise validators from config.json (async — runs in background)
 // Pass initial enabled state from persisted prefs so validators start correctly
-initValidators({ localEnabled: prefs.get('validate'), externalEnabled: prefs.get('validateExternal') });
+initValidators({
+  localEnabled: prefs.get('validate'),
+  externalEnabled: prefs.get('validateExternal'),
+  getFhirTarget: () => questMeta.fhirTarget,
+});
