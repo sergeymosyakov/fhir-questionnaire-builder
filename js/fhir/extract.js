@@ -134,15 +134,19 @@ function buildObservation(qItem, valueProp, qr, obsProfile) {
 }
 
 function newFullUrl() {
-  const uuid =
-    (typeof globalThis !== 'undefined' && globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function')
-      ? globalThis.crypto.randomUUID()
-      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (ch) => {
-          const r = (Math.random() * 16) | 0;
-          const v = ch === 'x' ? r : (r & 0x3) | 0x8;
-          return v.toString(16);
-        });
-  return 'urn:uuid:' + uuid;
+  // crypto.randomUUID is available in all modern browsers and Node ≥ 14.17.
+  // Vitest runs in Node where globalThis.crypto.randomUUID is also present.
+  // No Math.random() fallback — use getRandomValues for the rare edge case.
+  if (typeof globalThis !== 'undefined' && globalThis.crypto?.randomUUID) {
+    return 'urn:uuid:' + globalThis.crypto.randomUUID();
+  }
+  // Secure fallback via getRandomValues (available in browsers and Node ≥ 15).
+  const bytes = new Uint8Array(16);
+  globalThis.crypto.getRandomValues(bytes);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant bits
+  const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  return 'urn:uuid:' + `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
 }
 
 /**
