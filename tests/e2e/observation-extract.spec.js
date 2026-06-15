@@ -114,7 +114,7 @@ test.describe('observation-extract — toggle and apply', () => {
 
 test.describe('observation-extract — export menu', () => {
   test('"Observations" item appears in Save dropdown', async ({ page }) => {
-    await freshStart(page);
+    await loadFixture(page);
     await expect(async () => {
       if (!(await page.getByTestId('export-obs-item').isVisible())) {
         await page.getByTestId('export-btn').click();
