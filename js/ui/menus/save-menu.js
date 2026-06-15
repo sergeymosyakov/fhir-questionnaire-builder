@@ -52,9 +52,9 @@ export class SaveMenu extends DropdownMenu {
     this._cloudSaveSep = this._sep();
     this._cloudSaveSep.style.display = 'none';
 
-    this._exportQuestItem = this._item(null, '&#x1F4C4; Questionnaire&hellip;', 'export-quest-item');
-    this._exportQrItem    = this._item(null, '&#x1F4CB; QuestionnaireResponse &middot; JSON file', 'export-qr-item');
-    this._exportObsItem   = this._item(null, '&#x1F9EA; Observations &middot; transaction Bundle', 'export-obs-item');
+    this._exportQuestItem = this._item(null, '&#x1F4C4; Questionnaire &middot; FHIR JSON', 'export-quest-item');
+    this._exportQrItem    = this._item(null, '&#x1F4CB; QuestionnaireResponse &middot; FHIR JSON', 'export-qr-item');
+    this._exportObsItem   = this._item(null, '&#x1F9EA; Observations &middot; FHIR JSON Bundle', 'export-obs-item');
 
     this._menu.append(
       this._cloudSaveBtn,

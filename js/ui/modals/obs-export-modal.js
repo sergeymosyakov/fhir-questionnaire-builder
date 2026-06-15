@@ -98,9 +98,7 @@ class ObsExportModal extends Modal {
     profSpacer.setAttribute('aria-hidden', 'true');
 
     const profInner = document.createElement('div');
-    profInner.style.display = 'flex';
-    profInner.style.alignItems = 'center';
-    profInner.style.gap = '6px';
+    profInner.className = 'obs-export-prof-row';
 
     const profChk = document.createElement('input');
     profChk.type           = 'checkbox';
@@ -111,9 +109,7 @@ class ObsExportModal extends Modal {
 
     const profLbl = document.createElement('label');
     profLbl.htmlFor          = 'obsExportProfile';
-    profLbl.style.fontSize   = '13px';
-    profLbl.style.fontWeight = '500';
-    profLbl.style.cursor     = 'pointer';
+    profLbl.className        = 'obs-export-prof-lbl';
     profLbl.textContent      = 'Add SDC profile';
     profLbl.dataset.tipTitle = 'meta.profile — sdc-observation';
     profLbl.dataset.tipBody  = `Adds meta.profile = ["${SDC_OBS_PROFILE}"] to each generated Observation. Recommended by the SDC IG to declare conformance.`;
