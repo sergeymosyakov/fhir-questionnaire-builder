@@ -359,8 +359,8 @@ export function nodeToFHIRItem(node) {
   }
 
   // sdc-questionnaire-observationExtract — mark item/group for Observation-based extraction
-  if (node._observationExtract && node.itemType !== 'display') {
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract', valueBoolean: true });
+  if (node._observationExtract != null && node.itemType !== 'display') {
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract', valueBoolean: node._observationExtract !== false });
   }
 
   // sdc-questionnaire-collapsible (groups only)

@@ -1,49 +1,62 @@
 import { StatesSection } from './base-section.js';
 import { STATES_SECTIONS } from './registry.js';
+import { createCustomSelect } from '../../custom-select.js';
+
+// '' = inherit from parent (no extension written), 'true' = yes, 'false' = suppress
+const OBS_ITEMS = [
+  { value: '',      label: 'Inherit from parent' },
+  { value: 'true',  label: 'Yes — extract as Observation' },
+  { value: 'false', label: 'No — suppress extraction' },
+];
+
+function nodeToVal(node) {
+  if (node._observationExtract === true)  return 'true';
+  if (node._observationExtract === false) return 'false';
+  return '';
+}
 
 class ObservationExtractSection extends StatesSection {
   initPending(node) {
-    return { draftObsExtract: !!node._observationExtract };
+    return { draftObsExtract: nodeToVal(node) };
   }
 
   isVisible(node) { return node.itemType !== 'display'; }
 
   build(pending) {
     const row = document.createElement('div');
-    row.className = 'states-modal-check-row';
-
-    const chk = document.createElement('input');
-    chk.type           = 'checkbox';
-    chk.id             = 'statesObsExtract';
-    chk.dataset.testid = 'states-obs-extract-chk';
-    chk.checked        = pending.draftObsExtract;
-    chk.addEventListener('change', () => { pending.draftObsExtract = chk.checked; });
+    row.className = 'states-modal-field-row';
 
     const lbl = document.createElement('label');
-    lbl.htmlFor          = 'statesObsExtract';
     lbl.className        = 'states-modal-chk-label';
-    lbl.textContent      = 'Extract as Observation';
+    lbl.textContent      = 'Extract as Observation:';
     lbl.dataset.tipTitle = 'sdc-questionnaire-observationExtract';
-    lbl.dataset.tipBody  = 'Marks this item (or group) for SDC Observation-based extraction. On extraction, each coded answer beneath an enabled item becomes an Observation. Requires item.code. The flag is inherited by descendants.';
+    lbl.dataset.tipBody  = 'Controls SDC Observation-based extraction for this item. "Inherit" writes no extension and defers to the nearest ancestor. "Yes" explicitly enables extraction (item.code required). "No" suppresses an inherited true.';
     lbl.dataset.tipFhir  = 'item.extension[sdc-questionnaire-observationExtract].valueBoolean';
     lbl.dataset.tipSpec  = 'SDC';
 
-    const hint = document.createElement('span');
-    hint.className   = 'states-modal-chk-hint';
-    hint.textContent = 'Coded answers below this item are extracted as Observation resources (sdc-questionnaire-observationExtract). Requires item.code.';
+    const sel = createCustomSelect({
+      items:     OBS_ITEMS,
+      value:     pending.draftObsExtract,
+      onChange:  v => { pending.draftObsExtract = v; },
+      className: 'sc-trigger--sm',
+      testid:    'states-obs-extract-sel',
+    });
 
-    row.appendChild(chk);
     row.appendChild(lbl);
-    row.appendChild(hint);
+    row.appendChild(sel.el);
     return row;
   }
 
   commit(pending, node) {
-    node._observationExtract = pending.draftObsExtract || undefined;
+    if (pending.draftObsExtract === 'true')  node._observationExtract = true;
+    else if (pending.draftObsExtract === 'false') node._observationExtract = false;
+    else delete node._observationExtract;
   }
 
   buildPatch(pending, _node) {
-    return { _observationExtract: pending.draftObsExtract || null };
+    if (pending.draftObsExtract === 'true')  return { _observationExtract: true };
+    if (pending.draftObsExtract === 'false') return { _observationExtract: false };
+    return { _observationExtract: null };
   }
 }
 

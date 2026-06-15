@@ -10,6 +10,7 @@ import { configure as configureObsExport } from './fhir/obs-export.js';
 import { initValidators } from './fhir/validators/init.js';
 import * as validateModal from './ui/modals/validate-modal.js';
 import * as metadataModal from './ui/modals/metadata-modal.js';
+import './ui/modals/obs-export-modal.js';
 import * as progress from './ui/progress.js';
 import { RenumberControl } from './ui/renumber-control.js';
 import * as search from './ui/search.js';

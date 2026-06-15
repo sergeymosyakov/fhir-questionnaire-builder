@@ -104,9 +104,10 @@ function qrReference(qr) {
   return { display: 'Source QuestionnaireResponse' };
 }
 
-function buildObservation(qItem, valueProp, qr) {
+function buildObservation(qItem, valueProp, qr, obsProfile) {
   const obs = {
     resourceType: 'Observation',
+    ...(obsProfile?.length ? { meta: { profile: obsProfile } } : {}),
     status: 'final',
     code: {
       coding: (qItem.code || []).map(c => {
@@ -148,9 +149,11 @@ function newFullUrl() {
  * Extract Observation resources from a completed QuestionnaireResponse.
  * @param {object} qr            - QuestionnaireResponse resource.
  * @param {object} questionnaire - source Questionnaire resource.
+ * @param {{ obsProfile?: string[] }} [options] - optional extraction options.
  * @returns {object} a FHIR `transaction` Bundle of Observation entries.
  */
-export function extractObservations(qr, questionnaire) {
+export function extractObservations(qr, questionnaire, options = {}) {
+  const obsProfile = options.obsProfile || [];
   const observations = [];
   if (qr && questionnaire) {
     const qrMap = indexQR(qr);
@@ -166,7 +169,7 @@ export function extractObservations(qr, questionnaire) {
         if (effective === true && isLeafQuestion && qItem.code?.length && qrItem) {
           for (const ans of qrItem.answer || []) {
             const valueProp = answerToValue(ans, qItem);
-            if (valueProp) observations.push(buildObservation(qItem, valueProp, qr));
+            if (valueProp) observations.push(buildObservation(qItem, valueProp, qr, obsProfile));
           }
         }
         walk(qItem.item, effective);

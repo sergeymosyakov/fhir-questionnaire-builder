@@ -157,8 +157,8 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       node._referenceProfiles = refProfileExts.map(e => e.valueCanonical).filter(Boolean);
     }
   }
-  // quantity: default unit from standard extension (questionnaire-unit)
-  if (node.itemType === 'quantity') {
+  // quantity / decimal / integer: default unit from standard extension (questionnaire-unit)
+  if (node.itemType === 'quantity' || node.itemType === 'decimal' || node.itemType === 'integer') {
     const unitExt = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit'
     );
@@ -345,7 +345,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   const obsExtractExt = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract'
   );
-  if (obsExtractExt && obsExtractExt.valueBoolean !== false) node._observationExtract = true;
+  if (obsExtractExt) node._observationExtract = obsExtractExt.valueBoolean === false ? false : true;
 
   // sdc-questionnaire-openLabel (open-choice items only)
   if (node.itemType === 'open-choice') {
@@ -516,7 +516,7 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     const groupObsExtractExt = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract'
     );
-    if (groupObsExtractExt && groupObsExtractExt.valueBoolean !== false) node._observationExtract = true;
+    if (groupObsExtractExt) node._observationExtract = groupObsExtractExt.valueBoolean === false ? false : true;
     // sdc-questionnaire-collapsible
     const collapsibleExt = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible'

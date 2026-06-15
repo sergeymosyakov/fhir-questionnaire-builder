@@ -245,10 +245,12 @@
 [data-testid="codesModal"] .modal-body    { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
 [data-testid="qrExportModal"] .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
 [data-testid="terminologyModal"] .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+[data-testid="obsExportModal"] .modal-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
 .meta-modal-row      { display: flex; align-items: flex-end; gap: 8px; }
 .meta-modal-row--col { flex-direction: column; align-items: flex-start; gap: 4px; }
 .meta-modal-row--col .meta-modal-lbl { flex: none; }
-.meta-modal-lbl      { flex: 0 0 90px; font-size: 13px; font-weight: 500; line-height: 26px; padding-bottom: 1px; }
+.meta-modal-lbl      { flex: 0 0 110px; font-size: 13px; font-weight: 500; line-height: 26px; padding-bottom: 1px; }
+.meta-modal-hint     { font-size: 11px; color: var(--c-muted, #888); padding: 0 0 4px 2px; }
 .meta-modal-inp      { flex: 1; height: 26px; padding: 0 6px; font-size: 13px;
                         border: 1px solid var(--c-border); border-radius: var(--r-sm); background: var(--c-bg); color: var(--c-text); }
 .meta-modal-inp--date { max-width: 160px; flex: 0 0 160px; }

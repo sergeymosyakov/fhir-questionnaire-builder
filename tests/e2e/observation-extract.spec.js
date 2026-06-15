@@ -25,7 +25,7 @@
 //   saveFormatModalApply    Apply button in save-format modal
 //   prompt-save             Confirm button in filename prompt dialog
 //   action-states           States action link on item nodes
-//   states-obs-extract-chk  Extract-as-Observation checkbox inside States modal
+//   states-obs-extract-sel  Extract-as-Observation dropdown trigger inside States modal
 //   statesModal             States modal backdrop
 //   statesModalApply        Apply button inside States modal
 // ─────────────────────────────────────────────────────────────────────────────
@@ -57,22 +57,21 @@ async function openStatesModal(page, nodeId) {
   await expect(page.locator('[data-testid="statesModal"]')).toBeVisible();
 }
 
-// ── 1. Checkbox visibility ────────────────────────────────────────────────────
+// ── 1. Dropdown visibility ────────────────────────────────────────────────────
 
-test.describe('observation-extract — checkbox in States modal', () => {
-  test('checkbox is present for an item node', async ({ page }) => {
+test.describe('observation-extract — dropdown in States modal', () => {
+  test('dropdown is present for an item node', async ({ page }) => {
     await loadFixture(page);
     await openStatesModal(page, 'weight');
-    await expect(page.locator('[data-testid="states-obs-extract-chk"]')).toBeVisible();
+    await expect(page.locator('[data-testid="states-obs-extract-sel"]')).toBeVisible();
   });
 });
 
 // ── 2. Toggle and persist ─────────────────────────────────────────────────────
 
 test.describe('observation-extract — toggle and apply', () => {
-  test('checking the box and applying activates the States action link', async ({ page }) => {
+  test('selecting "Yes" and applying activates the States action link', async ({ page }) => {
     await freshStart(page);
-    // Add a simple text item
     await expect(async () => {
       if (!(await page.getByTestId('add-root-group-btn').isVisible())) return;
       await page.getByTestId('add-root-group-btn').click();
@@ -80,37 +79,34 @@ test.describe('observation-extract — toggle and apply', () => {
     await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 6_000 });
     const nodeId = await page.locator('[data-node-id]').first().getAttribute('data-node-id');
     await openStatesModal(page, nodeId);
-    const chk = page.locator('[data-testid="states-obs-extract-chk"]');
-    // Ensure it starts unchecked
-    await expect(chk).not.toBeChecked();
-    await chk.check();
-    await expect(chk).toBeChecked();
+    // Starts at "Inherit" ('')
+    const trigger = page.locator('[data-testid="states-obs-extract-sel"]');
+    await expect(trigger).toHaveAttribute('data-value', '');
+    // Select "Yes"
+    await trigger.click();
+    await page.locator('[data-testid="csel-drop"] [data-val="true"]').click();
+    await expect(trigger).toHaveAttribute('data-value', 'true');
     await page.locator('[data-testid="statesModalApply"]').click();
     await expect(page.locator('[data-testid="statesModal"]')).toBeHidden();
-    // Re-open: flag should still be set
+    // Re-open: flag should still be "Yes"
     await openStatesModal(page, nodeId);
-    await expect(page.locator('[data-testid="states-obs-extract-chk"]')).toBeChecked();
+    await expect(page.locator('[data-testid="states-obs-extract-sel"]')).toHaveAttribute('data-value', 'true');
   });
 
-  test('loaded fixture has the group flag checked', async ({ page }) => {
+  test('loaded fixture has the group flag set to "Yes"', async ({ page }) => {
     await loadFixture(page);
     const groupId = 'vitals';
     const link = page.locator(`[data-node-id="${groupId}"]`).getByTestId('action-states');
-    if (!(await link.isVisible())) {
-      // Groups may use a different testid; find the states link via text
-      const grpRow = page.locator(`[data-node-id="${groupId}"]`);
-      await grpRow.locator('text=States').click();
-    } else {
-      await link.click();
-    }
+    await expect(link).toBeVisible();
+    await link.click();
     await expect(page.locator('[data-testid="statesModal"]')).toBeVisible();
-    await expect(page.locator('[data-testid="states-obs-extract-chk"]')).toBeChecked();
+    await expect(page.locator('[data-testid="states-obs-extract-sel"]')).toHaveAttribute('data-value', 'true');
   });
 
-  test('suppressed item flag is not checked', async ({ page }) => {
+  test('suppressed item shows "No" in dropdown', async ({ page }) => {
     await loadFixture(page);
     await openStatesModal(page, 'suppressed');
-    await expect(page.locator('[data-testid="states-obs-extract-chk"]')).not.toBeChecked();
+    await expect(page.locator('[data-testid="states-obs-extract-sel"]')).toHaveAttribute('data-value', 'false');
   });
 });
 

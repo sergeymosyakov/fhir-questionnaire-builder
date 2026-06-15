@@ -1,8 +1,8 @@
 import { DropdownMenu } from '../dropdown-menu.js';
 import { AppEvents } from '../../events.js';
 import * as qrExportModal from '../modals/qr-export-modal.js';
+import * as obsExportModal from '../modals/obs-export-modal.js';
 import { saveFormatModal } from '../modals/save-format-modal.js';
-import { exportObservations } from '../../fhir/obs-export.js';
 
 export class SaveMenu extends DropdownMenu {
   constructor() {
@@ -89,7 +89,7 @@ export class SaveMenu extends DropdownMenu {
     this._exportObsItem.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       const suggested = this._fileNameDisplay.getName().trim() || 'questionnaire';
-      exportObservations(suggested + '-observations.json');
+      obsExportModal.open(suggested + '-observations.json');
     });
   }
 }

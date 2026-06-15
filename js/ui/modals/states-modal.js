@@ -51,7 +51,7 @@ class StatesModal extends Modal {
     if (!this._pending) return;
     const { node, statesLink, setActive } = this._pending;
     node.applyPatch(this._buildPayload());
-    const anyActive = node.mandatory === true || !!node._readOnly || !!node._hidden || !!node._collapsible || !!node._usageMode || !!node._signatureRequired?.length;
+    const anyActive = node.mandatory === true || !!node._readOnly || !!node._hidden || node._observationExtract != null || !!node._collapsible || !!node._usageMode || !!node._signatureRequired?.length;
     setActive(statesLink, anyActive);
     Modal._svc.triggerCalcRecalc();
     this._cancel();
