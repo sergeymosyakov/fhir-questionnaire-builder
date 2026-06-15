@@ -51,7 +51,7 @@ async function loadFixture(page) {
 }
 
 async function openStatesModal(page, nodeId) {
-  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-states');
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-states').first();
   await expect(link).toBeVisible();
   await link.click();
   await expect(page.locator('[data-testid="statesModal"]')).toBeVisible();
@@ -96,7 +96,7 @@ test.describe('observation-extract — toggle and apply', () => {
   test('loaded fixture has the group flag set to "Yes"', async ({ page }) => {
     await loadFixture(page);
     const groupId = 'vitals';
-    const link = page.locator(`[data-node-id="${groupId}"]`).getByTestId('action-states');
+    const link = page.locator(`[data-node-id="${groupId}"]`).getByTestId('action-states').first();
     await expect(link).toBeVisible();
     await link.click();
     await expect(page.locator('[data-testid="statesModal"]')).toBeVisible();
