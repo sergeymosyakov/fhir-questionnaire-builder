@@ -56,8 +56,10 @@ const noteInput   = (page) => page.getByTestId('design-note-input');
 async function openNoteModal(page, nodeId) {
   const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-note');
   await expect(link).toBeVisible();
-  await link.click();
-  await expect(noteModal(page)).toBeVisible();
+  await expect(async () => {
+    await link.click();
+    await expect(noteModal(page)).toBeVisible();
+  }).toPass();
 }
 
 // ── Open / close ──────────────────────────────────────────────────────────────

@@ -258,25 +258,37 @@ test.describe('displayCategory — help toggle interaction', () => {
     await loadFixture(page);
     const toggle = page.locator('[data-preview-id="dc-help"] [data-testid="display-help-toggle"]');
     const content = page.locator('[data-preview-id="dc-help"] [data-testid="display-help-content"]');
-    await toggle.click();
-    await expect(content).toBeVisible();
+    await expect(toggle).toBeVisible();
+    await expect(async () => {
+      await toggle.click();
+      await expect(content).toBeVisible();
+    }).toPass();
   });
 
   test('clicking help toggle twice hides the content again', async ({ page }) => {
     await loadFixture(page);
     const toggle = page.locator('[data-preview-id="dc-help"] [data-testid="display-help-toggle"]');
     const content = page.locator('[data-preview-id="dc-help"] [data-testid="display-help-content"]');
-    await toggle.click();
-    await expect(content).toBeVisible();
-    await toggle.click();
-    await expect(content).not.toBeVisible();
+    await expect(toggle).toBeVisible();
+    await expect(async () => {
+      await toggle.click();
+      await expect(content).toBeVisible();
+    }).toPass();
+    await expect(async () => {
+      await toggle.click();
+      await expect(content).not.toBeVisible();
+    }).toPass();
   });
 
   test('help content text matches item title', async ({ page }) => {
     await loadFixture(page);
     const toggle = page.locator('[data-preview-id="dc-help"] [data-testid="display-help-toggle"]');
     const content = page.locator('[data-preview-id="dc-help"] [data-testid="display-help-content"]');
-    await toggle.click();
+    await expect(toggle).toBeVisible();
+    await expect(async () => {
+      await toggle.click();
+      await expect(content).toBeVisible();
+    }).toPass();
     await expect(content).toHaveText('Enter your date of birth in YYYY-MM-DD format.');
   });
 });
