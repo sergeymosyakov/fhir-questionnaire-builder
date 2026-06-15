@@ -1,0 +1,95 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "obs-extract-e2e",
+  "url": "http://example.org/Questionnaire/obs-extract-e2e",
+  "title": "Observation Extract E2E",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "vitals",
+      "text": "Vital Signs",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+          "valueBoolean": true
+        }
+      ],
+      "item": [
+        {
+          "linkId": "weight",
+          "text": "Body weight",
+          "type": "decimal",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7",
+              "display": "Body weight"
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "kg",
+                "display": "kg"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "smoking",
+          "text": "Smoking status",
+          "type": "choice",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "72166-2",
+              "display": "Tobacco smoking status"
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "http://snomed.info/sct",
+                "code": "266919005",
+                "display": "Never smoked tobacco"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://snomed.info/sct",
+                "code": "77176002",
+                "display": "Current smoker"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "suppressed",
+          "text": "Not extracted (false override)",
+          "type": "string",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48767-8",
+              "display": "Annotation comment"
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+              "valueBoolean": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "no-code",
+      "text": "Not extracted (no code)",
+      "type": "string"
+    }
+  ]
+}

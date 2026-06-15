@@ -40,6 +40,12 @@
         "note": "referenceResource, referenceFilter, referenceProfile, signatureRequired"
       },
       {
+        "label": "Observation Extraction Demo",
+        "file": "observation-extract-demo.fhir.json",
+        "type": "questionnaire",
+        "note": "sdc-questionnaire-observationExtract: extract answers as Observation resources"
+      },
+      {
         "label": "BMI & Body Composition",
         "file": "sdc-variables-demo.fhir.json",
         "type": "questionnaire"

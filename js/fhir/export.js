@@ -358,6 +358,11 @@ export function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden', valueBoolean: true });
   }
 
+  // sdc-questionnaire-observationExtract — mark item/group for Observation-based extraction
+  if (node._observationExtract && node.itemType !== 'display') {
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract', valueBoolean: true });
+  }
+
   // sdc-questionnaire-collapsible (groups only)
   if (node.type === 'group' && node._collapsible) {
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible', valueCode: node._collapsible });

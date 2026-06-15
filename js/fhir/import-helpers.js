@@ -28,6 +28,7 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden',
   'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden',
+  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel',
   ITEM_DISABLED_DISPLAY_EXTENSION_URL,

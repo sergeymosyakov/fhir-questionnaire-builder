@@ -2,6 +2,7 @@ import { DropdownMenu } from '../dropdown-menu.js';
 import { AppEvents } from '../../events.js';
 import * as qrExportModal from '../modals/qr-export-modal.js';
 import { saveFormatModal } from '../modals/save-format-modal.js';
+import { exportObservations } from '../../fhir/obs-export.js';
 
 export class SaveMenu extends DropdownMenu {
   constructor() {
@@ -53,12 +54,14 @@ export class SaveMenu extends DropdownMenu {
 
     this._exportQuestItem = this._item(null, '&#x1F4C4; Questionnaire&hellip;', 'export-quest-item');
     this._exportQrItem    = this._item(null, '&#x1F4CB; QuestionnaireResponse &middot; JSON file', 'export-qr-item');
+    this._exportObsItem   = this._item(null, '&#x1F9EA; Observations &middot; transaction Bundle', 'export-obs-item');
 
     this._menu.append(
       this._cloudSaveBtn,
       this._cloudSaveSep,
       this._exportQuestItem,
       this._exportQrItem,
+      this._exportObsItem,
     );
 
     this._cloudSaveBtn.addEventListener('click', () => {
@@ -81,6 +84,12 @@ export class SaveMenu extends DropdownMenu {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       const suggested = this._fileNameDisplay.getName().trim() || 'questionnaire';
       qrExportModal.open(suggested + '-response.json');
+    });
+
+    this._exportObsItem.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
+      const suggested = this._fileNameDisplay.getName().trim() || 'questionnaire';
+      exportObservations(suggested + '-observations.json');
     });
   }
 }

@@ -341,6 +341,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (hiddenExt?.valueBoolean === true) node._hidden = true;
 
+  // sdc-questionnaire-observationExtract — mark for Observation-based extraction
+  const obsExtractExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract'
+  );
+  if (obsExtractExt && obsExtractExt.valueBoolean !== false) node._observationExtract = true;
+
   // sdc-questionnaire-openLabel (open-choice items only)
   if (node.itemType === 'open-choice') {
     const openLabelExt = (fhirItem.extension || []).find(
@@ -506,6 +512,11 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
            e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden'
     );
     if (groupHiddenExt?.valueBoolean === true) node._hidden = true;
+    // sdc-questionnaire-observationExtract (groups)
+    const groupObsExtractExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract'
+    );
+    if (groupObsExtractExt && groupObsExtractExt.valueBoolean !== false) node._observationExtract = true;
     // sdc-questionnaire-collapsible
     const collapsibleExt = (fhirItem.extension || []).find(
       e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible'

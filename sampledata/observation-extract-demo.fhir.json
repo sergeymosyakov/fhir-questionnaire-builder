@@ -1,0 +1,156 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "observation-extract-demo",
+  "url": "http://example.org/Questionnaire/observation-extract-demo",
+  "version": "1.0.0",
+  "name": "ObservationExtractDemo",
+  "title": "Observation Extraction Demo (Vital Signs)",
+  "status": "draft",
+  "description": "Demonstrates SDC Observation-based extraction (sdc-questionnaire-observationExtract). Completed answers below the flagged group are extracted as Observation resources. Body weight/height/temperature carry questionnaire-unit and extract as Quantity; smoking status extracts as a CodeableConcept. The 'Internal note' item sets the flag to false to suppress extraction even though it carries a code.",
+  "item": [
+    {
+      "linkId": "vitals",
+      "text": "Vital Signs",
+      "type": "group",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "85353-1",
+          "display": "Vital signs, weight, height, head circumference, oxygen saturation and BMI panel"
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+          "valueBoolean": true
+        }
+      ],
+      "item": [
+        {
+          "linkId": "weight",
+          "text": "Body weight",
+          "type": "decimal",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7",
+              "display": "Body weight"
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "kg",
+                "display": "kg"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "height",
+          "text": "Body height",
+          "type": "decimal",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "8302-2",
+              "display": "Body height"
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "cm",
+                "display": "cm"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "temperature",
+          "text": "Body temperature",
+          "type": "decimal",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "8310-5",
+              "display": "Body temperature"
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "Cel",
+                "display": "C"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "smoking",
+          "text": "Smoking status",
+          "type": "choice",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "72166-2",
+              "display": "Tobacco smoking status"
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "http://snomed.info/sct",
+                "code": "266919005",
+                "display": "Never smoked tobacco"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://snomed.info/sct",
+                "code": "8517006",
+                "display": "Ex-smoker"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://snomed.info/sct",
+                "code": "77176002",
+                "display": "Current smoker"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "internal-note",
+          "text": "Internal note (not extracted)",
+          "type": "string",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48767-8",
+              "display": "Annotation comment"
+            }
+          ],
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+              "valueBoolean": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "consent",
+      "text": "Consent to share (no code \u2014 not extracted)",
+      "type": "boolean"
+    }
+  ]
+}

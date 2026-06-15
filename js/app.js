@@ -6,6 +6,7 @@ import { tree, values, rawFhir, questVariables, questContained, questMeta, getVa
 import { buildFHIRObject, buildFHIRObjectVersioned, configure as configureExport } from './fhir/export.js';
 import { configure as configureImport } from './fhir/import.js';
 import { configure as configureQrExport } from './fhir/qr-export.js';
+import { configure as configureObsExport } from './fhir/obs-export.js';
 import { initValidators } from './fhir/validators/init.js';
 import * as validateModal from './ui/modals/validate-modal.js';
 import * as metadataModal from './ui/modals/metadata-modal.js';
@@ -51,6 +52,7 @@ AuthPanel.configure({ tree });
 configureExport({ tree, questMeta, rawFhir, questVariables, questContained });
 configureImport({ tree, resetSeq, rawFhir, questVariables, questContained, questMeta, setValue, clearAllValues, renderTree });
 configureQrExport({ values });
+configureObsExport({ values });
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
 export const qrAnswers   = new QRAnswersManager({ values, tree, rawFhir, shouldValidate: () => prefs.get('validate') });

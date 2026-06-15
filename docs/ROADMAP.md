@@ -12,7 +12,7 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 Supports Scenario 1 (round-trip) and Scenario 3 (logic testing). This is where most industrial-grade SDC complexity lives.
 
-- [ ] **Extraction** — SDC observation-based extraction (`sdc-questionnaire-observationExtract`) and definition-based extraction; generate target FHIR resources (Observation, Condition, etc.) from a completed QuestionnaireResponse
+- [ ] **Extraction (definition-based)** — SDC definition-based extraction; generate arbitrary target FHIR resources (Condition, AllergyIntolerance, etc.) from a completed QuestionnaireResponse via `item.definition` + `definitionExtract`. (Observation-based extraction is implemented.)
 - [ ] **Population** — populate item values from external FHIR resources via `launchContext` + `itemPopulationContext`; prerequisite: FHIR server integration
 - [ ] **`item.definition` resolution** — resolve `item.definition` against a StructureDefinition to auto-fill `text`, `type`, and value constraints; prerequisite: FHIR server integration
 

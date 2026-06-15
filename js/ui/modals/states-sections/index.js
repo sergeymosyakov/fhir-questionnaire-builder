@@ -2,6 +2,7 @@ export { STATES_SECTIONS } from './registry.js';
 import './required.js';
 import './read-only.js';
 import './hidden.js';
+import './observation-extract.js';
 import './collapsible.js';
 import './usage-mode.js';
 import './signature.js';
