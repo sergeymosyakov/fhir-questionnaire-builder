@@ -68,8 +68,10 @@ async function addGroupAndItem(page) {
 async function setTypeOpenChoice(page, nodeId) {
   const typeLink = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type');
   await expect(typeLink).toBeVisible();
-  await typeLink.click();
-  await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible({ timeout: 5_000 });
+  await expect(async () => {
+    await typeLink.click();
+    await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
+  }).toPass();
   await page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select').click();
   await page.locator('[data-testid="csel-drop"] [data-val="open-choice"]').click();
   await page.getByTestId('answerTypeModalApply').click();
