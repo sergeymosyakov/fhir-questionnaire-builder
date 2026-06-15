@@ -26,6 +26,8 @@
 //   prompt-save             Confirm button in filename prompt dialog
 //   action-states           States action link on item nodes
 //   states-obs-extract-sel  Extract-as-Observation dropdown trigger inside States modal
+//   obsExportModal          Observation export modal backdrop
+//   obsExportModalApply     Apply button in the Observation export modal
 //   statesModal             States modal backdrop
 //   statesModalApply        Apply button inside States modal
 // ─────────────────────────────────────────────────────────────────────────────
@@ -162,10 +164,14 @@ test.describe('observation-extract — Bundle download', () => {
     await weightInput.fill('72');
     await page.getByTestId('preview-search-input').click();
 
-    // Download Bundle
+    // Open the Observations export modal via the Save dropdown
+    await openDropdownItem(page, 'export-btn', 'export-obs-item');
+    await expect(page.locator('[data-testid="obsExportModal"]')).toBeVisible();
+
+    // Click Apply — this triggers the actual download
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      openDropdownItem(page, 'export-btn', 'export-obs-item'),
+      page.locator('[data-testid="obsExportModalApply"]').click(),
     ]);
     const bundle = JSON.parse(fs.readFileSync(await download.path(), 'utf8'));
     expect(bundle.resourceType).toBe('Bundle');
