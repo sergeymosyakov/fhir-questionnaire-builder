@@ -35,7 +35,7 @@ class ShowWhenModal extends ExprAwareModal {
 
     this.setTitle('Show When', node.title || node.id || 'Item');
     this.body.innerHTML = '';
-    buildVisPanel(draft, this.constructor._svc.tree, this.body, visLink, () => {});
+    buildVisPanel(draft, this.constructor._svc.questDoc.tree, this.body, visLink, () => {});
 
     const ddRow = document.createElement('div');
     ddRow.className = 'sw-disabled-display-row';
