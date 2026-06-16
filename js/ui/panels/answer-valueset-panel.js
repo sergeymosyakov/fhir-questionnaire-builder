@@ -18,8 +18,8 @@ class AnswerValueSetPanel extends Panel {
     this._tree = null;
   }
 
-  configure({ tree }) {
-    this._tree = tree;
+  configure({ questDoc }) {
+    this._tree = questDoc.tree;
     this.refresh();
   }
 

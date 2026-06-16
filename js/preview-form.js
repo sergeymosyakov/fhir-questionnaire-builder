@@ -28,10 +28,8 @@ export const getLastCtx = () => _instance?.getLastCtx();
 export class PreviewForm {
   /**
    * @param {object} deps — injected state
-   * @param {Array} deps.tree
+   * @param {object} deps.questDoc
    * @param {object} deps.answerStore
-   * @param {object} deps.rawFhir
-   * @param {Array} deps.questVariables
    * @param {Function} deps.calcFormOk
    * @param {Function} deps.isMandatory
    * @param {Function} deps.evalConstraints
@@ -39,10 +37,10 @@ export class PreviewForm {
    */
   constructor(deps) {
     _instance = this;
-    this._tree            = deps.tree;
+    this._tree            = deps.questDoc.tree;
     this._answerStore     = deps.answerStore;
-    this._rawFhir         = deps.rawFhir;
-    this._questVariables  = deps.questVariables;
+    this._rawFhir         = deps.questDoc;
+    this._questVariables  = deps.questDoc.variables;
     this._calcFormOk      = deps.calcFormOk;
 
     this._viewPrefs     = { showLinkId: true, showPrefix: true, showBadges: true, showHiddenItems: true };

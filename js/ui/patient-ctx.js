@@ -7,8 +7,8 @@ import { PatientPresetMenu } from './menus/patient-preset-menu.js';
 import { AppEvents } from '../events.js';
 
 let _tree = null, _questVariables = null;
-export function configure({ tree, questVariables }) {
-  _tree = tree; _questVariables = questVariables;
+export function configure({ questDoc }) {
+  _tree = questDoc.tree; _questVariables = questDoc.variables;
   // Seed defaults for any patient vars not yet present
   for (const def of PATIENT_VARS) {
     if (!getEntry(_questVariables, def.name)) {

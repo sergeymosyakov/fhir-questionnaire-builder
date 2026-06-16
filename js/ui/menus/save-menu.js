@@ -18,7 +18,7 @@ export class SaveMenu extends DropdownMenu {
     });
 
     this._fileNameDisplay = null;
-    this._tree        = null;
+    this._questDoc    = null;
     this._answerStore = null;
 
     this._bindTreeVisibility();
@@ -26,10 +26,10 @@ export class SaveMenu extends DropdownMenu {
     this._bindHandlers();
   }
 
-  /** @param {{ fileNameDisplay, tree, answerStore }} deps */
-  configure({ fileNameDisplay, tree, answerStore }) {
+  /** @param {{ fileNameDisplay, questDoc, answerStore }} deps */
+  configure({ fileNameDisplay, questDoc, answerStore }) {
     this._fileNameDisplay = fileNameDisplay;
-    this._tree        = tree;
+    this._questDoc    = questDoc;
     this._answerStore = answerStore;
   }
 
@@ -40,7 +40,7 @@ export class SaveMenu extends DropdownMenu {
   promptExport() {
     saveFormatModal.open({
       fileNameDisplay: this._fileNameDisplay,
-      tree:   this._tree,
+      tree:   this._questDoc.tree,
       values: this._answerStore.data,
     });
   }
@@ -75,7 +75,7 @@ export class SaveMenu extends DropdownMenu {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       saveFormatModal.open({
         fileNameDisplay: this._fileNameDisplay,
-        tree:   this._tree,
+        tree:   this._questDoc.tree,
         values: this._answerStore.data,
       });
     });

@@ -22,11 +22,11 @@ const _GITHUB_SVG = '<svg width="13" height="13" viewBox="0 0 16 16" fill="curre
   + '</svg>';
 
 export class AuthPanel {
-  static _svc = { tree: null };
+  static _svc = { questDoc: null };
   static _cloudEls = { saveBtn: null, saveSep: null, loadItem: null, loadSep: null };
 
-  static configure({ tree }) {
-    AuthPanel._svc.tree = tree;
+  static configure({ questDoc }) {
+    AuthPanel._svc.questDoc = questDoc;
   }
 
   static configureCloudEls({ saveBtn, saveSep, loadItem, loadSep, questLoader: _ignored }) {
@@ -120,7 +120,7 @@ export class AuthPanel {
 
     this._signOutItem.addEventListener('click', async () => {
       this._userMenu.style.display = 'none';
-      if (AuthPanel._svc.tree.length > 0) {
+      if (AuthPanel._svc.questDoc.tree.length > 0) {
         const answer = await confirmModal.open({
           title:       'Sign out?',
           msg:         'Your unsaved work will be lost. Sign out anyway?',
@@ -191,7 +191,7 @@ export class AuthPanel {
     const syncCloudSave = () => {
       const { saveBtn, saveSep } = AuthPanel._cloudEls;
       const loggedIn = this._userChip.style.display !== 'none';
-      const hasNodes = AuthPanel._svc.tree.length > 0;
+      const hasNodes = AuthPanel._svc.questDoc.tree.length > 0;
       const show = loggedIn && hasNodes ? '' : 'none';
       if (saveBtn) saveBtn.style.display = show;
       if (saveSep) saveSep.style.display = show;

@@ -5,10 +5,10 @@ import * as autosave from './autosave.js';
 import { buildFHIRObject } from '../fhir/export.js';
 
 export class AutosaveToggle {
-  static _svc = { questMeta: null };
+  static _svc = { questDoc: null };
 
-  static configure({ questMeta }) {
-    AutosaveToggle._svc.questMeta = questMeta;
+  static configure({ questDoc }) {
+    AutosaveToggle._svc.questDoc = questDoc;
   }
 
   /** @param {HTMLElement} btnEl */
@@ -17,7 +17,7 @@ export class AutosaveToggle {
     this._bind();
     autosave.init({
       buildFn:  buildFHIRObject,
-      questMeta: AutosaveToggle._svc.questMeta,
+      questMeta: AutosaveToggle._svc.questDoc.meta,
       onSaved:  date => this._sync(autosave.isEnabled(), date),
     }).then(() => this._sync(autosave.isEnabled(), null));
   }

@@ -32,7 +32,7 @@ export class Modal {
   static _svc = {
     getLastCtx:  null,  // () => {qr, env} — for expression evaluation
     questDoc:    null,  // QuestDocument singleton
-    answerStore: null,  // AnswerStore singleton (reads via .get(); writes via events)
+    answerStore: null,  // AnswerStore singleton
   };
 
   /** Called once at startup (builder/index.js) to inject app-layer services. */

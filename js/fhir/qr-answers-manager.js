@@ -7,10 +7,10 @@ import * as validateModal from '../ui/modals/validate-modal.js';
 import { AppEvents } from '../events.js';
 
 export class QRAnswersManager {
-  /** @param {{ answerStore, tree, questDoc, shouldValidate? }} deps — state references */
-  constructor({ answerStore, tree, questDoc, shouldValidate }) {
+  /** @param {{ questDoc, answerStore, shouldValidate? }} deps — state references */
+  constructor({ questDoc, answerStore, shouldValidate }) {
     this._answerStore     = answerStore;
-    this._tree            = tree;
+    this._tree            = questDoc.tree;
     this._questDoc        = questDoc;
     this._shouldValidate  = shouldValidate || (() => true);
   }

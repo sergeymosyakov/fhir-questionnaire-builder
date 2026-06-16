@@ -18,8 +18,8 @@ class ContainedPanel extends Panel {
     this._questContained = null;
   }
 
-  configure({ questContained }) {
-    this._questContained = questContained;
+  configure({ questDoc }) {
+    this._questContained = questDoc.contained;
     this.refresh();
   }
 

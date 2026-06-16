@@ -25,13 +25,12 @@ const panel = new BuilderPanel({ questDoc, answerStore });
 // leftPanelBody → document.querySelector('.left-panel-body') (stable DOM).
 
 Modal.configure({
-  getFhirTarget: () => questDoc.fhirTarget,
   getLastCtx,
   questDoc,
   answerStore,
 });
 
-Section.configure({ getFhirTarget: () => questDoc.fhirTarget });
+Section.configure({ questDoc });
 
 // ── Re-exports for backward compatibility ─────────────────────────────────────
 export function mount(opts)                  { panel.mount(opts); }

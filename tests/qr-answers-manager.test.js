@@ -21,9 +21,8 @@ const { importQRAnswers }        = await import('../js/fhir/qr-import.js');
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function makeManager(overrides = {}) {
   const defaults = {
+    questDoc:    overrides.questDoc ?? { rawFhir: null, tree: [] },
     answerStore: { data: {}, get: () => undefined },
-    tree:     [],
-    questDoc: overrides.questDoc ?? { rawFhir: null },
   };
   return new QRAnswersManager({ ...defaults, ...overrides });
 }

@@ -40,12 +40,12 @@ import { CopyPaste } from './ui/copy-paste.js';
 storage.register(new SupabaseAdapter(supabase));
 
 // ── Inject state into UI panels ────────────────────────────────────────
-containedPanel.configure({ questContained: questDoc.contained });
-answerValueSetPanel.configure({ tree: questDoc.tree });
-variablesPanel.configure({ questVariables: questDoc.variables, mountEl: document.getElementById('variablesCardMount') });
-patientCtx.configure({ tree: questDoc.tree, questVariables: questDoc.variables });
+containedPanel.configure({ questDoc });
+answerValueSetPanel.configure({ questDoc });
+variablesPanel.configure({ questDoc, mountEl: document.getElementById('variablesCardMount') });
+patientCtx.configure({ questDoc });
 patientCtx.mount(document.getElementById('patientPresetWrap'));
-AuthPanel.configure({ tree: questDoc.tree });
+AuthPanel.configure({ questDoc });
 
 // ── Inject state into FHIR modules ─────────────────────────────────────
 configureExport({ questDoc });
@@ -54,7 +54,7 @@ configureQrExport({ answerStore });
 configureObsExport({ answerStore });
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
-export const qrAnswers   = new QRAnswersManager({ answerStore, tree: questDoc.tree, questDoc, shouldValidate: () => prefs.get('validate') });
+export const qrAnswers   = new QRAnswersManager({ questDoc, answerStore, shouldValidate: () => prefs.get('validate') });
 export const questLoader = new QuestionnaireLoader({ questDoc, answerStore,
   reinitForm:       (opts) => previewForm.reinitForm(opts),
   shouldValidate:   () => prefs.get('validate'),
@@ -63,7 +63,7 @@ export const questLoader = new QuestionnaireLoader({ questDoc, answerStore,
 });
 
 export const previewForm = new PreviewForm({
-  tree: questDoc.tree, answerStore, rawFhir: questDoc, questVariables: questDoc.variables,
+  questDoc, answerStore,
   calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES,
 });
 
@@ -171,7 +171,7 @@ previewForm.mount({
 });
 
 // ── Save/Export menu ──────────────────────────────────────────────────────────
-saveMenu.configure({ fileNameDisplay, tree: questDoc.tree, answerStore });
+saveMenu.configure({ fileNameDisplay, questDoc, answerStore });
 
 // ── Settings menu handlers ────────────────────────────────────────────────────
 // Tips and Autosave initial states resolve asynchronously from storage —

@@ -28,8 +28,8 @@ let _collapsed = false;
 let _draft     = null; // working copy while modal is open; null when closed
 const _el = { card: null, toggle: null, chipList: null, count: null, editBtn: null, reinitBtn: null };
 
-export function configure({ questVariables, mountEl }) {
-  _questVariables = questVariables;
+export function configure({ questDoc, mountEl }) {
+  _questVariables = questDoc.variables;
   // Build card DOM from template
   const card = document.createElement('div');
   card.className = 'variables-card';
