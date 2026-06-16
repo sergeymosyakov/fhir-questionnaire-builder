@@ -8,26 +8,34 @@ import { AppEvents } from '../events.js';
 
 let _tree = null, _questVariables = null;
 
-document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
-  _tree = e.detail.questDoc?.tree ?? null;
-  _questVariables = e.detail.questDoc?.variables ?? null;
-  if (_questVariables) {
-    for (const def of PATIENT_VARS) {
-      if (!getEntry(_questVariables, def.name)) {
-        setEntry(_questVariables, def.name, toExpr(def.type, def.default));
-      }
+export function configure({ questDoc }) {
+  _tree = questDoc.tree; _questVariables = questDoc.variables;
+  // Seed defaults for any patient vars not yet present
+  for (const def of PATIENT_VARS) {
+    if (!getEntry(_questVariables, def.name)) {
+      setEntry(_questVariables, def.name, toExpr(def.type, def.default));
     }
   }
-  presetMenu.setDisabled(false);
-});
-document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,     () => presetMenu.setDisabled(false));
-document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => { _tree = null; _questVariables = null; presetMenu.setDisabled(true); });
-
-// Wire preset handlers once at module load
-presetMenu.setHandlers({
-  onPreset: preset => { if (_questVariables) applyPreset(preset, _questVariables); _doAfterApply(); },
-  onCustom: () => _modal.open(),
-});
+  // Update on subsequent loads
+  document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
+    _tree = e.detail.questDoc?.tree ?? null;
+    _questVariables = e.detail.questDoc?.variables ?? null;
+    if (_questVariables) {
+      for (const def of PATIENT_VARS) {
+        if (!getEntry(_questVariables, def.name)) {
+          setEntry(_questVariables, def.name, toExpr(def.type, def.default));
+        }
+      }
+    }
+    presetMenu.setDisabled(false);
+  }, { once: false });
+  document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,     () => presetMenu.setDisabled(false));
+  document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => { _tree = null; _questVariables = null; presetMenu.setDisabled(true); });
+  presetMenu.setHandlers({
+    onPreset: preset => { if (_questVariables) applyPreset(preset, _questVariables); _doAfterApply(); },
+    onCustom: () => _modal.open(),
+  });
+}
 
 const PATIENT_VARS = [
   { name: 'age',      type: 'number',   label: 'Age (years)',    default: 30 },

@@ -13,10 +13,6 @@ import '../fhir/formats/redcap.js';
 // ── Single panel instance ─────────────────────────────────────────────────────
 const panel = new BuilderPanel({ questDoc, answerStore });
 
-// ── Notes ─────────────────────────────────────────────────────────────────────
-// Modal._svc and Section._svc are populated via QUESTIONNAIRE_LOADED event
-// dispatched by questionnaire-loader.js — no configure() needed here.
-
 // ── Re-exports for backward compatibility ─────────────────────────────────────
 export function mount(opts)                  { panel.mount(opts); }
 export function renderTree()                 { panel.renderTree(); }

@@ -20,12 +20,10 @@ export class CopyPaste {
 
   static {
     if (typeof document !== 'undefined') {
-      document.addEventListener('questionnaire-loaded', e => {
-        if (e.detail?.questDoc) CopyPaste._svc.questDoc = e.detail.questDoc;
-      });
-      document.addEventListener('questionnaire-cleared', () => {
-        CopyPaste._svc.questDoc = null;
-      });
+      const _update = e => { if (e.detail?.questDoc) CopyPaste._svc.questDoc = e.detail.questDoc; };
+      document.addEventListener(AppEvents.APP_CONTEXT_READY,    _update);
+      document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, _update);
+      document.addEventListener('questionnaire-cleared', () => { CopyPaste._svc.questDoc = null; });
     }
   }
 

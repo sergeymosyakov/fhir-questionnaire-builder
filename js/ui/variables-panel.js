@@ -49,6 +49,7 @@ export function configure({ mountEl }) {
   _el.reinitBtn.addEventListener('click', () => {
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
   });
+  document.addEventListener(AppEvents.APP_CONTEXT_READY, e => { _questVariables = e.detail.questDoc?.variables ?? null; });
   document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => { _questVariables = e.detail.questDoc?.variables ?? null; _el.card.style.display = ''; refresh(); });
   document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,    () => { _el.card.style.display = ''; });
   document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => { _questVariables = null; _el.card.style.display = 'none'; refresh(); });
@@ -64,6 +65,7 @@ class VariablesModal extends Modal {
   }
 
   open() {
+    if (!_questVariables) return;
     _draft = _questVariables.map(v => ({ name: v.name, expression: v.expression }));
     this._renderBody();
     super.open();

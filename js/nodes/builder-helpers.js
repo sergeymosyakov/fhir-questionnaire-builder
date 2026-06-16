@@ -56,6 +56,7 @@ export function buildPrefixInput(node, placeholder = '\u2014') {
   inp.type = 'text';
   inp.value = node._prefix || '';
   inp.className = 'node-prefix-input';
+  inp.dataset.testid = 'node-prefix-input';
   inp.placeholder = placeholder;
   inp.dataset.tipTitle = 'Display prefix';
   inp.dataset.tipBody  = 'Cosmetic only \u2014 e.g. "1.". Does not affect logic or linkId.';

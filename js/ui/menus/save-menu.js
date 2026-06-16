@@ -3,6 +3,8 @@ import { AppEvents } from '../../events.js';
 import * as qrExportModal from '../modals/qr-export-modal.js';
 import * as obsExportModal from '../modals/obs-export-modal.js';
 import { saveFormatModal } from '../modals/save-format-modal.js';
+import { questDoc } from '../../fhir/quest-document.js';
+import { answerStore } from '../../answer-store.js';
 
 export class SaveMenu extends DropdownMenu {
   constructor() {
@@ -18,17 +20,6 @@ export class SaveMenu extends DropdownMenu {
     });
 
     this._fileNameDisplay = null;
-    this._questDoc    = null;
-    this._answerStore = null;
-
-    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
-      this._questDoc    = e.detail.questDoc    ?? null;
-      this._answerStore = e.detail.answerStore ?? null;
-    });
-    document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => {
-      this._questDoc    = null;
-      this._answerStore = null;
-    });
 
     this._bindTreeVisibility();
     this._buildMenu();
@@ -47,8 +38,8 @@ export class SaveMenu extends DropdownMenu {
   promptExport() {
     saveFormatModal.open({
       fileNameDisplay: this._fileNameDisplay,
-      tree:   this._questDoc.tree,
-      values: this._answerStore.data,
+      tree:   questDoc.tree,
+      values: answerStore.data,
     });
   }
 
@@ -82,8 +73,8 @@ export class SaveMenu extends DropdownMenu {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       saveFormatModal.open({
         fileNameDisplay: this._fileNameDisplay,
-        tree:   this._questDoc.tree,
-        values: this._answerStore.data,
+        tree:   questDoc.tree,
+        values: answerStore.data,
       });
     });
 

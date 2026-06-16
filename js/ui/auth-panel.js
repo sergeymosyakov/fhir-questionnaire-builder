@@ -27,12 +27,10 @@ export class AuthPanel {
 
   static {
     if (typeof document !== 'undefined') {
-      document.addEventListener('questionnaire-loaded', e => {
-        AuthPanel._questDocTree = e.detail.questDoc?.tree ?? null;
-      });
-      document.addEventListener('questionnaire-cleared', () => {
-        AuthPanel._questDocTree = null;
-      });
+      const _update = e => { AuthPanel._questDocTree = e.detail.questDoc?.tree ?? null; };
+      document.addEventListener(AppEvents.APP_CONTEXT_READY,    _update);
+      document.addEventListener('questionnaire-loaded',          _update);
+      document.addEventListener('questionnaire-cleared', () => { AuthPanel._questDocTree = null; });
     }
   }
 

@@ -7,6 +7,8 @@
 //   applyLabel:  string|null  — apply btn text;         null = omit  (default: 'Apply')
 //   maxWidth:    string|null  — CSS max-width for the modal box      (default: null)
 //   bodyClass:   string|null  — extra CSS class on .modal-body       (default: null)
+import { questDoc as _questDoc } from '../../fhir/quest-document.js';
+import { answerStore as _answerStore } from '../../answer-store.js';
 
 // Single shared Escape handler — closes the topmost open modal.
 const _registry = new Map(); // backdrop → cancel callback
@@ -27,29 +29,11 @@ function _mk(tag, className) {
   return el;
 }
 
+import { questDoc } from '../../fhir/quest-document.js';
+import { answerStore } from '../../answer-store.js';
 export class Modal {
-  /**
-   * Snapshot of the current questionnaire document and answer store.
-   * Updated automatically via QUESTIONNAIRE_LOADED / QUESTIONNAIRE_CLEARED events.
-   * Modals read from here without any configure() call.
-   */
-  static _svc = {
-    questDoc:    null,
-    answerStore: null,
-  };
-
-  static {
-    if (typeof document !== 'undefined') {
-      document.addEventListener('questionnaire-loaded', e => {
-        if (e.detail?.questDoc)    Modal._svc.questDoc    = e.detail.questDoc;
-        if (e.detail?.answerStore) Modal._svc.answerStore = e.detail.answerStore;
-      });
-      document.addEventListener('questionnaire-cleared', () => {
-        Modal._svc.questDoc    = null;
-        Modal._svc.answerStore = null;
-      });
-    }
-  }
+  /** Direct references to singleton document and answer store — always current. */
+  static _svc = { get questDoc() { return questDoc; }, get answerStore() { return answerStore; } };
 
   /** Override in subclass to assign data-testid attributes to modal DOM elements. */
   getName() { return null; }

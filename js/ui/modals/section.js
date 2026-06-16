@@ -9,26 +9,14 @@
 // applyTip / makeCollapsible are exported here so ALL section directories can
 // import from one place instead of duplicating or cross-importing helpers.
 
+import { questDoc as _questDocSingleton } from '../../fhir/quest-document.js';
+
 export class Section {
   /** @type {string[] | null} Allowed FHIR version ids; null = all versions. */
   fhirVersions = null;
 
-  /**
-   * Snapshot of questDoc — updated automatically via QUESTIONNAIRE_LOADED event.
-   * Used only for version-gating sections (isVersionVisible).
-   */
-  static _svc = {};
-
-  static {
-    if (typeof document !== 'undefined') {
-      document.addEventListener('questionnaire-loaded', e => {
-        if (e.detail?.questDoc) Section._svc.questDoc = e.detail.questDoc;
-      });
-      document.addEventListener('questionnaire-cleared', () => {
-        Section._svc.questDoc = null;
-      });
-    }
-  }
+  /** Direct reference to the questDoc singleton — always current. */
+  static _svc = { get questDoc() { return _questDocSingleton; } };
 
   /**
    * Returns true if the section should be shown for the current FHIR version.

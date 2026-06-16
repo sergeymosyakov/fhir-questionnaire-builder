@@ -24,6 +24,9 @@ export const AppEvents = Object.freeze({
   QUESTIONNAIRE_META_CHANGED:    'questionnaire-meta-changed',
   // detail: { data: object, fileName: string }
   QUESTIONNAIRE_LOAD_REQUESTED:  'questionnaire-load-requested',
+  // Dispatched once at app startup to register questDoc + answerStore singletons.
+  // detail: { questDoc, answerStore } — does NOT trigger UI visibility changes.
+  APP_CONTEXT_READY:             'app:context-ready',
 
   // ── Builder ───────────────────────────────────────────────────────────────
   BUILDER_RERENDER:     'builder:rerender',

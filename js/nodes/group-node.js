@@ -456,7 +456,8 @@ export class GroupNode extends BaseNode {
       items:    [{ value: 'AND', label: 'AND' }, { value: 'OR', label: 'OR' }],
       value:    node.logicWithParent || 'AND',
       className: 'sc-trigger--sm',
-      onChange: v => { node.logicWithParent = v; },
+      testid:   'group-logic-select',
+      onChange: v => { node.logicWithParent = v; document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED)); },
     });
     logicRow.appendChild(logicSel.el);
     body.appendChild(logicRow);

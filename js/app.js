@@ -40,7 +40,9 @@ import { CopyPaste } from './ui/copy-paste.js';
 storage.register(new SupabaseAdapter(supabase));
 
 // UI panels subscribe to QUESTIONNAIRE_LOADED internally — no configure() needed.
-// patient-ctx wires preset handlers at module load; mount() inserts DOM.
+// patient-ctx: configure() initialises defaults and wires preset handlers (uses
+// presetMenu which is declared after module-level code — must be called after load).
+patientCtx.configure({ questDoc });
 patientCtx.mount(document.getElementById('patientPresetWrap'));
 variablesPanel.configure({ mountEl: document.getElementById('variablesCardMount') });
 
@@ -93,6 +95,13 @@ document.addEventListener(AppEvents.QUESTIONNAIRE_LOAD_REQUESTED, async e => {
   if (await questLoader.confirmBeforeLoad() !== 'proceed') return;
   questLoader.load(data, fileName);
 });
+
+// Seed all subscribers with the initial empty questDoc+answerStore.
+// Uses APP_CONTEXT_READY (not QUESTIONNAIRE_LOADED) so it does NOT
+// trigger UI visibility changes (card show/hide, toolbar, etc.).
+document.dispatchEvent(new CustomEvent(AppEvents.APP_CONTEXT_READY, {
+  detail: { questDoc, answerStore },
+}));
 
 // Buttons
 document.getElementById('addRootGroupBtn').onclick = () => {

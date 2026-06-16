@@ -19,9 +19,11 @@ class ContainedPanel extends Panel {
 
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
       this._questContained = e.detail.questDoc?.contained ?? null;
+      this.refresh();
     });
     document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => {
       this._questContained = null;
+      this._showCount(0);
     });
   }
 

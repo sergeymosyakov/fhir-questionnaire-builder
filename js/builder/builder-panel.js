@@ -72,6 +72,7 @@ export class BuilderPanel {
     this._container.innerHTML = '';
     this._container.appendChild(frag);
     document.dispatchEvent(new CustomEvent(AppEvents.RENUMBER_DONE));
+    document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
   }
 
   addRootGroup() {

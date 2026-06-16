@@ -19,9 +19,11 @@ class AnswerValueSetPanel extends Panel {
 
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
       this._tree = e.detail.questDoc?.tree ?? null;
+      this.refresh();
     });
     document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => {
       this._tree = null;
+      this._showCount(0);
     });
   }
 
