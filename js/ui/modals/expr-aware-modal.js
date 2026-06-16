@@ -4,13 +4,21 @@
 // evaluates them on every REFRESH_EXPR_ICONS event (form value changes, typing).
 import { Modal } from './modal-base.js';
 import { AppEvents } from '../../events.js';
-import { _rc } from '../../preview/render-ctx.js';
 
 export class ExprAwareModal extends Modal {
+  static _fpCtx = null;
+
+  static {
+    if (typeof document !== 'undefined') {
+      document.addEventListener(AppEvents.FHIRPATH_CTX_UPDATED, e => {
+        ExprAwareModal._fpCtx = e.detail;
+      });
+    }
+  }
+
   constructor(options) {
     super(options);
     this._exprIconEls = [];
-    this._fpCtx = null;
     if (typeof document !== 'undefined') {
       document.addEventListener(AppEvents.REFRESH_EXPR_ICONS, () => this._refreshExprIcons());
     }
@@ -25,13 +33,12 @@ export class ExprAwareModal extends Modal {
 
   close() {
     this._exprIconEls = [];
-    this._fpCtx = null;
     super.close();
   }
 
   _refreshExprIcons() {
     if (!this._exprIconEls.length) return;
-    const { fp, qr, env } = _rc.lastCtx || {};
+    const { fp, qr, env } = ExprAwareModal._fpCtx || {};
     if (!fp) return;
     for (const el of this._exprIconEls) {
       const expr = el.dataset.exprIcon;

@@ -105,6 +105,10 @@ export const AppEvents = Object.freeze({
   // (no detail)                          — wipe all answers (import / reset)
   ANSWERS_CLEAR: 'answer:clear',
 
+  // Dispatched after every FHIRPath evaluation cycle.
+  // detail: { fp, qr, env } — fhirpath engine, current QR, and variable env.
+  FHIRPATH_CTX_UPDATED: 'fhirpath:ctx-updated',
+
   // ── FHIR version ─────────────────────────────────────────────────────────
   // detail: { versionId: 'R4'|'R4B'|'R5', fromVersionId?: 'R4'|'R4B'|'R5', source?: 'user' }
   // Dispatched by FhirVersionSelect when the user changes the target FHIR version

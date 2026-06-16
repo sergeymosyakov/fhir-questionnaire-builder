@@ -98,7 +98,7 @@ export class QuestionnaireLoader {
         document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
       }
       document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOADED, {
-        detail: { fileName: fileName || '' },
+        detail: { fileName: fileName || '', questDoc: this._questDoc, answerStore: this._answerStore },
       }));
       progress.show('Rendering ' + this._tree.length + ' nodes…');
       await this._renderTreeAsync((done, total) => progress.update(done, total));

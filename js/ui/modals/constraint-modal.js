@@ -2,10 +2,14 @@
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import * as explainModal from './explain-modal.js';
-import { _rc } from '../../preview/render-ctx.js';
+import { AppEvents } from '../../events.js';
 import { createCustomSelect } from '../custom-select.js';
 import { nodePickerModal } from './node-picker-modal.js';
-import { AppEvents } from '../../events.js';
+
+let _previewCtx = null;
+if (typeof document !== 'undefined') {
+  document.addEventListener(AppEvents.FHIRPATH_CTX_UPDATED, e => { _previewCtx = e.detail; });
+}
 
 class ConstraintModal extends Modal {
   getName() { return 'constraintModal'; }
@@ -137,7 +141,7 @@ class ConstraintModal extends Modal {
       explainBtn.dataset.tipBody  = 'Evaluate the FHIRPath expression and show the result tree';
       explainBtn.onclick = () => {
         const fp = window.fhirpath;
-        const { qr, env } = _rc.lastCtx || {};
+        const { qr, env } = _previewCtx || {};
         if (fp && exprInp.value.trim()) explainModal.show(exprInp.value.trim(), fp, qr, env);
       };
 

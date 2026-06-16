@@ -28,15 +28,27 @@ function _mk(tag, className) {
 }
 
 export class Modal {
-  /** Builder services injected at app startup via Modal.configure(). */
+  /**
+   * Snapshot of the current questionnaire document and answer store.
+   * Updated automatically via QUESTIONNAIRE_LOADED / QUESTIONNAIRE_CLEARED events.
+   * Modals read from here without any configure() call.
+   */
   static _svc = {
-    questDoc:    null,  // QuestDocument singleton
-    answerStore: null,  // AnswerStore singleton
+    questDoc:    null,
+    answerStore: null,
   };
 
-  /** Called once at startup (builder/index.js) to inject app-layer services. */
-  static configure(services) {
-    Object.assign(Modal._svc, services);
+  static {
+    if (typeof document !== 'undefined') {
+      document.addEventListener('questionnaire-loaded', e => {
+        if (e.detail?.questDoc)    Modal._svc.questDoc    = e.detail.questDoc;
+        if (e.detail?.answerStore) Modal._svc.answerStore = e.detail.answerStore;
+      });
+      document.addEventListener('questionnaire-cleared', () => {
+        Modal._svc.questDoc    = null;
+        Modal._svc.answerStore = null;
+      });
+    }
   }
 
   /** Override in subclass to assign data-testid attributes to modal DOM elements. */

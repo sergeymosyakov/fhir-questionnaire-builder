@@ -178,6 +178,7 @@ export class PreviewForm {
       evalCalcNodes(this._tree, qr, fhirpath, this._answerStore.data, envVars, base);
       const env = { resource: qr, ...envVars };
       this._lastCtx.fp = fhirpath; this._lastCtx.qr = qr; this._lastCtx.env = env;
+      document.dispatchEvent(new CustomEvent(AppEvents.FHIRPATH_CTX_UPDATED, { detail: { fp: fhirpath, qr, env } }));
       document.dispatchEvent(new CustomEvent(AppEvents.REFRESH_EXPR_ICONS));
       return { fp: fhirpath, qr, envVars };
     }

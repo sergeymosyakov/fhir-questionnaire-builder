@@ -14,12 +14,21 @@ export class Section {
   fhirVersions = null;
 
   /**
-   * Inject shared services used by version-gated sections.
-   * Called once by builder/index.js after Modal.configure().
-   * @param {{ getFhirTarget: () => string }} svc
+   * Snapshot of questDoc — updated automatically via QUESTIONNAIRE_LOADED event.
+   * Used only for version-gating sections (isVersionVisible).
    */
   static _svc = {};
-  static configure(svc) { Object.assign(Section._svc, svc); }
+
+  static {
+    if (typeof document !== 'undefined') {
+      document.addEventListener('questionnaire-loaded', e => {
+        if (e.detail?.questDoc) Section._svc.questDoc = e.detail.questDoc;
+      });
+      document.addEventListener('questionnaire-cleared', () => {
+        Section._svc.questDoc = null;
+      });
+    }
+  }
 
   /**
    * Returns true if the section should be shown for the current FHIR version.
