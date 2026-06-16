@@ -10,6 +10,8 @@ import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { showWarn } from '../ui/toast.js';
 import { versionCompatRegistry } from '../fhir/version-compat-registry.js';
 import { numberingService } from './numbering-service.js';
+import { findAndRemove } from '../utils.js';
+import { ConfirmDialog } from '../ui/confirm-dialog.js';
 
 const fhirpath = typeof window !== 'undefined' ? window.fhirpath : null;
 
@@ -129,6 +131,15 @@ export class BuilderPanel {
   }
 
   _subscribeEvents() {
+    document.addEventListener(AppEvents.NODE_DELETE_REQUESTED, async e => {
+      const { id, label } = e.detail;
+      const ok = await ConfirmDialog.show(label);
+      if (ok) {
+        findAndRemove(id, this._tree);
+        document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
+        document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+      }
+    });
     document.addEventListener(AppEvents.CALC_RECALC_REQUESTED,
       () => this._doCalcRecalc());
     document.addEventListener(AppEvents.BUILDER_RERENDER,

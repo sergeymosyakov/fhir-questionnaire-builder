@@ -76,6 +76,19 @@ export const AppEvents = Object.freeze({
   // 'id' matches Validator#id — dispatched by UI toggles; validators listen and set this.enabled
   VALIDATOR_TOGGLE:    'validator-toggle',
 
+  // ── Node actions ──────────────────────────────────────────────────────────
+  // Dispatched by node delete buttons; BuilderPanel listens and handles
+  // confirm + findAndRemove + rerender.  detail: { id: string, label: string }
+  NODE_DELETE_REQUESTED:       'node:delete-requested',
+  // Dispatched by node copy/paste buttons; CopyPaste listens.
+  // detail: { id: string }
+  NODE_COPY_REQUESTED:         'node:copy-requested',
+  NODE_PASTE_AFTER_REQUESTED:  'node:paste-after-requested',
+  NODE_PASTE_BEFORE_REQUESTED: 'node:paste-before-requested',
+  // Dispatched by CopyPaste after clipboard changes (copy or clear).
+  // detail: { hasClip: boolean }
+  CLIPBOARD_CHANGED:           'node:clipboard-changed',
+
   // ── Node patching ─────────────────────────────────────────────────────────
   // detail: { ids: string[], patch: object, nodeType?: 'group'|'item' }
   // Dispatched by modals to copy current settings to other nodes.

@@ -35,8 +35,7 @@ import * as statusBadge from './ui/status-badge.js';
 import { QRAnswersManager } from './fhir/qr-answers-manager.js';
 import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
 import { CopyPaste } from './ui/copy-paste.js';
-import { BaseNode } from './nodes/base-node.js';
-
+// Instantiated after builder/index.js so BaseNode event listeners are active.
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
 
@@ -245,16 +244,9 @@ new UndoRedo(
 );
 
 // ── Copy / Paste ──────────────────────────────────────────────────────────────
-// Instantiated after builder/index.js so BaseNode._svc already exists.
-// Services are patched into BaseNode._svc here to avoid a circular import chain.
+// Instantiated after builder/index.js so BaseNode event listeners are active.
 CopyPaste.configure({ tree, questContained });
-const _copyPaste = new CopyPaste();
-BaseNode.configure({
-  copyNode:   (id) => _copyPaste.copy(id),
-  pasteAfter:  (id) => _copyPaste.paste(id),
-  pasteBefore: (id) => _copyPaste.pasteBefore(id),
-  hasPaste:   () => _copyPaste.hasPending(),
-});
+new CopyPaste();
 
 // Initialise validators from config.json (async — runs in background)
 // Pass initial enabled state from persisted prefs so validators start correctly

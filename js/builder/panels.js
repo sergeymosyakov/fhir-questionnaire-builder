@@ -4,7 +4,6 @@ import { getAllItems } from './_shared.js';
 import { AppEvents } from '../events.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { createDatePicker } from '../ui/date-picker.js';
-import { BaseNode } from '../nodes/base-node.js';
 
 // ── Panel factory helper ──────────────────────────────────────────────────────
 export function addPanel(key, buildFn, div, panels) {
@@ -114,12 +113,12 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
 }
 
 // ── Visibility panel (FHIR enableWhen) ───────────────────────────────────────
-export function buildVisPanel(node, p, visLink, setActive) {
+export function buildVisPanel(node, tree, p, visLink, setActive) {
   if (!Array.isArray(node.enableWhen)) node.enableWhen = [];
   if (!node.enableBehavior) node.enableBehavior = 'all';
   if (node.enableWhenExpression === undefined) node.enableWhenExpression = '';
 
-  const allItems = getAllItems(BaseNode._svc.tree).filter(it => it.id !== node.id);
+  const allItems = getAllItems(tree).filter(it => it.id !== node.id);
 
   const syncActive = () => {
     setActive(visLink, node.enableWhen.length > 0 || !!node.enableWhenExpression);

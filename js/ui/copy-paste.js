@@ -26,6 +26,13 @@ export class CopyPaste {
   constructor() {
     /** Serialised FHIR JSON of the last copied item. null = nothing copied. */
     this._clip = null;
+
+    document.addEventListener(AppEvents.NODE_COPY_REQUESTED,
+      e => this.copy(e.detail.id));
+    document.addEventListener(AppEvents.NODE_PASTE_AFTER_REQUESTED,
+      e => this.paste(e.detail.id));
+    document.addEventListener(AppEvents.NODE_PASTE_BEFORE_REQUESTED,
+      e => this.pasteBefore(e.detail.id));
   }
 
   /** Returns true if there is something in the clipboard. */
@@ -38,6 +45,7 @@ export class CopyPaste {
     const fhirItem = nodeToFHIRItem(node);
     this._clip = JSON.stringify(fhirItem);
     navigator.clipboard?.writeText(this._clip).catch(() => {});
+    document.dispatchEvent(new CustomEvent(AppEvents.CLIPBOARD_CHANGED, { detail: { hasClip: true } }));
     // Re-render so Paste-after buttons become active
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
   }

@@ -1,5 +1,4 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
-import { ConfirmDialog } from '../ui/confirm-dialog.js';
 import { AppEvents } from '../events.js';
 // ── ItemNode ──────────────────────────────────────────────────────────────────
 // Abstract base for all question item nodes (type: 'item').
@@ -333,10 +332,10 @@ export class ItemNode extends BaseNode {
     btnCopy.textContent = '\u29c9';
     btnCopy.dataset.tipTitle = 'Copy item';
     btnCopy.dataset.tipBody  = 'Copies this item to the clipboard as FHIR JSON. Use Paste after on any node to insert the copy.';
-    btnCopy.onclick = e => { e.stopPropagation(); BaseNode._svc.copyNode?.(node.id); };
+    btnCopy.onclick = e => { e.stopPropagation(); document.dispatchEvent(new CustomEvent(AppEvents.NODE_COPY_REQUESTED, { detail: { id: node.id } })); };
     titleWrap.appendChild(btnCopy);
 
-    const _makePasteBtn = (icon, testid, tipTitle, tipBody, action) => {
+    const _makePasteBtn = (icon, testid, tipTitle, tipBody, eventName) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'btn-node-paste';
@@ -344,12 +343,15 @@ export class ItemNode extends BaseNode {
       btn.textContent = icon;
       btn.dataset.tipTitle = tipTitle;
       btn.dataset.tipBody  = tipBody;
-      btn.classList.toggle('btn-node-paste--hidden', !BaseNode._svc.hasPaste?.());
-      btn.onclick = e => { e.stopPropagation(); action(); };
+      btn.classList.toggle('btn-node-paste--hidden', !BaseNode._hasClipboard);
+      document.addEventListener(AppEvents.CLIPBOARD_CHANGED, e => {
+        btn.classList.toggle('btn-node-paste--hidden', !e.detail.hasClip);
+      }, { signal: node._ac.signal });
+      btn.onclick = e => { e.stopPropagation(); document.dispatchEvent(new CustomEvent(eventName, { detail: { id: node.id } })); };
       return btn;
     };
-    titleWrap.appendChild(_makePasteBtn('\u2191\u29c9', 'node-paste-before-btn', 'Paste before', 'Insert copied node before this item.', () => BaseNode._svc.pasteBefore?.(node.id)));
-    titleWrap.appendChild(_makePasteBtn('\u2193\u29c9', 'node-paste-after-btn',  'Paste after',  'Insert copied node after this item.',  () => BaseNode._svc.pasteAfter?.(node.id)));
+    titleWrap.appendChild(_makePasteBtn('\u2191\u29c9', 'node-paste-before-btn', 'Paste before', 'Insert copied node before this item.', AppEvents.NODE_PASTE_BEFORE_REQUESTED));
+    titleWrap.appendChild(_makePasteBtn('\u2193\u29c9', 'node-paste-after-btn',  'Paste after',  'Insert copied node after this item.',  AppEvents.NODE_PASTE_AFTER_REQUESTED));
 
     const prefixInput = node._buildPrefixInput('prefix');
     titleWrap.appendChild(prefixInput);
@@ -490,9 +492,9 @@ export class ItemNode extends BaseNode {
     btnDel.className = 'btn-node-delete';
     btnDel.dataset.testid = 'node-delete-btn';
     btnDel.dataset.tipTitle = 'Delete item';
-    btnDel.onclick = async () => {
-      const ok = await ConfirmDialog.show(node.title || node.id);
-      if (ok) { BaseNode._svc.findAndRemove(node.id, BaseNode._svc.tree); BaseNode.notifyChanged(); node._dispatchRerender(); }
+    btnDel.onclick = () => {
+      document.dispatchEvent(new CustomEvent(AppEvents.NODE_DELETE_REQUESTED,
+        { detail: { id: node.id, label: node.title || node.id } }));
     };
 
     div.appendChild(header);

@@ -63,18 +63,24 @@ export class BaseNode {
 
   // ── Builder service injection ─────────────────────────────────────────────
   // Nodes must not import application state or services directly.
-  // Call BaseNode.configure() once at app startup (builder/index.js).
-  // confirmDelete  → import ConfirmDialog from js/ui/confirm-dialog.js
+  // confirmDelete  → dispatch NODE_DELETE_REQUESTED → BuilderPanel handles it
   // triggerCalcRecalc → dispatch AppEvents.CALC_RECALC_REQUESTED
-  // formatSeg     → import formatSeg from js/builder/_shared.js
-  static _svc = {
-    tree:          null,  // tree array (state.js)
-    findAndRemove: null,  // (id, nodes) => void
-    leftPanelBody: null,  // scroll container for builder navigate-to
-  };
+  // formatSeg     → import numberingService from js/builder/numbering-service.js
+  // copyNode/paste → dispatch NODE_COPY/PASTE_*_REQUESTED → CopyPaste handles it
+  // domPurify/marked → window.DOMPurify / window.marked (loaded from lib/)
+  // leftPanelBody → document.querySelector('.left-panel-body') (stable DOM element)
 
-  static configure(services) {
-    Object.assign(BaseNode._svc, services);
+  /** True when CopyPaste has something in the clipboard. Updated via CLIPBOARD_CHANGED event. */
+  static _hasClipboard = false;
+
+  // Subscribe once at module load: track clipboard state reactively.
+  // Used by buildBuilder() to set initial visibility of paste buttons.
+  static {
+    if (typeof document !== 'undefined') {
+      document.addEventListener(AppEvents.CLIPBOARD_CHANGED, e => {
+        BaseNode._hasClipboard = e.detail.hasClip;
+      });
+    }
   }
 
   /** Dispatch a preview:response-changed event so PreviewForm re-renders. */
@@ -308,7 +314,8 @@ export class BaseNode {
   // Apply XHTML / markdown / plain text to label element.
   // Priority: rendering-xhtml > rendering-markdown > plain text.
   _applyLabelContent(el) {
-    const { domPurify, marked } = BaseNode._svc;
+    const domPurify = window.DOMPurify;
+    const marked    = window.marked;
     if (this._renderXhtml && domPurify) {
       el.innerHTML = domPurify.sanitize(this._renderXhtml);
     } else if (this._renderMarkdown && domPurify && marked) {
@@ -437,7 +444,7 @@ export class BaseNode {
     this._navAbort = new AbortController();
     document.addEventListener(AppEvents.BUILDER_NAVIGATE_TO, e => {
       if (e.detail?.nodeId !== this.id) return;
-      const panel = BaseNode._svc.leftPanelBody;
+      const panel = document.querySelector('.left-panel-body');
       if (panel) {
         const top = el.getBoundingClientRect().top
           - panel.getBoundingClientRect().top
