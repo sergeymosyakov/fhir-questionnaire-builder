@@ -22,21 +22,22 @@ import '../fhir/formats/redcap.js';
 // Inject shared state into _shared (triggerCalcRecalc + renderTree need them)
 sharedInit({ tree, rawFhir, values, renderTree });
 
-// ── Inject builder services into node layer ───────────────────────────────────
-// Nodes must not import state or services directly — they receive them here.
+// ── Inject services into node / modal / section layers ────────────────────────
+// Nodes, modals, and sections must not import state or services directly.
+// Shared fields are defined once; each configure() receives only what it needs.
 // copyNode / pasteAfter / hasPaste are injected later by app.js once CopyPaste
 // is instantiated (avoids circular: builder/index.js ← app.js ← copy-paste.js).
+const _shared = { tree, triggerCalcRecalc, getFhirTarget: () => questMeta.fhirTarget };
+
 BaseNode.configure({
-  tree,
+  ..._shared,
   findAndRemove,
   confirmDelete,
-  triggerCalcRecalc,
   tickForm:      () => document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM)),
   formatSeg,
   domPurify:     window.DOMPurify,
   marked:        window.marked,
   leftPanelBody: document.querySelector('.left-panel-body'),
-  getFhirTarget: () => questMeta.fhirTarget,
   // placeholders — patched by app.js after CopyPaste instantiation
   copyNode:   null,
   pasteAfter:  null,
@@ -44,21 +45,18 @@ BaseNode.configure({
   hasPaste:   null,
 });
 
-// ── Inject app services into modal layer ──────────────────────────────────────
 Modal.configure({
-  triggerCalcRecalc,
+  ..._shared,
   getLastCtx,
   questMeta,
-  tree,
   values,
   getValue,
   setValue,
   deleteValue,
   questContained,
-  getFhirTarget: () => questMeta.fhirTarget,
 });
 
-Section.configure({ getFhirTarget: () => questMeta.fhirTarget });
+Section.configure({ ..._shared });
 
 // ── Event listeners ───────────────────────────────────────────────────────────
 // Nodes dispatch custom events instead of importing index.js/preview-form.js
