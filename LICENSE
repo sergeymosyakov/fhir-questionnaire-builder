@@ -1,4 +1,4 @@
-Copyright (c) 2026 Sergey Mosyakov, Huthaifa Khan / Roko Labs Inc.
+Copyright (c) 2026 Sergey Mosyakov, Huthaifa Khan, Roko Labs Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to use,
@@ -9,7 +9,7 @@ purposes only, subject to the following conditions:
    use of the Software — in whole or in part — must include a clearly visible
    credit in the form:
 
-       Based on FHIR Questionnaire Builder by Sergey Mosyakov, Huthaifa Khan / Roko Labs Inc.
+       Based on FHIR Questionnaire Builder by Sergey Mosyakov, Huthaifa Khan, Roko Labs Inc.
        https://github.com/sergeymosyakov/fhir-questionnaire-builder
 
    This credit must appear in the source code, documentation, README, or
