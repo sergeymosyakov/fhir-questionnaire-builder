@@ -30,7 +30,6 @@ function _mk(tag, className) {
 export class Modal {
   /** Builder services injected at app startup via Modal.configure(). */
   static _svc = {
-    getLastCtx:  null,  // () => {qr, env} — for expression evaluation
     questDoc:    null,  // QuestDocument singleton
     answerStore: null,  // AnswerStore singleton
   };

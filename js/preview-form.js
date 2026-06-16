@@ -22,9 +22,6 @@ function _yield() {
 
 let _instance = null;
 
-// ── Compatibility wrappers (used by builder/index.js) ───────────────────────
-export const getLastCtx = () => _instance?.getLastCtx();
-
 export class PreviewForm {
   /**
    * @param {object} deps — injected state

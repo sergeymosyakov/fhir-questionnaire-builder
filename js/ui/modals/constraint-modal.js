@@ -22,9 +22,10 @@ class ConstraintModal extends Modal {
     this.footer.insertBefore(this._copyToBtn, this.footer.firstChild);
   }
 
-  open(node, constraintLink, setActive) {
+  open(node, constraintLink, setActive, fpCtx = null) {
     if (!Array.isArray(node.constraint)) node.constraint = [];
     const draft = JSON.parse(JSON.stringify(node.constraint));
+    this._fpCtx   = fpCtx;
     this._pending = { node, constraintLink, setActive, draft };
     this.setTitle('Constraints', node.title || node.id || 'Item');
     this.body.innerHTML = '';
@@ -136,7 +137,7 @@ class ConstraintModal extends Modal {
       explainBtn.dataset.tipBody  = 'Evaluate the FHIRPath expression and show the result tree';
       explainBtn.onclick = () => {
         const fp = window.fhirpath;
-        const { qr, env } = Modal._svc.getLastCtx();
+        const { qr, env } = this._fpCtx || {};
         if (fp && exprInp.value.trim()) explainModal.show(exprInp.value.trim(), fp, qr, env);
       };
 

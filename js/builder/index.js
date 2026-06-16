@@ -2,7 +2,6 @@
 // Thin facade: creates a BuilderPanel instance, runs DI configure calls, and
 // re-exports panel methods for backward compatibility.
 import { questDoc, answerStore } from '../state.js';
-import { getLastCtx } from '../preview-form.js';
 import { Modal } from '../ui/modals/modal-base.js';
 import { Section } from '../ui/modals/section.js';
 import { BuilderPanel } from './builder-panel.js';
@@ -25,7 +24,6 @@ const panel = new BuilderPanel({ questDoc, answerStore });
 // leftPanelBody → document.querySelector('.left-panel-body') (stable DOM).
 
 Modal.configure({
-  getLastCtx,
   questDoc,
   answerStore,
 });

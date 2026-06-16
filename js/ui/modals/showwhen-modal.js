@@ -24,7 +24,8 @@ class ShowWhenModal extends ExprAwareModal {
     this.footer.insertBefore(this._copyToBtn, this.footer.firstChild);
   }
 
-  open(node, visLink, setActive) {
+  open(node, visLink, setActive, fpCtx = null) {
+    this._fpCtx = fpCtx;
     const draft = Object.assign({}, node, {
       enableWhen:           JSON.parse(JSON.stringify(node.enableWhen || [])),
       enableBehavior:       node.enableBehavior       || 'all',

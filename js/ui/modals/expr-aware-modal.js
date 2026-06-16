@@ -9,6 +9,7 @@ export class ExprAwareModal extends Modal {
   constructor(options) {
     super(options);
     this._exprIconEls = [];
+    this._fpCtx = null;
     if (typeof document !== 'undefined') {
       document.addEventListener(AppEvents.REFRESH_EXPR_ICONS, () => this._refreshExprIcons());
     }
@@ -23,12 +24,13 @@ export class ExprAwareModal extends Modal {
 
   close() {
     this._exprIconEls = [];
+    this._fpCtx = null;
     super.close();
   }
 
   _refreshExprIcons() {
     if (!this._exprIconEls.length) return;
-    const { fp, qr, env } = Modal._svc.getLastCtx?.() || {};
+    const { fp, qr, env } = this._fpCtx || {};
     if (!fp) return;
     for (const el of this._exprIconEls) {
       const expr = el.dataset.exprIcon;
