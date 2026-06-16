@@ -6,7 +6,6 @@ import { NODE_REGISTRY } from './registry.js';
 import { TextNode } from './text-node.js';
 import { AddChildMenu } from '../ui/add-child-menu.js';
 import { ConfirmDialog } from '../ui/confirm-dialog.js';
-import { numberingService } from '../builder/numbering-service.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -382,7 +381,7 @@ export class GroupNode extends BaseNode {
 
     _addChild('Group', () => {
       const n = new GroupNode({ title: 'New Group' });
-      n.id = node.id + '.' + numberingService.formatSeg(node.children.length + 1);
+      n.id = node.id + '.' + String(node.children.length + 1);
       return n;
     });
     _addChild('Item', () => {
@@ -396,7 +395,7 @@ export class GroupNode extends BaseNode {
             constraint: template.constraint ? template.constraint.map(c => ({ ...c })) : [],
           })
         : new TextNode({ title: 'New Item', itemType: 'text' });
-      n.id = node.id + '.' + numberingService.formatSeg(node.children.length + 1);
+      n.id = node.id + '.' + String(node.children.length + 1);
       return n;
     });
 

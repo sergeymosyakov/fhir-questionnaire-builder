@@ -75,7 +75,7 @@ export class BuilderPanel {
 
   addRootGroup() {
     const node = createGroupNode({ title: 'New Group' });
-    node.id = numberingService.formatSeg(this._tree.length + 1);
+    node.id = String(this._tree.length + 1);
     this._tree.push(node);
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
     this.renderTree();
