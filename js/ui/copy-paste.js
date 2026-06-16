@@ -13,13 +13,20 @@ import { AppEvents } from '../events.js';
 const STRUCTURAL_RE = /\.descendants\(\)|\.item\.where\s*\(\s*type\s*=|\.count\(\)/;
 
 export class CopyPaste {
-  /** Services injected at app startup. */
+  /** Services populated automatically via QUESTIONNAIRE_LOADED event. */
   static _svc = {
-    questDoc: null,  // QuestDocument singleton
+    questDoc: null,
   };
 
-  static configure(services) {
-    Object.assign(CopyPaste._svc, services);
+  static {
+    if (typeof document !== 'undefined') {
+      document.addEventListener('questionnaire-loaded', e => {
+        if (e.detail?.questDoc) CopyPaste._svc.questDoc = e.detail.questDoc;
+      });
+      document.addEventListener('questionnaire-cleared', () => {
+        CopyPaste._svc.questDoc = null;
+      });
+    }
   }
 
   constructor() {

@@ -28,8 +28,7 @@ let _collapsed = false;
 let _draft     = null; // working copy while modal is open; null when closed
 const _el = { card: null, toggle: null, chipList: null, count: null, editBtn: null, reinitBtn: null };
 
-export function configure({ questDoc, mountEl }) {
-  _questVariables = questDoc.variables;
+export function configure({ mountEl }) {
   // Build card DOM from template
   const card = document.createElement('div');
   card.className = 'variables-card';
@@ -50,9 +49,9 @@ export function configure({ questDoc, mountEl }) {
   _el.reinitBtn.addEventListener('click', () => {
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
   });
-  document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => { _el.card.style.display = ''; refresh(); });
+  document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => { _questVariables = e.detail.questDoc?.variables ?? null; _el.card.style.display = ''; refresh(); });
   document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,    () => { _el.card.style.display = ''; });
-  document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => { _el.card.style.display = 'none'; refresh(); });
+  document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => { _questVariables = null; _el.card.style.display = 'none'; refresh(); });
   document.addEventListener(AppEvents.PATIENT_CTX_APPLIED, refresh);
   refresh();
 }

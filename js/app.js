@@ -21,8 +21,8 @@ import { PreviewForm } from './preview-form.js';
 import { saveMenu, settingsMenu, prefs, answersMenu, questionnairesMenu, mount as mountHeaderActions } from './ui/header-actions.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
-import containedPanel        from './ui/panels/contained-panel.js';
-import answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
+import _containedPanel        from './ui/panels/contained-panel.js';
+import _answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
 import * as patientCtx        from './ui/patient-ctx.js';
 import { FileNameDisplay } from './ui/file-name.js';
 import { AppEvents } from './events.js';
@@ -39,13 +39,10 @@ import { CopyPaste } from './ui/copy-paste.js';
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
 
-// ── Inject state into UI panels ────────────────────────────────────────
-containedPanel.configure({ questDoc });
-answerValueSetPanel.configure({ questDoc });
-variablesPanel.configure({ questDoc, mountEl: document.getElementById('variablesCardMount') });
-patientCtx.configure({ questDoc });
+// UI panels subscribe to QUESTIONNAIRE_LOADED internally — no configure() needed.
+// patient-ctx wires preset handlers at module load; mount() inserts DOM.
 patientCtx.mount(document.getElementById('patientPresetWrap'));
-AuthPanel.configure({ questDoc });
+variablesPanel.configure({ mountEl: document.getElementById('variablesCardMount') });
 
 // ── Inject state into FHIR modules ─────────────────────────────────────
 configureExport({ questDoc });
@@ -171,7 +168,7 @@ previewForm.mount({
 });
 
 // ── Save/Export menu ──────────────────────────────────────────────────────────
-saveMenu.configure({ fileNameDisplay, questDoc, answerStore });
+saveMenu.configure({ fileNameDisplay });
 
 // ── Settings menu handlers ────────────────────────────────────────────────────
 // Tips and Autosave initial states resolve asynchronously from storage —
@@ -246,7 +243,6 @@ new UndoRedo(
 
 // ── Copy / Paste ──────────────────────────────────────────────────────────────
 // Instantiated after builder/index.js so BaseNode event listeners are active.
-CopyPaste.configure({ questDoc });
 new CopyPaste();
 
 // Initialise validators from config.json (async — runs in background)

@@ -16,11 +16,13 @@ class AnswerValueSetPanel extends Panel {
       tipSpec:  'R4 · optional',
     });
     this._tree = null;
-  }
 
-  configure({ questDoc }) {
-    this._tree = questDoc.tree;
-    this.refresh();
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
+      this._tree = e.detail.questDoc?.tree ?? null;
+    });
+    document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => {
+      this._tree = null;
+    });
   }
 
   refresh() {

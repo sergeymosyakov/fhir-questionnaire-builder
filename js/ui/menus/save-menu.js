@@ -21,16 +21,23 @@ export class SaveMenu extends DropdownMenu {
     this._questDoc    = null;
     this._answerStore = null;
 
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
+      this._questDoc    = e.detail.questDoc    ?? null;
+      this._answerStore = e.detail.answerStore ?? null;
+    });
+    document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => {
+      this._questDoc    = null;
+      this._answerStore = null;
+    });
+
     this._bindTreeVisibility();
     this._buildMenu();
     this._bindHandlers();
   }
 
-  /** @param {{ fileNameDisplay, questDoc, answerStore }} deps */
-  configure({ fileNameDisplay, questDoc, answerStore }) {
+  /** @param {{ fileNameDisplay }} deps */
+  configure({ fileNameDisplay }) {
     this._fileNameDisplay = fileNameDisplay;
-    this._questDoc    = questDoc;
-    this._answerStore = answerStore;
   }
 
   get cloudSaveBtn() { return this._cloudSaveBtn; }

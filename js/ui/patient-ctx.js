@@ -7,24 +7,27 @@ import { PatientPresetMenu } from './menus/patient-preset-menu.js';
 import { AppEvents } from '../events.js';
 
 let _tree = null, _questVariables = null;
-export function configure({ questDoc }) {
-  _tree = questDoc.tree; _questVariables = questDoc.variables;
-  // Seed defaults for any patient vars not yet present
-  for (const def of PATIENT_VARS) {
-    if (!getEntry(_questVariables, def.name)) {
-      setEntry(_questVariables, def.name, toExpr(def.type, def.default));
+
+document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
+  _tree = e.detail.questDoc?.tree ?? null;
+  _questVariables = e.detail.questDoc?.variables ?? null;
+  if (_questVariables) {
+    for (const def of PATIENT_VARS) {
+      if (!getEntry(_questVariables, def.name)) {
+        setEntry(_questVariables, def.name, toExpr(def.type, def.default));
+      }
     }
   }
-  // Disable preset button when no questionnaire is loaded
-  document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  () => presetMenu.setDisabled(false));
-  document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,     () => presetMenu.setDisabled(false));
-  document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => presetMenu.setDisabled(true));
-  // Wire preset handlers
-  presetMenu.setHandlers({
-    onPreset: preset => { applyPreset(preset, _questVariables); _doAfterApply(); },
-    onCustom: () => _modal.open(),
-  });
-}
+  presetMenu.setDisabled(false);
+});
+document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,     () => presetMenu.setDisabled(false));
+document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => { _tree = null; _questVariables = null; presetMenu.setDisabled(true); });
+
+// Wire preset handlers once at module load
+presetMenu.setHandlers({
+  onPreset: preset => { if (_questVariables) applyPreset(preset, _questVariables); _doAfterApply(); },
+  onCustom: () => _modal.open(),
+});
 
 const PATIENT_VARS = [
   { name: 'age',      type: 'number',   label: 'Age (years)',    default: 30 },

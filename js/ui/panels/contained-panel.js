@@ -16,11 +16,13 @@ class ContainedPanel extends Panel {
       tipSpec:  'R4 · optional',
     });
     this._questContained = null;
-  }
 
-  configure({ questDoc }) {
-    this._questContained = questDoc.contained;
-    this.refresh();
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
+      this._questContained = e.detail.questDoc?.contained ?? null;
+    });
+    document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => {
+      this._questContained = null;
+    });
   }
 
   refresh() {
