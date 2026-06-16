@@ -44,7 +44,7 @@ class ConstraintModal extends Modal {
       document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
         detail: { ids, patch, nodeType: 'item' },
       }));
-      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     }, 'item');
   }
@@ -54,7 +54,7 @@ class ConstraintModal extends Modal {
     const { node, draft, constraintLink, setActive } = this._pending;
     node.applyPatch({ constraint: draft });
     setActive(constraintLink, draft.length > 0);
-    Modal._svc.triggerCalcRecalc();
+    document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     this._cancel();
   }
 

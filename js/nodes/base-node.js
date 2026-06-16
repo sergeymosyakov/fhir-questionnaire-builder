@@ -64,13 +64,13 @@ export class BaseNode {
   // ── Builder service injection ─────────────────────────────────────────────
   // Nodes must not import application state or services directly.
   // Call BaseNode.configure() once at app startup (builder/index.js).
+  // confirmDelete  → import ConfirmDialog from js/ui/confirm-dialog.js
+  // triggerCalcRecalc → dispatch AppEvents.CALC_RECALC_REQUESTED
+  // formatSeg     → import formatSeg from js/builder/_shared.js
   static _svc = {
-    tree:              null,  // tree array (state.js)
-    findAndRemove:     null,  // (id, nodes) => void
-    confirmDelete:     null,  // (label) => Promise<boolean>
-    triggerCalcRecalc: null,  // () => void
-    formatSeg:         null,  // (n) => string
-    leftPanelBody:     null,  // scroll container for builder navigate-to
+    tree:          null,  // tree array (state.js)
+    findAndRemove: null,  // (id, nodes) => void
+    leftPanelBody: null,  // scroll container for builder navigate-to
   };
 
   static configure(services) {

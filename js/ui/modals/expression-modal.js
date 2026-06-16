@@ -4,7 +4,6 @@
 //   openDual(node, link, setActive, cb) — dual-field (items: calc + init in one modal)
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { ExprAwareModal } from './expr-aware-modal.js';
-import { Modal } from './modal-base.js';
 import { EXPR_SECTIONS, makeExprField, renderExprSections } from './expression-sections/index.js';
 import { nodePickerModal } from './node-picker-modal.js';
 import { AppEvents } from '../../events.js';
@@ -70,7 +69,7 @@ class ExpressionModal extends ExprAwareModal {
     const allowedType = sourceNode?.type;
     nodePickerModal.open(excludeId, (ids) => {
       document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, { detail: { ids, patch, nodeType: allowedType } }));
-      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     }, allowedType);
   }

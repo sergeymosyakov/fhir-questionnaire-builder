@@ -1,6 +1,6 @@
 ﻿// ── Action panel builders ─────────────────────────────────────────────────────
 import { parseOptions } from '../utils.js';
-import { getAllItems, triggerCalcRecalc } from './_shared.js';
+import { getAllItems } from './_shared.js';
 import { AppEvents } from '../events.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { createDatePicker } from '../ui/date-picker.js';
@@ -381,7 +381,7 @@ export function buildVisPanel(node, p, visLink, setActive) {
     clearTimeout(exprInp._d);
     exprInp._d = setTimeout(() => document.dispatchEvent(new CustomEvent(AppEvents.REFRESH_EXPR_ICONS)), 400);
   };
-  exprInp.onblur = () => { triggerCalcRecalc(); };
+  exprInp.onblur = () => { document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED)); };
   p.appendChild(exprInp);
 
   syncActive();

@@ -52,6 +52,10 @@ export const AppEvents = Object.freeze({
   CLOSE_DROPDOWNS:       'close-dropdowns',
 
   // ── Builder utilities ──────────────────────────────────────────────────────
+  // Dispatched by nodes/modals when they change FHIR data that requires
+  // FHIRPath calc expressions to be re-evaluated.  BuilderPanel listens and
+  // runs evalCalcNodes + dispatches RESPONSE_CHANGED.
+  CALC_RECALC_REQUESTED: 'calc-recalc-requested',
   REFRESH_EXPR_ICONS:    'refresh-expr-icons',
   REFRESH_CALC_BADGES:   'refresh-calc-badges',
   COLLAPSE_ALL_PREVIEW:  'collapse-all-preview',

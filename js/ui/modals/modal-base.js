@@ -30,7 +30,6 @@ function _mk(tag, className) {
 export class Modal {
   /** Builder services injected at app startup via Modal.configure(). */
   static _svc = {
-    triggerCalcRecalc: null,  // () => void
     getLastCtx:        null,  // () => {qr, env}
     questMeta:         null,  // questionnaire metadata object
     tree:              null,  // tree array

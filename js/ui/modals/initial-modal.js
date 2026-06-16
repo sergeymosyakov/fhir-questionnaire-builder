@@ -42,7 +42,7 @@ class InitialModal extends Modal {
       document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
         detail: { ids, patch, nodeType: node.type },
       }));
-      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     }, node.type);
   }
@@ -52,7 +52,7 @@ class InitialModal extends Modal {
     const { node, initLink, setActive } = this._pending;
     INITIAL_SECTIONS.forEach(s => s.commit(this._pending, node));
     setActive(initLink, node._initialValue !== undefined && node._initialValue !== '');
-    Modal._svc.triggerCalcRecalc();
+    document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     this._cancel();
   }
 

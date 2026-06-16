@@ -42,7 +42,7 @@ class StatesModal extends Modal {
       document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
         detail: { ids, patch, nodeType: node.type },
       }));
-      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     }, node.type);
   }
@@ -53,7 +53,7 @@ class StatesModal extends Modal {
     node.applyPatch(this._buildPayload());
     const anyActive = node.mandatory === true || !!node._readOnly || !!node._hidden || node._observationExtract != null || !!node._collapsible || !!node._usageMode || !!node._signatureRequired?.length;
     setActive(statesLink, anyActive);
-    Modal._svc.triggerCalcRecalc();
+    document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     this._cancel();
   }
 

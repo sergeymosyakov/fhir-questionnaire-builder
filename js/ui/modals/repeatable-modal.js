@@ -48,7 +48,7 @@ class RepeatableModal extends Modal {
       document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
         detail: { ids, patch, nodeType: 'item' },
       }));
-      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     }, 'item');
   }
@@ -58,7 +58,7 @@ class RepeatableModal extends Modal {
     const { node, repeatLink, setActive } = this._pending;
     REPEATABLE_SECTIONS.forEach(s => s.commit(this._pending, node));
     setActive(repeatLink, !!node.repeats);
-    Modal._svc.triggerCalcRecalc();
+    document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     this._cancel();
   }
 

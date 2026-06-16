@@ -61,7 +61,7 @@ class AnswerTypeModal extends Modal {
 
     ANSWER_TYPE_SECTIONS.forEach(s => s.commit(this._pending, node));
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
-    Modal._svc.triggerCalcRecalc();
+    document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     this._cancel();
   }
 

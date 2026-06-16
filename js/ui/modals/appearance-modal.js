@@ -40,7 +40,7 @@ class AppearanceModal extends Modal {
     const { node } = this._pending;
     nodePickerModal.open(node.id, (ids) => {
       document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, { detail: { ids, patch, nodeType: node.type } }));
-      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     }, node.type);
   }
@@ -50,7 +50,7 @@ class AppearanceModal extends Modal {
     const { node, styleLink, setActive } = this._pending;
     node.applyPatch(this._buildPayload());
     setActive(styleLink, !!(node._renderStyle || node._renderXhtml || node._renderMarkdown));
-    Modal._svc.triggerCalcRecalc();
+    document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     this._cancel();
   }
 

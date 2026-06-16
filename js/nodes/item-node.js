@@ -1,4 +1,6 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
+import { ConfirmDialog } from '../ui/confirm-dialog.js';
+import { AppEvents } from '../events.js';
 // ── ItemNode ──────────────────────────────────────────────────────────────────
 // Abstract base for all question item nodes (type: 'item').
 // Concrete subclasses set `this.itemType` and may add type-specific defaults.
@@ -399,7 +401,8 @@ export class ItemNode extends BaseNode {
       fhir:  'sdc-questionnaire-calculatedExpression / initialExpression',
       spec:  'SDC \u00B7 optional',
     }, actions);
-    exprLink.onclick = () => MODAL_REGISTRY.get('expression').openDual(node, exprLink, setActive, BaseNode._svc.triggerCalcRecalc);
+    exprLink.onclick = () => MODAL_REGISTRY.get('expression').openDual(node, exprLink, setActive,
+      () => document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED)));
 
     const repeatLink = node._makeActionLink('Repeatable', 'repeatable', {
       title: 'Repeatable',
@@ -488,7 +491,7 @@ export class ItemNode extends BaseNode {
     btnDel.dataset.testid = 'node-delete-btn';
     btnDel.dataset.tipTitle = 'Delete item';
     btnDel.onclick = async () => {
-      const ok = await BaseNode._svc.confirmDelete(node.title || node.id);
+      const ok = await ConfirmDialog.show(node.title || node.id);
       if (ok) { BaseNode._svc.findAndRemove(node.id, BaseNode._svc.tree); BaseNode.notifyChanged(); node._dispatchRerender(); }
     };
 

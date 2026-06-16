@@ -5,6 +5,8 @@ import { AppEvents } from '../events.js';
 import { NODE_REGISTRY } from './registry.js';
 import { TextNode } from './text-node.js';
 import { AddChildMenu } from '../ui/add-child-menu.js';
+import { ConfirmDialog } from '../ui/confirm-dialog.js';
+import { formatSeg } from '../builder/_shared.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -333,7 +335,7 @@ export class GroupNode extends BaseNode {
       label:       'Calculated Expression',
       fhirLabel:   'FHIRPath calculatedExpression:',
       placeholder: "%resource.item.where(linkId='...')",
-      onApply:     BaseNode._svc.triggerCalcRecalc,
+      onApply: () => document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED)),
     });
 
     const styleLink = node._makeActionLink('Appearance', 'style', {
@@ -380,7 +382,7 @@ export class GroupNode extends BaseNode {
 
     _addChild('Group', () => {
       const n = new GroupNode({ title: 'New Group' });
-      n.id = node.id + '.' + BaseNode._svc.formatSeg(node.children.length + 1);
+      n.id = node.id + '.' + formatSeg(node.children.length + 1);
       return n;
     });
     _addChild('Item', () => {
@@ -394,7 +396,7 @@ export class GroupNode extends BaseNode {
             constraint: template.constraint ? template.constraint.map(c => ({ ...c })) : [],
           })
         : new TextNode({ title: 'New Item', itemType: 'text' });
-      n.id = node.id + '.' + BaseNode._svc.formatSeg(node.children.length + 1);
+      n.id = node.id + '.' + formatSeg(node.children.length + 1);
       return n;
     });
 
@@ -428,7 +430,7 @@ export class GroupNode extends BaseNode {
     btnDel.dataset.testid = 'node-delete-btn';
     btnDel.dataset.tipTitle = 'Delete group';
     btnDel.onclick = async () => {
-      const ok = await BaseNode._svc.confirmDelete(node.title || node.id);
+      const ok = await ConfirmDialog.show(node.title || node.id);
       if (ok) { BaseNode._svc.findAndRemove(node.id, BaseNode._svc.tree); BaseNode.notifyChanged(); node._dispatchRerender(); }
     };
 

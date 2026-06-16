@@ -50,8 +50,9 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/eval.js` | Tree evaluation — `enableWhen[]` visibility, `enableWhenExpression` FHIRPath, `evalConstraints`; `evaluateNode(node, ctx, results, _insideHidden)` — hidden nodes (`node._hidden` or `_insideHidden=true`) are marked `{hidden:true, hiddenRoot:bool}` and excluded from normal enableWhen evaluation; all descendants recursed with `_insideHidden=true` |
 | `js/render-builder.js` | Left panel — 3-line re-export shim → `js/builder/` |
 | `js/builder/ctx.js` | `BuilderCtx` JSDoc typedef (no runtime exports) |
-| `js/builder/index.js` | Builder orchestrator — public API (`renderTree`, `collapseAll`, `renumberAll`, `addRootGroup`, `renderTreeAsync`) |
-| `js/builder/_shared.js` | Shared utilities; injected deps via `init(deps)`; `getAllItems`, `triggerCalcRecalc`, `confirmDelete`; `setRenumberGetter(fn)` / `formatSeg()` — renumber format injected from `app.js` (avoids direct DOM reads in shared module) |
+| `js/builder/index.js` | Builder thin facade — creates `BuilderPanel` instance, runs DI `configure()` calls, re-exports public API (`renderTree`, `renumberAll`, `addRootGroup`, `renderTreeAsync`, `setRenumberGetter`) |
+| `js/builder/builder-panel.js` | `class BuilderPanel` — all stateful builder logic: `renderTree`, `renderTreeAsync`, `renumberAll`, `addRootGroup`, `mount`, collapse/expand, DnD init, `_doCalcRecalc()` (listens to `CALC_RECALC_REQUESTED`), `setRenumberGetter` |
+| `js/builder/_shared.js` | Pure utilities — `getAllItems` (flat item list for dropdowns), `formatSeg(n)` / `setFormatGetter(fn)` (renumber format, injected by `app.js`) |
 | `js/builder/dnd.js` | Self-contained drag & drop; all state via `init(onDrop, tree, formTick)` |
 | `js/builder/panels.js` | Action panel builders: `addPanel`, `buildVisPanel` (enableWhen), `buildTypePanel` (type+options — dead code; only used as a reference), `buildStylePanel` (appearance for groups). Dead functions `buildMandPanel` / `buildInitialPanel` / `buildConstraintPanel` / `buildSupportLinkPanel` removed — those actions moved to dedicated modals |
 | `js/ui/modal-registry.js` | Singleton `MODAL_REGISTRY: Map<string, module>` — zero deps; each modal calls `MODAL_REGISTRY.set(key, {open, …})` at import time; node classes call `MODAL_REGISTRY.get(key).open(…)` without importing modals directly (avoids circular deps) |
@@ -148,6 +149,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + up/down/Enter navigation |
 | `js/ui/dropdown-menu.js` | Abstract base class for all header dropdown menus — constructor builds `.load-wrap`+button+`.load-menu`; `_item(id,html,testid)`, `_sep()`, `_checkItem(inputId,label,testid)` helpers; `_onOpen` hook; `close/show/hide`; listens to `close-dropdowns` CustomEvent |
+| `js/ui/confirm-dialog.js` | `ConfirmDialog` — static `show(label) → Promise<boolean>`; standalone "Delete node?" modal; no DI, no `_svc`; imported directly by `group-node.js` and `item-node.js` |
 | `js/ui/header-actions.js` | Mounts all 6 header menu instances into `#headerActions` span; exports `questionnairesMenu`, `answersMenu`, `saveMenu`, `previewModeMenu`, `viewOptionsMenu`, `settingsMenu`, `prefs` |
 | `js/ui/menus/questionnaires-menu.js` | `QuestionnairesMenu extends DropdownMenu` — Load/Library/Cloud/Recent-draft items; `_onOpen` syncs recent-draft item; "From file…" opens `loadFormatModal` (format picker → FHIR JSON or REDCap CSV); click handlers dispatch `CLOUD_LOAD_REQUESTED` event |
 | `js/ui/menus/answers-menu.js` | `AnswersMenu extends DropdownMenu` — Load QR file / Load from Library; hidden file input (`data-testid="qr-file-input"`); initially hidden, shown when tree has nodes |
@@ -285,10 +287,12 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 - **Vanilla JS DOM** — left panel (builder) constructed imperatively
 - **Event-driven rendering** — cross-module communication via `AppEvents` custom events; preview re-renders on `RESPONSE_CHANGED`, `REINIT_FORM`, etc.
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
-- **Playwright** — E2E test suite; **604 tests** across 48 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
-- **Dependency injection** — `dnd.js` and `_shared.js` receive all state via `init()`, no module-level singletons
+- **Playwright** — E2E test suite; **824 tests** across 48 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
+- **Dependency injection** — `dnd.js` receives callbacks from `BuilderPanel`; `_shared.js` is pure-function only (no injected state)
+- **Event-driven calc** — nodes/modals dispatch `CALC_RECALC_REQUESTED`; `BuilderPanel` listens and runs `evalCalcNodes` + dispatches `RESPONSE_CHANGED`
+- **Confirm dialog** — `ConfirmDialog.show(label)` in `js/ui/confirm-dialog.js` — no DI, standalone `Promise<boolean>`
 - **`ctx` object** — `{ renderTree, renderNode, tree, collapsed }` passed down to renderers and panels
-- **Vitest** — unit test suite for pure-function modules; **1274 tests** across 30 files; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules; **1287 tests** across 31 files; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://sergeymosyakov.github.io/fhir-questionnaire-builder/
 
 ---

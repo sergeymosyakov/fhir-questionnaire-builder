@@ -45,7 +45,7 @@ class CodesModal extends Modal {
       document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
         detail: { ids, patch, nodeType: node.type },
       }));
-      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     }, node.type);
   }
@@ -58,7 +58,7 @@ class CodesModal extends Modal {
                      !!(node._supportLinks?.length) || !!(node._unknownExtensions?.length) ||
                      !!node._shortText;
     setActive(link, isActive);
-    Modal._svc.triggerCalcRecalc();
+    document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     this._cancel();
   }
 

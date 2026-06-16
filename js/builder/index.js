@@ -1,17 +1,13 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
+// Thin facade: creates a BuilderPanel instance, runs DI configure calls, and
+// re-exports panel methods for backward compatibility.
 import { tree, rawFhir, values, questMeta, questContained, getValue, setValue, deleteValue } from '../state.js';
-import { init as sharedInit, formatSeg, confirmDelete, triggerCalcRecalc } from './_shared.js';
-import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { getLastCtx } from '../preview-form.js';
 import { findAndRemove } from '../utils.js';
-import { GroupNode } from '../nodes/group-node.js';
-import { createGroupNode } from '../nodes/index.js';
 import { BaseNode } from '../nodes/base-node.js';
 import { Modal } from '../ui/modals/modal-base.js';
 import { Section } from '../ui/modals/section.js';
-import { AppEvents } from '../events.js';
-import { showWarn } from '../ui/toast.js';
-import { versionCompatRegistry } from '../fhir/version-compat-registry.js';
+import { BuilderPanel } from './builder-panel.js';
 import '../fhir/version-compat/open-choice.js';
 import '../fhir/version-compat/r5-downgrade.js';
 import '../fhir/formats/r4.js';
@@ -19,29 +15,32 @@ import '../fhir/formats/r4b.js';
 import '../fhir/formats/r5.js';
 import '../fhir/formats/redcap.js';
 
-// Inject shared state into _shared (triggerCalcRecalc + renderTree need them)
-sharedInit({ tree, rawFhir, values, renderTree });
+// ── Single panel instance ─────────────────────────────────────────────────────
+const panel = new BuilderPanel({ tree, rawFhir, values, questMeta });
 
 // ── Inject services into node / modal / section layers ────────────────────────
 // Nodes, modals, and sections must not import state or services directly.
-// Shared fields are defined once; each configure() receives only what it needs.
+// triggerCalcRecalc / confirmDelete / formatSeg are no longer injected as _svc
+// callbacks — nodes and modals dispatch CALC_RECALC_REQUESTED or import
+// ConfirmDialog / formatSeg directly.
 // copyNode / pasteAfter / hasPaste are injected later by app.js once CopyPaste
 // is instantiated (avoids circular: builder/index.js ← app.js ← copy-paste.js).
-const _shared = { tree, triggerCalcRecalc, getFhirTarget: () => questMeta.fhirTarget };
+const _shared = {
+  tree,
+  getFhirTarget: () => questMeta.fhirTarget,
+};
 
 BaseNode.configure({
   ..._shared,
   findAndRemove,
-  confirmDelete,
-  formatSeg,
   domPurify:     window.DOMPurify,
   marked:        window.marked,
   leftPanelBody: document.querySelector('.left-panel-body'),
   // placeholders — patched by app.js after CopyPaste instantiation
-  copyNode:   null,
+  copyNode:    null,
   pasteAfter:  null,
   pasteBefore: null,
-  hasPaste:   null,
+  hasPaste:    null,
 });
 
 Modal.configure({
@@ -57,134 +56,11 @@ Modal.configure({
 
 Section.configure({ ..._shared });
 
-// ── Event listeners ───────────────────────────────────────────────────────────
-// Nodes dispatch custom events instead of importing index.js/preview-form.js
-// (those modules import nodes — importing back would be circular).
-document.addEventListener(AppEvents.BUILDER_RERENDER, () => renderTree());
-document.addEventListener(AppEvents.BUILDER_EXPAND_ALL, () => { setCollapsedAll(tree, false); renderTree(); });
-document.addEventListener(AppEvents.BUILDER_COLLAPSE_ALL, () => { setCollapsedAll(tree, true); renderTree(); });
-document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => {
-  document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
-});
-// When FHIR version changes: update questMeta and trigger rerender
-document.addEventListener(AppEvents.FHIR_VERSION_CHANGED, e => {
-  const { versionId, fromVersionId, source } = e.detail ?? {};
-  if (versionId && questMeta.fhirTarget !== versionId) {
-    if (source === 'user' && tree.length > 0) {
-      versionCompatRegistry.runAll(fromVersionId ?? questMeta.fhirTarget, versionId, tree)
-        .then(msgs => {
-          if (msgs.length > 0) showWarn(msgs.join('\n'));
-        });
-    }
-    questMeta.fhirTarget = versionId;
-    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
-    document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
-  }
-});
-
-// Builder toolbar buttons — wired via mount()
-let _container = null;
-
-export function mount({ collapseAllBtn, expandAllBtn, treeContainer }) {
-  _container = treeContainer;
-  collapseAllBtn.onclick = () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_COLLAPSE_ALL));
-  expandAllBtn.onclick   = () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
-}
-
-function renderNode(node) {
-  return node.buildBuilder();
-}
-
-export function renderTree() {
-  _container.innerHTML = '';
-  for (const node of tree) _container.appendChild(renderNode(node));
-  _container.appendChild(makeRootDropZone());
-}
-
-export async function renderTreeAsync(onProgress) {
-  const raf = () => new Promise(r => requestAnimationFrame(r));
-  await raf(); // yield so caller's progress UI can paint
-  // Build off-screen in a fragment — RAF yields keep progress bar updating
-  // without causing layout reflows in the live left panel.
-  const frag = document.createDocumentFragment();
-  const total = tree.length;
-  for (let i = 0; i < tree.length; i++) {
-    frag.appendChild(renderNode(tree[i]));
-    if (onProgress) onProgress(i + 1, total);
-    await raf();
-  }
-  frag.appendChild(makeRootDropZone());
-  _container.innerHTML = '';
-  _container.appendChild(frag);
-}
-
-// Wire DnD re-render callback once
-dndInit(renderTree, tree);
-
-// ── Collapse / expand all ─────────────────────────────────────────────────────
-function setCollapsedAll(nodes, value) {
-  for (const n of nodes) {
-    if (n.type === 'group') {
-      GroupNode._collapseMap.set(n.id, value);
-      setCollapsedAll(n.children, value);
-    }
-  }
-}
-// collapseAll / expandAll — driven by BUILDER_COLLAPSE_ALL / BUILDER_EXPAND_ALL events
-
-// ── Renumber ──────────────────────────────────────────────────────────────────
-// Renumber writes only node._prefix — node.id (FHIR linkId) is never touched,
-// so all enableWhen / calculatedExpression references stay valid.
-function _applyPrefixes(nodes, parentPrefix) {
-  nodes.forEach((node, i) => {
-    const seg = formatSeg(i + 1);
-    const prefix = parentPrefix ? parentPrefix + '.' + seg : seg;
-    node._prefix = prefix;
-    if (node.type === 'group' && node.children.length) _applyPrefixes(node.children, prefix);
-  });
-}
-export async function renumberAll() {
-  const raf = () => new Promise(r => requestAnimationFrame(r));
-  // Yield first so progress.show() has a chance to paint before any sync work
-  await raf();
-
-  _applyPrefixes(tree, '');
-
-  // Build into a DocumentFragment off-screen so RAF yields update the progress bar
-  // without touching the live DOM — no layout thrash or visual jitter in the left panel.
-  // Swap into the container in one operation at the end.
-  const frag = document.createDocumentFragment();
-  const total = tree.length;
-  for (let i = 0; i < tree.length; i++) {
-    frag.appendChild(renderNode(tree[i]));
-    document.dispatchEvent(new CustomEvent(AppEvents.RENUMBER_PROGRESS, { detail: { done: i + 1, total } }));
-    await raf();
-  }
-  frag.appendChild(makeRootDropZone());
-  _container.innerHTML = '';
-  _container.appendChild(frag);
-  document.dispatchEvent(new CustomEvent(AppEvents.RENUMBER_DONE));
-}
-
-// ── Root-level add buttons (wired in app.js via these exports) ────────────────
-export function addRootGroup() {
-  const node = createGroupNode({ title: 'New Group' });
-  node.id = formatSeg(tree.length + 1);
-  tree.push(node);
-  document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
-  renderTree();
-  requestAnimationFrame(() => {
-    const el = document.querySelector('[data-node-id="' + CSS.escape(node.id) + '"]');
-    if (el) {
-      const panel = document.querySelector('.left-panel-body');
-      if (panel) {
-        const top = el.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop;
-        panel.scrollTo({ top, behavior: 'smooth' });
-      } else {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-      el.classList.add('node-flash'); setTimeout(() => el.classList.remove('node-flash'), 1000);
-    }
-  });
-}
+// ── Re-exports for backward compatibility ─────────────────────────────────────
+export function mount(opts)                  { panel.mount(opts); }
+export function renderTree()                 { panel.renderTree(); }
+export function renderTreeAsync(onProgress)  { return panel.renderTreeAsync(onProgress); }
+export function renumberAll()                { return panel.renumberAll(); }
+export function addRootGroup()               { panel.addRootGroup(); }
+export function setRenumberGetter(fn)        { panel.setRenumberGetter(fn); }
 

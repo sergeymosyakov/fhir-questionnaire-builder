@@ -2,7 +2,6 @@
 // Centered modal for editing a node's enableWhen conditions and
 // enableWhenExpression. Uses a draft pattern — changes are only committed on Apply.
 import { MODAL_REGISTRY } from './modal-registry.js';
-import { Modal } from './modal-base.js';
 import { ExprAwareModal } from './expr-aware-modal.js';
 import { createCustomSelect } from '../custom-select.js';
 import { buildVisPanel } from '../../builder/panels.js';
@@ -74,7 +73,7 @@ class ShowWhenModal extends ExprAwareModal {
       delete node._disabledDisplay;
     }
     setActive(visLink, node.enableWhen.length > 0 || !!node.enableWhenExpression);
-    Modal._svc.triggerCalcRecalc();
+    document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     this._cancel();
   }
 
@@ -99,7 +98,7 @@ class ShowWhenModal extends ExprAwareModal {
       document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
         detail: { ids, patch, nodeType: null },
       }));
-      Modal._svc.triggerCalcRecalc();
+      document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     }, null);
   }
