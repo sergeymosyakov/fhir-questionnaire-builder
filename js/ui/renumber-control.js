@@ -10,10 +10,9 @@ export class RenumberControl {
    * @param {HTMLElement} formatWrap  — container for the format dropdown
    * @param {HTMLElement} btn         — the Renumber button
    * @param {object} deps
-   * @param {Function} deps.renumberAll        — async renumber action
-   * @param {Function} deps.setRenumberGetter  — registers format getter
+   * @param {Function} deps.renumberAll  — async renumber action
    */
-  constructor(formatWrap, btn, { renumberAll, setRenumberGetter }) {
+  constructor(formatWrap, btn, { renumberAll }) {
     this._btn = btn;
 
     const sel = createCustomSelect({
@@ -25,14 +24,16 @@ export class RenumberControl {
       value: 'numbers',
       className: 'sc-trigger--sm',
       testid: 'renumber-format',
+      onChange: v => {
+        document.dispatchEvent(new CustomEvent(AppEvents.RENUMBER_FORMAT_CHANGED,
+          { detail: { format: v || 'numbers' } }));
+      },
     });
     sel.el.dataset.tipTitle = 'Prefix format';
     sel.el.dataset.tipBody  = 'Format used by Renumber: numeric (1, 1.1), Roman numerals (I, I.I), or letters (A, A.A). Does not affect linkId — only item.prefix.';
     sel.el.dataset.tipFhir  = 'Questionnaire.item.prefix';
     sel.el.dataset.tipSpec  = 'R4 · optional';
     formatWrap.appendChild(sel.el);
-
-    setRenumberGetter(() => sel.getValue() || 'numbers');
 
     btn.onclick = async () => {
       btn.disabled = true;

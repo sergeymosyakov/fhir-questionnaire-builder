@@ -22,7 +22,7 @@ const panel = new BuilderPanel({ tree, rawFhir, values, questMeta });
 // Nodes, modals, and sections must not import state or services directly.
 // triggerCalcRecalc / confirmDelete / formatSeg are no longer injected as _svc
 // callbacks — nodes and modals dispatch CALC_RECALC_REQUESTED or import
-// ConfirmDialog / formatSeg directly.
+// ConfirmDialog. formatSeg lives in NumberingService (numbering-service.js).
 // copyNode / pasteAfter / hasPaste are injected later by app.js once CopyPaste
 // is instantiated (avoids circular: builder/index.js ← app.js ← copy-paste.js).
 const _shared = {
@@ -62,5 +62,4 @@ export function renderTree()                 { panel.renderTree(); }
 export function renderTreeAsync(onProgress)  { return panel.renderTreeAsync(onProgress); }
 export function renumberAll()                { return panel.renumberAll(); }
 export function addRootGroup()               { panel.addRootGroup(); }
-export function setRenumberGetter(fn)        { panel.setRenumberGetter(fn); }
 

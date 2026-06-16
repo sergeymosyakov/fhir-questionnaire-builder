@@ -15,7 +15,7 @@ import * as progress from './ui/progress.js';
 import { RenumberControl } from './ui/renumber-control.js';
 import * as search from './ui/search.js';
 import { UndoRedo } from './ui/undo-redo.js';
-import { renumberAll, addRootGroup, mount as mountBuilder, renderTree, renderTreeAsync, setRenumberGetter } from './builder/index.js';
+import { renumberAll, addRootGroup, mount as mountBuilder, renderTree, renderTreeAsync } from './builder/index.js';
 import * as helpModal from './ui/modals/help-modal.js';
 import { PreviewForm } from './preview-form.js';
 import { saveMenu, settingsMenu, prefs, answersMenu, questionnairesMenu, mount as mountHeaderActions } from './ui/header-actions.js';
@@ -120,7 +120,7 @@ new FhirVersionSelect(
 new RenumberControl(
   document.getElementById('renumberFormatWrap'),
   document.getElementById('renumberBtn'),
-  { renumberAll, setRenumberGetter },
+  { renumberAll },
 );
 
 // ── Global progress bar init ──────────────────────────────────────────────

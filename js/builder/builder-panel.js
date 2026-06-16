@@ -9,7 +9,7 @@ import { createGroupNode } from '../nodes/index.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
 import { showWarn } from '../ui/toast.js';
 import { versionCompatRegistry } from '../fhir/version-compat-registry.js';
-import { formatSeg, setFormatGetter } from './_shared.js';
+import { numberingService } from './numbering-service.js';
 
 const fhirpath = typeof window !== 'undefined' ? window.fhirpath : null;
 
@@ -75,7 +75,7 @@ export class BuilderPanel {
 
   addRootGroup() {
     const node = createGroupNode({ title: 'New Group' });
-    node.id = formatSeg(this._tree.length + 1);
+    node.id = numberingService.formatSeg(this._tree.length + 1);
     this._tree.push(node);
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
     this.renderTree();
@@ -106,8 +106,6 @@ export class BuilderPanel {
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
   }
 
-  setRenumberGetter(fn) { setFormatGetter(fn); }
-
   // ── Private ─────────────────────────────────────────────────────────────────
   _renderNode(node) { return node.buildBuilder(); }
 
@@ -122,7 +120,7 @@ export class BuilderPanel {
 
   _applyPrefixes(nodes, parentPrefix) {
     nodes.forEach((node, i) => {
-      const seg = formatSeg(i + 1);
+      const seg = numberingService.formatSeg(i + 1);
       const prefix = parentPrefix ? parentPrefix + '.' + seg : seg;
       node._prefix = prefix;
       if (node.type === 'group' && node.children.length)

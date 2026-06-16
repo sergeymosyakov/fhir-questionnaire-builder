@@ -61,6 +61,12 @@ export const AppEvents = Object.freeze({
   COLLAPSE_ALL_PREVIEW:  'collapse-all-preview',
   EXPAND_ALL_PREVIEW:    'expand-all-preview',
 
+  // ── Renumber ──────────────────────────────────────────────────────────────
+  // detail: { format: 'numbers'|'roman'|'letters' }
+  // Dispatched by RenumberControl when the user changes the prefix format.
+  // NumberingService listens and updates its internal format.
+  RENUMBER_FORMAT_CHANGED: 'renumber-format-changed',
+
   // ── Renumber progress ─────────────────────────────────────────────────────
   RENUMBER_PROGRESS:   'renumber-progress',
   RENUMBER_DONE:       'renumber-done',
