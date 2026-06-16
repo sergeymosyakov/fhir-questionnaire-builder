@@ -1,4 +1,3 @@
-import { _rc } from '../preview/render-ctx.js';
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 import { AppEvents } from '../events.js';
 // Abstract base for all question item nodes (type: 'item').
@@ -395,7 +394,7 @@ export class ItemNode extends BaseNode {
       fhir:  'Questionnaire.item.enableWhen[]',
       spec:  'R4 \u00B7 optional',
     }, actions);
-    visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive, _rc.lastCtx);
+    visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive);
 
     const exprLink = node._makeActionLink('Expression', 'expr', {
       title: 'FHIRPath Expressions',
@@ -404,8 +403,7 @@ export class ItemNode extends BaseNode {
       spec:  'SDC \u00B7 optional',
     }, actions);
     exprLink.onclick = () => MODAL_REGISTRY.get('expression').openDual(node, exprLink, setActive,
-      () => document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED)),
-      _rc.lastCtx);
+      () => document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED)));
 
     const repeatLink = node._makeActionLink('Repeatable', 'repeatable', {
       title: 'Repeatable',
@@ -429,7 +427,7 @@ export class ItemNode extends BaseNode {
       fhir:  'Questionnaire.item.extension[questionnaire-constraint]',
       spec:  'R4 \u00B7 optional',
     }, actions);
-    constraintLink.onclick = () => MODAL_REGISTRY.get('constraint').open(node, constraintLink, setActive, _rc.lastCtx);
+    constraintLink.onclick = () => MODAL_REGISTRY.get('constraint').open(node, constraintLink, setActive);
 
     const styleLink = node._makeActionLink('Appearance', 'appearance', {
       title: 'Appearance (rendering-style)',

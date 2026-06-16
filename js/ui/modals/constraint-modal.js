@@ -2,6 +2,7 @@
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import * as explainModal from './explain-modal.js';
+import { _rc } from '../../preview/render-ctx.js';
 import { createCustomSelect } from '../custom-select.js';
 import { nodePickerModal } from './node-picker-modal.js';
 import { AppEvents } from '../../events.js';
@@ -22,10 +23,9 @@ class ConstraintModal extends Modal {
     this.footer.insertBefore(this._copyToBtn, this.footer.firstChild);
   }
 
-  open(node, constraintLink, setActive, fpCtx = null) {
+  open(node, constraintLink, setActive) {
     if (!Array.isArray(node.constraint)) node.constraint = [];
     const draft = JSON.parse(JSON.stringify(node.constraint));
-    this._fpCtx   = fpCtx;
     this._pending = { node, constraintLink, setActive, draft };
     this.setTitle('Constraints', node.title || node.id || 'Item');
     this.body.innerHTML = '';
@@ -137,7 +137,7 @@ class ConstraintModal extends Modal {
       explainBtn.dataset.tipBody  = 'Evaluate the FHIRPath expression and show the result tree';
       explainBtn.onclick = () => {
         const fp = window.fhirpath;
-        const { qr, env } = this._fpCtx || {};
+        const { qr, env } = _rc.lastCtx || {};
         if (fp && exprInp.value.trim()) explainModal.show(exprInp.value.trim(), fp, qr, env);
       };
 

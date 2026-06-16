@@ -4,6 +4,7 @@
 // evaluates them on every REFRESH_EXPR_ICONS event (form value changes, typing).
 import { Modal } from './modal-base.js';
 import { AppEvents } from '../../events.js';
+import { _rc } from '../../preview/render-ctx.js';
 
 export class ExprAwareModal extends Modal {
   constructor(options) {
@@ -30,7 +31,7 @@ export class ExprAwareModal extends Modal {
 
   _refreshExprIcons() {
     if (!this._exprIconEls.length) return;
-    const { fp, qr, env } = this._fpCtx || {};
+    const { fp, qr, env } = _rc.lastCtx || {};
     if (!fp) return;
     for (const el of this._exprIconEls) {
       const expr = el.dataset.exprIcon;

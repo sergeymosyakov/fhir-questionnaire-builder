@@ -25,7 +25,7 @@ class ExpressionModal extends ExprAwareModal {
   }
 
   open(cfg) {
-    this._fpCtx = cfg.fpCtx || null;
+    this._fpCtx = null;
     this._pending = { mode: 'single', cfg, draft: cfg.node[cfg.field] || '' };
     this.setTitle(cfg.label, cfg.node.title || cfg.node.id || 'Item');
     this.body.innerHTML = '';
@@ -43,8 +43,8 @@ class ExpressionModal extends ExprAwareModal {
     setTimeout(() => this.body.querySelector('textarea')?.focus(), 50);
   }
 
-  openDual(node, link, setActive, onApply, fpCtx = null) {
-    this._fpCtx = fpCtx;
+  openDual(node, link, setActive, onApply) {
+    this._fpCtx = null;
     this._pending = { mode: 'dual', node, link, setActive, onApply,
       ...Object.assign({}, ...EXPR_SECTIONS.map(s => s.initPending(node))) };
     this.setTitle('FHIRPath Expressions', node.title || node.id || 'Item');

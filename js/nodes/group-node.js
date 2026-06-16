@@ -13,7 +13,6 @@ import { AddChildMenu } from '../ui/add-child-menu.js';
 //   _codes, _supportLinks, _hidden, _designNote, _unknownExtensions
 import { BaseNode } from './base-node.js';
 import { isDescendant } from '../utils.js';
-import { _rc } from '../preview/render-ctx.js';
 
 export class GroupNode extends BaseNode {
   /** Builder-only collapse state — keyed by node.id, not persisted to FHIR. */
@@ -323,7 +322,7 @@ export class GroupNode extends BaseNode {
       fhir:  'Questionnaire.item.enableWhen[]',
       spec:  'R4 \u00B7 optional',
     }, actions);
-    visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive, _rc.lastCtx);
+    visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive);
 
     const exprLink = node._makeActionLink('Expression', 'expr', {
       title: 'Calculated Expression',
@@ -333,7 +332,6 @@ export class GroupNode extends BaseNode {
     }, actions);
     exprLink.onclick = () => MODAL_REGISTRY.get('expression').open({
       node, link: exprLink, setActive,
-      fpCtx:       _rc.lastCtx,
       field:       '_calculatedExpr',
       label:       'Calculated Expression',
       fhirLabel:   'FHIRPath calculatedExpression:',
