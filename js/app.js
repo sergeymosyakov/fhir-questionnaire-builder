@@ -82,7 +82,6 @@ AuthPanel.configureCloudEls({
   saveSep:  saveMenu.cloudSaveSep,
   loadItem: questionnairesMenu.cloudItem,
   loadSep:  questionnairesMenu.cloudSep,
-  questLoader,
 });
 // AuthPanel — mounts sign-in / user chip into authWrap, handles cloud ops
 new AuthPanel(document.getElementById('authWrap'));
@@ -91,6 +90,12 @@ new AuthPanel(document.getElementById('authWrap'));
 document.addEventListener(AppEvents.QUESTIONNAIRE_CLEAR_REQUESTED, () => questLoader.confirmAndReset());
 // questionnaire-reset is dispatched by AuthPanel (sign-out with unsaved work)
 document.addEventListener(AppEvents.QUESTIONNAIRE_RESET, () => questLoader.reset());
+// questionnaire-load-requested is dispatched by AuthPanel (cloud load)
+document.addEventListener(AppEvents.QUESTIONNAIRE_LOAD_REQUESTED, async e => {
+  const { data, fileName } = e.detail;
+  if (await questLoader.confirmBeforeLoad() !== 'proceed') return;
+  questLoader.load(data, fileName);
+});
 
 // Buttons
 document.getElementById('addRootGroupBtn').onclick = () => {

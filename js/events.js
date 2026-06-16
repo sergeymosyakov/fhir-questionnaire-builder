@@ -22,6 +22,8 @@ export const AppEvents = Object.freeze({
   QUESTIONNAIRE_CLEAR_REQUESTED: 'questionnaire-clear-requested',
   QUESTIONNAIRE_RESET:           'questionnaire-reset',
   QUESTIONNAIRE_META_CHANGED:    'questionnaire-meta-changed',
+  // detail: { data: object, fileName: string }
+  QUESTIONNAIRE_LOAD_REQUESTED:  'questionnaire-load-requested',
 
   // ── Builder ───────────────────────────────────────────────────────────────
   BUILDER_RERENDER:     'builder:rerender',

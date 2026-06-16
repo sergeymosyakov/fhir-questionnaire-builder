@@ -22,16 +22,15 @@ const _GITHUB_SVG = '<svg width="13" height="13" viewBox="0 0 16 16" fill="curre
   + '</svg>';
 
 export class AuthPanel {
-  static _svc = { tree: null, questLoader: null };
+  static _svc = { tree: null };
   static _cloudEls = { saveBtn: null, saveSep: null, loadItem: null, loadSep: null };
 
   static configure({ tree }) {
     AuthPanel._svc.tree = tree;
   }
 
-  static configureCloudEls({ saveBtn, saveSep, loadItem, loadSep, questLoader }) {
+  static configureCloudEls({ saveBtn, saveSep, loadItem, loadSep, questLoader: _ignored }) {
     AuthPanel._cloudEls = { saveBtn, saveSep, loadItem, loadSep };
-    AuthPanel._svc.questLoader = questLoader;
   }
 
   constructor(mountEl) {
@@ -158,14 +157,14 @@ export class AuthPanel {
   }
 
   async _doCloudLoad() {
-    const { questLoader } = AuthPanel._svc;
-    if (await questLoader.confirmBeforeLoad() !== 'proceed') return;
     cloudModal.open(async id => {
       try {
         progress.show('Loading from cloud\u2026');
         const fhirJson = await storage.cloudLoad(id);
         this._cloudId = id;
-        await questLoader.load(fhirJson, fhirJson.title || 'Cloud questionnaire');
+        document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOAD_REQUESTED, {
+          detail: { data: fhirJson, fileName: fhirJson.title || 'Cloud questionnaire' }
+        }));
       } catch (err) {
         progress.hide();
         import('./toast.js').then(m => m.showError('Cloud load failed: ' + err.message));
