@@ -33,7 +33,6 @@ BaseNode.configure({
   ..._shared,
   findAndRemove,
   confirmDelete,
-  tickForm:      () => document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM)),
   formatSeg,
   domPurify:     window.DOMPurify,
   marked:        window.marked,

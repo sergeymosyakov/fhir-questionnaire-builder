@@ -370,7 +370,7 @@ export class GroupNode extends BaseNode {
       () => {
         const newNode = factory();
         node.children.push(newNode);
-        BaseNode._svc.tickForm();
+        document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
         BaseNode.notifyChanged();
         GroupNode._collapseMap.set(node.id, false);
         node._dispatchRerender();

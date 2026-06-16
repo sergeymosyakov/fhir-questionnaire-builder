@@ -69,7 +69,6 @@ export class BaseNode {
     findAndRemove:     null,  // (id, nodes) => void
     confirmDelete:     null,  // (label) => Promise<boolean>
     triggerCalcRecalc: null,  // () => void
-    tickForm:          null,  // () => void — dispatches REINIT_FORM
     formatSeg:         null,  // (n) => string
     leftPanelBody:     null,  // scroll container for builder navigate-to
   };
