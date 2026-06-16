@@ -95,6 +95,14 @@ export const AppEvents = Object.freeze({
   // patch values: null = delete key from node, any other value = assign to node.
   // nodeType: if set, BaseNode skips nodes whose type doesn't match (type safety).
   COPY_TO_NODES: 'copy-to-nodes',
+  // ── Answer store ─────────────────────────────────────────────────────────
+  // detail: { id: string, value: any }  — set one answer value
+  ANSWER_SET:    'answer:set',
+  // detail: { id: string }              — delete one answer key
+  ANSWER_DELETE: 'answer:delete',
+  // (no detail)                          — wipe all answers (import / reset)
+  ANSWERS_CLEAR: 'answer:clear',
+
   // ── FHIR version ─────────────────────────────────────────────────────────
   // detail: { versionId: 'R4'|'R4B'|'R5', fromVersionId?: 'R4'|'R4B'|'R5', source?: 'user' }
   // Dispatched by FhirVersionSelect when the user changes the target FHIR version

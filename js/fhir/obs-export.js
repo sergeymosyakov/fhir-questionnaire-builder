@@ -18,9 +18,9 @@ const SDC_OBS_PROFILE = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-obse
  * @returns {object} the generated Bundle (also useful for tests).
  */
 export function exportObservations(fileName, meta) {
-  const { values } = _svc;
+  const { answerStore } = _svc;
   const fhirQ = buildFHIRObject();
-  const qr    = buildQR(fhirQ, values);
+  const qr    = buildQR(fhirQ, answerStore.data);
   qr.status   = 'completed';
   qr.authored = new Date().toISOString();
   if (meta && meta.qrId)    qr.id      = meta.qrId;

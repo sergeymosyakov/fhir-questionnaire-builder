@@ -1,15 +1,14 @@
 // Tests for evaluateNode (FHIR R4 enableWhen-based visibility).
-// eval.js imports values from state.js (CDN) — mocked below.
+// eval.js imports answerStore from state.js — mocked below.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Shared mutable values store — eval.js reads this
+// Shared mutable values store — eval.js reads this via answerStore.getAll
 const _values = {};
-
-vi.mock('../js/state.js', () => ({
-  values: _values,
-  getValue: id => _values[id],
-  getAllValues: id => {
+const _mockAnswerStore = {
+  data: _values,
+  get: id => _values[id],
+  getAll: id => {
     const result = [];
     if (_values[id] !== undefined) result.push(_values[id]);
     const n = _values[id + '$$n'] || 0;
@@ -18,6 +17,10 @@ vi.mock('../js/state.js', () => ({
     }
     return result;
   },
+};
+
+vi.mock('../js/state.js', () => ({
+  answerStore: _mockAnswerStore,
 }));
 
 const { evaluateNode, markAllDisabled } = await import('../js/eval.js');

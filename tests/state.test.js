@@ -3,19 +3,31 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock Vue reactivity CDN (state.js imports it at module level)
-vi.mock('https://unpkg.com/@vue/reactivity@3.5/dist/reactivity.esm-browser.js', () => ({
-  ref: v => ({ value: v }),
-  reactive: v => v,
-  effect: fn => fn(),
-}));
+// DOM stubs — needed for AnswerStore event listeners
+globalThis.CustomEvent = class CustomEvent {
+  constructor(type, init) { this.type = type; this.detail = init?.detail; }
+};
+const _listeners = {};
+globalThis.document = {
+  dispatchEvent(e) {
+    (_listeners[e.type] || []).forEach(fn => fn(e));
+  },
+  addEventListener(type, fn) {
+    (_listeners[type] = _listeners[type] || []).push(fn);
+  },
+};
 
 // Mock fhirpath evaluate — routes by expression string
 function makeFp(routes) {
   return { evaluate: vi.fn((qr, expr, _env) => routes[expr] ?? []) };
 }
 
-const { evalConstraints, setValue, getAllValues, clearAllValues } = await import('../js/state.js');
+const { evalConstraints, answerStore } = await import('../js/state.js');
+const { AppEvents } = await import('../js/events.js');
+
+function setValue(id, v) { document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id, value: v } })); }
+function clearAllValues() { document.dispatchEvent(new CustomEvent(AppEvents.ANSWERS_CLEAR)); }
+function getAllValues(id) { return answerStore.getAll(id); }
 
 // ── getAllValues ───────────────────────────────────────────────────────────────
 describe('getAllValues', () => {

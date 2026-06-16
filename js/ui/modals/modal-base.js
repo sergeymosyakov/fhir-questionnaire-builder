@@ -31,11 +31,8 @@ export class Modal {
   /** Builder services injected at app startup via Modal.configure(). */
   static _svc = {
     getLastCtx:  null,  // () => {qr, env} — for expression evaluation
-    questDoc:    null,  // QuestDocument singleton (tree, meta, contained, variables)
-    values:      null,  // preview answer store
-    getValue:    null,  // (key) => any
-    setValue:    null,  // (key, val) => void
-    deleteValue: null,  // (key) => void
+    questDoc:    null,  // QuestDocument singleton
+    answerStore: null,  // AnswerStore singleton (reads via .get(); writes via events)
   };
 
   /** Called once at startup (builder/index.js) to inject app-layer services. */

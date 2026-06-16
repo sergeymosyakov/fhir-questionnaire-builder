@@ -29,9 +29,7 @@ export class PreviewForm {
   /**
    * @param {object} deps — injected state
    * @param {Array} deps.tree
-   * @param {object} deps.values
-   * @param {Function} deps.getValue
-   * @param {Function} deps.setValue
+   * @param {object} deps.answerStore
    * @param {object} deps.rawFhir
    * @param {Array} deps.questVariables
    * @param {Function} deps.calcFormOk
@@ -42,9 +40,7 @@ export class PreviewForm {
   constructor(deps) {
     _instance = this;
     this._tree            = deps.tree;
-    this._values          = deps.values;
-    this._getValue        = deps.getValue;
-    this._setValue         = deps.setValue;
+    this._answerStore     = deps.answerStore;
     this._rawFhir         = deps.rawFhir;
     this._questVariables  = deps.questVariables;
     this._calcFormOk      = deps.calcFormOk;
@@ -61,12 +57,12 @@ export class PreviewForm {
     _rc.viewPrefs        = this._viewPrefs;
     _rc.lastCtx          = this._lastCtx;
     _rc.buildControl     = (node, iconEl, cb) => this._buildControl(node, iconEl, cb);
-    _rc.values           = this._values;
+    _rc.values           = this._answerStore.data;
     _rc.updateGroupIcons = () => GroupNode.updateAll(_rc);
     _rc.isMandatory      = deps.isMandatory;
     _rc.calcFormOk       = deps.calcFormOk;
     _rc.evalConstraints  = deps.evalConstraints;
-    _rc.getValue         = deps.getValue;
+    _rc.getValue         = id => this._answerStore.get(id);
     _rc.CHECKABLE_TYPES  = deps.CHECKABLE_TYPES;
 
     // ── Event listeners ─────────────────────────────────────────────────────
@@ -129,13 +125,13 @@ export class PreviewForm {
     const base = this._rawFhir.value
       ? JSON.parse(JSON.stringify(this._rawFhir.value))
       : { resourceType: 'Questionnaire', item: [] };
-    const qr = buildQR(base, this._values);
-    if (!silent) progress.show('Evaluating variables\u2026');
+    const qr = buildQR(base, this._answerStore.data);
+    if (!silent) progress.show('Evaluating variables…');
     await _yield();
     const envVars = buildVarEnv(this._questVariables, qr, fhirpath);
-    if (!silent) progress.show('Applying initial values\u2026');
+    if (!silent) progress.show('Applying initial values…');
     await _yield();
-    evalInitialExprNodes(this._tree, qr, fhirpath, this._values, envVars);
+    evalInitialExprNodes(this._tree, qr, fhirpath, this._answerStore.data, envVars);
     this._preQR = qr;
     this._preEnvVars = envVars;
     if (!silent) progress.show('Refreshing preview\u2026');
@@ -181,10 +177,10 @@ export class PreviewForm {
         qr = this._preQR; envVars = this._preEnvVars;
         this._preQR = null; this._preEnvVars = null;
       } else {
-        qr = buildQR(base, this._values);
+        qr = buildQR(base, this._answerStore.data);
         envVars = buildVarEnv(this._questVariables, qr, fhirpath);
       }
-      evalCalcNodes(this._tree, qr, fhirpath, this._values, envVars, base);
+      evalCalcNodes(this._tree, qr, fhirpath, this._answerStore.data, envVars, base);
       const env = { resource: qr, ...envVars };
       this._lastCtx.fp = fhirpath; this._lastCtx.qr = qr; this._lastCtx.env = env;
       document.dispatchEvent(new CustomEvent(AppEvents.REFRESH_EXPR_ICONS));
@@ -212,7 +208,8 @@ export class PreviewForm {
       document.dispatchEvent(new CustomEvent(AppEvents.REFRESH_CALC_BADGES));
     };
     const ctx = {
-      getValue: this._getValue, setValue: this._setValue,
+      getValue: id => this._answerStore.get(id),
+      setValue: (id, v) => document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id, value: v } })),
       onChange, _reCalc: reCalcAndRefresh,
       _fpCtx: this._lastCtx,
     };

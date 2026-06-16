@@ -7,16 +7,16 @@ import * as validateModal from '../ui/modals/validate-modal.js';
 import { AppEvents } from '../events.js';
 
 export class QRAnswersManager {
-  /** @param {{ values, tree, questDoc, shouldValidate? }} deps — state references */
-  constructor({ values, tree, questDoc, shouldValidate }) {
-    this._values          = values;
+  /** @param {{ answerStore, tree, questDoc, shouldValidate? }} deps — state references */
+  constructor({ answerStore, tree, questDoc, shouldValidate }) {
+    this._answerStore     = answerStore;
     this._tree            = tree;
     this._questDoc        = questDoc;
     this._shouldValidate  = shouldValidate || (() => true);
   }
 
   apply(qr) {
-    const result = importQRAnswers(qr, this._values, this._tree);
+    const result = importQRAnswers(qr, this._answerStore.data, this._tree);
     if (!result.ok) { showError('Cannot load answers: ' + result.error); return; }
 
     document.dispatchEvent(new CustomEvent(AppEvents.QR_LOADED, { detail: {
@@ -35,7 +35,6 @@ export class QRAnswersManager {
     const raw = this._questDoc?.rawFhir;
     const currentUrl = (raw && (raw.url || raw.id)) || '';
     const issues = [];
-
     if (result.questionnaire && currentUrl && result.questionnaire !== currentUrl) {
       issues.push({
         severity: 'warning', nodeId: null,
@@ -57,7 +56,7 @@ export class QRAnswersManager {
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 
     if (issues.length > 0 && this._shouldValidate()) {
-      validateModal.show('Load Answers \u2014 ' + result.loaded + ' loaded', 'import', { tree: this._tree, values: this._values, extraIssues: issues });
+      validateModal.show('Load Answers \u2014 ' + result.loaded + ' loaded', 'import', { tree: this._tree, values: this._answerStore.data, extraIssues: issues });
     }
   }
 }

@@ -1,6 +1,7 @@
 import { RepeatableSection } from './base-section.js';
 import { REPEATABLE_SECTIONS } from './registry.js';
 import { Modal } from '../modal-base.js';
+import { AppEvents } from '../../../events.js';
 
 class RepeatSection extends RepeatableSection {
   initPending(node) {
@@ -137,11 +138,12 @@ class RepeatSection extends RepeatableSection {
         node._maxOccurs = max;
         // Trim extra rows that now exceed maxOccurs
         const id       = node.id;
-        const currentN = Modal._svc.getValue(id + '$$n') || 0;
+        const currentN = Modal._svc.answerStore.get(id + '$$n') || 0;
         if (currentN + 1 > max) {
           const keepN = max - 1;
-          for (let i = keepN + 1; i <= currentN; i++) Modal._svc.deleteValue(id + '$$' + i);
-          if (keepN <= 0) Modal._svc.deleteValue(id + '$$n'); else Modal._svc.setValue(id + '$$n', keepN);
+          for (let i = keepN + 1; i <= currentN; i++) document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$' + i } }));
+          if (keepN <= 0) document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$n' } }));
+          else document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: id + '$$n', value: keepN } }));
         }
       } else {
         delete node._maxOccurs;

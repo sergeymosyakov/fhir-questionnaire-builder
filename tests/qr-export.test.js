@@ -25,8 +25,8 @@ import { exportQR, configure as configureQrExport } from '../js/fhir/qr-export.j
 import { buildFHIRObject } from '../js/fhir/export.js';
 import { buildQR }         from '../js/fhir/qr-builder.js';
 
-// _svc injection — exportQR needs values from _svc, not state.js
-configureQrExport({ values: {} });
+// _svc injection — exportQR needs answerStore from _svc, not state.js
+configureQrExport({ answerStore: { data: {} } });
 
 // ── DOM stub helpers ──────────────────────────────────────────────────────────
 

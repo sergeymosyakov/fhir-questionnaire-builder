@@ -15,21 +15,19 @@ import { versionRegistry } from './version-registry.js';
 import { loadConfirmModal } from '../ui/modals/load-confirm-modal.js';
 
 export class QuestionnaireLoader {
-  /** @param {{ questDoc: import('./quest-document.js').QuestDocument,
-   *            values, clearAllValues?, reinitForm?, shouldValidate?,
+  /** @param {{ questDoc: import('../fhir/quest-document.js').QuestDocument,
+   *            answerStore, reinitForm?, shouldValidate?,
    *            renderTree?, renderTreeAsync? }} deps */
-  constructor({ questDoc, values, reinitForm, shouldValidate,
-                renderTree: renderTreeFn, renderTreeAsync: renderTreeAsyncFn,
-                clearAllValues }) {
+  constructor({ questDoc, answerStore, reinitForm, shouldValidate,
+                renderTree: renderTreeFn, renderTreeAsync: renderTreeAsyncFn }) {
     this._questDoc         = questDoc;
-    this._tree             = questDoc.tree;     // alias — same array reference
-    this._values           = values;
+    this._tree             = questDoc.tree;
+    this._answerStore      = answerStore;
     this._reinitForm       = reinitForm || null;
     this._importSeq        = 0;
     this._shouldValidate   = shouldValidate || (() => true);
     this._renderTree       = renderTreeFn       || renderTree;
     this._renderTreeAsync  = renderTreeAsyncFn  || renderTreeAsync;
-    this._clearAllValues   = clearAllValues     || (() => {});
     // Reset-flow callbacks — injected via configureResetFlow()
     this._resetFlow        = null;
   }
@@ -48,7 +46,7 @@ export class QuestionnaireLoader {
    */
   reset() {
     this._questDoc.reset();   // destroyTree + rawFhir=null + contained/variables/meta
-    this._clearAllValues();
+    document.dispatchEvent(new CustomEvent(AppEvents.ANSWERS_CLEAR));
     this._renderTree();
     if (this._resetFlow?.clearDraft) this._resetFlow.clearDraft();
     document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_CLEARED));
@@ -108,8 +106,8 @@ export class QuestionnaireLoader {
 
       // Show import report only when local validator finds errors and validate is enabled.
       // Warnings are non-blocking — users can review them via Tools → Validate.
-      if (this._shouldValidate() && validateTree(this._tree, this._values, { name: data?.name }).some(i => i.severity === 'error')) {
-        validateModal.show('Import — Validation Report', 'import', { questJson: data, tree: this._tree, values: this._values });
+      if (this._shouldValidate() && validateTree(this._tree, this._answerStore.data, { name: data?.name }).some(i => i.severity === 'error')) {
+        validateModal.show('Import — Validation Report', 'import', { questJson: data, tree: this._tree, values: this._answerStore.data });
       }
       this._expandValueSets(++this._importSeq);
     } catch (err) {
@@ -125,7 +123,7 @@ export class QuestionnaireLoader {
     const failures = await terminologyService.expandAll(this._tree, this._questDoc.meta);
     if (this._importSeq !== seq) return;
     if (failures.length) {
-      validateModal.show('ValueSet Expansion Errors', 'import', { tree: this._tree, values: this._values });
+      validateModal.show('ValueSet Expansion Errors', 'import', { tree: this._tree, values: this._answerStore.data });
     }
     if (this._reinitForm) {
       await this._reinitForm({ silent: true });

@@ -7,37 +7,11 @@
 export { questDoc } from './fhir/quest-document.js';
 
 // ── Answer store ──────────────────────────────────────────────────────────────
-// Plain (non-reactive) store for current form values in preview.
-// Not reactive on purpose — answer values never trigger re-renders.
-// Do not access this directly — use getValue / setValue / deleteValue / clearAllValues.
-export const values = {};
-
-// ── Values API ────────────────────────────────────────────────────────────────
-// The single source of truth for answer access. When repeats support is added
-// the internal storage will change; all callers that use this API will be safe.
-
-/** Return the primary (first) answer for a linkId. */
-export const getValue   = id  => values[id];
-
-/** Set the primary answer for a linkId. */
-export const setValue   = (id, val) => { values[id] = val; };
-
-/** Delete the answer for a linkId. */
-export const deleteValue = id => { delete values[id]; };
-
-/** Wipe the entire answer store (used on import / reset). */
-export const clearAllValues = () => { Object.keys(values).forEach(k => delete values[k]); };
-
-/** Return all answers for a linkId: primary + repeat rows ($$1, $$2, …). */
-export function getAllValues(id) {
-  const result = [];
-  if (values[id] !== undefined) result.push(values[id]);
-  const n = values[id + '$$n'] || 0;
-  for (let i = 1; i <= n; i++) {
-    if (values[id + '$$' + i] !== undefined) result.push(values[id + '$$' + i]);
-  }
-  return result;
-}
+// Writes: dispatch AppEvents.ANSWER_SET / ANSWER_DELETE / ANSWERS_CLEAR.
+// Reads:  answerStore.get(id) / answerStore.getAll(id).
+// Raw object: answerStore.data — pass to buildQR, evalCalcNodes, validate, etc.
+export { answerStore } from './answer-store.js';
+import { answerStore as _store } from './answer-store.js';
 
 // ── ID factory ────────────────────────────────────────────────────────────────
 export { resetSeq } from './id.js';
@@ -78,17 +52,17 @@ export const calcFormOk = node => {
   // Only boolean (checkbox) calc nodes participate in pass/fail
   if (node._calculatedExpr && node._readOnly) {
     if (node.itemType !== 'checkbox') return true;
-    return getValue(node.id) === true;
+    return _store.get(node.id) === true;
   }
   // checkbox: mandatory → must have been explicitly answered (true = yes, false = no)
   // undefined means the user has not interacted yet → still invalid
   if (node.itemType === 'checkbox' && isMandatory(node)) {
-    const val = getValue(node.id);
+    const val = _store.get(node.id);
     return val === true || val === false;
   }
   // url: validate format regardless of required
   if (node.itemType === 'url') {
-    const val = getValue(node.id);
+    const val = _store.get(node.id);
     if (!val || val === '') return !isMandatory(node);
     if (!_isValidUrl(val)) return false;
     if (node._regex) { try { if (!new RegExp(node._regex).test(val)) return false; } catch { /* invalid regex — skip */ } }
@@ -96,7 +70,7 @@ export const calcFormOk = node => {
   }
   // attachment: required means a file must be chosen; also enforce maxFileSizeMB
   if (node.itemType === 'attachment') {
-    const val = getValue(node.id);
+    const val = _store.get(node.id);
     if (val && node._maxFileSizeMB !== undefined) {
       if (val.size > node._maxFileSizeMB * 1024 * 1024) return false;
     }
@@ -105,7 +79,7 @@ export const calcFormOk = node => {
   }
   // integer/decimal/number: check min/max range (regardless of required)
   if (node.itemType === 'integer' || node.itemType === 'decimal' || node.itemType === 'number') {
-    const val = getValue(node.id);
+    const val = _store.get(node.id);
     if (val !== undefined && val !== '' && val !== null) {
       const num = Number(val);
       if (!isFinite(num)) return false; // non-numeric input is always invalid
@@ -123,28 +97,28 @@ export const calcFormOk = node => {
   // reference: mandatory → { reference: "Type/id" } must be present
   if (node.itemType === 'reference') {
     if (!isMandatory(node)) return true;
-    const val = getValue(node.id);
+    const val = _store.get(node.id);
     return val != null && typeof val === 'object' && !!val.reference;
   }
   // quantity: mandatory → { value: number, unit: string } must be present
   if (node.itemType === 'quantity') {
     if (!isMandatory(node)) return true;
-    const val = getValue(node.id);
+    const val = _store.get(node.id);
     return val != null && typeof val === 'object' && val.value !== undefined && !!val.unit;
   }
   // minLength: non-empty value must meet minimum length
   if (node._minLength) {
-    const val = getValue(node.id);
+    const val = _store.get(node.id);
     if (val && String(val).length > 0 && String(val).length < node._minLength) return false;
   }
   // regex: non-empty value must match pattern
   if (node._regex) {
-    const val = getValue(node.id);
+    const val = _store.get(node.id);
     if (val && String(val).length > 0) { try { if (!new RegExp(node._regex).test(String(val))) return false; } catch { /* invalid regex — skip */ } }
   }
   // mandatory text/number/date/etc → must be non-empty
   if (isMandatory(node) && NONEMPTY_TYPES.has(node.itemType)) {
-    const val = getValue(node.id);
+    const val = _store.get(node.id);
     return val !== undefined && val !== '' && val !== null;
   }
   return true;

@@ -2,7 +2,7 @@
 import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
-import { questDoc, values, getValue, setValue, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES, clearAllValues, resetSeq } from './state.js';
+import { questDoc, answerStore, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES, resetSeq } from './state.js';
 import { buildFHIRObject, buildFHIRObjectVersioned, configure as configureExport } from './fhir/export.js';
 import { configure as configureImport } from './fhir/import.js';
 import { configure as configureQrExport } from './fhir/qr-export.js';
@@ -49,22 +49,21 @@ AuthPanel.configure({ tree: questDoc.tree });
 
 // ── Inject state into FHIR modules ─────────────────────────────────────
 configureExport({ questDoc });
-configureImport({ questDoc, resetSeq, setValue, clearAllValues, renderTree });
-configureQrExport({ values });
-configureObsExport({ values });
+configureImport({ questDoc, resetSeq, renderTree });
+configureQrExport({ answerStore });
+configureObsExport({ answerStore });
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
-export const qrAnswers   = new QRAnswersManager({ values, tree: questDoc.tree, questDoc, shouldValidate: () => prefs.get('validate') });
-export const questLoader = new QuestionnaireLoader({ questDoc, values,
+export const qrAnswers   = new QRAnswersManager({ answerStore, tree: questDoc.tree, questDoc, shouldValidate: () => prefs.get('validate') });
+export const questLoader = new QuestionnaireLoader({ questDoc, answerStore,
   reinitForm:       (opts) => previewForm.reinitForm(opts),
   shouldValidate:   () => prefs.get('validate'),
   renderTree,
   renderTreeAsync,
-  clearAllValues,
 });
 
 export const previewForm = new PreviewForm({
-  tree: questDoc.tree, values, getValue, setValue, rawFhir: questDoc, questVariables: questDoc.variables,
+  tree: questDoc.tree, answerStore, rawFhir: questDoc, questVariables: questDoc.variables,
   calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES,
 });
 
@@ -167,7 +166,7 @@ previewForm.mount({
 });
 
 // ── Save/Export menu ──────────────────────────────────────────────────────────
-saveMenu.configure({ fileNameDisplay, tree: questDoc.tree, values });
+saveMenu.configure({ fileNameDisplay, tree: questDoc.tree, answerStore });
 
 // ── Settings menu handlers ────────────────────────────────────────────────────
 // Tips and Autosave initial states resolve asynchronously from storage —
@@ -198,7 +197,7 @@ Promise.all([
     },
     onAutosaveToggle: (enabled) => as.setEnabled(enabled),
     onValidate: () => {
-      validateModal.show('Validate — Report', 'validate', { questJson: buildFHIRObjectVersioned(questDoc.fhirTarget), tree: questDoc.tree, values });
+      validateModal.show('Validate — Report', 'validate', { questJson: buildFHIRObjectVersioned(questDoc.fhirTarget), tree: questDoc.tree, values: answerStore.data });
     },
     onExpand:   () => previewForm.expandAll(),
     onCollapse: () => previewForm.collapseAll(),
@@ -218,7 +217,7 @@ questLoader.configureResetFlow({
   confirmOpen:        () => clearConfirmModal.open(),
   promptExport:       (onDone) => saveMenu.promptExport(onDone),
   showValidateExport: (onExport) => {
-    validateModal.show('Export — Validation Report', 'export', { questJson: buildFHIRObjectVersioned(questDoc.fhirTarget), tree: questDoc.tree, values, onExport });
+    validateModal.show('Export — Validation Report', 'export', { questJson: buildFHIRObjectVersioned(questDoc.fhirTarget), tree: questDoc.tree, values: answerStore.data, onExport });
   },
   clearDraft: () => import('./ui/autosave.js').then(m => m.clearDraft()),
 });

@@ -6,7 +6,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 globalThis.CustomEvent = class CustomEvent {
   constructor(type, init) { this.type = type; this.detail = init?.detail; }
 };
-globalThis.document = { dispatchEvent: vi.fn(), addEventListener: vi.fn() };
+const _eventListeners = {};
+globalThis.document = {
+  dispatchEvent(e) { (_eventListeners[e.type] || []).forEach(fn => fn(e)); },
+  addEventListener(type, fn) { (_eventListeners[type] = _eventListeners[type] || []).push(fn); },
+};
 
 const _tree           = [];
 const _questVariables = [];
@@ -19,17 +23,19 @@ const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draf
 const _questDoc = { tree: _tree, meta: _questMeta, rawFhir: null, variables: _questVariables, contained: _questContained };
 
 vi.mock('../js/state.js', () => ({
-  questDoc:       _questDoc,
-  values:         _values,
+  questDoc:   _questDoc,
+  answerStore: {
+    data: _values,
+    get:  id => _values[id],
+    getAll: id => { const r = []; if (_values[id] !== undefined) r.push(_values[id]); return r; },
+  },
   resetSeq:       vi.fn(),
-  setValue:       (id, val) => { _values[id] = val; },
-  clearAllValues: () => { Object.keys(_values).forEach(k => delete _values[k]); },
 }));
 
 vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
 const { importFHIR, configure: configureImport } = await import('../js/fhir/import.js');
-configureImport({ questDoc: _questDoc, resetSeq: vi.fn(), setValue: (id, val) => { _values[id] = val; }, clearAllValues: () => { Object.keys(_values).forEach(k => delete _values[k]); }, renderTree: vi.fn() });
+configureImport({ questDoc: _questDoc, resetSeq: vi.fn(), renderTree: vi.fn() });
 
 vi.stubGlobal('alert', vi.fn());
 vi.mock('../js/ui/toast.js', () => ({ showError: vi.fn(), showWarn: vi.fn() }));

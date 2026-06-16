@@ -1,7 +1,7 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
 // Thin facade: creates a BuilderPanel instance, runs DI configure calls, and
 // re-exports panel methods for backward compatibility.
-import { questDoc, values, getValue, setValue, deleteValue } from '../state.js';
+import { questDoc, answerStore } from '../state.js';
 import { getLastCtx } from '../preview-form.js';
 import { Modal } from '../ui/modals/modal-base.js';
 import { Section } from '../ui/modals/section.js';
@@ -14,7 +14,7 @@ import '../fhir/formats/r5.js';
 import '../fhir/formats/redcap.js';
 
 // ── Single panel instance ─────────────────────────────────────────────────────
-const panel = new BuilderPanel({ questDoc, values });
+const panel = new BuilderPanel({ questDoc, answerStore });
 
 // ── Inject services into node / modal / section layers ────────────────────────
 // Nodes must not import application state or services directly.
@@ -28,10 +28,7 @@ Modal.configure({
   getFhirTarget: () => questDoc.fhirTarget,
   getLastCtx,
   questDoc,
-  values,
-  getValue,
-  setValue,
-  deleteValue,
+  answerStore,
 });
 
 Section.configure({ getFhirTarget: () => questDoc.fhirTarget });

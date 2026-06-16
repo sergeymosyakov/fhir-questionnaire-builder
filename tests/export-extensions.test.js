@@ -18,7 +18,7 @@ const _questDoc = { tree: _tree, meta: _questMeta, rawFhir: null, variables: _qu
 
 vi.mock('../js/state.js', () => ({
   questDoc:        _questDoc,
-  values:          {},
+  answerStore:     { data: {}, get: () => undefined, getAll: () => [] },
   calcFormOk:      () => true,
   isMandatory:     () => false,
   CHECKABLE_TYPES: new Set(),

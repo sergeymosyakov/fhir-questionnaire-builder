@@ -2,11 +2,11 @@
 // Centered modal for editing item type, options, and answerValueSet.
 import { MODAL_REGISTRY } from '../modal-registry.js';
 import { Modal } from '../modal-base.js';
+import { AppEvents } from '../../../events.js';
 import { createItemNode } from '../../../nodes/index.js';
 import { createCustomSelect } from '../../custom-select.js';
 import { ITEM_TYPES } from './data.js';
 import { ANSWER_TYPE_SECTIONS } from './index.js';
-import { AppEvents } from '../../../events.js';
 
 // Replace a node in the tree array (recursive, in-place splice).
 function _replaceInTree(treeArr, nodeId, newNode) {
@@ -42,10 +42,10 @@ class AnswerTypeModal extends Modal {
 
     if (node.itemType !== this._pending.draftType) {
       const id = node.id;
-      Modal._svc.deleteValue(id);
-      const n = Modal._svc.values[id + '$$n'] || 0;
-      for (let i = 1; i <= n; i++) Modal._svc.deleteValue(id + '$$' + i);
-      delete Modal._svc.values[id + '$$n'];
+      document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id } }));
+      const n = Modal._svc.answerStore.data[id + '$$n'] || 0;
+      for (let i = 1; i <= n; i++) document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$' + i } }));
+      document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$n' } }));
     }
 
     const newNode = createItemNode(this._pending.draftType, { id: node.id });

@@ -7,13 +7,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 globalThis.CustomEvent = class CustomEvent {
   constructor(type, init) { this.type = type; this.detail = init?.detail; }
 };
-globalThis.document = { dispatchEvent: vi.fn(), addEventListener: vi.fn() };
+// Wire event dispatch so ANSWER_SET/DELETE/CLEAR mutate _values directly
+const _eventListeners = {};
+globalThis.document = {
+  dispatchEvent(e) { (_eventListeners[e.type] || []).forEach(fn => fn(e)); },
+  addEventListener(type, fn) { (_eventListeners[type] = _eventListeners[type] || []).push(fn); },
+};
+// Pre-wire answer store events so applyInitialValues populates _values
+const _values = {};
+(_eventListeners['answer:set']    = []).push(e => { _values[e.detail.id] = e.detail.value; });
+(_eventListeners['answer:delete'] = []).push(e => { delete _values[e.detail.id]; });
+(_eventListeners['answer:clear']  = []).push(() => { Object.keys(_values).forEach(k => delete _values[k]); });
 
 // Exposed so importFHIR tests can inspect state after import.
 const _tree           = [];
 const _questVariables = [];
 const _questContained = [];
-const _values         = {};
 const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
   effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [], _signatureRequired: [], _implicitRules: '',
@@ -21,17 +30,19 @@ const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draf
 const _questDoc = { tree: _tree, meta: _questMeta, rawFhir: null, variables: _questVariables, contained: _questContained };
 
 vi.mock('../js/state.js', () => ({
-  questDoc:       _questDoc,
-  values:         _values,
+  questDoc:   _questDoc,
+  answerStore: {
+    data: _values,
+    get:  id => _values[id],
+    getAll: id => { const r = []; if (_values[id] !== undefined) r.push(_values[id]); return r; },
+  },
   resetSeq:       vi.fn(),
-  setValue:       (id, val) => { _values[id] = val; },
-  clearAllValues: () => { Object.keys(_values).forEach(k => delete _values[k]); },
 }));
 
 vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
 const { fhirTypeToItemType, fhirOptsToStr, hasNonCodingOpts, humanEnableWhen, applyVisibility, importFHIR, configure: configureImport } = await import('../js/fhir/import.js');
-configureImport({ questDoc: _questDoc, resetSeq: vi.fn(), setValue: (id, val) => { _values[id] = val; }, clearAllValues: () => { Object.keys(_values).forEach(k => delete _values[k]); }, renderTree: vi.fn() });
+configureImport({ questDoc: _questDoc, resetSeq: vi.fn(), renderTree: vi.fn() });
 
 vi.stubGlobal('alert', vi.fn());
 

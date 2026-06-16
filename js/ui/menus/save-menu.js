@@ -18,19 +18,19 @@ export class SaveMenu extends DropdownMenu {
     });
 
     this._fileNameDisplay = null;
-    this._tree   = null;
-    this._values = null;
+    this._tree        = null;
+    this._answerStore = null;
 
     this._bindTreeVisibility();
     this._buildMenu();
     this._bindHandlers();
   }
 
-  /** @param {{ fileNameDisplay, tree, values }} deps */
-  configure({ fileNameDisplay, tree, values }) {
+  /** @param {{ fileNameDisplay, tree, answerStore }} deps */
+  configure({ fileNameDisplay, tree, answerStore }) {
     this._fileNameDisplay = fileNameDisplay;
-    this._tree   = tree;
-    this._values = values;
+    this._tree        = tree;
+    this._answerStore = answerStore;
   }
 
   get cloudSaveBtn() { return this._cloudSaveBtn; }
@@ -41,7 +41,7 @@ export class SaveMenu extends DropdownMenu {
     saveFormatModal.open({
       fileNameDisplay: this._fileNameDisplay,
       tree:   this._tree,
-      values: this._values,
+      values: this._answerStore.data,
     });
   }
 
@@ -76,7 +76,7 @@ export class SaveMenu extends DropdownMenu {
       saveFormatModal.open({
         fileNameDisplay: this._fileNameDisplay,
         tree:   this._tree,
-        values: this._values,
+        values: this._answerStore.data,
       });
     });
 

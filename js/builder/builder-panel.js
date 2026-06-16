@@ -16,11 +16,11 @@ import { ConfirmDialog } from '../ui/confirm-dialog.js';
 const fhirpath = typeof window !== 'undefined' ? window.fhirpath : null;
 
 export class BuilderPanel {
-  constructor({ questDoc, values }) {
-    this._questDoc = questDoc;
-    this._tree     = questDoc.tree;   // alias — same array reference
-    this._values   = values;
-    this._container = null;
+  constructor({ questDoc, answerStore }) {
+    this._questDoc    = questDoc;
+    this._tree        = questDoc.tree;
+    this._answerStore = answerStore;
+    this._container   = null;
 
     this._subscribeEvents();
     dndInit(() => this.renderTree(), questDoc.tree);
@@ -101,8 +101,8 @@ export class BuilderPanel {
   _doCalcRecalc() {
     if (this._questDoc.rawFhir && fhirpath) {
       const base = JSON.parse(JSON.stringify(this._questDoc.rawFhir));
-      const qr = buildQR(base, this._values);
-      evalCalcNodes(this._tree, qr, fhirpath, this._values, {}, base);
+      const qr = buildQR(base, this._answerStore.data);
+      evalCalcNodes(this._tree, qr, fhirpath, this._answerStore.data, {}, base);
     }
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
   }

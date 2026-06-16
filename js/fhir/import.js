@@ -5,7 +5,7 @@ import { normaliseSTU3 } from './stu3-shim.js';
 import { destroyTree } from '../utils.js';
 
 let _svc = {};
-/** @param {{ questDoc: import('./quest-document.js').QuestDocument, resetSeq, setValue, clearAllValues, renderTree }} svc */
+/** @param {{ questDoc: import('./quest-document.js').QuestDocument, resetSeq, renderTree }} svc */
 export function configure(svc) { _svc = svc; }
 import {
   buildLinkIdMap,
@@ -29,18 +29,17 @@ export {
   resolveContainedValueSet,
 };
 
-// Walk the tree and pre-populate values[] from node._initialValue / _initialValues
+// Walk the tree and pre-populate answers from node._initialValue / _initialValues
 function applyInitialValues(nodes) {
-  const { setValue } = _svc;
   for (const node of nodes) {
     if (node.repeats && node._initialValues && node._initialValues.length > 1) {
-      setValue(node.id, node._initialValues[0]);
+      document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: node.id, value: node._initialValues[0] } }));
       for (let i = 1; i < node._initialValues.length; i++) {
-        setValue(node.id + '$$' + i, node._initialValues[i]);
+        document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: node.id + '$$' + i, value: node._initialValues[i] } }));
       }
-      setValue(node.id + '$$n', node._initialValues.length - 1);
+      document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: node.id + '$$n', value: node._initialValues.length - 1 } }));
     } else if (node._initialValue !== undefined) {
-      setValue(node.id, node._initialValue);
+      document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: node.id, value: node._initialValue } }));
     }
     if (node.type === 'group') applyInitialValues(node.children);
   }
@@ -48,7 +47,7 @@ function applyInitialValues(nodes) {
 
 // Main import entry point
 export function importFHIR(fhirJson, renderFn) {
-  const { questDoc, resetSeq, clearAllValues, renderTree } = _svc;
+  const { questDoc, resetSeq, renderTree } = _svc;
   const { tree, meta: questMeta, variables: questVariables, contained: questContained } = questDoc;
   let q = fhirJson;
   if (typeof q === 'string') {
@@ -60,7 +59,7 @@ export function importFHIR(fhirJson, renderFn) {
   }
   q = normaliseSTU3(q); // no-op for R4; converts STU3 fields to R4 equivalents
   destroyTree(tree);
-  clearAllValues();
+  document.dispatchEvent(new CustomEvent(AppEvents.ANSWERS_CLEAR));
   questDoc.rawFhir = q;
   resetSeq();
 

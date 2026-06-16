@@ -12,9 +12,9 @@ export function configure(svc) { _svc = svc; }
  * @param {{ status?, subject?, author?, id?, language?, metaVersionId?, metaSource?, metaProfile?, metaTag?, metaSecurity? }} [meta]
  */
 export function exportQR(fileName, meta) {
-  const { values } = _svc;
+  const { answerStore } = _svc;
   const fhirQ = buildFHIRObject();
-  const qr    = buildQR(fhirQ, values);
+  const qr    = buildQR(fhirQ, answerStore.data);
   qr.status   = (meta && meta.status)  || 'in-progress';
   if (meta && meta.id)      qr.id       = meta.id;
   if (meta && meta.language) qr.language = meta.language;
