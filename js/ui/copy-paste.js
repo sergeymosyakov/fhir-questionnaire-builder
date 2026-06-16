@@ -15,8 +15,7 @@ const STRUCTURAL_RE = /\.descendants\(\)|\.item\.where\s*\(\s*type\s*=|\.count\(
 export class CopyPaste {
   /** Services injected at app startup. */
   static _svc = {
-    tree:           null,  // tree array (state.js)
-    questContained: null,  // contained[] (state.js)
+    questDoc: null,  // QuestDocument singleton
   };
 
   static configure(services) {
@@ -40,7 +39,7 @@ export class CopyPaste {
 
   /** Serialise node to FHIR JSON and store in clipboard. */
   copy(nodeId) {
-    const node = this._findNode(nodeId, CopyPaste._svc.tree);
+    const node = this._findNode(nodeId, CopyPaste._svc.questDoc.tree);
     if (!node) return;
     const fhirItem = nodeToFHIRItem(node);
     this._clip = JSON.stringify(fhirItem);
@@ -66,13 +65,13 @@ export class CopyPaste {
     try { fhirItem = JSON.parse(this._clip); } catch { return; }
 
     const { remapped, idMap } = this._remapLinkIds(fhirItem);
-    const node = fhirItemToNode(remapped, new Map(), CopyPaste._svc.questContained || []);
+    const node = fhirItemToNode(remapped, new Map(), CopyPaste._svc.questDoc.contained || []);
     if (position === 'before') this._insertBefore(node, anchorId);
     else                       this._insertAfter(node, anchorId);
 
     // Analyse for potential expression issues
     const externalRefs   = this._collectExternalRefs(fhirItem, idMap);
-    const structuralHits = this._detectStructural(CopyPaste._svc.tree);
+    const structuralHits = this._detectStructural(CopyPaste._svc.questDoc.tree);
 
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
@@ -99,8 +98,8 @@ export class CopyPaste {
   }
 
   _insertBefore(node, beforeId) {
-    if (!this._insertBeforeIn(node, beforeId, CopyPaste._svc.tree)) {
-      CopyPaste._svc.tree.unshift(node);
+    if (!this._insertBeforeIn(node, beforeId, CopyPaste._svc.questDoc.tree)) {
+      CopyPaste._svc.questDoc.tree.unshift(node);
     }
   }
 
@@ -118,8 +117,8 @@ export class CopyPaste {
   }
 
   _insertAfter(node, afterId) {
-    if (!this._insertAfterIn(node, afterId, CopyPaste._svc.tree)) {
-      CopyPaste._svc.tree.push(node);
+    if (!this._insertAfterIn(node, afterId, CopyPaste._svc.questDoc.tree)) {
+      CopyPaste._svc.questDoc.tree.push(node);
     }
   }
 
@@ -162,7 +161,7 @@ export class CopyPaste {
   }
 
   _uniqueId(base, usedInBatch) {
-    const existing = new Set(this._allLinkIds(CopyPaste._svc.tree));
+    const existing = new Set(this._allLinkIds(CopyPaste._svc.questDoc.tree));
     if (usedInBatch) for (const id of usedInBatch) existing.add(id);
     let id = base;
     let n = 2;

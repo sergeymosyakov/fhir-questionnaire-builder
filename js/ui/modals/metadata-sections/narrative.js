@@ -4,7 +4,7 @@ import { Modal } from '../modal-base.js';
 
 class NarrativeSection extends Section {
   build(_pending) {
-    const questMeta = Modal._svc.questMeta;
+    const questMeta = Modal._svc.questDoc.meta;
     const frag = document.createDocumentFragment();
 
     const narrativeRow = document.createElement('div');

@@ -7,11 +7,11 @@ import * as validateModal from '../ui/modals/validate-modal.js';
 import { AppEvents } from '../events.js';
 
 export class QRAnswersManager {
-  /** @param {{ values, tree, rawFhir, shouldValidate? }} deps — state references */
-  constructor({ values, tree, rawFhir, shouldValidate }) {
+  /** @param {{ values, tree, questDoc, shouldValidate? }} deps — state references */
+  constructor({ values, tree, questDoc, shouldValidate }) {
     this._values          = values;
     this._tree            = tree;
-    this._rawFhir         = rawFhir;
+    this._questDoc        = questDoc;
     this._shouldValidate  = shouldValidate || (() => true);
   }
 
@@ -32,7 +32,7 @@ export class QRAnswersManager {
       metaSecurity:  result.meta.metaSecurity,
     } }));
 
-    const raw = this._rawFhir.value;
+    const raw = this._questDoc?.rawFhir;
     const currentUrl = (raw && (raw.url || raw.id)) || '';
     const issues = [];
 

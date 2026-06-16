@@ -7,6 +7,7 @@ import './formats/r5.js';
 import './formats/redcap.js';
 
 let _svc = {};
+/** @param {{ questDoc: import('./quest-document.js').QuestDocument }} svc */
 export function configure(svc) { _svc = svc; }
 import { downloadJSON } from './download.js';
 
@@ -462,7 +463,8 @@ export function nodeToFHIRItem(node) {
 }
 
 export function buildFHIRObject() {
-  const { tree, questMeta, rawFhir, questVariables, questContained } = _svc;
+  const { questDoc } = _svc;
+  const { tree, meta: questMeta, rawFhir, variables: questVariables, contained: questContained } = questDoc;
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
   const q = {
     resourceType: 'Questionnaire',
@@ -472,7 +474,7 @@ export function buildFHIRObject() {
   };
   if (questMeta.url)         q.url         = questMeta.url;
   if (questMeta.version)     q.version     = questMeta.version;
-  q.title = questMeta.title || (rawFhir.value && rawFhir.value.title) || 'Untitled Questionnaire';
+  q.title = questMeta.title || (rawFhir && rawFhir.title) || 'Untitled Questionnaire';
   if (questMeta.name)        q.name        = questMeta.name;
   if (questMeta.publisher)   q.publisher   = questMeta.publisher;
   if (questMeta.description) q.description = questMeta.description;

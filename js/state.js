@@ -1,8 +1,12 @@
 // ── State, factories, and pure utilities ───────────────────────────────────────────
 
-// ── State ────────────────────────────────────────────────────────────────────────────
-export const tree = [];
+// ── Document state ────────────────────────────────────────────────────────────
+// The currently loaded FHIR Questionnaire document — tree, rawFhir, metadata,
+// contained resources, and SDC variables — lives in QuestDocument.
+// Import questDoc wherever document state is needed.
+export { questDoc } from './fhir/quest-document.js';
 
+// ── Answer store ──────────────────────────────────────────────────────────────
 // Plain (non-reactive) store for current form values in preview.
 // Not reactive on purpose — answer values never trigger re-renders.
 // Do not access this directly — use getValue / setValue / deleteValue / clearAllValues.
@@ -35,97 +39,14 @@ export function getAllValues(id) {
   return result;
 }
 
-// FHIRPath: original FHIR Questionnaire JSON after import; null if not loaded.
-export const rawFhir = { value: null };
-
-// Questionnaire-level SDC variables: [{name, expression}]
-// Populated from sdc-questionnaire-variable extensions on import.
-// Also used to store patient context variables (%age, %gender, %bmi, ...).
-export const questVariables = [];
-
-// Questionnaire-level metadata — preserved across import/export and editable via Properties modal.
-export const questMeta = {
-  // Core (always visible in Properties modal)
-  id:            '',
-  url:           '',
-  version:       '',
-  title:         '',
-  status:        'draft',
-  publisher:     '',
-  description:   '',
-  name:          '',
-  // Advanced (collapsible section in Properties modal)
-  date:          '',          // Questionnaire.date — last changed; exported as-is (today if blank)
-  subjectType:   [],           // Questionnaire.subjectType — array of resource type codes; empty = unrestricted
-  purpose:       '',
-  copyright:     '',
-  approvalDate:  '',
-  lastReviewDate: '',
-  effectivePeriodStart: '',   // Questionnaire.effectivePeriod.start
-  effectivePeriodEnd:   '',   // Questionnaire.effectivePeriod.end
-  experimental:    null,       // null = not set, true/false = Questionnaire.experimental
-  language:        '',          // BCP-47 language code, e.g. 'en', 'en-US'
-  derivedFrom:     [],          // canonical[] — parent questionnaire URLs
-  replaces:        [],          // canonical[] — questionnaires superseded by this one (extension: replaces)
-  // Business identifiers — editable via Properties modal
-  _rawIdentifier:   [],        // Questionnaire.identifier[] — array of { use?, system?, value? }
-  // Questionnaire root fields — varying edit support (see individual comments)
-  _rawText:         null,      // Questionnaire.text — FHIR Narrative { status, div } — shown read-only in Properties modal
-  _rawContact:      null,      // Questionnaire.contact[] — editable via Contact section in Properties modal
-  _rawUseContext:   null,      // Questionnaire.useContext[] — pass-through only; too complex for a generic editor
-  _rawJurisdiction: null,      // Questionnaire.jurisdiction[] — editable via Jurisdiction section in Properties modal; full CodeableConcept[] preserved; only coding[0] shown per entry
-  _rawCode:         null,      // Questionnaire.code[] root-level coding — editable via Codes section in Properties modal
-  // meta.* — partially editable via Properties modal "Resource Meta" section
-  _metaVersionId:   '',       // meta.versionId — editable text + Generate button
-  _metaSource:      '',       // meta.source — URI; editable text input
-  _metaLastUpdated: '',       // meta.lastUpdated — display only; always refreshed to now on export
-  _rawMetaProfile:  [],       // meta.profile[] — canonical URLs; editable list
-  _rawMetaTag:      [],       // meta.tag[] — Coding[]; editable system/code/display rows
-  _rawMetaSecurity: [],       // meta.security[] — Coding[]; editable system/code/display rows
-  _rawQuestExtensions: [],    // Questionnaire.extension[] — non-variable extensions, preserved for round-trip
-  preferredTermServer: '',    // Questionnaire.extension[sdc-questionnaire-preferredTerminologyServer].valueUrl
-  _signatureRequired: [],     // questionnaire-signatureRequired — array of {system, code, display}
-  _implicitRules:     '',     // Questionnaire.implicitRules — URI; editable in Properties modal
-  // Target FHIR version — drives UI gates and export meta.fhirVersion
-  fhirTarget: 'R4',
-};
-
-// Questionnaire.contained[] — raw FHIR resource objects, preserved for round-trip.
-export const questContained = [];
-
-/** Reset all questMeta fields to their initial empty state. */
-export function resetQuestMeta() {
-  questMeta.id = ''; questMeta.url = ''; questMeta.version = '';
-  questMeta.title = ''; questMeta.status = 'draft';
-  questMeta.publisher = ''; questMeta.description = ''; questMeta.name = '';
-  questMeta.date = ''; questMeta.subjectType = [];
-  questMeta.purpose = ''; questMeta.copyright = '';
-  questMeta.approvalDate = ''; questMeta.lastReviewDate = '';
-  questMeta.effectivePeriodStart = ''; questMeta.effectivePeriodEnd = '';
-  questMeta.experimental = null; questMeta.language = ''; questMeta.derivedFrom = [];
-  questMeta.replaces = [];
-  questMeta._rawIdentifier = [];
-  questMeta._rawText = null;
-  questMeta._rawContact = null; questMeta._rawUseContext = null; questMeta._rawJurisdiction = null;
-  questMeta._rawCode = null;
-  questMeta._metaVersionId = ''; questMeta._metaSource = '';
-  questMeta._metaLastUpdated = ''; questMeta._rawMetaProfile = [];
-  questMeta._rawMetaTag = []; questMeta._rawMetaSecurity = [];
-  questMeta._rawQuestExtensions = [];
-  questMeta.preferredTermServer = '';
-  questMeta._signatureRequired = [];
-  questMeta._implicitRules = '';
-  questMeta.fhirTarget = 'R4';
-}
+// ── ID factory ────────────────────────────────────────────────────────────────
+export { resetSeq } from './id.js';
 
 // Item types that have form-value validation logic in the preview.
 // CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
 // NONEMPTY_TYPES: mandatory → value must be non-empty (subset, excludes url/attachment).
 export const CHECKABLE_TYPES = new Set(['checkbox', 'text', 'number', 'date', 'dateTime', 'time', 'url', 'attachment', 'open-choice', 'decimal', 'integer', 'quantity', 'reference', 'radio', 'select', 'checklist']);
 export const NONEMPTY_TYPES  = new Set(['text', 'number', 'date', 'dateTime', 'time', 'open-choice', 'decimal', 'integer', 'radio', 'select', 'checklist']);
-
-// ── ID factory ────────────────────────────────────────────────────────────────
-export { resetSeq } from './id.js';
 
 
 // Helper: follows FHIR spec — required defaults to false; only true when explicitly set

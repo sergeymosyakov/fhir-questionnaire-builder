@@ -5,6 +5,7 @@ import { normaliseSTU3 } from './stu3-shim.js';
 import { destroyTree } from '../utils.js';
 
 let _svc = {};
+/** @param {{ questDoc: import('./quest-document.js').QuestDocument, resetSeq, setValue, clearAllValues, renderTree }} svc */
 export function configure(svc) { _svc = svc; }
 import {
   buildLinkIdMap,
@@ -47,7 +48,8 @@ function applyInitialValues(nodes) {
 
 // Main import entry point
 export function importFHIR(fhirJson, renderFn) {
-  const { tree, resetSeq, rawFhir, questVariables, questContained, questMeta, clearAllValues, renderTree } = _svc;
+  const { questDoc, resetSeq, clearAllValues, renderTree } = _svc;
+  const { tree, meta: questMeta, variables: questVariables, contained: questContained } = questDoc;
   let q = fhirJson;
   if (typeof q === 'string') {
     try { q = JSON.parse(q); } catch (e) { showError('Invalid JSON:\n' + e.message); return; }
@@ -59,7 +61,7 @@ export function importFHIR(fhirJson, renderFn) {
   q = normaliseSTU3(q); // no-op for R4; converts STU3 fields to R4 equivalents
   destroyTree(tree);
   clearAllValues();
-  rawFhir.value = q;
+  questDoc.rawFhir = q;
   resetSeq();
 
   // Populate questionnaire-level metadata

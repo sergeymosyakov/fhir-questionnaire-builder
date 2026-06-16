@@ -2,7 +2,7 @@
 import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
-import { tree, values, rawFhir, questVariables, questContained, questMeta, getValue, setValue, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES, clearAllValues, resetQuestMeta, resetSeq } from './state.js';
+import { questDoc, values, getValue, setValue, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES, clearAllValues, resetSeq } from './state.js';
 import { buildFHIRObject, buildFHIRObjectVersioned, configure as configureExport } from './fhir/export.js';
 import { configure as configureImport } from './fhir/import.js';
 import { configure as configureQrExport } from './fhir/qr-export.js';
@@ -40,34 +40,31 @@ import { CopyPaste } from './ui/copy-paste.js';
 storage.register(new SupabaseAdapter(supabase));
 
 // ── Inject state into UI panels ────────────────────────────────────────
-containedPanel.configure({ questContained });
-answerValueSetPanel.configure({ tree });
-variablesPanel.configure({ questVariables, mountEl: document.getElementById('variablesCardMount') });
-patientCtx.configure({ tree, questVariables });
+containedPanel.configure({ questContained: questDoc.contained });
+answerValueSetPanel.configure({ tree: questDoc.tree });
+variablesPanel.configure({ questVariables: questDoc.variables, mountEl: document.getElementById('variablesCardMount') });
+patientCtx.configure({ tree: questDoc.tree, questVariables: questDoc.variables });
 patientCtx.mount(document.getElementById('patientPresetWrap'));
-AuthPanel.configure({ tree });
+AuthPanel.configure({ tree: questDoc.tree });
 
 // ── Inject state into FHIR modules ─────────────────────────────────────
-configureExport({ tree, questMeta, rawFhir, questVariables, questContained });
-configureImport({ tree, resetSeq, rawFhir, questVariables, questContained, questMeta, setValue, clearAllValues, renderTree });
+configureExport({ questDoc });
+configureImport({ questDoc, resetSeq, setValue, clearAllValues, renderTree });
 configureQrExport({ values });
 configureObsExport({ values });
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
-export const qrAnswers   = new QRAnswersManager({ values, tree, rawFhir, shouldValidate: () => prefs.get('validate') });
-export const questLoader = new QuestionnaireLoader({ tree, values, questMeta, rawFhir,
+export const qrAnswers   = new QRAnswersManager({ values, tree: questDoc.tree, questDoc, shouldValidate: () => prefs.get('validate') });
+export const questLoader = new QuestionnaireLoader({ questDoc, values,
   reinitForm:       (opts) => previewForm.reinitForm(opts),
   shouldValidate:   () => prefs.get('validate'),
   renderTree,
   renderTreeAsync,
   clearAllValues,
-  resetQuestMeta,
-  questVariables,
-  questContained,
 });
 
 export const previewForm = new PreviewForm({
-  tree, values, getValue, setValue, rawFhir, questVariables,
+  tree: questDoc.tree, values, getValue, setValue, rawFhir: questDoc, questVariables: questDoc.variables,
   calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES,
 });
 
@@ -113,7 +110,7 @@ mountBuilder({
 // Mount FHIR version selector
 new FhirVersionSelect(
   document.getElementById('fhirVersionSelectMount'),
-  () => questMeta.fhirTarget,
+  () => questDoc.fhirTarget,
 ).mount();
 
 new RenumberControl(
@@ -170,7 +167,7 @@ previewForm.mount({
 });
 
 // ── Save/Export menu ──────────────────────────────────────────────────────────
-saveMenu.configure({ fileNameDisplay, tree, values });
+saveMenu.configure({ fileNameDisplay, tree: questDoc.tree, values });
 
 // ── Settings menu handlers ────────────────────────────────────────────────────
 // Tips and Autosave initial states resolve asynchronously from storage —
@@ -180,7 +177,7 @@ Promise.all([
   import('./ui/autosave.js').then(async as => {
     await as.init({
       buildFn:   buildFHIRObject,
-      questMeta: questMeta,
+      questMeta: questDoc.meta,
       onSaved:   date => {
         const label = date
           ? 'Autosave \u00b7 ' + String(date.getHours()).padStart(2, '0') + ':' + String(date.getMinutes()).padStart(2, '0')
@@ -201,7 +198,7 @@ Promise.all([
     },
     onAutosaveToggle: (enabled) => as.setEnabled(enabled),
     onValidate: () => {
-      validateModal.show('Validate \u2014 Report', 'validate', { questJson: buildFHIRObjectVersioned(questMeta.fhirTarget), tree, values });
+      validateModal.show('Validate — Report', 'validate', { questJson: buildFHIRObjectVersioned(questDoc.fhirTarget), tree: questDoc.tree, values });
     },
     onExpand:   () => previewForm.expandAll(),
     onCollapse: () => previewForm.collapseAll(),
@@ -210,7 +207,7 @@ Promise.all([
 
 // ── Metadata card (status + experimental badge) ──────────────────────────────
 new MetadataCard({
-  questMeta,
+  questMeta: questDoc.meta,
   mountEl: document.getElementById('questMetaCardMount'),
   onEdit: () => metadataModal.open(),
 });
@@ -221,7 +218,7 @@ questLoader.configureResetFlow({
   confirmOpen:        () => clearConfirmModal.open(),
   promptExport:       (onDone) => saveMenu.promptExport(onDone),
   showValidateExport: (onExport) => {
-    validateModal.show('Export — Validation Report', 'export', { questJson: buildFHIRObjectVersioned(questMeta.fhirTarget), tree, values, onExport });
+    validateModal.show('Export — Validation Report', 'export', { questJson: buildFHIRObjectVersioned(questDoc.fhirTarget), tree: questDoc.tree, values, onExport });
   },
   clearDraft: () => import('./ui/autosave.js').then(m => m.clearDraft()),
 });
@@ -245,7 +242,7 @@ new UndoRedo(
 
 // ── Copy / Paste ──────────────────────────────────────────────────────────────
 // Instantiated after builder/index.js so BaseNode event listeners are active.
-CopyPaste.configure({ tree, questContained });
+CopyPaste.configure({ questDoc });
 new CopyPaste();
 
 // Initialise validators from config.json (async — runs in background)
@@ -253,5 +250,5 @@ new CopyPaste();
 initValidators({
   localEnabled: prefs.get('validate'),
   externalEnabled: prefs.get('validateExternal'),
-  getFhirTarget: () => questMeta.fhirTarget,
+  getFhirTarget: () => questDoc.fhirTarget,
 });

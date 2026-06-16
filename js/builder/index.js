@@ -1,7 +1,7 @@
 // ── Builder tree entry point ──────────────────────────────────────────────────
 // Thin facade: creates a BuilderPanel instance, runs DI configure calls, and
 // re-exports panel methods for backward compatibility.
-import { tree, rawFhir, values, questMeta, questContained, getValue, setValue, deleteValue } from '../state.js';
+import { questDoc, values, getValue, setValue, deleteValue } from '../state.js';
 import { getLastCtx } from '../preview-form.js';
 import { Modal } from '../ui/modals/modal-base.js';
 import { Section } from '../ui/modals/section.js';
@@ -14,7 +14,7 @@ import '../fhir/formats/r5.js';
 import '../fhir/formats/redcap.js';
 
 // ── Single panel instance ─────────────────────────────────────────────────────
-const panel = new BuilderPanel({ tree, rawFhir, values, questMeta });
+const panel = new BuilderPanel({ questDoc, values });
 
 // ── Inject services into node / modal / section layers ────────────────────────
 // Nodes must not import application state or services directly.
@@ -25,18 +25,16 @@ const panel = new BuilderPanel({ tree, rawFhir, values, questMeta });
 // leftPanelBody → document.querySelector('.left-panel-body') (stable DOM).
 
 Modal.configure({
-  getFhirTarget: () => questMeta.fhirTarget,
+  getFhirTarget: () => questDoc.fhirTarget,
   getLastCtx,
-  questMeta,
-  tree,
+  questDoc,
   values,
   getValue,
   setValue,
   deleteValue,
-  questContained,
 });
 
-Section.configure({ getFhirTarget: () => questMeta.fhirTarget });
+Section.configure({ getFhirTarget: () => questDoc.fhirTarget });
 
 // ── Re-exports for backward compatibility ─────────────────────────────────────
 export function mount(opts)                  { panel.mount(opts); }

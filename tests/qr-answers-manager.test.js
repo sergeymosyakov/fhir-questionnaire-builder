@@ -23,7 +23,7 @@ function makeManager(overrides = {}) {
   const defaults = {
     values:   {},
     tree:     [],
-    rawFhir:  { value: null },
+    questDoc: { rawFhir: null },
   };
   return new QRAnswersManager({ ...defaults, ...overrides });
 }
@@ -110,8 +110,8 @@ describe('QRAnswersManager.apply — questionnaire mismatch', () => {
       ...SUCCESS,
       questionnaire: 'http://example.com/qs/other',
     });
-    const rawFhir = { value: { url: 'http://example.com/qs/current' } };
-    makeManager({ rawFhir }).apply({});
+    const questDoc = { rawFhir: { url: 'http://example.com/qs/current' } };
+    makeManager({ questDoc }).apply({});
     expect(validateModal.show).toHaveBeenCalledTimes(1);
     const [, , { extraIssues: issues }] = validateModal.show.mock.calls[0];
     expect(issues[0].severity).toBe('warning');
@@ -124,15 +124,15 @@ describe('QRAnswersManager.apply — questionnaire mismatch', () => {
       ...SUCCESS,
       questionnaire: 'http://example.com/qs/same',
     });
-    const rawFhir = { value: { url: 'http://example.com/qs/same' } };
-    makeManager({ rawFhir }).apply({});
+    const questDoc = { rawFhir: { url: 'http://example.com/qs/same' } };
+    makeManager({ questDoc }).apply({});
     expect(validateModal.show).not.toHaveBeenCalled();
   });
 
   it('does not warn when QR has no questionnaire field', () => {
     importQRAnswers.mockReturnValue({ ...SUCCESS, questionnaire: '' });
-    const rawFhir = { value: { url: 'http://example.com/qs/current' } };
-    makeManager({ rawFhir }).apply({});
+    const questDoc = { rawFhir: { url: 'http://example.com/qs/current' } };
+    makeManager({ questDoc }).apply({});
     expect(validateModal.show).not.toHaveBeenCalled();
   });
 });
@@ -190,8 +190,8 @@ describe('QRAnswersManager.apply — multiple issues', () => {
       questionnaire: 'http://other',
       unmatched: ['q1'],
     });
-    const rawFhir = { value: { url: 'http://current' } };
-    makeManager({ rawFhir }).apply({});
+    const questDoc = { rawFhir: { url: 'http://current' } };
+    makeManager({ questDoc }).apply({});
     const [, , { extraIssues: issues }] = validateModal.show.mock.calls[0];
     expect(issues).toHaveLength(2);
   });

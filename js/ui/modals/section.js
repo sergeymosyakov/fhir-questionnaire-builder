@@ -27,7 +27,7 @@ export class Section {
    */
   isVersionVisible() {
     if (!this.fhirVersions) return true;
-    const target = Section._svc.getFhirTarget?.() ?? 'R4';
+    const target = Section._svc.questDoc?.fhirTarget ?? Section._svc.getFhirTarget?.() ?? 'R4';
     return this.fhirVersions.includes(target);
   }
 

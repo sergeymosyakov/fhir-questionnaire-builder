@@ -16,15 +16,14 @@ import { ConfirmDialog } from '../ui/confirm-dialog.js';
 const fhirpath = typeof window !== 'undefined' ? window.fhirpath : null;
 
 export class BuilderPanel {
-  constructor({ tree, rawFhir, values, questMeta }) {
-    this._tree = tree;
-    this._rawFhir = rawFhir;
-    this._values = values;
-    this._questMeta = questMeta;
+  constructor({ questDoc, values }) {
+    this._questDoc = questDoc;
+    this._tree     = questDoc.tree;   // alias — same array reference
+    this._values   = values;
     this._container = null;
 
     this._subscribeEvents();
-    dndInit(() => this.renderTree(), tree);
+    dndInit(() => this.renderTree(), questDoc.tree);
   }
 
   // ── Public API ──────────────────────────────────────────────────────────────
@@ -100,8 +99,8 @@ export class BuilderPanel {
   }
 
   _doCalcRecalc() {
-    if (this._rawFhir.value && fhirpath) {
-      const base = JSON.parse(JSON.stringify(this._rawFhir.value));
+    if (this._questDoc.rawFhir && fhirpath) {
+      const base = JSON.parse(JSON.stringify(this._questDoc.rawFhir));
       const qr = buildQR(base, this._values);
       evalCalcNodes(this._tree, qr, fhirpath, this._values, {}, base);
     }
@@ -153,14 +152,14 @@ export class BuilderPanel {
     });
     document.addEventListener(AppEvents.FHIR_VERSION_CHANGED, e => {
       const { versionId, fromVersionId, source } = e.detail ?? {};
-      if (versionId && this._questMeta.fhirTarget !== versionId) {
+      if (versionId && this._questDoc.meta.fhirTarget !== versionId) {
         if (source === 'user' && this._tree.length > 0) {
           versionCompatRegistry
-            .runAll(fromVersionId ?? this._questMeta.fhirTarget, versionId,
+            .runAll(fromVersionId ?? this._questDoc.meta.fhirTarget, versionId,
               this._tree)
             .then(msgs => { if (msgs.length > 0) showWarn(msgs.join('\n')); });
         }
-        this._questMeta.fhirTarget = versionId;
+        this._questDoc.meta.fhirTarget = versionId;
         document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
         document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
       }

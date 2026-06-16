@@ -96,7 +96,7 @@ class NodePickerModal extends Modal {
   }
 
   _renderTree(query) {
-    const filtered = _filterTree(Modal._svc.tree || [], query, this._excludeId, this._allowedType);
+    const filtered = _filterTree(Modal._svc.questDoc.tree || [], query, this._excludeId, this._allowedType);
     this._treeEl.innerHTML = '';
 
     if (!filtered.length) {

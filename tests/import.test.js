@@ -14,23 +14,16 @@ const _tree           = [];
 const _questVariables = [];
 const _questContained = [];
 const _values         = {};
-const _rawFhir        = { value: null };
 const _questMeta      = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
   effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [], _signatureRequired: [], _implicitRules: '',
   _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
+const _questDoc = { tree: _tree, meta: _questMeta, rawFhir: null, variables: _questVariables, contained: _questContained };
 
 vi.mock('../js/state.js', () => ({
-  ref:            v => ({ value: v }),
-  tree:           _tree,
+  questDoc:       _questDoc,
   values:         _values,
-  rawFhir:        _rawFhir,
-  questVariables: _questVariables,
-  questContained: { splice: () => { _questContained.splice(0); }, push: (v) => _questContained.push(v) },
-  questMeta:      _questMeta,
   resetSeq:       vi.fn(),
-  makeGroup:      vi.fn(title => ({ type: 'group', id: 'g', title, children: [], enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', mandatory: false, logicWithParent: 'AND' })),
-  makeItem:       vi.fn(title => ({ type: 'item',  id: 'i', title, itemType: 'text', options: '', mandatory: false, enableWhen: [], enableBehavior: 'all', enableWhenExpression: '', constraint: [] })),
   setValue:       (id, val) => { _values[id] = val; },
   clearAllValues: () => { Object.keys(_values).forEach(k => delete _values[k]); },
 }));
@@ -38,7 +31,7 @@ vi.mock('../js/state.js', () => ({
 vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
 const { fhirTypeToItemType, fhirOptsToStr, hasNonCodingOpts, humanEnableWhen, applyVisibility, importFHIR, configure: configureImport } = await import('../js/fhir/import.js');
-configureImport({ tree: _tree, resetSeq: vi.fn(), rawFhir: _rawFhir, questVariables: _questVariables, questContained: _questContained, questMeta: _questMeta, setValue: (id, val) => { _values[id] = val; }, clearAllValues: () => { Object.keys(_values).forEach(k => delete _values[k]); }, renderTree: vi.fn() });
+configureImport({ questDoc: _questDoc, resetSeq: vi.fn(), setValue: (id, val) => { _values[id] = val; }, clearAllValues: () => { Object.keys(_values).forEach(k => delete _values[k]); }, renderTree: vi.fn() });
 
 vi.stubGlobal('alert', vi.fn());
 
@@ -363,7 +356,7 @@ describe('importFHIR', () => {
     _questVariables.splice(0);
     _questContained.splice(0);
     Object.keys(_values).forEach(k => delete _values[k]);
-    _rawFhir.value = null;
+    _questDoc.rawFhir = null;
     Object.assign(_questMeta, { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
       name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
       effectivePeriodStart: '', effectivePeriodEnd: '',
@@ -443,7 +436,7 @@ describe('importFHIR', () => {
   it('sets rawFhir after import', () => {
     const q = minQ();
     importFHIR(q);
-    expect(_rawFhir.value).toBe(q);
+    expect(_questDoc.rawFhir).toBe(q);
   });
 
   it('clears tree before importing new questionnaire', () => {

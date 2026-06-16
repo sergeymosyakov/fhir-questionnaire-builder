@@ -33,9 +33,6 @@ vi.mock('../js/utils.js', () => ({
 }));
 vi.mock('../js/state.js', () => ({
   clearAllValues: vi.fn(),
-  resetQuestMeta: vi.fn(),
-  questVariables: [],
-  questContained: [],
 }));
 
 const { QuestionnaireLoader }    = await import('../js/fhir/questionnaire-loader.js');
@@ -48,22 +45,27 @@ const { renderTreeAsync, renderTree } = await import('../js/builder/index.js');
 const { GroupNode }              = await import('../js/nodes/group-node.js');
 const { terminologyService }     = await import('../js/fhir/terminology-service.js');
 const { loadConfirmModal }       = await import('../js/ui/modals/load-confirm-modal.js');
-const { destroyTree }            = await import('../js/utils.js');
-const state                      = await import('../js/state.js');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function makeLoader(overrides = {}) {
-  const defaults = {
-    tree:            [],
-    values:          {},
-    questMeta:       {},
-    reinitForm:      vi.fn(() => Promise.resolve()),
-    clearAllValues:  state.clearAllValues,
-    resetQuestMeta:  state.resetQuestMeta,
-    questVariables:  state.questVariables,
-    questContained:  state.questContained,
+  const tree = overrides.tree ?? [];
+  const questDoc = overrides.questDoc ?? {
+    tree,
+    meta: { fhirTarget: 'R4' },
+    rawFhir: null,
+    contained: [],
+    variables: [],
+    reset: vi.fn(),
   };
-  return new QuestionnaireLoader({ ...defaults, ...overrides });
+  return new QuestionnaireLoader({
+    questDoc,
+    values:         overrides.values ?? {},
+    clearAllValues: overrides.clearAllValues ?? vi.fn(),
+    reinitForm:     overrides.reinitForm ?? vi.fn(() => Promise.resolve()),
+    shouldValidate: overrides.shouldValidate,
+    renderTree:     overrides.renderTree,
+    renderTreeAsync: overrides.renderTreeAsync,
+  });
 }
 
 beforeEach(() => {
@@ -220,23 +222,18 @@ describe('QuestionnaireLoader.load — VS expansion failures', () => {
 
 // ── reset() ───────────────────────────────────────────────────────────────────
 describe('QuestionnaireLoader.reset', () => {
-  it('calls destroyTree with the tree array', () => {
-    const tree = [{ id: 'g1' }];
-    const loader = makeLoader({ tree });
+  it('calls questDoc.reset()', () => {
+    const questDoc = { tree: [], meta: {}, rawFhir: null, contained: [], variables: [], reset: vi.fn() };
+    const loader = makeLoader({ questDoc });
     loader.reset();
-    expect(destroyTree).toHaveBeenCalledWith(tree);
+    expect(questDoc.reset).toHaveBeenCalledTimes(1);
   });
 
   it('calls clearAllValues', () => {
-    const loader = makeLoader();
+    const clearAllValues = vi.fn();
+    const loader = makeLoader({ clearAllValues });
     loader.reset();
-    expect(state.clearAllValues).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls resetQuestMeta', () => {
-    const loader = makeLoader();
-    loader.reset();
-    expect(state.resetQuestMeta).toHaveBeenCalledTimes(1);
+    expect(clearAllValues).toHaveBeenCalledTimes(1);
   });
 
   it('calls renderTree', () => {
@@ -253,14 +250,7 @@ describe('QuestionnaireLoader.reset', () => {
     expect(evt).toBeDefined();
   });
 
-  it('clears rawFhir.value when rawFhir is provided', () => {
-    const rawFhir = { value: { resourceType: 'Questionnaire' } };
-    const loader = makeLoader({ rawFhir });
-    loader.reset();
-    expect(rawFhir.value).toBeNull();
-  });
-
-  it('does not throw when rawFhir is not provided', () => {
+  it('does not throw', () => {
     const loader = makeLoader();
     expect(() => loader.reset()).not.toThrow();
   });
@@ -281,15 +271,6 @@ describe('QuestionnaireLoader.reset', () => {
   it('does not throw when resetFlow is not configured (no clearDraft)', () => {
     const loader = makeLoader();
     expect(() => loader.reset()).not.toThrow();
-  });
-
-  it('splices questVariables and questContained', () => {
-    state.questVariables.push({ name: 'v1' });
-    state.questContained.push({ id: 'vs1' });
-    const loader = makeLoader();
-    loader.reset();
-    expect(state.questVariables.length).toBe(0);
-    expect(state.questContained.length).toBe(0);
   });
 });
 
@@ -324,27 +305,27 @@ describe('QuestionnaireLoader.confirmAndReset', () => {
     const { loader, confirmOpen } = makeFlowLoader([]);
     await loader.confirmAndReset();
     expect(confirmOpen).not.toHaveBeenCalled();
-    expect(state.clearAllValues).toHaveBeenCalledTimes(1);
+    expect(loader._clearAllValues).toHaveBeenCalledTimes(1);
   });
 
   it('calls reset() directly when _resetFlow is not configured', async () => {
     const loader = makeLoader({ tree: [{ id: 'g1' }] });
     await loader.confirmAndReset();
-    expect(state.clearAllValues).toHaveBeenCalledTimes(1);
+    expect(loader._clearAllValues).toHaveBeenCalledTimes(1);
   });
 
   it('does nothing when user picks cancel', async () => {
     const { loader, confirmOpen } = makeFlowLoader([{ id: 'g1' }]);
     confirmOpen.mockResolvedValue('cancel');
     await loader.confirmAndReset();
-    expect(state.clearAllValues).not.toHaveBeenCalled();
+    expect(loader._clearAllValues).not.toHaveBeenCalled();
   });
 
   it('calls reset() when user picks clear (not cancel/export)', async () => {
     const { loader, confirmOpen } = makeFlowLoader([{ id: 'g1' }]);
     confirmOpen.mockResolvedValue('clear');
     await loader.confirmAndReset();
-    expect(state.clearAllValues).toHaveBeenCalledTimes(1);
+    expect(loader._clearAllValues).toHaveBeenCalledTimes(1);
   });
 
   it('calls showValidateExport (no issues) when user picks export', async () => {

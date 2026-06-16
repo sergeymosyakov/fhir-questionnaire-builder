@@ -6,7 +6,7 @@ import { Modal } from '../modal-base.js';
 
 class ResourceMetaSection extends Section {
   build(pending) {
-    const questMeta = Modal._svc.questMeta;
+    const questMeta = Modal._svc.questDoc.meta;
     return makeCollapsible({
       testid:      'meta-resource-meta-toggle',
       tip:         { title: 'Questionnaire.meta', body: 'Resource-level metadata: server version ID, source URI, last-updated timestamp, profile declarations, workflow tags, and security labels.', fhir: 'Questionnaire.meta', spec: 'R4' },

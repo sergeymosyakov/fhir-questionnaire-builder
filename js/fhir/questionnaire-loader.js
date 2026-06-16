@@ -13,28 +13,23 @@ import { AppEvents } from '../events.js';
 import { versionRegistry } from './version-registry.js';
 // Format registrations are handled by js/fhir/formats/*.js, imported via export.js
 import { loadConfirmModal } from '../ui/modals/load-confirm-modal.js';
-import { destroyTree } from '../utils.js';
 
 export class QuestionnaireLoader {
-  /** @param {{ tree, values, questMeta, reinitForm?, rawFhir?, shouldValidate?,
-   *            renderTree?, renderTreeAsync?,
-   *            clearAllValues?, resetQuestMeta?, questVariables?, questContained? }} deps */
-  constructor({ tree, values, questMeta, reinitForm, rawFhir, shouldValidate,
+  /** @param {{ questDoc: import('./quest-document.js').QuestDocument,
+   *            values, clearAllValues?, reinitForm?, shouldValidate?,
+   *            renderTree?, renderTreeAsync? }} deps */
+  constructor({ questDoc, values, reinitForm, shouldValidate,
                 renderTree: renderTreeFn, renderTreeAsync: renderTreeAsyncFn,
-                clearAllValues, resetQuestMeta, questVariables, questContained }) {
-    this._tree             = tree;
+                clearAllValues }) {
+    this._questDoc         = questDoc;
+    this._tree             = questDoc.tree;     // alias — same array reference
     this._values           = values;
-    this._questMeta        = questMeta;
-    this._rawFhir          = rawFhir || null;
     this._reinitForm       = reinitForm || null;
     this._importSeq        = 0;
     this._shouldValidate   = shouldValidate || (() => true);
     this._renderTree       = renderTreeFn       || renderTree;
     this._renderTreeAsync  = renderTreeAsyncFn  || renderTreeAsync;
     this._clearAllValues   = clearAllValues     || (() => {});
-    this._resetQuestMeta   = resetQuestMeta     || (() => {});
-    this._questVariables   = questVariables     || [];
-    this._questContained   = questContained     || [];
     // Reset-flow callbacks — injected via configureResetFlow()
     this._resetFlow        = null;
   }
@@ -52,12 +47,8 @@ export class QuestionnaireLoader {
    * Equivalent to the old _doReset() — but encapsulated in the loader.
    */
   reset() {
-    destroyTree(this._tree);
+    this._questDoc.reset();   // destroyTree + rawFhir=null + contained/variables/meta
     this._clearAllValues();
-    if (this._rawFhir) this._rawFhir.value = null;
-    this._resetQuestMeta();
-    this._questVariables.splice(0);
-    this._questContained.splice(0);
     this._renderTree();
     if (this._resetFlow?.clearDraft) this._resetFlow.clearDraft();
     document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_CLEARED));
@@ -96,8 +87,8 @@ export class QuestionnaireLoader {
       // Auto-detect FHIR version: builder-target-version extension first, then
       // feature-based heuristics (see formatRegistry.detectVersion); default R4
       const _importedVersion = versionRegistry.detectVersion(data);
-      if (this._questMeta.fhirTarget !== _importedVersion) {
-        this._questMeta.fhirTarget = _importedVersion;
+      if (this._questDoc.meta.fhirTarget !== _importedVersion) {
+        this._questDoc.meta.fhirTarget = _importedVersion;
         document.dispatchEvent(new CustomEvent(AppEvents.FHIR_VERSION_CHANGED, {
           detail: { versionId: _importedVersion },
         }));
@@ -131,7 +122,7 @@ export class QuestionnaireLoader {
   // ── Private ────────────────────────────────────────────────────────────────
 
   async _expandValueSets(seq) {
-    const failures = await terminologyService.expandAll(this._tree, this._questMeta);
+    const failures = await terminologyService.expandAll(this._tree, this._questDoc.meta);
     if (this._importSeq !== seq) return;
     if (failures.length) {
       validateModal.show('ValueSet Expansion Errors', 'import', { tree: this._tree, values: this._values });

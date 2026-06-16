@@ -132,7 +132,7 @@ class ChoiceSection extends AnswerTypeSection {
     avsSubLbl.dataset.tipFhir  = 'Questionnaire.item.answerValueSet';
     avsSubLbl.dataset.tipSpec  = 'R4';
 
-    const containedVS = [...Modal._svc.questContained].filter(r => r.resourceType === 'ValueSet');
+    const containedVS = [...Modal._svc.questDoc.contained].filter(r => r.resourceType === 'ValueSet');
     const avsItems = [
       { value: '', label: '\u2014 none \u2014' },
       ...containedVS.map(vs => ({ value: '#' + vs.id, label: '#' + vs.id + (vs.title ? ' \u2014 ' + vs.title : '') })),
@@ -177,7 +177,7 @@ class ChoiceSection extends AnswerTypeSection {
       avsTestBtn.disabled = true;
       const result = await terminologyService.testExpand(
         url,
-        Modal._svc.questMeta?.preferredTermServer,
+        Modal._svc.questDoc.meta?.preferredTermServer,
       );
       avsTestBtn.disabled = false;
       avsTestStatus.className   = `term-test-status term-test-status--${result.ok ? 'ok' : 'err'}`;
@@ -367,7 +367,7 @@ class ChoiceSection extends AnswerTypeSection {
         delete node._answerMedias;
       } else if (pending.draftAVS) {
         node._answerValueSet = pending.draftAVS;
-        node.options = resolveContainedValueSet(Modal._svc.questContained, pending.draftAVS);
+        node.options = resolveContainedValueSet(Modal._svc.questDoc.contained, pending.draftAVS);
         delete node._optionOrdinals;
         delete node._optionPrefixes;
         delete node._optionExclusives;

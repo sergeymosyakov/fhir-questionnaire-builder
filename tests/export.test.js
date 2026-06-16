@@ -3,47 +3,35 @@
 
 import { describe, it, expect, vi } from 'vitest';
 
-// Minimal state mock — buildFHIRObject reads tree, questVariables, rawFhir
+// Minimal state mock — buildFHIRObject reads questDoc via _svc
 const _tree = [];
 const _questVariables = [];
 const _questContained = [];
-let _rawFhir = { value: null };
 const _questMeta = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
   name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
   effectivePeriodStart: '', effectivePeriodEnd: '', replaces: [], _rawQuestExtensions: [],
   _rawText: null,
   _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
+const _questDoc = { tree: _tree, meta: _questMeta, rawFhir: null, variables: _questVariables, contained: _questContained };
 
 vi.mock('../js/state.js', () => ({
-  tree:            _tree,
-  questVariables:  _questVariables,
-  questContained:  _questContained,
-  questMeta:       _questMeta,
-  rawFhir:         _rawFhir,
+  questDoc:        _questDoc,
   values:          {},
-  _bulkUpdate:     { value: false },
-  ref:             v => ({ value: v }),
-  reactive:        v => v,
-  effect:          () => {},
   calcFormOk:      () => true,
   isMandatory:     () => false,
   CHECKABLE_TYPES: new Set(),
-  showLinkId:      { value: false },
-  showPrefix:      { value: false },
   resetSeq:        () => {},
-  makeGroup:       () => ({}),
-  makeItem:        () => ({}),
   NONEMPTY_TYPES:  new Set(),
 }));
 
 const { buildFHIRObject, configure: configureExport } = await import('../js/fhir/export.js');
-configureExport({ tree: _tree, questMeta: _questMeta, rawFhir: _rawFhir, questVariables: _questVariables, questContained: _questContained });
+configureExport({ questDoc: _questDoc });
 
 // Helper: reset tree and run buildFHIRObject
 function build(nodes, title = 'Test Q', vars = []) {
   _tree.splice(0, _tree.length, ...nodes);
   _questVariables.splice(0, _questVariables.length, ...vars);
-  _rawFhir.value = { title };
+  _questDoc.rawFhir = { title };
   return buildFHIRObject();
 }
 
@@ -75,7 +63,7 @@ describe('buildFHIRObject — structure', () => {
   });
 
   it('falls back to Untitled Questionnaire when rawFhir has no title', () => {
-    _rawFhir.value = null;
+    _questDoc.rawFhir = null;
     _tree.splice(0);
     const q = buildFHIRObject();
     expect(q.title).toBe('Untitled Questionnaire');

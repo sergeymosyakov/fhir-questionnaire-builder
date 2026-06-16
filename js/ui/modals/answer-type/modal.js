@@ -50,7 +50,7 @@ class AnswerTypeModal extends Modal {
 
     const newNode = createItemNode(this._pending.draftType, { id: node.id });
     Object.assign(newNode, node, { itemType: this._pending.draftType });
-    _replaceInTree(Modal._svc.tree, node.id, newNode);
+    _replaceInTree(Modal._svc.questDoc.tree, node.id, newNode);
     node = newNode;
 
     if (!node.supportsRepeat() && node.repeats) {
@@ -89,7 +89,7 @@ class AnswerTypeModal extends Modal {
 
     const built = ANSWER_TYPE_SECTIONS.map(s => ({ s, el: s.build(this._pending) }));
 
-    const fhirTarget = Modal._svc.getFhirTarget?.() ?? 'R4';
+    const fhirTarget = Modal._svc.questDoc?.fhirTarget ?? 'R4';
     const filteredTypes = fhirTarget === 'R5'
       ? ITEM_TYPES.filter(t => t !== 'open-choice')
       : ITEM_TYPES;
