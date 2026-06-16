@@ -322,3 +322,12 @@
   background: var(--c-err);
   color: #fff;
 }
+
+/* === No-JS fallback ========================================================== */
+.noscript-main {
+  max-width: 720px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: sans-serif;
+  color: #1f2937;
+}
