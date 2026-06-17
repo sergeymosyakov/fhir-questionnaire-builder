@@ -5,7 +5,7 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 8_000 },
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: process.env.CI ? 2 : 2,
 
   // Always generate HTML report (open: never so it doesn't auto-launch).
   // Add list reporter for readable CI logs.
