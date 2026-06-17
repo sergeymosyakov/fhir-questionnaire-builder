@@ -9,6 +9,7 @@
 // data-tip-spec   — spec version label, e.g. "R4" (optional)
 
 import * as storage from '../storage/storage.js';
+import { AppEvents } from '../events.js';
 
 const LS_KEY = 'tooltips-enabled';
 let _enabled = true; // initialised from storage in init()
@@ -22,6 +23,8 @@ export function setEnabled(val) {
   _enabled = !!val;
   storage.setItem(LS_KEY, _enabled ? 'true' : 'false');
   if (!_enabled) _hide();
+  const badge = document.getElementById('tooltipsOffBadge');
+  if (badge) badge.style.display = _enabled ? 'none' : '';
 }
 
 function _getEl() {
@@ -116,6 +119,9 @@ function _hide() {
 
 export async function init() {
   _enabled = await storage.getItem(LS_KEY) !== 'false';
+  // Sync badge to initial persisted state
+  const badge = document.getElementById('tooltipsOffBadge');
+  if (badge) badge.style.display = _enabled ? 'none' : '';
   document.addEventListener('mouseover', e => {
     const t = e.target.closest('[data-tip-title],[data-tip-body]');
     if (t) _show(t);
@@ -127,4 +133,11 @@ export async function init() {
   // Hide on scroll / resize to avoid stale position
   window.addEventListener('scroll', _hide, true);
   window.addEventListener('resize', _hide);
+  // Signal initial state to settings-menu (may be awaiting async init)
+  document.dispatchEvent(new CustomEvent(AppEvents.TIPS_INIT_DONE, { detail: { enabled: _enabled } }));
+}
+
+// Self-wire: settings-menu dispatches TIPS_TOGGLED; apply and persist.
+if (typeof document !== 'undefined') {
+  document.addEventListener(AppEvents.TIPS_TOGGLED, e => setEnabled(e.detail.enabled));
 }

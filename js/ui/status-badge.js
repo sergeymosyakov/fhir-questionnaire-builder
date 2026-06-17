@@ -4,18 +4,17 @@
 //   update({ visible, ctx })    — visible: eval results; ctx: { fp, qr, envVars }
 //                                 Computes mandatory/calc/constraint/range criteria internally.
 import { isMandatory, calcFormOk, evalConstraints, answerStore, CHECKABLE_TYPES } from '../state.js';
+import { AppEvents } from '../events.js';
 
 let _btn        = null;
 let _dropdown   = null;
 let _wrap       = null;
 let _open       = false;
-let _navigateFn = null;
 
-export function init(elements, navigateFn) {
+export function init(elements) {
   _btn        = elements.btn;
   _dropdown   = elements.dropdown;
   _wrap       = elements.wrap;
-  _navigateFn = navigateFn || null;
 
   _btn.addEventListener('click', e => {
     e.stopPropagation();
@@ -126,7 +125,7 @@ function _renderList(items) {
     row.addEventListener('click', e => {
       e.stopPropagation();
       _close();
-      if (_navigateFn) _navigateFn(item.id);
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE, { detail: { id: item.id } }));
     });
 
     const num = document.createElement('span');

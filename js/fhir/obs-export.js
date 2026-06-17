@@ -6,8 +6,14 @@ import { buildQR } from './qr-builder.js';
 import { extractObservations } from './extract.js';
 import { downloadJSON } from './download.js';
 
+import { AppEvents } from '../events.js';
+
 let _svc = {};
-export function configure(svc) { _svc = svc; }
+export function configure(svc) { _svc = { ..._svc, ...svc }; }
+if (typeof document !== 'undefined') {
+  document.addEventListener(AppEvents.APP_CONTEXT_READY,
+    e => { if (e.detail?.answerStore) configure({ answerStore: e.detail.answerStore }); });
+}
 
 const SDC_OBS_PROFILE = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-observation';
 

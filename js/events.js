@@ -86,6 +86,20 @@ export const AppEvents = Object.freeze({
   // 'id' matches Validator#id — dispatched by UI toggles; validators listen and set this.enabled
   VALIDATOR_TOGGLE:    'validator-toggle',
 
+  // ── Tooltip & autosave settings ──────────────────────────────────────────
+  // Dispatched by tooltip.init() after reading persisted state.
+  TIPS_INIT_DONE:       'tips-init-done',
+  // Dispatched by settings-menu tips checkbox; tooltip.js listens and calls setEnabled().
+  TIPS_TOGGLED:         'tips-toggled',
+  // Dispatched by autosave.init() after reading persisted state.
+  AUTOSAVE_INIT_DONE:   'autosave-init-done',
+  // Dispatched by settings-menu autosave checkbox; autosave.js listens and calls setEnabled().
+  AUTOSAVE_TOGGLED:     'autosave-toggled',
+  // Dispatched by autosave._save() each time a draft is persisted. detail: { date: Date }
+  AUTOSAVE_SAVED:       'autosave-saved',
+  // Dispatched by settings-menu Validate button; validate-modal.js listens and shows the report.
+  VALIDATE_REQUESTED:   'validate-requested',
+
   // ── Node actions ──────────────────────────────────────────────────────────
   // Dispatched by node delete buttons; BuilderPanel listens and handles
   // confirm + findAndRemove + rerender.  detail: { id: string, label: string }

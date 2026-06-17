@@ -312,4 +312,16 @@ if (typeof document !== 'undefined') {
       });
     });
   });
+
+  // Self-wire: settings-menu Validate button dispatches VALIDATE_REQUESTED
+  document.addEventListener(AppEvents.VALIDATE_REQUESTED, () => {
+    import('../../fhir/export.js').then(({ buildFHIRObjectVersioned }) => {
+      const { questDoc, answerStore } = ValidateModal._svc;
+      _modal.show('Validate \u2014 Report', 'validate', {
+        questJson: buildFHIRObjectVersioned(questDoc.fhirTarget),
+        tree:      questDoc.tree,
+        values:    answerStore.data,
+      });
+    });
+  });
 }

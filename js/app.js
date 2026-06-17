@@ -2,13 +2,11 @@
 import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
-import { questDoc, answerStore, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES, resetSeq } from './state.js';
-import { buildFHIRObject, buildFHIRObjectVersioned, configure as configureExport } from './fhir/export.js';
+import { questDoc, answerStore, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './state.js';
 import { configure as configureImport } from './fhir/import.js';
-import { configure as configureQrExport } from './fhir/qr-export.js';
-import { configure as configureObsExport } from './fhir/obs-export.js';
+import './fhir/qr-export.js';
+import './fhir/obs-export.js';
 import { initValidators } from './fhir/validators/init.js';
-import * as validateModal from './ui/modals/validate-modal.js';
 import * as metadataModal from './ui/modals/metadata-modal.js';
 import './ui/modals/obs-export-modal.js';
 import * as progress from './ui/progress.js';
@@ -18,7 +16,7 @@ import { UndoRedo } from './ui/undo-redo.js';
 import { renumberAll, addRootGroup, mount as mountBuilder, renderTree, renderTreeAsync } from './builder/index.js';
 import * as helpModal from './ui/modals/help-modal.js';
 import { PreviewForm } from './preview-form.js';
-import { saveMenu, settingsMenu, prefs, questionnairesMenu, mount as mountHeaderActions } from './ui/header-actions.js';
+import { saveMenu, prefs, questionnairesMenu, mount as mountHeaderActions } from './ui/header-actions.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
 import _containedPanel        from './ui/panels/contained-panel.js';
@@ -44,11 +42,9 @@ const patientProfile = new PatientProfile();
 patientProfile.mount(document.getElementById('patientPresetWrap'));
 variablesPanel.configure({ mountEl: document.getElementById('variablesCardMount') });
 
-// ── Inject state into FHIR modules ─────────────────────────────────────
-configureExport({ questDoc });
-configureImport({ questDoc, resetSeq, renderTree });
-configureQrExport({ answerStore });
-configureObsExport({ answerStore });
+// FHIR modules self-wire via APP_CONTEXT_READY — no configure() calls needed
+// import.js still needs renderTree injected (not available via APP_CONTEXT_READY)
+configureImport({ renderTree });
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
 export const qrAnswers   = new QRAnswersManager({ questDoc, answerStore, shouldValidate: () => prefs.get('validate') });
@@ -122,20 +118,14 @@ progress.init({
   blocker: document.getElementById('uiBlocker'),
 });
 
-// ── Tooltip init (for tooltipsOffBadge and settingsMenu sync) ───────────────
-const _tooltipsOffBadge = document.getElementById('tooltipsOffBadge');
-import('./ui/tooltip.js').then(tt => {
-  tt.init().then(() => {
-    _tooltipsOffBadge.style.display = tt.isEnabled() ? 'none' : '';
-  });
-});
+// ── Tooltip init ────────────────────────────────────────────────────────────
+// tooltip.js updates #tooltipsOffBadge and dispatches TIPS_INIT_DONE itself
+import('./ui/tooltip.js').then(tt => tt.init());
 
 statusBadge.init({
   btn:      document.getElementById('statusBadgeBtn'),
   dropdown: document.getElementById('statusDropdown'),
   wrap:     document.getElementById('statusBadgeWrap'),
-}, (id) => {
-  document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE, { detail: { id } }));
 });
 
 document.getElementById('helpBtn').addEventListener('click', () => helpModal.open());
@@ -165,40 +155,9 @@ previewForm.mount({
 // FILE_NAME_CHANGED event wires FileNameDisplay → save-menu
 
 // ── Settings menu handlers ────────────────────────────────────────────────────
-// Tips and Autosave initial states resolve asynchronously from storage —
-// we update the menu rows once each module finishes its init() call.
-Promise.all([
-  import('./ui/tooltip.js').then(async tt => { await tt.init(); return tt; }),
-  import('./ui/autosave.js').then(async as => {
-    await as.init({
-      buildFn:   buildFHIRObject,
-      questMeta: questDoc.meta,
-      onSaved:   date => {
-        const label = date
-          ? 'Autosave \u00b7 ' + String(date.getHours()).padStart(2, '0') + ':' + String(date.getMinutes()).padStart(2, '0')
-          : 'Autosave';
-        settingsMenu.setAutosaveLabel(label);
-      },
-    });
-    return as;
-  }),
-]).then(([tt, as]) => {
-  settingsMenu.setHandlers({
-    initialTips:      tt.isEnabled(),
-    initialAutosave:  as.isEnabled(),
-    onTipsToggle:     (enabled) => {
-      tt.setEnabled(enabled);
-      const badge = document.getElementById('tooltipsOffBadge');
-      if (badge) badge.style.display = enabled ? 'none' : '';
-    },
-    onAutosaveToggle: (enabled) => as.setEnabled(enabled),
-    onValidate: () => {
-      validateModal.show('Validate — Report', 'validate', { questJson: buildFHIRObjectVersioned(questDoc.fhirTarget), tree: questDoc.tree, values: answerStore.data });
-    },
-    onExpand:   () => previewForm.expandAll(),
-    onCollapse: () => previewForm.collapseAll(),
-  });
-});
+// tooltip.js → TIPS_INIT_DONE/TIPS_TOGGLED  → settings-menu (self-wired)
+// autosave.js → AUTOSAVE_INIT_DONE/AUTOSAVE_SAVED/AUTOSAVE_TOGGLED → settings-menu (self-wired)
+import('./ui/autosave.js').then(as => as.init());
 
 // ── Metadata card (status + experimental badge) ──────────────────────────────
 new MetadataCard({

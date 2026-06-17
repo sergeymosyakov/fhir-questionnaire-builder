@@ -62,40 +62,20 @@ export class SettingsMenu extends DropdownMenu {
       this._expandItem,
       this._collapseItem,
     );
-  }
 
-  /** Get the checkbox input inside a row built by _checkItem. */
-  _inp(row) { return row.querySelector('input'); }
-
-  /** Update the autosave row label (e.g. "Autosave · 14:32") */
-  setAutosaveLabel(text) {
-    this._autosaveRow.querySelector('span').textContent = text;
-  }
-
-  /**
-   * Wire all action callbacks. Tips and Autosave initial states are
-   * injected here because they resolve asynchronously from storage.
-   *
-   * @param {{
-   *   initialTips:      boolean,
-   *   initialAutosave:  boolean,
-   *   onTipsToggle:     (enabled: boolean) => void,
-   *   onAutosaveToggle: (enabled: boolean) => void,
-   *   onValidate:       () => void,
-   *   onExpand:         () => void,
-   *   onCollapse:       () => void,
-   * }} handlers
-   */
-  setHandlers({ initialTips, initialAutosave, onTipsToggle, onAutosaveToggle, onValidate, onExpand, onCollapse }) {
-    this._inp(this._tipsRow).checked     = initialTips;
-    this._inp(this._autosaveRow).checked = initialAutosave;
-
-    // Keep menu open on checkbox toggle (stop click from bubbling to backdrop)
+    // Keep menu open on checkbox toggle
     [this._tipsRow, this._autosaveRow, this._validateLocalRow, this._validateExternalRow]
       .forEach(row => row.addEventListener('click', e => e.stopPropagation()));
 
-    this._inp(this._tipsRow).addEventListener('change', e => onTipsToggle(e.target.checked));
-    this._inp(this._autosaveRow).addEventListener('change', e => onAutosaveToggle(e.target.checked));
+    // Tips toggle — dispatch event; tooltip.js listens and calls setEnabled()
+    this._inp(this._tipsRow).addEventListener('change', e => {
+      document.dispatchEvent(new CustomEvent(AppEvents.TIPS_TOGGLED, { detail: { enabled: e.target.checked } }));
+    });
+
+    // Autosave toggle — dispatch event; autosave.js listens and calls setEnabled()
+    this._inp(this._autosaveRow).addEventListener('change', e => {
+      document.dispatchEvent(new CustomEvent(AppEvents.AUTOSAVE_TOGGLED, { detail: { enabled: e.target.checked } }));
+    });
 
     this._inp(this._validateLocalRow).addEventListener('change', e => {
       const enabled = e.target.checked;
@@ -111,18 +91,41 @@ export class SettingsMenu extends DropdownMenu {
 
     this._validateItem.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      onValidate();
+      document.dispatchEvent(new CustomEvent(AppEvents.VALIDATE_REQUESTED));
     });
 
     this._expandItem.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      onExpand();
+      document.dispatchEvent(new CustomEvent(AppEvents.EXPAND_ALL_PREVIEW));
     });
 
     this._collapseItem.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      onCollapse();
+      document.dispatchEvent(new CustomEvent(AppEvents.COLLAPSE_ALL_PREVIEW));
     });
+
+    // Receive initial checkbox states from tooltip/autosave after their async init()
+    document.addEventListener(AppEvents.TIPS_INIT_DONE,
+      e => { this._inp(this._tipsRow).checked = e.detail.enabled; });
+    document.addEventListener(AppEvents.AUTOSAVE_INIT_DONE,
+      e => { this._inp(this._autosaveRow).checked = e.detail.enabled; });
+
+    // Update autosave label on each save
+    document.addEventListener(AppEvents.AUTOSAVE_SAVED, e => {
+      const d = e.detail.date;
+      const label = d
+        ? 'Autosave \u00b7 ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')
+        : 'Autosave';
+      this.setAutosaveLabel(label);
+    });
+  }
+
+  /** Get the checkbox input inside a row built by _checkItem. */
+  _inp(row) { return row.querySelector('input'); }
+
+  /** Update the autosave row label (e.g. "Autosave · 14:32") */
+  setAutosaveLabel(text) {
+    this._autosaveRow.querySelector('span').textContent = text;
   }
 
   _isActive(row) {

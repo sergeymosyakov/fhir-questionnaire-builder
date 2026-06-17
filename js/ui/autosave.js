@@ -2,10 +2,12 @@
 // Saves the current questionnaire to a per-questionnaire storage slot.
 
 import * as storage from '../storage/storage.js';
+import { buildFHIRObject } from '../fhir/export.js';
+import { AppEvents } from '../events.js';
 // Key = Questionnaire.url  OR  identifier[fhir-qb.app/editor].value (auto-gen).
 //
 // API:
-//   init({ buildFn, questMeta, onSaved }) — start the interval
+//   init({ onSaved }) — start the interval
 //   getMostRecentDraft() → { meta, key } | null
 //   getDraftData(key)    → parsedJson | null
 //   clearDraft()         — remove current questionnaire's slot
@@ -16,11 +18,14 @@ const META_PREFIX    = 'autosave-meta:';
 const LS_ENABLED_KEY = 'autosave-enabled';
 const INTERVAL_MS    = 15_000;
 
-let _buildFn   = null;
 let _questMeta = null;
 let _timer     = null;
-let _onSaved   = null;
 let _enabled   = true; // initialised from storage in init()
+
+if (typeof document !== 'undefined') {
+  document.addEventListener(AppEvents.APP_CONTEXT_READY,
+    e => { if (e.detail?.questDoc) _questMeta = e.detail.questDoc.meta; });
+}
 
 export function isEnabled() { return _enabled; }
 export function setEnabled(val) {
@@ -41,9 +46,9 @@ function _getKey(q) {
 }
 
 function _save() {
-  if (!_enabled || !_buildFn) return;
+  if (!_enabled || !_questMeta) return;
   try {
-    const q = _buildFn();
+    const q = buildFHIRObject();
     if (!q.item || q.item.length === 0) return;
     const key = _getKey(q);
     storage.setItem(KEY_PREFIX  + key, JSON.stringify(q));
@@ -52,21 +57,19 @@ function _save() {
       title:   q.title || 'Untitled',
       key,
     }));
-    if (_onSaved) _onSaved(new Date());
+    document.dispatchEvent(new CustomEvent(AppEvents.AUTOSAVE_SAVED, { detail: { date: new Date() } }));
   } catch (_) { /* storage full — fail silently */ }
 }
 
 /** Start autosave interval. Call once after app is ready. */
-export async function init({ buildFn, questMeta, onSaved }) {
-  _buildFn   = buildFn;
-  _questMeta = questMeta;
-  _onSaved   = onSaved ?? null;
+export async function init() {
   _enabled   = await storage.getItem(LS_ENABLED_KEY) !== 'false';
   // One-time cleanup of old single-slot keys from previous version
   storage.removeItem('autosave-draft');
   storage.removeItem('autosave-meta');
   if (_timer) clearInterval(_timer);
   _timer = setInterval(_save, INTERVAL_MS);
+  document.dispatchEvent(new CustomEvent(AppEvents.AUTOSAVE_INIT_DONE, { detail: { enabled: _enabled } }));
 }
 
 /** Return { meta, key } for the most recently saved draft across all slots,
@@ -93,9 +96,9 @@ export async function getDraftData(key) {
 
 /** Remove the current questionnaire's autosave slot. */
 export function clearDraft() {
-  if (!_buildFn || !_questMeta) return;
+  if (!_questMeta) return;
   try {
-    const q = _buildFn();
+    const q = buildFHIRObject();
     const key = q.url
       || (_questMeta._rawIdentifier || []).find(i => i.system === EDITOR_SYSTEM)?.value;
     if (!key) return;
@@ -105,6 +108,6 @@ export function clearDraft() {
 }
 
 // Self-wire: clear draft when QuestionnaireLoader resets
-import('../events.js').then(({ AppEvents }) => {
-  document.addEventListener(AppEvents.AUTOSAVE_CLEAR_DRAFT, () => clearDraft());
-});
+document.addEventListener(AppEvents.AUTOSAVE_CLEAR_DRAFT, () => clearDraft());
+// Self-wire: settings-menu dispatches AUTOSAVE_TOGGLED; apply and persist.
+document.addEventListener(AppEvents.AUTOSAVE_TOGGLED, e => setEnabled(e.detail.enabled));

@@ -3,10 +3,15 @@ import { showError } from '../ui/toast.js';
 import { AppEvents } from '../events.js';
 import { normaliseSTU3 } from './stu3-shim.js';
 import { destroyTree } from '../utils.js';
+import { resetSeq } from '../id.js';
 
 let _svc = {};
-/** @param {{ questDoc: import('./quest-document.js').QuestDocument, resetSeq, renderTree }} svc */
-export function configure(svc) { _svc = svc; }
+/** @param {{ questDoc?: import('./quest-document.js').QuestDocument, renderTree?: Function }} svc */
+export function configure(svc) { _svc = { ..._svc, ...svc }; }
+if (typeof document !== 'undefined') {
+  document.addEventListener(AppEvents.APP_CONTEXT_READY,
+    e => { if (e.detail?.questDoc) configure({ questDoc: e.detail.questDoc }); });
+}
 import {
   buildLinkIdMap,
   fhirTypeToItemType,
@@ -47,7 +52,7 @@ function applyInitialValues(nodes) {
 
 // Main import entry point
 export function importFHIR(fhirJson, renderFn) {
-  const { questDoc, resetSeq, renderTree } = _svc;
+  const { questDoc, renderTree } = _svc;
   const { tree, meta: questMeta, variables: questVariables, contained: questContained } = questDoc;
   let q = fhirJson;
   if (typeof q === 'string') {

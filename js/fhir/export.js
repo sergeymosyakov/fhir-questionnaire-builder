@@ -6,10 +6,16 @@ import './formats/r4b.js';
 import './formats/r5.js';
 import './formats/redcap.js';
 
+import { AppEvents } from '../events.js';
+import { downloadJSON } from './download.js';
+
 let _svc = {};
 /** @param {{ questDoc: import('./quest-document.js').QuestDocument }} svc */
-export function configure(svc) { _svc = svc; }
-import { downloadJSON } from './download.js';
+export function configure(svc) { _svc = { ..._svc, ...svc }; }
+if (typeof document !== 'undefined') {
+  document.addEventListener(AppEvents.APP_CONTEXT_READY,
+    e => { if (e.detail?.questDoc) configure({ questDoc: e.detail.questDoc }); });
+}
 
 // Escape text for embedding in XHTML
 function _esc(s) {
