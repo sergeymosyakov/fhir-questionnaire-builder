@@ -6,13 +6,9 @@ import { buildFHIRObject } from '../fhir/export.js';
 import { importFHIR } from '../fhir/import.js';
 
 export class UndoRedo {
-  /**
-   * @param {HTMLElement} undoBtn
-   * @param {HTMLElement} redoBtn
-   */
-  constructor(undoBtn, redoBtn) {
-    this._undoBtn = undoBtn;
-    this._redoBtn = redoBtn;
+  constructor() {
+    this._undoBtn = document.querySelector('[data-mount="undo-btn"]');
+    this._redoBtn = document.querySelector('[data-mount="redo-btn"]');
 
     history.init({
       buildFn:  buildFHIRObject,

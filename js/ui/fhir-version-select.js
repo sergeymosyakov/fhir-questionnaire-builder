@@ -26,8 +26,8 @@ export class FhirVersionSelect {
    * @param {HTMLElement} mountEl - container to append the widget into
    * @param {() => string} getFhirTarget - returns current fhirTarget from questMeta
    */
-  constructor(mountEl, getFhirTarget) {
-    this._mount = mountEl;
+  constructor(getFhirTarget) {
+    this._mount = document.querySelector('[data-mount="fhir-version-select"]');
     this._getFhirTarget = getFhirTarget;
   }
 

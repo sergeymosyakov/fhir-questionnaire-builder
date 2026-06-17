@@ -87,7 +87,15 @@ export class PreviewForm {
     this._asyncRender(++this._renderVersion);
   }
 
-  mount(elements) {
+  mount() {
+    const elements = {
+      lform:           document.querySelector('[data-mount="preview-lform"]'),
+      fhirJsonView:    document.querySelector('[data-mount="fhir-json-view"]'),
+      leftPanelBody:   document.querySelector('[data-mount="left-panel-body"]'),
+      viewOptionsWrap: document.querySelector('[data-mount="viewOptionsWrap"]'),
+      previewModeWrap: document.querySelector('[data-mount="previewModeWrap"]'),
+      searchWrap:      document.querySelector('[data-mount="search-wrap"]'),
+    };
     this._els = elements;
 
     const syncToolbarVisibility = () => {

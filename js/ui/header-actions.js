@@ -19,7 +19,8 @@ export const previewModeMenu    = new PreviewModeMenu();
 export const viewOptionsMenu    = new ViewOptionsMenu();
 export const settingsMenu       = new SettingsMenu({ prefs });
 
-export function mount(wrap) {
+export function mount() {
+  const wrap = document.querySelector('[data-mount="header-actions"]');
   [questionnairesMenu, answersMenu, saveMenu, previewModeMenu, viewOptionsMenu, settingsMenu]
     .forEach(m => wrap.appendChild(m.el));
 }

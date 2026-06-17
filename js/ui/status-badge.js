@@ -11,10 +11,10 @@ let _dropdown   = null;
 let _wrap       = null;
 let _open       = false;
 
-export function init(elements) {
-  _btn        = elements.btn;
-  _dropdown   = elements.dropdown;
-  _wrap       = elements.wrap;
+export function init() {
+  _btn        = document.querySelector('[data-mount="status-badge-btn"]');
+  _dropdown   = document.querySelector('[data-mount="status-dropdown"]');
+  _wrap       = document.querySelector('[data-mount="status-badge-wrap"]');
 
   _btn.addEventListener('click', e => {
     e.stopPropagation();

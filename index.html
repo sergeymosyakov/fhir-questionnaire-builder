@@ -40,17 +40,17 @@
 <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
-<div id="progressWrap" class="progress-wrap">
-  <div id="progressBar" class="progress-bar"></div>
-  <span id="progressLabel" class="progress-label"></span>
+<div id="progressWrap" class="progress-wrap" data-mount="progress-wrap">
+  <div id="progressBar" class="progress-bar" data-mount="progress-bar"></div>
+  <span id="progressLabel" class="progress-label" data-mount="progress-label"></span>
 </div>
-<div id="uiBlocker" class="ui-blocker"></div>
+<div id="uiBlocker" class="ui-blocker" data-mount="ui-blocker"></div>
 
 <div class="top-panel">
   <span class="top-panel-title">Logic Builder</span>
   <div class="top-panel-sep"></div>
 
-  <div class="load-wrap" id="patientPresetWrap">
+  <div class="load-wrap" id="patientPresetWrap" data-mount="patient-preset">
     <button type="button" id="patientPresetBtn" data-testid="patient-preset-btn" class="btn-fhir"
       data-tip-title="Patient Preset"
       data-tip-body="Select a patient profile to populate %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb variables. Applying a preset re-evaluates all initialExpression fields. Use Custom… to edit values manually."
@@ -69,48 +69,48 @@
     <a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" target="_blank" rel="noopener" class="top-panel-github-link" data-tip-title="View source on GitHub"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" class="top-panel-github-icon"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
     <span>&copy; 2026 <a href="https://github.com/sergeymosyakov" target="_blank" rel="noopener">Sergey Mosyakov</a>, Huthaifa Khan &middot; Free to use with attribution</span>
   </div>
-  <div id="authWrap" class="top-panel-auth"><!-- AuthPanel builds and mounts its DOM here --></div>
+  <div id="authWrap" class="top-panel-auth" data-mount="auth-panel"><!-- AuthPanel builds and mounts its DOM here --></div>
 </div>
 
 <div class="layout" id="mainLayout">
-  <div class="left-panel">
+  <div class="left-panel" data-mount="left-panel">
     <div class="left-panel-header">
       <div class="left-panel-title-row">
         <span class="section-title">Logic Builder<span id="tooltipsOffBadge" class="tips-off-badge" style="display:none">tooltips off</span></span>
-        <span id="fhirVersionSelectMount" class="fhir-version-select-mount"
+        <span id="fhirVersionSelectMount" class="fhir-version-select-mount" data-mount="fhir-version-select"
           data-tip-title="FHIR Target Version"
           data-tip-body="Select the FHIR version this questionnaire targets. Affects which item types and fields are available in the builder, and is recorded in a builder-target-version extension on export (FHIR's Meta type has no fhirVersion field)."
           data-tip-fhir="Questionnaire.extension[builder-target-version]"
           data-tip-spec="R4 · R4B · R5"></span>
         <span class="left-panel-header-right">
-          <button id="undoBtn" type="button" class="btn-fhir btn-fhir--toggle" data-testid="undo-btn" disabled
+          <button id="undoBtn" type="button" class="btn-fhir btn-fhir--toggle" data-testid="undo-btn" data-mount="undo-btn" disabled
             data-tip-title="Undo"
             data-tip-body="Undo the last change (Ctrl+Z). Snapshot is taken 400ms after the last edit."
             data-tip-spec="Ctrl+Z">&#x21B6;</button>
-          <button id="redoBtn" type="button" class="btn-fhir btn-fhir--toggle" data-testid="redo-btn" disabled
+          <button id="redoBtn" type="button" class="btn-fhir btn-fhir--toggle" data-testid="redo-btn" data-mount="redo-btn" disabled
             data-tip-title="Redo"
             data-tip-body="Redo the last undone change (Ctrl+Y)."
             data-tip-spec="Ctrl+Y">&#x21B7;</button>
-          <button id="helpBtn" type="button" class="btn-fhir btn-fhir--toggle" data-testid="help-btn"
+          <button id="helpBtn" type="button" class="btn-fhir btn-fhir--toggle" data-testid="help-btn" data-mount="help-btn"
             data-tip-title="FHIR Field Reference"
             data-tip-body="Open the field reference — find any FHIR R4 / SDC field and where to configure it in the builder UI.">?</button>
         </span>
       </div>
       <div class="tree-toolbar">
-        <button id="addRootGroupBtn" type="button" class="btn-add-root" data-testid="add-root-group-btn"
+        <button id="addRootGroupBtn" type="button" class="btn-add-root" data-testid="add-root-group-btn" data-mount="add-root-group-btn"
           data-tip-title="Add Root Group"
           data-tip-body="Creates a new top-level group at the end of the questionnaire. Groups can contain items and other nested groups."
           data-tip-fhir="Questionnaire.item[type=group]"
           data-tip-spec="R4 · required">+ Add Root Group</button>
         <span class="tree-toolbar-sep"></span>
-        <button id="collapseAllBtn" type="button" class="btn-icon-ctrl" data-testid="collapse-all-btn"
+        <button id="collapseAllBtn" type="button" class="btn-icon-ctrl" data-testid="collapse-all-btn" data-mount="collapse-all-btn"
           data-tip-title="Collapse all"
           data-tip-body="Hides children under every group in the builder tree. Useful for navigating large questionnaires."><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 L6 6 L2 6 M10 2 L10 6 L14 6 M14 10 L10 10 L10 14 M6 14 L6 10 L2 10"/></svg></button>
-        <button id="expandAllBtn"   type="button" class="btn-icon-ctrl" data-testid="expand-all-btn"
+        <button id="expandAllBtn"   type="button" class="btn-icon-ctrl" data-testid="expand-all-btn" data-mount="expand-all-btn"
           data-tip-title="Expand all"
           data-tip-body="Shows all children under every group in the builder tree."><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10"/></svg></button>
-        <span id="renumberFormatWrap" class="renumber-format-wrap"></span>
-        <button id="renumberBtn" type="button" class="btn-tree-ctrl"
+        <span id="renumberFormatWrap" class="renumber-format-wrap" data-mount="renumber-wrap"></span>
+        <button id="renumberBtn" type="button" class="btn-tree-ctrl" data-mount="renumber-btn"
           data-testid="renumber-btn"
           data-tip-title="Renumber"
           data-tip-body="Assigns sequential prefix values (e.g. 1, 1.1, 1.2) to every item based on the selected format. Writes to item.prefix only — linkId is never changed."
@@ -119,39 +119,39 @@
       </div>
     </div>
     <!-- Questionnaire metadata card (mount point for js/ui/metadata-card.js) -->
-    <div id="questMetaCardMount"></div>
+    <div id="questMetaCardMount" data-mount="metadata-card"></div>
     <!-- Questionnaire-level SDC variables card (mount point for js/ui/variables-panel.js) -->
-    <div id="variablesCardMount"></div>
-    <div class="left-panel-body">
-      <div id="treeContainer" data-testid="tree-container"></div>
+    <div id="variablesCardMount" data-mount="variables-panel"></div>
+    <div class="left-panel-body" data-mount="left-panel-body">
+      <div id="treeContainer" data-testid="tree-container" data-mount="tree-container"></div>
     </div>
   </div>
-  <div class="panel-resizer" id="panelResizer"></div>
+  <div class="panel-resizer" id="panelResizer" data-mount="panel-resizer"></div>
   <div class="right-panel">
     <div class="right-panel-header">
       <div class="right-panel-header-top">
-        <span class="section-title">
+        <span class="section-title" data-mount="file-name">
           <span tabindex="-1" data-testid="preview-panel-title">Questionnaire Preview</span>
         </span>
-        <span id="headerActions" class="preview-header-actions"></span>
+        <span id="headerActions" class="preview-header-actions" data-mount="header-actions"></span>
       </div>
       <div class="fhir-toolbar">
-        <div class="search-wrap" id="searchWrap" style="display:none">
-          <input type="search" id="searchInput" class="search-input" placeholder="&#x1F50D; Search&hellip;" autocomplete="off" data-testid="preview-search-input">
-          <button id="searchPrevBtn" type="button" class="search-nav-btn" data-tip-title="Previous match" data-tip-body="Jump to the previous search result. Keyboard shortcut: ↑ while search is focused.">&#x2191;</button>
-          <button id="searchNextBtn" type="button" class="search-nav-btn" data-tip-title="Next match" data-tip-body="Jump to the next search result. Keyboard shortcut: ↓ or Enter while search is focused.">&#x2193;</button>
-          <span id="searchCounter" class="search-counter"></span>
+        <div class="search-wrap" id="searchWrap" style="display:none" data-mount="search-wrap">
+          <input type="search" id="searchInput" class="search-input" data-mount="search-input" placeholder="&#x1F50D; Search&hellip;" autocomplete="off" data-testid="preview-search-input">
+          <button id="searchPrevBtn" type="button" class="search-nav-btn" data-mount="search-prev-btn" data-tip-title="Previous match" data-tip-body="Jump to the previous search result. Keyboard shortcut: ↑ while search is focused.">&#x2191;</button>
+          <button id="searchNextBtn" type="button" class="search-nav-btn" data-mount="search-next-btn" data-tip-title="Next match" data-tip-body="Jump to the next search result. Keyboard shortcut: ↓ or Enter while search is focused.">&#x2193;</button>
+          <span id="searchCounter" class="search-counter" data-mount="search-counter"></span>
         </div>
         <span class="fhir-toolbar-sep"></span>
-        <span id="statusBadgeWrap" class="status-badge-wrap" style="display:none">
-          <button id="statusBadgeBtn" type="button" class="status-badge" data-testid="status-badge-btn"></button>
-          <div id="statusDropdown" class="status-dropdown" style="display:none"></div>
+        <span id="statusBadgeWrap" class="status-badge-wrap" style="display:none" data-mount="status-badge-wrap">
+          <button id="statusBadgeBtn" type="button" class="status-badge" data-testid="status-badge-btn" data-mount="status-badge-btn"></button>
+          <div id="statusDropdown" class="status-dropdown" style="display:none" data-mount="status-dropdown"></div>
         </span>
       </div>
     </div>
     <div class="right-panel-body">
-      <div class="preview-card" id="lform" data-testid="preview-panel"></div>
-      <pre id="fhirJsonView" class="fhir-json-view" style="display:none"></pre>
+      <div class="preview-card" id="lform" data-testid="preview-panel" data-mount="preview-lform"></div>
+      <pre id="fhirJsonView" class="fhir-json-view" style="display:none" data-mount="fhir-json-view"></pre>
     </div>
   </div>
 </div>

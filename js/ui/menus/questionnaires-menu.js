@@ -37,9 +37,11 @@ export class QuestionnairesMenu extends DropdownMenu {
     this._recentSep.style.display = 'none';
 
     this._cloudSep = this._sep();
+    this._cloudSep.dataset.mount = 'auth-cloud-load-sep';
     this._cloudSep.style.display = 'none';
 
     this._cloudItem = this._item(null, '&#x2601;&#xFE0F; From Cloud&hellip;', 'load-cloud-item');
+    this._cloudItem.dataset.mount = 'auth-cloud-load-item';
     this._cloudItem.style.display = 'none';
 
     this._loadFromFileItem = this._item('loadFromFileItem', '&#x1F4C2; From file&hellip;', 'load-from-file-item');

@@ -6,15 +6,13 @@ import * as storage from '../storage/storage.js';
 export class PanelResizer {
   /**
    * @param {object} opts
-   * @param {HTMLElement} opts.resizer   — the drag handle element
-   * @param {HTMLElement} opts.panel     — the panel whose width is controlled
-   * @param {string}      opts.storageKey
-   * @param {number}      [opts.min]    — minimum panel width in px (default 200)
-   * @param {function}    [opts.max]    — returns max width in px (default 70vw)
+   * @param {string}   opts.storageKey
+   * @param {number}   [opts.min]    — minimum panel width in px (default 200)
+   * @param {function} [opts.max]    — returns max width in px (default 70vw)
    */
-  constructor({ resizer, panel, storageKey, min = 200, max = () => window.innerWidth * 0.7 }) {
-    this._resizer    = resizer;
-    this._panel      = panel;
+  constructor({ storageKey, min = 200, max = () => window.innerWidth * 0.7 }) {
+    this._resizer    = document.querySelector('[data-mount="panel-resizer"]');
+    this._panel      = document.querySelector('[data-mount="left-panel"]');
     this._storageKey = storageKey;
     this._min        = min;
     this._max        = max;

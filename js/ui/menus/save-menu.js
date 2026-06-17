@@ -55,9 +55,11 @@ export class SaveMenu extends DropdownMenu {
 
   _buildMenu() {
     this._cloudSaveBtn = this._item(null, '&#x2601;&#xFE0F; Cloud', 'cloud-save-btn');
+    this._cloudSaveBtn.dataset.mount = 'auth-cloud-save-btn';
     this._cloudSaveBtn.style.display = 'none';
 
     this._cloudSaveSep = this._sep();
+    this._cloudSaveSep.dataset.mount = 'auth-cloud-save-sep';
     this._cloudSaveSep.style.display = 'none';
 
     this._exportQuestItem = this._item(null, '&#x1F4C4; Questionnaire &middot; FHIR JSON', 'export-quest-item');

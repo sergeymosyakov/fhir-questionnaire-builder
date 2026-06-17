@@ -14,7 +14,7 @@ import '../fhir/formats/redcap.js';
 const panel = new BuilderPanel({ questDoc, answerStore });
 
 // ── Re-exports for backward compatibility ─────────────────────────────────────
-export function mount(opts)                  { panel.mount(opts); }
+export function mount() { panel.mount(); }
 export function renderTree()                 { panel.renderTree(); }
 export function renderTreeAsync(onProgress)  { return panel.renderTreeAsync(onProgress); }
 export function renumberAll()                { return panel.renumberAll(); }

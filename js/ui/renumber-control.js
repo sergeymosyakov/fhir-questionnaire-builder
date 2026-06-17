@@ -7,12 +7,12 @@ import { AppEvents } from '../events.js';
 
 export class RenumberControl {
   /**
-   * @param {HTMLElement} formatWrap  — container for the format dropdown
-   * @param {HTMLElement} btn         — the Renumber button
    * @param {object} deps
    * @param {Function} deps.renumberAll  — async renumber action
    */
-  constructor(formatWrap, btn, { renumberAll }) {
+  constructor({ renumberAll }) {
+    const formatWrap = document.querySelector('[data-mount="renumber-wrap"]');
+    const btn        = document.querySelector('[data-mount="renumber-btn"]');
     this._btn = btn;
 
     const sel = createCustomSelect({

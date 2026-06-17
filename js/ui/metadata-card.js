@@ -21,8 +21,9 @@ const _CARD_HTML = `
   data-tip-body="Edit questionnaire-level metadata: id, url, version, title, status, publisher and description. These fields are preserved on import and written back on export.">Edit</button>`;
 
 export class MetadataCard {
-  /** @param {{ questMeta: object, mountEl: HTMLElement, onEdit: Function }} deps */
-  constructor({ questMeta, mountEl, onEdit }) {
+  /** @param {{ questMeta: object, onEdit: Function }} deps */
+  constructor({ questMeta, onEdit }) {
+    const mountEl = document.querySelector('[data-mount="metadata-card"]');
     const card = document.createElement('div');
     card.className = 'quest-meta-card';
     card.dataset.testid = 'quest-meta-card';

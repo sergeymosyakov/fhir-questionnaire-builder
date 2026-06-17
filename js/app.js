@@ -16,7 +16,7 @@ import { UndoRedo } from './ui/undo-redo.js';
 import { renumberAll, addRootGroup, mount as mountBuilder } from './builder/index.js';
 import * as helpModal from './ui/modals/help-modal.js';
 import { PreviewForm } from './preview-form.js';
-import { saveMenu, prefs, questionnairesMenu, mount as mountHeaderActions } from './ui/header-actions.js';
+import { prefs, mount as mountHeaderActions } from './ui/header-actions.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
 import _containedPanel        from './ui/panels/contained-panel.js';
@@ -37,10 +37,10 @@ import { CopyPaste } from './ui/copy-paste.js';
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
 
-// ── Patient profile widget ──────────────────────────────────────────────
+// ── Patient profile widget (self-finds [data-mount="patient-preset"]) ─────────
 const patientProfile = new PatientProfile();
-patientProfile.mount(document.getElementById('patientPresetWrap'));
-variablesPanel.configure({ mountEl: document.getElementById('variablesCardMount') });
+patientProfile.mount();
+variablesPanel.configure();
 
 // FHIR modules self-wire via APP_CONTEXT_READY — no configure() calls needed
 
@@ -56,112 +56,56 @@ export const previewForm = new PreviewForm({
   calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES,
 });
 
-// Mount header action menus into toolbar
-mountHeaderActions(document.getElementById('headerActions'));
+// Mount header action menus — each class self-finds its mount point
+mountHeaderActions();
 
-// questionnairesMenu dispatches QUESTIONNAIRE_LOAD_REQUESTED — no configure() needed
-
-// FileNameDisplay — mounts chip into preview section-title; self-contained
-new FileNameDisplay(document.querySelector('.right-panel .section-title'));
-// Wire cloud elements from menus into AuthPanel (cross-component, no getElementById)
-AuthPanel.configureCloudEls({
-  saveBtn:  saveMenu.cloudSaveBtn,
-  saveSep:  saveMenu.cloudSaveSep,
-  loadItem: questionnairesMenu.cloudItem,
-  loadSep:  questionnairesMenu.cloudSep,
-});
-// AuthPanel — mounts sign-in / user chip into authWrap, handles cloud ops
-new AuthPanel(document.getElementById('authWrap'));
-
-// questionnaire-clear-requested, questionnaire-reset, questionnaire-load-requested
-// are all handled by QuestionnaireLoader which self-wires in its constructor.
+// FileNameDisplay — self-finds [data-mount="file-name"]
+new FileNameDisplay();
+// AuthPanel — self-finds [data-mount="auth-panel"] + cloud elements by data-mount
+new AuthPanel();
 
 // Seed all subscribers with the initial empty questDoc+answerStore.
-// Uses APP_CONTEXT_READY (not QUESTIONNAIRE_LOADED) so it does NOT
-// trigger UI visibility changes (card show/hide, toolbar, etc.).
 document.dispatchEvent(new CustomEvent(AppEvents.APP_CONTEXT_READY, {
   detail: { questDoc, answerStore },
 }));
 
-// Buttons
-document.getElementById('addRootGroupBtn').onclick = () => addRootGroup();
-// QUESTIONNAIRE_NEW is dispatched by BuilderPanel.addRootGroup() when tree was empty
+// Buttons — self-find their elements
+document.querySelector('[data-mount="add-root-group-btn"]').onclick = () => addRootGroup();
 
-// ── Builder toolbar + tree container ──────────────────────────────────────────
-mountBuilder({
-  collapseAllBtn: document.getElementById('collapseAllBtn'),
-  expandAllBtn:   document.getElementById('expandAllBtn'),
-  treeContainer:  document.getElementById('treeContainer'),
-});
+// ── Builder toolbar + tree container (self-finds by data-mount) ───────────────
+mountBuilder();
 
-// Mount FHIR version selector
-new FhirVersionSelect(
-  document.getElementById('fhirVersionSelectMount'),
-  () => questDoc.fhirTarget,
-).mount();
+// ── FHIR version selector (self-finds [data-mount="fhir-version-select"]) ─────
+new FhirVersionSelect(() => questDoc.fhirTarget).mount();
 
-new RenumberControl(
-  document.getElementById('renumberFormatWrap'),
-  document.getElementById('renumberBtn'),
-  { renumberAll },
-);
+// ── Renumber (self-finds renumber-wrap and renumber-btn) ──────────────────────
+new RenumberControl({ renumberAll });
 
-// ── Global progress bar init ──────────────────────────────────────────────
-progress.init({
-  wrap:    document.getElementById('progressWrap'),
-  bar:     document.getElementById('progressBar'),
-  label:   document.getElementById('progressLabel'),
-  blocker: document.getElementById('uiBlocker'),
-});
+// ── Global progress bar (self-finds progress-* elements) ─────────────────────
+progress.init();
 
-// ── Tooltip init ────────────────────────────────────────────────────────────
-// tooltip.js updates #tooltipsOffBadge and dispatches TIPS_INIT_DONE itself
+// ── Tooltip init ──────────────────────────────────────────────────────────────
 import('./ui/tooltip.js').then(tt => tt.init());
 
-statusBadge.init({
-  btn:      document.getElementById('statusBadgeBtn'),
-  dropdown: document.getElementById('statusDropdown'),
-  wrap:     document.getElementById('statusBadgeWrap'),
-});
+// ── Status badge (self-finds status-badge-* elements) ─────────────────────────
+statusBadge.init();
 
-document.getElementById('helpBtn').addEventListener('click', () => helpModal.open());
+document.querySelector('[data-mount="help-btn"]').addEventListener('click', () => helpModal.open());
 
-// ── Search init ───────────────────────────────────────────────────────────
-search.init({
-  input:       document.getElementById('searchInput'),
-  prevBtn:     document.getElementById('searchPrevBtn'),
-  nextBtn:     document.getElementById('searchNextBtn'),
-  counter:     document.getElementById('searchCounter'),
-  lform:       document.getElementById('lform'),
-  fhirJsonView: document.getElementById('fhirJsonView'),
-  searchWrap:  document.getElementById('searchWrap'),
-});
+// ── Search (self-finds search-* elements) ─────────────────────────────────────
+search.init();
 
-// ── Preview module init ──────────────────────────────────────────────────────
-previewForm.mount({
-  lform:           document.getElementById('lform'),
-  fhirJsonView:    document.getElementById('fhirJsonView'),
-  leftPanelBody:   document.querySelector('.left-panel-body'),
-  viewOptionsWrap: document.getElementById('viewOptionsWrap'),
-  previewModeWrap: document.getElementById('previewModeWrap'),
-  searchWrap:      document.getElementById('searchWrap'),
-});
-
-// ── Save/Export menu ──────────────────────────────────────────────────────────
-// FILE_NAME_CHANGED event wires FileNameDisplay → save-menu
+// ── Preview form (self-finds all elements by data-mount) ──────────────────────
+previewForm.mount();
 
 // ── Settings menu handlers ────────────────────────────────────────────────────
-// tooltip.js → TIPS_INIT_DONE/TIPS_TOGGLED  → settings-menu (self-wired)
-// autosave.js → AUTOSAVE_INIT_DONE/AUTOSAVE_SAVED/AUTOSAVE_TOGGLED → settings-menu (self-wired)
 import('./ui/autosave.js').then(as => as.init());
 
-// ── Metadata card (status + experimental badge) ──────────────────────────────
+// ── Metadata card (self-finds [data-mount="metadata-card"]) ───────────────────
 new MetadataCard({
   questMeta: questDoc.meta,
-  mountEl: document.getElementById('questMetaCardMount'),
   onEdit: () => metadataModal.open(),
 });
-
 
 // Reset flow is self-wired in QuestionnaireLoader constructor
 
@@ -170,17 +114,11 @@ document.addEventListener('click', () => {
   document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
 });
 
-// ── Panel resize drag ─────────────────────────────────────────────────────────
-new PanelResizer({
-  resizer:    document.getElementById('panelResizer'),
-  panel:      document.querySelector('.left-panel'),
-  storageKey: 'leftPanelWidth',
-}).init();
+// ── Panel resize drag (self-finds panel-resizer and left-panel) ───────────────
+new PanelResizer({ storageKey: 'leftPanelWidth' }).init();
 
-new UndoRedo(
-  document.getElementById('undoBtn'),
-  document.getElementById('redoBtn'),
-);
+// ── Undo/Redo (self-finds undo-btn and redo-btn) ──────────────────────────────
+new UndoRedo();
 
 // ── Copy / Paste ──────────────────────────────────────────────────────────────
 // Instantiated after builder/index.js so BaseNode event listeners are active.

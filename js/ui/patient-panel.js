@@ -198,7 +198,7 @@ export class PatientProfile {
   }
 
   /** Insert the preset menu into the DOM. */
-  mount(mountEl) {
-    mountEl.replaceWith(this._presetMenu.el);
+  mount() {
+    document.querySelector('[data-mount="patient-preset"]').replaceWith(this._presetMenu.el);
   }
 }

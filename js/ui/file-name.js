@@ -9,8 +9,8 @@
 import { AppEvents } from '../events.js';
 
 export class FileNameDisplay {
-  /** @param {HTMLElement} mountEl – element to append the chip into */
-  constructor(mountEl) {
+  constructor() {
+    const mountEl = document.querySelector('[data-mount="file-name"]');
     // ── Build DOM ──────────────────────────────────────────────────────────
     this._wrap = document.createElement('span');
     this._wrap.className = 'loaded-file-name-wrap';

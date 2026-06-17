@@ -23,7 +23,6 @@ const _GITHUB_SVG = '<svg width="13" height="13" viewBox="0 0 16 16" fill="curre
 
 export class AuthPanel {
   static _questDocTree = null;  // snapshot from QUESTIONNAIRE_LOADED
-  static _cloudEls = { saveBtn: null, saveSep: null, loadItem: null, loadSep: null };
 
   static {
     if (typeof document !== 'undefined') {
@@ -34,13 +33,14 @@ export class AuthPanel {
     }
   }
 
-  static configureCloudEls({ saveBtn, saveSep, loadItem, loadSep, questLoader: _ignored }) {
-    AuthPanel._cloudEls = { saveBtn, saveSep, loadItem, loadSep };
-  }
-
-  constructor(mountEl) {
-    this._mount     = mountEl;
+  constructor() {
+    this._mount     = document.querySelector('[data-mount="auth-panel"]');
     this._cloudId   = null;  // cloud row id of the currently open questionnaire
+    // Cloud menu elements exist in DOM after mountHeaderActions() which runs before new AuthPanel()
+    this._cloudSaveBtn  = document.querySelector('[data-mount="auth-cloud-save-btn"]');
+    this._cloudSaveSep  = document.querySelector('[data-mount="auth-cloud-save-sep"]');
+    this._cloudLoadItem = document.querySelector('[data-mount="auth-cloud-load-item"]');
+    this._cloudLoadSep  = document.querySelector('[data-mount="auth-cloud-load-sep"]');
 
     this._buildDOM();
     this._bindHandlers();
@@ -143,7 +143,7 @@ export class AuthPanel {
   // ── Cloud operations (triggered by menu events) ───────────────────────────
 
   async _doCloudSave() {
-    const { saveBtn } = AuthPanel._cloudEls;
+    const saveBtn = this._cloudSaveBtn;
     saveBtn.classList.add('load-menu-item--loading');
     try {
       const fhirJson = buildFHIRObject();
@@ -199,7 +199,8 @@ export class AuthPanel {
 
   _initReactive() {
     const syncCloudSave = () => {
-      const { saveBtn, saveSep } = AuthPanel._cloudEls;
+      const saveBtn = this._cloudSaveBtn;
+      const saveSep = this._cloudSaveSep;
       const loggedIn = this._userChip.style.display !== 'none';
       const hasNodes = (AuthPanel._questDocTree?.length ?? 0) > 0;
       const show = loggedIn && hasNodes ? '' : 'none';
@@ -214,8 +215,10 @@ export class AuthPanel {
   // ── Auth state ────────────────────────────────────────────────────────────
 
   _setAuthUI(user) {
-    const { saveBtn, saveSep, loadItem, loadSep } = AuthPanel._cloudEls;
-
+    const saveBtn  = this._cloudSaveBtn;
+    const saveSep  = this._cloudSaveSep;
+    const loadItem = this._cloudLoadItem;
+    const loadSep  = this._cloudLoadSep;
     if (user) {
       this._signInBtn.style.display  = 'none';
       this._userChip.style.display   = 'inline-flex';

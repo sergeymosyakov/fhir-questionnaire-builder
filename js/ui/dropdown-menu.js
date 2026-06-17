@@ -19,7 +19,7 @@ export class DropdownMenu {
                 testid, tipTitle, tipBody, tipFhir, tipSpec } = {}) {
     this._wrap = document.createElement('div');
     this._wrap.className = 'load-wrap';
-    if (wrapId) this._wrap.id = wrapId;
+    if (wrapId) { this._wrap.id = wrapId; this._wrap.dataset.mount = wrapId; }
 
     this._btn = document.createElement('button');
     this._btn.id = btnId;

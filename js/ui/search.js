@@ -15,8 +15,16 @@ let _matches = [];   // matched elements (lform-item rows OR <mark> nodes)
 let _idx     = -1;   // current match index
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-export function init(elements) {
-  _el = elements;
+export function init() {
+  _el = {
+    input:        document.querySelector('[data-mount="search-input"]'),
+    prevBtn:      document.querySelector('[data-mount="search-prev-btn"]'),
+    nextBtn:      document.querySelector('[data-mount="search-next-btn"]'),
+    counter:      document.querySelector('[data-mount="search-counter"]'),
+    lform:        document.querySelector('[data-mount="preview-lform"]'),
+    fhirJsonView: document.querySelector('[data-mount="fhir-json-view"]'),
+    searchWrap:   document.querySelector('[data-mount="search-wrap"]'),
+  };
 
   _el.input.addEventListener('input', _onInput);
   _el.input.addEventListener('keydown', e => {

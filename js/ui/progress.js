@@ -9,8 +9,13 @@
 let _el  = null;
 let _op  = '';
 
-export function init(elements) {
-  _el = elements;
+export function init() {
+  _el = {
+    wrap:    document.querySelector('[data-mount="progress-wrap"]'),
+    bar:     document.querySelector('[data-mount="progress-bar"]'),
+    label:   document.querySelector('[data-mount="progress-label"]'),
+    blocker: document.querySelector('[data-mount="ui-blocker"]'),
+  };
   _el.wrap.style.display    = 'none';
   _el.blocker.style.display = 'none';
 }

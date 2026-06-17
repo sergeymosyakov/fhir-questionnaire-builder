@@ -28,8 +28,10 @@ export class BuilderPanel {
   }
 
   // ── Public API ──────────────────────────────────────────────────────────────
-  mount({ collapseAllBtn, expandAllBtn, treeContainer }) {
-    this._container = treeContainer;
+  mount() {
+    this._container = document.querySelector('[data-mount="tree-container"]');
+    const collapseAllBtn = document.querySelector('[data-mount="collapse-all-btn"]');
+    const expandAllBtn   = document.querySelector('[data-mount="expand-all-btn"]');
     collapseAllBtn.onclick = () =>
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_COLLAPSE_ALL));
     expandAllBtn.onclick = () =>
