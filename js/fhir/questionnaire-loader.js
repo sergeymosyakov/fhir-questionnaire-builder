@@ -30,6 +30,17 @@ export class QuestionnaireLoader {
     this._renderTreeAsync  = renderTreeAsyncFn  || renderTreeAsync;
     // Reset-flow callbacks — injected via configureResetFlow()
     this._resetFlow        = null;
+
+    // Self-wire lifecycle events — no external wiring needed in app.js
+    if (typeof document !== 'undefined') {
+      document.addEventListener(AppEvents.QUESTIONNAIRE_CLEAR_REQUESTED, () => this.confirmAndReset());
+      document.addEventListener(AppEvents.QUESTIONNAIRE_RESET, () => this.reset());
+      document.addEventListener(AppEvents.QUESTIONNAIRE_LOAD_REQUESTED, async e => {
+        const { data, fileName } = e.detail;
+        if (await this.confirmBeforeLoad() !== 'proceed') return;
+        this.load(data, fileName);
+      });
+    }
   }
 
   /**

@@ -82,16 +82,8 @@ AuthPanel.configureCloudEls({
 // AuthPanel — mounts sign-in / user chip into authWrap, handles cloud ops
 new AuthPanel(document.getElementById('authWrap'));
 
-// questionnaire-clear-requested is dispatched by the × button in FileNameDisplay
-document.addEventListener(AppEvents.QUESTIONNAIRE_CLEAR_REQUESTED, () => questLoader.confirmAndReset());
-// questionnaire-reset is dispatched by AuthPanel (sign-out with unsaved work)
-document.addEventListener(AppEvents.QUESTIONNAIRE_RESET, () => questLoader.reset());
-// questionnaire-load-requested is dispatched by AuthPanel (cloud load)
-document.addEventListener(AppEvents.QUESTIONNAIRE_LOAD_REQUESTED, async e => {
-  const { data, fileName } = e.detail;
-  if (await questLoader.confirmBeforeLoad() !== 'proceed') return;
-  questLoader.load(data, fileName);
-});
+// questionnaire-clear-requested, questionnaire-reset, questionnaire-load-requested
+// are all handled by QuestionnaireLoader which self-wires in its constructor.
 
 // Seed all subscribers with the initial empty questDoc+answerStore.
 // Uses APP_CONTEXT_READY (not QUESTIONNAIRE_LOADED) so it does NOT
