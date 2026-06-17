@@ -32,6 +32,9 @@ export function init() {
 export function update({ visible, ctx }) {
   if (!_btn) return;
 
+  const store = _getStore();
+  if (!store) return; // APP_CONTEXT_READY not yet fired
+
   const anyVisible = visible.length > 0;
   const fp   = ctx?.fp   ?? null;
   const qr   = ctx?.qr   ?? null;
@@ -44,7 +47,6 @@ export function update({ visible, ctx }) {
   );
   const hasMandatory = mandatoryItems.length > 0;
 
-  const store = _getStore();
   const calcItems = activeItems.filter(r =>
     r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox'
   );
@@ -70,7 +72,7 @@ export function update({ visible, ctx }) {
   }
 
   const formItemsOk = visible.filter(r => !r.disabled && !r.hidden).every(res => {
-    if (res.node.type === 'item') return res.ok && calcFormOk(res.node);
+    if (res.node.type === 'item') return res.ok && calcFormOk(res.node, store);
     return res.ok;
   });
   const finalOk = (hasMandatory ? formItemsOk : true) && (hasCalc ? calcAllOk : true) &&
