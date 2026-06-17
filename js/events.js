@@ -189,6 +189,8 @@ const _cache = new Map();
 export const EventState = {
   /** @returns {object|undefined} last detail for the event, or undefined if never fired */
   get(eventName) { return _cache.get(eventName); },
+  /** For testing only — seed the cache without dispatching an event */
+  _set(eventName, detail) { _cache.set(eventName, detail); },
 };
 
 if (typeof document !== 'undefined') {

@@ -14,7 +14,7 @@ import { versionRegistry } from './version-registry.js';
 import { loadConfirmModal } from '../ui/modals/load-confirm-modal.js';
 
 export class QuestionnaireLoader {
-  constructor(override = {}) {
+  constructor() {
     this._questDoc         = null;
     this._tree             = null;
     this._answerStore      = null;
@@ -27,14 +27,9 @@ export class QuestionnaireLoader {
         this._tree        = questDoc.tree;
         this._answerStore = answerStore;
       };
-      // Optional DI override (tests) takes precedence over EventState
-      if (override.questDoc) {
-        _init(override);
-      } else {
-        const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
-        if (cached?.questDoc) { _init(cached); }
-        else { document.addEventListener(AppEvents.APP_CONTEXT_READY, e => _init(e.detail), { once: true }); }
-      }
+      const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
+      if (cached?.questDoc) { _init(cached); }
+      else { document.addEventListener(AppEvents.APP_CONTEXT_READY, e => _init(e.detail), { once: true }); }
       document.addEventListener(AppEvents.VALIDATOR_TOGGLE, e => {
         if (e.detail?.id === 'local') this._validateEnabled = e.detail.enabled;
       });

@@ -45,6 +45,7 @@ const progress                   = await import('../js/ui/progress.js');
 const { GroupNode }              = await import('../js/nodes/group-node.js');
 const { terminologyService }     = await import('../js/fhir/terminology-service.js');
 const { loadConfirmModal }       = await import('../js/ui/modals/load-confirm-modal.js');
+const { EventState, AppEvents }  = await import('../js/events.js');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function makeLoader(overrides = {}) {
@@ -58,10 +59,8 @@ function makeLoader(overrides = {}) {
     variables: [],
     reset: vi.fn(),
   };
-  return new QuestionnaireLoader({
-    questDoc,
-    answerStore,
-  });
+  EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc, answerStore });
+  return new QuestionnaireLoader();
 }
 
 beforeEach(() => {

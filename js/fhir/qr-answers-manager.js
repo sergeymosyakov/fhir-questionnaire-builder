@@ -7,7 +7,7 @@ import * as validateModal from '../ui/modals/validate-modal.js';
 import { AppEvents, EventState } from '../events.js';
 
 export class QRAnswersManager {
-  constructor(override = {}) {
+  constructor() {
     this._answerStore     = null;
     this._tree            = null;
     this._questDoc        = null;
@@ -19,14 +19,9 @@ export class QRAnswersManager {
         this._tree        = questDoc.tree;
         this._questDoc    = questDoc;
       };
-      // Optional DI override (tests) takes precedence over EventState
-      if (override.questDoc) {
-        _init(override);
-      } else {
-        const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
-        if (cached?.questDoc) { _init(cached); }
-        else { document.addEventListener(AppEvents.APP_CONTEXT_READY, e => _init(e.detail), { once: true }); }
-      }
+      const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
+      if (cached?.questDoc) { _init(cached); }
+      else { document.addEventListener(AppEvents.APP_CONTEXT_READY, e => _init(e.detail), { once: true }); }
 
       document.addEventListener(AppEvents.VALIDATOR_TOGGLE, e => {
         if (e.detail?.id === 'local') this._validateEnabled = e.detail.enabled;

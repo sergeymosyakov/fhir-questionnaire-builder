@@ -17,14 +17,14 @@ const { QRAnswersManager }       = await import('../js/fhir/qr-answers-manager.j
 const { showError }              = await import('../js/ui/toast.js');
 const validateModal              = await import('../js/ui/modals/validate-modal.js');
 const { importQRAnswers }        = await import('../js/fhir/qr-import.js');
+const { EventState, AppEvents }  = await import('../js/events.js');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function makeManager(overrides = {}) {
-  const defaults = {
-    questDoc:    overrides.questDoc ?? { rawFhir: null, tree: [] },
-    answerStore: { data: {}, get: () => undefined },
-  };
-  return new QRAnswersManager({ ...defaults, ...overrides });
+  const questDoc    = overrides.questDoc ?? { rawFhir: null, tree: [] };
+  const answerStore = overrides.answerStore ?? { data: {}, get: () => undefined };
+  EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc, answerStore });
+  return new QRAnswersManager();
 }
 
 const SUCCESS = {
