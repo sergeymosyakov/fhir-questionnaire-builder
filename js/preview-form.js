@@ -331,6 +331,7 @@ export class PreviewForm {
     search.refresh();
     this._updateJsonView();
     progress.hide();
+    document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_RENDER_DONE));
   }
 
   _updateJsonView() {

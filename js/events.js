@@ -49,6 +49,7 @@ export const AppEvents = Object.freeze({
   // Dispatched by any preview control when the user changes a response value.
   // PreviewForm listens and triggers a re-render via _asyncRender.
   RESPONSE_CHANGED:    'preview:response-changed',
+  PREVIEW_RENDER_DONE: 'preview:render-done',
 
   // ── Patient / QR ─────────────────────────────────────────────────────────
   PATIENT_CTX_APPLIED: 'patient-ctx-applied',

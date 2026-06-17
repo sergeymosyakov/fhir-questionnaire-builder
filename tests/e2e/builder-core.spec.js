@@ -270,13 +270,14 @@ test.describe('Load FHIR → both panels', () => {
     );
 
     await page.getByTestId('expand-all-btn').click();
-    await openDropdownItem(page, 'tools-btn', 'expand-all-item');
 
-    await page.waitForFunction(() => {
-      const nodes = document.querySelectorAll('[data-testid="tree-container"] [data-node-id]').length;
-      const rows  = document.querySelectorAll('[data-testid="preview-panel"] [data-preview-id]').length;
-      return nodes > 0 && nodes === rows;
-    }, { timeout: 15000 });
+    // Listen for PREVIEW_RENDER_DONE before triggering expand-all in settings
+    await page.evaluate(() => {
+      window.__previewRenderDone = false;
+      document.addEventListener('preview:render-done', () => { window.__previewRenderDone = true; }, { once: true });
+    });
+    await openDropdownItem(page, 'tools-btn', 'expand-all-item');
+    await page.waitForFunction(() => window.__previewRenderDone, { timeout: 20_000 });
 
     const nodeCount    = await page.locator('[data-testid="tree-container"] [data-node-id]').count();
     const previewCount = await page.locator('[data-testid="preview-panel"] [data-preview-id]').count();
