@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildQR } from '../js/fhir/qr-builder.js';
 
-const { evalConstraints } = await import('../js/state.js');
+const { evalConstraints } = await import('../js/fhir/form-checks.js');
 
 // Minimal fhirpath mock: navigates QR structure and evaluates comparisons.
 // Supports: %resource.repeat(item).where(linkId='X').answer.valueDecimal >= N

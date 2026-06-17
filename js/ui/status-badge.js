@@ -4,7 +4,7 @@
 //   update({ visible, ctx })    — visible: eval results; ctx: { fp, qr, envVars }
 //                                 Computes mandatory/calc/constraint/range criteria internally.
 import { AppEvents, EventState } from '../events.js';
-import { isMandatory, calcFormOk, evalConstraints, CHECKABLE_TYPES } from '../state.js';
+import { isMandatory, calcFormOk, evalConstraints, CHECKABLE_TYPES } from '../fhir/form-checks.js';
 
 function _getStore() { return EventState.get(AppEvents.APP_CONTEXT_READY)?.answerStore; }
 
@@ -59,7 +59,7 @@ export function update({ visible, ctx }) {
     !isMandatory(r.node) && (r.node._minValue !== undefined || r.node._maxValue !== undefined)
   );
   const hasRange   = rangeItems.length > 0;
-  const rangeAllOk = rangeItems.every(r => calcFormOk(r.node));
+  const rangeAllOk = rangeItems.every(r => calcFormOk(r.node, store));
 
   const hasCriteria = hasMandatory || hasCalc || hasConstraints || hasRange;
 
@@ -79,10 +79,10 @@ export function update({ visible, ctx }) {
     hasCriteria;
 
   const failingItems = [
-    ...mandatoryItems.filter(r => !r.ok || !calcFormOk(r.node)).map(r => ({ title: r.node.title, id: r.node.id })),
+    ...mandatoryItems.filter(r => !r.ok || !calcFormOk(r.node, store)).map(r => ({ title: r.node.title, id: r.node.id })),
     ...calcItems.filter(r => store?.get(r.node.id) !== true).map(r => ({ title: r.node.title, id: r.node.id })),
     ...constraintItems.filter(r => !evalConstraints(r.node, fp, qr, cEnv)).map(r => ({ title: r.node.title, id: r.node.id })),
-    ...rangeItems.filter(r => !calcFormOk(r.node)).map(r => ({ title: r.node.title, id: r.node.id })),
+    ...rangeItems.filter(r => !calcFormOk(r.node, store)).map(r => ({ title: r.node.title, id: r.node.id })),
   ];
 
   _wrap.style.display = 'inline-flex';

@@ -2,13 +2,13 @@
 import { _rc } from './preview/render-ctx.js';
 import { BaseNode } from './nodes/index.js';
 import { GroupNode } from './nodes/group-node.js';
-import { AppEvents } from './events.js';
+import { AppEvents, EventState } from './events.js';
 import { highlightJson } from './utils.js';
 import { evaluateNode } from './eval.js';
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes, buildVarEnv, evalInitialExprNodes } from './fhir/calc.js';
 import { buildFHIRObject } from './fhir/export.js';
-import { calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './state.js';
+import { calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './fhir/form-checks.js';
 
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
@@ -35,7 +35,7 @@ export class PreviewForm {
     this._answerStore     = deps.answerStore;
     this._rawFhir         = deps.questDoc;
     this._questVariables  = deps.questDoc.variables;
-    this._calcFormOk      = calcFormOk;
+    this._calcFormOk      = node => calcFormOk(node, this._answerStore);
 
     this._viewPrefs     = { showLinkId: true, showPrefix: true, showBadges: true, showHiddenItems: true };
     this._previewMode   = 'preview';
@@ -52,7 +52,7 @@ export class PreviewForm {
     _rc.values           = this._answerStore.data;
     _rc.updateGroupIcons = () => GroupNode.updateAll(_rc);
     _rc.isMandatory      = isMandatory;
-    _rc.calcFormOk       = calcFormOk;
+    _rc.calcFormOk       = node => calcFormOk(node, this._answerStore);
     _rc.evalConstraints  = evalConstraints;
     _rc.getValue         = id => this._answerStore.get(id);
     _rc.CHECKABLE_TYPES  = CHECKABLE_TYPES;
@@ -68,7 +68,14 @@ export class PreviewForm {
       document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_NAVIGATE_TO, { detail: { id: e.detail.id } }));
     });
     document.addEventListener(AppEvents.RESPONSE_CHANGED, () => this._asyncRender(++this._renderVersion));
-    this.mount(); // self-mounts — DOM already ready when constructor runs
+
+    // mount() needs viewOptionsWrap/previewModeWrap which are created by mountHeaderActions()
+    // — defer until APP_CONTEXT_READY which fires after mountHeaderActions()
+    if (EventState.get(AppEvents.APP_CONTEXT_READY)) {
+      this.mount();
+    } else {
+      document.addEventListener(AppEvents.APP_CONTEXT_READY, () => this.mount(), { once: true });
+    }
   }
 
   // ── Public API ──────────────────────────────────────────────────────────────

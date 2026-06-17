@@ -22,7 +22,8 @@ function makeFp(routes) {
   return { evaluate: vi.fn((qr, expr, _env) => routes[expr] ?? []) };
 }
 
-const { evalConstraints, answerStore } = await import('../js/state.js');
+const { evalConstraints } = await import('../js/fhir/form-checks.js');
+const { answerStore } = await import('../js/answer-store.js');
 const { AppEvents } = await import('../js/events.js');
 
 function setValue(id, v) { document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id, value: v } })); }

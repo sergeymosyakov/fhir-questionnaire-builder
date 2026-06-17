@@ -1,7 +1,7 @@
 // ── Tree evaluation: enableWhen visibility ───────────────────────────────────────
 // ctx: { fp, qr, envVars } — fhirpath + QuestionnaireResponse + variable env
 // (optional; needed only for enableWhenExpression FHIRPath evaluation)
-import { answerStore } from './state.js';
+import { answerStore } from './answer-store.js';
 
 // Marks every node in a subtree as visible-but-disabled.
 export function markAllDisabled(nodes, results) {

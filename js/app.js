@@ -2,7 +2,8 @@
 import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
-import { questDoc, answerStore } from './state.js';
+import { questDoc } from './fhir/quest-document.js';
+import { answerStore } from './answer-store.js';
 import './fhir/import.js';
 import './fhir/qr-export.js';
 import './fhir/obs-export.js';

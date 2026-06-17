@@ -19,7 +19,7 @@ const _mockAnswerStore = {
   },
 };
 
-vi.mock('../js/state.js', () => ({
+vi.mock('../js/answer-store.js', () => ({
   answerStore: _mockAnswerStore,
 }));
 
