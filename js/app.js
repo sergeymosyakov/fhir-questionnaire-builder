@@ -67,8 +67,7 @@ export const previewForm = new PreviewForm({
 // Mount header action menus into toolbar
 mountHeaderActions(document.getElementById('headerActions'));
 
-// Inject manager singletons into menus (breaks circular app.js ← menu → app.js)
-questionnairesMenu.configure({ questLoader });
+// questionnairesMenu dispatches QUESTIONNAIRE_LOAD_REQUESTED — no configure() needed
 
 // FileNameDisplay — mounts chip into preview section-title; self-contained
 new FileNameDisplay(document.querySelector('.right-panel .section-title'));

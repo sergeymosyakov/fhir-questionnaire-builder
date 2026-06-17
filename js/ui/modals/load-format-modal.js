@@ -28,13 +28,19 @@ function _saveFormat(v) {
   try { localStorage.setItem(LS_KEY, v); } catch { /* ignore */ }
 }
 
+import { AppEvents } from '../../events.js';
+
 class LoadFormatModal extends Modal {
   getName() { return 'loadFormatModal'; }
 
   constructor() {
     super({ applyLabel: 'Choose file\u2026', cancelLabel: 'Cancel', maxWidth: '400px' });
     this._onLoaded     = null;
-    this._defaultOnLoaded = null;
+    this._defaultOnLoaded = (data, fileName) => {
+      document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOAD_REQUESTED, {
+        detail: { data, fileName },
+      }));
+    };
     this._format       = _savedFormat();
 
     // ── Body ──────────────────────────────────────────────────────────────────
@@ -70,11 +76,6 @@ class LoadFormatModal extends Modal {
     inp.dataset.testid = testid;
     inp.addEventListener('change', handler);
     return inp;
-  }
-
-  /** Set a persistent default loader used when the modal is bypassed (e.g. E2E tests calling setInputFiles directly). */
-  configure(defaultOnLoaded) {
-    this._defaultOnLoaded = defaultOnLoaded;
   }
 
   /** Open the modal. `onLoaded(fhirJson, fileName)` is called after successful parse. */
