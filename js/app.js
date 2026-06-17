@@ -68,13 +68,10 @@ document.dispatchEvent(new CustomEvent(AppEvents.APP_CONTEXT_READY, {
 // BuilderPanel.mount() also wires addRootGroup, renumber, collapse/expand buttons
 mountBuilder();
 
-// ── Global progress bar (self-finds progress-* elements) ─────────────────────
-
 // ── FHIR version selector (self-finds [data-mount="fhir-version-select"]) ─────
 new FhirVersionSelect(() => questDoc.fhirTarget).mount();
 
-// ── Builder toolbar + tree container (self-finds by data-mount) ───────────────
-mountBuilder();
+// ── Global progress bar (self-finds progress-* elements) ─────────────────────
 progress.init();
 
 // ── Tooltip init ──────────────────────────────────────────────────────────────
