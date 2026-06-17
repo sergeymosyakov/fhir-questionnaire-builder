@@ -64,6 +64,7 @@ export class BuilderPanel {
     this._container.innerHTML = '';
     for (const node of this._tree) this._container.appendChild(this._renderNode(node));
     this._container.appendChild(makeRootDropZone());
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RENDER_DONE));
   }
 
   async renderTreeAsync(onProgress) {

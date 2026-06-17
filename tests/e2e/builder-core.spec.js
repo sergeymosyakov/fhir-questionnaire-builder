@@ -271,19 +271,17 @@ test.describe('Load FHIR → both panels', () => {
 
     await page.getByTestId('expand-all-btn').click();
 
-    // Listen for PREVIEW_RENDER_DONE before triggering expand-all in settings
-    await page.evaluate(() => {
-      window.__previewRenderDone = false;
-      document.addEventListener('preview:render-done', () => { window.__previewRenderDone = true; }, { once: true });
-    });
+    await page.evaluate(() => { window.__done = false; document.addEventListener('preview:render-done', () => { window.__done = true; }, { once: true }); });
     await openDropdownItem(page, 'tools-btn', 'expand-all-item');
-    await page.waitForFunction(() => window.__previewRenderDone, { timeout: 20_000 });
+    await page.waitForFunction(() => window.__done, { timeout: 20_000 });
+
+    await page.waitForFunction(() => window.__done, { timeout: 20_000 });
 
     const nodeCount    = await page.locator('[data-testid="tree-container"] [data-node-id]').count();
     const previewCount = await page.locator('[data-testid="preview-panel"] [data-preview-id]').count();
 
     expect(nodeCount).toBeGreaterThan(0);
-    expect(previewCount).toBeGreaterThan(0);
+    expect(nodeCount).toBe(previewCount);
   });
 });
 

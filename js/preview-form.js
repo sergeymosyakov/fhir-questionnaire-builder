@@ -83,6 +83,8 @@ export class PreviewForm {
       document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_NAVIGATE_TO, { detail: { id: e.detail.id } }));
     });
     document.addEventListener(AppEvents.RESPONSE_CHANGED, () => this._asyncRender(++this._renderVersion));
+    document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => this._asyncRender(++this._renderVersion));
+    document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => this._asyncRender(++this._renderVersion));
 
     // mount() needs viewOptionsWrap/previewModeWrap which are created by mountHeaderActions()
     // — defer until APP_CONTEXT_READY which fires after mountHeaderActions()
@@ -99,12 +101,10 @@ export class PreviewForm {
 
   collapseAll() {
     document.dispatchEvent(new CustomEvent(AppEvents.COLLAPSE_ALL_PREVIEW));
-    this._asyncRender(++this._renderVersion);
   }
 
   expandAll() {
     document.dispatchEvent(new CustomEvent(AppEvents.EXPAND_ALL_PREVIEW));
-    this._asyncRender(++this._renderVersion);
   }
 
   mount() {

@@ -50,6 +50,7 @@ export const AppEvents = Object.freeze({
   // PreviewForm listens and triggers a re-render via _asyncRender.
   RESPONSE_CHANGED:    'preview:response-changed',
   PREVIEW_RENDER_DONE: 'preview:render-done',
+  BUILDER_RENDER_DONE:  'builder:render-done',
 
   // ── Patient / QR ─────────────────────────────────────────────────────────
   PATIENT_CTX_APPLIED: 'patient-ctx-applied',
