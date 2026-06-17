@@ -162,6 +162,11 @@ export class AuthPanel {
   }
 
   async _doCloudLoad() {
+    const proceed = await new Promise(resolve =>
+      document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOAD_CONFIRM_REQUESTED,
+        { detail: { resolve } }))
+    );
+    if (!proceed) return;
     cloudModal.open(async id => {
       try {
         progress.show('Loading from cloud\u2026');

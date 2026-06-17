@@ -66,6 +66,11 @@ export class QuestionnairesMenu extends DropdownMenu {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       const key = this._recentItem.dataset.draftKey;
       if (!key) return;
+      const proceed = await new Promise(resolve =>
+        document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOAD_CONFIRM_REQUESTED,
+          { detail: { resolve } }))
+      );
+      if (!proceed) return;
       const data = await autosave.getDraftData(key);
       if (!data) return;
       progress.show('Loading recent draft\u2026');
@@ -74,8 +79,13 @@ export class QuestionnairesMenu extends DropdownMenu {
       }));
     });
 
-    this._loadFromFileItem.addEventListener('click', () => {
+    this._loadFromFileItem.addEventListener('click', async () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
+      const proceed = await new Promise(resolve =>
+        document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOAD_CONFIRM_REQUESTED,
+          { detail: { resolve } }))
+      );
+      if (!proceed) return;
       loadFormatModal.open((data, fileName) => {
         progress.show('Loading ' + fileName + '\u2026');
         progress.update(0, 1);
@@ -85,8 +95,14 @@ export class QuestionnairesMenu extends DropdownMenu {
       });
     });
 
-    this._loadLibraryItem.addEventListener('click', () => {
+    this._loadLibraryItem.addEventListener('click', async () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
+      // Ask confirmation before opening library (tree may have unsaved items)
+      const proceed = await new Promise(resolve =>
+        document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOAD_CONFIRM_REQUESTED,
+          { detail: { resolve } }))
+      );
+      if (!proceed) return;
       libraryModal.open('fhir-r4', item => {
         progress.show('Loading ' + item.label + '\u2026');
         fetch('sampledata/' + item.file)

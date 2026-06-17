@@ -32,9 +32,14 @@ export class QuestionnaireLoader {
     if (typeof document !== 'undefined') {
       document.addEventListener(AppEvents.QUESTIONNAIRE_CLEAR_REQUESTED, () => this.confirmAndReset());
       document.addEventListener(AppEvents.QUESTIONNAIRE_RESET, () => this.reset());
+      document.addEventListener(AppEvents.QUESTIONNAIRE_LOAD_CONFIRM_REQUESTED, async e => {
+        const result = await this.confirmBeforeLoad();
+        e.detail.resolve(result === 'proceed');
+      });
       document.addEventListener(AppEvents.QUESTIONNAIRE_LOAD_REQUESTED, async e => {
         const { data, fileName } = e.detail;
-        if (await this.confirmBeforeLoad() !== 'proceed') return;
+        // Note: caller may have already confirmed (e.g. library open after confirm).
+        // We do NOT call confirmBeforeLoad here — the menu already did it.
         this.load(data, fileName);
       });
     }

@@ -22,6 +22,11 @@ export const AppEvents = Object.freeze({
   QUESTIONNAIRE_CLEAR_REQUESTED: 'questionnaire-clear-requested',
   QUESTIONNAIRE_RESET:           'questionnaire-reset',
   QUESTIONNAIRE_META_CHANGED:    'questionnaire-meta-changed',
+  // Dispatched before opening a load dialog when tree may have unsaved items.
+  // detail: { resolve: (proceed: boolean) => void }
+  // loadConfirmModal resolves true if proceed, false if cancel.
+  QUESTIONNAIRE_LOAD_CONFIRM_REQUESTED: 'questionnaire-load-confirm-requested',
+
   // detail: { data: object, fileName: string }
   QUESTIONNAIRE_LOAD_REQUESTED:  'questionnaire-load-requested',
   // Dispatched once at app startup to register questDoc + answerStore singletons.
