@@ -18,6 +18,7 @@ vi.mock('../js/ui/progress.js', () => ({ show: vi.fn(), update: vi.fn(), hide: v
 vi.mock('../js/builder/index.js', () => ({
   renderTreeAsync: vi.fn(() => Promise.resolve()),
   renderTree: vi.fn(),
+  addRootGroup: vi.fn(),
 }));
 vi.mock('../js/nodes/group-node.js', () => ({
   GroupNode: { resetCollapsedFromTree: vi.fn() },
@@ -41,7 +42,6 @@ const { importFHIR }             = await import('../js/fhir/import.js');
 const { validateTree }           = await import('../js/fhir/validate.js');
 const validateModal              = await import('../js/ui/modals/validate-modal.js');
 const progress                   = await import('../js/ui/progress.js');
-const { renderTreeAsync, renderTree } = await import('../js/builder/index.js');
 const { GroupNode }              = await import('../js/nodes/group-node.js');
 const { terminologyService }     = await import('../js/fhir/terminology-service.js');
 const { loadConfirmModal }       = await import('../js/ui/modals/load-confirm-modal.js');
@@ -63,8 +63,6 @@ function makeLoader(overrides = {}) {
     answerStore,
     reinitForm:     overrides.reinitForm ?? vi.fn(() => Promise.resolve()),
     shouldValidate: overrides.shouldValidate,
-    renderTree:     overrides.renderTree,
-    renderTreeAsync: overrides.renderTreeAsync,
   });
 }
 
@@ -73,7 +71,6 @@ beforeEach(() => {
   // Reset default mock return values
   importFHIR.mockImplementation(() => {});
   validateTree.mockReturnValue([]);
-  renderTreeAsync.mockResolvedValue(undefined);
   terminologyService.expandAll.mockResolvedValue([]);
   loadConfirmModal.open.mockResolvedValue('proceed');
 });
@@ -108,7 +105,7 @@ describe('QuestionnaireLoader.load — success', () => {
   it('calls importFHIR with the raw data', async () => {
     const data = { resourceType: 'Questionnaire' };
     await makeLoader().load(data, 'test.json');
-    expect(importFHIR).toHaveBeenCalledWith(data, expect.any(Function));
+    expect(importFHIR).toHaveBeenCalledWith(data);
   });
 
   it('calls GroupNode.resetCollapsedFromTree', async () => {
@@ -130,14 +127,9 @@ describe('QuestionnaireLoader.load — success', () => {
     expect(loadedEvt[0].detail.fileName).toBe('my-qs.json');
   });
 
-  it('calls renderTreeAsync', async () => {
+  it('calls progress.show and progress.hide in finally', async () => {
     await makeLoader().load({}, 'test.json');
-    expect(renderTreeAsync).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls progress.show before render, progress.hide in finally', async () => {
-    await makeLoader().load({}, 'test.json');
-    expect(progress.show).toHaveBeenCalledTimes(1);
+    expect(progress.show).not.toHaveBeenCalled(); // rendering moved to BuilderPanel
     expect(progress.hide).toHaveBeenCalledTimes(1);
   });
 
@@ -167,10 +159,10 @@ describe('QuestionnaireLoader.load — import error', () => {
     expect(progress.hide).toHaveBeenCalledTimes(1);
   });
 
-  it('does not call renderTreeAsync after import error', async () => {
+  it('does not throw when importFHIR throws', async () => {
     importFHIR.mockImplementation(() => { throw new Error('oops'); });
     await makeLoader().load({}, 'bad.json');
-    expect(renderTreeAsync).not.toHaveBeenCalled();
+    expect(progress.hide).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -237,10 +229,12 @@ describe('QuestionnaireLoader.reset', () => {
     expect(evt).toBeDefined();
   });
 
-  it('calls renderTree', () => {
+  it('dispatches BUILDER_RERENDER on reset', () => {
     const loader = makeLoader();
     loader.reset();
-    expect(renderTree).toHaveBeenCalledTimes(1);
+    const calls = document.dispatchEvent.mock.calls;
+    const evt = calls.find(c => c[0].type === 'builder:rerender');
+    expect(evt).toBeDefined();
   });
 
   it('dispatches QUESTIONNAIRE_CLEARED event', () => {

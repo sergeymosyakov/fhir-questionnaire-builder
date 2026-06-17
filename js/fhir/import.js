@@ -6,7 +6,7 @@ import { destroyTree } from '../utils.js';
 import { resetSeq } from '../id.js';
 
 let _svc = {};
-/** @param {{ questDoc?: import('./quest-document.js').QuestDocument, renderTree?: Function }} svc */
+/** @param {{ questDoc?: import('./quest-document.js').QuestDocument }} svc */
 export function configure(svc) { _svc = { ..._svc, ...svc }; }
 if (typeof document !== 'undefined') {
   document.addEventListener(AppEvents.APP_CONTEXT_READY,
@@ -51,8 +51,8 @@ function applyInitialValues(nodes) {
 }
 
 // Main import entry point
-export function importFHIR(fhirJson, renderFn) {
-  const { questDoc, renderTree } = _svc;
+export function importFHIR(fhirJson) {
+  const { questDoc } = _svc;
   const { tree, meta: questMeta, variables: questVariables, contained: questContained } = questDoc;
   let q = fhirJson;
   if (typeof q === 'string') {
@@ -148,5 +148,5 @@ export function importFHIR(fhirJson, renderFn) {
     // tree is fully built — notify preview to reinitialise
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
   }
-  if (renderFn) renderFn(); else renderTree();
+  document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
 }

@@ -3,7 +3,7 @@ import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
 import { questDoc, answerStore, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './state.js';
-import { configure as configureImport } from './fhir/import.js';
+import './fhir/import.js';
 import './fhir/qr-export.js';
 import './fhir/obs-export.js';
 import { initValidators } from './fhir/validators/init.js';
@@ -13,7 +13,7 @@ import * as progress from './ui/progress.js';
 import { RenumberControl } from './ui/renumber-control.js';
 import * as search from './ui/search.js';
 import { UndoRedo } from './ui/undo-redo.js';
-import { renumberAll, addRootGroup, mount as mountBuilder, renderTree, renderTreeAsync } from './builder/index.js';
+import { renumberAll, addRootGroup, mount as mountBuilder } from './builder/index.js';
 import * as helpModal from './ui/modals/help-modal.js';
 import { PreviewForm } from './preview-form.js';
 import { saveMenu, prefs, questionnairesMenu, mount as mountHeaderActions } from './ui/header-actions.js';
@@ -43,16 +43,12 @@ patientProfile.mount(document.getElementById('patientPresetWrap'));
 variablesPanel.configure({ mountEl: document.getElementById('variablesCardMount') });
 
 // FHIR modules self-wire via APP_CONTEXT_READY — no configure() calls needed
-// import.js still needs renderTree injected (not available via APP_CONTEXT_READY)
-configureImport({ renderTree });
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
 export const qrAnswers   = new QRAnswersManager({ questDoc, answerStore, shouldValidate: () => prefs.get('validate') });
 export const questLoader = new QuestionnaireLoader({ questDoc, answerStore,
   reinitForm:       (opts) => previewForm.reinitForm(opts),
   shouldValidate:   () => prefs.get('validate'),
-  renderTree,
-  renderTreeAsync,
 });
 
 export const previewForm = new PreviewForm({

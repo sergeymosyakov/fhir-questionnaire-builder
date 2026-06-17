@@ -12,6 +12,7 @@ import { versionCompatRegistry } from '../fhir/version-compat-registry.js';
 import { numberingService } from './numbering-service.js';
 import { findAndRemove } from '../utils.js';
 import { ConfirmDialog } from '../ui/confirm-dialog.js';
+import * as progress from '../ui/progress.js';
 
 const fhirpath = typeof window !== 'undefined' ? window.fhirpath : null;
 
@@ -150,8 +151,12 @@ export class BuilderPanel {
       () => { this._setCollapsedAll(this._tree, false); this.renderTree(); });
     document.addEventListener(AppEvents.BUILDER_COLLAPSE_ALL,
       () => { this._setCollapsedAll(this._tree, true); this.renderTree(); });
-    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => {
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, async () => {
       document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
+      progress.show('Rendering ' + this._tree.length + ' nodes…');
+      await this.renderTreeAsync((done, total) => progress.update(done, total));
+      progress.hide();
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
     });
     document.addEventListener(AppEvents.FHIR_VERSION_CHANGED, e => {
       const { versionId, fromVersionId, source } = e.detail ?? {};

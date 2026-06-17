@@ -6,7 +6,6 @@ import { importFHIR } from './import.js';
 import { validateTree } from './validate.js';
 import * as validateModal from '../ui/modals/validate-modal.js';
 import * as progress from '../ui/progress.js';
-import { renderTreeAsync, renderTree } from '../builder/index.js';
 import { GroupNode } from '../nodes/group-node.js';
 import { terminologyService } from './terminology-service.js';
 import { AppEvents } from '../events.js';
@@ -16,18 +15,14 @@ import { loadConfirmModal } from '../ui/modals/load-confirm-modal.js';
 
 export class QuestionnaireLoader {
   /** @param {{ questDoc: import('../fhir/quest-document.js').QuestDocument,
-   *            answerStore, reinitForm?, shouldValidate?,
-   *            renderTree?, renderTreeAsync? }} deps */
-  constructor({ questDoc, answerStore, reinitForm, shouldValidate,
-                renderTree: renderTreeFn, renderTreeAsync: renderTreeAsyncFn }) {
+   *            answerStore, reinitForm?, shouldValidate? }} deps */
+  constructor({ questDoc, answerStore, reinitForm, shouldValidate }) {
     this._questDoc         = questDoc;
     this._tree             = questDoc.tree;
     this._answerStore      = answerStore;
     this._reinitForm       = reinitForm || null;
     this._importSeq        = 0;
     this._shouldValidate   = shouldValidate || (() => true);
-    this._renderTree       = renderTreeFn       || renderTree;
-    this._renderTreeAsync  = renderTreeAsyncFn  || renderTreeAsync;
     // Self-wire lifecycle events — no external wiring needed in app.js
     if (typeof document !== 'undefined') {
       document.addEventListener(AppEvents.QUESTIONNAIRE_CLEAR_REQUESTED, () => this.confirmAndReset());
@@ -52,7 +47,7 @@ export class QuestionnaireLoader {
   reset() {
     this._questDoc.reset();
     document.dispatchEvent(new CustomEvent(AppEvents.ANSWERS_CLEAR));
-    this._renderTree();
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     document.dispatchEvent(new CustomEvent(AppEvents.AUTOSAVE_CLEAR_DRAFT));
     document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_CLEARED));
   }
@@ -91,7 +86,7 @@ export class QuestionnaireLoader {
   /** Full import pipeline: parse → render tree → validate → expand ValueSets. */
   async load(data, fileName) {
     try {
-      importFHIR(data, () => {});
+      importFHIR(data);
       // Auto-detect FHIR version: builder-target-version extension first, then
       // feature-based heuristics (see formatRegistry.detectVersion); default R4
       const _importedVersion = versionRegistry.detectVersion(data);
@@ -110,9 +105,6 @@ export class QuestionnaireLoader {
       document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOADED, {
         detail: { fileName: fileName || '', questDoc: this._questDoc, answerStore: this._answerStore },
       }));
-      progress.show('Rendering ' + this._tree.length + ' nodes…');
-      await this._renderTreeAsync((done, total) => progress.update(done, total));
-      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
 
       // Show import report only when local validator finds errors and validate is enabled.
       // Warnings are non-blocking — users can review them via Tools → Validate.

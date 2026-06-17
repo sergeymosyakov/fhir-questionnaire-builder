@@ -42,7 +42,7 @@ vi.mock('../js/state.js', () => ({
 vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
 const { fhirTypeToItemType, fhirOptsToStr, hasNonCodingOpts, humanEnableWhen, applyVisibility, importFHIR, configure: configureImport } = await import('../js/fhir/import.js');
-configureImport({ questDoc: _questDoc, resetSeq: vi.fn(), renderTree: vi.fn() });
+configureImport({ questDoc: _questDoc });
 
 vi.stubGlobal('alert', vi.fn());
 
