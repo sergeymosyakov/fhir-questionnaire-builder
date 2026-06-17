@@ -10,9 +10,9 @@ import './fhir/obs-export.js';
 import { initValidators } from './fhir/validators/init.js';
 import './ui/modals/obs-export-modal.js';
 import { UndoRedo } from './ui/undo-redo.js';
-import { mount as mountBuilder } from './builder/index.js';
+import './builder/index.js';
 import { PreviewForm } from './preview-form.js';
-import { prefs, mount as mountHeaderActions } from './ui/header-actions.js';
+import './ui/header-actions.js';
 import './ui/modals/index.js';
 import './ui/variables-panel.js';
 import _containedPanel        from './ui/panels/contained-panel.js';
@@ -39,8 +39,7 @@ new QRAnswersManager();
 new QuestionnaireLoader();
 new PreviewForm();
 
-// Mount header action menus — each class self-finds its mount point
-mountHeaderActions();
+// header-actions and builder self-mount on import
 
 // FileNameDisplay — self-finds [data-mount="file-name"]
 new FileNameDisplay();
@@ -52,9 +51,8 @@ document.dispatchEvent(new CustomEvent(AppEvents.APP_CONTEXT_READY, {
   detail: { questDoc, answerStore },
 }));
 
-// ── Builder toolbar + tree container (self-finds by data-mount) ───────────────
-// BuilderPanel.mount() also wires addRootGroup, renumber, collapse/expand buttons
-mountBuilder();
+// Builder, header menus, fhir-version: self-mount on import
+// (builder mount runs after APP_CONTEXT_READY via EventState)
 
 // ── FHIR version selector (self-finds and self-mounts) ──────────────────
 new FhirVersionSelect();
@@ -81,8 +79,5 @@ new UndoRedo();
 // ── Copy / Paste ──────────────────────────────────────────────────────────────
 new CopyPaste();
 
-// Validators: read config.json, initial enabled state from prefs
-initValidators({
-  localEnabled: prefs.get('validate'),
-  externalEnabled: prefs.get('validateExternal'),
-});
+// Validators: read config.json and prefs from localStorage directly
+initValidators();

@@ -19,9 +19,16 @@ import { ExternalValidator } from './external.js';
 import { AppEvents }         from '../../events.js';
 
 /**
- * @param {{ localEnabled?: boolean, externalEnabled?: boolean }} opts
+ * Reads config.json and registers validators.
+ * Reads initial enabled state from localStorage directly (prefs keys).
  */
-export async function initValidators({ localEnabled = true, externalEnabled = false } = {}) {
+export async function initValidators(override = {}) {
+  const _ls = (key, def) => {
+    try { const v = (typeof localStorage !== 'undefined') && localStorage.getItem('fhirqb.' + key); return v === null || v === false ? def : v !== 'false'; }
+    catch { return def; }
+  };
+  const localEnabled    = override.localEnabled    ?? _ls('validate', true);
+  const externalEnabled = override.externalEnabled ?? _ls('validateExternal', false);
   try {
     const cfg = await fetch('./config.json').then(r => r.json());
     const defs = cfg.validators || [{ type: 'local', name: 'Built-in' }];

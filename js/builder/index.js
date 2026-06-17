@@ -19,3 +19,6 @@ export function renderTreeAsync(onProgress)  { return panel.renderTreeAsync(onPr
 export function renumberAll()                { return panel.renumberAll(); }
 export function addRootGroup()               { panel.addRootGroup(); }
 
+// Self-mount on import
+if (typeof document !== 'undefined') mount();
+

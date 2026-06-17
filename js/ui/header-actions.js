@@ -24,3 +24,6 @@ export function mount() {
   [questionnairesMenu, answersMenu, saveMenu, previewModeMenu, viewOptionsMenu, settingsMenu]
     .forEach(m => wrap.appendChild(m.el));
 }
+
+// Self-mount on import (DOM already ready; script is deferred)
+if (typeof document !== 'undefined') mount();
