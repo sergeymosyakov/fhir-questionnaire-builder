@@ -2,11 +2,9 @@ import { Section } from '../section.js';
 import { META_SECTIONS } from './registry.js';
 import { makeCollapsible, applyTip } from './helpers.js';
 import { renderCodesEditor } from '../codes-modal.js';
-import { Modal } from '../modal-base.js';
 
 class ResourceMetaSection extends Section {
-  build(pending) {
-    const questMeta = Modal._svc.questDoc.meta;
+  build(pending, questMeta) {
     return makeCollapsible({
       testid:      'meta-resource-meta-toggle',
       tip:         { title: 'Questionnaire.meta', body: 'Resource-level metadata: server version ID, source URI, last-updated timestamp, profile declarations, workflow tags, and security labels.', fhir: 'Questionnaire.meta', spec: 'R4' },

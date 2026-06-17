@@ -3,7 +3,7 @@
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import { nodePickerModal } from './node-picker-modal.js';
-import { AppEvents } from '../../events.js';
+import { AppEvents, EventState } from '../../events.js';
 
 class NoteModal extends Modal {
   getName() { return 'designNoteModal'; }
@@ -45,7 +45,7 @@ class NoteModal extends Modal {
         detail: { ids, patch, nodeType: null },
       }));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
-    }, null);
+    }, null, EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.tree ?? []);
   }
 
   _apply() {

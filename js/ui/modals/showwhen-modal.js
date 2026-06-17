@@ -6,7 +6,7 @@ import { ExprAwareModal } from './expr-aware-modal.js';
 import { createCustomSelect } from '../custom-select.js';
 import { buildVisPanel } from '../../builder/panels.js';
 import { nodePickerModal } from './node-picker-modal.js';
-import { AppEvents } from '../../events.js';
+import { AppEvents, EventState } from '../../events.js';
 
 class ShowWhenModal extends ExprAwareModal {
   getName() { return 'showWhenModal'; }
@@ -101,7 +101,7 @@ class ShowWhenModal extends ExprAwareModal {
       }));
       document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
-    }, null);
+    }, null, EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.tree ?? []);
   }
 
   _cancel() {

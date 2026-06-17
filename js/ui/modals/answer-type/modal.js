@@ -25,7 +25,9 @@ class AnswerTypeModal extends Modal {
     MODAL_REGISTRY.set('answerType', this);
   }
 
-  open(node, typeLink, setActive) {
+  open(node, typeLink, setActive, questDoc, answerStore) {
+    this._questDoc    = questDoc;
+    this._answerStore = answerStore;
     this._pending = Object.assign(
       { node, typeLink, setActive, draftType: node.itemType },
       ...ANSWER_TYPE_SECTIONS.map(s => s.initPending(node)),
@@ -43,14 +45,14 @@ class AnswerTypeModal extends Modal {
     if (node.itemType !== this._pending.draftType) {
       const id = node.id;
       document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id } }));
-      const n = Modal._svc.answerStore.data[id + '$$n'] || 0;
+      const n = this._answerStore?.data[id + '$$n'] || 0;
       for (let i = 1; i <= n; i++) document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$' + i } }));
       document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$n' } }));
     }
 
     const newNode = createItemNode(this._pending.draftType, { id: node.id });
     Object.assign(newNode, node, { itemType: this._pending.draftType });
-    _replaceInTree(Modal._svc.questDoc.tree, node.id, newNode);
+    _replaceInTree(this._questDoc?.tree, node.id, newNode);
     node = newNode;
 
     if (!node.supportsRepeat() && node.repeats) {
@@ -59,7 +61,7 @@ class AnswerTypeModal extends Modal {
       delete node._maxOccurs;
     }
 
-    ANSWER_TYPE_SECTIONS.forEach(s => s.commit(this._pending, node));
+    ANSWER_TYPE_SECTIONS.forEach(s => s.commit(this._pending, node, this._questDoc, this._answerStore));
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     this._cancel();
@@ -87,9 +89,9 @@ class AnswerTypeModal extends Modal {
     typeLbl.dataset.tipFhir  = 'Questionnaire.item.type';
     typeLbl.dataset.tipSpec  = 'R4';
 
-    const built = ANSWER_TYPE_SECTIONS.map(s => ({ s, el: s.build(this._pending) }));
+    const built = ANSWER_TYPE_SECTIONS.map(s => ({ s, el: s.build(this._pending, this._questDoc, this._answerStore) }));
 
-    const fhirTarget = Modal._svc.questDoc?.fhirTarget ?? 'R4';
+    const fhirTarget = this._questDoc?.fhirTarget ?? 'R4';
     const filteredTypes = fhirTarget === 'R5'
       ? ITEM_TYPES.filter(t => t !== 'open-choice')
       : ITEM_TYPES;

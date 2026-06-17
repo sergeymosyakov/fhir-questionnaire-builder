@@ -4,7 +4,7 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import { ITEM_SECTIONS, renderItemSections } from './item-sections/index.js';
 import { nodePickerModal } from './node-picker-modal.js';
-import { AppEvents } from '../../events.js';
+import { AppEvents, EventState } from '../../events.js';
 
 class CodesModal extends Modal {
   getName() { return 'codesModal'; }
@@ -47,7 +47,7 @@ class CodesModal extends Modal {
       }));
       document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
-    }, node.type);
+    }, node.type, EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.tree ?? []);
   }
 
   _apply() {

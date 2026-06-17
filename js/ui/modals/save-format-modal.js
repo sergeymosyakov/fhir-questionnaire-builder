@@ -1,3 +1,4 @@
+import { Modal } from './modal-base.js';
 // ── Save / Export format picker modal ────────────────────────────────────────
 // Opened from Save menu → "Questionnaire…". User picks the export format
 // (FHIR R4/R4B/R5 JSON, REDCap CSV, …) and clicks Export.
@@ -7,7 +8,6 @@
 //              saveFormatModalBody, saveFormatModalCancel, saveFormatModalApply,
 //              save-format-select
 
-import { Modal } from './modal-base.js';
 import { createCustomSelect } from '../custom-select.js';
 import { buildFHIRObject } from '../../fhir/export.js';
 import { downloadJSON } from '../../fhir/download.js';
@@ -60,10 +60,10 @@ class SaveFormatModal extends Modal {
   open(deps) {
     this._deps   = deps;
     // Resolve saved format; migrate old 'fhir' key to current FHIR target
-    this._format = _savedFormat() ?? (Modal._svc.questDoc?.fhirTarget ?? 'R4');
+    this._format = _savedFormat() ?? (deps?.fhirTarget ?? 'R4');
     // Ensure the stored id actually exists in the registry (guard after delete)
     if (!formatRegistry.get(this._format)) {
-      this._format = Modal._svc.questDoc?.fhirTarget ?? 'R4';
+      this._format = deps?.fhirTarget ?? 'R4';
     }
     this._sel.setValue(this._format);
     this.setTitle('Export Questionnaire');

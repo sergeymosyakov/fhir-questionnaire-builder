@@ -30,7 +30,7 @@ class RegexSection extends AnswerTypeSection {
     return section;
   }
 
-  commit(pending, node) {
+  commit(pending, node, _questDoc, _answerStore) {
     if (REGEX_TYPES.has(node.itemType) && pending.draftRegex.trim()) {
       node._regex = pending.draftRegex.trim();
     } else {

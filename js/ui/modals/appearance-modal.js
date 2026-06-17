@@ -3,7 +3,7 @@ import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import { APPEARANCE_SECTIONS, renderAppearanceSections } from './appearance-sections/index.js';
 import { nodePickerModal } from './node-picker-modal.js';
-import { AppEvents } from '../../events.js';
+import { AppEvents, EventState } from '../../events.js';
 
 class AppearanceModal extends Modal {
   getName() { return 'appearanceModal'; }
@@ -42,7 +42,7 @@ class AppearanceModal extends Modal {
       document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, { detail: { ids, patch, nodeType: node.type } }));
       document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
-    }, node.type);
+    }, node.type, EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.tree ?? []);
   }
 
   _apply() {

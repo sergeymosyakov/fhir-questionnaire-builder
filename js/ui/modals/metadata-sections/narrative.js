@@ -1,10 +1,8 @@
 import { Section } from '../section.js';
 import { META_SECTIONS } from './registry.js';
-import { Modal } from '../modal-base.js';
 
 class NarrativeSection extends Section {
-  build(_pending) {
-    const questMeta = Modal._svc.questDoc.meta;
+  build(_pending, questMeta) {
     const frag = document.createDocumentFragment();
 
     const narrativeRow = document.createElement('div');

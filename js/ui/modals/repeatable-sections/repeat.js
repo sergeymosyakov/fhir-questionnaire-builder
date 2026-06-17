@@ -1,6 +1,5 @@
 import { RepeatableSection } from './base-section.js';
 import { REPEATABLE_SECTIONS } from './registry.js';
-import { Modal } from '../modal-base.js';
 import { AppEvents } from '../../../events.js';
 
 class RepeatSection extends RepeatableSection {
@@ -12,7 +11,7 @@ class RepeatSection extends RepeatableSection {
     };
   }
 
-  build(pending) {
+  build(pending, _questDoc, _answerStore) {
     const frag = document.createDocumentFragment();
 
     // ── Hint ────────────────────────────────────────────────────────────────
@@ -125,7 +124,7 @@ class RepeatSection extends RepeatableSection {
     return frag;
   }
 
-  commit(pending, node) {
+  commit(pending, node, _questDoc, answerStore) {
     node.repeats = pending.draftRepeats;
 
     if (pending.draftRepeats) {
@@ -138,7 +137,7 @@ class RepeatSection extends RepeatableSection {
         node._maxOccurs = max;
         // Trim extra rows that now exceed maxOccurs
         const id       = node.id;
-        const currentN = Modal._svc.answerStore.get(id + '$$n') || 0;
+        const currentN = answerStore?.get(id + '$$n') || 0;
         if (currentN + 1 > max) {
           const keepN = max - 1;
           for (let i = keepN + 1; i <= currentN; i++) document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$' + i } }));

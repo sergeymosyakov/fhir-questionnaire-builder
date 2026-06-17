@@ -56,7 +56,7 @@ class ChoiceColumnsSection extends AnswerTypeSection {
     return section;
   }
 
-  commit(pending, node) {
+  commit(pending, node, _questDoc, _answerStore) {
     const cols = (pending.draftChoiceColumns || []).filter(c => c.path);
     node._choiceColumns = cols.length ? cols : undefined;
   }

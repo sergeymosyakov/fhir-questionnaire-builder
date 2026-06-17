@@ -2,7 +2,7 @@
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import * as explainModal from './explain-modal.js';
-import { AppEvents } from '../../events.js';
+import { AppEvents, EventState } from '../../events.js';
 import { createCustomSelect } from '../custom-select.js';
 import { nodePickerModal } from './node-picker-modal.js';
 
@@ -51,7 +51,7 @@ class ConstraintModal extends Modal {
       }));
       document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
-    }, 'item');
+    }, 'item', EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.tree ?? []);
   }
 
   _apply() {

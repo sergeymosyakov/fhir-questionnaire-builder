@@ -2,7 +2,6 @@ import { AnswerTypeSection } from '../base-section.js';
 import { ANSWER_TYPE_SECTIONS } from '../registry.js';
 import { resolveContainedValueSet } from '../../../../fhir/import.js';
 import { createCustomSelect } from '../../../custom-select.js';
-import { Modal } from '../../modal-base.js';
 import { CHOICE_TYPES } from '../data.js';
 import { parseOptions } from '../../../../utils.js';
 import { fhirOptsToStr } from '../../../../fhir/import-helpers.js';
@@ -78,7 +77,7 @@ class ChoiceSection extends AnswerTypeSection {
     }
   }
 
-  build(pending) {
+  build(pending, questDoc, _answerStore) {
     this._pending = pending;
     const section = document.createElement('div');
 
@@ -132,7 +131,7 @@ class ChoiceSection extends AnswerTypeSection {
     avsSubLbl.dataset.tipFhir  = 'Questionnaire.item.answerValueSet';
     avsSubLbl.dataset.tipSpec  = 'R4';
 
-    const containedVS = [...Modal._svc.questDoc.contained].filter(r => r.resourceType === 'ValueSet');
+    const containedVS = [...questDoc?.contained ?? []].filter(r => r.resourceType === 'ValueSet');
     const avsItems = [
       { value: '', label: '\u2014 none \u2014' },
       ...containedVS.map(vs => ({ value: '#' + vs.id, label: '#' + vs.id + (vs.title ? ' \u2014 ' + vs.title : '') })),
@@ -177,7 +176,7 @@ class ChoiceSection extends AnswerTypeSection {
       avsTestBtn.disabled = true;
       const result = await terminologyService.testExpand(
         url,
-        Modal._svc.questDoc.meta?.preferredTermServer,
+        questDoc?.meta?.preferredTermServer,
       );
       avsTestBtn.disabled = false;
       avsTestStatus.className   = `term-test-status term-test-status--${result.ok ? 'ok' : 'err'}`;
@@ -355,7 +354,7 @@ class ChoiceSection extends AnswerTypeSection {
     return section;
   }
 
-  commit(pending, node) {
+  commit(pending, node, questDoc, _answerStore) {
     if (CHOICE_TYPES.has(node.itemType)) {
       if (pending.draftSrc === 'expression') {
         node._answerExpression = pending.draftAnswerExpr.trim();
@@ -367,7 +366,7 @@ class ChoiceSection extends AnswerTypeSection {
         delete node._answerMedias;
       } else if (pending.draftAVS) {
         node._answerValueSet = pending.draftAVS;
-        node.options = resolveContainedValueSet(Modal._svc.questDoc.contained, pending.draftAVS);
+        node.options = resolveContainedValueSet(questDoc?.contained ?? [], pending.draftAVS);
         delete node._optionOrdinals;
         delete node._optionPrefixes;
         delete node._optionExclusives;

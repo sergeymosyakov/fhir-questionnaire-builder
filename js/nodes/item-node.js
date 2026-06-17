@@ -1,5 +1,5 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 // Abstract base for all question item nodes (type: 'item').
 // Concrete subclasses set `this.itemType` and may add type-specific defaults.
 // Optional FHIR-imported properties set after construction (all item types):
@@ -376,7 +376,7 @@ export class ItemNode extends BaseNode {
       fhir:  'Questionnaire.item.type',
       spec:  'R4 \u00B7 required',
     }, actions);
-    typeLink.onclick = () => MODAL_REGISTRY.get('answerType').open(node, typeLink, setActive);
+    typeLink.onclick = () => { const _ctx = EventState.get(AppEvents.APP_CONTEXT_READY); MODAL_REGISTRY.get('answerType').open(node, typeLink, setActive, _ctx?.questDoc, _ctx?.answerStore); };
 
     const statesLink = node._makeActionLink('States', 'states', {
       title: 'Item / group states',

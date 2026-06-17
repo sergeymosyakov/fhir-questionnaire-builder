@@ -34,7 +34,7 @@ class DisplayCatSection extends AnswerTypeSection {
     return section;
   }
 
-  commit(pending, node) {
+  commit(pending, node, _questDoc, _answerStore) {
     if (node.itemType === 'display' && pending.draftDisplayCategory) {
       node._displayCategory = pending.draftDisplayCategory;
     } else {

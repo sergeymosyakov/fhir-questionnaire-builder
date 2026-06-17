@@ -75,7 +75,7 @@ class ReferenceSection extends AnswerTypeSection {
     return section;
   }
 
-  commit(pending, node) {
+  commit(pending, node, _questDoc, _answerStore) {
     node.referenceResource = (node.itemType === 'reference' && pending.draftRefRes) ? pending.draftRefRes : undefined;
     if (node.itemType === 'reference' && pending.draftRefProfiles?.length) {
       node._referenceProfiles = pending.draftRefProfiles;

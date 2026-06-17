@@ -46,7 +46,7 @@ class ItemMediaSection extends AnswerTypeSection {
     return section;
   }
 
-  commit(pending, node) {
+  commit(pending, node, _questDoc, _answerStore) {
     const url = pending.draftItemMediaUrl.trim();
     if (url) {
       node._itemMedia = { url };

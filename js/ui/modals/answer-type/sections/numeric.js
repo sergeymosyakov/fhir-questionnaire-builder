@@ -99,7 +99,7 @@ class NumericSection extends AnswerTypeSection {
     return section;
   }
 
-  commit(pending, node) {
+  commit(pending, node, _questDoc, _answerStore) {
     if (NUMERIC_TYPES.has(node.itemType)) {
       const _pf    = s => { const n = parseFloat(s); return isNaN(n) ? undefined : n; };
       const _pi    = s => { const n = parseInt(s, 10); return isNaN(n) ? undefined : n; };

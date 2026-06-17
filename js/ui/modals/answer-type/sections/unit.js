@@ -91,7 +91,7 @@ class UnitSection extends AnswerTypeSection {
     return section;
   }
 
-  commit(pending, node) {
+  commit(pending, node, _questDoc, _answerStore) {
     node.quantityUnit = (node.itemType === 'quantity' && pending.draftUnit) ? pending.draftUnit : undefined;
     if (node.itemType === 'quantity' && pending.draftUnitValueSet)
       node._unitValueSet = pending.draftUnitValueSet;

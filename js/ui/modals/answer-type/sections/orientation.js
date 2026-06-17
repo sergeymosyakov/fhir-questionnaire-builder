@@ -33,7 +33,7 @@ class OrientationSection extends AnswerTypeSection {
     return section;
   }
 
-  commit(pending, node) {
+  commit(pending, node, _questDoc, _answerStore) {
     if (node.itemType === 'radio' && pending.draftOrientation) {
       node._choiceOrientation = pending.draftOrientation;
     } else {

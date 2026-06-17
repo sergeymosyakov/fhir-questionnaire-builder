@@ -5,7 +5,7 @@
 import { MODAL_REGISTRY } from './modal-registry.js';
 import { Modal } from './modal-base.js';
 import { terminologyService } from '../../fhir/terminology-service.js';
-import { AppEvents } from '../../events.js';
+import { AppEvents, EventState } from '../../events.js';
 import { nodePickerModal } from './node-picker-modal.js';
 
 const PREF_TERM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer';
@@ -60,7 +60,7 @@ class TerminologyModal extends Modal {
         detail: { ids, patch, nodeType: 'item' },
       }));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
-    }, 'item');
+    }, 'item', EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.tree ?? []);
   }
 
   _cancel() {

@@ -14,6 +14,6 @@ import './resource-meta.js';
 import './codes.js';
 import { META_SECTIONS } from './registry.js';
 
-export function renderMetaSections(container, pending) {
-  for (const s of META_SECTIONS) container.appendChild(s.build(pending));
+export function renderMetaSections(container, pending, questMeta) {
+  for (const s of META_SECTIONS) container.appendChild(s.build(pending, questMeta));
 }

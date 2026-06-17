@@ -1,11 +1,11 @@
+import { Modal } from './modal-base.js';
 // ── Node Picker modal ─────────────────────────────────────────────────────────
 // Reusable modal that shows the questionnaire tree with checkboxes.
 // Search filters by title or linkId; matching leaves + all ancestors are kept.
 //
 // Usage:
-//   nodePickerModal.open(excludeId, onConfirm)
+//   nodePickerModal.open(excludeId, onConfirm, EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.tree ?? [])
 //   onConfirm receives string[] of selected node ids.
-import { Modal } from './modal-base.js';
 
 /** Recursively keep matching leaves + their ancestors.
  *  @param {object[]} nodes       — flat or nested tree array
@@ -61,7 +61,8 @@ class NodePickerModal extends Modal {
    * @param {Function} onConfirm   — called with string[] of selected ids
    * @param {string}   [allowedType] — 'group' | 'item' | null (show all)
    */
-  open(excludeId, onConfirm, allowedType = null) {
+  open(excludeId, onConfirm, allowedType = null, tree = []) {
+    this._tree = tree;
     this._excludeId   = excludeId;
     this._onConfirm   = onConfirm;
     this._allowedType = allowedType;
@@ -96,7 +97,7 @@ class NodePickerModal extends Modal {
   }
 
   _renderTree(query) {
-    const filtered = _filterTree(Modal._svc.questDoc.tree || [], query, this._excludeId, this._allowedType);
+    const filtered = _filterTree(this._tree || [], query, this._excludeId, this._allowedType);
     this._treeEl.innerHTML = '';
 
     if (!filtered.length) {

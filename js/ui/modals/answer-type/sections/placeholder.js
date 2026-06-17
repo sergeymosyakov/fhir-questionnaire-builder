@@ -52,7 +52,7 @@ class PlaceholderSection extends AnswerTypeSection {
     }
   }
 
-  commit(pending, node) {
+  commit(pending, node, _questDoc, _answerStore) {
     if (ENTRY_FORMAT_TYPES.has(node.itemType) && pending.draftEntryFormat.trim()) {
       node._entryFormat = pending.draftEntryFormat.trim();
     } else {

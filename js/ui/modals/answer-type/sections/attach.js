@@ -46,7 +46,7 @@ class AttachSection extends AnswerTypeSection {
     return section;
   }
 
-  commit(pending, node) {
+  commit(pending, node, _questDoc, _answerStore) {
     if (node.itemType === 'attachment' && pending.draftMaxFileSizeMB !== '') {
       const mb = parseFloat(pending.draftMaxFileSizeMB);
       if (!isNaN(mb) && mb > 0) node._maxFileSizeMB = mb; else delete node._maxFileSizeMB;

@@ -35,7 +35,9 @@ export class MetadataCard {
     this._experimental = card.querySelector('.quest-meta-card-experimental');
 
     card.querySelector('.quest-meta-edit-btn').onclick = () =>
-      document.dispatchEvent(new CustomEvent(AppEvents.METADATA_EDIT_REQUESTED));
+      document.dispatchEvent(new CustomEvent(AppEvents.METADATA_EDIT_REQUESTED, {
+        detail: { questMeta: EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.meta }
+      }));
 
     document.addEventListener(AppEvents.QUESTIONNAIRE_META_CHANGED, () => this._update());
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  () => { this._update(); this._card.style.display = ''; });

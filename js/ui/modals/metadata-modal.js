@@ -8,8 +8,8 @@ class MetadataModal extends Modal {
     this._pending = null;
   }
 
-  open() {
-    const questMeta = Modal._svc.questDoc.meta;
+  open(questMeta) {
+    this._questMeta = questMeta;
     this._pending = {
       id:            questMeta.id,
       url:           questMeta.url,
@@ -45,14 +45,15 @@ class MetadataModal extends Modal {
     };
     this.setTitle('Questionnaire Properties', '');
     this.body.innerHTML = '';
-    renderMetaSections(this.body, this._pending);
+    renderMetaSections(this.body, this._pending, questMeta);
     super.open();
   }
 
   _apply() {
     if (!this._pending) return;
     const p = this._pending;
-    const questMeta = Modal._svc.questDoc.meta;
+    const questMeta = this._questMeta;
+    if (!questMeta) return;
     questMeta.id            = p.id.trim();
     questMeta.url           = p.url.trim();
     questMeta.version       = p.version.trim();
@@ -103,5 +104,8 @@ export const open = () => _modal.open();
 // Self-wire: MetadataCard dispatches METADATA_EDIT_REQUESTED when Edit is clicked
 import { AppEvents as _AppEvents } from '../../events.js';
 if (typeof document !== 'undefined') {
-  document.addEventListener(_AppEvents.METADATA_EDIT_REQUESTED, () => _modal.open());
+  document.addEventListener(_AppEvents.METADATA_EDIT_REQUESTED, e => {
+    const questMeta = e.detail?.questMeta;
+    if (questMeta) _modal.open(questMeta);
+  });
 }
