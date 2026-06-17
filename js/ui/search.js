@@ -157,3 +157,6 @@ function _clear() {
   _el.counter.classList.remove('search-counter--empty');
   _el.input.classList.remove('search-input--empty');
 }
+
+// Self-initialize on import
+if (typeof document !== 'undefined') init();

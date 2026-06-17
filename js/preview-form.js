@@ -8,6 +8,7 @@ import { evaluateNode } from './eval.js';
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes, buildVarEnv, evalInitialExprNodes } from './fhir/calc.js';
 import { buildFHIRObject } from './fhir/export.js';
+import { calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './state.js';
 
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
@@ -27,10 +28,6 @@ export class PreviewForm {
    * @param {object} deps — injected state
    * @param {object} deps.questDoc
    * @param {object} deps.answerStore
-   * @param {Function} deps.calcFormOk
-   * @param {Function} deps.isMandatory
-   * @param {Function} deps.evalConstraints
-   * @param {Set} deps.CHECKABLE_TYPES
    */
   constructor(deps) {
     _instance = this;
@@ -38,7 +35,7 @@ export class PreviewForm {
     this._answerStore     = deps.answerStore;
     this._rawFhir         = deps.questDoc;
     this._questVariables  = deps.questDoc.variables;
-    this._calcFormOk      = deps.calcFormOk;
+    this._calcFormOk      = calcFormOk;
 
     this._viewPrefs     = { showLinkId: true, showPrefix: true, showBadges: true, showHiddenItems: true };
     this._previewMode   = 'preview';
@@ -54,11 +51,11 @@ export class PreviewForm {
     _rc.buildControl     = (node, iconEl, cb) => this._buildControl(node, iconEl, cb);
     _rc.values           = this._answerStore.data;
     _rc.updateGroupIcons = () => GroupNode.updateAll(_rc);
-    _rc.isMandatory      = deps.isMandatory;
-    _rc.calcFormOk       = deps.calcFormOk;
-    _rc.evalConstraints  = deps.evalConstraints;
+    _rc.isMandatory      = isMandatory;
+    _rc.calcFormOk       = calcFormOk;
+    _rc.evalConstraints  = evalConstraints;
     _rc.getValue         = id => this._answerStore.get(id);
-    _rc.CHECKABLE_TYPES  = deps.CHECKABLE_TYPES;
+    _rc.CHECKABLE_TYPES  = CHECKABLE_TYPES;
 
     // ── Event listeners ─────────────────────────────────────────────────────
     document.addEventListener(AppEvents.VIEW_PREF_CHANGE,   e => this._onViewPrefChange(e));

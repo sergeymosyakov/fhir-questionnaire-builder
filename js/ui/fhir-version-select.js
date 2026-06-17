@@ -30,9 +30,10 @@ export class FhirVersionSelect {
     this._mount = document.querySelector('[data-mount="fhir-version-select"]');
     this._sel = null;
     this._el = null;
+    this._mount_widget(); // self-mounts
   }
 
-  mount() {
+  _mount_widget() {
     const items = versionRegistry.getAll().map(v => ({ value: v.id, label: v.selectorLabel ?? v.label }));
     const wrap = document.createElement('span');
     wrap.className = 'fhir-version-select-wrap';

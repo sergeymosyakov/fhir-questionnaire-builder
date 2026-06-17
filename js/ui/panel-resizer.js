@@ -17,14 +17,14 @@ export class PanelResizer {
     this._min        = min;
     this._max        = max;
     this._bind();
+    this._restoreWidth(); // async, fire-and-forget
   }
 
-  /** Restore saved width from storage. Returns `this` for chaining. */
-  async init() {
+  /** Restore saved width from storage. */
+  async _restoreWidth() {
     let saved;
     try { saved = await storage.getItem(this._storageKey); } catch { /* private mode / quota */ }
     if (saved) this._panel.style.width = saved + 'px';
-    return this;
   }
 
   _bind() {

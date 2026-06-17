@@ -46,3 +46,6 @@ export function hide() {
   _el.bar.classList.remove('progress-bar--indeterminate');
   _op = '';
 }
+
+// Self-initialize on import (DOM is ready; script is deferred)
+if (typeof document !== 'undefined') init();

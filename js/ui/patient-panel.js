@@ -195,10 +195,8 @@ export class PatientProfile {
       },
       onCustom: () => this._modal.open(this._currentVars),
     });
-  }
 
-  /** Insert the preset menu into the DOM. */
-  mount() {
+    // Self-mount on construction
     document.querySelector('[data-mount="patient-preset"]').replaceWith(this._presetMenu.el);
   }
 }

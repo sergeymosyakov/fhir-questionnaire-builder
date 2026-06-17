@@ -19,9 +19,9 @@ import { ExternalValidator } from './external.js';
 import { AppEvents }         from '../../events.js';
 
 /**
- * @param {{ localEnabled?: boolean, externalEnabled?: boolean, getFhirTarget?: () => string }} opts
+ * @param {{ localEnabled?: boolean, externalEnabled?: boolean }} opts
  */
-export async function initValidators({ localEnabled = true, externalEnabled = false, getFhirTarget = () => 'R4' } = {}) {
+export async function initValidators({ localEnabled = true, externalEnabled = false } = {}) {
   try {
     const cfg = await fetch('./config.json').then(r => r.json());
     const defs = cfg.validators || [{ type: 'local', name: 'Built-in' }];
@@ -32,7 +32,7 @@ export async function initValidators({ localEnabled = true, externalEnabled = fa
         v.enabled = localEnabled;
         validatorRegistry.register(v);
       } else if (def.type === 'external' && def.url) {
-        const v = new ExternalValidator({ name: def.name || def.url, url: def.url, retries: def.retries ?? 3, getFhirTarget });
+        const v = new ExternalValidator({ name: def.name || def.url, url: def.url, retries: def.retries ?? 3 });
         v.enabled = externalEnabled;
         validatorRegistry.register(v);
       }

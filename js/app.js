@@ -2,14 +2,12 @@
 import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
-import { questDoc, answerStore, calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './state.js';
+import { questDoc, answerStore } from './state.js';
 import './fhir/import.js';
 import './fhir/qr-export.js';
 import './fhir/obs-export.js';
 import { initValidators } from './fhir/validators/init.js';
 import './ui/modals/obs-export-modal.js';
-import * as progress from './ui/progress.js';
-import * as search from './ui/search.js';
 import { UndoRedo } from './ui/undo-redo.js';
 import { mount as mountBuilder } from './builder/index.js';
 import { PreviewForm } from './preview-form.js';
@@ -26,7 +24,6 @@ import { FhirVersionSelect } from './ui/fhir-version-select.js';
 import { AuthPanel } from './ui/auth-panel.js';
 import { MetadataCard } from './ui/metadata-card.js';
 import { PanelResizer } from './ui/panel-resizer.js';
-import * as statusBadge from './ui/status-badge.js';
 import { QRAnswersManager } from './fhir/qr-answers-manager.js';
 import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
 import { CopyPaste } from './ui/copy-paste.js';
@@ -35,7 +32,7 @@ import { CopyPaste } from './ui/copy-paste.js';
 storage.register(new SupabaseAdapter(supabase));
 
 // ── Patient profile widget ────────────────────────────────────────────────────
-new PatientProfile().mount();
+new PatientProfile();
 // variables-panel self-initializes on import via side-effect
 
 // FHIR modules self-wire via APP_CONTEXT_READY — no configure() calls needed
@@ -44,10 +41,7 @@ new PatientProfile().mount();
 export const qrAnswers   = new QRAnswersManager({ questDoc, answerStore });
 export const questLoader = new QuestionnaireLoader({ questDoc, answerStore });
 
-export const previewForm = new PreviewForm({
-  questDoc, answerStore,
-  calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES,
-});
+export const previewForm = new PreviewForm({ questDoc, answerStore });
 
 // Mount header action menus — each class self-finds its mount point
 mountHeaderActions();
@@ -66,20 +60,11 @@ document.dispatchEvent(new CustomEvent(AppEvents.APP_CONTEXT_READY, {
 // BuilderPanel.mount() also wires addRootGroup, renumber, collapse/expand buttons
 mountBuilder();
 
-// ── FHIR version selector (self-finds [data-mount="fhir-version-select"]) ─────
-new FhirVersionSelect().mount();
+// ── FHIR version selector (self-finds and self-mounts) ──────────────────
+new FhirVersionSelect();
 
-// ── Global progress bar (self-finds progress-* elements) ─────────────────────
-progress.init();
-
-// ── Tooltip init ──────────────────────────────────────────────────────────────
+// progress, statusBadge, search, tooltip: self-init on import
 import('./ui/tooltip.js').then(tt => tt.init());
-
-// ── Status badge (self-finds status-badge-* elements) ─────────────────────────
-statusBadge.init();
-
-// ── Search (self-finds search-* elements) ─────────────────────────────────────
-search.init();
 
 // ── Preview form (self-finds all elements by data-mount) ──────────────────────
 previewForm.mount();
@@ -94,7 +79,7 @@ new MetadataCard();
 // CLOSE_DROPDOWNS on outside click is self-wired in DropdownMenu static {}
 
 // ── Panel resize drag (self-finds panel-resizer and left-panel) ───────────────
-new PanelResizer({ storageKey: 'leftPanelWidth' }).init();
+new PanelResizer({ storageKey: 'leftPanelWidth' });
 
 // ── Undo/Redo (self-finds undo-btn and redo-btn) ──────────────────────────────
 new UndoRedo();
@@ -108,5 +93,4 @@ new CopyPaste();
 initValidators({
   localEnabled: prefs.get('validate'),
   externalEnabled: prefs.get('validateExternal'),
-  getFhirTarget: () => questDoc.fhirTarget,
 });

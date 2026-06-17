@@ -146,3 +146,6 @@ function _renderList(items) {
     _dropdown.appendChild(row);
   });
 }
+
+// Self-initialize on import
+if (typeof document !== 'undefined') init();

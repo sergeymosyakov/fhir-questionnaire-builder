@@ -8,6 +8,7 @@
 
 import { Validator } from './base.js';
 import { BUILDER_VERSION_EXTENSION_URL } from '../format-registry.js';
+import { AppEvents, EventState } from '../../events.js';
 /** Thrown for non-retryable validation failures (e.g. HTTP 413 / 4xx). */
 class ValidatorFatalError extends Error {}
 const CORS_PROXY_KEY = 'corsProxyUrl';
@@ -66,14 +67,22 @@ function _parseOutcome(outcome, questJson) {
 export class ExternalValidator extends Validator {
   /**
    * @param {{ name: string, url: string, retries?: number, getFhirTarget?: () => string }} cfg
+   * getFhirTarget is optional — used only in tests; production reads from EventState.
    */
-  constructor({ name, url, retries = 3, getFhirTarget = () => 'R4' }) {
+  constructor({ name, url, retries = 3, getFhirTarget }) {
     super();
     this.enabled  = false; // off by default; toggled via VALIDATOR_TOGGLE event
     this._name    = name;
     this._url     = url.replace(/\/$/, '');
     this._retries = retries;
-    this._getFhirTarget = getFhirTarget;
+    this._getFhirTargetOverride = getFhirTarget || null;
+  }
+
+  _getFhirTarget() {
+    if (this._getFhirTargetOverride) return this._getFhirTargetOverride();
+    return EventState.get(AppEvents.FHIR_VERSION_CHANGED)?.versionId
+        ?? EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.meta?.fhirTarget
+        ?? 'R4';
   }
 
   get id()   { return 'external'; }
