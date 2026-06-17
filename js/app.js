@@ -66,8 +66,6 @@ new FhirVersionSelect();
 // progress, statusBadge, search, tooltip: self-init on import
 import('./ui/tooltip.js').then(tt => tt.init());
 
-// ── Preview form (self-finds all elements by data-mount) ──────────────────────
-previewForm.mount();
 
 // ── Settings menu handlers ────────────────────────────────────────────────────
 import('./ui/autosave.js').then(as => as.init());

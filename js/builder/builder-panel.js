@@ -1,7 +1,7 @@
 // ── BuilderPanel class ────────────────────────────────────────────────────────
 // Encapsulates builder tree rendering, renumbering, collapse/expand, DnD, and
 // FHIR calc recalculation.  Created once by builder/index.js.
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 import { buildQR } from '../fhir/qr-builder.js';
 import { evalCalcNodes } from '../fhir/calc.js';
 import { GroupNode } from '../nodes/group-node.js';
@@ -18,14 +18,29 @@ import { RenumberControl } from '../ui/renumber-control.js';
 const fhirpath = typeof window !== 'undefined' ? window.fhirpath : null;
 
 export class BuilderPanel {
-  constructor({ questDoc, answerStore }) {
-    this._questDoc    = questDoc;
-    this._tree        = questDoc.tree;
-    this._answerStore = answerStore;
+  constructor() {
+    this._questDoc    = null;
+    this._tree        = null;
+    this._answerStore = null;
     this._container   = null;
 
-    this._subscribeEvents();
-    dndInit(() => this.renderTree(), questDoc.tree);
+    const _init = (questDoc, answerStore) => {
+      this._questDoc    = questDoc;
+      this._tree        = questDoc.tree;
+      this._answerStore = answerStore;
+      this._subscribeEvents();
+      dndInit(() => this.renderTree(), questDoc.tree);
+    };
+
+    // If APP_CONTEXT_READY already fired — read from cache; otherwise wait
+    const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
+    if (cached?.questDoc) {
+      _init(cached.questDoc, cached.answerStore);
+    } else {
+      document.addEventListener(AppEvents.APP_CONTEXT_READY, e => {
+        _init(e.detail.questDoc, e.detail.answerStore);
+      }, { once: true });
+    }
   }
 
   // ── Public API ──────────────────────────────────────────────────────────────

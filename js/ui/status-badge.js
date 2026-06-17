@@ -3,8 +3,10 @@
 //   init(elements, navigateFn)  — wire up { btn, dropdown, wrap }; navigateFn(id)
 //   update({ visible, ctx })    — visible: eval results; ctx: { fp, qr, envVars }
 //                                 Computes mandatory/calc/constraint/range criteria internally.
-import { isMandatory, calcFormOk, evalConstraints, answerStore, CHECKABLE_TYPES } from '../state.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
+import { isMandatory, calcFormOk, evalConstraints, CHECKABLE_TYPES } from '../state.js';
+
+function _getStore() { return EventState.get(AppEvents.APP_CONTEXT_READY)?.answerStore; }
 
 let _btn        = null;
 let _dropdown   = null;
@@ -42,11 +44,12 @@ export function update({ visible, ctx }) {
   );
   const hasMandatory = mandatoryItems.length > 0;
 
+  const store = _getStore();
   const calcItems = activeItems.filter(r =>
     r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox'
   );
   const hasCalc    = calcItems.length > 0;
-  const calcAllOk  = calcItems.every(r => answerStore.get(r.node.id) === true);
+  const calcAllOk  = calcItems.every(r => store?.get(r.node.id) === true);
 
   const constraintItems   = activeItems.filter(r => r.node.constraint?.length);
   const hasConstraints    = constraintItems.length > 0;
@@ -77,7 +80,7 @@ export function update({ visible, ctx }) {
 
   const failingItems = [
     ...mandatoryItems.filter(r => !r.ok || !calcFormOk(r.node)).map(r => ({ title: r.node.title, id: r.node.id })),
-    ...calcItems.filter(r => answerStore.get(r.node.id) !== true).map(r => ({ title: r.node.title, id: r.node.id })),
+    ...calcItems.filter(r => store?.get(r.node.id) !== true).map(r => ({ title: r.node.title, id: r.node.id })),
     ...constraintItems.filter(r => !evalConstraints(r.node, fp, qr, cEnv)).map(r => ({ title: r.node.title, id: r.node.id })),
     ...rangeItems.filter(r => !calcFormOk(r.node)).map(r => ({ title: r.node.title, id: r.node.id })),
   ];

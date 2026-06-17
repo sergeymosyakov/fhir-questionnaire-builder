@@ -68,6 +68,7 @@ export class PreviewForm {
       document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_NAVIGATE_TO, { detail: { id: e.detail.id } }));
     });
     document.addEventListener(AppEvents.RESPONSE_CHANGED, () => this._asyncRender(++this._renderVersion));
+    this.mount(); // self-mounts — DOM already ready when constructor runs
   }
 
   // ── Public API ──────────────────────────────────────────────────────────────
