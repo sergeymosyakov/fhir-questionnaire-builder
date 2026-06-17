@@ -4,18 +4,30 @@
 import { importQRAnswers } from './qr-import.js';
 import { showError } from '../ui/toast.js';
 import * as validateModal from '../ui/modals/validate-modal.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 
 export class QRAnswersManager {
-  /** @param {{ questDoc, answerStore }} deps — state references */
-  constructor({ questDoc, answerStore }) {
-    this._answerStore     = answerStore;
-    this._tree            = questDoc.tree;
-    this._questDoc        = questDoc;
-    this._validateEnabled = true;  // kept in sync via VALIDATOR_TOGGLE
+  constructor(override = {}) {
+    this._answerStore     = null;
+    this._tree            = null;
+    this._questDoc        = null;
+    this._validateEnabled = true;
 
-    // Listen for QR_ANSWERS_REQUESTED so no external caller needs a reference.
     if (typeof document !== 'undefined') {
+      const _init = ({ questDoc, answerStore }) => {
+        this._answerStore = answerStore;
+        this._tree        = questDoc.tree;
+        this._questDoc    = questDoc;
+      };
+      // Optional DI override (tests) takes precedence over EventState
+      if (override.questDoc) {
+        _init(override);
+      } else {
+        const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
+        if (cached?.questDoc) { _init(cached); }
+        else { document.addEventListener(AppEvents.APP_CONTEXT_READY, e => _init(e.detail), { once: true }); }
+      }
+
       document.addEventListener(AppEvents.VALIDATOR_TOGGLE, e => {
         if (e.detail?.id === 'local') this._validateEnabled = e.detail.enabled;
       });

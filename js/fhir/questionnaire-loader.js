@@ -8,21 +8,33 @@ import * as validateModal from '../ui/modals/validate-modal.js';
 import * as progress from '../ui/progress.js';
 import { GroupNode } from '../nodes/group-node.js';
 import { terminologyService } from './terminology-service.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 import { versionRegistry } from './version-registry.js';
 // Format registrations are handled by js/fhir/formats/*.js, imported via export.js
 import { loadConfirmModal } from '../ui/modals/load-confirm-modal.js';
 
 export class QuestionnaireLoader {
-  /** @param {{ questDoc: import('../fhir/quest-document.js').QuestDocument, answerStore }} deps */
-  constructor({ questDoc, answerStore }) {
-    this._questDoc         = questDoc;
-    this._tree             = questDoc.tree;
-    this._answerStore      = answerStore;
+  constructor(override = {}) {
+    this._questDoc         = null;
+    this._tree             = null;
+    this._answerStore      = null;
     this._importSeq        = 0;
-    this._validateEnabled  = true;  // kept in sync via VALIDATOR_TOGGLE
-    // Self-wire lifecycle events — no external wiring needed in app.js
+    this._validateEnabled  = true;
+
     if (typeof document !== 'undefined') {
+      const _init = ({ questDoc, answerStore }) => {
+        this._questDoc    = questDoc;
+        this._tree        = questDoc.tree;
+        this._answerStore = answerStore;
+      };
+      // Optional DI override (tests) takes precedence over EventState
+      if (override.questDoc) {
+        _init(override);
+      } else {
+        const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
+        if (cached?.questDoc) { _init(cached); }
+        else { document.addEventListener(AppEvents.APP_CONTEXT_READY, e => _init(e.detail), { once: true }); }
+      }
       document.addEventListener(AppEvents.VALIDATOR_TOGGLE, e => {
         if (e.detail?.id === 'local') this._validateEnabled = e.detail.enabled;
       });

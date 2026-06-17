@@ -1,4 +1,4 @@
-﻿// Entry point: wires toolbar buttons and orchestrates UI modules.
+﻿// Entry point — composition root. All modules self-wire via events + EventState.
 import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
@@ -28,19 +28,15 @@ import { PanelResizer } from './ui/panel-resizer.js';
 import { QRAnswersManager } from './fhir/qr-answers-manager.js';
 import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
 import { CopyPaste } from './ui/copy-paste.js';
-// Instantiated after builder/index.js so BaseNode event listeners are active.
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
 
 // ── Patient profile widget ────────────────────────────────────────────────────
 new PatientProfile();
-// variables-panel self-initializes on import via side-effect
 
-// FHIR modules self-wire via APP_CONTEXT_READY — no configure() calls needed
-
-// ── Manager singletons (DI from state) ─────────────────────────────────
-new QRAnswersManager({ questDoc, answerStore });
-new QuestionnaireLoader({ questDoc, answerStore });
+// ── Self-wiring singletons — each subscribes to APP_CONTEXT_READY ─────────
+new QRAnswersManager();
+new QuestionnaireLoader();
 new PreviewForm();
 
 // Mount header action menus — each class self-finds its mount point
@@ -83,11 +79,9 @@ new PanelResizer({ storageKey: 'leftPanelWidth' });
 new UndoRedo();
 
 // ── Copy / Paste ──────────────────────────────────────────────────────────────
-// Instantiated after builder/index.js so BaseNode event listeners are active.
 new CopyPaste();
 
-// Initialise validators from config.json (async — runs in background)
-// Pass initial enabled state from persisted prefs so validators start correctly
+// Validators: read config.json, initial enabled state from prefs
 initValidators({
   localEnabled: prefs.get('validate'),
   externalEnabled: prefs.get('validateExternal'),
