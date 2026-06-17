@@ -5,18 +5,6 @@ import * as obsExportModal from '../modals/obs-export-modal.js';
 import { saveFormatModal } from '../modals/save-format-modal.js';
 
 export class SaveMenu extends DropdownMenu {
-  static _svc = { questDoc: null, answerStore: null };
-
-  static {
-    if (typeof document !== 'undefined') {
-      const _update = e => {
-        if (e.detail?.questDoc)   SaveMenu._svc.questDoc   = e.detail.questDoc;
-        if (e.detail?.answerStore) SaveMenu._svc.answerStore = e.detail.answerStore;
-      };
-      document.addEventListener(AppEvents.APP_CONTEXT_READY,    _update);
-      document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, _update);
-    }
-  }
   constructor() {
     super({
       btnId:    'exportBtn',
@@ -28,6 +16,15 @@ export class SaveMenu extends DropdownMenu {
       tipTitle: 'Save / Export',
       tipBody:  'Save to cloud or export the questionnaire as FHIR R4 JSON, or download current answers as a QuestionnaireResponse.',
     });
+
+    this._questDoc    = null;
+    this._answerStore = null;
+    const _update = e => {
+      if (e.detail?.questDoc)    this._questDoc    = e.detail.questDoc;
+      if (e.detail?.answerStore) this._answerStore = e.detail.answerStore;
+    };
+    document.addEventListener(AppEvents.APP_CONTEXT_READY,    _update);
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, _update);
 
     this._fileName = '';
     document.addEventListener(AppEvents.FILE_NAME_CHANGED, e => { this._fileName = e.detail.name; });
@@ -48,8 +45,8 @@ export class SaveMenu extends DropdownMenu {
   promptExport() {
     saveFormatModal.open({
       fileName: this._fileName,
-      tree:   SaveMenu._svc.questDoc?.tree,
-      values: SaveMenu._svc.answerStore?.data,
+      tree:   this._questDoc?.tree,
+      values: this._answerStore?.data,
     });
   }
 
@@ -86,8 +83,8 @@ export class SaveMenu extends DropdownMenu {
       saveFormatModal.open({
         fhirTarget: EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.fhirTarget ?? 'R4',
         fileName: this._fileName,
-        tree:   SaveMenu._svc.questDoc?.tree,
-        values: SaveMenu._svc.answerStore?.data,
+        tree:   this._questDoc?.tree,
+        values: this._answerStore?.data,
       });
     });
 

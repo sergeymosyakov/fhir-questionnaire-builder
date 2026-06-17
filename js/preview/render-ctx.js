@@ -1,6 +1,6 @@
 // ── Shared render context ──────────────────────────────────────────────────────
 // Written by preview-form.js (PreviewForm class), read by node classes.
-// Breaks the potential circular dependency between node classes and state.js.
+// Breaks the potential circular dependency between node classes and the document model.
 
 export const _rc = {
   // Per-render-cycle (set at the start of each _asyncRender call):
@@ -18,7 +18,7 @@ export const _rc = {
   values:             null, // values object (for repeat row mutations)
   updateGroupIcons:   null, // function() — GroupNode.updateAll(_rc); used as callback in item-node.js
 
-  // State helpers — injected from state.js to avoid circular imports in node classes:
+  // State helpers — injected to avoid circular imports in node classes:
   isMandatory:    null, // function(node) → bool
   calcFormOk:     null, // function(node) → bool
   evalConstraints: null, // function(node, fp, qr, env) → bool

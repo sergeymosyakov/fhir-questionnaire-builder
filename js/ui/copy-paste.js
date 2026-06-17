@@ -2,8 +2,6 @@
 // Serialises a node subtree to FHIR JSON (via export.js), re-maps linkIds to
 // avoid collisions, then deserialises back (via import-item.js) and inserts the
 // result after the source node in the tree.
-//
-// Services injected via CopyPaste.configure() in builder/index.js.
 import { nodeToFHIRItem } from '../fhir/export.js';
 import { fhirItemToNode } from '../fhir/import-item.js';
 import { MODAL_REGISTRY } from './modals/modal-registry.js';
@@ -13,23 +11,17 @@ import { AppEvents } from '../events.js';
 const STRUCTURAL_RE = /\.descendants\(\)|\.item\.where\s*\(\s*type\s*=|\.count\(\)/;
 
 export class CopyPaste {
-  /** Services populated automatically via QUESTIONNAIRE_LOADED event. */
-  static _svc = {
-    questDoc: null,
-  };
-
-  static {
-    if (typeof document !== 'undefined') {
-      const _update = e => { if (e.detail?.questDoc) CopyPaste._svc.questDoc = e.detail.questDoc; };
-      document.addEventListener(AppEvents.APP_CONTEXT_READY,    _update);
-      document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, _update);
-      document.addEventListener('questionnaire-cleared', () => { CopyPaste._svc.questDoc = null; });
-    }
-  }
-
   constructor() {
     /** Serialised FHIR JSON of the last copied item. null = nothing copied. */
     this._clip = null;
+    this._questDoc = null;
+
+    document.addEventListener(AppEvents.APP_CONTEXT_READY,
+      e => { if (e.detail?.questDoc) this._questDoc = e.detail.questDoc; });
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,
+      e => { if (e.detail?.questDoc) this._questDoc = e.detail.questDoc; });
+    document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED,
+      () => { this._questDoc = null; });
 
     document.addEventListener(AppEvents.NODE_COPY_REQUESTED,
       e => this.copy(e.detail.id));
@@ -44,7 +36,7 @@ export class CopyPaste {
 
   /** Serialise node to FHIR JSON and store in clipboard. */
   copy(nodeId) {
-    const node = this._findNode(nodeId, CopyPaste._svc.questDoc.tree);
+    const node = this._findNode(nodeId, this._questDoc.tree);
     if (!node) return;
     const fhirItem = nodeToFHIRItem(node);
     this._clip = JSON.stringify(fhirItem);
@@ -70,13 +62,13 @@ export class CopyPaste {
     try { fhirItem = JSON.parse(this._clip); } catch { return; }
 
     const { remapped, idMap } = this._remapLinkIds(fhirItem);
-    const node = fhirItemToNode(remapped, new Map(), CopyPaste._svc.questDoc.contained || []);
+    const node = fhirItemToNode(remapped, new Map(), this._questDoc.contained || []);
     if (position === 'before') this._insertBefore(node, anchorId);
     else                       this._insertAfter(node, anchorId);
 
     // Analyse for potential expression issues
     const externalRefs   = this._collectExternalRefs(fhirItem, idMap);
-    const structuralHits = this._detectStructural(CopyPaste._svc.questDoc.tree);
+    const structuralHits = this._detectStructural(this._questDoc.tree);
 
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
@@ -103,8 +95,8 @@ export class CopyPaste {
   }
 
   _insertBefore(node, beforeId) {
-    if (!this._insertBeforeIn(node, beforeId, CopyPaste._svc.questDoc.tree)) {
-      CopyPaste._svc.questDoc.tree.unshift(node);
+    if (!this._insertBeforeIn(node, beforeId, this._questDoc.tree)) {
+      this._questDoc.tree.unshift(node);
     }
   }
 
@@ -122,8 +114,8 @@ export class CopyPaste {
   }
 
   _insertAfter(node, afterId) {
-    if (!this._insertAfterIn(node, afterId, CopyPaste._svc.questDoc.tree)) {
-      CopyPaste._svc.questDoc.tree.push(node);
+    if (!this._insertAfterIn(node, afterId, this._questDoc.tree)) {
+      this._questDoc.tree.push(node);
     }
   }
 
@@ -166,7 +158,7 @@ export class CopyPaste {
   }
 
   _uniqueId(base, usedInBatch) {
-    const existing = new Set(this._allLinkIds(CopyPaste._svc.questDoc.tree));
+    const existing = new Set(this._allLinkIds(this._questDoc.tree));
     if (usedInBatch) for (const id of usedInBatch) existing.add(id);
     let id = base;
     let n = 2;

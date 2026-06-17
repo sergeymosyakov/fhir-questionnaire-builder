@@ -1,5 +1,5 @@
 // ── ID factory ────────────────────────────────────────────────────────────────
-// Extracted to break the cycle: state.js ← nodes/base-node.js ← state.js
+// ID utilities — extracted to avoid circular imports.
 let _seq = 1;
 export const nextId   = () => 'n' + (_seq++);
 export const resetSeq = () => { _seq = 1; };

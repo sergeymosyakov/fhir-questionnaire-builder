@@ -7,7 +7,7 @@ import { AppEvents } from '../../events.js';
 
 const QR_STATUSES = ['in-progress', 'completed', 'amended', 'entered-in-error', 'stopped'];
 
-// QR pre-fill state — owned here, not in state.js.
+// QR pre-fill state — owned here.
 const _qrMeta = {
   status: 'in-progress', subject: '', author: '',
   id: '', language: '',

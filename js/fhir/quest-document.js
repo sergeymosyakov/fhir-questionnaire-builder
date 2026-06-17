@@ -19,7 +19,7 @@ export class QuestDocument {
 
   /**
    * Questionnaire-level metadata — populated on import, edited via Properties modal.
-   * Mirrors all fields from the old questMeta object in state.js.
+   * Questionnaire-level metadata fields.
    */
   meta = {
     // Core (always visible in Properties modal)

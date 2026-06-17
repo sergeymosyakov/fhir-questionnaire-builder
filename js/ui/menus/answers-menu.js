@@ -35,8 +35,6 @@ export class AnswersMenu extends DropdownMenu {
     this._bindHandlers();
   }
 
-  configure({ qrAnswers: _ignored }) { /* no-op — now event-driven */ }
-
   _buildMenu() {
     this._loadAnswersItem = this._item(null, '&#x1F4C2; From file&hellip;', 'load-answers-from-file');
     this._loadAnswersLibraryItem = this._item(null, '&#x1F4DA; From Library&hellip;', 'load-answers-library-item');
