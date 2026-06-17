@@ -18,12 +18,12 @@ import { UndoRedo } from './ui/undo-redo.js';
 import { renumberAll, addRootGroup, mount as mountBuilder, renderTree, renderTreeAsync } from './builder/index.js';
 import * as helpModal from './ui/modals/help-modal.js';
 import { PreviewForm } from './preview-form.js';
-import { saveMenu, settingsMenu, prefs, answersMenu, questionnairesMenu, mount as mountHeaderActions } from './ui/header-actions.js';
+import { saveMenu, settingsMenu, prefs, questionnairesMenu, mount as mountHeaderActions } from './ui/header-actions.js';
 import './ui/modals/index.js';
 import * as variablesPanel    from './ui/variables-panel.js';
 import _containedPanel        from './ui/panels/contained-panel.js';
 import _answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
-import * as patientCtx        from './ui/patient-ctx.js';
+import { PatientProfile } from './ui/patient-panel.js';
 import { FileNameDisplay } from './ui/file-name.js';
 import { AppEvents } from './events.js';
 import { FhirVersionSelect } from './ui/fhir-version-select.js';
@@ -39,11 +39,9 @@ import { CopyPaste } from './ui/copy-paste.js';
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
 
-// UI panels subscribe to QUESTIONNAIRE_LOADED internally — no configure() needed.
-// patient-ctx: configure() initialises defaults and wires preset handlers (uses
-// presetMenu which is declared after module-level code — must be called after load).
-patientCtx.configure({ questDoc });
-patientCtx.mount(document.getElementById('patientPresetWrap'));
+// ── Patient profile widget ──────────────────────────────────────────────
+const patientProfile = new PatientProfile();
+patientProfile.mount(document.getElementById('patientPresetWrap'));
 variablesPanel.configure({ mountEl: document.getElementById('variablesCardMount') });
 
 // ── Inject state into FHIR modules ─────────────────────────────────────
@@ -70,11 +68,10 @@ export const previewForm = new PreviewForm({
 mountHeaderActions(document.getElementById('headerActions'));
 
 // Inject manager singletons into menus (breaks circular app.js ← menu → app.js)
-answersMenu.configure({ qrAnswers });
 questionnairesMenu.configure({ questLoader });
 
-// FileNameDisplay — mounts chip into preview section-title
-const fileNameDisplay = new FileNameDisplay(document.querySelector('.right-panel .section-title'));
+// FileNameDisplay — mounts chip into preview section-title; self-contained
+new FileNameDisplay(document.querySelector('.right-panel .section-title'));
 // Wire cloud elements from menus into AuthPanel (cross-component, no getElementById)
 AuthPanel.configureCloudEls({
   saveBtn:  saveMenu.cloudSaveBtn,
@@ -104,11 +101,8 @@ document.dispatchEvent(new CustomEvent(AppEvents.APP_CONTEXT_READY, {
 }));
 
 // Buttons
-document.getElementById('addRootGroupBtn').onclick = () => {
-  addRootGroup();
-  // If no file is loaded yet, signal that a new questionnaire was started
-  if (!fileNameDisplay.getName()) document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_NEW));
-};
+document.getElementById('addRootGroupBtn').onclick = () => addRootGroup();
+// QUESTIONNAIRE_NEW is dispatched by BuilderPanel.addRootGroup() when tree was empty
 
 // ── Builder toolbar + tree container ──────────────────────────────────────────
 mountBuilder({
@@ -177,7 +171,7 @@ previewForm.mount({
 });
 
 // ── Save/Export menu ──────────────────────────────────────────────────────────
-saveMenu.configure({ fileNameDisplay });
+// FILE_NAME_CHANGED event wires FileNameDisplay → save-menu
 
 // ── Settings menu handlers ────────────────────────────────────────────────────
 // Tips and Autosave initial states resolve asynchronously from storage —

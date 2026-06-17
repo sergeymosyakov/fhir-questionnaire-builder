@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 globalThis.CustomEvent = class CustomEvent {
   constructor(type, init) { this.type = type; this.detail = init?.detail; }
 };
-globalThis.document = { dispatchEvent: vi.fn() };
+globalThis.document = { dispatchEvent: vi.fn(), addEventListener: vi.fn() };
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
 vi.mock('../js/ui/toast.js', () => ({ showError: vi.fn() }));

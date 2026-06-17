@@ -44,11 +44,13 @@ export class FileNameDisplay {
   _show(name) {
     this._nameEl.textContent  = name || '';
     this._wrap.style.display  = 'inline-flex';
+    document.dispatchEvent(new CustomEvent(AppEvents.FILE_NAME_CHANGED, { detail: { name: name || '' } }));
   }
 
   _hide() {
     this._nameEl.textContent = '';
     this._wrap.style.display = 'none';
+    document.dispatchEvent(new CustomEvent(AppEvents.FILE_NAME_CHANGED, { detail: { name: '' } }));
   }
 
   // ── Public API ────────────────────────────────────────────────────────────
@@ -60,5 +62,6 @@ export class FileNameDisplay {
   /** Imperatively update the displayed name (e.g. after a Save-As rename). */
   setName(name) {
     this._nameEl.textContent = name || '';
+    document.dispatchEvent(new CustomEvent(AppEvents.FILE_NAME_CHANGED, { detail: { name: name || '' } }));
   }
 }

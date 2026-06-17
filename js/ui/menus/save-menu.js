@@ -19,16 +19,12 @@ export class SaveMenu extends DropdownMenu {
       tipBody:  'Save to cloud or export the questionnaire as FHIR R4 JSON, or download current answers as a QuestionnaireResponse.',
     });
 
-    this._fileNameDisplay = null;
+    this._fileName = '';
+    document.addEventListener(AppEvents.FILE_NAME_CHANGED, e => { this._fileName = e.detail.name; });
 
     this._bindTreeVisibility();
     this._buildMenu();
     this._bindHandlers();
-  }
-
-  /** @param {{ fileNameDisplay }} deps */
-  configure({ fileNameDisplay }) {
-    this._fileNameDisplay = fileNameDisplay;
   }
 
   get cloudSaveBtn() { return this._cloudSaveBtn; }
@@ -37,7 +33,7 @@ export class SaveMenu extends DropdownMenu {
   /** Prompt for filename then export FHIR JSON via saveFormatModal. */
   promptExport() {
     saveFormatModal.open({
-      fileNameDisplay: this._fileNameDisplay,
+      fileName: this._fileName,
       tree:   questDoc.tree,
       values: answerStore.data,
     });
@@ -72,7 +68,7 @@ export class SaveMenu extends DropdownMenu {
     this._exportQuestItem.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       saveFormatModal.open({
-        fileNameDisplay: this._fileNameDisplay,
+        fileName: this._fileName,
         tree:   questDoc.tree,
         values: answerStore.data,
       });
@@ -80,13 +76,13 @@ export class SaveMenu extends DropdownMenu {
 
     this._exportQrItem.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      const suggested = this._fileNameDisplay.getName().trim() || 'questionnaire';
+      const suggested = this._fileName.trim() || 'questionnaire';
       qrExportModal.open(suggested + '-response.json');
     });
 
     this._exportObsItem.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      const suggested = this._fileNameDisplay.getName().trim() || 'questionnaire';
+      const suggested = this._fileName.trim() || 'questionnaire';
       obsExportModal.open(suggested + '-observations.json');
     });
   }

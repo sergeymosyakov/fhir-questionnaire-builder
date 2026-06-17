@@ -56,7 +56,7 @@ class SaveFormatModal extends Modal {
     this.body.appendChild(row);
   }
 
-  /** @param {{ fileNameDisplay, tree, values }} deps */
+  /** @param {{ fileName, tree, values }} deps */
   open(deps) {
     this._deps   = deps;
     // Resolve saved format; migrate old 'fhir' key to current FHIR target
@@ -82,9 +82,9 @@ class SaveFormatModal extends Modal {
   // Works for any registered format: FHIR JSON variants and CSV formats alike.
 
   _exportWithFormat(fmt) {
-    const { fileNameDisplay, tree, values } = this._deps;
+    const { fileName, tree, values } = this._deps;
     const baseQ     = buildFHIRObject();
-    const suggested = fileNameDisplay.getName().trim() || 'questionnaire';
+    const suggested = (fileName || '').trim() || 'questionnaire';
 
     fmt.onBeforeReport?.();
 
@@ -115,7 +115,7 @@ class SaveFormatModal extends Modal {
               document.body.removeChild(a);
               URL.revokeObjectURL(url);
             }
-            fileNameDisplay.setName(trimmed);
+              document.dispatchEvent(new CustomEvent('file-name:changed', { detail: { name: trimmed } }));
           });
         },
       }

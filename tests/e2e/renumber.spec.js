@@ -11,7 +11,7 @@
 //   csel-drop              custom-select dropdown panel
 
 import { test, expect } from '@playwright/test';
-import { freshStart, addRootGroup, addItemToGroup, waitForLoad } from './helpers/builder.js';
+import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
 
 async function addTwoItems(page) {
   await addRootGroup(page);

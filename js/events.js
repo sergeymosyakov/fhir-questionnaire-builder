@@ -112,6 +112,17 @@ export const AppEvents = Object.freeze({
   // detail: { fp, qr, env } — fhirpath engine, current QR, and variable env.
   FHIRPATH_CTX_UPDATED: 'fhirpath:ctx-updated',
 
+  // Dispatched when a set of SDC variables should be merged into the questionnaire.
+  // detail: { variables: [{name: string, expression: string}] }
+  // Receiver merges by name (upsert) without touching other variables.
+  VARIABLES_APPLY: 'variables:apply',
+
+  // Dispatched by AnswersMenu when the user picks a QR file or sample response.
+  // detail: { data: object } — raw QuestionnaireResponse JSON.
+  QR_ANSWERS_REQUESTED: 'qr:answers-requested',
+  // Dispatched by FileNameDisplay when the displayed file name changes.
+  // detail: { name: string } — current name; empty string when cleared.
+  FILE_NAME_CHANGED: 'file-name:changed',
   // ── FHIR version ─────────────────────────────────────────────────────────
   // detail: { versionId: 'R4'|'R4B'|'R5', fromVersionId?: 'R4'|'R4B'|'R5', source?: 'user' }
   // Dispatched by FhirVersionSelect when the user changes the target FHIR version

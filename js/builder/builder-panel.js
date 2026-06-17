@@ -76,10 +76,12 @@ export class BuilderPanel {
   }
 
   addRootGroup() {
+    const wasEmpty = this._tree.length === 0;
     const node = createGroupNode({ title: 'New Group' });
     node.id = String(this._tree.length + 1);
     this._tree.push(node);
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
+    if (wasEmpty) document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_NEW));
     this.renderTree();
     requestAnimationFrame(() => {
       const el = document.querySelector(

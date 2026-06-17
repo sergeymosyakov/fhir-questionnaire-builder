@@ -5,6 +5,7 @@
 // The singleton `questDoc` is the single source of truth for the current
 // document. Import it wherever document state is needed.
 import { destroyTree } from '../utils.js';
+import { AppEvents } from '../events.js';
 
 export class QuestDocument {
   /** @type {import('../nodes/base-node.js').BaseNode[]} Root-level tree nodes. */
@@ -76,9 +77,20 @@ export class QuestDocument {
   }
 
   /**
+   * Merge-patch a set of SDC variables into this.variables.
+   * Each entry is upserted by name without touching other variables.
+   */
+  applyVariables(variables) {
+    for (const { name, expression } of variables) {
+      const idx = this.variables.findIndex(v => v.name === name);
+      if (idx >= 0) this.variables[idx].expression = expression;
+      else this.variables.push({ name, expression });
+    }
+  }
+
+  /**
    * Reset to empty state — in-place mutation so all external array references
    * (tree, contained, variables) remain valid.
-   * Replaces the old resetQuestMeta() + destroyTree(tree) + array splices pattern.
    */
   reset() {
     destroyTree(this.tree);
@@ -105,3 +117,11 @@ export class QuestDocument {
 
 /** Singleton — the currently loaded (or empty) questionnaire document. */
 export const questDoc = new QuestDocument();
+
+// The singleton wires itself to VARIABLES_APPLY so any module can
+// dispatch the event without knowing about questDoc directly.
+if (typeof document !== 'undefined') {
+  document.addEventListener(AppEvents.VARIABLES_APPLY, e => {
+    questDoc.applyVariables(e.detail.variables);
+  });
+}

@@ -14,7 +14,7 @@
 //   .logic-separator       separator between items ("AND" / "OR" text)
 
 import { test, expect } from '@playwright/test';
-import { freshStart, addRootGroup, addItemToGroup, waitForLoad } from './helpers/builder.js';
+import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
 
 async function addSecondItem(page, groupId) {
   const group = page.locator(`[data-node-id="${groupId}"]`);

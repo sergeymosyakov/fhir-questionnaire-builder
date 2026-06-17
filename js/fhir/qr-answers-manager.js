@@ -13,6 +13,13 @@ export class QRAnswersManager {
     this._tree            = questDoc.tree;
     this._questDoc        = questDoc;
     this._shouldValidate  = shouldValidate || (() => true);
+
+    // Listen for QR_ANSWERS_REQUESTED so no external caller needs a reference.
+    if (typeof document !== 'undefined') {
+      document.addEventListener(AppEvents.QR_ANSWERS_REQUESTED, e => {
+        this.apply(e.detail.data);
+      });
+    }
   }
 
   apply(qr) {

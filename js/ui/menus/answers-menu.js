@@ -16,9 +16,7 @@ export class AnswersMenu extends DropdownMenu {
       tipBody:  'Load answers from a QuestionnaireResponse file, or pick a sample response for the current questionnaire.',
     });
 
-    this._qrAnswers = null;
-
-    // Hidden file input — closure keeps the reference, no instance property needed
+    // Hidden file input for QR file picker
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = '.json,application/json';
@@ -26,7 +24,7 @@ export class AnswersMenu extends DropdownMenu {
     fileInput.dataset.testid = 'qr-file-input';
     fileInput.addEventListener('change', e => {
       readFileAsJSON(e)
-        .then(({ data }) => this._qrAnswers.apply(data))
+        .then(({ data }) => document.dispatchEvent(new CustomEvent(AppEvents.QR_ANSWERS_REQUESTED, { detail: { data } })))
         .catch(err => err && showError('Parse error: ' + err.message));
     });
     document.body.appendChild(fileInput);
@@ -37,7 +35,7 @@ export class AnswersMenu extends DropdownMenu {
     this._bindHandlers();
   }
 
-  configure({ qrAnswers }) { this._qrAnswers = qrAnswers; }
+  configure({ qrAnswers: _ignored }) { /* no-op — now event-driven */ }
 
   _buildMenu() {
     this._loadAnswersItem = this._item(null, '&#x1F4C2; From file&hellip;', 'load-answers-from-file');
@@ -61,7 +59,7 @@ export class AnswersMenu extends DropdownMenu {
       libraryModal.open('qr-responses', item => {
         fetch('sampledata/' + item.file)
           .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-          .then(data => this._qrAnswers.apply(data))
+          .then(data => document.dispatchEvent(new CustomEvent(AppEvents.QR_ANSWERS_REQUESTED, { detail: { data } })))
           .catch(err => showError('Could not load sample response: ' + err.message));
       }, 'qr');
     });
