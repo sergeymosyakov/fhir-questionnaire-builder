@@ -10,10 +10,9 @@ import { initValidators } from './fhir/validators/init.js';
 import * as metadataModal from './ui/modals/metadata-modal.js';
 import './ui/modals/obs-export-modal.js';
 import * as progress from './ui/progress.js';
-import { RenumberControl } from './ui/renumber-control.js';
 import * as search from './ui/search.js';
 import { UndoRedo } from './ui/undo-redo.js';
-import { renumberAll, mount as mountBuilder } from './builder/index.js';
+import { mount as mountBuilder } from './builder/index.js';
 import * as helpModal from './ui/modals/help-modal.js';
 import { PreviewForm } from './preview-form.js';
 import { prefs, mount as mountHeaderActions } from './ui/header-actions.js';
@@ -66,15 +65,16 @@ document.dispatchEvent(new CustomEvent(AppEvents.APP_CONTEXT_READY, {
 }));
 
 // ── Builder toolbar + tree container (self-finds by data-mount) ───────────────
+// BuilderPanel.mount() also wires addRootGroup, renumber, collapse/expand buttons
 mountBuilder();
+
+// ── Global progress bar (self-finds progress-* elements) ─────────────────────
 
 // ── FHIR version selector (self-finds [data-mount="fhir-version-select"]) ─────
 new FhirVersionSelect(() => questDoc.fhirTarget).mount();
 
-// ── Renumber (self-finds renumber-wrap and renumber-btn) ──────────────────────
-new RenumberControl({ renumberAll });
-
-// ── Global progress bar (self-finds progress-* elements) ─────────────────────
+// ── Builder toolbar + tree container (self-finds by data-mount) ───────────────
+mountBuilder();
 progress.init();
 
 // ── Tooltip init ──────────────────────────────────────────────────────────────

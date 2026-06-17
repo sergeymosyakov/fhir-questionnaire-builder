@@ -13,6 +13,7 @@ import { numberingService } from './numbering-service.js';
 import { findAndRemove } from '../utils.js';
 import { ConfirmDialog } from '../ui/confirm-dialog.js';
 import * as progress from '../ui/progress.js';
+import { RenumberControl } from '../ui/renumber-control.js';
 
 const fhirpath = typeof window !== 'undefined' ? window.fhirpath : null;
 
@@ -38,6 +39,7 @@ export class BuilderPanel {
     expandAllBtn.onclick    = () =>
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
     addRootGroupBtn.onclick = () => this.addRootGroup();
+    new RenumberControl({ renumberAll: () => this.renumberAll() });
   }
 
   renderTree() {
