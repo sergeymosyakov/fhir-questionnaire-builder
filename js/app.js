@@ -39,10 +39,9 @@ new PatientProfile();
 // FHIR modules self-wire via APP_CONTEXT_READY — no configure() calls needed
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
-export const qrAnswers   = new QRAnswersManager({ questDoc, answerStore });
-export const questLoader = new QuestionnaireLoader({ questDoc, answerStore });
-
-export const previewForm = new PreviewForm({ questDoc, answerStore });
+new QRAnswersManager({ questDoc, answerStore });
+new QuestionnaireLoader({ questDoc, answerStore });
+new PreviewForm();
 
 // Mount header action menus — each class self-finds its mount point
 mountHeaderActions();

@@ -29,13 +29,13 @@ export class PreviewForm {
    * @param {object} deps.questDoc
    * @param {object} deps.answerStore
    */
-  constructor(deps) {
+  constructor() {
     _instance = this;
-    this._tree            = deps.questDoc.tree;
-    this._answerStore     = deps.answerStore;
-    this._rawFhir         = deps.questDoc;
-    this._questVariables  = deps.questDoc.variables;
-    this._calcFormOk      = node => calcFormOk(node, this._answerStore);
+    this._tree            = null;
+    this._answerStore     = null;
+    this._rawFhir         = null;
+    this._questVariables  = null;
+    this._calcFormOk      = null;
 
     this._viewPrefs     = { showLinkId: true, showPrefix: true, showBadges: true, showHiddenItems: true };
     this._previewMode   = 'preview';
@@ -49,13 +49,28 @@ export class PreviewForm {
     _rc.viewPrefs        = this._viewPrefs;
     _rc.lastCtx          = this._lastCtx;
     _rc.buildControl     = (node, iconEl, cb) => this._buildControl(node, iconEl, cb);
-    _rc.values           = this._answerStore.data;
-    _rc.updateGroupIcons = () => GroupNode.updateAll(_rc);
     _rc.isMandatory      = isMandatory;
-    _rc.calcFormOk       = node => calcFormOk(node, this._answerStore);
     _rc.evalConstraints  = evalConstraints;
-    _rc.getValue         = id => this._answerStore.get(id);
     _rc.CHECKABLE_TYPES  = CHECKABLE_TYPES;
+
+    // ── Data wiring deferred until APP_CONTEXT_READY ─────────────────────────
+    const _initData = ({ questDoc, answerStore }) => {
+      this._tree          = questDoc.tree;
+      this._answerStore   = answerStore;
+      this._rawFhir       = questDoc;
+      this._questVariables = questDoc.variables;
+      this._calcFormOk    = node => calcFormOk(node, answerStore);
+      _rc.values          = answerStore.data;
+      _rc.calcFormOk      = this._calcFormOk;
+      _rc.updateGroupIcons = () => GroupNode.updateAll(_rc);
+      _rc.getValue        = id => answerStore.get(id);
+    };
+    const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
+    if (cached?.questDoc) {
+      _initData(cached);
+    } else {
+      document.addEventListener(AppEvents.APP_CONTEXT_READY, e => _initData(e.detail), { once: true });
+    }
 
     // ── Event listeners ─────────────────────────────────────────────────────
     document.addEventListener(AppEvents.VIEW_PREF_CHANGE,   e => this._onViewPrefChange(e));
