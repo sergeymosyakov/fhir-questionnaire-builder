@@ -61,8 +61,6 @@ function makeLoader(overrides = {}) {
   return new QuestionnaireLoader({
     questDoc,
     answerStore,
-    reinitForm:     overrides.reinitForm ?? vi.fn(() => Promise.resolve()),
-    shouldValidate: overrides.shouldValidate,
   });
 }
 
@@ -113,10 +111,11 @@ describe('QuestionnaireLoader.load — success', () => {
     expect(GroupNode.resetCollapsedFromTree).toHaveBeenCalledTimes(1);
   });
 
-  it('calls reinitForm', async () => {
-    const reinitForm = vi.fn(() => Promise.resolve());
-    await makeLoader({ reinitForm }).load({}, 'test.json');
-    expect(reinitForm).toHaveBeenCalled();
+  it('dispatches REINIT_FORM on load', async () => {
+    await makeLoader().load({}, 'test.json');
+    const calls = document.dispatchEvent.mock.calls;
+    const evt = calls.find(c => c[0].type === 'reinit-form');
+    expect(evt).toBeDefined();
   });
 
   it('dispatches QUESTIONNAIRE_LOADED event with fileName', async () => {

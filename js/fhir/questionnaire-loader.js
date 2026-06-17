@@ -14,17 +14,18 @@ import { versionRegistry } from './version-registry.js';
 import { loadConfirmModal } from '../ui/modals/load-confirm-modal.js';
 
 export class QuestionnaireLoader {
-  /** @param {{ questDoc: import('../fhir/quest-document.js').QuestDocument,
-   *            answerStore, reinitForm?, shouldValidate? }} deps */
-  constructor({ questDoc, answerStore, reinitForm, shouldValidate }) {
+  /** @param {{ questDoc: import('../fhir/quest-document.js').QuestDocument, answerStore }} deps */
+  constructor({ questDoc, answerStore }) {
     this._questDoc         = questDoc;
     this._tree             = questDoc.tree;
     this._answerStore      = answerStore;
-    this._reinitForm       = reinitForm || null;
     this._importSeq        = 0;
-    this._shouldValidate   = shouldValidate || (() => true);
+    this._validateEnabled  = true;  // kept in sync via VALIDATOR_TOGGLE
     // Self-wire lifecycle events — no external wiring needed in app.js
     if (typeof document !== 'undefined') {
+      document.addEventListener(AppEvents.VALIDATOR_TOGGLE, e => {
+        if (e.detail?.id === 'local') this._validateEnabled = e.detail.enabled;
+      });
       document.addEventListener(AppEvents.QUESTIONNAIRE_CLEAR_REQUESTED, () => this.confirmAndReset());
       document.addEventListener(AppEvents.QUESTIONNAIRE_RESET, () => this.reset());
       document.addEventListener(AppEvents.QUESTIONNAIRE_LOAD_CONFIRM_REQUESTED, async e => {
@@ -97,18 +98,14 @@ export class QuestionnaireLoader {
         }));
       }
       GroupNode.resetCollapsedFromTree(this._tree);
-      if (this._reinitForm) {
-        await this._reinitForm();
-      } else {
-        document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
-      }
+      document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
       document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOADED, {
         detail: { fileName: fileName || '', questDoc: this._questDoc, answerStore: this._answerStore },
       }));
 
       // Show import report only when local validator finds errors and validate is enabled.
       // Warnings are non-blocking — users can review them via Tools → Validate.
-      if (this._shouldValidate() && validateTree(this._tree, this._answerStore.data, { name: data?.name }).some(i => i.severity === 'error')) {
+      if (this._validateEnabled && validateTree(this._tree, this._answerStore.data, { name: data?.name }).some(i => i.severity === 'error')) {
         validateModal.show('Import — Validation Report', 'import', { questJson: data, tree: this._tree, values: this._answerStore.data });
       }
       this._expandValueSets(++this._importSeq);
@@ -127,10 +124,6 @@ export class QuestionnaireLoader {
     if (failures.length) {
       validateModal.show('ValueSet Expansion Errors', 'import', { tree: this._tree, values: this._answerStore.data });
     }
-    if (this._reinitForm) {
-      await this._reinitForm({ silent: true });
-    } else {
-      document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
-    }
+    document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM, { detail: { silent: true } }));
   }
 }

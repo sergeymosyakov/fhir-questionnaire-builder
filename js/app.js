@@ -13,12 +13,12 @@ import * as progress from './ui/progress.js';
 import { RenumberControl } from './ui/renumber-control.js';
 import * as search from './ui/search.js';
 import { UndoRedo } from './ui/undo-redo.js';
-import { renumberAll, addRootGroup, mount as mountBuilder } from './builder/index.js';
+import { renumberAll, mount as mountBuilder } from './builder/index.js';
 import * as helpModal from './ui/modals/help-modal.js';
 import { PreviewForm } from './preview-form.js';
 import { prefs, mount as mountHeaderActions } from './ui/header-actions.js';
 import './ui/modals/index.js';
-import * as variablesPanel    from './ui/variables-panel.js';
+import './ui/variables-panel.js';
 import _containedPanel        from './ui/panels/contained-panel.js';
 import _answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
 import { PatientProfile } from './ui/patient-panel.js';
@@ -37,19 +37,15 @@ import { CopyPaste } from './ui/copy-paste.js';
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
 
-// ── Patient profile widget (self-finds [data-mount="patient-preset"]) ─────────
-const patientProfile = new PatientProfile();
-patientProfile.mount();
-variablesPanel.configure();
+// ── Patient profile widget ────────────────────────────────────────────────────
+new PatientProfile().mount();
+// variables-panel self-initializes on import via side-effect
 
 // FHIR modules self-wire via APP_CONTEXT_READY — no configure() calls needed
 
 // ── Manager singletons (DI from state) ─────────────────────────────────
-export const qrAnswers   = new QRAnswersManager({ questDoc, answerStore, shouldValidate: () => prefs.get('validate') });
-export const questLoader = new QuestionnaireLoader({ questDoc, answerStore,
-  reinitForm:       (opts) => previewForm.reinitForm(opts),
-  shouldValidate:   () => prefs.get('validate'),
-});
+export const qrAnswers   = new QRAnswersManager({ questDoc, answerStore });
+export const questLoader = new QuestionnaireLoader({ questDoc, answerStore });
 
 export const previewForm = new PreviewForm({
   questDoc, answerStore,
@@ -68,9 +64,6 @@ new AuthPanel();
 document.dispatchEvent(new CustomEvent(AppEvents.APP_CONTEXT_READY, {
   detail: { questDoc, answerStore },
 }));
-
-// Buttons — self-find their elements
-document.querySelector('[data-mount="add-root-group-btn"]').onclick = () => addRootGroup();
 
 // ── Builder toolbar + tree container (self-finds by data-mount) ───────────────
 mountBuilder();

@@ -63,7 +63,7 @@ export class PreviewForm {
     // ── Event listeners ─────────────────────────────────────────────────────
     document.addEventListener(AppEvents.VIEW_PREF_CHANGE,   e => this._onViewPrefChange(e));
     document.addEventListener(AppEvents.PREVIEW_MODE_CHANGE,e => this._onPreviewModeChange(e));
-    document.addEventListener(AppEvents.REINIT_FORM,        () => this.reinitForm());
+    document.addEventListener(AppEvents.REINIT_FORM,        e => this.reinitForm({ silent: e.detail?.silent }));
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => {
       this._els.lform?.closest('.right-panel-body')?.scrollTo({ top: 0 });
     });

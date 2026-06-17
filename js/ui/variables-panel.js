@@ -28,7 +28,7 @@ let _collapsed = false;
 let _draft     = null; // working copy while modal is open; null when closed
 const _el = { card: null, toggle: null, chipList: null, count: null, editBtn: null, reinitBtn: null };
 
-export function configure() {
+export function init() {
   const mountEl = document.querySelector('[data-mount="variables-panel"]');
   // Build card DOM from template
   const card = document.createElement('div');
@@ -57,6 +57,9 @@ export function configure() {
   document.addEventListener(AppEvents.PATIENT_CTX_APPLIED, refresh);
   refresh();
 }
+
+// Self-initialize when the module is imported (DOM is ready at this point)
+if (typeof document !== 'undefined') { init(); }
 
 class VariablesModal extends Modal {
   getName() { return 'variablesModal'; }

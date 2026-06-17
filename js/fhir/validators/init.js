@@ -16,6 +16,7 @@
 import { validatorRegistry } from './registry.js';
 import { LocalValidator }    from './local.js';
 import { ExternalValidator } from './external.js';
+import { AppEvents }         from '../../events.js';
 
 /**
  * @param {{ localEnabled?: boolean, externalEnabled?: boolean, getFhirTarget?: () => string }} opts
@@ -41,6 +42,11 @@ export async function initValidators({ localEnabled = true, externalEnabled = fa
     const v = new LocalValidator();
     v.enabled = localEnabled;
     validatorRegistry.register(v);
+  }
+  // Broadcast initial states so listeners (QuestionnaireLoader, QRAnswersManager) sync up
+  if (typeof document !== 'undefined') {
+    document.dispatchEvent(new CustomEvent(AppEvents.VALIDATOR_TOGGLE, { detail: { id: 'local',    enabled: localEnabled } }));
+    document.dispatchEvent(new CustomEvent(AppEvents.VALIDATOR_TOGGLE, { detail: { id: 'external', enabled: externalEnabled } }));
   }
 }
 

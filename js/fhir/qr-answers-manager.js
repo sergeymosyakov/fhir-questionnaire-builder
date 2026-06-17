@@ -7,15 +7,18 @@ import * as validateModal from '../ui/modals/validate-modal.js';
 import { AppEvents } from '../events.js';
 
 export class QRAnswersManager {
-  /** @param {{ questDoc, answerStore, shouldValidate? }} deps — state references */
-  constructor({ questDoc, answerStore, shouldValidate }) {
+  /** @param {{ questDoc, answerStore }} deps — state references */
+  constructor({ questDoc, answerStore }) {
     this._answerStore     = answerStore;
     this._tree            = questDoc.tree;
     this._questDoc        = questDoc;
-    this._shouldValidate  = shouldValidate || (() => true);
+    this._validateEnabled = true;  // kept in sync via VALIDATOR_TOGGLE
 
     // Listen for QR_ANSWERS_REQUESTED so no external caller needs a reference.
     if (typeof document !== 'undefined') {
+      document.addEventListener(AppEvents.VALIDATOR_TOGGLE, e => {
+        if (e.detail?.id === 'local') this._validateEnabled = e.detail.enabled;
+      });
       document.addEventListener(AppEvents.QR_ANSWERS_REQUESTED, e => {
         this.apply(e.detail.data);
       });
@@ -62,7 +65,7 @@ export class QRAnswersManager {
 
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 
-    if (issues.length > 0 && this._shouldValidate()) {
+    if (issues.length > 0 && this._validateEnabled) {
       validateModal.show('Load Answers \u2014 ' + result.loaded + ' loaded', 'import', { tree: this._tree, values: this._answerStore.data, extraIssues: issues });
     }
   }
