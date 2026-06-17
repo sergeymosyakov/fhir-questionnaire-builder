@@ -263,6 +263,12 @@ test.describe('Load FHIR → both panels', () => {
     await page.locator('[data-sample="example-bariatric.fhir.json"]').waitFor({ timeout: 10_000 });
     await page.click('[data-sample="example-bariatric.fhir.json"]');
 
+    // Wait for builder render to complete (progress bar hidden) before expanding
+    await page.waitForFunction(
+      () => document.querySelector('[data-mount="progress-wrap"]')?.style.display === 'none',
+      { timeout: 20_000 }
+    );
+
     await page.getByTestId('expand-all-btn').click();
     await openDropdownItem(page, 'tools-btn', 'expand-all-item');
 
