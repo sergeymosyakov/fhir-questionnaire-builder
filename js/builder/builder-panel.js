@@ -41,6 +41,8 @@ export class BuilderPanel {
         _init(e.detail.questDoc, e.detail.answerStore);
       }, { once: true });
     }
+
+    if (typeof document !== 'undefined') this.mount();
   }
 
   // ── Public API ──────────────────────────────────────────────────────────────

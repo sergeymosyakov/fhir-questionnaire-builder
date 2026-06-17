@@ -5,7 +5,7 @@
 import { nodeToFHIRItem } from '../fhir/export.js';
 import { fhirItemToNode } from '../fhir/import-item.js';
 import { MODAL_REGISTRY } from './modals/modal-registry.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 
 // FHIRPath structural-query patterns that may be affected when items are added.
 const STRUCTURAL_RE = /\.descendants\(\)|\.item\.where\s*\(\s*type\s*=|\.count\(\)/;
@@ -14,7 +14,7 @@ export class CopyPaste {
   constructor() {
     /** Serialised FHIR JSON of the last copied item. null = nothing copied. */
     this._clip = null;
-    this._questDoc = null;
+    this._questDoc = EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc ?? null;
 
     document.addEventListener(AppEvents.APP_CONTEXT_READY,
       e => { if (e.detail?.questDoc) this._questDoc = e.detail.questDoc; });

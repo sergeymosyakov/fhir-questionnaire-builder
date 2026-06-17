@@ -17,8 +17,8 @@ export class SaveMenu extends DropdownMenu {
       tipBody:  'Save to cloud or export the questionnaire as FHIR R4 JSON, or download current answers as a QuestionnaireResponse.',
     });
 
-    this._questDoc    = null;
-    this._answerStore = null;
+    this._questDoc    = EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc    ?? null;
+    this._answerStore = EventState.get(AppEvents.APP_CONTEXT_READY)?.answerStore ?? null;
     const _update = e => {
       if (e.detail?.questDoc)    this._questDoc    = e.detail.questDoc;
       if (e.detail?.answerStore) this._answerStore = e.detail.answerStore;
