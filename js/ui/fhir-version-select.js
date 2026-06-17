@@ -10,7 +10,7 @@
 
 import { versionRegistry } from '../fhir/version-registry.js';
 import { createCustomSelect } from './custom-select.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 
 export class FhirVersionSelect {
   /** @type {HTMLElement} */
@@ -26,9 +26,10 @@ export class FhirVersionSelect {
    * @param {HTMLElement} mountEl - container to append the widget into
    * @param {() => string} getFhirTarget - returns current fhirTarget from questMeta
    */
-  constructor(getFhirTarget) {
+  constructor() {
     this._mount = document.querySelector('[data-mount="fhir-version-select"]');
-    this._getFhirTarget = getFhirTarget;
+    this._sel = null;
+    this._el = null;
   }
 
   mount() {
@@ -37,14 +38,15 @@ export class FhirVersionSelect {
     wrap.className = 'fhir-version-select-wrap';
     wrap.dataset.testid = 'fhir-version-select-wrap';
 
+    const fhirTarget = () => EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.meta?.fhirTarget ?? 'R4';
     const sel = createCustomSelect({
       items,
-      value:     this._getFhirTarget(),
+      value:     fhirTarget(),
       className: 'fhir-version-sel sc-trigger--sm',
       testid:    'fhir-version-select',
       onChange:  v => {
         document.dispatchEvent(new CustomEvent(AppEvents.FHIR_VERSION_CHANGED, {
-          detail: { versionId: v, fromVersionId: this._getFhirTarget(), source: 'user' },
+          detail: { versionId: v, fromVersionId: fhirTarget(), source: 'user' },
         }));
       },
     });

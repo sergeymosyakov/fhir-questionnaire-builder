@@ -163,4 +163,36 @@ export const AppEvents = Object.freeze({
   // When source:'user' and the tree is non-empty, version-compat checkers run and
   // a warning toast is shown only if any checker produces a message.
   FHIR_VERSION_CHANGED: 'fhir-version-changed',
+
+  // Dispatched by MetadataCard "Edit" button; MetadataModal listens and opens.
+  METADATA_EDIT_REQUESTED: 'metadata-edit-requested',
 });
+
+// ── Event state cache ─────────────────────────────────────────────────────────
+// Stores the last detail for selected events so late subscribers can read the
+// current state immediately without waiting for the next dispatch.
+//
+// Usage: EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc
+//
+// Only events listed in STATEFUL_EVENTS are cached.
+const STATEFUL_EVENTS = new Set([
+  AppEvents.APP_CONTEXT_READY,
+  AppEvents.QUESTIONNAIRE_LOADED,
+  AppEvents.QUESTIONNAIRE_CLEARED,
+  AppEvents.QUESTIONNAIRE_NEW,
+  AppEvents.FHIR_VERSION_CHANGED,
+  AppEvents.PREVIEW_MODE_CHANGE,
+]);
+
+const _cache = new Map();
+
+export const EventState = {
+  /** @returns {object|undefined} last detail for the event, or undefined if never fired */
+  get(eventName) { return _cache.get(eventName); },
+};
+
+if (typeof document !== 'undefined') {
+  for (const name of STATEFUL_EVENTS) {
+    document.addEventListener(name, e => _cache.set(name, e.detail ?? {}));
+  }
+}

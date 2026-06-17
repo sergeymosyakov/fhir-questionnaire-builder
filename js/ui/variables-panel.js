@@ -59,7 +59,7 @@ export function init() {
 }
 
 // Self-initialize when the module is imported (DOM is ready at this point)
-if (typeof document !== 'undefined') { init(); }
+// VariablesModal is declared below — side-effect init() must come after it
 
 class VariablesModal extends Modal {
   getName() { return 'variablesModal'; }
@@ -184,4 +184,7 @@ function _renderChips() {
     _el.chipList.appendChild(chip);
   }
 }
+
+// Self-initialize after all class declarations are complete
+if (typeof document !== 'undefined') { init(); }
 

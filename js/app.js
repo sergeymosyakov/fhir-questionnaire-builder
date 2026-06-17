@@ -7,13 +7,11 @@ import './fhir/import.js';
 import './fhir/qr-export.js';
 import './fhir/obs-export.js';
 import { initValidators } from './fhir/validators/init.js';
-import * as metadataModal from './ui/modals/metadata-modal.js';
 import './ui/modals/obs-export-modal.js';
 import * as progress from './ui/progress.js';
 import * as search from './ui/search.js';
 import { UndoRedo } from './ui/undo-redo.js';
 import { mount as mountBuilder } from './builder/index.js';
-import * as helpModal from './ui/modals/help-modal.js';
 import { PreviewForm } from './preview-form.js';
 import { prefs, mount as mountHeaderActions } from './ui/header-actions.js';
 import './ui/modals/index.js';
@@ -69,7 +67,7 @@ document.dispatchEvent(new CustomEvent(AppEvents.APP_CONTEXT_READY, {
 mountBuilder();
 
 // ── FHIR version selector (self-finds [data-mount="fhir-version-select"]) ─────
-new FhirVersionSelect(() => questDoc.fhirTarget).mount();
+new FhirVersionSelect().mount();
 
 // ── Global progress bar (self-finds progress-* elements) ─────────────────────
 progress.init();
@@ -79,8 +77,6 @@ import('./ui/tooltip.js').then(tt => tt.init());
 
 // ── Status badge (self-finds status-badge-* elements) ─────────────────────────
 statusBadge.init();
-
-document.querySelector('[data-mount="help-btn"]').addEventListener('click', () => helpModal.open());
 
 // ── Search (self-finds search-* elements) ─────────────────────────────────────
 search.init();
@@ -92,17 +88,10 @@ previewForm.mount();
 import('./ui/autosave.js').then(as => as.init());
 
 // ── Metadata card (self-finds [data-mount="metadata-card"]) ───────────────────
-new MetadataCard({
-  questMeta: questDoc.meta,
-  onEdit: () => metadataModal.open(),
-});
+new MetadataCard();
 
 // Reset flow is self-wired in QuestionnaireLoader constructor
-
-// Close any open dropdowns when clicking outside
-document.addEventListener('click', () => {
-  document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-});
+// CLOSE_DROPDOWNS on outside click is self-wired in DropdownMenu static {}
 
 // ── Panel resize drag (self-finds panel-resizer and left-panel) ───────────────
 new PanelResizer({ storageKey: 'leftPanelWidth' }).init();

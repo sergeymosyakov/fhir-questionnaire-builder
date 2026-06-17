@@ -99,3 +99,9 @@ class MetadataModal extends Modal {
 
 const _modal = new MetadataModal();
 export const open = () => _modal.open();
+
+// Self-wire: MetadataCard dispatches METADATA_EDIT_REQUESTED when Edit is clicked
+import { AppEvents as _AppEvents } from '../../events.js';
+if (typeof document !== 'undefined') {
+  document.addEventListener(_AppEvents.METADATA_EDIT_REQUESTED, () => _modal.open());
+}

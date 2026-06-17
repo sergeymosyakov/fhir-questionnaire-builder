@@ -15,6 +15,14 @@ import { AppEvents } from '../events.js';
 //   tipFhir/tipSpec   — FHIR path / spec badge for tooltip
 
 export class DropdownMenu {
+  // One-time global click handler: clicking outside any dropdown closes all.
+  static {
+    if (typeof document !== 'undefined') {
+      document.addEventListener('click', () =>
+        document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS)));
+    }
+  }
+
   constructor({ btnId, menuId, wrapId, label, btnClass = 'btn-fhir',
                 testid, tipTitle, tipBody, tipFhir, tipSpec } = {}) {
     this._wrap = document.createElement('div');

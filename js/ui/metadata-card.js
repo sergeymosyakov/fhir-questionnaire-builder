@@ -1,7 +1,7 @@
 // ── Metadata Card ─────────────────────────────────────────────────────────────
 // Summary card showing questionnaire status + experimental badge.
 // Updated via AppEvents (no @vue/reactivity effect).
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 
 const _CARD_HTML = `
 <span class="quest-meta-card-label">Questionnaire</span>
@@ -21,8 +21,7 @@ const _CARD_HTML = `
   data-tip-body="Edit questionnaire-level metadata: id, url, version, title, status, publisher and description. These fields are preserved on import and written back on export.">Edit</button>`;
 
 export class MetadataCard {
-  /** @param {{ questMeta: object, onEdit: Function }} deps */
-  constructor({ questMeta, onEdit }) {
+  constructor() {
     const mountEl = document.querySelector('[data-mount="metadata-card"]');
     const card = document.createElement('div');
     card.className = 'quest-meta-card';
@@ -34,9 +33,9 @@ export class MetadataCard {
     this._card         = card;
     this._status       = card.querySelector('.quest-meta-card-status');
     this._experimental = card.querySelector('.quest-meta-card-experimental');
-    this._questMeta    = questMeta;
 
-    card.querySelector('.quest-meta-edit-btn').onclick = () => onEdit();
+    card.querySelector('.quest-meta-edit-btn').onclick = () =>
+      document.dispatchEvent(new CustomEvent(AppEvents.METADATA_EDIT_REQUESTED));
 
     document.addEventListener(AppEvents.QUESTIONNAIRE_META_CHANGED, () => this._update());
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  () => { this._update(); this._card.style.display = ''; });
@@ -45,7 +44,8 @@ export class MetadataCard {
   }
 
   _update() {
-    const questMeta = this._questMeta;
+    const questMeta = EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.meta;
+    if (!questMeta) return;
     this._status.textContent    = questMeta.status || 'draft';
     this._status.dataset.status = questMeta.status || 'draft';
     const exp = questMeta.experimental;
