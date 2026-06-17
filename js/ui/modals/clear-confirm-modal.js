@@ -2,6 +2,7 @@
 // 3-button confirm: Export first | Clear anyway | Cancel
 // open() returns Promise<'export'|'clear'|'cancel'>
 import { Modal } from './modal-base.js';
+import { AppEvents } from '../../events.js';
 
 class ClearConfirmModal extends Modal {
   getName() { return 'clearConfirmModal'; }
@@ -56,3 +57,11 @@ class ClearConfirmModal extends Modal {
 }
 
 export const clearConfirmModal = new ClearConfirmModal();
+
+// Self-wire: open when QuestionnaireLoader requests confirmation
+if (typeof document !== 'undefined') {
+  document.addEventListener(AppEvents.CLEAR_CONFIRM_REQUESTED, async e => {
+    const choice = await clearConfirmModal.open();
+    e.detail.resolve(choice);
+  });
+}

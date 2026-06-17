@@ -123,6 +123,19 @@ export const AppEvents = Object.freeze({
   // Dispatched by FileNameDisplay when the displayed file name changes.
   // detail: { name: string } — current name; empty string when cleared.
   FILE_NAME_CHANGED: 'file-name:changed',
+
+  // ── Reset flow coordination ───────────────────────────────────────────────
+  // Each event carries detail: { resolve: Function } — the listener calls
+  // resolve(result) when the user has responded.
+  //
+  // CLEAR_CONFIRM_REQUESTED   resolve('proceed' | 'export' | 'cancel')
+  // EXPORT_PROMPT_REQUESTED   resolve() when export is done or skipped
+  // VALIDATE_EXPORT_REQUESTED resolve() when validate modal is dismissed
+  // AUTOSAVE_CLEAR_DRAFT      (no resolve) — fire-and-forget
+  CLEAR_CONFIRM_REQUESTED:   'reset:clear-confirm-requested',
+  EXPORT_PROMPT_REQUESTED:   'reset:export-prompt-requested',
+  VALIDATE_EXPORT_REQUESTED: 'reset:validate-export-requested',
+  AUTOSAVE_CLEAR_DRAFT:      'reset:autosave-clear-draft',
   // ── FHIR version ─────────────────────────────────────────────────────────
   // detail: { versionId: 'R4'|'R4B'|'R5', fromVersionId?: 'R4'|'R4B'|'R5', source?: 'user' }
   // Dispatched by FhirVersionSelect when the user changes the target FHIR version

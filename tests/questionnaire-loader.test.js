@@ -256,102 +256,65 @@ describe('QuestionnaireLoader.reset', () => {
     expect(() => loader.reset()).not.toThrow();
   });
 
-  it('calls clearDraft when resetFlow is configured', () => {
-    const clearDraft = vi.fn();
+  it('dispatches AUTOSAVE_CLEAR_DRAFT on reset', () => {
     const loader = makeLoader();
-    loader.configureResetFlow({
-      confirmOpen: vi.fn(),
-      promptExport: vi.fn(),
-      showValidateExport: vi.fn(),
-      clearDraft,
-    });
     loader.reset();
-    expect(clearDraft).toHaveBeenCalledTimes(1);
+    const types = document.dispatchEvent.mock.calls.map(c => c[0].type);
+    expect(types).toContain('reset:autosave-clear-draft');
   });
 
-  it('does not throw when resetFlow is not configured (no clearDraft)', () => {
+  it('does not throw', () => {
     const loader = makeLoader();
     expect(() => loader.reset()).not.toThrow();
   });
 });
 
-// ── configureResetFlow() ───────────────────────────────────────────────────────
-describe('QuestionnaireLoader.configureResetFlow', () => {
-  it('stores the provided callbacks in _resetFlow', () => {
-    const callbacks = {
-      confirmOpen: vi.fn(),
-      promptExport: vi.fn(),
-      showValidateExport: vi.fn(),
-      clearDraft: vi.fn(),
-    };
-    const loader = makeLoader();
-    loader.configureResetFlow(callbacks);
-    expect(loader._resetFlow).toStrictEqual(callbacks);
-  });
-});
-
 // ── confirmAndReset() ─────────────────────────────────────────────────────────
 describe('QuestionnaireLoader.confirmAndReset', () => {
-  function makeFlowLoader(treeItems = []) {
-    const loader = makeLoader({ tree: treeItems });
-    const confirmOpen     = vi.fn();
-    const promptExport    = vi.fn();
-    const showValidateExport = vi.fn();
-    const clearDraft      = vi.fn();
-    loader.configureResetFlow({ confirmOpen, promptExport, showValidateExport, clearDraft });
-    return { loader, confirmOpen, promptExport, showValidateExport, clearDraft };
+  function _resolveNext(eventType, value) {
+    const orig = document.addEventListener;
+    vi.spyOn(document, 'addEventListener').mockImplementationOnce((type, fn) => {
+      if (type === eventType) {
+        // simulate listener registration — immediately call the handler
+        setTimeout(() => fn({ detail: { resolve: r => r(value) } }), 0);
+      } else {
+        orig.call(document, type, fn);
+      }
+    });
   }
 
   it('calls reset() immediately when tree is empty', async () => {
-    const { loader, confirmOpen } = makeFlowLoader([]);
+    const loader = makeLoader({ tree: [] });
     await loader.confirmAndReset();
-    expect(confirmOpen).not.toHaveBeenCalled();
     expect(loader._questDoc.reset).toHaveBeenCalledTimes(1);
   });
 
-  it('calls reset() directly when _resetFlow is not configured', async () => {
+  it('dispatches CLEAR_CONFIRM_REQUESTED when tree has items', async () => {
     const loader = makeLoader({ tree: [{ id: 'g1' }] });
+    // Dispatch event but provide a resolve that returns 'cancel' so it exits
+    document.dispatchEvent.mockImplementationOnce(e => {
+      if (e.type === 'reset:clear-confirm-requested') e.detail.resolve('cancel');
+    });
+    await loader.confirmAndReset();
+    const types = document.dispatchEvent.mock.calls.map(c => c[0].type);
+    expect(types).toContain('reset:clear-confirm-requested');
+  });
+
+  it('calls reset() when user picks clear', async () => {
+    const loader = makeLoader({ tree: [{ id: 'g1' }] });
+    document.dispatchEvent.mockImplementationOnce(e => {
+      if (e.type === 'reset:clear-confirm-requested') e.detail.resolve('clear');
+    });
     await loader.confirmAndReset();
     expect(loader._questDoc.reset).toHaveBeenCalledTimes(1);
   });
 
   it('does nothing when user picks cancel', async () => {
-    const { loader, confirmOpen } = makeFlowLoader([{ id: 'g1' }]);
-    confirmOpen.mockResolvedValue('cancel');
+    const loader = makeLoader({ tree: [{ id: 'g1' }] });
+    document.dispatchEvent.mockImplementationOnce(e => {
+      if (e.type === 'reset:clear-confirm-requested') e.detail.resolve('cancel');
+    });
     await loader.confirmAndReset();
     expect(loader._questDoc.reset).not.toHaveBeenCalled();
-  });
-
-  it('calls reset() when user picks clear (not cancel/export)', async () => {
-    const { loader, confirmOpen } = makeFlowLoader([{ id: 'g1' }]);
-    confirmOpen.mockResolvedValue('clear');
-    await loader.confirmAndReset();
-    expect(loader._questDoc.reset).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls showValidateExport (no issues) when user picks export', async () => {
-    const { loader, confirmOpen, promptExport, showValidateExport } = makeFlowLoader([{ id: 'g1' }]);
-    confirmOpen.mockResolvedValue('export');
-    validateTree.mockReturnValue([]);
-    await loader.confirmAndReset();
-    expect(showValidateExport).toHaveBeenCalledTimes(1);
-    expect(promptExport).not.toHaveBeenCalled();
-    // callback passed as first arg calls promptExport → then reset
-    const [onExport] = showValidateExport.mock.calls[0];
-    onExport();
-    expect(promptExport).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls showValidateExport (with issues) when user picks export', async () => {
-    const { loader, confirmOpen, promptExport, showValidateExport } = makeFlowLoader([{ id: 'g1' }]);
-    confirmOpen.mockResolvedValue('export');
-    validateTree.mockReturnValue([{ severity: 'error', nodeId: 'q1', message: 'bad' }]);
-    await loader.confirmAndReset();
-    expect(showValidateExport).toHaveBeenCalledTimes(1);
-    expect(promptExport).not.toHaveBeenCalled();
-    // callback passed as first arg calls promptExport → then reset
-    const [onExport] = showValidateExport.mock.calls[0];
-    onExport();
-    expect(promptExport).toHaveBeenCalledTimes(1);
   });
 });

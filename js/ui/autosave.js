@@ -103,3 +103,8 @@ export function clearDraft() {
     storage.removeItem(META_PREFIX + key);
   } catch (_) { /* key may not exist */ }
 }
+
+// Self-wire: clear draft when QuestionnaireLoader resets
+import('../events.js').then(({ AppEvents }) => {
+  document.addEventListener(AppEvents.AUTOSAVE_CLEAR_DRAFT, () => clearDraft());
+});

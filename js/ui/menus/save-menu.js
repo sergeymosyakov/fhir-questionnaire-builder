@@ -21,6 +21,10 @@ export class SaveMenu extends DropdownMenu {
 
     this._fileName = '';
     document.addEventListener(AppEvents.FILE_NAME_CHANGED, e => { this._fileName = e.detail.name; });
+    // EXPORT_PROMPT_REQUESTED: open export dialog, resolve when done
+    document.addEventListener(AppEvents.EXPORT_PROMPT_REQUESTED, e => {
+      this.promptExport(() => e.detail.resolve());
+    });
 
     this._bindTreeVisibility();
     this._buildMenu();

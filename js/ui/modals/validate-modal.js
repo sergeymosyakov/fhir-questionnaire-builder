@@ -298,3 +298,18 @@ const _modal = new ValidateModal();
  * @param {{ questJson?, tree?, values?, onExport? }} opts
  */
 export const show = (title, mode, opts) => _modal.show(title, mode, opts);
+
+// Self-wire: show validate+export modal when QuestionnaireLoader requests it
+if (typeof document !== 'undefined') {
+  document.addEventListener(AppEvents.VALIDATE_EXPORT_REQUESTED, e => {
+    const { questDoc, answerStore, resolve } = e.detail;
+    import('../../fhir/export.js').then(({ buildFHIRObjectVersioned }) => {
+      _modal.show('Export \u2014 Validation Report', 'export', {
+        questJson: buildFHIRObjectVersioned(questDoc.fhirTarget),
+        tree:      questDoc.tree,
+        values:    answerStore.data,
+        onExport:  resolve,
+      });
+    });
+  });
+}

@@ -28,9 +28,6 @@ export class QuestionnaireLoader {
     this._shouldValidate   = shouldValidate || (() => true);
     this._renderTree       = renderTreeFn       || renderTree;
     this._renderTreeAsync  = renderTreeAsyncFn  || renderTreeAsync;
-    // Reset-flow callbacks — injected via configureResetFlow()
-    this._resetFlow        = null;
-
     // Self-wire lifecycle events — no external wiring needed in app.js
     if (typeof document !== 'undefined') {
       document.addEventListener(AppEvents.QUESTIONNAIRE_CLEAR_REQUESTED, () => this.confirmAndReset());
@@ -44,22 +41,14 @@ export class QuestionnaireLoader {
   }
 
   /**
-   * Inject UI callbacks needed for the confirm-and-reset flow.
-   * Called once after construction when all UI modules are available.
-   */
-  configureResetFlow({ confirmOpen, promptExport, showValidateExport, clearDraft }) {
-    this._resetFlow = { confirmOpen, promptExport, showValidateExport, clearDraft };
-  }
-
-  /**
    * Hard reset: destroy tree, clear all state, dispatch QUESTIONNAIRE_CLEARED.
    * Equivalent to the old _doReset() — but encapsulated in the loader.
    */
   reset() {
-    this._questDoc.reset();   // destroyTree + rawFhir=null + contained/variables/meta
+    this._questDoc.reset();
     document.dispatchEvent(new CustomEvent(AppEvents.ANSWERS_CLEAR));
     this._renderTree();
-    if (this._resetFlow?.clearDraft) this._resetFlow.clearDraft();
+    document.dispatchEvent(new CustomEvent(AppEvents.AUTOSAVE_CLEAR_DRAFT));
     document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_CLEARED));
   }
 
@@ -69,16 +58,21 @@ export class QuestionnaireLoader {
    * - Else show confirm dialog → export-if-needed → reset.
    */
   async confirmAndReset() {
-    if (!this._resetFlow) { this.reset(); return; }
-    const { confirmOpen, promptExport, showValidateExport } = this._resetFlow;
+    if (this._tree.length === 0) { this.reset(); return; }
 
-    if (this._tree.length > 0) {
-      const choice = await confirmOpen();
-      if (choice === 'cancel') return;
-      if (choice === 'export') {
-        showValidateExport(() => { promptExport(() => this.reset()); });
-        return;
-      }
+    const choice = await new Promise(resolve =>
+      document.dispatchEvent(new CustomEvent(AppEvents.CLEAR_CONFIRM_REQUESTED, { detail: { resolve } }))
+    );
+    if (choice === 'cancel') return;
+    if (choice === 'export') {
+      await new Promise(resolve =>
+        document.dispatchEvent(new CustomEvent(AppEvents.VALIDATE_EXPORT_REQUESTED, {
+          detail: { resolve, questDoc: this._questDoc, answerStore: this._answerStore }
+        }))
+      );
+      await new Promise(resolve =>
+        document.dispatchEvent(new CustomEvent(AppEvents.EXPORT_PROMPT_REQUESTED, { detail: { resolve } }))
+      );
     }
     this.reset();
   }

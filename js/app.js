@@ -27,7 +27,7 @@ import { PatientProfile } from './ui/patient-panel.js';
 import { FileNameDisplay } from './ui/file-name.js';
 import { AppEvents } from './events.js';
 import { FhirVersionSelect } from './ui/fhir-version-select.js';
-import { clearConfirmModal } from './ui/modals/clear-confirm-modal.js';
+import { clearConfirmModal as _clearConfirmModal } from './ui/modals/clear-confirm-modal.js'; // side-effect: self-wires CLEAR_CONFIRM_REQUESTED
 import { AuthPanel } from './ui/auth-panel.js';
 import { MetadataCard } from './ui/metadata-card.js';
 import { PanelResizer } from './ui/panel-resizer.js';
@@ -208,15 +208,7 @@ new MetadataCard({
 });
 
 
-// ── Configure reset flow (DI: UI callbacks for confirm → export → reset) ─────
-questLoader.configureResetFlow({
-  confirmOpen:        () => clearConfirmModal.open(),
-  promptExport:       (onDone) => saveMenu.promptExport(onDone),
-  showValidateExport: (onExport) => {
-    validateModal.show('Export — Validation Report', 'export', { questJson: buildFHIRObjectVersioned(questDoc.fhirTarget), tree: questDoc.tree, values: answerStore.data, onExport });
-  },
-  clearDraft: () => import('./ui/autosave.js').then(m => m.clearDraft()),
-});
+// Reset flow is self-wired in QuestionnaireLoader constructor
 
 // Close any open dropdowns when clicking outside
 document.addEventListener('click', () => {
