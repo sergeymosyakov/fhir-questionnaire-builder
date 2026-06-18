@@ -86,7 +86,15 @@ export async function searchFhir(resourceType, query, count = 10) {
     headers: { Accept: 'application/fhir+json' },
     signal: AbortSignal.timeout(6000),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`;
+    try {
+      const oo = await res.json();
+      const diag = oo?.issue?.[0]?.diagnostics;
+      if (diag) msg += ' — ' + diag.substring(0, 120);
+    } catch { /* keep default */ }
+    throw new Error(msg);
+  }
 
   const bundle = await res.json();
   return (bundle.entry || [])
