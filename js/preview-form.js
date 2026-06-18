@@ -352,7 +352,7 @@ export class PreviewForm {
       document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
       showInfo(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} from server.`);
     } catch (err) {
-      showError('$populate failed: ' + err.message);
+      showError(err.message);
     } finally {
       progress.hide();
     }
