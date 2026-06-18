@@ -3,7 +3,13 @@
 // Requires fhirBaseUrl and optional corsProxyUrl from serverConfig.
 import { serverConfig, CONFIG_KEYS } from './server-config.js';
 
-const CORS_ENABLED_HOSTS = ['hapi.fhir.org', 'r4.smarthealthit.org', 'launch.smarthealthit.org'];
+const CORS_ENABLED_HOSTS = [
+  'hapi.fhir.org',
+  'r4.smarthealthit.org',
+  'launch.smarthealthit.org',
+  'test.ahdis.ch',        // Matchbox SDC server
+  'terminology.hl7.org',  // HL7 terminology server
+];
 
 /**
  * Proxy a URL through corsProxyUrl if configured and needed.
