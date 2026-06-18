@@ -39,16 +39,15 @@ export async function populateFromServer(fhirBase, questJson, patientRef) {
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    // Try to extract OperationOutcome diagnostics
-    let detail = '';
+    let detail = text.substring(0, 150);
     try {
       const oo = JSON.parse(text);
       const issue = oo?.issue?.[0];
-      detail = issue?.diagnostics || issue?.details?.text || oo?.text?.div?.replace(/<[^>]+>/g, '').trim().substring(0, 120) || '';
-    } catch {
-      detail = text.substring(0, 150);
-    }
-    const hint = res.status === 400 || res.status === 404
+      detail = issue?.diagnostics || issue?.details?.text
+        || oo?.text?.div?.replace(/<[^>]+>/g, '').trim().substring(0, 120)
+        || detail;
+    } catch { /* keep raw text */ }
+    const hint = (res.status === 400 || res.status === 404)
       ? ' (This server may not support the SDC $populate operation.)'
       : '';
     throw new Error(`$populate: HTTP ${res.status}${detail ? ' — ' + detail : ''}${hint}`);
