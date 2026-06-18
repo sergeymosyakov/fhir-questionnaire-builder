@@ -7,7 +7,7 @@ import {
   CONFIG_KEYS,
 } from './fhir/server-config.js';
 import * as auth       from './auth/auth.js';
-import { loadSettings, saveSettings } from './fhir/server-config-cloud.js';
+import { loadSettings, saveSettings, supabaseProvider } from './fhir/server-config-cloud.js';
 
 // ── Defaults (fallback labels shown in placeholders) ─────────────────────────
 const DEFAULTS = {
@@ -165,11 +165,10 @@ function _collectField(inputId, key) {
   if (!input) return;
   const val = input.value.trim();
   const defaultVal = DEFAULTS[key] || '';
-  if (val && val !== defaultVal) {
-    _lsProvider.set(key, val);
-  } else {
-    _lsProvider.set(key, null); // clear if same as default
-  }
+  const finalVal = (val && val !== defaultVal) ? val : null;
+  _lsProvider.set(key, finalVal);
+  // Also update supabaseProvider cache so saveSettings() persists the new value
+  if (_currentUser) supabaseProvider.set(key, finalVal);
   _markCustom(input, null, key);
 }
 
