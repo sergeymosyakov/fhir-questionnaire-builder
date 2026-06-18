@@ -16,8 +16,9 @@ export const CONFIG_KEYS = {
   CORS_PROXY:         'corsProxyUrl',
   TERMINOLOGY_SERVER: 'terminologyServer',
   NLM_API_BASE:       'nlmApiBaseUrl',
-  FHIR_BASE:          'fhirBaseUrl',     // for patient / resource search
-  VALIDATORS:         'validators',      // JSON array string
+  FHIR_BASE:          'fhirBaseUrl',      // for patient / resource search
+  SDC_SERVER:         'sdcServerUrl',     // for SDC operations ($populate, $extract)
+  VALIDATORS:         'validators',       // JSON array string
 };
 
 const LS_PREFIX = 'fhirqb.server.';

@@ -5,17 +5,20 @@
 // SDC spec: https://hl7.org/fhir/uv/sdc/OperationDefinition-Questionnaire-populate.html
 
 import { proxiedUrl } from './fhir-search.js';
+import { serverConfig, CONFIG_KEYS } from './server-config.js';
 
 /**
  * Populate a QuestionnaireResponse from a FHIR server.
+ * Uses SDC_SERVER if configured, falls back to FHIR_BASE.
  *
- * @param {string}  fhirBase   - Base FHIR server URL (e.g. https://hapi.fhir.org/baseR4)
+ * @param {string}  fhirBase   - Base FHIR server URL (fallback)
  * @param {object}  questJson  - FHIR Questionnaire resource
  * @param {string}  patientRef - Patient reference string (e.g. 'Patient/123')
  * @returns {Promise<object>} FHIR QuestionnaireResponse resource
  */
 export async function populateFromServer(fhirBase, questJson, patientRef) {
-  const base      = fhirBase.replace(/\/$/, '');
+  const sdcBase   = serverConfig.get(CONFIG_KEYS.SDC_SERVER) || fhirBase;
+  const base      = sdcBase.replace(/\/$/, '');
   const targetUrl = `${base}/Questionnaire/$populate`;
   const url       = proxiedUrl(targetUrl);
 

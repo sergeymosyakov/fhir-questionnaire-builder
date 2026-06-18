@@ -15,6 +15,7 @@ const DEFAULTS = {
   [CONFIG_KEYS.FHIR_BASE]:          '',
   [CONFIG_KEYS.CORS_PROXY]:         '',
   [CONFIG_KEYS.NLM_API_BASE]:       'https://clinicaltables.nlm.nih.gov/api',
+  [CONFIG_KEYS.SDC_SERVER]:          '',
 };
 
 // ── Register providers (same order as app.js but settings page is standalone) ─
@@ -206,6 +207,7 @@ _el('saveBtn').addEventListener('click', () => {
   _collectField('fhirBaseInput',   CONFIG_KEYS.FHIR_BASE);
   _collectField('corsProxyInput',  CONFIG_KEYS.CORS_PROXY);
   _collectField('nlmApiInput',     CONFIG_KEYS.NLM_API_BASE);
+  _collectField('sdcServerInput',  CONFIG_KEYS.SDC_SERVER);
   // Re-sync all reset button states and input custom styles
   document.querySelectorAll('[data-reset]').forEach(btn => {
     const key = btn.dataset.reset;
@@ -236,6 +238,7 @@ async function init() {
   _wireField('fhirBaseInput',   null, CONFIG_KEYS.FHIR_BASE);
   _wireField('corsProxyInput',  null, CONFIG_KEYS.CORS_PROXY);
   _wireField('nlmApiInput',     null, CONFIG_KEYS.NLM_API_BASE);
+  _wireField('sdcServerInput',  null, CONFIG_KEYS.SDC_SERVER);
 
   // Wire reset buttons by data-reset attribute
   document.querySelectorAll('[data-reset]').forEach(btn => {
@@ -272,6 +275,11 @@ async function init() {
     const url = _el('termServerInput').value.trim() || serverConfig.get(CONFIG_KEYS.TERMINOLOGY_SERVER);
     _testFhirServer(url, _el('testTermServerResult'), _el('testTermServerBtn'));
   });
+  _el('testSdcServerBtn').addEventListener('click', () => {
+    const url = _el('sdcServerInput').value.trim() || serverConfig.get(CONFIG_KEYS.SDC_SERVER);
+    _testFhirServer(url, _el('testSdcServerResult'), _el('testSdcServerBtn'));
+  });
+
   _el('testFhirBaseBtn').addEventListener('click', () => {
     const url = _el('fhirBaseInput').value.trim() || serverConfig.get(CONFIG_KEYS.FHIR_BASE);
     _testFhirServer(url, _el('testFhirBaseResult'), _el('testFhirBaseBtn'));

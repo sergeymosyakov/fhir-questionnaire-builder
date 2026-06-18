@@ -50,7 +50,20 @@
         </div>
       </div>
     </div>
-
+      <div class="s-card">
+        <div class="s-card-title">SDC Server</div>
+        <div class="s-card-desc">FHIR server implementing the <a href="https://hl7.org/fhir/uv/sdc/" target="_blank">SDC IG</a> — used for <code>$populate</code> and other SDC server operations (<em>Answers ▾ → Fill from FHIR Server</em>). If blank, falls back to FHIR Base Server. Example: <code>https://test.ahdis.ch/matchboxv3/fhir</code> (Matchbox).</div>
+        <div class="s-field">
+          <label class="s-label" for="sdcServerInput">SDC Server URL</label>
+          <input id="sdcServerInput" class="s-input" type="url" placeholder="https://test.ahdis.ch/matchboxv3/fhir" autocomplete="off" spellcheck="false">
+          <button class="s-reset-btn" data-reset="sdcServerUrl" disabled>Reset</button>
+          <span class="s-hint">Used for <code>$populate</code>. Separate from FHIR Base Server which is for resource lookups.</span>
+          <div class="s-test-row">
+            <button class="s-test-btn" id="testSdcServerBtn">Test connection</button>
+            <span class="s-test-result" id="testSdcServerResult"></span>
+          </div>
+        </div>
+      </div>
     <!-- ── CORS Proxy ────────────────────────────────────────────────────── -->
     <div class="s-card">
       <div class="s-card-title">CORS Proxy</div>
