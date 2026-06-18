@@ -47,7 +47,7 @@ export async function populateFromServer(fhirBase, questJson, patientRef) {
       const oo = JSON.parse(text);
       const issue = oo?.issue?.[0];
       detail = issue?.diagnostics || issue?.details?.text
-        || oo?.text?.div?.replace(/<[^>]+>/g, '').trim().substring(0, 120)
+        || oo?.text?.div?.replace(/<[^>]*>/g, '').replace(/[<>]/g, '').trim().substring(0, 120)
         || detail;
     } catch { /* keep raw text */ }
     const hint = (res.status === 400 || res.status === 404)

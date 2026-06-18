@@ -74,6 +74,9 @@ function answerToValue(answer) {
 function setPath(obj, path, value) {
   if (!path) return;
   const parts = path.split('.');
+  // Guard against prototype pollution from attacker-controlled item.definition paths.
+  const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+  if (parts.some(p => UNSAFE_KEYS.has(p))) return;
   let cur = obj;
   for (let i = 0; i < parts.length - 1; i++) {
     const key = parts[i];
