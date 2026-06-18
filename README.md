@@ -17,6 +17,7 @@ The right-side **preview panel is a live SDC-compliant runtime**: it executes FH
 | [docs/CONTEXT.md](docs/CONTEXT.md) | Architecture, file map, node model, UX features, build rules |
 | [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) | FHIR R4 field mapping, supported extensions, known gaps |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Feature backlog |
+| [docs/COMPETITORS.md](docs/COMPETITORS.md) | Honest, no-spin comparison vs LHC-Forms, Smart Forms, Aidbox, Medplum, Firely |
 
 ---
 
