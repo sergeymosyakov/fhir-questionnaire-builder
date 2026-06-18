@@ -11,7 +11,7 @@ export class MoreMenu extends DropdownMenu {
       btnId:    'moreBtn',
       menuId:   'moreMenu',
       wrapId:   'moreWrap',
-      label:    '&#x22EF;',
+      label:    'More &#x25BE;',
       testid:   'more-btn',
       tipTitle: 'More',
       tipBody:  'Undo, Redo, Help and Settings.',

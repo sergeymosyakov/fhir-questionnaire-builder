@@ -120,9 +120,12 @@ test.describe('Settings page', () => {
     await expect(page.locator('[data-reset="terminologyServer"]')).toBeDisabled();
   });
 
-  test('settings gear button opens settings.html from main app', async ({ page }) => {
+  test('settings link opens settings.html from main app via \u22ef menu', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="settings-page-btn"]');
+    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    // settings-page-btn is inside the ⋯ More menu
+    await page.getByTestId('more-btn').click();
+    await expect(page.getByTestId('settings-page-btn')).toBeVisible();
 
     const [settingsPage] = await Promise.all([
       page.context().waitForEvent('page'),
