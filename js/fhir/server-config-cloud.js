@@ -37,7 +37,7 @@ export async function loadSettings(userId) {
       .from(TABLE)
       .select('server_config')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
     if (!error && data?.server_config) {
       supabaseProvider.hydrate(data.server_config);
     }
