@@ -9,29 +9,16 @@
 import { Validator } from './base.js';
 import { BUILDER_VERSION_EXTENSION_URL } from '../format-registry.js';
 import { AppEvents, EventState } from '../../events.js';
+import { serverConfig, CONFIG_KEYS } from '../server-config.js';
 /** Thrown for non-retryable validation failures (e.g. HTTP 413 / 4xx). */
 class ValidatorFatalError extends Error {}
-const CORS_PROXY_KEY = 'corsProxyUrl';
-let _proxyUrl = '';
-let _proxyLoaded = false;
-let _proxyPromise = null;
 
 /** Map a builder version id to the matching HAPI public-server base path. */
 const _HAPI_BASE_BY_VERSION = { R4: 'baseR4', R4B: 'baseR4B', R5: 'baseR5' };
 
-function _loadProxy() {
-  if (_proxyLoaded) return Promise.resolve();
-  if (_proxyPromise) return _proxyPromise;
-  _proxyPromise = fetch('./config.json')
-    .then(r => r.json())
-    .then(cfg => { _proxyUrl = (cfg[CORS_PROXY_KEY] || '').replace(/\/$/, ''); })
-    .catch(() => {})
-    .finally(() => { _proxyLoaded = true; });
-  return _proxyPromise;
-}
-
 function _proxied(url) {
-  return _proxyUrl ? `${_proxyUrl}?url=${encodeURIComponent(url)}` : url;
+  const proxy = (serverConfig.get(CONFIG_KEYS.CORS_PROXY) || '').replace(/\/$/, '');
+  return proxy ? `${proxy}?url=${encodeURIComponent(url)}` : url;
 }
 
 /** Parse OperationOutcome issues into the common Issue[] format. */
@@ -105,7 +92,7 @@ export class ExternalValidator extends Validator {
   }
 
   async _run(questJson) {
-    await _loadProxy();
+    await serverConfig.ready();
 
     const endpoint = _proxied(`${this._baseUrl()}/Questionnaire/$validate`);
     // Strip the builder-target-version extension — it is a builder-internal

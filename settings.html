@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — FHIR Logic Builder</title>
+  <link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+
+  <div class="settings-header">
+    <div class="settings-header-top">
+      <h1>Settings</h1>
+      <a href="index.html" class="settings-back" target="_parent">← Back to Builder</a>
+    </div>
+    <p class="settings-subtitle">Configure servers and validators. Custom values are saved in your browser.</p>
+  </div>
+
+  <div class="settings-wrap">
+
+    <!-- ── Terminology Server ─────────────────────────────────────────────── -->
+    <div class="s-card">
+      <div class="s-card-title">Terminology Server</div>
+      <div class="s-card-desc">FHIR $expand endpoint used to resolve ValueSet bindings (choice items, answer options).</div>
+      <div class="s-field">
+        <label class="s-label" for="termServerInput">Server URL</label>
+        <input id="termServerInput" class="s-input" type="url" placeholder="https://tx.fhir.org/r4" autocomplete="off" spellcheck="false">
+        <button class="s-reset-btn" data-reset="terminologyServer" disabled>Reset</button>
+        <span class="s-hint">Used by Answer Type modal when expanding ValueSets from a canonical URL.</span>
+        <div class="s-test-row">
+          <button class="s-test-btn" id="testTermServerBtn">Test connection</button>
+          <span class="s-test-result" id="testTermServerResult"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FHIR Base Server ──────────────────────────────────────────────── -->
+    <div class="s-card">
+      <div class="s-card-title">FHIR Base Server</div>
+      <div class="s-card-desc">Base FHIR endpoint for resource lookups — used to search for Patients, Practitioners, and other referenced resources in the preview.</div>
+      <div class="s-field">
+        <label class="s-label" for="fhirBaseInput">Base URL</label>
+        <input id="fhirBaseInput" class="s-input" type="url" placeholder="https://hapi.fhir.org/baseR4" autocomplete="off" spellcheck="false">
+        <button class="s-reset-btn" data-reset="fhirBaseUrl" disabled>Reset</button>
+        <span class="s-hint">Used for <code>reference</code> item type autocomplete. Leave blank to disable.</span>
+        <div class="s-test-row">
+          <button class="s-test-btn" id="testFhirBaseBtn">Test connection</button>
+          <span class="s-test-result" id="testFhirBaseResult"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CORS Proxy ────────────────────────────────────────────────────── -->
+    <div class="s-card">
+      <div class="s-card-title">CORS Proxy</div>
+      <div class="s-card-desc">Proxy worker that forwards requests to FHIR servers when CORS headers are not set. Required for browser-based validation against external servers.</div>
+      <div class="s-field">
+        <label class="s-label" for="corsProxyInput">Proxy URL</label>
+        <input id="corsProxyInput" class="s-input" type="url" placeholder="https://your-proxy.workers.dev" autocomplete="off" spellcheck="false">
+        <button class="s-reset-btn" data-reset="corsProxyUrl" disabled>Reset</button>
+        <span class="s-hint">Requests are forwarded as <code>proxy?url=&lt;encoded-target&gt;</code>. Leave blank to call servers directly.</span>
+      </div>
+    </div>
+
+    <!-- ── NLM API ──────────────────────────────────────────────────────── -->
+    <div class="s-card">
+      <div class="s-card-title">NLM Clinical Tables API</div>
+      <div class="s-card-desc">NLM endpoint for searching clinical terminology (LOINC, SNOMED, ICD). No CORS proxy needed — NLM sends <code>Access-Control-Allow-Origin: *</code>.</div>
+      <div class="s-field">
+        <label class="s-label" for="nlmApiInput">API Base URL</label>
+        <input id="nlmApiInput" class="s-input" type="url" placeholder="https://clinicaltables.nlm.nih.gov/api" autocomplete="off" spellcheck="false">
+        <button class="s-reset-btn" data-reset="nlmApiBaseUrl" disabled>Reset</button>
+      </div>
+    </div>
+
+    <!-- ── Validators ────────────────────────────────────────────────────── -->
+    <div class="s-card">
+      <div class="s-card-title">Validators</div>
+      <div class="s-card-desc">Validation pipeline run on import and on demand. The built-in validator is always available. External validators POST the FHIR Questionnaire to a FHIR server's <code>$validate</code> endpoint.</div>
+      <div id="validatorsDisplay" class="s-validators-list"></div>
+    </div>
+
+    <!-- ── Active providers ──────────────────────────────────────────────── -->
+    <div class="s-card">
+      <div class="s-card-title">Active Configuration Sources</div>
+      <div class="s-card-desc">Settings are resolved in priority order — higher sources override lower ones.</div>
+      <div id="providersDisplay"></div>
+    </div>
+
+  </div>
+
+  <div class="s-save-bar">
+    <button class="s-save-btn" id="saveBtn">Save settings</button>
+    <span class="s-status" id="saveStatus"></span>
+  </div>
+
+  <script type="module" src="js/settings.js"></script>
+</body>
+</html>

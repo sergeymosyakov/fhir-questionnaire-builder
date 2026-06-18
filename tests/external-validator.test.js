@@ -235,15 +235,14 @@ describe('ExternalValidator — CORS proxy', () => {
   afterEach(() => { vi.unstubAllGlobals(); vi.resetModules(); });
 
   it('wraps the endpoint in the configured CORS proxy URL', async () => {
-    vi.resetModules(); // reset module-level proxy cache so config.json is re-read
+    vi.resetModules();
     const sent = [];
-    vi.stubGlobal('fetch', vi.fn(async (url) => {
-      if (typeof url === 'string' && url.includes('config.json')) {
-        return { ok: true, json: async () => ({ corsProxyUrl: 'https://proxy.example/' }) };
-      }
+    vi.stubGlobal('fetch', vi.fn(async (url, _opts) => {
       sent.push(url);
       return okResp({ resourceType: 'OperationOutcome', issue: [] });
     }));
+    const { serverConfig, DefaultConfigProvider } = await import('../js/fhir/server-config.js');
+    serverConfig.register(new DefaultConfigProvider({ corsProxyUrl: 'https://proxy.example/' }));
     const { ExternalValidator: FreshValidator } = await import('../js/fhir/validators/external.js');
     const v = new FreshValidator({ name: 'HAPI FHIR', url: 'https://hapi.fhir.org/baseR4', getFhirTarget: () => 'R4' });
     v.enabled = true;

@@ -4,6 +4,7 @@ import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';
 import { questDoc } from './fhir/quest-document.js';
 import { answerStore } from './answer-store.js';
+import { serverConfig, LocalStorageConfigProvider } from './fhir/server-config.js';
 import './fhir/import.js';
 import './fhir/qr-export.js';
 import './fhir/obs-export.js';
@@ -13,6 +14,7 @@ import { UndoRedo } from './ui/undo-redo.js';
 import './builder/index.js';
 import { PreviewForm } from './preview-form.js';
 import './ui/header-actions.js';
+import './ui/left-header-actions.js';
 import './ui/modals/index.js';
 import './ui/variables-panel.js';
 import _containedPanel        from './ui/panels/contained-panel.js';
@@ -30,6 +32,10 @@ import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
 import { CopyPaste } from './ui/copy-paste.js';
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
+
+// ── Server config — register providers (low to high priority) ────────────────
+serverConfig.register(new LocalStorageConfigProvider());   // user overrides
+serverConfig.load('./config.json');                         // base defaults (async, non-blocking)
 
 // ── Patient profile widget ────────────────────────────────────────────────────
 new PatientProfile();

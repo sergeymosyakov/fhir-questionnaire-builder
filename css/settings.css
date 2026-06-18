@@ -1,0 +1,255 @@
+/* ── Settings page ────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --s-bg:        #f8f9fa;
+  --s-surface:   #ffffff;
+  --s-border:    #dee2e6;
+  --s-text:      #212529;
+  --s-muted:     #6c757d;
+  --s-primary:   #1565c0;
+  --s-primary-lt:#e3f0ff;
+  --s-success:   #2e7d32;
+  --s-success-lt:#e8f5e9;
+  --s-warn:      #f57f17;
+  --s-warn-lt:   #fff8e1;
+  --s-danger:    #c62828;
+  --s-radius:    6px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--s-bg);
+  color: var(--s-text);
+  min-height: 100vh;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.settings-header {
+  background: var(--s-surface);
+  border-bottom: 1px solid var(--s-border);
+  padding: 18px 32px 14px;
+}
+.settings-header-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+.settings-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--s-text);
+  flex: 1;
+}
+.settings-back {
+  font-size: 13px;
+  color: var(--s-primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.settings-back:hover { text-decoration: underline; }
+.settings-subtitle {
+  font-size: 13px;
+  color: var(--s-muted);
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+.settings-wrap {
+  max-width: 760px;
+  margin: 24px auto;
+  padding: 0 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────── */
+.s-card {
+  background: var(--s-surface);
+  border: 1px solid var(--s-border);
+  border-radius: var(--s-radius);
+  padding: 20px 24px;
+}
+.s-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.s-card-desc {
+  font-size: 12px;
+  color: var(--s-muted);
+  margin-bottom: 16px;
+}
+
+/* ── Field row ───────────────────────────────────────────────────────────── */
+.s-field {
+  display: grid;
+  grid-template-columns: 180px 1fr auto;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+}
+.s-field:last-child { margin-bottom: 0; }
+
+.s-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--s-text);
+}
+.s-hint {
+  font-size: 11px;
+  color: var(--s-muted);
+  grid-column: 2 / -1;
+  margin-top: -6px;
+}
+
+.s-input {
+  width: 100%;
+  font-family: monospace;
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 1px solid var(--s-border);
+  border-radius: var(--s-radius);
+  background: var(--s-bg);
+  color: var(--s-text);
+  transition: border-color .15s;
+}
+.s-input:focus { outline: none; border-color: var(--s-primary); background: var(--s-primary-lt); }
+.s-input.is-custom { border-color: var(--s-warn); background: var(--s-warn-lt); }
+.s-input.is-custom:focus { border-color: var(--s-warn); }
+
+.s-reset-btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  background: none;
+  border: 1px solid var(--s-border);
+  border-radius: var(--s-radius);
+  color: var(--s-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+.s-reset-btn:hover { color: var(--s-danger); border-color: var(--s-danger); }
+.s-reset-btn:disabled { opacity: .35; cursor: default; }
+
+/* ── Test button + result ────────────────────────────────────────────────── */
+.s-test-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  grid-column: 2 / -1;
+}
+.s-test-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+  background: var(--s-primary-lt);
+  border: 1px solid var(--s-primary);
+  border-radius: var(--s-radius);
+  color: var(--s-primary);
+  cursor: pointer;
+  transition: background .15s;
+}
+.s-test-btn:hover { background: #bbdefb; }
+.s-test-btn:disabled { opacity: .5; cursor: default; }
+
+.s-test-result {
+  font-size: 12px;
+  color: var(--s-muted);
+}
+.s-test-result.ok   { color: var(--s-success); }
+.s-test-result.fail { color: var(--s-danger); }
+
+/* ── Validators section ──────────────────────────────────────────────────── */
+.s-validators-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.s-validator-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 120px auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--s-border);
+  border-radius: var(--s-radius);
+  background: var(--s-bg);
+}
+.s-validator-type {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--s-muted);
+}
+.s-validator-url {
+  font-family: monospace;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--s-border);
+  border-radius: 4px;
+  background: var(--s-surface);
+  color: var(--s-text);
+  transition: border-color .15s;
+}
+.s-validator-url:focus { outline: none; border-color: var(--s-primary); }
+.s-validator-name {
+  font-size: 12px;
+  color: var(--s-text);
+}
+
+/* ── Provider badge ──────────────────────────────────────────────────────── */
+.s-provider-badge {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: var(--s-primary-lt);
+  color: var(--s-primary);
+  font-weight: 600;
+}
+.s-provider-badge.custom {
+  background: var(--s-warn-lt);
+  color: var(--s-warn);
+}
+.s-provider-badge.cloud {
+  background: var(--s-success-lt);
+  color: var(--s-success);
+}
+
+/* ── Save bar ─────────────────────────────────────────────────────────────── */
+.s-save-bar {
+  position: sticky;
+  bottom: 0;
+  background: var(--s-surface);
+  border-top: 1px solid var(--s-border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,.06);
+}
+.s-save-btn {
+  padding: 8px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--s-primary);
+  border: none;
+  border-radius: var(--s-radius);
+  color: #fff;
+  cursor: pointer;
+  transition: background .15s;
+}
+.s-save-btn:hover { background: #0d47a1; }
+.s-save-btn:disabled { opacity: .5; cursor: default; }
+
+.s-status {
+  font-size: 13px;
+  color: var(--s-muted);
+}
+.s-status.saved { color: var(--s-success); }

@@ -39,10 +39,8 @@ const CAP_BODY = {
   software: { name: 'HAPI FHIR', version: '6.0' },
 };
 
-// Default implementation: config.json returns {} (no CORS proxy);
-// all other URLs will use per-test mockResolvedValueOnce.
+// Default implementation: all non-expected URLs reject.
 const defaultImpl = (url) => {
-  if (String(url).includes('config.json')) return Promise.resolve(makeOk({}));
   return Promise.reject(new Error('unexpected fetch: ' + String(url)));
 };
 mockFetch.mockImplementation(defaultImpl);
@@ -51,19 +49,15 @@ const { terminologyService } =
   await import('../js/fhir/terminology-service.js');
 const DEFAULT_TERMINOLOGY_SERVER = 'https://tx.fhir.org/r4';
 
-// Prime _configLoaded = true before any per-test mocks run.
-// The module fetches /config.json on the first real async call; after that
-// _loadConfig() is a no-op and per-test mockResolvedValueOnce calls map 1:1
-// to actual FHIR requests.
+// Warmup: serverConfig.ready() resolves immediately (no config.json fetch needed).
+// One mock consumed by the VS expand request.
 beforeAll(async () => {
-  // Two Once mocks: [0] consumed by config.json, [1] consumed by the VS request
   mockFetch
-    .mockImplementationOnce(() => Promise.resolve(makeOk({})))      // /config.json
-    .mockImplementationOnce(() => Promise.resolve(makeOk({          // VS expand (warmup)
+    .mockImplementationOnce(() => Promise.resolve(makeOk({
       resourceType: 'ValueSet', expansion: { contains: [] },
     })));
   await terminologyService.expandValueSet('http://warmup', DEFAULT_TERMINOLOGY_SERVER);
-  // Reset so tests start clean; defaultImpl stays as the fallback
+  // Reset so tests start clean
   mockFetch.mockReset();
   mockFetch.mockImplementation(defaultImpl);
 });

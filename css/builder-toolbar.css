@@ -161,14 +161,26 @@
 .load-menu--right { left: auto; right: 0; }
 .load-menu--right { left: auto; right: 0; }
 .load-menu-item {
+  display: block;
+  width: 100%;
   padding: 8px 14px;
   font-size: 12px;
+  font-family: inherit;
+  font-weight: normal;
+  text-align: left;
+  text-decoration: none;
   cursor: pointer;
   color: var(--c-text);
+  background: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
   transition: background .1s;
   white-space: nowrap;
 }
 .load-menu-item:hover { background: var(--c-primary-lt); color: var(--c-primary); }
+.load-menu-item:disabled,
+.load-menu-item[disabled] { color: var(--c-text-2, #bbb); cursor: default; pointer-events: none; }
 .load-menu-sep { height: 1px; background: var(--c-border); margin: 2px 0; }
 .load-menu-group {
   padding: 6px 14px 3px;

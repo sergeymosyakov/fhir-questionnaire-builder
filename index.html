@@ -82,19 +82,7 @@
           data-tip-body="Select the FHIR version this questionnaire targets. Affects which item types and fields are available in the builder, and is recorded in a builder-target-version extension on export (FHIR's Meta type has no fhirVersion field)."
           data-tip-fhir="Questionnaire.extension[builder-target-version]"
           data-tip-spec="R4 · R4B · R5"></span>
-        <span class="left-panel-header-right">
-          <button id="undoBtn" type="button" class="btn-fhir btn-fhir--toggle" data-testid="undo-btn" data-mount="undo-btn" disabled
-            data-tip-title="Undo"
-            data-tip-body="Undo the last change (Ctrl+Z). Snapshot is taken 400ms after the last edit."
-            data-tip-spec="Ctrl+Z">&#x21B6;</button>
-          <button id="redoBtn" type="button" class="btn-fhir btn-fhir--toggle" data-testid="redo-btn" data-mount="redo-btn" disabled
-            data-tip-title="Redo"
-            data-tip-body="Redo the last undone change (Ctrl+Y)."
-            data-tip-spec="Ctrl+Y">&#x21B7;</button>
-          <button id="helpBtn" type="button" class="btn-fhir btn-fhir--toggle" data-testid="help-btn" data-mount="help-btn"
-            data-tip-title="FHIR Field Reference"
-            data-tip-body="Open the field reference — find any FHIR R4 / SDC field and where to configure it in the builder UI.">?</button>
-        </span>
+        <span class="left-panel-header-right" data-mount="left-header-right"></span>
       </div>
       <div class="tree-toolbar">
         <button id="addRootGroupBtn" type="button" class="btn-add-root" data-testid="add-root-group-btn" data-mount="add-root-group-btn"

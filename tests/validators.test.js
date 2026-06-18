@@ -4,6 +4,7 @@ import { Validator }         from '../js/fhir/validators/base.js';
 import { LocalValidator }    from '../js/fhir/validators/local.js';
 import { ValidatorRegistry } from '../js/fhir/validators/registry.js';
 import { initValidators }    from '../js/fhir/validators/init.js';
+import { serverConfig, DefaultConfigProvider } from '../js/fhir/server-config.js';
 
 describe('Validator base class', () => {
   it('returns [] without calling _run() when disabled', async () => {
@@ -88,17 +89,15 @@ describe('ValidatorRegistry', () => {
 });
 
 describe('initValidators', () => {
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => { serverConfig._clear(); vi.unstubAllGlobals(); });
 
   it('registers local + external validators from config.json', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => ({
-      json: async () => ({
-        validators: [
-          { type: 'local', name: 'Built-in' },
-          { type: 'external', name: 'HAPI FHIR', url: 'https://hapi.fhir.org/baseR4' },
-        ],
-      }),
-    })));
+    serverConfig.register(new DefaultConfigProvider({
+      validators: [
+        { type: 'local', name: 'Built-in' },
+        { type: 'external', name: 'HAPI FHIR', url: 'https://hapi.fhir.org/baseR4' },
+      ],
+    }));
     const { validatorRegistry } = await import('../js/fhir/validators/registry.js');
     const before = validatorRegistry.getAll().length;
     await initValidators({ localEnabled: true, externalEnabled: true, getFhirTarget: () => 'R4' });
@@ -110,8 +109,8 @@ describe('initValidators', () => {
     expect(ext.name).toBe('HAPI FHIR R4');
   });
 
-  it('falls back to a local validator when config.json cannot be loaded', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
+  it('falls back to a local validator when no validators configured', async () => {
+    // No providers registered — serverConfig.getParsed('validators') returns null
     const { validatorRegistry } = await import('../js/fhir/validators/registry.js');
     const before = validatorRegistry.getAll().length;
     await initValidators({ localEnabled: true });
@@ -122,9 +121,9 @@ describe('initValidators', () => {
   });
 
   it('skips external definitions that have no url', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => ({
-      json: async () => ({ validators: [{ type: 'external', name: 'No URL' }] }),
-    })));
+    serverConfig.register(new DefaultConfigProvider({
+      validators: [{ type: 'external', name: 'No URL' }],
+    }));
     const { validatorRegistry } = await import('../js/fhir/validators/registry.js');
     const before = validatorRegistry.getAll().length;
     await initValidators({});

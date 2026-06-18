@@ -17,6 +17,7 @@ import { validatorRegistry } from './registry.js';
 import { LocalValidator }    from './local.js';
 import { ExternalValidator } from './external.js';
 import { AppEvents }         from '../../events.js';
+import { serverConfig, CONFIG_KEYS } from '../server-config.js';
 
 /**
  * Reads config.json and registers validators.
@@ -30,8 +31,8 @@ export async function initValidators(override = {}) {
   const localEnabled    = override.localEnabled    ?? _ls('validate', true);
   const externalEnabled = override.externalEnabled ?? _ls('validateExternal', false);
   try {
-    const cfg = await fetch('./config.json').then(r => r.json());
-    const defs = cfg.validators || [{ type: 'local', name: 'Built-in' }];
+    await serverConfig.ready();
+    const defs = serverConfig.getParsed(CONFIG_KEYS.VALIDATORS) || [{ type: 'local', name: 'Built-in' }];
 
     for (const def of defs) {
       if (def.type === 'local') {
