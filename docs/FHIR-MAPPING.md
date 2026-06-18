@@ -473,7 +473,7 @@ These fields are present in the FHIR spec at the `Questionnaire` root level but 
 | FHIR field / extension | Status | Notes |
 |---|---|---|
 | `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
-| Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; no live FHIR server search |
+| Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; **live FHIR server search autocomplete** when a FHIR Base Server is configured (debounced name search via `fhir-search.js`); no profile-based validation of the chosen reference |
 
 
 ---
