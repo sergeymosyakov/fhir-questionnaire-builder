@@ -42,7 +42,7 @@ const FHIR_R4_RESOURCES = [
 /** Extract a human-readable display name from a FHIR resource. */
 function _displayName(resource) {
   const type = resource.resourceType;
-  if (type === 'Patient' || type === 'Practitioner' || type === 'RelatedPerson') {
+  if (['Patient','Practitioner','RelatedPerson','Person'].includes(type)) {
     const name = resource.name?.[0];
     if (name) {
       const family = name.family || '';
@@ -50,8 +50,19 @@ function _displayName(resource) {
       return [family, given].filter(Boolean).join(', ') || name.text || resource.id;
     }
   }
-  if (type === 'Organization' || type === 'Location' || type === 'Medication') {
+  if (['Organization','Location','HealthcareService','Medication'].includes(type)) {
     return resource.name || resource.id;
+  }
+  if (['Encounter','EpisodeOfCare'].includes(type)) {
+    const patName = resource.subject?.display || resource.patient?.display || '';
+    const status  = resource.status ? `[${resource.status}]` : '';
+    const date    = resource.period?.start?.slice(0, 10) || '';
+    return [patName, date, status].filter(Boolean).join(' ') || resource.id;
+  }
+  if (['Condition','Observation','Procedure'].includes(type)) {
+    const code    = resource.code?.coding?.[0]?.display || resource.code?.text || '';
+    const patient = resource.subject?.display || '';
+    return [code, patient].filter(Boolean).join(' — ') || resource.id;
   }
   return resource.name || resource.title || resource.id;
 }
@@ -68,10 +79,16 @@ async function _searchFhir(resourceType, query) {
   if (!base || !resourceType || !query.trim()) return [];
   const params = new URLSearchParams({ _count: '10' });
   // Common search params by resource type
-  if (['Patient','Practitioner','RelatedPerson'].includes(resourceType)) {
+  if (['Patient','Practitioner','RelatedPerson','Person'].includes(resourceType)) {
     params.set('name', query);
-  } else if (['Organization','Location'].includes(resourceType)) {
+  } else if (['Organization','Location','HealthcareService'].includes(resourceType)) {
     params.set('name', query);
+  } else if (['Encounter','EpisodeOfCare'].includes(resourceType)) {
+    params.set('patient.name', query);
+  } else if (['Condition','Observation','Procedure','DiagnosticReport','MedicationRequest','ServiceRequest'].includes(resourceType)) {
+    params.set('patient.name', query);
+  } else if (['Medication','Substance'].includes(resourceType)) {
+    params.set('code', query);
   } else {
     params.set('_id', query); // fallback: search by ID
   }

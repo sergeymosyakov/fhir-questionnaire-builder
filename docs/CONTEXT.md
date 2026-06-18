@@ -432,7 +432,7 @@ _shortText         // string — sdc-questionnaire-shortText ext; abbreviated la
 | `group` | `group` | ✅ | — | |
 | `group` (no children) | `group` | ✅ `[Info]` | — | |
 | `attachment` | `attachment` | ✅ file input | ✅ required = file chosen | |
-| `reference` | `reference` | ✅ dropdown (resource type) + id input | ✅ required = type+id filled | `questionnaire-referenceResource` extension locks dropdown; no live FHIR server search |
+| `reference` | `reference` | ✅ dropdown (resource type) + id input; **live FHIR search** when `fhirBaseUrl` configured in Settings — autocomplete by name (Patient/Practitioner/etc.) or `patient.name` (Encounter/Condition/etc.) via portal dropdown | ✅ required = type+id filled | `questionnaire-referenceResource` extension locks dropdown |
 
 ---
 
