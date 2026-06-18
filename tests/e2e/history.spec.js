@@ -53,7 +53,7 @@ test.describe('Undo', () => {
     await expect(nodes(page)).toHaveCount(1);
     await expect(undoBtn(page)).toBeEnabled({ timeout: HISTORY_TIMEOUT });
 
-    await undoBtn(page).click();
+    await page.keyboard.press('Control+z');
     await expect(nodes(page)).toHaveCount(0);
   });
 
@@ -62,7 +62,7 @@ test.describe('Undo', () => {
     await addRootGroup(page);
     await expect(undoBtn(page)).toBeEnabled({ timeout: HISTORY_TIMEOUT });
 
-    await undoBtn(page).click();
+    await page.keyboard.press('Control+z');
     await expect(undoBtn(page)).toBeDisabled();
   });
 
@@ -85,7 +85,7 @@ test.describe('Redo', () => {
     await addRootGroup(page);
     await expect(undoBtn(page)).toBeEnabled({ timeout: HISTORY_TIMEOUT });
 
-    await undoBtn(page).click();
+    await page.keyboard.press('Control+z');
     await expect(redoBtn(page)).toBeEnabled();
   });
 
@@ -94,10 +94,10 @@ test.describe('Redo', () => {
     await addRootGroup(page);
     await expect(undoBtn(page)).toBeEnabled({ timeout: HISTORY_TIMEOUT });
 
-    await undoBtn(page).click();
+    await page.keyboard.press('Control+z');
     await expect(nodes(page)).toHaveCount(0);
 
-    await redoBtn(page).click();
+    await page.keyboard.press('Control+y');
     await expect(nodes(page)).toHaveCount(1);
   });
 
@@ -106,8 +106,8 @@ test.describe('Redo', () => {
     await addRootGroup(page);
     await expect(undoBtn(page)).toBeEnabled({ timeout: HISTORY_TIMEOUT });
 
-    await undoBtn(page).click();
-    await redoBtn(page).click();
+    await page.keyboard.press('Control+z');
+    await page.keyboard.press('Control+y');
     await expect(redoBtn(page)).toBeDisabled();
   });
 
