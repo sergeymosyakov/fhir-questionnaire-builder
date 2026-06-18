@@ -167,3 +167,52 @@ div.lform-item--hidden {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ── Reference search autocomplete ──────────────────────────────────────────── */
+.ref-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.ref-search-wrap .ref-id-input {
+  width: 100%;
+}
+.ref-search-drop {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 0;
+  right: 0;
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid #dde3ec;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.12);
+  z-index: 900;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.ref-search-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  color: #212529;
+  transition: background .1s;
+}
+.ref-search-item:hover { background: #e3f0ff; }
+.ref-search-name { flex: 1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ref-search-id   { font-family: monospace; font-size: 11px; color: #888; flex-shrink: 0; }
+.ref-search-empty {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+}
+.ref-search-error { color: #c62828; }
