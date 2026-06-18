@@ -508,7 +508,8 @@ These warnings appear for well-formed, spec-compliant resources and cannot be av
 
 | Operation | How to use | Notes |
 |---|---|---|
-| `Questionnaire/$populate` | Preview panel → **↧ Populate** button (visible when FHIR Base Server is configured in Settings) → enter `Patient/{id}` → click **Fill from Server** | Sends `POST {fhirBase}/Questionnaire/$populate` with `Parameters { questionnaire, subject }`. Merges returned `QuestionnaireResponse` answers into the current form via `importQRAnswers`. Accepts both direct QR result and Parameters-wrapped QR. |
+| `Questionnaire/$populate` | **Answers ▾ → ↧ Fill from FHIR Server…** (enabled when a questionnaire is loaded) → search for a Patient by name (live FHIR search against the FHIR Base Server) or type `Patient/{id}` → click **Fill from Server** | Sends `POST {SDC Server || FHIR Base}/Questionnaire/$populate` with `Parameters { questionnaire, subject }`. Merges returned `QuestionnaireResponse` answers into the current form via `importQRAnswers`. Accepts both direct QR result and Parameters-wrapped QR. Requires a server implementing the SDC IG (e.g. Matchbox). |
+| Definition-based extraction | **Save ▾ → Definition Extract · FHIR JSON Bundle** (after filling answers) → review the extracted resources → **Download Bundle** | Client-side `definitionExtract(questJson, qr)` walks groups carrying the `sdc-questionnaire-definitionExtract` extension, maps each child `item.definition` answer to its FHIR resource element path, and produces a transaction `Bundle`. No server required. |
 
 ### SDC extensions — population and extraction (partial support)
 
@@ -520,7 +521,7 @@ The following extensions configure *how* the server-side engine populates fields
 | `sdc-questionnaire-launchContext` | Declares named contexts (patient, encounter, user, etc.) passed at launch time; enables server-side pre-population |
 | `sdc-questionnaire-itemContext` | FHIRPath expression that defines the FHIR context node for population and extraction of a specific item |
 | `sdc-questionnaire-sourceQueries` / `sdc-questionnaire-contextExpression` | Batch FHIR queries to populate form data from a server at launch |
-| `sdc-questionnaire-definitionExtract` | Extracts completed answers into specified FHIR resource element paths |
+| `sdc-questionnaire-definitionExtract` | Extracts completed answers into specified FHIR resource element paths — **evaluated client-side** via Save ▾ → Definition Extract (see SDC server operations above); other extensions below are round-tripped only |
 | `sdc-questionnaire-targetStructureMap` | StructureMap used to transform a completed QR into other FHIR resources |
 | `sdc-questionnaire-sourceStructureMap` | StructureMap used to pre-populate the questionnaire from existing FHIR data |
 | `sdc-questionnaire-columnCount` / `sdc-questionnaire-width` | Grid layout: number of columns in a group and per-item width for multi-column display |

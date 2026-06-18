@@ -8,7 +8,6 @@ import { buildFHIRObject } from '../../fhir/export.js';
 import { buildQR }         from '../../fhir/qr-builder.js';
 import { definitionExtract } from '../../fhir/sdc-definition-extract.js';
 import { EventState }   from '../../events.js';
-import { showWarn as _showWarn } from '../toast.js';
 
 export class DefExtractModal extends Modal {
   constructor() {
@@ -39,8 +38,7 @@ export class DefExtractModal extends Modal {
     // Warnings
     if (warnings.length) {
       const warn = document.createElement('div');
-      warn.className = 'modal-field-hint';
-      warn.style.cssText = 'color:var(--c-amber);margin-bottom:12px;font-size:12px;';
+      warn.className = 'modal-field-hint def-extract-warn';
       warn.textContent = warnings.join(' ');
       this.body.appendChild(warn);
     }
@@ -54,27 +52,25 @@ export class DefExtractModal extends Modal {
 
     // Summary
     const summary = document.createElement('p');
-    summary.style.cssText = 'font-size:13px;margin-bottom:12px;';
+    summary.className = 'def-extract-summary';
     summary.textContent = `Extracted ${count} resource${count !== 1 ? 's' : ''} from current answers.`;
     this.body.appendChild(summary);
 
     // Resource list
     const list = document.createElement('div');
-    list.style.cssText = 'display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;';
+    list.className = 'def-extract-list';
 
     for (const entry of bundle.entry) {
       const r = entry.resource;
       const card = document.createElement('div');
-      card.style.cssText =
-        'padding:8px 12px;border:1px solid var(--c-border);border-radius:6px;' +
-        'background:var(--c-bg);font-size:12px;';
+      card.className = 'def-extract-card';
 
       const title = document.createElement('span');
-      title.style.cssText = 'font-weight:700;color:var(--c-primary);margin-right:8px;';
+      title.className = 'def-extract-type';
       title.textContent = r.resourceType;
 
       const id = document.createElement('span');
-      id.style.cssText = 'font-family:monospace;color:var(--c-text-2);font-size:11px;';
+      id.className = 'def-extract-id';
       id.textContent = r.id;
 
       // Show top-level field summary
@@ -83,7 +79,7 @@ export class DefExtractModal extends Modal {
         .slice(0, 4)
         .join(', ');
       const fieldSummary = document.createElement('div');
-      fieldSummary.style.cssText = 'color:var(--c-text-2);margin-top:3px;font-size:11px;';
+      fieldSummary.className = 'def-extract-fields';
       fieldSummary.textContent = fields ? `Fields: ${fields}` : '(no data fields)';
 
       card.append(title, id, fieldSummary);

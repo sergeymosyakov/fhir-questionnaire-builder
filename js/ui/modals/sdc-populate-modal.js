@@ -21,17 +21,16 @@ export class SdcPopulateModal extends Modal {
     this.body.innerHTML = '';
 
     const desc = document.createElement('p');
-    desc.className = 'modal-field-hint';
-    desc.style.marginBottom = '14px';
+    desc.className = 'modal-field-hint sdc-pop-desc';
     desc.textContent = 'Search for a patient by name. The server will pre-fill the questionnaire with data from their record.';
     this.body.appendChild(desc);
 
     const searchRow = document.createElement('div');
-    searchRow.style.cssText = 'position:relative;';
+    searchRow.className = 'sdc-pop-field';
 
     const lbl = document.createElement('label');
     lbl.textContent = 'Patient';
-    lbl.style.cssText = 'display:block;font-size:12px;font-weight:600;color:var(--c-text-2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase;';
+    lbl.className = 'sdc-pop-label';
     lbl.setAttribute('for', 'sdc-pop-search');
     lbl.dataset.tipTitle = 'SDC $populate subject';
     lbl.dataset.tipBody  = 'Patient reference passed as the subject to the $populate operation.';
@@ -41,8 +40,7 @@ export class SdcPopulateModal extends Modal {
     this._searchInput = document.createElement('input');
     this._searchInput.type        = 'text';
     this._searchInput.id          = 'sdc-pop-search';
-    this._searchInput.className   = 'ext-url-input';
-    this._searchInput.style.cssText = 'width:100%;height:32px;padding:0 10px;font-size:13px;box-sizing:border-box;';
+    this._searchInput.className   = 'ext-url-input sdc-pop-input';
     this._searchInput.placeholder = 'Search by name or enter Patient/{id}\u2026';
     this._searchInput.dataset.testid = 'sdc-populate-patient-ref-input';
     this._searchInput.autocomplete = 'off';
@@ -50,8 +48,7 @@ export class SdcPopulateModal extends Modal {
     this._selectedRef = '';
 
     this._drop = document.createElement('div');
-    this._drop.className = 'ref-search-drop';
-    this._drop.style.cssText = 'display:none;position:fixed;z-index:10001;';
+    this._drop.className = 'ref-search-drop sdc-pop-drop';
     document.body.appendChild(this._drop);
 
     const positionDrop = () => {
@@ -76,7 +73,13 @@ export class SdcPopulateModal extends Modal {
           const item = document.createElement('button');
           item.type = 'button';
           item.className = 'ref-search-item';
-          item.innerHTML = '<span class="ref-search-name">' + r.display + '</span><span class="ref-search-id">' + r.id + '</span>';
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'ref-search-name';
+          nameSpan.textContent = r.display;
+          const idSpan = document.createElement('span');
+          idSpan.className = 'ref-search-id';
+          idSpan.textContent = r.id;
+          item.append(nameSpan, idSpan);
           item.addEventListener('mousedown', e => {
             e.preventDefault();
             this._searchInput.value = r.display + ' (' + r.id + ')';
@@ -130,7 +133,8 @@ export class SdcPopulateModal extends Modal {
 
   _apply() {
     const ref = this._selectedRef || this._searchInput.value.trim();
-    if (!ref) { this._searchInput.style.borderColor = '#c62828'; return; }
+    if (!ref) { this._searchInput.classList.add('sdc-pop-input--error'); return; }
+    this._searchInput.classList.remove('sdc-pop-input--error');
     const patientRef = ref.includes('/') ? ref : 'Patient/' + ref;
     document.dispatchEvent(new CustomEvent(AppEvents.SDC_POPULATE_REQUESTED, {
       detail: { patientRef },

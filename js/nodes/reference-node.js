@@ -137,7 +137,13 @@ export class ReferenceNode extends ItemNode {
             const item = document.createElement('button');
             item.type = 'button';
             item.className = 'ref-search-item';
-            item.innerHTML = `<span class="ref-search-name">${r.display}</span><span class="ref-search-id">${r.id}</span>`;
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'ref-search-name';
+            nameSpan.textContent = r.display;
+            const idSpan = document.createElement('span');
+            idSpan.className = 'ref-search-id';
+            idSpan.textContent = r.id;
+            item.append(nameSpan, idSpan);
             item.addEventListener('mousedown', e => {
               e.preventDefault();
               idInput.value = r.id;
