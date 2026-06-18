@@ -5,6 +5,7 @@ import { supabase } from './auth/supabase-client.js';
 import { questDoc } from './fhir/quest-document.js';
 import { answerStore } from './answer-store.js';
 import { serverConfig, LocalStorageConfigProvider } from './fhir/server-config.js';
+import './fhir/server-config-cloud.js';
 import './fhir/import.js';
 import './fhir/qr-export.js';
 import './fhir/obs-export.js';

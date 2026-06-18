@@ -6,6 +6,8 @@ import {
   LocalStorageConfigProvider,
   CONFIG_KEYS,
 } from './fhir/server-config.js';
+import * as auth       from './auth/auth.js';
+import { loadSettings, saveSettings } from './fhir/server-config-cloud.js';
 
 // ── Defaults (fallback labels shown in placeholders) ─────────────────────────
 const DEFAULTS = {
@@ -18,7 +20,18 @@ const DEFAULTS = {
 // ── Register providers (same order as app.js but settings page is standalone) ─
 const _lsProvider = new LocalStorageConfigProvider();
 serverConfig.register(_lsProvider);
+// SupabaseConfigProvider is registered by server-config-cloud.js import above
 serverConfig.load('./config.json');
+
+// ── Track current user ────────────────────────────────────────────────────────
+let _currentUser = null;
+auth.onAuthChange(async (_event, user) => {
+  _currentUser = user;
+  _updateCloudBadge(user);
+  if (user) await loadSettings(user.id);
+  await serverConfig.ready();
+  _refreshAllFields();
+});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function _el(id) { return document.getElementById(id); }
@@ -159,6 +172,35 @@ function _collectField(inputId, key) {
   _markCustom(input, null, key);
 }
 
+
+// ── Cloud badge ───────────────────────────────────────────────────────────────
+function _updateCloudBadge(user) {
+  const bar = _el('saveStatus')?.closest('.s-save-bar');
+  if (!bar) return;
+  let badge = bar.querySelector('.s-cloud-badge');
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.className = 's-cloud-badge';
+    bar.insertBefore(badge, bar.querySelector('.s-status'));
+  }
+  badge.textContent = user ? '☁️ Synced to cloud' : '';
+  badge.style.display = user ? '' : 'none';
+}
+
+// Refresh all input fields from current serverConfig values (after cloud load)
+function _refreshAllFields() {
+  const map = {
+    [CONFIG_KEYS.TERMINOLOGY_SERVER]: 'termServerInput',
+    [CONFIG_KEYS.FHIR_BASE]:          'fhirBaseInput',
+    [CONFIG_KEYS.CORS_PROXY]:         'corsProxyInput',
+    [CONFIG_KEYS.NLM_API_BASE]:       'nlmApiInput',
+  };
+  for (const [key, inputId] of Object.entries(map)) {
+    const inp = _el(inputId);
+    if (inp) inp.value = serverConfig.get(key) || '';
+  }
+}
+
 _el('saveBtn').addEventListener('click', () => {
   _collectField('termServerInput', CONFIG_KEYS.TERMINOLOGY_SERVER);
   _collectField('fhirBaseInput',   CONFIG_KEYS.FHIR_BASE);
@@ -177,7 +219,13 @@ _el('saveBtn').addEventListener('click', () => {
     const inp = _el(map[key]);
     if (inp) inp.classList.toggle('is-custom', _lsProvider.get(key) != null);
   });
-  _showStatus('Settings saved.', true);
+  if (_currentUser) {
+    saveSettings(_currentUser.id)
+      .then(() => _showStatus('Saved to cloud.', true))
+      .catch(() => _showStatus('Saved locally (cloud sync failed).', true));
+  } else {
+    _showStatus('Settings saved.', true);
+  }
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────

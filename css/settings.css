@@ -253,3 +253,9 @@ body {
   color: var(--s-muted);
 }
 .s-status.saved { color: var(--s-success); }
+
+.s-cloud-badge {
+  font-size: 12px;
+  color: var(--s-success);
+  margin-right: auto;
+}
