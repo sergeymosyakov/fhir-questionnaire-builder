@@ -4,7 +4,7 @@
   "title": "Reference Type Demo",
   "status": "draft",
   "experimental": true,
-  "copyright": "© 2026 Sergey Mosyakov",
+  "copyright": "\u00a9 2026 Sergey Mosyakov",
   "subjectType": [
     "Patient"
   ],
@@ -84,6 +84,10 @@
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType",
           "valueString": "HumanName"
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtract",
+          "valueBoolean": true
         }
       ],
       "item": [

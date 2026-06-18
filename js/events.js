@@ -53,7 +53,8 @@ export const AppEvents = Object.freeze({
 
   // ── SDC server operations ─────────────────────────────────────────────────
   // detail: { patientRef: string } — e.g. 'Patient/123'
-  SDC_POPULATE_REQUESTED: 'sdc:populate-requested',
+  SDC_POPULATE_REQUESTED:  'sdc:populate-requested',
+  DEF_EXTRACT_REQUESTED:   'sdc:def-extract-requested',
   BUILDER_RENDER_DONE:  'builder:render-done',
 
   // ── Patient / QR ─────────────────────────────────────────────────────────

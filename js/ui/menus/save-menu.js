@@ -62,6 +62,7 @@ export class SaveMenu extends DropdownMenu {
     this._exportQuestItem = this._item(null, '&#x1F4C4; Questionnaire &middot; FHIR JSON', 'export-quest-item');
     this._exportQrItem    = this._item(null, '&#x1F4CB; QuestionnaireResponse &middot; FHIR JSON', 'export-qr-item');
     this._exportObsItem   = this._item(null, '&#x1F9EA; Observations &middot; FHIR JSON Bundle', 'export-obs-item');
+    this._exportDefItem   = this._item(null, '&#x1F9E9; Definition Extract &middot; FHIR JSON Bundle', 'export-def-extract-item');
 
     this._menu.append(
       this._cloudSaveBtn,
@@ -69,6 +70,7 @@ export class SaveMenu extends DropdownMenu {
       this._exportQuestItem,
       this._exportQrItem,
       this._exportObsItem,
+      this._exportDefItem,
     );
 
     this._cloudSaveBtn.addEventListener('click', () => {
@@ -98,6 +100,11 @@ export class SaveMenu extends DropdownMenu {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       const suggested = this._fileName.trim() || 'questionnaire';
       obsExportModal.open(suggested + '-observations.json');
+    });
+
+    this._exportDefItem.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
+      document.dispatchEvent(new CustomEvent(AppEvents.DEF_EXTRACT_REQUESTED));
     });
   }
 }

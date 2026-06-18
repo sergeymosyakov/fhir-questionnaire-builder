@@ -1,0 +1,33 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "def-extract-test",
+  "status": "draft",
+  "title": "Definition Extract Test",
+  "item": [
+    {
+      "linkId": "patient-group",
+      "type": "group",
+      "text": "Patient Information",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtract",
+          "valueBoolean": true
+        }
+      ],
+      "item": [
+        {
+          "linkId": "patient-family",
+          "type": "string",
+          "text": "Family name",
+          "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient.name.family"
+        },
+        {
+          "linkId": "patient-given",
+          "type": "string",
+          "text": "Given name",
+          "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient.name.given"
+        }
+      ]
+    }
+  ]
+}

@@ -156,6 +156,7 @@
     { cat: 'QR Export', field: 'QuestionnaireResponse.meta.profile[]', desc: 'Canonical URLs of profiles this response claims to conform to', where: 'Export → QuestionnaireResponse modal → Profiles section', how: 'Click "+ Add Profile URL" and enter canonical URL(s)' },
 
     // ── SDC Server operations ─────────────────────────────────────────────────
+    { cat: 'SDC Server', field: 'sdc-questionnaire-definitionExtract', desc: 'Marks a group item as an extraction context. All child items with item.definition will be extracted into a FHIR resource of the type specified in the definition URL (e.g. StructureDefinition/Patient#Patient.name.family).', where: 'Builder: add extension via import; Save ▾ → Definition Extract to run extraction', how: 'Import a questionnaire with definitionExtract groups, fill answers, then Save ▾ → Definition Extract · FHIR JSON Bundle → Download.' },
     { cat: 'SDC Server', field: 'Questionnaire/$populate', desc: 'Sends the current Questionnaire to a FHIR server\'s $populate operation to pre-fill answers from a patient record. Requires FHIR Base Server configured in Settings.', where: 'Preview panel → "↧ Populate" button (visible when FHIR Base Server is set and a questionnaire is loaded)', how: 'Click "↧ Populate", enter a Patient reference (e.g. Patient/123), click "Fill from Server". Answers are merged into the current form.' },
 
     // ── REDCap ────────────────────────────────────────────────────────────────
