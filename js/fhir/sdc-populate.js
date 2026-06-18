@@ -46,9 +46,9 @@ export async function populateFromServer(fhirBase, questJson, patientRef) {
     try {
       const oo = JSON.parse(text);
       const issue = oo?.issue?.[0];
-      detail = issue?.diagnostics || issue?.details?.text
-        || oo?.text?.div?.replace(/<[^>]*>/g, '').replace(/[<>]/g, '').trim().substring(0, 120)
-        || detail;
+      // Use only structured OperationOutcome fields — never parse the XHTML
+      // narrative (text.div), which is untrusted HTML.
+      detail = issue?.diagnostics || issue?.details?.text || detail;
     } catch { /* keep raw text */ }
     const hint = (res.status === 400 || res.status === 404)
       ? ' (This server may not support the SDC $populate operation.)'

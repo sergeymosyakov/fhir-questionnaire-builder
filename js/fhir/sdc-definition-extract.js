@@ -75,11 +75,11 @@ function setPath(obj, path, value) {
   if (!path) return;
   const parts = path.split('.');
   // Guard against prototype pollution from attacker-controlled item.definition paths.
-  const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
-  if (parts.some(p => UNSAFE_KEYS.has(p))) return;
+  const isUnsafeKey = (k) => k === '__proto__' || k === 'constructor' || k === 'prototype';
   let cur = obj;
   for (let i = 0; i < parts.length - 1; i++) {
     const key = parts[i];
+    if (isUnsafeKey(key)) return;
     if (!(key in cur)) cur[key] = {};
     // If existing value is array, use first element
     if (Array.isArray(cur[key])) {
@@ -90,6 +90,7 @@ function setPath(obj, path, value) {
     }
   }
   const lastKey = parts[parts.length - 1];
+  if (isUnsafeKey(lastKey)) return;
   // If path ends in array-like field (name, identifier, address, telecom), wrap in array
   const ARRAY_FIELDS = new Set(['name','identifier','address','telecom','code','coding',
     'category','reasonCode','note','performer','contained','extension','modifierExtension']);
