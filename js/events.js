@@ -50,6 +50,10 @@ export const AppEvents = Object.freeze({
   // PreviewForm listens and triggers a re-render via _asyncRender.
   RESPONSE_CHANGED:    'preview:response-changed',
   PREVIEW_RENDER_DONE: 'preview:render-done',
+
+  // ── SDC server operations ─────────────────────────────────────────────────
+  // detail: { patientRef: string } — e.g. 'Patient/123'
+  SDC_POPULATE_REQUESTED: 'sdc:populate-requested',
   BUILDER_RENDER_DONE:  'builder:render-done',
 
   // ── Patient / QR ─────────────────────────────────────────────────────────

@@ -1,0 +1,62 @@
+// ── SDC $populate ─────────────────────────────────────────────────────────────
+// Sends a Questionnaire to a FHIR server's $populate operation with a patient
+// reference and returns the resulting QuestionnaireResponse.
+//
+// SDC spec: https://hl7.org/fhir/uv/sdc/OperationDefinition-Questionnaire-populate.html
+
+/**
+ * Populate a QuestionnaireResponse from a FHIR server.
+ *
+ * @param {string}  fhirBase   - Base FHIR server URL (e.g. https://hapi.fhir.org/baseR4)
+ * @param {object}  questJson  - FHIR Questionnaire resource
+ * @param {string}  patientRef - Patient reference string (e.g. 'Patient/123')
+ * @param {string}  [corsProxy] - Optional CORS proxy URL
+ * @returns {Promise<object>} FHIR QuestionnaireResponse resource
+ */
+export async function populateFromServer(fhirBase, questJson, patientRef, corsProxy = '') {
+  const base = fhirBase.replace(/\/$/, '');
+  const targetUrl = `${base}/Questionnaire/$populate`;
+  const url = corsProxy
+    ? `${corsProxy.replace(/\/$/, '')}?url=${encodeURIComponent(targetUrl)}`
+    : targetUrl;
+
+  const body = JSON.stringify({
+    resourceType: 'Parameters',
+    parameter: [
+      { name: 'questionnaire',   resource: questJson },
+      { name: 'subject', valueReference: { reference: patientRef } },
+    ],
+  });
+
+  const res = await fetch(url, {
+    method:  'POST',
+    headers: {
+      'Content-Type': 'application/fhir+json',
+      'Accept':        'application/fhir+json',
+    },
+    body,
+    signal: AbortSignal.timeout(30_000),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    const detail = text ? ` — ${text.substring(0, 300)}` : '';
+    throw new Error(`$populate failed: HTTP ${res.status}${detail}`);
+  }
+
+  const result = await res.json();
+
+  // Result is a QuestionnaireResponse directly
+  if (result.resourceType === 'QuestionnaireResponse') return result;
+
+  // Result is a Parameters resource wrapping a QuestionnaireResponse
+  if (result.resourceType === 'Parameters') {
+    const param = result.parameter?.find(p =>
+      p.name === 'questionnaire-response' || p.name === 'response' || p.name === 'return'
+    );
+    if (param?.resource?.resourceType === 'QuestionnaireResponse') return param.resource;
+    throw new Error(`$populate Parameters response did not contain a QuestionnaireResponse`);
+  }
+
+  throw new Error(`$populate returned unexpected resourceType: ${result.resourceType}`);
+}

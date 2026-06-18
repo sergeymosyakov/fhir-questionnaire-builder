@@ -155,6 +155,9 @@
     { cat: 'QR Export', field: 'QuestionnaireResponse.meta.lastUpdated', desc: 'Auto-set to current UTC timestamp on every export', where: 'Automatic', how: 'Set automatically — no user input needed' },
     { cat: 'QR Export', field: 'QuestionnaireResponse.meta.profile[]', desc: 'Canonical URLs of profiles this response claims to conform to', where: 'Export → QuestionnaireResponse modal → Profiles section', how: 'Click "+ Add Profile URL" and enter canonical URL(s)' },
 
+    // ── SDC Server operations ─────────────────────────────────────────────────
+    { cat: 'SDC Server', field: 'Questionnaire/$populate', desc: 'Sends the current Questionnaire to a FHIR server\'s $populate operation to pre-fill answers from a patient record. Requires FHIR Base Server configured in Settings.', where: 'Preview panel → "↧ Populate" button (visible when FHIR Base Server is set and a questionnaire is loaded)', how: 'Click "↧ Populate", enter a Patient reference (e.g. Patient/123), click "Fill from Server". Answers are merged into the current form.' },
+
     // ── REDCap ────────────────────────────────────────────────────────────────
     { cat: 'REDCap', field: 'Import from REDCap CSV', desc: 'Converts a REDCap Data Dictionary CSV export into a FHIR R4 Questionnaire. Supports field types: text, notes, radio, checkbox, dropdown, yesno, truefalse, slider, file, calc, descriptive, sql. Forms become groups; section headers become nested groups. Branching logic is converted to enableWhen[] rules. All REDCap-specific values (branching string, calc expression, matrix group, alignment, etc.) are preserved as round-trip extensions under the http://fhir-qb.app/redcap/ namespace.', where: 'Questionnaires ▾ menu → From REDCap CSV…', how: 'Click "Questionnaires ▾" → "From REDCap CSV…" → choose a .csv file. If validation errors are found a Compatibility Report modal is shown; warnings allow import to proceed.' },
     { cat: 'REDCap', field: 'Export to REDCap CSV', desc: 'Exports the current questionnaire as a REDCap Data Dictionary CSV. For questionnaires originally imported from REDCap CSV the export is lossless (round-trip via stored extensions). For questionnaires built from scratch or imported from FHIR a best-effort conversion is performed. A Compatibility Report modal is shown when the questionnaire contains constructs that cannot be represented in REDCap (deep nesting, answerValueSet by URL, SDC expressions, reference/quantity types, etc.).', where: 'Save ▾ menu → Questionnaire · REDCap CSV', how: 'Click "Save ▾" → "Questionnaire · REDCap CSV". If compatibility issues exist a report modal opens with "Export anyway" to proceed.' },
@@ -169,6 +172,7 @@
     'Item — Extensions': 'cat-ext',
     'Item — SDC':        'cat-sdc',
     'QR Export':         'cat-qr',
+    'SDC Server':        'cat-sdc',
     'REDCap':            'cat-redcap',
     'Not Supported':     'cat-ns',
   };

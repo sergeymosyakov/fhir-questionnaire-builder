@@ -9,6 +9,10 @@ import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes, buildVarEnv, evalInitialExprNodes } from './fhir/calc.js';
 import { buildFHIRObject } from './fhir/export.js';
 import { calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './fhir/form-checks.js';
+import { importQRAnswers } from './fhir/qr-import.js';
+import { populateFromServer } from './fhir/sdc-populate.js';
+import { serverConfig, CONFIG_KEYS } from './fhir/server-config.js';
+import { showError, showInfo } from './ui/toast.js';
 
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
@@ -85,6 +89,7 @@ export class PreviewForm {
     document.addEventListener(AppEvents.RESPONSE_CHANGED, () => this._asyncRender(++this._renderVersion));
     document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => this._asyncRender(++this._renderVersion));
     document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => this._asyncRender(++this._renderVersion));
+    document.addEventListener(AppEvents.SDC_POPULATE_REQUESTED, e => this._populate(e.detail.patientRef));
 
     // mount() needs viewOptionsWrap/previewModeWrap which are created by mountHeaderActions()
     // — defer until APP_CONTEXT_READY which fires after mountHeaderActions()
@@ -332,6 +337,26 @@ export class PreviewForm {
     this._updateJsonView();
     progress.hide();
     document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_RENDER_DONE));
+  }
+
+  /** Call $populate on the configured FHIR server and load the resulting answers. */
+  async _populate(patientRef) {
+    const fhirBase  = serverConfig.get(CONFIG_KEYS.FHIR_BASE);
+    const corsProxy = serverConfig.get(CONFIG_KEYS.CORS_PROXY) || '';
+    if (!fhirBase) { showError('No FHIR Base Server configured. Open Settings to set one.'); return; }
+
+    progress.show('Populating from server\u2026');
+    try {
+      const questJson = buildFHIRObject();
+      const qr = await populateFromServer(fhirBase, questJson, patientRef, corsProxy);
+      const { loaded } = importQRAnswers(qr, this._answerStore.data, this._tree);
+      document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
+      showInfo(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} from server.`);
+    } catch (err) {
+      showError('$populate failed: ' + err.message);
+    } finally {
+      progress.hide();
+    }
   }
 
   _updateJsonView() {

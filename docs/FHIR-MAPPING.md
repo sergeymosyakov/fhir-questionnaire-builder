@@ -504,9 +504,16 @@ These warnings appear for well-formed, spec-compliant resources and cannot be av
 | `"Unable to resolve resource with reference 'Practitioner/...' "` | Demo data uses relative references to non-existent resources on public HAPI | Accept — demo-only; valid FHIR structure |
 | SNOMED CT `not-present` / coded values | HAPI public sandbox does not load SNOMED | Accept — well-formed FHIR |
 
-### SDC extensions — population and extraction (out of scope)
+### SDC server operations — supported
 
-These SDC extensions support advanced form pre-population from clinical data and extraction of completed answers into FHIR resources. They require a FHIR server and/or StructureMap tooling and are out of scope for this builder.
+| Operation | How to use | Notes |
+|---|---|---|
+| `Questionnaire/$populate` | Preview panel → **↧ Populate** button (visible when FHIR Base Server is configured in Settings) → enter `Patient/{id}` → click **Fill from Server** | Sends `POST {fhirBase}/Questionnaire/$populate` with `Parameters { questionnaire, subject }`. Merges returned `QuestionnaireResponse` answers into the current form via `importQRAnswers`. Accepts both direct QR result and Parameters-wrapped QR. |
+
+### SDC extensions — population and extraction (partial support)
+
+The `$populate` operation above pre-fills the form using server-side logic.
+The following extensions configure *how* the server-side engine populates fields — the builder round-trips them through import/export but does not evaluate them client-side.
 
 | Extension | Notes |
 |---|---|
