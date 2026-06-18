@@ -31,7 +31,6 @@ import { PanelResizer } from './ui/panel-resizer.js';
 import { QRAnswersManager } from './fhir/qr-answers-manager.js';
 import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
 import { CopyPaste } from './ui/copy-paste.js';
-import { SdcPopulateBtn } from './ui/sdc-populate-btn.js';
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
 
@@ -86,7 +85,6 @@ new UndoRedo();
 
 // ── Copy / Paste ──────────────────────────────────────────────────────────────
 new CopyPaste();
-new SdcPopulateBtn();
 
 // Validators: read config.json and prefs from localStorage directly
 initValidators();

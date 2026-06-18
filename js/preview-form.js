@@ -341,14 +341,13 @@ export class PreviewForm {
 
   /** Call $populate on the configured FHIR server and load the resulting answers. */
   async _populate(patientRef) {
-    const fhirBase  = serverConfig.get(CONFIG_KEYS.FHIR_BASE);
-    const corsProxy = serverConfig.get(CONFIG_KEYS.CORS_PROXY) || '';
+    const fhirBase = serverConfig.get(CONFIG_KEYS.FHIR_BASE);
     if (!fhirBase) { showError('No FHIR Base Server configured. Open Settings to set one.'); return; }
 
     progress.show('Populating from server\u2026');
     try {
       const questJson = buildFHIRObject();
-      const qr = await populateFromServer(fhirBase, questJson, patientRef, corsProxy);
+      const qr = await populateFromServer(fhirBase, questJson, patientRef);
       const { loaded } = importQRAnswers(qr, this._answerStore.data, this._tree);
       document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
       showInfo(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} from server.`);

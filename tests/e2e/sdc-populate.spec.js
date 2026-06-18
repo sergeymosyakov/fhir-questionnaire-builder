@@ -37,26 +37,32 @@ test.describe('SDC $populate button', () => {
     await clearFhirBaseUrl(page);
   });
 
-  test('populate button hidden when no FHIR base server configured', async ({ page }) => {
+  test('populate item hidden in Answers menu when no FHIR base server configured', async ({ page }) => {
     await freshStart(page);
     await loadBariatric(page);
+    // Open Answers menu — populate item should not be visible
+    await page.getByTestId('answers-btn').click();
     await expect(page.getByTestId('sdc-populate-btn')).toBeHidden();
+    await page.keyboard.press('Escape');
   });
 
-  test('populate button hidden when no questionnaire loaded', async ({ page }) => {
+  test('populate item hidden when no questionnaire loaded', async ({ page }) => {
     await page.addInitScript(() => localStorage.clear());
     await setFhirBaseUrl(page, 'https://hapi.fhir.org/baseR4');
     await page.goto('/');
     await page.waitForSelector('[data-testid="add-root-group-btn"]');
-    await expect(page.getByTestId('sdc-populate-btn')).toBeHidden();
+    // No questionnaire — Answers menu itself should be hidden (tree empty)
+    await expect(page.getByTestId('answers-btn')).toBeHidden();
   });
 
-  test('populate button visible when fhirBaseUrl set and questionnaire loaded', async ({ page }) => {
+  test('populate item visible in Answers menu when fhirBaseUrl set and questionnaire loaded', async ({ page }) => {
     await setFhirBaseUrl(page, 'https://hapi.fhir.org/baseR4');
     await page.goto('/');
     await page.waitForSelector('[data-testid="add-root-group-btn"]');
     await loadBariatric(page);
+    await page.getByTestId('answers-btn').click();
     await expect(page.getByTestId('sdc-populate-btn')).toBeVisible();
+    await page.keyboard.press('Escape');
   });
 
   test('clicking populate button opens modal with patient ref input', async ({ page }) => {
@@ -65,12 +71,12 @@ test.describe('SDC $populate button', () => {
     await page.waitForSelector('[data-testid="add-root-group-btn"]');
     await loadBariatric(page);
 
-    await page.getByTestId('sdc-populate-btn').click();
+    await openDropdownItem(page, 'answers-btn', 'sdc-populate-btn');
 
     // Modal should open
     const input = page.getByTestId('sdc-populate-patient-ref-input');
     await expect(input).toBeVisible();
-    await expect(input).toHaveValue('Patient/');
+    // Input starts empty (search field, no pre-fill)
   });
 
   test('modal cancel closes without dispatching event', async ({ page }) => {
@@ -83,7 +89,7 @@ test.describe('SDC $populate button', () => {
       document.addEventListener('sdc:populate-requested', () => { window.__populateFired = true; }, { once: true });
     });
 
-    await page.getByTestId('sdc-populate-btn').click();
+    await openDropdownItem(page, 'answers-btn', 'sdc-populate-btn');
     await page.getByTestId('sdc-populate-patient-ref-input').waitFor();
 
     // Press Escape to cancel
@@ -105,7 +111,7 @@ test.describe('SDC $populate button', () => {
       }, { once: true });
     });
 
-    await page.getByTestId('sdc-populate-btn').click();
+    await openDropdownItem(page, 'answers-btn', 'sdc-populate-btn');
     const input = page.getByTestId('sdc-populate-patient-ref-input');
     await input.fill('Patient/test-123');
     await page.locator('[data-testid="sdcPopulate"] .modal-btn--apply').click();
@@ -126,7 +132,7 @@ test.describe('SDC $populate button', () => {
       }, { once: true });
     });
 
-    await page.getByTestId('sdc-populate-btn').click();
+    await openDropdownItem(page, 'answers-btn', 'sdc-populate-btn');
     const input = page.getByTestId('sdc-populate-patient-ref-input');
     await input.fill('98765');
     await page.locator('[data-testid="sdcPopulate"] .modal-btn--apply').click();

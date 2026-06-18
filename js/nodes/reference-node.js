@@ -6,6 +6,7 @@ import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { serverConfig, CONFIG_KEYS } from '../fhir/server-config.js';
+import { searchFhir, displayName as _displayName } from '../fhir/fhir-search.js';
 
 const FHIR_R4_RESOURCES = [
   'Account','ActivityDefinition','AdverseEvent','AllergyIntolerance','Appointment',
@@ -39,81 +40,8 @@ const FHIR_R4_RESOURCES = [
 
 // ── FHIR resource search ──────────────────────────────────────────────────────
 
-/** Extract a human-readable display name from a FHIR resource. */
-function _displayName(resource) {
-  const type = resource.resourceType;
-  if (['Patient','Practitioner','RelatedPerson','Person'].includes(type)) {
-    const name = resource.name?.[0];
-    if (name) {
-      const family = name.family || '';
-      const given  = (name.given || []).join(' ');
-      return [family, given].filter(Boolean).join(', ') || name.text || resource.id;
-    }
-  }
-  if (['Organization','Location','HealthcareService','Medication'].includes(type)) {
-    return resource.name || resource.id;
-  }
-  if (['Encounter','EpisodeOfCare'].includes(type)) {
-    const patName = resource.subject?.display || resource.patient?.display || '';
-    const status  = resource.status ? `[${resource.status}]` : '';
-    const date    = resource.period?.start?.slice(0, 10) || '';
-    return [patName, date, status].filter(Boolean).join(' ') || resource.id;
-  }
-  if (['Condition','Observation','Procedure'].includes(type)) {
-    const code    = resource.code?.coding?.[0]?.display || resource.code?.text || '';
-    const patient = resource.subject?.display || '';
-    return [code, patient].filter(Boolean).join(' — ') || resource.id;
-  }
-  return resource.name || resource.title || resource.id;
-}
 
-/** Proxy a URL through corsProxyUrl if configured. */
-function _proxied(url) {
-  const proxy = (serverConfig.get(CONFIG_KEYS.CORS_PROXY) || '').replace(/\/$/, '');
-  return proxy ? `${proxy}?url=${encodeURIComponent(url)}` : url;
-}
 
-/** Search a FHIR server for resources matching `query`. Returns [{id, display}]. */
-async function _searchFhir(resourceType, query) {
-  const base = (serverConfig.get(CONFIG_KEYS.FHIR_BASE) || '').replace(/\/$/, '');
-  if (!base || !resourceType || !query.trim()) return [];
-  const params = new URLSearchParams({ _count: '10' });
-  // Common search params by resource type
-  if (['Patient','Practitioner','RelatedPerson','Person'].includes(resourceType)) {
-    params.set('name', query);
-  } else if (['Organization','Location','HealthcareService'].includes(resourceType)) {
-    params.set('name', query);
-  } else if (['Encounter','EpisodeOfCare'].includes(resourceType)) {
-    params.set('patient.name', query);
-  } else if (['Condition','Observation','Procedure','DiagnosticReport','MedicationRequest','ServiceRequest'].includes(resourceType)) {
-    params.set('patient.name', query);
-  } else if (['Medication','Substance'].includes(resourceType)) {
-    params.set('code', query);
-  } else {
-    params.set('_id', query); // fallback: search by ID
-  }
-  // Use proxy only if configured AND the base URL's hostname differs from known CORS-enabled servers
-  const fhirUrl = `${base}/${resourceType}?${params}`;
-  let fetchUrl = fhirUrl;
-  const proxy = (serverConfig.get(CONFIG_KEYS.CORS_PROXY) || '').replace(/\/$/, '');
-  if (proxy) {
-    try {
-      const { hostname } = new URL(base);
-      // Skip proxy for servers known to support CORS
-      const corsEnabled = ['hapi.fhir.org', 'r4.smarthealthit.org', 'launch.smarthealthit.org'];
-      if (!corsEnabled.includes(hostname)) {
-        fetchUrl = `${proxy}?url=${encodeURIComponent(fhirUrl)}`;
-      }
-    } catch { /* invalid URL, use direct */ }
-  }
-  const res = await fetch(fetchUrl, { headers: { Accept: 'application/fhir+json' }, signal: AbortSignal.timeout(6000) });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const bundle = await res.json();
-  return (bundle.entry || []).map(e => ({
-    id:      e.resource?.id || '',
-    display: _displayName(e.resource),
-  })).filter(r => r.id);
-}
 
 export class ReferenceNode extends ItemNode {
   constructor(data = {}) {
@@ -233,7 +161,7 @@ export class ReferenceNode extends ItemNode {
         dropdown.appendChild(loading);
         openDropdown();
         try {
-          const results = await _searchFhir(resourceType, query);
+          const results = await searchFhir(resourceType, query);
           showResults(results, query);
         } catch (e) {
           const err = document.createElement('div');

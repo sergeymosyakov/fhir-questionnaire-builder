@@ -4,21 +4,20 @@
 //
 // SDC spec: https://hl7.org/fhir/uv/sdc/OperationDefinition-Questionnaire-populate.html
 
+import { proxiedUrl } from './fhir-search.js';
+
 /**
  * Populate a QuestionnaireResponse from a FHIR server.
  *
  * @param {string}  fhirBase   - Base FHIR server URL (e.g. https://hapi.fhir.org/baseR4)
  * @param {object}  questJson  - FHIR Questionnaire resource
  * @param {string}  patientRef - Patient reference string (e.g. 'Patient/123')
- * @param {string}  [corsProxy] - Optional CORS proxy URL
  * @returns {Promise<object>} FHIR QuestionnaireResponse resource
  */
-export async function populateFromServer(fhirBase, questJson, patientRef, corsProxy = '') {
-  const base = fhirBase.replace(/\/$/, '');
+export async function populateFromServer(fhirBase, questJson, patientRef) {
+  const base      = fhirBase.replace(/\/$/, '');
   const targetUrl = `${base}/Questionnaire/$populate`;
-  const url = corsProxy
-    ? `${corsProxy.replace(/\/$/, '')}?url=${encodeURIComponent(targetUrl)}`
-    : targetUrl;
+  const url       = proxiedUrl(targetUrl);
 
   const body = JSON.stringify({
     resourceType: 'Parameters',
