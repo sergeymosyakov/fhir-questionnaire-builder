@@ -38,7 +38,7 @@
     <!-- ── FHIR Base Server ──────────────────────────────────────────────── -->
     <div class="s-card">
       <div class="s-card-title">FHIR Base Server</div>
-      <div class="s-card-desc">Base FHIR endpoint for resource lookups — used to search for Patients, Practitioners, and other referenced resources in the preview.</div>
+        <div class="s-card-desc">Base FHIR endpoint for resource lookups — used to search for Patients, Practitioners, and other referenced resources in the preview. Also used for SDC server operations (e.g. <code>$populate</code> via <em>Answers ▾ → Fill from FHIR Server</em>). Note: <code>$populate</code> requires a server implementing the SDC IG — standard public servers (HAPI, SmartHealthIT) do not support it. Try <a href="https://test.ahdis.ch/matchboxv3/fhir" target="_blank">Matchbox</a> for SDC operations.</div>
       <div class="s-field">
         <label class="s-label" for="fhirBaseInput">Base URL</label>
         <input id="fhirBaseInput" class="s-input" type="url" placeholder="https://hapi.fhir.org/baseR4" autocomplete="off" spellcheck="false">
