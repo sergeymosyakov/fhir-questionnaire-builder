@@ -266,6 +266,18 @@ export class BaseNode {
       row.appendChild(sb);
     }
 
+    if (this._isSubject && !isPatient) {
+      const sub = document.createElement('span');
+      sub.className = 'preview-meta-badge preview-meta-badge--subject';
+      sub.dataset.testid = 'preview-subject-badge';
+      sub.textContent = 'SUBJECT';
+      sub.dataset.tipTitle = 'sdc-questionnaire-isSubject';
+      sub.dataset.tipBody  = 'This item\u2019s answer identifies the subject of the QuestionnaireResponse (QuestionnaireResponse.subject). Used by SDC servers when generating the response \u2014 has no effect on the patient-facing control.';
+      sub.dataset.tipFhir  = 'item.extension[sdc-questionnaire-isSubject].valueBoolean';
+      sub.dataset.tipSpec  = 'SDC';
+      row.appendChild(sub);
+    }
+
     if (this._prefix && rc.viewPrefs.showPrefix) {
       const pfx = document.createElement('span');
       pfx.className = 'preview-prefix';

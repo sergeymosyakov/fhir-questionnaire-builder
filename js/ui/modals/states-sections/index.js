@@ -6,6 +6,7 @@ import './observation-extract.js';
 import './collapsible.js';
 import './usage-mode.js';
 import './signature.js';
+import './is-subject.js';
 import { STATES_SECTIONS } from './registry.js';
 
 export function renderStatesSections(container, pending) {

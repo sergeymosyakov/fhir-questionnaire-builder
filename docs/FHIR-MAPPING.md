@@ -62,6 +62,7 @@ Every node in the tree is either a **group** or an **item**:
   _answerValueSet:     string,           // FHIR item.answerValueSet URL — preserved round-trip; external URLs expanded via terminologyService on load
   _answerExpression:   string,           // SDC sdc-questionnaire-answerExpression — FHIRPath expression evaluated at render time; result replaces answerOption[] in preview
   _candidateExpression: string,          // SDC sdc-questionnaire-candidateExpression — FHIRPath expression for candidate/suggested answers; evaluated at render time; mutually exclusive with _answerExpression / answerOption[]
+  _isSubject:          boolean,          // SDC sdc-questionnaire-isSubject — marks the item whose answer identifies the QuestionnaireResponse subject; only one item per questionnaire may set it
   _minValue:           number,           // questionnaire-minValue extension value (decimal or integer)
   _maxValue:           number,           // questionnaire-maxValue extension value (decimal or integer)
   _optionOrdinals:     object,           // map of option code → ordinalValue (from ordinalValue extension on answerOption.extension or valueCoding.extension fallback)
@@ -240,6 +241,7 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | `_answerValueSet` | `item.answerValueSet` | imported → `node._answerValueSet`; exported back unchanged; external URLs expanded via `terminologyService.expandAll()` on questionnaire load — options cached in `node._vsCache` and rendered in preview; server resolved via per-item `_preferredTermServer` → questionnaire-level default → `https://tx.fhir.org/r4`; expansion failures shown in validateModal |
 | `_answerExpression` | SDC `sdc-questionnaire-answerExpression` extension (`valueExpression.expression`) | FHIRPath evaluated at render time; result replaces static `answerOption[]` in preview; `answerOption[]` is suppressed on export when set; editable in Answer Type modal (Expression source radio) |
 | `_candidateExpression` | SDC `sdc-questionnaire-candidateExpression` extension (`valueExpression.expression`) | FHIRPath evaluated at render time for candidate/suggested answers; same client-side evaluation as `_answerExpression`; mutually exclusive with `_answerExpression` and `answerOption[]` (each clears the others); `answerOption[]` suppressed on export when set; editable in Answer Type modal (Candidate source radio) |
+| `_isSubject` | SDC `sdc-questionnaire-isSubject` extension (`valueBoolean`) | marks the item whose answer identifies the `QuestionnaireResponse.subject`; editable in States modal (Is subject checkbox, non-display items only); shown as a `SUBJECT` badge in the builder preview (not in patient view); export emits `valueBoolean: true`; validation errors when set on more than one item |
 | `_initialValue` | `item.initial[0]` value | imported from `initial[0]`; exported as `initial: [entry]`; pre-fills `values[]` on import |
 | `_initialValues` | `item.initial[]` all values | set only for repeating items with >1 initial value; exported as `initial: [entry, …]`; `_initialValue` holds `initial[0]` for backwards compat |
 | `_initialSelected` | `answerOption[].initialSelected` | code of the initially-selected option; preserved round-trip; if no `item.initial[]` exists, also used to pre-fill `_initialValue` |
@@ -289,6 +291,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression` | SDC | `_initialExpr` | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression` | SDC | `_answerExpression` (dynamic answer options for choice/radio/open-choice) | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression` | SDC | `_candidateExpression` (dynamic candidate/suggested answers for choice/radio/open-choice) | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject` | SDC | `_isSubject` (item whose answer is the QR subject) | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable` | SDC | `questVariables[]` on root | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression` | SDC | `enableWhenExpression` | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-constraint` | standard | `constraint[]` | Yes |
@@ -452,6 +455,7 @@ All R4 `Questionnaire` invariants (que-0 through que-13) are enforced by the loc
 | `calculatedExpression` set + `readOnly` not `true` | warning | Computed value can be overwritten by the user — consider setting read-only |
 | `answerExpression` set + `answerOption[]` also present | warning | Mutually exclusive in SDC — `answerOption[]` is ignored at runtime |
 | `candidateExpression` set + `answerOption[]` also present | warning | Mutually exclusive in SDC — `answerOption[]` is ignored at runtime |
+| `isSubject: true` on more than one item | error | A QuestionnaireResponse can have only one subject — lists all marked linkIds |
 | `candidateExpression` with invalid FHIRPath syntax | error | Reported as `Candidate expression error: …` |
 | `enableWhen[]` set + `enableWhenExpression` also set | warning | Both visibility controls are active — `enableWhenExpression` takes precedence in SDC |
 | `repeats: false` + `_initialValues` count > 1 | warning | Only the first initial value is used when repeats is not enabled |
@@ -531,6 +535,5 @@ The following extensions configure *how* the server-side engine populates fields
 | `sdc-questionnaire-sourceStructureMap` | StructureMap used to pre-populate the questionnaire from existing FHIR data |
 | `sdc-questionnaire-columnCount` / `sdc-questionnaire-width` | Grid layout: number of columns in a group and per-item width for multi-column display |
 | `sdc-questionnaire-lookupQuestionnaire` | Canonical reference to a Questionnaire used to produce candidate answers for `reference` items (for server-side lookup) |
-| `sdc-questionnaire-isSubject` | Marks the item whose answer identifies the subject of the questionnaire response (overrides `Questionnaire.subjectType` for the response) |
 
 

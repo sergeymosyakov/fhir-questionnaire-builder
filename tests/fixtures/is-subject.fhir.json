@@ -1,0 +1,37 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "is-subject-e2e",
+  "title": "Is Subject E2E Test",
+  "status": "draft",
+  "subjectType": [
+    "Patient"
+  ],
+  "item": [
+    {
+      "linkId": "q-subject",
+      "text": "Patient reference (subject)",
+      "type": "reference",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource",
+          "valueCode": "Patient"
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject",
+          "valueBoolean": true
+        }
+      ]
+    },
+    {
+      "linkId": "q-plain",
+      "text": "Practitioner reference (not subject)",
+      "type": "reference",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource",
+          "valueCode": "Practitioner"
+        }
+      ]
+    }
+  ]
+}

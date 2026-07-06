@@ -343,6 +343,29 @@ describe('validateTree — candidateExpression + answerOption co-presence', () =
   });
 });
 
+// ── isSubject: at most one item may be the QR subject ─────────────────────────
+describe('validateTree — isSubject uniqueness', () => {
+  it('errors when more than one item is marked isSubject', () => {
+    const a = makeItem({ id: 'q1', itemType: 'reference', _isSubject: true });
+    const b = makeItem({ id: 'q2', itemType: 'reference', _isSubject: true });
+    const issues = validateTree([a, b]);
+    const subjectErrs = issues.filter(i => i.severity === 'error' && i.message.match(/isSubject/));
+    expect(subjectErrs.length).toBeGreaterThan(0);
+  });
+
+  it('does not error when exactly one item is marked isSubject', () => {
+    const a = makeItem({ id: 'q1', itemType: 'reference', _isSubject: true });
+    const b = makeItem({ id: 'q2', itemType: 'reference' });
+    const issues = validateTree([a, b]);
+    expect(issues.filter(i => i.message.match(/isSubject/))).toHaveLength(0);
+  });
+
+  it('does not error when no item is marked isSubject', () => {
+    const issues = validateTree([makeItem({ id: 'q1', itemType: 'reference' })]);
+    expect(issues.filter(i => i.message.match(/isSubject/))).toHaveLength(0);
+  });
+});
+
 // ── cross-field: enableWhen + enableWhenExpression ───────────────────────────
 describe('validateTree — enableWhen + enableWhenExpression conflict', () => {
   it('warns when both enableWhen[] and enableWhenExpression are set', () => {

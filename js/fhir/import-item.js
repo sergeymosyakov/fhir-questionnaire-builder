@@ -341,6 +341,12 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (hiddenExt?.valueBoolean === true) node._hidden = true;
 
+  // sdc-questionnaire-isSubject — marks the item whose answer identifies the QR subject
+  const isSubjectExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject'
+  );
+  if (isSubjectExt?.valueBoolean === true) node._isSubject = true;
+
   // sdc-questionnaire-observationExtract — mark for Observation-based extraction
   const obsExtractExt = (fhirItem.extension || []).find(
     e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract'

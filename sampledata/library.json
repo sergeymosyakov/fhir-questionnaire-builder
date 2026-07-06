@@ -37,7 +37,7 @@
         "label": "Care Referral Request",
         "file": "reference-example.fhir.json",
         "type": "questionnaire",
-        "note": "referenceResource, referenceFilter, referenceProfile, signatureRequired, definitionExtract"
+        "note": "referenceResource, referenceFilter, referenceProfile, signatureRequired, definitionExtract, isSubject"
       },
       {
         "label": "Observation Extraction Demo",

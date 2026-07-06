@@ -85,6 +85,10 @@ export function validateTree(tree, _values = {}, questMeta = null) {
   for (const id of allIds) idCount[id] = (idCount[id] || 0) + 1;
   const dupIds = new Set(Object.keys(idCount).filter(k => idCount[k] > 1));
 
+  // Pre-compute items marked as subject (sdc-questionnaire-isSubject) — only one allowed
+  const subjectNodes    = all.filter(n => n._isSubject);
+  const firstSubjectId  = subjectNodes[0]?.id;
+
   for (const node of all) {
     const id = node.id;
 
@@ -98,6 +102,11 @@ export function validateTree(tree, _values = {}, questMeta = null) {
     // que-1: group items must have nested items (R4 invariant)
     if (node.type === 'group' && (!node.children || node.children.length === 0)) {
       issues.push({ severity: 'warning', nodeId: id, message: 'Group item has no children — R4 invariant que-1 requires group items to contain nested items. The exported resource will fail FHIR validation.' });
+    }
+
+    // sdc-questionnaire-isSubject: at most one item may be the subject of a QuestionnaireResponse
+    if (node._isSubject && subjectNodes.length > 1 && id !== firstSubjectId) {
+      issues.push({ severity: 'error', nodeId: id, message: `Multiple items marked as subject (sdc-questionnaire-isSubject) — a QuestionnaireResponse can have only one subject. Marked on: ${subjectNodes.map(n => n.id).join(', ')}.` });
     }
 
     // que-5: answerValueSet only valid for choice/open-choice/decimal/integer/date/dateTime/time/string/quantity

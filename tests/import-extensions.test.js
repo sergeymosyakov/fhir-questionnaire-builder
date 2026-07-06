@@ -420,6 +420,36 @@ describe('importFHIR — candidateExpression', () => {
   });
 });
 
+// ── isSubject import ──────────────────────────────────────────────────────────
+describe('importFHIR — isSubject', () => {
+  const IS_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject';
+  const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+
+  beforeEach(() => { _tree.splice(0); });
+
+  it('reads isSubject extension → node._isSubject', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'reference', text: 'Q',
+      extension: [{ url: IS_URL, valueBoolean: true }],
+    }]));
+    expect(_tree[0]._isSubject).toBe(true);
+  });
+
+  it('does not set _isSubject when extension is absent', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'reference', text: 'Q' }]));
+    expect(_tree[0]._isSubject).toBeUndefined();
+  });
+
+  it('does not add isSubject URL to _unknownExtensions', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'reference', text: 'Q',
+      extension: [{ url: IS_URL, valueBoolean: true }],
+    }]));
+    const unknown = _tree[0]._unknownExtensions || [];
+    expect(unknown.some(e => e.url === IS_URL)).toBe(false);
+  });
+});
+
 // ── regex ──────────────────────────────────────────────────────────────────
 describe('_regex', () => {
   const RX_URL = 'http://hl7.org/fhir/StructureDefinition/regex';

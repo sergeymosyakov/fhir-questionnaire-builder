@@ -31,6 +31,7 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel',
+  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject',
   ITEM_DISABLED_DISPLAY_EXTENSION_URL,
   ITEM_ANSWER_CONSTRAINT_EXTENSION_URL,
   'http://hl7.org/fhir/StructureDefinition/maxSize',

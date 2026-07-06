@@ -158,6 +158,11 @@
   background: #f3e5f5;
   border-color: #ce93d8;
 }
+.preview-meta-badge--subject {
+  color: #00695c;
+  background: #e0f2f1;
+  border-color: #80cbc4;
+}
 
 /* Reference info hints (profile / filter) */
 .ctrl-ref-info {

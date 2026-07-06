@@ -866,6 +866,30 @@ describe('buildFHIRObject — candidateExpression', () => {
   });
 });
 
+// ── isSubject export ──────────────────────────────────────────────────────────
+describe('buildFHIRObject — isSubject', () => {
+  const IS_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject';
+  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
+
+  it('exports _isSubject as valueBoolean extension', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference', _isSubject: true }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === IS_URL);
+    expect(ext?.valueBoolean).toBe(true);
+  });
+
+  it('does not export isSubject extension when _isSubject is absent', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === IS_URL);
+    expect(ext).toBeUndefined();
+  });
+
+  it('does not export isSubject on display items', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'display', _isSubject: true }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === IS_URL);
+    expect(ext).toBeUndefined();
+  });
+});
+
 // ── regex ──────────────────────────────────────────────────────────────────
 describe('buildFHIRObject — _regex', () => {
   const RX_URL = 'http://hl7.org/fhir/StructureDefinition/regex';
