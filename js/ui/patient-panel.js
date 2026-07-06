@@ -60,13 +60,6 @@ function _presetToVars(preset) {
     .map(def => ({ name: def.name, expression: toExpr(def.type, preset.values[def.name]) }));
 }
 
-/** Build variables array that seeds missing patient vars with defaults. */
-function _defaultVars(existingNames) {
-  return PATIENT_VARS
-    .filter(def => !existingNames.has(def.name))
-    .map(def => ({ name: def.name, expression: toExpr(def.type, def.default) }));
-}
-
 // ── Manual-edit modal ─────────────────────────────────────────────────────────
 class PatientEditModal extends Modal {
   getName() { return 'patientCtxModal'; }
@@ -155,20 +148,18 @@ export class PatientProfile {
     this._presetMenu = new PatientPresetMenu(PATIENT_PRESETS);
     this._currentVars = [];  // snapshot of last known questDoc.variables for modal open
 
-    // Seed defaults when document becomes available
-    const _seedDefaults = (vars) => {
+    // Snapshot existing variables for the modal — patient variables are NOT
+    // auto-seeded; they are added only when a preset is picked or Custom applied.
+    const _snapshotVars = (vars) => {
       this._currentVars = vars ?? [];
-      const existingNames = new Set(this._currentVars.map(v => v.name));
-      const defaults = _defaultVars(existingNames);
-      if (defaults.length > 0) _applyVars(defaults);
     };
 
     document.addEventListener(AppEvents.APP_CONTEXT_READY, e => {
-      _seedDefaults(e.detail.questDoc?.variables);
+      _snapshotVars(e.detail.questDoc?.variables);
       this._presetMenu.setDisabled(false);
     });
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
-      _seedDefaults(e.detail.questDoc?.variables);
+      _snapshotVars(e.detail.questDoc?.variables);
       this._presetMenu.setDisabled(false);
     });
     document.addEventListener(AppEvents.QUESTIONNAIRE_NEW, () => {

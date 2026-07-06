@@ -110,6 +110,9 @@
   height: 16px;
   display: inline-block;
 }
+.variables-card-count:empty {
+  display: none;
+}
 .variables-edit-btn {
   font-size: 11px;
   padding: 2px 8px;

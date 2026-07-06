@@ -151,7 +151,7 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `js/ui/answer-type/sections/attach.js` | `AttachSection` — max file size + MIME types inputs (attachment only); `commit()` writes `_maxFileSizeMB`, `_mimeTypes` |
 | `js/ui/answer-type/sections/item-media.js` | `ItemMediaSection` — URL + content-type inputs for sdc-questionnaire-itemMedia; visible for all types; `commit()` writes `_itemMedia` |
 | `js/ui/repeatable-modal.js` | Repeatable edit modal — `init(elements)`, `open(node, repeatLink, setActive)`; draft pattern; toggle for `node.repeats` + cardinality card (`_minOccurs` / `_maxOccurs` integer inputs); Apply trims excess rows when maxOccurs reduced; calls `triggerCalcRecalc()`; **"Copy to…"** button in footer: `_buildPayload()` → `{ repeats, _minOccurs, _maxOccurs }`, opens `nodePickerModal` with `allowedType='item'`, on confirm dispatches `AppEvents.COPY_TO_NODES` |
-| `js/ui/patient-ctx.js` | Patient presets dropdown + `PatientModal extends Modal` — 5 built-in profiles + Custom…; `configure({tree, questVariables})`; `PatientModal.open()` builds input rows, `_apply()` commits values + fires `REINIT_FORM` + `PATIENT_CTX_APPLIED`; auto-applies on preset selection; `presetMenu = new PatientPresetMenu(PATIENT_PRESETS)` mounted by replacing `#patientPresetWrap` |
+| `js/ui/patient-panel.js` | Patient presets dropdown + `PatientEditModal extends Modal` — 5 built-in profiles + Custom…; variables are NOT auto-seeded (created only on preset selection or Custom… apply); snapshots `questDoc.variables` on `APP_CONTEXT_READY`/`QUESTIONNAIRE_LOADED` for modal defaults; `_apply()` commits values + fires `REINIT_FORM` + `PATIENT_CTX_APPLIED`; auto-applies on preset selection; `presetMenu = new PatientPresetMenu(PATIENT_PRESETS)` mounted by replacing `[data-mount="patient-preset"]` |
 | `js/ui/progress.js` | Global progress bar — `init(elements)`, `show/update/hide` |
 | `js/ui/search.js` | Preview search — `init(elements)`, `refresh()`; highlight + up/down/Enter navigation |
 | `js/ui/dropdown-menu.js` | Abstract base class for all header dropdown menus — constructor builds `.load-wrap`+button+`.load-menu`; `_item(id,html,testid)`, `_sep()`, `_checkItem(inputId,label,testid)` helpers; `_onOpen` hook; `close/show/hide`; listens to `close-dropdowns` CustomEvent |
@@ -330,13 +330,14 @@ BaseNode            — js/nodes/base-node.js       shared scaffold, dimmed/disa
 ### State
 
 ```js
-// Patient context — stored as FHIRPath literal expressions in questVariables (js/ui/patient-ctx.js)
-// Seeded as: { name:'age', expression:'30' }, { name:'gender', expression:"'male'" }, etc.
+// Patient context — stored as FHIRPath literal expressions in questVariables (js/ui/patient-panel.js)
+// NOT auto-seeded: created only when a patient preset is selected or Custom… is applied
+// e.g. { name:'age', expression:'30' }, { name:'gender', expression:"'male'" }, etc.
 // Accessible in FHIRPath as %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb
 
 tree              // plain array — questionnaire node tree
 values            // plain object — form answers (not reactive; avoids re-render on every keystroke)
-questVariables    // plain array — SDC variable entries; patient ctx seeded here
+questVariables    // plain array — SDC variable entries; patient ctx added here on preset/Custom apply
 questContained    // plain array — Questionnaire.contained[] raw FHIR resources (round-trip)
 questMeta         // plain object — questionnaire-level metadata: id, url, version, title, status, publisher, description
 rawFhir           // { value: null } — original FHIR JSON after import
@@ -543,7 +544,7 @@ _shortText         // string — sdc-questionnaire-shortText ext; abbreviated la
 - **Style editor** — `Style` panel on every node: Bold / Italic checkboxes, color picker, raw CSS field. Syncs with `_renderStyle`; applied live in preview. XHTML section for `_renderXhtml` (sanitized via DOMPurify; rendered as `innerHTML` in preview)
 - **Auto-scroll on add** — `+ Group`, `+ Item`, `Add Root Group` scroll to and flash the new node; parent group auto-expands
 - **Visual condition builder** — "Show When" action panel uses FHIR `enableWhen[]` directly: AND/ANY toggle, per-condition rows (question picker + operator + type-aware value input), "+ Add condition", FHIRPath `enableWhenExpression` for advanced expressions
-- **Patient Context popup** — "Patient Context" button in toolbar opens modal; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables`; button disabled when no questionnaire is loaded; Apply fires `REINIT_FORM` + `PATIENT_CTX_APPLIED` events → immediate preview re-eval; `variablesPanel.refresh()` updates chips
+- **Patient Context popup** — "Patient Context" button in toolbar opens modal; sets `%age`, `%gender`, `%bmi`, `%pregnant`, `%smoker`, `%proc`, `%comorb` as FHIRPath literal expressions in `questVariables` (created only on preset selection or Custom… apply — not auto-seeded); button disabled when no questionnaire is loaded; Apply fires `REINIT_FORM` + `PATIENT_CTX_APPLIED` events → immediate preview re-eval; `variablesPanel.refresh()` updates chips
 - **AND/OR badges** — on group headers: `ALL items ✓` / `ANY item ✓`
 - **Logic separators** — `— AND —` / `— OR —` between sibling items inside a group
 - **Dimmed rows** — conditional items shown grayed (🔒) when condition not met; groups also show their children as disabled (N/A) rows; animate to active when met

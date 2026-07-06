@@ -97,15 +97,15 @@ test.describe('Variables modal — open / close', () => {
     await expect(variablesModal(page)).not.toBeVisible();
   });
 
-  test('modal shows patient context variables by default', async ({ page }) => {
-    // patient-ctx.init() seeds 7 patient vars (%age, %gender, %bmi, …) into questVariables
-    // on every app startup, so the Variables modal always starts with those rows.
+  test('modal opens empty on a fresh questionnaire (no auto-seeded variables)', async ({ page }) => {
+    // Patient variables are no longer auto-seeded — a fresh questionnaire has zero
+    // questionnaire-level variables until the user adds one or picks a patient preset.
     await freshStartWithGroup(page);
     await variablesEditBtn(page).click();
     await expect(variablesModalBody(page)).toBeVisible();
     await expect(variablesModalBody(page).getByText('+ Add Variable')).toBeVisible();
-    // At least one patient variable row present
-    await expect(variablesModalBody(page).locator('input.variables-name-input').first()).toBeVisible();
+    // No variable rows on a fresh questionnaire
+    await expect(variablesModalBody(page).locator('input.variables-name-input')).toHaveCount(0);
   });
 });
 
@@ -121,8 +121,7 @@ test.describe('Variables modal — draft pattern', () => {
   test('Cancel after adding variable does not increase the chip count', async ({ page }) => {
     await freshStartWithGroup(page);
 
-    // Get baseline chip count (patient vars are pre-seeded but refresh() not yet called,
-    // so count badge is empty — read chip count from chip list instead)
+    // Fresh questionnaire has no variables — baseline row count is 0.
     await variablesEditBtn(page).click();
     const rowsBefore = await variablesModalBody(page).locator('input.variables-name-input').count();
     await variablesModalCancel(page).click();
@@ -158,8 +157,8 @@ test.describe('Variables modal — draft pattern', () => {
   });
 
   test('count badge increases after adding named variables', async ({ page }) => {
-    // patient-ctx seeds 7 patient vars at startup; Add 2 more named ones.
-    // After Apply, refresh() is called → count shows total (7 + 2 = 9).
+    // Fresh questionnaire has no variables; add 2 named ones.
+    // After Apply, refresh() is called → count badge shows the total (rowsBefore + 2).
     await freshStartWithGroup(page);
     await variablesEditBtn(page).click();
 
