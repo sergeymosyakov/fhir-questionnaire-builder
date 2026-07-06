@@ -152,3 +152,28 @@ test.describe('History reset on clear', () => {
     await expect(redoBtn(page)).toBeDisabled();
   });
 });
+
+// ── Undo/redo with side-panel cards subscribed (regression: detail-less event) ─
+// Contained / Answer-ValueSet / Variables cards subscribe to QUESTIONNAIRE_LOADED
+// in their constructors (active from app start) and read e.detail.questDoc.
+// undo()/redo() dispatch that event WITHOUT detail, which used to throw
+// "Cannot read properties of null (reading 'questDoc')".
+
+test.describe('History — undo/redo raises no page error (detail-less event)', () => {
+  test('undo then redo does not throw a TypeError', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', err => errors.push(err.message));
+
+    await freshStart(page);
+    await addRootGroup(page);
+    await expect(undoBtn(page)).toBeEnabled({ timeout: HISTORY_TIMEOUT });
+
+    await page.keyboard.press('Control+z');
+    await expect(nodes(page)).toHaveCount(0);
+    await page.keyboard.press('Control+y');
+    await expect(nodes(page)).toHaveCount(1);
+
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
+

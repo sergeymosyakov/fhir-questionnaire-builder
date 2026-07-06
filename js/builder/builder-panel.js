@@ -176,7 +176,9 @@ export class BuilderPanel {
       () => { this._setCollapsedAll(this._tree, false); this.renderTree(); });
     document.addEventListener(AppEvents.BUILDER_COLLAPSE_ALL,
       () => { this._setCollapsedAll(this._tree, true); this.renderTree(); });
-    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, async () => {      if (!this._tree) return; // _init not yet complete (APP_CONTEXT_READY pending)      document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, async () => {
+      if (!this._tree) return; // _init not yet complete (APP_CONTEXT_READY pending)
+      document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
       progress.show('Rendering ' + this._tree.length + ' nodes…');
       await this.renderTreeAsync((done, total) => progress.update(done, total));
       progress.hide();

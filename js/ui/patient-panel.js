@@ -9,7 +9,7 @@
 import { createCustomSelect } from './custom-select.js';
 import { Modal } from './modals/modal-base.js';
 import { PatientPresetMenu } from './menus/patient-preset-menu.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 
 // ── Variable definitions ──────────────────────────────────────────────────────
 const PATIENT_VARS = [
@@ -159,7 +159,7 @@ export class PatientProfile {
       this._presetMenu.setDisabled(false);
     });
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
-      _snapshotVars(e.detail.questDoc?.variables);
+      _snapshotVars((e.detail?.questDoc ?? EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc)?.variables);
       this._presetMenu.setDisabled(false);
     });
     document.addEventListener(AppEvents.QUESTIONNAIRE_NEW, () => {

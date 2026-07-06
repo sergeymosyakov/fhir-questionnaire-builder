@@ -4,7 +4,7 @@
 // Cloud save/load triggered via CLOUD_SAVE_REQUESTED / CLOUD_LOAD_REQUESTED events.
 // Mount: pass an empty container element from app.js.
 import * as auth from '../auth/auth.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 import * as storage from '../storage/storage.js';
 import * as cloudModal from './modals/cloud-modal.js';
 import { confirmModal } from './modals/confirm-modal.js';
@@ -26,10 +26,10 @@ export class AuthPanel {
 
   static {
     if (typeof document !== 'undefined') {
-      const _update = e => { AuthPanel._questDocTree = e.detail.questDoc?.tree ?? null; };
+      const _update = e => { AuthPanel._questDocTree = (e.detail?.questDoc ?? EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc)?.tree ?? null; };
       document.addEventListener(AppEvents.APP_CONTEXT_READY,    _update);
-      document.addEventListener('questionnaire-loaded',          _update);
-      document.addEventListener('questionnaire-cleared', () => { AuthPanel._questDocTree = null; });
+      document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  _update);
+      document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => { AuthPanel._questDocTree = null; });
     }
   }
 

@@ -2,7 +2,7 @@
 // Collapsible card (above tree) + edit modal for sdc-questionnaire-variable.
 // configure({questVariables, mountEl}) — call once at startup.
 import { Modal } from './modals/modal-base.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 
 const _CARD_HTML = `
 <div class="variables-card-header">
@@ -51,7 +51,7 @@ export function init() {
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
   });
   document.addEventListener(AppEvents.APP_CONTEXT_READY, e => { _questVariables = e.detail.questDoc?.variables ?? null; });
-  document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => { _questVariables = e.detail.questDoc?.variables ?? null; _el.card.style.display = ''; refresh(); });
+  document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => { _questVariables = (e.detail?.questDoc ?? EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc)?.variables ?? null; _el.card.style.display = ''; refresh(); });
   document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,    () => { _el.card.style.display = ''; });
   document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => { _questVariables = null; _el.card.style.display = 'none'; refresh(); });
   document.addEventListener(AppEvents.PATIENT_CTX_APPLIED, refresh);

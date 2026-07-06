@@ -1,7 +1,7 @@
 // ── Contained Resources panel ─────────────────────────────────────────────────
 // Collapsible read-only card showing Questionnaire.contained[] items.
 // Each chip fires 'show-json' event → handled by JsonViewerModal.
-import { AppEvents } from '../../events.js';
+import { AppEvents, EventState } from '../../events.js';
 import { Panel } from './panel-base.js';
 
 class ContainedPanel extends Panel {
@@ -18,7 +18,9 @@ class ContainedPanel extends Panel {
     this._questContained = null;
 
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
-      this._questContained = e.detail.questDoc?.contained ?? null;
+      // undo/redo dispatch this event without detail — fall back to the current questDoc.
+      const qd = e.detail?.questDoc ?? EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc;
+      this._questContained = qd?.contained ?? null;
       this.refresh();
     });
     document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => {

@@ -1,7 +1,7 @@
 // ── Answer ValueSet panel ─────────────────────────────────────────────────────
 // Collapsible read-only card showing all answerValueSet URLs referenced by items.
 // Each chip fires 'show-json' event → handled by JsonViewerModal.
-import { AppEvents } from '../../events.js';
+import { AppEvents, EventState } from '../../events.js';
 import { Panel } from './panel-base.js';
 
 class AnswerValueSetPanel extends Panel {
@@ -18,7 +18,9 @@ class AnswerValueSetPanel extends Panel {
     this._tree = null;
 
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => {
-      this._tree = e.detail.questDoc?.tree ?? null;
+      // undo/redo dispatch this event without detail — fall back to the current questDoc.
+      const qd = e.detail?.questDoc ?? EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc;
+      this._tree = qd?.tree ?? null;
       this.refresh();
     });
     document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => {
