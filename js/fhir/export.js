@@ -342,6 +342,11 @@ export function nodeToFHIRItem(node) {
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation', valueCode: node._choiceOrientation });
   }
 
+  // sdc-questionnaire-columnCount (multi-column layout of a choice question's options)
+  if (Number.isInteger(node._columnCount) && node._columnCount > 1) {
+    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount', valueInteger: node._columnCount });
+  }
+
   // sdc-questionnaire-choiceColumn (0..* multi-column choice display)
   if (node._choiceColumns && node._choiceColumns.length) {
     for (const col of node._choiceColumns) {

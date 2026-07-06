@@ -450,6 +450,48 @@ describe('importFHIR — isSubject', () => {
   });
 });
 
+// ── columnCount import ────────────────────────────────────────────────────────
+describe('importFHIR — columnCount', () => {
+  const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount';
+  const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+
+  beforeEach(() => { _tree.splice(0); });
+
+  it('reads columnCount extension → node._columnCount', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Q',
+      answerOption: [{ valueCoding: { code: 'a', display: 'A' } }],
+      extension: [{ url: CC_URL, valueInteger: 3 }],
+    }]));
+    expect(_tree[0]._columnCount).toBe(3);
+  });
+
+  it('ignores columnCount of 1 or less', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Q',
+      answerOption: [{ valueCoding: { code: 'a', display: 'A' } }],
+      extension: [{ url: CC_URL, valueInteger: 1 }],
+    }]));
+    expect(_tree[0]._columnCount).toBeUndefined();
+  });
+
+  it('does not set _columnCount when extension is absent', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+      answerOption: [{ valueCoding: { code: 'a', display: 'A' } }] }]));
+    expect(_tree[0]._columnCount).toBeUndefined();
+  });
+
+  it('does not add columnCount URL to _unknownExtensions', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Q',
+      answerOption: [{ valueCoding: { code: 'a', display: 'A' } }],
+      extension: [{ url: CC_URL, valueInteger: 2 }],
+    }]));
+    const unknown = _tree[0]._unknownExtensions || [];
+    expect(unknown.some(e => e.url === CC_URL)).toBe(false);
+  });
+});
+
 // ── regex ──────────────────────────────────────────────────────────────────
 describe('_regex', () => {
   const RX_URL = 'http://hl7.org/fhir/StructureDefinition/regex';

@@ -1,0 +1,84 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "column-count-e2e",
+  "title": "Column Count E2E Test",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "q-cols",
+      "text": "Radio with 2-column layout",
+      "type": "choice",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount",
+          "valueInteger": 2
+        }
+      ],
+      "answerOption": [
+        { "valueCoding": { "code": "a", "display": "Alpha" } },
+        { "valueCoding": { "code": "b", "display": "Beta" } },
+        { "valueCoding": { "code": "c", "display": "Gamma" } },
+        { "valueCoding": { "code": "d", "display": "Delta" } }
+      ]
+    },
+    {
+      "linkId": "q-plain",
+      "text": "Radio without column layout",
+      "type": "choice",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ],
+      "answerOption": [
+        { "valueCoding": { "code": "x", "display": "Option X" } },
+        { "valueCoding": { "code": "y", "display": "Option Y" } }
+      ]
+    },
+    {
+      "linkId": "q-select",
+      "text": "Drop-down with columnCount (spec-valid, no visual columns)",
+      "type": "choice",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "drop-down"
+              }
+            ]
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount",
+          "valueInteger": 3
+        }
+      ],
+      "answerOption": [
+        { "valueCoding": { "code": "p", "display": "Pico" } },
+        { "valueCoding": { "code": "q", "display": "Quo" } }
+      ]
+    }
+  ]
+}

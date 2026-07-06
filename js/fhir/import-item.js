@@ -246,6 +246,14 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (choiceOrientExt?.valueCode) node._choiceOrientation = choiceOrientExt.valueCode;
 
+  // sdc-questionnaire-columnCount — lay out a choice question's options across N columns
+  const columnCountExt = (fhirItem.extension || []).find(
+    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount'
+  );
+  if (Number.isInteger(columnCountExt?.valueInteger) && columnCountExt.valueInteger > 1) {
+    node._columnCount = columnCountExt.valueInteger;
+  }
+
   // sdc-questionnaire-choiceColumn (0..* — multi-column display for choice/open-choice/reference)
   const choiceColExts = (fhirItem.extension || []).filter(
     e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn'

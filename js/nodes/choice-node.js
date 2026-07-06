@@ -265,7 +265,10 @@ export class RadioNode extends ItemNode {
       return wrap;
     }
 
-    if (node._choiceOrientation === 'vertical') wrap.classList.add('ctrl-wrap--vertical');
+    if (node._columnCount > 1) {
+      wrap.classList.add('ctrl-wrap--columns');
+      wrap.style.setProperty('--col-count', node._columnCount);
+    } else if (node._choiceOrientation === 'vertical') wrap.classList.add('ctrl-wrap--vertical');
     else if (node._choiceOrientation === 'horizontal') wrap.classList.add('ctrl-wrap--horizontal');
 
     const rbName = 'radio_' + node.id;
@@ -425,7 +428,10 @@ export class ChecklistNode extends ItemNode {
       return wrap;
     }
 
-    if (node._choiceOrientation === 'horizontal') wrap.classList.add('ctrl-wrap--horizontal');
+    if (node._columnCount > 1) {
+      wrap.classList.add('ctrl-wrap--columns');
+      wrap.style.setProperty('--col-count', node._columnCount);
+    } else if (node._choiceOrientation === 'horizontal') wrap.classList.add('ctrl-wrap--horizontal');
     else wrap.classList.add('ctrl-wrap--vertical');
 
     // Value is a comma-separated string of selected codes

@@ -890,6 +890,36 @@ describe('buildFHIRObject — isSubject', () => {
   });
 });
 
+// ── columnCount export ────────────────────────────────────────────────────────
+describe('buildFHIRObject — columnCount', () => {
+  const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount';
+  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
+
+  it('exports _columnCount as valueInteger extension', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A,b=B', _columnCount: 3 }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === CC_URL);
+    expect(ext?.valueInteger).toBe(3);
+  });
+
+  it('does not export columnCount when absent', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === CC_URL);
+    expect(ext).toBeUndefined();
+  });
+
+  it('does not export columnCount when value is 1 or less', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A', _columnCount: 1 }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === CC_URL);
+    expect(ext).toBeUndefined();
+  });
+
+  it('exports _columnCount on a drop-down (select) choice (spec-valid, any choice type)', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A,b=B', _columnCount: 3 }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === CC_URL);
+    expect(ext?.valueInteger).toBe(3);
+  });
+});
+
 // ── regex ──────────────────────────────────────────────────────────────────
 describe('buildFHIRObject — _regex', () => {
   const RX_URL = 'http://hl7.org/fhir/StructureDefinition/regex';

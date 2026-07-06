@@ -75,7 +75,7 @@
         "label": "Item Control Demo",
         "file": "item-control-demo.fhir.json",
         "type": "questionnaire",
-        "note": "check-box, autocomplete, text-area, spinner, drop-down, slider, lookup, regex, optionExclusive, usageMode, itemMedia, itemWeight"
+        "note": "check-box, columnCount, autocomplete, text-area, spinner, drop-down, slider, lookup, regex, optionExclusive, usageMode, itemMedia, itemWeight"
       },
       {
         "label": "Answer Option Types Demo",

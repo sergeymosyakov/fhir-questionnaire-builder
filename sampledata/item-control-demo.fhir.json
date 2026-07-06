@@ -6,7 +6,7 @@
   "item": [
     {
       "linkId": "cb-multi",
-      "text": "Select all that apply",
+      "text": "Select all that apply (2-column layout)",
       "type": "choice",
       "repeats": true,
       "answerConstraint": "optionsOnly",
@@ -31,6 +31,27 @@
             "code": "c",
             "display": "Gamma"
           }
+        },
+        {
+          "valueCoding": {
+            "system": "http://example.org/demo-codes",
+            "code": "d",
+            "display": "Delta"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "http://example.org/demo-codes",
+            "code": "e",
+            "display": "Epsilon"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "http://example.org/demo-codes",
+            "code": "f",
+            "display": "Zeta"
+          }
         }
       ],
       "extension": [
@@ -44,6 +65,10 @@
               }
             ]
           }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount",
+          "valueInteger": 2
         }
       ]
     },
