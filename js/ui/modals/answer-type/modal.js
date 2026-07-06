@@ -55,7 +55,9 @@ class AnswerTypeModal extends Modal {
     _replaceInTree(this._questDoc?.tree, node.id, newNode);
     node = newNode;
 
-    if (!node.supportsRepeat() && node.repeats) {
+    if (node.impliesRepeats()) {
+      node.repeats = true;
+    } else if (!node.supportsRepeat() && node.repeats) {
       node.repeats = false;
       delete node._minOccurs;
       delete node._maxOccurs;

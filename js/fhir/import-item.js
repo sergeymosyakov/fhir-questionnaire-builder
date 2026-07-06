@@ -421,7 +421,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   if (ddExt?.valueCode) node._disabledDisplay = ddExt.valueCode;
 
   node._readOnly = !!fhirItem.readOnly;
-  if (fhirItem.repeats) node.repeats = true;
+  if (fhirItem.repeats || node.impliesRepeats()) node.repeats = true;
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
   if (fhirItem.definition) node._definition = fhirItem.definition;
   const baseTypeExt = (fhirItem.extension || []).find(

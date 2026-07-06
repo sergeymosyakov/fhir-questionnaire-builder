@@ -1288,6 +1288,13 @@ describe('importFHIR', () => {
       expect(_tree[0].itemType).toBe('checklist');
     });
 
+    it('check-box on choice → checklist is inherently repeats:true', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', extension: [ic('check-box')] }]));
+      expect(_tree[0].itemType).toBe('checklist');
+      expect(_tree[0].repeats).toBe(true);
+      expect(_tree[0].impliesRepeats()).toBe(true);
+    });
+
     it('radio-button on choice → radio itemType', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', extension: [ic('radio-button')] }]));
       expect(_tree[0].itemType).toBe('radio');

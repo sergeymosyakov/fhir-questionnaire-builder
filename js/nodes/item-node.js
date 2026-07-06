@@ -30,6 +30,13 @@ export class ItemNode extends BaseNode {
   /** Whether this item type supports repeats. Overridden by CheckboxNode and DisplayNode. */
   supportsRepeat() { return true; }
 
+  /**
+   * Whether repeats is intrinsic to the control (always true, not user-toggleable).
+   * Checklist (multi-select check-box) expresses multiple answers via its own
+   * checkboxes, so it is inherently repeats:true. Overridden by ChecklistNode.
+   */
+  impliesRepeats() { return false; }
+
   // ── Condition icon logic for items ────────────────────────────────────────
   _evalCondition(res, rc) {
     const { ctx, cEnv } = rc;
@@ -169,7 +176,9 @@ export class ItemNode extends BaseNode {
   // Build interactive control (or repeat controls).
   _buildControl(row, res, rc) {
     if (this._readOnly || this._calculatedExpr) return;
-    if (this.repeats && this.itemType !== 'checkbox') {
+    // Multi-select controls (checkbox / checklist) express repeats via their own
+    // multiple selection — supportsRepeat() is false for them, so no "Add another".
+    if (this.repeats && this.supportsRepeat()) {
       row.appendChild(this._buildRepeatContainer(res._iconEl, () => rc.updateGroupIcons(), rc));
     } else {
       row.appendChild(rc.buildControl(this, res._iconEl, () => rc.updateGroupIcons()));

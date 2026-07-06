@@ -143,3 +143,42 @@ test.describe('Repeatable — import round-trip', () => {
     await expect(link).toHaveClass(/action-edit--active/);
   });
 });
+
+test.describe('Repeatable — multi-select controls do not show "Add another"', () => {
+  test('checklist (choice + check-box) with repeats:true renders checkboxes but no "+ Add another"', async ({ page }) => {
+    await freshStart(page);
+
+    const fhirJson = JSON.stringify({
+      resourceType: 'Questionnaire',
+      id: 'checklist-repeats',
+      title: 'Checklist Repeats',
+      status: 'draft',
+      item: [{
+        linkId: 'cl1',
+        text: 'Select all that apply',
+        type: 'choice',
+        repeats: true,
+        extension: [{
+          url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl',
+          valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'check-box' }] },
+        }],
+        answerOption: [
+          { valueCoding: { code: 'a', display: 'Alpha' } },
+          { valueCoding: { code: 'b', display: 'Beta' } },
+        ],
+      }],
+    });
+
+    await page.locator('[data-testid="fhir-file-input"]').setInputFiles({
+      name: 'checklist-repeats.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(fhirJson),
+    });
+
+    const item = page.locator('[data-preview-id="cl1"]');
+    await expect(item).toBeVisible();
+    // Multiple selection is expressed by the checkboxes themselves — no repeat container.
+    await expect(item.getByTestId('repeat-add-btn')).toHaveCount(0);
+    await expect(item.locator('input[type="checkbox"]').first()).toBeVisible();
+  });
+});

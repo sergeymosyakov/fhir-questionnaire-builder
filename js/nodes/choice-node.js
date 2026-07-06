@@ -410,9 +410,12 @@ export class ChecklistNode extends ItemNode {
   constructor(data = {}) {
     super(data);
     this.itemType = 'checklist';
+    // Multi-select check-box is inherently multiple selection → always repeats:true.
+    this.repeats = true;
   }
 
   supportsRepeat() { return false; }
+  impliesRepeats() { return true; }
 
   buildControl(ctx) {
     const node = this;
