@@ -6,6 +6,7 @@ import { ExprAwareModal } from './expr-aware-modal.js';
 import { createCustomSelect } from '../custom-select.js';
 import { buildVisPanel } from '../../builder/panels.js';
 import { nodePickerModal } from './node-picker-modal.js';
+import { humanEnableWhen } from '../../fhir/import-helpers.js';
 import { AppEvents, EventState } from '../../events.js';
 
 class ShowWhenModal extends ExprAwareModal {
@@ -68,6 +69,16 @@ class ShowWhenModal extends ExprAwareModal {
     node.enableWhen           = draft.enableWhen;
     node.enableBehavior       = draft.enableBehavior;
     node.enableWhenExpression = draft.enableWhenExpression;
+    // Recompute the human-readable enableWhen label so the preview visibility
+    // badge does not go stale when the condition is edited or removed.
+    if (node.enableWhen && node.enableWhen.length) {
+      const map = {};
+      const walk = nodes => { for (const n of nodes || []) { map[n.id] = n.title || n.id || ''; walk(n.children); } };
+      walk(this.constructor._svc.questDoc.tree);
+      node._enableWhenText = humanEnableWhen(node.enableWhen, node.enableBehavior, map);
+    } else {
+      delete node._enableWhenText;
+    }
     if (draft._disabledDisplay && draft._disabledDisplay !== 'protected') {
       node._disabledDisplay = draft._disabledDisplay;
     } else {

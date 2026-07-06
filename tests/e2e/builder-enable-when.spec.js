@@ -15,6 +15,7 @@
 //   showWhenModal        (id) Show When modal backdrop
 //   showWhenModalBody    (id) modal body
 //   showWhenModalApply   (id) Apply button
+//   preview-condition-hint  visibility-condition badge in the preview row
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -79,5 +80,56 @@ test.describe('enableWhen (standard)', () => {
 
     // Dependent item must now be visible (condition met)
     await expect(page.locator('[data-preview-id="1.2"]')).not.toHaveClass(/lform-waiting/, { timeout: 3000 });
+  });
+
+  test('removing the condition clears the stale preview visibility badge', async ({ page }) => {
+    await freshStart(page);
+
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    const group = page.locator('[data-node-id="1"]');
+
+    // Trigger item 1.1
+    await group.getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.1"]').getByTestId('action-type')).toBeVisible();
+    const triggerNode = page.locator('[data-node-id="1.1"]');
+    await expect(triggerNode.getByTestId('node-title-display')).toBeVisible();
+    await triggerNode.getByTestId('node-title-display').click();
+    await expect(triggerNode.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
+    await triggerNode.getByTestId('node-title-input').fill('Trigger');
+    await triggerNode.getByTestId('node-title-input').blur();
+
+    // Dependent item 1.2
+    await group.getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.2"]').getByTestId('action-vis')).toBeVisible();
+
+    // Add a condition: 1.1 = yes
+    await page.locator('[data-node-id="1.2"]').getByTestId('action-vis').click();
+    await expect(page.locator('[data-testid="showWhenModal"]')).toBeVisible();
+    await page.locator('[data-testid="showWhenModalBody"] .vis-add-btn').click();
+    await page.locator('[data-testid="showWhenModalBody"] .vis-q-sel-trigger').click();
+    await page.waitForSelector('.vis-q-sel-drop', { timeout: 3000 });
+    await page.locator('.vis-q-sel-opt[data-id="1.1"]').click();
+    await page.locator('[data-testid="showWhenModalBody"] .vis-cond-val-inp').fill('yes');
+    await page.locator('[data-testid="showWhenModalApply"]').click();
+    await expect(page.locator('[data-testid="showWhenModal"]')).not.toBeVisible();
+
+    // Preview shows the visibility badge for 1.2, with the freshly-computed
+    // human-readable text (not the placeholder "condition not met").
+    const hint = page.locator('[data-preview-id="1.2"]').getByTestId('preview-condition-hint');
+    await expect(hint).toBeVisible();
+    await expect(hint).toContainText('Trigger');
+
+    // Reopen Show When and remove the condition
+    await page.locator('[data-node-id="1.2"]').getByTestId('action-vis').click();
+    await expect(page.locator('[data-testid="showWhenModal"]')).toBeVisible();
+    await page.locator('[data-testid="showWhenModalBody"] .vis-cond-rm').click();
+    await page.locator('[data-testid="showWhenModalApply"]').click();
+    await expect(page.locator('[data-testid="showWhenModal"]')).not.toBeVisible();
+
+    // Badge must be gone — not stale
+    await expect(page.locator('[data-preview-id="1.2"]').getByTestId('preview-condition-hint')).toHaveCount(0);
   });
 });

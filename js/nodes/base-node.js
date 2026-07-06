@@ -140,6 +140,7 @@ export class BaseNode {
     row.appendChild(label);
     const hint = document.createElement('span');
     hint.className = 'preview-condition-hint preview-condition-waiting';
+    hint.dataset.testid = 'preview-condition-hint';
     const dimText = this._enableWhenText || this.enableWhenExpression || 'condition not met';
     hint.textContent = '\uD83D\uDD12 ' + dimText;
     if (this.enableWhenExpression) {
@@ -382,6 +383,7 @@ export class BaseNode {
     if (!isPatient && visText) {
       const hint = document.createElement('span');
       hint.className = 'preview-condition-hint';
+      hint.dataset.testid = 'preview-condition-hint';
       hint.textContent = '\uD83D\uDC41\uFE0F ' + visText;
       if (this.enableWhenExpression) {
         hint.classList.add('preview-condition-hint--explain');
