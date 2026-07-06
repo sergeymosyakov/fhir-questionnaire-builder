@@ -104,6 +104,7 @@ class VariablesModal extends Modal {
     const addBtn = document.createElement('button');
     addBtn.type = 'button';
     addBtn.className = 'variables-add-btn';
+    addBtn.dataset.testid = 'variables-add-btn';
     addBtn.textContent = '+ Add Variable';
     addBtn.addEventListener('click', () => { _draft.push({ name: '', expression: '' }); this._renderBody(); });
     this.body.appendChild(addBtn);

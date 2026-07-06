@@ -11,6 +11,7 @@
 //   variablesModalClose   × close button
 //   variablesModalCancel  Cancel button
 //   variablesModalApply   Apply button
+//   variables-add-btn     "+ Add Variable" button inside the modal body
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -42,6 +43,7 @@ const variablesModalBody   = (page) => page.locator('[data-testid="variablesModa
 const variablesModalClose  = (page) => page.locator('[data-testid="variablesModalClose"]');
 const variablesModalCancel = (page) => page.locator('[data-testid="variablesModalCancel"]');
 const variablesModalApply  = (page) => page.locator('[data-testid="variablesModalApply"]');
+const variablesAddBtn      = (page) => page.getByTestId('variables-add-btn');
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
@@ -103,7 +105,7 @@ test.describe('Variables modal — open / close', () => {
     await freshStartWithGroup(page);
     await variablesEditBtn(page).click();
     await expect(variablesModalBody(page)).toBeVisible();
-    await expect(variablesModalBody(page).getByText('+ Add Variable')).toBeVisible();
+    await expect(variablesAddBtn(page)).toBeVisible();
     // No variable rows on a fresh questionnaire
     await expect(variablesModalBody(page).locator('input.variables-name-input')).toHaveCount(0);
   });
@@ -113,7 +115,7 @@ test.describe('Variables modal — draft pattern', () => {
   test('clicking "+ Add Variable" adds a variable row', async ({ page }) => {
     await freshStartWithGroup(page);
     await variablesEditBtn(page).click();
-    await variablesModalBody(page).getByText('+ Add Variable').click();
+    await variablesAddBtn(page).click();
     // Row should have name and expression inputs
     await expect(variablesModalBody(page).locator('input').first()).toBeVisible();
   });
@@ -128,7 +130,7 @@ test.describe('Variables modal — draft pattern', () => {
 
     // Open again and add a new named variable, then cancel
     await variablesEditBtn(page).click();
-    await variablesModalBody(page).getByText('+ Add Variable').click();
+    await variablesAddBtn(page).click();
     await variablesModalBody(page).locator('input.variables-name-input').last().fill('tempVar');
     await variablesModalCancel(page).click();
 
@@ -141,7 +143,7 @@ test.describe('Variables modal — draft pattern', () => {
   test('Apply with name and expression shows chip in card', async ({ page }) => {
     await freshStartWithGroup(page);
     await variablesEditBtn(page).click();
-    await variablesModalBody(page).getByText('+ Add Variable').click();
+    await variablesAddBtn(page).click();
 
     // Fill the last row (the newly added one)
     const nameInput = variablesModalBody(page).locator('input.variables-name-input').last();
@@ -164,9 +166,9 @@ test.describe('Variables modal — draft pattern', () => {
 
     const rowsBefore = await variablesModalBody(page).locator('input.variables-name-input').count();
 
-    await variablesModalBody(page).getByText('+ Add Variable').click();
+    await variablesAddBtn(page).click();
     await variablesModalBody(page).locator('input.variables-name-input').last().fill('varA');
-    await variablesModalBody(page).getByText('+ Add Variable').click();
+    await variablesAddBtn(page).click();
     await variablesModalBody(page).locator('input.variables-name-input').last().fill('varB');
 
     await variablesModalApply(page).click();
@@ -182,7 +184,7 @@ test.describe('Variables modal — draft pattern', () => {
 
     // Open, add a row, type a name, then cancel
     await variablesEditBtn(page).click();
-    await variablesModalBody(page).getByText('+ Add Variable').click();
+    await variablesAddBtn(page).click();
     await variablesModalBody(page).locator('input.variables-name-input').last().fill('tempVar');
     await variablesModalCancel(page).click();
 
@@ -198,7 +200,7 @@ test.describe('Variables modal — draft pattern', () => {
 test.describe('Variables panel — card collapse/expand', () => {
   async function addVariable(page, name) {
     await variablesEditBtn(page).click();
-    await variablesModalBody(page).getByText('+ Add Variable').click();
+    await variablesAddBtn(page).click();
     await variablesModalBody(page).locator('input.variables-name-input').first().fill(name);
     await variablesModalApply(page).click();
   }
