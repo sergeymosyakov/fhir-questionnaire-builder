@@ -13,6 +13,7 @@ import {
   applyConstraints,
   resolveContainedValueSet,
   _collectUnknownExtensions,
+  ANSWER_SOURCE_EXPR_EXTS,
 } from './import-helpers.js';
 
 // Build our item node from a FHIR leaf question
@@ -202,12 +203,11 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     node._initialExpr = initExpr.valueExpression.expression || '';
   }
 
-  // SDC answerExpression — dynamic answer options computed via FHIRPath
-  const answerExprExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression'
-  );
-  if (answerExprExt?.valueExpression) {
-    node._answerExpression = answerExprExt.valueExpression.expression || '';
+  // SDC answer-source expressions — dynamic answer options computed via FHIRPath
+  // (answerExpression / candidateExpression). Both map ext → prop identically.
+  for (const { url, prop } of ANSWER_SOURCE_EXPR_EXTS) {
+    const exprExt = (fhirItem.extension || []).find(e => e.url === url);
+    if (exprExt?.valueExpression) node[prop] = exprExt.valueExpression.expression || '';
   }
 
   // maxLength

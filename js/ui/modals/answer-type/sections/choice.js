@@ -59,6 +59,33 @@ function _buildRows(node) {
   }));
 }
 
+// Build a labelled FHIRPath textarea sub-section for an answer-source expression
+// (answerExpression / candidateExpression). Shared by both to avoid duplication.
+function _buildExprSubSection({ visible, label, tipTitle, tipBody, tipFhir, testid, value, placeholder, onInput }) {
+  const sec = document.createElement('div');
+  sec.className     = 'at-modal-sub';
+  sec.style.display = visible ? 'block' : 'none';
+
+  const lbl = document.createElement('div');
+  lbl.className        = 'at-modal-sub-lbl';
+  lbl.textContent      = label;
+  lbl.dataset.tipTitle = tipTitle;
+  lbl.dataset.tipBody  = tipBody;
+  lbl.dataset.tipFhir  = tipFhir;
+  lbl.dataset.tipSpec  = 'SDC';
+
+  const inp = document.createElement('textarea');
+  inp.className      = 'at-modal-opt-inp';
+  inp.dataset.testid = testid;
+  inp.value          = value;
+  inp.placeholder    = placeholder;
+  inp.rows           = 3;
+  inp.oninput = () => onInput(inp.value);
+
+  sec.append(lbl, inp);
+  return sec;
+}
+
 class ChoiceSection extends AnswerTypeSection {
   isVisible(type) { return CHOICE_TYPES.has(type); }
 
@@ -88,11 +115,17 @@ class ChoiceSection extends AnswerTypeSection {
     const optRadio  = Object.assign(document.createElement('input'), { type: 'radio', name: '_at_src', id: '_at_src_opt',  value: 'options',     checked: pending.draftSrc === 'options' });
     const avsRadio  = Object.assign(document.createElement('input'), { type: 'radio', name: '_at_src', id: '_at_src_avs',  value: 'valueset',    checked: pending.draftSrc === 'valueset' });
     const exprRadio = Object.assign(document.createElement('input'), { type: 'radio', name: '_at_src', id: '_at_src_expr', value: 'expression',  checked: pending.draftSrc === 'expression' });
-    const optLbl    = Object.assign(document.createElement('label'), { htmlFor: '_at_src_opt',  textContent: 'Options list',               className: 'at-modal-src-lbl' });
-    const avsLbl    = Object.assign(document.createElement('label'), { htmlFor: '_at_src_avs',  textContent: 'ValueSet (answerValueSet)',   className: 'at-modal-src-lbl' });
-    const exprLbl   = Object.assign(document.createElement('label'), { htmlFor: '_at_src_expr', textContent: 'Expression (answerExpression)', className: 'at-modal-src-lbl' });
+    const candRadio = Object.assign(document.createElement('input'), { type: 'radio', name: '_at_src', id: '_at_src_cand', value: 'candidate',   checked: pending.draftSrc === 'candidate' });
+    optRadio.dataset.testid  = 'src-options-radio';
+    avsRadio.dataset.testid  = 'src-valueset-radio';
+    exprRadio.dataset.testid = 'src-answer-expr-radio';
+    candRadio.dataset.testid = 'src-candidate-expr-radio';
+    const optLbl    = Object.assign(document.createElement('label'), { htmlFor: '_at_src_opt',  textContent: 'Options list',                    className: 'at-modal-src-lbl' });
+    const avsLbl    = Object.assign(document.createElement('label'), { htmlFor: '_at_src_avs',  textContent: 'ValueSet (answerValueSet)',       className: 'at-modal-src-lbl' });
+    const exprLbl   = Object.assign(document.createElement('label'), { htmlFor: '_at_src_expr', textContent: 'Expression (answerExpression)',    className: 'at-modal-src-lbl' });
+    const candLbl   = Object.assign(document.createElement('label'), { htmlFor: '_at_src_cand', textContent: 'Candidate (candidateExpression)', className: 'at-modal-src-lbl' });
 
-    sourceRow.append(optRadio, optLbl, avsRadio, avsLbl, exprRadio, exprLbl);
+    sourceRow.append(optRadio, optLbl, avsRadio, avsLbl, exprRadio, exprLbl, candRadio, candLbl);
     section.appendChild(sourceRow);
 
     // ── Options sub-section ──────────────────────────────────────────────────
@@ -208,29 +241,32 @@ class ChoiceSection extends AnswerTypeSection {
     avsSection.append(avsSubLbl, avsDrop.el, avsUrlInp, avsTestWrap);
     section.appendChild(avsSection);
 
-    // ── answerExpression sub-section ─────────────────────────────────────────
-    const exprSection = document.createElement('div');
-    exprSection.className     = 'at-modal-sub';
-    exprSection.style.display = pending.draftSrc === 'expression' ? 'block' : 'none';
-
-    const exprSubLbl = document.createElement('div');
-    exprSubLbl.className        = 'at-modal-sub-lbl';
-    exprSubLbl.textContent      = 'FHIRPath expression (sdc-questionnaire-answerExpression):';
-    exprSubLbl.dataset.tipTitle = 'Answer Expression';
-    exprSubLbl.dataset.tipBody  = 'FHIRPath expression evaluated against the current QuestionnaireResponse. Must return a collection of strings, numbers, or Coding objects — each becomes an answer option. Falls back to the static options list if evaluation fails or returns empty.';
-    exprSubLbl.dataset.tipFhir  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression';
-    exprSubLbl.dataset.tipSpec  = 'SDC';
-
-    const exprInp = document.createElement('textarea');
-    exprInp.className      = 'at-modal-opt-inp';
-    exprInp.dataset.testid = 'answer-expr-input';
-    exprInp.value          = pending.draftAnswerExpr;
-    exprInp.placeholder    = "e.g. %resource.item.where(linkId='category').answer.valueCoding.code";
-    exprInp.rows           = 3;
-    exprInp.oninput = () => { pending.draftAnswerExpr = exprInp.value; };
-
-    exprSection.append(exprSubLbl, exprInp);
+    // ── answerExpression / candidateExpression sub-sections ──────────────────
+    const exprSection = _buildExprSubSection({
+      visible:     pending.draftSrc === 'expression',
+      label:       'FHIRPath expression (sdc-questionnaire-answerExpression):',
+      tipTitle:    'Answer Expression',
+      tipBody:     'FHIRPath expression evaluated against the current QuestionnaireResponse. Returns the permitted answers — a collection of strings, numbers, or Coding objects, each becoming an answer option. Falls back to the static options list if evaluation fails or returns empty.',
+      tipFhir:     'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression',
+      testid:      'answer-expr-input',
+      value:       pending.draftAnswerExpr,
+      placeholder: "e.g. %resource.item.where(linkId='category').answer.valueCoding.code",
+      onInput:     v => { pending.draftAnswerExpr = v; },
+    });
     section.appendChild(exprSection);
+
+    const candidateSection = _buildExprSubSection({
+      visible:     pending.draftSrc === 'candidate',
+      label:       'FHIRPath expression (sdc-questionnaire-candidateExpression):',
+      tipTitle:    'Candidate Expression',
+      tipBody:     'FHIRPath, CQL, or FHIR Query expression that resolves to a list of candidate (suggested) answers for the item. Like answerExpression, each result becomes a selectable option, but candidates are suggestions rather than the strictly permitted set — typically used for lookup / reference items. Falls back to the static options list if evaluation fails or returns empty.',
+      tipFhir:     'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression',
+      testid:      'candidate-expr-input',
+      value:       pending.draftCandidateExpr,
+      placeholder: "e.g. %resource.item.where(linkId='contacts').answer.valueReference",
+      onInput:     v => { pending.draftCandidateExpr = v; },
+    });
+    section.appendChild(candidateSection);
 
     // ── openLabel sub-section (open-choice only) ─────────────────────────────
     const openLabelSection = document.createElement('div');
@@ -304,6 +340,7 @@ class ChoiceSection extends AnswerTypeSection {
       optSection.style.display  = which === 'options'     ? 'block' : 'none';
       avsSection.style.display  = which === 'valueset'    ? 'block' : 'none';
       exprSection.style.display = which === 'expression'  ? 'block' : 'none';
+      candidateSection.style.display = which === 'candidate' ? 'block' : 'none';
       pending.draftSrc = which;
       _updateItemControlRows();
     };
@@ -324,6 +361,7 @@ class ChoiceSection extends AnswerTypeSection {
       }
     };
     exprRadio.onchange = () => { if (exprRadio.checked) { pending.draftAVS = ''; _showOnly('expression'); } };
+    candRadio.onchange = () => { if (candRadio.checked) { pending.draftAVS = ''; _showOnly('candidate'); } };
 
     // ── answerConstraint (R4B/R5) ────────────────────────────────────────────
     const aconstRow = document.createElement('div');
@@ -356,8 +394,14 @@ class ChoiceSection extends AnswerTypeSection {
 
   commit(pending, node, questDoc, _answerStore) {
     if (CHOICE_TYPES.has(node.itemType)) {
-      if (pending.draftSrc === 'expression') {
-        node._answerExpression = pending.draftAnswerExpr.trim();
+      if (pending.draftSrc === 'expression' || pending.draftSrc === 'candidate') {
+        if (pending.draftSrc === 'expression') {
+          node._answerExpression = pending.draftAnswerExpr.trim();
+          delete node._candidateExpression;
+        } else {
+          node._candidateExpression = pending.draftCandidateExpr.trim();
+          delete node._answerExpression;
+        }
         delete node._answerValueSet;
         delete node._optionOrdinals;
         delete node._optionPrefixes;
@@ -375,6 +419,7 @@ class ChoiceSection extends AnswerTypeSection {
       } else {
         delete node._answerValueSet;
         delete node._answerExpression;
+        delete node._candidateExpression;
 
         const rows = (pending.draftOptionRows || []).filter(r => r.code.trim());
         node.options = rows.map(r => r.code.trim() + '=' + r.label.trim()).join(',');
@@ -487,7 +532,11 @@ class ChoiceSection extends AnswerTypeSection {
       draftAVS:         node._answerValueSet || '',
       draftOpenLabel:   node._openLabel || '',
       draftAnswerExpr:  node._answerExpression || '',
-      draftSrc:         node._answerExpression ? 'expression' : (node._answerValueSet ? 'valueset' : 'options'),
+      draftCandidateExpr: node._candidateExpression || '',
+      draftSrc:         node._answerExpression ? 'expression'
+                      : node._candidateExpression ? 'candidate'
+                      : node._answerValueSet ? 'valueset'
+                      : 'options',
       draftAutocomplete:      node._itemControl === 'autocomplete',
       draftLookup:            node._itemControl === 'lookup',
       draftAnswerConstraint:  node._answerConstraint || '',

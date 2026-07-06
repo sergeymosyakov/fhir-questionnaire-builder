@@ -835,6 +835,37 @@ describe('buildFHIRObject — answerExpression', () => {
   });
 });
 
+// ── candidateExpression export ────────────────────────────────────────────────
+describe('buildFHIRObject — candidateExpression', () => {
+  const CE_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression';
+  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
+
+  it('exports _candidateExpression as valueExpression extension', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: '', _candidateExpression: "'a' | 'b'" }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === CE_URL);
+    expect(ext?.valueExpression?.expression).toBe("'a' | 'b'");
+    expect(ext?.valueExpression?.language).toBe('text/fhirpath');
+  });
+
+  it('omits answerOption when _candidateExpression is set', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A,b=B', _candidateExpression: "'a' | 'b'" }]);
+    expect(q.item[0].answerOption).toBeUndefined();
+  });
+
+  it('does not export candidateExpression extension when _candidateExpression is absent', () => {
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A' }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === CE_URL);
+    expect(ext).toBeUndefined();
+  });
+
+  it('round-trips: node with _candidateExpression exports correct extension and no answerOption', () => {
+    const expr = "%resource.item.where(linkId='contacts').answer.valueReference";
+    const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference', options: '', _candidateExpression: expr }]);
+    const ext = (q.item[0].extension || []).find(e => e.url === CE_URL);
+    expect(ext?.valueExpression?.expression).toBe(expr);
+  });
+});
+
 // ── regex ──────────────────────────────────────────────────────────────────
 describe('buildFHIRObject — _regex', () => {
   const RX_URL = 'http://hl7.org/fhir/StructureDefinition/regex';

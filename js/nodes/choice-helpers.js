@@ -3,7 +3,8 @@
 // ChoiceNode / RadioNode / OpenChoiceNode (js/nodes/choice-node.js).
 import { parseOptions, rawOptsToPairs } from '../utils.js';
 
-// Evaluate answerExpression (SDC) against the current FHIRPath context.
+// Evaluate the answer-source expression (SDC answerExpression or
+// candidateExpression) against the current FHIRPath context.
 // Returns [{code, display}] from the expression result, or falls back to
 // node options when the expression is absent, empty, or errors.
 // For external answerValueSet items, reads node._vsCache populated by
@@ -14,15 +15,23 @@ export function _nodeOpts(node) {
 }
 
 export function _evalAnswerOpts(node, fpCtx) {
-  if (!node._answerExpression) {
+  const expr = node._answerExpression || node._candidateExpression;
+  if (!expr) {
     if (node._answerValueSet && !node._answerValueSet.startsWith('#')) {
       return node._vsCache ?? [];
     }
     return _nodeOpts(node);
   }
   if (!fpCtx || !fpCtx.fp || !fpCtx.qr) return _nodeOpts(node);
+  return _evalExpr(node, expr, fpCtx);
+}
+
+// Evaluate a FHIRPath answer-source expression (answerExpression /
+// candidateExpression) and map each result item to a {code, display} option.
+// Falls back to the node's static options when the result is empty or errors.
+function _evalExpr(node, expr, fpCtx) {
   try {
-    const raw = fpCtx.fp.evaluate(fpCtx.qr, node._answerExpression, fpCtx.env || {});
+    const raw = fpCtx.fp.evaluate(fpCtx.qr, expr, fpCtx.env || {});
     if (!raw || !raw.length) return _nodeOpts(node);
     return raw.map(v => {
       if (v === null || v === undefined) return null;

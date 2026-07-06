@@ -6,7 +6,7 @@
   "title": "Answer Expression Demo — Dynamic Option Lists",
   "status": "draft",
   "publisher": "FHIR Questionnaire Builder",
-  "description": "Demonstrates sdc-questionnaire-answerExpression: answer options computed at runtime via FHIRPath. The 'Recommended Action' and 'Severity Level' questions derive their options dynamically from the PHQ-2 score.",
+  "description": "Demonstrates SDC answer-source expressions that compute options at runtime via FHIRPath. 'Severity Level' and 'Recommended Action' use sdc-questionnaire-answerExpression (the permitted answer set). 'Suggested follow-up option' uses sdc-questionnaire-candidateExpression (candidate/suggested answers). All derive their options dynamically from the PHQ-2 score.",
   "extension": [
     {
       "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
@@ -185,6 +185,20 @@
               "valueExpression": {
                 "language": "text/fhirpath",
                 "expression": "iif(%phq2score >= 3, 'refer-psychiatry' | 'start-antidepressant' | 'crisis-assessment', iif(%phq2score >= 1, 'watchful-waiting' | 'counselling' | 'lifestyle-support', 'no-action-needed' | 'routine-follow-up'))"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "follow-up-candidate",
+          "text": "Suggested follow-up option (candidates via candidateExpression)",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%phq2score >= 3, 'urgent-clinic' | 'telehealth-24h' | 'in-person-48h', 'routine-clinic' | 'phone-check-2w')"
               }
             }
           ]

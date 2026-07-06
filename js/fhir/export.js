@@ -1,7 +1,6 @@
 ﻿// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
 import { parseOptions, ITLH_KEY_GROUP_OR } from '../utils.js';
-import { formatRegistry } from './format-registry.js';
-import './formats/r4.js';
+import { formatRegistry } from './format-registry.js';import { ANSWER_SOURCE_EXPR_EXTS } from './import-helpers.js';import './formats/r4.js';
 import './formats/r4b.js';
 import './formats/r5.js';
 import './formats/redcap.js';
@@ -111,9 +110,9 @@ export function nodeToFHIRItem(node) {
 
   // item.initial[] — multi-value for repeating items; single value otherwise
   // que-11: must be absent when answerOption[] is present (use answerOption[].initialSelected instead)
-  // Also suppressed when answerValueSet or answerExpression is set (same constraint applies)
+  // Also suppressed when answerValueSet or an answer-source expression is set (same constraint applies)
   const hasAnswerOptions = node.type === 'item' && (
-    node.options || node._rawAnswerOptions || node._answerValueSet || node._answerExpression
+    node.options || node._rawAnswerOptions || node._answerValueSet || node._answerExpression || node._candidateExpression
   );
   // que-8: display items cannot have initial[] (R4 invariant)
   if (node.type === 'item' && node.itemType !== 'display' && !hasAnswerOptions) {
@@ -214,9 +213,11 @@ export function nodeToFHIRItem(node) {
   // initialExpression
   if (node._initialExpr)
     ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression', valueExpression: { language: 'text/fhirpath', expression: node._initialExpr } });
-  // answerExpression (SDC) — dynamic answer options
-  if (node._answerExpression)
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression', valueExpression: { language: 'text/fhirpath', expression: node._answerExpression } });
+  // answer-source expressions (SDC) — dynamic answer options (answerExpression / candidateExpression)
+  for (const { url, prop } of ANSWER_SOURCE_EXPR_EXTS) {
+    if (node[prop])
+      ext.push({ url, valueExpression: { language: 'text/fhirpath', expression: node[prop] } });
+  }
   // questionnaire-itemControl
   if (node.itemType === 'radio')
     ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'radio-button' }] } });
@@ -234,7 +235,7 @@ export function nodeToFHIRItem(node) {
 
   if (node.type === 'group') {
     fhirItem.item = node.children.map(nodeToFHIRItem);
-  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice' || node.itemType === 'checklist') && (node.options || node._rawAnswerOptions) && !node._answerValueSet && !node._answerExpression) {
+  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice' || node.itemType === 'checklist') && (node.options || node._rawAnswerOptions) && !node._answerValueSet && !node._answerExpression && !node._candidateExpression) {
     if (node._rawAnswerOptions) {
       // Round-trip: preserve the original non-valueCoding FHIR answerOption[] types
       fhirItem.answerOption = node._rawAnswerOptions.map(opt => {

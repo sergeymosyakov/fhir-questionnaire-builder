@@ -122,6 +122,17 @@ describe('validateTree — FHIRPath expression', () => {
     const issues = validateTree([makeItem({ id: 'q1', itemType: 'select', options: 'a=A,b=B' })]);
     expect(errIds(issues)).toHaveLength(0);
   });
+
+  it('errors on invalid candidateExpression', () => {
+    const issues = validateTree([makeItem({ id: 'q1', itemType: 'select', options: '', _candidateExpression: 'INVALID expression' })]);
+    expect(errIds(issues)).toContain('q1');
+    expect(issues.find(i => i.nodeId === 'q1' && i.severity === 'error').message).toMatch(/Candidate expression error/);
+  });
+
+  it('no error for valid candidateExpression', () => {
+    const issues = validateTree([makeItem({ id: 'q1', itemType: 'select', options: '', _candidateExpression: "'a' | 'b' | 'c'" })]);
+    expect(errIds(issues)).toHaveLength(0);
+  });
 });
 
 // ── reference item ──────────────────────────────────────────────────────────
@@ -314,6 +325,21 @@ describe('validateTree — answerExpression + answerOption co-presence', () => {
     const item = makeItem({ id: 'q1', _answerExpression: '%meds' });
     const issues = validateTree([item]);
     expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/answerExpression/))).toHaveLength(0);
+  });
+});
+
+// ── cross-field: candidateExpression + answerOption[] ─────────────────────
+describe('validateTree — candidateExpression + answerOption co-presence', () => {
+  it('warns when both candidateExpression and options string are set', () => {
+    const item = makeItem({ id: 'q1', _candidateExpression: '%meds', options: 'a,b,c' });
+    const issues = validateTree([item]);
+    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/candidateExpression.*answerOption/))).toBeTruthy();
+  });
+
+  it('no warning when only candidateExpression is set', () => {
+    const item = makeItem({ id: 'q1', _candidateExpression: '%meds' });
+    const issues = validateTree([item]);
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/candidateExpression/))).toHaveLength(0);
   });
 });
 

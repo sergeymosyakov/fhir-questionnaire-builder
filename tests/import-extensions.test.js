@@ -386,6 +386,40 @@ describe('importFHIR — answerExpression', () => {
   });
 });
 
+// ── candidateExpression import ────────────────────────────────────────────────
+describe('importFHIR — candidateExpression', () => {
+  const CE_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression';
+  const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
+
+  beforeEach(() => { _tree.splice(0); });
+
+  it('reads candidateExpression extension → node._candidateExpression', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Q',
+      extension: [{
+        url: CE_URL,
+        valueExpression: { language: 'text/fhirpath', expression: "'a' | 'b' | 'c'" },
+      }],
+    }]));
+    expect(_tree[0]._candidateExpression).toBe("'a' | 'b' | 'c'");
+  });
+
+  it('does not set _candidateExpression when extension is absent', () => {
+    importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
+      answerOption: [{ valueCoding: { code: 'x', display: 'X' } }] }]));
+    expect(_tree[0]._candidateExpression).toBeUndefined();
+  });
+
+  it('does not add candidateExpression URL to _unknownExtensions', () => {
+    importFHIR(minQ([{
+      linkId: 'q1', type: 'choice', text: 'Q',
+      extension: [{ url: CE_URL, valueExpression: { language: 'text/fhirpath', expression: '%x' } }],
+    }]));
+    const unknown = _tree[0]._unknownExtensions || [];
+    expect(unknown.some(e => e.url === CE_URL)).toBe(false);
+  });
+});
+
 // ── regex ──────────────────────────────────────────────────────────────────
 describe('_regex', () => {
   const RX_URL = 'http://hl7.org/fhir/StructureDefinition/regex';

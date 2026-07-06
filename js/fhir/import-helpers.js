@@ -37,6 +37,7 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/StructureDefinition/mimeType',
   'http://hl7.org/fhir/StructureDefinition/designNote',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression',
+  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer',
   'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn',
   'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption',
@@ -50,6 +51,17 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType',
   'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType',
 ]);
+
+// ── SDC answer-source expressions ─────────────────────────────────────────────
+// FHIRPath expressions that resolve to a list of answer options at render time.
+// answerExpression → the permitted answer set; candidateExpression → suggested
+// candidate answers. Both are mutually exclusive with a static answerOption[]
+// source and share the same import (ext → prop), export (prop → ext), render and
+// validation handling. Shared by import-item.js and export.js.
+export const ANSWER_SOURCE_EXPR_EXTS = [
+  { url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression',    prop: '_answerExpression' },
+  { url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression', prop: '_candidateExpression' },
+];
 
 export function _collectUnknownExtensions(fhirItem) {
   const unknown = (fhirItem.extension || []).filter(e => !KNOWN_ITEM_EXTENSION_URLS.has(e.url));

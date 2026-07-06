@@ -54,7 +54,7 @@
         "label": "Answer Expression Demo",
         "file": "answer-expression-demo.fhir.json",
         "type": "questionnaire",
-        "note": "sdc-questionnaire-answerExpression: dynamic options from PHQ-2 score"
+        "note": "sdc-questionnaire-answerExpression + candidateExpression: dynamic options from PHQ-2 score"
       },
       {
         "label": "Lifestyle & Social History",

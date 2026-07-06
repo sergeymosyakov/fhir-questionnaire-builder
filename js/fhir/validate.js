@@ -112,6 +112,9 @@ export function validateTree(tree, _values = {}, questMeta = null) {
     const fhirPathAeErr = _checkFhirPath(node._answerExpression);
     if (fhirPathAeErr) issues.push({ severity: 'error', nodeId: id, message: `Answer expression error: ${fhirPathAeErr}` });
 
+    const fhirPathCeErr = _checkFhirPath(node._candidateExpression);
+    if (fhirPathCeErr) issues.push({ severity: 'error', nodeId: id, message: `Candidate expression error: ${fhirPathCeErr}` });
+
     const fhirPathEwErr = _checkFhirPath(node.enableWhenExpression);
     if (fhirPathEwErr) issues.push({ severity: 'error', nodeId: id, message: `enableWhenExpression error: ${fhirPathEwErr}` });
 
@@ -154,11 +157,13 @@ export function validateTree(tree, _values = {}, questMeta = null) {
       issues.push({ severity: 'warning', nodeId: id, message: 'Item has a calculatedExpression but is not read-only — the user can overwrite the computed value. Consider setting read-only.' });
     }
 
-    // answerExpression + answerOption[] co-presence — mutually exclusive in SDC
+    // answer-source expression + answerOption[] co-presence — answerOption is suppressed on export
     const hasAnswerOptions = (node._rawAnswerOptions && node._rawAnswerOptions.length > 0) ||
                              (node.options && node.options.trim());
-    if (node._answerExpression && node._answerExpression.trim() && hasAnswerOptions) {
-      issues.push({ severity: 'warning', nodeId: id, message: 'Item has both answerExpression and answerOption[] — these are mutually exclusive in SDC. answerOption[] will be ignored at runtime.' });
+    for (const [name, val] of [['answerExpression', node._answerExpression], ['candidateExpression', node._candidateExpression]]) {
+      if (val && val.trim() && hasAnswerOptions) {
+        issues.push({ severity: 'warning', nodeId: id, message: `Item has both ${name} and answerOption[] — these are mutually exclusive in SDC. answerOption[] will be ignored at runtime.` });
+      }
     }
 
     // enableWhen + enableWhenExpression conflict — only one should control visibility
@@ -184,7 +189,7 @@ export function validateTree(tree, _values = {}, questMeta = null) {
       (node._initialValue !== undefined && node._initialValue !== node._initialSelected) ||
       (node._initialValues && node._initialValues.length > 0)
     );
-    if (hasInitial && (node.options || node._rawAnswerOptions || node._answerValueSet || node._answerExpression)) {
+    if (hasInitial && (node.options || node._rawAnswerOptions || node._answerValueSet || node._answerExpression || node._candidateExpression)) {
       issues.push({ severity: 'warning', nodeId: id, message: 'Initial value is set but the item has answer options — R4 invariant que-11 forbids initial[x] when answerOption[] is present. Use the answer option\'s "Initially selected" setting instead. The initial value will be omitted from the export.' });
     }
 
@@ -256,7 +261,8 @@ export function validateTree(tree, _values = {}, questMeta = null) {
         (!node.options || !node.options.trim()) &&
         !node._rawAnswerOptions &&
         !node._answerValueSet &&
-        !node._answerExpression) {
+        !node._answerExpression &&
+        !node._candidateExpression) {
       issues.push({ severity: 'warning', nodeId: id, message: `Item type "${node.itemType}" has no answer options — answerOption will be empty in the export.` });
     }
 
