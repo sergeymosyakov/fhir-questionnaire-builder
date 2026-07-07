@@ -2,7 +2,7 @@
 
 > A deliberately unvarnished assessment of where this builder stands against
 > other FHIR Questionnaire / SDC tools. Written to expose gaps, not to market.
-> If something here reads as a weakness — it is one. Last reviewed: June 2026.
+> If something here reads as a weakness — it is one. Last reviewed: July 2026.
 
 This is a **zero-backend, single-page browser tool** served as static files
 (GitHub Pages). That framing matters: several "competitors" below are full
@@ -34,11 +34,11 @@ authoring/runtime slice.
 
 | Area | Honest status |
 |---|---|
-| Field-mapping coverage | On par with LHC-Forms for R4 Questionnaire fields and common SDC extensions. |
+| Field-mapping coverage | On par with LHC-Forms for R4 Questionnaire fields and common SDC extensions, including dynamic `answerExpression` / `candidateExpression`, `isSubject`, and `choiceColumn` / `columnCount`. |
 | Round-trip transparency | **Better than most.** Every import↔export mapping is documented and silent data loss is explicitly flagged (`docs/FHIR-MAPPING.md`). Few tools publish this. |
 | Live SDC runtime | Real client-side FHIRPath: `enableWhen` / `enableWhenExpression`, `calculatedExpression`, `initialExpression` chains evaluate against an injected Patient. Comparable to Smart Forms. |
 | Multi-version support | STU3→R4 normalization on import; R5-only fields downgraded to private extensions on R4/R4B export with lossless re-import. Engineering-solid. |
-| Logic testing UX | Patient-context presets to drive expressions, undo/redo, autosave, drag-and-drop, cloud persistence. This is our strongest differentiator over LHC-Forms. |
+| Logic testing UX | Patient-context presets to drive expressions, undo/redo, autosave, drag-and-drop, cloud persistence, and a Simple/Advanced view mode that hides FHIR plumbing for faster authoring. This is our strongest differentiator over LHC-Forms. |
 | Validation | HAPI `$validate` integration plus formal R4 invariants and cross-field semantic warnings. |
 
 ## Where we are at parity (with caveats)
