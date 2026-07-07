@@ -184,11 +184,14 @@ describe('QuestionnaireLoader.load — VS expansion failures', () => {
     terminologyService.expandAll.mockResolvedValueOnce([
       { node: { id: 'q1' }, vsUrl: 'http://vs', server: 'https://tx.fhir.org/r4', error: 'timeout' },
     ]);
-    await makeLoader().load({}, 'test.json');
-    // validateModal.show called once for expansion errors
+    const data = { resourceType: 'Questionnaire', item: [] };
+    await makeLoader().load(data, 'test.json');
+    // validateModal.show called once for expansion errors — with the questJson
+    // so the external validator does not POST an empty body (HTTP 400).
     const showCalls = validateModal.show.mock.calls;
     const expansionCall = showCalls.find(c => c[0].includes('ValueSet'));
     expect(expansionCall).toBeDefined();
+    expect(expansionCall[2].questJson).toBe(data);
   });
 
   it('does not call validateModal.show for VS when no failures', async () => {

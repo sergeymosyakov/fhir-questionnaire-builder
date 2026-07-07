@@ -21,6 +21,23 @@ function _proxied(url) {
   return proxy ? `${proxy}?url=${encodeURIComponent(url)}` : url;
 }
 
+/** Turn an error response body into a readable one-line message.
+ *  Parses a FHIR OperationOutcome (issue[].diagnostics / details.text) when
+ *  present; otherwise falls back to a trimmed raw snippet. */
+function _outcomeMessage(text) {
+  const raw = (text || '').trim();
+  try {
+    const oo = JSON.parse(raw);
+    if (oo?.resourceType === 'OperationOutcome' && Array.isArray(oo.issue)) {
+      const parts = oo.issue
+        .map(i => i.diagnostics || i.details?.text || i.details?.coding?.[0]?.display || i.code)
+        .filter(Boolean);
+      if (parts.length) return parts.join('; ');
+    }
+  } catch { /* not JSON — fall through to raw snippet */ }
+  return raw.slice(0, 200);
+}
+
 /** Parse OperationOutcome issues into the common Issue[] format. */
 function _parseOutcome(outcome, questJson) {
   const issues = [];
@@ -94,6 +111,11 @@ export class ExternalValidator extends Validator {
   async _run(questJson) {
     await serverConfig.ready();
 
+    // Never POST a body that is not a valid Questionnaire. Some callers invoke
+    // validation without a questJson (e.g. the ValueSet-expansion report); that
+    // would serialise `{}` and get a confusing HTTP 400 "missing resourceType".
+    if (!questJson || questJson.resourceType !== 'Questionnaire') return [];
+
     const endpoint = _proxied(`${this._baseUrl()}/Questionnaire/$validate`);
     // Strip the builder-target-version extension — it is a builder-internal
     // round-trip marker that the FHIR server does not recognise (would produce
@@ -129,7 +151,7 @@ export class ExternalValidator extends Validator {
         if (!resp.ok) {
           // Other client errors (4xx) are not retryable; server errors (5xx) are.
           const text = await resp.text().catch(() => '');
-          const snippet = text.trim().slice(0, 200);
+          const snippet = _outcomeMessage(text);
           const msg = `External validator returned HTTP ${resp.status} ${resp.statusText}${snippet ? ` — ${snippet}` : ''}`;
           if (resp.status >= 400 && resp.status < 500) throw new ValidatorFatalError(msg);
           throw new Error(msg);

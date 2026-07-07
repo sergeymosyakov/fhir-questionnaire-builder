@@ -198,6 +198,20 @@ describe('ExternalValidator — error handling', () => {
     await expect(v.run({ resourceType: 'Questionnaire', item: [] })).rejects.toThrow(/HTTP 400.*bad input/);
   });
 
+  it('surfaces the OperationOutcome diagnostics from a 4xx body (not raw JSON)', async () => {
+    const oo = JSON.stringify({
+      resourceType: 'OperationOutcome',
+      issue: [{ severity: 'error', code: 'processing', diagnostics: 'HAPI-0450: Failed to parse request body' }],
+    });
+    stubFetch({}, { ok: false, status: 400, statusText: 'Bad Request', text: async () => oo });
+    const v = makeValidator({ retries: 3 });
+    await expect(v.run({ resourceType: 'Questionnaire', item: [] }))
+      .rejects.toThrow(/HAPI-0450: Failed to parse request body/);
+    // The raw JSON blob must not leak into the message.
+    await expect(v.run({ resourceType: 'Questionnaire', item: [] }))
+      .rejects.not.toThrow(/resourceType/);
+  });
+
   it('retries on a 5xx response and fails after exhausting attempts', async () => {
     let calls = 0;
     stubFetch({}, () => { calls++; return { ok: false, status: 500, statusText: 'Server Error', text: async () => '' }; });
@@ -228,6 +242,32 @@ describe('ExternalValidator — error handling', () => {
     await expect(p).resolves.toEqual([]);
     expect(calls).toBe(2);
     vi.useRealTimers();
+  });
+});
+
+describe('ExternalValidator — guard: skip invalid Questionnaire body', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  function makeGuardValidator() {
+    const v = new ExternalValidator({ name: 'HAPI FHIR', url: 'https://hapi.fhir.org/baseR4', getFhirTarget: () => 'R4' });
+    v.enabled = true;
+    return v;
+  }
+
+  it('returns [] and never POSTs when questJson is null', async () => {
+    const fetchMock = makeFetchMock();
+    vi.stubGlobal('fetch', fetchMock);
+    const v = makeGuardValidator();
+    await expect(v.run(null)).resolves.toEqual([]);
+    expect(fetchMock.calls.some(c => String(c.url).includes('$validate'))).toBe(false);
+  });
+
+  it('returns [] when questJson has no resourceType (would 400 "missing resourceType")', async () => {
+    const fetchMock = makeFetchMock();
+    vi.stubGlobal('fetch', fetchMock);
+    const v = makeGuardValidator();
+    await expect(v.run({ item: [] })).resolves.toEqual([]);
+    expect(fetchMock.calls.some(c => String(c.url).includes('$validate'))).toBe(false);
   });
 });
 

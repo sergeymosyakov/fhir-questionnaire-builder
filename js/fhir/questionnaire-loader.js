@@ -115,7 +115,7 @@ export class QuestionnaireLoader {
       if (this._validateEnabled && validateTree(this._tree, this._answerStore.data, { name: data?.name }).some(i => i.severity === 'error')) {
         validateModal.show('Import — Validation Report', 'import', { questJson: data, tree: this._tree, values: this._answerStore.data });
       }
-      this._expandValueSets(++this._importSeq);
+      this._expandValueSets(++this._importSeq, data);
     } catch (err) {
       showError('Import error: ' + err.message);
     } finally {
@@ -125,11 +125,11 @@ export class QuestionnaireLoader {
 
   // ── Private ────────────────────────────────────────────────────────────────
 
-  async _expandValueSets(seq) {
+  async _expandValueSets(seq, questJson) {
     const failures = await terminologyService.expandAll(this._tree, this._questDoc.meta);
     if (this._importSeq !== seq) return;
     if (failures.length) {
-      validateModal.show('ValueSet Expansion Errors', 'import', { tree: this._tree, values: this._answerStore.data });
+      validateModal.show('ValueSet Expansion Errors', 'import', { questJson, tree: this._tree, values: this._answerStore.data });
     }
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM, { detail: { silent: true } }));
   }

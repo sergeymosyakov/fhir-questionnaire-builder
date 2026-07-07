@@ -89,6 +89,10 @@ class ValidateModal extends Modal {
           this._fillSection(sectionEls[i], issues, null);
         })
         .catch(err => {
+          // A validator that failed to run is not "All good" — flag it so the
+          // title/footer stay honest instead of appending "— All good".
+          hasErrors = true;
+          hasIssues = true;
           this._fillSection(sectionEls[i], [], err);
         })
         .finally(() => {
@@ -105,8 +109,8 @@ class ValidateModal extends Modal {
     this.footer.innerHTML = '';
 
     const allIssues = results.flatMap(r => r.issues);
-    const hasErrors = allIssues.some(i => i.severity === 'error');
-    const hasIssues = allIssues.length > 0 || extraIssues.length > 0;
+    const hasErrors = allIssues.some(i => i.severity === 'error') || results.some(r => r.error);
+    const hasIssues = allIssues.length > 0 || extraIssues.length > 0 || results.some(r => r.error);
 
     for (const { validator, issues, error } of results) {
       if (!validator.enabled) continue; // skip disabled validators — they returned [] and don't need a section
