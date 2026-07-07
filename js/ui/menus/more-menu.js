@@ -3,7 +3,7 @@
 // Undo and Redo buttons keep their data-mount attributes so UndoRedo class
 // can find and wire them as usual.
 import { DropdownMenu } from '../dropdown-menu.js';
-import { AppEvents }    from '../../events.js';
+import { AppEvents, EventState }    from '../../events.js';
 
 export class MoreMenu extends DropdownMenu {
   constructor() {
@@ -14,14 +14,59 @@ export class MoreMenu extends DropdownMenu {
       label:    'More &#x25BE;',
       testid:   'more-btn',
       tipTitle: 'More',
-      tipBody:  'Undo, Redo, Help and Settings.',
+      tipBody:  'View mode, tree controls, Undo, Redo, Help and Settings.',
     });
 
     this._menu.className += ' load-menu--right';
     this._buildMenu();
+
+    document.addEventListener(AppEvents.BUILDER_VIEW_MODE_CHANGE, e => this._reflectMode(e.detail?.mode));
+    this._reflectMode(EventState.get(AppEvents.BUILDER_VIEW_MODE_CHANGE)?.mode);
+  }
+
+  _reflectMode(mode) {
+    if (!this._simpleItem || !this._advancedItem) return;
+    this._simpleItem.classList.toggle('load-menu-item--checked',   mode === 'simple');
+    this._advancedItem.classList.toggle('load-menu-item--checked', mode === 'advanced');
   }
 
   _buildMenu() {
+    // ── View mode: Simple / Advanced ──────────────────────────────────────────
+    this._simpleItem = this._item('moreSimpleItem', 'Simple', 'view-simple-item');
+    this._simpleItem.classList.add('load-menu-item--checkable');
+    this._simpleItem.dataset.tipTitle = 'Simple view';
+    this._simpleItem.dataset.tipBody  = 'Hides advanced per-item controls (States, Show When, Answer Type, Expression, etc.), leaving only Add group/item, rename and delete.';
+    this._simpleItem.addEventListener('click', () => {
+      this.close();
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_VIEW_MODE_CHANGE, { detail: { mode: 'simple' } }));
+    });
+
+    this._advancedItem = this._item('moreAdvancedItem', 'Advanced', 'view-advanced-item');
+    this._advancedItem.classList.add('load-menu-item--checkable');
+    this._advancedItem.dataset.tipTitle = 'Advanced view';
+    this._advancedItem.dataset.tipBody  = 'Shows every per-item control (all modal action links) on the builder tree.';
+    this._advancedItem.addEventListener('click', () => {
+      this.close();
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_VIEW_MODE_CHANGE, { detail: { mode: 'advanced' } }));
+    });
+
+    // ── Tree controls: Expand all / Collapse all ──────────────────────────────
+    const expandItem = this._item(null, '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="menu-item-icon"><path d="M2 6 L2 2 L6 2 M10 2 L14 2 L14 6 M14 10 L14 14 L10 14 M6 14 L2 14 L2 10"/></svg>Expand all', 'expand-all-btn');
+    expandItem.dataset.tipTitle = 'Expand all';
+    expandItem.dataset.tipBody  = 'Shows all children under every group in the builder tree.';
+    expandItem.addEventListener('click', () => {
+      this.close();
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
+    });
+
+    const collapseItem = this._item(null, '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="menu-item-icon"><path d="M6 2 L6 6 L2 6 M10 2 L10 6 L14 6 M14 10 L10 10 L10 14 M6 14 L6 10 L2 10"/></svg>Collapse all', 'collapse-all-btn');
+    collapseItem.dataset.tipTitle = 'Collapse all';
+    collapseItem.dataset.tipBody  = 'Hides children under every group in the builder tree.';
+    collapseItem.addEventListener('click', () => {
+      this.close();
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_COLLAPSE_ALL));
+    });
+
     // ── Undo ────────────────────────────────────────────────────────────────
     this._undoItem = document.createElement('button');
     this._undoItem.type = 'button';
@@ -77,6 +122,11 @@ export class MoreMenu extends DropdownMenu {
     this._settingsItem.addEventListener('click', () =>
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS)));
 
-    this._menu.append(this._undoItem, this._redoItem, sep, this._helpItem, this._settingsItem);
+    this._menu.append(
+      this._simpleItem, this._advancedItem, this._sep(),
+      expandItem, collapseItem, this._sep(),
+      this._undoItem, this._redoItem, sep,
+      this._helpItem, this._settingsItem,
+    );
   }
 }

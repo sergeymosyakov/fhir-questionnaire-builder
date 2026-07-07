@@ -39,6 +39,7 @@ export const AppEvents = Object.freeze({
   BUILDER_NAVIGATE_TO:  'builder:navigate-to',
   BUILDER_EXPAND_ALL:   'builder:expand-all',
   BUILDER_COLLAPSE_ALL: 'builder:collapse-all',
+  BUILDER_VIEW_MODE_CHANGE: 'builder:view-mode-change',
 
   // ── Preview / form ────────────────────────────────────────────────────────
   PREVIEW_NAVIGATE_TO: 'preview:navigate-to',
@@ -189,6 +190,7 @@ const STATEFUL_EVENTS = new Set([
   AppEvents.QUESTIONNAIRE_NEW,
   AppEvents.FHIR_VERSION_CHANGED,
   AppEvents.PREVIEW_MODE_CHANGE,
+  AppEvents.BUILDER_VIEW_MODE_CHANGE,
 ]);
 
 const _cache = new Map();

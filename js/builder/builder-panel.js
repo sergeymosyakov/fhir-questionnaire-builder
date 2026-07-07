@@ -48,13 +48,7 @@ export class BuilderPanel {
   // ── Public API ──────────────────────────────────────────────────────────────
   mount() {
     this._container = document.querySelector('[data-mount="tree-container"]');
-    const collapseAllBtn   = document.querySelector('[data-mount="collapse-all-btn"]');
-    const expandAllBtn     = document.querySelector('[data-mount="expand-all-btn"]');
     const addRootGroupBtn  = document.querySelector('[data-mount="add-root-group-btn"]');
-    collapseAllBtn.onclick  = () =>
-      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_COLLAPSE_ALL));
-    expandAllBtn.onclick    = () =>
-      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_EXPAND_ALL));
     addRootGroupBtn.onclick = () => this.addRootGroup();
     new RenumberControl({ renumberAll: () => this.renumberAll() });
   }

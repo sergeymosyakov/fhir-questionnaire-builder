@@ -79,6 +79,7 @@ export function makeActionLink(_node, label, key, tip, container) {
   a.textContent    = label;
   a.className      = 'action-edit';
   a.dataset.testid = 'action-' + key;
+  a.dataset.role   = 'advanced-ctrl';
   if (tip?.title) a.dataset.tipTitle = tip.title;
   if (tip?.body)  a.dataset.tipBody  = tip.body;
   if (tip?.fhir)  a.dataset.tipFhir  = tip.fhir;

@@ -134,8 +134,10 @@
   background: #334155;
   border-color: #334155;
 }
-/* Active item checkmark in preview-mode dropdown */
-.load-menu-item--checked::before { content: '\2713\00A0'; }
+/* Radio-style dropdown items reserve a fixed checkmark gutter so the active
+   item's ✓ lines up with the (blank) gutter of the inactive ones. */
+.load-menu-item--checkable::before { content: '\2713\00A0'; visibility: hidden; }
+.load-menu-item--checked::before   { content: '\2713\00A0'; visibility: visible; }
 
 .top-github-link {
   display: inline-flex;

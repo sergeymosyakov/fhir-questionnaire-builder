@@ -31,6 +31,7 @@ export class PreviewModeMenu extends DropdownMenu {
     ];
     items.forEach(([mode, label, id, testid]) => {
       const item = this._item(id, label, testid);
+      item.classList.add('load-menu-item--checkable');
       item.dataset.mode = mode;
       item.addEventListener('click', () => {
         this.close();

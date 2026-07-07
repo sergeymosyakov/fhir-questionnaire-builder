@@ -158,7 +158,14 @@ test.describe('Builder → preview: delete item', () => {
     await expect(page.locator(`[data-node-id="${itemId}"]`)).toBeVisible();
     await expect(page.locator(`[data-preview-id="${itemId}"]`)).toBeVisible();
 
-    await page.locator(`[data-node-id="${itemId}"]`).getByTestId('node-delete-btn').click();
+    const itemNode = page.locator(`[data-node-id="${itemId}"]`);
+    await expect(async () => {
+      if (!(await itemNode.getByTestId('node-delete-btn').isVisible())) {
+        await itemNode.getByTestId('node-gear-btn').click();
+      }
+      await expect(itemNode.getByTestId('node-delete-btn')).toBeVisible();
+    }).toPass();
+    await itemNode.getByTestId('node-delete-btn').click();
     await page.getByTestId('delete-confirm-del-btn').click();
 
     await expect(page.locator(`[data-node-id="${itemId}"]`)).toHaveCount(0);
@@ -175,7 +182,14 @@ test.describe('Builder → preview: delete group with children', () => {
     await expect(page.locator(`[data-preview-id="${groupId}"]`)).toBeVisible();
     await expect(page.locator(`[data-preview-id="${itemId}"]`)).toBeVisible();
 
-    await page.locator(`[data-node-id="${groupId}"]`).getByTestId('node-delete-btn').first().click();
+    const groupNode = page.locator(`[data-node-id="${groupId}"]`);
+    await expect(async () => {
+      if (!(await groupNode.getByTestId('node-delete-btn').first().isVisible())) {
+        await groupNode.getByTestId('group-add-btn').first().click();
+      }
+      await expect(groupNode.getByTestId('node-delete-btn').first()).toBeVisible();
+    }).toPass();
+    await groupNode.getByTestId('node-delete-btn').first().click();
     await page.getByTestId('delete-confirm-del-btn').click();
 
     await expect(page.locator(`[data-node-id="${groupId}"]`)).toHaveCount(0);
@@ -269,7 +283,7 @@ test.describe('Load FHIR → both panels', () => {
       { timeout: 20_000 }
     );
 
-    await page.getByTestId('expand-all-btn').click();
+    await openDropdownItem(page, 'more-btn', 'expand-all-btn');
 
     await page.evaluate(() => { window.__done = false; document.addEventListener('preview:render-done', () => { window.__done = true; }, { once: true }); });
     await openDropdownItem(page, 'tools-btn', 'expand-all-item');

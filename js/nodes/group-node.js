@@ -4,7 +4,7 @@ import { createCustomSelect } from '../ui/custom-select.js';
 import { AppEvents } from '../events.js';
 import { NODE_REGISTRY } from './registry.js';
 import { TextNode } from './text-node.js';
-import { AddChildMenu } from '../ui/add-child-menu.js';
+import { NodeGearMenu } from '../ui/node-gear-menu.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -364,12 +364,12 @@ export class GroupNode extends BaseNode {
     noteLink.onclick = () => MODAL_REGISTRY.get('note').open(node, noteLink, setActive);
     setActive(noteLink, !!node._designNote);
 
-    // ⊕ Add ▾ dropdown
-    const addChild = new AddChildMenu();
+    // ⚙ gear menu (Add Group / Add Item / Delete) — replaces the ⊕ Add ▾ dropdown and the × button
+    const gear = new NodeGearMenu('group-add-btn');
 
-    const _addChild = (label, factory) => addChild.addItem(
+    const _addChild = (label, testid, factory) => gear.addItem(
       label,
-      'add-menu-' + label.toLowerCase(),
+      testid,
       () => {
         const newNode = factory();
         node.children.push(newNode);
@@ -381,12 +381,12 @@ export class GroupNode extends BaseNode {
       }
     );
 
-    _addChild('Group', () => {
+    _addChild('Add Group', 'add-menu-group', () => {
       const n = new GroupNode({ title: 'New Group' });
       n.id = node.id + '.' + String(node.children.length + 1);
       return n;
     });
-    _addChild('Item', () => {
+    _addChild('Add Item', 'add-menu-item', () => {
       const siblings = node.children.filter(c => c.type === 'item');
       const template = siblings.length > 0 ? siblings[siblings.length - 1] : null;
       const n = template
@@ -400,8 +400,11 @@ export class GroupNode extends BaseNode {
       n.id = node.id + '.' + String(node.children.length + 1);
       return n;
     });
-
-    actions.appendChild(addChild.el);
+    gear.addSep();
+    gear.addItem('Delete', 'node-delete-btn', () => {
+      document.dispatchEvent(new CustomEvent(AppEvents.NODE_DELETE_REQUESTED,
+        { detail: { id: node.id, label: node.title || node.id } }));
+    }, { destructive: true });
 
     const headerTop = document.createElement('div');
     headerTop.className = 'node-header-top';
@@ -425,18 +428,8 @@ export class GroupNode extends BaseNode {
     header.appendChild(titleRow);
     header.appendChild(actions);
 
-    const btnDel = document.createElement('button');
-    btnDel.textContent = '\u2715';
-    btnDel.className = 'btn-node-delete';
-    btnDel.dataset.testid = 'node-delete-btn';
-    btnDel.dataset.tipTitle = 'Delete group';
-    btnDel.onclick = () => {
-      document.dispatchEvent(new CustomEvent(AppEvents.NODE_DELETE_REQUESTED,
-        { detail: { id: node.id, label: node.title || node.id } }));
-    };
-
     div.appendChild(header);
-    div.appendChild(btnDel);
+    div.appendChild(gear.el);
 
 
     setActive(visLink,    !!(node.enableWhen?.length) || !!node.enableWhenExpression);

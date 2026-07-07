@@ -1,5 +1,6 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 import { AppEvents, EventState } from '../events.js';
+import { NodeGearMenu } from '../ui/node-gear-menu.js';
 // Abstract base for all question item nodes (type: 'item').
 // Concrete subclasses set `this.itemType` and may add type-specific defaults.
 // Optional FHIR-imported properties set after construction (all item types):
@@ -495,18 +496,15 @@ export class ItemNode extends BaseNode {
     header.appendChild(titleRow);
     header.appendChild(actions);
 
-    const btnDel = document.createElement('button');
-    btnDel.textContent = '\u2715';
-    btnDel.className = 'btn-node-delete';
-    btnDel.dataset.testid = 'node-delete-btn';
-    btnDel.dataset.tipTitle = 'Delete item';
-    btnDel.onclick = () => {
+    // ⚙ gear menu (Delete) — replaces the × button
+    const gear = new NodeGearMenu('node-gear-btn');
+    gear.addItem('Delete', 'node-delete-btn', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.NODE_DELETE_REQUESTED,
         { detail: { id: node.id, label: node.title || node.id } }));
-    };
+    }, { destructive: true });
 
     div.appendChild(header);
-    div.appendChild(btnDel);
+    div.appendChild(gear.el);
 
     setActive(typeLink,        true);
     setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);

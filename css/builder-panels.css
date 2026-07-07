@@ -15,59 +15,61 @@
 .action-edit:hover   { background: #d1c4e9; }
 .action-edit--active { background: #4527a0; color: #fff; font-weight: 600; }
 .action-edit--active:hover { background: #311b92; }
+
+/* Simple mode — hide advanced (modal-opening) controls; keep the ⚙ gear (Add / Delete) + structure */
+.builder--simple [data-role="advanced-ctrl"] { display: none; }
 .action-add          { background: var(--c-primary-lt); color: var(--c-primary); }
 .action-add:hover    { background: #bbdefb; }
 .action-delete       { background: #ffebee; color: #c62828; }
 .action-delete:hover { background: #ffcdd2; }
-.action-add-wrap     { position: relative; display: inline-flex; }
-.action-add-btn {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  background: var(--c-primary-lt);
-  color: var(--c-primary);
-  transition: background .12s;
-  white-space: nowrap;
+
+/* ── Node gear menu (replaces the × delete button) ─────────────────────────── */
+.node-gear-wrap {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  z-index: 20;
 }
-.action-add-btn:hover { background: #bbdefb; }
-.action-add-menu {
+.node-gear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--r-sm);
+  color: #b0b6bd;
+  cursor: pointer;
+  transition: color .15s, background .15s;
+}
+.node-gear-btn:hover { color: var(--c-primary); background: #eef2f7; }
+.node-gear-menu {
   position: absolute;
   top: calc(100% + 4px);
-  left: 0;
+  right: 0;
+  left: auto;
   z-index: 100;
   background: #fff;
   border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
   box-shadow: 0 4px 12px rgba(0,0,0,.12);
-  min-width: 110px;
+  min-width: 130px;
   overflow: hidden;
 }
-.action-add-menu-item {
+.node-gear-menu-item {
   padding: 7px 14px;
   font-size: 12px;
   cursor: pointer;
-  color: var(--c-primary);
+  color: var(--c-text);
+  white-space: nowrap;
   transition: background .1s;
 }
-.action-add-menu-item:hover { background: var(--c-primary-lt); }
-.btn-node-delete {
-  position: absolute;
-  top: 6px;
-  right: 8px;
-  background: none;
-  border: none;
-  color: #ccc;
-  font-size: 13px;
-  line-height: 1;
-  padding: 0 2px;
-  cursor: pointer;
-  transition: color .15s;
-}
-.btn-node-delete:hover { color: #c62828; }
+.node-gear-menu-item:hover { background: var(--c-primary-lt); }
+.node-gear-menu-item--danger { color: #c62828; }
+.node-gear-menu-item--danger:hover { background: #ffebee; }
+.node-gear-menu-sep { height: 1px; background: var(--c-border); margin: 4px 0; }
 
 .btn-node-copy {
   display: inline-flex;
