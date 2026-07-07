@@ -18,10 +18,6 @@
 
 /* Simple mode — hide advanced (modal-opening) controls; keep the ⚙ gear (Add / Delete) + structure */
 .builder--simple [data-role="advanced-ctrl"] { display: none; }
-.action-add          { background: var(--c-primary-lt); color: var(--c-primary); }
-.action-add:hover    { background: #bbdefb; }
-.action-delete       { background: #ffebee; color: #c62828; }
-.action-delete:hover { background: #ffcdd2; }
 
 /* ── Node gear menu (replaces the × delete button) ─────────────────────────── */
 .node-gear-wrap {
