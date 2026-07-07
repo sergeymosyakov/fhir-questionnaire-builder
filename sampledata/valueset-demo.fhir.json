@@ -157,10 +157,10 @@
           "answerValueSet": "#vs-activity-level"
         },
         {
-          "linkId": "q-occupation",
-          "text": "Occupation type",
+          "linkId": "q-marital",
+          "text": "Marital status",
           "type": "choice",
-          "answerValueSet": "http://hl7.org/fhir/ValueSet/occupation-snomed-ct"
+          "answerValueSet": "http://hl7.org/fhir/ValueSet/marital-status"
         }
       ]
     }
