@@ -107,6 +107,11 @@ body {
   margin-top: -6px;
 }
 
+.s-empty-note {
+  font-size: 13px;
+  color: var(--s-muted);
+}
+
 .s-input {
   width: 100%;
   font-family: monospace;

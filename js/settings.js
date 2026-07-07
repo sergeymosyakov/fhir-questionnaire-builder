@@ -52,7 +52,7 @@ function _setResult(el, { ok, message, loading = false }) {
 function _renderValidators(validators) {
   const wrap = _el('validatorsDisplay');
   if (!validators || validators.length === 0) {
-    wrap.innerHTML = '<p style="font-size:13px;color:#888">No validators configured in config.json.</p>';
+    wrap.innerHTML = '<p class="s-empty-note">No validators configured in config.json.</p>';
     return;
   }
   wrap.innerHTML = '';

@@ -115,7 +115,7 @@ class SaveFormatModal extends Modal {
               document.body.removeChild(a);
               URL.revokeObjectURL(url);
             }
-              document.dispatchEvent(new CustomEvent('file-name:changed', { detail: { name: trimmed } }));
+            document.dispatchEvent(new CustomEvent(AppEvents.FILE_NAME_CHANGED, { detail: { name: trimmed } }));
           });
         },
       }
