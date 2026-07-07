@@ -5,6 +5,7 @@ import { AppEvents } from '../events.js';
 import { NODE_REGISTRY } from './registry.js';
 import { TextNode } from './text-node.js';
 import { NodeGearMenu } from '../ui/node-gear-menu.js';
+import { addCopyPasteGearItems } from './builder-helpers.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -264,34 +265,6 @@ export class GroupNode extends BaseNode {
     typeLabel.textContent = isEmptyGroupNode ? '[Info]' : '[Group]';
     titleWrap.appendChild(typeLabel);
 
-    const btnCopy = document.createElement('button');
-    btnCopy.type = 'button';
-    btnCopy.className = 'btn-node-copy';
-    btnCopy.dataset.testid = 'node-copy-btn';
-    btnCopy.textContent = '\u29c9';
-    btnCopy.dataset.tipTitle = 'Copy group';
-    btnCopy.dataset.tipBody  = 'Copies this group and all its children. Use Paste after on any node to insert the copy.';
-    btnCopy.onclick = e => { e.stopPropagation(); document.dispatchEvent(new CustomEvent(AppEvents.NODE_COPY_REQUESTED, { detail: { id: node.id } })); };
-    titleWrap.appendChild(btnCopy);
-
-    const _makePasteBtn = (icon, testid, tipTitle, tipBody, eventName) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'btn-node-paste';
-      btn.dataset.testid = testid;
-      btn.textContent = icon;
-      btn.dataset.tipTitle = tipTitle;
-      btn.dataset.tipBody  = tipBody;
-      btn.classList.toggle('btn-node-paste--hidden', !BaseNode._hasClipboard);
-      document.addEventListener(AppEvents.CLIPBOARD_CHANGED, e => {
-        btn.classList.toggle('btn-node-paste--hidden', !e.detail.hasClip);
-      }, { signal: node._ac.signal });
-      btn.onclick = e => { e.stopPropagation(); document.dispatchEvent(new CustomEvent(eventName, { detail: { id: node.id } })); };
-      return btn;
-    };
-    titleWrap.appendChild(_makePasteBtn('\u2191\u29c9', 'node-paste-before-btn', 'Paste before', 'Insert copied node before this group.', AppEvents.NODE_PASTE_BEFORE_REQUESTED));
-    titleWrap.appendChild(_makePasteBtn('\u2193\u29c9', 'node-paste-after-btn',  'Paste after',  'Insert copied node after this group.',  AppEvents.NODE_PASTE_AFTER_REQUESTED));
-
     const linkIdInput = node._buildLinkIdInput();
 
     const prefixInput = node._buildPrefixInput('\u2014');
@@ -400,6 +373,8 @@ export class GroupNode extends BaseNode {
       n.id = node.id + '.' + String(node.children.length + 1);
       return n;
     });
+    gear.addSep();
+    addCopyPasteGearItems(gear, node, BaseNode._hasClipboard);
     gear.addSep();
     gear.addItem('Delete', 'node-delete-btn', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.NODE_DELETE_REQUESTED,

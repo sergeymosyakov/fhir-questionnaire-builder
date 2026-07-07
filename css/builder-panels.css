@@ -26,6 +26,7 @@
   right: 6px;
   z-index: 20;
 }
+.node-gear-wrap--open { z-index: 200; }
 .node-gear-btn {
   display: inline-flex;
   align-items: center;
@@ -65,40 +66,9 @@
 .node-gear-menu-item:hover { background: var(--c-primary-lt); }
 .node-gear-menu-item--danger { color: #c62828; }
 .node-gear-menu-item--danger:hover { background: #ffebee; }
+.node-gear-menu-item--disabled { color: var(--c-text-dim, #aaa); cursor: default; opacity: .55; }
+.node-gear-menu-item--disabled:hover { background: none; }
 .node-gear-menu-sep { height: 1px; background: var(--c-border); margin: 4px 0; }
-
-.btn-node-copy {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  color: #bbb;
-  font-size: 13px;
-  line-height: 1;
-  padding: 0 3px;
-  cursor: pointer;
-  transition: color .15s;
-  vertical-align: middle;
-}
-.btn-node-copy:hover { color: #4527a0; }
-
-.btn-node-paste {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  color: #4527a0;
-  font-size: 13px;
-  line-height: 1;
-  padding: 0 2px;
-  cursor: pointer;
-  transition: color .15s, opacity .15s;
-  vertical-align: middle;
-}
-.btn-node-paste:hover { color: #311b92; }
-.btn-node-paste--hidden { display: none; }
 
 /* === Collapsible action panels =============================================== */
 .node-body {

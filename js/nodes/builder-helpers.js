@@ -7,6 +7,30 @@ import { AppEvents } from '../events.js';
 
 const _notify = () => document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 
+/**
+ * Populate a NodeGearMenu with Copy / Paste before / Paste after items.
+ * Paste items are shown disabled (greyed) when the clipboard is empty and
+ * toggled live via CLIPBOARD_CHANGED. Caller adds its own separator + Delete.
+ * @param {import('../ui/node-gear-menu.js').NodeGearMenu} gear
+ * @param {object} node          node instance (needs .id and ._ac.signal)
+ * @param {boolean} hasClip      initial clipboard state (BaseNode._hasClipboard)
+ */
+export function addCopyPasteGearItems(gear, node, hasClip) {
+  gear.addItem('Copy', 'node-copy-btn', () =>
+    document.dispatchEvent(new CustomEvent(AppEvents.NODE_COPY_REQUESTED, { detail: { id: node.id } })));
+  const pb = gear.addItem('Paste before', 'node-paste-before-btn', () =>
+    document.dispatchEvent(new CustomEvent(AppEvents.NODE_PASTE_BEFORE_REQUESTED, { detail: { id: node.id } })),
+    { disabled: !hasClip });
+  const pa = gear.addItem('Paste after', 'node-paste-after-btn', () =>
+    document.dispatchEvent(new CustomEvent(AppEvents.NODE_PASTE_AFTER_REQUESTED, { detail: { id: node.id } })),
+    { disabled: !hasClip });
+  document.addEventListener(AppEvents.CLIPBOARD_CHANGED, e => {
+    const dis = !e.detail.hasClip;
+    pb.classList.toggle('node-gear-menu-item--disabled', dis);
+    pa.classList.toggle('node-gear-menu-item--disabled', dis);
+  }, { signal: node._ac.signal });
+}
+
 /** Returns a <div class="node-title-row"> with a click-to-edit title field. */
 export function buildInlineTitleEditor(node) {
   const titleRow = document.createElement('div');

@@ -1,6 +1,7 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 import { AppEvents, EventState } from '../events.js';
 import { NodeGearMenu } from '../ui/node-gear-menu.js';
+import { addCopyPasteGearItems } from './builder-helpers.js';
 // Abstract base for all question item nodes (type: 'item').
 // Concrete subclasses set `this.itemType` and may add type-specific defaults.
 // Optional FHIR-imported properties set after construction (all item types):
@@ -334,34 +335,6 @@ export class ItemNode extends BaseNode {
     typeLabel.textContent = '[Item]';
     titleWrap.appendChild(typeLabel);
 
-    const btnCopy = document.createElement('button');
-    btnCopy.type = 'button';
-    btnCopy.className = 'btn-node-copy';
-    btnCopy.dataset.testid = 'node-copy-btn';
-    btnCopy.textContent = '\u29c9';
-    btnCopy.dataset.tipTitle = 'Copy item';
-    btnCopy.dataset.tipBody  = 'Copies this item to the clipboard as FHIR JSON. Use Paste after on any node to insert the copy.';
-    btnCopy.onclick = e => { e.stopPropagation(); document.dispatchEvent(new CustomEvent(AppEvents.NODE_COPY_REQUESTED, { detail: { id: node.id } })); };
-    titleWrap.appendChild(btnCopy);
-
-    const _makePasteBtn = (icon, testid, tipTitle, tipBody, eventName) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'btn-node-paste';
-      btn.dataset.testid = testid;
-      btn.textContent = icon;
-      btn.dataset.tipTitle = tipTitle;
-      btn.dataset.tipBody  = tipBody;
-      btn.classList.toggle('btn-node-paste--hidden', !BaseNode._hasClipboard);
-      document.addEventListener(AppEvents.CLIPBOARD_CHANGED, e => {
-        btn.classList.toggle('btn-node-paste--hidden', !e.detail.hasClip);
-      }, { signal: node._ac.signal });
-      btn.onclick = e => { e.stopPropagation(); document.dispatchEvent(new CustomEvent(eventName, { detail: { id: node.id } })); };
-      return btn;
-    };
-    titleWrap.appendChild(_makePasteBtn('\u2191\u29c9', 'node-paste-before-btn', 'Paste before', 'Insert copied node before this item.', AppEvents.NODE_PASTE_BEFORE_REQUESTED));
-    titleWrap.appendChild(_makePasteBtn('\u2193\u29c9', 'node-paste-after-btn',  'Paste after',  'Insert copied node after this item.',  AppEvents.NODE_PASTE_AFTER_REQUESTED));
-
     const prefixInput = node._buildPrefixInput('prefix');
     titleWrap.appendChild(prefixInput);
 
@@ -496,8 +469,10 @@ export class ItemNode extends BaseNode {
     header.appendChild(titleRow);
     header.appendChild(actions);
 
-    // ⚙ gear menu (Delete) — replaces the × button
+    // ⚙ gear menu (Copy / Paste / Delete) — replaces the × button
     const gear = new NodeGearMenu('node-gear-btn');
+    addCopyPasteGearItems(gear, node, BaseNode._hasClipboard);
+    gear.addSep();
     gear.addItem('Delete', 'node-delete-btn', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.NODE_DELETE_REQUESTED,
         { detail: { id: node.id, label: node.title || node.id } }));

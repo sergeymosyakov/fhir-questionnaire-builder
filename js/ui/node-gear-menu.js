@@ -38,7 +38,12 @@ export class NodeGearMenu {
       e.stopPropagation();
       const wasOpen = this._menu.style.display !== 'none';
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      this._menu.style.display = wasOpen ? 'none' : 'block';
+      if (wasOpen) {
+        this.close();
+      } else {
+        this._menu.style.display = 'block';
+        this._wrap.classList.add('node-gear-wrap--open');
+      }
     });
 
     document.addEventListener(AppEvents.CLOSE_DROPDOWNS, () => this.close());
@@ -47,7 +52,7 @@ export class NodeGearMenu {
   /** Root element to append to the DOM. */
   get el() { return this._wrap; }
 
-  close() { this._menu.style.display = 'none'; }
+  close() { this._menu.style.display = 'none'; this._wrap.classList.remove('node-gear-wrap--open'); }
 
   /** Add a divider between item groups. */
   addSep() {
@@ -61,14 +66,19 @@ export class NodeGearMenu {
    * @param {string} label            Visible text
    * @param {string} testid           data-testid value
    * @param {Function} onClick        Called after the menu closes
-   * @param {{destructive?: boolean}} [opts]
+   * @param {{destructive?: boolean, disabled?: boolean}} [opts]
    */
   addItem(label, testid, onClick, opts = {}) {
     const mi = document.createElement('div');
     mi.className = 'node-gear-menu-item' + (opts.destructive ? ' node-gear-menu-item--danger' : '');
+    if (opts.disabled) mi.classList.add('node-gear-menu-item--disabled');
     mi.dataset.testid = testid;
     mi.textContent = label;
-    mi.addEventListener('click', () => { this.close(); onClick(); });
+    mi.addEventListener('click', () => {
+      if (mi.classList.contains('node-gear-menu-item--disabled')) return;
+      this.close();
+      onClick();
+    });
     this._menu.appendChild(mi);
     return mi;
   }
