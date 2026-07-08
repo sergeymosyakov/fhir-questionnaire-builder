@@ -81,7 +81,6 @@ function _buildRow(cols, idx, pending, rerender) {
   pathIn.placeholder = 'Path (e.g. code)';
   pathIn.value = col.path || '';
   pathIn.dataset.testid = 'cc-path';
-  pathIn.oninput = () => { col.path = pathIn.value; };
 
   const labelIn = document.createElement('input');
   labelIn.type = 'text';
@@ -142,6 +141,15 @@ function _buildRow(cols, idx, pending, rerender) {
   };
 
   row.append(pathIn, labelIn, widthIn, fdWrap, delBtn);
+  // apply initial disabled state
+  const _updateDepFields = () => {
+    const hasPath = pathIn.value.trim().length > 0;
+    labelIn.disabled = !hasPath;
+    widthIn.disabled = !hasPath;
+    fdCb.disabled    = !hasPath;
+  };
+  pathIn.oninput = () => { col.path = pathIn.value; _updateDepFields(); };
+  _updateDepFields();
   return row;
 }
 

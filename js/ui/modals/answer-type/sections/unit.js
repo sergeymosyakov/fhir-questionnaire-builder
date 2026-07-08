@@ -97,12 +97,15 @@ class UnitSection extends AnswerTypeSection {
       node._unitValueSet = pending.draftUnitValueSet;
     else
       delete node._unitValueSet;
-    // Unit options (explicit list)
-    const uopts = (pending.draftUnitOptions || []).filter(u => u.code.trim());
+    // Unit options (explicit list) — derive code from display when blank (prevents
+    // silent drop of rows where the user fills only the display name).
+    const uopts = (pending.draftUnitOptions || [])
+      .map(u => ({ ...u, code: u.code.trim() || u.display.trim(), display: u.display.trim() || u.code.trim() }))
+      .filter(u => u.code);
     node._unitOptions = uopts.length ? uopts.map(u => ({
       system: u.system.trim() || undefined,
-      code: u.code.trim(),
-      display: u.display.trim() || undefined,
+      code: u.code,
+      display: u.display || undefined,
     })) : undefined;
   }
 
