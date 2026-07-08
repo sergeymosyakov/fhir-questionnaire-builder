@@ -400,8 +400,8 @@ export class GroupNode extends BaseNode {
     metaRow.appendChild(prefixInput);
 
     header.appendChild(headerTop);
-    header.appendChild(metaRow);
     header.appendChild(titleRow);
+    header.appendChild(metaRow);
     header.appendChild(actions);
 
     div.appendChild(header);
