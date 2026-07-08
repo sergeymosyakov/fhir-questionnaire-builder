@@ -176,7 +176,7 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   flex: 1;
   min-width: 60px;
   padding: 2px 5px;
-  border: 1px solid transparent;
+  border: 1px solid color-mix(in srgb, var(--c-amber) 35%, transparent);
   border-radius: var(--r-sm);
   background: var(--c-amber-lt);
   transition: border-color .15s;
@@ -193,7 +193,7 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   flex: 1;
   min-width: 60px;
   padding: 2px 5px;
-  border: 1px solid transparent;
+  border: 1px solid color-mix(in srgb, var(--c-primary) 30%, transparent);
   border-radius: var(--r-sm);
   background: var(--c-primary-lt);
   transition: border-color .15s;
@@ -256,9 +256,8 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
 .node-title-input:hover { border-color: var(--c-border); }
 .node-title-input:focus { outline: none; border-color: var(--c-primary); background: var(--c-primary-lt); }
 
-/* ── Inline answer-type row (Simple mode only) ─────────────────────────────── */
-.node-inline-type { display: none; }
-.builder--simple .node-inline-type {
+/* ── Inline answer-type row (both view modes) ──────────────────────────────── */
+.node-inline-type {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -285,6 +284,8 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
 }
 .node-inline-type-config svg { display: block; }
 .node-inline-type-config:hover { color: var(--c-primary); background: #eef2f7; }
+.node-inline-type-config--active { color: var(--c-primary); background: var(--c-primary-lt); }
+.node-inline-type-config--active:hover { color: var(--c-primary); filter: brightness(0.9); }
 .node-inline-type-config--attn { color: var(--c-amber); background: var(--c-amber-lt); }
 .node-inline-type-config--attn:hover { color: var(--c-amber); background: var(--c-amber-lt); }
 

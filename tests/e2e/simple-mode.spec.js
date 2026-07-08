@@ -11,7 +11,7 @@
 //   view-advanced-item  "Advanced" menu item
 //   expand-all-btn      "Expand all" menu item (builder tree)
 //   collapse-all-btn    "Collapse all" menu item (builder tree)
-//   action-type         "Answer Type" action link on an item (advanced-ctrl)
+//   action-states       "States" action link on an item (advanced-ctrl, hidden in Simple)
 //   group-add-btn       "+" Add child button on a group (stays visible)
 
 import { test, expect } from '@playwright/test';
@@ -27,14 +27,14 @@ async function seedTree(page) {
 test.describe('Simple / Advanced view mode', () => {
   test('advanced is the default — action links are visible', async ({ page }) => {
     const itemId = await seedTree(page);
-    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type')).toBeVisible();
+    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-states')).toBeVisible();
   });
 
   test('switching to Simple hides action links but keeps Add ▾', async ({ page }) => {
     const itemId = await seedTree(page);
     await openDropdownItem(page, 'more-btn', 'view-simple-item');
 
-    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type')).toBeHidden();
+    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-states')).toBeHidden();
     // Add ▾ on the group remains available so items/groups can still be added.
     await expect(page.locator('[data-node-id="1"]').getByTestId('group-add-btn')).toBeVisible();
   });
@@ -42,10 +42,10 @@ test.describe('Simple / Advanced view mode', () => {
   test('switching back to Advanced re-shows action links', async ({ page }) => {
     const itemId = await seedTree(page);
     await openDropdownItem(page, 'more-btn', 'view-simple-item');
-    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type')).toBeHidden();
+    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-states')).toBeHidden();
 
     await openDropdownItem(page, 'more-btn', 'view-advanced-item');
-    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type')).toBeVisible();
+    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-states')).toBeVisible();
   });
 
   test('the active mode shows a checkmark in the menu', async ({ page }) => {
@@ -65,11 +65,11 @@ test.describe('Simple / Advanced view mode', () => {
   test('the Simple choice persists across reload', async ({ page }) => {
     const itemId = await seedTree(page);
     await openDropdownItem(page, 'more-btn', 'view-simple-item');
-    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type')).toBeHidden();
+    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-states')).toBeHidden();
 
     await page.reload();
     await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type')).toBeHidden();
+    await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-states')).toBeHidden();
   });
 });
 

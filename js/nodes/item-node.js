@@ -4,7 +4,7 @@ import { NodeGearMenu } from '../ui/node-gear-menu.js';
 import { addCopyPasteGearItems, applyMetaLabelTips } from './builder-helpers.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { ITEM_TYPES } from '../ui/modals/answer-type/data.js';
-import { changeNodeType, nodeTypeNeedsConfig } from './change-type.js';
+import { changeNodeType, nodeTypeNeedsConfig, nodeHasTypeConfig } from './change-type.js';
 // Abstract base for all question item nodes (type: 'item').
 // Concrete subclasses set `this.itemType` and may add type-specific defaults.
 // Optional FHIR-imported properties set after construction (all item types):
@@ -15,9 +15,10 @@ import { changeNodeType, nodeTypeNeedsConfig } from './change-type.js';
 import { BaseNode, applyRenderStyle } from './base-node.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
 
-// Builds the inline answer-type row shown in Simple mode (CSS-hidden in
-// Advanced). A compact type dropdown + a config button that opens the full
-// Answer Type modal (highlighted when the current type still needs options).
+// Builds the inline answer-type row shown in every builder card (both view
+// modes). A compact type dropdown that fills the row + a config button opening
+// the full Answer Type modal (highlighted for choice-family types, whose answer
+// options are defined in that modal). Replaces the old "Answer Type" action link.
 const _TUNE_SVG =
   '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
   'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -27,7 +28,7 @@ const _TUNE_SVG =
   '<line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/>' +
   '<line x1="17" y1="16" x2="23" y2="16"/></svg>';
 
-function buildInlineTypeRow(node, typeLink, setActive) {
+function buildInlineTypeRow(node, setActive) {
   const row = document.createElement('div');
   row.className = 'node-inline-type';
 
@@ -59,20 +60,27 @@ function buildInlineTypeRow(node, typeLink, setActive) {
   });
   row.appendChild(sel.el);
 
-  const needs = nodeTypeNeedsConfig(node);
+  const isChoice  = nodeTypeNeedsConfig(node);
+  const hasConfig = !isChoice && nodeHasTypeConfig(node);
   const cfg = document.createElement('button');
   cfg.type = 'button';
-  cfg.className = 'node-inline-type-config' + (needs ? ' node-inline-type-config--attn' : '');
-  cfg.dataset.testid = 'inline-answer-config';
+  cfg.className = 'node-inline-type-config'
+    + (isChoice  ? ' node-inline-type-config--attn'   : '')
+    + (hasConfig ? ' node-inline-type-config--active'  : '');
+  cfg.dataset.testid = 'action-type';
   cfg.innerHTML = _TUNE_SVG;
-  cfg.dataset.tipTitle = needs ? 'Answer options' : 'Answer type settings';
-  cfg.dataset.tipBody  = needs
+  cfg.dataset.tipTitle = isChoice  ? 'Answer options'
+                       : hasConfig ? 'Answer type settings (configured)'
+                       :             'Answer type settings';
+  cfg.dataset.tipBody  = isChoice
     ? 'Answer options for this type are configured in the Answer Type dialog. Click to open.'
+    : hasConfig
+    ? 'This item has Answer Type settings configured. Click to view or change them.'
     : 'Configure options, value sets, units, and other advanced settings for this answer type.';
-  cfg.onclick = typeLink?.onclick ?? (() => {
+  cfg.onclick = () => {
     const _ctx = EventState.get(AppEvents.APP_CONTEXT_READY);
-    MODAL_REGISTRY.get('answerType').open(node, typeLink, setActive, _ctx?.questDoc, _ctx?.answerStore);
-  });
+    MODAL_REGISTRY.get('answerType').open(node, null, setActive, _ctx?.questDoc, _ctx?.answerStore);
+  };
   row.appendChild(cfg);
 
   return row;
@@ -419,14 +427,6 @@ export class ItemNode extends BaseNode {
 
     const setActive = (el, active) => el.classList.toggle('action-edit--active', active);
 
-    const typeLink = node._makeActionLink('Answer Type', 'type', {
-      title: 'Answer Type',
-      body:  'Sets the FHIR item type (boolean, decimal, string, choice, date, url, attachment, reference, quantity, display). Controls which input control is rendered in the preview.',
-      fhir:  'Questionnaire.item.type',
-      spec:  'R4 \u00B7 required',
-    }, actions);
-    typeLink.onclick = () => { const _ctx = EventState.get(AppEvents.APP_CONTEXT_READY); MODAL_REGISTRY.get('answerType').open(node, typeLink, setActive, _ctx?.questDoc, _ctx?.answerStore); };
-
     const statesLink = node._makeActionLink('States', 'states', {
       title: 'Item / group states',
       body:  'Required \u2014 must be answered to pass validation.\nRead-only \u2014 value set programmatically, not editable (items only).\nHidden \u2014 excluded from patient view; participates in logic.',
@@ -533,8 +533,8 @@ export class ItemNode extends BaseNode {
 
     header.appendChild(headerTop);
     header.appendChild(titleRow);
+    header.appendChild(buildInlineTypeRow(node, setActive));
     header.appendChild(metaRow);
-    header.appendChild(buildInlineTypeRow(node, typeLink, setActive));
     header.appendChild(actions);
 
     // ⚙ gear menu (Copy / Paste / Delete) — replaces the × button
@@ -549,7 +549,6 @@ export class ItemNode extends BaseNode {
     div.appendChild(header);
     div.appendChild(gear.el);
 
-    setActive(typeLink,        true);
     setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
     setActive(exprLink,       !!(node._calculatedExpr || node._initialExpr));
     setActive(statesLink,     node.mandatory === true || !!node._readOnly || !!node._hidden || node._observationExtract != null || !!node._usageMode || !!node._signatureRequired?.length);

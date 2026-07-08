@@ -175,6 +175,8 @@
 .at-modal-sub-lbl:not(:first-child) { margin-top: 10px; }
 .at-modal-sub-lbl--mt  { margin-top: 10px; }
 .at-modal-sub-lbl--mb0 { margin-bottom: 0; }
+.at-modal-sub-lbl--muted { opacity: .45; }
+.at-modal-placeholder-inp:disabled { opacity: .45; cursor: not-allowed; }
 .at-modal-sub-inp      { width: 100%; box-sizing: border-box; resize: vertical; font-family: inherit; font-size: inherit; }
 .at-modal-opt-inp      { width: 100%; box-sizing: border-box; resize: vertical; min-height: 2rem; font-family: inherit; font-size: inherit; }
 .at-modal-avs-drop     { margin-bottom: 6px; }

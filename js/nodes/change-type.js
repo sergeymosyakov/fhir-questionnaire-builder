@@ -78,3 +78,34 @@ export function nodeTypeNeedsConfig(node) {
   return !!node && CHOICE_ANSWER_TYPES.has(node.itemType);
 }
 
+/**
+ * True when a non-choice item has at least one Answer Type setting configured
+ * (regex, min/max, unit, entryFormat, slider step, attachment constraints, etc.).
+ * Used to show the "active" (blue) state on the config button so the user knows
+ * there is something configured in the Answer Type dialog.
+ * @param {object} node
+ * @returns {boolean}
+ */
+export function nodeHasTypeConfig(node) {
+  if (!node) return false;
+  return !!(
+    node._regex ||
+    node._minValue !== undefined ||
+    node._maxValue !== undefined ||
+    node._sliderStep !== undefined ||
+    node.quantityUnit ||
+    node._unitValueSet ||
+    node._unitOptions?.length ||
+    node._entryFormat ||
+    node._maxDecimalPlaces !== undefined ||
+    node._mimeTypes?.length ||
+    node._maxFileSizeMB !== undefined ||
+    node._itemControl ||
+    node._choiceOrientation ||
+    node._columnCount ||
+    node._openLabel ||
+    node._answerConstraint ||
+    node._itemMedia?.url
+  );
+}
+

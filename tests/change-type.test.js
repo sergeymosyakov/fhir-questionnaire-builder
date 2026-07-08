@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { changeNodeType, nodeTypeNeedsConfig } from '../js/nodes/change-type.js';
+import { changeNodeType, nodeTypeNeedsConfig, nodeHasTypeConfig } from '../js/nodes/change-type.js';
 import { createItemNode } from '../js/nodes/index.js';
 
 describe('changeNodeType', () => {
@@ -78,5 +78,55 @@ describe('nodeTypeNeedsConfig', () => {
   it('is false for null/undefined', () => {
     expect(nodeTypeNeedsConfig(null)).toBe(false);
     expect(nodeTypeNeedsConfig(undefined)).toBe(false);
+  });
+});
+
+describe('nodeHasTypeConfig', () => {
+  it('is true when a text item has a regex pattern', () => {
+    const n = createItemNode('text', { id: '1' });
+    n._regex = '[A-Z]+';
+    expect(nodeHasTypeConfig(n)).toBe(true);
+  });
+
+  it('is true when an integer item has a min or max value', () => {
+    const n = createItemNode('integer', { id: '1' });
+    n._minValue = 0;
+    expect(nodeHasTypeConfig(n)).toBe(true);
+    delete n._minValue;
+    n._maxValue = 100;
+    expect(nodeHasTypeConfig(n)).toBe(true);
+  });
+
+  it('is true when a quantity item has a unit', () => {
+    const n = createItemNode('quantity', { id: '1' });
+    n.quantityUnit = 'kg';
+    expect(nodeHasTypeConfig(n)).toBe(true);
+  });
+
+  it('is true when a decimal item has sliderStep', () => {
+    const n = createItemNode('decimal', { id: '1' });
+    n._sliderStep = 0.5;
+    expect(nodeHasTypeConfig(n)).toBe(true);
+  });
+
+  it('is true when item has entryFormat', () => {
+    const n = createItemNode('date', { id: '1' });
+    n._entryFormat = 'MM/DD/YYYY';
+    expect(nodeHasTypeConfig(n)).toBe(true);
+  });
+
+  it('is true when attachment item has mime types', () => {
+    const n = createItemNode('attachment', { id: '1' });
+    n._mimeTypes = ['image/png'];
+    expect(nodeHasTypeConfig(n)).toBe(true);
+  });
+
+  it('is false for a plain text item with no settings', () => {
+    expect(nodeHasTypeConfig(createItemNode('text', { id: '1' }))).toBe(false);
+  });
+
+  it('is false for null/undefined', () => {
+    expect(nodeHasTypeConfig(null)).toBe(false);
+    expect(nodeHasTypeConfig(undefined)).toBe(false);
   });
 });

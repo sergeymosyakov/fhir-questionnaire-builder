@@ -40,7 +40,17 @@ class ItemMediaSection extends AnswerTypeSection {
     ctInp.dataset.testid = 'item-media-ct-input';
     ctInp.value          = pending.draftItemMediaCt;
     ctInp.placeholder    = 'image/png';
+    ctInp.disabled       = !pending.draftItemMediaUrl.trim();
+    ctInp.title          = '';
     ctInp.oninput = () => { pending.draftItemMediaCt = ctInp.value; };
+
+    const updateCtState = () => {
+      const hasUrl = inp.value.trim().length > 0;
+      ctInp.disabled = !hasUrl;
+      ctLbl.classList.toggle('at-modal-sub-lbl--muted', !hasUrl);
+    };
+    inp.addEventListener('input', updateCtState);
+    updateCtState();
 
     section.append(lbl, inp, ctLbl, ctInp);
     return section;
