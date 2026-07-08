@@ -52,6 +52,8 @@ await page.getByTestId('export-quest-item').click();
 
 **rAF yield before commitInput** — after `fill()` for reactive DOM, yield two rAF before committing.
 
+**Preserve `data-testid` when moving/consolidating UI** — when a control moves to a new home (e.g. a title-row icon → a gear-menu item), keep the **same** `data-testid` on the new element so existing specs keep resolving it. Only the *interaction* changes (e.g. open the gear menu first), not the id. This avoids mass spec churn. If the surrounding container now contains sibling nodes carrying the same testid (a group whose children reuse `node-copy-btn` etc.), scope the locator to the node's own menu with `.first()` (the node's own header/menu precedes its children in the DOM).
+
 ## Fixtures
 
 - **Fixture validity** — test fixtures must not trigger side-effects unrelated to the test. If loading a fixture causes a warning/error modal to auto-open (e.g. import validate modal), fix the fixture — do NOT dismiss the modal silently in `loadFixture`/`freshLoad`. A `choice` item in a fixture must have at least 1 `answerOption` to avoid triggering the import validation warning. Empty-state UI scenarios must be reached by removing rows in the test, not by having a broken fixture item.

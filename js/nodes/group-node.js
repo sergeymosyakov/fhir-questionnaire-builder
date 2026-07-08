@@ -5,7 +5,7 @@ import { AppEvents } from '../events.js';
 import { NODE_REGISTRY } from './registry.js';
 import { TextNode } from './text-node.js';
 import { NodeGearMenu } from '../ui/node-gear-menu.js';
-import { addCopyPasteGearItems } from './builder-helpers.js';
+import { addCopyPasteGearItems, applyMetaLabelTips } from './builder-helpers.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -393,6 +393,7 @@ export class GroupNode extends BaseNode {
     const idLbl = document.createElement('span');
     idLbl.className = 'node-meta-label node-meta-label--id';
     idLbl.textContent = 'id:';
+    applyMetaLabelTips(idLbl, prefixLbl);
     metaRow.appendChild(idLbl);
     metaRow.appendChild(linkIdInput);
     metaRow.appendChild(prefixLbl);

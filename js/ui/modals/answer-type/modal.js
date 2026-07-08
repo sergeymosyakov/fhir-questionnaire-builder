@@ -3,19 +3,10 @@
 import { MODAL_REGISTRY } from '../modal-registry.js';
 import { Modal } from '../modal-base.js';
 import { AppEvents } from '../../../events.js';
-import { createItemNode } from '../../../nodes/index.js';
+import { changeNodeType } from '../../../nodes/change-type.js';
 import { createCustomSelect } from '../../custom-select.js';
 import { ITEM_TYPES } from './data.js';
 import { ANSWER_TYPE_SECTIONS } from './index.js';
-
-// Replace a node in the tree array (recursive, in-place splice).
-function _replaceInTree(treeArr, nodeId, newNode) {
-  for (let i = 0; i < treeArr.length; i++) {
-    if (treeArr[i].id === nodeId) { treeArr.splice(i, 1, newNode); return true; }
-    if (treeArr[i].children && _replaceInTree(treeArr[i].children, nodeId, newNode)) return true;
-  }
-  return false;
-}
 
 class AnswerTypeModal extends Modal {
   getName() { return 'answerTypeModal'; }
@@ -40,28 +31,7 @@ class AnswerTypeModal extends Modal {
 
   _apply() {
     if (!this._pending) return;
-    let node = this._pending.node;
-
-    if (node.itemType !== this._pending.draftType) {
-      const id = node.id;
-      document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id } }));
-      const n = this._answerStore?.data[id + '$$n'] || 0;
-      for (let i = 1; i <= n; i++) document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$' + i } }));
-      document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$n' } }));
-    }
-
-    const newNode = createItemNode(this._pending.draftType, { id: node.id });
-    Object.assign(newNode, node, { itemType: this._pending.draftType });
-    _replaceInTree(this._questDoc?.tree, node.id, newNode);
-    node = newNode;
-
-    if (node.impliesRepeats()) {
-      node.repeats = true;
-    } else if (!node.supportsRepeat() && node.repeats) {
-      node.repeats = false;
-      delete node._minOccurs;
-      delete node._maxOccurs;
-    }
+    const node = changeNodeType(this._pending.node, this._pending.draftType, this._questDoc?.tree, this._answerStore);
 
     ANSWER_TYPE_SECTIONS.forEach(s => s.commit(this._pending, node, this._questDoc, this._answerStore));
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));

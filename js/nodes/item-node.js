@@ -1,7 +1,10 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 import { AppEvents, EventState } from '../events.js';
 import { NodeGearMenu } from '../ui/node-gear-menu.js';
-import { addCopyPasteGearItems } from './builder-helpers.js';
+import { addCopyPasteGearItems, applyMetaLabelTips } from './builder-helpers.js';
+import { createCustomSelect } from '../ui/custom-select.js';
+import { ITEM_TYPES } from '../ui/modals/answer-type/data.js';
+import { changeNodeType, nodeTypeNeedsConfig } from './change-type.js';
 // Abstract base for all question item nodes (type: 'item').
 // Concrete subclasses set `this.itemType` and may add type-specific defaults.
 // Optional FHIR-imported properties set after construction (all item types):
@@ -11,6 +14,69 @@ import { addCopyPasteGearItems } from './builder-helpers.js';
 //   _initialValue, _initialValues, _initialSelected
 import { BaseNode, applyRenderStyle } from './base-node.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
+
+// Builds the inline answer-type row shown in Simple mode (CSS-hidden in
+// Advanced). A compact type dropdown + a config button that opens the full
+// Answer Type modal (highlighted when the current type still needs options).
+const _TUNE_SVG =
+  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+  'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+  '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>' +
+  '<line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>' +
+  '<line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>' +
+  '<line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/>' +
+  '<line x1="17" y1="16" x2="23" y2="16"/></svg>';
+
+function buildInlineTypeRow(node, typeLink, setActive) {
+  const row = document.createElement('div');
+  row.className = 'node-inline-type';
+
+  const lbl = document.createElement('span');
+  lbl.className = 'node-meta-label node-meta-label--type';
+  lbl.textContent = 'type:';
+  lbl.dataset.tipTitle = 'Answer type';
+  lbl.dataset.tipBody  = 'The FHIR data type for answers to this item (text, integer, choice, date, \u2026). Determines which control renders in the preview.';
+  lbl.dataset.tipFhir  = 'Questionnaire.item.type';
+  lbl.dataset.tipSpec  = 'R4';
+  row.appendChild(lbl);
+
+  const ctx = EventState.get(AppEvents.APP_CONTEXT_READY);
+  const fhirTarget = ctx?.questDoc?.fhirTarget ?? 'R4';
+  const types = fhirTarget === 'R5' ? ITEM_TYPES.filter(t => t !== 'open-choice') : ITEM_TYPES;
+
+  const sel = createCustomSelect({
+    items:     types.map(t => ({ value: t, label: t })),
+    value:     node.itemType,
+    className: 'sc-trigger--sm',
+    testid:    'inline-answer-type',
+    onChange:  v => {
+      if (v === node.itemType) return;
+      const _ctx = EventState.get(AppEvents.APP_CONTEXT_READY);
+      changeNodeType(node, v, _ctx?.questDoc?.tree, _ctx?.answerStore);
+      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+      document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
+    },
+  });
+  row.appendChild(sel.el);
+
+  const needs = nodeTypeNeedsConfig(node);
+  const cfg = document.createElement('button');
+  cfg.type = 'button';
+  cfg.className = 'node-inline-type-config' + (needs ? ' node-inline-type-config--attn' : '');
+  cfg.dataset.testid = 'inline-answer-config';
+  cfg.innerHTML = _TUNE_SVG;
+  cfg.dataset.tipTitle = needs ? 'Answer options' : 'Answer type settings';
+  cfg.dataset.tipBody  = needs
+    ? 'Answer options for this type are configured in the Answer Type dialog. Click to open.'
+    : 'Configure options, value sets, units, and other advanced settings for this answer type.';
+  cfg.onclick = typeLink?.onclick ?? (() => {
+    const _ctx = EventState.get(AppEvents.APP_CONTEXT_READY);
+    MODAL_REGISTRY.get('answerType').open(node, typeLink, setActive, _ctx?.questDoc, _ctx?.answerStore);
+  });
+  row.appendChild(cfg);
+
+  return row;
+}
 
 export class ItemNode extends BaseNode {
   constructor(data = {}) {
@@ -459,14 +525,16 @@ export class ItemNode extends BaseNode {
     const idLbl = document.createElement('span');
     idLbl.className = 'node-meta-label node-meta-label--id';
     idLbl.textContent = 'id:';
+    applyMetaLabelTips(idLbl, prefixLbl);
     metaRow.appendChild(idLbl);
     metaRow.appendChild(linkIdInput);
     metaRow.appendChild(prefixLbl);
     metaRow.appendChild(prefixInput);
 
     header.appendChild(headerTop);
-    header.appendChild(metaRow);
     header.appendChild(titleRow);
+    header.appendChild(metaRow);
+    header.appendChild(buildInlineTypeRow(node, typeLink, setActive));
     header.appendChild(actions);
 
     // ⚙ gear menu (Copy / Paste / Delete) — replaces the × button

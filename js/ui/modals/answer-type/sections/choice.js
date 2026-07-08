@@ -421,7 +421,15 @@ class ChoiceSection extends AnswerTypeSection {
         delete node._answerExpression;
         delete node._candidateExpression;
 
-        const rows = (pending.draftOptionRows || []).filter(r => r.code.trim());
+        // Derive a code from the label when the Code field is left blank (and
+        // vice versa) so a label-only option is kept instead of silently dropped.
+        const rows = (pending.draftOptionRows || [])
+          .map(r => {
+            const code  = r.code.trim()  || r.label.trim();
+            const label = r.label.trim() || r.code.trim();
+            return { ...r, code, label };
+          })
+          .filter(r => r.code);
         node.options = rows.map(r => r.code.trim() + '=' + r.label.trim()).join(',');
 
         // Sync _rawAnswerOptions: preserve extra Coding properties (system, etc.)

@@ -66,10 +66,6 @@ export function buildLinkIdInput(node) {
   inp.type = 'text';
   inp.value = node.id;
   inp.className = 'node-linkid-input';
-  inp.dataset.tipTitle = 'FHIR linkId';
-  inp.dataset.tipBody  = 'Editable. Must be unique within the questionnaire.';
-  inp.dataset.tipFhir  = 'Questionnaire.item.linkId';
-  inp.dataset.tipSpec  = 'R4';
   inp.oninput = () => { node.id = inp.value.trim() || node.id; _notify(); };
   return inp;
 }
@@ -82,12 +78,20 @@ export function buildPrefixInput(node, placeholder = '\u2014') {
   inp.className = 'node-prefix-input';
   inp.dataset.testid = 'node-prefix-input';
   inp.placeholder = placeholder;
-  inp.dataset.tipTitle = 'Display prefix';
-  inp.dataset.tipBody  = 'Cosmetic only \u2014 e.g. "1.". Does not affect logic or linkId.';
-  inp.dataset.tipFhir  = 'Questionnaire.item.prefix';
-  inp.dataset.tipSpec  = 'R4';
   inp.oninput = () => { node._prefix = inp.value.trim() || undefined; _notify(); };
   return inp;
+}
+
+/** Attach FHIR tooltips to the `id:` and `prefix:` meta labels (shared by item + group). */
+export function applyMetaLabelTips(idLbl, prefixLbl) {
+  idLbl.dataset.tipTitle = 'FHIR linkId';
+  idLbl.dataset.tipBody  = 'Editable. Must be unique within the questionnaire.';
+  idLbl.dataset.tipFhir  = 'Questionnaire.item.linkId';
+  idLbl.dataset.tipSpec  = 'R4';
+  prefixLbl.dataset.tipTitle = 'Display prefix';
+  prefixLbl.dataset.tipBody  = 'Cosmetic only \u2014 e.g. "1.". Does not affect logic or linkId.';
+  prefixLbl.dataset.tipFhir  = 'Questionnaire.item.prefix';
+  prefixLbl.dataset.tipSpec  = 'R4';
 }
 
 /**

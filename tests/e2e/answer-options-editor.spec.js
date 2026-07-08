@@ -247,4 +247,16 @@ test.describe('answer options editor — export round-trip', () => {
     const ordUrl = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
     expect(opts[3].extension?.find(e => e.url === ordUrl)?.valueDecimal).toBe(4);
   });
+
+  test('a label-only option (blank Code) is kept, deriving the code from the label', async ({ page }) => {
+    await freshLoad(page);
+    await openModal(page);
+    await page.getByTestId('opt-add-btn').click();
+    await page.getByTestId('opt-label-3').fill('Unknown'); // Label only, Code left blank
+    await applyModal(page);
+    // Reopen: the row survived and Code was derived from the Label.
+    await openModal(page);
+    await expect(page.getByTestId('opt-code-3')).toHaveValue('Unknown');
+    await expect(page.getByTestId('opt-label-3')).toHaveValue('Unknown');
+  });
 });
