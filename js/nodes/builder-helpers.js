@@ -3,7 +3,7 @@
 // Each function takes the node instance as its first argument.
 // Called via thin delegators on BaseNode: node._buildInlineTitleEditor(), etc.
 import * as dnd from '../builder/dnd.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 
 const _notify = () => document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 
@@ -83,8 +83,7 @@ export function buildPrefixInput(node, placeholder = '\u2014') {
 }
 
 /** Attach FHIR tooltips to the `id:` and `prefix:` meta labels (shared by item + group). */
-export function applyMetaLabelTips(idLbl, prefixLbl) {
-  idLbl.dataset.tipTitle = 'FHIR linkId';
+export function applyMetaLabelTips(idLbl, prefixLbl) {  idLbl.dataset.tipTitle = 'FHIR linkId';
   idLbl.dataset.tipBody  = 'Editable. Must be unique within the questionnaire.';
   idLbl.dataset.tipFhir  = 'Questionnaire.item.linkId';
   idLbl.dataset.tipSpec  = 'R4';
@@ -92,6 +91,25 @@ export function applyMetaLabelTips(idLbl, prefixLbl) {
   prefixLbl.dataset.tipBody  = 'Cosmetic only \u2014 e.g. "1.". Does not affect logic or linkId.';
   prefixLbl.dataset.tipFhir  = 'Questionnaire.item.prefix';
   prefixLbl.dataset.tipSpec  = 'R4';
+}
+
+/**
+ * Add a "Show properties" checkable item to a NodeGearMenu that toggles the
+ * id/prefix meta row for all builder nodes. Wires live state updates via
+ * BUILDER_META_ROW_CHANGE so the checkmark stays in sync across all open
+ * gear menus.
+ * @param {import('../ui/node-gear-menu.js').NodeGearMenu} gear
+ * @param {object} node   node instance (needs ._ac.signal for cleanup)
+ */
+export function addMetaRowGearItem(gear, node) {
+  const isVisible = () => EventState.get(AppEvents.BUILDER_META_ROW_CHANGE)?.visible ?? true;
+  const mi = gear.addCheckItem('Show properties', 'toggle-node-props', isVisible(), () => {
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_META_ROW_CHANGE,
+      { detail: { visible: !isVisible() } }));
+  });
+  document.addEventListener(AppEvents.BUILDER_META_ROW_CHANGE, e => {
+    mi.classList.toggle('node-gear-menu-item--checked', e.detail?.visible ?? true);
+  }, { signal: node._ac.signal });
 }
 
 /**

@@ -62,6 +62,24 @@ export class NodeGearMenu {
   }
 
   /**
+   * Add a checkable item to the menu (shows a ✓ prefix when checked).
+   * @param {string}   label
+   * @param {string}   testid
+   * @param {boolean}  checked   initial checked state
+   * @param {Function} onClick   called after the menu closes
+   */
+  addCheckItem(label, testid, checked, onClick) {
+    const mi = document.createElement('div');
+    mi.className = 'node-gear-menu-item node-gear-menu-item--checkable';
+    if (checked) mi.classList.add('node-gear-menu-item--checked');
+    mi.dataset.testid = testid;
+    mi.textContent = label;
+    mi.addEventListener('click', () => { this.close(); onClick(); });
+    this._menu.appendChild(mi);
+    return mi;
+  }
+
+  /**
    * Add a clickable item to the menu.
    * @param {string} label            Visible text
    * @param {string} testid           data-testid value

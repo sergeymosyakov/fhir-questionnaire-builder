@@ -1,7 +1,7 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 import { AppEvents, EventState } from '../events.js';
 import { NodeGearMenu } from '../ui/node-gear-menu.js';
-import { addCopyPasteGearItems, applyMetaLabelTips } from './builder-helpers.js';
+import { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem } from './builder-helpers.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { ITEM_TYPES } from '../ui/modals/answer-type/data.js';
 import { changeNodeType, nodeTypeNeedsConfig, nodeHasTypeConfig } from './change-type.js';
@@ -539,6 +539,8 @@ export class ItemNode extends BaseNode {
 
     // ⚙ gear menu (Copy / Paste / Delete) — replaces the × button
     const gear = new NodeGearMenu('node-gear-btn');
+    addMetaRowGearItem(gear, node);
+    gear.addSep();
     addCopyPasteGearItems(gear, node, BaseNode._hasClipboard);
     gear.addSep();
     gear.addItem('Delete', 'node-delete-btn', () => {

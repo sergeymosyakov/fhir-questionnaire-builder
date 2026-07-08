@@ -5,7 +5,7 @@ import { AppEvents } from '../events.js';
 import { NODE_REGISTRY } from './registry.js';
 import { TextNode } from './text-node.js';
 import { NodeGearMenu } from '../ui/node-gear-menu.js';
-import { addCopyPasteGearItems, applyMetaLabelTips } from './builder-helpers.js';
+import { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem } from './builder-helpers.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -339,6 +339,8 @@ export class GroupNode extends BaseNode {
 
     // ⚙ gear menu (Add Group / Add Item / Delete) — replaces the ⊕ Add ▾ dropdown and the × button
     const gear = new NodeGearMenu('group-add-btn');
+    addMetaRowGearItem(gear, node);
+    gear.addSep();
 
     const _addChild = (label, testid, factory) => gear.addItem(
       label,

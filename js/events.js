@@ -40,6 +40,9 @@ export const AppEvents = Object.freeze({
   BUILDER_EXPAND_ALL:   'builder:expand-all',
   BUILDER_COLLAPSE_ALL: 'builder:collapse-all',
   BUILDER_VIEW_MODE_CHANGE: 'builder:view-mode-change',
+  // detail: { visible: boolean } — toggle id/prefix meta row on builder nodes.
+  // Stateful: EventState caches the last value so late subscribers read it.
+  BUILDER_META_ROW_CHANGE: 'builder:meta-row-change',
 
   // ── Preview / form ────────────────────────────────────────────────────────
   PREVIEW_NAVIGATE_TO: 'preview:navigate-to',
@@ -191,6 +194,7 @@ const STATEFUL_EVENTS = new Set([
   AppEvents.FHIR_VERSION_CHANGED,
   AppEvents.PREVIEW_MODE_CHANGE,
   AppEvents.BUILDER_VIEW_MODE_CHANGE,
+  AppEvents.BUILDER_META_ROW_CHANGE,
 ]);
 
 const _cache = new Map();

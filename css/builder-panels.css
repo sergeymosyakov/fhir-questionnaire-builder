@@ -18,6 +18,7 @@
 
 /* Simple mode — hide advanced (modal-opening) controls; keep the ⚙ gear (Add / Delete) + structure */
 .builder--simple [data-role="advanced-ctrl"] { display: none; }
+.builder--hide-props .node-meta-row { display: none; }
 
 /* ── Node gear menu (replaces the × delete button) ─────────────────────────── */
 .node-gear-wrap {
@@ -66,6 +67,8 @@
 .node-gear-menu-item:hover { background: var(--c-primary-lt); }
 .node-gear-menu-item--danger { color: #c62828; }
 .node-gear-menu-item--danger:hover { background: #ffebee; }
+.node-gear-menu-item--checkable::before { content: '\2713\00A0'; visibility: hidden; }
+.node-gear-menu-item--checked::before   { visibility: visible; }
 .node-gear-menu-item--disabled { color: var(--c-text-dim, #aaa); cursor: default; opacity: .55; }
 .node-gear-menu-item--disabled:hover { background: none; }
 .node-gear-menu-sep { height: 1px; background: var(--c-border); margin: 4px 0; }
