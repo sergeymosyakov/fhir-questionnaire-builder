@@ -19,6 +19,8 @@ async function addTwoItems(page) {
   // Add second item
   const group = page.locator('[data-node-id="1"]');
   await group.getByTestId('group-add-btn').click();
+  // Wait for the add menu to open before clicking to avoid a click-before-open race.
+  await expect(page.locator('[data-testid="add-menu-item"]').first()).toBeVisible();
   await page.locator('[data-testid="add-menu-item"]').first().click();
   await expect(page.locator('[data-node-id="1.2"]')).toBeVisible();
 }

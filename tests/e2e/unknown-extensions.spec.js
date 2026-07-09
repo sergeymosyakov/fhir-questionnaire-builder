@@ -47,9 +47,16 @@ async function exportFHIR(page) {
   await page.locator('[data-testid="export-btn"]').click();
   await page.locator('[data-testid="export-quest-item"]').click();
   await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
+  await page.getByTestId('saveFormatModalApply').click();
+  // If the questionnaire has validation warnings the validate modal opens first
+  // and blocks the save prompt — click "Export anyway" so the download proceeds.
+  const modal = page.locator('[data-testid="validateModal"]');
+  await modal.waitFor({ state: 'visible', timeout: 3_000 }).catch(() => {});
+  if (await modal.isVisible()) await modal.locator('.btn-fhir-export').click();
+  // Wrap only the actual download trigger (prompt-save) in the download wait.
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.locator('[data-testid="saveFormatModalApply"]').click().then(() => page.getByTestId('prompt-save').click()),
+    page.getByTestId('prompt-save').click(),
   ]);
   const filePath = await download.path();
   const { readFileSync } = await import('node:fs');
