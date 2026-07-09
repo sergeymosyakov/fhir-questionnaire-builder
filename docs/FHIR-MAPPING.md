@@ -284,7 +284,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 
 | Extension URL | Type | Field | Standard? |
 |---|---|---|---|
-| `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'`, `'checklist'`, or `_itemControl` string | Yes (codes: `radio-button`, `check-box`, `autocomplete`, `lookup`, `drop-down`, `text-area`, `text-box`, `spinner`, `flyover`, group `header`/`footer`); `lookup` triggers live server-side ValueSet search via `$expand?filter=`; `flyover` (display items) hides text inline and reveals it on hover; `header`/`footer` render a group as a top/bottom band |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'`, `'checklist'`, or `_itemControl` string | Yes (codes: `radio-button`, `check-box`, `autocomplete`, `lookup`, `drop-down`, `text-box`, `spinner`, `slider`, `flyover`, group `header`/`footer`; plus the **de-facto** `text-area` code, not defined in the FHIR item-control code system but permitted by the extension's Extensible binding); `lookup` triggers live server-side ValueSet search via `$expand?filter=`; `flyover` (display items) hides text inline and reveals it on hover; `header`/`footer` render a group as a top/bottom band |
 | `http://hl7.org/fhir/StructureDefinition/rendering-style` | standard | `_renderStyle` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-xhtml` | standard | `_renderXhtml` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-markdown` | standard | `_renderMarkdown` | Yes (parsed by marked.js + DOMPurify; xhtml takes priority) |
@@ -394,7 +394,7 @@ This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR wit
 |---|---|
 | R4 | ✅ Fully supported |
 | R4B | ✅ Fully supported — schema overlaps R4; R5-only fields are downgraded to builder-private extensions on export |
-| R5 | ✅ Fully supported — `disabledDisplay` and `answerConstraint` are R5 native fields; `choice`/`open-choice` exported as `coding` |
+| R5 | ✅ Fully supported — `disabledDisplay` and `answerConstraint` are R5 native fields; `choice`/`open-choice` exported as `coding`. *Exception:* the R5-only root metadata fields `versionAlgorithm[x]` and `copyrightLabel` are not parsed or preserved. |
 | STU3 | ✅ Import shim — automatically normalised to R4 on load via `js/fhir/stu3-shim.js`; see table below |
 
 ### STU3 → R4 Normalisation (`js/fhir/stu3-shim.js`)
@@ -563,7 +563,6 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `enableBehavior` | ✅ | `all` / `any`; auto-written when required (que-12) |
 | `answerValueSet` | ✅ | Expanded on load via terminology server; round-trip |
 | `answerOption[]` | ✅ | valueCoding, valueString, valueInteger, valueDate, valueTime, valueReference; + initialSelected; + ordinalValue, optionPrefix, optionExclusive, itemWeight, answerMedia extensions |
-| `answerOption[].valueQuantity` | ❌ | Not parsed; ignored on import |
 | `initial[]` | ✅ | All supported value types; multi-value for repeating items |
 | `item[]` (nested) | ✅ | Unlimited depth |
 | `disabledDisplay` | 🔧 | R5 native; on R4/R4B export downgraded to builder-private extension for lossless round-trip |
@@ -576,7 +575,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 
 | Extension | Status | Notes |
 |---|---|---|
-| `questionnaire-itemControl` | ✅ | Codes: radio-button, check-box, drop-down, autocomplete, lookup, text-area, text-box, spinner, slider, flyover; group codes: header, footer |
+| `questionnaire-itemControl` | ✅ | FHIR codes: radio-button, check-box, drop-down, autocomplete, lookup, text-box, spinner, slider, flyover; group codes: header, footer. **`text-area`** is a widely-used **de-facto** code (not defined in the FHIR item-control code system; the extension's *Extensible* binding permits it). Other FHIR codes (list, table, htable, atable, inline, prompt, unit, lower, upper) are preserved in `_itemControl` on round-trip but not specially rendered. |
 | `rendering-style` | ✅ | Inline CSS on `item._text` |
 | `rendering-xhtml` | ✅ | Raw XHTML, sanitized via DOMPurify |
 | `rendering-markdown` | ✅ | Parsed by marked.js + DOMPurify |
@@ -671,6 +670,8 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 |---|---|---|
 | `item.disabledDisplay` | 🔧 | R5 native; downgraded to builder-private extension on R4/R4B export; lossless round-trip |
 | `item.answerConstraint` | 🔧 | R5 native; downgraded to builder-private extension on R4/R4B export; lossless round-trip |
+| `versionAlgorithm[x]` | ❌ | R5-only root field; not parsed or preserved (lost on R5 round-trip). R4/R4B convey the same via the `artifact-versionAlgorithm` extension, which round-trips through `_rawQuestExtensions`. |
+| `copyrightLabel` | ❌ | R5-only root field; not parsed or preserved (lost on R5 round-trip) |
 
 ---
 
