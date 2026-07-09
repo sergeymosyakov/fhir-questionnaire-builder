@@ -150,7 +150,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
     const qWidget = buildQuestionSelect(allItems, ew.question || '', (id, it) => {
       ew.question = id;
       delete ew.answerBoolean; delete ew.answerString; delete ew.answerCoding;
-      delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate;
+      delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate; delete ew.answerQuantity;
       ew.operator = '=';
       if (it) buildOpVal(it.itemType || '', it.options || '');
       else opSel.setOptions([{ value: '', label: '\u2014' }]);
@@ -189,7 +189,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
             ew.operator = 'exists';
             ew.answerBoolean = v.endsWith('|true');
             delete ew.answerString; delete ew.answerCoding;
-            delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate;
+            delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate; delete ew.answerQuantity;
             valWrap.innerHTML = '';
           } else {
             const sel = v;
@@ -214,7 +214,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
           const [op, boolStr] = v.split('|');
           ew.operator = op;
           ew.answerBoolean = boolStr === 'true';
-          delete ew.answerString; delete ew.answerCoding; delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate;
+          delete ew.answerString; delete ew.answerCoding; delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate; delete ew.answerQuantity;
         });
       } else if (itype === 'select' || itype === 'radio' || itype === 'open-choice' || itype === 'checklist') {
         const items = [{ value: '=', label: '=' }, { value: '!=', label: '\u2260' }];
@@ -241,7 +241,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
           }
         }
         _wrapChange();
-      } else if (itype === 'number' || itype === 'integer' || itype === 'decimal' || itype === 'quantity') {
+      } else if (itype === 'number' || itype === 'integer' || itype === 'decimal') {
         const items = [
           { value: '=', label: '=' }, { value: '!=', label: '\u2260' },
           { value: '>', label: '>' }, { value: '<', label: '<' },
@@ -265,6 +265,43 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
             }
           };
           valWrap.appendChild(inp);
+        }
+        _wrapChange();
+      } else if (itype === 'quantity') {
+        const items = [
+          { value: '=', label: '=' }, { value: '!=', label: '\u2260' },
+          { value: '>', label: '>' }, { value: '<', label: '<' },
+          { value: '>=', label: '\u2265' }, { value: '<=', label: '\u2264' },
+        ];
+        _addExistsOpts(items);
+        opSel.setOptions(items);
+        if (ew.operator === 'exists') {
+          opSel.setValue('exists|' + (ew.answerBoolean === false ? 'false' : 'true'));
+        } else {
+          opSel.setValue(ew.operator || '=');
+          const q = ew.answerQuantity || {};
+          const qNode = allItems.find(it => it.id === ew.question);
+          const numInp = document.createElement('input');
+          numInp.type = 'number'; numInp.step = 'any';
+          numInp.className = 'vis-cond-val-inp vis-cond-qty-num';
+          numInp.value = q.value !== undefined ? q.value : '';
+          const unitInp = document.createElement('input');
+          unitInp.type = 'text'; unitInp.className = 'vis-cond-val-inp vis-cond-qty-unit';
+          unitInp.placeholder = 'unit';
+          unitInp.value = q.code || q.unit || (qNode && qNode.quantityUnit) || '';
+          const setQ = () => {
+            const n = parseFloat(numInp.value);
+            const u = unitInp.value.trim();
+            ew.answerQuantity = {
+              ...(isNaN(n) ? {} : { value: n }),
+              ...(u ? { unit: u, code: u } : {}),
+            };
+            delete ew.answerDecimal; delete ew.answerInteger;
+          };
+          numInp.oninput  = setQ;
+          unitInp.oninput = setQ;
+          valWrap.appendChild(numInp);
+          valWrap.appendChild(unitInp);
         }
         _wrapChange();
       } else if (itype === 'date' || itype === 'dateTime' || itype === 'time') {

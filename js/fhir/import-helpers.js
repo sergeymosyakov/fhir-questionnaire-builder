@@ -138,6 +138,7 @@ export function humanEnableWhen(enableWhen, enableBehavior, linkIdMap) {
     else if (ew.answerString   !== undefined) val = '\u00AB' + ew.answerString + '\u00BB';
     else if (ew.answerInteger  !== undefined) val = ew.answerInteger;
     else if (ew.answerDecimal  !== undefined) val = ew.answerDecimal;
+    else if (ew.answerQuantity !== undefined) val = (ew.answerQuantity.value ?? '?') + (ew.answerQuantity.unit || ew.answerQuantity.code ? ' ' + (ew.answerQuantity.unit || ew.answerQuantity.code) : '');
     else if (ew.answerCoding)                 val = ew.answerCoding.display || ew.answerCoding.code || '?';
     else val = '?';
     const opLabel = { '=': '=', '!=': '\u2260', '>': '>', '<': '<', '>=': '\u2265', '<=': '\u2264' }[ew.operator] || ew.operator;

@@ -1,0 +1,41 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "enable-when-quantity-test",
+  "status": "draft",
+  "title": "enableWhen answerQuantity Test",
+  "item": [
+    {
+      "linkId": "weight",
+      "text": "Body weight",
+      "type": "quantity",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+          "valueCoding": {
+            "system": "http://unitsofmeasure.org",
+            "code": "kg",
+            "display": "kg"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "weight-alert",
+      "text": "High weight — extra assessment required.",
+      "type": "display",
+      "disabledDisplay": "hidden",
+      "enableWhen": [
+        {
+          "question": "weight",
+          "operator": ">=",
+          "answerQuantity": {
+            "value": 100,
+            "unit": "kg",
+            "code": "kg",
+            "system": "http://unitsofmeasure.org"
+          }
+        }
+      ]
+    }
+  ]
+}

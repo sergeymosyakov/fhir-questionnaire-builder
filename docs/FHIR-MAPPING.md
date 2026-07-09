@@ -236,7 +236,7 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | `_optionSystems` | `answerOption[].valueCoding.system` | map of option code → system URI (e.g. `http://loinc.org`); optional per-option; editable in Answer Type modal **System** column; exported as `valueCoding.system` in the simple options path; preserved from `_rawAnswerOptions.valueCoding.system` in the raw path |
 | `_optionPrefixes` | `questionnaire-optionPrefix` ext on `answerOption[].extension` | map of option code → display prefix string (e.g. `'A.'`, `'1.'`); prepended to option label in select/radio preview; editable in Answer Type modal (`code=Prefix` format, comma-separated); exported to `answerOption.extension` alongside `ordinalValue` when present |
 | `_sliderStep` | `questionnaire-sliderStepValue` ext (`valueDecimal` or `valueInteger` on import; always `valueInteger` on export — decimal steps rounded; R4 constraint) | imported/exported for `integer`/`decimal` items; renders item as `<input type="range">` slider in preview; editable in Answer Type modal |
-| `_disabledDisplay` | `item.disabledDisplay` (R5 native field) + R4/R4B downgrade extension `item-disabledDisplay` | `'hidden'` → item removed from DOM when not visible; `'protected'` (default) → grayed row; editable in Show When modal; on R4/R4B export the native field is downgraded to the builder-private extension (field is absent from R4/R4B) |
+| `_disabledDisplay` | `item.disabledDisplay` (R5 native field) + R4/R4B downgrade extension `item-disabledDisplay` | Effect applies in **patient view** only: `'hidden'` → item removed from the form when its condition is not met; `'protected'` (default) → item kept but shown grayed/read-only. In the **builder/design preview** every disabled item is always shown dimmed (`lform-waiting`) regardless of this value, so the author sees the full form. Editable in Show When modal; on R4/R4B export the native field is downgraded to the builder-private extension (field is absent from R4/R4B) |
 | `_minOccurs` | `questionnaire-minOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true` |
 | `_maxOccurs` | `questionnaire-maxOccurs` ext (`valueInteger`) | imported/exported when `node.repeats === true`; enforced in preview — add button disabled at limit |
 | `_answerValueSet` | `item.answerValueSet` | imported → `node._answerValueSet`; exported back unchanged; external URLs expanded via `terminologyService.expandAll()` on questionnaire load — options cached in `node._vsCache` and rendered in preview; server resolved via per-item `_preferredTermServer` → questionnaire-level default → `https://tx.fhir.org/r4`; expansion failures shown in validateModal |
@@ -277,6 +277,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 - `node.enableBehavior === 'any'`: **any** condition is sufficient (OR)
 - `enableWhenExpression`: evaluated via FHIRPath if present (takes precedence over `enableWhen[]`)
 - Answer type coercion: all comparisons use `String()` normalization for consistent boolean/string matching
+- Quantity answers (`answerQuantity`): the referenced answer is a `{ value, unit }` object — compared numerically on `value` for all operators; `=`/`≠` additionally require the unit (UCUM code) to match when the condition specifies one
 
 ---
 
@@ -567,7 +568,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `item[]` (nested) | ✅ | Unlimited depth |
 | `disabledDisplay` | 🔧 | R5 native; on R4/R4B export downgraded to builder-private extension for lossless round-trip |
 | `answerConstraint` | 🔧 | R5 native; on R4/R4B export downgraded to builder-private extension |
-| `enableWhen.answerQuantity` | ❌ | Quantity-type enableWhen answers not supported in condition evaluation |
+| `enableWhen.answerQuantity` | ✅ | Quantity-type enableWhen conditions: numeric comparison on the value for all operators; `=`/`≠` also match the unit (UCUM code) when set. Edited in the Show When panel (value + unit) for quantity questions. |
 
 ---
 

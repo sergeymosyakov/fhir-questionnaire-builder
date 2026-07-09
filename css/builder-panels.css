@@ -204,6 +204,8 @@
   font-size: 11px;
   max-width: 120px;
 }
+.vis-cond-qty-num  { max-width: 70px; }
+.vis-cond-qty-unit { max-width: 60px; margin-left: 4px; }
 .vis-cond-rm {
   height: 22px;
   padding: 0 6px;

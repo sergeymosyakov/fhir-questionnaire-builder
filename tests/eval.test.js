@@ -23,7 +23,7 @@ vi.mock('../js/answer-store.js', () => ({
   answerStore: _mockAnswerStore,
 }));
 
-const { evaluateNode, markAllDisabled } = await import('../js/eval.js');
+const { evaluateNode, markAllDisabled, compareValue } = await import('../js/eval.js');
 
 // Helper: reset values before each test
 beforeEach(() => {
@@ -433,5 +433,69 @@ describe('evaluateNode — enableWhen with repeat values', () => {
     _values['q1$$n'] = 1;
     _values['q1$$1'] = 'something';
     expect(evaluateNode(node, {}, []).visible).toBe(true);
+  });
+});
+
+// ── compareValue — answerQuantity ─────────────────────────────────────────────
+describe('compareValue — answerQuantity', () => {
+  const cond = (operator, value, unit) => ({
+    question: 'q', operator, answerQuantity: { value, ...(unit ? { unit, code: unit } : {}) },
+  });
+
+  it('= matches value and unit', () => {
+    expect(compareValue({ value: 5, unit: 'kg' }, cond('=', 5, 'kg'))).toBe(true);
+  });
+
+  it('= fails when unit differs', () => {
+    expect(compareValue({ value: 5, unit: 'g' }, cond('=', 5, 'kg'))).toBe(false);
+  });
+
+  it('= matches value alone when condition has no unit', () => {
+    expect(compareValue({ value: 5, unit: 'kg' }, cond('=', 5))).toBe(true);
+  });
+
+  it('!= is the negation of =', () => {
+    expect(compareValue({ value: 5, unit: 'kg' }, cond('!=', 5, 'kg'))).toBe(false);
+    expect(compareValue({ value: 6, unit: 'kg' }, cond('!=', 5, 'kg'))).toBe(true);
+  });
+
+  it('>= / <= / > / < compare on the numeric value (unit ignored)', () => {
+    expect(compareValue({ value: 100, unit: 'kg' }, cond('>=', 100, 'kg'))).toBe(true);
+    expect(compareValue({ value: 99,  unit: 'kg' }, cond('>=', 100, 'kg'))).toBe(false);
+    expect(compareValue({ value: 101, unit: 'kg' }, cond('>',  100))).toBe(true);
+    expect(compareValue({ value: 100, unit: 'kg' }, cond('>',  100))).toBe(false);
+    expect(compareValue({ value: 40,  unit: 'kg' }, cond('<',  50))).toBe(true);
+    expect(compareValue({ value: 50,  unit: 'kg' }, cond('<=', 50))).toBe(true);
+  });
+
+  it('handles a bare numeric current value (no unit object)', () => {
+    expect(compareValue(100, cond('>=', 100))).toBe(true);
+  });
+
+  it('no answer (undefined) does not satisfy a numeric comparison', () => {
+    expect(compareValue(undefined, cond('>=', 100, 'kg'))).toBe(false);
+  });
+});
+
+// ── evaluateNode — answerQuantity visibility ──────────────────────────────────
+describe('evaluateNode — enableWhen answerQuantity', () => {
+  it('shows item when quantity answer satisfies >=', () => {
+    const node = {
+      id: 'alert', type: 'item', mandatory: false,
+      enableWhen: [{ question: 'weight', operator: '>=', answerQuantity: { value: 100, unit: 'kg', code: 'kg' } }],
+      enableBehavior: 'all', enableWhenExpression: '',
+    };
+    _values['weight'] = { value: 120, unit: 'kg' };
+    expect(evaluateNode(node, {}, []).visible).toBe(true);
+  });
+
+  it('hides item when quantity answer is below threshold', () => {
+    const node = {
+      id: 'alert', type: 'item', mandatory: false,
+      enableWhen: [{ question: 'weight', operator: '>=', answerQuantity: { value: 100, unit: 'kg', code: 'kg' } }],
+      enableBehavior: 'all', enableWhenExpression: '',
+    };
+    _values['weight'] = { value: 80, unit: 'kg' };
+    expect(evaluateNode(node, {}, []).visible).toBe(false);
   });
 });

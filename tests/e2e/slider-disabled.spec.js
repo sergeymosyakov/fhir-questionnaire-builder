@@ -77,9 +77,14 @@ test.describe('slider rendering', () => {
 // ── disabledDisplay behaviour ─────────────────────────────────────────────────
 
 test.describe('disabledDisplay', () => {
-  test('hidden item is absent from DOM when condition not met', async ({ page }) => {
+  // Design/builder preview always shows disabled items dimmed (never removed),
+  // regardless of disabledDisplay. The hidden/protected distinction only takes
+  // effect in patient view.
+  test('hidden item is dimmed (not removed) in design preview when condition not met', async ({ page }) => {
     await loadFixture(page);
-    await expect(page.locator('[data-preview-id="extra-notes"]')).toHaveCount(0);
+    const row = page.locator('[data-preview-id="extra-notes"]');
+    await expect(row).toBeVisible();
+    await expect(row).toHaveClass(/lform-waiting/);
   });
 
   test('protected item is visible (dimmed) when condition not met', async ({ page }) => {
@@ -89,17 +94,27 @@ test.describe('disabledDisplay', () => {
     await expect(row).toHaveClass(/lform-waiting/);
   });
 
-  test('hidden item appears when condition becomes met', async ({ page }) => {
+  test('hidden item becomes active when condition becomes met', async ({ page }) => {
     await loadFixture(page);
     await moveSlider(page, 8);
-    await expect(page.locator('[data-preview-id="extra-notes"]')).toBeVisible();
+    const row = page.locator('[data-preview-id="extra-notes"]');
+    await expect(row).toBeVisible();
+    await expect(row).not.toHaveClass(/lform-waiting/);
   });
 
-  test('hidden item disappears again when condition stops being met', async ({ page }) => {
+  test('hidden item dims again when condition stops being met', async ({ page }) => {
     await loadFixture(page);
     await moveSlider(page, 8);
-    await expect(page.locator('[data-preview-id="extra-notes"]')).toBeVisible();
+    await expect(page.locator('[data-preview-id="extra-notes"]')).not.toHaveClass(/lform-waiting/);
     await moveSlider(page, 3);
+    await expect(page.locator('[data-preview-id="extra-notes"]')).toHaveClass(/lform-waiting/);
+  });
+
+  test('hidden item is removed in patient view when condition not met', async ({ page }) => {
+    await loadFixture(page);
+    await page.getByTestId('preview-mode-btn').click();
+    await page.getByTestId('preview-mode-patient').click();
+    await expect(page.locator('#lform')).toHaveClass(/patient-view/);
     await expect(page.locator('[data-preview-id="extra-notes"]')).toHaveCount(0);
   });
 
@@ -172,15 +187,20 @@ test.describe('builder UI', () => {
     await page.keyboard.press('Escape');
   });
 
-  test('changing disabledDisplay to hidden removes item from preview', async ({ page }) => {
+  test('changing disabledDisplay to hidden removes item in patient view', async ({ page }) => {
     await loadFixture(page);
-    // general-notes is currently protected (shows dimmed)
+    // general-notes is currently protected (shows dimmed in the design preview)
     await expect(page.locator('[data-preview-id="general-notes"]')).toBeVisible();
     await page.locator('[data-node-id="general-notes"]').getByTestId('action-vis').click();
     await page.getByTestId('disabled-display-select').click();
     await page.locator('.oc-opt[data-val="hidden"]').click();
     await page.locator('[data-testid="showWhenModalApply"]').click();
-    // After applying, general-notes should no longer be in the DOM (condition still not met)
+    // Design preview: still shown dimmed (author always sees the full form).
+    await expect(page.locator('[data-preview-id="general-notes"]')).toHaveClass(/lform-waiting/);
+    // Patient view: removed because the condition is not met and it is now hidden.
+    await page.getByTestId('preview-mode-btn').click();
+    await page.getByTestId('preview-mode-patient').click();
+    await expect(page.locator('#lform')).toHaveClass(/patient-view/);
     await expect(page.locator('[data-preview-id="general-notes"]')).toHaveCount(0);
   });
 });

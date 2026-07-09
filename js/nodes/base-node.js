@@ -152,8 +152,11 @@ export class BaseNode {
   }
 
   // ── Dimmed state (enableWhen condition not yet met) ───────────────────────
+  // Only reached in the builder/design preview (patient view removes disabled
+  // items earlier). Every disabled item is shown dimmed here regardless of
+  // disabledDisplay — the author always sees the full form. The hidden/protected
+  // distinction only takes effect in patient view.
   _renderDimmed(res, container, rc) {
-    if (this._disabledDisplay === 'hidden') return;
     const row = this._makePreviewRow('lform-item lform-waiting preview-row--pointer');
     row.dataset.tipTitle = 'Click to navigate to builder node';
     row.addEventListener('click', () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: this.id } })));

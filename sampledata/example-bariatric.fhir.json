@@ -807,6 +807,24 @@
               "valueString": "Pending review"
             }
           ]
+        },
+        {
+          "linkId": "q-weight-alert",
+          "prefix": "9.10",
+          "type": "display",
+          "text": "\u26A0\uFE0F High pre-operative weight (\u2265 100 kg) \u2014 additional anaesthetic assessment required.",
+          "enableWhen": [
+            {
+              "question": "q-weight-preop",
+              "operator": ">=",
+              "answerQuantity": {
+                "value": 100,
+                "unit": "kg",
+                "code": "kg",
+                "system": "http://unitsofmeasure.org"
+              }
+            }
+          ]
         }
       ]
     },

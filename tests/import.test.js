@@ -275,6 +275,22 @@ describe('humanEnableWhen', () => {
     expect(result).toBe('«BMI» > 30');
   });
 
+  it('formats answerQuantity value with unit', () => {
+    const result = humanEnableWhen(
+      [{ question: 'weight', operator: '>=', answerQuantity: { value: 100, unit: 'kg', code: 'kg' } }],
+      'all', { weight: 'Weight' }
+    );
+    expect(result).toBe('«Weight» ≥ 100 kg');
+  });
+
+  it('formats answerQuantity value without unit', () => {
+    const result = humanEnableWhen(
+      [{ question: 'weight', operator: '>=', answerQuantity: { value: 100 } }],
+      'all', { weight: 'Weight' }
+    );
+    expect(result).toBe('«Weight» ≥ 100');
+  });
+
   it('falls back to ? for unrecognised answer type', () => {
     const result = humanEnableWhen(
       [{ question: 'q1', operator: '=' }],

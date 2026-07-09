@@ -18,6 +18,25 @@ export function compareValue(val, ew) {
     const hasVal = val !== undefined && val !== null && val !== '';
     return ew.answerBoolean !== false ? hasVal : !hasVal;
   }
+  // Quantity answers: current value is a { value, unit } object; compare numerically
+  // on the value, and (for =/≠) also match the unit code when the condition sets one.
+  if (ew.answerQuantity !== undefined) {
+    const q = ew.answerQuantity || {};
+    const curNum  = Number(val && typeof val === 'object' ? val.value : val);
+    const ansNum  = Number(q.value);
+    const curUnit = val && typeof val === 'object' ? (val.unit || '') : '';
+    const ansUnit = q.code || q.unit || '';
+    const unitOk  = !ansUnit || String(curUnit) === String(ansUnit);
+    switch (ew.operator) {
+      case '=':  return curNum === ansNum && unitOk;
+      case '!=': return !(curNum === ansNum && unitOk);
+      case '>':  return curNum >  ansNum;
+      case '<':  return curNum <  ansNum;
+      case '>=': return curNum >= ansNum;
+      case '<=': return curNum <= ansNum;
+    }
+    return false;
+  }
   let answer;
   if      (ew.answerBoolean  !== undefined) answer = ew.answerBoolean;
   else if (ew.answerString   !== undefined) answer = ew.answerString;
