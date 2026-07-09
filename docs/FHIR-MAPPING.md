@@ -355,7 +355,7 @@ Additional round-trip fields (stored opaquely; not editable in the builder):
 | `_answerValueSet` | `item.answerValueSet` | URL preserved; expanded via `terminologyService` on load |
 | `questContained[]` | `Questionnaire.contained[]` | Resources deep-copied on export; not otherwise processed |
 | `_unknownExtensions[]` | `item.extension[]` | Unrecognised extension objects preserved verbatim; editable via Props modal |
-| `questMeta._rawQuestExtensions[]` | `Questionnaire.extension[]` (non-variable) | All root-level extensions that are **not** handled by a dedicated field (variables, replaces, preferredTerminologyServer, signatureRequired, builder-target-version) are preserved verbatim in `_rawQuestExtensions` and written back unchanged on export. This covers round-trip fidelity for `sdc-questionnaire-launchContext`, `sdc-questionnaire-itemContext`, `sdc-questionnaire-assembleExpectation`, `sdc-questionnaire-contextExpression`, and any other root-level SDC/custom extension. No editing UI — the declared contexts are not parsed or evaluated client-side. |
+| `questMeta._rawQuestExtensions[]` | `Questionnaire.extension[]` (non-variable) | All root-level extensions that are **not** handled by a dedicated field (variables, replaces, preferredTerminologyServer, signatureRequired, launchContext, builder-target-version) are preserved verbatim in `_rawQuestExtensions` and written back unchanged on export. This covers round-trip fidelity for `sdc-questionnaire-itemContext`, `sdc-questionnaire-assembleExpectation`, `sdc-questionnaire-contextExpression`, and any other root-level SDC/custom extension. No editing UI. |
 
 ### QR answer encoding
 
@@ -502,7 +502,6 @@ Fields and extensions that are imported, stored internally, and written back on 
 |---|---|---|
 | `Questionnaire.contained[]` | 🔧 Deep-copied on export; each resource visible as a JSON chip in the **Contained** card in the left panel | Not editable in the builder — content must be edited in the source file |
 | `type: 'reference'` items | 🔧 Resource-type dropdown + id text input + live FHIR server search autocomplete (when a FHIR Base Server is configured) | No profile-based validation of the selected reference value |
-| `sdc-questionnaire-launchContext` | 🔧 Full editing UI in **Properties → Launch Context** (preset names, type, description); import/export round-trip | The declared variables (%patient, %user, …) are not evaluated beyond what the builder injects from the Patient Panel; full population requires an SDC-capable server (`$populate`) |
 | `sdc-questionnaire-definitionExtract` | 🔧 Client-side extraction runs via **Save ▾ → Definition Extract**; produces a FHIR transaction Bundle from `item.definition` answer mappings | `sdc-questionnaire-itemExtractionContext` and StructureMap-based extraction are not evaluated |
 | `Questionnaire.jurisdiction[]` in Properties modal | 🔧 First `coding` per entry editable (system / code / display) | Extra codings and the `text` field within each CodeableConcept are not preserved when saved |
 
@@ -555,20 +554,20 @@ These warnings appear for well-formed, spec-compliant resources and cannot be av
 | `Questionnaire/$populate` | **Answers ▾ → ↧ Fill from FHIR Server…** (enabled when a questionnaire is loaded) → search for a Patient by name (live FHIR search against the FHIR Base Server) or type `Patient/{id}` → click **Fill from Server** | Sends `POST {SDC Server || FHIR Base}/Questionnaire/$populate` with `Parameters { questionnaire, subject }`. Merges returned `QuestionnaireResponse` answers into the current form via `importQRAnswers`. Accepts both direct QR result and Parameters-wrapped QR. Requires a server implementing the SDC IG (e.g. Matchbox). |
 | Definition-based extraction | **Save ▾ → Definition Extract · FHIR JSON Bundle** (after filling answers) → review the extracted resources → **Download Bundle** | Client-side `definitionExtract(questJson, qr)` walks groups carrying the `sdc-questionnaire-definitionExtract` extension, maps each child `item.definition` answer to its FHIR resource element path, and produces a transaction `Bundle`. No server required. |
 
-### SDC extensions — population and extraction (partial support)
+### SDC extensions — population and extraction
 
 The `$populate` operation above pre-fills the form using server-side logic.
 The following extensions configure *how* the server-side engine populates or extracts fields.
 
 | Extension | Builder support | Notes |
 |---|---|---|
-| `sdc-questionnaire-launchContext` | ✅ Editing UI + round-trip | Declare %patient / %user / %encounter in **Properties → Launch Context**; used by SDC servers for `$populate` |
-| `sdc-questionnaire-definitionExtract` | 🔧 Partial client-side | **Save ▾ → Definition Extract** runs client-side extraction from `item.definition` mappings; `itemExtractionContext` and StructureMap-based extraction not evaluated |
-| `sdc-questionnaire-itemContext` | 🔄 Round-trip only | FHIRPath context per item for server-side population; not evaluated client-side |
-| `sdc-questionnaire-sourceQueries` / `sdc-questionnaire-contextExpression` | 🔄 Round-trip only | Server-side batch queries for pre-population |
-| `sdc-questionnaire-targetStructureMap` | 🔄 Round-trip only | StructureMap transform of completed QR; requires server StructureMap engine |
-| `sdc-questionnaire-sourceStructureMap` | 🔄 Round-trip only | StructureMap for pre-population; requires server StructureMap engine |
-| `sdc-questionnaire-width` | 🔄 Round-trip only | Column width for `gtable`; not rendered (table layout not implemented) |
-| `sdc-questionnaire-lookupQuestionnaire` | 🔄 Round-trip only | Server-side lookup questionnaire for `reference` items |
+| `sdc-questionnaire-launchContext` | ✅ Full | Editing UI in **Properties → Launch Context** + import/export. Execution requires SDC server. |
+| `sdc-questionnaire-definitionExtract` | 🔧 Partial | Client-side extraction via **Save ▾ → Definition Extract**; `itemExtractionContext` and StructureMap-based extraction not evaluated |
+| `sdc-questionnaire-itemContext` | 🔄 Round-trip only | Not evaluated client-side |
+| `sdc-questionnaire-sourceQueries` / `contextExpression` | 🔄 Round-trip only | Server-side batch queries |
+| `sdc-questionnaire-targetStructureMap` | 🔄 Round-trip only | Requires server StructureMap engine |
+| `sdc-questionnaire-sourceStructureMap` | 🔄 Round-trip only | Requires server StructureMap engine |
+| `sdc-questionnaire-width` | 🔄 Round-trip only | Table column width; table layout not implemented |
+| `sdc-questionnaire-lookupQuestionnaire` | 🔄 Round-trip only | Server-side reference lookup |
 
 
