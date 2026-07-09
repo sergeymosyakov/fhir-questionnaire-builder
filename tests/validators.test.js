@@ -55,6 +55,22 @@ describe('LocalValidator', () => {
     const issues = await v.run({ name: 'GoodName' }, [], {});
     expect(issues.some(i => /que-0/.test(i.message))).toBe(false);
   });
+
+  it('surfaces a modifierExtension warning from the questJson root', async () => {
+    const v = new LocalValidator();
+    const questJson = {
+      name: 'GoodName',
+      modifierExtension: [{ url: 'http://example.org/mod', valueBoolean: true }],
+    };
+    const issues = await v.run(questJson, [], {});
+    expect(issues.some(i => i.severity === 'warning' && /modifierExtension/.test(i.message))).toBe(true);
+  });
+
+  it('emits no modifierExtension warning when the questJson root has none', async () => {
+    const v = new LocalValidator();
+    const issues = await v.run({ name: 'GoodName' }, [], {});
+    expect(issues.some(i => /modifierExtension/.test(i.message))).toBe(false);
+  });
 });
 
 describe('ValidatorRegistry', () => {

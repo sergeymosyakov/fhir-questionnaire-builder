@@ -15,8 +15,11 @@ export class LocalValidator extends Validator {
   get type() { return 'local'; }
 
   async _run(questJson, tree, values = {}) {
-    // Pass questMeta-like object from questJson root for que-0 name check
-    const questMeta = questJson ? { name: questJson.name } : null;
+    // Pass questMeta-like object from questJson root for root-level checks
+    // (que-0 name check + modifierExtension warning).
+    const questMeta = questJson
+      ? { name: questJson.name, _rawModifierExtension: questJson.modifierExtension }
+      : null;
     return validateTree(tree, values, questMeta);
   }
 }

@@ -1,0 +1,24 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "modifier-extension-demo",
+  "title": "Modifier Extension Demo",
+  "status": "draft",
+  "modifierExtension": [
+    {
+      "url": "http://vendor.example.com/fhir/StructureDefinition/questionnaire-suppress-scoring",
+      "valueBoolean": true
+    }
+  ],
+  "item": [
+    {
+      "linkId": "q1",
+      "text": "First question",
+      "type": "string"
+    },
+    {
+      "linkId": "q2",
+      "text": "Second question",
+      "type": "boolean"
+    }
+  ]
+}
