@@ -62,6 +62,21 @@ export class DisplayNode extends ItemNode {
   // ── Row content: category icon + label (no control section) ──────────────
   _buildRowContent(row, res, rc) {
     this._initRowClass(row);
+
+    // Flyover itemControl: text is hidden inline and revealed on hover.
+    if (this._itemControl === 'flyover') {
+      const fly = document.createElement('span');
+      fly.className        = 'display-flyover';
+      fly.dataset.testid   = 'display-flyover';
+      fly.textContent      = '\u24D8 Flyover';
+      fly.dataset.tipTitle = 'Flyover';
+      fly.dataset.tipBody  = this.title;
+      row.appendChild(fly);
+      this._buildSupportLinks(row, rc);
+      this._buildVisHint(row, rc);
+      return;
+    }
+
     // Category icon appears BEFORE the label (non-help categories)
     const cat = this._displayCategory;
     if (cat && cat !== 'help') {

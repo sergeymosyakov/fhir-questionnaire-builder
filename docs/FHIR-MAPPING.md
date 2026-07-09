@@ -284,7 +284,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 
 | Extension URL | Type | Field | Standard? |
 |---|---|---|---|
-| `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'`, `'checklist'`, or `_itemControl` string | Yes (codes: `radio-button`, `check-box`, `autocomplete`, `lookup`, `drop-down`, `text-area`, `text-box`, `spinner`); `lookup` triggers live server-side ValueSet search via `$expand?filter=` |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'`, `'checklist'`, or `_itemControl` string | Yes (codes: `radio-button`, `check-box`, `autocomplete`, `lookup`, `drop-down`, `text-area`, `text-box`, `spinner`, `flyover`); `lookup` triggers live server-side ValueSet search via `$expand?filter=`; `flyover` (display items) hides text inline and reveals it on hover |
 | `http://hl7.org/fhir/StructureDefinition/rendering-style` | standard | `_renderStyle` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-xhtml` | standard | `_renderXhtml` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-markdown` | standard | `_renderMarkdown` | Yes (parsed by marked.js + DOMPurify; xhtml takes priority) |
@@ -576,7 +576,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 
 | Extension | Status | Notes |
 |---|---|---|
-| `questionnaire-itemControl` | ✅ | Codes: radio-button, check-box, drop-down, autocomplete, lookup, text-area, text-box, spinner, slider |
+| `questionnaire-itemControl` | ✅ | Codes: radio-button, check-box, drop-down, autocomplete, lookup, text-area, text-box, spinner, slider, flyover |
 | `rendering-style` | ✅ | Inline CSS on `item._text` |
 | `rendering-xhtml` | ✅ | Raw XHTML, sanitized via DOMPurify |
 | `rendering-markdown` | ✅ | Parsed by marked.js + DOMPurify |
@@ -612,7 +612,6 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `questionnaire-baseType` | ✅ | Base FHIR type (editable via Props) |
 | `questionnaire-fhirType` | ✅ | Specific FHIR type (editable via Props) |
 | `questionnaire-itemControl: gtable` | ❌ | Table layout not implemented |
-| `questionnaire-itemControl: flyover` | ❌ | Flyover/popup tooltip not implemented |
 | `questionnaire-itemControl: header/footer/title` | ❌ | Special display controls not implemented |
 
 ---

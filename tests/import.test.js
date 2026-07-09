@@ -1330,6 +1330,12 @@ describe('importFHIR', () => {
       expect(_tree[0]._itemControl).toBe('spinner');
     });
 
+    it('flyover on display → display with _itemControl', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'display', text: 'Hover help', extension: [ic('flyover')] }]));
+      expect(_tree[0].itemType).toBe('display');
+      expect(_tree[0]._itemControl).toBe('flyover');
+    });
+
     it('no itemControl extension → no _itemControl property', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q' }]));
       expect(_tree[0]._itemControl).toBeUndefined();

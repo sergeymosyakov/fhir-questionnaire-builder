@@ -383,6 +383,24 @@
           ]
         }
       ]
+    },
+    {
+      "linkId": "flyover-demo",
+      "text": "Exercise means any activity that raises your heart rate for 10+ minutes, including brisk walking, cycling, or swimming.",
+      "type": "display",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "flyover"
+              }
+            ]
+          }
+        }
+      ]
     }
   ],
   "text": {

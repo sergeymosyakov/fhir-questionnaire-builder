@@ -13,6 +13,7 @@ import './sections/orientation.js';
 import './sections/column-count.js';
 import './sections/choice-columns.js';
 import './sections/display-cat.js';
+import './sections/display-flyover.js';
 import './sections/attach.js';
 import './sections/regex.js';
 import './sections/item-media.js';

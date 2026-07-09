@@ -65,6 +65,22 @@
 .display-help-content         { display: none; font-size: 12px; color: var(--c-text-2); line-height: 1.5; }
 .display-help-content--open   { display: block; }
 
+/* === Flyover (itemControl) — text revealed on hover ========================= */
+.display-flyover {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid #bbb;
+  background: #fff;
+  color: var(--c-text-2);
+  cursor: help;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.display-flyover:hover { background: var(--c-primary-lt, #d9eafc); color: var(--c-primary); border-color: var(--c-primary); }
+
 /* === Flash animations ======================================================== */
 @keyframes preview-flash {
   0%   { box-shadow: 0 0 0 2px var(--c-primary); background: #e3f2fd; }

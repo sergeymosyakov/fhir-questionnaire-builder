@@ -298,6 +298,16 @@ describe('buildFHIRObject — answerOption', () => {
     expect(ic.valueCodeableConcept.coding[0].code).toBe('autocomplete');
   });
 
+  it('exports _itemControl as itemControl extension (flyover on display)', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Hover help', itemType: 'display', _itemControl: 'flyover',
+    }]);
+    const ext = q.item[0].extension || [];
+    const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
+    expect(ic).toBeDefined();
+    expect(ic.valueCodeableConcept.coding[0].code).toBe('flyover');
+  });
+
   it('exports _itemControl as itemControl extension (text-area)', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'text', _itemControl: 'text-area',
