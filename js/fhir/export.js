@@ -513,6 +513,7 @@ export function buildFHIRObject() {
   if (questMeta._rawUseContext)   q.useContext  = questMeta._rawUseContext;
   if (questMeta._rawJurisdiction) q.jurisdiction = questMeta._rawJurisdiction;
   if (questMeta._rawCode)              q.code        = questMeta._rawCode;
+  if (questMeta._rawModifierExtension?.length) q.modifierExtension = JSON.parse(JSON.stringify(questMeta._rawModifierExtension));
   if (questMeta.derivedFrom?.length)   q.derivedFrom = questMeta.derivedFrom;
   if (questMeta.effectivePeriodStart || questMeta.effectivePeriodEnd) {
     const ep = {};

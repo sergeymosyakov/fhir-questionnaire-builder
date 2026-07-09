@@ -649,6 +649,26 @@ describe('validateTree — que-0 Questionnaire.name format', () => {
   });
 });
 
+// ── modifierExtension warning ─────────────────────────────────────────────────
+describe('validateTree — modifierExtension warning', () => {
+  it('warns when questMeta._rawModifierExtension is non-empty', () => {
+    const issues = validateTree([], {}, {
+      _rawModifierExtension: [{ url: 'http://example.org/someModifier', valueBoolean: true }],
+    });
+    expect(issues.length).toBe(1);
+    expect(issues[0].severity).toBe('warning');
+    expect(issues[0].nodeId).toBe('(root)');
+    expect(issues[0].message).toMatch(/modifierExtension/);
+    expect(issues[0].message).toMatch(/http:\/\/example\.org\/someModifier/);
+  });
+
+  it('no warning when _rawModifierExtension is empty or absent', () => {
+    expect(validateTree([], {}, { _rawModifierExtension: [] })).toHaveLength(0);
+    expect(validateTree([], {}, {})).toHaveLength(0);
+    expect(validateTree([], {}, null)).toHaveLength(0);
+  });
+});
+
 // ── que-1: group must have children ──────────────────────────────────────────
 describe('validateTree — que-1 group must have children', () => {
   it('warns when group has no children', () => {

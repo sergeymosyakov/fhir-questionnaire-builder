@@ -96,6 +96,9 @@ export function importFHIR(fhirJson) {
   questMeta._rawJurisdiction = Array.isArray(q.jurisdiction) ? q.jurisdiction : null;
   questMeta._rawCode         = Array.isArray(q.code)         ? q.code         : null;
   questMeta.derivedFrom      = Array.isArray(q.derivedFrom)  ? [...q.derivedFrom] : [];
+  questMeta._rawModifierExtension = Array.isArray(q.modifierExtension) && q.modifierExtension.length
+    ? JSON.parse(JSON.stringify(q.modifierExtension))
+    : [];
   questMeta._metaVersionId   = q.meta?.versionId  || '';
   questMeta._metaSource      = q.meta?.source      || '';
   questMeta._metaLastUpdated = q.meta?.lastUpdated || '';

@@ -43,6 +43,8 @@ class MetadataModal extends Modal {
       jurisdictions:  JSON.parse(JSON.stringify(questMeta._rawJurisdiction || [])),
       preferredTermServer: questMeta.preferredTermServer || '',
       launchContexts: JSON.parse(JSON.stringify(questMeta.launchContexts || [])),
+      // modifierExtension[] — round-trip only; never shown in UI but preserved
+      _rawModifierExtension: JSON.parse(JSON.stringify(questMeta._rawModifierExtension || [])),
     };
     this.setTitle('Questionnaire Properties', '');
     this.body.innerHTML = '';
@@ -90,6 +92,7 @@ class MetadataModal extends Modal {
     questMeta._rawJurisdiction = filteredJur.length ? filteredJur : null;
     questMeta.preferredTermServer = p.preferredTermServer.trim();
     questMeta.launchContexts = p.launchContexts.filter(lc => lc.name.trim());
+    questMeta._rawModifierExtension = p._rawModifierExtension || [];
     this._cancel();
     document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_META_CHANGED));
   }

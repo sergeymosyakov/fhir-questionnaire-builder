@@ -540,7 +540,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `text` (Narrative) | 🔧 | Read-only display in Properties; auto-generated on export; not user-editable |
 | `contained[]` | 🔧 | Deep-copied on export; viewable as JSON chips; not editable in the builder |
 | `implicitRules` | ✅ | Editable in Properties → Resource Meta |
-| `modifierExtension[]` | ❌ | Not read; lost on export cycle |
+| `modifierExtension[]` | 🔄 | Preserved in `questMeta._rawModifierExtension`; written back on export. Validator emits a warning when present — the builder does not interpret modifier semantics. |
 | Unknown root `extension[]` | 🔄 | Preserved in `_rawQuestExtensions`; written back unchanged |
 
 ---

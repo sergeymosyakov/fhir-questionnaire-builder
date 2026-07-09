@@ -77,6 +77,12 @@ export function validateTree(tree, _values = {}, questMeta = null) {
     issues.push({ severity: 'warning', nodeId: '(root)', message: `Questionnaire.name "${questMeta.name}" does not conform to R4 naming convention (que-0) — must start with an uppercase letter and contain only letters, digits, and underscores (max 255 chars).` });
   }
 
+  // ── modifierExtension: warn when present (FHIR R4 §2.6.2.2) ────────────────
+  if (questMeta?._rawModifierExtension?.length) {
+    const urls = questMeta._rawModifierExtension.map(e => e.url || '(no url)').join(', ');
+    issues.push({ severity: 'warning', nodeId: '(root)', message: `This questionnaire has ${questMeta._rawModifierExtension.length} modifierExtension(s) that the builder does not interpret. The questionnaire may have modified semantics not reflected in the builder UI. URLs: ${urls}` });
+  }
+
   const all    = _collectNodes(tree);
   const allIds = all.map(n => n.id);
 
