@@ -497,54 +497,190 @@ Extensions that configure how the server-side engine populates or extracts field
 
 ---
 
-## Not Supported / Partial Support
+## FHIR Coverage
+
+A complete status listing of every FHIR R4 Questionnaire field, extension, and SDC feature relative to this builder.
 
 **Legend:**
 - ✅ **Full** — editable in the builder, imported, exported, and (where applicable) executed client-side.
-- 🔄 **Round-trip only** — preserved on import and written back on export unchanged. No editing UI and no client-side execution.
-- 🔧 **Partial** — some functionality works; specific gaps described.
-- ❌ **Not supported** — the feature requires server-side execution that the builder cannot perform; declared/preserved in the FHIR JSON but not acted upon.
+- 🔧 **Partial** — some functionality works; specific gaps noted.
+- 🔄 **Round-trip** — preserved on import and written back on export unchanged. No editing UI and no client-side execution.
+- ❌ **Not supported** — not parsed; data may be lost on import/export cycle.
 
 ---
 
-### Round-trip only
+### Questionnaire root fields
 
-Fields and extensions that are imported, stored internally, and written back on export unchanged. No editing UI in the builder.
-
-| Field / Extension | Notes |
-|---|---|
-| `Questionnaire.useContext[]` | 🔄 Preserved as `questMeta._rawUseContext`; not editable (structure too variable for a generic editor) |
-| Unknown `Questionnaire.extension[]` | 🔄 All root-level extensions not claimed by a dedicated parser are preserved in `questMeta._rawQuestExtensions` and written back unchanged. This covers any future or non-standard extensions not listed below. |
-| Unknown `item.extension[]` | 🔄 Unrecognised item-level extensions are preserved in `node._unknownExtensions[]`; viewable and editable as raw JSON via the **Props** button |
-| `sdc-questionnaire-itemContext` | 🔄 FHIRPath expression defining the FHIR context node for server-side population/extraction; round-tripped |
-| `sdc-questionnaire-sourceQueries` / `sdc-questionnaire-contextExpression` | 🔄 Server-side batch queries for form pre-population; round-tripped |
-| `sdc-questionnaire-width` | 🔄 Column width hint for `gtable` item control; round-tripped; not rendered (table layout not yet implemented) |
-| `sdc-questionnaire-lookupQuestionnaire` | 🔄 Canonical reference to a Questionnaire used for server-side reference lookup; round-tripped |
-| `meta.tag[]` / `meta.security[]` on QR import | 🔄 Preserved on QR load; no editing UI in the QR Export modal |
-
----
-
-### Partial support
-
-| Field / Extension | What works | What is missing |
+| Field | Status | Notes |
 |---|---|---|
-| `Questionnaire.contained[]` | 🔧 Deep-copied on export; each resource visible as a JSON chip in the **Contained** card in the left panel | Not editable in the builder — content must be edited in the source file |
-| `type: 'reference'` items | 🔧 Resource-type dropdown + id text input + live FHIR server search autocomplete (when a FHIR Base Server is configured) | No profile-based validation of the selected reference value |
-| `sdc-questionnaire-definitionExtract` | 🔧 Client-side extraction runs via **Save ▾ → Definition Extract**; produces a FHIR transaction Bundle from `item.definition` answer mappings | `sdc-questionnaire-itemExtractionContext` and StructureMap-based extraction are not evaluated |
-| `Questionnaire.jurisdiction[]` in Properties modal | 🔧 First `coding` per entry editable (system / code / display) | Extra codings and the `text` field within each CodeableConcept are not preserved when saved |
+| `id` | ✅ | Editable in Properties |
+| `url` | ✅ | |
+| `version` | ✅ | |
+| `name` | ✅ | |
+| `title` | ✅ | |
+| `status` | ✅ | |
+| `experimental` | ✅ | |
+| `date` | ✅ | |
+| `publisher` | ✅ | |
+| `description` | ✅ | |
+| `purpose` | ✅ | |
+| `copyright` | ✅ | |
+| `approvalDate` | ✅ | |
+| `lastReviewDate` | ✅ | |
+| `effectivePeriod` | ✅ | |
+| `subjectType[]` | ✅ | Chip UI in Properties |
+| `language` | ✅ | |
+| `identifier[]` | ✅ | Editable in Properties |
+| `code[]` | ✅ | Editable in Properties |
+| `contact[]` | ✅ | Editable in Properties |
+| `jurisdiction[]` | 🔧 | First `coding` per entry editable; extra codings and `text` field lost on save |
+| `useContext[]` | 🔄 | Preserved; no editing UI (structure too variable) |
+| `derivedFrom[]` | ✅ | Editable in Properties |
+| `meta.*` | ✅ | versionId, source, lastUpdated (always refreshed), profile[], tag[], security[] — all editable in Properties |
+| `text` (Narrative) | 🔧 | Read-only display in Properties; auto-generated on export; not user-editable |
+| `contained[]` | 🔧 | Deep-copied on export; viewable as JSON chips; not editable in the builder |
+| `implicitRules` | ✅ | Editable in Properties → Resource Meta |
+| `modifierExtension[]` | ❌ | Not read; lost on export cycle |
+| Unknown root `extension[]` | 🔄 | Preserved in `_rawQuestExtensions`; written back unchanged |
 
 ---
 
-### Not supported (requires server-side execution)
+### Item core fields
 
-These features require capabilities that do not exist client-side. The extensions are **round-tripped** (data is not lost), but the builder cannot execute them.
+| Field | Status | Notes |
+|---|---|---|
+| `linkId` | ✅ | Editable inline; validated unique |
+| `text` | ✅ | Inline title editor |
+| `type` | ✅ | All 16 R4 item types + builder aliases (radio, checklist, select, checkbox, …) |
+| `required` | ✅ | |
+| `repeats` | ✅ | |
+| `readOnly` | ✅ | |
+| `maxLength` | ✅ | |
+| `prefix` | ✅ | Editable inline |
+| `definition` (URL) | 🔧 | Preserved and editable as a URL; not resolved against StructureDefinition (requires server) |
+| `code[]` | ✅ | Editable via Props button |
+| `enableWhen[]` | ✅ | Full editor; AND/OR behavior |
+| `enableBehavior` | ✅ | `all` / `any`; auto-written when required (que-12) |
+| `answerValueSet` | ✅ | Expanded on load via terminology server; round-trip |
+| `answerOption[]` | ✅ | valueCoding, valueString, valueInteger, valueDate, valueTime, valueReference; + initialSelected; + ordinalValue, optionPrefix, optionExclusive, itemWeight, answerMedia extensions |
+| `answerOption[].valueQuantity` | ❌ | Not parsed; ignored on import |
+| `initial[]` | ✅ | All supported value types; multi-value for repeating items |
+| `item[]` (nested) | ✅ | Unlimited depth |
+| `disabledDisplay` | 🔧 | R5 native; on R4/R4B export downgraded to builder-private extension for lossless round-trip |
+| `answerConstraint` | 🔧 | R5 native; on R4/R4B export downgraded to builder-private extension |
+| `enableWhen.answerQuantity` | ❌ | Quantity-type enableWhen answers not supported in condition evaluation |
 
-| Feature | Why it cannot run client-side |
-|---|---|
-| StructureMap execution (`sdc-questionnaire-targetStructureMap`, `sdc-questionnaire-sourceStructureMap`) | ❌ Requires a StructureMap engine. The extensions are preserved in `_rawQuestExtensions` but not interpreted. |
-| `item.definition` resolution against StructureDefinition | ❌ `item.definition` is preserved and editable as a URL, but the builder does not fetch the referenced StructureDefinition or auto-fill `text`, `type`, or value constraints from it. Requires server integration. |
-| Sub-questionnaire assembly (`sdc-questionnaire-subQuestionnaire`) | ❌ Not parsed or resolved. Requires a FHIR server that implements SDC questionnaire assembly. |
-| `sdc-questionnaire-itemPopulationContext` | ❌ Server-side population context expression; round-tripped but not evaluated. |
+---
+
+### R4 standard extensions (item-level)
+
+| Extension | Status | Notes |
+|---|---|---|
+| `questionnaire-itemControl` | ✅ | Codes: radio-button, check-box, drop-down, autocomplete, lookup, text-area, text-box, spinner, slider |
+| `rendering-style` | ✅ | Inline CSS on `item._text` |
+| `rendering-xhtml` | ✅ | Raw XHTML, sanitized via DOMPurify |
+| `rendering-markdown` | ✅ | Parsed by marked.js + DOMPurify |
+| `ordinalValue` | ✅ | Per-option numeric score |
+| `itemWeight` | ✅ | Per-option weight |
+| `questionnaire-optionPrefix` | ✅ | Per-option display prefix |
+| `questionnaire-optionExclusive` | ✅ | "None of the above" exclusive option |
+| `questionnaire-unit` | ✅ | Quantity default unit (UCUM) |
+| `questionnaire-unitValueSet` | ✅ | Canonical URL for selectable UCUM units |
+| `questionnaire-unitOption` | ✅ | 0..* explicit selectable units |
+| `questionnaire-referenceResource` | ✅ | Locks `reference` type to one resource type |
+| `questionnaire-referenceFilter` | ✅ | FHIRPath filter for valid reference targets |
+| `questionnaire-referenceProfile` | ✅ | Canonical profile URLs for reference items |
+| `questionnaire-minOccurs` | ✅ | Min repeat rows |
+| `questionnaire-maxOccurs` | ✅ | Max repeat rows; enforced in preview |
+| `minValue` | ✅ | Numeric min; enforced in preview |
+| `maxValue` | ✅ | Numeric max; enforced in preview |
+| `maxDecimalPlaces` | ✅ | Max decimal digits |
+| `minLength` | ✅ | Min character count |
+| `maxSize` | ✅ | Max file size in MB (attachment) |
+| `mimeType` | ✅ | Allowed MIME types (attachment) |
+| `regex` | ✅ | Regex validation pattern |
+| `questionnaire-sliderStepValue` | ✅ | Step value; renders integer/decimal as slider |
+| `questionnaire-choiceOrientation` | ✅ | vertical / horizontal layout for radio groups |
+| `questionnaire-displayCategory` | ✅ | instructions / security / help; group items only in R4 |
+| `questionnaire-supportLink` | ✅ | 🔗 help URIs per item/group |
+| `questionnaire-signatureRequired` | ✅ | 0..* signature type codings |
+| `questionnaire-constraint` | ✅ | FHIRPath validation rules; enforced in preview |
+| `questionnaire-usageMode` | ✅ | capture / display / display-non-empty / … |
+| `questionnaire-hidden` | ✅ | R4 alias for `sdc-questionnaire-hidden`; both read on import |
+| `entryFormat` | ✅ | R4 alias for `sdc-questionnaire-entryFormat`; both read on import |
+| `designNote` | ✅ | Author-internal note (not shown to patients) |
+| `questionnaire-baseType` | ✅ | Base FHIR type (editable via Props) |
+| `questionnaire-fhirType` | ✅ | Specific FHIR type (editable via Props) |
+| `questionnaire-itemControl: gtable` | ❌ | Table layout not implemented |
+| `questionnaire-itemControl: flyover` | ❌ | Flyover/popup tooltip not implemented |
+| `questionnaire-itemControl: header/footer/title` | ❌ | Special display controls not implemented |
+
+---
+
+### SDC extensions (item-level)
+
+| Extension | Status | Notes |
+|---|---|---|
+| `sdc-questionnaire-variable` | ✅ | Questionnaire-level and item-level; editable in Variables panel |
+| `sdc-questionnaire-calculatedExpression` | ✅ | FHIRPath; evaluated in topological order |
+| `sdc-questionnaire-initialExpression` | ✅ | FHIRPath; evaluated on load and Re-init |
+| `sdc-questionnaire-enableWhenExpression` | ✅ | FHIRPath visibility condition |
+| `sdc-questionnaire-answerExpression` | ✅ | Dynamic answer options |
+| `sdc-questionnaire-candidateExpression` | ✅ | Candidate/suggested answers |
+| `sdc-questionnaire-hidden` | ✅ | Permanently hidden from patients |
+| `sdc-questionnaire-entryFormat` | ✅ | Placeholder hint text |
+| `sdc-questionnaire-collapsible` | ✅ | default-closed / default-open groups |
+| `sdc-questionnaire-openLabel` | ✅ | Custom open-choice placeholder label |
+| `sdc-questionnaire-isSubject` | ✅ | Marks QR subject item |
+| `sdc-questionnaire-columnCount` | ✅ | Multi-column choice layout |
+| `sdc-questionnaire-choiceColumn` | ✅ | Multi-column dropdown definition |
+| `sdc-questionnaire-itemMedia` | ✅ | Image/audio/video inline before the control |
+| `sdc-questionnaire-answerMedia` | ✅ | Media attached to individual answer options (round-trip; rendered in preview) |
+| `sdc-questionnaire-shortText` | ✅ | Abbreviated label for summary views |
+| `sdc-questionnaire-preferredTerminologyServer` | ✅ | Per-item terminology server override |
+| `sdc-questionnaire-observationExtract` | ✅ | Observation-based extraction flag; extraction runs client-side |
+| `sdc-questionnaire-itemContext` | 🔄 | FHIRPath context for server-side population; round-tripped |
+| `sdc-questionnaire-itemPopulationContext` | 🔄 | Server-side population context expression; round-tripped |
+| `sdc-questionnaire-itemExtractionContext` | 🔄 | Extraction context; round-tripped |
+| `sdc-questionnaire-subQuestionnaire` | 🔄 | Inline sub-questionnaire reference; round-tripped; not resolved (requires server assembly) |
+
+---
+
+### SDC extensions (questionnaire root-level)
+
+| Extension | Status | Notes |
+|---|---|---|
+| `sdc-questionnaire-variable` | ✅ | Editable in Variables panel |
+| `sdc-questionnaire-launchContext` | ✅ | Full editing UI in Properties → Launch Context |
+| `sdc-questionnaire-preferredTerminologyServer` | ✅ | Editable in Properties → Terminology Server |
+| `sdc-questionnaire-definitionExtract` | 🔧 | Client-side extraction via Save ▾ → Definition Extract; `itemExtractionContext` and StructureMap paths not evaluated |
+| `sdc-questionnaire-assembleExpectation` | 🔄 | Assembly flag; round-tripped via `_rawQuestExtensions` |
+| `sdc-questionnaire-endpoint` | 🔄 | QR submission endpoint; round-tripped |
+| `sdc-questionnaire-performerType` | 🔄 | Performer type restriction; round-tripped |
+| `sdc-questionnaire-sourceQueries` / `contextExpression` | 🔄 | Server-side batch queries; round-tripped |
+| `sdc-questionnaire-targetStructureMap` | 🔄 | QR→resource StructureMap; round-tripped; requires server engine to execute |
+| `sdc-questionnaire-sourceStructureMap` | 🔄 | Pre-population StructureMap; round-tripped; requires server engine to execute |
+| `sdc-questionnaire-lookupQuestionnaire` | 🔄 | Server-side lookup reference; round-tripped |
+| `sdc-questionnaire-width` | 🔄 | Table column width hint; round-tripped; table layout not implemented |
+
+---
+
+### R5 fields (with R4 downgrade)
+
+| Field | Status | Notes |
+|---|---|---|
+| `item.disabledDisplay` | 🔧 | R5 native; downgraded to builder-private extension on R4/R4B export; lossless round-trip |
+| `item.answerConstraint` | 🔧 | R5 native; downgraded to builder-private extension on R4/R4B export; lossless round-trip |
+
+---
+
+### STU3 import
+
+| Feature | Status | Notes |
+|---|---|---|
+| STU3 → R4 normalisation | ✅ | `item.option[]` → `answerOption[]`, `item.options` → `answerValueSet`, `hasAnswer` → `exists`, typed `initial<T>` → `initial[{value<T>}]` |
+| STU3 export | ❌ | Export always produces R4/R4B/R5; no STU3 output |
+
 
 
 ---
