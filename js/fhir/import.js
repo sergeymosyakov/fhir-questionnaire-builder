@@ -106,6 +106,7 @@ export function importFHIR(fhirJson) {
 
   const SDC_VAR_URL  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
   const REPLACES_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
+  const LAUNCH_CTX_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext';
   questVariables.splice(0);
 
   questContained.splice(0);
@@ -134,8 +135,22 @@ export function importFHIR(fhirJson) {
         return { system: c.system || '', code: c.code || '', display: c.display || '' };
       })
     : [];
-  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL && e.url !== SIG_REQ_URL && e.url !== BUILDER_VERSION_EXTENSION_URL);
+  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL && e.url !== SIG_REQ_URL && e.url !== BUILDER_VERSION_EXTENSION_URL && e.url !== LAUNCH_CTX_URL);
   questMeta._rawQuestExtensions = nonVarExts.length ? JSON.parse(JSON.stringify(nonVarExts)) : [];
+
+  // sdc-questionnaire-launchContext (0..*)
+  const launchCtxExts = (q.extension || []).filter(e => e.url === LAUNCH_CTX_URL);
+  questMeta.launchContexts = launchCtxExts.map(e => {
+    const subs = e.extension || [];
+    const nameSub = subs.find(s => s.url === 'name');
+    const typeSub = subs.find(s => s.url === 'type');
+    const descSub = subs.find(s => s.url === 'description');
+    return {
+      name:        nameSub?.valueCoding?.code || nameSub?.valueId || '',
+      type:        typeSub?.valueCode || '',
+      description: descSub?.valueString || '',
+    };
+  });
 
   try {
     const linkIdMap = buildLinkIdMap(q.item);

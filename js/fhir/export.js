@@ -539,6 +539,14 @@ export function buildFHIRObject() {
       url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired',
       valueCodeableConcept: { coding: [{ system: sig.system, code: sig.code, display: sig.display }] },
     })),
+    ...(questMeta.launchContexts || []).filter(lc => lc.name.trim()).map(lc => ({
+      url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext',
+      extension: [
+        { url: 'name', valueCoding: { system: 'http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext', code: lc.name.trim() } },
+        ...(lc.type.trim() ? [{ url: 'type', valueCode: lc.type.trim() }] : []),
+        ...(lc.description.trim() ? [{ url: 'description', valueString: lc.description.trim() }] : []),
+      ],
+    })),
     ...(questMeta._rawQuestExtensions || []).map(e => JSON.parse(JSON.stringify(e))),
   ];
   if (questExt.length) q.extension = questExt;

@@ -9,6 +9,14 @@
   "description": "Demonstrates SDC answer-source expressions that compute options at runtime via FHIRPath. 'Severity Level' and 'Recommended Action' use sdc-questionnaire-answerExpression (the permitted answer set). 'Suggested follow-up option' uses sdc-questionnaire-candidateExpression (candidate/suggested answers). All derive their options dynamically from the PHQ-2 score.",
   "extension": [
     {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext",
+      "extension": [
+        { "url": "name", "valueCoding": { "system": "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext", "code": "patient" } },
+        { "url": "type", "valueCode": "Patient" },
+        { "url": "description", "valueString": "The patient completing the PHQ-2 screening" }
+      ]
+    },
+    {
       "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
       "valueExpression": {
         "name": "phq2score",

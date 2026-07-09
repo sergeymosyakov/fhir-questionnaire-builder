@@ -355,6 +355,7 @@ Additional round-trip fields (stored opaquely; not editable in the builder):
 | `_answerValueSet` | `item.answerValueSet` | URL preserved; expanded via `terminologyService` on load |
 | `questContained[]` | `Questionnaire.contained[]` | Resources deep-copied on export; not otherwise processed |
 | `_unknownExtensions[]` | `item.extension[]` | Unrecognised extension objects preserved verbatim; editable via Props modal |
+| `questMeta._rawQuestExtensions[]` | `Questionnaire.extension[]` (non-variable) | All root-level extensions that are **not** handled by a dedicated field (variables, replaces, preferredTerminologyServer, signatureRequired, builder-target-version) are preserved verbatim in `_rawQuestExtensions` and written back unchanged on export. This covers round-trip fidelity for `sdc-questionnaire-launchContext`, `sdc-questionnaire-itemContext`, `sdc-questionnaire-assembleExpectation`, `sdc-questionnaire-contextExpression`, and any other root-level SDC/custom extension. No editing UI — the declared contexts are not parsed or evaluated client-side. |
 
 ### QR answer encoding
 
@@ -474,10 +475,9 @@ Legend: ⚠️ = silent data loss (field present in import file, ignored or over
 
 ### Questionnaire root-level — silent data loss on export
 
-These fields are present in the FHIR spec at the `Questionnaire` root level but are not stored on import and are therefore not written back on export.
+All known root-level fields are either fully editable (see Questionnaire-Level Metadata table) or preserved verbatim via `_rawQuestExtensions` (see Additional round-trip fields above). There are no known root-level fields with silent data loss.
 
-| FHIR field | Status | Notes |
-|---|---|---|
+> **`sdc-questionnaire-launchContext`** now has a dedicated editing UI in the Properties modal ("Launch Context" collapsible section). Entries are parsed from `Questionnaire.extension[]` into `questMeta.launchContexts[]` on import and written back as extensions on export. The FHIRPath variables they declare (%patient, %user, %encounter, …) can be used in `calculatedExpression`, `enableWhenExpression`, and other FHIRPath fields. Client-side evaluation is limited to what the builder can resolve from the injected patient profile (Scenario 3); server-side `$populate` may use additional contexts.
 
 ### Item-level — not implemented
 

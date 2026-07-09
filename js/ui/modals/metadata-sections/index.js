@@ -5,6 +5,7 @@ import './narrative.js';
 import './terminology-server.js';
 import './advanced.js';
 import './subject-type.js';
+import './launch-context.js';
 import './derived-from.js';
 import './replaces.js';
 import './identifiers.js';
