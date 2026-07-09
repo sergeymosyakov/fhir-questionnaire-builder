@@ -284,7 +284,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 
 | Extension URL | Type | Field | Standard? |
 |---|---|---|---|
-| `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'`, `'checklist'`, or `_itemControl` string | Yes (codes: `radio-button`, `check-box`, `autocomplete`, `lookup`, `drop-down`, `text-area`, `text-box`, `spinner`, `flyover`); `lookup` triggers live server-side ValueSet search via `$expand?filter=`; `flyover` (display items) hides text inline and reveals it on hover |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl` | standard | `itemType: 'radio'`, `'checklist'`, or `_itemControl` string | Yes (codes: `radio-button`, `check-box`, `autocomplete`, `lookup`, `drop-down`, `text-area`, `text-box`, `spinner`, `flyover`, group `header`/`footer`); `lookup` triggers live server-side ValueSet search via `$expand?filter=`; `flyover` (display items) hides text inline and reveals it on hover; `header`/`footer` render a group as a top/bottom band |
 | `http://hl7.org/fhir/StructureDefinition/rendering-style` | standard | `_renderStyle` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-xhtml` | standard | `_renderXhtml` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/rendering-markdown` | standard | `_renderMarkdown` | Yes (parsed by marked.js + DOMPurify; xhtml takes priority) |
@@ -576,7 +576,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 
 | Extension | Status | Notes |
 |---|---|---|
-| `questionnaire-itemControl` | ✅ | Codes: radio-button, check-box, drop-down, autocomplete, lookup, text-area, text-box, spinner, slider, flyover |
+| `questionnaire-itemControl` | ✅ | Codes: radio-button, check-box, drop-down, autocomplete, lookup, text-area, text-box, spinner, slider, flyover; group codes: header, footer |
 | `rendering-style` | ✅ | Inline CSS on `item._text` |
 | `rendering-xhtml` | ✅ | Raw XHTML, sanitized via DOMPurify |
 | `rendering-markdown` | ✅ | Parsed by marked.js + DOMPurify |
@@ -611,8 +611,9 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `designNote` | ✅ | Author-internal note (not shown to patients) |
 | `questionnaire-baseType` | ✅ | Base FHIR type (editable via Props) |
 | `questionnaire-fhirType` | ✅ | Specific FHIR type (editable via Props) |
-| `questionnaire-itemControl: gtable` | ❌ | Table layout not implemented |
-| `questionnaire-itemControl: header/footer/title` | ❌ | Special display controls not implemented |
+| `questionnaire-itemControl: gtable` | ❌ | Group table layout not implemented (round-tripped verbatim) |
+
+> Note: `title` is **not** a valid `questionnaire-item-control` code in FHIR R4 — the code system defines group controls (`list`, `table`, `htable`, `gtable`, `atable`, `header`, `footer`), text/display controls (`inline`, `prompt`, `unit`, `lower`, `upper`, `flyover`, `help`), and question controls only.
 
 ---
 

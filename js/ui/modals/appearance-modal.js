@@ -49,7 +49,8 @@ class AppearanceModal extends Modal {
     if (!this._pending) return;
     const { node, styleLink, setActive } = this._pending;
     node.applyPatch(this._buildPayload());
-    setActive(styleLink, !!(node._renderStyle || node._renderXhtml || node._renderMarkdown));
+    setActive(styleLink, !!(node._renderStyle || node._renderXhtml || node._renderMarkdown
+      || (node.type === 'group' && (node._itemControl === 'header' || node._itemControl === 'footer'))));
     document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     this._cancel();
   }

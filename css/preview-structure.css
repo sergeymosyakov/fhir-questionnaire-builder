@@ -42,6 +42,37 @@
 .group-label       { font-weight: 600; color: var(--c-primary); font-size: 13px; }
 .display-info-label { font-style: italic; color: var(--c-text-2); font-size: 12px; }
 
+/* === Group itemControl: header / footer ===================================== */
+.lform-group-header { border-bottom: 2px solid var(--c-primary, #2563eb); padding-bottom: 6px; }
+.lform-group-header .group-label {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+}
+.lform-group-footer { border-top: 1px solid var(--c-border, #e0e0e0); padding-top: 6px; }
+.lform-group-footer .group-label {
+  font-size: 11px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--c-text-2, #6b7280);
+  text-transform: none;
+}
+.preview-group-ctrl-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  margin-top: 3px;
+  background: var(--c-primary-lt, #d9eafc);
+  color: var(--c-primary, #2563eb);
+  cursor: help;
+}
+
 /* === Collapse toggle in preview ============================================== */
 .preview-collapse-toggle {
   font-size: 10px;

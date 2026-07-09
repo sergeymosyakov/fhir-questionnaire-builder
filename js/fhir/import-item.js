@@ -558,6 +558,12 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     );
     const groupDcCode = groupDcExt?.valueCodeableConcept?.coding?.[0]?.code;
     if (groupDcCode) node._displayCategory = groupDcCode;
+    // questionnaire-itemControl — group-level display controls (header / footer / gtable / …)
+    const groupCtrlExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl'
+    );
+    const groupCtrlCode = groupCtrlExt?.valueCodeableConcept?.coding?.[0]?.code;
+    if (groupCtrlCode) node._itemControl = groupCtrlCode;
     // Preserve any unrecognised extensions for round-trip pass-through
     const groupUnknown = _collectUnknownExtensions(fhirItem);
     if (groupUnknown) node._unknownExtensions = groupUnknown;

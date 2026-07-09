@@ -5,6 +5,31 @@
   "title": "Item Control Demo",
   "item": [
     {
+      "linkId": "form-header",
+      "text": "Item Control Reference Form",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "header"
+              }
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "form-header-note",
+          "text": "This form demonstrates the supported FHIR itemControl display codes.",
+          "type": "display"
+        }
+      ]
+    },
+    {
       "linkId": "cb-multi",
       "text": "Select all that apply (2-column layout)",
       "type": "choice",
@@ -399,6 +424,31 @@
               }
             ]
           }
+        }
+      ]
+    },
+    {
+      "linkId": "form-footer",
+      "text": "All responses are confidential and used for quality-improvement purposes only.",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "footer"
+              }
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "form-footer-copyright",
+          "text": "© 2026 Item Control Demo",
+          "type": "display"
         }
       ]
     }

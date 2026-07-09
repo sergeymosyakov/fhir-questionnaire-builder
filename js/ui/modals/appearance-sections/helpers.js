@@ -22,10 +22,6 @@ export function makeSectionHdr(title, tipTitle, tipBody, tipFhir, tipSpec) {
   const label = document.createElement('span');
   label.textContent = title;
   hdr.appendChild(label);
-  const key = document.createElement('span');
-  key.className = 'expr-section-key';
-  key.textContent = tipFhir;
-  hdr.appendChild(key);
   hdr.dataset.tipTitle = tipTitle;
   hdr.dataset.tipBody  = tipBody;
   hdr.dataset.tipFhir  = tipFhir;

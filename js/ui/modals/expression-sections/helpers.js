@@ -54,11 +54,7 @@ export function makeSectionBlock(title, fhirKey, hint, exprValue, testid, placeh
   hdr.dataset.tipSpec  = 'SDC';
   const titleSpan = document.createElement('span');
   titleSpan.textContent = title;
-  const keySpan = document.createElement('span');
-  keySpan.className   = 'expr-section-key';
-  keySpan.textContent = fhirKey;
   hdr.appendChild(titleSpan);
-  hdr.appendChild(keySpan);
   frag.appendChild(hdr);
 
   const hintEl = document.createElement('div');

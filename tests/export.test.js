@@ -308,6 +308,18 @@ describe('buildFHIRObject — answerOption', () => {
     expect(ic.valueCodeableConcept.coding[0].code).toBe('flyover');
   });
 
+  it('exports _itemControl as itemControl extension (header on group)', () => {
+    const q = build([{
+      id: 'g1', type: 'group', title: 'Section', _itemControl: 'header',
+      children: [{ id: 'g1.1', type: 'item', title: 'Q', itemType: 'text' }],
+    }]);
+    const ext = q.item[0].extension || [];
+    const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
+    expect(ic).toBeDefined();
+    expect(ic.valueCodeableConcept.coding[0].code).toBe('header');
+    expect(q.item[0].type).toBe('group');
+  });
+
   it('exports _itemControl as itemControl extension (text-area)', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'text', _itemControl: 'text-area',

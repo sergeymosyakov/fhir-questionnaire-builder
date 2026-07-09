@@ -1336,6 +1336,18 @@ describe('importFHIR', () => {
       expect(_tree[0]._itemControl).toBe('flyover');
     });
 
+    it('header on group → group with _itemControl', () => {
+      importFHIR(minQ([{ linkId: 'g1', type: 'group', text: 'G', extension: [ic('header')], item: [{ linkId: 'g1.1', type: 'string', text: 'Q' }] }]));
+      expect(_tree[0].type).toBe('group');
+      expect(_tree[0]._itemControl).toBe('header');
+    });
+
+    it('footer on group → group with _itemControl', () => {
+      importFHIR(minQ([{ linkId: 'g1', type: 'group', text: 'G', extension: [ic('footer')], item: [{ linkId: 'g1.1', type: 'string', text: 'Q' }] }]));
+      expect(_tree[0].type).toBe('group');
+      expect(_tree[0]._itemControl).toBe('footer');
+    });
+
     it('no itemControl extension → no _itemControl property', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q' }]));
       expect(_tree[0]._itemControl).toBeUndefined();

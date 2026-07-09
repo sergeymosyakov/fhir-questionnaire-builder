@@ -1,0 +1,52 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "group-layout-test",
+  "status": "draft",
+  "title": "Group Layout Test",
+  "item": [
+    {
+      "linkId": "hdr",
+      "text": "Section header",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              { "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "header" }
+            ]
+          }
+        }
+      ],
+      "item": [
+        { "linkId": "hdr-note", "text": "Header intro text", "type": "display" }
+      ]
+    },
+    {
+      "linkId": "plain",
+      "text": "Plain section",
+      "type": "group",
+      "item": [
+        { "linkId": "plain-q", "text": "A question", "type": "string" }
+      ]
+    },
+    {
+      "linkId": "ftr",
+      "text": "All responses are confidential.",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              { "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "footer" }
+            ]
+          }
+        }
+      ],
+      "item": [
+        { "linkId": "ftr-note", "text": "© 2026", "type": "display" }
+      ]
+    }
+  ]
+}

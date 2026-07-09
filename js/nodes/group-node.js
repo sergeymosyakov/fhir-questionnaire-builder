@@ -104,6 +104,23 @@ export class GroupNode extends BaseNode {
     const isPatient = rc.previewMode === 'patient';
     const isEmptyGroup = this.children.length === 0;
 
+    // questionnaire-itemControl header / footer — styled group band
+    if (this._itemControl === 'header' || this._itemControl === 'footer') {
+      row.classList.add('lform-group-' + this._itemControl);
+      if (!isPatient) {
+        const badge = document.createElement('span');
+        badge.className = 'preview-group-ctrl-badge';
+        badge.textContent = this._itemControl;
+        badge.dataset.tipTitle = this._itemControl === 'header' ? 'Group header' : 'Group footer';
+        badge.dataset.tipBody = this._itemControl === 'header'
+          ? 'This group is rendered as a header — continuously visible at the top of the questionnaire.'
+          : 'This group is rendered as a footer — continuously visible at the bottom of the questionnaire.';
+        badge.dataset.tipFhir = 'item.extension[questionnaire-itemControl].valueCodeableConcept.coding.code = ' + this._itemControl;
+        badge.dataset.tipSpec = 'R4';
+        row.appendChild(badge);
+      }
+    }
+
     if (!isPatient && !isEmptyGroup) {
       const isOr = this.logicWithParent === 'OR';
       const lb = document.createElement('span');
@@ -412,7 +429,7 @@ export class GroupNode extends BaseNode {
 
     setActive(visLink,    !!(node.enableWhen?.length) || !!node.enableWhenExpression);
     setActive(exprLink,   !!node._calculatedExpr);
-    setActive(styleLink,  !!(node._renderStyle || node._renderXhtml));
+    setActive(styleLink,  !!(node._renderStyle || node._renderXhtml || node._itemControl === 'header' || node._itemControl === 'footer'));
     setActive(statesLink, node.mandatory === true || !!node._hidden || node._observationExtract != null || !!node._collapsible || !!node._usageMode || !!node._signatureRequired?.length);
     setActive(propsLink,  !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length) || !!node._shortText);
 
