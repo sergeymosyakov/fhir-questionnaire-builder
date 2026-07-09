@@ -19,6 +19,34 @@ const R5_FIELD_EXTENSIONS = {
   answerConstraint: ITEM_ANSWER_CONSTRAINT_EXTENSION_URL,
 };
 
+// Official HL7 cross-version extensions for R5-only Questionnaire root fields.
+// Both are valid on Questionnaire from R4 onward (FHIR Extensions Pack).
+const ARTIFACT_VERSION_ALGO_URL    = 'http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm';
+const ARTIFACT_COPYRIGHT_LABEL_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel';
+
+/**
+ * Move R5-only native Questionnaire root fields (versionAlgorithm[x],
+ * copyrightLabel) into their official cross-version extensions so the document
+ * is valid against the R4/R4B schema. Mutates in place.
+ * @param {object} q - FHIR Questionnaire object (already deep-cloned)
+ */
+export function backportR5RootFields(q) {
+  if (!q) return;
+  const ext = [];
+  if (q.versionAlgorithmString !== undefined) {
+    ext.push({ url: ARTIFACT_VERSION_ALGO_URL, valueString: q.versionAlgorithmString });
+    delete q.versionAlgorithmString;
+  } else if (q.versionAlgorithmCoding !== undefined) {
+    ext.push({ url: ARTIFACT_VERSION_ALGO_URL, valueCoding: q.versionAlgorithmCoding });
+    delete q.versionAlgorithmCoding;
+  }
+  if (q.copyrightLabel !== undefined) {
+    ext.push({ url: ARTIFACT_COPYRIGHT_LABEL_URL, valueString: q.copyrightLabel });
+    delete q.copyrightLabel;
+  }
+  if (ext.length) q.extension = [...(q.extension || []), ...ext];
+}
+
 /**
  * Recursively move R5-only native item fields into cross-version extensions.
  * Mutates the questionnaire in place.

@@ -108,6 +108,7 @@ describe('buildFHIRObject — questMeta', () => {
   const EMPTY_META = { id: '', url: '', version: '', title: '', status: 'draft', publisher: '', description: '',
     name: '', date: '', subjectType: [], purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
     effectivePeriodStart: '', effectivePeriodEnd: '',
+    copyrightLabel: '', _versionAlgorithmString: '', _versionAlgorithmCoding: null,
     _rawContact: null, _rawUseContext: null, _rawJurisdiction: null, _rawCode: null };
 
   afterEach(() => { Object.assign(_questMeta, EMPTY_META); });
@@ -240,6 +241,26 @@ describe('buildFHIRObject — questMeta', () => {
     _questMeta.copyright = '© 2024 HL7';
     const q = buildFHIRObject();
     expect(q.copyright).toBe('© 2024 HL7');
+  });
+
+  it('exports copyrightLabel (R5 native) when set', () => {
+    _questMeta.copyrightLabel = 'All rights reserved';
+    const q = buildFHIRObject();
+    expect(q.copyrightLabel).toBe('All rights reserved');
+  });
+
+  it('exports versionAlgorithmCoding (R5 native) when set', () => {
+    _questMeta._versionAlgorithmCoding = { system: 'http://hl7.org/fhir/version-algorithm', code: 'semver' };
+    const q = buildFHIRObject();
+    expect(q.versionAlgorithmCoding.code).toBe('semver');
+  });
+
+  it('exports versionAlgorithmString (takes precedence over Coding)', () => {
+    _questMeta._versionAlgorithmString = '%v1 > %v2';
+    _questMeta._versionAlgorithmCoding = { code: 'semver' };
+    const q = buildFHIRObject();
+    expect(q.versionAlgorithmString).toBe('%v1 > %v2');
+    expect(q.versionAlgorithmCoding).toBeUndefined();
   });
 
   it('exports approvalDate when set', () => {

@@ -1,0 +1,25 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "version-algorithm-test",
+  "extension": [
+    {
+      "url": "https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/builder-target-version",
+      "valueCode": "5.0.0"
+    }
+  ],
+  "status": "draft",
+  "title": "Version Algorithm Test",
+  "versionAlgorithmCoding": {
+    "system": "http://hl7.org/fhir/version-algorithm",
+    "code": "semver",
+    "display": "Semantic version"
+  },
+  "copyrightLabel": "All rights reserved",
+  "item": [
+    {
+      "linkId": "q1",
+      "text": "Your name",
+      "type": "string"
+    }
+  ]
+}

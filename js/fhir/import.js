@@ -110,6 +110,25 @@ export function importFHIR(fhirJson) {
   const SDC_VAR_URL  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
   const REPLACES_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
   const LAUNCH_CTX_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext';
+  const ARTIFACT_VERSION_ALGO_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm';
+  const ARTIFACT_COPYRIGHT_LABEL_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel';
+
+  // versionAlgorithm[x] — R5 native field, or R4/R4B artifact-versionAlgorithm extension
+  const vaExt = (q.extension || []).find(e => e.url === ARTIFACT_VERSION_ALGO_URL);
+  if (q.versionAlgorithmString !== undefined) {
+    questMeta._versionAlgorithmString = q.versionAlgorithmString; questMeta._versionAlgorithmCoding = null;
+  } else if (q.versionAlgorithmCoding) {
+    questMeta._versionAlgorithmCoding = JSON.parse(JSON.stringify(q.versionAlgorithmCoding)); questMeta._versionAlgorithmString = '';
+  } else if (vaExt?.valueString !== undefined) {
+    questMeta._versionAlgorithmString = vaExt.valueString; questMeta._versionAlgorithmCoding = null;
+  } else if (vaExt?.valueCoding) {
+    questMeta._versionAlgorithmCoding = JSON.parse(JSON.stringify(vaExt.valueCoding)); questMeta._versionAlgorithmString = '';
+  } else {
+    questMeta._versionAlgorithmString = ''; questMeta._versionAlgorithmCoding = null;
+  }
+  // copyrightLabel — R5 native field, or R4/R4B artifact-copyrightLabel extension
+  const clExt = (q.extension || []).find(e => e.url === ARTIFACT_COPYRIGHT_LABEL_URL);
+  questMeta.copyrightLabel = q.copyrightLabel || clExt?.valueString || '';
   questVariables.splice(0);
 
   questContained.splice(0);
@@ -138,7 +157,7 @@ export function importFHIR(fhirJson) {
         return { system: c.system || '', code: c.code || '', display: c.display || '' };
       })
     : [];
-  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL && e.url !== SIG_REQ_URL && e.url !== BUILDER_VERSION_EXTENSION_URL && e.url !== LAUNCH_CTX_URL);
+  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL && e.url !== SIG_REQ_URL && e.url !== BUILDER_VERSION_EXTENSION_URL && e.url !== LAUNCH_CTX_URL && e.url !== ARTIFACT_VERSION_ALGO_URL && e.url !== ARTIFACT_COPYRIGHT_LABEL_URL);
   questMeta._rawQuestExtensions = nonVarExts.length ? JSON.parse(JSON.stringify(nonVarExts)) : [];
 
   // sdc-questionnaire-launchContext (0..*)

@@ -1,5 +1,5 @@
 import { formatRegistry, setBuilderVersion } from '../format-registry.js';
-import { backportR5ItemFields } from './_downgrade.js';
+import { backportR5ItemFields, backportR5RootFields } from './_downgrade.js';
 
 formatRegistry.register({
   id:               'R4B',
@@ -13,6 +13,7 @@ formatRegistry.register({
   build(baseQ) {
     const q = JSON.parse(JSON.stringify(baseQ));
     backportR5ItemFields(q);
+    backportR5RootFields(q);
     q.meta = q.meta ?? { lastUpdated: new Date().toISOString() };
     setBuilderVersion(q, '4.3.0');
     return q;

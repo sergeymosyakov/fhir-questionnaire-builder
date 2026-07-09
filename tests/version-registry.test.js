@@ -171,6 +171,33 @@ describe('R4 format', () => {
     expect(itemExtCode(result.item[0], DISABLED_DISPLAY_EXT_URL)).toBe('hidden');
   });
 
+  it('downgrades R5-only root fields to official artifact-* extensions', () => {
+    const ARTIFACT_VERSION_ALGO_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm';
+    const ARTIFACT_COPYRIGHT_LABEL_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel';
+    const base = {
+      resourceType: 'Questionnaire',
+      copyrightLabel: 'All rights reserved',
+      versionAlgorithmCoding: { system: 'http://hl7.org/fhir/version-algorithm', code: 'semver' },
+      item: [],
+    };
+    const result = fmt.build(base);
+    expect(result.copyrightLabel).toBeUndefined();
+    expect(result.versionAlgorithmCoding).toBeUndefined();
+    const va = (result.extension || []).find(e => e.url === ARTIFACT_VERSION_ALGO_URL);
+    const cl = (result.extension || []).find(e => e.url === ARTIFACT_COPYRIGHT_LABEL_URL);
+    expect(va.valueCoding.code).toBe('semver');
+    expect(cl.valueString).toBe('All rights reserved');
+  });
+
+  it('downgrades a string-form versionAlgorithm to a valueString extension', () => {
+    const ARTIFACT_VERSION_ALGO_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm';
+    const base = { resourceType: 'Questionnaire', versionAlgorithmString: '%version1 > %version2', item: [] };
+    const result = fmt.build(base);
+    expect(result.versionAlgorithmString).toBeUndefined();
+    const va = (result.extension || []).find(e => e.url === ARTIFACT_VERSION_ALGO_URL);
+    expect(va.valueString).toBe('%version1 > %version2');
+  });
+
   it('downgrades R5-only fields recursively in nested items', () => {
     const base = {
       resourceType: 'Questionnaire',

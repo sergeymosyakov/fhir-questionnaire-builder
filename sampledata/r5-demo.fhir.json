@@ -9,10 +9,16 @@
   ],
   "url": "http://example.org/fhir/Questionnaire/r5-demo",
   "version": "1.0",
+  "versionAlgorithmCoding": {
+    "system": "http://hl7.org/fhir/version-algorithm",
+    "code": "semver",
+    "display": "Semantic version"
+  },
   "title": "FHIR R5 Feature Demo",
   "status": "draft",
+  "copyrightLabel": "All rights reserved",
   "date": "2025-01-01",
-  "description": "Demonstrates FHIR R5 native fields: answerConstraint (replacing open-choice) and disabledDisplay. Load this questionnaire and the version selector will automatically switch to R5.",
+  "description": "Demonstrates FHIR R5 native fields: answerConstraint (replacing open-choice), disabledDisplay, versionAlgorithm and copyrightLabel. Load this questionnaire and the version selector will automatically switch to R5.",
   "item": [
     {
       "linkId": "intro",

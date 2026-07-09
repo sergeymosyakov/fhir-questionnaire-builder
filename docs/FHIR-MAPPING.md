@@ -395,7 +395,7 @@ This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR wit
 |---|---|
 | R4 | ✅ Fully supported |
 | R4B | ✅ Fully supported — schema overlaps R4; R5-only fields are downgraded to builder-private extensions on export |
-| R5 | ✅ Fully supported — `disabledDisplay` and `answerConstraint` are R5 native fields; `choice`/`open-choice` exported as `coding`. *Exception:* the R5-only root metadata fields `versionAlgorithm[x]` and `copyrightLabel` are not parsed or preserved. |
+| R5 | ✅ Fully supported — `disabledDisplay` and `answerConstraint` are R5 native fields; `choice`/`open-choice` exported as `coding`. The R5-only root metadata fields `versionAlgorithm[x]` and `copyrightLabel` are editable in Properties → Advanced and downgraded to their official `artifact-*` extensions on R4/R4B export. |
 | STU3 | ✅ Import shim — automatically normalised to R4 on load via `js/fhir/stu3-shim.js`; see table below |
 
 ### STU3 → R4 Normalisation (`js/fhir/stu3-shim.js`)
@@ -671,8 +671,8 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 |---|---|---|
 | `item.disabledDisplay` | 🔧 | R5 native; downgraded to builder-private extension on R4/R4B export; lossless round-trip |
 | `item.answerConstraint` | 🔧 | R5 native; downgraded to builder-private extension on R4/R4B export; lossless round-trip |
-| `versionAlgorithm[x]` | ❌ | R5-only root field; not parsed or preserved (lost on R5 round-trip). R4/R4B convey the same via the `artifact-versionAlgorithm` extension, which round-trips through `_rawQuestExtensions`. |
-| `copyrightLabel` | ❌ | R5-only root field; not parsed or preserved (lost on R5 round-trip) |
+| `versionAlgorithm[x]` | ✅ | R5 native field (string or Coding). Editable in Properties → Advanced (standard Version Algorithm code set, or a custom FHIRPath string). Native on R5 export; on R4/R4B export written as the official `artifact-versionAlgorithm` extension. Read from either form on import. Lossless round-trip on all versions. |
+| `copyrightLabel` | ✅ | R5 native field. Editable in Properties → Advanced (Copyright Label). Native on R5 export; on R4/R4B export written as the official `artifact-copyrightLabel` extension. Read from either form on import. Lossless round-trip on all versions. |
 
 ---
 

@@ -500,6 +500,9 @@ export function buildFHIRObject() {
   if (questMeta.language)    q.language    = questMeta.language;
   if (questMeta.purpose)     q.purpose     = questMeta.purpose;
   if (questMeta.copyright)   q.copyright   = questMeta.copyright;
+  if (questMeta.copyrightLabel) q.copyrightLabel = questMeta.copyrightLabel;
+  if (questMeta._versionAlgorithmString)      q.versionAlgorithmString = questMeta._versionAlgorithmString;
+  else if (questMeta._versionAlgorithmCoding) q.versionAlgorithmCoding = JSON.parse(JSON.stringify(questMeta._versionAlgorithmCoding));
   if (questMeta.approvalDate)   q.approvalDate   = questMeta.approvalDate;
   if (questMeta.lastReviewDate) q.lastReviewDate = questMeta.lastReviewDate;
   q.date = questMeta.date || new Date().toISOString().split('T')[0];

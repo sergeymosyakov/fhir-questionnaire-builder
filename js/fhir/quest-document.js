@@ -44,6 +44,9 @@ export class QuestDocument {
     language:        '',
     derivedFrom:     [],
     replaces:        [],
+    copyrightLabel:  '',
+    _versionAlgorithmString: '',
+    _versionAlgorithmCoding: null,
     // Business identifiers
     _rawIdentifier:   [],
     // FHIR root fields — pass-through or limited edit
@@ -104,6 +107,7 @@ export class QuestDocument {
       purpose: '', copyright: '', approvalDate: '', lastReviewDate: '',
       effectivePeriodStart: '', effectivePeriodEnd: '',
       experimental: null, language: '', derivedFrom: [], replaces: [],
+      copyrightLabel: '', _versionAlgorithmString: '', _versionAlgorithmCoding: null,
       _rawIdentifier: [], _rawText: null, _rawContact: null,
       _rawUseContext: null, _rawJurisdiction: null, _rawCode: null,
       _metaVersionId: '', _metaSource: '', _metaLastUpdated: '',

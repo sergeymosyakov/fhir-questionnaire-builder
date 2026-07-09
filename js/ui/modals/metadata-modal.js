@@ -1,6 +1,7 @@
 // ── Questionnaire Properties (metadata) modal ────────────────────────────────
 import { Modal } from './modal-base.js';
 import { renderMetaSections } from './metadata-sections/index.js';import { AppEvents } from '../../events.js';
+import { VERSION_ALGO_OPTIONS, VERSION_ALGO_SYSTEM } from './metadata-sections/data.js';
 class MetadataModal extends Modal {
   getName() { return 'metadataModal'; }
   constructor() {
@@ -43,6 +44,9 @@ class MetadataModal extends Modal {
       jurisdictions:  JSON.parse(JSON.stringify(questMeta._rawJurisdiction || [])),
       preferredTermServer: questMeta.preferredTermServer || '',
       launchContexts: JSON.parse(JSON.stringify(questMeta.launchContexts || [])),
+      copyrightLabel:  questMeta.copyrightLabel || '',
+      versionAlgo:     questMeta._versionAlgorithmCoding?.code || (questMeta._versionAlgorithmString ? '__custom__' : ''),
+      versionAlgoExpr: questMeta._versionAlgorithmString || '',
       // modifierExtension[] — round-trip only; never shown in UI but preserved
       _rawModifierExtension: JSON.parse(JSON.stringify(questMeta._rawModifierExtension || [])),
     };
@@ -69,6 +73,19 @@ class MetadataModal extends Modal {
     questMeta.subjectType   = p.subjectType.filter(t => t.trim());
     questMeta.purpose       = p.purpose.trim();
     questMeta.copyright     = p.copyright.trim();
+    questMeta.copyrightLabel = p.copyrightLabel.trim();
+    if (p.versionAlgo === '__custom__') {
+      questMeta._versionAlgorithmString = p.versionAlgoExpr.trim();
+      questMeta._versionAlgorithmCoding = null;
+    } else if (p.versionAlgo) {
+      const opt = VERSION_ALGO_OPTIONS.find(o => o.value === p.versionAlgo);
+      const display = opt ? opt.label.split(' \u2014 ')[1] || p.versionAlgo : p.versionAlgo;
+      questMeta._versionAlgorithmCoding = { system: VERSION_ALGO_SYSTEM, code: p.versionAlgo, display };
+      questMeta._versionAlgorithmString = '';
+    } else {
+      questMeta._versionAlgorithmString = '';
+      questMeta._versionAlgorithmCoding = null;
+    }
     questMeta.approvalDate  = p.approvalDate.trim();
     questMeta.lastReviewDate = p.lastReviewDate.trim();
     questMeta.effectivePeriodStart = p.effectivePeriodStart.trim();

@@ -782,3 +782,57 @@ describe('import baseType / fhirType', () => {
     expect(_tree[0]._fhirType).toBeUndefined();
   });
 });
+
+// ── versionAlgorithm[x] / copyrightLabel (R5 native + R4 artifact extensions) ──
+describe('import versionAlgorithm / copyrightLabel', () => {
+  const VA_EXT = 'http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm';
+  const CL_EXT = 'http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel';
+  const q = (extra = {}) => ({ resourceType: 'Questionnaire', title: 'T', item: [], ...extra });
+  beforeEach(() => { _tree.splice(0); });
+
+  it('reads R5 native versionAlgorithmCoding + copyrightLabel', () => {
+    importFHIR(q({
+      versionAlgorithmCoding: { system: 'http://hl7.org/fhir/version-algorithm', code: 'semver' },
+      copyrightLabel: 'All rights reserved',
+    }));
+    expect(_questMeta._versionAlgorithmCoding.code).toBe('semver');
+    expect(_questMeta._versionAlgorithmString).toBe('');
+    expect(_questMeta.copyrightLabel).toBe('All rights reserved');
+  });
+
+  it('reads R5 native versionAlgorithmString', () => {
+    importFHIR(q({ versionAlgorithmString: '%v1 > %v2' }));
+    expect(_questMeta._versionAlgorithmString).toBe('%v1 > %v2');
+    expect(_questMeta._versionAlgorithmCoding).toBeNull();
+  });
+
+  it('reads R4 artifact-versionAlgorithm + artifact-copyrightLabel extensions', () => {
+    importFHIR(q({
+      extension: [
+        { url: VA_EXT, valueCoding: { system: 'http://hl7.org/fhir/version-algorithm', code: 'integer' } },
+        { url: CL_EXT, valueString: 'Some rights reserved' },
+      ],
+    }));
+    expect(_questMeta._versionAlgorithmCoding.code).toBe('integer');
+    expect(_questMeta.copyrightLabel).toBe('Some rights reserved');
+  });
+
+  it('excludes the artifact-* extensions from _rawQuestExtensions', () => {
+    importFHIR(q({
+      extension: [
+        { url: VA_EXT, valueString: 'natural' },
+        { url: CL_EXT, valueString: 'x' },
+      ],
+    }));
+    const raw = _questMeta._rawQuestExtensions || [];
+    expect(raw.some(e => e.url === VA_EXT)).toBe(false);
+    expect(raw.some(e => e.url === CL_EXT)).toBe(false);
+  });
+
+  it('defaults to empty when neither field nor extension present', () => {
+    importFHIR(q());
+    expect(_questMeta._versionAlgorithmString).toBe('');
+    expect(_questMeta._versionAlgorithmCoding).toBeNull();
+    expect(_questMeta.copyrightLabel).toBe('');
+  });
+});

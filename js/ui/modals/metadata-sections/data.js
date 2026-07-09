@@ -43,3 +43,17 @@ export const TELECOM_SYSTEMS = ['email', 'phone', 'url', 'fax', 'pager', 'sms', 
 
 export const ID_USES       = ['', 'usual', 'official', 'temp', 'secondary', 'old'];
 export const ID_USE_LABELS = ['(use)', 'usual', 'official', 'temp', 'secondary', 'old'];
+
+// Questionnaire.versionAlgorithm[x] — code system + editor options.
+// Coding form uses the standard Version Algorithm code system; '__custom__'
+// switches to a free-text FHIRPath expression (the versionAlgorithmString form).
+export const VERSION_ALGO_SYSTEM = 'http://hl7.org/fhir/version-algorithm';
+export const VERSION_ALGO_OPTIONS = [
+  { value: '',          label: '(not set)' },
+  { value: 'semver',    label: 'semver \u2014 Semantic version' },
+  { value: 'integer',   label: 'integer \u2014 Whole number' },
+  { value: 'alpha',     label: 'alpha \u2014 Alphabetical' },
+  { value: 'date',      label: 'date \u2014 Date/time' },
+  { value: 'natural',   label: 'natural \u2014 Natural language' },
+  { value: '__custom__', label: 'Custom expression (FHIRPath)\u2026' },
+];
