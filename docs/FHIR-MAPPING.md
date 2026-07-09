@@ -42,7 +42,7 @@ Every node in the tree is either a **group** or an **item**:
   constraint:          object[],
   itemType:            'text'|'integer'|'decimal'|'date'|'dateTime'|'time'|'url'|'attachment'|'checkbox'|'select'|'radio'|'open-choice'|'quantity'|'reference'|'display', // 'number' legacy alias
   options:             string,           // comma-separated, used by select/radio/open-choice
-  repeats:             boolean,          // FHIR item.repeats — multi-row input in preview ("+ Add another"). For checklist (multi-select check-box) repeats is intrinsic: always true, no "Add another" (multiple selection is the checkboxes themselves) — see impliesRepeats()
+  repeats:             boolean,          // FHIR item.repeats. For question items: multi-row input in preview ("+ Add another"). For checklist (multi-select check-box) repeats is intrinsic: always true, no "Add another" (multiple selection is the checkboxes themselves) — see impliesRepeats(). For groups: round-tripped, but repeated group instances are NOT rendered in the preview (no per-repetition UI yet)
   _renderStyle:        string,           // inline CSS (from rendering-style extension)
   _renderXhtml:        string,           // raw XHTML markup (from rendering-xhtml extension; sanitized via DOMPurify and rendered as innerHTML in preview)
   _renderMarkdown:     string,           // Markdown text (from rendering-markdown extension; parsed by marked.js + sanitized via DOMPurify; rendering-xhtml takes priority)

@@ -93,7 +93,7 @@
         "label": "AHRQ Medication Safety Report",
         "file": "ahrq-medication-safety.fhir.json",
         "type": "questionnaire",
-        "note": "Real LOINC form: contained ValueSets, itemControl (header/footer/gtable), enableWhen/enableBehavior, minLength, repeating groups, 30+ questions"
+        "note": "Real LOINC form: contained ValueSets, itemControl (header/footer), enableWhen/enableBehavior, minLength, repeating groups, 30+ questions"
       },
       {
         "label": "PRAPARE — Social Health Screening",
