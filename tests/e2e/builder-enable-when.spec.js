@@ -132,4 +132,42 @@ test.describe('enableWhen (standard)', () => {
     // Badge must be gone — not stale
     await expect(page.locator('[data-preview-id="1.2"]').getByTestId('preview-condition-hint')).toHaveCount(0);
   });
+
+  test('condition audit tooltip shows actual value and pass/fail for each enableWhen rule', async ({ page }) => {
+    await freshStart(page);
+
+    await page.getByTestId('add-root-group-btn').click();
+    const group = page.locator('[data-node-id="1"]');
+
+    // Trigger item 1.1
+    await group.getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.1"]').getByTestId('action-type')).toBeVisible();
+
+    // Dependent item 1.2 with condition: 1.1 = 'yes'
+    await group.getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await page.locator('[data-node-id="1.2"]').getByTestId('action-vis').click();
+    await page.locator('[data-testid="showWhenModalBody"] .vis-add-btn').click();
+    await page.locator('[data-testid="showWhenModalBody"] .vis-q-sel-trigger').click();
+    await page.waitForSelector('.vis-q-sel-drop');
+    await page.locator('.vis-q-sel-opt[data-id="1.1"]').click();
+    await page.locator('[data-testid="showWhenModalBody"] .vis-cond-val-inp').fill('yes');
+    await page.locator('[data-testid="showWhenModalApply"]').click();
+
+    // No answer yet → hint tooltip should contain audit with ✗ and "(no answer)"
+    const hint = page.locator('[data-preview-id="1.2"]').getByTestId('preview-condition-hint');
+    await expect(hint).toBeVisible();
+    const tipBody = await hint.getAttribute('data-tip-body');
+    expect(tipBody).toContain('Enable when');
+    expect(tipBody).toContain('1.1');
+    expect(tipBody).toContain('(no answer)');
+    expect(tipBody).toContain('\u2717'); // ✗ — condition failed
+
+    // Fill 'yes' → condition met → item visible (hint gone)
+    const triggerInput = page.locator('[data-preview-id="1.1"]').locator('textarea').first();
+    await triggerInput.fill('yes');
+    await triggerInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+    await expect(page.locator('[data-preview-id="1.2"]')).not.toHaveClass(/lform-waiting/, { timeout: 3000 });
+  });
 });

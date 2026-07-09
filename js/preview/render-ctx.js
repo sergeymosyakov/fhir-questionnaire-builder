@@ -23,5 +23,6 @@ export const _rc = {
   calcFormOk:     null, // function(node) → bool
   evalConstraints: null, // function(node, fp, qr, env) → bool
   getValue:       null, // function(id) → any
+  getAll:         null, // function(id) → any[]  (all answers incl. repeat rows)
   CHECKABLE_TYPES: null, // Set<string>
 };

@@ -12,7 +12,8 @@ export function markAllDisabled(nodes, results) {
 }
 
 // Compare a single value against one enableWhen condition.
-function compareValue(val, ew) {
+// Exported so that base-node.js can reuse it for the condition audit tooltip.
+export function compareValue(val, ew) {
   if (ew.operator === 'exists') {
     const hasVal = val !== undefined && val !== null && val !== '';
     return ew.answerBoolean !== false ? hasVal : !hasVal;

@@ -68,6 +68,7 @@ export class PreviewForm {
       _rc.calcFormOk      = this._calcFormOk;
       _rc.updateGroupIcons = () => GroupNode.updateAll(_rc);
       _rc.getValue        = id => answerStore.get(id);
+      _rc.getAll          = id => answerStore.getAll(id);
     };
     const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
     if (cached?.questDoc) {

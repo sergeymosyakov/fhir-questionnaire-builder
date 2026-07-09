@@ -5,6 +5,32 @@ import { nextId } from '../id.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
 import * as bh from './builder-helpers.js';
 import { AppEvents } from '../events.js';
+import { compareValue } from '../eval.js';
+
+// Build a multi-line condition audit string for the enableWhen tooltip.
+// Shows each condition with its operator, expected value, actual value, and result.
+function buildEnableWhenAudit(enableWhen, enableBehavior, getAll) {
+  if (!getAll) return null;
+  const logic = enableBehavior === 'any' ? 'ANY' : 'ALL';
+  const lines = enableWhen.map(ew => {
+    const all = getAll(ew.question);
+    const actual = all.length === 0 ? '(no answer)' : all.map(v => JSON.stringify(v)).join(', ');
+    const expected = ew.operator === 'exists'
+      ? (ew.answerBoolean !== false ? 'exists' : 'not exists')
+      : JSON.stringify(
+          ew.answerBoolean  !== undefined ? ew.answerBoolean  :
+          ew.answerString   !== undefined ? ew.answerString   :
+          ew.answerInteger  !== undefined ? ew.answerInteger  :
+          ew.answerDecimal  !== undefined ? ew.answerDecimal  :
+          ew.answerCoding   !== undefined ? (ew.answerCoding.code || ew.answerCoding.display) : '?'
+        );
+    const passed = all.length === 0
+      ? compareValue(undefined, ew)
+      : all.some(v => compareValue(v, ew));
+    return `${passed ? '\u2713' : '\u2717'} [${ew.question}] ${ew.operator} ${expected}  \u2192  actual: ${actual}`;
+  });
+  return `Enable when (${logic}):\n` + lines.join('\n');
+}
 
 // Shared wrapper factory used by every buildControl() implementation.
 export function createWrap() {
@@ -155,8 +181,11 @@ export class BaseNode {
         if (rc.lastCtx.fp) explainModal.show(expr, rc.lastCtx.fp, rc.lastCtx.qr, rc.lastCtx.env);
       });
     } else {
+      const audit = buildEnableWhenAudit(this.enableWhen, this.enableBehavior, rc.getAll);
       hint.dataset.tipTitle = 'Visibility condition';
-      hint.dataset.tipBody  = 'Not yet met: ' + dimText + '\n\nThis label is auto-generated from the enableWhen condition. To change it \u2014 edit the Show When panel in the builder.';
+      hint.dataset.tipBody  = audit
+        ? audit + '\n\n' + 'This label is auto-generated from the enableWhen condition. To change it \u2014 edit the Show When panel in the builder.'
+        : 'Not yet met: ' + dimText + '\n\nThis label is auto-generated from the enableWhen condition. To change it \u2014 edit the Show When panel in the builder.';
       hint.dataset.tipFhir  = 'Questionnaire.item.enableWhen[]';
       hint.dataset.tipSpec  = 'R4';
     }
