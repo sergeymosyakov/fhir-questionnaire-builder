@@ -471,20 +471,53 @@ All rules are tested in `tests/validate.test.js` (1064 unit tests total across a
 
 ## Not Supported / Partial Support
 
-Legend: ⚠️ = silent data loss (field present in import file, ignored or overwritten on export); ❌ = not handled at all; 🔧 = partial support.
+**Legend:**
+- ✅ **Full** — editable in the builder, imported, exported, and (where applicable) executed client-side.
+- 🔄 **Round-trip only** — preserved on import and written back on export unchanged. No editing UI and no client-side execution.
+- 🔧 **Partial** — some functionality works; specific gaps described.
+- ❌ **Not supported** — the feature requires server-side execution that the builder cannot perform; declared/preserved in the FHIR JSON but not acted upon.
 
-### Questionnaire root-level — silent data loss on export
+---
 
-All known root-level fields are either fully editable (see Questionnaire-Level Metadata table) or preserved verbatim via `_rawQuestExtensions` (see Additional round-trip fields above). There are no known root-level fields with silent data loss.
+### Round-trip only
 
-> **`sdc-questionnaire-launchContext`** now has a dedicated editing UI in the Properties modal ("Launch Context" collapsible section). Entries are parsed from `Questionnaire.extension[]` into `questMeta.launchContexts[]` on import and written back as extensions on export. The FHIRPath variables they declare (%patient, %user, %encounter, …) can be used in `calculatedExpression`, `enableWhenExpression`, and other FHIRPath fields. Client-side evaluation is limited to what the builder can resolve from the injected patient profile (Scenario 3); server-side `$populate` may use additional contexts.
+Fields and extensions that are imported, stored internally, and written back on export unchanged. No editing UI in the builder.
 
-### Item-level — not implemented
+| Field / Extension | Notes |
+|---|---|
+| `Questionnaire.useContext[]` | 🔄 Preserved as `questMeta._rawUseContext`; not editable (structure too variable for a generic editor) |
+| Unknown `Questionnaire.extension[]` | 🔄 All root-level extensions not claimed by a dedicated parser are preserved in `questMeta._rawQuestExtensions` and written back unchanged. This covers any future or non-standard extensions not listed below. |
+| Unknown `item.extension[]` | 🔄 Unrecognised item-level extensions are preserved in `node._unknownExtensions[]`; viewable and editable as raw JSON via the **Props** button |
+| `sdc-questionnaire-itemContext` | 🔄 FHIRPath expression defining the FHIR context node for server-side population/extraction; round-tripped |
+| `sdc-questionnaire-sourceQueries` / `sdc-questionnaire-contextExpression` | 🔄 Server-side batch queries for form pre-population; round-tripped |
+| `sdc-questionnaire-width` | 🔄 Column width hint for `gtable` item control; round-tripped; not rendered (table layout not yet implemented) |
+| `sdc-questionnaire-lookupQuestionnaire` | 🔄 Canonical reference to a Questionnaire used for server-side reference lookup; round-tripped |
+| `meta.tag[]` / `meta.security[]` on QR import | 🔄 Preserved on QR load; no editing UI in the QR Export modal |
 
-| FHIR field / extension | Status | Notes |
+---
+
+### Partial support
+
+| Field / Extension | What works | What is missing |
 |---|---|---|
-| `Questionnaire.contained[]` | 🔧 Preserved round-trip | Viewable as JSON in the Contained card; not otherwise editable |
-| Resource reference resolution | 🔧 Partial | `type: 'reference'`: resource-type dropdown + id text input; **live FHIR server search autocomplete** when a FHIR Base Server is configured (debounced name search via `fhir-search.js`); no profile-based validation of the chosen reference |
+| `Questionnaire.contained[]` | 🔧 Deep-copied on export; each resource visible as a JSON chip in the **Contained** card in the left panel | Not editable in the builder — content must be edited in the source file |
+| `type: 'reference'` items | 🔧 Resource-type dropdown + id text input + live FHIR server search autocomplete (when a FHIR Base Server is configured) | No profile-based validation of the selected reference value |
+| `sdc-questionnaire-launchContext` | 🔧 Full editing UI in **Properties → Launch Context** (preset names, type, description); import/export round-trip | The declared variables (%patient, %user, …) are not evaluated beyond what the builder injects from the Patient Panel; full population requires an SDC-capable server (`$populate`) |
+| `sdc-questionnaire-definitionExtract` | 🔧 Client-side extraction runs via **Save ▾ → Definition Extract**; produces a FHIR transaction Bundle from `item.definition` answer mappings | `sdc-questionnaire-itemExtractionContext` and StructureMap-based extraction are not evaluated |
+| `Questionnaire.jurisdiction[]` in Properties modal | 🔧 First `coding` per entry editable (system / code / display) | Extra codings and the `text` field within each CodeableConcept are not preserved when saved |
+
+---
+
+### Not supported (requires server-side execution)
+
+These features require capabilities that do not exist client-side. The extensions are **round-tripped** (data is not lost), but the builder cannot execute them.
+
+| Feature | Why it cannot run client-side |
+|---|---|
+| StructureMap execution (`sdc-questionnaire-targetStructureMap`, `sdc-questionnaire-sourceStructureMap`) | ❌ Requires a StructureMap engine. The extensions are preserved in `_rawQuestExtensions` but not interpreted. |
+| `item.definition` resolution against StructureDefinition | ❌ `item.definition` is preserved and editable as a URL, but the builder does not fetch the referenced StructureDefinition or auto-fill `text`, `type`, or value constraints from it. Requires server integration. |
+| Sub-questionnaire assembly (`sdc-questionnaire-subQuestionnaire`) | ❌ Not parsed or resolved. Requires a FHIR server that implements SDC questionnaire assembly. |
+| `sdc-questionnaire-itemPopulationContext` | ❌ Server-side population context expression; round-tripped but not evaluated. |
 
 
 ---
@@ -525,17 +558,17 @@ These warnings appear for well-formed, spec-compliant resources and cannot be av
 ### SDC extensions — population and extraction (partial support)
 
 The `$populate` operation above pre-fills the form using server-side logic.
-The following extensions configure *how* the server-side engine populates fields — the builder round-trips them through import/export but does not evaluate them client-side.
+The following extensions configure *how* the server-side engine populates or extracts fields.
 
-| Extension | Notes |
-|---|---|
-| `sdc-questionnaire-launchContext` | Declares named contexts (patient, encounter, user, etc.) passed at launch time; enables server-side pre-population |
-| `sdc-questionnaire-itemContext` | FHIRPath expression that defines the FHIR context node for population and extraction of a specific item |
-| `sdc-questionnaire-sourceQueries` / `sdc-questionnaire-contextExpression` | Batch FHIR queries to populate form data from a server at launch |
-| `sdc-questionnaire-definitionExtract` | Extracts completed answers into specified FHIR resource element paths — **evaluated client-side** via Save ▾ → Definition Extract (see SDC server operations above); other extensions below are round-tripped only |
-| `sdc-questionnaire-targetStructureMap` | StructureMap used to transform a completed QR into other FHIR resources |
-| `sdc-questionnaire-sourceStructureMap` | StructureMap used to pre-populate the questionnaire from existing FHIR data |
-| `sdc-questionnaire-width` | When used with a table item control (`gtable`), indicates the width to give the question's column — round-tripped only; not yet rendered (requires table layout) |
-| `sdc-questionnaire-lookupQuestionnaire` | Canonical reference to a Questionnaire used to produce candidate answers for `reference` items (for server-side lookup) |
+| Extension | Builder support | Notes |
+|---|---|---|
+| `sdc-questionnaire-launchContext` | ✅ Editing UI + round-trip | Declare %patient / %user / %encounter in **Properties → Launch Context**; used by SDC servers for `$populate` |
+| `sdc-questionnaire-definitionExtract` | 🔧 Partial client-side | **Save ▾ → Definition Extract** runs client-side extraction from `item.definition` mappings; `itemExtractionContext` and StructureMap-based extraction not evaluated |
+| `sdc-questionnaire-itemContext` | 🔄 Round-trip only | FHIRPath context per item for server-side population; not evaluated client-side |
+| `sdc-questionnaire-sourceQueries` / `sdc-questionnaire-contextExpression` | 🔄 Round-trip only | Server-side batch queries for pre-population |
+| `sdc-questionnaire-targetStructureMap` | 🔄 Round-trip only | StructureMap transform of completed QR; requires server StructureMap engine |
+| `sdc-questionnaire-sourceStructureMap` | 🔄 Round-trip only | StructureMap for pre-population; requires server StructureMap engine |
+| `sdc-questionnaire-width` | 🔄 Round-trip only | Column width for `gtable`; not rendered (table layout not implemented) |
+| `sdc-questionnaire-lookupQuestionnaire` | 🔄 Round-trip only | Server-side lookup questionnaire for `reference` items |
 
 
