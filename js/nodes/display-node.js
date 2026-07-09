@@ -7,6 +7,9 @@ import { NODE_REGISTRY } from './registry.js';
 import { applyRenderStyle } from './base-node.js';
 import { createWrap } from './base-node.js';
 
+// Crisp info-circle glyph for flyover display items (text revealed on hover).
+const FLYOVER_SVG = '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="4.7" r="1" fill="currentColor"/><rect x="7.15" y="6.9" width="1.7" height="5" rx="0.85" fill="currentColor"/></svg>';
+
 export class DisplayNode extends ItemNode {
   constructor(data = {}) {
     super(data);
@@ -68,7 +71,7 @@ export class DisplayNode extends ItemNode {
       const fly = document.createElement('span');
       fly.className        = 'display-flyover';
       fly.dataset.testid   = 'display-flyover';
-      fly.textContent      = '\u24D8 Flyover';
+      fly.innerHTML        = FLYOVER_SVG;
       fly.dataset.tipTitle = 'Flyover';
       fly.dataset.tipBody  = this.title;
       row.appendChild(fly);

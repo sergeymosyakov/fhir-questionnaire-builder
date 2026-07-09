@@ -56,7 +56,6 @@ test.describe('flyover — import render', () => {
     const row = page.locator('[data-preview-id="flyover-note"]');
     const marker = row.getByTestId('display-flyover');
     await expect(marker).toBeVisible();
-    await expect(marker).toContainText('Flyover');
     // The full display text is NOT shown inline — it lives in the tooltip attribute.
     await expect(row).not.toContainText('government-issued ID');
     await expect(marker).toHaveAttribute('data-tip-body', /government-issued ID/);
