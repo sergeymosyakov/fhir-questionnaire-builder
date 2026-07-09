@@ -469,6 +469,34 @@ All rules are tested in `tests/validate.test.js` (1064 unit tests total across a
 
 ---
 
+## SDC Operations
+
+Server-side SDC operations that the builder integrates with, and the extensions that configure them.
+
+### SDC server operations — supported
+
+| Operation | How to use | Notes |
+|---|---|---|
+| `Questionnaire/$populate` | **Answers ▾ → ↧ Fill from FHIR Server…** (enabled when a questionnaire is loaded) → search for a Patient by name (live FHIR search against the FHIR Base Server) or type `Patient/{id}` → click **Fill from Server** | Sends `POST {SDC Server || FHIR Base}/Questionnaire/$populate` with `Parameters { questionnaire, subject }`. Merges returned `QuestionnaireResponse` answers into the current form via `importQRAnswers`. Accepts both direct QR result and Parameters-wrapped QR. Requires a server implementing the SDC IG (e.g. Matchbox). |
+| Definition-based extraction | **Save ▾ → Definition Extract · FHIR JSON Bundle** (after filling answers) → review the extracted resources → **Download Bundle** | Client-side `definitionExtract(questJson, qr)` walks groups carrying the `sdc-questionnaire-definitionExtract` extension, maps each child `item.definition` answer to its FHIR resource element path, and produces a transaction `Bundle`. No server required. |
+
+### SDC extensions — population and extraction
+
+Extensions that configure how the server-side engine populates or extracts fields.
+
+| Extension | Builder support | Notes |
+|---|---|---|
+| `sdc-questionnaire-launchContext` | ✅ Full | Editing UI in **Properties → Launch Context** + import/export. Execution requires SDC server. |
+| `sdc-questionnaire-definitionExtract` | 🔧 Partial | Client-side extraction via **Save ▾ → Definition Extract**; `itemExtractionContext` and StructureMap-based extraction not evaluated |
+| `sdc-questionnaire-itemContext` | 🔄 Round-trip only | Not evaluated client-side |
+| `sdc-questionnaire-sourceQueries` / `contextExpression` | 🔄 Round-trip only | Server-side batch queries |
+| `sdc-questionnaire-targetStructureMap` | 🔄 Round-trip only | Requires server StructureMap engine |
+| `sdc-questionnaire-sourceStructureMap` | 🔄 Round-trip only | Requires server StructureMap engine |
+| `sdc-questionnaire-width` | 🔄 Round-trip only | Table column width; table layout not implemented |
+| `sdc-questionnaire-lookupQuestionnaire` | 🔄 Round-trip only | Server-side reference lookup |
+
+---
+
 ## Not Supported / Partial Support
 
 **Legend:**
@@ -549,25 +577,6 @@ These warnings appear for well-formed, spec-compliant resources and cannot be av
 
 ### SDC server operations — supported
 
-| Operation | How to use | Notes |
-|---|---|---|
-| `Questionnaire/$populate` | **Answers ▾ → ↧ Fill from FHIR Server…** (enabled when a questionnaire is loaded) → search for a Patient by name (live FHIR search against the FHIR Base Server) or type `Patient/{id}` → click **Fill from Server** | Sends `POST {SDC Server || FHIR Base}/Questionnaire/$populate` with `Parameters { questionnaire, subject }`. Merges returned `QuestionnaireResponse` answers into the current form via `importQRAnswers`. Accepts both direct QR result and Parameters-wrapped QR. Requires a server implementing the SDC IG (e.g. Matchbox). |
-| Definition-based extraction | **Save ▾ → Definition Extract · FHIR JSON Bundle** (after filling answers) → review the extracted resources → **Download Bundle** | Client-side `definitionExtract(questJson, qr)` walks groups carrying the `sdc-questionnaire-definitionExtract` extension, maps each child `item.definition` answer to its FHIR resource element path, and produces a transaction `Bundle`. No server required. |
-
-### SDC extensions — population and extraction
-
-The `$populate` operation above pre-fills the form using server-side logic.
-The following extensions configure *how* the server-side engine populates or extracts fields.
-
-| Extension | Builder support | Notes |
-|---|---|---|
-| `sdc-questionnaire-launchContext` | ✅ Full | Editing UI in **Properties → Launch Context** + import/export. Execution requires SDC server. |
-| `sdc-questionnaire-definitionExtract` | 🔧 Partial | Client-side extraction via **Save ▾ → Definition Extract**; `itemExtractionContext` and StructureMap-based extraction not evaluated |
-| `sdc-questionnaire-itemContext` | 🔄 Round-trip only | Not evaluated client-side |
-| `sdc-questionnaire-sourceQueries` / `contextExpression` | 🔄 Round-trip only | Server-side batch queries |
-| `sdc-questionnaire-targetStructureMap` | 🔄 Round-trip only | Requires server StructureMap engine |
-| `sdc-questionnaire-sourceStructureMap` | 🔄 Round-trip only | Requires server StructureMap engine |
-| `sdc-questionnaire-width` | 🔄 Round-trip only | Table column width; table layout not implemented |
-| `sdc-questionnaire-lookupQuestionnaire` | 🔄 Round-trip only | Server-side reference lookup |
+See **[SDC Operations](#sdc-operations)** section above.
 
 
