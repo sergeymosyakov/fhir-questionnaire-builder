@@ -81,4 +81,112 @@ test.describe('Renumber — prefix assignment', () => {
     const item1 = page.locator('[data-node-id="1.1"]');
     await expect(item1.locator('[data-testid="node-prefix-input"]')).toHaveValue('I.I');
   });
+
+  test('letter format produces correct prefix (a.a style)', async ({ page }) => {
+    await freshStart(page);
+    await addTwoItems(page);
+
+    await expect(async () => {
+      if (!(await page.locator('[data-testid="csel-drop"]').isVisible())) {
+        await page.getByTestId('renumber-format').click();
+      }
+      await expect(page.locator('[data-testid="csel-drop"]')).toBeVisible();
+    }).toPass();
+    await page.locator('[data-testid="csel-drop"] [data-val="letters"]').click();
+
+    await page.getByTestId('renumber-btn').click();
+    await expect(page.getByTestId('renumber-btn')).toBeEnabled({ timeout: 8000 });
+
+    const item1 = page.locator('[data-node-id="1.1"]');
+    const item2 = page.locator('[data-node-id="1.2"]');
+    const p1 = await item1.locator('[data-testid="node-prefix-input"]').inputValue();
+    const p2 = await item2.locator('[data-testid="node-prefix-input"]').inputValue();
+    // letters format produces letter-based prefixes (A.A, A.B …)
+    expect(p1).toMatch(/[a-z]/i);
+    expect(p2).toMatch(/[a-z]/i);
+    expect(p1).not.toBe(p2);
+  });
+
+  test('renumber after deleting middle item produces sequential prefixes', async ({ page }) => {
+    await freshStart(page);
+    // Add three items: 1.1, 1.2, 1.3
+    await addRootGroup(page);
+    await addItemToGroup(page, '1');
+    const group = page.locator('[data-node-id="1"]');
+    await group.getByTestId('group-add-btn').click();
+    await expect(page.locator('[data-testid="add-menu-item"]').first()).toBeVisible();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.2"]')).toBeVisible();
+    await group.getByTestId('group-add-btn').click();
+    await expect(page.locator('[data-testid="add-menu-item"]').first()).toBeVisible();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.3"]')).toBeVisible();
+
+    // Delete middle item 1.2
+    await page.keyboard.press('Escape');
+    const item2 = page.locator('[data-node-id="1.2"]');
+    await item2.getByTestId('node-gear-btn').click();
+    await expect(item2.getByTestId('node-delete-btn').first()).toBeVisible();
+    await item2.getByTestId('node-delete-btn').first().click();
+    await expect(page.getByTestId('delete-confirm-del-btn')).toBeVisible({ timeout: 5_000 });
+    await page.getByTestId('delete-confirm-del-btn').click();
+    await expect(page.locator('[data-node-id="1.2"]')).toHaveCount(0, { timeout: 5_000 });
+
+    // Renumber — remaining items should get 1.1 and 1.2 prefixes
+    await page.getByTestId('renumber-btn').click();
+    await expect(page.getByTestId('renumber-btn')).toBeEnabled({ timeout: 8000 });
+
+    // The node that was 1.3 is now at position 2 — its prefix should be 1.2
+    const remaining = page.locator('[data-node-id="1.3"]');
+    await expect(remaining.locator('[data-testid="node-prefix-input"]')).toHaveValue('1.2');
+  });
+
+  test('prefix persists in FHIR export after renumber', async ({ page }) => {
+    await freshStart(page);
+    await addTwoItems(page);
+
+    await page.getByTestId('renumber-btn').click();
+    await expect(page.getByTestId('renumber-btn')).toBeEnabled({ timeout: 8000 });
+
+    const json = await page.evaluate(async () => {
+      const { buildFHIRObject } = await import('/js/fhir/export.js');
+      return JSON.stringify(buildFHIRObject());
+    });
+    const q = JSON.parse(json);
+    function findItem(items, linkId) {
+      for (const it of items ?? []) {
+        if (it.linkId === linkId) return it;
+        const found = findItem(it.item ?? [], linkId);
+        if (found) return found;
+      }
+    }
+    // Both items should have a prefix field in the exported FHIR
+    expect(findItem(q.item, '1.1')?.prefix).toBe('1.1');
+    expect(findItem(q.item, '1.2')?.prefix).toBe('1.2');
+  });
+
+  test('manual prefix edit is preserved without renumber', async ({ page }) => {
+    await freshStart(page);
+    await addTwoItems(page);
+
+    // Manually set prefix on item 1.1
+    const prefixInput = page.locator('[data-node-id="1.1"]').locator('[data-testid="node-prefix-input"]');
+    await prefixInput.fill('Q1');
+    await prefixInput.blur();
+
+    // Export and verify prefix is in FHIR
+    const json = await page.evaluate(async () => {
+      const { buildFHIRObject } = await import('/js/fhir/export.js');
+      return JSON.stringify(buildFHIRObject());
+    });
+    const q = JSON.parse(json);
+    function findItem(items, linkId) {
+      for (const it of items ?? []) {
+        if (it.linkId === linkId) return it;
+        const found = findItem(it.item ?? [], linkId);
+        if (found) return found;
+      }
+    }
+    expect(findItem(q.item, '1.1')?.prefix).toBe('Q1');
+  });
 });

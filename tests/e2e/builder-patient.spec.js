@@ -127,4 +127,75 @@ test.describe('Re-init', () => {
       page.locator('[data-preview-id="profile-bmi"] .preview-readonly-value')
     ).toContainText('24');
   });
+
+  test('Adult Female preset sets age=28 and bmi=22', async ({ page }) => {
+    await loadEligibility(page);
+    await selectPreset(page, 'adult-female');
+
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-preview-id="profile-age"] .preview-readonly-value');
+        return el && el.textContent.trim() === '28';
+      },
+      { timeout: 10000 }
+    );
+
+    await expect(
+      page.locator('[data-preview-id="profile-age"] .preview-readonly-value')
+    ).toContainText('28');
+    await expect(
+      page.locator('[data-preview-id="profile-bmi"] .preview-readonly-value')
+    ).toContainText('22');
+  });
+
+  test('Pregnant Female preset reveals pregnancy-relevant section', async ({ page }) => {
+    await loadEligibility(page);
+    await selectPreset(page, 'pregnant-female');
+
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-preview-id="profile-age"] .preview-readonly-value');
+        return el && el.textContent.trim() === '30';
+      },
+      { timeout: 10000 }
+    );
+
+    // Pregnant female should show pregnancy-related section
+    await expect(page.locator('[data-preview-id="pregnancy-section"]')).not.toHaveClass(/lform-waiting/, { timeout: 5_000 });
+  });
+
+  test('Obese Male preset shows smoker-section (smoker=true)', async ({ page }) => {
+    await loadEligibility(page);
+    await selectPreset(page, 'obese-male');
+
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-preview-id="profile-age"] .preview-readonly-value');
+        return el && el.textContent.trim() === '45';
+      },
+      { timeout: 10000 }
+    );
+
+    await expect(page.locator('[data-preview-id="smoker-section"]')).not.toHaveClass(/lform-waiting/, { timeout: 5_000 });
+  });
+
+  test('switching preset updates displayed values (Adult Male → Child)', async ({ page }) => {
+    await loadEligibility(page);
+    await selectPreset(page, 'adult-male');
+    await page.waitForFunction(
+      () => document.querySelector('[data-preview-id="profile-age"] .preview-readonly-value')?.textContent.trim() === '35',
+      { timeout: 10000 }
+    );
+
+    // Switch to child
+    await selectPreset(page, 'child');
+    await page.waitForFunction(
+      () => document.querySelector('[data-preview-id="profile-age"] .preview-readonly-value')?.textContent.trim() === '10',
+      { timeout: 10000 }
+    );
+
+    await expect(
+      page.locator('[data-preview-id="profile-age"] .preview-readonly-value')
+    ).toContainText('10');
+  });
 });
