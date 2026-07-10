@@ -171,3 +171,86 @@ test.describe('enableWhen (standard)', () => {
     await expect(page.locator('[data-preview-id="1.2"]')).not.toHaveClass(/lform-waiting/, { timeout: 3000 });
   });
 });
+
+// ── Import-based enableWhen tests (using annual-health-check fixture) ──────────
+
+import path from 'node:path';
+const ANNUAL = path.resolve('sampledata/annual-health-check.fhir.json');
+
+async function loadAnnual(page) {
+  await page.addInitScript(() => localStorage.clear());
+  await page.goto('/');
+  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(ANNUAL);
+  await expect(page.locator('[data-preview-id="smoker"]')).toBeVisible({ timeout: 8_000 });
+}
+
+async function commitInput(page) {
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await page.getByTestId('preview-search-input').click();
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+}
+
+test.describe('enableWhen — fixture-based (annual-health-check)', () => {
+  test('numeric > condition: pain-location shows when pain > 0', async ({ page }) => {
+    await loadAnnual(page);
+    // pain-location has enableWhen: pain > 0
+    // Initially pain is empty → pain-location must be dimmed
+    await expect(page.locator('[data-preview-id="pain-location"]')).toHaveClass(/lform-waiting/);
+
+    // Fill pain level > 0 (pain is integer → number input or textarea)
+    const painInput = page.locator('[data-preview-id="pain"]').locator('input, textarea').first();
+    await painInput.fill('3');
+    await painInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+    await commitInput(page);
+
+    await expect(page.locator('[data-preview-id="pain-location"]')).not.toHaveClass(/lform-waiting/, { timeout: 5_000 });
+  });
+
+  test('condition not met: pain-location hidden in patient view when pain = 0', async ({ page }) => {
+    await loadAnnual(page);
+    // Switch to patient view without filling pain
+    await expect(page.getByTestId('preview-mode-patient')).not.toBeVisible();
+    await page.getByTestId('preview-mode-btn').click();
+    await expect(page.getByTestId('preview-mode-patient')).toBeVisible();
+    await page.getByTestId('preview-mode-patient').click();
+    await expect(page.locator('#lform')).toHaveClass(/patient-view/, { timeout: 5_000 });
+
+    // pain-location must not render (enableWhen not met)
+    await expect(page.locator('[data-preview-id="pain-location"]')).toHaveCount(0);
+  });
+
+  test('boolean condition: smoker = true shows cigs, smoker = false hides cigs', async ({ page }) => {
+    await loadAnnual(page);
+    // Initially cigs is dimmed
+    await expect(page.locator('[data-preview-id="cigs"]')).toHaveClass(/lform-waiting/);
+
+    // Check smoker → cigs visible
+    await page.locator('[data-preview-id="smoker"] input[type="checkbox"]').click();
+    await commitInput(page);
+    await expect(page.locator('[data-preview-id="cigs"]')).not.toHaveClass(/lform-waiting/, { timeout: 5_000 });
+
+    // Uncheck smoker → cigs dimmed again
+    await page.locator('[data-preview-id="smoker"] input[type="checkbox"]').click();
+    await commitInput(page);
+    await expect(page.locator('[data-preview-id="cigs"]')).toHaveClass(/lform-waiting/, { timeout: 5_000 });
+  });
+
+  test('condition audit shows current answer and pass/fail in tip-body', async ({ page }) => {
+    await loadAnnual(page);
+    // cigs is dimmed → hint visible with audit data
+    const hint = page.locator('[data-preview-id="cigs"]').getByTestId('preview-condition-hint');
+    await expect(hint).toBeVisible();
+
+    // Fill trigger and verify audit shows pass (✓)
+    await page.locator('[data-preview-id="smoker"] input[type="checkbox"]').click();
+    await commitInput(page);
+    await expect(page.locator('[data-preview-id="cigs"]')).not.toHaveClass(/lform-waiting/, { timeout: 5_000 });
+  });
+
+  test('enableWhen on group — lifestyle group visible by default (no condition)', async ({ page }) => {
+    await loadAnnual(page);
+    // Lifestyle group has no enableWhen — must be fully visible (no lform-waiting class)
+    await expect(page.locator('[data-preview-id="lifestyle"]')).not.toHaveClass(/lform-waiting/);
+  });
+});

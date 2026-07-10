@@ -86,3 +86,146 @@ test.describe('Group AND/OR logic — preview reactivity', () => {
     await expect(page.locator('.preview-logic-badge').first()).toHaveText(/ALL items/);
   });
 });
+
+// ── Calculated-expression tests using annual-health-check fixture ─────────────
+
+import path from 'node:path';
+const ANNUAL = path.resolve('sampledata/annual-health-check.fhir.json');
+
+async function loadAnnual(page) {
+  await page.goto('/');
+  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(ANNUAL);
+  await expect(page.locator('[data-preview-id="bmi"]')).toBeVisible({ timeout: 10_000 });
+}
+
+async function commitInput(page) {
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await page.getByTestId('preview-search-input').click();
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+}
+
+test.describe('calculatedExpression — annual-health-check fixture', () => {
+  test('BMI is calculated from height and weight inputs', async ({ page }) => {
+    await loadAnnual(page);
+
+    const heightInput = page.locator('[data-preview-id="height"]').locator('input').first();
+    const weightInput = page.locator('[data-preview-id="weight"]').locator('input').first();
+
+    // Commit after each fill (like regression) so the calc chain fires incrementally
+    await heightInput.fill('180');
+    await heightInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+    await commitInput(page);
+    await weightInput.fill('80');
+    await weightInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+    await commitInput(page);
+
+    // BMI row textContent contains the prefix ("1.3") and the computed value ("24.7").
+    // Use \d{2,}[.,]\d to match 2+ digit decimals — excludes the single-digit prefix.
+    const bmiText = await page.locator('[data-preview-id="bmi"]').textContent({ timeout: 5_000 });
+    expect(bmiText).toMatch(/\d{2,}[.,]\d/);
+  });
+
+  test('bmi-high-flag is true when BMI >= 30', async ({ page }) => {
+    await loadAnnual(page);
+
+    const heightInput = page.locator('[data-preview-id="height"]').locator('input, textarea').first();
+    const weightInput = page.locator('[data-preview-id="weight"]').locator('input, textarea').first();
+
+    // 170 cm, 90 kg → BMI ≈ 31.1 → high-flag true
+    await heightInput.fill('170');
+    await heightInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+    await weightInput.fill('90');
+    await weightInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+    await commitInput(page);
+
+    // bmi-high-flag is readOnly boolean → rendered as text "true", not a checkbox
+    await expect(page.locator('[data-preview-id="bmi-high-flag"]')).toContainText('true', { timeout: 5_000 });
+  });
+
+  test('bmi-high-display shows when BMI >= 30 (calc chain: height→bmi→flag→display)', async ({ page }) => {
+    await loadAnnual(page);
+
+    // bmi-high-display has enableWhen: bmi-high-flag = true
+    // Initially the flag is false → display is hidden
+    await expect(page.locator('[data-preview-id="bmi-high-display"]')).toHaveClass(/lform-waiting/);
+
+    const heightInput = page.locator('[data-preview-id="height"]').locator('input, textarea').first();
+    const weightInput = page.locator('[data-preview-id="weight"]').locator('input, textarea').first();
+
+    // 175 cm, 100 kg → BMI ≈ 32.7 → high-flag true → display visible
+    await heightInput.fill('175');
+    await heightInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+    await weightInput.fill('100');
+    await weightInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+    await commitInput(page);
+
+    await expect(page.locator('[data-preview-id="bmi-high-display"]')).not.toHaveClass(/lform-waiting/, { timeout: 5_000 });
+  });
+
+  test('bmi-high-display hides again when weight drops back below threshold', async ({ page }) => {
+    await loadAnnual(page);
+
+    const heightInput = page.locator('[data-preview-id="height"]').locator('input, textarea').first();
+    const weightInput = page.locator('[data-preview-id="weight"]').locator('input, textarea').first();
+
+    // First: make BMI high → display appears
+    await heightInput.fill('175');
+    await heightInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+    await weightInput.fill('100');
+    await weightInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+    await commitInput(page);
+    await expect(page.locator('[data-preview-id="bmi-high-display"]')).not.toHaveClass(/lform-waiting/, { timeout: 5_000 });
+
+    // Then drop weight → BMI below 30 → display hidden again
+    await weightInput.fill('60');
+    await weightInput.evaluate(el => el.dispatchEvent(new Event('change', { bubbles: true })));
+    await commitInput(page);
+    await expect(page.locator('[data-preview-id="bmi-high-display"]')).toHaveClass(/lform-waiting/, { timeout: 5_000 });
+  });
+
+  test('logic badge persists after page navigation (logic setting survives re-render)', async ({ page }) => {
+    await freshStart(page);
+    await addRootGroup(page);
+    await addItemToGroup(page, '1');
+    const group = page.locator('[data-node-id="1"]');
+    await group.getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.2"]')).toBeVisible();
+
+    // Close any open type-selector dropdown left from adding items
+    await page.keyboard.press('Escape');
+
+    const logicTrigger = group.getByTestId('group-logic-select');
+    await logicTrigger.click();
+    await page.locator('[data-testid="csel-drop"] [data-val="OR"]').click();
+    await expect(page.locator('.preview-logic-badge').first()).toHaveText(/ANY item/);
+
+    // Commit input (focuses search box) — acts as neutral navigation without opening dropdowns
+    await commitInput(page);
+    // Badge must still show OR after re-render tick
+    await expect(page.locator('.preview-logic-badge').first()).toHaveText(/ANY item/);
+  });
+
+  test('group with OR logic: badge class reflects OR state in preview DOM', async ({ page }) => {
+    await freshStart(page);
+    await addRootGroup(page);
+    await addItemToGroup(page, '1');
+    const group = page.locator('[data-node-id="1"]');
+    await group.getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.2"]')).toBeVisible();
+
+    // Close any open dropdown before interacting with logic select
+    await page.keyboard.press('Escape');
+
+    const logicTrigger = group.getByTestId('group-logic-select');
+    await logicTrigger.click();
+    await page.locator('[data-testid="csel-drop"] [data-val="OR"]').click();
+
+    // The logic separator text between items should be "OR"
+    const separator = page.locator('.logic-separator').first();
+    await expect(separator).toBeVisible();
+    await expect(separator).toHaveText('OR');
+  });
+});
