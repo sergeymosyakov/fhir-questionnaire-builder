@@ -26,7 +26,7 @@ const SDC_OBS_PROFILE = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-obse
 export function exportObservations(fileName, meta) {
   const { answerStore } = _svc;
   const fhirQ = buildFHIRObject();
-  const qr    = buildQR(fhirQ, answerStore.data);
+  const qr    = buildQR(fhirQ, answerStore.toValueMap());
   qr.status   = 'completed';
   qr.authored = new Date().toISOString();
   if (meta && meta.qrId)    qr.id      = meta.qrId;

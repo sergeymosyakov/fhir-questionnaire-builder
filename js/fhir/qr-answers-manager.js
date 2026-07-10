@@ -33,8 +33,10 @@ export class QRAnswersManager {
   }
 
   apply(qr) {
-    const result = importQRAnswers(qr, this._answerStore.data, this._tree);
+    const values = this._answerStore.toValueMap();
+    const result = importQRAnswers(qr, values, this._tree);
     if (!result.ok) { showError('Cannot load answers: ' + result.error); return; }
+    this._answerStore.replaceAll(values);
 
     document.dispatchEvent(new CustomEvent(AppEvents.QR_LOADED, { detail: {
       status:        result.meta.status,
@@ -73,7 +75,7 @@ export class QRAnswersManager {
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 
     if (issues.length > 0 && this._validateEnabled) {
-      validateModal.show('Load Answers \u2014 ' + result.loaded + ' loaded', 'import', { tree: this._tree, values: this._answerStore.data, extraIssues: issues });
+      validateModal.show('Load Answers — ' + result.loaded + ' loaded', 'import', { tree: this._tree, values: this._answerStore.toValueMap(), extraIssues: issues });
     }
   }
 }

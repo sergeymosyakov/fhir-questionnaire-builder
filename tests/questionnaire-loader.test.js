@@ -33,7 +33,7 @@ vi.mock('../js/utils.js', () => ({
   destroyTree: vi.fn(),
 }));
 vi.mock('../js/state.js', () => ({
-  answerStore: { data: {}, get: vi.fn(), getAll: vi.fn() },
+  answerStore: { data: {}, get: vi.fn(), getAll: vi.fn(), toValueMap() { return this.data; } },
 }));
 
 const { QuestionnaireLoader }    = await import('../js/fhir/questionnaire-loader.js');
@@ -50,7 +50,7 @@ const { EventState, AppEvents }  = await import('../js/events.js');
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function makeLoader(overrides = {}) {
   const tree = overrides.tree ?? [];
-  const answerStore = overrides.answerStore ?? { data: {}, get: vi.fn(), getAll: vi.fn() };
+  const answerStore = overrides.answerStore ?? { data: {}, get: vi.fn(), getAll: vi.fn(), toValueMap() { return this.data; } };
   const questDoc = overrides.questDoc ?? {
     tree,
     meta: { fhirTarget: 'R4' },

@@ -112,8 +112,8 @@ export class QuestionnaireLoader {
 
       // Show import report only when local validator finds errors and validate is enabled.
       // Warnings are non-blocking — users can review them via Tools → Validate.
-      if (this._validateEnabled && validateTree(this._tree, this._answerStore.data, { name: data?.name }).some(i => i.severity === 'error')) {
-        validateModal.show('Import — Validation Report', 'import', { questJson: data, tree: this._tree, values: this._answerStore.data });
+      if (this._validateEnabled && validateTree(this._tree, this._answerStore.toValueMap(), { name: data?.name }).some(i => i.severity === 'error')) {
+        validateModal.show('Import — Validation Report', 'import', { questJson: data, tree: this._tree, values: this._answerStore.toValueMap() });
       }
       this._expandValueSets(++this._importSeq, data);
     } catch (err) {
@@ -129,7 +129,7 @@ export class QuestionnaireLoader {
     const failures = await terminologyService.expandAll(this._tree, this._questDoc.meta);
     if (this._importSeq !== seq) return;
     if (failures.length) {
-      validateModal.show('ValueSet Expansion Errors', 'import', { questJson, tree: this._tree, values: this._answerStore.data });
+      validateModal.show('ValueSet Expansion Errors', 'import', { questJson, tree: this._tree, values: this._answerStore.toValueMap() });
     }
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM, { detail: { silent: true } }));
   }

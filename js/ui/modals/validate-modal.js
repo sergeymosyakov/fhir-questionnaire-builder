@@ -311,7 +311,7 @@ if (typeof document !== 'undefined') {
       _modal.show('Export \u2014 Validation Report', 'export', {
         questJson: buildFHIRObjectVersioned(questDoc.fhirTarget),
         tree:      questDoc.tree,
-        values:    answerStore.data,
+        values:    answerStore.toValueMap(),
         onExport:  resolve,
       });
     });
@@ -324,7 +324,7 @@ if (typeof document !== 'undefined') {
       _modal.show('Validate \u2014 Report', 'validate', {
         questJson: buildFHIRObjectVersioned(questDoc.fhirTarget),
         tree:      questDoc.tree,
-        values:    answerStore.data,
+        values:    answerStore.toValueMap(),
       });
     });
   });

@@ -268,7 +268,7 @@ export class ItemNode extends BaseNode {
   _buildRepeatContainer(iconEl, onAfterChange, rc) {
     const id     = this.id;
     const rowKey = i => i === 0 ? id : id + '$$' + i;
-    const n      = rc.values[id + '$$n'] || 0;
+    const n      = rc.getValue(id + '$$n') || 0;
 
     const wrap = document.createElement('div');
     wrap.className = 'repeat-wrap';
@@ -290,9 +290,9 @@ export class ItemNode extends BaseNode {
         rm.dataset.testid = 'repeat-remove-btn';
         const _i = i;
         rm.onclick = () => {
-          for (let j = _i; j < n; j++) rc.values[rowKey(j)] = rc.values[rowKey(j + 1)];
-          delete rc.values[rowKey(n)];
-          rc.values[id + '$$n'] = n - 1;
+          for (let j = _i; j < n; j++) rc.set(rowKey(j), rc.getValue(rowKey(j + 1)));
+          rc.remove(rowKey(n));
+          rc.set(id + '$$n', n - 1);
           BaseNode.notifyChanged();
         };
         rowEl.appendChild(rm);
@@ -313,7 +313,7 @@ export class ItemNode extends BaseNode {
       addBtn.disabled = true;
       addBtn.dataset.tipTitle = 'Maximum ' + maxOccurs + ' answer' + (maxOccurs === 1 ? '' : 's') + ' reached';
     }
-    addBtn.onclick = () => { if (!atMax) { rc.values[id + '$$n'] = n + 1; BaseNode.notifyChanged(); } };
+    addBtn.onclick = () => { if (!atMax) { rc.set(id + '$$n', n + 1); BaseNode.notifyChanged(); } };
     wrap.appendChild(addBtn);
 
     return wrap;

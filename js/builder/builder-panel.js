@@ -124,8 +124,10 @@ export class BuilderPanel {
   _doCalcRecalc() {
     if (this._questDoc.rawFhir && fhirpath) {
       const base = JSON.parse(JSON.stringify(this._questDoc.rawFhir));
-      const qr = buildQR(base, this._answerStore.data);
-      evalCalcNodes(this._tree, qr, fhirpath, this._answerStore.data, {}, base);
+      const values = this._answerStore.toValueMap();
+      const qr = buildQR(base, values);
+      evalCalcNodes(this._tree, qr, fhirpath, values, {}, base);
+      this._answerStore.merge(values);
     }
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
   }

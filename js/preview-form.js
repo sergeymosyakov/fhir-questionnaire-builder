@@ -64,11 +64,12 @@ export class PreviewForm {
       this._rawFhir       = questDoc;
       this._questVariables = questDoc.variables;
       this._calcFormOk    = node => calcFormOk(node, answerStore);
-      _rc.values          = answerStore.data;
       _rc.calcFormOk      = this._calcFormOk;
       _rc.updateGroupIcons = () => GroupNode.updateAll(_rc);
       _rc.getValue        = id => answerStore.get(id);
       _rc.getAll          = id => answerStore.getAll(id);
+      _rc.set             = (id, v) => answerStore.set(id, v);
+      _rc.remove          = id => answerStore.remove(id);
     };
     const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
     if (cached?.questDoc) {
@@ -154,13 +155,15 @@ export class PreviewForm {
     const base = this._rawFhir.value
       ? JSON.parse(JSON.stringify(this._rawFhir.value))
       : { resourceType: 'Questionnaire', item: [] };
-    const qr = buildQR(base, this._answerStore.data);
+    const qr = buildQR(base, this._answerStore.toValueMap());
     if (!silent) progress.show('Evaluating variables…');
     await _yield();
     const envVars = buildVarEnv(this._questVariables, qr, fhirpath);
     if (!silent) progress.show('Applying initial values…');
     await _yield();
-    evalInitialExprNodes(this._tree, qr, fhirpath, this._answerStore.data, envVars);
+    const initMap = this._answerStore.toValueMap();
+    evalInitialExprNodes(this._tree, qr, fhirpath, initMap, envVars);
+    this._answerStore.merge(initMap);
     this._preQR = qr;
     this._preEnvVars = envVars;
     if (!silent) progress.show('Refreshing preview\u2026');
@@ -206,10 +209,12 @@ export class PreviewForm {
         qr = this._preQR; envVars = this._preEnvVars;
         this._preQR = null; this._preEnvVars = null;
       } else {
-        qr = buildQR(base, this._answerStore.data);
+        qr = buildQR(base, this._answerStore.toValueMap());
         envVars = buildVarEnv(this._questVariables, qr, fhirpath);
       }
-      evalCalcNodes(this._tree, qr, fhirpath, this._answerStore.data, envVars, base);
+      const calcMap = this._answerStore.toValueMap();
+      evalCalcNodes(this._tree, qr, fhirpath, calcMap, envVars, base);
+      this._answerStore.merge(calcMap);
       const env = { resource: qr, ...envVars };
       this._lastCtx.fp = fhirpath; this._lastCtx.qr = qr; this._lastCtx.env = env;
       document.dispatchEvent(new CustomEvent(AppEvents.FHIRPATH_CTX_UPDATED, { detail: { fp: fhirpath, qr, env } }));
@@ -349,7 +354,9 @@ export class PreviewForm {
     try {
       const questJson = buildFHIRObject();
       const qr = await populateFromServer(fhirBase, questJson, patientRef);
-      const { loaded } = importQRAnswers(qr, this._answerStore.data, this._tree);
+      const values = this._answerStore.toValueMap();
+      const { loaded } = importQRAnswers(qr, values, this._tree);
+      this._answerStore.replaceAll(values);
       document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
       showInfo(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} from server.`);
     } catch (err) {

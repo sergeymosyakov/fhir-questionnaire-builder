@@ -20,7 +20,7 @@ if (typeof document !== 'undefined') {
 export function exportQR(fileName, meta) {
   const { answerStore } = _svc;
   const fhirQ = buildFHIRObject();
-  const qr    = buildQR(fhirQ, answerStore.data);
+  const qr    = buildQR(fhirQ, answerStore.toValueMap());
   qr.status   = (meta && meta.status)  || 'in-progress';
   if (meta && meta.id)      qr.id       = meta.id;
   if (meta && meta.language) qr.language = meta.language;

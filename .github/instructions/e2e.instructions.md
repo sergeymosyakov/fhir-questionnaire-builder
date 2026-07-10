@@ -58,3 +58,8 @@ await page.getByTestId('export-quest-item').click();
 
 - **Fixture validity** — test fixtures must not trigger side-effects unrelated to the test. If loading a fixture causes a warning/error modal to auto-open (e.g. import validate modal), fix the fixture — do NOT dismiss the modal silently in `loadFixture`/`freshLoad`. A `choice` item in a fixture must have at least 1 `answerOption` to avoid triggering the import validation warning. Empty-state UI scenarios must be reached by removing rows in the test, not by having a broken fixture item.
 - **No silent workarounds in test helpers** — `if (await modal.isVisible()) { await modal.close() }` in a setup helper is forbidden unless the test explicitly covers that modal. If something unexpected opens during test setup, fix the root cause. Exception: if the test IS asserting on the modal (checking its content, verifying it opened), dismissing it at the end of the assertion block is correct.
+
+## Running the suite
+
+- **Always run tests in an observable way — never blind-buffer.** Playwright (and Vitest) runs, especially the full e2e suite, must be launched so their live state is inspectable at any moment. Do NOT pipe the command through `tail`/`head`/`grep` — that buffers everything until the process exits and hides all progress. Instead either stream output live (`npx playwright test`) or tee it to a log file that can be read while the run is in flight (`npx playwright test 2>&1 | tee /tmp/e2e.log`), then filter the saved log afterwards for a summary.
+- E2E is **on-demand only** — run `npx playwright test` only when explicitly asked, never as part of the default pre-push checklist.

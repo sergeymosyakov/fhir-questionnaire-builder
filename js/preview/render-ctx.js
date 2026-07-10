@@ -15,7 +15,6 @@ export const _rc = {
   viewPrefs:          null, // _viewPrefs object (mutated in-place on pref changes)
   lastCtx:            null, // _lastCtx object (mutated in-place by _reCalc)
   buildControl:       null, // function(node, iconEl, onAfterChange)
-  values:             null, // values object (for repeat row mutations)
   updateGroupIcons:   null, // function() — GroupNode.updateAll(_rc); used as callback in item-node.js
 
   // State helpers — injected to avoid circular imports in node classes:
@@ -24,5 +23,7 @@ export const _rc = {
   evalConstraints: null, // function(node, fp, qr, env) → bool
   getValue:       null, // function(id) → any
   getAll:         null, // function(id) → any[]  (all answers incl. repeat rows)
+  set:            null, // function(id, v) — write a single answer (repeat rows)
+  remove:         null, // function(id) — delete a single answer (repeat rows)
   CHECKABLE_TYPES: null, // Set<string>
 };

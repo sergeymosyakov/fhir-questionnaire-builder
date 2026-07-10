@@ -24,7 +24,7 @@ export class DefExtractModal extends Modal {
     if (!ctx?.questDoc || !ctx?.answerStore) return;
 
     const questJson = buildFHIRObject();
-    const qr = buildQR(questJson, ctx.answerStore.data);
+    const qr = buildQR(questJson, ctx.answerStore.toValueMap());
     this._result = definitionExtract(questJson, qr);
 
     this._renderBody();

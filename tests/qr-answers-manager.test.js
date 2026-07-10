@@ -22,7 +22,7 @@ const { EventState, AppEvents }  = await import('../js/events.js');
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function makeManager(overrides = {}) {
   const questDoc    = overrides.questDoc ?? { rawFhir: null, tree: [] };
-  const answerStore = overrides.answerStore ?? { data: {}, get: () => undefined };
+  const answerStore = overrides.answerStore ?? { data: {}, get: () => undefined, toValueMap() { return this.data; }, replaceAll() {} };
   EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc, answerStore });
   return new QRAnswersManager();
 }
