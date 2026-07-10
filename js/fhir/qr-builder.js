@@ -49,18 +49,12 @@ function buildQRItem(fhirItem, values) {
   const qrItem = { linkId: fhirItem.linkId };
   const children = fhirItem.item || [];
   const t = fhirItem.type || 'string';
-  const val = values[fhirItem.linkId];
+  const rows = values[fhirItem.linkId];
+  const val  = rows ? rows[0] : undefined;
 
-  // Collect all answer values: primary + repeat rows ($$1, $$2, …)
+  // Collect all defined answer rows (repeat rows are plain array elements).
   function allVals() {
-    const id = fhirItem.linkId;
-    const n  = values[id + '$$n'] || 0;
-    const vs = val !== undefined ? [val] : [];
-    for (let i = 1; i <= n; i++) {
-      const v = values[id + '$$' + i];
-      if (v !== undefined) vs.push(v);
-    }
-    return vs;
+    return (values[fhirItem.linkId] || []).filter(v => v !== undefined);
   }
 
   const makeAnswer = (v) => buildAnswer(fhirItem, v);

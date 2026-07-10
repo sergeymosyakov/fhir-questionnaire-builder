@@ -34,16 +34,12 @@ function replaceInTree(treeArr, nodeId, newNode) {
  * @param {object} [answerStore] answerStore (to read `$$n` repeat count)
  * @returns {object} the new node instance
  */
-export function changeNodeType(node, newType, tree, answerStore) {
+export function changeNodeType(node, newType, tree, _answerStore) {
   if (node.itemType !== newType) {
     const id = node.id;
     if (typeof document !== 'undefined') {
+      // Drop the stored answer and all its repeat rows in one shot.
       document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id } }));
-      const n = answerStore?.data[id + '$$n'] || 0;
-      for (let i = 1; i <= n; i++) {
-        document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$' + i } }));
-      }
-      document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$n' } }));
     }
   }
 

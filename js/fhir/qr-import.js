@@ -9,7 +9,7 @@ function _collectLinkIds(nodes, set = new Set()) {
   return set;
 }
 
-// Flatten QR item[] recursively → { [linkId]: primaryValue, [linkId+'$$N']: extraValue, [linkId+'$$n']: count }
+// Flatten QR item[] recursively → { [linkId]: [row0, row1, …] } (repeat rows as array)
 function _flattenQR(items, out = {}) {
   for (const item of items || []) {
     if (item.answer && item.answer.length) {
@@ -27,14 +27,8 @@ function _flattenQR(items, out = {}) {
         if (ans.valueString    !== undefined) return ans.valueString;
         return undefined;
       };
-      out[item.linkId] = extractVal(item.answer[0]);
-      if (item.answer.length > 1) {
-        for (let i = 1; i < item.answer.length; i++) {
-          const v = extractVal(item.answer[i]);
-          if (v !== undefined) out[item.linkId + '$$' + i] = v;
-        }
-        out[item.linkId + '$$n'] = item.answer.length - 1;
-      }
+      out[item.linkId] = item.answer.map(extractVal).filter(v => v !== undefined);
+      if (out[item.linkId].length === 0) delete out[item.linkId];
       // Nested items inside answers (non-group questions with sub-items)
       for (const ans of item.answer) {
         if (ans.item) _flattenQR(ans.item, out);
@@ -74,34 +68,21 @@ export function importQRAnswers(qrJson, values, tree) {
   const unmatched = [];
   let loaded = 0;
 
-  for (const [key, val] of Object.entries(extracted)) {
-    // Repeat meta-keys: id$$n and id$$N — load if base id is known
-    const repeatMatch = key.match(/^(.+)\$\$(\d+|n)$/);
-    if (repeatMatch && knownIds.has(repeatMatch[1])) {
-      values[key] = val;
-      continue;
-    }
-    if (knownIds.has(key)) {
-      values[key] = val;
+  for (const [linkId, arr] of Object.entries(extracted)) {
+    if (knownIds.has(linkId)) {
+      values[linkId] = arr;
       loaded++;
     } else {
-      unmatched.push(key);
+      unmatched.push(linkId);
     }
   }
 
-  // Merge multi-answer QR entries for checklist items into comma-separated values
+  // Merge multi-answer QR entries for checklist items into a single comma-separated row
   const checklistIds = _collectChecklistIds(tree);
   for (const id of checklistIds) {
-    const base = values[id];
-    const n = values[id + '$$n'];
-    if (base !== undefined && n > 0) {
-      const codes = [base];
-      for (let i = 1; i <= n; i++) {
-        const v = values[id + '$$' + i];
-        if (v !== undefined) { codes.push(v); delete values[id + '$$' + i]; }
-      }
-      delete values[id + '$$n'];
-      values[id] = codes.join(',');
+    const arr = values[id];
+    if (Array.isArray(arr) && arr.length > 1) {
+      values[id] = [arr.filter(v => v !== undefined).join(',')];
     }
   }
 

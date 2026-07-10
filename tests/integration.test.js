@@ -3,7 +3,14 @@
 // Uses a minimal real-like fhirpath mock that evaluates numeric comparisons.
 
 import { describe, it, expect } from 'vitest';
-import { buildQR } from '../js/fhir/qr-builder.js';
+import { buildQR as _buildQR } from '../js/fhir/qr-builder.js';
+
+// The store represents answers as a tree { linkId: [rows] }; wrap the scalar value
+// maps these tests use into single-row arrays so the produced QR stays unchanged.
+const bq = (fhir, vals = {}) =>
+  _buildQR(fhir, Object.fromEntries(
+    Object.entries(vals).map(([k, v]) => [k, Array.isArray(v) ? v : [v]])
+  ));
 
 const { evalConstraints } = await import('../js/fhir/form-checks.js');
 
@@ -63,7 +70,7 @@ describe('integration — decimal item constraint', () => {
   };
 
   it('passes when decimal value satisfies >= constraint', () => {
-    const qr = buildQR(fhir, { '1.1': 5, '1.2': 'x' });
+    const qr = bq(fhir, { '1.1': 5, '1.2': 'x' });
     const node = {
       constraint: [{
         key: 'min-val', severity: 'error',
@@ -74,7 +81,7 @@ describe('integration — decimal item constraint', () => {
   });
 
   it('fails when decimal value is below threshold', () => {
-    const qr = buildQR(fhir, { '1.1': 2, '1.2': 'x' });
+    const qr = bq(fhir, { '1.1': 2, '1.2': 'x' });
     const node = {
       constraint: [{
         key: 'min-val', severity: 'error',
@@ -85,7 +92,7 @@ describe('integration — decimal item constraint', () => {
   });
 
   it('fails when valueInteger used for decimal-type item (wrong key)', () => {
-    const qr = buildQR(fhir, { '1.1': 5 });
+    const qr = bq(fhir, { '1.1': 5 });
     const node = {
       constraint: [{
         key: 'wrong-key', severity: 'error',
@@ -102,7 +109,7 @@ describe('integration — integer item constraint', () => {
   const fhir = { item: [{ linkId: 'q-months', type: 'integer' }] };
 
   it('passes when integer value satisfies constraint', () => {
-    const qr = buildQR(fhir, { 'q-months': 6 });
+    const qr = bq(fhir, { 'q-months': 6 });
     const node = {
       constraint: [{
         key: 'diet-months', severity: 'error',
@@ -113,7 +120,7 @@ describe('integration — integer item constraint', () => {
   });
 
   it('fails when integer value is below threshold', () => {
-    const qr = buildQR(fhir, { 'q-months': 1 });
+    const qr = bq(fhir, { 'q-months': 1 });
     const node = {
       constraint: [{
         key: 'diet-months', severity: 'error',
@@ -129,7 +136,7 @@ describe('integration — warning constraint', () => {
   const fhir = { item: [{ linkId: 'phq9', type: 'integer' }] };
 
   it('warning constraint does not affect pass/fail', () => {
-    const qr = buildQR(fhir, { 'phq9': 20 }); // above warning threshold
+    const qr = bq(fhir, { 'phq9': 20 }); // above warning threshold
     const node = {
       constraint: [{
         key: 'phq9-warning', severity: 'warning',
@@ -150,7 +157,7 @@ describe('integration — nested item constraint', () => {
         item: [{ linkId: 'nested', type: 'decimal' }],
       }],
     };
-    const qr = buildQR(fhir, { nested: 10 });
+    const qr = bq(fhir, { nested: 10 });
     const node = {
       constraint: [{
         key: 'c', severity: 'error',

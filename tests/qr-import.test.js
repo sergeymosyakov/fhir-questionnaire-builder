@@ -67,43 +67,43 @@ describe('importQRAnswers — basic loading', () => {
   it('loads a string value', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueString: 'hello' }] }]), values, tree);
-    expect(values.q1).toBe('hello');
+    expect(values.q1).toEqual(['hello']);
   });
 
   it('loads a boolean value', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueBoolean: false }] }]), values, tree);
-    expect(values.q1).toBe(false);
+    expect(values.q1).toEqual([false]);
   });
 
   it('loads an integer value', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueInteger: 42 }] }]), values, tree);
-    expect(values.q1).toBe(42);
+    expect(values.q1).toEqual([42]);
   });
 
   it('loads a decimal value', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueDecimal: 3.14 }] }]), values, tree);
-    expect(values.q1).toBe(3.14);
+    expect(values.q1).toEqual([3.14]);
   });
 
   it('loads a date value', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueDate: '2025-06-01' }] }]), values, tree);
-    expect(values.q1).toBe('2025-06-01');
+    expect(values.q1).toEqual(['2025-06-01']);
   });
 
   it('loads a dateTime value', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueDateTime: '2025-06-01T10:00:00Z' }] }]), values, tree);
-    expect(values.q1).toBe('2025-06-01T10:00:00Z');
+    expect(values.q1).toEqual(['2025-06-01T10:00:00Z']);
   });
 
   it('loads a valueCoding code', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q1', answer: [{ valueCoding: { code: 'LA1', display: 'Option 1' } }] }]), values, tree);
-    expect(values.q1).toBe('LA1');
+    expect(values.q1).toEqual(['LA1']);
   });
 
   it('reports correct loaded count', () => {
@@ -146,13 +146,13 @@ describe('importQRAnswers — all value types', () => {
   it('loads all seven value types correctly in one pass', () => {
     const values = {};
     importQRAnswers(qr, values, tree);
-    expect(values['q-str']).toBe('text');
-    expect(values['q-bool']).toBe(true);
-    expect(values['q-int']).toBe(99);
-    expect(values['q-dec']).toBe(1.5);
-    expect(values['q-date']).toBe('2026-01-15');
-    expect(values['q-dt']).toBe('2026-01-15T08:30:00Z');
-    expect(values['q-code']).toBe('C001');
+    expect(values['q-str']).toEqual(['text']);
+    expect(values['q-bool']).toEqual([true]);
+    expect(values['q-int']).toEqual([99]);
+    expect(values['q-dec']).toEqual([1.5]);
+    expect(values['q-date']).toEqual(['2026-01-15']);
+    expect(values['q-dt']).toEqual(['2026-01-15T08:30:00Z']);
+    expect(values['q-code']).toEqual(['C001']);
   });
 });
 
@@ -164,25 +164,25 @@ describe('importQRAnswers — time and reference types', () => {
   it('loads a valueTime string', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q-time', answer: [{ valueTime: '14:30:00' }] }]), values, tree);
-    expect(values['q-time']).toBe('14:30:00');
+    expect(values['q-time']).toEqual(['14:30:00']);
   });
 
   it('loads a valueReference as { reference } object', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q-ref', answer: [{ valueReference: { reference: 'Practitioner/456' } }] }]), values, tree);
-    expect(values['q-ref']).toEqual({ reference: 'Practitioner/456' });
+    expect(values['q-ref']).toEqual([{ reference: 'Practitioner/456' }]);
   });
 
   it('loads a valueQuantity as { value, unit } object', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q-time', answer: [{ valueQuantity: { value: 70, unit: 'kg' } }] }]), values, tree);
-    expect(values['q-time']).toEqual({ value: 70, unit: 'kg' });
+    expect(values['q-time']).toEqual([{ value: 70, unit: 'kg' }]);
   });
 
   it('loads a valueUri as string', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q-ref', answer: [{ valueUri: 'https://example.org' }] }]), values, tree);
-    expect(values['q-ref']).toBe('https://example.org');
+    expect(values['q-ref']).toEqual(['https://example.org']);
   });
 
   it('ignores answer entries with no recognised value type', () => {
@@ -219,7 +219,7 @@ describe('importQRAnswers — unmatched linkIds', () => {
       { linkId: 'q-known',   answer: [{ valueString: 'yes' }] },
       { linkId: 'q-unknown', answer: [{ valueString: 'no' }] },
     ]), values, tree);
-    expect(values['q-known']).toBe('yes');
+    expect(values['q-known']).toEqual(['yes']);
   });
 
   it('does not count unmatched in loaded count', () => {
@@ -258,8 +258,8 @@ describe('importQRAnswers — nested groups', () => {
         { linkId: 'q2', answer: [{ valueInteger: 7 }] },
       ],
     }]), values, tree);
-    expect(values.q1).toBe('alpha');
-    expect(values.q2).toBe(7);
+    expect(values.q1).toEqual(['alpha']);
+    expect(values.q2).toEqual([7]);
   });
 
   it('handles two-level nesting', () => {
@@ -278,7 +278,7 @@ describe('importQRAnswers — nested groups', () => {
         item: [{ linkId: 'leaf', answer: [{ valueBoolean: true }] }],
       }],
     }]), values, deepTree);
-    expect(values.leaf).toBe(true);
+    expect(values.leaf).toEqual([true]);
   });
 });
 
@@ -297,10 +297,10 @@ describe('importQRAnswers — repeat rows', () => {
         { valueString: 'third' },
       ],
     }]), values, tree);
-    expect(values['q-rep']).toBe('first');
+    expect(values['q-rep'][0]).toEqual('first');
   });
 
-  it('loads extra answers as $$N keys', () => {
+  it('loads all answers as array rows', () => {
     const values = {};
     importQRAnswers(makeQR([{
       linkId: 'q-rep',
@@ -310,11 +310,10 @@ describe('importQRAnswers — repeat rows', () => {
         { valueString: 'third' },
       ],
     }]), values, tree);
-    expect(values['q-rep$$1']).toBe('second');
-    expect(values['q-rep$$2']).toBe('third');
+    expect(values['q-rep']).toEqual(['first', 'second', 'third']);
   });
 
-  it('sets $$n to the number of extra rows', () => {
+  it('row count equals the number of answers', () => {
     const values = {};
     importQRAnswers(makeQR([{
       linkId: 'q-rep',
@@ -324,19 +323,19 @@ describe('importQRAnswers — repeat rows', () => {
         { valueString: 'c' },
       ],
     }]), values, tree);
-    expect(values['q-rep$$n']).toBe(2);
+    expect(values['q-rep']).toHaveLength(3);
   });
 
-  it('does not set $$n for single-answer items', () => {
+  it('single-answer item stores a one-row array', () => {
     const values = {};
     importQRAnswers(makeQR([{
       linkId: 'q-rep',
       answer: [{ valueString: 'only' }],
     }]), values, tree);
-    expect(values['q-rep$$n']).toBeUndefined();
+    expect(values['q-rep']).toEqual(['only']);
   });
 
-  it('$$N repeat keys count as loaded for known linkId base', () => {
+  it('repeat rows count as a single loaded item', () => {
     const r = importQRAnswers(makeQR([{
       linkId: 'q-rep',
       answer: [
@@ -364,9 +363,7 @@ describe('importQRAnswers — checklist merge', () => {
         { valueCoding: { code: 'c' } },
       ],
     }]), values, checklistTree);
-    expect(values['q-cl']).toBe('a,b,c');
-    expect(values['q-cl$$1']).toBeUndefined();
-    expect(values['q-cl$$n']).toBeUndefined();
+    expect(values['q-cl']).toEqual(['a,b,c']);
   });
 
   it('single answer for checklist remains as-is', () => {
@@ -375,7 +372,7 @@ describe('importQRAnswers — checklist merge', () => {
       linkId: 'q-cl',
       answer: [{ valueCoding: { code: 'x' } }],
     }]), values, checklistTree);
-    expect(values['q-cl']).toBe('x');
+    expect(values['q-cl']).toEqual(['x']);
   });
 
   it('regular (non-checklist) items are NOT merged', () => {
@@ -388,9 +385,7 @@ describe('importQRAnswers — checklist merge', () => {
         { valueCoding: { code: 'b' } },
       ],
     }]), values, regularTree);
-    expect(values['q-reg']).toBe('a');
-    expect(values['q-reg$$1']).toBe('b');
-    expect(values['q-reg$$n']).toBe(1);
+    expect(values['q-reg']).toEqual(['a', 'b']);
   });
 });
 
@@ -439,20 +434,20 @@ describe('importQRAnswers — empty/missing answers', () => {
 
 describe('importQRAnswers — values object mutation', () => {
   it('merges new keys into existing values (does not clear)', () => {
-    const values = { existing: 'preserved' };
+    const values = { existing: ['preserved'] };
     importQRAnswers(makeQR([
       { linkId: 'q1', answer: [{ valueString: 'new' }] },
     ]), values, makeTree('q1'));
-    expect(values.existing).toBe('preserved');
-    expect(values.q1).toBe('new');
+    expect(values.existing).toEqual(['preserved']);
+    expect(values.q1).toEqual(['new']);
   });
 
   it('overwrites existing key when same linkId present in QR', () => {
-    const values = { q1: 'old' };
+    const values = { q1: ['old'] };
     importQRAnswers(makeQR([
       { linkId: 'q1', answer: [{ valueString: 'new' }] },
     ]), values, makeTree('q1'));
-    expect(values.q1).toBe('new');
+    expect(values.q1).toEqual(['new']);
   });
 });
 
