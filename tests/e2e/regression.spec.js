@@ -483,3 +483,168 @@ test.describe('M2 — Large form (AHRQ 30+ items) renders without JS errors', ()
     await expect(modal).not.toBeVisible({ timeout: 3_000 });
   });
 });
+
+// ── H5: Clear form resets builder state ───────────────────────────────────────
+
+const PHQ9 = path.resolve('sampledata/phq-9.fhir.json');
+
+test.describe('H5 — Clear form resets builder and preview', () => {
+  test('clear-form-btn appears after loading a questionnaire', async ({ page }) => {
+    await freshStart(page);
+    await loadFile(page, ANNUAL);
+    await expect(page.locator('[data-preview-id="height"]')).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByTestId('clear-form-btn')).toBeVisible();
+  });
+
+  test('confirming clear removes all nodes from builder tree', async ({ page }) => {
+    await freshStart(page);
+    await loadFile(page, ANNUAL);
+    await expect(page.locator('[data-preview-id="height"]')).toBeVisible({ timeout: 8_000 });
+
+    await page.getByTestId('clear-form-btn').click();
+    // Confirm the "Clear anyway" modal
+    await expect(page.getByTestId('clear-confirm-clear-btn')).toBeVisible({ timeout: 5_000 });
+    await page.getByTestId('clear-confirm-clear-btn').click();
+
+    // Tree must be empty — no node cards remain
+    await expect(page.locator('[data-testid="tree-container"] [data-node-id]')).toHaveCount(0, { timeout: 5_000 });
+  });
+
+  test('cancelling clear keeps the existing questionnaire intact', async ({ page }) => {
+    await freshStart(page);
+    await loadFile(page, ANNUAL);
+    await expect(page.locator('[data-preview-id="height"]')).toBeVisible({ timeout: 8_000 });
+
+    await page.getByTestId('clear-form-btn').click();
+    await expect(page.getByTestId('clear-confirm-cancel-btn')).toBeVisible({ timeout: 5_000 });
+    await page.getByTestId('clear-confirm-cancel-btn').click();
+
+    // Height must still be visible
+    await expect(page.locator('[data-preview-id="height"]')).toBeVisible();
+  });
+});
+
+// ── M3: PHQ-9 FHIR import → export round-trip (LOINC linkIds) ────────────────
+
+test.describe('M3 — PHQ-9 import/export preserves LOINC linkIds and answerOptions', () => {
+  test('PHQ-9 imports successfully and shows LOINC-prefixed items', async ({ page }) => {
+    await freshStart(page);
+    await loadFile(page, PHQ9);
+    // PHQ-9 items use LOINC linkIds like /44250-9
+    await expect(page.locator('[data-preview-id="/44250-9"]')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('[data-preview-id="/44255-8"]')).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('PHQ-9 re-export preserves LOINC linkId on first question', async ({ page }) => {
+    await freshStart(page);
+    await loadFile(page, PHQ9);
+    await expect(page.locator('[data-preview-id="/44250-9"]')).toBeVisible({ timeout: 10_000 });
+
+    const json = await page.evaluate(async () => {
+      const { buildFHIRObject } = await import('/js/fhir/export.js');
+      return JSON.stringify(buildFHIRObject());
+    });
+    const q = JSON.parse(json);
+    function flatIds(items) {
+      const ids = [];
+      for (const it of items ?? []) {
+        ids.push(it.linkId);
+        ids.push(...flatIds(it.item ?? []));
+      }
+      return ids;
+    }
+    const ids = flatIds(q.item);
+    expect(ids).toContain('/44250-9');
+    expect(ids).toContain('/44255-8');
+  });
+
+  test('PHQ-9 re-export preserves answerOption coding on first question', async ({ page }) => {
+    await freshStart(page);
+    await loadFile(page, PHQ9);
+    await expect(page.locator('[data-preview-id="/44250-9"]')).toBeVisible({ timeout: 10_000 });
+
+    const json = await page.evaluate(async () => {
+      const { buildFHIRObject } = await import('/js/fhir/export.js');
+      return JSON.stringify(buildFHIRObject());
+    });
+    const q = JSON.parse(json);
+    function findItem(items, id) {
+      for (const it of items ?? []) {
+        if (it.linkId === id) return it;
+        const found = findItem(it.item ?? [], id);
+        if (found) return found;
+      }
+    }
+    const first = findItem(q.item, '/44250-9');
+    expect(first?.answerOption?.length).toBeGreaterThan(0);
+    // LA6568-5 = "Not at all"
+    const codes = first.answerOption.map(o => o.valueCoding?.code);
+    expect(codes).toContain('LA6568-5');
+  });
+
+  test('PHQ-9 builder tree shows 9+ question nodes', async ({ page }) => {
+    await freshStart(page);
+    await loadFile(page, PHQ9);
+    await expect(page.locator('[data-preview-id="/44250-9"]')).toBeVisible({ timeout: 10_000 });
+
+    const nodeCount = await page.locator('[data-testid="tree-container"] [data-node-id]').count();
+    expect(nodeCount).toBeGreaterThan(9);
+  });
+});
+
+// ── M4: Export metadata — resourceType, title, status always present ──────────
+
+test.describe('M4 — Exported questionnaire always has required FHIR metadata', () => {
+  test('exported questionnaire has resourceType = Questionnaire', async ({ page }) => {
+    await freshStart(page);
+    await loadFile(page, ANNUAL);
+    await expect(page.locator('[data-preview-id="height"]')).toBeVisible({ timeout: 8_000 });
+
+    const json = await page.evaluate(async () => {
+      const { buildFHIRObject } = await import('/js/fhir/export.js');
+      return JSON.stringify(buildFHIRObject());
+    });
+    const q = JSON.parse(json);
+    expect(q.resourceType).toBe('Questionnaire');
+  });
+
+  test('exported questionnaire has non-empty title', async ({ page }) => {
+    await freshStart(page);
+    await loadFile(page, ANNUAL);
+    await expect(page.locator('[data-preview-id="height"]')).toBeVisible({ timeout: 8_000 });
+
+    const json = await page.evaluate(async () => {
+      const { buildFHIRObject } = await import('/js/fhir/export.js');
+      return JSON.stringify(buildFHIRObject());
+    });
+    const q = JSON.parse(json);
+    expect(q.title).toBeTruthy();
+  });
+
+  test('exported questionnaire has status field', async ({ page }) => {
+    await freshStart(page);
+    await loadFile(page, ANNUAL);
+    await expect(page.locator('[data-preview-id="height"]')).toBeVisible({ timeout: 8_000 });
+
+    const json = await page.evaluate(async () => {
+      const { buildFHIRObject } = await import('/js/fhir/export.js');
+      return JSON.stringify(buildFHIRObject());
+    });
+    const q = JSON.parse(json);
+    expect(['draft', 'active', 'retired', 'unknown']).toContain(q.status);
+  });
+
+  test('manually built questionnaire exports with at least one item', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+
+    const json = await page.evaluate(async () => {
+      const { buildFHIRObject } = await import('/js/fhir/export.js');
+      return JSON.stringify(buildFHIRObject());
+    });
+    const q = JSON.parse(json);
+    expect(q.resourceType).toBe('Questionnaire');
+    expect(q.item?.length).toBeGreaterThan(0);
+  });
+});
