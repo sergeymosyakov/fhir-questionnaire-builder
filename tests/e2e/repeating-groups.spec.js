@@ -206,6 +206,52 @@ test.describe('repeating group — nested repeat (schedule inside medication)', 
   });
 });
 
+// ── min/max occurs ───────────────────────────────────────────────────────────
+test.describe('repeating group — minOccurs / maxOccurs', () => {
+  test('Add button is disabled when instance count reaches maxOccurs (5)', async ({ page }) => {
+    await freshLoad(page);
+    // Add up to maxOccurs=5
+    for (let i = 0; i < 4; i++) {
+      await medsAdd(page).click();
+    }
+    await expect(medsInsts(page)).toHaveCount(5);
+    // At maxOccurs the Add button must be disabled
+    await expect(medsAdd(page)).toBeDisabled();
+  });
+
+  test('Remove button is hidden when only minOccurs (1) instances remain', async ({ page }) => {
+    await freshLoad(page);
+    // Starts at 1 instance — remove button must be hidden
+    await expect(meds(page).locator(':scope > .rg-inst [data-testid="rg-remove-btn"]')).toHaveCount(0);
+  });
+
+  test('Remove button reappears once a second instance is added beyond minOccurs', async ({ page }) => {
+    await freshLoad(page);
+    await medsAdd(page).click();
+    await expect(medsInsts(page)).toHaveCount(2);
+    await expect(meds(page).locator(':scope > .rg-inst [data-testid="rg-remove-btn"]').first()).toBeVisible();
+  });
+
+  test('removing back to minOccurs=1 hides Remove button again', async ({ page }) => {
+    await freshLoad(page);
+    await medsAdd(page).click();
+    await expect(medsInsts(page)).toHaveCount(2);
+    await meds(page).locator(':scope > .rg-inst [data-testid="rg-remove-btn"]').first().click();
+    await expect(medsInsts(page)).toHaveCount(1);
+    await expect(meds(page).locator(':scope > .rg-inst [data-testid="rg-remove-btn"]')).toHaveCount(0);
+  });
+
+  test('schedule inner group respects maxOccurs=3', async ({ page }) => {
+    await freshLoad(page);
+    const inst0 = medsInsts(page).first();
+    // Add up to maxOccurs=3 for schedule
+    await schedAdd(inst0).click();
+    await schedAdd(inst0).click();
+    await expect(schedInsts(inst0)).toHaveCount(3);
+    await expect(schedAdd(inst0)).toBeDisabled();
+  });
+});
+
 // ── FHIR round-trip ───────────────────────────────────────────────────────────
 test.describe('repeating group — FHIR round-trip', () => {
   test('exported FHIR JSON has repeats:true on meds and schedule groups', async ({ page }) => {

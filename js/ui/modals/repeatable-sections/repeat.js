@@ -135,14 +135,23 @@ class RepeatSection extends RepeatableSection {
 
       if (max !== undefined && !isNaN(max)) {
         node._maxOccurs = max;
-        // Trim extra rows that now exceed maxOccurs
-        const id       = node.id;
-        const currentN = answerStore?.get(id + '$$n') || 0;
-        if (currentN + 1 > max) {
-          const keepN = max - 1;
-          for (let i = keepN + 1; i <= currentN; i++) document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$' + i } }));
-          if (keepN <= 0) document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$n' } }));
-          else document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: id + '$$n', value: keepN } }));
+        // Trim extra instances/rows that now exceed maxOccurs
+        if (node.type === 'group') {
+          // Group instances live in the tree store — trim via removeInstance
+          const currentCount = answerStore?.instanceCount(node.id) ?? 0;
+          for (let i = currentCount - 1; i >= max; i--) {
+            answerStore?.removeInstance(node.id, i);
+          }
+        } else {
+          // Item repeat rows use the flat $$ addressing
+          const id       = node.id;
+          const currentN = answerStore?.get(id + '$$n') || 0;
+          if (currentN + 1 > max) {
+            const keepN = max - 1;
+            for (let i = keepN + 1; i <= currentN; i++) document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$' + i } }));
+            if (keepN <= 0) document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: id + '$$n' } }));
+            else document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: id + '$$n', value: keepN } }));
+          }
         }
       } else {
         delete node._maxOccurs;
