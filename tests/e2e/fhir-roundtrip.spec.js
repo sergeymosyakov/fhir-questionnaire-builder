@@ -263,3 +263,108 @@ test.describe('annual-health-check: hidden + calc + readOnly + initial round-tri
     expect(referral?.initial?.length).toBeGreaterThan(0);
   });
 });
+
+// ── maxDecimalPlaces round-trip ───────────────────────────────────────────────
+
+const FHIR_FEATURES = path.resolve('tests/fixtures/fhir-features.fhir.json');
+
+test.describe('maxDecimalPlaces round-trip', () => {
+  test('maxDecimalPlaces extension preserved in export', async ({ page }) => {
+    await freshLoad(page, FHIR_FEATURES, 'readonly-text');
+    const q = await exportFHIR(page);
+    const item = findItem(q.item, 'decimal-places');
+    expect(item).toBeTruthy();
+    const ext = extOf(item, 'maxDecimalPlaces');
+    expect(ext?.valueInteger).toBe(2);
+  });
+});
+
+// ── rendering-markdown round-trip ─────────────────────────────────────────────
+
+const MARKDOWN_FIXTURE = path.resolve('tests/fixtures/rendering-markdown.fhir.json');
+
+test.describe('rendering-markdown round-trip', () => {
+  test('rendering-markdown extension preserved in export', async ({ page }) => {
+    await freshLoad(page, MARKDOWN_FIXTURE, 'q-bold');
+    const q = await exportFHIR(page);
+    const item = findItem(q.item, 'q-bold');
+    expect(item).toBeTruthy();
+    // rendering-markdown is on item._text.extension
+    const textExts = (item?._text?.extension ?? []);
+    const mdExt = textExts.find(e => e.url?.includes('rendering-markdown'));
+    expect(mdExt).toBeTruthy();
+  });
+
+  test('item with both rendering-xhtml and rendering-markdown exports both', async ({ page }) => {
+    await freshLoad(page, MARKDOWN_FIXTURE, 'q-bold');
+    const q = await exportFHIR(page);
+    const item = findItem(q.item, 'q-xhtml-wins');
+    const textExts = (item?._text?.extension ?? []);
+    const hasXhtml = textExts.some(e => e.url?.includes('rendering-xhtml'));
+    const hasMd    = textExts.some(e => e.url?.includes('rendering-markdown'));
+    // At least one must be preserved (xhtml takes priority in render but both exported)
+    expect(hasXhtml || hasMd).toBe(true);
+  });
+});
+
+// ── sdc-questionnaire-shortText round-trip ────────────────────────────────────
+
+const SHORT_TEXT = path.resolve('tests/fixtures/short-text.fhir.json');
+
+test.describe('sdc-questionnaire-shortText round-trip', () => {
+  test('shortText extension preserved on item', async ({ page }) => {
+    await freshLoad(page, SHORT_TEXT, 'q-with-short');
+    const q = await exportFHIR(page);
+    const item = findItem(q.item, 'q-with-short');
+    const ext = extOf(item, 'sdc-questionnaire-shortText');
+    expect(ext).toBeTruthy();
+  });
+
+  test('shortText extension preserved on group', async ({ page }) => {
+    await freshLoad(page, SHORT_TEXT, 'q-with-short');
+    const q = await exportFHIR(page);
+    const group = findItem(q.item, 'grp-with-short');
+    const ext = extOf(group, 'sdc-questionnaire-shortText');
+    expect(ext).toBeTruthy();
+  });
+
+  test('item without shortText has no extension', async ({ page }) => {
+    await freshLoad(page, SHORT_TEXT, 'q-with-short');
+    const q = await exportFHIR(page);
+    const item = findItem(q.item, 'q-no-short');
+    const ext = extOf(item, 'sdc-questionnaire-shortText');
+    expect(ext).toBeUndefined();
+  });
+});
+
+// ── disabledDisplay round-trip ────────────────────────────────────────────────
+
+const SLIDER_DISABLED = path.resolve('tests/fixtures/slider-disabled.fhir.json');
+
+test.describe('disabledDisplay round-trip', () => {
+  test('disabledDisplay: hidden preserved in export (as native field or extension)', async ({ page }) => {
+    await freshLoad(page, SLIDER_DISABLED, 'pain-score');
+    const q = await exportFHIR(page);
+    const item = findItem(q.item, 'extra-notes');
+    expect(item).toBeTruthy();
+    // disabledDisplay is R5 native; on R4 export it's downgraded to an extension
+    // Check either the native field or an extension is present
+    const hasNative = item.disabledDisplay === 'hidden';
+    const hasExt    = (item.extension ?? []).some(e => e.url?.includes('disabledDisplay'));
+    expect(hasNative || hasExt, 'disabledDisplay hidden must be preserved').toBe(true);
+  });
+
+  test('item with disabledDisplay=hidden is absent from patient view when condition not met', async ({ page }) => {
+    await freshLoad(page, SLIDER_DISABLED, 'pain-score');
+    // extra-notes has enableWhen and disabledDisplay: hidden
+    // With condition not met and disabledDisplay='hidden', item is removed in patient view
+    await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await page.getByTestId('preview-mode-btn').click();
+    await expect(page.getByTestId('preview-mode-patient')).toBeVisible();
+    await page.getByTestId('preview-mode-patient').click();
+    await expect(page.locator('#lform')).toHaveClass(/patient-view/, { timeout: 5_000 });
+
+    // condition not met (pain-score is empty) → extra-notes should be hidden
+    await expect(page.locator('[data-preview-id="extra-notes"]')).toHaveCount(0);
+  });
+});

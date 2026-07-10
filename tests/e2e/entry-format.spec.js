@@ -53,9 +53,13 @@ async function addTextItem(page) {
 
 async function openAnswerTypeModal(page, itemId) {
   const link = page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type');
-  await expect(link).toBeVisible();
-  await link.click();
-  await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
+  await expect(async () => {
+    if (!(await page.locator('[data-testid="answerTypeModal"]').isVisible())) {
+      await expect(link).toBeVisible();
+      await link.click();
+    }
+    await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
+  }).toPass({ timeout: 10_000 });
 }
 
 async function changeType(page, typeValue) {
