@@ -44,22 +44,24 @@ export class GTableRenderer {
       const th = document.createElement('th');
       th.className = 'gtable-th';
 
+      // Title in its own span (first line)
       const titleSpan = document.createElement('span');
+      titleSpan.className  = 'gtable-th-title';
       titleSpan.textContent = ch.title || ch.id;
-      th.appendChild(titleSpan);
-
       if (ch.mandatory === true) {
         const star = document.createElement('span');
         star.className   = 'gtable-required-star';
         star.textContent = ' *';
-        th.appendChild(star);
+        titleSpan.appendChild(star);
       }
+      th.appendChild(titleSpan);
 
-      // ── Per-column design-mode indicators ─────────────────────────────────
-      // These are static properties of the column (same for every row) so they
-      // belong in the header, not repeated in each cell.
+      // Indicators in a separate sub-row below the title (design mode only)
       if (!isPatient) {
-        this._buildColIndicators(th, ch, rc);
+        const indRow = document.createElement('div');
+        indRow.className = 'gtable-th-indicators';
+        this._buildColIndicators(indRow, ch, rc);
+        if (indRow.childElementCount > 0) th.appendChild(indRow);
       }
 
       headerRow.appendChild(th);

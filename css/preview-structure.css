@@ -396,10 +396,19 @@
   border: 1px solid var(--c-primary, #3498db);
   color: var(--c-primary, #3498db);
 }
-/* Column header indicators: small inline icons for enableWhen, readOnly, calc, constraint, etc. */
+/* Column header indicators: separate sub-row below the title */
+.gtable-th-title {
+  display: block;
+}
+.gtable-th-indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 3px;
+  opacity: 0.75;
+}
 .gtable-col-ind {
   display: inline-block;
-  margin-left: 4px;
   font-size: 0.75em;
   line-height: 1;
   vertical-align: middle;
