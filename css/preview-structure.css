@@ -396,4 +396,23 @@
   border: 1px solid var(--c-primary, #3498db);
   color: var(--c-primary, #3498db);
 }
+/* Column header indicators: small inline icons for enableWhen, readOnly, calc, constraint, etc. */
+.gtable-col-ind {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.75em;
+  line-height: 1;
+  vertical-align: middle;
+  cursor: default;
+  text-decoration: none;
+}
+.gtable-col-ind--optional {
+  font-size: 0.68em;
+  font-weight: 500;
+  color: #888;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 0 3px;
+  line-height: 1.4;
+}
 

@@ -302,3 +302,113 @@ test.describe('gtable — FHIR round-trip', () => {
     expect(ext?.valueCodeableConcept?.coding?.[0]?.code).toBe('gtable');
   });
 });
+
+// ── Column header indicators ──────────────────────────────────────────────────
+// These tests mirror the standard row-level badge tests but verify that the
+// same metadata surfaces as column-header indicators inside a gtable.
+// Fixture group: "features" — a gtable with columns for each feature.
+
+test.describe('gtable — column header indicators (mirror of row-level badge tests)', () => {
+  test('enableWhen condition: 👁 indicator visible in column header', async ({ page }) => {
+    await loadFixture(page);
+    const featTable = page.locator('[data-gtable-id="features"]');
+    // feat-conditional column has enableWhen → should show 👁 in its <th>
+    const condTh = featTable.locator('th.gtable-th').filter({ hasText: 'Conditional' });
+    await expect(condTh).toBeVisible();
+    // Use filter to target specifically the 👁 icon (not other indicators)
+    await expect(condTh.locator('.gtable-col-ind').filter({ hasText: '👁' })).toBeVisible();
+  });
+
+  test('enableWhen: conditional cell is empty when condition not met (cell mode hides dimmed items)', async ({ page }) => {
+    await loadFixture(page);
+    // feat-conditional has enableWhen: feat-trigger = true
+    // trigger is unchecked → in cell mode the conditional item is not rendered (empty cell)
+    // The column header 👁 indicator tells the author the column has a condition
+    const condCell = page.locator('[data-preview-id="feat-conditional"]').first();
+    await expect(condCell).toHaveCount(0);
+  });
+
+  test('enableWhen: conditional cell appears after trigger is checked', async ({ page }) => {
+    await loadFixture(page);
+    // Check the trigger checkbox
+    const triggerCheckbox = page.locator('[data-preview-id="feat-trigger"]').first()
+      .locator('input[type="checkbox"]').first();
+    await triggerCheckbox.click();
+    await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await page.getByTestId('preview-search-input').click();
+    await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+
+    // feat-conditional should now be rendered in its cell
+    await expect(page.locator('[data-preview-id="feat-conditional"]').first())
+      .toBeVisible({ timeout: 5_000 });
+  });
+
+  test('readOnly: 🔒 indicator visible in column header', async ({ page }) => {
+    await loadFixture(page);
+    const featTable = page.locator('[data-gtable-id="features"]');
+    const roTh = featTable.locator('th.gtable-th').filter({ hasText: 'Read-only' });
+    await expect(roTh.locator('.gtable-col-ind').filter({ hasText: '🔒' })).toBeVisible();
+  });
+
+  test('readOnly: cell renders read-only value (not an editable input)', async ({ page }) => {
+    await loadFixture(page);
+    // feat-readonly has readOnly:true and initial value — cell should show preview-readonly-value
+    const roCell = page.locator('[data-preview-id="feat-readonly"]').first();
+    await expect(roCell).toBeVisible();
+    // No textarea / editable input
+    await expect(roCell.locator('textarea:not([disabled]), input:not([disabled])')).toHaveCount(0);
+  });
+
+  test('calculatedExpression: ⚡ indicator visible in column header', async ({ page }) => {
+    await loadFixture(page);
+    const featTable = page.locator('[data-gtable-id="features"]');
+    const calcTh = featTable.locator('th.gtable-th').filter({ hasText: 'Doubled' });
+    await expect(calcTh.locator('.gtable-col-ind').filter({ hasText: '⚡' })).toBeVisible();
+  });
+
+  test('calculatedExpression: calc column has no editable input', async ({ page }) => {
+    await loadFixture(page);
+    // feat-calc is readOnly + calculatedExpression — cell renders read-only value, not an input
+    // In cell mode _buildControl returns early for readOnly/calc items
+    const calcCell = page.locator('[data-preview-id="feat-calc"]').first();
+    // The cell may be absent (calc result = null before any input) or present as read-only
+    // Either way: no editable input should be in this cell
+    const editableCount = await calcCell.locator('textarea:not([disabled]), input:not([disabled])').count();
+    expect(editableCount).toBe(0);
+  });
+
+  test('constraint: ⚠️ indicator visible in column header', async ({ page }) => {
+    await loadFixture(page);
+    const featTable = page.locator('[data-gtable-id="features"]');
+    const constrTh = featTable.locator('th.gtable-th').filter({ hasText: 'Range 1-10' });
+    await expect(constrTh.locator('.gtable-col-ind').filter({ hasText: '⚠' })).toBeVisible();
+  });
+
+  test('support link: 🔗 indicator visible in column header', async ({ page }) => {
+    await loadFixture(page);
+    const featTable = page.locator('[data-gtable-id="features"]');
+    const linkTh = featTable.locator('th.gtable-th').filter({ hasText: 'With support link' });
+    await expect(linkTh.locator('a.gtable-col-ind')).toBeVisible();
+    const href = await linkTh.locator('a.gtable-col-ind').getAttribute('href');
+    expect(href).toBe('https://example.com/docs/field-help');
+  });
+
+  test('column header indicators are NOT shown in patient view', async ({ page }) => {
+    await loadFixture(page);
+    await enablePatientView(page);
+    // In patient view, no gtable-col-ind elements should appear
+    const featTable = page.locator('[data-gtable-id="features"]');
+    await expect(featTable).toBeVisible();
+    await expect(featTable.locator('.gtable-col-ind')).toHaveCount(0);
+  });
+
+  test('required column shows * but NOT optional for required items', async ({ page }) => {
+    await loadFixture(page);
+    const medsTable = page.locator('[data-gtable-id="medications"]');
+    const medicationTh = medsTable.locator('th.gtable-th').filter({ hasText: 'Medication' });
+    // Required → star exists
+    await expect(medicationTh.locator('.gtable-required-star')).toBeVisible();
+    // Required → no "optional" indicator
+    await expect(medicationTh.locator('.gtable-col-ind--optional')).toHaveCount(0);
+  });
+});

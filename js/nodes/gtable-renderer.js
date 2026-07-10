@@ -38,16 +38,30 @@ export class GTableRenderer {
     // ── Column headers ──────────────────────────────────────────────────────
     const thead     = table.createTHead();
     const headerRow = thead.insertRow();
+    const isPatient = rc.previewMode === 'patient';
+
     for (const ch of group.children) {
       const th = document.createElement('th');
       th.className = 'gtable-th';
-      th.textContent = ch.title || ch.id;
+
+      const titleSpan = document.createElement('span');
+      titleSpan.textContent = ch.title || ch.id;
+      th.appendChild(titleSpan);
+
       if (ch.mandatory === true) {
         const star = document.createElement('span');
-        star.className  = 'gtable-required-star';
+        star.className   = 'gtable-required-star';
         star.textContent = ' *';
         th.appendChild(star);
       }
+
+      // ── Per-column design-mode indicators ─────────────────────────────────
+      // These are static properties of the column (same for every row) so they
+      // belong in the header, not repeated in each cell.
+      if (!isPatient) {
+        this._buildColIndicators(th, ch, rc);
+      }
+
       headerRow.appendChild(th);
     }
     // Extra column for Remove buttons (only when group repeats)
@@ -165,5 +179,91 @@ export class GTableRenderer {
     }
 
     rc.cellMode = prevCellMode;
+  }
+
+  // ── Column header indicators: per-column static metadata ─────────────────
+  // Shows small icon badges in the column <th> for properties that are the same
+  // for every row: enableWhen condition, readOnly, calculatedExpression,
+  // constraint, support links.
+  _buildColIndicators(th, ch, _rc) {
+    // enableWhen / enableWhenExpression → 👁️
+    if (ch.enableWhen?.length || ch.enableWhenExpression) {
+      const ind = document.createElement('span');
+      ind.className    = 'gtable-col-ind';
+      ind.textContent  = '👁';
+      ind.dataset.tipTitle = 'Conditional column';
+      ind.dataset.tipBody  = ch._enableWhenText
+        || ch.enableWhenExpression
+        || 'This column has a Show When (enableWhen) condition.';
+      ind.dataset.tipFhir  = 'Questionnaire.item.enableWhen[]';
+      ind.dataset.tipSpec  = 'R4';
+      th.appendChild(ind);
+    }
+
+    // readOnly → 🔒
+    if (ch._readOnly && !ch._calculatedExpr) {
+      const ind = document.createElement('span');
+      ind.className    = 'gtable-col-ind';
+      ind.textContent  = '🔒';
+      ind.dataset.tipTitle = 'Read-only column';
+      ind.dataset.tipBody  = 'Values in this column are read-only (item.readOnly).';
+      ind.dataset.tipFhir  = 'Questionnaire.item.readOnly';
+      ind.dataset.tipSpec  = 'R4';
+      th.appendChild(ind);
+    }
+
+    // calculatedExpression → ⚡
+    if (ch._calculatedExpr) {
+      const ind = document.createElement('span');
+      ind.className    = 'gtable-col-ind';
+      ind.textContent  = '⚡';
+      ind.dataset.tipTitle = 'Calculated column';
+      ind.dataset.tipBody  = 'Values in this column are computed by: ' + ch._calculatedExpr;
+      ind.dataset.tipFhir  = 'sdc-questionnaire-calculatedExpression';
+      ind.dataset.tipSpec  = 'SDC';
+      th.appendChild(ind);
+    }
+
+    // constraint → ⚠️
+    if (ch.constraint?.length) {
+      const msgs = ch.constraint.map(c => c.human || c.expression || c.key).filter(Boolean);
+      const ind = document.createElement('span');
+      ind.className    = 'gtable-col-ind';
+      ind.textContent  = '⚠️';
+      ind.dataset.tipTitle = 'Has constraint';
+      ind.dataset.tipBody  = msgs.join('\n') || 'questionnaire-constraint on this column';
+      ind.dataset.tipFhir  = 'Questionnaire.item.extension[questionnaire-constraint]';
+      ind.dataset.tipSpec  = 'R4';
+      th.appendChild(ind);
+    }
+
+    // support links → 🔗
+    if (ch._supportLinks?.length) {
+      const validLinks = ch._supportLinks.filter(u => u && /^https?:/i.test(u));
+      for (const url of validLinks) {
+        const a = document.createElement('a');
+        a.className = 'gtable-col-ind support-link-icon';
+        a.textContent = '🔗';
+        a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        a.dataset.tipTitle = 'Support link';
+        a.dataset.tipBody  = url;
+        a.dataset.tipFhir  = 'Questionnaire.item.extension[questionnaire-supportLink]';
+        a.dataset.tipSpec  = 'R4';
+        a.addEventListener('click', e => e.stopPropagation());
+        th.appendChild(a);
+      }
+    }
+
+    // optional badge — show when mandatory is explicitly false
+    if (ch.mandatory === false && ch.type === 'item') {
+      const ind = document.createElement('span');
+      ind.className    = 'gtable-col-ind gtable-col-ind--optional';
+      ind.textContent  = 'optional';
+      ind.dataset.tipTitle = 'Optional column';
+      ind.dataset.tipBody  = 'This field is not required (item.required: false).';
+      ind.dataset.tipFhir  = 'Questionnaire.item.required';
+      ind.dataset.tipSpec  = 'R4';
+      th.appendChild(ind);
+    }
   }
 }
