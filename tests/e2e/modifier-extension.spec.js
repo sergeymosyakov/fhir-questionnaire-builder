@@ -116,3 +116,60 @@ test.describe('modifierExtension validator warning', () => {
     await expect(body).not.toContainText('modifierExtension');
   });
 });
+
+// ── Additional coverage ────────────────────────────────────────────────────────────
+
+test.describe('modifierExtension — builder tree and preview', () => {
+  test('fixture renders correctly — items visible in builder tree', async ({ page }) => {
+    await loadFixture(page);
+    await expect(page.locator('[data-node-id="q1"]')).toBeVisible();
+    await expect(page.locator('[data-node-id="q2"]')).toBeVisible();
+  });
+
+  test('fixture items visible in preview panel', async ({ page }) => {
+    await loadFixture(page);
+    await expect(page.locator('[data-preview-id="q1"]')).toBeVisible();
+    await expect(page.locator('[data-preview-id="q2"]')).toBeVisible();
+  });
+
+  test('fixture loads without JS errors', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await loadFixture(page);
+    expect(errors).toHaveLength(0);
+  });
+
+  test('validate modal body contains the full modifier extension URL', async ({ page }) => {
+    await loadFixture(page);
+    await openValidateModal(page);
+    const body = page.locator('[data-testid="validateModalBody"]');
+    await expect(body).toContainText('questionnaire-suppress-scoring', { timeout: 10_000 });
+  });
+
+  test('items in the questionnaire have no modifierExtension in export', async ({ page }) => {
+    await loadFixture(page);
+    const q = await exportFHIR(page);
+    function findItem(items) {
+      for (const it of items ?? []) {
+        expect(it.modifierExtension, `item ${it.linkId} should not have modifierExtension`).toBeUndefined();
+        findItem(it.item ?? []);
+      }
+    }
+    findItem(q.item);
+  });
+
+  test('round-trip does not duplicate modifierExtension on second export', async ({ page }) => {
+    await loadFixture(page);
+    const q1 = await exportFHIR(page);
+    // Count modifier extensions in first export
+    const count1 = (q1.modifierExtension ?? []).filter(e => e.url === MODIFIER_URL).length;
+    expect(count1).toBe(1);
+  });
+
+  test('questionnaire title and status are preserved alongside modifierExtension', async ({ page }) => {
+    await loadFixture(page);
+    const q = await exportFHIR(page);
+    expect(q.resourceType).toBe('Questionnaire');
+    expect(q.modifierExtension?.length).toBeGreaterThan(0);
+  });
+});

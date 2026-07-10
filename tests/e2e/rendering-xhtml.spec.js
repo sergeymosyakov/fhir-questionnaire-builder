@@ -92,3 +92,107 @@ test.describe('rendering-xhtml round-trip via Appearance modal', () => {
     await expect(page.locator('[data-preview-id="1.1"] strong')).toContainText('Rich text');
   });
 });
+
+// ── Security: additional XSS vectors via Appearance modal ────────────────
+
+async function buildItemAndOpenAppearance(page) {
+  await page.addInitScript(() => localStorage.clear());
+  await page.goto('/');
+  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.getByTestId('add-root-group-btn').click();
+  await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
+  await page.locator('[data-testid="add-menu-item"]').first().click();
+  await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
+  const appLink = page.locator('[data-node-id="1.1"]').getByTestId('action-appearance');
+  await expect(appLink).toBeVisible();
+  await appLink.click();
+  await expect(page.locator('[data-testid="appearanceModal"]')).toBeVisible();
+}
+
+async function applyXhtml(page, xhtml) {
+  await page.getByTestId('appearance-xhtml-input').fill(xhtml);
+  await page.locator('[data-testid="appearanceModalApply"]').click();
+  await expect(page.locator('[data-testid="appearanceModal"]')).not.toBeVisible();
+}
+
+test.describe('rendering-xhtml — XSS sanitization (additional vectors)', () => {
+  test('onerror event handler stripped by DOMPurify', async ({ page }) => {
+    await buildItemAndOpenAppearance(page);
+    await applyXhtml(page, '<img src="x" onerror="window.__xss2=1">Safe text');
+
+    // onerror must not execute
+    await page.evaluate(() => new Promise(r => requestAnimationFrame(r)));
+    const xssRan = await page.evaluate(() => window.__xss2);
+    expect(xssRan).toBeUndefined();
+  });
+
+  test('javascript: href stripped by DOMPurify', async ({ page }) => {
+    await buildItemAndOpenAppearance(page);
+    await applyXhtml(page, '<a href="javascript:window.__xss3=1">click me</a>');
+
+    // The link must not have a javascript: href in the DOM.
+    // DOMPurify either removes the href entirely (null) or changes it.
+    const href = await page.locator('[data-preview-id="1.1"] a').getAttribute('href').catch(() => null);
+    // null = href removed entirely (safe); if present, must not be javascript:
+    if (href !== null) {
+      expect(href).not.toMatch(/javascript:/i);
+    }
+    expect(await page.evaluate(() => window.__xss3)).toBeUndefined();
+  });
+
+  test('onclick attribute stripped by DOMPurify', async ({ page }) => {
+    await buildItemAndOpenAppearance(page);
+    await applyXhtml(page, '<span onclick="window.__xss4=1">text</span>');
+
+    const onclick = await page.locator('[data-preview-id="1.1"] span').getAttribute('onclick').catch(() => null);
+    expect(onclick).toBeNull();
+  });
+
+  test('safe <a href> link is preserved after sanitization', async ({ page }) => {
+    await buildItemAndOpenAppearance(page);
+    await applyXhtml(page, '<a href="https://example.com">More info</a>');
+
+    const link = page.locator('[data-preview-id="1.1"] a');
+    await expect(link).toBeVisible();
+    await expect(link).toContainText('More info');
+    const href = await link.getAttribute('href');
+    expect(href).toBe('https://example.com');
+  });
+
+  test('nested safe HTML elements preserved', async ({ page }) => {
+    await buildItemAndOpenAppearance(page);
+    await applyXhtml(page, '<ul><li>First item</li><li>Second item</li></ul>');
+
+    await expect(page.locator('[data-preview-id="1.1"] ul')).toBeVisible();
+    const items = page.locator('[data-preview-id="1.1"] li');
+    await expect(items).toHaveCount(2);
+    await expect(items.nth(0)).toContainText('First item');
+  });
+
+  test('rendering-xhtml round-trips through export', async ({ page }) => {
+    await buildItemAndOpenAppearance(page);
+    await applyXhtml(page, '<em>Italic text</em>');
+
+    const json = await page.evaluate(async () => {
+      const { buildFHIRObject } = await import('/js/fhir/export.js');
+      return JSON.stringify(buildFHIRObject());
+    });
+    const q = JSON.parse(json);
+    function findItem(items, id) {
+      for (const it of items ?? []) {
+        if (it.linkId === id) return it;
+        const f = findItem(it.item ?? [], id); if (f) return f;
+      }
+    }
+    const item = findItem(q.item, '1.1');
+    const xhtmlExt = (item?._text?.extension ?? []).find(e => e.url?.includes('rendering-xhtml'));
+    expect(xhtmlExt?.valueString).toContain('<em>Italic text</em>');
+  });
+
+  test('fixture loads without JS errors', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await loadFixture(page);
+    expect(errors).toHaveLength(0);
+  });
+});
