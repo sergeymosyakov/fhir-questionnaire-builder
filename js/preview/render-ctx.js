@@ -26,4 +26,11 @@ export const _rc = {
   set:            null, // function(id, v) — write a single answer (repeat rows)
   remove:         null, // function(id) — delete a single answer (repeat rows)
   CHECKABLE_TYPES: null, // Set<string>
+
+  // Repeating-group instance context (set during render):
+  instancePath:   [],   // [{ id, idx }, …] — current repeating-group instance scope
+  instanceCount:  null, // function(groupId, path) → number
+  addInstance:    null, // function(groupId, path) → new count
+  removeInstance: null, // function(groupId, idx, path)
+  evalChildren:   null, // function(children, path) → results[] — per-instance eval
 };

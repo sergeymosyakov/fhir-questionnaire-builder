@@ -63,13 +63,22 @@ export class PreviewForm {
       this._answerStore   = answerStore;
       this._rawFhir       = questDoc;
       this._questVariables = questDoc.variables;
-      this._calcFormOk    = node => calcFormOk(node, answerStore);
-      _rc.calcFormOk      = this._calcFormOk;
+      this._calcFormOk    = (node, path) => calcFormOk(node, answerStore, path);
+      _rc.instancePath    = [];
+      _rc.calcFormOk      = node => this._calcFormOk(node, _rc.instancePath);
       _rc.updateGroupIcons = () => GroupNode.updateAll(_rc);
-      _rc.getValue        = id => answerStore.get(id);
-      _rc.getAll          = id => answerStore.getAll(id);
-      _rc.set             = (id, v) => answerStore.set(id, v);
-      _rc.remove          = id => answerStore.remove(id);
+      _rc.getValue        = id => answerStore.get(id, _rc.instancePath);
+      _rc.getAll          = id => answerStore.getAll(id, _rc.instancePath);
+      _rc.set             = (id, v) => answerStore.set(id, v, _rc.instancePath);
+      _rc.remove          = id => answerStore.remove(id, _rc.instancePath);
+      _rc.instanceCount   = (id, p) => answerStore.instanceCount(id, p);
+      _rc.addInstance     = (id, p) => answerStore.addInstance(id, p);
+      _rc.removeInstance  = (id, i, p) => answerStore.removeInstance(id, i, p);
+      _rc.evalChildren    = (children, p) => {
+        const r = [];
+        for (const ch of children) evaluateNode(ch, _rc.ctx, r, false, p);
+        return r;
+      };
     };
     const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
     if (cached?.questDoc) {
@@ -226,14 +235,14 @@ export class PreviewForm {
 
   _buildControl(node, iconEl, onAfterChange) {
     const isPatient = this._previewMode === 'patient';
+    const path = _rc.instancePath && _rc.instancePath.length ? _rc.instancePath.slice() : undefined;
     const updateOwnIcon = () => {
+      const ok = this._calcFormOk(node, path);
       if (iconEl) {
-        const ok = this._calcFormOk(node);
         iconEl.className   = ok ? 'icon-ok' : 'icon-fail';
         iconEl.textContent = ok ? '\u2713' : '\u2717';
       }
       if (isPatient && node._previewEl) {
-        const ok = this._calcFormOk(node);
         node._previewEl.classList.toggle('lform-item--invalid', !ok);
       }
     };
@@ -243,8 +252,8 @@ export class PreviewForm {
       document.dispatchEvent(new CustomEvent(AppEvents.REFRESH_CALC_BADGES));
     };
     const ctx = {
-      getValue: id => this._answerStore.get(id),
-      setValue: (id, v) => document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id, value: v } })),
+      getValue: id => this._answerStore.get(id, path),
+      setValue: (id, v) => document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id, value: v, path } })),
       onChange, _reCalc: reCalcAndRefresh,
       _fpCtx: this._lastCtx,
     };
@@ -315,6 +324,7 @@ export class PreviewForm {
     _rc.ctx = ctx; _rc.resultMap = resultMap; _rc.cEnv = _cEnv;
     _rc.visible = visible; _rc.groupIconMap = groupIconMap;
     _rc.previewMode = this._previewMode;
+    _rc.instancePath = [];
 
     const frag = document.createDocumentFragment();
     for (const node of this._tree) {

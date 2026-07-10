@@ -253,6 +253,23 @@
   background: #e3f2fd;
   border-color: #42a5f5;
 }
+
+/* === Repeating group instances ============================================== */
+.rg-instances { padding: 6px 2px 2px; }
+.rg-inst {
+  position: relative;
+  border: 1.5px dashed #b9c6d6;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 14px 0;
+  background: rgba(15, 40, 80, 0.04);
+}
+.rg-inst .repeat-remove-btn.rg-del {
+  position: absolute;
+  top: -11px;
+  left: 10px;
+  z-index: 1;
+}
 .preview-readonly-value {
   display: inline-block;
   font-size: 13px;

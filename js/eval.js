@@ -60,8 +60,11 @@ export function compareValue(val, ew) {
 
 // Evaluate one enableWhen condition against current form values.
 // For repeating items: condition is met if ANY answer satisfies it (FHIR R4 spec).
-function checkOneEnableWhen(ew) {
-  const all = answerStore.getAll(ew.question);
+// `path` scopes the read to the current repeating-group instance; falls back to
+// the root scope when the referenced field is not present in the instance.
+function checkOneEnableWhen(ew, path) {
+  let all = answerStore.getAll(ew.question, path);
+  if (all.length === 0 && path && path.length) all = answerStore.getAll(ew.question);
   if (all.length === 0) return compareValue(undefined, ew);
   return all.some(v => compareValue(v, ew));
 }
@@ -70,9 +73,9 @@ function checkOneEnableWhen(ew) {
 // 1. enableWhen[] (standard R4) — check against values[]
 // 2. enableWhenExpression (SDC) — evaluate via FHIRPath
 // 3. Neither present → always visible
-function isNodeVisible(node, ctx) {
+function isNodeVisible(node, ctx, path) {
   if (node.enableWhen && node.enableWhen.length) {
-    const checks = node.enableWhen.map(checkOneEnableWhen);
+    const checks = node.enableWhen.map(ew => checkOneEnableWhen(ew, path));
     return node.enableBehavior === 'any' ? checks.some(Boolean) : checks.every(Boolean);
   }
   if (node.enableWhenExpression && ctx && ctx.fp && ctx.qr) {
@@ -88,7 +91,7 @@ function isNodeVisible(node, ctx) {
 // Form-value checks (calcFormOk) are applied separately in the preview renderer
 // so that typing in a control does NOT trigger a full DOM rebuild on each input event.
 // _insideHidden: true when a parent node carries sdc-questionnaire-hidden=true
-export function evaluateNode(node, ctx, results, _insideHidden = false) {
+export function evaluateNode(node, ctx, results, _insideHidden = false, path = []) {
   // sdc-questionnaire-hidden: node (and all its descendants) are marked hidden.
   // calculatedExpression still runs; they are excluded from PASS/FAIL validation.
   if (node._hidden || _insideHidden) {
@@ -96,12 +99,12 @@ export function evaluateNode(node, ctx, results, _insideHidden = false) {
     const entry = { node, visible: true, ok: true, hidden: true, hiddenRoot: isRoot };
     results.push(entry);
     if (node.type === 'group') {
-      for (const ch of node.children) evaluateNode(ch, ctx, results, true);
+      for (const ch of node.children) evaluateNode(ch, ctx, results, true, path);
     }
     return { ok: true, visible: true, hidden: true };
   }
 
-  const visible = isNodeVisible(node, ctx);
+  const visible = isNodeVisible(node, ctx, path);
   if (!visible) {
     const showDimmed = !!(node.enableWhen && node.enableWhen.length) || !!node.enableWhenExpression;
     results.push({ node, visible: false, ok: node.mandatory === false, showDimmed });
@@ -116,13 +119,20 @@ export function evaluateNode(node, ctx, results, _insideHidden = false) {
     return { ok: true, visible: true };
   }
 
+  // Repeating group: children are evaluated & rendered per instance by
+  // GroupNode._renderInstances (with the instance path), not in this flat pass.
+  if (node.repeats) {
+    results.push({ node, visible: true, ok: true, repeating: true });
+    return { ok: true, visible: true };
+  }
+
   // Group: push placeholder FIRST → group heading appears above children in preview
   const entry = { node, visible: true, ok: true };
   results.push(entry);
 
   const visKids = [];
   for (const ch of node.children) {
-    const r = evaluateNode(ch, ctx, results);
+    const r = evaluateNode(ch, ctx, results, false, path);
     if (r.visible) visKids.push(r);
   }
 

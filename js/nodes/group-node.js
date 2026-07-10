@@ -24,6 +24,7 @@ export class GroupNode extends BaseNode {
     this.type            = 'group';
     this.logicWithParent = data.logicWithParent ?? 'AND';
     this.children        = data.children        ?? [];
+    this.repeats         = data.repeats         ?? false;
     if (typeof document !== 'undefined') {
       document.addEventListener(AppEvents.BUILDER_NAVIGATE, e => {
         if (!this._previewCollapsed) return;
@@ -121,6 +122,18 @@ export class GroupNode extends BaseNode {
       }
     }
 
+    // Repeatable group badge (item.repeats on a group)
+    if (this.repeats && !isPatient) {
+      const rb = document.createElement('span');
+      rb.className = 'preview-group-ctrl-badge';
+      rb.textContent = 'Repeatable';
+      rb.dataset.tipTitle = 'Repeatable group';
+      rb.dataset.tipBody = 'This group repeats \u2014 the respondent can add multiple entries.';
+      rb.dataset.tipFhir = 'Questionnaire.item.repeats';
+      rb.dataset.tipSpec = 'R4';
+      row.appendChild(rb);
+    }
+
     if (!isPatient && !isEmptyGroup) {
       const isOr = this.logicWithParent === 'OR';
       const lb = document.createElement('span');
@@ -184,8 +197,16 @@ export class GroupNode extends BaseNode {
 
     if (this._previewCollapsed) return;
 
+    if (this.repeats) { this._renderInstances(target, rc); return; }
+
     const nested = document.createElement('div');
     nested.className = 'preview-nested';
+    this._appendChildRows(nested, rc);
+    if (nested.childElementCount > 0) target.appendChild(nested);
+  }
+
+  // Render this group's child rows (with AND/OR separators) from the current rc.resultMap.
+  _appendChildRows(nested, rc) {
     const logic = this.logicWithParent || 'AND';
     let firstVisible = true;
     for (const ch of this.children) {
@@ -202,7 +223,63 @@ export class GroupNode extends BaseNode {
         if (childRes.visible) firstVisible = false;
       }
     }
-    if (nested.childElementCount > 0) target.appendChild(nested);
+  }
+
+  // Repeating group: render N instance blocks, each evaluated & rendered with its
+  // own instance path so values / enableWhen / validation are scoped per entry.
+  _renderInstances(target, rc) {
+    const parentPath = rc.instancePath || [];
+    const min = (this._minOccurs && this._minOccurs > 0) ? this._minOccurs : 1;
+    let count = rc.instanceCount(this.id, parentPath);
+    while (count < min) { rc.addInstance(this.id, parentPath); count++; }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'preview-nested rg-instances';
+    wrap.dataset.rgGroup = this.id;    // e.g. data-rg-group="meds", "schedule"
+
+    const saved = { map: rc.resultMap, visible: rc.visible, path: rc.instancePath };
+    for (let i = 0; i < count; i++) {
+      const instPath = [...parentPath, { id: this.id, idx: i }];
+      const block = document.createElement('div');
+      block.className = 'rg-inst';
+
+      if (count > min) {
+        const rm = document.createElement('button');
+        rm.type = 'button';
+        rm.className = 'repeat-remove-btn rg-del';
+        rm.textContent = '\u00D7';
+        rm.dataset.testid = 'rg-remove-btn';
+        rm.dataset.tipTitle = 'Remove this entry';
+        const _i = i;
+        rm.onclick = () => { rc.removeInstance(this.id, _i, parentPath); BaseNode.notifyChanged(); };
+        block.appendChild(rm);
+      }
+
+      rc.instancePath = instPath;
+      const instResults = rc.evalChildren(this.children, instPath);
+      rc.resultMap = new Map(instResults.map(r => [r.node.id, r]));
+      rc.visible   = instResults;
+      this._appendChildRows(block, rc);
+      rc.resultMap = saved.map; rc.visible = saved.visible; rc.instancePath = saved.path;
+
+      wrap.appendChild(block);
+    }
+
+    const max = this._maxOccurs;
+    const atMax = max !== undefined && count >= max;
+    const add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'repeat-add-btn';
+    add.dataset.testid = 'rg-add-btn';
+    add.textContent = '+ Add another entry';
+    if (atMax) {
+      add.disabled = true;
+      add.dataset.tipTitle = 'Maximum ' + max + ' entr' + (max === 1 ? 'y' : 'ies') + ' reached';
+    }
+    add.onclick = () => { if (!atMax) { rc.addInstance(this.id, parentPath); BaseNode.notifyChanged(); } };
+    wrap.appendChild(add);
+
+    target.appendChild(wrap);
   }
 
   // Refresh pass/fail icons on every rendered group.

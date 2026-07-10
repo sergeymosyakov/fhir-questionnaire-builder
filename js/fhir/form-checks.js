@@ -39,8 +39,13 @@ function _isValidUrl(s) {
  * Check whether a node's current answer satisfies all validation rules.
  * @param {object} node  — tree node
  * @param {object} store — AnswerStore instance (get(id) / data)
+ * @param {Array}  [path] — instance path for a field inside a repeating group
  */
-export function calcFormOk(node, store) {
+export function calcFormOk(node, store, path) {
+  if (path && path.length) {
+    const base = store;                                    // scope all reads to the instance
+    store = { get: id => base.get(id, path) };
+  }
   if (node._calculatedExpr && node._readOnly) {
     if (node.itemType !== 'checkbox') return true;
     return store.get(node.id) === true;

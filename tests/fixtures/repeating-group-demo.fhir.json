@@ -1,0 +1,73 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "repeating-group-demo",
+  "url": "http://example.org/Questionnaire/repeating-group-demo",
+  "name": "RepeatingGroupDemo",
+  "title": "Repeating Group Demo",
+  "status": "draft",
+  "date": "2026-07-10",
+  "publisher": "FHIR Questionnaire Builder",
+  "description": "Demonstrates repeating groups: each medication is its own entry with per-instance required validation and a per-instance enableWhen (PRN note shows only when 'As needed?' is Yes in that same entry). Includes a nested repeating group (dose schedule) inside each medication.",
+  "item": [
+    {
+      "linkId": "patient-name",
+      "text": "Patient name",
+      "type": "string",
+      "required": true
+    },
+    {
+      "linkId": "meds",
+      "text": "Medications",
+      "type": "group",
+      "repeats": true,
+      "item": [
+        {
+          "linkId": "med-name",
+          "text": "Medication name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "linkId": "med-dose",
+          "text": "Dose (mg)",
+          "type": "decimal"
+        },
+        {
+          "linkId": "med-prn",
+          "text": "As needed (PRN)?",
+          "type": "boolean"
+        },
+        {
+          "linkId": "med-prn-note",
+          "text": "PRN instructions",
+          "type": "string",
+          "enableWhen": [
+            {
+              "question": "med-prn",
+              "operator": "=",
+              "answerBoolean": true
+            }
+          ]
+        },
+        {
+          "linkId": "schedule",
+          "text": "Dose schedule",
+          "type": "group",
+          "repeats": true,
+          "item": [
+            {
+              "linkId": "sched-time",
+              "text": "Time of day",
+              "type": "time"
+            },
+            {
+              "linkId": "sched-amount",
+              "text": "Amount (tablets)",
+              "type": "integer"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

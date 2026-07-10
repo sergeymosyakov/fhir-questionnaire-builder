@@ -500,6 +500,15 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     applyVisibility(node, fhirItem, linkIdMap);
     const hasOrGroup = applyConstraints(node, fhirItem);
     if (hasOrGroup) node.logicWithParent = 'OR';
+    if (fhirItem.repeats) node.repeats = true;
+    const grpMinOccExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs'
+    );
+    if (grpMinOccExt?.valueInteger !== undefined) node._minOccurs = grpMinOccExt.valueInteger;
+    const grpMaxOccExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs'
+    );
+    if (grpMaxOccExt?.valueInteger !== undefined) node._maxOccurs = grpMaxOccExt.valueInteger;
     const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));
     if (rs) node._renderStyle = rs.valueString || '';
     const rx = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-xhtml'));
