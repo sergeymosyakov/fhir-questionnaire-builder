@@ -324,3 +324,76 @@
 .logic-separator-or::before,
 .logic-separator-or::after { background: #ffe0b2; }
 
+/* === Group table layout (questionnaire-itemControl: gtable) ================ */
+.gtable {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 6px 14px 8px;
+  font-size: 0.87rem;
+  width: calc(100% - 28px);
+}
+.gtable th.gtable-th {
+  text-align: left;
+  padding: 5px 10px;
+  border-bottom: 2px solid var(--c-border, #dde);
+  color: var(--c-label, #555);
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--c-surface-alt, #f7f9fc);
+}
+.gtable th.gtable-th-action {
+  width: 2.2rem;
+}
+.gtable td.gtable-td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--c-border-light, #edf0f5);
+  vertical-align: middle;
+}
+.gtable td.gtable-td-action {
+  width: 2.2rem;
+  text-align: center;
+  vertical-align: middle;
+}
+.gtable td.gtable-tfoot-td {
+  padding: 4px 8px;
+}
+/* Cell-mode item: strip the row wrapper visually — let the control fill the cell */
+.gtable .gtable-cell-item {
+  display: contents;
+}
+/* Remove hover/padding from lform-item inside a gtable cell */
+.gtable td .lform-item {
+  padding: 0;
+  gap: 4px;
+}
+.gtable td .lform-item:hover { background: transparent; }
+/* Remove button */
+.gtable-rm-btn {
+  border: none;
+  background: transparent;
+  color: var(--c-danger, #e74c3c);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.gtable-rm-btn:hover { background: rgba(231, 76, 60, 0.1); }
+/* Add row button */
+.gtable-add-btn {
+  font-size: 0.82rem;
+  padding: 3px 10px;
+  margin: 2px 0;
+}
+/* Required star inside column header */
+.gtable-required-star {
+  color: var(--c-danger, #e74c3c);
+  font-weight: 700;
+}
+/* Builder badge for gtable */
+.preview-group-ctrl-badge--gtable {
+  background: transparent;
+  border: 1px solid var(--c-primary, #3498db);
+  color: var(--c-primary, #3498db);
+}
+

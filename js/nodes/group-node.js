@@ -6,6 +6,7 @@ import { NODE_REGISTRY } from './registry.js';
 import { TextNode } from './text-node.js';
 import { NodeGearMenu } from '../ui/node-gear-menu.js';
 import { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem } from './builder-helpers.js';
+import { GTableRenderer } from './gtable-renderer.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -122,6 +123,19 @@ export class GroupNode extends BaseNode {
       }
     }
 
+    // questionnaire-itemControl gtable — table layout badge
+    if (this._itemControl === 'gtable' && !isPatient) {
+      const badge = document.createElement('span');
+      badge.className = 'preview-group-ctrl-badge preview-group-ctrl-badge--gtable';
+      badge.textContent = 'gtable';
+      badge.dataset.testid = 'gtable-badge';
+      badge.dataset.tipTitle = 'Group table layout (gtable)';
+      badge.dataset.tipBody = 'This group is rendered as a table — each child item is a column, each repeat instance is a row.';
+      badge.dataset.tipFhir = 'item.extension[questionnaire-itemControl].valueCodeableConcept.coding.code = gtable';
+      badge.dataset.tipSpec = 'R4 · SDC';
+      row.appendChild(badge);
+    }
+
     // Repeatable group badge (item.repeats on a group)
     if (this.repeats && !isPatient) {
       const rb = document.createElement('span');
@@ -196,6 +210,13 @@ export class GroupNode extends BaseNode {
     if (iconEl) rc.groupIconMap.set(this.id, { icon: iconEl, descendants, node: this });
 
     if (this._previewCollapsed) return;
+
+    // questionnaire-itemControl gtable — render as table (takes priority over repeats,
+    // because GTableRenderer handles repeating rows itself when group.repeats is true)
+    if (this._itemControl === 'gtable') {
+      new GTableRenderer(this).render(target, rc, rc.instancePath || []);
+      return;
+    }
 
     if (this.repeats) { this._renderInstances(target, rc); return; }
 

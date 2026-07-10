@@ -74,6 +74,11 @@
       {
         "label": "Item Control Demo",
         "file": "item-control-demo.fhir.json",
+        "type": "questionnaire"
+      },
+      {
+        "label": "Group Table Layout Demo (gtable)",
+        "file": "gtable-demo.fhir.json",
         "type": "questionnaire",
         "note": "check-box, columnCount, autocomplete, text-area, spinner, drop-down, slider, lookup, regex, optionExclusive, usageMode, itemMedia, itemWeight, flyover, header, footer"
       },

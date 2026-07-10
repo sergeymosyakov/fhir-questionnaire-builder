@@ -140,6 +140,13 @@ export class ItemNode extends BaseNode {
   // ── Row content: label + badges + control ─────────────────────────────────
   _buildRowContent(row, res, rc) {
     const isPatient = rc.previewMode === 'patient';
+
+    // Cell mode (inside gtable): skip label and design-mode badges, render control only.
+    if (rc.cellMode) {
+      this._buildControl(row, res, rc);
+      this._buildReadOnlyValue(row, rc);
+      return;
+    }
     const label = this._buildLabel(res, rc);
     if (this._renderStyle) applyRenderStyle(label, this._renderStyle);
 

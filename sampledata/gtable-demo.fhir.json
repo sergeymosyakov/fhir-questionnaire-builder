@@ -1,0 +1,169 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "gtable-demo",
+  "title": "Group Table Layout Demo (gtable)",
+  "status": "active",
+  "description": "Demonstrates questionnaire-itemControl=gtable: groups rendered as HTML tables. Includes repeating rows, single-row tables, a nested stacked group inside a table cell, and a nested gtable inside a table cell.",
+  "item": [
+    {
+      "linkId": "medications",
+      "text": "Current Medications (repeating gtable)",
+      "type": "group",
+      "repeats": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "gtable" }]
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs",
+          "valueInteger": 1
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs",
+          "valueInteger": 10
+        }
+      ],
+      "item": [
+        { "linkId": "med-name",      "text": "Medication", "type": "string",  "required": true },
+        { "linkId": "med-dose",      "text": "Dose",       "type": "decimal" },
+        {
+          "linkId": "med-unit",
+          "text": "Unit",
+          "type": "choice",
+          "answerOption": [
+            { "valueCoding": { "code": "mg",  "display": "mg"  } },
+            { "valueCoding": { "code": "g",   "display": "g"   } },
+            { "valueCoding": { "code": "ml",  "display": "ml"  } },
+            { "valueCoding": { "code": "mcg", "display": "mcg" } }
+          ]
+        },
+        {
+          "linkId": "med-frequency",
+          "text": "Frequency",
+          "type": "choice",
+          "answerOption": [
+            { "valueCoding": { "code": "od",  "display": "Once daily"  } },
+            { "valueCoding": { "code": "bd",  "display": "Twice daily" } },
+            { "valueCoding": { "code": "tds", "display": "Three times" } },
+            { "valueCoding": { "code": "prn", "display": "As needed"   } }
+          ]
+        },
+        { "linkId": "med-start", "text": "Start date", "type": "date" }
+      ]
+    },
+    {
+      "linkId": "vitals",
+      "text": "Vital Signs (single-row gtable)",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "gtable" }]
+          }
+        }
+      ],
+      "item": [
+        { "linkId": "bp-sys", "text": "Systolic BP",  "type": "integer" },
+        { "linkId": "bp-dia", "text": "Diastolic BP", "type": "integer" },
+        { "linkId": "hr",     "text": "Heart rate",   "type": "integer" },
+        { "linkId": "temp",   "text": "Temp (°C)",    "type": "decimal"  },
+        { "linkId": "o2sat",  "text": "SpO2 (%)",     "type": "integer"  }
+      ]
+    },
+    {
+      "linkId": "appointments",
+      "text": "Appointments (gtable with stacked group in one cell)",
+      "type": "group",
+      "repeats": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "gtable" }]
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs",
+          "valueInteger": 1
+        }
+      ],
+      "item": [
+        { "linkId": "appt-date", "text": "Date", "type": "date", "required": true },
+        {
+          "linkId": "appt-type",
+          "text": "Type",
+          "type": "choice",
+          "answerOption": [
+            { "valueCoding": { "code": "gp",     "display": "GP"         } },
+            { "valueCoding": { "code": "spec",    "display": "Specialist" } },
+            { "valueCoding": { "code": "imaging", "display": "Imaging"    } }
+          ]
+        },
+        {
+          "linkId": "appt-provider",
+          "text": "Provider (stacked)",
+          "type": "group",
+          "item": [
+            { "linkId": "prov-name",  "text": "Name",  "type": "string" },
+            { "linkId": "prov-phone", "text": "Phone", "type": "string" }
+          ]
+        },
+        { "linkId": "appt-notes", "text": "Notes", "type": "string" }
+      ]
+    },
+    {
+      "linkId": "lab-results",
+      "text": "Lab Results (gtable with nested gtable in one cell)",
+      "type": "group",
+      "repeats": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "gtable" }]
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs",
+          "valueInteger": 1
+        }
+      ],
+      "item": [
+        { "linkId": "lab-date",  "text": "Date",  "type": "date",   "required": true },
+        {
+          "linkId": "lab-panel",
+          "text": "Panel",
+          "type": "choice",
+          "answerOption": [
+            { "valueCoding": { "code": "cbc",   "display": "CBC"        } },
+            { "valueCoding": { "code": "bmp",   "display": "BMP"        } },
+            { "valueCoding": { "code": "lipid", "display": "Lipid panel"} }
+          ]
+        },
+        {
+          "linkId": "lab-values",
+          "text": "Values (nested gtable)",
+          "type": "group",
+          "repeats": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [{ "system": "http://hl7.org/fhir/questionnaire-item-control", "code": "gtable" }]
+              }
+            }
+          ],
+          "item": [
+            { "linkId": "lab-val-name",  "text": "Test",   "type": "string"  },
+            { "linkId": "lab-val-value", "text": "Result", "type": "decimal" },
+            { "linkId": "lab-val-unit",  "text": "Unit",   "type": "string"  }
+          ]
+        }
+      ]
+    }
+  ]
+}

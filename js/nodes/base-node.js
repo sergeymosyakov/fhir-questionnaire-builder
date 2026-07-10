@@ -131,6 +131,18 @@ export class BaseNode {
     const isPatient = rc.previewMode === 'patient';
     if (res.hidden && (isPatient || !rc.viewPrefs.showHiddenItems)) return;
 
+    // Cell mode: item is inside a gtable cell — skip the full row pipeline,
+    // render a minimal wrapper with just the control (no label/badges/navBtn).
+    // Groups always use the normal path so they can decide their own layout.
+    if (rc.cellMode && this.type === 'item') {
+      if (!res.visible) return; // dimmed items are invisible in table cells
+      const row = this._makePreviewRow('lform-item gtable-cell-item');
+      res._iconEl = null;
+      this._buildRowContent(row, res, rc);
+      container.appendChild(row);
+      return;
+    }
+
     // questionnaire-usageMode: filter items based on preview mode
     if (this._usageMode) {
       const m = this._usageMode;
