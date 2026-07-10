@@ -220,3 +220,62 @@ test.describe('repeating group — FHIR round-trip', () => {
     expect(medsItem?.item?.find(i => i.linkId === 'schedule')?.repeats).toBe(true);
   });
 });
+
+// ── Repeatable action link in builder ────────────────────────────────────────
+test.describe('repeating group — Repeatable action link in builder', () => {
+  test('loaded repeating group has Repeatable action link highlighted (active)', async ({ page }) => {
+    await freshLoad(page);
+    const repeatBtn = page.locator('[data-testid="tree-container"] .node-group').filter({
+      has: page.locator('[data-testid="node-title-display"]:has-text("Medications")'),
+    }).first().locator('[data-testid="action-repeatable"]').first();
+    await expect(repeatBtn).toBeVisible({ timeout: 5_000 });
+    await expect(repeatBtn).toHaveClass(/action-edit--active/);
+  });
+
+  test('new plain group has Repeatable action link NOT active by default', async ({ page }) => {
+    await page.addInitScript(() => localStorage.clear());
+    await page.goto('/');
+    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-testid="tree-container"] [data-node-id]').first()
+      .getByTestId('action-repeatable')).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('[data-testid="tree-container"] [data-node-id]').first()
+      .getByTestId('action-repeatable')).not.toHaveClass(/action-edit--active/);
+  });
+
+  test('clicking Repeatable action link opens the Repeatable modal', async ({ page }) => {
+    await freshLoad(page);
+    const repeatBtn = page.locator('[data-testid="tree-container"] .node-group').filter({
+      has: page.locator('[data-testid="node-title-display"]:has-text("Medications")'),
+    }).first().locator('[data-testid="action-repeatable"]').first();
+    await expect(repeatBtn).toBeVisible({ timeout: 5_000 });
+    await repeatBtn.click();
+    await expect(page.locator('[data-testid="repeatableModal"]')).toBeVisible({ timeout: 5_000 });
+    await page.locator('[data-testid="repeatableModal"]').getByRole('button', { name: 'Cancel' }).click();
+  });
+
+  test('toggling Repeatable on in modal activates the action link and shows preview instances', async ({ page }) => {
+    await page.addInitScript(() => localStorage.clear());
+    await page.goto('/');
+    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+    await page.getByTestId('add-root-group-btn').click();
+    const groupNode = page.locator('[data-testid="tree-container"] .node-group').first();
+    // Add a child item so the group has children (needed for instances to render)
+    await expect(groupNode.getByTestId('group-add-btn')).toBeVisible({ timeout: 5_000 });
+    await groupNode.getByTestId('group-add-btn').click();
+    const addItemBtn = page.locator('[data-testid="add-menu-item"]').first();
+    await expect(addItemBtn).toBeVisible({ timeout: 5_000 });
+    await addItemBtn.click();
+    // Now enable Repeatable on the group
+    const repeatBtn = page.locator('[data-testid="tree-container"] .node-group [data-testid="action-repeatable"]').first();
+    await expect(repeatBtn).toBeVisible({ timeout: 5_000 });
+    await expect(repeatBtn).not.toHaveClass(/action-edit--active/);
+    await repeatBtn.click();
+    await expect(page.locator('[data-testid="repeatableModal"]')).toBeVisible({ timeout: 5_000 });
+    await page.getByTestId('repeat-modal-toggle').check();
+    await page.locator('[data-testid="repeatableModal"]').getByRole('button', { name: /apply/i }).click();
+    await expect(repeatBtn).toHaveClass(/action-edit--active/, { timeout: 5_000 });
+    await expect(page.locator('[data-testid="rg-add-btn"]').first()).toBeVisible({ timeout: 5_000 });
+  });
+});
+

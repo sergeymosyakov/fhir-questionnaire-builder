@@ -71,7 +71,7 @@
 
 /* === Preview helpers ========================================================= */
 .preview-no-visible   { color: #999; font-size: 13px; padding: 12px; }
-.preview-icon-ph      { width: 20px; flex-shrink: 0; display: inline-block; margin-top: 1px; }
+.preview-icon-ph      { flex-shrink: 0; display: inline-block; margin-top: 1px; }
 .preview-row--pointer { cursor: pointer; }
 
 /* === Preview → builder navigation icon ===================================== */

@@ -406,6 +406,14 @@ export class GroupNode extends BaseNode {
       onApply: () => document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED)),
     });
 
+    const repeatLink = node._makeActionLink('Repeatable', 'repeatable', {
+      title: 'Repeatable group',
+      body:  'When enabled the group repeats \u2014 the respondent can fill in multiple entries. Stored as FHIR item.repeats. Use min/max occurrences to constrain the number of entries.',
+      fhir:  'Questionnaire.item.repeats',
+      spec:  'R4',
+    }, actions);
+    repeatLink.onclick = () => MODAL_REGISTRY.get('repeatable').open(node, repeatLink, setActive);
+
     const styleLink = node._makeActionLink('Appearance', 'style', {
       title: 'Appearance (rendering-style)',
       body:  'Inline CSS applied to the group title in the preview. Stored in the standard FHIR rendering-style extension on the _text element.',
@@ -509,6 +517,7 @@ export class GroupNode extends BaseNode {
     setActive(styleLink,  !!(node._renderStyle || node._renderXhtml || node._itemControl === 'header' || node._itemControl === 'footer'));
     setActive(statesLink, node.mandatory === true || !!node._hidden || node._observationExtract != null || !!node._collapsible || !!node._usageMode || !!node._signatureRequired?.length);
     setActive(propsLink,  !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length) || !!node._shortText);
+    setActive(repeatLink, !!node.repeats);
 
     const body = document.createElement('div');
     body.className = 'node-body';

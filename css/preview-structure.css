@@ -255,13 +255,18 @@
 }
 
 /* === Repeating group instances ============================================== */
-.rg-instances { padding: 6px 2px 2px; }
+.rg-instances {
+  padding: 6px 2px 2px;
+  background: transparent;  /* do not inherit preview-nested's opaque bg — tint must accumulate */
+  border-left: none;
+  margin-left: 0;
+}
 .rg-inst {
   position: relative;
   border: 1.5px dashed #b9c6d6;
   border-radius: 8px;
   padding: 10px;
-  margin: 14px 0;
+  margin: 5px;
   background: rgba(15, 40, 80, 0.04);
 }
 .rg-inst .repeat-remove-btn.rg-del {

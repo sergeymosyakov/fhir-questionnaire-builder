@@ -46,11 +46,11 @@ class RepeatableModal extends Modal {
     const { node } = this._pending;
     nodePickerModal.open(node.id, (ids) => {
       document.dispatchEvent(new CustomEvent(AppEvents.COPY_TO_NODES, {
-        detail: { ids, patch, nodeType: 'item' },
+        detail: { ids, patch, nodeType: node.type === 'group' ? 'group' : 'item' },
       }));
       document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
       document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
-    }, 'item', EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.tree ?? []);
+    }, node.type === 'group' ? 'group' : 'item', EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.tree ?? []);
   }
 
   _apply() {
