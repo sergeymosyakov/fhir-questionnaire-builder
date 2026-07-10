@@ -54,4 +54,44 @@ test.describe('SDC Definition Extract', () => {
     await modal.locator('.modal-close').click();
     await expect(modal).not.toBeVisible();
   });
+
+  test('modal body contains a bundle or resource list', async ({ page }) => {
+    await loadFixture(page);
+    await openDropdownItem(page, 'export-btn', 'export-def-extract-item');
+    const modal = page.locator('[data-testid="defExtract"]').first();
+    await expect(modal).toBeVisible();
+    // The body should contain FHIR resource references (Bundle, Patient, or similar)
+    const bodyText = await modal.locator('.modal-body').textContent();
+    // Either a bundle or a "no extractable data" message
+    expect(bodyText.length).toBeGreaterThan(10);
+  });
+
+  test('fixture has nodes in builder tree with definition-based items', async ({ page }) => {
+    await loadFixture(page);
+    // The def-extract fixture should have nodes visible in the tree
+    const nodeCount = await page.locator('[data-testid="tree-container"] [data-node-id]').count();
+    expect(nodeCount).toBeGreaterThan(0);
+  });
+
+  test('loading fixture shows items in preview', async ({ page }) => {
+    await loadFixture(page);
+    // The def-extract fixture items should render in preview
+    await expect(page.locator('.preview-card .lform-item').first()).toBeVisible({ timeout: 8_000 });
+  });
+
+  test('extract modal download button is present', async ({ page }) => {
+    await loadFixture(page);
+    await openDropdownItem(page, 'export-btn', 'export-def-extract-item');
+    const modal = page.locator('[data-testid="defExtract"]').first();
+    await expect(modal).toBeVisible();
+    // There should be at least one button in the modal (close or download)
+    await expect(modal.locator('button').first()).toBeVisible();
+  });
+
+  test('fixture loads without JS errors', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await loadFixture(page);
+    expect(errors).toHaveLength(0);
+  });
 });

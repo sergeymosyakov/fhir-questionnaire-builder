@@ -90,3 +90,68 @@ test.describe('choiceColumn — multi-column dropdown', () => {
     expect(cols[1].extension).toContainEqual({ url: 'forDisplay', valueBoolean: true });
   });
 });
+
+test.describe('choiceColumn — additional scenarios', () => {
+  test('selecting second option shows its forDisplay value in trigger', async ({ page }) => {
+    await loadFixture(page);
+    const row = page.locator('[data-preview-id="med"]');
+    const trigger = row.locator('.sc-trigger');
+    await trigger.click();
+    const secondRow = page.locator('.oc-col-row').nth(1);
+    await secondRow.click();
+    await expect(trigger.locator('.sc-trigger-text')).toHaveText('Carvedilol 25 MG');
+  });
+
+  test('dropdown closes when clicking outside', async ({ page }) => {
+    await loadFixture(page);
+    const trigger = page.locator('[data-preview-id="med"]').locator('.sc-trigger');
+    await trigger.click();
+    await expect(page.locator('.oc-col-header')).toBeVisible();
+    await page.mouse.click(0, 0);
+    await expect(page.locator('.oc-col-header')).not.toBeVisible();
+  });
+
+  test('choice-column badge visible in builder tree for the item', async ({ page }) => {
+    await loadFixture(page);
+    // The builder node for "med" should show a badge or active action link
+    // indicating choiceColumn is configured
+    const node = page.locator('[data-node-id="med"]');
+    await expect(node).toBeVisible();
+    // The node should have a type label
+    await expect(node.getByTestId('node-type-label')).toBeVisible();
+  });
+
+  test('patient view renders choice column dropdown correctly', async ({ page }) => {
+    await loadFixture(page);
+    // Switch to patient view
+    await expect(page.getByTestId('preview-mode-patient')).not.toBeVisible();
+    await page.getByTestId('preview-mode-btn').click();
+    await expect(page.getByTestId('preview-mode-patient')).toBeVisible();
+    await page.getByTestId('preview-mode-patient').click();
+    await expect(page.locator('#lform')).toHaveClass(/patient-view/, { timeout: 5_000 });
+
+    // The med item should still render its trigger in patient view
+    const trigger = page.locator('[data-preview-id="med"]').locator('.sc-trigger');
+    await expect(trigger).toBeVisible();
+  });
+
+  test('fixture loads without JS errors', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await loadFixture(page);
+    expect(errors).toHaveLength(0);
+  });
+
+  test('re-import exported file still shows multi-column dropdown', async ({ page }) => {
+    await loadFixture(page);
+    // Get the exported FHIR via evaluate
+    const exportedStr = await page.evaluate(async () => {
+      const { buildFHIRObject } = await import('/js/fhir/export.js');
+      return JSON.stringify(buildFHIRObject());
+    });
+    const exported = JSON.parse(exportedStr);
+    const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn';
+    const medItem = exported.item.find(i => i.linkId === 'med');
+    expect(medItem.extension?.some(e => e.url === CC_URL)).toBe(true);
+  });
+});

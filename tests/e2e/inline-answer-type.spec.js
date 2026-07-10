@@ -82,4 +82,68 @@ test.describe('inline answer-type selector', () => {
     await cfgOf(page, id).click();
     await expect(page.getByTestId('type-select')).toBeVisible();
   });
+
+  test('changing type to integer updates preview to show number input', async ({ page }) => {
+    const id = await seed(page);
+    await setInlineType(page, id, 'integer');
+    // integer renders as a number input in preview
+    await expect(page.locator(`[data-preview-id="${id}"]`).locator('input[type="number"], input:not([type])')
+      .first()).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('changing type to checkbox renders a checkbox input in preview', async ({ page }) => {
+    const id = await seed(page);
+    await setInlineType(page, id, 'checkbox');
+    // checkbox renders as input[type="checkbox"] in preview
+    await expect(page.locator(`[data-preview-id="${id}"]`).locator('input[type="checkbox"]').first())
+      .toBeVisible({ timeout: 5_000 });
+  });
+
+  test('type is preserved in FHIR export', async ({ page }) => {
+    const id = await seed(page);
+    await setInlineType(page, id, 'date');
+
+    const json = await page.evaluate(async () => {
+      const { buildFHIRObject } = await import('/js/fhir/export.js');
+      return JSON.stringify(buildFHIRObject());
+    });
+    const q = JSON.parse(json);
+    function findItem(items, linkId) {
+      for (const it of items ?? []) {
+        if (it.linkId === linkId) return it;
+        const found = findItem(it.item ?? [], linkId);
+        if (found) return found;
+      }
+    }
+    expect(findItem(q.item, id)?.type).toBe('date');
+  });
+
+  test('switching back to text removes choice highlight from config button', async ({ page }) => {
+    const id = await seed(page);
+    await setInlineType(page, id, 'select');
+    await expect(cfgOf(page, id)).toHaveClass(/node-inline-type-config--attn/);
+    // Switch back to text
+    await setInlineType(page, id, 'text');
+    await expect(cfgOf(page, id)).not.toHaveClass(/node-inline-type-config--attn/);
+  });
+
+  test('all major types can be selected from the inline dropdown', async ({ page }) => {
+    const id = await seed(page);
+    const types = ['integer', 'decimal', 'date', 'text'];
+    for (const t of types) {
+      await setInlineType(page, id, t);
+      await expect(page.locator(`[data-node-id="${id}"]`).first().getByTestId('inline-answer-type'))
+        .toHaveAttribute('data-value', t);
+    }
+  });
+
+  test('config button dialog shows current type pre-selected', async ({ page }) => {
+    const id = await seed(page);
+    await setInlineType(page, id, 'integer');
+    await cfgOf(page, id).click();
+    await expect(page.getByTestId('answerTypeModal')).toBeVisible();
+    // The type select inside the modal should show 'integer'
+    await expect(page.getByTestId('type-select')).toHaveAttribute('data-value', 'integer');
+    await page.getByTestId('answerTypeModalApply').click();
+  });
 });
