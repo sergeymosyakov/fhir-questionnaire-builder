@@ -64,12 +64,13 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .4px;
-  padding: 1px 6px;
+  padding: 1px 7px;
   border-radius: 8px;
   flex-shrink: 0;
   margin-top: 3px;
-  background: var(--c-primary-lt, #d9eafc);
+  background: transparent;
   color: var(--c-primary, #2563eb);
+  border: 1px solid currentColor;
   cursor: help;
 }
 
@@ -91,14 +92,14 @@
 .preview-logic-badge {
   display: inline-block;
   font-size: 10px;
-  font-weight: 600;
-  padding: 2px 8px;
+  font-weight: 500;
+  padding: 1px 7px;
   border-radius: 10px;
   flex-shrink: 0;
   margin-top: 3px;
   cursor: help;
 }
-.preview-logic-and { background: #e3edfc; color: var(--c-primary); }
+.preview-logic-and { background: #ecf0f1; color: #5d6d7e; }
 .preview-logic-or  { background: #fff3e0; color: #e65100; }
 
 /* === Required star / optional badge ========================================= */
