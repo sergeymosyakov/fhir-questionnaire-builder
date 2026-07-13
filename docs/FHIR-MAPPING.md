@@ -438,12 +438,12 @@ All R4 `Questionnaire` invariants (que-0 through que-13) are enforced by the loc
 |---|---|---|---|
 | que-0 | `Questionnaire.name` must match `[A-Z][A-Za-z0-9_]{0,254}` | ⚠️ warning | — |
 | que-1 | Group items must have nested items | ⚠️ warning | — |
-| que-2 | All `linkId` values must be unique | ❌ error | — |
+| que-2 | All `linkId` values must be unique | ✅ error | Checked in `js/fhir/validators/local.js`; duplicate linkId surfaces as an error in the Validate modal |
 | que-3 | `display` items cannot have `item.code[]` | ⚠️ warning | ✅ suppressed |
 | que-4 | `answerOption[]` and `answerValueSet` are mutually exclusive | ❌ error | ✅ `answerOption[]` path skips when VS set |
 | que-5 | `answerValueSet` only valid on choice/open-choice/decimal/integer/date/dateTime/time/string/quantity | ❌ error | ✅ suppressed on disallowed types |
 | que-6 | `display` items cannot have `required` or `repeats` | ⚠️ warning | ✅ suppressed |
-| que-7 | `enableWhen.operator = 'exists'` must use `answerBoolean` | ❌ error | — |
+| que-7 | `enableWhen.operator = 'exists'` must use `answerBoolean` | ✅ error | Evaluated in `js/eval.js`; validator warns in `js/fhir/validate.js` when `answerBoolean` is missing |
 | que-8 | `display`/`group` items cannot have `initial[]` | ⚠️ (via que-11) | ✅ suppressed |
 | que-9 | `display` items cannot have `readOnly` | ⚠️ warning | ✅ suppressed |
 | que-10 | `maxLength` only valid for boolean/decimal/integer/string/text/url/open-choice | ⚠️ warning | ✅ suppressed on disallowed types |
