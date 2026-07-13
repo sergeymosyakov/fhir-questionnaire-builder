@@ -612,6 +612,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `questionnaire-baseType` | ✅ | Base FHIR type (editable via Props) |
 | `questionnaire-fhirType` | ✅ | Specific FHIR type (editable via Props) |
 | `questionnaire-itemControl: gtable` | ✅ | Group table layout — children become columns, repeat instances become rows. Non-repeating groups render a single data row. Nested groups inside cells render using their own `_itemControl` (stacked default or nested gtable). GTABLE badge shown in builder. Sample: `sampledata/gtable-demo.fhir.json`. |
+| `questionnaire-itemControl: atable` | ❌ | Answer table (Likert matrix) — group children become rows, their shared `answerOption[]` values become columns; each cell is a radio button. Widely used in clinical scales (PHQ-9, AUDIT, GAD-7). Round-tripped verbatim; falls back to stacked layout in preview. |
 
 > Note: `title` is **not** a valid `questionnaire-item-control` code in FHIR R4 — the code system defines group controls (`list`, `table`, `htable`, `gtable`, `atable`, `header`, `footer`), text/display controls (`inline`, `prompt`, `unit`, `lower`, `upper`, `flyover`, `help`), and question controls only.
 
