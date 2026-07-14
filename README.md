@@ -33,7 +33,7 @@ The right-side **preview panel is a live SDC-compliant runtime**: it executes FH
 ```
 
 ### GitHub Pages
-https://sergeymosyakov.github.io/fhir-questionnaire-builder/
+https://fhirbuilder.com/
 
 ### Tests
 ```powershell
@@ -43,8 +43,8 @@ npm run test:e2e     # e2e tests — Playwright/Chromium
 npm run test:e2e:ui  # e2e tests — Playwright UI mode
 ```
 Vitest and Playwright CI run automatically on every push via GitHub Actions.
-Playwright HTML report: https://sergeymosyakov.github.io/fhir-questionnaire-builder/playwright-report/
-Coverage report: https://sergeymosyakov.github.io/fhir-questionnaire-builder/coverage/
+Playwright HTML report: https://fhirbuilder.com/playwright-report/
+Coverage report: https://fhirbuilder.com/coverage/
 
 > **One-time setup**: in the repo go to **Settings → Pages → Source** and select **GitHub Actions**.
 
