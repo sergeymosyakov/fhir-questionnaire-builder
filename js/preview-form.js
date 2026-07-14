@@ -18,7 +18,7 @@ import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
 import './ui/modals/explain-modal.js';
 import * as progress from './ui/progress.js';
-import { languageMenu } from './ui/menus/language-menu.js';
+import { languageMenu } from './ui/header-actions.js';
 
 const fhirpath = window.fhirpath;
 
