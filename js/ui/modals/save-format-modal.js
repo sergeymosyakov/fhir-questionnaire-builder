@@ -49,7 +49,14 @@ class SaveFormatModal extends Modal {
       items:    formatRegistry.getAll().map(f => ({ value: f.id, label: f.label })),
       value:    this._format,
       testid:   'save-format-select',
-      onChange: v => { this._format = v; _saveFormat(v); },
+      onChange: v => {
+        // Cancel any side effects of the previously selected format (e.g. REDCap
+        // compat validator gets disabled if user switches away from REDCap).
+        const prev = formatRegistry.get(this._format);
+        if (prev?.onCancel) prev.onCancel();
+        this._format = v;
+        _saveFormat(v);
+      },
     });
 
     row.append(lbl, this._sel.el);
@@ -59,6 +66,9 @@ class SaveFormatModal extends Modal {
   /** @param {{ fileName, tree, values }} deps */
   open(deps) {
     this._deps   = deps;
+    // Cancel any lingering side effects from previous format (e.g. REDCap validator left enabled)
+    const prev = formatRegistry.get(this._format);
+    if (prev?.onCancel) prev.onCancel();
     // Resolve saved format; migrate old 'fhir' key to current FHIR target
     this._format = _savedFormat() ?? (deps?.fhirTarget ?? 'R4');
     // Ensure the stored id actually exists in the registry (guard after delete)
