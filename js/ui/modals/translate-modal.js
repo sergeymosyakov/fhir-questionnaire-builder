@@ -66,7 +66,12 @@ export class TranslateModal extends Modal {
       value:    '',
       testid:   'translate-lang-select',
       className: 'sc-trigger--sm',
-      onChange: v => { this._targetLang = v; btn.disabled = !v; },
+      onChange: v => {
+        this._targetLang = v;
+        btn.disabled = !v;
+        const hasExisting = !!(v && this._questDoc?.translations?.[v]);
+        editBtn.style.display = hasExisting ? '' : 'none';
+      },
     });
     sel.el.dataset.tipTitle = 'Target language';
     sel.el.dataset.tipBody  = 'Language to translate the questionnaire into.';
@@ -83,6 +88,15 @@ export class TranslateModal extends Modal {
     btn.addEventListener('click', () => this._startTranslation());
     row.appendChild(btn);
 
+    const editBtn = document.createElement('button');
+    editBtn.type      = 'button';
+    editBtn.className = 'modal-btn';
+    editBtn.dataset.testid = 'translate-edit-btn';
+    editBtn.textContent = 'Edit existing';
+    editBtn.style.display = 'none';
+    editBtn.addEventListener('click', () => this._loadExisting(this._targetLang));
+    row.appendChild(editBtn);
+
     body.appendChild(row);
 
     // If translations already exist show a language switcher note
@@ -94,6 +108,37 @@ export class TranslateModal extends Modal {
       note.textContent = `Existing translations: ${labels}. Translating again will overwrite only the selected language.`;
       body.appendChild(note);
     }
+  }
+
+  // ── Load existing translations for editing (skips API) ────────────────────
+  _loadExisting(lang) {
+    const qd    = this._questDoc;
+    const store = qd.translations?.[lang] ?? { title: '', items: {}, opts: {}, ui: {} };
+    const entries = [];
+
+    if (qd.meta.title) entries.push({ key: '__title__', original: qd.meta.title, translated: store.title || '' });
+
+    function walk(nodes) {
+      for (const node of nodes || []) {
+        if (node.title) entries.push({ key: node.id, original: node.title, translated: store.items[node.id] ?? '' });
+        const opts = _getOptionLabels(node);
+        for (const { code, display } of opts) {
+          if (display) {
+            const key = node.id + '__' + code;
+            entries.push({ key, original: display, translated: store.opts[key] ?? '' });
+          }
+        }
+        walk(node.children || []);
+      }
+    }
+    walk(qd.tree);
+
+    for (const [key, original] of Object.entries(UI_STRINGS)) {
+      entries.push({ key: '__ui__' + key, original, isUi: true, translated: store.ui?.[key] ?? '' });
+    }
+
+    this._reviewRows = entries;
+    this._renderReview();
   }
 
   // ── Phase 2: translate ─────────────────────────────────────────────────────
