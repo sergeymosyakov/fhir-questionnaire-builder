@@ -22,8 +22,8 @@
 //   translate-progress    progress bar wrap
 //   translate-table       review table
 //   lang-switcher-wrap    language switcher container in preview toolbar
-//   lang-btn-original     "Original" language button
-//   lang-btn-es           "Spanish" language button
+//   lang-menu-item-original     "Original" language button
+//   lang-menu-item-es           "Spanish" language button
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -103,14 +103,17 @@ test.describe('translation — modal', () => {
 test.describe('translation — language switcher', () => {
   test('loading PHQ-9 (which has Spanish translations) shows language switcher', async ({ page }) => {
     await loadPHQ9(page);
-    // PHQ-9 has Spanish translations → lang-switcher-wrap should be visible
-    await expect(page.locator('[data-testid="lang-switcher-wrap"]')).toBeVisible({ timeout: 5_000 });
+    // PHQ-9 has Spanish translations → lang-menu-btn should be visible
+    await expect(page.getByTestId('lang-menu-btn')).toBeVisible({ timeout: 5_000 });
   });
 
-  test('language switcher has Original and Spanish buttons', async ({ page }) => {
+  test('language switcher has Original and Spanish items in dropdown', async ({ page }) => {
     await loadPHQ9(page);
-    await expect(page.getByTestId('lang-btn-original')).toBeVisible({ timeout: 5_000 });
-    await expect(page.getByTestId('lang-btn-es')).toBeVisible({ timeout: 5_000 });
+    // Open the language menu dropdown first
+    await page.getByTestId('lang-menu-btn').click();
+    await expect(page.getByTestId('lang-menu-item-original')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId('lang-menu-item-es')).toBeVisible({ timeout: 5_000 });
+    await page.keyboard.press('Escape');
   });
 
   test('clicking Spanish shows translated item labels', async ({ page }) => {
@@ -119,9 +122,9 @@ test.describe('translation — language switcher', () => {
     const firstItem = page.locator('[data-preview-id="/44250-9"]');
     await expect(firstItem).toContainText('Little interest', { timeout: 5_000 });
 
-    // Switch to Spanish
-    await page.getByTestId('lang-btn-es').click();
-    await expect(page.locator('#lform')).toBeVisible();
+    // Open menu and select Spanish
+    await page.getByTestId('lang-menu-btn').click();
+    await page.getByTestId('lang-menu-item-es').click();
     // Wait for re-render
     await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 
@@ -131,12 +134,14 @@ test.describe('translation — language switcher', () => {
 
   test('switching back to Original restores English labels', async ({ page }) => {
     await loadPHQ9(page);
-    await page.getByTestId('lang-btn-es').click();
+    await page.getByTestId('lang-menu-btn').click();
+    await page.getByTestId('lang-menu-item-es').click();
     await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
     await expect(page.locator('[data-preview-id="/44250-9"]')).toContainText('Poco', { timeout: 5_000 });
 
-    // Switch back
-    await page.getByTestId('lang-btn-original').click();
+    // Switch back via menu
+    await page.getByTestId('lang-menu-btn').click();
+    await page.getByTestId('lang-menu-item-original').click();
     await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
     await expect(page.locator('[data-preview-id="/44250-9"]')).toContainText('Little interest', { timeout: 5_000 });
   });
@@ -145,8 +150,8 @@ test.describe('translation — language switcher', () => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
-    // No translations → switcher hidden
-    await expect(page.locator('[data-testid="lang-switcher-wrap"]')).toHaveCSS('display', 'none');
+    // No translations → lang-menu-btn hidden
+    await expect(page.getByTestId('lang-menu-btn')).not.toBeVisible();
   });
 });
 

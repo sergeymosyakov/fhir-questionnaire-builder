@@ -18,6 +18,7 @@ import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
 import './ui/modals/explain-modal.js';
 import * as progress from './ui/progress.js';
+import { languageMenu } from './ui/menus/language-menu.js';
 
 const fhirpath = window.fhirpath;
 
@@ -94,7 +95,8 @@ export class PreviewForm {
     document.addEventListener(AppEvents.REINIT_FORM,        e => this.reinitForm({ silent: e.detail?.silent }));
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => {
       this._els.lform?.closest('.right-panel-body')?.scrollTo({ top: 0 });
-      this._updateLangSwitcher();
+      // Rebuild unconditionally here (not inside _asyncRender which may be cancelled)
+      languageMenu.rebuild(this._rawFhir?.translations);
     });
     document.addEventListener(AppEvents.BUILDER_NAVIGATE,   e => {
       document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_NAVIGATE_TO, { detail: { id: e.detail.id } }));
@@ -106,7 +108,6 @@ export class PreviewForm {
     document.addEventListener(AppEvents.LANGUAGE_CHANGED, e => {
       _rc.activeLanguage  = e.detail?.lang ?? '';
       _rc.translations    = this._rawFhir?.translations ?? {};
-      this._updateLangSwitcher();
       this._asyncRender(++this._renderVersion);
     });
 
@@ -139,9 +140,14 @@ export class PreviewForm {
       viewOptionsWrap: document.querySelector('[data-mount="viewOptionsWrap"]'),
       previewModeWrap: document.querySelector('[data-mount="previewModeWrap"]'),
       searchWrap:      document.querySelector('[data-mount="search-wrap"]'),
-      langSwitcherWrap: document.querySelector('[data-mount="lang-switcher-wrap"]'),
     };
     this._els = elements;
+
+    // Mount language menu into the preview toolbar
+    const langSlot = document.querySelector('[data-mount="lang-switcher-wrap"]');
+    if (langSlot && !langSlot.contains(languageMenu.el)) {
+      langSlot.appendChild(languageMenu.el);
+    }
 
     const syncToolbarVisibility = () => {
       const d = this._tree.length > 0 ? '' : 'none';
@@ -361,8 +367,8 @@ export class PreviewForm {
     statusBadge.update({ visible, ctx });
     search.refresh();
     this._updateJsonView();
-    // Refresh language switcher in case translations changed (e.g. after translate modal apply)
-    this._updateLangSwitcher();
+    // Rebuild language menu in case translations changed (e.g. after translate modal apply)
+    languageMenu.rebuild(this._rawFhir?.translations);
     progress.hide();
     document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_RENDER_DONE));
   }
@@ -394,45 +400,5 @@ export class PreviewForm {
     const q = buildFHIRObject();
     this._els.fhirJsonView.innerHTML = highlightJson(JSON.stringify(q, null, 2));
     search.refresh();
-  }
-
-  /** Rebuild the language switcher in the preview toolbar. */
-  _updateLangSwitcher() {
-    const wrap = this._els?.langSwitcherWrap;
-    if (!wrap) return;
-    const langs = Object.keys(this._rawFhir?.translations || {});
-    if (!langs.length) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
-
-    wrap.style.display = '';
-    wrap.innerHTML = '';
-
-    const label = document.createElement('span');
-    label.className = 'lang-switcher-label';
-    label.textContent = '🌐';
-    label.dataset.tipTitle = 'Display language';
-    label.dataset.tipBody  = 'Switch the preview between the original language and available translations.';
-    label.dataset.tipFhir  = 'item._text.extension[translation]';
-    label.dataset.tipSpec  = 'R4';
-    wrap.appendChild(label);
-
-    // Build items: original + each translated language
-    const { SUPPORTED_LANGUAGES } = window._translationModule || {};
-    const langItems = [
-      { value: '', label: 'Original' },
-      ...langs.map(l => ({ value: l, label: (SUPPORTED_LANGUAGES?.get(l)) || l })),
-    ];
-
-    // Inline select using buttons (custom-select may not be loaded here)
-    for (const { value, label: lbl } of langItems) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'lang-btn' + (_rc.activeLanguage === value ? ' lang-btn--active' : '');
-      btn.textContent = lbl;
-      btn.dataset.testid = 'lang-btn-' + (value || 'original');
-      btn.addEventListener('click', () => {
-        document.dispatchEvent(new CustomEvent(AppEvents.LANGUAGE_CHANGED, { detail: { lang: value } }));
-      });
-      wrap.appendChild(btn);
-    }
   }
 }

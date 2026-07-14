@@ -9,6 +9,7 @@ import { SaveMenu }           from './menus/save-menu.js';
 import { PreviewModeMenu }    from './menus/preview-mode-menu.js';
 import { ViewOptionsMenu }    from './menus/view-options-menu.js';
 import { SettingsMenu }       from './menus/settings-menu.js';
+import { LanguageMenu }       from './menus/language-menu.js';
 import { Prefs }              from './prefs.js';
 
 export const prefs             = new Prefs();
@@ -18,6 +19,7 @@ export const saveMenu           = new SaveMenu();
 export const previewModeMenu    = new PreviewModeMenu();
 export const viewOptionsMenu    = new ViewOptionsMenu();
 export const settingsMenu       = new SettingsMenu({ prefs });
+export const languageMenu       = new LanguageMenu();
 
 export function mount() {
   const wrap = document.querySelector('[data-mount="header-actions"]');
