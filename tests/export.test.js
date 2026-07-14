@@ -1,7 +1,7 @@
 // Tests for export helpers.
 // export.js imports reactive state — we mock ../js/state.js.
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 
 // Minimal state mock — buildFHIRObject reads questDoc via _svc
 const _tree = [];
@@ -611,4 +611,70 @@ describe('buildFHIRObject — answerValueSet', () => {
   });
 });
 
-// ── item.initial[] export ─────────────────────────────────────────────────────
+// ── generateNarrativeDiv ─────────────────────────────────────────────────────
+
+describe('generateNarrativeDiv', () => {
+  let generateNarrativeDiv;
+  beforeAll(async () => {
+    ({ generateNarrativeDiv } = await import('../js/fhir/export.js'));
+  });
+
+  it('returns a div string containing the questionnaire title', () => {
+    const html = generateNarrativeDiv({ title: 'My Q', status: 'draft', item: [] });
+    expect(html).toContain('My Q');
+    expect(html).toContain('<div');
+  });
+
+  it('includes status and publisher when present', () => {
+    const html = generateNarrativeDiv({ title: 'T', status: 'active', publisher: 'ACME', item: [] });
+    expect(html).toContain('active');
+    expect(html).toContain('ACME');
+  });
+
+  it('lists item linkIds in the narrative', () => {
+    const html = generateNarrativeDiv({
+      title: 'T', status: 'draft',
+      item: [{ linkId: 'q1', text: 'Question 1', type: 'boolean' }],
+    });
+    expect(html).toContain('q1');
+  });
+});
+
+// ── translation export (_exportTranslations / _translationExt / _mergeTranslationExts) ──
+
+describe('buildFHIRObject — translations export', () => {
+  it('writes _title.extension translation when questDoc.translations has title', () => {
+    _tree.length = 0;
+    _questDoc.translations = {
+      es: { title: 'Cuestionario', items: {}, opts: {}, ui: {} },
+    };
+    const q = buildFHIRObject();
+    expect(q._title?.extension).toBeDefined();
+    const ext = q._title.extension.find(e => e.extension?.some(x => x.valueCode === 'es'));
+    expect(ext).toBeTruthy();
+    _questDoc.translations = null;
+  });
+
+  it('writes item _text.extension translation for a translated item', () => {
+    _tree.length = 0;
+    _tree.push({
+      id: 'q1', type: 'item', itemType: 'text', title: 'Question',
+      enableWhen: [], constraint: [], options: '', mandatory: false, repeats: false, children: [],
+    });
+    _questDoc.translations = {
+      es: { title: '', items: { q1: 'Pregunta' }, opts: {}, ui: {} },
+    };
+    const q = buildFHIRObject();
+    const item = q.item[0];
+    expect(item._text?.extension).toBeDefined();
+    _tree.length = 0;
+    _questDoc.translations = null;
+  });
+
+  it('does not add _title extension when no translations set', () => {
+    _tree.length = 0;
+    _questDoc.translations = null;
+    const q = buildFHIRObject();
+    expect(q._title).toBeUndefined();
+  });
+});
