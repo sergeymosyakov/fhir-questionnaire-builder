@@ -1,8 +1,9 @@
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 import { AppEvents, EventState } from '../events.js';
 import { NodeGearMenu } from '../ui/node-gear-menu.js';
-import { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem } from './builder-helpers.js';
+import { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem, buildInsideDropZone } from './builder-helpers.js';
 import { createCustomSelect } from '../ui/custom-select.js';
+import { uiStr } from '../preview/render-ctx.js';
 import { ITEM_TYPES } from '../ui/modals/answer-type/data.js';
 import { changeNodeType, nodeTypeNeedsConfig, nodeHasTypeConfig } from './change-type.js';
 // Abstract base for all question item nodes (type: 'item').
@@ -93,6 +94,13 @@ export class ItemNode extends BaseNode {
     this.repeats    = data.repeats    ?? false;
     this.options    = data.options    ?? '';
     this.constraint = data.constraint ?? [];
+    this.children   = data.children   ?? [];
+  }
+
+  /** Abort own listeners and recursively destroy children. */
+  destroy() {
+    super.destroy();
+    this.children.forEach(c => c.destroy());
   }
 
   /** Build the interactive preview control element for this node.
@@ -112,6 +120,14 @@ export class ItemNode extends BaseNode {
    * checkboxes, so it is inherently repeats:true. Overridden by ChecklistNode.
    */
   impliesRepeats() { return false; }
+
+  // ── Sub-item children (FHIR R4: non-group items may have item[]) ──────────
+  _renderChildren(res, target, rc) {
+    if (this._previewCollapsed) return;
+    this._renderNestedChildren(res, target, rc);
+  }
+  _renderDimmedChildren(res, c, rc)   { this._renderNestedChildren(res, c,         rc); }
+  _renderDisabledChildren(res, c, rc) { this._renderNestedChildren(res, c,         rc); }
 
   // ── Condition icon logic for items ────────────────────────────────────────
   _evalCondition(res, rc) {
@@ -188,6 +204,8 @@ export class ItemNode extends BaseNode {
     this._buildControl(row, res, rc);
     this._buildReadOnlyValue(row, rc);
     this._buildCalcBadge(row, res, rc);
+    // Collapse toggle for items with sub-items
+    this._buildPreviewCollapseToggle(row);
   }
 
   _buildConstraintBadge(row, rc) {
@@ -314,7 +332,7 @@ export class ItemNode extends BaseNode {
     const addBtn = document.createElement('button');
     addBtn.type = 'button';
     addBtn.className = 'repeat-add-btn';
-    addBtn.textContent = '+ Add another';
+    addBtn.textContent = uiStr('add_another', rc);
     addBtn.dataset.testid = 'repeat-add-btn';
     if (atMax) {
       addBtn.disabled = true;
@@ -409,6 +427,11 @@ export class ItemNode extends BaseNode {
     titleWrap.className = 'node-title';
     const dragHandle = node._buildDragHandle();
     if (dragHandle) titleWrap.insertBefore(dragHandle, titleWrap.firstChild);
+
+    // Collapse button — shown when item has sub-items
+    if (node.children.length > 0) {
+      titleWrap.appendChild(node._buildCollapseBtn(div));
+    }
 
     const typeLabel = document.createElement('span');
     typeLabel.className = 'node-type-label lbl-item';
@@ -544,9 +567,11 @@ export class ItemNode extends BaseNode {
     header.appendChild(metaRow);
     header.appendChild(actions);
 
-    // ⚙ gear menu (Copy / Paste / Delete) — replaces the × button
+    // ⚙ gear menu (Add Sub-group / Add Sub-item / Copy / Paste / Delete)
     const gear = new NodeGearMenu('node-gear-btn');
     addMetaRowGearItem(gear, node);
+    gear.addSep();
+    node._addChildGearItems(gear);
     gear.addSep();
     addCopyPasteGearItems(gear, node, BaseNode._hasClipboard);
     gear.addSep();
@@ -568,6 +593,22 @@ export class ItemNode extends BaseNode {
     setActive(constraintLink, !!(node.constraint?.length));
     setActive(codesLink,      !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.some(u => u)) || !!node._shortText);
     setActive(termLink,        !!node._preferredTermServer);
+
+    if (node.children.length > 0) {
+      const body = document.createElement('div');
+      body.className = 'node-body';
+      if (BaseNode._collapseMap.get(node.id)) body.style.display = 'none';
+      for (let i = 0; i < node.children.length; i++) {
+        const childWrap = node.children[i].buildBuilder();
+        if (i === 0) {
+          const firstDrop = childWrap.querySelector('.drop-zone-above');
+          if (firstDrop) firstDrop.textContent = 'Drop here to add as first sub-item';
+        }
+        body.appendChild(childWrap);
+      }
+      body.appendChild(buildInsideDropZone(node));
+      div.appendChild(body);
+    }
 
     wrapper.appendChild(div);
     return wrapper;

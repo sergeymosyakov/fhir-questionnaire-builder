@@ -7,7 +7,7 @@ import { answerStore } from './answer-store.js';
 export function markAllDisabled(nodes, results) {
   for (const ch of nodes) {
     results.push({ node: ch, visible: true, ok: true, disabled: true });
-    if (ch.type === 'group') markAllDisabled(ch.children, results);
+    if (ch.children?.length) markAllDisabled(ch.children, results);
   }
 }
 
@@ -98,7 +98,7 @@ export function evaluateNode(node, ctx, results, _insideHidden = false, path = [
     const isRoot = !!node._hidden && !_insideHidden;
     const entry = { node, visible: true, ok: true, hidden: true, hiddenRoot: isRoot };
     results.push(entry);
-    if (node.type === 'group') {
+    if (node.children?.length) {
       for (const ch of node.children) evaluateNode(ch, ctx, results, true, path);
     }
     return { ok: true, visible: true, hidden: true };
@@ -108,7 +108,7 @@ export function evaluateNode(node, ctx, results, _insideHidden = false, path = [
   if (!visible) {
     const showDimmed = !!(node.enableWhen && node.enableWhen.length) || !!node.enableWhenExpression;
     results.push({ node, visible: false, ok: node.mandatory === false, showDimmed });
-    if (showDimmed && node.type === 'group') {
+    if (showDimmed && node.children?.length) {
       markAllDisabled(node.children, results);
     }
     return { ok: node.mandatory === false, visible: false, showDimmed };
@@ -116,6 +116,9 @@ export function evaluateNode(node, ctx, results, _insideHidden = false, path = [
 
   if (node.type === 'item') {
     results.push({ node, visible: true, ok: true });
+    if (node.children?.length) {
+      for (const ch of node.children) evaluateNode(ch, ctx, results, false, path);
+    }
     return { ok: true, visible: true };
   }
 

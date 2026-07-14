@@ -19,7 +19,7 @@ function _filterTree(nodes, query, exclude, allowedType) {
   for (const node of nodes) {
     if (node.id === exclude) continue;
     const selectable = !allowedType || node.type === allowedType;
-    if (node.type === 'group') {
+    if (node.children?.length) {
       const filteredChildren = _filterTree(node.children || [], query, exclude, allowedType);
       const selfMatch = !query || node.title?.toLowerCase().includes(query) || node.id?.toLowerCase().includes(query);
       // Include group if it matches (or has matching descendants)

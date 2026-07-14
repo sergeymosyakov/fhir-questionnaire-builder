@@ -3,9 +3,9 @@ import * as dnd from '../builder/dnd.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { AppEvents } from '../events.js';
 import { NODE_REGISTRY } from './registry.js';
-import { TextNode } from './text-node.js';
 import { NodeGearMenu } from '../ui/node-gear-menu.js';
-import { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem } from './builder-helpers.js';
+import { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem, buildInsideDropZone } from './builder-helpers.js';
+import { uiStr } from '../preview/render-ctx.js';
 import { GTableRenderer } from './gtable-renderer.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
@@ -17,8 +17,8 @@ import { BaseNode } from './base-node.js';
 import { isDescendant } from '../utils.js';
 
 export class GroupNode extends BaseNode {
-  /** Builder-only collapse state — keyed by node.id, not persisted to FHIR. */
-  static _collapseMap = new Map();
+  /** Backward-compat: delegates to BaseNode._collapseMap (shared with ItemNode). */
+  static get _collapseMap() { return BaseNode._collapseMap; }
 
   constructor(data = {}) {
     super(data);
@@ -26,15 +26,8 @@ export class GroupNode extends BaseNode {
     this.logicWithParent = data.logicWithParent ?? 'AND';
     this.children        = data.children        ?? [];
     this.repeats         = data.repeats         ?? false;
-    if (typeof document !== 'undefined') {
-      document.addEventListener(AppEvents.BUILDER_NAVIGATE, e => {
-        if (!this._previewCollapsed) return;
-        if (!isDescendant(e.detail.id, this)) return;
-        this._previewCollapsed = false; // own state only — PreviewForm triggers _asyncRender
-      }, { signal: this._ac.signal });
-      document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._previewCollapsed = true; }, { signal: this._ac.signal });
-      document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._previewCollapsed = false; }, { signal: this._ac.signal });
-    }
+    // _previewCollapsed and COLLAPSE_ALL/EXPAND_ALL/BUILDER_NAVIGATE listeners
+    // are inherited from BaseNode constructor.
   }
 
   /** Abort own listeners and recursively destroy children. */
@@ -163,18 +156,7 @@ export class GroupNode extends BaseNode {
     }
 
     if (!isEmptyGroup) {
-      const collapsed = this._previewCollapsed;
-      const toggle = document.createElement('span');
-      toggle.className = 'preview-collapse-toggle';
-      toggle.textContent = collapsed ? '\u25B6' : '\u25BC';
-      toggle.dataset.tipTitle = collapsed ? 'Expand section' : 'Collapse section';
-      const groupNode = this;
-      toggle.addEventListener('click', e => {
-        e.stopPropagation();
-        groupNode._previewCollapsed = !groupNode._previewCollapsed;
-        BaseNode.notifyChanged();
-      });
-      row.insertBefore(toggle, row.firstChild);
+      this._buildPreviewCollapseToggle(row);
     }
   }
 
@@ -185,17 +167,6 @@ export class GroupNode extends BaseNode {
 
   _renderDisabledChildren(res, container, rc) {
     this._renderNestedChildren(res, container, rc);
-  }
-
-  _renderNestedChildren(res, container, rc) {
-    if (this.children.length === 0) return;
-    const nested = document.createElement('div');
-    nested.className = 'preview-nested';
-    for (const ch of this.children) {
-      const childRes = rc.resultMap.get(ch.id);
-      if (childRes) BaseNode.dispatch(childRes, nested, rc);
-    }
-    if (nested.childElementCount > 0) container.appendChild(nested);
   }
 
   // ── Children: register groupIconMap, render expanded children with separators ─
@@ -237,7 +208,9 @@ export class GroupNode extends BaseNode {
         if (!firstVisible && childRes.visible) {
           const sep = document.createElement('div');
           sep.className = 'logic-separator logic-separator-' + logic.toLowerCase();
-          sep.textContent = logic;
+          sep.textContent = logic === 'OR'
+            ? uiStr('or_separator',  rc)
+            : uiStr('and_separator', rc);
           nested.appendChild(sep);
         }
         BaseNode.dispatch(childRes, nested, rc);
@@ -315,9 +288,10 @@ export class GroupNode extends BaseNode {
   // Called after import / clear so runtime UI state matches the FHIR default.
   static resetCollapsedFromTree(nodes) {
     for (const n of nodes) {
-      if (n.type === 'group') {
-        n._previewCollapsed = n._collapsible === 'default-closed';
-        GroupNode.resetCollapsedFromTree(n.children || []);
+      BaseNode._collapseMap.delete(n.id);
+      if (n.children?.length) {
+        if (n.type === 'group') n._previewCollapsed = n._collapsible === 'default-closed';
+        GroupNode.resetCollapsedFromTree(n.children);
       }
     }
   }
@@ -353,22 +327,7 @@ export class GroupNode extends BaseNode {
     const titleWrap = document.createElement('div');
     titleWrap.className = 'node-title';
 
-    const collapsed = GroupNode._collapseMap.get(node.id) || false;
-    const toggleBtn = document.createElement('button');
-    toggleBtn.type = 'button';
-    toggleBtn.className = 'node-collapse-btn';
-    toggleBtn.dataset.testid = 'group-collapse-btn';
-    toggleBtn.textContent = collapsed ? '\u25B6' : '\u25BC';
-    toggleBtn.dataset.tipTitle = collapsed ? 'Expand' : 'Collapse';
-    toggleBtn.onclick = e => {
-      e.stopPropagation();
-      const isNowCollapsed = !(GroupNode._collapseMap.get(node.id) || false);
-      GroupNode._collapseMap.set(node.id, isNowCollapsed);
-      toggleBtn.textContent = isNowCollapsed ? '\u25B6' : '\u25BC';
-      toggleBtn.dataset.tipTitle = isNowCollapsed ? 'Expand' : 'Collapse';
-      const body = div.querySelector('.node-body');
-      if (body) body.style.display = isNowCollapsed ? 'none' : '';
-    };
+    const toggleBtn = node._buildCollapseBtn(div);
     titleWrap.appendChild(toggleBtn);
     const dragHandle = node._buildDragHandle();
     if (dragHandle) titleWrap.insertBefore(dragHandle, titleWrap.firstChild);
@@ -460,44 +419,11 @@ export class GroupNode extends BaseNode {
     noteLink.onclick = () => MODAL_REGISTRY.get('note').open(node, noteLink, setActive);
     setActive(noteLink, !!node._designNote);
 
-    // ⚙ gear menu (Add Group / Add Item / Delete) — replaces the ⊕ Add ▾ dropdown and the × button
+    // ⚙ gear menu (Add Group / Add Item / Copy / Paste / Delete)
     const gear = new NodeGearMenu('group-add-btn');
     addMetaRowGearItem(gear, node);
     gear.addSep();
-
-    const _addChild = (label, testid, factory) => gear.addItem(
-      label,
-      testid,
-      () => {
-        const newNode = factory();
-        node.children.push(newNode);
-        document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
-        BaseNode.notifyChanged();
-        GroupNode._collapseMap.set(node.id, false);
-        node._dispatchRerender();
-        document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: newNode.id } }));
-      }
-    );
-
-    _addChild('Add Group', 'add-menu-group', () => {
-      const n = new GroupNode({ title: 'New Group' });
-      n.id = node.id + '.' + String(node.children.length + 1);
-      return n;
-    });
-    _addChild('Add Item', 'add-menu-item', () => {
-      const siblings = node.children.filter(c => c.type === 'item');
-      const template = siblings.length > 0 ? siblings[siblings.length - 1] : null;
-      const n = template
-        ? new (NODE_REGISTRY.get(template.itemType) ?? TextNode)({
-            title: 'New Item', itemType: template.itemType,
-            mandatory: template.mandatory, repeats: template.repeats || false,
-            options: template.options,
-            constraint: template.constraint ? template.constraint.map(c => ({ ...c })) : [],
-          })
-        : new TextNode({ title: 'New Item', itemType: 'text' });
-      n.id = node.id + '.' + String(node.children.length + 1);
-      return n;
-    });
+    node._addChildGearItems(gear);
     gear.addSep();
     addCopyPasteGearItems(gear, node, BaseNode._hasClipboard);
     gear.addSep();
@@ -542,7 +468,7 @@ export class GroupNode extends BaseNode {
 
     const body = document.createElement('div');
     body.className = 'node-body';
-    if (GroupNode._collapseMap.get(node.id)) body.style.display = 'none';
+    if (BaseNode._collapseMap.get(node.id)) body.style.display = 'none';
 
     const logicRow = document.createElement('div');
     logicRow.className = 'logic-row';
@@ -566,7 +492,7 @@ export class GroupNode extends BaseNode {
       body.appendChild(childWrap);
     }
 
-    body.appendChild(node._buildDropZoneInside());
+    body.appendChild(buildInsideDropZone(node));
 
     div.appendChild(body);
     wrapper.appendChild(div);

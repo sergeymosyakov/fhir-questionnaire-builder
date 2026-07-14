@@ -8,7 +8,7 @@ export function getAllItems(nodes, result = [], prefix = '') {
   for (const n of nodes) {
     if (n.type === 'item') {
       result.push({ id: n.id, label: (prefix ? prefix + ' › ' : '') + n.title, itemType: n.itemType, options: n.options });
-    } else if (n.type === 'group') {
+    } else if (n.children?.length) {
       getAllItems(n.children, result, (prefix ? prefix + ' › ' : '') + n.title);
     }
   }

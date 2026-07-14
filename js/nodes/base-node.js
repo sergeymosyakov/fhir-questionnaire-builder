@@ -3,9 +3,11 @@
 // Subclasses must set `this.type` and optionally `this.itemType`.
 import { nextId } from '../id.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
+import { uiStr } from '../preview/render-ctx.js';
 import * as bh from './builder-helpers.js';
 import { AppEvents } from '../events.js';
 import { compareValue } from '../eval.js';
+import { isDescendant } from '../utils.js';
 
 // Build a multi-line condition audit string for the enableWhen tooltip.
 // Shows each condition with its operator, expected value, actual value, and result.
@@ -53,6 +55,9 @@ export function applyRenderStyle(el, raw) {
 }
 
 export class BaseNode {
+  /** Shared collapse state for all nodes with children (group and item). */
+  static _collapseMap = new Map();
+
   constructor(data = {}) {
     this.id                   = data.id   ?? nextId();
     this.title                = data.title ?? '';
@@ -60,6 +65,7 @@ export class BaseNode {
     this.enableBehavior       = data.enableBehavior       ?? 'all';
     this.enableWhenExpression = data.enableWhenExpression ?? '';
     this.mandatory            = data.mandatory            ?? false;
+    this._previewCollapsed    = false;
     if (typeof document !== 'undefined') {
       this._ac = new AbortController();
       this._initPreviewNavListener();
@@ -70,6 +76,14 @@ export class BaseNode {
         if (nodeType && this.type !== nodeType) return; // type mismatch — skip
         this.applyPatch(patch);
       }, { signal: this._ac.signal });
+      // Preview collapse/expand — shared by any node with children.
+      document.addEventListener(AppEvents.BUILDER_NAVIGATE, e => {
+        if (!this._previewCollapsed) return;
+        if (!isDescendant(e.detail.id, this)) return;
+        this._previewCollapsed = false;
+      }, { signal: this._ac.signal });
+      document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._previewCollapsed = true;  }, { signal: this._ac.signal });
+      document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._previewCollapsed = false; }, { signal: this._ac.signal });
     }
   }
 
@@ -409,7 +423,7 @@ export class BaseNode {
         btn.className = 'support-link-patient-btn';
         btn.dataset.testid = 'support-link-patient-btn';
         btn.href = url; btn.target = '_blank'; btn.rel = 'noopener noreferrer';
-        btn.textContent = 'More info \u2197';
+        btn.textContent = uiStr('more_info', rc);
         row.appendChild(btn);
       } else {
         const icon = document.createElement('a');
@@ -479,7 +493,38 @@ export class BaseNode {
     return container;
   }
 
-  // Render children into target. No-op in base; overridden in GroupNode.
+  // ── Preview collapse toggle (shared by GroupNode and ItemNode-with-children) ─
+  // Inserts ▶/▼ as the first child of `row` when this node has children.
+  _buildPreviewCollapseToggle(row) {
+    if (!this.children?.length) return;
+    const collapsed = this._previewCollapsed;
+    const toggle = document.createElement('span');
+    toggle.className = 'preview-collapse-toggle';
+    toggle.textContent = collapsed ? '\u25B6' : '\u25BC';
+    toggle.dataset.tipTitle = collapsed ? 'Expand section' : 'Collapse section';
+    const node = this;
+    toggle.addEventListener('click', e => {
+      e.stopPropagation();
+      node._previewCollapsed = !node._previewCollapsed;
+      BaseNode.notifyChanged();
+    });
+    row.insertBefore(toggle, row.firstChild);
+  }
+
+  // Simple nested children render — no separators, no repeating instances.
+  // Used by GroupNode (dimmed/disabled paths) and ItemNode (always).
+  _renderNestedChildren(_res, container, rc) {
+    if (!this.children?.length) return;
+    const nested = document.createElement('div');
+    nested.className = 'preview-nested';
+    for (const ch of this.children) {
+      const childRes = rc.resultMap.get(ch.id);
+      if (childRes) BaseNode.dispatch(childRes, nested, rc);
+    }
+    if (nested.childElementCount > 0) container.appendChild(nested);
+  }
+
+  // Render children into target. No-op in base; overridden in GroupNode and ItemNode.
   _renderChildren(_res, _target, _rc) { /* no-op */ }
 
   // ── Shared builder-panel helpers ──────────────────────────────────────────
@@ -494,6 +539,31 @@ export class BaseNode {
   isDraggable() { return true; }
   _buildDragHandle()    { return bh.buildDragHandle(this); }
   _buildDropZoneAbove() { return bh.buildDropZoneAbove(this); }
+
+  // ── Collapse button (shared by GroupNode and ItemNode-with-children) ──────
+  // `div` is the outer node card element; used to find `.node-body` on toggle.
+  _buildCollapseBtn(div) {
+    const collapsed = BaseNode._collapseMap.get(this.id) || false;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'node-collapse-btn';
+    btn.dataset.testid = 'group-collapse-btn';
+    btn.textContent = collapsed ? '\u25B6' : '\u25BC';
+    btn.dataset.tipTitle = collapsed ? 'Expand' : 'Collapse';
+    btn.onclick = e => {
+      e.stopPropagation();
+      const isNowCollapsed = !(BaseNode._collapseMap.get(this.id) || false);
+      BaseNode._collapseMap.set(this.id, isNowCollapsed);
+      btn.textContent = isNowCollapsed ? '\u25B6' : '\u25BC';
+      btn.dataset.tipTitle = isNowCollapsed ? 'Expand' : 'Collapse';
+      const body = div.querySelector('.node-body');
+      if (body) body.style.display = isNowCollapsed ? 'none' : '';
+    };
+    return btn;
+  }
+
+  // ── "Add Sub-group / Add Sub-item" gear items (shared) ───────────────────
+  _addChildGearItems(gear) { bh.addChildGearItems(gear, this); }
 
   // ── Builder event dispatch ─────────────────────────────────────────────────
   // Breaks circular imports: index.js and preview-form.js both import nodes,

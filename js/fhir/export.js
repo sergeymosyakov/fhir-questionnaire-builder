@@ -307,6 +307,11 @@ export function nodeToFHIRItem(node) {
   const _maxLengthAllowed = new Set(['checkbox', 'decimal', 'integer', 'number', 'text', 'url', 'open-choice']);
   if (node._maxLength !== undefined && node._maxLength !== null && _maxLengthAllowed.has(node.itemType)) fhirItem.maxLength = node._maxLength;
 
+  // Non-group item with nested sub-items (FHIR R4 allows this).
+  if (node.type === 'item' && node.children?.length > 0) {
+    fhirItem.item = node.children.map(nodeToFHIRItem);
+  }
+
   // answerConstraint (R5 native; downgraded to a cross-version extension for R4/R4B)
   if (node._answerConstraint) fhirItem.answerConstraint = node._answerConstraint;
 
@@ -646,6 +651,23 @@ function _exportTranslations(q, translations) {
     }
   }
   walkItems(q.item);
+
+  // Write ui-translations custom extension for each language that has ui strings
+  const UI_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/ui-translations';
+  // Remove stale ui-translation extensions first
+  q.extension = (q.extension || []).filter(e => e.url !== UI_TRANS_URL);
+  for (const lang of langs) {
+    const ui = translations[lang].ui;
+    if (!ui || !Object.keys(ui).length) continue;
+    q.extension.push({
+      url: UI_TRANS_URL,
+      extension: [
+        { url: 'lang',    valueCode:   lang },
+        { url: 'strings', valueString: JSON.stringify(ui) },
+      ],
+    });
+  }
+  if (!q.extension.length) delete q.extension;
 }
 
 function _translationExt(lang, content) {

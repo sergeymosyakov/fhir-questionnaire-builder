@@ -15,7 +15,7 @@ export const escAttr = s => (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quo
 export function findAndRemove(id, nodes) {
   for (let i = 0; i < nodes.length; i++) {
     if (nodes[i].id === id) { const [n] = nodes.splice(i, 1); n.destroy?.(); return true; }
-    if (nodes[i].type === 'group' && findAndRemove(id, nodes[i].children)) return true;
+    if (nodes[i].children?.length && findAndRemove(id, nodes[i].children)) return true;
   }
   return false;
 }
@@ -30,7 +30,7 @@ export function destroyTree(nodes) {
 export function isDescendant(nodeId, group) {
   for (const ch of group.children) {
     if (ch.id === nodeId) return true;
-    if (ch.type === 'group' && isDescendant(nodeId, ch)) return true;
+    if (ch.children?.length && isDescendant(nodeId, ch)) return true;
   }
   return false;
 }
@@ -39,7 +39,7 @@ export function isDescendant(nodeId, group) {
 export function findAncestorGroupIds(nodeId, nodes, ancestors = []) {
   for (const n of nodes) {
     if (n.id === nodeId) return ancestors;
-    if (n.type === 'group') {
+    if (n.children?.length) {
       const found = findAncestorGroupIds(nodeId, n.children, [...ancestors, n.id]);
       if (found) return found;
     }

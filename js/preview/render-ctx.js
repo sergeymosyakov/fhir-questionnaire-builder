@@ -1,3 +1,4 @@
+import { UI_STRINGS } from '../fhir/ui-strings.js';
 // ── Shared render context ──────────────────────────────────────────────────────
 // Written by preview-form.js (PreviewForm class), read by node classes.
 // Breaks the potential circular dependency between node classes and the document model.
@@ -39,3 +40,15 @@ export const _rc = {
   // translations store — same reference as questDoc.translations
   translations:   null,
 };
+
+/**
+ * Look up a UI string translation from the render context.
+ * Falls back to the English default from UI_STRINGS automatically.
+ * @param {string} key  — key from UI_STRINGS (e.g. 'or_separator')
+ * @param {object} rc   — render context (may be null/undefined outside preview)
+ */
+export function uiStr(key, rc) {
+  const fallback = UI_STRINGS[key] ?? key;
+  if (!rc?.activeLanguage) return fallback;
+  return rc.translations?.[rc.activeLanguage]?.ui?.[key] ?? fallback;
+}

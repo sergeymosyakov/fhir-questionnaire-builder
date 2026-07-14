@@ -137,7 +137,7 @@ export class BuilderPanel {
 
   _setCollapsedAll(nodes, value) {
     for (const n of nodes) {
-      if (n.type === 'group') {
+      if (n.children?.length) {
         GroupNode._collapseMap.set(n.id, value);
         this._setCollapsedAll(n.children, value);
       }
@@ -149,7 +149,7 @@ export class BuilderPanel {
       const seg = numberingService.formatSeg(i + 1);
       const prefix = parentPrefix ? parentPrefix + '.' + seg : seg;
       node._prefix = prefix;
-      if (node.type === 'group' && node.children.length)
+      if (node.children?.length)
         this._applyPrefixes(node.children, prefix);
     });
   }

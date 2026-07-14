@@ -11,7 +11,7 @@ let _tree = null;
 export function findNode(nodes, id, parent = null) {
   for (let i = 0; i < nodes.length; i++) {
     if (nodes[i].id === id) return { node: nodes[i], arr: nodes, idx: i, parent };
-    if (nodes[i].type === 'group') {
+    if (nodes[i].children?.length) {
       const r = findNode(nodes[i].children, id, nodes[i]);
       if (r) return r;
     }
@@ -21,7 +21,7 @@ export function findNode(nodes, id, parent = null) {
 
 function _isAncestor(ancestorId, nodeId) {
   const a = findNode(_tree, ancestorId);
-  if (!a || a.node.type !== 'group') return false;
+  if (!a || !a.node.children?.length) return false;
   return !!findNode(a.node.children, nodeId);
 }
 
@@ -31,7 +31,7 @@ function _doDrop(targetId, position) {
   if ((position === 'inside' || position === 'inside-last') && _isAncestor(_dragId, targetId)) return;
   if (position === 'inside' || position === 'inside-last') {
     const t = findNode(_tree, targetId);
-    if (!t || t.node.type !== 'group') return;
+    if (!t || !t.node.children?.length) return;
   }
 
   const src = findNode(_tree, _dragId);

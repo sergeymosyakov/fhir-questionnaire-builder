@@ -19,6 +19,7 @@
 import { Modal }                  from './modal-base.js';
 import { createCustomSelect }     from '../custom-select.js';
 import { translateBatch, SUPPORTED_LANGUAGES } from '../../fhir/translate-api.js';
+import { UI_STRINGS }             from '../../fhir/ui-strings.js';
 import { AppEvents }              from '../../events.js';
 import { showError }              from '../toast.js';
 
@@ -122,6 +123,11 @@ export class TranslateModal extends Modal {
     }
     walk(qd.tree);
 
+    // UI strings (shown in patient view: buttons, separators, placeholders)
+    for (const [key, original] of Object.entries(UI_STRINGS)) {
+      entries.push({ key: '__ui__' + key, original, isUi: true });
+    }
+
     if (!entries.length) { showError('No translatable text found.'); return; }
 
     // Show progress
@@ -196,7 +202,19 @@ export class TranslateModal extends Modal {
       });
 
     const tbody = table.createTBody();
+    let inUiSection = false;
     this._reviewRows.forEach(row => {
+      // Add a separator row before UI strings section
+      if (row.isUi && !inUiSection) {
+        inUiSection = true;
+        const sepRow = tbody.insertRow();
+        sepRow.className = 'translate-section-sep';
+        const sepCell = document.createElement('td');
+        sepCell.colSpan = 2;
+        sepCell.className = 'translate-section-label';
+        sepCell.textContent = 'UI strings (buttons, separators, placeholders)';
+        sepRow.appendChild(sepCell);
+      }
       const tr = tbody.insertRow();
       const tdOrig = tr.insertCell();
       tdOrig.className = 'translate-td-orig';
@@ -252,13 +270,16 @@ export class TranslateModal extends Modal {
   _applyTranslations() {
     const lang = this._targetLang;
     const qd   = this._questDoc;
-    if (!qd.translations[lang]) qd.translations[lang] = { title: '', items: {}, opts: {} };
+    if (!qd.translations[lang]) qd.translations[lang] = { title: '', items: {}, opts: {}, ui: {} };
+    if (!qd.translations[lang].ui) qd.translations[lang].ui = {};
     const store = qd.translations[lang];
 
     for (const row of this._reviewRows) {
       const val = row.inputEl?.value ?? row.translated;
       if (row.key === '__title__') {
         store.title = val;
+      } else if (row.key.startsWith('__ui__')) {
+        store.ui[row.key.slice(6)] = val;   // strip '__ui__' prefix
       } else if (row.key.includes('__')) {
         store.opts[row.key] = val;
       } else {

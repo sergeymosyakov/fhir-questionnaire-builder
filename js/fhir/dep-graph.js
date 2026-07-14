@@ -36,7 +36,7 @@ export function extractRefs(expr) {
 function flatten(nodes, out = []) {
   for (const node of nodes) {
     out.push(node);
-    if (node.type === 'group' && Array.isArray(node.children)) {
+    if (node.children?.length) {
       flatten(node.children, out);
     }
   }
@@ -63,12 +63,30 @@ export function buildDepGraph(nodes, variables = []) {
   const idSet = new Set(nodeIds);
   const varNames = new Set((variables || []).map(v => v && v.name).filter(Boolean));
 
+  // Build ancestor map: for each node, the set of its ancestor node IDs.
+  // Used to skip path-navigation linkIds (ancestors appear as traversal steps
+  // in QR-path expressions, e.g. item.where(linkId='parent').answer.item... —
+  // they are NOT real value dependencies).
+  const ancestorMap = new Map(); // nodeId → Set<ancestorId>
+  function buildAncestors(nodeList, inherited) {
+    for (const n of nodeList) {
+      ancestorMap.set(n.id, new Set(inherited));
+      if (n.children?.length) {
+        buildAncestors(n.children, [...inherited, n.id]);
+      }
+    }
+  }
+  buildAncestors(nodes || [], []);
+
   const edges = new Map();
   const missing = new Map();
   for (const id of nodeIds) edges.set(id, new Set());
 
   const addDep = (fromId, toId) => {
-    if (toId === fromId) return; // self-reference handled by cycle detection if real
+    if (toId === fromId) return;
+    // Skip if toId is an ancestor of fromId — that linkId is a QR path-navigation
+    // step, not a value dependency (e.g. parent.answer.item.where(linkId='self')).
+    if (ancestorMap.get(fromId)?.has(toId)) return;
     if (idSet.has(toId)) {
       edges.get(fromId).add(toId);
     } else if (!varNames.has(toId)) {

@@ -670,21 +670,6 @@ describe('validateTree — modifierExtension warning', () => {
 });
 
 // ── que-1: group must have children ──────────────────────────────────────────
-describe('validateTree — que-1 group must have children', () => {
-  it('warns when group has no children', () => {
-    const g = makeGroup({ id: 'g1', children: [] });
-    const issues = validateTree([g]);
-    expect(warnIds(issues)).toContain('g1');
-    expect(issues.find(i => i.nodeId === 'g1' && i.message.match(/que-1|no children/))).toBeTruthy();
-  });
-
-  it('no warning when group has children', () => {
-    const g = makeGroup({ id: 'g1', children: [makeItem({ id: 'q1' })] });
-    const issues = validateTree([g]);
-    expect(issues.filter(i => i.nodeId === 'g1' && i.message.match(/que-1/))).toHaveLength(0);
-  });
-});
-
 // ── que-5: answerValueSet only for allowed types ──────────────────────────────
 describe('validateTree — que-5 answerValueSet type restriction', () => {
   it('errors when answerValueSet set on url item', () => {

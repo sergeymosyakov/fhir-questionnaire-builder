@@ -583,20 +583,16 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     return node;
   }
 
-  // Question with nested sub-items → wrap in synthetic group
+  // Non-group item with nested sub-items (FHIR R4 allows this).
+  // Keep as ItemNode so the item retains its own answer + calculatedExpression.
+  // Sub-items become node.children and render below the parent's control.
   if ((fhirItem.item || []).length > 0) {
-    const wrapper = createGroupNode({
-      id:        fhirItem.linkId ? fhirItem.linkId + '-grp' : undefined,
-      title:     fhirItem.text || fhirItem.linkId || 'Group',
-      mandatory: !!fhirItem.required,
-    });
-    applyVisibility(wrapper, fhirItem, linkIdMap);
-    wrapper.children.push(fhirQuestionToItem(fhirItem, linkIdMap, contained));
+    const node = fhirQuestionToItem(fhirItem, linkIdMap, contained);
     for (const child of fhirItem.item) {
       const n = fhirItemToNode(child, linkIdMap, contained);
-      if (n) wrapper.children.push(n);
+      if (n) node.children.push(n);
     }
-    return wrapper;
+    return node;
   }
 
   return fhirQuestionToItem(fhirItem, linkIdMap, contained);

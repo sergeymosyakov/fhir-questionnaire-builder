@@ -1,0 +1,31 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "item-with-subitems-test",
+  "title": "Item With Sub-items Test",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "q1",
+      "text": "Parent question with sub-items",
+      "type": "boolean",
+      "readOnly": true,
+      "item": [
+        {
+          "linkId": "q1.1",
+          "text": "Sub-item one",
+          "type": "boolean"
+        },
+        {
+          "linkId": "q1.2",
+          "text": "Sub-item two",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "linkId": "q2",
+      "text": "Leaf item (no children)",
+      "type": "string"
+    }
+  ]
+}

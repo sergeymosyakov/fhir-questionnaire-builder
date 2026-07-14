@@ -241,8 +241,22 @@ function _importTranslations(q, tree, translations) {
     }
   }
   walk(q.item);
+
+  // Read custom ui-translations extension from questionnaire root
+  const UI_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/ui-translations';
+  for (const ext of (q.extension || []).filter(e => e.url === UI_TRANS_URL)) {
+    const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
+    const strings = (ext.extension || []).find(s => s.url === 'strings')?.valueString;
+    if (!lang || !strings) continue;
+    try {
+      const parsed = JSON.parse(strings);
+      _ensureLang(translations, lang);
+      Object.assign(translations[lang].ui, parsed);
+    } catch { /* ignore malformed */ }
+  }
 }
 
 function _ensureLang(translations, lang) {
-  if (!translations[lang]) translations[lang] = { title: '', items: {}, opts: {} };
+  if (!translations[lang]) translations[lang] = { title: '', items: {}, opts: {}, ui: {} };
+  if (!translations[lang].ui) translations[lang].ui = {};
 }

@@ -1557,16 +1557,50 @@ describe('importFHIR', () => {
     });
   });
 
-  // ── non-group item with sub-items (synthetic group wrap) ──────────────────
+  // ── non-group item with sub-items ────────────────────────────────────────
   describe('non-group item with sub-items', () => {
-    it('wraps a non-group question with item[] in a synthetic group', () => {
+    it('treats a non-group question with item[] as ItemNode with children, same linkId', () => {
       importFHIR(minQ([{
         linkId: 'q1', type: 'string', text: 'Parent',
         item: [{ linkId: 'q1.1', type: 'string', text: 'Child' }],
       }]));
-      expect(_tree[0].type).toBe('group');
-      expect(_tree[0].id).toBe('q1-grp');
-      expect(_tree[0].children).toHaveLength(2); // parent item + child
+      expect(_tree[0].type).toBe('item');
+      expect(_tree[0].id).toBe('q1');          // no -grp suffix
+      expect(_tree[0].children).toHaveLength(1);
+    });
+
+    it('keeps non-group item as ItemNode with children array', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'boolean', text: 'Parent boolean',
+        item: [{ linkId: 'q1.1', type: 'boolean', text: 'Child 1' },
+               { linkId: 'q1.2', type: 'boolean', text: 'Child 2' }],
+      }]));
+      expect(_tree[0].type).toBe('item');
+      expect(_tree[0].id).toBe('q1');
+      expect(_tree[0].itemType).toBe('checkbox');  // boolean → checkbox
+      expect(_tree[0].children).toHaveLength(2);
+      expect(_tree[0].children[0].id).toBe('q1.1');
+      expect(_tree[0].children[1].id).toBe('q1.2');
+    });
+
+    it('preserves linkId unchanged — no -grp suffix', () => {
+      importFHIR(minQ([{
+        linkId: 'section-1', type: 'string', text: 'Q with sub',
+        item: [{ linkId: 'section-1.1', type: 'string', text: 'Sub' }],
+      }]));
+      expect(_tree[0].id).toBe('section-1');
+      expect(_tree[0].children[0].id).toBe('section-1.1');
+    });
+
+    it('exports item with children back with item[] — children preserved on node', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'boolean', text: 'Parent',
+        item: [{ linkId: 'q1.1', type: 'boolean', text: 'Child' }],
+      }]));
+      // children are preserved on the ItemNode for export and rendering
+      expect(_tree[0].type).toBe('item');
+      expect(_tree[0].children).toHaveLength(1);
+      expect(_tree[0].children[0].id).toBe('q1.1');
     });
   });
 });

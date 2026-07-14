@@ -106,3 +106,6 @@ export const SUPPORTED_LANGUAGES = new Map([
 if (typeof window !== 'undefined') {
   window._translationModule = { SUPPORTED_LANGUAGES };
 }
+
+// UI_STRINGS lives in ui-strings.js (shared with render-ctx.js uiStr helper)
+export { UI_STRINGS } from './ui-strings.js';

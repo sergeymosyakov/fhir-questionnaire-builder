@@ -4,6 +4,7 @@
 // Called via thin delegators on BaseNode: node._buildInlineTitleEditor(), etc.
 import * as dnd from '../builder/dnd.js';
 import { AppEvents, EventState } from '../events.js';
+import { NODE_REGISTRY } from './registry.js';
 
 const _notify = () => document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 
@@ -146,5 +147,51 @@ export function buildDropZoneAbove(node) {
   div.className   = 'drop-zone drop-zone-above';
   div.textContent = 'Drop here';
   dnd.attachDropZone(div, node, 'before');
+  return div;
+}
+
+/**
+ * Add "Add Sub-group" and "Add Sub-item" entries to a NodeGearMenu.
+ * Shared between GroupNode and ItemNode-with-children.
+ */
+export function addChildGearItems(gear, node) {
+  gear.addItem('Add Group', 'add-menu-group', () => {
+    const GroupCls = NODE_REGISTRY.get('group');
+    if (!GroupCls) return;
+    const n = new GroupCls({ title: 'New Group' });
+    n.id = node.id + '.' + String(node.children.length + 1);
+    node.children.push(n);
+    document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
+    document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: n.id } }));
+  });
+  gear.addItem('Add Item', 'add-menu-item', () => {
+    const siblings = node.children.filter(c => c.type === 'item');
+    const template = siblings.length > 0 ? siblings[siblings.length - 1] : null;
+    const Cls = (template && NODE_REGISTRY.get(template.itemType)) ?? NODE_REGISTRY.get('text');
+    if (!Cls) return;
+    const n = template
+      ? new Cls({ title: 'New Item', itemType: template.itemType,
+                  mandatory: template.mandatory, repeats: template.repeats || false,
+                  options: template.options,
+                  constraint: template.constraint ? template.constraint.map(c => ({ ...c })) : [] })
+      : new Cls({ title: 'New Item', itemType: 'text' });
+    n.id = node.id + '.' + String(node.children.length + 1);
+    node.children.push(n);
+    document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
+    document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+    document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: n.id } }));
+  });
+
+}
+
+/** Returns a drop-zone-inside element wired for DnD into the last child position. */
+export function buildInsideDropZone(node) {
+  const div = document.createElement('div');
+  div.className   = 'drop-zone drop-zone-inside';
+  div.textContent = 'Drop here to add as last child';
+  dnd.attachDropZone(div, node, 'inside-last');
   return div;
 }

@@ -22,7 +22,7 @@ export function buildVarEnv(variables, qr, fp) {
 function indexNodes(nodes, map = new Map()) {
   for (const node of nodes) {
     map.set(node.id, node);
-    if (node.type === 'group' && Array.isArray(node.children)) indexNodes(node.children, map);
+    if (node.children?.length) indexNodes(node.children, map);
   }
   return map;
 }
@@ -113,6 +113,6 @@ export function evalInitialExprNodes(nodes, qr, fp, values, envVars = {}) {
         // silently skip nodes whose expression fails
       }
     }
-    if (node.type === 'group') evalInitialExprNodes(node.children, qr, fp, values, envVars);
+    if (node.children?.length) evalInitialExprNodes(node.children, qr, fp, values, envVars);
   }
 }

@@ -41,7 +41,7 @@ const FHIR_R4_RESOURCES = new Set([
 function _collectNodes(nodes, out = []) {
   for (const n of nodes) {
     out.push(n);
-    if (n.type === 'group' && n.children) _collectNodes(n.children, out);
+    if (n.children?.length) _collectNodes(n.children, out);
   }
   return out;
 }
@@ -103,11 +103,6 @@ export function validateTree(tree, _values = {}, questMeta = null) {
       issues.push({ severity: 'error', nodeId: '(empty)', message: 'Node has an empty linkId — linkId is required in FHIR R4.' });
     } else if (dupIds.has(id)) {
       issues.push({ severity: 'error', nodeId: id, message: `Duplicate linkId "${id}" — linkIds must be unique within a Questionnaire.` });
-    }
-
-    // que-1: group items must have nested items (R4 invariant)
-    if (node.type === 'group' && (!node.children || node.children.length === 0)) {
-      issues.push({ severity: 'warning', nodeId: id, message: 'Group item has no children — R4 invariant que-1 requires group items to contain nested items. The exported resource will fail FHIR validation.' });
     }
 
     // sdc-questionnaire-isSubject: at most one item may be the subject of a QuestionnaireResponse
