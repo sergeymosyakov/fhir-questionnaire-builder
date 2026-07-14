@@ -71,6 +71,16 @@ export class QuestDocument {
     fhirTarget: 'R4',
   };
 
+  /**
+   * Translation store — populated by the Translate modal or on import.
+   * Structure: { [langCode]: { title?: string, items: { [linkId]: string },
+   *              opts: { [linkId+'__'+code]: string } } }
+   * - items: translated item.text per linkId
+   * - opts:  translated answerOption labels, key = linkId + '__' + optionCode
+   * - title: translated Questionnaire.title
+   */
+  translations = {};
+
   /** Convenience getter — same as meta.fhirTarget. */
   get fhirTarget() { return this.meta.fhirTarget; }
 

@@ -72,6 +72,11 @@ export const AppEvents = Object.freeze({
   // ── UI utilities ───────────────────────────────────────────────────────────
   CLOSE_DROPDOWNS:       'close-dropdowns',
 
+  // ── Translation ────────────────────────────────────────────────────────────
+  // detail: { lang: string } — BCP-47 code, e.g. 'es', 'fr', '' = source lang
+  LANGUAGE_CHANGED:    'language-changed',
+  TRANSLATE_REQUESTED: 'translate-requested',
+
   // ── Builder utilities ──────────────────────────────────────────────────────
   // Dispatched by nodes/modals when they change FHIR data that requires
   // FHIRPath calc expressions to be re-evaluated.  BuilderPanel listens and
@@ -195,6 +200,7 @@ const STATEFUL_EVENTS = new Set([
   AppEvents.PREVIEW_MODE_CHANGE,
   AppEvents.BUILDER_VIEW_MODE_CHANGE,
   AppEvents.BUILDER_META_ROW_CHANGE,
+  AppEvents.LANGUAGE_CHANGED,
 ]);
 
 const _cache = new Map();

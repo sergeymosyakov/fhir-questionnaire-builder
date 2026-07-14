@@ -65,6 +65,7 @@ export class PreviewForm {
       this._questVariables = questDoc.variables;
       this._calcFormOk    = (node, path) => calcFormOk(node, answerStore, path);
       _rc.instancePath    = [];
+      _rc.translations    = questDoc.translations;
       _rc.calcFormOk      = node => this._calcFormOk(node, _rc.instancePath);
       _rc.updateGroupIcons = () => GroupNode.updateAll(_rc);
       _rc.getValue        = id => answerStore.get(id, _rc.instancePath);
@@ -93,6 +94,7 @@ export class PreviewForm {
     document.addEventListener(AppEvents.REINIT_FORM,        e => this.reinitForm({ silent: e.detail?.silent }));
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => {
       this._els.lform?.closest('.right-panel-body')?.scrollTo({ top: 0 });
+      this._updateLangSwitcher();
     });
     document.addEventListener(AppEvents.BUILDER_NAVIGATE,   e => {
       document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_NAVIGATE_TO, { detail: { id: e.detail.id } }));
@@ -101,6 +103,12 @@ export class PreviewForm {
     document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => this._asyncRender(++this._renderVersion));
     document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => this._asyncRender(++this._renderVersion));
     document.addEventListener(AppEvents.SDC_POPULATE_REQUESTED, e => this._populate(e.detail.patientRef));
+    document.addEventListener(AppEvents.LANGUAGE_CHANGED, e => {
+      _rc.activeLanguage  = e.detail?.lang ?? '';
+      _rc.translations    = this._rawFhir?.translations ?? {};
+      this._updateLangSwitcher();
+      this._asyncRender(++this._renderVersion);
+    });
 
     // mount() needs viewOptionsWrap/previewModeWrap which are created by mountHeaderActions()
     // — defer until APP_CONTEXT_READY which fires after mountHeaderActions()
@@ -131,6 +139,7 @@ export class PreviewForm {
       viewOptionsWrap: document.querySelector('[data-mount="viewOptionsWrap"]'),
       previewModeWrap: document.querySelector('[data-mount="previewModeWrap"]'),
       searchWrap:      document.querySelector('[data-mount="search-wrap"]'),
+      langSwitcherWrap: document.querySelector('[data-mount="lang-switcher-wrap"]'),
     };
     this._els = elements;
 
@@ -324,6 +333,7 @@ export class PreviewForm {
     _rc.ctx = ctx; _rc.resultMap = resultMap; _rc.cEnv = _cEnv;
     _rc.visible = visible; _rc.groupIconMap = groupIconMap;
     _rc.previewMode = this._previewMode;
+    _rc.translations = this._rawFhir?.translations ?? {};
     _rc.instancePath = [];
 
     const frag = document.createDocumentFragment();
@@ -351,6 +361,8 @@ export class PreviewForm {
     statusBadge.update({ visible, ctx });
     search.refresh();
     this._updateJsonView();
+    // Refresh language switcher in case translations changed (e.g. after translate modal apply)
+    this._updateLangSwitcher();
     progress.hide();
     document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_RENDER_DONE));
   }
@@ -382,5 +394,45 @@ export class PreviewForm {
     const q = buildFHIRObject();
     this._els.fhirJsonView.innerHTML = highlightJson(JSON.stringify(q, null, 2));
     search.refresh();
+  }
+
+  /** Rebuild the language switcher in the preview toolbar. */
+  _updateLangSwitcher() {
+    const wrap = this._els?.langSwitcherWrap;
+    if (!wrap) return;
+    const langs = Object.keys(this._rawFhir?.translations || {});
+    if (!langs.length) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+
+    wrap.style.display = '';
+    wrap.innerHTML = '';
+
+    const label = document.createElement('span');
+    label.className = 'lang-switcher-label';
+    label.textContent = '🌐';
+    label.dataset.tipTitle = 'Display language';
+    label.dataset.tipBody  = 'Switch the preview between the original language and available translations.';
+    label.dataset.tipFhir  = 'item._text.extension[translation]';
+    label.dataset.tipSpec  = 'R4';
+    wrap.appendChild(label);
+
+    // Build items: original + each translated language
+    const { SUPPORTED_LANGUAGES } = window._translationModule || {};
+    const langItems = [
+      { value: '', label: 'Original' },
+      ...langs.map(l => ({ value: l, label: (SUPPORTED_LANGUAGES?.get(l)) || l })),
+    ];
+
+    // Inline select using buttons (custom-select may not be loaded here)
+    for (const { value, label: lbl } of langItems) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'lang-btn' + (_rc.activeLanguage === value ? ' lang-btn--active' : '');
+      btn.textContent = lbl;
+      btn.dataset.testid = 'lang-btn-' + (value || 'original');
+      btn.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent(AppEvents.LANGUAGE_CHANGED, { detail: { lang: value } }));
+      });
+      wrap.appendChild(btn);
+    }
   }
 }

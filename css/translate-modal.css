@@ -1,0 +1,119 @@
+/* ── Translate modal styles ─────────────────────────────────────────────────── */
+
+.translate-desc {
+  font-size: 0.88rem;
+  color: var(--c-text-secondary, #666);
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+
+.translate-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.translate-existing-note {
+  font-size: 0.82rem;
+  color: var(--c-text-secondary, #888);
+  margin: 10px 0 0;
+  font-style: italic;
+}
+
+/* ── Progress ── */
+.translate-progress-wrap {
+  padding: 12px 0;
+}
+.translate-progress-label {
+  font-size: 0.88rem;
+  color: var(--c-text, #333);
+  margin-bottom: 8px;
+}
+.translate-progress-bar {
+  height: 6px;
+  background: var(--c-border, #e0e4ea);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.translate-progress-fill {
+  height: 100%;
+  background: var(--c-primary, #3498db);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.2s ease;
+}
+
+/* ── Review table ── */
+.translate-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.87rem;
+  margin: 0 0 12px;
+}
+.translate-table th {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 2px solid var(--c-border, #dde);
+  font-weight: 600;
+  color: var(--c-label, #555);
+  width: 50%;
+}
+.translate-td-orig {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--c-border-light, #eee);
+  color: var(--c-text-secondary, #666);
+  vertical-align: top;
+  word-break: break-word;
+}
+.translate-table td {
+  border-bottom: 1px solid var(--c-border-light, #eee);
+  vertical-align: top;
+}
+.translate-inp {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 3px 6px;
+  font-size: 0.87rem;
+  border: 1px solid var(--c-border, #ccc);
+  border-radius: 3px;
+  resize: vertical;
+  font-family: inherit;
+  min-height: 28px;
+}
+.translate-inp:focus {
+  outline: none;
+  border-color: var(--c-primary, #3498db);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.15);
+}
+
+.translate-review-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--c-border-light, #eee);
+}
+
+/* ── Language switcher chip in preview toolbar ── */
+.lang-switcher-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lang-btn {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border: 1px solid var(--c-border, #ccc);
+  border-radius: 3px;
+  background: var(--c-surface, #fff);
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--c-text, #333);
+}
+.lang-btn:hover { background: var(--c-hover, #f0f4fa); }
+.lang-btn--active {
+  background: var(--c-primary, #3498db);
+  color: #fff;
+  border-color: var(--c-primary, #3498db);
+}

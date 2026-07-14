@@ -31,6 +31,8 @@ import { SimpleMode } from './ui/simple-mode.js';
 import { BuilderMetaToggle } from './ui/builder-meta-toggle.js';
 import { QRAnswersManager } from './fhir/qr-answers-manager.js';
 import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
+import { TranslateModal } from './ui/modals/translate-modal.js';
+import './fhir/translate-api.js'; // sets window._translationModule
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
 
@@ -45,6 +47,7 @@ new PatientProfile();
 new QRAnswersManager();
 new QuestionnaireLoader();
 new PreviewForm();
+TranslateModal.configure({ questDoc });
 
 // header-actions and builder self-mount on import
 

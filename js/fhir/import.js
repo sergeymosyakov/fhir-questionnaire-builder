@@ -66,6 +66,10 @@ export function importFHIR(fhirJson) {
   destroyTree(tree);
   document.dispatchEvent(new CustomEvent(AppEvents.ANSWERS_CLEAR));
   questDoc.rawFhir = q;
+  // Clear translations in-place so existing rc.translations reference stays valid
+  // (??= initialises the property when the questDoc mock in unit tests lacks it)
+  questDoc.translations ??= {};
+  for (const k of Object.keys(questDoc.translations)) delete questDoc.translations[k];
   resetSeq();
 
   // Populate questionnaire-level metadata
@@ -181,9 +185,64 @@ export function importFHIR(fhirJson) {
       if (n) tree.push(n);
     }
     applyInitialValues(tree);
+    // Read existing translation extensions into questDoc.translations
+    _importTranslations(q, tree, questDoc.translations);
   } finally {
     // tree is fully built — notify preview to reinitialise
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
   }
   document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+}
+
+// ── Translation import ────────────────────────────────────────────────────────
+const TRANSLATION_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
+
+/**
+ * Read `_text.extension[translation]` (and `_title`) from the raw FHIR JSON
+ * and populate the `translations` store keyed by language code.
+ */
+function _importTranslations(q, tree, translations) {
+  // Questionnaire.title translations
+  const titleExts = (q._title?.extension || []).filter(e => e.url === TRANSLATION_URL);
+  for (const ext of titleExts) {
+    const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
+    const content = (ext.extension || []).find(s => s.url === 'content')?.valueString;
+    if (!lang || content == null) continue;
+    _ensureLang(translations, lang);
+    translations[lang].title = content;
+  }
+
+  // Walk all items recursively
+  function walk(fhirItems) {
+    for (const fi of fhirItems || []) {
+      const textExts = (fi._text?.extension || []).filter(e => e.url === TRANSLATION_URL);
+      for (const ext of textExts) {
+        const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
+        const content = (ext.extension || []).find(s => s.url === 'content')?.valueString;
+        if (!lang || content == null) continue;
+        _ensureLang(translations, lang);
+        translations[lang].items[fi.linkId] = content;
+      }
+      // answerOption labels
+      for (const ao of fi.answerOption || []) {
+        const code = ao.valueCoding?.code || ao.valueString || ao.valueInteger?.toString();
+        if (!code) continue;
+        const optExts = (ao._valueCoding?._display?.extension || [])
+          .filter(e => e.url === TRANSLATION_URL);
+        for (const ext of optExts) {
+          const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
+          const content = (ext.extension || []).find(s => s.url === 'content')?.valueString;
+          if (!lang || content == null) continue;
+          _ensureLang(translations, lang);
+          translations[lang].opts[fi.linkId + '__' + code] = content;
+        }
+      }
+      walk(fi.item);
+    }
+  }
+  walk(q.item);
+}
+
+function _ensureLang(translations, lang) {
+  if (!translations[lang]) translations[lang] = { title: '', items: {}, opts: {} };
 }

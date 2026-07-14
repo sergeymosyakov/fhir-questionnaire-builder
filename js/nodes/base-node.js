@@ -369,10 +369,16 @@ export class BaseNode {
   }
 
   // Apply XHTML / markdown / plain text to label element.
-  // Priority: rendering-xhtml > rendering-markdown > plain text.
-  _applyLabelContent(el) {
+  // Priority: rendering-xhtml > rendering-markdown > translation > plain text.
+  _applyLabelContent(el, rc) {
     const domPurify = window.DOMPurify;
     const marked    = window.marked;
+    // If a translation language is active and a translation exists, use it
+    const lang = rc?.activeLanguage;
+    if (lang && rc?.translations?.[lang]?.items?.[this.id] != null) {
+      el.textContent = rc.translations[lang].items[this.id];
+      return;
+    }
     if (this._renderXhtml && domPurify) {
       el.innerHTML = domPurify.sanitize(this._renderXhtml);
     } else if (this._renderMarkdown && domPurify && marked) {
@@ -383,9 +389,10 @@ export class BaseNode {
   }
 
   // Build the label element. Overridden in GroupNode, ItemNode, DisplayNode.
-  _buildLabel() {
+  // rc is optional — passed during preview render for translation lookup.
+  _buildLabel(_res, rc) {
     const el = document.createElement('span');
-    this._applyLabelContent(el);
+    this._applyLabelContent(el, rc);
     return el;
   }
 

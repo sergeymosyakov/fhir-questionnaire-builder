@@ -33,4 +33,9 @@ export const _rc = {
   addInstance:    null, // function(groupId, path) → new count
   removeInstance: null, // function(groupId, idx, path)
   evalChildren:   null, // function(children, path) → results[] — per-instance eval
+
+  // Active translation language ('' = show original source language)
+  activeLanguage: '',
+  // translations store — same reference as questDoc.translations
+  translations:   null,
 };

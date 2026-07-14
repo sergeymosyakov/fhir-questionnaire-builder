@@ -92,11 +92,11 @@ export class GroupNode extends BaseNode {
   }
 
   // ── Label: group-label class, XHTML support ───────────────────────────────
-  _buildLabel() {
+  _buildLabel(_res, rc) {
     const isEmptyGroup = this.children.length === 0;
     const el = document.createElement('span');
     el.className = isEmptyGroup ? 'display-info-label' : 'group-label';
-    this._applyLabelContent(el);
+    this._applyLabelContent(el, rc);
     return el;
   }
 

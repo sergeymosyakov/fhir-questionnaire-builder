@@ -61,6 +61,8 @@ export class SettingsMenu extends DropdownMenu {
       this._sep(),
       this._expandItem,
       this._collapseItem,
+      this._sep(),
+      this._item('translateItem', '🌐 Translate questionnaire\u2026', 'translate-item'),
     );
 
     // Keep menu open on checkbox toggle
@@ -102,6 +104,11 @@ export class SettingsMenu extends DropdownMenu {
     this._collapseItem.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       document.dispatchEvent(new CustomEvent(AppEvents.COLLAPSE_ALL_PREVIEW));
+    });
+
+    this._menu.querySelector('[data-testid="translate-item"]')?.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
+      document.dispatchEvent(new CustomEvent(AppEvents.TRANSLATE_REQUESTED));
     });
 
     // Receive initial checkbox states from tooltip/autosave after their async init()

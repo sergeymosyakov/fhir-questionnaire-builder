@@ -131,9 +131,9 @@ export class ItemNode extends BaseNode {
   }
 
   // ── Label: XHTML or plain text ────────────────────────────────────────────
-  _buildLabel() {
+  _buildLabel(_res, rc) {
     const el = document.createElement('span');
-    this._applyLabelContent(el);
+    this._applyLabelContent(el, rc);
     return el;
   }
 

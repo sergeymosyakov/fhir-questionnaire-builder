@@ -481,7 +481,7 @@ export function nodeToFHIRItem(node) {
 
 export function buildFHIRObject() {
   const { questDoc } = _svc;
-  const { tree, meta: questMeta, rawFhir, variables: questVariables, contained: questContained } = questDoc;
+  const { tree, meta: questMeta, rawFhir, variables: questVariables, contained: questContained, translations } = questDoc;
   const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
   const q = {
     resourceType: 'Questionnaire',
@@ -570,6 +570,9 @@ export function buildFHIRObject() {
     if (questMeta._rawMetaSecurity?.length) q.meta.security  = questMeta._rawMetaSecurity;
   }
 
+  // Write translations back as FHIR translation extensions
+  _exportTranslations(q, translations);
+
   return q;
 }
 
@@ -587,4 +590,76 @@ export function buildFHIRObjectVersioned(fhirTarget = 'R4') {
 
 export function exportFHIR(fileName) {
   downloadJSON(buildFHIRObject(), fileName || 'questionnaire.json');
+}
+
+// ── Translation export ────────────────────────────────────────────────────────
+const TRANSLATION_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
+
+/**
+ * Write questDoc.translations into the FHIR JSON as standard translation
+ * extensions on `_text`, `_title`, and `answerOption._valueCoding._display`.
+ */
+function _exportTranslations(q, translations) {
+  if (!translations || !Object.keys(translations).length) return;
+  const langs = Object.keys(translations);
+
+  // Questionnaire.title
+  const titleExts = langs
+    .filter(l => translations[l].title)
+    .map(l => _translationExt(l, translations[l].title));
+  if (titleExts.length) {
+    q._title = q._title || {};
+    q._title.extension = _mergeTranslationExts(q._title.extension || [], titleExts);
+  }
+
+  // Walk the exported item tree in parallel with the translations
+  function walkItems(items) {
+    for (const fi of items || []) {
+      // item.text
+      const textExts = langs
+        .filter(l => translations[l].items[fi.linkId] != null)
+        .map(l => _translationExt(l, translations[l].items[fi.linkId]));
+      if (textExts.length) {
+        fi._text = fi._text || {};
+        fi._text.extension = _mergeTranslationExts(fi._text.extension || [], textExts);
+      }
+
+      // answerOption labels
+      for (const ao of fi.answerOption || []) {
+        const code = ao.valueCoding?.code || ao.valueString || ao.valueInteger?.toString();
+        if (!code) continue;
+        const key = fi.linkId + '__' + code;
+        const optExts = langs
+          .filter(l => translations[l].opts[key] != null)
+          .map(l => _translationExt(l, translations[l].opts[key]));
+        if (!optExts.length) continue;
+        if (ao.valueCoding) {
+          ao._valueCoding = ao._valueCoding || {};
+          ao._valueCoding._display = ao._valueCoding._display || {};
+          ao._valueCoding._display.extension = _mergeTranslationExts(
+            ao._valueCoding._display.extension || [], optExts
+          );
+        }
+      }
+
+      walkItems(fi.item);
+    }
+  }
+  walkItems(q.item);
+}
+
+function _translationExt(lang, content) {
+  return {
+    url: TRANSLATION_URL,
+    extension: [
+      { url: 'lang',    valueCode:   lang },
+      { url: 'content', valueString: content },
+    ],
+  };
+}
+
+/** Replace/add translation extensions while preserving non-translation extensions. */
+function _mergeTranslationExts(existing, newExts) {
+  const nonTrans = (existing || []).filter(e => e.url !== TRANSLATION_URL);
+  return [...nonTrans, ...newExts];
 }
