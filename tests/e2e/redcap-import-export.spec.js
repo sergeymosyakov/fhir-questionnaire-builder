@@ -199,4 +199,44 @@ test.describe('REDCap CSV export', () => {
     await validateModalClose(page).click();
     await expect(validateModal(page)).not.toBeVisible();
   });
+
+  test('switching from REDCap to FHIR format does not show REDCap warnings', async ({ page }) => {
+    await freshStart(page);
+
+    const answerExprPath = path.resolve(__dirname, '../../sampledata/answer-expression-demo.fhir.json');
+    await loadFHIRJSON(page, answerExprPath);
+    await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 10_000 });
+
+    // Step 1: export as REDCap → compat modal appears
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
+    await expect(page.getByTestId('saveFormatModal')).toBeVisible();
+    await page.getByTestId('save-format-select').click();
+    await page.locator('[data-testid="csel-drop"] [data-val="redcap"]').click();
+    await page.getByTestId('saveFormatModalApply').click();
+    await expect(validateModal(page)).toBeVisible({ timeout: 10_000 });
+    await expect(validateModalBody(page)).toContainText('REDCap equivalent');
+    await validateModalClose(page).click();
+    await expect(validateModal(page)).not.toBeVisible();
+
+    // Step 2: export as FHIR R4 — REDCap compat validator must NOT fire
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
+    await expect(page.getByTestId('saveFormatModal')).toBeVisible();
+    // saveFormatModal now defaults to R4 (REDCap was previous selection; onCancel resets it)
+    // Select R4 explicitly to be safe
+    await page.getByTestId('save-format-select').click();
+    await page.locator('[data-testid="csel-drop"] [data-val="R4"]').click();
+    await page.getByTestId('saveFormatModalApply').click();
+
+    // Either the modal is skipped (no issues → prompt) or shows without REDCap text
+    const modalVisible = await validateModal(page).isVisible({ timeout: 5_000 }).catch(() => false);
+    if (modalVisible) {
+      await expect(validateModal(page)).toBeVisible();
+      await expect(validateModalBody(page)).not.toContainText('REDCap equivalent');
+      await validateModalClose(page).click();
+    } else {
+      // Modal skipped → filename prompt appeared (no REDCap validator ran)
+      await expect(page.getByTestId('prompt-save')).toBeVisible({ timeout: 8_000 });
+      await page.keyboard.press('Escape');
+    }
+  });
 });
