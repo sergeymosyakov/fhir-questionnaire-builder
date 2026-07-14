@@ -23,7 +23,7 @@ export const languageMenu       = new LanguageMenu();
 
 export function mount() {
   const wrap = document.querySelector('[data-mount="header-actions"]');
-  [questionnairesMenu, answersMenu, saveMenu, previewModeMenu, viewOptionsMenu, settingsMenu]
+  [questionnairesMenu, answersMenu, saveMenu, previewModeMenu, viewOptionsMenu, settingsMenu, languageMenu]
     .forEach(m => wrap.appendChild(m.el));
 }
 

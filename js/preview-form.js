@@ -143,12 +143,6 @@ export class PreviewForm {
     };
     this._els = elements;
 
-    // Mount language menu into the preview toolbar
-    const langSlot = document.querySelector('[data-mount="lang-switcher-wrap"]');
-    if (langSlot && !langSlot.contains(languageMenu.el)) {
-      langSlot.appendChild(languageMenu.el);
-    }
-
     const syncToolbarVisibility = () => {
       const d = this._tree.length > 0 ? '' : 'none';
       elements.viewOptionsWrap.style.display = d;
