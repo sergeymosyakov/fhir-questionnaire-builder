@@ -31,7 +31,7 @@ function _doDrop(targetId, position) {
   if ((position === 'inside' || position === 'inside-last') && _isAncestor(_dragId, targetId)) return;
   if (position === 'inside' || position === 'inside-last') {
     const t = findNode(_tree, targetId);
-    if (!t || !t.node.children?.length) return;
+    if (!t || !(t.node.type === 'group' || t.node.children?.length > 0)) return;
   }
 
   const src = findNode(_tree, _dragId);

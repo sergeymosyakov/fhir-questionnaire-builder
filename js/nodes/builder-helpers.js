@@ -161,6 +161,8 @@ export function addChildGearItems(gear, node) {
     const n = new GroupCls({ title: 'New Group' });
     n.id = node.id + '.' + String(node.children.length + 1);
     node.children.push(n);
+    // Ensure parent node is expanded in the builder so the new child is visible.
+    node.constructor._collapseMap?.set(node.id, false);
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
@@ -179,6 +181,8 @@ export function addChildGearItems(gear, node) {
       : new Cls({ title: 'New Item', itemType: 'text' });
     n.id = node.id + '.' + String(node.children.length + 1);
     node.children.push(n);
+    // Ensure parent node is expanded in the builder so the new child is visible.
+    node.constructor._collapseMap?.set(node.id, false);
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
