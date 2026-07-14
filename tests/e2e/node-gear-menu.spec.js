@@ -34,7 +34,7 @@ test.describe('Node gear menu', () => {
     await expect(group.getByTestId('node-delete-btn')).toHaveText('Delete');
   });
 
-  test('item gear exposes only Delete (no add options)', async ({ page }) => {
+  test('item gear exposes Add Item, Add Group and Delete', async ({ page }) => {
     await freshStart(page);
     await addRootGroup(page);
     const itemId = await addItemToGroup(page, '1');
@@ -48,8 +48,9 @@ test.describe('Node gear menu', () => {
     }).toPass();
 
     await expect(item.getByTestId('node-delete-btn').first()).toHaveText('Delete');
-    await expect(item.getByTestId('add-menu-item')).toHaveCount(0);
-    await expect(item.getByTestId('add-menu-group')).toHaveCount(0);
+    // Items now support sub-items — Add Item and Add Group are present in their gear
+    await expect(item.getByTestId('add-menu-item')).toHaveCount(1);
+    await expect(item.getByTestId('add-menu-group')).toHaveCount(1);
   });
 
   test('Add Item from group gear creates a child item with correct linkId', async ({ page }) => {
