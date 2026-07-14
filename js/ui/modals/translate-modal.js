@@ -24,7 +24,7 @@ import { showError }              from '../toast.js';
 
 export class TranslateModal extends Modal {
   constructor() {
-    super({ cancelLabel: 'Close', applyLabel: null, maxWidth: '780px', testid: 'translateModal' });
+    super({ cancelLabel: null, applyLabel: null, maxWidth: '780px', testid: 'translateModal' });
     this._targetLang  = '';
     this._reviewRows  = []; // { key, original, translated, inputEl }
     this._questDoc    = null;
@@ -48,6 +48,8 @@ export class TranslateModal extends Modal {
   _renderPicker() {
     const body = this.body;
     body.innerHTML = '';
+    // Footer: just Close
+    this._setFooterPicker();
 
     const desc = document.createElement('p');
     desc.className = 'translate-desc';
@@ -172,6 +174,8 @@ export class TranslateModal extends Modal {
   _renderReview() {
     const body = this.body;
     body.innerHTML = '';
+    // Footer: Discard + Apply
+    this._setFooterReview();
 
     const info = document.createElement('p');
     info.className = 'translate-desc';
@@ -210,10 +214,28 @@ export class TranslateModal extends Modal {
     });
 
     body.appendChild(table);
+  }
 
-    // Apply button
-    const footer = document.createElement('div');
-    footer.className = 'translate-review-footer';
+  // ── Footer helpers ─────────────────────────────────────────────────────────
+  _setFooterPicker() {
+    this.footer.innerHTML = '';
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'modal-btn modal-btn--cancel';
+    closeBtn.dataset.testid = 'translateModalClose';
+    closeBtn.textContent = 'Close';
+    closeBtn.addEventListener('click', () => this.close());
+    this.footer.appendChild(closeBtn);
+  }
+
+  _setFooterReview() {
+    this.footer.innerHTML = '';
+    const discardBtn = document.createElement('button');
+    discardBtn.type = 'button';
+    discardBtn.className = 'modal-btn modal-btn--cancel';
+    discardBtn.dataset.testid = 'translate-cancel-btn';
+    discardBtn.textContent = 'Discard';
+    discardBtn.addEventListener('click', () => this._renderPicker());
 
     const applyBtn = document.createElement('button');
     applyBtn.type = 'button';
@@ -222,16 +244,8 @@ export class TranslateModal extends Modal {
     applyBtn.textContent = 'Apply translations';
     applyBtn.addEventListener('click', () => this._applyTranslations());
 
-    const cancelBtn = document.createElement('button');
-    cancelBtn.type = 'button';
-    cancelBtn.className = 'modal-btn modal-btn--cancel';
-    cancelBtn.dataset.testid = 'translate-cancel-btn';
-    cancelBtn.textContent = 'Discard';
-    cancelBtn.addEventListener('click', () => this._renderPicker());
-
-    footer.appendChild(cancelBtn);
-    footer.appendChild(applyBtn);
-    body.appendChild(footer);
+    this.footer.appendChild(discardBtn);
+    this.footer.appendChild(applyBtn);
   }
 
   // ── Phase 4: apply ─────────────────────────────────────────────────────────

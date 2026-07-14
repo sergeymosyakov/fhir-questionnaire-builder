@@ -41,10 +41,14 @@ export class LanguageMenu extends DropdownMenu {
    */
   rebuild(translations) {
     this._menu.innerHTML = '';
-    this._activeLang = '';
-    this._syncButton();
-
     const langs = Object.keys(translations || {});
+
+    // Reset to Original only if the active language is no longer in the available set
+    if (this._activeLang && !langs.includes(this._activeLang)) {
+      this._activeLang = '';
+      document.dispatchEvent(new CustomEvent(AppEvents.LANGUAGE_CHANGED, { detail: { lang: '' } }));
+    }
+    this._syncButton();
     if (!langs.length) {
       if (this._wrap) this._wrap.style.display = 'none';
       return;
