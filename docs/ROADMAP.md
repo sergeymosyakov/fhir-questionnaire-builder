@@ -26,9 +26,8 @@ The initial translation implementation (v1) covers the MVP flow: auto-translate 
 
 - [x] **Translation of `rendering-xhtml` / `rendering-markdown`** — XHTML translations stored per-language in `questDoc.translations[lang].xhtml` and in a custom `http://fhir-qb.app/StructureDefinition/xhtml-translations` FHIR extension. Google Translate preserves HTML tags. `_applyLabelContent` checks `xhtml[linkId]` first (rendered via `innerHTML + DOMPurify`), then plain `items[linkId]`.
 - [ ] **Configurable translation API** — currently hard-wired to Google `gtx` (unofficial endpoint). Add a Settings toggle to choose between `gtx` (free, no key), DeepL free tier (requires key), LibreTranslate (self-hosted URL), or OpenAI. Store the choice in `serverConfig`.
-- [ ] **`Questionnaire.title` in the language switcher** — when a translation language is active, the preview panel title should also switch to the translated title. Currently only `item.text` (question labels) switch.
 - [x] **`_renderStyle` inheritance in translated view** — verified non-issue: `applyRenderStyle` is called after `_applyLabelContent` in `_buildRowContent`, so CSS styles are applied to the label element regardless of translation state.
-- [ ] **Partial translation badge** — when a translation exists for only some items (e.g. only 3 of 9 PHQ-9 questions are translated), the language switcher should indicate incomplete coverage. Consider a warning indicator or per-item "missing translation" fallback marker.
+- [x] **Partial translation badge / Edit existing** — already handled: "Edit existing" in the Translate modal shows all items, new/untranslated ones appear with empty fields making it clear what's missing.
 - [x] **Edit existing translations outside the translate modal** — implemented: "Edit existing" button in the Translate modal picker pre-fills the review table from stored translations without calling the API.
 - [ ] **`atable` itemControl support for translated answer option labels** — the `atable` renderer (when implemented) needs to read `rc.translations[lang].opts` for column headers.
 
