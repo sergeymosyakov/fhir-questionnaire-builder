@@ -80,7 +80,8 @@ function isNodeVisible(node, ctx, path) {
   }
   if (node.enableWhenExpression && ctx && ctx.fp && ctx.qr) {
     try {
-      const result = ctx.fp.evaluate(ctx.qr, node.enableWhenExpression, ctx.envVars || {});
+      const env = { resource: ctx.qr, ...(ctx.envVars || {}) };
+      const result = ctx.fp.evaluate(ctx.qr, node.enableWhenExpression, env);
       return result[0] === true;
     } catch { return false; }
   }
