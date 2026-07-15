@@ -141,17 +141,24 @@ export class GroupNode extends BaseNode {
     }
 
     if (!isPatient && !isEmptyGroup) {
-      const isOr = this.logicWithParent === 'OR';
-      const lb = document.createElement('span');
-      lb.className = 'preview-logic-badge preview-logic-' + (isOr ? 'or' : 'and');
-      lb.textContent = isOr ? 'ANY item \u2713' : 'ALL items \u2713';
-      lb.dataset.tipTitle = isOr ? 'Any item passes (OR)' : 'All items required (AND)';
-      lb.dataset.tipBody = isOr
-        ? 'Group is satisfied if at least one child item has a valid answer.\nStored in FHIR as a questionnaire-constraint with key e3a8c2f1\u2026:group-or.'
-        : 'Group is satisfied only when all child items have valid answers.\nThis is the default FHIR behaviour \u2014 no extra constraint is generated.';
-      lb.dataset.tipFhir = isOr ? 'questionnaire-constraint (key: ITLH_NS:group-or)' : 'item.required (default AND)';
-      lb.dataset.tipSpec = 'R4';
-      row.appendChild(lb);
+      // Show logic badge only when there are meaningful (answerable) children.
+      // Suppress it for groups that contain only display/info items.
+      const hasAnswerableChild = this.children.some(
+        ch => !(ch.itemType === 'display' || (ch.type === 'group' && !ch.children?.length))
+      );
+      if (hasAnswerableChild) {
+        const isOr = this.logicWithParent === 'OR';
+        const lb = document.createElement('span');
+        lb.className = 'preview-logic-badge preview-logic-' + (isOr ? 'or' : 'and');
+        lb.textContent = isOr ? 'ANY item \u2713' : 'ALL items \u2713';
+        lb.dataset.tipTitle = isOr ? 'Any item passes (OR)' : 'All items required (AND)';
+        lb.dataset.tipBody = isOr
+          ? 'Group is satisfied if at least one child item has a valid answer.\nStored in FHIR as a questionnaire-constraint with key e3a8c2f1\u2026:group-or.'
+          : 'Group is satisfied only when all child items have valid answers.\nThis is the default FHIR behaviour \u2014 no extra constraint is generated.';
+        lb.dataset.tipFhir = isOr ? 'questionnaire-constraint (key: ITLH_NS:group-or)' : 'item.required (default AND)';
+        lb.dataset.tipSpec = 'R4';
+        row.appendChild(lb);
+      }
     }
 
     if (!isEmptyGroup) {
