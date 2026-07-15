@@ -29,11 +29,9 @@ export class DisplayNode extends ItemNode {
   }
 
   // ── Label: help toggle or plain label with category icon ──────────────────
-  _buildLabel() {
+  _buildLabel(_res, rc) {
     const cat = this._displayCategory;
     if (cat === 'help') {
-      // Help items: collapsible toggle button
-      // Store toggle state on the instance so it survives full re-renders
       const wrap = document.createElement('span');
       wrap.className = 'display-help-wrap';
       const toggle = document.createElement('button');
@@ -44,7 +42,7 @@ export class DisplayNode extends ItemNode {
       const content = document.createElement('span');
       content.className = 'display-help-content';
       content.dataset.testid = 'display-help-content';
-      content.textContent = this.title;
+      this._applyLabelContent(content, rc);
       if (this._helpOpen) {
         content.classList.add('display-help-content--open');
         toggle.classList.add('display-help-toggle--open');
@@ -58,7 +56,7 @@ export class DisplayNode extends ItemNode {
       return wrap;
     }
     const el = document.createElement('span');
-    this._applyLabelContent(el);
+    this._applyLabelContent(el, rc);
     return el;
   }
 
