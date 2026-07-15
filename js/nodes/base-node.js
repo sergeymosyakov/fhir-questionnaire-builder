@@ -511,6 +511,30 @@ export class BaseNode {
     row.insertBefore(toggle, row.firstChild);
   }
 
+  // Render children with AND/OR separators, skipping separators adjacent to display/info items.
+  // Used by both GroupNode and ItemNode (when it has sub-items).
+  _appendChildRows(nested, rc) {
+    const logic = this.logicWithParent || 'AND';
+    let lastVisibleIsInfo = true; // treat start-of-list as "info" so first item gets no separator
+    for (const ch of this.children) {
+      const childRes = rc.resultMap.get(ch.id);
+      if (childRes && childRes.hidden && (rc.previewMode === 'patient' || !rc.viewPrefs.showHiddenItems)) continue;
+      if (childRes && (childRes.visible || childRes.showDimmed)) {
+        const isInfo = ch.itemType === 'display' || (ch.type === 'group' && !ch.children?.length);
+        if (!isInfo && !lastVisibleIsInfo && childRes.visible) {
+          const sep = document.createElement('div');
+          sep.className = 'logic-separator logic-separator-' + logic.toLowerCase();
+          sep.textContent = logic === 'OR'
+            ? uiStr('or_separator',  rc)
+            : uiStr('and_separator', rc);
+          nested.appendChild(sep);
+        }
+        BaseNode.dispatch(childRes, nested, rc);
+        if (childRes.visible) lastVisibleIsInfo = isInfo;
+      }
+    }
+  }
+
   // Simple nested children render — no separators, no repeating instances.
   // Used by GroupNode (dimmed/disabled paths) and ItemNode (always).
   _renderNestedChildren(_res, container, rc) {

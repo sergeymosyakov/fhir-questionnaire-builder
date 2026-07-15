@@ -90,11 +90,12 @@ function buildInlineTypeRow(node, setActive) {
 export class ItemNode extends BaseNode {
   constructor(data = {}) {
     super(data);
-    this.type       = 'item';
-    this.repeats    = data.repeats    ?? false;
-    this.options    = data.options    ?? '';
-    this.constraint = data.constraint ?? [];
-    this.children   = data.children   ?? [];
+    this.type           = 'item';
+    this.repeats         = data.repeats         ?? false;
+    this.options         = data.options         ?? '';
+    this.constraint      = data.constraint      ?? [];
+    this.children        = data.children        ?? [];
+    this.logicWithParent = data.logicWithParent ?? 'AND';
   }
 
   /** Abort own listeners and recursively destroy children. */
@@ -124,7 +125,11 @@ export class ItemNode extends BaseNode {
   // ── Sub-item children (FHIR R4: non-group items may have item[]) ──────────
   _renderChildren(res, target, rc) {
     if (this._previewCollapsed) return;
-    this._renderNestedChildren(res, target, rc);
+    if (!this.children.length) return;
+    const nested = document.createElement('div');
+    nested.className = 'preview-nested';
+    this._appendChildRows(nested, rc);
+    if (nested.childElementCount > 0) target.appendChild(nested);
   }
   _renderDimmedChildren(res, c, rc)   { this._renderNestedChildren(res, c,         rc); }
   _renderDisabledChildren(res, c, rc) { this._renderNestedChildren(res, c,         rc); }
