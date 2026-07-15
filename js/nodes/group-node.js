@@ -198,14 +198,16 @@ export class GroupNode extends BaseNode {
   }
 
   // Render this group's child rows (with AND/OR separators) from the current rc.resultMap.
+  // Separators are skipped adjacent to display/info items — they don't participate in logic.
   _appendChildRows(nested, rc) {
     const logic = this.logicWithParent || 'AND';
-    let firstVisible = true;
+    let lastAnswerableVisible = false; // was the last visible non-display item answerable?
     for (const ch of this.children) {
       const childRes = rc.resultMap.get(ch.id);
       if (childRes && childRes.hidden && (rc.previewMode === 'patient' || !rc.viewPrefs.showHiddenItems)) continue;
       if (childRes && (childRes.visible || childRes.showDimmed)) {
-        if (!firstVisible && childRes.visible) {
+        const isInfo = ch.itemType === 'display' || (ch.type === 'group' && !ch.children?.length);
+        if (!isInfo && lastAnswerableVisible && childRes.visible) {
           const sep = document.createElement('div');
           sep.className = 'logic-separator logic-separator-' + logic.toLowerCase();
           sep.textContent = logic === 'OR'
@@ -214,7 +216,7 @@ export class GroupNode extends BaseNode {
           nested.appendChild(sep);
         }
         BaseNode.dispatch(childRes, nested, rc);
-        if (childRes.visible) firstVisible = false;
+        if (childRes.visible) lastAnswerableVisible = !isInfo;
       }
     }
   }
