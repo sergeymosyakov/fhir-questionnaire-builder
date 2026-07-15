@@ -201,13 +201,13 @@ export class GroupNode extends BaseNode {
   // Separators are skipped adjacent to display/info items — they don't participate in logic.
   _appendChildRows(nested, rc) {
     const logic = this.logicWithParent || 'AND';
-    let lastAnswerableVisible = false; // was the last visible non-display item answerable?
+    let lastVisibleIsInfo = true; // treat start-of-list as "info" so first answerable gets no separator
     for (const ch of this.children) {
       const childRes = rc.resultMap.get(ch.id);
       if (childRes && childRes.hidden && (rc.previewMode === 'patient' || !rc.viewPrefs.showHiddenItems)) continue;
       if (childRes && (childRes.visible || childRes.showDimmed)) {
         const isInfo = ch.itemType === 'display' || (ch.type === 'group' && !ch.children?.length);
-        if (!isInfo && lastAnswerableVisible && childRes.visible) {
+        if (!isInfo && !lastVisibleIsInfo && childRes.visible) {
           const sep = document.createElement('div');
           sep.className = 'logic-separator logic-separator-' + logic.toLowerCase();
           sep.textContent = logic === 'OR'
@@ -216,7 +216,7 @@ export class GroupNode extends BaseNode {
           nested.appendChild(sep);
         }
         BaseNode.dispatch(childRes, nested, rc);
-        if (childRes.visible) lastAnswerableVisible = !isInfo;
+        if (childRes.visible) lastVisibleIsInfo = isInfo;
       }
     }
   }
