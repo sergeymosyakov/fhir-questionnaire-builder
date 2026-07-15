@@ -141,12 +141,16 @@ export class GroupNode extends BaseNode {
     }
 
     if (!isPatient && !isEmptyGroup) {
-      // Show logic badge only when there are meaningful (answerable) children.
-      // Suppress it for groups that contain only display/info items.
-      const hasAnswerableChild = this.children.some(
-        ch => !(ch.itemType === 'display' || (ch.type === 'group' && !ch.children?.length))
-      );
-      if (hasAnswerableChild) {
+      // Show logic badge only when there is at least one answerable descendant.
+      // Recurse into child groups so nested display-only subtrees are also suppressed.
+      function hasAnswerableDescendant(nodes) {
+        return nodes.some(ch => {
+          if (ch.itemType === 'display') return false;
+          if (ch.type === 'group') return ch.children?.length ? hasAnswerableDescendant(ch.children) : false;
+          return true; // any non-display item counts
+        });
+      }
+      if (hasAnswerableDescendant(this.children)) {
         const isOr = this.logicWithParent === 'OR';
         const lb = document.createElement('span');
         lb.className = 'preview-logic-badge preview-logic-' + (isOr ? 'or' : 'and');
