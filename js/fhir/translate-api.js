@@ -5,8 +5,9 @@
 //
 // Public API:
 //   translateBatch(texts, targetLang, sourceLang?)  → Promise<string[]>
-//   SUPPORTED_LANGUAGES  Map<code, label>
+//   SUPPORTED_LANGUAGES  Map<code, label>  (from js/fhir/languages.js)
 // ─────────────────────────────────────────────────────────────────────────────
+import { LANGUAGES_MAP } from './languages.js';
 
 const BATCH_SIZE = 40;   // Google gtx handles ~40 segments per request reliably
 const SEPARATOR  = '\n'; // newline is preserved by gtx (not a separator in output)
@@ -60,51 +61,12 @@ async function _callGtx(text, target, source) {
 }
 
 // ── Supported languages ───────────────────────────────────────────────────────
-// A practical subset of languages supported by Google Translate.
-// Code = BCP-47 / ISO 639-1.
-export const SUPPORTED_LANGUAGES = new Map([
-  ['ar', 'Arabic'],
-  ['zh', 'Chinese (Simplified)'],
-  ['zh-TW', 'Chinese (Traditional)'],
-  ['hr', 'Croatian'],
-  ['cs', 'Czech'],
-  ['da', 'Danish'],
-  ['nl', 'Dutch'],
-  ['fi', 'Finnish'],
-  ['fr', 'French'],
-  ['de', 'German'],
-  ['el', 'Greek'],
-  ['he', 'Hebrew'],
-  ['hi', 'Hindi'],
-  ['hu', 'Hungarian'],
-  ['id', 'Indonesian'],
-  ['it', 'Italian'],
-  ['ja', 'Japanese'],
-  ['ko', 'Korean'],
-  ['ms', 'Malay'],
-  ['no', 'Norwegian'],
-  ['fa', 'Persian'],
-  ['pl', 'Polish'],
-  ['pt', 'Portuguese'],
-  ['ro', 'Romanian'],
-  ['ru', 'Russian'],
-  ['sk', 'Slovak'],
-  ['sl', 'Slovenian'],
-  ['es', 'Spanish'],
-  ['sw', 'Swahili'],
-  ['sv', 'Swedish'],
-  ['tl', 'Tagalog'],
-  ['ta', 'Tamil'],
-  ['th', 'Thai'],
-  ['tr', 'Turkish'],
-  ['uk', 'Ukrainian'],
-  ['ur', 'Urdu'],
-  ['vi', 'Vietnamese'],
-]);
+// SUPPORTED_LANGUAGES is the master language list from languages.js
+export const SUPPORTED_LANGUAGES = LANGUAGES_MAP;
 
 // Make accessible to preview-form language switcher (avoids circular import)
 if (typeof window !== 'undefined') {
-  window._translationModule = { SUPPORTED_LANGUAGES };
+  window._translationModule = { SUPPORTED_LANGUAGES: LANGUAGES_MAP };
 }
 
 // UI_STRINGS lives in ui-strings.js (shared with render-ctx.js uiStr helper)

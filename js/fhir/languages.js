@@ -1,0 +1,62 @@
+// ── Master language list — single source of truth ────────────────────────────
+// Used by:
+//   translate-api.js  → SUPPORTED_LANGUAGES (translation target picker)
+//   metadata-sections/data.js → LANGUAGES (Questionnaire.language field dropdown)
+//
+// Entries: BCP-47 code → English display label.
+// Sorted alphabetically by code. Includes base codes and widely-used regional
+// variants supported by both FHIR (as valid BCP-47 tags) and Google Translate.
+
+export const LANGUAGES_MAP = new Map([
+  ['ar',    'Arabic'],
+  ['cs',    'Czech'],
+  ['da',    'Danish'],
+  ['de',    'German'],
+  ['de-AT', 'German (Austria)'],
+  ['de-CH', 'German (Switzerland)'],
+  ['de-DE', 'German (Germany)'],
+  ['el',    'Greek'],
+  ['en',    'English'],
+  ['en-GB', 'English (UK)'],
+  ['en-US', 'English (US)'],
+  ['es',    'Spanish'],
+  ['es-ES', 'Spanish (Spain)'],
+  ['fa',    'Persian'],
+  ['fi',    'Finnish'],
+  ['fr',    'French'],
+  ['fr-BE', 'French (Belgium)'],
+  ['fr-CH', 'French (Switzerland)'],
+  ['fr-FR', 'French (France)'],
+  ['he',    'Hebrew'],
+  ['hi',    'Hindi'],
+  ['hr',    'Croatian'],
+  ['hu',    'Hungarian'],
+  ['id',    'Indonesian'],
+  ['it',    'Italian'],
+  ['ja',    'Japanese'],
+  ['ko',    'Korean'],
+  ['ms',    'Malay'],
+  ['nb',    'Norwegian Bokmål'],
+  ['nl',    'Dutch'],
+  ['nl-BE', 'Dutch (Belgium)'],
+  ['nl-NL', 'Dutch (Netherlands)'],
+  ['no',    'Norwegian'],
+  ['pl',    'Polish'],
+  ['pt',    'Portuguese'],
+  ['pt-BR', 'Portuguese (Brazil)'],
+  ['ro',    'Romanian'],
+  ['ru',    'Russian'],
+  ['sk',    'Slovak'],
+  ['sl',    'Slovenian'],
+  ['sv',    'Swedish'],
+  ['sw',    'Swahili'],
+  ['ta',    'Tamil'],
+  ['th',    'Thai'],
+  ['tl',    'Tagalog'],
+  ['tr',    'Turkish'],
+  ['uk',    'Ukrainian'],
+  ['ur',    'Urdu'],
+  ['vi',    'Vietnamese'],
+  ['zh',    'Chinese (Simplified)'],
+  ['zh-TW', 'Chinese (Traditional)'],
+]);
