@@ -387,12 +387,18 @@ export class BaseNode {
   _applyLabelContent(el, rc) {
     const domPurify = window.DOMPurify;
     const marked    = window.marked;
-    // If a translation language is active and a translation exists, use it
     const lang = rc?.activeLanguage;
+    // 1. Translated XHTML (per-language rich text)
+    if (lang && rc?.translations?.[lang]?.xhtml?.[this.id] != null) {
+      el.innerHTML = domPurify ? domPurify.sanitize(rc.translations[lang].xhtml[this.id]) : '';
+      return;
+    }
+    // 2. Translated plain text
     if (lang && rc?.translations?.[lang]?.items?.[this.id] != null) {
       el.textContent = rc.translations[lang].items[this.id];
       return;
     }
+    // 3. Original rendering-xhtml / rendering-markdown / plain title
     if (this._renderXhtml && domPurify) {
       el.innerHTML = domPurify.sanitize(this._renderXhtml);
     } else if (this._renderMarkdown && domPurify && marked) {

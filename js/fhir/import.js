@@ -254,9 +254,24 @@ function _importTranslations(q, tree, translations) {
       Object.assign(translations[lang].ui, parsed);
     } catch { /* ignore malformed */ }
   }
+
+  // Read custom xhtml-translations extension from questionnaire root
+  const XHTML_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/xhtml-translations';
+  for (const ext of (q.extension || []).filter(e => e.url === XHTML_TRANS_URL)) {
+    const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
+    const strings = (ext.extension || []).find(s => s.url === 'strings')?.valueString;
+    if (!lang || !strings) continue;
+    try {
+      const parsed = JSON.parse(strings);
+      _ensureLang(translations, lang);
+      if (!translations[lang].xhtml) translations[lang].xhtml = {};
+      Object.assign(translations[lang].xhtml, parsed);
+    } catch { /* ignore malformed */ }
+  }
 }
 
 function _ensureLang(translations, lang) {
-  if (!translations[lang]) translations[lang] = { title: '', items: {}, opts: {}, ui: {} };
-  if (!translations[lang].ui) translations[lang].ui = {};
+  if (!translations[lang]) translations[lang] = { title: '', items: {}, opts: {}, ui: {}, xhtml: {} };
+  if (!translations[lang].ui)   translations[lang].ui   = {};
+  if (!translations[lang].xhtml) translations[lang].xhtml = {};
 }

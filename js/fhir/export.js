@@ -668,6 +668,22 @@ function _exportTranslations(q, translations) {
     });
   }
   if (!q.extension.length) delete q.extension;
+
+  // Write xhtml-translations custom extension for each language that has XHTML translations
+  const XHTML_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/xhtml-translations';
+  q.extension = (q.extension || []).filter(e => e.url !== XHTML_TRANS_URL);
+  for (const lang of langs) {
+    const xhtml = translations[lang].xhtml;
+    if (!xhtml || !Object.keys(xhtml).length) continue;
+    q.extension.push({
+      url: XHTML_TRANS_URL,
+      extension: [
+        { url: 'lang',    valueCode:   lang },
+        { url: 'strings', valueString: JSON.stringify(xhtml) },
+      ],
+    });
+  }
+  if (!q.extension.length) delete q.extension;
 }
 
 function _translationExt(lang, content) {

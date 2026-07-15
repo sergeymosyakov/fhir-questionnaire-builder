@@ -120,7 +120,11 @@ export class TranslateModal extends Modal {
 
     function walk(nodes) {
       for (const node of nodes || []) {
-        if (node.title) entries.push({ key: node.id, original: node.title, translated: store.items[node.id] ?? '' });
+        if (node._renderXhtml) {
+          entries.push({ key: node.id, original: node._renderXhtml, isXhtml: true, translated: store.xhtml?.[node.id] ?? '' });
+        } else if (node.title) {
+          entries.push({ key: node.id, original: node.title, translated: store.items[node.id] ?? '' });
+        }
         const opts = _getOptionLabels(node);
         for (const { code, display } of opts) {
           if (display) {
@@ -157,7 +161,12 @@ export class TranslateModal extends Modal {
     // Walk tree
     function walk(nodes) {
       for (const node of nodes || []) {
-        if (node.title) entries.push({ key: node.id, original: node.title });
+        if (node._renderXhtml) {
+          // Send full XHTML to API — Google Translate preserves HTML tags
+          entries.push({ key: node.id, original: node._renderXhtml, isXhtml: true });
+        } else if (node.title) {
+          entries.push({ key: node.id, original: node.title });
+        }
         // answerOption labels from the node model
         const opts = _getOptionLabels(node);
         for (const { code, display } of opts) {
@@ -315,8 +324,9 @@ export class TranslateModal extends Modal {
   _applyTranslations() {
     const lang = this._targetLang;
     const qd   = this._questDoc;
-    if (!qd.translations[lang]) qd.translations[lang] = { title: '', items: {}, opts: {}, ui: {} };
-    if (!qd.translations[lang].ui) qd.translations[lang].ui = {};
+    if (!qd.translations[lang]) qd.translations[lang] = { title: '', items: {}, opts: {}, ui: {}, xhtml: {} };
+    if (!qd.translations[lang].ui)   qd.translations[lang].ui   = {};
+    if (!qd.translations[lang].xhtml) qd.translations[lang].xhtml = {};
     const store = qd.translations[lang];
 
     for (const row of this._reviewRows) {
@@ -327,6 +337,8 @@ export class TranslateModal extends Modal {
         store.ui[row.key.slice(6)] = val;   // strip '__ui__' prefix
       } else if (row.key.includes('__')) {
         store.opts[row.key] = val;
+      } else if (row.isXhtml) {
+        store.xhtml[row.key] = val;  // translated XHTML
       } else {
         store.items[row.key] = val;
       }
