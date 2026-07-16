@@ -1,0 +1,20 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "collapse-dimmed-group-test",
+  "title": "Collapse Dimmed Group Test",
+  "status": "draft",
+  "item": [
+    { "linkId": "trig", "text": "Trigger question", "type": "boolean" },
+    {
+      "linkId": "dgrp",
+      "text": "Conditional group",
+      "type": "group",
+      "enableWhen": [
+        { "question": "trig", "operator": "=", "answerBoolean": true }
+      ],
+      "item": [
+        { "linkId": "dchild", "text": "Child of conditional group", "type": "boolean" }
+      ]
+    }
+  ]
+}

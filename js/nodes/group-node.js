@@ -172,10 +172,12 @@ export class GroupNode extends BaseNode {
 
   // ── Dimmed/disabled: also render children to keep counts in sync ─────────
   _renderDimmedChildren(res, container, rc) {
+    if (this._previewCollapsed) return;
     this._renderNestedChildren(res, container, rc);
   }
 
   _renderDisabledChildren(res, container, rc) {
+    if (this._previewCollapsed) return;
     this._renderNestedChildren(res, container, rc);
   }
 
