@@ -51,6 +51,7 @@ export class PreviewForm {
     this._renderTimer   = null;   // debounce handle for RESPONSE_CHANGED
     this._calcCache     = null;   // { nodeMap, order } — cached dep-graph, invalidated on REINIT_FORM
     this._pendingCtx    = null;   // result of last _reCalc(), consumed by next _asyncRender
+    this._lastVisibleSig = null;  // fingerprint of last visible-set; fast-path skips DOM rebuild when unchanged
     this._els           = {};
 
     // ── Wire _rc (shared context for node classes) ──────────────────────────
@@ -109,12 +110,13 @@ export class PreviewForm {
       clearTimeout(this._renderTimer);
       this._renderTimer = setTimeout(() => this._asyncRender(this._renderVersion), 30);
     });
-    document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => this._asyncRender(++this._renderVersion));
-    document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => this._asyncRender(++this._renderVersion));
+    document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._lastVisibleSig = null; this._asyncRender(++this._renderVersion); });
+    document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._lastVisibleSig = null; this._asyncRender(++this._renderVersion); });
     document.addEventListener(AppEvents.SDC_POPULATE_REQUESTED, e => this._populate(e.detail.patientRef));
     document.addEventListener(AppEvents.LANGUAGE_CHANGED, e => {
       _rc.activeLanguage  = e.detail?.lang ?? '';
       _rc.translations    = this._rawFhir?.translations ?? {};
+      this._lastVisibleSig = null;  // text content changes — full rebuild required
       this._asyncRender(++this._renderVersion);
     });
 
@@ -175,9 +177,10 @@ export class PreviewForm {
 
   async reinitForm({ silent = false } = {}) {
     if (!fhirpath) return;
-    // Questionnaire structure changed — dep-graph cache is stale.
-    this._calcCache  = null;
-    this._pendingCtx = null;
+    // Questionnaire structure changed — dep-graph cache and visible-set fingerprint are stale.
+    this._calcCache      = null;
+    this._pendingCtx     = null;
+    this._lastVisibleSig = null;
     if (!silent) progress.show('Building questionnaire response\u2026');
     await _yield();
     const base = this._rawFhir.value
@@ -212,6 +215,7 @@ export class PreviewForm {
       showHiddenItems: 'preview--no-hidden',
     }[e.detail.key];
     if (cls) lform.classList.toggle(cls, !e.detail.value);
+    this._lastVisibleSig = null;  // display mode changed — full rebuild
     this._asyncRender(++this._renderVersion);
   }
 
@@ -224,6 +228,7 @@ export class PreviewForm {
       lform.style.display                    = isJson ? 'none' : '';
       this._els.fhirJsonView.style.display   = isJson ? '' : 'none';
     }
+    this._lastVisibleSig = null;  // mode change — full rebuild
     this._asyncRender(++this._renderVersion);
   }
 
@@ -330,6 +335,26 @@ export class PreviewForm {
 
     const lform = this._els.lform;
     if (!lform) { progress.hide(); return; }
+
+    // ── Fast path: visible set unchanged ────────────────────────────────────
+    // REFRESH_CALC_BADGES has already updated calc-badge elements in-place
+    // (dispatched synchronously inside _reCalc() → reCalcAndRefresh). Skip the
+    // full DOM teardown/rebuild and only refresh the derived outputs.
+    const visibleSig = visible.map(r => r.node.id).join('\0');
+    if (visibleSig === this._lastVisibleSig && lform.children.length > 0) {
+      _rc.ctx = ctx; _rc.resultMap = resultMap; _rc.cEnv = _cEnv;
+      _rc.visible = visible;
+      GroupNode.updateAll(_rc);
+      statusBadge.update({ visible, ctx });
+      search.refresh();
+      this._updateJsonView();
+      progress.hide();
+      document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_RENDER_DONE));
+      return;
+    }
+    this._lastVisibleSig = visibleSig;
+
+    // ── Full rebuild ─────────────────────────────────────────────────────────
     const scrollPanel = lform.closest('.right-panel-body');
     const savedScroll = scrollPanel ? scrollPanel.scrollTop : 0;
 
