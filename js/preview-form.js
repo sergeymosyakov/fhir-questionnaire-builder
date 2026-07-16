@@ -344,6 +344,16 @@ export class PreviewForm {
     if (visibleSig === this._lastVisibleSig && lform.children.length > 0) {
       _rc.ctx = ctx; _rc.resultMap = resultMap; _rc.cEnv = _cEnv;
       _rc.visible = visible;
+      // Refresh validity icons for all visible nodes in-place (calc values
+      // may have changed, updating calcFormOk result without a full rebuild).
+      for (const r of results) {
+        if (!r.visible) continue;
+        const iconEl = r.node._iconEl;
+        if (!iconEl || !document.contains(iconEl)) continue;
+        const { displayOk } = r.node._evalCondition?.(r, _rc) ?? { displayOk: true };
+        iconEl.className   = displayOk ? 'icon-ok' : 'icon-fail';
+        iconEl.textContent = displayOk ? '\u2713' : '\u2717';
+      }
       GroupNode.updateAll(_rc);
       statusBadge.update({ visible, ctx });
       search.refresh();

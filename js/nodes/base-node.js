@@ -277,6 +277,7 @@ export class BaseNode {
       }
     }
     res._iconEl = iconEl;
+    this._iconEl = iconEl;   // also on node — survives across renders for fast-path icon refresh
 
     if (rc.viewPrefs.showLinkId && !isPatient) row.appendChild(this._buildLinkIdTag(rc));
 
