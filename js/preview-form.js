@@ -361,7 +361,7 @@ export class PreviewForm {
     // rebuild even when the visible node set is unchanged.
     const nodesSig  = visible.map(r => {
       const n = r.node;
-      return `${n.id}|${n.title ?? ''}|${n.itemType ?? ''}|${n.mandatory ?? ''}|${n.logicWithParent ?? ''}|${n._prefix ?? ''}|${n._choiceOrientation ?? ''}`;
+      return `${n.id}|${n.title ?? ''}|${n.itemType ?? ''}|${n.mandatory ?? ''}|${n.logicWithParent ?? ''}|${n._prefix ?? ''}|${n._choiceOrientation ?? ''}|${n._previewCollapsed ? 'c' : 'e'}`;
     }).join('\0');
     const repNodes  = results.filter(r => r.visible && r.node.repeats);
     const curCounts = new Map(repNodes.map(r => [r.node.id, this._answerStore.data[r.node.id]?.length ?? 1]));
