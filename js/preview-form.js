@@ -340,7 +340,16 @@ export class PreviewForm {
     // REFRESH_CALC_BADGES has already updated calc-badge elements in-place
     // (dispatched synchronously inside _reCalc() → reCalcAndRefresh). Skip the
     // full DOM teardown/rebuild and only refresh the derived outputs.
-    const visibleSig = visible.map(r => r.node.id).join('\0');
+    //
+    // Also include repeat-instance counts (answerStore array lengths) so that
+    // "+ Add another" and "× Remove" actions force a full rebuild — they don't
+    // change which nodes are visible, but they change the DOM within a repeating
+    // item's row.
+    const repSig = results
+      .filter(r => r.visible && r.node.repeats)
+      .map(r => this._answerStore.data[r.node.id]?.length ?? 1)
+      .join(',');
+    const visibleSig = visible.map(r => r.node.id).join('\0') + '\t' + repSig;
     if (visibleSig === this._lastVisibleSig && lform.children.length > 0) {
       _rc.ctx = ctx; _rc.resultMap = resultMap; _rc.cEnv = _cEnv;
       _rc.visible = visible;
