@@ -1640,3 +1640,130 @@ describe('importFHIR — implicitRules', () => {
   });
 });
 
+const TRANSLATION_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
+const UI_TRANS_URL    = 'http://fhir-qb.app/StructureDefinition/ui-translations';
+const XHTML_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/xhtml-translations';
+
+function makeTitleTranslation(lang, content) {
+  return {
+    url: TRANSLATION_URL,
+    extension: [
+      { url: 'lang',    valueCode:   lang    },
+      { url: 'content', valueString: content },
+    ],
+  };
+}
+
+// ── _importTranslations (via importFHIR) ──────────────────────────────────────
+describe('importFHIR — _importTranslations', () => {
+  beforeEach(() => {
+    // Ensure translations are cleared before each test
+    _questDoc.translations = {};
+  });
+
+  it('reads title translations from q._title.extension', () => {
+    importFHIR({
+      resourceType: 'Questionnaire', title: 'Hello', item: [],
+      _title: { extension: [makeTitleTranslation('de', 'Hallo')] },
+    });
+    expect(_questDoc.translations?.de?.title).toBe('Hallo');
+  });
+
+  it('reads item.text translations from fi._text.extension', () => {
+    importFHIR({
+      resourceType: 'Questionnaire', title: 'T', item: [{
+        linkId: 'q1', type: 'string', text: 'Name',
+        _text: { extension: [makeTitleTranslation('fr', 'Nom')] },
+      }],
+    });
+    expect(_questDoc.translations?.fr?.items?.q1).toBe('Nom');
+  });
+
+  it('reads answerOption label translations', () => {
+    importFHIR({
+      resourceType: 'Questionnaire', title: 'T', item: [{
+        linkId: 'q1', type: 'choice',
+        answerOption: [{
+          valueCoding: { code: 'M', display: 'Male' },
+          _valueCoding: { _display: { extension: [makeTitleTranslation('de', 'Männlich')] } },
+        }],
+      }],
+    });
+    expect(_questDoc.translations?.de?.opts?.['q1__M']).toBe('Männlich');
+  });
+
+  it('reads ui-translations extension from questionnaire root', () => {
+    const uiStrings = { 'next': 'Weiter', 'finish': 'Fertig' };
+    importFHIR({
+      resourceType: 'Questionnaire', title: 'T', item: [],
+      extension: [{
+        url: UI_TRANS_URL,
+        extension: [
+          { url: 'lang',    valueCode:   'de' },
+          { url: 'strings', valueString: JSON.stringify(uiStrings) },
+        ],
+      }],
+    });
+    expect(_questDoc.translations?.de?.ui?.next).toBe('Weiter');
+    expect(_questDoc.translations?.de?.ui?.finish).toBe('Fertig');
+  });
+
+  it('reads xhtml-translations extension from questionnaire root', () => {
+    const xhtmlStrings = { 'intro-text': '<p>Einleitung</p>' };
+    importFHIR({
+      resourceType: 'Questionnaire', title: 'T', item: [],
+      extension: [{
+        url: XHTML_TRANS_URL,
+        extension: [
+          { url: 'lang',    valueCode:   'de' },
+          { url: 'strings', valueString: JSON.stringify(xhtmlStrings) },
+        ],
+      }],
+    });
+    expect(_questDoc.translations?.de?.xhtml?.['intro-text']).toBe('<p>Einleitung</p>');
+  });
+
+  it('ignores ui-translations with malformed JSON strings', () => {
+    importFHIR({
+      resourceType: 'Questionnaire', title: 'T', item: [],
+      extension: [{
+        url: UI_TRANS_URL,
+        extension: [
+          { url: 'lang',    valueCode:   'de' },
+          { url: 'strings', valueString: '{not valid json' },
+        ],
+      }],
+    });
+    // Should not throw and de.ui should be empty (or de not created at all)
+    expect(_questDoc.translations?.de?.ui ?? {}).toEqual({});
+  });
+
+  it('skips title translation with missing lang or content', () => {
+    importFHIR({
+      resourceType: 'Questionnaire', title: 'T', item: [],
+      _title: {
+        extension: [
+          { url: TRANSLATION_URL, extension: [{ url: 'content', valueString: 'Hallo' }] }, // no lang
+          { url: TRANSLATION_URL, extension: [{ url: 'lang', valueCode: 'de' }] },          // no content
+        ],
+      },
+    });
+    // Neither incomplete translation should produce an entry
+    expect(Object.keys(_questDoc.translations ?? {})).toHaveLength(0);
+  });
+
+  it('initialises multiple language keys independently (_ensureLang)', () => {
+    importFHIR({
+      resourceType: 'Questionnaire', title: 'T', item: [],
+      _title: {
+        extension: [
+          makeTitleTranslation('de', 'Hallo'),
+          makeTitleTranslation('fr', 'Bonjour'),
+        ],
+      },
+    });
+    expect(_questDoc.translations?.de?.title).toBe('Hallo');
+    expect(_questDoc.translations?.fr?.title).toBe('Bonjour');
+  });
+});
+

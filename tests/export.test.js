@@ -677,4 +677,76 @@ describe('buildFHIRObject — translations export', () => {
     const q = buildFHIRObject();
     expect(q._title).toBeUndefined();
   });
+
+  it('writes ui-translations extension for languages with ui strings', () => {
+    _tree.length = 0;
+    _questDoc.translations = {
+      de: { title: '', items: {}, opts: {}, ui: { next: 'Weiter' }, xhtml: {} },
+    };
+    const q = buildFHIRObject();
+    const UI_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/ui-translations';
+    const uiExt = (q.extension || []).find(e => e.url === UI_TRANS_URL);
+    expect(uiExt).toBeDefined();
+    const langSub    = uiExt.extension.find(s => s.url === 'lang');
+    const stringsSub = uiExt.extension.find(s => s.url === 'strings');
+    expect(langSub?.valueCode).toBe('de');
+    expect(JSON.parse(stringsSub.valueString)).toEqual({ next: 'Weiter' });
+    _questDoc.translations = null;
+  });
+
+  it('writes xhtml-translations extension for languages with xhtml strings', () => {
+    _tree.length = 0;
+    _questDoc.translations = {
+      de: { title: '', items: {}, opts: {}, ui: {}, xhtml: { intro: '<p>Text</p>' } },
+    };
+    const q = buildFHIRObject();
+    const XHTML_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/xhtml-translations';
+    const xhtmlExt = (q.extension || []).find(e => e.url === XHTML_TRANS_URL);
+    expect(xhtmlExt).toBeDefined();
+    const strings = JSON.parse(xhtmlExt.extension.find(s => s.url === 'strings').valueString);
+    expect(strings.intro).toBe('<p>Text</p>');
+    _questDoc.translations = null;
+  });
+
+  it('writes answerOption label translations (_valueCoding._display.extension)', () => {
+    _tree.length = 0;
+    _tree.push({
+      id: 'q1', type: 'item', itemType: 'radio', title: 'Choice Q',
+      enableWhen: [], constraint: [], options: 'M, F', mandatory: false, repeats: false, children: [],
+    });
+    _questDoc.translations = {
+      de: { title: '', items: {}, opts: { 'q1__M': 'Männlich' }, ui: {}, xhtml: {} },
+    };
+    const q = buildFHIRObject();
+    const ao = q.item?.[0]?.answerOption?.find(a => a.valueCoding?.code === 'M');
+    expect(ao?._valueCoding?._display?.extension).toBeDefined();
+    const ext = ao._valueCoding._display.extension.find(e =>
+      e.extension?.some(x => x.valueCode === 'de')
+    );
+    expect(ext).toBeTruthy();
+    expect(ext.extension.find(x => x.url === 'content')?.valueString).toBe('Männlich');
+    _tree.length = 0;
+    _questDoc.translations = null;
+  });
+
+  it('_mergeTranslationExts preserves existing non-translation extensions', () => {
+    _tree.length = 0;
+    // First export: sets up _title extension
+    _questDoc.translations = {
+      es: { title: 'Primera', items: {}, opts: {}, ui: {}, xhtml: {} },
+    };
+    buildFHIRObject();
+    // Second export: same language, different content — mergeTranslationExts should replace
+    _questDoc.translations = {
+      es: { title: 'Segunda', items: {}, opts: {}, ui: {}, xhtml: {} },
+    };
+    const q2 = buildFHIRObject();
+    const TRANSLATION_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
+    const transExts = (q2._title?.extension || []).filter(e => e.url === TRANSLATION_URL);
+    // Should have exactly one translation ext for 'es', not duplicate
+    const esExts = transExts.filter(e => e.extension?.some(x => x.valueCode === 'es'));
+    expect(esExts).toHaveLength(1);
+    expect(esExts[0].extension.find(x => x.url === 'content')?.valueString).toBe('Segunda');
+    _questDoc.translations = null;
+  });
 });

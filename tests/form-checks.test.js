@@ -213,3 +213,22 @@ describe('evalConstraints', () => {
     expect(evalConstraints({ constraint: c }, fpThrow, qr, {})).toBe(false);
   });
 });
+
+// ── calcFormOk — path scoping for repeating groups ────────────────────────────
+describe('calcFormOk — path-scoped store', () => {
+  it('wraps store.get with path argument when path is provided', () => {
+    // store.get(id, path) returns valid url for path[0]=0, invalid for path[0]=1
+    const mockStore = {
+      get: (id, pathArg) => (pathArg && pathArg[0] === 0) ? 'https://valid.example' : 'not-a-url',
+    };
+    const n = node({ itemType: 'url' });
+    expect(calcFormOk(n, mockStore, [0])).toBe(true);
+    expect(calcFormOk(n, mockStore, [1])).toBe(false);
+  });
+
+  it('empty path array skips path-scoping', () => {
+    const mockStore = { get: () => '' };
+    const n = node({ itemType: 'url', mandatory: false });
+    expect(calcFormOk(n, mockStore, [])).toBe(true);
+  });
+});

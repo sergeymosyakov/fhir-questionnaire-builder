@@ -157,4 +157,16 @@ describe('REDCapCompatValidator', () => {
     const issues = await validator._run(null, [], {});
     expect(issues).toHaveLength(0);
   });
+
+  it('id getter returns "redcap-compat"', () => {
+    expect(validator.id).toBe('redcap-compat');
+  });
+
+  it('name getter returns "REDCap Compatibility"', () => {
+    expect(validator.name).toBe('REDCap Compatibility');
+  });
+
+  it('type getter returns "local"', () => {
+    expect(validator.type).toBe('local');
+  });
 });

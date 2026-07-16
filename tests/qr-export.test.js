@@ -217,4 +217,38 @@ describe('exportQR — id, language and meta block', () => {
     exportQR('test.json', { metaProfile: [] });
     expect(buildQR.mock.results[0].value.meta.profile).toBeUndefined();
   });
+
+  it('writes meta.tag when provided (filters empty codes)', () => {
+    exportQR('test.json', { metaTag: [{ code: 'tag1', system: 'http://example.org' }, { code: '' }] });
+    const tag = buildQR.mock.results[0].value.meta.tag;
+    expect(tag).toHaveLength(1);
+    expect(tag[0].code).toBe('tag1');
+  });
+
+  it('omits meta.tag when empty array', () => {
+    exportQR('test.json', { metaTag: [] });
+    expect(buildQR.mock.results[0].value.meta.tag).toBeUndefined();
+  });
+
+  it('writes meta.security when provided (filters empty codes)', () => {
+    exportQR('test.json', { metaSecurity: [{ code: 'restricted' }, { code: '  ' }] });
+    const sec = buildQR.mock.results[0].value.meta.security;
+    expect(sec).toHaveLength(1);
+    expect(sec[0].code).toBe('restricted');
+  });
+
+  it('omits meta.security when empty array', () => {
+    exportQR('test.json', { metaSecurity: [] });
+    expect(buildQR.mock.results[0].value.meta.security).toBeUndefined();
+  });
+
+  it('sets id when meta.id provided', () => {
+    exportQR('test.json', { id: 'my-qr-id' });
+    expect(buildQR.mock.results[0].value.id).toBe('my-qr-id');
+  });
+
+  it('sets language when meta.language provided', () => {
+    exportQR('test.json', { language: 'de' });
+    expect(buildQR.mock.results[0].value.language).toBe('de');
+  });
 });
