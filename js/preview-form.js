@@ -48,11 +48,12 @@ export class PreviewForm {
     this._preQR         = null;
     this._preEnvVars    = null;
     this._renderVersion = 0;
-    this._renderTimer   = null;   // debounce handle for RESPONSE_CHANGED
-    this._calcCache     = null;   // { nodeMap, order } — cached dep-graph, invalidated on REINIT_FORM
-    this._pendingCtx    = null;   // result of last _reCalc(), consumed by next _asyncRender
-    this._lastVisibleSig = null;  // fingerprint of last visible-set; fast-path skips DOM rebuild when unchanged
-    this._els           = {};
+    this._renderTimer    = null;   // debounce handle for RESPONSE_CHANGED
+    this._calcCache      = null;   // { nodeMap, order } — cached dep-graph, invalidated on REINIT_FORM
+    this._pendingCtx     = null;   // result of last _reCalc(), consumed by next _asyncRender
+    this._lastVisibleSig = null;   // nodesSig\trepSig fingerprint; fast/partial path when unchanged
+    this._lastRepCounts  = null;   // Map<nodeId, length> — used by partial rebuild to detect which row changed
+    this._els            = {};
 
     // ── Wire _rc (shared context for node classes) ──────────────────────────
     _rc.viewPrefs        = this._viewPrefs;
@@ -110,13 +111,13 @@ export class PreviewForm {
       clearTimeout(this._renderTimer);
       this._renderTimer = setTimeout(() => this._asyncRender(this._renderVersion), 30);
     });
-    document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._lastVisibleSig = null; this._asyncRender(++this._renderVersion); });
-    document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._lastVisibleSig = null; this._asyncRender(++this._renderVersion); });
+    document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._asyncRender(++this._renderVersion); });
+    document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._asyncRender(++this._renderVersion); });
     document.addEventListener(AppEvents.SDC_POPULATE_REQUESTED, e => this._populate(e.detail.patientRef));
     document.addEventListener(AppEvents.LANGUAGE_CHANGED, e => {
       _rc.activeLanguage  = e.detail?.lang ?? '';
       _rc.translations    = this._rawFhir?.translations ?? {};
-      this._lastVisibleSig = null;  // text content changes — full rebuild required
+      this._lastVisibleSig = null; this._lastRepCounts = null;  // text content changes — full rebuild required
       this._asyncRender(++this._renderVersion);
     });
 
@@ -177,10 +178,11 @@ export class PreviewForm {
 
   async reinitForm({ silent = false } = {}) {
     if (!fhirpath) return;
-    // Questionnaire structure changed — dep-graph cache and visible-set fingerprint are stale.
+    // Questionnaire structure changed — all cached state is stale.
     this._calcCache      = null;
     this._pendingCtx     = null;
     this._lastVisibleSig = null;
+    this._lastRepCounts  = null;
     if (!silent) progress.show('Building questionnaire response\u2026');
     await _yield();
     const base = this._rawFhir.value
@@ -215,7 +217,7 @@ export class PreviewForm {
       showHiddenItems: 'preview--no-hidden',
     }[e.detail.key];
     if (cls) lform.classList.toggle(cls, !e.detail.value);
-    this._lastVisibleSig = null;  // display mode changed — full rebuild
+    this._lastVisibleSig = null; this._lastRepCounts = null;  // display mode changed — full rebuild
     this._asyncRender(++this._renderVersion);
   }
 
@@ -228,7 +230,7 @@ export class PreviewForm {
       lform.style.display                    = isJson ? 'none' : '';
       this._els.fhirJsonView.style.display   = isJson ? '' : 'none';
     }
-    this._lastVisibleSig = null;  // mode change — full rebuild
+    this._lastVisibleSig = null; this._lastRepCounts = null;  // mode change — full rebuild
     this._asyncRender(++this._renderVersion);
   }
 
@@ -336,25 +338,64 @@ export class PreviewForm {
     const lform = this._els.lform;
     if (!lform) { progress.hide(); return; }
 
-    // ── Fast path: visible set unchanged ────────────────────────────────────
-    // REFRESH_CALC_BADGES has already updated calc-badge elements in-place
-    // (dispatched synchronously inside _reCalc() → reCalcAndRefresh). Skip the
-    // full DOM teardown/rebuild and only refresh the derived outputs.
-    //
-    // Also include repeat-instance counts (answerStore array lengths) so that
-    // "+ Add another" and "× Remove" actions force a full rebuild — they don't
-    // change which nodes are visible, but they change the DOM within a repeating
-    // item's row.
-    const repSig = results
-      .filter(r => r.visible && r.node.repeats)
-      .map(r => this._answerStore.data[r.node.id]?.length ?? 1)
-      .join(',');
-    const visibleSig = visible.map(r => r.node.id).join('\0') + '\t' + repSig;
-    if (visibleSig === this._lastVisibleSig && lform.children.length > 0) {
+    // ── Signature: nodesSig (which nodes visible) + repSig (repeat counts) ──
+    const nodesSig   = visible.map(r => r.node.id).join('\0');
+    const repNodes   = results.filter(r => r.visible && r.node.repeats);
+    const curCounts  = new Map(repNodes.map(r => [r.node.id, this._answerStore.data[r.node.id]?.length ?? 1]));
+    const repSig     = [...curCounts.values()].join(',');
+    const visibleSig = nodesSig + '\t' + repSig;
+
+    const [prevNodesSig = '', prevRepSig = ''] = (this._lastVisibleSig ?? '\t').split('\t');
+    const hasDOM = lform.children.length > 0;
+
+    if (nodesSig === prevNodesSig && hasDOM) {
       _rc.ctx = ctx; _rc.resultMap = resultMap; _rc.cEnv = _cEnv;
       _rc.visible = visible;
-      // Refresh validity icons for all visible nodes in-place (calc values
-      // may have changed, updating calcFormOk result without a full rebuild).
+
+      if (repSig === prevRepSig) {
+        // ── Fast path: only values changed ────────────────────────────────
+        // REFRESH_CALC_BADGES already updated badge elements in-place.
+        // Refresh validity icons and meta outputs without touching the DOM.
+        for (const r of results) {
+          if (!r.visible) continue;
+          const iconEl = r.node._iconEl;
+          if (!iconEl || !document.contains(iconEl)) continue;
+          const { displayOk } = r.node._evalCondition?.(r, _rc) ?? { displayOk: true };
+          iconEl.className   = displayOk ? 'icon-ok' : 'icon-fail';
+          iconEl.textContent = displayOk ? '\u2713' : '\u2717';
+        }
+        GroupNode.updateAll(_rc);
+        statusBadge.update({ visible, ctx });
+        search.refresh();
+        this._updateJsonView();
+        progress.hide();
+        document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_RENDER_DONE));
+        return;
+      }
+
+      // ── Partial rebuild: only repeat counts changed (+ Add another / × Remove)
+      // Rebuild only the rows whose count changed — no lform.innerHTML = '',
+      // no scroll save/restore, no flash.
+      _rc.previewMode  = this._previewMode;
+      _rc.translations = this._rawFhir?.translations ?? {};
+      _rc.instancePath = [];
+
+      for (const r of repNodes) {
+        const curLen  = curCounts.get(r.node.id);
+        const prevLen = this._lastRepCounts?.get(r.node.id) ?? 1;
+        if (curLen === prevLen) continue;                          // unchanged
+
+        const oldRow = r.node._previewEl;
+        if (!oldRow || !document.contains(oldRow)) continue;      // safety guard
+
+        const newFrag = document.createDocumentFragment();
+        BaseNode.dispatch(r, newFrag, _rc);
+        oldRow.replaceWith(newFrag);                               // surgical swap
+      }
+
+      this._lastVisibleSig = visibleSig;
+      this._lastRepCounts  = curCounts;
+      // Refresh icons across all visible items (a repeat add may change required state)
       for (const r of results) {
         if (!r.visible) continue;
         const iconEl = r.node._iconEl;
@@ -371,9 +412,11 @@ export class PreviewForm {
       document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_RENDER_DONE));
       return;
     }
-    this._lastVisibleSig = visibleSig;
 
-    // ── Full rebuild ─────────────────────────────────────────────────────────
+    // ── Full rebuild: visible set changed ─────────────────────────────────────
+    this._lastVisibleSig = visibleSig;
+    this._lastRepCounts  = curCounts;
+
     const scrollPanel = lform.closest('.right-panel-body');
     const savedScroll = scrollPanel ? scrollPanel.scrollTop : 0;
 
