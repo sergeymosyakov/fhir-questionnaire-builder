@@ -139,6 +139,7 @@
   color: #111827;
   letter-spacing: 0.01em;
   padding: 4px 0 2px;
+  line-height: 24px;
 }
 .patient-view .display-info-label {
   font-size: 14px;
@@ -173,7 +174,9 @@
 }
 .patient-view .preview-collapse-toggle {
   color: #9ca3af;
-  font-size: 11px;
+  font-size: 13px;
+  line-height: 24px;
+  padding-top: 4px;
 }
 .patient-view .preview-collapse-toggle:hover { color: #374151; }
 .patient-view input[type="text"],
