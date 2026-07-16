@@ -53,6 +53,7 @@ export class PreviewForm {
     this._pendingCtx     = null;   // result of last _reCalc(), consumed by next _asyncRender
     this._lastVisibleSig = null;   // nodesSig\trepSig fingerprint; fast/partial path when unchanged
     this._lastRepCounts  = null;   // Map<nodeId, length> — used by partial rebuild to detect which row changed
+    this._lastRepDataSz  = null;   // Map<nodeId, JSON-length> — detects data changes inside instances (e.g. enableWhen in gtable)
     this._els            = {};
 
     // ── Wire _rc (shared context for node classes) ──────────────────────────
@@ -111,13 +112,29 @@ export class PreviewForm {
       clearTimeout(this._renderTimer);
       this._renderTimer = setTimeout(() => this._asyncRender(this._renderVersion), 30);
     });
-    document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._asyncRender(++this._renderVersion); });
-    document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._asyncRender(++this._renderVersion); });
+    // Builder-side structural changes (modal apply, type change, expression edit)
+    // dispatch CALC_RECALC_REQUESTED. Invalidate all render caches so the next
+    // _asyncRender does a full rebuild rather than taking the fast/partial path.
+    document.addEventListener(AppEvents.CALC_RECALC_REQUESTED, () => {
+      this._lastVisibleSig = null;
+      this._lastRepCounts  = null;
+      this._lastRepDataSz  = null;
+      this._calcCache      = null;
+    });
+    // QR answers load does not dispatch REINIT_FORM — reset caches so the next
+    // _asyncRender takes the full-rebuild path and re-renders all controls.
+    document.addEventListener(AppEvents.QR_LOADED, () => {
+      this._lastVisibleSig = null;
+      this._lastRepCounts  = null;
+      this._lastRepDataSz  = null;
+    });
+    document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null; this._asyncRender(++this._renderVersion); });
+    document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null; this._asyncRender(++this._renderVersion); });
     document.addEventListener(AppEvents.SDC_POPULATE_REQUESTED, e => this._populate(e.detail.patientRef));
     document.addEventListener(AppEvents.LANGUAGE_CHANGED, e => {
       _rc.activeLanguage  = e.detail?.lang ?? '';
       _rc.translations    = this._rawFhir?.translations ?? {};
-      this._lastVisibleSig = null; this._lastRepCounts = null;  // text content changes — full rebuild required
+      this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null;  // text content changes — full rebuild required
       this._asyncRender(++this._renderVersion);
     });
 
@@ -183,6 +200,7 @@ export class PreviewForm {
     this._pendingCtx     = null;
     this._lastVisibleSig = null;
     this._lastRepCounts  = null;
+    this._lastRepDataSz  = null;
     if (!silent) progress.show('Building questionnaire response\u2026');
     await _yield();
     const base = this._rawFhir.value
@@ -338,11 +356,20 @@ export class PreviewForm {
     const lform = this._els.lform;
     if (!lform) { progress.hide(); return; }
 
-    // ── Signature: nodesSig (which nodes visible) + repSig (repeat counts) ──
-    const nodesSig   = visible.map(r => r.node.id).join('\0');
-    const repNodes   = results.filter(r => r.visible && r.node.repeats);
-    const curCounts  = new Map(repNodes.map(r => [r.node.id, this._answerStore.data[r.node.id]?.length ?? 1]));
-    const repSig     = [...curCounts.values()].join(',');
+    // ── Signature: nodesSig (which nodes visible + rendering-relevant properties) ────
+    // Include display-affecting properties so any builder-side change forces a full
+    // rebuild even when the visible node set is unchanged.
+    const nodesSig  = visible.map(r => {
+      const n = r.node;
+      return `${n.id}|${n.title ?? ''}|${n.itemType ?? ''}|${n.mandatory ?? ''}|${n.logicWithParent ?? ''}|${n._prefix ?? ''}|${n._choiceOrientation ?? ''}`;
+    }).join('\0');
+    const repNodes  = results.filter(r => r.visible && r.node.repeats);
+    const curCounts = new Map(repNodes.map(r => [r.node.id, this._answerStore.data[r.node.id]?.length ?? 1]));
+    // Also track JSON size of instance data so enableWhen changes INSIDE instances
+    // (e.g. inside a gtable row) force a partial rebuild rather than a fast path.
+    const dataSzOf  = id => { const d = this._answerStore.data[id]; return d ? JSON.stringify(d).length : 0; };
+    const curDataSz = new Map(repNodes.map(r => [r.node.id, dataSzOf(r.node.id)]));
+    const repSig    = repNodes.map(r => `${curCounts.get(r.node.id)}:${curDataSz.get(r.node.id)}`).join(',');
     const visibleSig = nodesSig + '\t' + repSig;
 
     const [prevNodesSig = '', prevRepSig = ''] = (this._lastVisibleSig ?? '\t').split('\t');
@@ -383,18 +410,35 @@ export class PreviewForm {
       for (const r of repNodes) {
         const curLen  = curCounts.get(r.node.id);
         const prevLen = this._lastRepCounts?.get(r.node.id) ?? 1;
-        if (curLen === prevLen) continue;                          // unchanged
+        const curSz   = curDataSz.get(r.node.id);
+        const prevSz  = this._lastRepDataSz?.get(r.node.id) ?? 0;
+        if (curLen === prevLen && curSz === prevSz) continue;      // unchanged
 
         const oldRow = r.node._previewEl;
         if (!oldRow || !document.contains(oldRow)) continue;      // safety guard
 
+        // Repeating groups render their instances (rg-instances / gtable table) as a
+        // SIBLING of the header row in the parent container — not inside the header.
+        // Capture this sibling BEFORE the replace so we can remove it afterward,
+        // otherwise the old instances div remains in the DOM alongside the new one.
+        const oldSibling = oldRow.nextElementSibling;
+
         const newFrag = document.createDocumentFragment();
         BaseNode.dispatch(r, newFrag, _rc);
         oldRow.replaceWith(newFrag);                               // surgical swap
+
+        // Remove orphaned old instances / gtable sibling left behind by replaceWith.
+        if (oldSibling && (
+          oldSibling.dataset.rgGroup  === r.node.id ||
+          oldSibling.dataset.gtableId === r.node.id
+        )) {
+          oldSibling.remove();
+        }
       }
 
       this._lastVisibleSig = visibleSig;
       this._lastRepCounts  = curCounts;
+      this._lastRepDataSz  = curDataSz;
       // Refresh icons across all visible items (a repeat add may change required state)
       for (const r of results) {
         if (!r.visible) continue;
