@@ -68,10 +68,21 @@ function coerceResult(node, result) {
 // raw Questionnaire `base` is supplied, each computed value is written back into
 // the QuestionnaireResponse so dependent expressions read the fresh value within
 // the same pass. Circular dependencies are evaluated best-effort in tree order.
-export function evalCalcNodes(nodes, qr, fp, values, envVars = {}, base = null) {
+//
+// Pass a `cachedCtx` object (built by `buildCalcCache`) to avoid rebuilding the
+// dependency graph and node index on every call — those are stable as long as
+// the questionnaire structure doesn't change.
+export function buildCalcCache(nodes, variables = []) {
+  return {
+    nodeMap: indexNodes(nodes),
+    order:   topoOrder(buildDepGraph(nodes, variables)).order,
+  };
+}
+
+export function evalCalcNodes(nodes, qr, fp, values, envVars = {}, base = null, cachedCtx = null) {
   const env = { resource: qr, ...envVars };
-  const nodeMap = indexNodes(nodes);
-  const { order } = topoOrder(buildDepGraph(nodes, []));
+  const nodeMap = cachedCtx?.nodeMap || indexNodes(nodes);
+  const order   = cachedCtx?.order   || topoOrder(buildDepGraph(nodes, [])).order;
 
   // Maps used to write computed values back into the live QR (only when base known).
   const fhirMap = base ? indexFhirItems(base.item) : null;

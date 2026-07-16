@@ -3,7 +3,7 @@
 // FHIR calc recalculation.  Created once by builder/index.js.
 import { AppEvents, EventState } from '../events.js';
 import { buildQR } from '../fhir/qr-builder.js';
-import { evalCalcNodes } from '../fhir/calc.js';
+import { evalCalcNodes, buildCalcCache } from '../fhir/calc.js';
 import { GroupNode } from '../nodes/group-node.js';
 import { createGroupNode } from '../nodes/index.js';
 import { init as dndInit, makeRootDropZone } from './dnd.js';
@@ -22,6 +22,7 @@ export class BuilderPanel {
     this._questDoc    = null;
     this._tree        = null;
     this._answerStore = null;
+    this._calcCache   = null;   // { nodeMap, order } — cached dep-graph for _doCalcRecalc
     this._container   = null;
 
     const _init = (questDoc, answerStore) => {
@@ -126,7 +127,11 @@ export class BuilderPanel {
       const base = JSON.parse(JSON.stringify(this._questDoc.rawFhir));
       const values = this._answerStore.toValueMap();
       const qr = buildQR(base, values);
-      evalCalcNodes(this._tree, qr, fhirpath, values, {}, base);
+      // Reuse cached dep-graph order — stable while questionnaire structure is unchanged.
+      if (!this._calcCache) {
+        this._calcCache = buildCalcCache(this._tree, this._questDoc.variables);
+      }
+      evalCalcNodes(this._tree, qr, fhirpath, values, {}, base, this._calcCache);
       this._answerStore.merge(values);
     }
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
@@ -160,6 +165,7 @@ export class BuilderPanel {
       const ok = await ConfirmDialog.show(label);
       if (ok) {
         findAndRemove(id, this._tree);
+        this._calcCache = null;  // node removed — dep-graph stale
         document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
         document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
       }
@@ -174,6 +180,7 @@ export class BuilderPanel {
       () => { this._setCollapsedAll(this._tree, true); this.renderTree(); });
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, async () => {
       if (!this._tree) return; // _init not yet complete (APP_CONTEXT_READY pending)
+      this._calcCache = null;  // questionnaire structure changed — invalidate dep-graph cache
       document.querySelector('.left-panel-body')?.scrollTo({ top: 0 });
       progress.show('Rendering ' + this._tree.length + ' nodes…');
       await this.renderTreeAsync((done, total) => progress.update(done, total));

@@ -6,7 +6,7 @@ import { AppEvents, EventState } from './events.js';
 import { highlightJson } from './utils.js';
 import { evaluateNode } from './eval.js';
 import { buildQR } from './fhir/qr-builder.js';
-import { evalCalcNodes, buildVarEnv, evalInitialExprNodes } from './fhir/calc.js';
+import { evalCalcNodes, buildVarEnv, evalInitialExprNodes, buildCalcCache } from './fhir/calc.js';
 import { buildFHIRObject } from './fhir/export.js';
 import { calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './fhir/form-checks.js';
 import { importQRAnswers } from './fhir/qr-import.js';
@@ -48,6 +48,9 @@ export class PreviewForm {
     this._preQR         = null;
     this._preEnvVars    = null;
     this._renderVersion = 0;
+    this._renderTimer   = null;   // debounce handle for RESPONSE_CHANGED
+    this._calcCache     = null;   // { nodeMap, order } — cached dep-graph, invalidated on REINIT_FORM
+    this._pendingCtx    = null;   // result of last _reCalc(), consumed by next _asyncRender
     this._els           = {};
 
     // ── Wire _rc (shared context for node classes) ──────────────────────────
@@ -101,7 +104,11 @@ export class PreviewForm {
     document.addEventListener(AppEvents.BUILDER_NAVIGATE,   e => {
       document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_NAVIGATE_TO, { detail: { id: e.detail.id } }));
     });
-    document.addEventListener(AppEvents.RESPONSE_CHANGED, () => this._asyncRender(++this._renderVersion));
+    document.addEventListener(AppEvents.RESPONSE_CHANGED, () => {
+      ++this._renderVersion;
+      clearTimeout(this._renderTimer);
+      this._renderTimer = setTimeout(() => this._asyncRender(this._renderVersion), 30);
+    });
     document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => this._asyncRender(++this._renderVersion));
     document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => this._asyncRender(++this._renderVersion));
     document.addEventListener(AppEvents.SDC_POPULATE_REQUESTED, e => this._populate(e.detail.patientRef));
@@ -168,6 +175,9 @@ export class PreviewForm {
 
   async reinitForm({ silent = false } = {}) {
     if (!fhirpath) return;
+    // Questionnaire structure changed — dep-graph cache is stale.
+    this._calcCache  = null;
+    this._pendingCtx = null;
     if (!silent) progress.show('Building questionnaire response\u2026');
     await _yield();
     const base = this._rawFhir.value
@@ -231,13 +241,21 @@ export class PreviewForm {
         envVars = buildVarEnv(this._questVariables, qr, fhirpath);
       }
       const calcMap = this._answerStore.toValueMap();
-      evalCalcNodes(this._tree, qr, fhirpath, calcMap, envVars, base);
+      // Reuse cached dep-graph order (stable until questionnaire structure changes).
+      if (!this._calcCache) {
+        this._calcCache = buildCalcCache(this._tree, this._questVariables);
+      }
+      evalCalcNodes(this._tree, qr, fhirpath, calcMap, envVars, base, this._calcCache);
       this._answerStore.merge(calcMap);
       const env = { resource: qr, ...envVars };
       this._lastCtx.fp = fhirpath; this._lastCtx.qr = qr; this._lastCtx.env = env;
       document.dispatchEvent(new CustomEvent(AppEvents.FHIRPATH_CTX_UPDATED, { detail: { fp: fhirpath, qr, env } }));
       document.dispatchEvent(new CustomEvent(AppEvents.REFRESH_EXPR_ICONS));
-      return { fp: fhirpath, qr, envVars };
+      const ctx = { fp: fhirpath, qr, envVars };
+      // Stash so the next _asyncRender (triggered by RESPONSE_CHANGED) can reuse
+      // this result instead of running evalCalcNodes a second time.
+      this._pendingCtx = ctx;
+      return ctx;
     }
     return { fp: null, qr: null, envVars: {} };
   }
@@ -270,7 +288,10 @@ export class PreviewForm {
   }
 
   async _asyncRender(version) {
-    const ctx = this._reCalc();
+    // Reuse the context stashed by the last _reCalc() call (e.g. from a node's
+    // _reCalc callback) so we don't run evalCalcNodes a second time per change.
+    const ctx = this._pendingCtx || this._reCalc();
+    this._pendingCtx = null;
     await _yield();
     if (version !== this._renderVersion) { progress.hide(); return; }
 
