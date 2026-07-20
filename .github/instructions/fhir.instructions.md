@@ -1,5 +1,5 @@
 ---
-applyTo: "js/**,docs/**,help.html,sampledata/**"
+applyTo: "js/**,docs/**,docs-site/**,help.html,sampledata/**"
 description: "FHIR field/extension/SDC support conventions for the Questionnaire Builder — mandatory FHIR tooltips, keeping docs/FHIR-MAPPING.md, docs/ROADMAP.md, help.html, and sampledata/ in sync, and two-layer preview validation. Use when adding, removing, or changing any FHIR mapping, extension, or SDC feature."
 ---
 
@@ -16,6 +16,7 @@ Every UI label or input that controls a FHIR field or extension must have `data-
 - **Implemented = removed from Not Supported.** Once a FHIR field or feature is fully implemented, DELETE its row from all Not Supported / remaining-gaps tables in `docs/FHIR-MAPPING.md` and add it to the relevant supported table. A ✅ row must **never** remain in a Not Supported section. After every change, grep the not-supported sections (e.g. `implicitRules`, `answerConstraint`) to confirm nothing implemented lingers there.
 - **Implemented = removed from ROADMAP.** Once a roadmap item is fully implemented, DELETE it from `docs/ROADMAP.md` — do NOT mark it `[x]`. The roadmap lists only outstanding work.
 - **Keep `help.html` in sync.** Whenever a FHIR field, extension, or SDC feature is added, removed, or renamed in the builder — update the corresponding row(s) in the `HELP_DATA` array in `help.html`. Adding a new field → new row; removing support → delete the row or move it to the "Not Supported" category; changing where/how a field is configured → update the `where` and `how` columns. `help.html` must always reflect the actual current state of the builder UI.
+- **Product docs (`docs-site/`) must be grounded in the actual implementation — never invent.** Before writing or editing any `docs-site/pages/*.md` page, verify every claim against the codebase (`js/`, `help.html`, `docs/CONTEXT.md`, `docs/FHIR-MAPPING.md`) or by exercising the running app in the browser. Do not describe aspirational, planned, or assumed behaviour as if it exists. If a capability is partial or not implemented, say so honestly or omit it. Field names, extension URLs, menu paths, and button labels must match the real UI exactly.
 
 ## Sample data
 
