@@ -311,6 +311,14 @@ export class PreviewForm {
     };
     const el = node.buildControl(ctx);
     this._applyA11yLabels(el, node);
+    // Inline validation errors are assertive live regions so screen readers
+    // announce them when they appear/change (a11y).
+    if (el && typeof el.querySelectorAll === 'function') {
+      el.querySelectorAll('.ctrl-err').forEach(e => {
+        e.setAttribute('role', 'alert');
+        e.setAttribute('aria-live', 'assertive');
+      });
+    }
     return el;
   }
 

@@ -18,6 +18,10 @@ export function init() {
   _dropdown   = document.querySelector('[data-mount="status-dropdown"]');
   _wrap       = document.querySelector('[data-mount="status-badge-wrap"]');
 
+  // Announce PASS/FAIL changes to screen readers (a11y).
+  _btn.setAttribute('aria-live', 'polite');
+  _btn.setAttribute('aria-atomic', 'true');
+
   _btn.addEventListener('click', e => {
     e.stopPropagation();
     _open = !_open;
