@@ -13,15 +13,22 @@
 // Returns { el, getValue(), setValue(v), setOptions(items), setOnChange(fn) }
 //   el is the trigger <div> — insert it wherever the native <select> was.
 
-export function createCustomSelect({ items = [], value = '', onChange, className = '', testid, searchable } = {}) {
+export function createCustomSelect({ items = [], value = '', onChange, className = '', testid, searchable, ariaLabel } = {}) {
   let _items    = items.slice();
   let _value    = value;
   let _handler  = onChange || null;
+  let _activeIdx = -1;
+  const _uid = 'csel-' + Math.random().toString(36).slice(2, 9);
 
-  // ── Trigger ───────────────────────────────────────────────────────────────
+  // ── Trigger ───────────────────────────────────────────────────
   const trigger = document.createElement('div');
   trigger.className = 'sc-trigger' + (className ? ' ' + className : '');
   trigger.tabIndex  = 0;
+  // ARIA combobox semantics (a11y).
+  trigger.setAttribute('role', 'combobox');
+  trigger.setAttribute('aria-haspopup', 'listbox');
+  trigger.setAttribute('aria-expanded', 'false');
+  if (ariaLabel) trigger.setAttribute('aria-label', ariaLabel);
   if (testid) trigger.dataset.testid = testid;
 
   const textSpan = document.createElement('span');
@@ -41,6 +48,9 @@ export function createCustomSelect({ items = [], value = '', onChange, className
 
   const _close = () => {
     if (dropEl) { dropEl.remove(); dropEl = null; }
+    _activeIdx = -1;
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.removeAttribute('aria-activedescendant');
     document.removeEventListener('mousedown', _onOutside, true);
     document.removeEventListener('keydown',   _onKey,     true);
   };
@@ -49,8 +59,35 @@ export function createCustomSelect({ items = [], value = '', onChange, className
     if (!trigger.contains(e.target) && !dropEl?.contains(e.target)) _close();
   };
 
+  // Visible option elements in the open dropdown (respects search filtering).
+  const _visibleOpts = () => dropEl
+    ? [...dropEl.querySelectorAll('.oc-opt')].filter(o => o.style.display !== 'none')
+    : [];
+
+  const _setActive = (idx) => {
+    const opts = _visibleOpts();
+    if (!opts.length) return;
+    _activeIdx = Math.max(0, Math.min(idx, opts.length - 1));
+    opts.forEach((o, i) => o.classList.toggle('oc-opt--active', i === _activeIdx));
+    const el = opts[_activeIdx];
+    trigger.setAttribute('aria-activedescendant', el.id);
+    el.scrollIntoView({ block: 'nearest' });
+  };
+
   const _onKey = e => {
-    if (e.key === 'Escape') { _close(); trigger.focus(); }
+    if (e.key === 'Escape') { _close(); trigger.focus(); return; }
+    const opts = _visibleOpts();
+    if (!opts.length) return;
+    if (e.key === 'ArrowDown')      { e.preventDefault(); _setActive(_activeIdx + 1); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); _setActive(_activeIdx - 1); }
+    else if (e.key === 'Home')      { e.preventDefault(); _setActive(0); }
+    else if (e.key === 'End')       { e.preventDefault(); _setActive(opts.length - 1); }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      const el = opts[_activeIdx] || opts[0];
+      const item = _items.find(it => it.value === el.dataset.val);
+      if (item) _pick(item);
+    }
   };
 
   const _pick = (item) => {
@@ -69,6 +106,17 @@ export function createCustomSelect({ items = [], value = '', onChange, className
     dropEl = document.createElement('div');
     dropEl.className = 'oc-drop csel-drop';
     dropEl.dataset.testid = 'csel-drop';
+    dropEl.id = _uid + '-list';
+    dropEl.setAttribute('role', 'listbox');
+    trigger.setAttribute('aria-controls', dropEl.id);
+    trigger.setAttribute('aria-expanded', 'true');
+
+    // Highlight the currently-selected (or first) option once rendered.
+    const _initActive = () => {
+      const opts = _visibleOpts();
+      const sel = opts.findIndex(o => o.dataset.val === _value);
+      _setActive(sel >= 0 ? sel : 0);
+    };
 
     if (useSearch) {
       const searchInp = document.createElement('input');
@@ -88,10 +136,12 @@ export function createCustomSelect({ items = [], value = '', onChange, className
             || opt.textContent.toLowerCase().includes(q);
           opt.style.display = match ? '' : 'none';
         }
+        _setActive(0);
       });
 
       document.body.appendChild(dropEl);
       _position();
+      _initActive();
       document.addEventListener('mousedown', _onOutside, true);
       document.addEventListener('keydown',   _onKey,     true);
       setTimeout(() => searchInp.focus(), 0);
@@ -99,6 +149,7 @@ export function createCustomSelect({ items = [], value = '', onChange, className
       _renderOpts(dropEl);
       document.body.appendChild(dropEl);
       _position();
+      _initActive();
       document.addEventListener('mousedown', _onOutside, true);
       document.addEventListener('keydown',   _onKey,     true);
     }
@@ -106,16 +157,19 @@ export function createCustomSelect({ items = [], value = '', onChange, className
 
   const _renderOpts = (container) => {
     const created = [];
-    for (const item of _items) {
+    _items.forEach((item, i) => {
       const opt = document.createElement('div');
       opt.className = 'oc-opt' + (item.value === _value ? ' oc-opt--sel' : '');
+      opt.id = _uid + '-opt-' + i;
+      opt.setAttribute('role', 'option');
+      opt.setAttribute('aria-selected', String(item.value === _value));
       opt.textContent = item.label;
       opt.dataset.val = item.value;
       if (item.title) opt.dataset.tipTitle = item.title;
       opt.addEventListener('mousedown', e => { e.preventDefault(); _pick(item); });
       container.appendChild(opt);
       created.push(opt);
-    }
+    });
     return created;
   };
 
@@ -144,8 +198,12 @@ export function createCustomSelect({ items = [], value = '', onChange, className
 
   trigger.addEventListener('click', _open);
   trigger.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); _open(); }
-    if (e.key === 'Escape') _close();
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!dropEl) _open();
+    } else if (e.key === 'Escape') {
+      _close();
+    }
   });
 
   // ── Public API ────────────────────────────────────────────────────────────
@@ -160,7 +218,9 @@ export function createCustomSelect({ items = [], value = '', onChange, className
       // Refresh open dropdown if visible
       if (dropEl) {
         for (const opt of dropEl.querySelectorAll('.oc-opt')) {
-          opt.classList.toggle('oc-opt--sel', opt.dataset.val === _value);
+          const sel = opt.dataset.val === _value;
+          opt.classList.toggle('oc-opt--sel', sel);
+          opt.setAttribute('aria-selected', String(sel));
         }
       }
     },

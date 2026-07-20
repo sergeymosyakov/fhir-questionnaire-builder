@@ -31,6 +31,14 @@ export class ChoiceNode extends ItemNode {
     const trigger = document.createElement('div');
     trigger.className = 'sc-trigger';
     trigger.tabIndex  = 0;
+    // ARIA combobox semantics (a11y).
+    trigger.setAttribute('role', 'combobox');
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+    {
+      const nm = String(node.title || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (nm) trigger.setAttribute('aria-label', nm);
+    }
 
     const textSpan = document.createElement('span');
     textSpan.className = 'sc-trigger-text';
@@ -62,6 +70,7 @@ export class ChoiceNode extends ItemNode {
     const close = () => {
       if (dropEl) { dropEl.remove(); dropEl = null; }
       _open = false;
+      trigger.setAttribute('aria-expanded', 'false');
       document.removeEventListener('mousedown', _onOutside, true);
     };
 
@@ -88,12 +97,16 @@ export class ChoiceNode extends ItemNode {
         if (cols && cols.length) {
           const rawOpt = _findRawOpt(node, code);
           const row = _buildColRow(cols, rawOpt, code, display);
+          row.setAttribute('role', 'option');
+          row.setAttribute('aria-selected', String(code === selected));
           if (code === selected) row.classList.add('oc-opt--sel');
           row.addEventListener('mousedown', e => { e.preventDefault(); _pick(code); });
           container.appendChild(row);
         } else {
           const opt   = document.createElement('div');
           opt.className = 'oc-opt';
+          opt.setAttribute('role', 'option');
+          opt.setAttribute('aria-selected', String(code === selected));
           if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
             const pfx = document.createElement('span');
             pfx.className = 'option-prefix';
@@ -221,6 +234,7 @@ export class ChoiceNode extends ItemNode {
       if (dropEl) { close(); return; }
       dropEl = document.createElement('div');
       dropEl.className = 'oc-drop';
+      dropEl.setAttribute('role', 'listbox');
 
       switch (node._itemControl) {
         case 'autocomplete': _fillDropAutocomplete(); break;
@@ -230,6 +244,7 @@ export class ChoiceNode extends ItemNode {
 
       document.body.appendChild(dropEl);
       _open = true;
+      trigger.setAttribute('aria-expanded', 'true');
       _reposition();
       document.addEventListener('mousedown', _onOutside, true);
     };

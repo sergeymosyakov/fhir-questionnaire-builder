@@ -198,6 +198,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointe
   text-overflow: ellipsis;
 }
 .oc-opt:hover    { background: #f0f4ff; }
+.oc-opt--active  { background: #e0e7ff; }
 .oc-opt--sel     { background: #eef2ff; color: var(--c-primary); font-weight: 600; }
 
 /* choiceColumn multi-column dropdown */
