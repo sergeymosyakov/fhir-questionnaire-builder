@@ -66,12 +66,17 @@ export class ChoiceNode extends ItemNode {
 
     let dropEl = null;
     let _open  = false;
+    let _activeIdx = -1;
+    const _uid = 'csel-' + Math.random().toString(36).slice(2, 9);
 
     const close = () => {
       if (dropEl) { dropEl.remove(); dropEl = null; }
       _open = false;
+      _activeIdx = -1;
       trigger.setAttribute('aria-expanded', 'false');
+      trigger.removeAttribute('aria-activedescendant');
       document.removeEventListener('mousedown', _onOutside, true);
+      document.removeEventListener('keydown', _onKey, true);
     };
 
     const _onOutside = e => {
@@ -87,6 +92,35 @@ export class ChoiceNode extends ItemNode {
       trigger.focus();
     };
 
+    // Keyboard navigation (standard dropdown): highlight an option and pick it.
+    const _optEls = () => dropEl ? [...dropEl.querySelectorAll('[role="option"]')] : [];
+    const _setActive = (idx) => {
+      const opts = _optEls();
+      if (!opts.length) return;
+      _activeIdx = Math.max(0, Math.min(idx, opts.length - 1));
+      opts.forEach((o, i) => {
+        if (!o.id) o.id = _uid + '-opt-' + i;
+        o.classList.toggle('oc-opt--active', i === _activeIdx);
+      });
+      trigger.setAttribute('aria-activedescendant', opts[_activeIdx].id);
+      opts[_activeIdx].scrollIntoView({ block: 'nearest' });
+    };
+    const _onKey = e => {
+      if (!_open) return;
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); trigger.focus(); return; }
+      const opts = _optEls();
+      if (!opts.length) return;
+      if (e.key === 'ArrowDown')    { e.preventDefault(); e.stopPropagation(); _setActive(_activeIdx + 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); _setActive(_activeIdx - 1); }
+      else if (e.key === 'Home')    { e.preventDefault(); e.stopPropagation(); _setActive(0); }
+      else if (e.key === 'End')     { e.preventDefault(); e.stopPropagation(); _setActive(opts.length - 1); }
+      else if (e.key === 'Enter') {
+        e.preventDefault(); e.stopPropagation();
+        const el = opts[_activeIdx] || opts[0];
+        if (el && el.dataset.code !== undefined) _pick(el.dataset.code);
+      }
+    };
+
     const _buildOpts = (container, filter = '') => {
       const q   = filter.toLowerCase();
       const cols = node._choiceColumns;
@@ -99,6 +133,7 @@ export class ChoiceNode extends ItemNode {
           const row = _buildColRow(cols, rawOpt, code, display);
           row.setAttribute('role', 'option');
           row.setAttribute('aria-selected', String(code === selected));
+          row.dataset.code = code;
           if (code === selected) row.classList.add('oc-opt--sel');
           row.addEventListener('mousedown', e => { e.preventDefault(); _pick(code); });
           container.appendChild(row);
@@ -107,6 +142,7 @@ export class ChoiceNode extends ItemNode {
           opt.className = 'oc-opt';
           opt.setAttribute('role', 'option');
           opt.setAttribute('aria-selected', String(code === selected));
+          opt.dataset.code = code;
           if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
             const pfx = document.createElement('span');
             pfx.className = 'option-prefix';
@@ -245,14 +281,26 @@ export class ChoiceNode extends ItemNode {
       document.body.appendChild(dropEl);
       _open = true;
       trigger.setAttribute('aria-expanded', 'true');
+      trigger.setAttribute('aria-controls', dropEl.id || (dropEl.id = _uid + '-list'));
       _reposition();
       document.addEventListener('mousedown', _onOutside, true);
+      // Standard dropdown gets keyboard navigation; search variants keep their
+      // own text-input-focused behaviour.
+      if (node._itemControl !== 'autocomplete' && node._itemControl !== 'lookup') {
+        document.addEventListener('keydown', _onKey, true);
+        const opts = _optEls();
+        const sel = opts.findIndex(o => o.dataset.code === selected);
+        _setActive(sel >= 0 ? sel : 0);
+      }
     };
 
     trigger.addEventListener('click', openDrop);
     trigger.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrop(); }
-      if (e.key === 'Escape') close();
+      if (_open) return; // while open, _onKey handles navigation
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        openDrop();
+      }
     });
 
     wrap.appendChild(trigger);

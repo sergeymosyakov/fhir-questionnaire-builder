@@ -58,6 +58,27 @@ test.describe('choice select accessibility', () => {
     await expect(drop).toBeHidden();
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
+
+  test('keyboard: ArrowDown opens and moves active option, Enter selects', async ({ page }) => {
+    const trigger = await choiceTrigger(page);
+    await trigger.focus();
+    await page.keyboard.press('ArrowDown'); // open
+    const drop = page.locator('.oc-drop').first();
+    await expect(drop).toBeVisible();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    const a1 = await trigger.getAttribute('aria-activedescendant');
+    expect(a1).toBeTruthy();
+    await page.keyboard.press('ArrowDown');
+    const a2 = await trigger.getAttribute('aria-activedescendant');
+    expect(a2).toBeTruthy();
+    expect(a2).not.toBe(a1);
+
+    await page.keyboard.press('Enter');
+    await expect(drop).toBeHidden();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await expect(trigger).not.toHaveClass(/sc-trigger--empty/);
+  });
 });
 
 // ── createCustomSelect — keyboard navigation ─────────────────────────────────
