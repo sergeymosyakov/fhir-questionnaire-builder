@@ -18,7 +18,7 @@
         { "id": "fhirpath", "title": "FHIRPath in the builder", "file": "fhirpath.md" },
         { "id": "extensions-sdc", "title": "Extensions & SDC", "file": "extensions-sdc.md" },
         { "id": "extraction", "title": "Extraction (definition & StructureMap)", "file": "extraction.md" },
-        { "id": "preview-modes", "title": "Preview, Patient View & LHC", "file": "preview-modes.md" }
+        { "id": "preview-modes", "title": "Preview, Patient View & FHIR JSON", "file": "preview-modes.md" }
       ]
     },
     {

@@ -122,11 +122,22 @@ export class MoreMenu extends DropdownMenu {
     this._settingsItem.addEventListener('click', () =>
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS)));
 
+    // ── Docs ────────────────────────────────────────────────────────────────
+    this._docsItem = document.createElement('a');
+    this._docsItem.href   = 'docs.html';
+    this._docsItem.className = "load-menu-item";
+    this._docsItem.dataset.testid = 'docs-page-btn';
+    this._docsItem.dataset.tipTitle = 'Documentation';
+    this._docsItem.dataset.tipBody  = 'Guides, concepts and how-tos for the FHIR Questionnaire Builder.';
+    this._docsItem.innerHTML = 'Documentation';
+    this._docsItem.addEventListener('click', () =>
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS)));
+
     this._menu.append(
       this._simpleItem, this._advancedItem, this._sep(),
       expandItem, collapseItem, this._sep(),
       this._undoItem, this._redoItem, sep,
-      this._helpItem, this._settingsItem,
+      this._helpItem, this._settingsItem, this._docsItem,
     );
   }
 }

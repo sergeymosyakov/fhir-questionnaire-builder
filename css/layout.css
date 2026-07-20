@@ -240,17 +240,6 @@
   font-size: 11px;
 }
 .top-panel-github-link:hover { color: #fff !important; }
-.top-panel-docs-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: rgba(255,255,255,.80) !important;
-  font-weight: 600;
-  font-size: 11px;
-  text-decoration: none;
-  margin-right: 10px;
-}
-.top-panel-docs-link:hover { color: #fff !important; }
 
 .top-panel-auth {
   margin-left: 20px;

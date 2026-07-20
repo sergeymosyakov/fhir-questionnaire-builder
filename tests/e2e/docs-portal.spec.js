@@ -4,7 +4,7 @@
 //
 // data-testid registry: (none — the docs portal is a separate static page)
 // Selectors used: #docSidebar, .doc-nav-link, #docContent, #docSearch,
-//                 .doc-placeholder, .top-panel-docs-link (app header)
+//                 .doc-placeholder; app opens docs via ⋯ More → Docs (docs-page-btn)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -27,13 +27,17 @@ test.describe('documentation portal', () => {
   });
 
   test('an unwritten page shows a placeholder', async ({ page }) => {
-    await page.goto('/docs.html#/who-its-for');
-    await expect(page.locator('#docContent h1')).toHaveText("Who it's for");
+    await page.goto('/docs.html#/running-locally');
+    await expect(page.locator('#docContent h1')).toHaveText('Running locally');
     await expect(page.locator('.doc-placeholder')).toBeVisible();
   });
 
-  test('the app header links to the docs portal', async ({ page }) => {
+  test('the ⋯ More menu links to the docs portal', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('.top-panel-docs-link')).toHaveAttribute('href', 'docs.html');
+    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    await page.getByTestId('more-btn').click();
+    const docsItem = page.getByTestId('docs-page-btn');
+    await expect(docsItem).toBeVisible();
+    await expect(docsItem).toHaveAttribute('href', 'docs.html');
   });
 });
