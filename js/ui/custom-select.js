@@ -13,12 +13,14 @@
 // Returns { el, getValue(), setValue(v), setOptions(items), setOnChange(fn) }
 //   el is the trigger <div> — insert it wherever the native <select> was.
 
+import { nextUid } from '../id.js';
+
 export function createCustomSelect({ items = [], value = '', onChange, className = '', testid, searchable, ariaLabel } = {}) {
   let _items    = items.slice();
   let _value    = value;
   let _handler  = onChange || null;
   let _activeIdx = -1;
-  const _uid = 'csel-' + Math.random().toString(36).slice(2, 9);
+  const _uid = nextUid('csel');
 
   // ── Trigger ───────────────────────────────────────────────────
   const trigger = document.createElement('div');

@@ -7,6 +7,7 @@ import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
 import { terminologyService } from '../fhir/terminology-service.js';
+import { nextUid } from '../id.js';
 import {
   _nodeOpts, _evalAnswerOpts, _resolveColValue, _findRawOpt,
   _getColDisplayLabel, _buildColHeader, _buildColRow, _appendOptionExtras,
@@ -67,7 +68,7 @@ export class ChoiceNode extends ItemNode {
     let dropEl = null;
     let _open  = false;
     let _activeIdx = -1;
-    const _uid = 'csel-' + Math.random().toString(36).slice(2, 9);
+    const _uid = nextUid('csel');
 
     const close = () => {
       if (dropEl) { dropEl.remove(); dropEl = null; }
