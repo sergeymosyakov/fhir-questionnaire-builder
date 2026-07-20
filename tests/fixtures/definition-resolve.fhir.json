@@ -1,0 +1,13 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "title": "Definition Resolve Demo",
+  "item": [
+    {
+      "linkId": "q-name",
+      "type": "string",
+      "text": "Name",
+      "definition": "http://hl7.org/fhir/StructureDefinition/DemoPatient#Patient.name.family"
+    }
+  ]
+}

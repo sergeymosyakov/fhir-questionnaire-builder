@@ -47,6 +47,7 @@ authoring/runtime slice.
 |---|---|
 | `$populate` | Implemented, but **requires an external SDC-capable server** (e.g. Matchbox). Cannot be exercised without one. Aidbox does this natively. |
 | Definition-based extraction | Implemented **client-side** for `item.definition` + `definitionExtract`. Covers the common case; not a general extraction engine. |
+| `item.definition` resolution | Implemented **client-side**: "Resolve from profile" in Item Properties loads an uploaded StructureDefinition and auto-fills `text`, `type`, and value constraints for the referenced element. Profile must be supplied (upload) — no auto-fetch/registry resolution. |
 | Reference resolution | Resource-type dropdown + id input + live FHIR server search (when a base server is configured). No profile-based validation of the chosen reference. |
 | Terminology binding | `answerValueSet` expansion works against a configured tx server; falls back to built-in lists. Fine for demos, limited in practice. |
 
@@ -55,7 +56,6 @@ authoring/runtime slice.
 | Gap | Who does it better | Why it matters |
 |---|---|---|
 | **StructureMap-based extraction/population** (`targetStructureMap` / `sourceStructureMap`) | Aidbox, Firely | Round-tripped only — **not executed.** This is the core of industrial-grade SDC extraction. Biggest single gap. |
-| **`item.definition` resolution against a StructureDefinition** | Aidbox, Firely | No auto-fill of `text` / `type` / value constraints from a profile. Authoring is fully manual. |
 | **Licensed terminology** (LOINC, SNOMED CT) | Any platform with a real tx server | Public HAPI doesn't load these, so validation of coded answers is partial. |
 | **Persistence / API / auth as a product** | Aidbox, Medplum, Firely | We have Supabase-backed cloud save, but we are not a FHIR store and have no server API. |
 | **Renderer maturity / accessibility audit** | LHC-Forms (battle-tested at NIH scale) | Their renderer has years of production hardening and formal a11y review; ours does not. |

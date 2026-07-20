@@ -205,7 +205,7 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | `logicWithParent: 'OR'` | AND/OR preview badge | Exported as `questionnaire-constraint` (key `ITLH_NS:group-or`) with FHIRPath over child linkIds; restored on import |
 | `logicWithParent: 'AND'` | *(default)* | No constraint generated; restored as default on import |
 | `children` | `item.item[]` | recursive |
-| `_definition` | `item.definition` | URL pointing to a StructureDefinition element; round-trip safe; editable via **Props** button |
+| `_definition` | `item.definition` | URL pointing to a StructureDefinition element; round-trip safe; editable via **Props** button; **Resolve from profile** action auto-fills `text`/`type`/constraints from an uploaded StructureDefinition (client-side, `js/fhir/definition-resolver.js`) |
 | `_baseType` | `questionnaire-baseType` ext (`valueCode`) | base FHIR type for items derived from an ElementDefinition (e.g. `string`, `HumanName`); round-trip safe; editable via **Props** button — Base Type field |
 | `_fhirType` | `questionnaire-fhirType` ext (`valueCode`) | specific FHIR type for complex elements (e.g. `HumanName`, `ContactPoint`); round-trip safe; editable via **Props** button — FHIR Type field |
 | `_codes` | `item.code[]` | coding entries (system / code / display); round-trip safe; editable via **Props** button |
@@ -246,7 +246,7 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | `_initialValue` | `item.initial[0]` value | imported from `initial[0]`; exported as `initial: [entry]`; pre-fills `values[]` on import |
 | `_initialValues` | `item.initial[]` all values | set only for repeating items with >1 initial value; exported as `initial: [entry, …]`; `_initialValue` holds `initial[0]` for backwards compat |
 | `_initialSelected` | `answerOption[].initialSelected` | code of the initially-selected option; preserved round-trip; if no `item.initial[]` exists, also used to pre-fill `_initialValue` |
-| `_definition` | `item.definition` | URL pointing to a StructureDefinition element; stored as `node._definition`; editable via **Props** button (codes-modal); round-trip safe; also supported on groups (see Group-specific) |
+| `_definition` | `item.definition` | URL pointing to a StructureDefinition element; stored as `node._definition`; editable via **Props** button (codes-modal); **Resolve from profile** auto-fills `text`/`type`/constraints from an uploaded StructureDefinition; round-trip safe; also supported on groups (see Group-specific) |
 | `_baseType` | `questionnaire-baseType` ext (`valueCode`) | base FHIR type for items derived from an ElementDefinition; editable via **Props** button — Base Type field; round-trip safe; also supported on groups |
 | `_fhirType` | `questionnaire-fhirType` ext (`valueCode`) | specific FHIR type for complex structures; editable via **Props** button — FHIR Type field; round-trip safe; also supported on groups |
 | `_maxDecimalPlaces` | `maxDecimalPlaces` ext (`valueInteger`) | Maximum decimal places for `decimal` items; enforced in preview (error message + `step` attribute); editable in Answer Type modal; round-trip safe |

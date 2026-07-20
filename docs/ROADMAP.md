@@ -8,11 +8,20 @@ See [CONTEXT.md](CONTEXT.md) for scenario definitions.
 
 ## Next
 
+### Client-side capability gaps (no server required)
+
+These are the honest feature gaps vs. competitors (see [COMPETITORS.md](COMPETITORS.md)) that can be closed **entirely in the browser** — no backend, no our-server dependency. Profiles/StructureDefinitions are supplied by file upload or canonical fetch. Ordered by planned implementation.
+
+1. [x] **`item.definition` resolution** — resolve `item.definition` (canonical URL to a profile element) against a StructureDefinition to auto-fill `text`, `type`, and value constraints (cardinality, binding). Implemented client-side in `js/fhir/definition-resolver.js`; Item Properties → Definition → **Resolve from profile…** loads an uploaded StructureDefinition (JSON) and fills the item — no server required.
+2. [ ] **Reference profile validation** — for `reference` items, validate the chosen resource against the expected `targetProfile`/type using a loaded profile (builds on #1); surface a warning in preview validation.
+3. [ ] **Definition-based extraction — general engine** — generalize the current client-side `item.definition` + `definitionExtract` extraction from the flat common case to nested paths, repeating groups → arrays, and profile-typed values.
+4. [ ] **Renderer maturity + accessibility audit** — ARIA roles/labels, label↔input association, keyboard navigation, focus management in modals, screen-reader error states; automated `axe-core` checks in e2e. Incremental, per node type + modal.
+5. [ ] **StructureMap execution** — actually **execute** FHIR Mapping Language (`targetStructureMap` / `sourceStructureMap`) for extraction/population in-browser (currently round-tripped only, not executed). Largest single gap; needs an in-browser FML engine or a bounded FML interpreter.
+6. [ ] **`atable` itemControl renderer** — render a group as an answer table (`itemControl = atable`): column headers, repeating rows. Unblocks the deferred "translate `atable` column headers" item below.
+
 ### Horizon 2 — SDC completeness (extraction & population)
 
 Supports Scenario 1 (round-trip) and Scenario 3 (logic testing). This is where most industrial-grade SDC complexity lives.
-
-- [ ] **`item.definition` resolution** — resolve `item.definition` against a StructureDefinition to auto-fill `text`, `type`, and value constraints; prerequisite: FHIR server integration
 
 ## Near-term
 
@@ -34,6 +43,5 @@ The initial translation implementation (v1) covers the MVP flow: auto-translate 
 ## Later
 
 - [ ] **Sub-questionnaire / modular questionnaires** — SDC `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-subQuestionnaire`; requires FHIR server for resolution; out of scope until server integration exists
-- [ ] **item.definition + StructureDefinition auto-population** — resolve `item.definition` URL against a FHIR server and auto-fill `text`, `type`, `baseType`, `fhirType` from the element; prerequisite: server integration
 
 ---

@@ -297,6 +297,14 @@
 .meta-modal-subhdr     { font-size: 11px; font-weight: 700; text-transform: uppercase;
                           letter-spacing: .06em; color: var(--c-text-2); }
 
+/* meta-modal — Resolve from profile (item.definition) */
+.meta-modal-resolve        { flex: 1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.meta-modal-btn            { height: 26px; padding: 0 10px; font-size: 12px; font-weight: 600;
+                              background: var(--c-accent); color: #fff; border: none; border-radius: var(--r-sm);
+                              cursor: pointer; white-space: nowrap; }
+.meta-modal-btn:hover      { opacity: .85; }
+.meta-modal-resolve-status { font-size: 12px; color: #2a9d2a; }
+
 /* === Clear form confirmation modal ========================================== */
 .clear-confirm-backdrop {
   position: fixed;
