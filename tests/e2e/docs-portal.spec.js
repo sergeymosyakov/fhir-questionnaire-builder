@@ -27,8 +27,8 @@ test.describe('documentation portal', () => {
   });
 
   test('an unwritten page shows a placeholder', async ({ page }) => {
-    await page.goto('/docs.html#/extensions-sdc');
-    await expect(page.locator('#docContent h1')).toHaveText('Extensions & SDC');
+    await page.goto('/docs.html#/preview-modes');
+    await expect(page.locator('#docContent h1')).toHaveText('Preview, Patient View & FHIR JSON');
     await expect(page.locator('.doc-placeholder')).toBeVisible();
   });
 
