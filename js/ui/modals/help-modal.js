@@ -9,7 +9,7 @@ class HelpModal extends Modal {
     this.setTitle('FHIR Field Reference');
 
     const iframe = document.createElement('iframe');
-    iframe.src = 'help.html';
+    iframe.src = 'help.html#embedded';
     iframe.className = 'help-iframe';
     iframe.title = 'FHIR Field Reference — where to find each FHIR field in the builder UI';
     this.body.appendChild(iframe);

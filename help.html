@@ -4,17 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FHIR Field Reference — Logic Builder</title>
+  <link rel="stylesheet" href="css/page-header.css">
   <link rel="stylesheet" href="css/help.css">
 </head>
 <body>
-  <div class="help-header">
-    <div class="help-header-top">
-      <h1>FHIR Field Reference</h1>
-      <a href="index.html" class="help-back-link" target="_parent">← Back to Builder</a>
+  <div class="page-header">
+    <div class="page-header-bar">
+      <h1 class="page-header-title">FHIR Field Reference</h1>
+      <input type="search" id="helpSearch" class="page-header-search page-header-search--inline" placeholder="Search by field name, extension, or keyword…" autocomplete="off">
+      <a href="index.html" class="page-header-back" target="_parent" data-back-link>← Back to Builder</a>
     </div>
-    <p class="help-subtitle">Find any FHIR R4 / SDC field and where to configure it in the Logic Builder UI.</p>
-    <input type="search" id="helpSearch" class="help-search" placeholder="Search by field name, extension, or keyword…" autocomplete="off">
-    <div id="helpCount" class="help-count"></div>
+    <p class="page-header-subtitle">Find any FHIR R4 / SDC field and where to configure it in the Logic Builder UI.</p>
+    <div id="helpCount" class="page-header-count"></div>
   </div>
 
   <div class="help-wrap">
@@ -260,5 +261,6 @@
   searchInput.addEventListener('input', () => update(searchInput.value));
   update('');
   </script>
+  <script type="module" src="js/embedded-nav.js"></script>
 </body>
 </html>

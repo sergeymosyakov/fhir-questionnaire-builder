@@ -30,62 +30,7 @@ html, body {
   background: var(--help-bg);
 }
 
-/* ── Header ─────────────────────────────────────────────────────────────────── */
-.help-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--help-surface);
-  border-bottom: 1px solid var(--help-border);
-  padding: 12px 20px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.06);
-}
-
-.help-header-top {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-}
-
-.help-header h1 {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--help-text);
-}
-
-.help-back-link {
-  font-size: 12px;
-  color: var(--help-accent);
-  text-decoration: none;
-}
-.help-back-link:hover { text-decoration: underline; }
-
-.help-subtitle {
-  font-size: 12px;
-  color: var(--help-muted);
-}
-
-.help-search {
-  width: 100%;
-  max-width: 520px;
-  padding: 5px 10px;
-  border: 1px solid var(--help-border);
-  border-radius: 6px;
-  font-size: 13px;
-  outline: none;
-  background: var(--help-bg);
-  color: var(--help-text);
-}
-.help-search:focus { border-color: var(--help-accent); box-shadow: 0 0 0 2px rgba(13,110,253,.15); }
-
-.help-count {
-  font-size: 11px;
-  color: var(--help-muted);
-  min-height: 14px;
-}
+/* ── Header: see css/page-header.css (shared across settings/help/docs) ─────── */
 
 /* ── Content wrapper ─────────────────────────────────────────────────────────── */
 .help-wrap {

@@ -111,4 +111,20 @@ test.describe('help modal — iframe content', () => {
     const count = await rows.count();
     expect(count).toBeGreaterThanOrEqual(30);
   });
+
+  test('"Back to Builder" link is hidden when embedded in the modal', async ({ page }) => {
+    await freshPage(page);
+    await page.getByTestId('more-btn').click();
+    await page.getByTestId('help-btn').click();
+    const frame = page.frameLocator('[data-testid="helpModalBody"] iframe.help-iframe');
+    // Wait for the embedded page to render, then confirm the back link is hidden.
+    await expect(frame.locator('h1')).toBeVisible({ timeout: 8_000 });
+    await expect(frame.locator('[data-back-link]')).toBeHidden();
+  });
+
+  test('"Back to Builder" link is shown when help.html is opened standalone', async ({ page }) => {
+    await page.goto('/help.html');
+    await expect(page.locator('[data-back-link]')).toBeVisible();
+    await expect(page.locator('[data-back-link]')).toHaveAttribute('href', 'index.html');
+  });
 });

@@ -5,13 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Documentation — FHIR Questionnaire Builder</title>
   <meta name="description" content="Product documentation for the FHIR Questionnaire Builder: guides, concepts, how-tos and reference.">
+  <link rel="stylesheet" href="css/page-header.css">
   <link rel="stylesheet" href="css/docs-portal.css">
 </head>
 <body>
-  <header class="doc-header">
-    <a class="doc-brand" href="#/">📘 <span>FHIR Questionnaire Builder Docs</span></a>
-    <input id="docSearch" class="doc-search" type="search" placeholder="Search docs…" autocomplete="off" spellcheck="false" aria-label="Search documentation">
-    <a class="doc-app-link" href="index.html" target="_parent">Open the Builder ↗</a>
+  <header class="page-header">
+    <div class="page-header-bar">
+      <a class="page-header-title" href="#/">📘 <span>FHIR Questionnaire Builder Docs</span></a>
+      <input id="docSearch" class="page-header-search page-header-search--inline" type="search" placeholder="Search docs…" autocomplete="off" spellcheck="false" aria-label="Search documentation">
+      <a class="page-header-back" href="index.html" target="_parent" data-back-link>← Back to Builder</a>
+    </div>
   </header>
 
   <div class="doc-layout">
@@ -24,6 +27,7 @@
 
   <script src="lib/marked.min.js"></script>
   <script src="lib/dompurify.min.js"></script>
+  <script type="module" src="js/embedded-nav.js"></script>
   <script src="docs-site/docs-viewer.js"></script>
 </body>
 </html>

@@ -4,17 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Settings — FHIR Logic Builder</title>
+  <link rel="stylesheet" href="css/page-header.css">
   <link rel="stylesheet" href="css/settings.css">
   <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
-  <div class="settings-header">
-    <div class="settings-header-top">
-      <h1>Settings</h1>
-      <a href="index.html" class="settings-back" target="_parent">← Back to Builder</a>
+  <div class="page-header">
+    <div class="page-header-bar">
+      <h1 class="page-header-title">Settings</h1>
+      <a href="index.html" class="page-header-back" target="_parent" data-back-link>← Back to Builder</a>
     </div>
-    <p class="settings-subtitle">Configure servers and validators. Custom values are saved in your browser.</p>
+    <p class="page-header-subtitle">Configure servers and validators. Custom values are saved in your browser.</p>
   </div>
 
   <div class="settings-wrap">
@@ -120,6 +121,7 @@
     <span class="s-status" id="saveStatus"></span>
   </div>
 
+  <script type="module" src="js/embedded-nav.js"></script>
   <script type="module" src="js/settings.js"></script>
 </body>
 </html>

@@ -10,7 +10,7 @@
   --doc-accent:    #2563eb;
   --doc-sidebar:   #f8fafc;
   --doc-code-bg:   #f3f4f6;
-  --doc-header-h:  56px;
+  --doc-header-h:  64px;
 }
 
 * { box-sizing: border-box; }
@@ -25,45 +25,7 @@ html, body {
   line-height: 1.6;
 }
 
-/* ── Header ───────────────────────────────────────────────────────────────── */
-.doc-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  height: var(--doc-header-h);
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 20px;
-  background: var(--doc-bg);
-  border-bottom: 1px solid var(--doc-border);
-}
-.doc-brand {
-  font-weight: 700;
-  color: var(--doc-fg);
-  text-decoration: none;
-  white-space: nowrap;
-}
-.doc-brand span { font-weight: 700; }
-.doc-search {
-  flex: 1;
-  max-width: 420px;
-  height: 34px;
-  padding: 0 12px;
-  border: 1px solid var(--doc-border);
-  border-radius: 8px;
-  font-size: 14px;
-  background: var(--doc-sidebar);
-}
-.doc-search:focus { outline: 2px solid var(--doc-accent); outline-offset: 0; }
-.doc-app-link {
-  margin-left: auto;
-  color: var(--doc-accent);
-  text-decoration: none;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.doc-app-link:hover { text-decoration: underline; }
+/* ── Header: see css/page-header.css (shared across settings/help/docs) ─────── */
 
 /* ── Layout ───────────────────────────────────────────────────────────────── */
 .doc-layout {
@@ -189,5 +151,5 @@ html, body {
     border-bottom: 1px solid var(--doc-border);
   }
   .doc-main { padding: 20px; }
-  .doc-app-link span { display: none; }
+  .page-header-title span { display: none; }
 }

@@ -27,35 +27,7 @@ body {
   min-height: 100vh;
 }
 
-/* ── Header ───────────────────────────────────────────────────────────────── */
-.settings-header {
-  background: var(--s-surface);
-  border-bottom: 1px solid var(--s-border);
-  padding: 18px 32px 14px;
-}
-.settings-header-top {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 4px;
-}
-.settings-header h1 {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--s-text);
-  flex: 1;
-}
-.settings-back {
-  font-size: 13px;
-  color: var(--s-primary);
-  text-decoration: none;
-  white-space: nowrap;
-}
-.settings-back:hover { text-decoration: underline; }
-.settings-subtitle {
-  font-size: 13px;
-  color: var(--s-muted);
-}
+/* ── Header: see css/page-header.css (shared across settings/help/docs) ─────── */
 
 /* ── Body ────────────────────────────────────────────────────────────────── */
 .settings-wrap {
