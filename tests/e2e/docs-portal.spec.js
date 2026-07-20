@@ -27,8 +27,8 @@ test.describe('documentation portal', () => {
   });
 
   test('an unwritten page shows a placeholder', async ({ page }) => {
-    await page.goto('/docs.html#/enablewhen');
-    await expect(page.locator('#docContent h1')).toHaveText('enableWhen & visibility');
+    await page.goto('/docs.html#/fhirpath');
+    await expect(page.locator('#docContent h1')).toHaveText('FHIRPath in the builder');
     await expect(page.locator('.doc-placeholder')).toBeVisible();
   });
 
