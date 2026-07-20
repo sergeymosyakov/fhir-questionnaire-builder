@@ -29,6 +29,10 @@ function _mk(tag, className) {
   return el;
 }
 
+// Focusable-element selector used for dialog focus trapping.
+const _FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+let _modalSeq = 0;
+
 import { questDoc } from '../../fhir/quest-document.js';
 import { answerStore } from '../../answer-store.js';
 export class Modal {
@@ -44,9 +48,16 @@ export class Modal {
 
     const box = _mk('div', 'modal-box');
     if (maxWidth) box.style.maxWidth = maxWidth;
+    // Dialog semantics for assistive tech + focus management.
+    this.box = box;
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-modal', 'true');
+    box.tabIndex = -1;
 
     const header = _mk('div', 'modal-header');
     this.title    = _mk('span');
+    this.title.id = 'modal-title-' + (++_modalSeq);
+    box.setAttribute('aria-labelledby', this.title.id);
     this.closeBtn = _mk('button', 'modal-close');
     this.closeBtn.type = 'button';
     this.closeBtn.dataset.tipTitle = 'Close';
@@ -94,9 +105,47 @@ export class Modal {
     document.body.appendChild(this.backdrop);
   }
 
-  open()  { this.backdrop.style.display = 'flex'; }
-  close() { this.backdrop.style.display = 'none'; }
+  open()  {
+    // Remember what had focus so it can be restored on close (a11y).
+    this._prevFocus = (typeof document !== 'undefined' && document.activeElement) || null;
+    this.backdrop.style.display = 'flex';
+    // Move focus into the dialog and trap Tab within it.
+    if (!this._trapHandler) {
+      this._trapHandler = (e) => this._onTrapKeydown(e);
+      this.backdrop.addEventListener('keydown', this._trapHandler);
+    }
+    try { this.box.focus({ preventScroll: true }); } catch { /* jsdom */ }
+  }
 
+  close() {
+    this.backdrop.style.display = 'none';
+    if (this._trapHandler) {
+      this.backdrop.removeEventListener('keydown', this._trapHandler);
+      this._trapHandler = null;
+    }
+    // Restore focus to the opener when it is still in the document (a11y).
+    const prev = this._prevFocus;
+    this._prevFocus = null;
+    if (prev && typeof prev.focus === 'function' && prev.isConnected) {
+      try { prev.focus({ preventScroll: true }); } catch { /* ignore */ }
+    }
+  }
+
+  /** Keep Tab focus cycling inside the dialog (focus trap). */
+  _onTrapKeydown(e) {
+    if (e.key !== 'Tab') return;
+    const items = [...this.box.querySelectorAll(_FOCUSABLE)]
+      .filter(el => el.offsetParent !== null || el === document.activeElement);
+    if (items.length === 0) { e.preventDefault(); this.box.focus(); return; }
+    const first = items[0];
+    const last  = items[items.length - 1];
+    const active = document.activeElement;
+    if (e.shiftKey && (active === first || active === this.box)) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && active === last) {
+      e.preventDefault(); first.focus();
+    }
+  }
   /** Render the standard two-part title: bold label + muted subject. */
   setTitle(label, subject) {
     this.title.innerHTML = '';

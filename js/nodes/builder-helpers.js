@@ -127,6 +127,13 @@ export function makeActionLink(_node, label, key, tip, container) {
   a.className      = 'action-edit';
   a.dataset.testid = 'action-' + key;
   a.dataset.role   = 'advanced-ctrl';
+  // Keyboard accessibility (a11y): these are <a> without href, so make them
+  // reachable and activatable from the keyboard like a button.
+  a.setAttribute('role', 'button');
+  a.tabIndex = 0;
+  a.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); a.click(); }
+  });
   if (tip?.title) a.dataset.tipTitle = tip.title;
   if (tip?.body)  a.dataset.tipBody  = tip.body;
   if (tip?.fhir)  a.dataset.tipFhir  = tip.fhir;
