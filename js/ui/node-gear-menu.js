@@ -25,10 +25,13 @@ export class NodeGearMenu {
     this._btn.className = 'node-gear-btn';
     this._btn.dataset.testid = testid;
     this._btn.dataset.tipTitle = 'Node actions';
+    this._btn.setAttribute('aria-haspopup', 'menu');
+    this._btn.setAttribute('aria-expanded', 'false');
     this._btn.innerHTML = _GEAR_SVG;
 
     this._menu = document.createElement('div');
     this._menu.className = 'node-gear-menu';
+    this._menu.setAttribute('role', 'menu');
     this._menu.style.display = 'none';
 
     this._wrap.appendChild(this._btn);
@@ -43,6 +46,15 @@ export class NodeGearMenu {
       } else {
         this._menu.style.display = 'block';
         this._wrap.classList.add('node-gear-wrap--open');
+        this._btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    // Escape closes the menu and returns focus to the gear button (a11y).
+    this._wrap.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && this._menu.style.display !== 'none') {
+        this.close();
+        this._btn.focus();
       }
     });
 
@@ -52,7 +64,7 @@ export class NodeGearMenu {
   /** Root element to append to the DOM. */
   get el() { return this._wrap; }
 
-  close() { this._menu.style.display = 'none'; this._wrap.classList.remove('node-gear-wrap--open'); }
+  close() { this._menu.style.display = 'none'; this._wrap.classList.remove('node-gear-wrap--open'); this._btn.setAttribute('aria-expanded', 'false'); }
 
   /** Add a divider between item groups. */
   addSep() {
@@ -74,7 +86,12 @@ export class NodeGearMenu {
     if (checked) mi.classList.add('node-gear-menu-item--checked');
     mi.dataset.testid = testid;
     mi.textContent = label;
-    mi.addEventListener('click', () => { this.close(); onClick(); });
+    mi.setAttribute('role', 'menuitemcheckbox');
+    mi.setAttribute('aria-checked', String(!!checked));
+    mi.tabIndex = 0;
+    const activate = () => { this.close(); onClick(); };
+    mi.addEventListener('click', activate);
+    mi.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
     this._menu.appendChild(mi);
     return mi;
   }
@@ -92,11 +109,16 @@ export class NodeGearMenu {
     if (opts.disabled) mi.classList.add('node-gear-menu-item--disabled');
     mi.dataset.testid = testid;
     mi.textContent = label;
-    mi.addEventListener('click', () => {
+    mi.setAttribute('role', 'menuitem');
+    mi.tabIndex = 0;
+    if (opts.disabled) mi.setAttribute('aria-disabled', 'true');
+    const activate = () => {
       if (mi.classList.contains('node-gear-menu-item--disabled')) return;
       this.close();
       onClick();
-    });
+    };
+    mi.addEventListener('click', activate);
+    mi.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
     this._menu.appendChild(mi);
     return mi;
   }

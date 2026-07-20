@@ -58,7 +58,7 @@ authoring/runtime slice.
 | **StructureMap-based extraction/population** (`targetStructureMap` / `sourceStructureMap`) | Aidbox, Firely | Round-tripped only — **not executed.** This is the core of industrial-grade SDC extraction. Biggest single gap. |
 | **Licensed terminology** (LOINC, SNOMED CT) | Any platform with a real tx server | Public HAPI doesn't load these, so validation of coded answers is partial. |
 | **Persistence / API / auth as a product** | Aidbox, Medplum, Firely | We have Supabase-backed cloud save, but we are not a FHIR store and have no server API. |
-| **Renderer maturity / accessibility audit** | LHC-Forms (battle-tested at NIH scale) | Their renderer has years of production hardening and formal a11y review. Ours now has an automated a11y e2e gate over the preview, accessible names on all controls, keyboard-accessible action links, and modal focus management (dialog role, focus-trap, focus return), but still lacks a full keyboard/screen-reader audit and production hardening. |
+| **Renderer maturity / accessibility audit** | LHC-Forms (battle-tested at NIH scale) | Their renderer has years of production hardening and formal a11y review. Ours now has a broad in-house a11y pass \u2014 accessible names on all controls, AA contrast, modal focus-trap/return, keyboard-operable dropdowns and builder tree, ARIA roles, and `aria-live` validation announcements (all e2e-guarded) \u2014 but still lacks a formal external a11y audit and production hardening. |
 | **Ecosystem / adoption** | LHC-Forms, Medplum | Reference implementations with large user bases, integrations, and community. We are an early-stage prototype. |
 
 ---

@@ -40,6 +40,9 @@ export function buildInlineTitleEditor(node) {
   titleDisplay.className = 'node-title-display';
   titleDisplay.dataset.testid = 'node-title-display';
   titleDisplay.tabIndex = 0;
+  // Keyboard-accessible click-to-edit (a11y). The title text is the accessible
+  // name; role=button conveys that activating it opens the editor.
+  titleDisplay.setAttribute('role', 'button');
   titleDisplay.textContent = node.title || '(no title)';
   const titleTextarea = document.createElement('textarea');
   titleTextarea.className = 'node-title-textarea';
@@ -48,14 +51,20 @@ export function buildInlineTitleEditor(node) {
   titleTextarea.style.display = 'none';
   titleTextarea.oninput = () => { node.title = titleTextarea.value; titleDisplay.textContent = titleTextarea.value || '(no title)'; _notify(); };
   titleTextarea.onblur  = () => { titleTextarea.style.display = 'none'; titleDisplay.style.display = ''; };
-  titleDisplay.addEventListener('click', e => {
-    e.stopPropagation();
+  const _openTitleEditor = () => {
     const h = titleDisplay.offsetHeight;
     titleDisplay.style.display = 'none';
     titleTextarea.style.display = '';
     titleTextarea.style.height = Math.max(h, 48) + 'px';
     titleTextarea.focus();
     titleTextarea.setSelectionRange(titleTextarea.value.length, titleTextarea.value.length);
+  };
+  titleDisplay.addEventListener('click', e => {
+    e.stopPropagation();
+    _openTitleEditor();
+  });
+  titleDisplay.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); _openTitleEditor(); }
   });
   titleRow.append(titleDisplay, titleTextarea);
   return { titleRow, titleDisplay, titleTextarea };
