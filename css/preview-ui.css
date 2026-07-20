@@ -60,7 +60,7 @@
   font-family: monospace;
   font-size: 10px;
   font-weight: 600;
-  color: var(--c-amber);
+  color: #b34700; /* darker amber — WCAG AA contrast on --c-amber-lt background */
   background: var(--c-amber-lt);
   border-radius: 20px;
   padding: 1px 8px;

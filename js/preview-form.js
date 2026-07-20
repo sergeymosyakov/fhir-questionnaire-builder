@@ -309,7 +309,25 @@ export class PreviewForm {
       onChange, _reCalc: reCalcAndRefresh,
       _fpCtx: this._lastCtx,
     };
-    return node.buildControl(ctx);
+    const el = node.buildControl(ctx);
+    this._applyA11yLabels(el, node);
+    return el;
+  }
+
+  // Give every native form control an accessible name derived from the item
+  // title when it lacks one (a11y: WCAG 4.1.2 / label). Controls that already
+  // carry aria-label / aria-labelledby or sit inside a <label> are left as-is.
+  _applyA11yLabels(controlEl, node) {
+    if (!controlEl || typeof controlEl.querySelectorAll !== 'function') return;
+    const label = String(node.title || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!label) return;
+    controlEl.querySelectorAll('input, select, textarea').forEach(f => {
+      if (f.type === 'hidden') return;
+      if (f.getAttribute('aria-label') || f.getAttribute('aria-labelledby')) return;
+      if (f.id && controlEl.querySelector(`label[for="${f.id}"]`)) return;
+      if (typeof f.closest === 'function' && f.closest('label')) return;
+      f.setAttribute('aria-label', label);
+    });
   }
 
   async _asyncRender(version) {

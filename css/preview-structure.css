@@ -113,8 +113,8 @@
 }
 .preview-optional-badge {
   font-size: 10px;
-  color: #999;
-  border: 1px solid #ddd;
+  color: #6b6b6b;
+  border: 1px solid #ccc;
   border-radius: 10px;
   padding: 1px 7px;
   white-space: nowrap;
