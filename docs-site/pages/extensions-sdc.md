@@ -103,4 +103,4 @@ information.
 
 ---
 
-Next: [Preview, Patient View & FHIR JSON](preview-modes.md).
+Next: [Extraction (definition & StructureMap)](extraction.md).
