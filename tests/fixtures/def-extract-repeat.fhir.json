@@ -1,0 +1,34 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "def-extract-repeat",
+  "status": "draft",
+  "title": "Definition Extract — repeating field values",
+  "item": [
+    {
+      "linkId": "patient-g",
+      "type": "group",
+      "text": "Patient",
+      "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient",
+      "extension": [
+        { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtract", "valueBoolean": true }
+      ],
+      "item": [
+        {
+          "linkId": "family",
+          "type": "string",
+          "text": "Family name",
+          "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient.name.family",
+          "initial": [{ "valueString": "Doe" }]
+        },
+        {
+          "linkId": "given",
+          "type": "string",
+          "text": "Given names",
+          "repeats": true,
+          "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient.name.given",
+          "initial": [{ "valueString": "John" }, { "valueString": "James" }]
+        }
+      ]
+    }
+  ]
+}

@@ -95,3 +95,42 @@ test.describe('SDC Definition Extract', () => {
     expect(errors).toHaveLength(0);
   });
 });
+
+// ── Repeating field values → arrays (general extraction engine) ──────────────
+test.describe('SDC Definition Extract — repeating field values', () => {
+  const REPEAT = path.resolve('tests/fixtures/def-extract-repeat.fhir.json');
+
+  async function loadRepeat(page) {
+    await freshStart(page);
+    await page.locator('[data-testid="fhir-file-input"]').setInputFiles(REPEAT);
+    await page.waitForSelector('[data-testid="tree-container"] [data-node-id]', { timeout: 15_000 });
+  }
+
+  test('summary reports one extracted Patient resource', async ({ page }) => {
+    await loadRepeat(page);
+    await openDropdownItem(page, 'export-btn', 'export-def-extract-item');
+    const modal = page.locator('[data-testid="defExtract"]').first();
+    await expect(modal).toBeVisible();
+    await expect(modal.locator('.def-extract-summary')).toContainText('Extracted 1 resource');
+  });
+
+  test('downloaded bundle promotes repeated given names to an array', async ({ page }) => {
+    await loadRepeat(page);
+    await openDropdownItem(page, 'export-btn', 'export-def-extract-item');
+    const modal = page.locator('[data-testid="defExtract"]').first();
+    await expect(modal).toBeVisible();
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('defExtractApply').click(),
+    ]);
+    const fp = await download.path();
+    const { readFileSync } = await import('node:fs');
+    const bundle = JSON.parse(readFileSync(fp, 'utf8'));
+
+    const patient = bundle.entry[0].resource;
+    expect(patient.resourceType).toBe('Patient');
+    expect(patient.name.family).toBe('Doe');
+    expect(patient.name.given).toEqual(['John', 'James']);
+  });
+});

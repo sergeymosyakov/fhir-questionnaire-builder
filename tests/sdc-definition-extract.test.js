@@ -401,6 +401,79 @@ describe('definitionExtract — nested structures', () => {
   });
 });
 
+// ── Repeating field values → arrays ──────────────────────────────────────────
+
+describe('definitionExtract — repeating field values', () => {
+  it('promotes a repeated non-array leaf (name.given) to an array', () => {
+    const q  = makeQ([{
+      linkId: 'g', type: 'group', definition: `${SD_BASE}Patient#Patient`,
+      extension: [{ url: EXTRACT_URL }],
+      item: [{ linkId: 'given', type: 'string', definition: `${SD_BASE}Patient#Patient.name.given` }],
+    }]);
+    const qr = makeQR([{
+      linkId: 'g',
+      item: [{ linkId: 'given', answer: [{ valueString: 'John' }, { valueString: 'James' }] }],
+    }]);
+    const { bundle } = definitionExtract(q, qr);
+    expect(bundle.entry[0].resource.name.given).toEqual(['John', 'James']);
+  });
+
+  it('keeps a single value scalar', () => {
+    const q  = makeQ([{
+      linkId: 'g', type: 'group', definition: `${SD_BASE}Patient#Patient`,
+      extension: [{ url: EXTRACT_URL }],
+      item: [{ linkId: 'given', type: 'string', definition: `${SD_BASE}Patient#Patient.name.given` }],
+    }]);
+    const qr = makeQR([{
+      linkId: 'g',
+      item: [{ linkId: 'given', answer: [{ valueString: 'Solo' }] }],
+    }]);
+    const { bundle } = definitionExtract(q, qr);
+    expect(bundle.entry[0].resource.name.given).toBe('Solo');
+  });
+});
+
+// ── Repeating groups → one resource per QR instance ──────────────────────────
+
+describe('definitionExtract — repeating groups', () => {
+  const q = makeQ([{
+    linkId: 'contact-g', type: 'group', repeats: true,
+    definition: `${SD_BASE}Patient#Patient`,
+    extension: [{ url: EXTRACT_URL }],
+    item: [{ linkId: 'family', type: 'string', definition: `${SD_BASE}Patient#Patient.name.family` }],
+  }]);
+
+  it('extracts one resource per repeating group instance', () => {
+    const qr = makeQR([
+      { linkId: 'contact-g', item: [{ linkId: 'family', answer: [{ valueString: 'Doe' }] }] },
+      { linkId: 'contact-g', item: [{ linkId: 'family', answer: [{ valueString: 'Roe' }] }] },
+    ]);
+    const { bundle, count } = definitionExtract(q, qr);
+    expect(count).toBe(2);
+    expect(bundle.entry.map(e => e.resource.name.family)).toEqual(['Doe', 'Roe']);
+  });
+
+  it('gives each extracted resource a unique id', () => {
+    const qr = makeQR([
+      { linkId: 'contact-g', item: [{ linkId: 'family', answer: [{ valueString: 'Doe' }] }] },
+      { linkId: 'contact-g', item: [{ linkId: 'family', answer: [{ valueString: 'Roe' }] }] },
+    ]);
+    const { bundle } = definitionExtract(q, qr);
+    const ids = bundle.entry.map(e => e.resource.id);
+    expect(new Set(ids).size).toBe(2);
+  });
+
+  it('scopes each instance to its own answers (no cross-contamination)', () => {
+    const qr = makeQR([
+      { linkId: 'contact-g', item: [{ linkId: 'family', answer: [{ valueString: 'First' }] }] },
+      { linkId: 'contact-g', item: [{ linkId: 'family', answer: [{ valueString: 'Second' }] }] },
+    ]);
+    const { bundle } = definitionExtract(q, qr);
+    expect(bundle.entry[0].resource.name.family).toBe('First');
+    expect(bundle.entry[1].resource.name.family).toBe('Second');
+  });
+});
+
 // ── parseDefinition edge cases ────────────────────────────────────────────────
 
 describe('definitionExtract — parseDefinition edge cases', () => {

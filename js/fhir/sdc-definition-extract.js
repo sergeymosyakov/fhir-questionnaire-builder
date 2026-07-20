@@ -99,9 +99,25 @@ function setPath(obj, path, value) {
     cur[lastKey] = [value];
   } else if (Array.isArray(cur[lastKey])) {
     cur[lastKey].push(value);
+  } else if (cur[lastKey] !== undefined) {
+    // Repeating field value on a non-array leaf → promote the scalar to an array.
+    cur[lastKey] = [cur[lastKey], value];
   } else {
     cur[lastKey] = value;
   }
+}
+
+/**
+ * Recursively collect every QR item matching a linkId across the whole tree.
+ * Repeating groups appear as multiple items with the same linkId.
+ * @returns {object[]} matching QR items (each a group instance)
+ */
+function findGroupInstances(qrItems, linkId, out = []) {
+  for (const it of (qrItems || [])) {
+    if (it.linkId === linkId) out.push(it);
+    if (it.item) findGroupInstances(it.item, linkId, out);
+  }
+  return out;
 }
 
 /**
@@ -117,10 +133,11 @@ function buildQRIndex(qrItems, out = {}) {
 
 /**
  * Walk Questionnaire items and collect extraction groups.
- * A group with definitionExtract = extraction context.
- * Returns array of { resourceType, fields: [{linkId, path, answer[]}] }
+ * A group with definitionExtract = extraction context. Repeating groups yield
+ * one entry per QR instance (so a repeating group extracts multiple resources).
+ * Returns array of { resourceType, fields: [{linkId, path, answers[]}] }
  */
-function collectGroups(qItems, qrIndex, parentResourceType = null) {
+function collectGroups(qItems, qr, parentResourceType = null) {
   const groups = [];
 
   for (const qItem of (qItems || [])) {
@@ -135,23 +152,30 @@ function collectGroups(qItems, qrIndex, parentResourceType = null) {
     }
 
     if (isExtractGroup) {
-      // This group defines a new resource instance
+      // This group defines a new resource instance (one per QR occurrence)
       const resourceType = localType || _inferResourceType(qItem);
       if (!resourceType) {
         // recurse into children with parent context
-        groups.push(...collectGroups(qItem.item, qrIndex, localType));
+        groups.push(...collectGroups(qItem.item, qr, localType));
         continue;
       }
 
-      const fields = [];
-      _collectFields(qItem.item, qrIndex, resourceType, fields);
-
-      if (fields.length > 0) {
-        groups.push({ resourceType, fields, linkId: qItem.linkId });
+      // Each QR occurrence of this group (repeats) → its own resource, scoped
+      // to that instance's answers. Falls back to the whole QR when the group
+      // linkId is not present (flat / implicit responses).
+      const instances = findGroupInstances(qr.item, qItem.linkId);
+      const scopes = instances.length ? instances.map(i => i.item) : [qr.item];
+      for (const scopeItems of scopes) {
+        const qrIndex = buildQRIndex(scopeItems);
+        const fields = [];
+        _collectFields(qItem.item, qrIndex, resourceType, fields);
+        if (fields.length > 0) {
+          groups.push({ resourceType, fields, linkId: qItem.linkId });
+        }
       }
     } else {
       // Not an extract group — recurse
-      groups.push(...collectGroups(qItem.item, qrIndex, localType));
+      groups.push(...collectGroups(qItem.item, qr, localType));
     }
   }
 
@@ -230,8 +254,7 @@ export function definitionExtract(questJson, qr) {
     return { bundle: null, count: 0, warnings: ['No QuestionnaireResponse provided.'] };
   }
 
-  const qrIndex = buildQRIndex(qr.item);
-  const groups  = collectGroups(questJson.item, qrIndex);
+  const groups = collectGroups(questJson.item, qr);
 
   if (groups.length === 0) {
     warnings.push(

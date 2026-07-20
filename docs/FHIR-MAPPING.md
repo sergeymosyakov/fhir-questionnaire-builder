@@ -483,7 +483,7 @@ Server-side SDC operations that the builder integrates with, and the extensions 
 | Operation | How to use | Notes |
 |---|---|---|
 | `Questionnaire/$populate` | **Answers ▾ → ↧ Fill from FHIR Server…** (enabled when a questionnaire is loaded) → search for a Patient by name (live FHIR search against the FHIR Base Server) or type `Patient/{id}` → click **Fill from Server** | Sends `POST {SDC Server || FHIR Base}/Questionnaire/$populate` with `Parameters { questionnaire, subject }`. Merges returned `QuestionnaireResponse` answers into the current form via `importQRAnswers`. Accepts both direct QR result and Parameters-wrapped QR. Requires a server implementing the SDC IG (e.g. Matchbox). |
-| Definition-based extraction | **Save ▾ → Definition Extract · FHIR JSON Bundle** (after filling answers) → review the extracted resources → **Download Bundle** | Client-side `definitionExtract(questJson, qr)` walks groups carrying the `sdc-questionnaire-definitionExtract` extension, maps each child `item.definition` answer to its FHIR resource element path, and produces a transaction `Bundle`. No server required. |
+| Definition-based extraction | **Save ▾ → Definition Extract · FHIR JSON Bundle** (after filling answers) → review the extracted resources → **Download Bundle** | Client-side `definitionExtract(questJson, qr)` walks groups carrying the `sdc-questionnaire-definitionExtract` extension, maps each child `item.definition` answer to its FHIR resource element path, and produces a transaction `Bundle`. Repeating field values promote to arrays; repeating extract groups produce one resource per QR instance. No server required. |
 
 ### SDC extensions — population and extraction
 
