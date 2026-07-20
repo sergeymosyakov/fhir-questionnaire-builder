@@ -122,6 +122,8 @@ export class TranslateModal extends Modal {
       for (const node of nodes || []) {
         if (node._renderXhtml) {
           entries.push({ key: node.id, original: node._renderXhtml, isXhtml: true, translated: store.xhtml?.[node.id] ?? '' });
+        } else if (node._renderMarkdown) {
+          entries.push({ key: node.id, original: node._renderMarkdown, isMarkdown: true, translated: store.markdown?.[node.id] ?? '' });
         } else if (node.title) {
           entries.push({ key: node.id, original: node.title, translated: store.items[node.id] ?? '' });
         }
@@ -164,6 +166,9 @@ export class TranslateModal extends Modal {
         if (node._renderXhtml) {
           // Send full XHTML to API — Google Translate preserves HTML tags
           entries.push({ key: node.id, original: node._renderXhtml, isXhtml: true });
+        } else if (node._renderMarkdown) {
+          // Send raw Markdown to API — Google Translate preserves Markdown syntax
+          entries.push({ key: node.id, original: node._renderMarkdown, isMarkdown: true });
         } else if (node.title) {
           entries.push({ key: node.id, original: node.title });
         }
@@ -324,9 +329,10 @@ export class TranslateModal extends Modal {
   _applyTranslations() {
     const lang = this._targetLang;
     const qd   = this._questDoc;
-    if (!qd.translations[lang]) qd.translations[lang] = { title: '', items: {}, opts: {}, ui: {}, xhtml: {} };
-    if (!qd.translations[lang].ui)   qd.translations[lang].ui   = {};
-    if (!qd.translations[lang].xhtml) qd.translations[lang].xhtml = {};
+    if (!qd.translations[lang]) qd.translations[lang] = { title: '', items: {}, opts: {}, ui: {}, xhtml: {}, markdown: {} };
+    if (!qd.translations[lang].ui)       qd.translations[lang].ui       = {};
+    if (!qd.translations[lang].xhtml)    qd.translations[lang].xhtml    = {};
+    if (!qd.translations[lang].markdown) qd.translations[lang].markdown = {};
     const store = qd.translations[lang];
 
     for (const row of this._reviewRows) {
@@ -339,6 +345,8 @@ export class TranslateModal extends Modal {
         store.opts[row.key] = val;
       } else if (row.isXhtml) {
         store.xhtml[row.key] = val;  // translated XHTML
+      } else if (row.isMarkdown) {
+        store.markdown[row.key] = val;  // translated Markdown
       } else {
         store.items[row.key] = val;
       }

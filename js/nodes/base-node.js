@@ -394,7 +394,13 @@ export class BaseNode {
       el.innerHTML = domPurify ? domPurify.sanitize(rc.translations[lang].xhtml[this.id]) : '';
       return;
     }
-    // 2. Translated plain text
+    // 2. Translated Markdown (per-language)
+    if (lang && rc?.translations?.[lang]?.markdown?.[this.id] != null) {
+      const md = rc.translations[lang].markdown[this.id];
+      el.innerHTML = (domPurify && marked) ? domPurify.sanitize(marked.parseInline(md)) : md;
+      return;
+    }
+    // 3. Translated plain text
     if (lang && rc?.translations?.[lang]?.items?.[this.id] != null) {
       el.textContent = rc.translations[lang].items[this.id];
       return;

@@ -683,6 +683,21 @@ function _exportTranslations(q, translations) {
       ],
     });
   }
+
+  // Write markdown-translations custom extension for each language that has Markdown translations
+  const MD_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/markdown-translations';
+  q.extension = (q.extension || []).filter(e => e.url !== MD_TRANS_URL);
+  for (const lang of langs) {
+    const markdown = translations[lang].markdown;
+    if (!markdown || !Object.keys(markdown).length) continue;
+    q.extension.push({
+      url: MD_TRANS_URL,
+      extension: [
+        { url: 'lang',    valueCode:   lang },
+        { url: 'strings', valueString: JSON.stringify(markdown) },
+      ],
+    });
+  }
   if (!q.extension.length) delete q.extension;
 }
 

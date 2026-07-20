@@ -268,10 +268,24 @@ function _importTranslations(q, tree, translations) {
       Object.assign(translations[lang].xhtml, parsed);
     } catch { /* ignore malformed */ }
   }
+
+  // Read custom markdown-translations extension from questionnaire root
+  const MD_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/markdown-translations';
+  for (const ext of (q.extension || []).filter(e => e.url === MD_TRANS_URL)) {
+    const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
+    const strings = (ext.extension || []).find(s => s.url === 'strings')?.valueString;
+    if (!lang || !strings) continue;
+    try {
+      const parsed = JSON.parse(strings);
+      _ensureLang(translations, lang);
+      Object.assign(translations[lang].markdown, parsed);
+    } catch { /* ignore malformed */ }
+  }
 }
 
 function _ensureLang(translations, lang) {
-  if (!translations[lang]) translations[lang] = { title: '', items: {}, opts: {}, ui: {}, xhtml: {} };
-  if (!translations[lang].ui)   translations[lang].ui   = {};
-  if (!translations[lang].xhtml) translations[lang].xhtml = {};
+  if (!translations[lang]) translations[lang] = { title: '', items: {}, opts: {}, ui: {}, xhtml: {}, markdown: {} };
+  if (!translations[lang].ui)       translations[lang].ui       = {};
+  if (!translations[lang].xhtml)    translations[lang].xhtml    = {};
+  if (!translations[lang].markdown) translations[lang].markdown = {};
 }
