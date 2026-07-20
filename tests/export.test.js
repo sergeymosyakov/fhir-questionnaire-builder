@@ -708,6 +708,31 @@ describe('buildFHIRObject — translations export', () => {
     _questDoc.translations = null;
   });
 
+  it('writes markdown-translations extension for languages with markdown strings', () => {
+    _tree.length = 0;
+    _questDoc.translations = {
+      de: { title: '', items: {}, opts: {}, ui: {}, xhtml: {}, markdown: { intro: '**Wichtig**' } },
+    };
+    const q = buildFHIRObject();
+    const MD_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/markdown-translations';
+    const mdExt = (q.extension || []).find(e => e.url === MD_TRANS_URL);
+    expect(mdExt).toBeDefined();
+    const strings = JSON.parse(mdExt.extension.find(s => s.url === 'strings').valueString);
+    expect(strings.intro).toBe('**Wichtig**');
+    _questDoc.translations = null;
+  });
+
+  it('does not write markdown-translations extension when no markdown strings', () => {
+    _tree.length = 0;
+    _questDoc.translations = {
+      de: { title: '', items: {}, opts: {}, ui: {}, xhtml: {}, markdown: {} },
+    };
+    const q = buildFHIRObject();
+    const MD_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/markdown-translations';
+    expect((q.extension || []).find(e => e.url === MD_TRANS_URL)).toBeUndefined();
+    _questDoc.translations = null;
+  });
+
   it('writes answerOption label translations (_valueCoding._display.extension)', () => {
     _tree.length = 0;
     _tree.push({

@@ -1643,6 +1643,7 @@ describe('importFHIR — implicitRules', () => {
 const TRANSLATION_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
 const UI_TRANS_URL    = 'http://fhir-qb.app/StructureDefinition/ui-translations';
 const XHTML_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/xhtml-translations';
+const MD_TRANS_URL    = 'http://fhir-qb.app/StructureDefinition/markdown-translations';
 
 function makeTitleTranslation(lang, content) {
   return {
@@ -1721,6 +1722,21 @@ describe('importFHIR — _importTranslations', () => {
       }],
     });
     expect(_questDoc.translations?.de?.xhtml?.['intro-text']).toBe('<p>Einleitung</p>');
+  });
+
+  it('reads markdown-translations extension from questionnaire root', () => {
+    const mdStrings = { 'intro-text': '**Einleitung**' };
+    importFHIR({
+      resourceType: 'Questionnaire', title: 'T', item: [],
+      extension: [{
+        url: MD_TRANS_URL,
+        extension: [
+          { url: 'lang',    valueCode:   'de' },
+          { url: 'strings', valueString: JSON.stringify(mdStrings) },
+        ],
+      }],
+    });
+    expect(_questDoc.translations?.de?.markdown?.['intro-text']).toBe('**Einleitung**');
   });
 
   it('ignores ui-translations with malformed JSON strings', () => {

@@ -282,7 +282,7 @@ export class TranslateModal extends Modal {
       const tdTrans = tr.insertCell();
       const inp = document.createElement('textarea');
       inp.className = 'translate-inp';
-      inp.rows = 1;
+      inp.rows = (row.isXhtml || row.isMarkdown) ? 3 : 1;
       inp.dataset.testid = 'translate-input-' + row.key;
       inp.value = row.translated;
       inp.addEventListener('input', () => { row.translated = inp.value; });

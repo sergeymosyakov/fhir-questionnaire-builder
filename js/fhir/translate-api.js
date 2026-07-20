@@ -10,7 +10,11 @@
 import { LANGUAGES_MAP } from './languages.js';
 
 const BATCH_SIZE = 40;   // Google gtx handles ~40 segments per request reliably
-const SEPARATOR  = '\n'; // newline is preserved by gtx (not a separator in output)
+// Unique record separator placed on its own line. Google Translate preserves it
+// verbatim and never merges it into adjacent text, so multi-line texts (XHTML /
+// Markdown that contain their own newlines) split back correctly by index.
+const SEP_TOKEN = '\uE000QBSEP\uE000';   // private-use-area sentinel, unlikely in real text
+const SEPARATOR = '\n' + SEP_TOKEN + '\n';
 
 /**
  * Translate an array of strings to `targetLang` (BCP-47, e.g. 'es', 'fr').
@@ -32,10 +36,11 @@ export async function translateBatch(texts, targetLang, sourceLang = 'auto') {
     const chunk = nonEmpty.slice(start, start + BATCH_SIZE);
     const joined = chunk.map(({ t }) => t).join(SEPARATOR);
     const translated = await _callGtx(joined, targetLang, sourceLang);
-    // Split result back by newline — same separator, same count
-    const parts = translated.split(SEPARATOR);
+    // Split result back by the sentinel token (tolerant of surrounding whitespace
+    // the translator may add/remove around the separator).
+    const parts = translated.split(SEP_TOKEN);
     chunk.forEach(({ i }, idx) => {
-      out[i] = parts[idx] ?? chunk[idx].t; // fallback to original on mismatch
+      out[i] = (parts[idx] ?? chunk[idx].t).replace(/^\n+|\n+$/g, ''); // trim wrapping newlines
     });
   }
 
