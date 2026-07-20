@@ -33,7 +33,7 @@
         { "id": "definition-extract", "title": "Definition-based extraction", "file": "definition-extract.md" },
         { "id": "resolve-profile", "title": "Resolve from profile", "file": "resolve-profile.md" },
         { "id": "redcap", "title": "REDCap import/export", "file": "redcap.md" },
-        { "id": "cloud-save", "title": "Cloud save & sharing", "file": "cloud-save.md" }
+        { "id": "cloud-save", "title": "Cloud save", "file": "cloud-save.md" }
       ]
     },
     {

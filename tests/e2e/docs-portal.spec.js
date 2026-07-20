@@ -26,9 +26,9 @@ test.describe('documentation portal', () => {
     await expect(visible).toHaveText('Translate a questionnaire');
   });
 
-  test('an unwritten page shows a placeholder', async ({ page }) => {
-    await page.goto('/docs.html#/import-roundtrip');
-    await expect(page.locator('#docContent h1')).toHaveText('Import & round-trip');
+  test('an unknown page id shows a not-found placeholder', async ({ page }) => {
+    await page.goto('/docs.html#/no-such-page');
+    await expect(page.locator('#docContent h1')).toHaveText('Page not found');
     await expect(page.locator('.doc-placeholder')).toBeVisible();
   });
 
