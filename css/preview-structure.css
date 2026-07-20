@@ -12,6 +12,10 @@
   align-items: flex-start;
   gap: 10px;
   padding: 10px 14px;
+  /* Reserve the 3px left-border gutter on every row so the coloured
+     success/error/required borders never shift the row content (prefix
+     numbers) sideways — keeps the ordinal column aligned. */
+  border-left: 3px solid transparent;
   transition: background .12s;
 }
 .lform-item:last-child { border-bottom: none; }

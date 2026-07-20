@@ -341,6 +341,7 @@ export class BaseNode {
     if (this._prefix && rc.viewPrefs.showPrefix) {
       const pfx = document.createElement('span');
       pfx.className = 'preview-prefix';
+      if (this.type === 'group') pfx.classList.add('preview-prefix--group');
       pfx.textContent = this._prefix;
       row.appendChild(pfx);
     }

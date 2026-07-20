@@ -109,6 +109,8 @@
   padding: 16px 24px;
   gap: 14px;
   border-bottom: 1px solid #f3f4f6;
+  /* Reserve the coloured-border gutter so required rows don't shift right. */
+  border-left: 3px solid transparent;
   transition: none;
   cursor: default;
 }
@@ -121,7 +123,7 @@
 .patient-view .lform-item.success,
 .patient-view .lform-item.error {
   background: #fff;
-  border-left: none;
+  border-left: 3px solid transparent;
 }
 .patient-view .preview-nested {
   border-left: none;
@@ -162,6 +164,12 @@
   border: none;
   padding: 0;
   border-radius: 0;
+}
+/* Group header number: vertically centre it against the taller group title
+   so it reads on the same line instead of floating above it. */
+.patient-view .preview-prefix--group {
+  align-self: center;
+  margin-top: 0;
 }
 .patient-view .preview-calc-value {
   font-size: 14px;
