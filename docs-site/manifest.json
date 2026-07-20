@@ -1,0 +1,58 @@
+{
+  "title": "FHIR Questionnaire Builder — Documentation",
+  "sections": [
+    {
+      "label": "Getting Started",
+      "pages": [
+        { "id": "what-is-this", "title": "What is this?", "file": "what-is-this.md" },
+        { "id": "who-its-for", "title": "Who it's for", "file": "who-its-for.md" },
+        { "id": "quick-tour", "title": "Quick tour", "file": "quick-tour.md" },
+        { "id": "running-locally", "title": "Running locally", "file": "running-locally.md" }
+      ]
+    },
+    {
+      "label": "Core Concepts",
+      "pages": [
+        { "id": "questionnaire-items", "title": "Questionnaire & items", "file": "questionnaire-items.md" },
+        { "id": "enablewhen", "title": "enableWhen & visibility", "file": "enablewhen.md" },
+        { "id": "fhirpath", "title": "FHIRPath in the builder", "file": "fhirpath.md" },
+        { "id": "extensions-sdc", "title": "Extensions & SDC", "file": "extensions-sdc.md" },
+        { "id": "extraction", "title": "Extraction (definition & StructureMap)", "file": "extraction.md" },
+        { "id": "preview-modes", "title": "Preview, Patient View & LHC", "file": "preview-modes.md" }
+      ]
+    },
+    {
+      "label": "How-to Guides",
+      "pages": [
+        { "id": "build-from-scratch", "title": "Build a questionnaire from scratch", "file": "build-from-scratch.md" },
+        { "id": "import-roundtrip", "title": "Import & round-trip", "file": "import-roundtrip.md" },
+        { "id": "answer-types", "title": "Answer types & options", "file": "answer-types.md" },
+        { "id": "validation", "title": "Validation", "file": "validation.md" },
+        { "id": "translate", "title": "Translate a questionnaire", "file": "translate.md" },
+        { "id": "populate", "title": "Fill from a FHIR server ($populate)", "file": "populate.md" },
+        { "id": "definition-extract", "title": "Definition-based extraction", "file": "definition-extract.md" },
+        { "id": "resolve-profile", "title": "Resolve from profile", "file": "resolve-profile.md" },
+        { "id": "redcap", "title": "REDCap import/export", "file": "redcap.md" },
+        { "id": "cloud-save", "title": "Cloud save & sharing", "file": "cloud-save.md" }
+      ]
+    },
+    {
+      "label": "Reference",
+      "pages": [
+        { "id": "field-reference", "title": "FHIR field reference", "file": "field-reference.md" },
+        { "id": "fhir-mapping", "title": "FHIR mapping & round-trip fidelity", "file": "fhir-mapping.md" },
+        { "id": "keyboard-a11y", "title": "Keyboard & accessibility", "file": "keyboard-a11y.md" },
+        { "id": "settings", "title": "Settings", "file": "settings.md" }
+      ]
+    },
+    {
+      "label": "About",
+      "pages": [
+        { "id": "comparison", "title": "How it compares", "file": "comparison.md" },
+        { "id": "roadmap-limitations", "title": "Roadmap & limitations", "file": "roadmap-limitations.md" },
+        { "id": "license", "title": "License & attribution", "file": "license.md" },
+        { "id": "security-privacy", "title": "Security & privacy", "file": "security-privacy.md" }
+      ]
+    }
+  ]
+}

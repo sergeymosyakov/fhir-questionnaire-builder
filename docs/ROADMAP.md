@@ -25,6 +25,7 @@ Supports Scenario 1 (round-trip) and Scenario 3 (logic testing). This is where m
 
 ## Near-term
 
+- [~] **Product documentation site** — **skeleton shipped:** a dependency-free, zero-build Markdown docs portal (`docs.html` + `docs-site/` + `css/docs-portal.css`) rendered client-side with the bundled `marked` + `DOMPurify`; sidebar nav from `docs-site/manifest.json`, live search, per-page TOC, "coming soon" placeholders for unwritten pages, and a **Docs** link in the app header (`tests/e2e/docs-portal.spec.js`). Content model is portable Markdown (no lock-in — can migrate to a generator later). **Remaining:** author the pages section by section (outline in the manifest).
 - [ ] **Performance regression test** — automated test with 200–300 item questionnaire covering deep nesting (depth 6–8), heavy `enableWhen`, and multiple `calculatedExpression` chains; assert render time stays under threshold
 
 ## Technical Debt

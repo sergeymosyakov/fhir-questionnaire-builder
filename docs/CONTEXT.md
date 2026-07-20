@@ -41,6 +41,8 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `index.html` | Entry point — markup, script imports |
 | `settings.html` | Standalone settings page (`css/settings.css` + `js/settings.js`); configures terminology server, FHIR base server, SDC server, CORS proxy, NLM API base, translation API endpoint; reads via `serverConfig`, saves to `LocalStorageConfigProvider` (not logged in) or Supabase `user_settings` table (logged in); shows active provider list + `☁️ Synced to cloud` badge; Test connection buttons; opened from `⋯` menu → Settings |
 | `favicon.svg` | Browser tab icon |
+| `docs.html` | Standalone **product documentation portal** (`css/docs-portal.css` + `docs-site/docs-viewer.js`); dependency-free Markdown viewer rendered client-side with the bundled `marked` + `DOMPurify`; sidebar from `docs-site/manifest.json`, live search, per-page TOC, hash routing (`#/<page-id>`), "coming soon" placeholders for unwritten pages; content authored as portable Markdown under `docs-site/pages/`; linked from the app header (`.top-panel-docs-link`) |
+| `docs-site/` | Documentation content: `manifest.json` (nav/outline), `docs-viewer.js` (generic viewer engine — fixed-size, does not grow with content), `pages/*.md` (one Markdown file per doc page) |
 | `start.ps1` | Local dev server: `npx serve .` |
 | `css/styles.css` | All styles and CSS design tokens (`--c-hover`, `--c-text-1`, `--c-accent`, etc.); `.top-panel-github-icon { vertical-align: -1px }` (GitHub SVG in header) |
 | `css/modals.css` | Shared modal system (`.modal-backdrop`, `.modal-box`, `.modal-header`, `.modal-close`, `.modal-body`, `.modal-footer`, `.modal-btn`) + per-modal z-index/size overrides via `#id` selectors |
