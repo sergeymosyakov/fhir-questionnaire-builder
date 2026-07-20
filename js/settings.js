@@ -16,6 +16,7 @@ const DEFAULTS = {
   [CONFIG_KEYS.CORS_PROXY]:         '',
   [CONFIG_KEYS.NLM_API_BASE]:       'https://clinicaltables.nlm.nih.gov/api',
   [CONFIG_KEYS.SDC_SERVER]:          '',
+  [CONFIG_KEYS.TRANSLATE_API]:      'https://translate.googleapis.com/translate_a/single',
 };
 
 // ── Register providers (same order as app.js but settings page is standalone) ─
@@ -194,6 +195,8 @@ function _refreshAllFields() {
     [CONFIG_KEYS.FHIR_BASE]:          'fhirBaseInput',
     [CONFIG_KEYS.CORS_PROXY]:         'corsProxyInput',
     [CONFIG_KEYS.NLM_API_BASE]:       'nlmApiInput',
+    [CONFIG_KEYS.SDC_SERVER]:         'sdcServerInput',
+    [CONFIG_KEYS.TRANSLATE_API]:      'translateApiInput',
   };
   for (const [key, inputId] of Object.entries(map)) {
     const inp = _el(inputId);
@@ -207,6 +210,7 @@ _el('saveBtn').addEventListener('click', () => {
   _collectField('corsProxyInput',  CONFIG_KEYS.CORS_PROXY);
   _collectField('nlmApiInput',     CONFIG_KEYS.NLM_API_BASE);
   _collectField('sdcServerInput',  CONFIG_KEYS.SDC_SERVER);
+  _collectField('translateApiInput', CONFIG_KEYS.TRANSLATE_API);
   // Re-sync all reset button states and input custom styles
   document.querySelectorAll('[data-reset]').forEach(btn => {
     const key = btn.dataset.reset;
@@ -216,6 +220,8 @@ _el('saveBtn').addEventListener('click', () => {
       [CONFIG_KEYS.FHIR_BASE]:          'fhirBaseInput',
       [CONFIG_KEYS.CORS_PROXY]:         'corsProxyInput',
       [CONFIG_KEYS.NLM_API_BASE]:       'nlmApiInput',
+      [CONFIG_KEYS.SDC_SERVER]:         'sdcServerInput',
+      [CONFIG_KEYS.TRANSLATE_API]:      'translateApiInput',
     };
     const inp = _el(map[key]);
     if (inp) inp.classList.toggle('is-custom', _lsProvider.get(key) != null);
@@ -238,6 +244,7 @@ async function init() {
   _wireField('corsProxyInput',  null, CONFIG_KEYS.CORS_PROXY);
   _wireField('nlmApiInput',     null, CONFIG_KEYS.NLM_API_BASE);
   _wireField('sdcServerInput',  null, CONFIG_KEYS.SDC_SERVER);
+  _wireField('translateApiInput', null, CONFIG_KEYS.TRANSLATE_API);
 
   // Wire reset buttons by data-reset attribute
   document.querySelectorAll('[data-reset]').forEach(btn => {
@@ -251,6 +258,8 @@ async function init() {
         [CONFIG_KEYS.FHIR_BASE]:          'fhirBaseInput',
         [CONFIG_KEYS.CORS_PROXY]:         'corsProxyInput',
         [CONFIG_KEYS.NLM_API_BASE]:       'nlmApiInput',
+        [CONFIG_KEYS.SDC_SERVER]:         'sdcServerInput',
+        [CONFIG_KEYS.TRANSLATE_API]:      'translateApiInput',
       };
       const inp = _el(map[key]);
       if (inp) {

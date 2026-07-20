@@ -19,6 +19,7 @@ export const CONFIG_KEYS = {
   FHIR_BASE:          'fhirBaseUrl',      // for patient / resource search
   SDC_SERVER:         'sdcServerUrl',     // for SDC operations ($populate, $extract)
   VALIDATORS:         'validators',       // JSON array string
+  TRANSLATE_API:      'translateApiUrl',  // translation endpoint (gtx-compatible)
 };
 
 const LS_PREFIX = 'fhirqb.server.';

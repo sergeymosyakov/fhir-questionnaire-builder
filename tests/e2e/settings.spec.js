@@ -120,8 +120,25 @@ test.describe('Settings page', () => {
     await expect(page.locator('[data-reset="terminologyServer"]')).toBeDisabled();
   });
 
-  test('settings link opens settings.html from main app via \u22ef menu', async ({ page }) => {
-    await page.goto('/');
+  test('translation API endpoint persists after reload', async ({ page }) => {
+    await gotoSettings(page);
+
+    const input = page.locator('#translateApiInput');
+    await expect(input).toBeVisible();
+
+    await input.fill('https://my-translate-proxy.example.com/translate');
+    await page.locator('#saveBtn').click();
+
+    await expect(input).toHaveClass(/is-custom/);
+    await expect(page.locator('[data-reset="translateApiUrl"]')).toBeEnabled();
+
+    await page.reload();
+    await page.waitForSelector('#translateApiInput');
+    const val = await page.locator('#translateApiInput').inputValue();
+    expect(val).toBe('https://my-translate-proxy.example.com/translate');
+  });
+
+  test('settings link opens settings.html from main app via \u22ef menu', async ({ page }) => {    await page.goto('/');
     await page.waitForSelector('[data-testid="add-root-group-btn"]');
     // settings-page-btn is inside the ⋯ More menu
     await page.getByTestId('more-btn').click();

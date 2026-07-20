@@ -6,8 +6,15 @@
 // Public API:
 //   translateBatch(texts, targetLang, sourceLang?)  → Promise<string[]>
 //   SUPPORTED_LANGUAGES  Map<code, label>  (from js/fhir/languages.js)
+//
+// The endpoint is configurable via Settings (CONFIG_KEYS.TRANSLATE_API). Any
+// gtx-compatible endpoint (self-hosted proxy) works; falls back to Google gtx.
 // ─────────────────────────────────────────────────────────────────────────────
 import { LANGUAGES_MAP } from './languages.js';
+import { serverConfig, CONFIG_KEYS } from './server-config.js';
+
+// Default unofficial Google Translate gtx endpoint (base URL, query appended below).
+const DEFAULT_TRANSLATE_ENDPOINT = 'https://translate.googleapis.com/translate_a/single';
 
 const BATCH_SIZE = 40;   // Google gtx handles ~40 segments per request reliably
 // Unique record separator placed on its own line. Google Translate preserves it
@@ -52,7 +59,8 @@ export async function translateBatch(texts, targetLang, sourceLang = 'auto') {
  * Returns the translated string (may contain newlines when input has them).
  */
 async function _callGtx(text, target, source) {
-  const url = 'https://translate.googleapis.com/translate_a/single'
+  const base = serverConfig.get(CONFIG_KEYS.TRANSLATE_API) || DEFAULT_TRANSLATE_ENDPOINT;
+  const url = base
     + `?client=gtx&sl=${encodeURIComponent(source)}&tl=${encodeURIComponent(target)}`
     + `&dt=t&q=${encodeURIComponent(text)}`;
 

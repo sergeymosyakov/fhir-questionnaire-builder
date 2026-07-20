@@ -87,6 +87,18 @@
       </div>
     </div>
 
+    <!-- ── Translation API ──────────────────────────────────────────────── -->
+    <div class="s-card">
+      <div class="s-card-title">Translation API</div>
+      <div class="s-card-desc">Endpoint used to auto-translate questionnaire text (Translate modal). Defaults to the unofficial Google Translate <code>gtx</code> endpoint (free, no key). Point this at a self-hosted <code>gtx</code>-compatible proxy if needed.</div>
+      <div class="s-field">
+        <label class="s-label" for="translateApiInput">Endpoint URL</label>
+        <input id="translateApiInput" class="s-input" type="url" placeholder="https://translate.googleapis.com/translate_a/single" autocomplete="off" spellcheck="false">
+        <button class="s-reset-btn" data-reset="translateApiUrl" disabled>Reset</button>
+        <span class="s-hint">Query params (<code>client=gtx&amp;sl&amp;tl&amp;dt=t&amp;q</code>) are appended automatically. Leave blank to use the default Google endpoint.</span>
+      </div>
+    </div>
+
     <!-- ── Validators ────────────────────────────────────────────────────── -->
     <div class="s-card">
       <div class="s-card-title">Validators</div>
