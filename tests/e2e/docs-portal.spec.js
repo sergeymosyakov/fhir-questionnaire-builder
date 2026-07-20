@@ -27,8 +27,8 @@ test.describe('documentation portal', () => {
   });
 
   test('an unwritten page shows a placeholder', async ({ page }) => {
-    await page.goto('/docs.html#/running-locally');
-    await expect(page.locator('#docContent h1')).toHaveText('Running locally');
+    await page.goto('/docs.html#/questionnaire-items');
+    await expect(page.locator('#docContent h1')).toHaveText('Questionnaire & items');
     await expect(page.locator('.doc-placeholder')).toBeVisible();
   });
 
