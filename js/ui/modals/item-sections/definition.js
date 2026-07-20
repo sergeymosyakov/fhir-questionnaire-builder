@@ -216,11 +216,18 @@ class DefinitionSection extends ItemSection {
       node._answerValueSet = resolved.answerValueSet;
     }
 
+    // Reference targets — allowed profiles + expected resource type.
+    if (node.itemType === 'reference') {
+      if (resolved.referenceProfiles) node._referenceProfiles = resolved.referenceProfiles;
+      if (resolved.referenceType)     node.referenceResource  = resolved.referenceType;
+    }
+
     // Status summary.
     const parts = [resolved.itemType || resolved.fhirType || 'element'];
     if (resolved.mandatory) parts.push('required');
     if (resolved.repeats)   parts.push('repeats');
     if (resolved.answerValueSet) parts.push('bound');
+    if (node.itemType === 'reference' && resolved.referenceType) parts.push('\u2192 ' + resolved.referenceType);
     status.textContent = `\u2713 ${resolved.elementId} \u2192 ${parts.join(' \u00B7 ')}`;
 
     document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));

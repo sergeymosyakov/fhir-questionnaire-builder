@@ -16,6 +16,19 @@
         "max": "1",
         "maxLength": 60,
         "type": [{ "code": "string" }]
+      },
+      {
+        "id": "Patient.managingOrganization",
+        "path": "Patient.managingOrganization",
+        "short": "Organization that is the custodian of the patient record",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Organization"]
+          }
+        ]
       }
     ]
   }

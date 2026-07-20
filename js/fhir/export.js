@@ -125,6 +125,10 @@ export function nodeToFHIRItem(node) {
       if (t === 'dateTime') return { valueDateTime: String(v) };
       if (t === 'time')     return { valueTime:     String(v) };
       if (t === 'url')      return { valueUri:      String(v) };
+      if (t === 'reference') {
+        const ref = (v && typeof v === 'object') ? v.reference : (typeof v === 'string' ? v : '');
+        return ref ? { valueReference: { reference: ref } } : null;
+      }
       if (t === 'choice')   return { valueCoding:   { code: String(v), display: String(v) } };
       return { valueString: String(v) };
     };

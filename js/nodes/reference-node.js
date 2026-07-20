@@ -7,6 +7,7 @@ import { BaseNode, createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { serverConfig, CONFIG_KEYS } from '../fhir/server-config.js';
 import { searchFhir, displayName as _displayName } from '../fhir/fhir-search.js';
+import { refTypeMismatch } from '../fhir/form-checks.js';
 
 const FHIR_R4_RESOURCES = [
   'Account','ActivityDefinition','AdverseEvent','AllergyIntolerance','Appointment',
@@ -86,11 +87,25 @@ export class ReferenceNode extends ItemNode {
     errMsg.className   = 'ctrl-err ctrl-err--ml';
     errMsg.textContent = 'id is required';
 
+    // Type-mismatch error — shown when the current reference points at a resource
+    // type other than the item's allowed type (e.g. from import or an expression).
+    const typeErr = document.createElement('span');
+    typeErr.className = 'ctrl-err ctrl-err--ml';
+    typeErr.dataset.testid = 'ref-type-error';
+    typeErr.style.display = 'none';
+    const refreshTypeErr = () => {
+      const cur = getValue(node.id);
+      const mismatch = !!node.referenceResource && refTypeMismatch(cur, node.referenceResource);
+      typeErr.textContent  = mismatch ? `Expected ${node.referenceResource}` : '';
+      typeErr.style.display = mismatch ? 'inline' : 'none';
+    };
+
     const update = () => {
       const type = sel.getValue();
       const id   = idInput.value.trim();
       errMsg.style.display = (type && !id) ? 'inline' : 'none';
       setValue(node.id, (type && id) ? { reference: type + '/' + id } : undefined);
+      refreshTypeErr();
       _reCalc(); onChange();
     };
 
@@ -209,6 +224,8 @@ export class ReferenceNode extends ItemNode {
     }
 
     wrap.appendChild(errMsg);
+    wrap.appendChild(typeErr);
+    refreshTypeErr();
 
     if (node._referenceProfiles?.length) {
       const info = document.createElement('span');

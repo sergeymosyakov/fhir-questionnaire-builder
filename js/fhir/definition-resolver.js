@@ -78,6 +78,19 @@ export function fhirDatatypeToItemType(code) {
 }
 
 /**
+ * Derive a FHIR resource type from a targetProfile canonical URL, but only for
+ * base FHIR profiles (`http://hl7.org/fhir/StructureDefinition/{ResourceType}`).
+ * Returns undefined for custom profile URLs whose slug is not the resource type.
+ * @param {string} url
+ * @returns {string|undefined}
+ */
+export function typeFromProfileUrl(url) {
+  if (typeof url !== 'string') return undefined;
+  const m = /^http:\/\/hl7\.org\/fhir\/StructureDefinition\/([A-Z][A-Za-z]+)$/.exec(url);
+  return m ? m[1] : undefined;
+}
+
+/**
  * Find an ElementDefinition in a StructureDefinition by id or path.
  * Snapshot is preferred over differential.
  * @param {object} sd         StructureDefinition
@@ -125,6 +138,17 @@ export function resolveDefinition(sd, definition) {
   const maxLength = typeof el.maxLength === 'number' ? el.maxLength : undefined;
   const answerValueSet = el.binding?.valueSet || undefined;
 
+  // Reference targets — type[].targetProfile (0..*). The allowed resource type
+  // is derived from a base FHIR profile URL when possible.
+  const rawTargets = el.type?.[0]?.targetProfile;
+  const referenceProfiles = (Array.isArray(rawTargets) ? rawTargets : rawTargets ? [rawTargets] : [])
+    .filter(p => typeof p === 'string' && p);
+  let referenceType;
+  for (const p of referenceProfiles) {
+    const t = typeFromProfileUrl(p);
+    if (t) { referenceType = t; break; }
+  }
+
   return {
     elementId: parsed.elementId,
     canonical: parsed.canonical,
@@ -135,6 +159,8 @@ export function resolveDefinition(sd, definition) {
     repeats,
     maxLength,
     answerValueSet,
+    referenceProfiles: referenceProfiles.length ? referenceProfiles : undefined,
+    referenceType,
     min,
     max,
   };

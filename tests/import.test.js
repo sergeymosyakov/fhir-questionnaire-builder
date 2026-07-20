@@ -721,9 +721,24 @@ describe('importFHIR', () => {
     });
   });
 
+  // ── initial valueReference import ──────────────────────────────────────────
+  describe('initial valueReference', () => {
+    it('reads item.initial[].valueReference into node._initialValue', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'reference', text: 'Q',
+        initial: [{ valueReference: { reference: 'Organization/7' } }],
+      }]));
+      expect(_tree[0]._initialValue).toEqual({ reference: 'Organization/7' });
+    });
+    it('reads a string valueReference into { reference }', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'reference', text: 'Q',
+        initial: [{ valueReference: 'Patient/3' }],
+      }]));
+      expect(_tree[0]._initialValue).toEqual({ reference: 'Patient/3' });
+    });
+  });
+
   // ── answerOption.initialSelected import ────────────────────────────────────
-  describe('answerOption.initialSelected', () => {
-    it('reads initialSelected into node._initialSelected', () => {
+  describe('answerOption.initialSelected', () => {    it('reads initialSelected into node._initialSelected', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
         answerOption: [
           { valueCoding: { code: 'yes', display: 'Yes' }, initialSelected: true },

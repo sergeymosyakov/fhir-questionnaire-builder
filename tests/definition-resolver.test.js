@@ -5,6 +5,7 @@ import {
   fhirDatatypeToItemType,
   findElement,
   resolveDefinition,
+  typeFromProfileUrl,
 } from '../js/fhir/definition-resolver.js';
 
 const SD = {
@@ -29,6 +30,12 @@ const SD = {
       { id: 'Patient.telecom', path: 'Patient.telecom',
         short: 'Contact points', min: 0, max: '*',
         type: [{ code: 'ContactPoint' }] },
+      { id: 'Patient.managingOrganization', path: 'Patient.managingOrganization',
+        short: 'Organization that is the custodian of the patient record', min: 0, max: '1',
+        type: [{ code: 'Reference', targetProfile: ['http://hl7.org/fhir/StructureDefinition/Organization'] }] },
+      { id: 'Patient.generalPractitioner', path: 'Patient.generalPractitioner',
+        short: 'Patient GP', min: 0, max: '*',
+        type: [{ code: 'Reference', targetProfile: ['http://example.org/StructureDefinition/custom-gp'] }] },
     ],
   },
 };
@@ -92,5 +99,24 @@ describe('resolveDefinition', () => {
   it('returns null when the element is missing or url has no fragment', () => {
     expect(resolveDefinition(SD, 'http://x#Patient.nope')).toBeNull();
     expect(resolveDefinition(SD, 'http://x')).toBeNull();
+  });
+  it('resolves a Reference with a base FHIR targetProfile to referenceType', () => {
+    const r = resolveDefinition(SD, 'http://x#Patient.managingOrganization');
+    expect(r.itemType).toBe('reference');
+    expect(r.referenceProfiles).toEqual(['http://hl7.org/fhir/StructureDefinition/Organization']);
+    expect(r.referenceType).toBe('Organization');
+  });
+  it('keeps custom targetProfile but leaves referenceType undefined', () => {
+    const r = resolveDefinition(SD, 'http://x#Patient.generalPractitioner');
+    expect(r.referenceProfiles).toEqual(['http://example.org/StructureDefinition/custom-gp']);
+    expect(r.referenceType).toBeUndefined();
+  });
+});
+
+describe('typeFromProfileUrl', () => {
+  it('derives a type only from base FHIR profile URLs', () => {
+    expect(typeFromProfileUrl('http://hl7.org/fhir/StructureDefinition/Organization')).toBe('Organization');
+    expect(typeFromProfileUrl('http://example.org/StructureDefinition/us-core-patient')).toBeUndefined();
+    expect(typeFromProfileUrl(null)).toBeUndefined();
   });
 });

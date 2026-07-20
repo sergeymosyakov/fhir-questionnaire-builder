@@ -451,6 +451,9 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       if (init.valueString   !== undefined) return init.valueString;
       if (init.valueUri      !== undefined) return init.valueUri;
       if (init.valueCoding)                 return init.valueCoding.code || init.valueCoding.display || '';
+      if (init.valueReference)              return typeof init.valueReference === 'string'
+        ? { reference: init.valueReference }
+        : init.valueReference;
       if (init.valueQuantity)               return {
         value: init.valueQuantity.value !== undefined ? String(init.valueQuantity.value) : '',
         unit:  init.valueQuantity.unit || '',

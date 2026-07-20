@@ -48,7 +48,7 @@ authoring/runtime slice.
 | `$populate` | Implemented, but **requires an external SDC-capable server** (e.g. Matchbox). Cannot be exercised without one. Aidbox does this natively. |
 | Definition-based extraction | Implemented **client-side** for `item.definition` + `definitionExtract`. Covers the common case; not a general extraction engine. |
 | `item.definition` resolution | Implemented **client-side**: "Resolve from profile" in Item Properties loads an uploaded StructureDefinition and auto-fills `text`, `type`, and value constraints for the referenced element. Profile must be supplied (upload) — no auto-fetch/registry resolution. |
-| Reference resolution | Resource-type dropdown + id input + live FHIR server search (when a base server is configured). No profile-based validation of the chosen reference. |
+| Reference resolution | Resource-type dropdown + id input + live FHIR server search (when a base server is configured). **Client-side type validation**: a reference answer whose resource type differs from the item's allowed type fails preview validation with an inline error. No instance-level profile conformance (needs the target resource from a server). |
 | Terminology binding | `answerValueSet` expansion works against a configured tx server; falls back to built-in lists. Fine for demos, limited in practice. |
 
 ## Where we are honestly behind

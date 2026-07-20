@@ -3,7 +3,7 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES, NONEMPTY_TYPES,
+  calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES, NONEMPTY_TYPES, refTypeMismatch,
 } from '../js/fhir/form-checks.js';
 
 // Store stub: get(id) reads from a plain map.
@@ -129,6 +129,33 @@ describe('calcFormOk — reference', () => {
   });
   it('optional reference is ok', () => {
     expect(calcFormOk(node({ itemType: 'reference', mandatory: false }), store({}))).toBe(true);
+  });
+  it('reference with matching type passes', () => {
+    const n = node({ itemType: 'reference', referenceResource: 'Patient', mandatory: true });
+    expect(calcFormOk(n, store({ q: { reference: 'Patient/1' } }))).toBe(true);
+  });
+  it('reference with wrong type fails even when optional', () => {
+    const n = node({ itemType: 'reference', referenceResource: 'Organization', mandatory: false });
+    expect(calcFormOk(n, store({ q: { reference: 'Patient/1' } }))).toBe(false);
+  });
+  it('reference with wrong type fails when mandatory', () => {
+    const n = node({ itemType: 'reference', referenceResource: 'Organization', mandatory: true });
+    expect(calcFormOk(n, store({ q: { reference: 'Patient/1' } }))).toBe(false);
+  });
+  it('no allowed type → no type check', () => {
+    const n = node({ itemType: 'reference', mandatory: false });
+    expect(calcFormOk(n, store({ q: { reference: 'Patient/1' } }))).toBe(true);
+  });
+});
+
+// ── refTypeMismatch ─────────────────────────────────────────────────────────────
+describe('refTypeMismatch', () => {
+  it('true only when the reference type differs from the allowed type', () => {
+    expect(refTypeMismatch({ reference: 'Patient/1' }, 'Organization')).toBe(true);
+    expect(refTypeMismatch({ reference: 'Patient/1' }, 'Patient')).toBe(false);
+    expect(refTypeMismatch({ reference: 'Patient/1' }, '')).toBe(false);
+    expect(refTypeMismatch(undefined, 'Patient')).toBe(false);
+    expect(refTypeMismatch({}, 'Patient')).toBe(false);
   });
 });
 

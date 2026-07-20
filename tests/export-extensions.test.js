@@ -469,6 +469,12 @@ describe('buildFHIRObject — reference, quantity, expr extensions', () => {
     expect(ext.find(e => e.url === REF_URL)?.valueCode).toBe('Patient');
   });
 
+  it('exports initial valueReference for reference item type', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference',
+      referenceResource: 'Organization', _initialValue: { reference: 'Organization/7' } }]);
+    expect(q.item[0].initial).toEqual([{ valueReference: { reference: 'Organization/7' } }]);
+  });
+
   it('exports questionnaire-unit for integer/decimal types (R4 invariant: only integer/decimal)', () => {
     for (const itemType of ['integer', 'decimal']) {
       const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType, quantityUnit: 'kg' }]);

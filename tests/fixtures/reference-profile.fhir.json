@@ -1,0 +1,37 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "title": "Reference Profile Validation Demo",
+  "item": [
+    {
+      "linkId": "q-org-bad",
+      "type": "reference",
+      "text": "Managing organization (wrong-type prefill)",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource",
+          "valueCode": "Organization"
+        }
+      ],
+      "initial": [{ "valueReference": { "reference": "Patient/1" } }]
+    },
+    {
+      "linkId": "q-org-ok",
+      "type": "reference",
+      "text": "Managing organization (correct-type prefill)",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource",
+          "valueCode": "Organization"
+        }
+      ],
+      "initial": [{ "valueReference": { "reference": "Organization/2" } }]
+    },
+    {
+      "linkId": "q-def",
+      "type": "reference",
+      "text": "Managing organization (resolve target)",
+      "definition": "http://hl7.org/fhir/StructureDefinition/DemoPatient#Patient.managingOrganization"
+    }
+  ]
+}

@@ -36,6 +36,21 @@ function _isValidUrl(s) {
 }
 
 /**
+ * True when a reference answer's resource type does not match the item's allowed
+ * type. Empty value or no allowed type → not a mismatch.
+ * @param {object} value        answer value ({ reference: 'Type/id' })
+ * @param {string} allowedType   node.referenceResource
+ * @returns {boolean}
+ */
+export function refTypeMismatch(value, allowedType) {
+  if (!allowedType) return false;
+  const ref = value && typeof value === 'object' ? value.reference : '';
+  if (!ref) return false;
+  const t = String(ref).split('/')[0];
+  return !!t && t !== allowedType;
+}
+
+/**
  * Check whether a node's current answer satisfies all validation rules.
  * @param {object} node  — tree node
  * @param {object} store — AnswerStore instance (get(id) / data)
@@ -49,6 +64,12 @@ export function calcFormOk(node, store, path) {
   if (node._calculatedExpr && node._readOnly) {
     if (node.itemType !== 'checkbox') return true;
     return store.get(node.id) === true;
+  }
+  // Reference type validation runs before the optional/mandatory shortcuts: a
+  // wrong-type reference is invalid whether or not the item is required.
+  if (node.itemType === 'reference' && node.referenceResource
+      && refTypeMismatch(store.get(node.id), node.referenceResource)) {
+    return false;
   }
   if (node.itemType === 'checkbox' && isMandatory(node)) {
     const val = store.get(node.id);

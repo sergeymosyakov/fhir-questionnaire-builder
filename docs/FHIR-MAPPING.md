@@ -140,7 +140,7 @@ Stored in `questMeta` (plain object in `js/state.js`). Populated on import, writ
 | `decimal` | `decimal` | Stored as `valueDecimal` in QR; use `.answer.valueDecimal` in FHIRPath constraints |
 | `quantity` | `quantity` | UCUM unit dropdown; `questionnaire-unit` extension read/written |
 | `string`, `text` | `text` | |
-| `reference` | `reference` | dropdown (resource type) + id input; `questionnaire-referenceResource` extension locks dropdown to one type |
+| `reference` | `reference` | dropdown (resource type) + id input; `questionnaire-referenceResource` extension locks dropdown to one type; a reference answer whose type differs from the allowed type fails preview validation with an inline "Expected {Type}" error (`js/fhir/form-checks.js` `refTypeMismatch`); `item.initial[].valueReference` round-trips |
 | `choice` | `select` | unless `questionnaire-itemControl: radio-button` → `radio` or `check-box` → `checklist` |
 | `choice` + itemControl `radio-button` | `radio` | see Extensions section |
 | `choice` + itemControl `check-box` | `checklist` | multi-select checkboxes; see Extensions section |
