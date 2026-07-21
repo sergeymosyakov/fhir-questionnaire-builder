@@ -23,11 +23,12 @@
 //   answerTypeModal        Answer Type modal backdrop
 
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'node:path';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/candidate-expression.fhir.json');
-const CE_URL  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression';
+const CE_URL  = FHIR.candidateExpression;
 
 async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());

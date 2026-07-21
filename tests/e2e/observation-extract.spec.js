@@ -35,10 +35,11 @@
 import path from 'node:path';
 import fs   from 'node:fs';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/obs-extract-e2e.fhir.json');
-const OBS_EXT = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract';
+const OBS_EXT = FHIR.observationExtract;
 
 async function freshStart(page) {
   await page.addInitScript(() => localStorage.clear());

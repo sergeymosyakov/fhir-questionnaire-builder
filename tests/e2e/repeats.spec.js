@@ -13,6 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -159,8 +160,8 @@ test.describe('Repeatable — multi-select controls do not show "Add another"', 
         type: 'choice',
         repeats: true,
         extension: [{
-          url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl',
-          valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'check-box' }] },
+          url: FHIR.itemControl,
+          valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'check-box' }] },
         }],
         answerOption: [
           { valueCoding: { code: 'a', display: 'Alpha' } },

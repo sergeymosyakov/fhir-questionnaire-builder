@@ -23,6 +23,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/fhir-features.fhir.json');
@@ -192,8 +193,8 @@ test.describe('minValue / maxValue enforcement', () => {
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(filePath, 'utf8'));
     const scoreItem = q.item.find(i => i.linkId === 'score');
-    const minExt = (scoreItem.extension || []).find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/minValue');
-    const maxExt = (scoreItem.extension || []).find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxValue');
+    const minExt = (scoreItem.extension || []).find(e => e.url === FHIR.minValue);
+    const maxExt = (scoreItem.extension || []).find(e => e.url === FHIR.maxValue);
     expect(minExt?.valueInteger).toBe(0);
     expect(maxExt?.valueInteger).toBe(10);
   });
@@ -250,7 +251,7 @@ test.describe('ordinalValue display', () => {
     const moodItem = q.item.find(i => i.linkId === 'mood');
     const firstOpt = moodItem.answerOption[0];
     const ordExt = (firstOpt.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/ordinalValue'
+      e => e.url === FHIR.ordinalValue
     );
     expect(ordExt?.valueDecimal).toBe(0);
   });
@@ -311,7 +312,7 @@ test.describe('minLength enforcement', () => {
     const q = JSON.parse(readFileSync(filePath, 'utf8'));
     const item = q.item.find(i => i.linkId === 'string-with-min');
     const minLenExt = (item.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/minLength'
+      e => e.url === FHIR.minLength
     );
     expect(minLenExt?.valueInteger).toBe(5);
   });
@@ -363,7 +364,7 @@ test.describe('maxDecimalPlaces', () => {
     const q = JSON.parse(readFileSync(filePath, 'utf8'));
     const item = q.item.find(i => i.linkId === 'decimal-places');
     const mdpExt = (item.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces'
+      e => e.url === FHIR.maxDecimalPlaces
     );
     expect(mdpExt?.valueInteger).toBe(2);
   });

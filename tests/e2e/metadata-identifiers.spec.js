@@ -102,10 +102,10 @@ test.describe('metadata modal — Identifiers section', () => {
   test('edited identifier system is committed on Apply and written to export', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await page.getByTestId('meta-identifier-system-0').fill('http://new.example.org/ids');
+    await page.getByTestId('meta-identifier-system-0').fill('https://new.example.org/ids');
     await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
-    expect(q.identifier[0].system).toBe('http://new.example.org/ids');
+    expect(q.identifier[0].system).toBe('https://new.example.org/ids');
   });
 
   test('Cancel discards identifier edits', async ({ page }) => {
@@ -122,12 +122,12 @@ test.describe('metadata modal — Identifiers section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-identifier-add-btn').click();
-    await page.getByTestId('meta-identifier-system-1').fill('http://acme.org/ids');
+    await page.getByTestId('meta-identifier-system-1').fill('https://acme.org/ids');
     await page.getByTestId('meta-identifier-value-1').fill('ACME-007');
     await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.identifier).toHaveLength(2);
-    expect(q.identifier[1]).toMatchObject({ system: 'http://acme.org/ids', value: 'ACME-007' });
+    expect(q.identifier[1]).toMatchObject({ system: 'https://acme.org/ids', value: 'ACME-007' });
   });
 
   test('removing all identifiers omits identifier[] from export', async ({ page }) => {

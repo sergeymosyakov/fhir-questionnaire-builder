@@ -19,6 +19,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 
 const FIXTURE = path.resolve('tests/fixtures/gtable-demo.fhir.json');
 
@@ -278,7 +279,7 @@ test.describe('gtable — FHIR round-trip', () => {
       }
     }
     const meds = find(q.item, 'medications');
-    const CTRL_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl';
+    const CTRL_URL = FHIR.itemControl;
     const ext = (meds?.extension ?? []).find(e => e.url === CTRL_URL);
     expect(ext?.valueCodeableConcept?.coding?.[0]?.code).toBe('gtable');
   });
@@ -296,7 +297,7 @@ test.describe('gtable — FHIR round-trip', () => {
         const f = find(it.item ?? [], id); if (f) return f;
       }
     }
-    const CTRL_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl';
+    const CTRL_URL = FHIR.itemControl;
     const labValues = find(q.item, 'lab-values');
     const ext = (labValues?.extension ?? []).find(e => e.url === CTRL_URL);
     expect(ext?.valueCodeableConcept?.coding?.[0]?.code).toBe('gtable');

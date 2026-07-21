@@ -28,6 +28,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 
 const PHQ9 = path.resolve('sampledata/phq-9.fhir.json');
 
@@ -167,7 +168,7 @@ test.describe('translation — FHIR round-trip', () => {
     });
     const q = JSON.parse(json);
 
-    const TRANS_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
+    const TRANS_URL = FHIR.translation;
     function find(items, id) {
       for (const it of items ?? []) {
         if (it.linkId === id) return it;
@@ -195,7 +196,7 @@ test.describe('translation — FHIR round-trip', () => {
       return JSON.stringify(buildFHIRObject());
     });
     const q = JSON.parse(json);
-    const TRANS_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
+    const TRANS_URL = FHIR.translation;
     const titleTrans = (q._title?.extension ?? []).filter(e => e.url === TRANS_URL);
     expect(titleTrans.length).toBeGreaterThan(0);
     const esTitle = titleTrans.find(e =>

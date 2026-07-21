@@ -15,6 +15,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { SNOMED_URL } from '../../js/fhir/urls/snomed.js';
+import { LOINC_URL } from '../../js/fhir/urls/loinc.js';
 import { loadFixture, openModal, exportFHIR } from './helpers/metadata.js';
 
 test.describe('metadata modal — Questionnaire codes', () => {
@@ -38,7 +40,7 @@ test.describe('metadata modal — Questionnaire codes', () => {
     await openModal(page);
     await page.getByTestId('meta-codes-toggle').click();
     await expect(page.getByTestId('meta-code-code-0')).toHaveValue('44249-1');
-    await expect(page.getByTestId('meta-code-system-0')).toHaveValue('http://loinc.org');
+    await expect(page.getByTestId('meta-code-system-0')).toHaveValue(LOINC_URL.system);
     await expect(page.getByTestId('meta-code-display-0')).toHaveValue('PHQ-9 total score');
     await page.locator('[data-testid="metadataModalCancel"]').click();
   });
@@ -57,7 +59,7 @@ test.describe('metadata modal — Questionnaire codes', () => {
     await openModal(page);
     await page.getByTestId('meta-codes-toggle').click();
     await page.getByTestId('meta-codes-add-btn').click();
-    await page.getByTestId('meta-code-system-1').fill('http://snomed.info/sct');
+    await page.getByTestId('meta-code-system-1').fill(SNOMED_URL.system);
     await page.getByTestId('meta-code-code-1').fill('44054006');
     await page.getByTestId('meta-code-display-1').fill('Type 2 diabetes');
     await page.locator('[data-testid="metadataModalApply"]').click();

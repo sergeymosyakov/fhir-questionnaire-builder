@@ -23,6 +23,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import path from 'node:path';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/answer-options-editor.fhir.json');
@@ -199,7 +200,7 @@ test.describe('answer options editor — export round-trip', () => {
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
     const opts = q.item[0].answerOption;
-    const ordUrl = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+    const ordUrl = FHIR.ordinalValue;
     expect(opts[0].extension?.find(e => e.url === ordUrl)?.valueDecimal).toBe(1);
     expect(opts[1].extension?.find(e => e.url === ordUrl)?.valueDecimal).toBe(2);
     expect(opts[2].extension?.find(e => e.url === ordUrl)?.valueDecimal).toBe(3);
@@ -217,7 +218,7 @@ test.describe('answer options editor — export round-trip', () => {
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
     const opts = q.item[0].answerOption;
-    const pfxUrl = 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix';
+    const pfxUrl = FHIR.optionPrefix;
     expect(opts[0].extension?.find(e => e.url === pfxUrl)?.valueString).toBe('A.');
     expect(opts[1].extension?.find(e => e.url === pfxUrl)?.valueString).toBe('B.');
     expect(opts[2].extension?.find(e => e.url === pfxUrl)?.valueString).toBe('C.');
@@ -244,7 +245,7 @@ test.describe('answer options editor — export round-trip', () => {
     const opts = q.item[0].answerOption;
     expect(opts).toHaveLength(4);
     expect(opts[3].valueCoding.code).toBe('critical');
-    const ordUrl = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+    const ordUrl = FHIR.ordinalValue;
     expect(opts[3].extension?.find(e => e.url === ordUrl)?.valueDecimal).toBe(4);
   });
 

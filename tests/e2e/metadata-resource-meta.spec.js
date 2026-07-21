@@ -29,6 +29,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { freshStart, loadFixture, openModal, exportFHIR } from './helpers/metadata.js';
 
 // ── Toggle ────────────────────────────────────────────────────────────────────
@@ -183,7 +184,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-profile-url-0')).toHaveValue(
-      'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire'
+      FHIR.sdcQuestionnaire
     );
     await page.locator('[data-testid="metadataModalCancel"]').click();
   });
@@ -208,7 +209,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     const q = await exportFHIR(page);
     expect(q.meta.profile).toEqual([
-      'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire',
+      FHIR.sdcQuestionnaire,
     ]);
   });
 
@@ -284,7 +285,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-security-system-0')).toHaveValue(
-      'http://terminology.hl7.org/CodeSystem/v3-Confidentiality'
+      FHIR.v3Confidentiality
     );
     await expect(page.getByTestId('meta-security-code-0')).toHaveValue('N');
     await expect(page.getByTestId('meta-security-display-0')).toHaveValue('Normal');
@@ -304,7 +305,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     const q = await exportFHIR(page);
     expect(q.meta.security).toEqual([
       {
-        system: 'http://terminology.hl7.org/CodeSystem/v3-Confidentiality',
+        system: FHIR.v3Confidentiality,
         code: 'N',
         display: 'Normal',
       },

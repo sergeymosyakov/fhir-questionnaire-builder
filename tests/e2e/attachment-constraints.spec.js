@@ -25,12 +25,13 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/attachment-constraints.fhir.json');
 
-const MAX_SIZE_URL = 'http://hl7.org/fhir/StructureDefinition/maxSize';
-const MIME_URL     = 'http://hl7.org/fhir/StructureDefinition/mimeType';
+const MAX_SIZE_URL = FHIR.maxSize;
+const MIME_URL     = FHIR.mimeType;
 
 async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });

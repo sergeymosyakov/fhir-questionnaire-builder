@@ -15,9 +15,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
+import { W3C_URL } from '../../js/fhir/urls/w3c.js';
 import { freshStart, loadFixture, openModal, exportFHIR } from './helpers/metadata.js';
 
-const REPLACES_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
+const REPLACES_URL = FHIR.replaces;
 
 // ── Narrative (Questionnaire.text) ───────────────────────────────────────────
 
@@ -59,7 +61,7 @@ test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
     const q = await exportFHIR(page);
     expect(q.text).toEqual({
       status: 'generated',
-      div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Test narrative content</p></div>',
+      div: `<div xmlns="${W3C_URL.xhtml}"><p>Test narrative content</p></div>`,
     });
   });
 

@@ -25,6 +25,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { readFileSync } from 'node:fs';
 import { openDropdownItem } from './helpers/dropdown.js';
 
@@ -95,8 +96,8 @@ test.describe('versionAlgorithm / copyrightLabel — R4 downgrade', () => {
     const q = await exportFHIR(page);
     expect(q.versionAlgorithmCoding).toBeUndefined();
     expect(q.copyrightLabel).toBeUndefined();
-    const va = (q.extension || []).find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm');
-    const cl = (q.extension || []).find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel');
+    const va = (q.extension || []).find(e => e.url === FHIR.artifactVersionAlgorithm);
+    const cl = (q.extension || []).find(e => e.url === FHIR.artifactCopyrightLabel);
     expect(va?.valueCoding?.code).toBe('semver');
     expect(cl?.valueString).toBe('All rights reserved');
   });

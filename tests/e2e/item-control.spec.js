@@ -13,6 +13,7 @@
 //   export-btn, export-quest-item, saveFormatModalApply, prompt-save — export flow
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { readFileSync } from 'node:fs';
 
@@ -248,6 +249,6 @@ test.describe('lookup itemControl', () => {
     const item = q.item.find(i => i.linkId === 'lk-vs');
     const ic = (item.extension || []).find(e => e.url.includes('questionnaire-itemControl'));
     expect(ic?.valueCodeableConcept.coding[0].code).toBe('lookup');
-    expect(item.answerValueSet).toBe('http://hl7.org/fhir/ValueSet/administrative-gender');
+    expect(item.answerValueSet).toBe(FHIR.vs + '/administrative-gender');
   });
 });

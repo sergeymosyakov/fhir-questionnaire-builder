@@ -26,6 +26,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { SNOMED_URL } from '../../js/fhir/urls/snomed.js';
+import { LOINC_URL } from '../../js/fhir/urls/loinc.js';
 
 // ── Mock API response shape ───────────────────────────────────────────────────
 // NLM Clinical Tables API returns: [total, codes[], extraHash, displays[]]
@@ -50,7 +52,7 @@ const MOCK_SNOMED_FHIR_RESPONSE = {
   resourceType: 'ValueSet',
   expansion: {
     contains: [
-      { system: 'http://snomed.info/sct', code: '73211009', display: 'Diabetes mellitus' },
+      { system: SNOMED_URL.system, code: '73211009', display: 'Diabetes mellitus' },
     ],
   },
 };
@@ -253,7 +255,7 @@ test.describe('Selecting a result', () => {
     await expect(searchInput(page)).toHaveValue('');
 
     // New code row should appear with LOINC values
-    await expect(page.getByTestId('code-system-0')).toHaveValue('http://loinc.org');
+    await expect(page.getByTestId('code-system-0')).toHaveValue(LOINC_URL.system);
     await expect(page.getByTestId('code-code-0')).toHaveValue('8480-6');
     await expect(page.getByTestId('code-display-0')).toHaveValue('Systolic blood pressure');
   });
@@ -299,7 +301,7 @@ test.describe('End-to-end: codes saved to node', () => {
     await page.locator('[data-node-id="1.1"]').getByTestId('action-codes').click();
     await expect(codesModal(page)).toBeVisible();
     await expect(page.getByTestId('code-code-0')).toHaveValue('8480-6');
-    await expect(page.getByTestId('code-system-0')).toHaveValue('http://loinc.org');
+    await expect(page.getByTestId('code-system-0')).toHaveValue(LOINC_URL.system);
     await expect(page.getByTestId('code-display-0')).toHaveValue('Systolic blood pressure');
   });
 });

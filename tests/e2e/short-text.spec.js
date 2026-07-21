@@ -23,6 +23,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 
 const FIXTURE = path.resolve('tests/fixtures/short-text.fhir.json');
 
@@ -98,7 +99,7 @@ test.describe('short-text — export round-trip', () => {
     const item = q.item.find(i => i.linkId === 'q-with-short');
     expect(item).toBeTruthy();
     const ext = (item.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText'
+      e => e.url === FHIR.shortText
     );
     expect(ext).toBeTruthy();
     expect(ext.valueString).toBe('Pain level');
@@ -120,7 +121,7 @@ test.describe('short-text — export round-trip', () => {
     const item = q.item.find(i => i.linkId === 'q-no-short');
     expect(item).toBeTruthy();
     const ext = (item.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText'
+      e => e.url === FHIR.shortText
     );
     expect(ext).toBeUndefined();
   });

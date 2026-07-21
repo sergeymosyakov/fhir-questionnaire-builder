@@ -26,6 +26,7 @@
 
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
 async function waitForLoad(page) {
@@ -212,13 +213,13 @@ test('Generate button fills versionId with a UUID', async ({ page }) => {
 test('user can add a profile URL and it appears in download', async ({ page }) => {
   await loadSampleAndOpenExportModal(page);
   await page.getByTestId('qr-export-profile-add').click();
-  await page.getByTestId('qr-export-profile-url-0').fill('http://hl7.org/fhir/StructureDefinition/MyProfile');
+  await page.getByTestId('qr-export-profile-url-0').fill(FHIR.sd + '/MyProfile');
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByTestId('qrExportModalApply').click(),
   ]);
   const qr = JSON.parse(readFileSync(await download.path(), 'utf8'));
-  expect(qr.meta?.profile).toContain('http://hl7.org/fhir/StructureDefinition/MyProfile');
+  expect(qr.meta?.profile).toContain(FHIR.sd + '/MyProfile');
 });
 
 test('downloaded JSON always has meta.lastUpdated', async ({ page }) => {

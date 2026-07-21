@@ -18,6 +18,7 @@
 //   metadataModalCancel      Cancel button
 
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { freshStart, openModal, exportFHIR } from './helpers/metadata.js';
 import path from 'node:path';
 
@@ -125,7 +126,7 @@ test.describe('Launch Context — round-trip import', () => {
     await expect(page.getByTestId('quest-meta-card')).toBeVisible({ timeout: 8_000 });
 
     const q = await exportFHIR(page);
-    const LC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext';
+    const LC_URL = FHIR.launchContext;
     const lcExts = (q.extension || []).filter(e => e.url === LC_URL);
     expect(lcExts.length).toBeGreaterThanOrEqual(1);
     const nameSub = lcExts[0].extension?.find(s => s.url === 'name');

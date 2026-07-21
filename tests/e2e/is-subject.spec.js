@@ -17,11 +17,12 @@
 //   preview-subject-badge   SUBJECT badge in the builder preview row
 
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'node:path';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/is-subject.fhir.json');
-const IS_URL  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject';
+const IS_URL  = FHIR.isSubject;
 
 async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());

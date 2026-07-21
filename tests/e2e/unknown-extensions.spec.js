@@ -25,6 +25,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 
 const FIXTURE = path.resolve('tests/fixtures/unknown-extensions.fhir.json');
 const CUSTOM_URL = 'https://vendor.example.com/fhir/StructureDefinition/custom-field';
@@ -80,7 +81,7 @@ test.describe('Unknown extensions round-trip', () => {
     await loadFixture(page);
     const q = await exportFHIR(page);
     const ext = q.item[0].extension;
-    const minLen = ext.filter(e => e.url === 'http://hl7.org/fhir/StructureDefinition/minLength');
+    const minLen = ext.filter(e => e.url === FHIR.minLength);
     // minLength should appear exactly once (written by known handler)
     expect(minLen).toHaveLength(1);
   });
@@ -138,7 +139,7 @@ test.describe('Add unknown extension via Props modal', () => {
     await page.locator('[data-testid="action-codes"]').nth(1).click();
     await page.locator('[data-testid="item-props-ext-toggle"]').click();
     await page.locator('[data-testid="item-props-ext-add"]').click();
-    await page.locator('[data-testid="item-props-ext-url-0"]').fill('http://new.example.com/ext');
+    await page.locator('[data-testid="item-props-ext-url-0"]').fill('https://new.example.com/ext');
     await page.locator('[data-testid="item-props-ext-type-0"]').click();
     await page.locator('[data-testid="csel-drop"] [data-val="valueBoolean"]').click();
     await page.locator('[data-testid="item-props-ext-val-0"]').click();
@@ -146,7 +147,7 @@ test.describe('Add unknown extension via Props modal', () => {
     await page.locator('[data-testid="codesModalApply"]').click();
     const q = await exportFHIR(page);
     const ext = (q.item[1].extension || []);
-    const added = ext.find(e => e.url === 'http://new.example.com/ext');
+    const added = ext.find(e => e.url === 'https://new.example.com/ext');
     expect(added).toBeDefined();
     expect(added.valueBoolean).toBe(true);
   });

@@ -27,6 +27,8 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { SNOMED_URL } from '../../js/fhir/urls/snomed.js';
+import { LOINC_URL } from '../../js/fhir/urls/loinc.js';
 
 const FIXTURE = path.resolve('tests/fixtures/codes-ordinal.fhir.json');
 
@@ -74,7 +76,7 @@ test.describe('Codes modal open/close', () => {
     await expect(page.locator('[data-testid="codesModal"]')).toBeVisible();
     // The pre-existing LOINC code should be in the first row
     await expect(page.locator('[data-testid="code-code-0"]')).toHaveValue('44250-9');
-    await expect(page.locator('[data-testid="code-system-0"]')).toHaveValue('http://loinc.org');
+    await expect(page.locator('[data-testid="code-system-0"]')).toHaveValue(LOINC_URL.system);
     await expect(page.locator('[data-testid="code-display-0"]')).toHaveValue('PHQ item 1');
   });
 
@@ -129,7 +131,7 @@ test.describe('Codes modal editing', () => {
     // Open modal for the plain (no codes) item
     await page.locator('[data-testid="action-codes"]').nth(1).click();
     await page.locator('[data-testid="codes-add-btn"]').click();
-    await page.locator('[data-testid="code-system-0"]').fill('http://snomed.info/sct');
+    await page.locator('[data-testid="code-system-0"]').fill(SNOMED_URL.system);
     await page.locator('[data-testid="code-code-0"]').fill('720433000');
     await page.locator('[data-testid="code-display-0"]').fill('PHQ-9');
     await page.locator('[data-testid="codesModalApply"]').click();
@@ -162,7 +164,7 @@ test.describe('Codes export round-trip', () => {
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(filePath, 'utf8'));
     expect(q.item[0].code[0].code).toBe('44250-9');
-    expect(q.item[0].code[0].system).toBe('http://loinc.org');
+    expect(q.item[0].code[0].system).toBe(LOINC_URL.system);
     expect(q.item[0].code[0].display).toBe('PHQ item 1');
   });
 });

@@ -21,11 +21,12 @@
 //   answerTypeModalApply   Apply button in the Answer Type modal
 
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'node:path';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/column-count.fhir.json');
-const CC_URL  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount';
+const CC_URL  = FHIR.columnCount;
 
 async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());

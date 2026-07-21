@@ -28,6 +28,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 
 const FIXTURE = path.resolve('tests/fixtures/terminology-server.fhir.json');
 
@@ -190,7 +191,7 @@ test.describe('Terminology server — export JSON', () => {
     const json = await page.locator('#fhirJsonView').textContent();
     const q = JSON.parse(json);
     const ext = (q.item?.[0]?.item?.[0]?.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer'
+      e => e.url === FHIR.preferredTerminologyServer
     );
     expect(ext?.valueUrl).toBe('https://tx.fhir.org/r4');
   });
@@ -205,7 +206,7 @@ test.describe('Terminology server — export JSON', () => {
     const json = await page.locator('#fhirJsonView').textContent();
     const q = JSON.parse(json);
     const ext = (q.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer'
+      e => e.url === FHIR.preferredTerminologyServer
     );
     expect(ext?.valueUrl).toBe('https://tx.fhir.org/r4');
   });

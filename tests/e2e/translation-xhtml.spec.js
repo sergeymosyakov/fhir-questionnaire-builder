@@ -16,6 +16,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { APP_URL } from '../../js/fhir/urls/app.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
 const XHTML_DEMO = path.resolve('sampledata/rendering-xhtml-demo.fhir.json');
@@ -187,7 +188,7 @@ test.describe('XHTML translation — export round-trip', () => {
     for await (const chunk of await download.createReadStream()) chunks.push(chunk);
     const json = JSON.parse(Buffer.concat(chunks).toString());
 
-    const XHTML_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/xhtml-translations';
+    const XHTML_TRANS_URL = APP_URL.xhtmlTranslations;
     const xhtmlExt = (json.extension || []).find(e => e.url === XHTML_TRANS_URL);
     expect(xhtmlExt).toBeTruthy();
     const lang = xhtmlExt.extension?.find(s => s.url === 'lang')?.valueCode;
@@ -269,7 +270,7 @@ test.describe('Markdown translation — export round-trip', () => {
     for await (const chunk of await download.createReadStream()) chunks.push(chunk);
     const json = JSON.parse(Buffer.concat(chunks).toString());
 
-    const MD_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/markdown-translations';
+    const MD_TRANS_URL = APP_URL.markdownTranslations;
     const mdExt = (json.extension || []).find(e => e.url === MD_TRANS_URL);
     expect(mdExt).toBeTruthy();
     const lang = mdExt.extension?.find(s => s.url === 'lang')?.valueCode;

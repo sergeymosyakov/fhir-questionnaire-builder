@@ -17,6 +17,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 
 const ANNUAL       = path.resolve('sampledata/annual-health-check.fhir.json');
 const ITEM_CONTROL = path.resolve('sampledata/item-control-demo.fhir.json');
@@ -106,7 +107,7 @@ test.describe('sdc-questionnaire-hidden', () => {
 
     const flag = findItem(q.item, 'bmi-high-flag');
     expect(flag).toBeTruthy();
-    const HIDDEN_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden';
+    const HIDDEN_URL = FHIR.hiddenSdc;
     const hiddenExt = (flag.extension ?? []).find(e => e.url === HIDDEN_URL);
     expect(hiddenExt?.valueBoolean).toBe(true);
   });
@@ -156,7 +157,7 @@ test.describe('questionnaire-usageMode', () => {
 
     const item = findItem(q.item, 'usage-mode-demo');
     expect(item).toBeTruthy();
-    const USAGE_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode';
+    const USAGE_URL = FHIR.usageMode;
     const ext = (item.extension ?? []).find(e => e.url === USAGE_URL);
     expect(ext?.valueCode).toBe('capture');
   });

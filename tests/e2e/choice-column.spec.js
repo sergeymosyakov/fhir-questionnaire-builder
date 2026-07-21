@@ -15,6 +15,7 @@
 import path from 'node:path';
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/choice-column.fhir.json');
@@ -79,7 +80,7 @@ test.describe('choiceColumn — multi-column dropdown', () => {
     const filePath = await download.path();
     const exported = JSON.parse(readFileSync(filePath, 'utf8'));
 
-    const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn';
+    const CC_URL = FHIR.choiceColumn;
     const medItem = exported.item.find(i => i.linkId === 'med');
     const cols = (medItem.extension || []).filter(e => e.url === CC_URL);
     expect(cols).toHaveLength(2);
@@ -150,7 +151,7 @@ test.describe('choiceColumn — additional scenarios', () => {
       return JSON.stringify(buildFHIRObject());
     });
     const exported = JSON.parse(exportedStr);
-    const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn';
+    const CC_URL = FHIR.choiceColumn;
     const medItem = exported.item.find(i => i.linkId === 'med');
     expect(medItem.extension?.some(e => e.url === CC_URL)).toBe(true);
   });

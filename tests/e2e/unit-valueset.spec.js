@@ -28,9 +28,10 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 
 const FIXTURE = path.resolve('tests/fixtures/unit-valueset.fhir.json');
-const VS_URL  = 'http://hl7.org/fhir/ValueSet/ucum-bodyweight';
+const VS_URL  = FHIR.vs + '/ucum-bodyweight';
 
 async function freshLoad(page) {
   await page.addInitScript(() => localStorage.clear());
@@ -62,7 +63,7 @@ test.describe('unit-valueset — export round-trip', () => {
 
     const item = json.item.find(i => i.linkId === 'q-with-unit-vs');
     expect(item).toBeDefined();
-    const ext = item.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet');
+    const ext = item.extension?.find(e => e.url === FHIR.unitValueSet);
     expect(ext).toBeDefined();
     expect(ext.valueCanonical).toBe(VS_URL);
   });
@@ -84,7 +85,7 @@ test.describe('unit-valueset — export round-trip', () => {
     const json2 = JSON.parse(Buffer.concat(buffer2).toString());
 
     const item = json2.item.find(i => i.linkId === 'q-no-unit');
-    const ext = item?.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet');
+    const ext = item?.extension?.find(e => e.url === FHIR.unitValueSet);
     expect(ext).toBeUndefined();
   });
 
@@ -106,14 +107,14 @@ test.describe('unit-valueset — export round-trip', () => {
 
     const item = json3.item.find(i => i.linkId === 'q-with-fixed-unit');
     // quantity items: questionnaire-unit is auto-converted to questionnaire-unitOption on export (R4 invariant)
-    const unitOptExt = item?.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption');
+    const unitOptExt = item?.extension?.find(e => e.url === FHIR.unitOption);
     expect(unitOptExt).toBeDefined();
     expect(unitOptExt.valueCoding.code).toBe('Cel');
 
-    const unitExt = item?.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit');
+    const unitExt = item?.extension?.find(e => e.url === FHIR.unit);
     expect(unitExt).toBeUndefined();
 
-    const vsExt = item?.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet');
+    const vsExt = item?.extension?.find(e => e.url === FHIR.unitValueSet);
     expect(vsExt).toBeUndefined();
   });
 });
@@ -168,7 +169,7 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
     const json = JSON.parse(Buffer.concat(buffer).toString());
 
     const item = json.item.find(i => i.linkId === 'q-no-unit');
-    const ext = item?.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet');
+    const ext = item?.extension?.find(e => e.url === FHIR.unitValueSet);
     expect(ext?.valueCanonical).toBe('https://example.com/vs/custom-units');
   });
 
@@ -196,7 +197,7 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
     const json = JSON.parse(Buffer.concat(buffer).toString());
 
     const item = json.item.find(i => i.linkId === 'q-with-unit-vs');
-    const ext = item?.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet');
+    const ext = item?.extension?.find(e => e.url === FHIR.unitValueSet);
     expect(ext).toBeUndefined();
   });
 });

@@ -9,6 +9,7 @@
 // across import-item.js / export.js / import-helpers.js and the modal sections.
 
 const HL7  = 'http:' + '//hl7.org/fhir';        // NOSONAR — FHIR canonical URI, not a network endpoint
+const THL7 = 'http:' + '//terminology.hl7.org'; // NOSONAR — HL7 terminology CodeSystem URI, not a network endpoint
 const SD   = HL7 + '/StructureDefinition';       // core FHIR extensions
 const SDC  = HL7 + '/uv/sdc/StructureDefinition'; // SDC extensions
 const SDCS = HL7 + '/uv/sdc/CodeSystem';          // SDC code systems
@@ -94,4 +95,7 @@ export const FHIR = {
   displayCategoryCS:    HL7 + '/questionnaire-display-category',
   versionAlgorithm:     HL7 + '/version-algorithm',
   icd10cm:              HL7 + '/sid/icd-10-cm',
+
+  // ── HL7 terminology.hl7.org code systems ──────────────────────────────────
+  v3Confidentiality:    THL7 + '/CodeSystem/v3-Confidentiality',
 };

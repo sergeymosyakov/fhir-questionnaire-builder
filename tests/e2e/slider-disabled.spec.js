@@ -14,6 +14,7 @@
 //   slider-step-input       Step field in Answer Type modal (visible only when slider-toggle is checked)
 
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'node:path';
 
@@ -69,7 +70,7 @@ test.describe('slider rendering', () => {
     const { readFileSync } = await import('node:fs');
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
     const ext = (q.item.find(i => i.linkId === 'pain-score').extension || [])
-      .find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue');
+      .find(e => e.url === FHIR.sliderStepValue);
     expect(ext?.valueInteger).toBe(1);
   });
 });
@@ -251,7 +252,7 @@ test.describe('sliderStepValue — R4 decimal constraint', () => {
     const q = JSON.parse(readFileSync(await download.path(), 'utf8'));
     // Find the item (it's nested under a group)
     const ext = (q.item[0].item[0].extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue'
+      e => e.url === FHIR.sliderStepValue
     );
     expect(ext?.valueInteger).toBe(1); // 0.5 rounded to 1
     expect(ext?.valueDecimal).toBeUndefined();

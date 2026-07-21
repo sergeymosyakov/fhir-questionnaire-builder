@@ -28,6 +28,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/display-category.fhir.json');
@@ -302,7 +303,7 @@ test.describe('displayCategory — help toggle interaction', () => {
 // is R4-invalid). Those warnings are non-blocking on import (import modal only shows errors).
 // On export the validate modal does open due to warnings — exportAndDownload() handles it.
 
-const DC_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory';
+const DC_URL = FHIR.displayCategory;
 
 function findItemRecursive(items, linkId) {
   for (const item of items) {

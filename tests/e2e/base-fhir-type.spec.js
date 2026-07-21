@@ -22,11 +22,12 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/base-fhir-type.fhir.json');
-const BASE_TYPE_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType';
-const FHIR_TYPE_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType';
+const BASE_TYPE_URL = FHIR.baseType;
+const FHIR_TYPE_URL = FHIR.fhirType;
 
 async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
@@ -66,7 +67,7 @@ test.describe('baseType / fhirType — import pre-fill', () => {
     await loadFixture(page);
     await openPropsModal(page, 'name-group');
     await expect(page.getByTestId('item-props-definition'))
-      .toHaveValue('http://hl7.org/fhir/StructureDefinition/Patient#Patient.name');
+      .toHaveValue(FHIR.sd + '/Patient#Patient.name');
   });
 
   test('Base Type field shows HumanName from fixture', async ({ page }) => {

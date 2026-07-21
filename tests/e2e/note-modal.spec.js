@@ -20,9 +20,10 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
-const DN_URL    = 'http://hl7.org/fhir/StructureDefinition/designNote';
+const DN_URL    = FHIR.designNote;
 const _FIXTURE  = path.resolve('tests/fixtures/meta-test.fhir.json');
 
 async function waitForLoad(page) {
