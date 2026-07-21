@@ -13,7 +13,7 @@
     {
       "resourceType": "ValueSet",
       "id": "vs-comorbidities",
-      "url": "http://example.org/fhir/ValueSet/bariatric-comorbidities",
+      "url": "https://example.org/fhir/ValueSet/bariatric-comorbidities",
       "name": "BariatricComorbidities",
       "title": "Obesity-Related Comorbidities",
       "status": "active",
@@ -51,14 +51,14 @@
     {
       "resourceType": "ValueSet",
       "id": "vs-vitamin-deficiencies",
-      "url": "http://example.org/fhir/ValueSet/bariatric-vitamin-deficiencies",
+      "url": "https://example.org/fhir/ValueSet/bariatric-vitamin-deficiencies",
       "name": "VitaminDeficiencies",
       "title": "Pre-operative Vitamin Deficiency Types",
       "status": "active",
       "compose": {
         "include": [
           {
-            "system": "http://example.org/bariatric/codes",
+            "system": "https://example.org/bariatric/codes",
             "concept": [
               {
                 "code": "vitD",

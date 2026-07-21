@@ -11,7 +11,7 @@
   "date": "2026-05-12",
   "modifierExtension": [
     {
-      "url": "http://vendor.example.com/fhir/StructureDefinition/questionnaire-suppress-scoring",
+      "url": "https://vendor.example.com/fhir/StructureDefinition/questionnaire-suppress-scoring",
       "valueBoolean": true
     }
   ],

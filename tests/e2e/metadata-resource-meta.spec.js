@@ -216,11 +216,11 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     await openModal(page);
     await page.getByTestId('meta-profile-add-btn').click();
-    await page.getByTestId('meta-profile-url-1').fill('http://example.org/custom-profile');
+    await page.getByTestId('meta-profile-url-1').fill('https://example.org/custom-profile');
     await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.meta.profile).toHaveLength(2);
-    expect(q.meta.profile[1]).toBe('http://example.org/custom-profile');
+    expect(q.meta.profile[1]).toBe('https://example.org/custom-profile');
   });
 
   test('removing all profiles omits meta.profile from export', async ({ page }) => {
@@ -237,7 +237,7 @@ test.describe('metadata modal — Resource Meta section', () => {
   test('tag Coding row is pre-populated from imported meta.tag', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await expect(page.getByTestId('meta-tag-system-0')).toHaveValue('http://example.org/tags');
+    await expect(page.getByTestId('meta-tag-system-0')).toHaveValue('https://example.org/tags');
     await expect(page.getByTestId('meta-tag-code-0')).toHaveValue('reviewed');
     await expect(page.getByTestId('meta-tag-display-0')).toHaveValue('Reviewed');
     await page.locator('[data-testid="metadataModalCancel"]').click();
@@ -255,7 +255,7 @@ test.describe('metadata modal — Resource Meta section', () => {
     await loadFixture(page);
     const q = await exportFHIR(page);
     expect(q.meta.tag).toEqual([
-      { system: 'http://example.org/tags', code: 'reviewed', display: 'Reviewed' },
+      { system: 'https://example.org/tags', code: 'reviewed', display: 'Reviewed' },
     ]);
   });
 

@@ -164,7 +164,7 @@ test.describe('H2 — calculatedExpression: BMI updates on height/weight input',
 
     const bmiText = await page.locator('[data-preview-id="bmi"]').textContent();
     // BMI should contain a decimal number (not just the "—" placeholder)
-    expect(bmiText).toMatch(/\d+[.,]\d/);
+    expect(bmiText).toMatch(/\d+[.,]\d/); // NOSONAR — matched against controlled preview text, not user input
   });
 
   test('BMI clears when weight is removed', async ({ page }) => {
@@ -185,7 +185,7 @@ test.describe('H2 — calculatedExpression: BMI updates on height/weight input',
     await commitInput(page);
     // BMI should return to placeholder/empty
     const bmiAfter = await page.locator('[data-preview-id="bmi"]').textContent();
-    expect(bmiAfter).not.toMatch(/^(\s*)\d{2}\.\d/);
+    expect(bmiAfter).not.toMatch(/^(\s*)\d{2}\.\d/); // NOSONAR — matched against controlled preview text, not user input
   });
 
   test('calc-chain sample re-init populates calculated fields without errors', async ({ page }) => {

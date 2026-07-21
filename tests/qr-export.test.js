@@ -219,7 +219,7 @@ describe('exportQR — id, language and meta block', () => {
   });
 
   it('writes meta.tag when provided (filters empty codes)', () => {
-    exportQR('test.json', { metaTag: [{ code: 'tag1', system: 'http://example.org' }, { code: '' }] });
+    exportQR('test.json', { metaTag: [{ code: 'tag1', system: 'https://example.org' }, { code: '' }] });
     const tag = buildQR.mock.results[0].value.meta.tag;
     expect(tag).toHaveLength(1);
     expect(tag[0].code).toBe('tag1');

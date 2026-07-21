@@ -97,7 +97,7 @@
   "url": "http://hl7.org/fhir/us/sdc/Questionnaire/54127-6",
   "identifier": [
     {
-      "system": "http://example.org/panel-id",
+      "system": "https://example.org/panel-id",
       "value": "54127-6"
     }
   ],

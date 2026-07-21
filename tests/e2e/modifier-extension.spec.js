@@ -29,7 +29,7 @@ import { test, expect } from '@playwright/test';
 
 const FIXTURE = path.resolve('tests/fixtures/modifier-extension.fhir.json');
 const MODIFIER_URL =
-  'http://vendor.example.com/fhir/StructureDefinition/questionnaire-suppress-scoring';
+  'https://vendor.example.com/fhir/StructureDefinition/questionnaire-suppress-scoring';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

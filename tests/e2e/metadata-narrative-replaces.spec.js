@@ -110,8 +110,8 @@ test.describe('metadata modal — Replaces section', () => {
   test('Replaces inputs are pre-populated from imported extensions', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await expect(page.getByTestId('meta-replaces-url-0')).toHaveValue('http://example.org/fhir/Questionnaire/meta-test|1.0');
-    await expect(page.getByTestId('meta-replaces-url-1')).toHaveValue('http://example.org/fhir/Questionnaire/meta-test|0.9');
+    await expect(page.getByTestId('meta-replaces-url-0')).toHaveValue('https://example.org/fhir/Questionnaire/meta-test|1.0');
+    await expect(page.getByTestId('meta-replaces-url-1')).toHaveValue('https://example.org/fhir/Questionnaire/meta-test|0.9');
     await page.locator('[data-testid="metadataModalCancel"]').click();
   });
 
@@ -145,17 +145,17 @@ test.describe('metadata modal — Replaces section', () => {
     const q = await exportFHIR(page);
     const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
     expect(entries).toHaveLength(2);
-    expect(entries[0].valueCanonical).toBe('http://example.org/fhir/Questionnaire/meta-test|1.0');
-    expect(entries[1].valueCanonical).toBe('http://example.org/fhir/Questionnaire/meta-test|0.9');
+    expect(entries[0].valueCanonical).toBe('https://example.org/fhir/Questionnaire/meta-test|1.0');
+    expect(entries[1].valueCanonical).toBe('https://example.org/fhir/Questionnaire/meta-test|0.9');
   });
 
   test('edited replaces URL is reflected in export', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await page.getByTestId('meta-replaces-url-0').fill('http://example.org/fhir/Questionnaire/updated|2.0');
+    await page.getByTestId('meta-replaces-url-0').fill('https://example.org/fhir/Questionnaire/updated|2.0');
     await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
-    expect(entries[0].valueCanonical).toBe('http://example.org/fhir/Questionnaire/updated|2.0');
+    expect(entries[0].valueCanonical).toBe('https://example.org/fhir/Questionnaire/updated|2.0');
   });
 });

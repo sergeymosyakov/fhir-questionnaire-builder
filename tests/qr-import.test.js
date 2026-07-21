@@ -116,10 +116,10 @@ describe('importQRAnswers — basic loading', () => {
 
   it('captures the questionnaire reference', () => {
     const r = importQRAnswers(
-      makeQR([], 'http://example.org/q1'),
+      makeQR([], 'https://example.org/q1'),
       {}, []
     );
-    expect(r.questionnaire).toBe('http://example.org/q1');
+    expect(r.questionnaire).toBe('https://example.org/q1');
   });
 
   it('returns empty string questionnaire when not set', () => {

@@ -1,7 +1,7 @@
 {
   "resourceType": "Questionnaire",
   "id": "prowl-ss",
-  "url": "http://example.org/fhir/Questionnaire/prowl-ss",
+  "url": "https://example.org/fhir/Questionnaire/prowl-ss",
   "version": "1.0.0",
   "name": "PROWL_SS",
   "title": "PROWL-SS — Post-Surgical Pain Assessment",

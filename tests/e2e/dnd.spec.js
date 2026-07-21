@@ -33,20 +33,27 @@ async function addItems(page, groupId, count) {
 /**
  * Dispatch HTML5 drag events programmatically.
  * handleSelector  — CSS selector for the drag handle element.
- * dropZoneEval    — JS expression evaluated in-page that returns the drop zone element.
+ * zone            — plain descriptor resolved in-page to the drop-zone element:
+ *                   { sel, index }               → querySelectorAll(sel)[index ?? 0]
+ *                   { anchor, closest, within }  → querySelector(anchor).closest(closest).querySelector(within)
  */
-async function doDrag(page, handleSelector, dropZoneEval) {
-  await page.evaluate(([hSel, dzExpr]) => {
+async function doDrag(page, handleSelector, zone) {
+  await page.evaluate(([hSel, z]) => {
     const handle = document.querySelector(hSel);
-    const dropZone = (new Function(`return ${dzExpr}`))();
-    if (!handle || !dropZone) throw new Error(`Missing: ${hSel} / ${dzExpr}`);
+    let dropZone = null;
+    if (z.sel) {
+      dropZone = document.querySelectorAll(z.sel)[z.index ?? 0];
+    } else if (z.anchor) {
+      dropZone = document.querySelector(z.anchor)?.closest(z.closest)?.querySelector(z.within);
+    }
+    if (!handle || !dropZone) throw new Error(`Missing: ${hSel} / ${JSON.stringify(z)}`);
     const dt = new DataTransfer();
     handle.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer: dt }));
     dropZone.dispatchEvent(new DragEvent('dragenter', { bubbles: true, cancelable: true, dataTransfer: dt }));
     dropZone.dispatchEvent(new DragEvent('dragover',  { bubbles: true, cancelable: true, dataTransfer: dt }));
     dropZone.dispatchEvent(new DragEvent('drop',      { bubbles: true, cancelable: true, dataTransfer: dt }));
     handle.dispatchEvent(new DragEvent('dragend',     { bubbles: true, dataTransfer: dt }));
-  }, [handleSelector, dropZoneEval]);
+  }, [handleSelector, zone]);
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
@@ -95,7 +102,7 @@ test.describe('Drag & Drop — node reorder', () => {
     await doDrag(
       page,
       '[data-node-id="1.2"] .node-drag-handle',
-      'document.querySelectorAll("[data-node-id=\'1\'] .drop-zone-above")[0]'
+      { sel: "[data-node-id='1'] .drop-zone-above", index: 0 }
     );
 
     // After drag: order should be [1.2, 1.1]
@@ -112,7 +119,7 @@ test.describe('Drag & Drop — node reorder', () => {
     await doDrag(
       page,
       '[data-node-id="1.1"] .node-drag-handle',
-      'document.querySelector("[data-node-id=\'1\'] .drop-zone-inside")'
+      { sel: "[data-node-id='1'] .drop-zone-inside" }
     );
 
     const order = await getGroupChildOrder(page, '1');
@@ -131,7 +138,7 @@ test.describe('Drag & Drop — node reorder', () => {
     await doDrag(
       page,
       '[data-node-id="2"] .node-drag-handle',
-      'document.querySelector("[data-node-id=\'1\'").closest(".node-wrap").querySelector(".drop-zone-above")'
+      { anchor: "[data-node-id='1']", closest: '.node-wrap', within: '.drop-zone-above' }
     );
 
     // After drag: exported FHIR item[0] should be '2'
@@ -158,7 +165,7 @@ test.describe('Drag & Drop — node reorder', () => {
     await doDrag(
       page,
       '[data-node-id="1.1"] .node-drag-handle',
-      'document.querySelector("[data-node-id=\'2\'] .drop-zone-inside")'
+      { sel: "[data-node-id='2'] .drop-zone-inside" }
     );
 
     const json = await page.evaluate(async () => {
@@ -182,7 +189,7 @@ test.describe('Drag & Drop — node reorder', () => {
     await doDrag(
       page,
       '[data-node-id="1.2"] .node-drag-handle',
-      'document.querySelectorAll("[data-node-id=\'1\'] .drop-zone-above")[0]'
+      { sel: "[data-node-id='1'] .drop-zone-above", index: 0 }
     );
 
     const order = await getGroupChildOrder(page, '1');
@@ -200,7 +207,7 @@ test.describe('Drag & Drop — node reorder', () => {
     await doDrag(
       page,
       '[data-node-id="1.2"] .node-drag-handle',
-      'document.querySelectorAll("[data-node-id=\'1\'] .drop-zone-above")[0]'
+      { sel: "[data-node-id='1'] .drop-zone-above", index: 0 }
     );
 
     // Both preview items should still be visible after re-render

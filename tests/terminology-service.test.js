@@ -29,8 +29,8 @@ const makeRetryable = (status) => ({
 const VS_BODY = {
   resourceType: 'ValueSet',
   expansion: { contains: [
-    { code: 'A', display: 'Alpha', system: 'http://example.com' },
-    { code: 'B', display: 'Beta',  system: 'http://example.com' },
+    { code: 'A', display: 'Alpha', system: 'https://example.com' },
+    { code: 'B', display: 'Beta',  system: 'https://example.com' },
   ] },
 };
 
@@ -112,8 +112,8 @@ describe('terminologyService.expandValueSet', () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
     const result = await terminologyService.expandValueSet('http://vs', DEFAULT_TERMINOLOGY_SERVER);
     expect(result).toHaveLength(2);
-    expect(result[0]).toEqual({ code: 'A', display: 'Alpha', system: 'http://example.com' });
-    expect(result[1]).toEqual({ code: 'B', display: 'Beta',  system: 'http://example.com' });
+    expect(result[0]).toEqual({ code: 'A', display: 'Alpha', system: 'https://example.com' });
+    expect(result[1]).toEqual({ code: 'B', display: 'Beta',  system: 'https://example.com' });
   });
 
   it('returns empty array when expansion.contains is empty', async () => {
@@ -159,7 +159,7 @@ describe('terminologyService.expandValueSet', () => {
 
   it('encodes the ValueSet URL as a query param', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
-    const vs = 'http://example.com/vs?v=1';
+    const vs = 'https://example.com/vs?v=1';
     await terminologyService.expandValueSet(vs, DEFAULT_TERMINOLOGY_SERVER);
     expect(mockFetch.mock.calls[0][0]).toContain(encodeURIComponent(vs));
   });

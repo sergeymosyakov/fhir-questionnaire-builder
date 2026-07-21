@@ -38,42 +38,42 @@
       "answerOption": [
         {
           "valueCoding": {
-            "system": "http://example.org/demo-codes",
+            "system": "https://example.org/demo-codes",
             "code": "a",
             "display": "Alpha"
           }
         },
         {
           "valueCoding": {
-            "system": "http://example.org/demo-codes",
+            "system": "https://example.org/demo-codes",
             "code": "b",
             "display": "Beta"
           }
         },
         {
           "valueCoding": {
-            "system": "http://example.org/demo-codes",
+            "system": "https://example.org/demo-codes",
             "code": "c",
             "display": "Gamma"
           }
         },
         {
           "valueCoding": {
-            "system": "http://example.org/demo-codes",
+            "system": "https://example.org/demo-codes",
             "code": "d",
             "display": "Delta"
           }
         },
         {
           "valueCoding": {
-            "system": "http://example.org/demo-codes",
+            "system": "https://example.org/demo-codes",
             "code": "e",
             "display": "Epsilon"
           }
         },
         {
           "valueCoding": {
-            "system": "http://example.org/demo-codes",
+            "system": "https://example.org/demo-codes",
             "code": "f",
             "display": "Zeta"
           }

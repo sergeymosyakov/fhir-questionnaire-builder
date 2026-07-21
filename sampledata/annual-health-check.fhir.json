@@ -2,7 +2,7 @@
   "resourceType": "Questionnaire",
   "id": "annual-health-check",
   "implicitRules": "https://example.org/fhir/implicit-rules/questionnaire",
-  "url": "http://example.org/fhir/Questionnaire/annual-health-check",
+  "url": "https://example.org/fhir/Questionnaire/annual-health-check",
   "version": "1.0",
   "title": "Annual Health Check",
   "status": "active",

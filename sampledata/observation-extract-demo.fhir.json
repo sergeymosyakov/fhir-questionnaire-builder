@@ -1,7 +1,7 @@
 {
   "resourceType": "Questionnaire",
   "id": "observation-extract-demo",
-  "url": "http://example.org/Questionnaire/observation-extract-demo",
+  "url": "https://example.org/Questionnaire/observation-extract-demo",
   "version": "1.0.0",
   "name": "ObservationExtractDemo",
   "title": "Observation Extraction Demo (Vital Signs)",

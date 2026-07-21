@@ -7,13 +7,13 @@
     {
       "resourceType": "ValueSet",
       "id": "vs-diet",
-      "url": "http://example.org/fhir/ValueSet/diet-type",
+      "url": "https://example.org/fhir/ValueSet/diet-type",
       "title": "Diet Types",
       "status": "active",
       "compose": {
         "include": [
           {
-            "system": "http://example.org/diet",
+            "system": "https://example.org/diet",
             "concept": [
               { "code": "low-carb",      "display": "Low Carbohydrate" },
               { "code": "mediterranean", "display": "Mediterranean"    }
@@ -25,7 +25,7 @@
     {
       "resourceType": "CodeSystem",
       "id": "cs-assessment",
-      "url": "http://example.org/fhir/CodeSystem/assessment",
+      "url": "https://example.org/fhir/CodeSystem/assessment",
       "title": "Assessment Categories",
       "status": "active",
       "content": "complete",
@@ -51,7 +51,7 @@
           "linkId": "q-category",
           "type": "choice",
           "text": "Assessment category",
-          "answerValueSet": "http://example.org/fhir/ValueSet/external"
+          "answerValueSet": "https://example.org/fhir/ValueSet/external"
         },
         {
           "linkId": "q-name",

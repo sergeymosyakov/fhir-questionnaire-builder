@@ -41,15 +41,15 @@
       "answerOption": [
         {
           "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 0 }],
-          "valueCoding": { "system": "http://example.org", "code": "not-at-all", "display": "Not at all" }
+          "valueCoding": { "system": "https://example.org", "code": "not-at-all", "display": "Not at all" }
         },
         {
           "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 1 }],
-          "valueCoding": { "system": "http://example.org", "code": "several-days", "display": "Several days" }
+          "valueCoding": { "system": "https://example.org", "code": "several-days", "display": "Several days" }
         },
         {
           "extension": [{ "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue", "valueDecimal": 2 }],
-          "valueCoding": { "system": "http://example.org", "code": "more-than-half", "display": "More than half the days" }
+          "valueCoding": { "system": "https://example.org", "code": "more-than-half", "display": "More than half the days" }
         }
       ]
     },

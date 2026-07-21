@@ -27,7 +27,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 
 const FIXTURE = path.resolve('tests/fixtures/unknown-extensions.fhir.json');
-const CUSTOM_URL = 'http://vendor.example.com/fhir/StructureDefinition/custom-field';
+const CUSTOM_URL = 'https://vendor.example.com/fhir/StructureDefinition/custom-field';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

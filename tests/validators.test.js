@@ -60,7 +60,7 @@ describe('LocalValidator', () => {
     const v = new LocalValidator();
     const questJson = {
       name: 'GoodName',
-      modifierExtension: [{ url: 'http://example.org/mod', valueBoolean: true }],
+      modifierExtension: [{ url: 'https://example.org/mod', valueBoolean: true }],
     };
     const issues = await v.run(questJson, [], {});
     expect(issues.some(i => i.severity === 'warning' && /modifierExtension/.test(i.message))).toBe(true);

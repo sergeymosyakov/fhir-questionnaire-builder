@@ -1,7 +1,7 @@
 {
   "resourceType": "Questionnaire",
   "id": "choice-column-demo",
-  "url": "http://example.org/Questionnaire/choice-column-demo",
+  "url": "https://example.org/Questionnaire/choice-column-demo",
   "title": "Choice Column Demo",
   "status": "active",
   "description": "Demonstrates the sdc-questionnaire-choiceColumn extension for multi-column dropdown rendering.",

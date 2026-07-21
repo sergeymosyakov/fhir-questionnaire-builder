@@ -10,7 +10,7 @@ import {
 
 const SD = {
   resourceType: 'StructureDefinition',
-  url: 'http://example.org/StructureDefinition/DemoPatient',
+  url: 'https://example.org/StructureDefinition/DemoPatient',
   type: 'Patient',
   snapshot: {
     element: [
@@ -35,7 +35,7 @@ const SD = {
         type: [{ code: 'Reference', targetProfile: ['http://hl7.org/fhir/StructureDefinition/Organization'] }] },
       { id: 'Patient.generalPractitioner', path: 'Patient.generalPractitioner',
         short: 'Patient GP', min: 0, max: '*',
-        type: [{ code: 'Reference', targetProfile: ['http://example.org/StructureDefinition/custom-gp'] }] },
+        type: [{ code: 'Reference', targetProfile: ['https://example.org/StructureDefinition/custom-gp'] }] },
     ],
   },
 };
@@ -108,7 +108,7 @@ describe('resolveDefinition', () => {
   });
   it('keeps custom targetProfile but leaves referenceType undefined', () => {
     const r = resolveDefinition(SD, 'http://x#Patient.generalPractitioner');
-    expect(r.referenceProfiles).toEqual(['http://example.org/StructureDefinition/custom-gp']);
+    expect(r.referenceProfiles).toEqual(['https://example.org/StructureDefinition/custom-gp']);
     expect(r.referenceType).toBeUndefined();
   });
 });
@@ -116,7 +116,7 @@ describe('resolveDefinition', () => {
 describe('typeFromProfileUrl', () => {
   it('derives a type only from base FHIR profile URLs', () => {
     expect(typeFromProfileUrl('http://hl7.org/fhir/StructureDefinition/Organization')).toBe('Organization');
-    expect(typeFromProfileUrl('http://example.org/StructureDefinition/us-core-patient')).toBeUndefined();
+    expect(typeFromProfileUrl('https://example.org/StructureDefinition/us-core-patient')).toBeUndefined();
     expect(typeFromProfileUrl(null)).toBeUndefined();
   });
 });

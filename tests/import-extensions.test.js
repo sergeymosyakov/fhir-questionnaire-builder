@@ -119,10 +119,10 @@ describe('importFHIR — unknown extensions', () => {
   it('collects unknown extension on an item into _unknownExtensions', () => {
     importFHIR(minQ([{
       linkId: 'q1', type: 'string', text: 'Q',
-      extension: [{ url: 'http://vendor.example.com/custom', valueString: 'val' }],
+      extension: [{ url: 'https://vendor.example.com/custom', valueString: 'val' }],
     }]));
     expect(_tree[0]._unknownExtensions).toHaveLength(1);
-    expect(_tree[0]._unknownExtensions[0].url).toBe('http://vendor.example.com/custom');
+    expect(_tree[0]._unknownExtensions[0].url).toBe('https://vendor.example.com/custom');
     expect(_tree[0]._unknownExtensions[0].valueString).toBe('val');
   });
 
@@ -140,22 +140,22 @@ describe('importFHIR — unknown extensions', () => {
       linkId: 'q1', type: 'string', text: 'Q',
       extension: [
         { url: FHIR.minLength, valueInteger: 2 },
-        { url: 'http://vendor.example.com/custom', valueString: 'val' },
+        { url: 'https://vendor.example.com/custom', valueString: 'val' },
       ],
     }]));
     expect(_tree[0]._minLength).toBe(2);
     expect(_tree[0]._unknownExtensions).toHaveLength(1);
-    expect(_tree[0]._unknownExtensions[0].url).toBe('http://vendor.example.com/custom');
+    expect(_tree[0]._unknownExtensions[0].url).toBe('https://vendor.example.com/custom');
   });
 
   it('collects unknown extension on a group into _unknownExtensions', () => {
     importFHIR(minQ([{
       linkId: 'g1', type: 'group', text: 'G',
-      extension: [{ url: 'http://vendor.example.com/group-ext', valueInteger: 99 }],
+      extension: [{ url: 'https://vendor.example.com/group-ext', valueInteger: 99 }],
       item: [{ linkId: 'q1', type: 'string', text: 'Q' }],
     }]));
     expect(_tree[0]._unknownExtensions).toHaveLength(1);
-    expect(_tree[0]._unknownExtensions[0].url).toBe('http://vendor.example.com/group-ext');
+    expect(_tree[0]._unknownExtensions[0].url).toBe('https://vendor.example.com/group-ext');
     expect(_tree[0]._unknownExtensions[0].valueInteger).toBe(99);
   });
 
@@ -178,18 +178,18 @@ describe('importFHIR — replaces extension', () => {
   });
 
   it('reads a single replaces extension into questMeta.replaces', () => {
-    importFHIR(minQ([{ url: REPLACES_URL, valueCanonical: 'http://example.org/fhir/Questionnaire/prior|1.0' }]));
-    expect(_questMeta.replaces).toEqual(['http://example.org/fhir/Questionnaire/prior|1.0']);
+    importFHIR(minQ([{ url: REPLACES_URL, valueCanonical: 'https://example.org/fhir/Questionnaire/prior|1.0' }]));
+    expect(_questMeta.replaces).toEqual(['https://example.org/fhir/Questionnaire/prior|1.0']);
   });
 
   it('reads multiple replaces extensions into questMeta.replaces array', () => {
     importFHIR(minQ([
-      { url: REPLACES_URL, valueCanonical: 'http://example.org/fhir/Questionnaire/v1' },
-      { url: REPLACES_URL, valueCanonical: 'http://example.org/fhir/Questionnaire/v2' },
+      { url: REPLACES_URL, valueCanonical: 'https://example.org/fhir/Questionnaire/v1' },
+      { url: REPLACES_URL, valueCanonical: 'https://example.org/fhir/Questionnaire/v2' },
     ]));
     expect(_questMeta.replaces).toHaveLength(2);
-    expect(_questMeta.replaces[0]).toBe('http://example.org/fhir/Questionnaire/v1');
-    expect(_questMeta.replaces[1]).toBe('http://example.org/fhir/Questionnaire/v2');
+    expect(_questMeta.replaces[0]).toBe('https://example.org/fhir/Questionnaire/v1');
+    expect(_questMeta.replaces[1]).toBe('https://example.org/fhir/Questionnaire/v2');
   });
 
   it('sets replaces to [] when no replaces extensions are present', () => {
@@ -198,7 +198,7 @@ describe('importFHIR — replaces extension', () => {
   });
 
   it('excludes replaces entries from _rawQuestExtensions', () => {
-    importFHIR(minQ([{ url: REPLACES_URL, valueCanonical: 'http://example.org/fhir/Questionnaire/prior' }]));
+    importFHIR(minQ([{ url: REPLACES_URL, valueCanonical: 'https://example.org/fhir/Questionnaire/prior' }]));
     const raw = _questMeta._rawQuestExtensions || [];
     expect(raw.some(e => e.url === REPLACES_URL)).toBe(false);
   });
@@ -649,11 +649,11 @@ describe('referenceProfile', () => {
     importFHIR(minQ([{
       linkId: 'q1', type: 'reference', text: 'Ref',
       extension: [
-        { url: RP_URL, valueCanonical: 'http://example.com/Profile1' },
-        { url: RP_URL, valueCanonical: 'http://example.com/Profile2' },
+        { url: RP_URL, valueCanonical: 'https://example.com/Profile1' },
+        { url: RP_URL, valueCanonical: 'https://example.com/Profile2' },
       ],
     }]));
-    expect(_tree[0]._referenceProfiles).toEqual(['http://example.com/Profile1', 'http://example.com/Profile2']);
+    expect(_tree[0]._referenceProfiles).toEqual(['https://example.com/Profile1', 'https://example.com/Profile2']);
   });
 
   it('does not set _referenceProfiles when absent', () => {

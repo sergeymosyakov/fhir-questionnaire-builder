@@ -61,7 +61,7 @@ test.describe('metadata modal — Identifiers section', () => {
     await loadFixture(page);
     await openModal(page);
     await expect(page.getByTestId('meta-identifier-use-0')).toHaveAttribute('data-value', 'official');
-    await expect(page.getByTestId('meta-identifier-system-0')).toHaveValue('http://example.org/questionnaire-ids');
+    await expect(page.getByTestId('meta-identifier-system-0')).toHaveValue('https://example.org/questionnaire-ids');
     await expect(page.getByTestId('meta-identifier-value-0')).toHaveValue('Q-2024-001');
     await page.locator('[data-testid="metadataModalCancel"]').click();
   });
@@ -86,7 +86,7 @@ test.describe('metadata modal — Identifiers section', () => {
     await loadFixture(page);
     const q = await exportFHIR(page);
     expect(q.identifier).toEqual([
-      { use: 'official', system: 'http://example.org/questionnaire-ids', value: 'Q-2024-001' },
+      { use: 'official', system: 'https://example.org/questionnaire-ids', value: 'Q-2024-001' },
     ]);
   });
 

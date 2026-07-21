@@ -22,8 +22,8 @@ describe('buildQR — structure', () => {
   });
 
   it('uses questionnaire url when present', () => {
-    const qr = bq({ url: 'http://example.org/q1', item: [] }, {});
-    expect(qr.questionnaire).toBe('http://example.org/q1');
+    const qr = bq({ url: 'https://example.org/q1', item: [] }, {});
+    expect(qr.questionnaire).toBe('https://example.org/q1');
   });
 
   it('falls back to id when no url', () => {
@@ -278,14 +278,14 @@ describe('buildQR — ordinalValue in valueCoding answers', () => {
   it('matching answerOption with ordinalValue on answerOption.extension', () => {
     const answerOption = [{
       extension: [{ url: ORDINAL_URL, valueDecimal: 3 }],
-      valueCoding: { code: 'opt1', display: 'Option 1', system: 'http://example.org' },
+      valueCoding: { code: 'opt1', display: 'Option 1', system: 'https://example.org' },
     }];
     const qr = bq(mkChoiceFhir(answerOption), { q: 'opt1' });
     const vc = qr.item[0].answer[0].valueCoding;
     expect(vc.code).toBe('opt1');
     expect(vc.extension).toEqual([{ url: ORDINAL_URL, valueDecimal: 3 }]);
     expect(vc.display).toBe('Option 1');
-    expect(vc.system).toBe('http://example.org');
+    expect(vc.system).toBe('https://example.org');
   });
 
   it('matching answerOption with ordinalValue on valueCoding.extension (fallback)', () => {
@@ -313,7 +313,7 @@ describe('buildQR — ordinalValue in valueCoding answers', () => {
   it('non-matching code → no enrichment (no system/display/extension)', () => {
     const answerOption = [{
       extension: [{ url: ORDINAL_URL, valueDecimal: 5 }],
-      valueCoding: { code: 'other', display: 'Other', system: 'http://example.org' },
+      valueCoding: { code: 'other', display: 'Other', system: 'https://example.org' },
     }];
     const qr = bq(mkChoiceFhir(answerOption), { q: 'unknown' });
     const vc = qr.item[0].answer[0].valueCoding;

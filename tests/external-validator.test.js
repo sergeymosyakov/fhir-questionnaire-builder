@@ -80,12 +80,12 @@ describe('ExternalValidator', () => {
       resourceType: 'Questionnaire',
       extension: [
         { url: VERSION_EXT_URL, valueCode: '4.0.1' },
-        { url: 'http://example.org/keep', valueString: 'x' },
+        { url: 'https://example.org/keep', valueString: 'x' },
       ],
       item: [],
     });
     const sentBody = JSON.parse(fetchMock.calls.at(-1).opts.body);
-    expect(sentBody.extension).toEqual([{ url: 'http://example.org/keep', valueString: 'x' }]);
+    expect(sentBody.extension).toEqual([{ url: 'https://example.org/keep', valueString: 'x' }]);
   });
 
   it('falls back to the configured URL when it has no recognised base segment', async () => {

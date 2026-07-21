@@ -142,7 +142,7 @@ test.describe('calculatedExpression — annual-health-check fixture', () => {
     // BMI row textContent contains the prefix ("1.3") and the computed value ("24.7").
     // Use \d{2,}[.,]\d to match 2+ digit decimals — excludes the single-digit prefix.
     const bmiText = await page.locator('[data-preview-id="bmi"]').textContent({ timeout: 5_000 });
-    expect(bmiText).toMatch(/\d{2,}[.,]\d/);
+    expect(bmiText).toMatch(/\d{2,}[.,]\d/); // NOSONAR — matched against controlled preview text, not user input
   });
 
   test('bmi-high-flag is true when BMI >= 30', async ({ page }) => {

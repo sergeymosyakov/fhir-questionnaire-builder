@@ -5,7 +5,7 @@
   "status": "draft",
   "modifierExtension": [
     {
-      "url": "http://vendor.example.com/fhir/StructureDefinition/questionnaire-suppress-scoring",
+      "url": "https://vendor.example.com/fhir/StructureDefinition/questionnaire-suppress-scoring",
       "valueBoolean": true
     }
   ],

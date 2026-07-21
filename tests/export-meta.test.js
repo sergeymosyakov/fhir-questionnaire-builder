@@ -97,7 +97,7 @@ describe('buildFHIRObject — _initialValue export', () => {
   });
 
   it('omits initial[] when item has _answerValueSet (que-11)', () => {
-    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', _initialValue: 'opt1', _answerValueSet: 'http://example.com/vs' }]);
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', _initialValue: 'opt1', _answerValueSet: 'https://example.com/vs' }]);
     expect(q.item[0].initial).toBeUndefined();
   });
 
@@ -152,9 +152,9 @@ describe('buildFHIRObject — questMeta', () => {
   });
 
   it('exports url when questMeta.url is set', () => {
-    _questMeta.url = 'http://example.org/fhir/Questionnaire/test';
+    _questMeta.url = 'https://example.org/fhir/Questionnaire/test';
     const q = buildFHIRObject();
-    expect(q.url).toBe('http://example.org/fhir/Questionnaire/test');
+    expect(q.url).toBe('https://example.org/fhir/Questionnaire/test');
   });
 
   it('omits url when questMeta.url is empty', () => {

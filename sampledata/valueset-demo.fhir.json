@@ -91,7 +91,7 @@
       "compose": {
         "include": [
           {
-            "system": "http://example.org/fhir/CodeSystem/activity-level",
+            "system": "https://example.org/fhir/CodeSystem/activity-level",
             "concept": [
               {
                 "code": "sedentary",

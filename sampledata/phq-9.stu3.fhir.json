@@ -4,7 +4,7 @@
   "meta": {
     "fhirVersion": "3.0.2"
   },
-  "url": "http://example.org/Questionnaire/phq-9-stu3",
+  "url": "https://example.org/Questionnaire/phq-9-stu3",
   "version": "1.0",
   "name": "PHQ9",
   "title": "PHQ-9 Depression Screening (STU3)",

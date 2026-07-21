@@ -69,7 +69,7 @@ describe('calcFormOk — url', () => {
   });
   it('valid url must also satisfy a regex when set', () => {
     const n = node({ itemType: 'url', _regex: '^https://' });
-    expect(calcFormOk(n, store({ q: 'http://example.org' }))).toBe(false);
+    expect(calcFormOk(n, store({ q: 'http://example.org' }))).toBe(false); // NOSONAR — intentionally http so it fails the ^https:// regex
     expect(calcFormOk(n, store({ q: 'https://example.org' }))).toBe(true);
   });
 });

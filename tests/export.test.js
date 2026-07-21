@@ -568,10 +568,10 @@ describe('buildFHIRObject — answerValueSet', () => {
   it('exports node._answerValueSet as item.answerValueSet', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Diet', itemType: 'select',
-      _answerValueSet: 'http://example.org/vs/diet',
+      _answerValueSet: 'https://example.org/vs/diet',
       enableWhen: [], constraint: [], options: '', mandatory: false,
     }]);
-    expect(q.item[0].answerValueSet).toBe('http://example.org/vs/diet');
+    expect(q.item[0].answerValueSet).toBe('https://example.org/vs/diet');
   });
 
   it('does not emit answerValueSet when not set on node', () => {
@@ -596,7 +596,7 @@ describe('buildFHIRObject — answerValueSet', () => {
   it('que-5: suppresses answerValueSet on url item (type not in allowed list)', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'URL', itemType: 'url',
-      _answerValueSet: 'http://example.org/vs',
+      _answerValueSet: 'https://example.org/vs',
       enableWhen: [], constraint: [], options: '', mandatory: false,
     }]);
     expect(q.item[0].answerValueSet).toBeUndefined();
@@ -605,7 +605,7 @@ describe('buildFHIRObject — answerValueSet', () => {
   it('que-5: suppresses answerValueSet on attachment item', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'File', itemType: 'attachment',
-      _answerValueSet: 'http://example.org/vs',
+      _answerValueSet: 'https://example.org/vs',
       enableWhen: [], constraint: [], mandatory: false,
     }]);
     expect(q.item[0].answerValueSet).toBeUndefined();

@@ -1,7 +1,7 @@
 {
   "resourceType": "Questionnaire",
   "id": "answer-expression-demo",
-  "url": "http://example.org/fhir/Questionnaire/answer-expression-demo",
+  "url": "https://example.org/fhir/Questionnaire/answer-expression-demo",
   "version": "1.0.0",
   "title": "Answer Expression Demo — Dynamic Option Lists",
   "status": "draft",

@@ -455,7 +455,7 @@ describe('validateTree — que-11 initial + answerOption conflict', () => {
   });
 
   it('warns when _initialValue is set and item has _answerValueSet', () => {
-    const item = makeItem({ id: 'q1', itemType: 'select', _initialValue: 'opt1', _answerValueSet: 'http://example.com/vs' });
+    const item = makeItem({ id: 'q1', itemType: 'select', _initialValue: 'opt1', _answerValueSet: 'https://example.com/vs' });
     const issues = validateTree([item]);
     expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toBeTruthy();
   });
@@ -500,19 +500,19 @@ describe('validateTree — que-4 answerOption + answerValueSet conflict', () => 
   it('no error when only options string and _answerValueSet are set (options may come from contained VS resolution)', () => {
     // node.options can be populated during import from a contained ValueSet — export already
     // suppresses answerOption[] when _answerValueSet is set, so this is not a real que-4 violation.
-    const item = makeItem({ id: 'q1', itemType: 'select', options: 'a=A,b=B', _answerValueSet: 'http://example.com/vs' });
+    const item = makeItem({ id: 'q1', itemType: 'select', options: 'a=A,b=B', _answerValueSet: 'https://example.com/vs' });
     const issues = validateTree([item]);
     expect(errIds(issues)).not.toContain('q1');
   });
 
   it('errors when both _rawAnswerOptions and _answerValueSet are set', () => {
-    const item = makeItem({ id: 'q1', itemType: 'select', options: '', _rawAnswerOptions: [{ valueCoding: { code: 'a' } }], _answerValueSet: 'http://example.com/vs' });
+    const item = makeItem({ id: 'q1', itemType: 'select', options: '', _rawAnswerOptions: [{ valueCoding: { code: 'a' } }], _answerValueSet: 'https://example.com/vs' });
     const issues = validateTree([item]);
     expect(errIds(issues)).toContain('q1');
   });
 
   it('no error when only _answerValueSet is set', () => {
-    const item = makeItem({ id: 'q1', itemType: 'select', options: '', _answerValueSet: 'http://example.com/vs' });
+    const item = makeItem({ id: 'q1', itemType: 'select', options: '', _answerValueSet: 'https://example.com/vs' });
     expect(errIds(validateTree([item]))).toHaveLength(0);
   });
 
@@ -654,13 +654,13 @@ describe('validateTree — que-0 Questionnaire.name format', () => {
 describe('validateTree — modifierExtension warning', () => {
   it('warns when questMeta._rawModifierExtension is non-empty', () => {
     const issues = validateTree([], {}, {
-      _rawModifierExtension: [{ url: 'http://example.org/someModifier', valueBoolean: true }],
+      _rawModifierExtension: [{ url: 'https://example.org/someModifier', valueBoolean: true }],
     });
     expect(issues.length).toBe(1);
     expect(issues[0].severity).toBe('warning');
     expect(issues[0].nodeId).toBe('(root)');
     expect(issues[0].message).toMatch(/modifierExtension/);
-    expect(issues[0].message).toMatch(/http:\/\/example\.org\/someModifier/);
+    expect(issues[0].message).toMatch(/https:\/\/example\.org\/someModifier/);
   });
 
   it('no warning when _rawModifierExtension is empty or absent', () => {
@@ -674,41 +674,41 @@ describe('validateTree — modifierExtension warning', () => {
 // ── que-5: answerValueSet only for allowed types ──────────────────────────────
 describe('validateTree — que-5 answerValueSet type restriction', () => {
   it('errors when answerValueSet set on url item', () => {
-    const item = makeItem({ id: 'q1', itemType: 'url', _answerValueSet: 'http://example.com/vs' });
+    const item = makeItem({ id: 'q1', itemType: 'url', _answerValueSet: 'https://example.com/vs' });
     const issues = validateTree([item]);
     expect(errIds(issues)).toContain('q1');
     expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-5/))).toBeTruthy();
   });
 
   it('errors when answerValueSet set on attachment item', () => {
-    const item = makeItem({ id: 'q1', itemType: 'attachment', _answerValueSet: 'http://example.com/vs' });
+    const item = makeItem({ id: 'q1', itemType: 'attachment', _answerValueSet: 'https://example.com/vs' });
     const issues = validateTree([item]);
     expect(errIds(issues)).toContain('q1');
   });
 
   it('errors when answerValueSet set on checkbox (boolean) item', () => {
-    const item = makeItem({ id: 'q1', itemType: 'checkbox', _answerValueSet: 'http://example.com/vs' });
+    const item = makeItem({ id: 'q1', itemType: 'checkbox', _answerValueSet: 'https://example.com/vs' });
     const issues = validateTree([item]);
     expect(errIds(issues)).toContain('q1');
   });
 
   it('no error when answerValueSet set on select item', () => {
-    const item = makeItem({ id: 'q1', itemType: 'select', options: '', _answerValueSet: 'http://example.com/vs' });
+    const item = makeItem({ id: 'q1', itemType: 'select', options: '', _answerValueSet: 'https://example.com/vs' });
     expect(errIds(validateTree([item]))).toHaveLength(0);
   });
 
   it('no error when answerValueSet set on text item', () => {
-    const item = makeItem({ id: 'q1', itemType: 'text', _answerValueSet: 'http://example.com/vs' });
+    const item = makeItem({ id: 'q1', itemType: 'text', _answerValueSet: 'https://example.com/vs' });
     expect(errIds(validateTree([item]))).toHaveLength(0);
   });
 
   it('no error when answerValueSet set on decimal item', () => {
-    const item = makeItem({ id: 'q1', itemType: 'decimal', _answerValueSet: 'http://example.com/vs' });
+    const item = makeItem({ id: 'q1', itemType: 'decimal', _answerValueSet: 'https://example.com/vs' });
     expect(errIds(validateTree([item]))).toHaveLength(0);
   });
 
   it('no error when answerValueSet set on quantity item', () => {
-    const item = makeItem({ id: 'q1', itemType: 'quantity', _answerValueSet: 'http://example.com/vs' });
+    const item = makeItem({ id: 'q1', itemType: 'quantity', _answerValueSet: 'https://example.com/vs' });
     expect(errIds(validateTree([item]))).toHaveLength(0);
   });
 });

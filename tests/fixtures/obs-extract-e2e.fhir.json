@@ -1,7 +1,7 @@
 {
   "resourceType": "Questionnaire",
   "id": "obs-extract-e2e",
-  "url": "http://example.org/Questionnaire/obs-extract-e2e",
+  "url": "https://example.org/Questionnaire/obs-extract-e2e",
   "title": "Observation Extract E2E",
   "status": "draft",
   "item": [

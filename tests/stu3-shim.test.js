@@ -144,10 +144,10 @@ describe('normaliseSTU3 — options reference → answerValueSet', () => {
   it('converts external options reference URL', () => {
     const json = q([{
       linkId: 'q1', type: 'choice',
-      options: { reference: 'http://example.org/ValueSet/my-vs' },
+      options: { reference: 'https://example.org/ValueSet/my-vs' },
     }]);
     const result = normaliseSTU3(json);
-    expect(result.item[0].answerValueSet).toBe('http://example.org/ValueSet/my-vs');
+    expect(result.item[0].answerValueSet).toBe('https://example.org/ValueSet/my-vs');
   });
 });
 
@@ -210,7 +210,7 @@ describe('normaliseSTU3 — initial<Type> → item.initial[]', () => {
     ['initialDateTime',  'valueDateTime',  '2024-01-01T00:00:00'],
     ['initialTime',      'valueTime',      '09:00:00'],
     ['initialString',    'valueString',    'hello'],
-    ['initialUri',       'valueUri',       'http://example.org'],
+    ['initialUri',       'valueUri',       'https://example.org'],
     ['initialCoding',    'valueCoding',    { code: 'a', display: 'A' }],
     ['initialQuantity',  'valueQuantity',  { value: 70, unit: 'kg' }],
     ['initialAttachment','valueAttachment',{ contentType: 'text/plain' }],

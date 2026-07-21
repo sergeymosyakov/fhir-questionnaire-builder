@@ -53,7 +53,7 @@ test.describe('preview ordinal prefix alignment', () => {
 
     // Compare only group 1's items (1.1–1.5): same nesting level, mixing required
     // (1.1, 1.2 → invalid) and normal (1.3–1.5) rows. They must share a left edge.
-    const g1 = lefts.filter(x => /^1\.\d+$/.test(x.prefix));
+    const g1 = lefts.filter(x => /^1\.\d+$/.test(x.prefix)); // NOSONAR — matched against controlled preview text, not user input
     expect(g1.some(x => x.invalid)).toBe(true);   // at least one required row
     expect(g1.some(x => !x.invalid)).toBe(true);  // at least one normal row
 

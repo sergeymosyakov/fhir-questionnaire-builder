@@ -7,7 +7,7 @@
       "valueCode": "5.0.0"
     }
   ],
-  "url": "http://example.org/fhir/Questionnaire/r5-demo",
+  "url": "https://example.org/fhir/Questionnaire/r5-demo",
   "version": "1.0",
   "versionAlgorithmCoding": {
     "system": "http://hl7.org/fhir/version-algorithm",

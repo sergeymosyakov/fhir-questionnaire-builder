@@ -77,7 +77,7 @@ describe('REDCapCompatValidator', () => {
   it('errors on answerValueSet by URL', async () => {
     const q = makeQ([
       group('f', 'F', [
-        item('q1', 'Q1', 'choice', { answerValueSet: 'http://example.org/vs' }),
+        item('q1', 'Q1', 'choice', { answerValueSet: 'https://example.org/vs' }),
       ]),
     ]);
     const issues = await validator._run(q, [], {});

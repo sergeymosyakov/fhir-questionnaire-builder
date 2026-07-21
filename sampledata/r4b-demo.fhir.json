@@ -7,7 +7,7 @@
       "valueCode": "4.3.0"
     }
   ],
-  "url": "http://example.org/fhir/Questionnaire/r4b-demo",
+  "url": "https://example.org/fhir/Questionnaire/r4b-demo",
   "version": "1.0",
   "title": "FHIR R4B Feature Demo",
   "status": "draft",

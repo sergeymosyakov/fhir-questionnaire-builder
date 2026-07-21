@@ -234,15 +234,15 @@ describe('buildFHIRObject — resource meta', () => {
     _questMeta._metaVersionId = 'v2';
     _questMeta._metaSource = 'https://example.org';
     _questMeta._rawMetaProfile = ['http://hl7.org/fhir/StructureDefinition/Questionnaire'];
-    _questMeta._rawMetaTag = [{ system: 'http://example.org', code: 'tag1' }];
-    _questMeta._rawMetaSecurity = [{ system: 'http://example.org', code: 'sec1' }];
+    _questMeta._rawMetaTag = [{ system: 'https://example.org', code: 'tag1' }];
+    _questMeta._rawMetaSecurity = [{ system: 'https://example.org', code: 'sec1' }];
     const q = build([]);
     expect(q.meta).toBeDefined();
     expect(q.meta.versionId).toBe('v2');
     expect(q.meta.source).toBe('https://example.org');
     expect(q.meta.profile).toEqual(['http://hl7.org/fhir/StructureDefinition/Questionnaire']);
-    expect(q.meta.tag).toEqual([{ system: 'http://example.org', code: 'tag1' }]);
-    expect(q.meta.security).toEqual([{ system: 'http://example.org', code: 'sec1' }]);
+    expect(q.meta.tag).toEqual([{ system: 'https://example.org', code: 'tag1' }]);
+    expect(q.meta.security).toEqual([{ system: 'https://example.org', code: 'sec1' }]);
     expect(q.meta.lastUpdated).toBeDefined();
   });
 
@@ -417,12 +417,12 @@ describe('buildFHIRObject — _optionSystems', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'select',
       options: 'a=Option A,b=Option B',
-      _optionSystems: { a: 'http://example.org/codes', b: LOINC_URL.system },
+      _optionSystems: { a: 'https://example.org/codes', b: LOINC_URL.system },
     }]);
     const opts = q.item[0].answerOption || [];
     const optA = opts.find(o => o.valueCoding?.code === 'a');
     const optB = opts.find(o => o.valueCoding?.code === 'b');
-    expect(optA?.valueCoding?.system).toBe('http://example.org/codes');
+    expect(optA?.valueCoding?.system).toBe('https://example.org/codes');
     expect(optB?.valueCoding?.system).toBe(LOINC_URL.system);
   });
 
@@ -439,7 +439,7 @@ describe('buildFHIRObject — _optionSystems', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'select',
       options: 'a=Option A,b=Option B',
-      _optionSystems: { a: 'http://example.org/codes' },
+      _optionSystems: { a: 'https://example.org/codes' },
     }]);
     const opts = q.item[0].answerOption || [];
     const optB = opts.find(o => o.valueCoding?.code === 'b');
@@ -450,7 +450,7 @@ describe('buildFHIRObject — _optionSystems', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'select',
       options: 'a=Option A',
-      _optionSystems: { a: 'http://example.org/codes' },
+      _optionSystems: { a: 'https://example.org/codes' },
     }]);
     const coding = q.item[0].answerOption[0].valueCoding;
     const keys = Object.keys(coding);
@@ -559,12 +559,12 @@ describe('_unknownExtensions pass-through', () => {
   it('writes unknown extensions to item.extension[]', () => {
     const node = {
       id: 'q1', title: 'Q1', type: 'item', itemType: 'text',
-      _unknownExtensions: [{ url: 'http://vendor.example.com/custom', valueString: 'val' }],
+      _unknownExtensions: [{ url: 'https://vendor.example.com/custom', valueString: 'val' }],
     };
     const q = build([node]);
     const ext = q.item[0].extension;
     expect(ext).toBeDefined();
-    const custom = ext.find(e => e.url === 'http://vendor.example.com/custom');
+    const custom = ext.find(e => e.url === 'https://vendor.example.com/custom');
     expect(custom).toBeDefined();
     expect(custom.valueString).toBe('val');
   });
@@ -573,13 +573,13 @@ describe('_unknownExtensions pass-through', () => {
     const node = {
       id: 'q1', title: 'Q1', type: 'item', itemType: 'text',
       _minLength: 3,
-      _unknownExtensions: [{ url: 'http://vendor.example.com/custom', valueBoolean: true }],
+      _unknownExtensions: [{ url: 'https://vendor.example.com/custom', valueBoolean: true }],
     };
     const q = build([node]);
     const ext = q.item[0].extension;
     expect(ext.length).toBeGreaterThanOrEqual(2);
     const minLen = ext.find(e => e.url === FHIR.minLength);
-    const custom = ext.find(e => e.url === 'http://vendor.example.com/custom');
+    const custom = ext.find(e => e.url === 'https://vendor.example.com/custom');
     expect(minLen).toBeDefined();
     expect(custom).toBeDefined();
     expect(custom.valueBoolean).toBe(true);
@@ -592,13 +592,13 @@ describe('_unknownExtensions pass-through', () => {
   });
 
   it('deep-clones unknown extensions (no shared references)', () => {
-    const src = { url: 'http://vendor.example.com/custom', valueString: 'val' };
+    const src = { url: 'https://vendor.example.com/custom', valueString: 'val' };
     const node = {
       id: 'q1', title: 'Q1', type: 'item', itemType: 'text',
       _unknownExtensions: [src],
     };
     const q = build([node]);
-    const exported = q.item[0].extension.find(e => e.url === 'http://vendor.example.com/custom');
+    const exported = q.item[0].extension.find(e => e.url === 'https://vendor.example.com/custom');
     expect(exported).not.toBe(src);
     expect(exported.valueString).toBe('val');
   });
@@ -681,23 +681,23 @@ describe('buildFHIRObject — replaces extension', () => {
   afterEach(() => { _questMeta.replaces = []; });
 
   it('exports a single replaces URL as one extension entry', () => {
-    _questMeta.replaces = ['http://example.org/fhir/Questionnaire/prior|1.0'];
+    _questMeta.replaces = ['https://example.org/fhir/Questionnaire/prior|1.0'];
     const q = build([]);
     const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
     expect(entries).toHaveLength(1);
-    expect(entries[0].valueCanonical).toBe('http://example.org/fhir/Questionnaire/prior|1.0');
+    expect(entries[0].valueCanonical).toBe('https://example.org/fhir/Questionnaire/prior|1.0');
   });
 
   it('exports multiple replaces URLs as separate extension entries', () => {
     _questMeta.replaces = [
-      'http://example.org/fhir/Questionnaire/v1',
-      'http://example.org/fhir/Questionnaire/v2',
+      'https://example.org/fhir/Questionnaire/v1',
+      'https://example.org/fhir/Questionnaire/v2',
     ];
     const q = build([]);
     const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
     expect(entries).toHaveLength(2);
-    expect(entries[0].valueCanonical).toBe('http://example.org/fhir/Questionnaire/v1');
-    expect(entries[1].valueCanonical).toBe('http://example.org/fhir/Questionnaire/v2');
+    expect(entries[0].valueCanonical).toBe('https://example.org/fhir/Questionnaire/v1');
+    expect(entries[1].valueCanonical).toBe('https://example.org/fhir/Questionnaire/v2');
   });
 
   it('omits replaces entries when array is empty', () => {
@@ -708,14 +708,14 @@ describe('buildFHIRObject — replaces extension', () => {
   });
 
   it('trims whitespace from replaces URLs', () => {
-    _questMeta.replaces = ['  http://example.org/fhir/Questionnaire/prior  '];
+    _questMeta.replaces = ['  https://example.org/fhir/Questionnaire/prior  '];
     const q = build([]);
     const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
-    expect(entries[0].valueCanonical).toBe('http://example.org/fhir/Questionnaire/prior');
+    expect(entries[0].valueCanonical).toBe('https://example.org/fhir/Questionnaire/prior');
   });
 
   it('skips blank and whitespace-only replaces entries', () => {
-    _questMeta.replaces = ['http://example.org/fhir/Questionnaire/prior', '  ', ''];
+    _questMeta.replaces = ['https://example.org/fhir/Questionnaire/prior', '  ', ''];
     const q = build([]);
     const entries = (q.extension || []).filter(e => e.url === REPLACES_URL);
     expect(entries).toHaveLength(1);
@@ -1063,11 +1063,11 @@ describe('referenceProfile export', () => {
   const RP_URL = FHIR.referenceProfile;
 
   it('exports _referenceProfiles as repeating extension', () => {
-    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference', _referenceProfiles: ['http://ex.com/P1', 'http://ex.com/P2'] }]);
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference', _referenceProfiles: ['https://ex.com/P1', 'https://ex.com/P2'] }]);
     const exts = q.item[0].extension.filter(e => e.url === RP_URL);
     expect(exts).toHaveLength(2);
-    expect(exts[0].valueCanonical).toBe('http://ex.com/P1');
-    expect(exts[1].valueCanonical).toBe('http://ex.com/P2');
+    expect(exts[0].valueCanonical).toBe('https://ex.com/P1');
+    expect(exts[1].valueCanonical).toBe('https://ex.com/P2');
   });
 
   it('does not export referenceProfile when absent', () => {

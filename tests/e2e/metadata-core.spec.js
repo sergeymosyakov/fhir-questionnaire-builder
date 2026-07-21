@@ -73,7 +73,7 @@ test.describe('metadata modal — fields populated on open', () => {
   test('url field shows the questionnaire url', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    await expect(page.getByTestId('meta-url')).toHaveValue('http://example.org/fhir/Questionnaire/meta-test');
+    await expect(page.getByTestId('meta-url')).toHaveValue('https://example.org/fhir/Questionnaire/meta-test');
   });
 
   test('version field shows the questionnaire version', async ({ page }) => {

@@ -169,7 +169,7 @@
     {
       "resourceType": "ValueSet",
       "id": "ll2655-0",
-      "url": "http://example.org/ValueSet/ll2655-0",
+      "url": "https://example.org/ValueSet/ll2655-0",
       "name": "AhrqMedicationQ2",
       "title": "AHRQ_Medication_Q2",
       "status": "active",
@@ -270,7 +270,7 @@
     {
       "resourceType": "ValueSet",
       "id": "ll2659-2",
-      "url": "http://example.org/ValueSet/ll2659-2",
+      "url": "https://example.org/ValueSet/ll2659-2",
       "name": "AhrqMedicationQ6",
       "title": "AHRQ_Medication_Q6",
       "status": "active",
@@ -359,7 +359,7 @@
     {
       "resourceType": "ValueSet",
       "id": "ll2660-0",
-      "url": "http://example.org/ValueSet/ll2660-0",
+      "url": "https://example.org/ValueSet/ll2660-0",
       "name": "AHRQMedicationQ7",
       "title": "AHRQ_Medication_Q7",
       "status": "active",

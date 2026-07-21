@@ -1,7 +1,7 @@
 {
   "resourceType": "Questionnaire",
   "id": "repeating-group-demo",
-  "url": "http://example.org/Questionnaire/repeating-group-demo",
+  "url": "https://example.org/Questionnaire/repeating-group-demo",
   "name": "RepeatingGroupDemo",
   "title": "Repeating Group Demo",
   "status": "draft",

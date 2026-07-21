@@ -150,7 +150,7 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
     await row.locator('[data-testid="action-type"]').click();
     const inp = page.locator('[data-testid="unit-valueset-url"]');
     await expect(inp).toBeVisible({ timeout: 5_000 });
-    await inp.fill('http://example.com/vs/custom-units');
+    await inp.fill('https://example.com/vs/custom-units');
     await page.locator('[data-testid="answerTypeModalApply"]').click();
 
     // Export and verify
@@ -169,7 +169,7 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
 
     const item = json.item.find(i => i.linkId === 'q-no-unit');
     const ext = item?.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet');
-    expect(ext?.valueCanonical).toBe('http://example.com/vs/custom-units');
+    expect(ext?.valueCanonical).toBe('https://example.com/vs/custom-units');
   });
 
   test('clearing unitValueSet URL removes extension on export', async ({ page }) => {

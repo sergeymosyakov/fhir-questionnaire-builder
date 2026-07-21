@@ -500,9 +500,9 @@ describe('importFHIR', () => {
   it('stores answerValueSet URL on the imported node', () => {
     importFHIR(minQ([{
       linkId: 'q1', type: 'choice', text: 'Diet',
-      answerValueSet: 'http://example.org/vs/diet',
+      answerValueSet: 'https://example.org/vs/diet',
     }]));
-    expect(_tree[0]._answerValueSet).toBe('http://example.org/vs/diet');
+    expect(_tree[0]._answerValueSet).toBe('https://example.org/vs/diet');
   });
 
   it('does not set _answerValueSet when not present in FHIR item', () => {
@@ -519,7 +519,7 @@ describe('importFHIR', () => {
       contained: [{
         resourceType: 'ValueSet',
         id: 'vs-diet',
-        compose: { include: [{ system: 'http://example.org', concept: [
+        compose: { include: [{ system: 'https://example.org', concept: [
           { code: 'veg', display: 'Vegetarian' },
           { code: 'omn', display: 'Omnivore' },
         ]}]}
@@ -546,8 +546,8 @@ describe('importFHIR', () => {
   });
 
   it('populates questMeta.url from the questionnaire', () => {
-    importFHIR({ resourceType: 'Questionnaire', url: 'http://example.org/fhir/q', item: [] });
-    expect(_questMeta.url).toBe('http://example.org/fhir/q');
+    importFHIR({ resourceType: 'Questionnaire', url: 'https://example.org/fhir/q', item: [] });
+    expect(_questMeta.url).toBe('https://example.org/fhir/q');
   });
 
   it('populates questMeta.version from the questionnaire', () => {
@@ -645,7 +645,7 @@ describe('importFHIR', () => {
   });
 
   it('resets questMeta fields to empty on re-import', () => {
-    importFHIR({ resourceType: 'Questionnaire', id: 'first', url: 'http://first.org', publisher: 'Pub', item: [] });
+    importFHIR({ resourceType: 'Questionnaire', id: 'first', url: 'https://first.org', publisher: 'Pub', item: [] });
     importFHIR({ resourceType: 'Questionnaire', item: [] });
     expect(_questMeta.id).toBe('');
     expect(_questMeta.url).toBe('');

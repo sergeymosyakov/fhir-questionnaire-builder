@@ -107,9 +107,9 @@ describe('QRAnswersManager.apply — questionnaire mismatch', () => {
   it('shows validateModal with mismatch warning', () => {
     importQRAnswers.mockReturnValue({
       ...SUCCESS,
-      questionnaire: 'http://example.com/qs/other',
+      questionnaire: 'https://example.com/qs/other',
     });
-    const questDoc = { rawFhir: { url: 'http://example.com/qs/current' } };
+    const questDoc = { rawFhir: { url: 'https://example.com/qs/current' } };
     makeManager({ questDoc }).apply({});
     expect(validateModal.show).toHaveBeenCalledTimes(1);
     const [, , { extraIssues: issues }] = validateModal.show.mock.calls[0];
@@ -121,16 +121,16 @@ describe('QRAnswersManager.apply — questionnaire mismatch', () => {
   it('does not warn when QR questionnaire matches loaded URL', () => {
     importQRAnswers.mockReturnValue({
       ...SUCCESS,
-      questionnaire: 'http://example.com/qs/same',
+      questionnaire: 'https://example.com/qs/same',
     });
-    const questDoc = { rawFhir: { url: 'http://example.com/qs/same' } };
+    const questDoc = { rawFhir: { url: 'https://example.com/qs/same' } };
     makeManager({ questDoc }).apply({});
     expect(validateModal.show).not.toHaveBeenCalled();
   });
 
   it('does not warn when QR has no questionnaire field', () => {
     importQRAnswers.mockReturnValue({ ...SUCCESS, questionnaire: '' });
-    const questDoc = { rawFhir: { url: 'http://example.com/qs/current' } };
+    const questDoc = { rawFhir: { url: 'https://example.com/qs/current' } };
     makeManager({ questDoc }).apply({});
     expect(validateModal.show).not.toHaveBeenCalled();
   });

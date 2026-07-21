@@ -10,7 +10,7 @@
       "type": "string",
       "extension": [
         {
-          "url": "http://vendor.example.com/fhir/StructureDefinition/custom-field",
+          "url": "https://vendor.example.com/fhir/StructureDefinition/custom-field",
           "valueString": "custom-value"
         },
         {
@@ -30,7 +30,7 @@
       "type": "group",
       "extension": [
         {
-          "url": "http://vendor.example.com/fhir/StructureDefinition/custom-group-field",
+          "url": "https://vendor.example.com/fhir/StructureDefinition/custom-group-field",
           "valueInteger": 42
         }
       ],

@@ -7,13 +7,13 @@
     "source": "https://example.org/systems/test-builder",
     "lastUpdated": "2024-03-15T10:00:00.000Z",
     "profile": ["http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire"],
-    "tag": [{ "system": "http://example.org/tags", "code": "reviewed", "display": "Reviewed" }],
+    "tag": [{ "system": "https://example.org/tags", "code": "reviewed", "display": "Reviewed" }],
     "security": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality", "code": "N", "display": "Normal" }]
   },
   "identifier": [
-    { "use": "official", "system": "http://example.org/questionnaire-ids", "value": "Q-2024-001" }
+    { "use": "official", "system": "https://example.org/questionnaire-ids", "value": "Q-2024-001" }
   ],
-  "url": "http://example.org/fhir/Questionnaire/meta-test",
+  "url": "https://example.org/fhir/Questionnaire/meta-test",
   "version": "2.0",
   "name": "MetaTestQuestionnaire",
   "title": "Meta Test Questionnaire",
@@ -35,8 +35,8 @@
     { "system": "http://loinc.org", "code": "44249-1", "display": "PHQ-9 total score" }
   ],
   "extension": [
-    { "url": "http://hl7.org/fhir/StructureDefinition/replaces", "valueCanonical": "http://example.org/fhir/Questionnaire/meta-test|1.0" },
-    { "url": "http://hl7.org/fhir/StructureDefinition/replaces", "valueCanonical": "http://example.org/fhir/Questionnaire/meta-test|0.9" }
+    { "url": "http://hl7.org/fhir/StructureDefinition/replaces", "valueCanonical": "https://example.org/fhir/Questionnaire/meta-test|1.0" },
+    { "url": "http://hl7.org/fhir/StructureDefinition/replaces", "valueCanonical": "https://example.org/fhir/Questionnaire/meta-test|0.9" }
   ],
   "item": [
     {

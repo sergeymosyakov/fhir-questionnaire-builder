@@ -332,7 +332,6 @@
 /* === Group table layout (questionnaire-itemControl: gtable) ================ */
 .gtable {
   border-collapse: collapse;
-  width: 100%;
   margin: 6px 14px 8px;
   font-size: 0.87rem;
   width: calc(100% - 28px);
