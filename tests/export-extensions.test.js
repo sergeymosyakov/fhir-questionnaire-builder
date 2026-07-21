@@ -233,14 +233,14 @@ describe('buildFHIRObject — resource meta', () => {
   it('writes q.meta when _metaVersionId is set', () => {
     _questMeta._metaVersionId = 'v2';
     _questMeta._metaSource = 'https://example.org';
-    _questMeta._rawMetaProfile = ['http://hl7.org/fhir/StructureDefinition/Questionnaire'];
+    _questMeta._rawMetaProfile = [FHIR.sd + '/Questionnaire'];
     _questMeta._rawMetaTag = [{ system: 'https://example.org', code: 'tag1' }];
     _questMeta._rawMetaSecurity = [{ system: 'https://example.org', code: 'sec1' }];
     const q = build([]);
     expect(q.meta).toBeDefined();
     expect(q.meta.versionId).toBe('v2');
     expect(q.meta.source).toBe('https://example.org');
-    expect(q.meta.profile).toEqual(['http://hl7.org/fhir/StructureDefinition/Questionnaire']);
+    expect(q.meta.profile).toEqual([FHIR.sd + '/Questionnaire']);
     expect(q.meta.tag).toEqual([{ system: 'https://example.org', code: 'tag1' }]);
     expect(q.meta.security).toEqual([{ system: 'https://example.org', code: 'sec1' }]);
     expect(q.meta.lastUpdated).toBeDefined();
@@ -846,7 +846,7 @@ describe('buildFHIRObject — answerExpression', () => {
 
 // ── candidateExpression export ────────────────────────────────────────────────
 describe('buildFHIRObject — candidateExpression', () => {
-  const CE_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression';
+  const CE_URL = FHIR.candidateExpression;
   const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
 
   it('exports _candidateExpression as valueExpression extension', () => {
@@ -877,7 +877,7 @@ describe('buildFHIRObject — candidateExpression', () => {
 
 // ── isSubject export ──────────────────────────────────────────────────────────
 describe('buildFHIRObject — isSubject', () => {
-  const IS_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject';
+  const IS_URL = FHIR.isSubject;
   const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
 
   it('exports _isSubject as valueBoolean extension', () => {
@@ -901,7 +901,7 @@ describe('buildFHIRObject — isSubject', () => {
 
 // ── columnCount export ────────────────────────────────────────────────────────
 describe('buildFHIRObject — columnCount', () => {
-  const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount';
+  const CC_URL = FHIR.columnCount;
   const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
 
   it('exports _columnCount as valueInteger extension', () => {

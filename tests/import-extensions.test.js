@@ -389,7 +389,7 @@ describe('importFHIR — answerExpression', () => {
 
 // ── candidateExpression import ────────────────────────────────────────────────
 describe('importFHIR — candidateExpression', () => {
-  const CE_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression';
+  const CE_URL = FHIR.candidateExpression;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
 
   beforeEach(() => { _tree.splice(0); });
@@ -423,7 +423,7 @@ describe('importFHIR — candidateExpression', () => {
 
 // ── isSubject import ──────────────────────────────────────────────────────────
 describe('importFHIR — isSubject', () => {
-  const IS_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject';
+  const IS_URL = FHIR.isSubject;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
 
   beforeEach(() => { _tree.splice(0); });
@@ -453,7 +453,7 @@ describe('importFHIR — isSubject', () => {
 
 // ── columnCount import ────────────────────────────────────────────────────────
 describe('importFHIR — columnCount', () => {
-  const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount';
+  const CC_URL = FHIR.columnCount;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
 
   beforeEach(() => { _tree.splice(0); });
@@ -746,7 +746,7 @@ describe('import baseType / fhirType', () => {
   it('reads baseType into _baseType on item', () => {
     importFHIR(minQ([{
       linkId: 'q1', type: 'string', text: 'Q',
-      definition: 'http://hl7.org/fhir/StructureDefinition/Patient#Patient.name.family',
+      definition: FHIR.sd + '/Patient#Patient.name.family',
       extension: [{ url: BASE_TYPE_URL, valueCode: 'string' }],
     }]));
     expect(_tree[0]._baseType).toBe('string');
@@ -755,7 +755,7 @@ describe('import baseType / fhirType', () => {
   it('reads fhirType into _fhirType on item', () => {
     importFHIR(minQ([{
       linkId: 'q1', type: 'group', text: 'Q',
-      definition: 'http://hl7.org/fhir/StructureDefinition/Patient#Patient.name',
+      definition: FHIR.sd + '/Patient#Patient.name',
       extension: [{ url: FHIR_TYPE_URL, valueCode: 'HumanName' }],
     }]));
     expect(_tree[0]._fhirType).toBe('HumanName');

@@ -3,6 +3,7 @@
 // since vitest runs in `node` environment.
 
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { FHIR } from '../js/fhir/urls/fhir.js';
 
 // ── Module mocks (hoisted automatically by vitest) ────────────────────────────
 
@@ -209,8 +210,8 @@ describe('exportQR — id, language and meta block', () => {
   });
 
   it('writes meta.profile when provided', () => {
-    exportQR('test.json', { metaProfile: ['http://hl7.org/fhir/StructureDefinition/qr-profile'] });
-    expect(buildQR.mock.results[0].value.meta.profile).toEqual(['http://hl7.org/fhir/StructureDefinition/qr-profile']);
+    exportQR('test.json', { metaProfile: [FHIR.sd + '/qr-profile'] });
+    expect(buildQR.mock.results[0].value.meta.profile).toEqual([FHIR.sd + '/qr-profile']);
   });
 
   it('omits meta.profile when empty array', () => {

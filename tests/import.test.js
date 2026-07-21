@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { FHIR } from '../js/fhir/urls/fhir.js';
 import { LOINC_URL } from '../js/fhir/urls/loinc.js';
 import { SNOMED_URL } from '../js/fhir/urls/snomed.js';
+import { APP_URL } from '../js/fhir/urls/app.js';
 import { UCUM_URL } from '../js/fhir/urls/ucum.js';
 
 // DOM stub — import.js dispatches REINIT_FORM after tree is built
@@ -533,9 +534,9 @@ describe('importFHIR', () => {
   it('leaves options empty for external answerValueSet URL', () => {
     importFHIR(minQ([{
       linkId: 'q1', type: 'choice', text: 'Occupation',
-      answerValueSet: 'http://hl7.org/fhir/ValueSet/occupation-snomed-ct',
+      answerValueSet: FHIR.vs + '/occupation-snomed-ct',
     }]));
-    expect(_tree[0]._answerValueSet).toBe('http://hl7.org/fhir/ValueSet/occupation-snomed-ct');
+    expect(_tree[0]._answerValueSet).toBe(FHIR.vs + '/occupation-snomed-ct');
     expect(_tree[0].options).toBe('');
   });
 
@@ -1659,10 +1660,10 @@ describe('importFHIR — implicitRules', () => {
   });
 });
 
-const TRANSLATION_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
-const UI_TRANS_URL    = 'http://fhir-qb.app/StructureDefinition/ui-translations';
-const XHTML_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/xhtml-translations';
-const MD_TRANS_URL    = 'http://fhir-qb.app/StructureDefinition/markdown-translations';
+const TRANSLATION_URL = FHIR.translation;
+const UI_TRANS_URL    = APP_URL.uiTranslations;
+const XHTML_TRANS_URL = APP_URL.xhtmlTranslations;
+const MD_TRANS_URL    = APP_URL.markdownTranslations;
 
 function makeTitleTranslation(lang, content) {
   return {

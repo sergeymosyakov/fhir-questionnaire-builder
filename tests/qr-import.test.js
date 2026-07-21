@@ -3,6 +3,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { importQRAnswers } from '../js/fhir/qr-import.js';
+import { FHIR } from '../js/fhir/urls/fhir.js';
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -529,7 +530,7 @@ describe('importQRAnswers — meta', () => {
   });
 
   it('returns meta.metaProfile as array when present', () => {
-    const profile = ['http://hl7.org/fhir/StructureDefinition/MyProfile'];
+    const profile = [FHIR.sd + '/MyProfile'];
     const qr = { resourceType: 'QuestionnaireResponse', meta: { profile }, item: [] };
     const r = importQRAnswers(qr, {}, []);
     expect(r.meta.metaProfile).toEqual(profile);

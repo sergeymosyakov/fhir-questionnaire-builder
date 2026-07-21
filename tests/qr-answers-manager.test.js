@@ -186,10 +186,10 @@ describe('QRAnswersManager.apply — multiple issues', () => {
   it('shows validateModal with two issues when both conditions apply', () => {
     importQRAnswers.mockReturnValue({
       ...SUCCESS,
-      questionnaire: 'http://other',
+      questionnaire: 'https://other',
       unmatched: ['q1'],
     });
-    const questDoc = { rawFhir: { url: 'http://current' } };
+    const questDoc = { rawFhir: { url: 'https://current' } };
     makeManager({ questDoc }).apply({});
     const [, , { extraIssues: issues }] = validateModal.show.mock.calls[0];
     expect(issues).toHaveLength(2);

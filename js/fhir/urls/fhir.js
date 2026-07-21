@@ -16,6 +16,8 @@ const SDCS = HL7 + '/uv/sdc/CodeSystem';          // SDC code systems
 export const FHIR = {
   // Base for building dynamic StructureDefinition URLs, e.g. `${FHIR.sd}/${type}`.
   sd: SD,
+  // Base for building FHIR ValueSet URIs, e.g. `${FHIR.vs}/marital-status`.
+  vs: HL7 + '/ValueSet',
 
   // ── Core FHIR (questionnaire-*) extensions ────────────────────────────────
   itemControl:          SD + '/questionnaire-itemControl',

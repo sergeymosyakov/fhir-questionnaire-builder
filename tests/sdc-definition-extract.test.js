@@ -3,10 +3,12 @@
 
 import { describe, it, expect } from 'vitest';
 import { definitionExtract } from '../js/fhir/sdc-definition-extract.js';
+import { FHIR } from '../js/fhir/urls/fhir.js';
+import { LOINC_URL } from '../js/fhir/urls/loinc.js';
 
-const EXTRACT_URL     = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtract';
-const EXTRACT_CTX_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtractContext';
-const SD_BASE         = 'http://hl7.org/fhir/StructureDefinition/';
+const EXTRACT_URL     = FHIR.definitionExtract;
+const EXTRACT_CTX_URL = FHIR.definitionExtractContext;
+const SD_BASE         = FHIR.sd + '/';
 
 function makeQ(items)  { return { resourceType: 'Questionnaire', item: items }; }
 function makeQR(items) { return { resourceType: 'QuestionnaireResponse', item: items }; }
@@ -186,7 +188,7 @@ describe('definitionExtract — answerToValue covers all value types', () => {
   });
 
   it('handles valueCoding (array field)', () => {
-    const coding = { system: 'http://loinc.org', code: '8310-5' };
+    const coding = { system: LOINC_URL.system, code: '8310-5' };
     const q  = makeQ([{ linkId:'g', type:'group', definition:`${SD_BASE}Obs#Obs`, extension:[{url:EXTRACT_URL}], item:[{linkId:'c',type:'choice',definition:`${SD_BASE}Obs#Obs.category`}] }]);
     const qr = makeQR([{ linkId:'g', item:[{linkId:'c',answer:[{valueCoding:coding}]}] }]);
     const { bundle } = definitionExtract(q, qr);

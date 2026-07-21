@@ -7,6 +7,7 @@ import {
   resolveDefinition,
   typeFromProfileUrl,
 } from '../js/fhir/definition-resolver.js';
+import { FHIR } from '../js/fhir/urls/fhir.js';
 
 const SD = {
   resourceType: 'StructureDefinition',
@@ -26,13 +27,13 @@ const SD = {
       { id: 'Patient.maritalStatus', path: 'Patient.maritalStatus',
         short: 'Marital status', min: 0, max: '1',
         type: [{ code: 'CodeableConcept' }],
-        binding: { strength: 'required', valueSet: 'http://hl7.org/fhir/ValueSet/marital-status' } },
+        binding: { strength: 'required', valueSet: FHIR.vs + '/marital-status' } },
       { id: 'Patient.telecom', path: 'Patient.telecom',
         short: 'Contact points', min: 0, max: '*',
         type: [{ code: 'ContactPoint' }] },
       { id: 'Patient.managingOrganization', path: 'Patient.managingOrganization',
         short: 'Organization that is the custodian of the patient record', min: 0, max: '1',
-        type: [{ code: 'Reference', targetProfile: ['http://hl7.org/fhir/StructureDefinition/Organization'] }] },
+        type: [{ code: 'Reference', targetProfile: [FHIR.sd + '/Organization'] }] },
       { id: 'Patient.generalPractitioner', path: 'Patient.generalPractitioner',
         short: 'Patient GP', min: 0, max: '*',
         type: [{ code: 'Reference', targetProfile: ['https://example.org/StructureDefinition/custom-gp'] }] },
@@ -42,11 +43,11 @@ const SD = {
 
 describe('parseDefinitionUrl', () => {
   it('splits canonical and element id', () => {
-    expect(parseDefinitionUrl('http://x/StructureDefinition/P#Patient.name.family'))
-      .toEqual({ canonical: 'http://x/StructureDefinition/P', elementId: 'Patient.name.family' });
+    expect(parseDefinitionUrl('https://x/StructureDefinition/P#Patient.name.family'))
+      .toEqual({ canonical: 'https://x/StructureDefinition/P', elementId: 'Patient.name.family' });
   });
   it('returns empty elementId when no fragment', () => {
-    expect(parseDefinitionUrl('http://x/P')).toEqual({ canonical: 'http://x/P', elementId: '' });
+    expect(parseDefinitionUrl('https://x/P')).toEqual({ canonical: 'https://x/P', elementId: '' });
   });
   it('returns null for empty input', () => {
     expect(parseDefinitionUrl('')).toBeNull();
@@ -77,37 +78,37 @@ describe('findElement', () => {
 
 describe('resolveDefinition', () => {
   it('resolves a required string element with maxLength', () => {
-    const r = resolveDefinition(SD, 'http://x#Patient.name.family');
+    const r = resolveDefinition(SD, 'https://x#Patient.name.family');
     expect(r).toMatchObject({
       itemType: 'text', fhirType: 'string', text: 'Family name',
       mandatory: true, repeats: false, maxLength: 60,
     });
   });
   it('resolves a boolean element from label', () => {
-    const r = resolveDefinition(SD, 'http://x#Patient.active');
+    const r = resolveDefinition(SD, 'https://x#Patient.active');
     expect(r).toMatchObject({ itemType: 'checkbox', text: 'Active flag', mandatory: false });
   });
   it('resolves a bound CodeableConcept to a choice with a value set', () => {
-    const r = resolveDefinition(SD, 'http://x#Patient.maritalStatus');
+    const r = resolveDefinition(SD, 'https://x#Patient.maritalStatus');
     expect(r.itemType).toBe('select');
-    expect(r.answerValueSet).toBe('http://hl7.org/fhir/ValueSet/marital-status');
+    expect(r.answerValueSet).toBe(FHIR.vs + '/marital-status');
   });
   it('marks max=* as repeats', () => {
-    const r = resolveDefinition(SD, 'http://x#Patient.telecom');
+    const r = resolveDefinition(SD, 'https://x#Patient.telecom');
     expect(r.repeats).toBe(true);
   });
   it('returns null when the element is missing or url has no fragment', () => {
-    expect(resolveDefinition(SD, 'http://x#Patient.nope')).toBeNull();
-    expect(resolveDefinition(SD, 'http://x')).toBeNull();
+    expect(resolveDefinition(SD, 'https://x#Patient.nope')).toBeNull();
+    expect(resolveDefinition(SD, 'https://x')).toBeNull();
   });
   it('resolves a Reference with a base FHIR targetProfile to referenceType', () => {
-    const r = resolveDefinition(SD, 'http://x#Patient.managingOrganization');
+    const r = resolveDefinition(SD, 'https://x#Patient.managingOrganization');
     expect(r.itemType).toBe('reference');
-    expect(r.referenceProfiles).toEqual(['http://hl7.org/fhir/StructureDefinition/Organization']);
+    expect(r.referenceProfiles).toEqual([FHIR.sd + '/Organization']);
     expect(r.referenceType).toBe('Organization');
   });
   it('keeps custom targetProfile but leaves referenceType undefined', () => {
-    const r = resolveDefinition(SD, 'http://x#Patient.generalPractitioner');
+    const r = resolveDefinition(SD, 'https://x#Patient.generalPractitioner');
     expect(r.referenceProfiles).toEqual(['https://example.org/StructureDefinition/custom-gp']);
     expect(r.referenceType).toBeUndefined();
   });
@@ -115,7 +116,7 @@ describe('resolveDefinition', () => {
 
 describe('typeFromProfileUrl', () => {
   it('derives a type only from base FHIR profile URLs', () => {
-    expect(typeFromProfileUrl('http://hl7.org/fhir/StructureDefinition/Organization')).toBe('Organization');
+    expect(typeFromProfileUrl(FHIR.sd + '/Organization')).toBe('Organization');
     expect(typeFromProfileUrl('https://example.org/StructureDefinition/us-core-patient')).toBeUndefined();
     expect(typeFromProfileUrl(null)).toBeUndefined();
   });

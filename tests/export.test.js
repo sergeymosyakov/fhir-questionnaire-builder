@@ -3,6 +3,7 @@
 
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { FHIR } from '../js/fhir/urls/fhir.js';
+import { APP_URL } from '../js/fhir/urls/app.js';
 
 // Minimal state mock — buildFHIRObject reads questDoc via _svc
 const _tree = [];
@@ -685,7 +686,7 @@ describe('buildFHIRObject — translations export', () => {
       de: { title: '', items: {}, opts: {}, ui: { next: 'Weiter' }, xhtml: {} },
     };
     const q = buildFHIRObject();
-    const UI_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/ui-translations';
+    const UI_TRANS_URL = APP_URL.uiTranslations;
     const uiExt = (q.extension || []).find(e => e.url === UI_TRANS_URL);
     expect(uiExt).toBeDefined();
     const langSub    = uiExt.extension.find(s => s.url === 'lang');
@@ -701,7 +702,7 @@ describe('buildFHIRObject — translations export', () => {
       de: { title: '', items: {}, opts: {}, ui: {}, xhtml: { intro: '<p>Text</p>' } },
     };
     const q = buildFHIRObject();
-    const XHTML_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/xhtml-translations';
+    const XHTML_TRANS_URL = APP_URL.xhtmlTranslations;
     const xhtmlExt = (q.extension || []).find(e => e.url === XHTML_TRANS_URL);
     expect(xhtmlExt).toBeDefined();
     const strings = JSON.parse(xhtmlExt.extension.find(s => s.url === 'strings').valueString);
@@ -715,7 +716,7 @@ describe('buildFHIRObject — translations export', () => {
       de: { title: '', items: {}, opts: {}, ui: {}, xhtml: {}, markdown: { intro: '**Wichtig**' } },
     };
     const q = buildFHIRObject();
-    const MD_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/markdown-translations';
+    const MD_TRANS_URL = APP_URL.markdownTranslations;
     const mdExt = (q.extension || []).find(e => e.url === MD_TRANS_URL);
     expect(mdExt).toBeDefined();
     const strings = JSON.parse(mdExt.extension.find(s => s.url === 'strings').valueString);
@@ -729,7 +730,7 @@ describe('buildFHIRObject — translations export', () => {
       de: { title: '', items: {}, opts: {}, ui: {}, xhtml: {}, markdown: {} },
     };
     const q = buildFHIRObject();
-    const MD_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/markdown-translations';
+    const MD_TRANS_URL = APP_URL.markdownTranslations;
     expect((q.extension || []).find(e => e.url === MD_TRANS_URL)).toBeUndefined();
     _questDoc.translations = null;
   });
@@ -767,7 +768,7 @@ describe('buildFHIRObject — translations export', () => {
       es: { title: 'Segunda', items: {}, opts: {}, ui: {}, xhtml: {} },
     };
     const q2 = buildFHIRObject();
-    const TRANSLATION_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
+    const TRANSLATION_URL = FHIR.translation;
     const transExts = (q2._title?.extension || []).filter(e => e.url === TRANSLATION_URL);
     // Should have exactly one translation ext for 'es', not duplicate
     const esExts = transExts.filter(e => e.extension?.some(x => x.valueCode === 'es'));

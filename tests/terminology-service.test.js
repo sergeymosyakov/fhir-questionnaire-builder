@@ -56,7 +56,7 @@ beforeAll(async () => {
     .mockImplementationOnce(() => Promise.resolve(makeOk({
       resourceType: 'ValueSet', expansion: { contains: [] },
     })));
-  await terminologyService.expandValueSet('http://warmup', DEFAULT_TERMINOLOGY_SERVER);
+  await terminologyService.expandValueSet('https://warmup', DEFAULT_TERMINOLOGY_SERVER);
   // Reset so tests start clean
   mockFetch.mockReset();
   mockFetch.mockImplementation(defaultImpl);
@@ -110,7 +110,7 @@ describe('terminologyService.getServer', () => {
 describe('terminologyService.expandValueSet', () => {
   it('returns mapped options on success', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
-    const result = await terminologyService.expandValueSet('http://vs', DEFAULT_TERMINOLOGY_SERVER);
+    const result = await terminologyService.expandValueSet('https://vs', DEFAULT_TERMINOLOGY_SERVER);
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({ code: 'A', display: 'Alpha', system: 'https://example.com' });
     expect(result[1]).toEqual({ code: 'B', display: 'Beta',  system: 'https://example.com' });
@@ -118,42 +118,42 @@ describe('terminologyService.expandValueSet', () => {
 
   it('returns empty array when expansion.contains is empty', async () => {
     mockFetch.mockResolvedValueOnce(makeOk({ resourceType: 'ValueSet', expansion: { contains: [] } }));
-    expect(await terminologyService.expandValueSet('http://vs', DEFAULT_TERMINOLOGY_SERVER)).toEqual([]);
+    expect(await terminologyService.expandValueSet('https://vs', DEFAULT_TERMINOLOGY_SERVER)).toEqual([]);
   });
 
   it('uses code as display fallback when display is absent', async () => {
     mockFetch.mockResolvedValueOnce(makeOk({
       resourceType: 'ValueSet',
-      expansion: { contains: [{ code: 'X', system: 'http://s.com' }] },
+      expansion: { contains: [{ code: 'X', system: 'https://s.com' }] },
     }));
-    const result = await terminologyService.expandValueSet('http://vs', DEFAULT_TERMINOLOGY_SERVER);
+    const result = await terminologyService.expandValueSet('https://vs', DEFAULT_TERMINOLOGY_SERVER);
     expect(result[0].display).toBe('X');
   });
 
   it('uses empty string for missing code', async () => {
     mockFetch.mockResolvedValueOnce(makeOk({
       resourceType: 'ValueSet',
-      expansion: { contains: [{ display: 'No code', system: 'http://s.com' }] },
+      expansion: { contains: [{ display: 'No code', system: 'https://s.com' }] },
     }));
-    const result = await terminologyService.expandValueSet('http://vs', DEFAULT_TERMINOLOGY_SERVER);
+    const result = await terminologyService.expandValueSet('https://vs', DEFAULT_TERMINOLOGY_SERVER);
     expect(result[0].code).toBe('');
   });
 
   it('throws on non-ok HTTP response', async () => {
     mockFetch.mockResolvedValueOnce(makeErr(404, 'Not Found'));
-    await expect(terminologyService.expandValueSet('http://vs', DEFAULT_TERMINOLOGY_SERVER))
+    await expect(terminologyService.expandValueSet('https://vs', DEFAULT_TERMINOLOGY_SERVER))
       .rejects.toThrow('HTTP 404 Not Found');
   });
 
   it('throws when response is not a ValueSet', async () => {
     mockFetch.mockResolvedValueOnce(makeOk({ resourceType: 'OperationOutcome' }));
-    await expect(terminologyService.expandValueSet('http://vs', DEFAULT_TERMINOLOGY_SERVER))
+    await expect(terminologyService.expandValueSet('https://vs', DEFAULT_TERMINOLOGY_SERVER))
       .rejects.toThrow('not a FHIR ValueSet');
   });
 
   it('falls back to default server when serverUrl is empty', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
-    await terminologyService.expandValueSet('http://vs', '');
+    await terminologyService.expandValueSet('https://vs', '');
     expect(mockFetch.mock.calls[0][0]).toContain('tx.fhir.org');
   });
 
@@ -169,43 +169,43 @@ describe('terminologyService.expandValueSet', () => {
 describe('terminologyService.expandWithFilter', () => {
   it('returns mapped options on success', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
-    const result = await terminologyService.expandWithFilter('http://vs', DEFAULT_TERMINOLOGY_SERVER, 'a');
+    const result = await terminologyService.expandWithFilter('https://vs', DEFAULT_TERMINOLOGY_SERVER, 'a');
     expect(result).toHaveLength(2);
   });
 
   it('includes filter param in URL when provided', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
-    await terminologyService.expandWithFilter('http://vs', DEFAULT_TERMINOLOGY_SERVER, 'alpha');
+    await terminologyService.expandWithFilter('https://vs', DEFAULT_TERMINOLOGY_SERVER, 'alpha');
     expect(mockFetch.mock.calls[0][0]).toContain('filter=alpha');
   });
 
   it('omits filter param when empty string', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
-    await terminologyService.expandWithFilter('http://vs', DEFAULT_TERMINOLOGY_SERVER, '');
+    await terminologyService.expandWithFilter('https://vs', DEFAULT_TERMINOLOGY_SERVER, '');
     expect(mockFetch.mock.calls[0][0]).not.toContain('filter=');
   });
 
   it('omits filter param when whitespace-only', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
-    await terminologyService.expandWithFilter('http://vs', DEFAULT_TERMINOLOGY_SERVER, '   ');
+    await terminologyService.expandWithFilter('https://vs', DEFAULT_TERMINOLOGY_SERVER, '   ');
     expect(mockFetch.mock.calls[0][0]).not.toContain('filter=');
   });
 
   it('respects custom count parameter', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
-    await terminologyService.expandWithFilter('http://vs', DEFAULT_TERMINOLOGY_SERVER, '', 25);
+    await terminologyService.expandWithFilter('https://vs', DEFAULT_TERMINOLOGY_SERVER, '', 25);
     expect(mockFetch.mock.calls[0][0]).toContain('_count=25');
   });
 
   it('throws on non-ok response', async () => {
     mockFetch.mockResolvedValueOnce(makeErr(400, 'Bad Request'));
-    await expect(terminologyService.expandWithFilter('http://vs', DEFAULT_TERMINOLOGY_SERVER, 'x'))
+    await expect(terminologyService.expandWithFilter('https://vs', DEFAULT_TERMINOLOGY_SERVER, 'x'))
       .rejects.toThrow('HTTP 400');
   });
 
   it('throws when response is not a ValueSet', async () => {
     mockFetch.mockResolvedValueOnce(makeOk({ resourceType: 'OperationOutcome' }));
-    await expect(terminologyService.expandWithFilter('http://vs', DEFAULT_TERMINOLOGY_SERVER))
+    await expect(terminologyService.expandWithFilter('https://vs', DEFAULT_TERMINOLOGY_SERVER))
       .rejects.toThrow('not a FHIR ValueSet');
   });
 });
@@ -292,7 +292,7 @@ describe('terminologyService.testServer', () => {
 describe('terminologyService.testExpand', () => {
   it('returns ok:true with count message on success', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
-    const result = await terminologyService.testExpand('http://vs', DEFAULT_TERMINOLOGY_SERVER);
+    const result = await terminologyService.testExpand('https://vs', DEFAULT_TERMINOLOGY_SERVER);
     expect(result.ok).toBe(true);
     expect(result.message).toMatch(/2 codes/);
     expect(result.count).toBe(2);
@@ -301,15 +301,15 @@ describe('terminologyService.testExpand', () => {
   it('uses singular "code" for count of 1', async () => {
     mockFetch.mockResolvedValueOnce(makeOk({
       resourceType: 'ValueSet',
-      expansion: { contains: [{ code: 'A', system: 'http://s.com' }] },
+      expansion: { contains: [{ code: 'A', system: 'https://s.com' }] },
     }));
-    const result = await terminologyService.testExpand('http://vs', DEFAULT_TERMINOLOGY_SERVER);
+    const result = await terminologyService.testExpand('https://vs', DEFAULT_TERMINOLOGY_SERVER);
     expect(result.message).toMatch(/^1 code$/);
   });
 
   it('returns ok:false with message on fetch failure', async () => {
     mockFetch.mockResolvedValueOnce(makeErr(404, 'Not Found'));
-    const result = await terminologyService.testExpand('http://vs', DEFAULT_TERMINOLOGY_SERVER);
+    const result = await terminologyService.testExpand('https://vs', DEFAULT_TERMINOLOGY_SERVER);
     expect(result.ok).toBe(false);
     expect(result.message).toContain('404');
   });
@@ -341,7 +341,7 @@ describe('terminologyService.expandAll', () => {
 
   it('expands and caches results on matching node', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
-    const node = { id: 'q1', _answerValueSet: 'http://vs', children: [] };
+    const node = { id: 'q1', _answerValueSet: 'https://vs', children: [] };
     const failures = await terminologyService.expandAll([node], {});
     expect(failures).toEqual([]);
     expect(node._vsCache).toHaveLength(2);
@@ -350,10 +350,10 @@ describe('terminologyService.expandAll', () => {
 
   it('records failure and caches empty array on HTTP error', async () => {
     mockFetch.mockResolvedValueOnce(makeErr(404, 'Not Found'));
-    const node = { id: 'q1', _answerValueSet: 'http://vs', children: [] };
+    const node = { id: 'q1', _answerValueSet: 'https://vs', children: [] };
     const failures = await terminologyService.expandAll([node], {});
     expect(failures).toHaveLength(1);
-    expect(failures[0].vsUrl).toBe('http://vs');
+    expect(failures[0].vsUrl).toBe('https://vs');
     expect(failures[0].node).toBe(node);
     expect(node._vsCache).toEqual([]);
   });
@@ -364,7 +364,7 @@ describe('terminologyService.expandAll', () => {
       .mockRejectedValueOnce(new TypeError('Failed to fetch'))
       .mockRejectedValueOnce(new TypeError('Failed to fetch'))
       .mockRejectedValueOnce(new TypeError('Failed to fetch'));
-    const node = { id: 'q1', _answerValueSet: 'http://vs', children: [] };
+    const node = { id: 'q1', _answerValueSet: 'https://vs', children: [] };
     const promise = terminologyService.expandAll([node], {});
     await vi.runAllTimersAsync();
     const failures = await promise;
@@ -379,14 +379,14 @@ describe('terminologyService.expandAll', () => {
   });
 
   it('skips lookup-type nodes (they do on-demand search)', async () => {
-    const node = { id: 'q1', _answerValueSet: 'http://vs', _itemControl: 'lookup', children: [] };
+    const node = { id: 'q1', _answerValueSet: 'https://vs', _itemControl: 'lookup', children: [] };
     await terminologyService.expandAll([node], {});
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('recursively expands nodes in nested children', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
-    const child = { id: 'q2', _answerValueSet: 'http://vs', children: [] };
+    const child = { id: 'q2', _answerValueSet: 'https://vs', children: [] };
     const parent = { id: 'g1', children: [child] };
     await terminologyService.expandAll([parent], {});
     expect(child._vsCache).toHaveLength(2);
@@ -397,20 +397,20 @@ describe('terminologyService.expandAll', () => {
       .mockResolvedValueOnce(makeErr(404, 'Not Found'))
       .mockResolvedValueOnce(makeErr(404, 'Not Found'));
     const nodes = [
-      { id: 'q1', _answerValueSet: 'http://vs1', children: [] },
-      { id: 'q2', _answerValueSet: 'http://vs2', children: [] },
+      { id: 'q1', _answerValueSet: 'https://vs1', children: [] },
+      { id: 'q2', _answerValueSet: 'https://vs2', children: [] },
     ];
     const failures = await terminologyService.expandAll(nodes, {});
     expect(failures).toHaveLength(2);
-    expect(failures[0].vsUrl).toBe('http://vs1');
-    expect(failures[1].vsUrl).toBe('http://vs2');
+    expect(failures[0].vsUrl).toBe('https://vs1');
+    expect(failures[1].vsUrl).toBe('https://vs2');
   });
 
   it('uses node._preferredTermServer via getServer', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
     const node = {
       id: 'q1',
-      _answerValueSet: 'http://vs',
+      _answerValueSet: 'https://vs',
       _preferredTermServer: 'https://custom-server.example.com',
       children: [],
     };
@@ -426,7 +426,7 @@ describe('_fetchWithRetry (via expandValueSet)', () => {
     mockFetch
       .mockResolvedValueOnce(makeRetryable(503))
       .mockResolvedValueOnce(makeOk(VS_BODY));
-    const promise = terminologyService.expandValueSet('http://vs', DEFAULT_TERMINOLOGY_SERVER);
+    const promise = terminologyService.expandValueSet('https://vs', DEFAULT_TERMINOLOGY_SERVER);
     await vi.runAllTimersAsync();
     const result = await promise;
     expect(result).toHaveLength(2);
@@ -439,7 +439,7 @@ describe('_fetchWithRetry (via expandValueSet)', () => {
     mockFetch
       .mockResolvedValueOnce(makeRetryable(429))
       .mockResolvedValueOnce(makeOk(VS_BODY));
-    const promise = terminologyService.expandValueSet('http://vs', DEFAULT_TERMINOLOGY_SERVER);
+    const promise = terminologyService.expandValueSet('https://vs', DEFAULT_TERMINOLOGY_SERVER);
     await vi.runAllTimersAsync();
     await promise;
     expect(mockFetch).toHaveBeenCalledTimes(2);
@@ -452,7 +452,7 @@ describe('_fetchWithRetry (via expandValueSet)', () => {
       .mockResolvedValueOnce(makeRetryable(503))
       .mockResolvedValueOnce(makeRetryable(503))
       .mockResolvedValueOnce(makeRetryable(503));
-    const promise = terminologyService.expandValueSet('http://vs', DEFAULT_TERMINOLOGY_SERVER);
+    const promise = terminologyService.expandValueSet('https://vs', DEFAULT_TERMINOLOGY_SERVER);
     // Attach rejection handler BEFORE running timers to prevent unhandled-rejection warning
     const check = expect(promise).rejects.toThrow('HTTP 503');
     await vi.runAllTimersAsync();
@@ -465,7 +465,7 @@ describe('_fetchWithRetry (via expandValueSet)', () => {
     mockFetch
       .mockRejectedValueOnce(new TypeError('Network error'))
       .mockResolvedValueOnce(makeOk(VS_BODY));
-    const promise = terminologyService.expandValueSet('http://vs', DEFAULT_TERMINOLOGY_SERVER);
+    const promise = terminologyService.expandValueSet('https://vs', DEFAULT_TERMINOLOGY_SERVER);
     await vi.runAllTimersAsync();
     const result = await promise;
     expect(result).toHaveLength(2);

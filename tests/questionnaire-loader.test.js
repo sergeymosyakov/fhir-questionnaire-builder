@@ -182,7 +182,7 @@ describe('QuestionnaireLoader.load — validation issues', () => {
 describe('QuestionnaireLoader.load — VS expansion failures', () => {
   it('calls validateModal.show with expansion failures', async () => {
     terminologyService.expandAll.mockResolvedValueOnce([
-      { node: { id: 'q1' }, vsUrl: 'http://vs', server: 'https://tx.fhir.org/r4', error: 'timeout' },
+      { node: { id: 'q1' }, vsUrl: 'https://vs', server: 'https://tx.fhir.org/r4', error: 'timeout' },
     ]);
     const data = { resourceType: 'Questionnaire', item: [] };
     await makeLoader().load(data, 'test.json');
