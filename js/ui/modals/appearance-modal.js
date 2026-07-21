@@ -60,4 +60,4 @@ class AppearanceModal extends Modal {
     this.close();
   }
 }
-new AppearanceModal();
+export const appearanceModal = typeof document !== 'undefined' ? new AppearanceModal() : null;

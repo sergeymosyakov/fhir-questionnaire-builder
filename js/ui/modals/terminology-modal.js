@@ -146,4 +146,4 @@ class TerminologyModal extends Modal {
     this.body.appendChild(extRow);
   }
 }
-new TerminologyModal();
+export const terminologyModal = typeof document !== 'undefined' ? new TerminologyModal() : null;

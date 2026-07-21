@@ -62,4 +62,4 @@ class StatesModal extends Modal {
     this.close();
   }
 }
-new StatesModal();
+export const statesModal = typeof document !== 'undefined' ? new StatesModal() : null;

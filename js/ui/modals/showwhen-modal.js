@@ -121,4 +121,4 @@ class ShowWhenModal extends ExprAwareModal {
     this.close();
   }
 }
-new ShowWhenModal();
+export const showWhenModal = typeof document !== 'undefined' ? new ShowWhenModal() : null;

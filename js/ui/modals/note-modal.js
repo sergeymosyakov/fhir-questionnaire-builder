@@ -77,4 +77,4 @@ class NoteModal extends Modal {
     this.body.appendChild(ta);
   }
 }
-new NoteModal();
+export const noteModal = typeof document !== 'undefined' ? new NoteModal() : null;

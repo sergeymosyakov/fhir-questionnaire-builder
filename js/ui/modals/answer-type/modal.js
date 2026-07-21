@@ -89,4 +89,4 @@ class AnswerTypeModal extends Modal {
     });
   }
 }
-new AnswerTypeModal();
+export const answerTypeModal = typeof document !== 'undefined' ? new AnswerTypeModal() : null;

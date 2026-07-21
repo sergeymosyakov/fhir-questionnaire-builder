@@ -67,4 +67,4 @@ class RepeatableModal extends Modal {
     this.close();
   }
 }
-new RepeatableModal();
+export const repeatableModal = typeof document !== 'undefined' ? new RepeatableModal() : null;

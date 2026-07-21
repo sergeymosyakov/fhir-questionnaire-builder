@@ -181,4 +181,4 @@ function _lbl(text, input, tip = null) {
   return row;
 }
 
-new ConstraintModal();
+export const constraintModal = typeof document !== 'undefined' ? new ConstraintModal() : null;

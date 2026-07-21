@@ -84,4 +84,4 @@ class PasteWarningModal extends Modal {
     this.body.appendChild(table);
   }
 }
-new PasteWarningModal();
+export const pasteWarningModal = typeof document !== 'undefined' ? new PasteWarningModal() : null;

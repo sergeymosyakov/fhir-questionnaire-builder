@@ -98,4 +98,4 @@ class ExpressionModal extends ExprAwareModal {
     this.close();
   }
 }
-new ExpressionModal();
+export const expressionModal = typeof document !== 'undefined' ? new ExpressionModal() : null;

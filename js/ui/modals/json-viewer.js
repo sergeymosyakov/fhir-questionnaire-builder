@@ -25,4 +25,4 @@ class JsonViewerModal extends Modal {
 
   _cancel() { this.close(); }
 }
-new JsonViewerModal();
+export const jsonViewerModal = typeof document !== 'undefined' ? new JsonViewerModal() : null;

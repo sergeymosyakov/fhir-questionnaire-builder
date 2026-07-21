@@ -61,4 +61,4 @@ class InitialModal extends Modal {
     this.close();
   }
 }
-new InitialModal();
+export const initialModal = typeof document !== 'undefined' ? new InitialModal() : null;

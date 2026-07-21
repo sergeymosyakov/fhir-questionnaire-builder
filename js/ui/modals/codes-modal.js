@@ -67,7 +67,7 @@ class CodesModal extends Modal {
     this.close();
   }
 }
-new CodesModal();
+export const codesModal = typeof document !== 'undefined' ? new CodesModal() : null;
 
 // Re-export shared utility used by metadata-sections/codes.js and resource-meta.js
 export { renderCodesEditor } from './item-sections/codes.js';
