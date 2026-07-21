@@ -1,3 +1,4 @@
+import { FHIR } from './urls/fhir.js';
 // ── SDC Observation-based extraction ─────────────────────────────────────────
 // Pure FHIR transformation: completed QuestionnaireResponse + source Questionnaire
 // → a `transaction` Bundle of Observation resources.
@@ -24,8 +25,8 @@
 //   • Skipped/cleared answers and items without a code produce nothing.
 
 const OBSERVATION_EXTRACT_URL =
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract';
-const UNIT_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit';
+  FHIR.observationExtract;
+const UNIT_URL = FHIR.unit;
 
 /**
  * Resolve the effective observationExtract flag declared directly on a node.

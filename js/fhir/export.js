@@ -7,6 +7,10 @@ import './formats/redcap.js';
 
 import { AppEvents } from '../events.js';
 import { downloadJSON } from './download.js';
+import { FHIR } from './urls/fhir.js';
+import { APP_URL } from './urls/app.js';
+import { UCUM_URL } from './urls/ucum.js';
+import { W3C_URL } from './urls/w3c.js';
 
 let _svc = {};
 /** @param {{ questDoc: import('./quest-document.js').QuestDocument }} svc */
@@ -41,7 +45,7 @@ export function generateNarrativeDiv(q) {
   collectItems(q.item, 0);
 
   const parts = [
-    '<div xmlns="http://www.w3.org/1999/xhtml">',
+    '<div xmlns="' + W3C_URL.xhtml + '">',
     `<h2>${_esc(q.title || q.id || 'Questionnaire')}</h2>`,
     `<table><tbody>${meta.join('')}</tbody></table>`,
   ];
@@ -76,7 +80,7 @@ function buildConstraintExtensions(constraint) {
   return constraint
     .filter(c => c.expression)
     .map(c => ({
-      url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint',
+      url: FHIR.constraint,
       extension: [
         ...(c.key        ? [{ url: 'key',        valueId:     c.key }]      : []),
         ...(c.severity   ? [{ url: 'severity',   valueCode:   c.severity }] : []),
@@ -97,11 +101,11 @@ export function nodeToFHIRItem(node) {
   if (node._definition) fhirItem.definition = node._definition;
   if (node._baseType) {
     fhirItem.extension = fhirItem.extension || [];
-    fhirItem.extension.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType', valueCode: node._baseType });
+    fhirItem.extension.push({ url: FHIR.baseType, valueCode: node._baseType });
   }
   if (node._fhirType) {
     fhirItem.extension = fhirItem.extension || [];
-    fhirItem.extension.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType', valueString: node._fhirType });
+    fhirItem.extension.push({ url: FHIR.fhirType, valueString: node._fhirType });
   }
   // que-3: display items cannot have code[] (R4 invariant)
   if (node._codes && node._codes.length && node.itemType !== 'display') fhirItem.code = node._codes;
@@ -156,7 +160,7 @@ export function nodeToFHIRItem(node) {
   // enableWhenExpression (SDC FHIRPath condition)
   if (node.enableWhenExpression) {
     ext.push({
-      url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression',
+      url: FHIR.enableWhenExpression,
       valueExpression: { language: 'text/fhirpath', expression: node.enableWhenExpression }
     });
   }
@@ -170,7 +174,7 @@ export function nodeToFHIRItem(node) {
       .map(c => `%resource.item.where(linkId='${c.id.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}').answer.exists()`)
       .join(' or ');
     ext.push({
-      url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint',
+      url: FHIR.constraint,
       extension: [
         { url: 'key',        valueId:     ITLH_KEY_GROUP_OR },
         { url: 'severity',   valueCode:   'error' },
@@ -182,25 +186,25 @@ export function nodeToFHIRItem(node) {
 
   // reference resource type
   if (node.itemType === 'reference' && node.referenceResource)
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource', valueCode: node.referenceResource });
+    ext.push({ url: FHIR.referenceResource, valueCode: node.referenceResource });
   // questionnaire-referenceFilter
   if (node.itemType === 'reference' && node._referenceFilter)
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter', valueString: node._referenceFilter });
+    ext.push({ url: FHIR.referenceFilter, valueString: node._referenceFilter });
   // questionnaire-referenceProfile (0..*)
   if (node.itemType === 'reference' && node._referenceProfiles?.length) {
     for (const url of node._referenceProfiles) {
-      ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile', valueCanonical: url });
+      ext.push({ url: FHIR.referenceProfile, valueCanonical: url });
     }
   }
   // questionnaire-unit — only valid on integer and decimal (R4 invariant: type='integer' or type='decimal')
   if ((node.itemType === 'integer' || node.itemType === 'decimal') && node.quantityUnit)
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit', valueCoding: { system: 'http://unitsofmeasure.org', code: node.quantityUnit } });
+    ext.push({ url: FHIR.unit, valueCoding: { system: UCUM_URL.system, code: node.quantityUnit } });
   // For quantity type: a single quantityUnit is exported as questionnaire-unitOption (R4 requires unitOption/unitValueSet for quantity)
   if (node.itemType === 'quantity' && node.quantityUnit && !node._unitOptions?.length)
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption', valueCoding: { system: 'http://unitsofmeasure.org', code: node.quantityUnit } });
+    ext.push({ url: FHIR.unitOption, valueCoding: { system: UCUM_URL.system, code: node.quantityUnit } });
   // questionnaire-unitValueSet
   if (node.itemType === 'quantity' && node._unitValueSet)
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet', valueCanonical: node._unitValueSet });
+    ext.push({ url: FHIR.unitValueSet, valueCanonical: node._unitValueSet });
   // questionnaire-unitOption (0..* selectable units)
   if (node.itemType === 'quantity' && node._unitOptions && node._unitOptions.length) {
     for (const u of node._unitOptions) {
@@ -208,15 +212,15 @@ export function nodeToFHIRItem(node) {
       if (u.system)  coding.system  = u.system;
       if (u.code)    coding.code    = u.code;
       if (u.display) coding.display = u.display;
-      ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption', valueCoding: coding });
+      ext.push({ url: FHIR.unitOption, valueCoding: coding });
     }
   }
   // calculatedExpression
   if (node._calculatedExpr)
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression', valueExpression: { language: 'text/fhirpath', expression: node._calculatedExpr } });
+    ext.push({ url: FHIR.calculatedExpression, valueExpression: { language: 'text/fhirpath', expression: node._calculatedExpr } });
   // initialExpression
   if (node._initialExpr)
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression', valueExpression: { language: 'text/fhirpath', expression: node._initialExpr } });
+    ext.push({ url: FHIR.initialExpression, valueExpression: { language: 'text/fhirpath', expression: node._initialExpr } });
   // answer-source expressions (SDC) — dynamic answer options (answerExpression / candidateExpression)
   for (const { url, prop } of ANSWER_SOURCE_EXPR_EXTS) {
     if (node[prop])
@@ -224,17 +228,17 @@ export function nodeToFHIRItem(node) {
   }
   // questionnaire-itemControl
   if (node.itemType === 'radio')
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'radio-button' }] } });
+    ext.push({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'radio-button' }] } });
   else if (node.itemType === 'checklist')
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'check-box' }] } });
+    ext.push({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'check-box' }] } });
   else if (node._itemControl)
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: node._itemControl }] } });
+    ext.push({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: node._itemControl }] } });
 
   // _renderStyle / _renderXhtml / _renderMarkdown → _text.extension[]
   const _textExts = [];
-  if (node._renderStyle)    _textExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/rendering-style',    valueString:   node._renderStyle });
-  if (node._renderXhtml)    _textExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/rendering-xhtml',    valueString:   node._renderXhtml });
-  if (node._renderMarkdown) _textExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/rendering-markdown', valueMarkdown: node._renderMarkdown });
+  if (node._renderStyle)    _textExts.push({ url: FHIR.renderingStyle,    valueString:   node._renderStyle });
+  if (node._renderXhtml)    _textExts.push({ url: FHIR.renderingXhtml,    valueString:   node._renderXhtml });
+  if (node._renderMarkdown) _textExts.push({ url: FHIR.renderingMarkdown, valueMarkdown: node._renderMarkdown });
   if (_textExts.length) fhirItem._text = { extension: _textExts };
 
   if (node.type === 'group') {
@@ -253,27 +257,27 @@ export function nodeToFHIRItem(node) {
           : '';
         const optOut = { ...opt };
         const MANAGED_OPT_EXTS = new Set([
-          'http://hl7.org/fhir/StructureDefinition/ordinalValue',
-          'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix',
-          'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive',
-          'http://hl7.org/fhir/StructureDefinition/itemWeight',
-          'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia',
+          FHIR.ordinalValue,
+          FHIR.optionPrefix,
+          FHIR.optionExclusive,
+          FHIR.itemWeight,
+          FHIR.answerMedia,
         ]);
         const optExts = (opt.extension || []).filter(e => !MANAGED_OPT_EXTS.has(e.url));
         if (node._optionOrdinals?.[key] !== undefined) {
-          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/ordinalValue', valueDecimal: node._optionOrdinals[key] });
+          optExts.push({ url: FHIR.ordinalValue, valueDecimal: node._optionOrdinals[key] });
         }
         if (node._optionPrefixes?.[key]) {
-          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix', valueString: node._optionPrefixes[key] });
+          optExts.push({ url: FHIR.optionPrefix, valueString: node._optionPrefixes[key] });
         }
         if (node._optionExclusives?.[key]) {
-          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive', valueBoolean: true });
+          optExts.push({ url: FHIR.optionExclusive, valueBoolean: true });
         }
         if (node._optionWeights?.[key] !== undefined) {
-          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/itemWeight', valueDecimal: node._optionWeights[key] });
+          optExts.push({ url: FHIR.itemWeight, valueDecimal: node._optionWeights[key] });
         }
         if (node._answerMedias?.[key]) {
-          optExts.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia', valueAttachment: node._answerMedias[key] });
+          optExts.push({ url: FHIR.answerMedia, valueAttachment: node._answerMedias[key] });
         }
         if (optExts.length) optOut.extension = optExts;
         if (node._initialSelected === key) optOut.initialSelected = true;
@@ -286,19 +290,19 @@ export function nodeToFHIRItem(node) {
         const answerOpt = { valueCoding: coding };
         const optExts = [];
         if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
-          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/ordinalValue', valueDecimal: node._optionOrdinals[code] });
+          optExts.push({ url: FHIR.ordinalValue, valueDecimal: node._optionOrdinals[code] });
         }
         if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
-          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix', valueString: node._optionPrefixes[code] });
+          optExts.push({ url: FHIR.optionPrefix, valueString: node._optionPrefixes[code] });
         }
         if (node._optionExclusives && node._optionExclusives[code]) {
-          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive', valueBoolean: true });
+          optExts.push({ url: FHIR.optionExclusive, valueBoolean: true });
         }
         if (node._optionWeights && node._optionWeights[code] !== undefined) {
-          optExts.push({ url: 'http://hl7.org/fhir/StructureDefinition/itemWeight', valueDecimal: node._optionWeights[code] });
+          optExts.push({ url: FHIR.itemWeight, valueDecimal: node._optionWeights[code] });
         }
         if (node._answerMedias && node._answerMedias[code]) {
-          optExts.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia', valueAttachment: node._answerMedias[code] });
+          optExts.push({ url: FHIR.answerMedia, valueAttachment: node._answerMedias[code] });
         }
         if (optExts.length) answerOpt.extension = optExts;
         if (node._initialSelected === code) answerOpt.initialSelected = true;
@@ -321,39 +325,39 @@ export function nodeToFHIRItem(node) {
 
   // minLength (SDC extension)
   if (node._minLength !== undefined && node._minLength !== null) {
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/minLength', valueInteger: node._minLength });
+    ext.push({ url: FHIR.minLength, valueInteger: node._minLength });
   }
 
   // regex validation pattern
   if (node._regex) {
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/regex', valueString: node._regex });
+    ext.push({ url: FHIR.regex, valueString: node._regex });
   }
 
   // maxSize (attachment items only — maximum file size in MB)
   if (node._maxFileSizeMB !== undefined && node._maxFileSizeMB !== null) {
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/maxSize', valueDecimal: node._maxFileSizeMB });
+    ext.push({ url: FHIR.maxSize, valueDecimal: node._maxFileSizeMB });
   }
 
   // mimeType (attachment items only — 0..* allowed MIME types)
   if (node._mimeTypes && node._mimeTypes.length) {
     for (const mime of node._mimeTypes) {
-      if (mime) ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/mimeType', valueCode: mime });
+      if (mime) ext.push({ url: FHIR.mimeType, valueCode: mime });
     }
   }
 
   // sdc-questionnaire-entryFormat
   if (node._entryFormat) {
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat', valueString: node._entryFormat });
+    ext.push({ url: FHIR.entryFormatSdc, valueString: node._entryFormat });
   }
 
   // questionnaire-choiceOrientation
   if (node._choiceOrientation) {
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation', valueCode: node._choiceOrientation });
+    ext.push({ url: FHIR.choiceOrientation, valueCode: node._choiceOrientation });
   }
 
   // sdc-questionnaire-columnCount (multi-column layout of a choice question's options)
   if (Number.isInteger(node._columnCount) && node._columnCount > 1) {
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount', valueInteger: node._columnCount });
+    ext.push({ url: FHIR.columnCount, valueInteger: node._columnCount });
   }
 
   // sdc-questionnaire-choiceColumn (0..* multi-column choice display)
@@ -364,67 +368,67 @@ export function nodeToFHIRItem(node) {
       if (col.label) sub.push({ url: 'label', valueString: col.label });
       if (col.width) sub.push({ url: 'width', valueQuantity: col.width });
       if (col.forDisplay !== undefined) sub.push({ url: 'forDisplay', valueBoolean: col.forDisplay });
-      ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn', extension: sub });
+      ext.push({ url: FHIR.choiceColumn, extension: sub });
     }
   }
 
   // questionnaire-supportLink (0..* URI)
   if (node._supportLinks && node._supportLinks.length) {
     for (const uri of node._supportLinks) {
-      if (uri) ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink', valueUri: uri });
+      if (uri) ext.push({ url: FHIR.supportLink, valueUri: uri });
     }
   }
 
   // sdc-questionnaire-hidden
   if (node._hidden) {
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden', valueBoolean: true });
+    ext.push({ url: FHIR.hiddenSdc, valueBoolean: true });
   }
 
   // sdc-questionnaire-isSubject (item whose answer identifies the QR subject)
   if (node._isSubject && node.type === 'item' && node.itemType !== 'display') {
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject', valueBoolean: true });
+    ext.push({ url: FHIR.isSubject, valueBoolean: true });
   }
 
   // sdc-questionnaire-observationExtract — mark item/group for Observation-based extraction
   if (node._observationExtract != null && node.itemType !== 'display') {
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract', valueBoolean: node._observationExtract !== false });
+    ext.push({ url: FHIR.observationExtract, valueBoolean: node._observationExtract !== false });
   }
 
   // sdc-questionnaire-collapsible (groups only)
   if (node.type === 'group' && node._collapsible) {
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible', valueCode: node._collapsible });
+    ext.push({ url: FHIR.collapsible, valueCode: node._collapsible });
   }
 
   // sdc-questionnaire-openLabel (open-choice items only)
   if (node.itemType === 'open-choice' && node._openLabel) {
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel', valueString: node._openLabel });
+    ext.push({ url: FHIR.openLabel, valueString: node._openLabel });
   }
 
   // sdc-questionnaire-preferredTerminologyServer — per-item terminology server override
   if (node._preferredTermServer) {
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer', valueUrl: node._preferredTermServer });
+    ext.push({ url: FHIR.preferredTerminologyServer, valueUrl: node._preferredTermServer });
   }
 
   // sdc-questionnaire-shortText — abbreviated label for summary views
   if (node._shortText) {
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText', valueString: node._shortText });
+    ext.push({ url: FHIR.shortText, valueString: node._shortText });
   }
 
   // designNote — author-facing internal note (not shown to end users)
   if (node._designNote) {
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/designNote', valueMarkdown: node._designNote });
+    ext.push({ url: FHIR.designNote, valueMarkdown: node._designNote });
   }
 
   // questionnaire-usageMode
   if (node._usageMode) {
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode', valueCode: node._usageMode });
+    ext.push({ url: FHIR.usageMode, valueCode: node._usageMode });
   }
 
   // questionnaire-signatureRequired (0..* valueCodeableConcept)
   if (node._signatureRequired?.length) {
     for (const sig of node._signatureRequired) {
       ext.push({
-        url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired',
+        url: FHIR.signatureRequired,
         valueCodeableConcept: { coding: [{ system: sig.system, code: sig.code, display: sig.display }] },
       });
     }
@@ -432,25 +436,25 @@ export function nodeToFHIRItem(node) {
 
   // sdc-questionnaire-itemMedia
   if (node._itemMedia) {
-    ext.push({ url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia', valueAttachment: node._itemMedia });
+    ext.push({ url: FHIR.itemMedia, valueAttachment: node._itemMedia });
   }
 
   // questionnaire-displayCategory — R4: only valid on group items; suppressed on display items
   if (node._displayCategory && node.itemType !== 'display') {
     ext.push({
-      url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory',
-      valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-display-category', code: node._displayCategory }] },
+      url: FHIR.displayCategory,
+      valueCodeableConcept: { coding: [{ system: FHIR.displayCategoryCS, code: node._displayCategory }] },
     });
   }
 
   // questionnaire-minValue / questionnaire-maxValue
   if (node._minValue !== undefined) {
     const isInt = Number.isInteger(node._minValue);
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/minValue', [isInt ? 'valueInteger' : 'valueDecimal']: node._minValue });
+    ext.push({ url: FHIR.minValue, [isInt ? 'valueInteger' : 'valueDecimal']: node._minValue });
   }
   if (node._maxValue !== undefined) {
     const isInt = Number.isInteger(node._maxValue);
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/maxValue', [isInt ? 'valueInteger' : 'valueDecimal']: node._maxValue });
+    ext.push({ url: FHIR.maxValue, [isInt ? 'valueInteger' : 'valueDecimal']: node._maxValue });
   }
   // que-5: answerValueSet only valid for choice/open-choice/decimal/integer/date/dateTime/time/string/quantity
   const _answerVsAllowed = new Set(['select','radio','checklist','open-choice','decimal','integer','number','text','date','dateTime','time','quantity']);
@@ -466,18 +470,18 @@ export function nodeToFHIRItem(node) {
   // minOccurs: only valid when item is required=true (R4 context invariant: que-minoccurs-1)
   if (node.repeats && node._minOccurs !== undefined && node.itemType !== 'display'
       && node.required)
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs', valueInteger: node._minOccurs });
+    ext.push({ url: FHIR.minOccurs, valueInteger: node._minOccurs });
   if (node.repeats && node._maxOccurs !== undefined)
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs', valueInteger: node._maxOccurs });
+    ext.push({ url: FHIR.maxOccurs, valueInteger: node._maxOccurs });
   // maxDecimalPlaces
   if (node._maxDecimalPlaces !== undefined) {
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces', valueInteger: node._maxDecimalPlaces });
+    ext.push({ url: FHIR.maxDecimalPlaces, valueInteger: node._maxDecimalPlaces });
   }
   // questionnaire-sliderStepValue — R4 only allows valueInteger; decimal step rounded
   if (node._sliderStep !== undefined) {
     const isInt = Number.isInteger(node._sliderStep);
     const stepVal = isInt ? node._sliderStep : Math.round(node._sliderStep);
-    ext.push({ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue', valueInteger: stepVal });
+    ext.push({ url: FHIR.sliderStepValue, valueInteger: stepVal });
   }
   // Pass-through: unknown extensions collected on import or added via Props modal
   if (node._unknownExtensions && node._unknownExtensions.length) {
@@ -491,7 +495,7 @@ export function nodeToFHIRItem(node) {
 export function buildFHIRObject() {
   const { questDoc } = _svc;
   const { tree, meta: questMeta, rawFhir, variables: questVariables, contained: questContained, translations } = questDoc;
-  const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
+  const SDC_VAR_URL = FHIR.variable;
   const q = {
     resourceType: 'Questionnaire',
     id:     questMeta.id     || 'logic-builder-export',
@@ -534,7 +538,7 @@ export function buildFHIRObject() {
     q.effectivePeriod = ep;
   }
   const vars = questVariables.filter(v => v.name && v.expression);
-  const REPLACES_EXT_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
+  const REPLACES_EXT_URL = FHIR.replaces;
   const questExt = [
     ...vars.map(v => ({
       url: SDC_VAR_URL,
@@ -545,17 +549,17 @@ export function buildFHIRObject() {
       valueCanonical: u.trim()
     })),
     ...(questMeta.preferredTermServer?.trim() ? [{
-      url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer',
+      url: FHIR.preferredTerminologyServer,
       valueUrl: questMeta.preferredTermServer.trim()
     }] : []),
     ...(questMeta._signatureRequired || []).map(sig => ({
-      url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired',
+      url: FHIR.signatureRequired,
       valueCodeableConcept: { coding: [{ system: sig.system, code: sig.code, display: sig.display }] },
     })),
     ...(questMeta.launchContexts || []).filter(lc => lc.name.trim()).map(lc => ({
-      url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext',
+      url: FHIR.launchContext,
       extension: [
-        { url: 'name', valueCoding: { system: 'http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext', code: lc.name.trim() } },
+        { url: 'name', valueCoding: { system: FHIR.launchContextCS, code: lc.name.trim() } },
         ...(lc.type.trim() ? [{ url: 'type', valueCode: lc.type.trim() }] : []),
         ...(lc.description.trim() ? [{ url: 'description', valueString: lc.description.trim() }] : []),
       ],
@@ -602,7 +606,7 @@ export function exportFHIR(fileName) {
 }
 
 // ── Translation export ────────────────────────────────────────────────────────
-const TRANSLATION_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
+const TRANSLATION_URL = FHIR.translation;
 
 /**
  * Write questDoc.translations into the FHIR JSON as standard translation
@@ -657,7 +661,7 @@ function _exportTranslations(q, translations) {
   walkItems(q.item);
 
   // Write ui-translations custom extension for each language that has ui strings
-  const UI_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/ui-translations';
+  const UI_TRANS_URL = APP_URL.uiTranslations;
   // Remove stale ui-translation extensions first
   q.extension = (q.extension || []).filter(e => e.url !== UI_TRANS_URL);
   for (const lang of langs) {
@@ -674,7 +678,7 @@ function _exportTranslations(q, translations) {
   if (!q.extension.length) delete q.extension;
 
   // Write xhtml-translations custom extension for each language that has XHTML translations
-  const XHTML_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/xhtml-translations';
+  const XHTML_TRANS_URL = APP_URL.xhtmlTranslations;
   q.extension = (q.extension || []).filter(e => e.url !== XHTML_TRANS_URL);
   for (const lang of langs) {
     const xhtml = translations[lang].xhtml;
@@ -689,7 +693,7 @@ function _exportTranslations(q, translations) {
   }
 
   // Write markdown-translations custom extension for each language that has Markdown translations
-  const MD_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/markdown-translations';
+  const MD_TRANS_URL = APP_URL.markdownTranslations;
   q.extension = (q.extension || []).filter(e => e.url !== MD_TRANS_URL);
   for (const lang of langs) {
     const markdown = translations[lang].markdown;

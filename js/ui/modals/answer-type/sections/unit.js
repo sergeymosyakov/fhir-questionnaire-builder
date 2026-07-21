@@ -2,6 +2,8 @@ import { AnswerTypeSection } from '../base-section.js';
 import { ANSWER_TYPE_SECTIONS } from '../registry.js';
 import { createCustomSelect } from '../../../custom-select.js';
 import { BUILDER_UNITS } from '../data.js';
+import { UCUM_URL } from '../../../../fhir/urls/ucum.js';
+import { EXAMPLE_URL } from '../../../../fhir/urls/examples.js';
 
 class UnitSection extends AnswerTypeSection {
   isVisible(type) { return type === 'quantity'; }
@@ -42,7 +44,7 @@ class UnitSection extends AnswerTypeSection {
     const vsInp = document.createElement('textarea');
     vsInp.rows             = 1;
     vsInp.className        = 'at-modal-sub-inp';
-    vsInp.placeholder      = 'http://unitsofmeasure.org/vs/…';
+    vsInp.placeholder      = EXAMPLE_URL.unitValueSet;
     vsInp.dataset.testid   = 'unit-valueset-url';
     vsInp.value            = pending.draftUnitValueSet || '';
     vsInp.oninput = () => { pending.draftUnitValueSet = vsInp.value.trim(); };
@@ -83,7 +85,7 @@ class UnitSection extends AnswerTypeSection {
     uoAddBtn.dataset.testid = 'uo-add-btn';
     uoAddBtn.onclick = () => {
       if (!pending.draftUnitOptions) pending.draftUnitOptions = [];
-      pending.draftUnitOptions.push({ system: 'http://unitsofmeasure.org', code: '', display: '' });
+      pending.draftUnitOptions.push({ system: UCUM_URL.system, code: '', display: '' });
       _renderUoRows();
     };
 

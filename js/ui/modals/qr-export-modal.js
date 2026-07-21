@@ -4,6 +4,7 @@ import { Modal } from './modal-base.js';
 import { exportQR } from '../../fhir/qr-export.js';
 import { createCustomSelect } from '../custom-select.js';
 import { AppEvents } from '../../events.js';
+import { EXAMPLE_URL } from '../../fhir/urls/examples.js';
 
 const QR_STATUSES = ['in-progress', 'completed', 'amended', 'entered-in-error', 'stopped'];
 
@@ -201,7 +202,7 @@ function _profileSection(s) {
       inp.type           = 'url';
       inp.className      = 'codes-inp';
       inp.value          = url;
-      inp.placeholder    = 'http://hl7.org/fhir/...';
+      inp.placeholder    = EXAMPLE_URL.fhirBase;
       inp.dataset.testid = `qr-export-profile-url-${idx}`;
       inp.oninput = () => { s.metaProfile[idx] = inp.value; };
       const rm = document.createElement('button');

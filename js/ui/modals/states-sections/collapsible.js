@@ -1,6 +1,7 @@
 import { StatesSection } from './base-section.js';
 import { STATES_SECTIONS } from './registry.js';
 import { createCustomSelect, COLL_OPTIONS } from './helpers.js';
+import { FHIR } from '../../../fhir/urls/fhir.js';
 
 class CollapsibleSection extends StatesSection {
   initPending(node) {
@@ -18,7 +19,7 @@ class CollapsibleSection extends StatesSection {
     lbl.textContent      = 'Collapsible:';
     lbl.dataset.tipTitle = 'Collapsible group';
     lbl.dataset.tipBody  = 'Controls whether this group renders as a collapsible section in the patient view. default-closed = starts collapsed; default-open = starts expanded but collapsible.';
-    lbl.dataset.tipFhir  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible';
+    lbl.dataset.tipFhir  = FHIR.collapsible;
     lbl.dataset.tipSpec  = 'SDC';
 
     const sel = createCustomSelect({

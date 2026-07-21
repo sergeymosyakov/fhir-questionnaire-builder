@@ -11,13 +11,16 @@
 
 import { createCustomSelect } from './custom-select.js';
 import { terminologyService } from '../fhir/terminology-service.js';
+import { FHIR } from '../fhir/urls/fhir.js';
+import { SNOMED_URL } from '../fhir/urls/snomed.js';
+import { LOINC_URL } from '../fhir/urls/loinc.js';
 
 const LOINC_TOU_KEY  = 'loinc-tou-accepted';
-const LOINC_SYSTEM   = 'http://loinc.org';
-const ICD10_SYSTEM   = 'http://hl7.org/fhir/sid/icd-10-cm';
-const SNOMED_SYSTEM  = 'http://snomed.info/sct';
+const LOINC_SYSTEM   = LOINC_URL.system;
+const ICD10_SYSTEM   = FHIR.icd10cm;
+const SNOMED_SYSTEM  = SNOMED_URL.system;
 // ValueSet URL that expands all active SNOMED CT concepts (via FHIR $expand + filter).
-const SNOMED_VS_URL  = 'http://snomed.info/sct?fhir_vs';
+const SNOMED_VS_URL  = SNOMED_URL.implicitVs;
 
 // Paths are relative to the NLM API base URL (configured in config.json).
 // terminologyService.nlmUrl(path) returns the proxied full URL at call time.

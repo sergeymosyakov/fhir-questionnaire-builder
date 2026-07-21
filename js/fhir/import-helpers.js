@@ -4,54 +4,55 @@ import { ITLH_KEY_GROUP_OR } from '../utils.js';import {
   ITEM_ANSWER_CONSTRAINT_EXTENSION_URL,
   ITEM_DISABLED_DISPLAY_EXTENSION_URL,
 } from './format-registry.js';
+import { FHIR } from './urls/fhir.js';
 // ── Known extension URLs — any item.extension[] entry NOT in this set is
 // collected into node._unknownExtensions for pass-through round-tripping.
 export const KNOWN_ITEM_EXTENSION_URLS = new Set([
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-unit',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression',
-  'http://hl7.org/fhir/StructureDefinition/minLength',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat',
-  'http://hl7.org/fhir/StructureDefinition/entryFormat',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory',
-  'http://hl7.org/fhir/StructureDefinition/minValue',
-  'http://hl7.org/fhir/StructureDefinition/maxValue',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount',
+  FHIR.enableWhenExpression,
+  FHIR.constraint,
+  FHIR.itemControl,
+  FHIR.referenceResource,
+  FHIR.unit,
+  FHIR.unitValueSet,
+  FHIR.calculatedExpression,
+  FHIR.initialExpression,
+  FHIR.minLength,
+  FHIR.entryFormatSdc,
+  FHIR.entryFormat,
+  FHIR.choiceOrientation,
+  FHIR.displayCategory,
+  FHIR.minValue,
+  FHIR.maxValue,
+  FHIR.minOccurs,
+  FHIR.maxOccurs,
+  FHIR.sliderStepValue,
+  FHIR.supportLink,
+  FHIR.hiddenSdc,
+  FHIR.hidden,
+  FHIR.observationExtract,
+  FHIR.collapsible,
+  FHIR.openLabel,
+  FHIR.isSubject,
+  FHIR.columnCount,
   ITEM_DISABLED_DISPLAY_EXTENSION_URL,
   ITEM_ANSWER_CONSTRAINT_EXTENSION_URL,
-  'http://hl7.org/fhir/StructureDefinition/maxSize',
-  'http://hl7.org/fhir/StructureDefinition/mimeType',
-  'http://hl7.org/fhir/StructureDefinition/designNote',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption',
-  'http://hl7.org/fhir/StructureDefinition/regex',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia',
-  'http://hl7.org/fhir/StructureDefinition/itemWeight',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType',
+  FHIR.maxSize,
+  FHIR.mimeType,
+  FHIR.designNote,
+  FHIR.answerExpression,
+  FHIR.candidateExpression,
+  FHIR.preferredTerminologyServer,
+  FHIR.choiceColumn,
+  FHIR.unitOption,
+  FHIR.regex,
+  FHIR.usageMode,
+  FHIR.referenceFilter,
+  FHIR.referenceProfile,
+  FHIR.signatureRequired,
+  FHIR.itemMedia,
+  FHIR.itemWeight,
+  FHIR.baseType,
+  FHIR.fhirType,
 ]);
 
 // ── SDC answer-source expressions ─────────────────────────────────────────────
@@ -61,8 +62,8 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
 // source and share the same import (ext → prop), export (prop → ext), render and
 // validation handling. Shared by import-item.js and export.js.
 export const ANSWER_SOURCE_EXPR_EXTS = [
-  { url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression',    prop: '_answerExpression' },
-  { url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression', prop: '_candidateExpression' },
+  { url: FHIR.answerExpression,    prop: '_answerExpression' },
+  { url: FHIR.candidateExpression, prop: '_candidateExpression' },
 ];
 
 export function _collectUnknownExtensions(fhirItem) {
@@ -157,7 +158,7 @@ export function applyVisibility(node, fhirItem, linkIdMap) {
   }
   // SDC enableWhenExpression → FHIRPath condition
   const eweExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression'
+    e => e.url === FHIR.enableWhenExpression
   );
   if (eweExt && eweExt.valueExpression) {
     node.enableWhenExpression = eweExt.valueExpression.expression || '';
@@ -168,7 +169,7 @@ export function applyVisibility(node, fhirItem, linkIdMap) {
 // Returns true if the system OR-group key was detected (logicWithParent should be set to 'OR').
 export function applyConstraints(node, fhirItem) {
   const constraints = (fhirItem.extension || []).filter(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint'
+    e => e.url === FHIR.constraint
   );
   if (!constraints.length) return false;
   let hasOrGroup = false;

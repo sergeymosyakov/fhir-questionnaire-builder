@@ -4,6 +4,8 @@ import { AppEvents } from '../events.js';
 import { normaliseSTU3 } from './stu3-shim.js';
 import { destroyTree } from '../utils.js';
 import { resetSeq } from '../id.js';
+import { FHIR } from './urls/fhir.js';
+import { APP_URL } from './urls/app.js';
 
 let _svc = {};
 /** @param {{ questDoc?: import('./quest-document.js').QuestDocument }} svc */
@@ -111,11 +113,11 @@ export function importFHIR(fhirJson) {
   questMeta._rawMetaTag      = Array.isArray(q.meta?.tag)      ? JSON.parse(JSON.stringify(q.meta.tag))      : [];
   questMeta._rawMetaSecurity = Array.isArray(q.meta?.security) ? JSON.parse(JSON.stringify(q.meta.security)) : [];
 
-  const SDC_VAR_URL  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
-  const REPLACES_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
-  const LAUNCH_CTX_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext';
-  const ARTIFACT_VERSION_ALGO_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm';
-  const ARTIFACT_COPYRIGHT_LABEL_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel';
+  const SDC_VAR_URL  = FHIR.variable;
+  const REPLACES_URL = FHIR.replaces;
+  const LAUNCH_CTX_URL = FHIR.launchContext;
+  const ARTIFACT_VERSION_ALGO_URL = FHIR.artifactVersionAlgorithm;
+  const ARTIFACT_COPYRIGHT_LABEL_URL = FHIR.artifactCopyrightLabel;
 
   // versionAlgorithm[x] — R5 native field, or R4/R4B artifact-versionAlgorithm extension
   const vaExt = (q.extension || []).find(e => e.url === ARTIFACT_VERSION_ALGO_URL);
@@ -150,10 +152,10 @@ export function importFHIR(fhirJson) {
       });
     }
   }
-  const PREF_TERM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer';
+  const PREF_TERM_URL = FHIR.preferredTerminologyServer;
   const prefTermQuestExt = (q.extension || []).find(e => e.url === PREF_TERM_URL);
   questMeta.preferredTermServer = prefTermQuestExt?.valueUrl || '';
-  const SIG_REQ_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired';
+  const SIG_REQ_URL = FHIR.signatureRequired;
   const sigReqExts = (q.extension || []).filter(e => e.url === SIG_REQ_URL);
   questMeta._signatureRequired = sigReqExts.length
     ? sigReqExts.filter(e => e.valueCodeableConcept?.coding?.[0]).map(e => {
@@ -195,7 +197,7 @@ export function importFHIR(fhirJson) {
 }
 
 // ── Translation import ────────────────────────────────────────────────────────
-const TRANSLATION_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
+const TRANSLATION_URL = FHIR.translation;
 
 /**
  * Read `_text.extension[translation]` (and `_title`) from the raw FHIR JSON
@@ -243,7 +245,7 @@ function _importTranslations(q, tree, translations) {
   walk(q.item);
 
   // Read custom ui-translations extension from questionnaire root
-  const UI_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/ui-translations';
+  const UI_TRANS_URL = APP_URL.uiTranslations;
   for (const ext of (q.extension || []).filter(e => e.url === UI_TRANS_URL)) {
     const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
     const strings = (ext.extension || []).find(s => s.url === 'strings')?.valueString;
@@ -256,7 +258,7 @@ function _importTranslations(q, tree, translations) {
   }
 
   // Read custom xhtml-translations extension from questionnaire root
-  const XHTML_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/xhtml-translations';
+  const XHTML_TRANS_URL = APP_URL.xhtmlTranslations;
   for (const ext of (q.extension || []).filter(e => e.url === XHTML_TRANS_URL)) {
     const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
     const strings = (ext.extension || []).find(s => s.url === 'strings')?.valueString;
@@ -270,7 +272,7 @@ function _importTranslations(q, tree, translations) {
   }
 
   // Read custom markdown-translations extension from questionnaire root
-  const MD_TRANS_URL = 'http://fhir-qb.app/StructureDefinition/markdown-translations';
+  const MD_TRANS_URL = APP_URL.markdownTranslations;
   for (const ext of (q.extension || []).filter(e => e.url === MD_TRANS_URL)) {
     const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
     const strings = (ext.extension || []).find(s => s.url === 'strings')?.valueString;

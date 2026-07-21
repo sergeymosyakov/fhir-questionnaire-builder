@@ -6,6 +6,7 @@ import { NODE_REGISTRY } from './registry.js';
 import { NodeGearMenu } from '../ui/node-gear-menu.js';
 import { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem, buildInsideDropZone } from './builder-helpers.js';
 import { GTableRenderer } from './gtable-renderer.js';
+import { FHIR } from '../fhir/urls/fhir.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -411,7 +412,7 @@ export class GroupNode extends BaseNode {
     const noteLink = node._makeActionLink('Note', 'note', {
       title: 'Design Note',
       body:  'Internal author note \u2014 stored as FHIR designNote extension. Never shown to patients.',
-      fhir:  'http://hl7.org/fhir/StructureDefinition/designNote',
+      fhir:  FHIR.designNote,
       spec:  'R4 \u00B7 optional',
     }, actions);
     noteLink.onclick = () => MODAL_REGISTRY.get('note').open(node, noteLink, setActive);

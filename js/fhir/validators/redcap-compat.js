@@ -7,18 +7,20 @@
 // mode, then disables it again.
 
 import { Validator } from './base.js';
+import { FHIR } from '../urls/fhir.js';
+import { APP_URL } from '../urls/app.js';
 
-const _ITEM_CTRL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl';
-const RC         = 'http://fhir-qb.app/redcap/';
+const _ITEM_CTRL = FHIR.itemControl;
+const RC         = APP_URL.redcapNs;
 
 // SDC / FHIR extensions that have no REDCap equivalent
 const UNSUPPORTED_EXTS = new Set([
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemContext',
-  'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint',
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable',
+  FHIR.answerExpression,
+  FHIR.initialExpression,
+  FHIR.choiceColumn,
+  FHIR.itemContext,
+  FHIR.constraint,
+  FHIR.variable,
 ]);
 
 /** Recursively walk FHIR item array. cb(item, depth) called for each item. */
@@ -136,7 +138,7 @@ export class REDCapCompatValidator extends Validator {
       // ── calculatedExpression (inform, not block) ──────────────────────
       if (!hasRcOrigin(item)) {
         const calcExt = (item.extension || []).find(
-          e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression'
+          e => e.url === FHIR.calculatedExpression
         );
         if (calcExt) {
           issues.push({

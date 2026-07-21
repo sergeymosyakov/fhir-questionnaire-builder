@@ -5,6 +5,7 @@ import {
   ITEM_ANSWER_CONSTRAINT_EXTENSION_URL,
   ITEM_DISABLED_DISPLAY_EXTENSION_URL,
 } from './format-registry.js';
+import { FHIR } from './urls/fhir.js';
 import {
   fhirTypeToItemType,
   fhirOptsToStr,
@@ -23,7 +24,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // questionnaire-itemControl: detect control code for all item types
   const itemCtrl = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl'
+    e => e.url === FHIR.itemControl
   );
   const ctrlCode = itemCtrl?.valueCodeableConcept?.coding?.[0]?.code;
 
@@ -48,7 +49,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   //  - non-valueCoding types (valueString, valueInteger, etc.) for round-trip
   //  - choiceColumn requires access to full Coding properties (system, code, display)
   const hasChoiceCol = (fhirItem.extension || []).some(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn'
+    e => e.url === FHIR.choiceColumn
   );
   if (fhirItem.answerOption && (hasNonCodingOpts(fhirItem.answerOption) || hasChoiceCol)) {
     node._rawAnswerOptions = JSON.parse(JSON.stringify(fhirItem.answerOption));
@@ -66,10 +67,10 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       const code = opt.valueCoding.code || opt.valueCoding.display || '';
       const ordExt =
         (opt.extension || []).find(
-          e => e.url === 'http://hl7.org/fhir/StructureDefinition/ordinalValue'
+          e => e.url === FHIR.ordinalValue
         ) ||
         (opt.valueCoding.extension || []).find(
-          e => e.url === 'http://hl7.org/fhir/StructureDefinition/ordinalValue'
+          e => e.url === FHIR.ordinalValue
         );
       if (ordExt && ordExt.valueDecimal !== undefined && code) {
         ordinals[code] = ordExt.valueDecimal;
@@ -84,7 +85,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     if (opt.valueCoding) {
       const code = opt.valueCoding.code || opt.valueCoding.display || '';
       const pfxExt = (opt.extension || []).find(
-        e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix'
+        e => e.url === FHIR.optionPrefix
       );
       if (pfxExt?.valueString && code) prefixes[code] = pfxExt.valueString;
     }
@@ -97,7 +98,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     if (opt.valueCoding) {
       const code = opt.valueCoding.code || opt.valueCoding.display || '';
       const exclExt = (opt.extension || []).find(
-        e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive'
+        e => e.url === FHIR.optionExclusive
       );
       if (exclExt?.valueBoolean && code) exclusives[code] = true;
     }
@@ -111,10 +112,10 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       const code = opt.valueCoding.code || opt.valueCoding.display || '';
       const wExt =
         (opt.extension || []).find(
-          e => e.url === 'http://hl7.org/fhir/StructureDefinition/itemWeight'
+          e => e.url === FHIR.itemWeight
         ) ||
         (opt.valueCoding.extension || []).find(
-          e => e.url === 'http://hl7.org/fhir/StructureDefinition/itemWeight'
+          e => e.url === FHIR.itemWeight
         );
       if (wExt?.valueDecimal !== undefined && code) weights[code] = wExt.valueDecimal;
     }
@@ -127,7 +128,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     if (opt.valueCoding) {
       const code = opt.valueCoding.code || opt.valueCoding.display || '';
       const amExt = (opt.extension || []).find(
-        e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia'
+        e => e.url === FHIR.answerMedia
       );
       if (amExt?.valueAttachment && code) answerMedias[code] = amExt.valueAttachment;
     }
@@ -140,19 +141,19 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // reference: allowed resource type from standard extension
   if (node.itemType === 'reference') {
     const refResExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource'
+      e => e.url === FHIR.referenceResource
     );
     if (refResExt && refResExt.valueCode) node.referenceResource = refResExt.valueCode;
 
     // questionnaire-referenceFilter — FHIRPath expression to filter valid references
     const refFilterExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter'
+      e => e.url === FHIR.referenceFilter
     );
     if (refFilterExt?.valueString) node._referenceFilter = refFilterExt.valueString;
 
     // questionnaire-referenceProfile — profile URL restricting valid reference targets
     const refProfileExts = (fhirItem.extension || []).filter(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile'
+      e => e.url === FHIR.referenceProfile
     );
     if (refProfileExts.length) {
       node._referenceProfiles = refProfileExts.map(e => e.valueCanonical).filter(Boolean);
@@ -161,17 +162,17 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // quantity / decimal / integer: default unit from standard extension (questionnaire-unit)
   if (node.itemType === 'quantity' || node.itemType === 'decimal' || node.itemType === 'integer') {
     const unitExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit'
+      e => e.url === FHIR.unit
     );
     if (unitExt?.valueCoding?.code) node.quantityUnit = unitExt.valueCoding.code;
     // questionnaire-unitValueSet: ValueSet of selectable units
     const unitVsExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet'
+      e => e.url === FHIR.unitValueSet
     );
     if (unitVsExt?.valueCanonical) node._unitValueSet = unitVsExt.valueCanonical;
     // questionnaire-unitOption: explicit list of selectable units (0..*)
     const unitOptExts = (fhirItem.extension || []).filter(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption'
+      e => e.url === FHIR.unitOption
     );
     if (unitOptExts.length) {
       node._unitOptions = unitOptExts
@@ -189,7 +190,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // SDC calculatedExpression
   const calcExpr = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression'
+    e => e.url === FHIR.calculatedExpression
   );
   if (calcExpr?.valueExpression) {
     node._calculatedExpr = calcExpr.valueExpression.expression || '';
@@ -197,7 +198,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // SDC initialExpression
   const initExpr = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression'
+    e => e.url === FHIR.initialExpression
   );
   if (initExpr?.valueExpression) {
     node._initialExpr = initExpr.valueExpression.expression || '';
@@ -223,32 +224,32 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // minLength (SDC extension)
   const minLenExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/minLength'
+    e => e.url === FHIR.minLength
   );
   if (minLenExt?.valueInteger !== undefined) node._minLength = minLenExt.valueInteger;
 
   // regex validation pattern
   const regexExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/regex'
+    e => e.url === FHIR.regex
   );
   if (regexExt?.valueString) node._regex = regexExt.valueString;
 
   // sdc-questionnaire-entryFormat (SDC) or entryFormat (R4 element-definition ext)
   const entryFmtExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat' ||
-         e.url === 'http://hl7.org/fhir/StructureDefinition/entryFormat'
+    e => e.url === FHIR.entryFormatSdc ||
+         e.url === FHIR.entryFormat
   );
   if (entryFmtExt?.valueString) node._entryFormat = entryFmtExt.valueString;
 
   // questionnaire-choiceOrientation
   const choiceOrientExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation'
+    e => e.url === FHIR.choiceOrientation
   );
   if (choiceOrientExt?.valueCode) node._choiceOrientation = choiceOrientExt.valueCode;
 
   // sdc-questionnaire-columnCount — lay out a choice question's options across N columns
   const columnCountExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount'
+    e => e.url === FHIR.columnCount
   );
   if (Number.isInteger(columnCountExt?.valueInteger) && columnCountExt.valueInteger > 1) {
     node._columnCount = columnCountExt.valueInteger;
@@ -256,7 +257,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // sdc-questionnaire-choiceColumn (0..* — multi-column display for choice/open-choice/reference)
   const choiceColExts = (fhirItem.extension || []).filter(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn'
+    e => e.url === FHIR.choiceColumn
   );
   if (choiceColExts.length) {
     node._choiceColumns = choiceColExts.map(ext => {
@@ -277,7 +278,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // questionnaire-displayCategory (display items only; groups handled in the group branch above)
   if (node.itemType === 'display') {
     const dcExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory'
+      e => e.url === FHIR.displayCategory
     );
     const dcCode = dcExt?.valueCodeableConcept?.coding?.[0]?.code;
     if (dcCode) node._displayCategory = dcCode;
@@ -285,14 +286,14 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // questionnaire-minValue / questionnaire-maxValue (SDC R4 extensions)
   const minValExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/minValue'
+    e => e.url === FHIR.minValue
   );
   if (minValExt) {
     const v = minValExt.valueDecimal ?? minValExt.valueInteger;
     if (v !== undefined) node._minValue = v;
   }
   const maxValExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxValue'
+    e => e.url === FHIR.maxValue
   );
   if (maxValExt) {
     const v = maxValExt.valueDecimal ?? maxValExt.valueInteger;
@@ -301,23 +302,23 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // minOccurs / maxOccurs cardinality extensions
   const minOccExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs'
+    e => e.url === FHIR.minOccurs
   );
   if (minOccExt?.valueInteger !== undefined) node._minOccurs = minOccExt.valueInteger;
   const maxOccExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs'
+    e => e.url === FHIR.maxOccurs
   );
   if (maxOccExt?.valueInteger !== undefined) node._maxOccurs = maxOccExt.valueInteger;
 
   // maxDecimalPlaces
   const maxDecExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces'
+    e => e.url === FHIR.maxDecimalPlaces
   );
   if (maxDecExt?.valueInteger !== undefined) node._maxDecimalPlaces = maxDecExt.valueInteger;
 
   // questionnaire-sliderStepValue
   const sliderExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue'
+    e => e.url === FHIR.sliderStepValue
   );
   if (sliderExt) {
     const v = sliderExt.valueDecimal ?? sliderExt.valueInteger;
@@ -326,77 +327,77 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // maxSize (attachment items only — maximum file size in MB)
   const maxSizeExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxSize'
+    e => e.url === FHIR.maxSize
   );
   if (maxSizeExt?.valueDecimal !== undefined) node._maxFileSizeMB = maxSizeExt.valueDecimal;
 
   // mimeType (attachment items only — 0..* allowed MIME types as valueCode)
   const mimeTypes = (fhirItem.extension || [])
-    .filter(e => e.url === 'http://hl7.org/fhir/StructureDefinition/mimeType' && e.valueCode)
+    .filter(e => e.url === FHIR.mimeType && e.valueCode)
     .map(e => e.valueCode);
   if (mimeTypes.length) node._mimeTypes = mimeTypes;
 
   // questionnaire-supportLink (0..* URI links to external help/reference)
   const supportLinks = (fhirItem.extension || [])
-    .filter(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink' && e.valueUri)
+    .filter(e => e.url === FHIR.supportLink && e.valueUri)
     .map(e => e.valueUri);
   if (supportLinks.length) node._supportLinks = supportLinks;
 
   // sdc-questionnaire-hidden (SDC) or questionnaire-hidden (R4 standard) — alias fallback
   const hiddenExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden' ||
-         e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden'
+    e => e.url === FHIR.hiddenSdc ||
+         e.url === FHIR.hidden
   );
   if (hiddenExt?.valueBoolean === true) node._hidden = true;
 
   // sdc-questionnaire-isSubject — marks the item whose answer identifies the QR subject
   const isSubjectExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject'
+    e => e.url === FHIR.isSubject
   );
   if (isSubjectExt?.valueBoolean === true) node._isSubject = true;
 
   // sdc-questionnaire-observationExtract — mark for Observation-based extraction
   const obsExtractExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract'
+    e => e.url === FHIR.observationExtract
   );
   if (obsExtractExt) node._observationExtract = obsExtractExt.valueBoolean === false ? false : true;
 
   // sdc-questionnaire-openLabel (open-choice items only)
   if (node.itemType === 'open-choice') {
     const openLabelExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel'
+      e => e.url === FHIR.openLabel
     );
     if (openLabelExt?.valueString) node._openLabel = openLabelExt.valueString;
   }
 
   // sdc-questionnaire-preferredTerminologyServer — per-item terminology server override
   const prefTermExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer'
+    e => e.url === FHIR.preferredTerminologyServer
   );
   if (prefTermExt?.valueUrl) node._preferredTermServer = prefTermExt.valueUrl;
 
   // sdc-questionnaire-shortText — abbreviated label for summary views
   const shortTextExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText'
+    e => e.url === FHIR.shortText
   );
   if (shortTextExt?.valueString) node._shortText = shortTextExt.valueString;
 
   // designNote — author-facing internal note
   const designNoteExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/designNote'
+    e => e.url === FHIR.designNote
   );
   if (designNoteExt?.valueMarkdown) node._designNote = designNoteExt.valueMarkdown;
   else if (designNoteExt?.valueString) node._designNote = designNoteExt.valueString;
 
   // questionnaire-usageMode — controls when the item is relevant: capture / display / display-non-empty / capture-display / capture-display-non-empty
   const usageModeExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode'
+    e => e.url === FHIR.usageMode
   );
   if (usageModeExt?.valueCode) node._usageMode = usageModeExt.valueCode;
 
   // questionnaire-signatureRequired — signature types required on item (repeats, valueCodeableConcept)
   const sigExts = (fhirItem.extension || []).filter(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired'
+    e => e.url === FHIR.signatureRequired
   );
   if (sigExts.length) {
     node._signatureRequired = sigExts
@@ -409,7 +410,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // sdc-questionnaire-itemMedia — media (image/audio/video) attached to the item question
   const itemMediaExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia'
+    e => e.url === FHIR.itemMedia
   );
   if (itemMediaExt?.valueAttachment) node._itemMedia = itemMediaExt.valueAttachment;
 
@@ -425,11 +426,11 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   if (fhirItem.prefix) node._prefix = fhirItem.prefix;
   if (fhirItem.definition) node._definition = fhirItem.definition;
   const baseTypeExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType'
+    e => e.url === FHIR.baseType
   );
   if (baseTypeExt?.valueCode) node._baseType = baseTypeExt.valueCode;
   const fhirTypeExt = (fhirItem.extension || []).find(
-    e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType'
+    e => e.url === FHIR.fhirType
   );
   if (fhirTypeExt?.valueCode) node._fhirType = fhirTypeExt.valueCode;
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
@@ -505,11 +506,11 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     if (hasOrGroup) node.logicWithParent = 'OR';
     if (fhirItem.repeats) node.repeats = true;
     const grpMinOccExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs'
+      e => e.url === FHIR.minOccurs
     );
     if (grpMinOccExt?.valueInteger !== undefined) node._minOccurs = grpMinOccExt.valueInteger;
     const grpMaxOccExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs'
+      e => e.url === FHIR.maxOccurs
     );
     if (grpMaxOccExt?.valueInteger !== undefined) node._maxOccurs = grpMaxOccExt.valueInteger;
     const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));
@@ -521,58 +522,58 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     if (fhirItem.prefix) node._prefix = fhirItem.prefix;
     if (fhirItem.definition) node._definition = fhirItem.definition;
     const grpBaseTypeExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType'
+      e => e.url === FHIR.baseType
     );
     if (grpBaseTypeExt?.valueCode) node._baseType = grpBaseTypeExt.valueCode;
     const grpFhirTypeExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType'
+      e => e.url === FHIR.fhirType
     );
     if (grpFhirTypeExt?.valueCode) node._fhirType = grpFhirTypeExt.valueCode;
     if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
     const groupSupportLinks = (fhirItem.extension || [])
-      .filter(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink' && e.valueUri)
+      .filter(e => e.url === FHIR.supportLink && e.valueUri)
       .map(e => e.valueUri);
     if (groupSupportLinks.length) node._supportLinks = groupSupportLinks;
     const groupHiddenExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden' ||
-           e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden'
+      e => e.url === FHIR.hiddenSdc ||
+           e.url === FHIR.hidden
     );
     if (groupHiddenExt?.valueBoolean === true) node._hidden = true;
     // sdc-questionnaire-observationExtract (groups)
     const groupObsExtractExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract'
+      e => e.url === FHIR.observationExtract
     );
     if (groupObsExtractExt) node._observationExtract = groupObsExtractExt.valueBoolean === false ? false : true;
     // sdc-questionnaire-collapsible
     const collapsibleExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible'
+      e => e.url === FHIR.collapsible
     );
     if (collapsibleExt?.valueCode) node._collapsible = collapsibleExt.valueCode;
     // sdc-questionnaire-preferredTerminologyServer — per-item terminology server override (groups)
     const groupPrefTermExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer'
+      e => e.url === FHIR.preferredTerminologyServer
     );
     if (groupPrefTermExt?.valueUrl) node._preferredTermServer = groupPrefTermExt.valueUrl;
     // sdc-questionnaire-shortText (groups)
     const groupShortTextExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText'
+      e => e.url === FHIR.shortText
     );
     if (groupShortTextExt?.valueString) node._shortText = groupShortTextExt.valueString;
     // designNote — author-facing internal note (groups)
     const groupDesignNoteExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/designNote'
+      e => e.url === FHIR.designNote
     );
     if (groupDesignNoteExt?.valueMarkdown) node._designNote = groupDesignNoteExt.valueMarkdown;
     else if (groupDesignNoteExt?.valueString) node._designNote = groupDesignNoteExt.valueString;
     // questionnaire-displayCategory — valid on group items in R4
     const groupDcExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory'
+      e => e.url === FHIR.displayCategory
     );
     const groupDcCode = groupDcExt?.valueCodeableConcept?.coding?.[0]?.code;
     if (groupDcCode) node._displayCategory = groupDcCode;
     // questionnaire-itemControl — group-level display controls (header / footer / gtable / …)
     const groupCtrlExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl'
+      e => e.url === FHIR.itemControl
     );
     const groupCtrlCode = groupCtrlExt?.valueCodeableConcept?.coding?.[0]?.code;
     if (groupCtrlCode) node._itemControl = groupCtrlCode;
@@ -580,11 +581,11 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     // computed value (its children then don't determine it). Mirror the leaf-item
     // import so it round-trips instead of being silently dropped.
     const groupCalcExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression'
+      e => e.url === FHIR.calculatedExpression
     );
     if (groupCalcExt?.valueExpression) node._calculatedExpr = groupCalcExt.valueExpression.expression || '';
     const groupInitExt = (fhirItem.extension || []).find(
-      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression'
+      e => e.url === FHIR.initialExpression
     );
     if (groupInitExt?.valueExpression) node._initialExpr = groupInitExt.valueExpression.expression || '';
     // Preserve any unrecognised extensions for round-trip pass-through

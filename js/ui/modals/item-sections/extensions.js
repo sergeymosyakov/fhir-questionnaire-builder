@@ -6,6 +6,7 @@ import {
   EXT_VALUE_TYPES, EXT_COMPLEX, EXT_BOOL, EXT_INT, EXT_DEC,
   extToDraft, draftToExt,
 } from './data.js';
+import { EXAMPLE_URL } from '../../../fhir/urls/examples.js';
 
 class ExtensionsSection extends ItemSection {
   initPending(node) {
@@ -42,7 +43,7 @@ class ExtensionsSection extends ItemSection {
             const urlInp = document.createElement('input');
             urlInp.type           = 'text';
             urlInp.className      = 'ext-url-input';
-            urlInp.placeholder    = 'http://example.com/fhir/StructureDefinition/ext-name';
+            urlInp.placeholder    = EXAMPLE_URL.extension;
             urlInp.dataset.testid = `item-props-ext-url-${idx}`;
             urlInp.value          = draft.url;
             urlInp.oninput = () => {

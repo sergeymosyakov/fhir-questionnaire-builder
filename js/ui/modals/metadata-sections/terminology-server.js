@@ -1,8 +1,9 @@
 import { Section } from '../section.js';
 import { META_SECTIONS } from './registry.js';
 import { makeRow } from './helpers.js';
+import { FHIR } from '../../../fhir/urls/fhir.js';
 
-const PREF_TERM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer';
+const PREF_TERM_URL = FHIR.preferredTerminologyServer;
 
 class TerminologyServerSection extends Section {
   build(pending) {

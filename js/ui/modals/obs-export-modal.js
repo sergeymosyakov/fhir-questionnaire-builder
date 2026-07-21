@@ -5,8 +5,9 @@
 import { Modal } from './modal-base.js';
 import { exportObservations } from '../../fhir/obs-export.js';
 import { AppEvents } from '../../events.js';
+import { FHIR } from '../../fhir/urls/fhir.js';
 
-const SDC_OBS_PROFILE = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-observation';
+const SDC_OBS_PROFILE = FHIR.sdcObservation;
 
 class ObsExportModal extends Modal {
   getName() { return 'obsExportModal'; }

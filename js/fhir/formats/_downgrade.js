@@ -12,6 +12,7 @@ import {
   ITEM_ANSWER_CONSTRAINT_EXTENSION_URL,
   ITEM_DISABLED_DISPLAY_EXTENSION_URL,
 } from '../format-registry.js';
+import { FHIR } from '../urls/fhir.js';
 
 /** Builder-private extension URLs for R5-only Questionnaire.item fields. */
 const R5_FIELD_EXTENSIONS = {
@@ -21,8 +22,8 @@ const R5_FIELD_EXTENSIONS = {
 
 // Official HL7 cross-version extensions for R5-only Questionnaire root fields.
 // Both are valid on Questionnaire from R4 onward (FHIR Extensions Pack).
-const ARTIFACT_VERSION_ALGO_URL    = 'http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm';
-const ARTIFACT_COPYRIGHT_LABEL_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel';
+const ARTIFACT_VERSION_ALGO_URL    = FHIR.artifactVersionAlgorithm;
+const ARTIFACT_COPYRIGHT_LABEL_URL = FHIR.artifactCopyrightLabel;
 
 /**
  * Move R5-only native Questionnaire root fields (versionAlgorithm[x],

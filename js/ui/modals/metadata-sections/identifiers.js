@@ -3,6 +3,7 @@ import { META_SECTIONS } from './registry.js';
 import { makeCollapsible } from './helpers.js';
 import { createCustomSelect } from '../../custom-select.js';
 import { ID_USES, ID_USE_LABELS } from './data.js';
+import { EXAMPLE_URL } from '../../../fhir/urls/examples.js';
 
 class IdentifiersSection extends Section {
   build(pending) {
@@ -37,7 +38,7 @@ class IdentifiersSection extends Section {
             sysInp.type           = 'url';
             sysInp.className      = 'codes-inp';
             sysInp.value          = ident.system || '';
-            sysInp.placeholder    = 'http://example.org/ids';
+            sysInp.placeholder    = EXAMPLE_URL.identifierSystem;
             sysInp.dataset.testid = `meta-identifier-system-${idx}`;
             sysInp.oninput = () => { ident.system = sysInp.value; setLabel(); };
 

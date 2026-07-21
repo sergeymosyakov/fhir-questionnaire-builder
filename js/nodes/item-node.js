@@ -6,6 +6,7 @@ import { createCustomSelect } from '../ui/custom-select.js';
 import { uiStr } from '../preview/render-ctx.js';
 import { ITEM_TYPES } from '../ui/modals/answer-type/data.js';
 import { changeNodeType, nodeTypeNeedsConfig, nodeHasTypeConfig } from './change-type.js';
+import { FHIR } from '../fhir/urls/fhir.js';
 // Abstract base for all question item nodes (type: 'item').
 // Concrete subclasses set `this.itemType` and may add type-specific defaults.
 // Optional FHIR-imported properties set after construction (all item types):
@@ -532,7 +533,7 @@ export class ItemNode extends BaseNode {
     const noteLink = node._makeActionLink('Note', 'note', {
       title: 'Design Note',
       body:  'Internal author note \u2014 stored as FHIR designNote extension. Never shown to patients.',
-      fhir:  'http://hl7.org/fhir/StructureDefinition/designNote',
+      fhir:  FHIR.designNote,
       spec:  'R4 \u00B7 optional',
     }, actions);
     noteLink.onclick = () => MODAL_REGISTRY.get('note').open(node, noteLink, setActive);

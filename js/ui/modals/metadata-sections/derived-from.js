@@ -1,6 +1,7 @@
 import { Section } from '../section.js';
 import { META_SECTIONS } from './registry.js';
 import { makeCollapsible } from './helpers.js';
+import { EXAMPLE_URL } from '../../../fhir/urls/examples.js';
 
 function buildUrlList(pending, key, { emptyText, placeholder, testidPrefix, addLabel }) {
   return ({ el, setLabel, expand }) => {
@@ -53,7 +54,7 @@ class DerivedFromSection extends Section {
       initialOpen: pending.derivedFrom.length > 0,
       buildBody:   buildUrlList(pending, 'derivedFrom', {
         emptyText:    'No derived-from URLs. Click \u2018+ Add URL\u2019 to add one.',
-        placeholder:  'http://example.org/fhir/Questionnaire/base|1.0',
+        placeholder:  EXAMPLE_URL.canonicalBase,
         testidPrefix: 'meta-derived',
         addLabel:     '+ Add URL',
       }),

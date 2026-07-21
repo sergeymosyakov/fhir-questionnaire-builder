@@ -34,13 +34,15 @@
 
 import { branchingToEnableWhen } from './branching-logic.js';
 import { transpileCalc, canTranspile } from './calc-transpiler.js';
+import { FHIR } from '../../urls/fhir.js';
+import { APP_URL } from '../../urls/app.js';
 
 // Extension URLs
-const RC = 'http://fhir-qb.app/redcap/';
-const ITEM_CONTROL_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl';
-const MIN_VALUE_URL    = 'http://hl7.org/fhir/StructureDefinition/minValue';
-const MAX_VALUE_URL    = 'http://hl7.org/fhir/StructureDefinition/maxValue';
-const CALC_EXPR_URL    = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression';
+const RC = APP_URL.redcapNs;
+const ITEM_CONTROL_URL = FHIR.itemControl;
+const MIN_VALUE_URL    = FHIR.minValue;
+const MAX_VALUE_URL    = FHIR.maxValue;
+const CALC_EXPR_URL    = FHIR.calculatedExpression;
 
 /** Build an extension object. */
 function ext(url, type, value) {
@@ -114,7 +116,7 @@ function buildItem(row) {
       fhirType = 'choice';
       answerOption = parseChoices(row.choices);
       extensions.push(ext(ITEM_CONTROL_URL, 'CodeableConcept', {
-        coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'drop-down' }],
+        coding: [{ system: FHIR.itemControlCS, code: 'drop-down' }],
       }));
       break;
     case 'yesno':
@@ -124,7 +126,7 @@ function buildItem(row) {
     case 'slider':
       fhirType = 'integer';
       extensions.push(ext(ITEM_CONTROL_URL, 'CodeableConcept', {
-        coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'slider' }],
+        coding: [{ system: FHIR.itemControlCS, code: 'slider' }],
       }));
       // Slider labels stored in choices → store as extension for round-trip
       if (row.choices.trim()) {

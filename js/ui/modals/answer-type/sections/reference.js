@@ -2,6 +2,7 @@ import { AnswerTypeSection } from '../base-section.js';
 import { ANSWER_TYPE_SECTIONS } from '../registry.js';
 import { createCustomSelect } from '../../../custom-select.js';
 import { FHIR_R4_TYPES } from '../data.js';
+import { EXAMPLE_URL } from '../../../../fhir/urls/examples.js';
 
 class ReferenceSection extends AnswerTypeSection {
   isVisible(type) { return type === 'reference'; }
@@ -46,7 +47,7 @@ class ReferenceSection extends AnswerTypeSection {
     profTa.className       = 'style-modal-raw-ta';
     profTa.dataset.testid  = 'ref-profile-ta';
     profTa.value           = (pending.draftRefProfiles || []).join('\n');
-    profTa.placeholder     = 'http://hl7.org/fhir/StructureDefinition/…';
+    profTa.placeholder     = EXAMPLE_URL.structureDef;
     profTa.addEventListener('input', () => {
       pending.draftRefProfiles = profTa.value.split('\n').map(s => s.trim()).filter(Boolean);
     });

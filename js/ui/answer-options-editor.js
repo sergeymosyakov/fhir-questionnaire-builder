@@ -13,6 +13,9 @@
  */
 
 import { createCustomSelect } from './custom-select.js';
+import { EXAMPLE_URL } from '../fhir/urls/examples.js';
+import { LOINC_URL } from '../fhir/urls/loinc.js';
+import { SNOMED_URL } from '../fhir/urls/snomed.js';
 
 const TYPE_ITEMS = [
   { value: 'coding',    label: 'Coding' },
@@ -86,7 +89,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
       {
         text:     'System',
         tipTitle: 'Coding system URI',
-        tipBody:  'Optional. The code system that defines this code, e.g. http://loinc.org or http://snomed.info/sct. Eliminates FHIR validator warnings about codes with no system.',
+        tipBody:  'Optional. The code system that defines this code, e.g. ' + LOINC_URL.system + ' or ' + SNOMED_URL.system + '. Eliminates FHIR validator warnings about codes with no system.',
         tipFhir:  'Questionnaire.item.answerOption[].valueCoding.system',
         tipSpec:  'R4',
       },
@@ -159,7 +162,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
       const fields = [
         { key: 'code',   placeholder: 'code',           testid: testidPrefix + '-code-' + idx },
         { key: 'label',  placeholder: 'label',          testid: testidPrefix + '-label-' + idx },
-        { key: 'system', placeholder: 'http://…',       testid: testidPrefix + '-system-' + idx },
+        { key: 'system', placeholder: EXAMPLE_URL.scheme,       testid: testidPrefix + '-system-' + idx },
         { key: 'score',  placeholder: 'score',          testid: testidPrefix + '-score-' + idx },
         { key: 'prefix', placeholder: 'prefix (e.g. A.)', testid: testidPrefix + '-prefix-' + idx },
         { key: 'weight', placeholder: 'weight',            testid: testidPrefix + '-weight-' + idx },

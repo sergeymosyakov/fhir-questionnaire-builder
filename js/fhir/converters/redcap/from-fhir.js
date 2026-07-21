@@ -12,12 +12,14 @@
 //   - Groups nested deeper than 2 levels → flattened with a warning comment in fieldLabel
 
 import { enableWhenToBranching } from './branching-logic.js';
+import { FHIR } from '../../urls/fhir.js';
+import { APP_URL } from '../../urls/app.js';
 
-const RC         = 'http://fhir-qb.app/redcap/';
-const ITEM_CTRL  = 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl';
-const MIN_VAL    = 'http://hl7.org/fhir/StructureDefinition/minValue';
-const MAX_VAL    = 'http://hl7.org/fhir/StructureDefinition/maxValue';
-const CALC_EXPR  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression';
+const RC         = APP_URL.redcapNs;
+const ITEM_CTRL  = FHIR.itemControl;
+const MIN_VAL    = FHIR.minValue;
+const MAX_VAL    = FHIR.maxValue;
+const CALC_EXPR  = FHIR.calculatedExpression;
 
 // CSV column headers (standard REDCap order)
 const HEADERS = [

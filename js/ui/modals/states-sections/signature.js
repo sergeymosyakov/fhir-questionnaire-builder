@@ -1,6 +1,7 @@
 import { StatesSection } from './base-section.js';
 import { STATES_SECTIONS } from './registry.js';
 import { createCustomSelect } from '../../custom-select.js';
+import { ETSI_URL } from '../../../fhir/urls/etsi.js';
 
 const SIG_TYPES = [
   { system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.1',  display: "Author's Signature" },
@@ -21,12 +22,12 @@ const SIG_TYPES = [
   { system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.16', display: 'Modification Signature' },
   { system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.17', display: 'Administrative (Error/Edit) Signature' },
   { system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.18', display: 'Timestamp Signature' },
-  { system: 'http://uri.etsi.org/01903/v1.2.2', code: 'ProofOfOrigin',   display: 'Proof of origin' },
-  { system: 'http://uri.etsi.org/01903/v1.2.2', code: 'ProofOfReceipt',  display: 'Proof of receipt' },
-  { system: 'http://uri.etsi.org/01903/v1.2.2', code: 'ProofOfDelivery', display: 'Proof of delivery' },
-  { system: 'http://uri.etsi.org/01903/v1.2.2', code: 'ProofOfSender',   display: 'Proof of sender' },
-  { system: 'http://uri.etsi.org/01903/v1.2.2', code: 'ProofOfapproval', display: 'Proof of approval' },
-  { system: 'http://uri.etsi.org/01903/v1.2.2', code: 'ProofOfCreation', display: 'Proof of creation' },
+  { system: ETSI_URL.xades132, code: 'ProofOfOrigin',   display: 'Proof of origin' },
+  { system: ETSI_URL.xades132, code: 'ProofOfReceipt',  display: 'Proof of receipt' },
+  { system: ETSI_URL.xades132, code: 'ProofOfDelivery', display: 'Proof of delivery' },
+  { system: ETSI_URL.xades132, code: 'ProofOfSender',   display: 'Proof of sender' },
+  { system: ETSI_URL.xades132, code: 'ProofOfapproval', display: 'Proof of approval' },
+  { system: ETSI_URL.xades132, code: 'ProofOfCreation', display: 'Proof of creation' },
 ];
 
 class SignatureSection extends StatesSection {

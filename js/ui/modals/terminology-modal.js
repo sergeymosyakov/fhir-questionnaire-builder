@@ -7,8 +7,9 @@ import { Modal } from './modal-base.js';
 import { terminologyService } from '../../fhir/terminology-service.js';
 import { AppEvents, EventState } from '../../events.js';
 import { nodePickerModal } from './node-picker-modal.js';
+import { FHIR } from '../../fhir/urls/fhir.js';
 
-const PREF_TERM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer';
+const PREF_TERM_URL = FHIR.preferredTerminologyServer;
 
 class TerminologyModal extends Modal {
   getName() { return 'terminologyModal'; }

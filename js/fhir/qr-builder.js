@@ -1,3 +1,4 @@
+import { FHIR } from './urls/fhir.js';
 // ── QuestionnaireResponse builder ─────────────────────────────────────────────
 // Builds a minimal QR from the original FHIR Questionnaire JSON + current values.
 // Used as context for FHIRPath calculatedExpression evaluation.
@@ -7,7 +8,7 @@
 //   non-group with children → answer[0].valueX + answer[0].item[]
 //   leaf questions → answer[0].valueX (only when answered)
 
-const ORDINAL_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+const ORDINAL_URL = FHIR.ordinalValue;
 
 // Build a single QR answer object for one value, typed by the FHIR item's type.
 // Exported so calculatedExpression evaluation can write results back into the QR

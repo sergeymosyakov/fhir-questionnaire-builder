@@ -2,8 +2,9 @@ import { Section } from '../section.js';
 import { META_SECTIONS } from './registry.js';
 import { makeCollapsible } from './helpers.js';
 import { createCustomSelect } from '../../custom-select.js';
+import { FHIR } from '../../../fhir/urls/fhir.js';
 
-const LC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext';
+const LC_URL = FHIR.launchContext;
 
 // Standard SDC launch-context names with their typical resource type.
 const COMMON_NAMES = [

@@ -7,6 +7,7 @@ import { extractObservations } from './extract.js';
 import { downloadJSON } from './download.js';
 
 import { AppEvents } from '../events.js';
+import { FHIR } from './urls/fhir.js';
 
 let _svc = {};
 export function configure(svc) { _svc = { ..._svc, ...svc }; }
@@ -15,7 +16,7 @@ if (typeof document !== 'undefined') {
     e => { if (e.detail?.answerStore) configure({ answerStore: e.detail.answerStore }); });
 }
 
-const SDC_OBS_PROFILE = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-observation';
+const SDC_OBS_PROFILE = FHIR.sdcObservation;
 
 /**
  * Build and download a transaction Bundle of extracted Observations.

@@ -2,6 +2,7 @@ import { Section } from '../section.js';
 import { META_SECTIONS } from './registry.js';
 import { makeCollapsible, applyTip } from './helpers.js';
 import { renderCodesEditor } from '../codes-modal.js';
+import { FHIR } from '../../../fhir/urls/fhir.js';
 
 class ResourceMetaSection extends Section {
   build(pending, questMeta) {
@@ -121,7 +122,7 @@ class ResourceMetaSection extends Section {
             inp.type           = 'url';
             inp.className      = 'codes-inp';
             inp.value          = url;
-            inp.placeholder    = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire';
+            inp.placeholder    = FHIR.sdcQuestionnaire;
             inp.dataset.testid = `meta-profile-url-${idx}`;
             inp.oninput = () => { pending.metaProfile[idx] = inp.value; };
             const rm = document.createElement('button');

@@ -7,6 +7,8 @@ import { parseOptions } from '../../../../utils.js';
 import { fhirOptsToStr } from '../../../../fhir/import-helpers.js';
 import { createOptionsEditor } from '../../../answer-options-editor.js';
 import { terminologyService } from '../../../../fhir/terminology-service.js';
+import { FHIR } from '../../../../fhir/urls/fhir.js';
+import { EXAMPLE_URL } from '../../../../fhir/urls/examples.js';
 
 function _buildRows(node) {
   const ords       = node._optionOrdinals  || {};
@@ -178,7 +180,7 @@ class ChoiceSection extends AnswerTypeSection {
     avsUrlInp.className      = 'at-modal-avs-url';
     avsUrlInp.dataset.testid = 'avs-url-input';
     avsUrlInp.value          = isExternalAVS ? pending.draftAVS : '';
-    avsUrlInp.placeholder    = 'http://terminology.hl7.org/ValueSet/...';
+    avsUrlInp.placeholder    = EXAMPLE_URL.valueSet;
     avsUrlInp.style.display  = isExternalAVS ? 'block' : 'none';
     avsUrlInp.oninput = () => { pending.draftAVS = avsUrlInp.value.trim(); _updateItemControlRows(); };
 
@@ -247,7 +249,7 @@ class ChoiceSection extends AnswerTypeSection {
       label:       'FHIRPath expression (sdc-questionnaire-answerExpression):',
       tipTitle:    'Answer Expression',
       tipBody:     'FHIRPath expression evaluated against the current QuestionnaireResponse. Returns the permitted answers — a collection of strings, numbers, or Coding objects, each becoming an answer option. Falls back to the static options list if evaluation fails or returns empty.',
-      tipFhir:     'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression',
+      tipFhir:     FHIR.answerExpression,
       testid:      'answer-expr-input',
       value:       pending.draftAnswerExpr,
       placeholder: "e.g. %resource.item.where(linkId='category').answer.valueCoding.code",
@@ -260,7 +262,7 @@ class ChoiceSection extends AnswerTypeSection {
       label:       'FHIRPath expression (sdc-questionnaire-candidateExpression):',
       tipTitle:    'Candidate Expression',
       tipBody:     'FHIRPath, CQL, or FHIR Query expression that resolves to a list of candidate (suggested) answers for the item. Like answerExpression, each result becomes a selectable option, but candidates are suggestions rather than the strictly permitted set — typically used for lookup / reference items. Falls back to the static options list if evaluation fails or returns empty.',
-      tipFhir:     'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression',
+      tipFhir:     FHIR.candidateExpression,
       testid:      'candidate-expr-input',
       value:       pending.draftCandidateExpr,
       placeholder: "e.g. %resource.item.where(linkId='contacts').answer.valueReference",
@@ -278,7 +280,7 @@ class ChoiceSection extends AnswerTypeSection {
     olSubLbl.textContent      = 'Open label (Other prompt):';
     olSubLbl.dataset.tipTitle = 'Open-choice label';
     olSubLbl.dataset.tipBody  = 'Custom label for the free-text entry in this open-choice control. Replaces the default "Choose or type\u2026" placeholder.';
-    olSubLbl.dataset.tipFhir  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel';
+    olSubLbl.dataset.tipFhir  = FHIR.openLabel;
     olSubLbl.dataset.tipSpec  = 'SDC';
 
     const olInp = document.createElement('input');

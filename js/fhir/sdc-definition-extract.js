@@ -1,3 +1,4 @@
+import { FHIR } from './urls/fhir.js';
 // ── SDC Definition-based extraction ──────────────────────────────────────────
 // Pure transformation: Questionnaire + QuestionnaireResponse → Bundle of FHIR
 // resources constructed from item.definition mappings.
@@ -17,10 +18,10 @@
 // • A transaction Bundle is returned; each resource gets a temporary id.
 
 const DEFINITION_EXTRACT_URL =
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtract';
+  FHIR.definitionExtract;
 
 const DEFINITION_EXTRACT_CONTEXT_URL =
-  'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtractContext';
+  FHIR.definitionExtractContext;
 
 /**
  * Check if a questionnaire item has the definitionExtract extension.
@@ -224,7 +225,7 @@ function buildResource(group, index) {
     resourceType: group.resourceType,
     id: `extracted-${group.resourceType.toLowerCase()}-${index + 1}`,
     meta: {
-      profile: [`http://hl7.org/fhir/StructureDefinition/${group.resourceType}`],
+      profile: [`${FHIR.sd}/${group.resourceType}`],
     },
   };
 
