@@ -25,8 +25,11 @@ import { serverConfig, CONFIG_KEYS } from '../server-config.js';
  */
 export async function initValidators(override = {}) {
   const _ls = (key, def) => {
-    try { const v = (typeof localStorage !== 'undefined') && localStorage.getItem('fhirqb.' + key); return v === null || v === false ? def : v !== 'false'; }
-    catch { return def; }
+    try {
+      if (typeof localStorage === 'undefined') return def;
+      const v = localStorage.getItem('fhirqb.' + key);
+      return v === null ? def : v !== 'false';
+    } catch { return def; }
   };
   const localEnabled    = override.localEnabled    ?? _ls('validate', true);
   const externalEnabled = override.externalEnabled ?? _ls('validateExternal', false);
