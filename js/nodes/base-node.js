@@ -41,6 +41,19 @@ export function createWrap() {
   return wrap;
 }
 
+// A descendant item is "relevant" to a container's aggregate pass/fail icon when
+// it carries something enforceable: a mandatory checkable answer, a read-only
+// calculated checkbox, a constraint, or a numeric min/max bound. When a group
+// (or composite item) has no relevant descendant, its AND/OR combination is a
+// no-op — so the "ALL/ANY items" badge and the child AND/OR separators are
+// meaningless and should be suppressed.
+export function isRelevantItem(node, rc) {
+  return (rc.isMandatory(node) && rc.CHECKABLE_TYPES.has(node.itemType)) ||
+    (node._calculatedExpr && node._readOnly && node.itemType === 'checkbox') ||
+    (node.constraint?.length > 0) ||
+    (node._minValue !== undefined || node._maxValue !== undefined);
+}
+
 // Safe allowlist for node._renderStyle — only these CSS properties are applied.
 const _STYLE_ALLOWLIST = new Set(['font-weight', 'font-style', 'color', 'font-size', 'text-decoration']);
 export function applyRenderStyle(el, raw) {
@@ -352,6 +365,17 @@ export class BaseNode {
   // Compute hasCondition / displayOk for the icon. Overridden in GroupNode and ItemNode.
   _evalCondition(_res, _rc) { return { hasCondition: false, displayOk: true }; }
 
+  // True when this container's own children govern its aggregate pass/fail — i.e.
+  // it has no calculatedExpression of its own AND has ≥1 enforceable descendant.
+  // When false, the AND/OR "ALL/ANY items" badge and the child AND/OR separators
+  // carry no meaning and are suppressed.
+  _hasChildLogic(rc) {
+    if (this._calculatedExpr) return false;
+    return rc.visible.some(r =>
+      r.node.type === 'item' && !r.disabled && !r.hidden &&
+      isDescendant(r.node.id, this) && isRelevantItem(r.node, rc));
+  }
+
   // Build linkId tag (same structure for all node types).
   _buildLinkIdTag(_rc) {
     const it = this.itemType;
@@ -529,13 +553,17 @@ export class BaseNode {
   // Used by both GroupNode and ItemNode (when it has sub-items).
   _appendChildRows(nested, rc) {
     const logic = this.logicWithParent || 'AND';
+    // Only draw AND/OR dividers when the AND/OR combination is meaningful — a
+    // group whose value is computed by its own expression, or that has no
+    // enforceable child, does not combine its children, so no separators.
+    const showSep = this._hasChildLogic(rc);
     let lastVisibleIsInfo = true; // treat start-of-list as "info" so first item gets no separator
     for (const ch of this.children) {
       const childRes = rc.resultMap.get(ch.id);
       if (childRes && childRes.hidden && (rc.previewMode === 'patient' || !rc.viewPrefs.showHiddenItems)) continue;
       if (childRes && (childRes.visible || childRes.showDimmed)) {
         const isInfo = ch.itemType === 'display' || (ch.type === 'group' && !ch.children?.length);
-        if (!isInfo && !lastVisibleIsInfo && childRes.visible) {
+        if (showSep && !isInfo && !lastVisibleIsInfo && childRes.visible) {
           const sep = document.createElement('div');
           sep.className = 'logic-separator logic-separator-' + logic.toLowerCase();
           sep.textContent = logic === 'OR'

@@ -25,11 +25,27 @@ async function addSecondItem(page, groupId) {
   return itemId;
 }
 
+// Mark an item Required via the States modal. The AND/OR "ALL/ANY items" badge
+// and the child separators only appear when a group has at least one enforceable
+// (required / constrained) child — so tests that assert on them must set one.
+async function makeRequired(page, nodeId) {
+  await page.keyboard.press('Escape'); // close any open type-selector dropdown
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-states');
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(page.getByTestId('statesModal')).toBeVisible();
+  await page.getByTestId('states-required-sel').click();
+  await page.locator('[data-testid="csel-drop"] [data-val="true"]').click();
+  await page.getByTestId('statesModalApply').click();
+  await expect(page.getByTestId('statesModal')).toBeHidden();
+}
+
 test.describe('Group AND/OR logic — preview reactivity', () => {
   test('default logic badge is "ALL items ✓" (AND)', async ({ page }) => {
     await freshStart(page);
     await addRootGroup(page);
     await addItemToGroup(page, '1');
+    await makeRequired(page, '1.1');
 
     const badge = page.locator('.preview-logic-badge').first();
     await expect(badge).toBeVisible();
@@ -41,6 +57,7 @@ test.describe('Group AND/OR logic — preview reactivity', () => {
     await addRootGroup(page);
     await addItemToGroup(page, '1');
     await addSecondItem(page, '1');
+    await makeRequired(page, '1.1');
 
     // Open the OR dropdown in the builder logic row
     const logicTrigger = page.locator('[data-node-id="1"]').getByTestId('group-logic-select');
@@ -58,6 +75,7 @@ test.describe('Group AND/OR logic — preview reactivity', () => {
     await addRootGroup(page);
     await addItemToGroup(page, '1');
     await addSecondItem(page, '1');
+    await makeRequired(page, '1.1');
 
     const logicTrigger = page.locator('[data-node-id="1"]').getByTestId('group-logic-select');
     await logicTrigger.click();
@@ -72,6 +90,7 @@ test.describe('Group AND/OR logic — preview reactivity', () => {
     await addRootGroup(page);
     await addItemToGroup(page, '1');
     await addSecondItem(page, '1');
+    await makeRequired(page, '1.1');
 
     const logicTrigger = page.locator('[data-node-id="1"]').getByTestId('group-logic-select');
 
@@ -195,6 +214,7 @@ test.describe('calculatedExpression — annual-health-check fixture', () => {
 
     // Close any open type-selector dropdown left from adding items
     await page.keyboard.press('Escape');
+    await makeRequired(page, '1.1');
 
     const logicTrigger = group.getByTestId('group-logic-select');
     await logicTrigger.click();
@@ -218,6 +238,7 @@ test.describe('calculatedExpression — annual-health-check fixture', () => {
 
     // Close any open dropdown before interacting with logic select
     await page.keyboard.press('Escape');
+    await makeRequired(page, '1.1');
 
     const logicTrigger = group.getByTestId('group-logic-select');
     await logicTrigger.click();

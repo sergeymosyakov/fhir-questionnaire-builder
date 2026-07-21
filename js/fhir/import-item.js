@@ -576,6 +576,17 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     );
     const groupCtrlCode = groupCtrlExt?.valueCodeableConcept?.coding?.[0]?.code;
     if (groupCtrlCode) node._itemControl = groupCtrlCode;
+    // SDC calculatedExpression / initialExpression — a group can carry its own
+    // computed value (its children then don't determine it). Mirror the leaf-item
+    // import so it round-trips instead of being silently dropped.
+    const groupCalcExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression'
+    );
+    if (groupCalcExt?.valueExpression) node._calculatedExpr = groupCalcExt.valueExpression.expression || '';
+    const groupInitExt = (fhirItem.extension || []).find(
+      e => e.url === 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression'
+    );
+    if (groupInitExt?.valueExpression) node._initialExpr = groupInitExt.valueExpression.expression || '';
     // Preserve any unrecognised extensions for round-trip pass-through
     const groupUnknown = _collectUnknownExtensions(fhirItem);
     if (groupUnknown) node._unknownExtensions = groupUnknown;

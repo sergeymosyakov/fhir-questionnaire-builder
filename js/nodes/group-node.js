@@ -12,7 +12,7 @@ import { GTableRenderer } from './gtable-renderer.js';
 // Optional FHIR-imported properties set after construction:
 //   _collapsible, _renderXhtml, _renderStyle, _prefix, _definition,
 //   _codes, _supportLinks, _hidden, _designNote, _unknownExtensions
-import { BaseNode } from './base-node.js';
+import { BaseNode, isRelevantItem } from './base-node.js';
 import { isDescendant } from '../utils.js';
 
 export class GroupNode extends BaseNode {
@@ -37,15 +37,21 @@ export class GroupNode extends BaseNode {
 
   // ── Condition icon logic for groups ──────────────────────────────────────
   _evalCondition(res, rc) {
+    // A group with its own calculatedExpression is a computed value — its
+    // children do not determine it, so don't aggregate them. Reflect the group's
+    // own state instead: honour its own constraint if present, otherwise show no
+    // aggregate icon.
+    if (this._calculatedExpr) {
+      if (this.constraint?.length) {
+        const { ctx, cEnv } = rc;
+        return { hasCondition: true, displayOk: rc.evalConstraints(this, ctx.fp, ctx.qr, cEnv) };
+      }
+      return { hasCondition: false, displayOk: true };
+    }
     const descendantItems = rc.visible.filter(r =>
       r.node.type === 'item' && !r.disabled && !r.hidden && isDescendant(r.node.id, this)
     );
-    const relevantItems = descendantItems.filter(r =>
-      (rc.isMandatory(r.node) && rc.CHECKABLE_TYPES.has(r.node.itemType)) ||
-      (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox') ||
-      r.node.constraint?.length > 0 ||
-      (r.node._minValue !== undefined || r.node._maxValue !== undefined)
-    );
+    const relevantItems = descendantItems.filter(r => isRelevantItem(r.node, rc));
     if (relevantItems.length === 0) return { hasCondition: false, displayOk: true };
     const { ctx, cEnv } = rc;
     const itemOk = k => k.ok && rc.calcFormOk(k.node) &&
@@ -62,18 +68,25 @@ export class GroupNode extends BaseNode {
     const entry = rc.groupIconMap.get(this.id);
     if (!entry) return;
     const { icon, descendants } = entry;
-    const relevant = descendants.filter(r =>
-      (rc.isMandatory(r.node) && rc.CHECKABLE_TYPES.has(r.node.itemType)) ||
-      (r.node._calculatedExpr && r.node._readOnly && r.node.itemType === 'checkbox') ||
-      r.node.constraint?.length > 0 ||
-      (r.node._minValue !== undefined || r.node._maxValue !== undefined)
-    );
+    const { ctx } = rc;
+    // Calculated group: its own expression drives it, children are irrelevant.
+    if (this._calculatedExpr) {
+      if (this.constraint?.length) {
+        const ok = rc.evalConstraints(this, ctx.fp, ctx.qr, ctx.envVars || {});
+        icon.className   = ok ? 'icon-ok' : 'icon-fail';
+        icon.textContent = ok ? '\u2713' : '\u2717';
+      } else {
+        icon.className   = 'icon-ok';
+        icon.textContent = '\u2713';
+      }
+      return;
+    }
+    const relevant = descendants.filter(r => isRelevantItem(r.node, rc));
     if (relevant.length === 0) {
       icon.className   = 'icon-ok';
       icon.textContent = '\u2713';
       return;
     }
-    const { ctx } = rc;
     const itemOk = k => k.ok && rc.calcFormOk(k.node) &&
       (!k.node.constraint?.length || rc.evalConstraints(k.node, ctx.fp, ctx.qr, ctx.envVars || {}));
     const ok = this.logicWithParent === 'OR'
@@ -141,16 +154,11 @@ export class GroupNode extends BaseNode {
     }
 
     if (!isPatient && !isEmptyGroup) {
-      // Show logic badge only when there is at least one answerable descendant.
-      // Recurse into child groups so nested display-only subtrees are also suppressed.
-      function hasAnswerableDescendant(nodes) {
-        return nodes.some(ch => {
-          if (ch.itemType === 'display') return false;
-          if (ch.type === 'group') return ch.children?.length ? hasAnswerableDescendant(ch.children) : false;
-          return true; // any non-display item counts
-        });
-      }
-      if (hasAnswerableDescendant(this.children)) {
+      // Show the AND/OR "ALL/ANY items" badge only when the group's children
+      // actually govern its pass/fail — i.e. it has no calculatedExpression of
+      // its own and has at least one enforceable descendant. Otherwise the badge
+      // is meaningless (nothing is being combined).
+      if (this._hasChildLogic(rc)) {
         const isOr = this.logicWithParent === 'OR';
         const lb = document.createElement('span');
         lb.className = 'preview-logic-badge preview-logic-' + (isOr ? 'or' : 'and');

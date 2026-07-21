@@ -95,4 +95,32 @@ test.describe('AND/OR separator logic', () => {
     const g3Row = page.locator('[data-preview-id="g3"]');
     await expect(g3Row.locator('.preview-logic-badge')).toBeVisible();
   });
+
+  // ── g4: optional (unconstrained) answerable items — nothing enforced ─────
+
+  test('g4: no separators when the group has no enforceable child', async ({ page }) => {
+    // o1/o2 are answerable but optional and unconstrained — the AND/OR
+    // combination is a no-op, so no dividers are drawn.
+    const g4Nested = page.locator('[data-preview-id="g4"] + .preview-nested');
+    await expect(page.locator('[data-preview-id="o1"]')).toBeVisible();
+    await expect(g4Nested.locator('.logic-separator')).toHaveCount(0);
+  });
+
+  test('g4: no ALL/ANY items badge for an optional group', async ({ page }) => {
+    const g4Row = page.locator('[data-preview-id="g4"]');
+    await expect(g4Row.locator('.preview-logic-badge')).toHaveCount(0);
+  });
+
+  // ── g5: group value computed by its own expression — children irrelevant ─
+
+  test('g5: no badge or separators when the group value is computed', async ({ page }) => {
+    // Even though cc1/cc2 are required, the group has its own
+    // calculatedExpression, so its children do not determine it: no badge, no
+    // AND/OR dividers.
+    const g5Row = page.locator('[data-preview-id="g5"]');
+    const g5Nested = page.locator('[data-preview-id="g5"] + .preview-nested');
+    await expect(page.locator('[data-preview-id="cc1"]')).toBeVisible();
+    await expect(g5Row.locator('.preview-logic-badge')).toHaveCount(0);
+    await expect(g5Nested.locator('.logic-separator')).toHaveCount(0);
+  });
 });

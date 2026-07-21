@@ -9,10 +9,10 @@
       "text": "Group: answerable, display between two answerables, answerable",
       "type": "group",
       "item": [
-        { "linkId": "q1", "text": "Question one",   "type": "boolean" },
-        { "linkId": "q2", "text": "Question two",   "type": "boolean" },
+        { "linkId": "q1", "text": "Question one",   "type": "boolean", "required": true },
+        { "linkId": "q2", "text": "Question two",   "type": "boolean", "required": true },
         { "linkId": "d1", "text": "NOTE: Info between q2 and q3.", "type": "display" },
-        { "linkId": "q3", "text": "Question three", "type": "boolean" }
+        { "linkId": "q3", "text": "Question three", "type": "boolean", "required": true }
       ]
     },
     {
@@ -29,9 +29,33 @@
       "text": "Group with only answerable items",
       "type": "group",
       "item": [
-        { "linkId": "qa", "text": "Answer item A", "type": "boolean" },
-        { "linkId": "qb", "text": "Answer item B", "type": "boolean" },
-        { "linkId": "qc", "text": "Answer item C", "type": "boolean" }
+        { "linkId": "qa", "text": "Answer item A", "type": "boolean", "required": true },
+        { "linkId": "qb", "text": "Answer item B", "type": "boolean", "required": true },
+        { "linkId": "qc", "text": "Answer item C", "type": "boolean", "required": true }
+      ]
+    },
+    {
+      "linkId": "g4",
+      "text": "Group with only optional (unconstrained) answerable items",
+      "type": "group",
+      "item": [
+        { "linkId": "o1", "text": "Optional one", "type": "boolean" },
+        { "linkId": "o2", "text": "Optional two", "type": "boolean" }
+      ]
+    },
+    {
+      "linkId": "g5",
+      "text": "Group whose own value is computed by an expression",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+          "valueExpression": { "language": "text/fhirpath", "expression": "1 + 1" }
+        }
+      ],
+      "item": [
+        { "linkId": "cc1", "text": "Child one", "type": "boolean", "required": true },
+        { "linkId": "cc2", "text": "Child two", "type": "boolean", "required": true }
       ]
     }
   ]
