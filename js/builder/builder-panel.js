@@ -51,7 +51,7 @@ export class BuilderPanel {
     this._container = document.querySelector('[data-mount="tree-container"]');
     const addRootGroupBtn  = document.querySelector('[data-mount="add-root-group-btn"]');
     addRootGroupBtn.onclick = () => this.addRootGroup();
-    new RenumberControl({ renumberAll: () => this.renumberAll() });
+    this._renumberControl = new RenumberControl({ renumberAll: () => this.renumberAll() });
   }
 
   renderTree() {
