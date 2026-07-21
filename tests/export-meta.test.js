@@ -2,6 +2,10 @@
 // Shares the same mock setup as export.test.js.
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
+import { FHIR } from '../js/fhir/urls/fhir.js';
+import { LOINC_URL } from '../js/fhir/urls/loinc.js';
+import { SNOMED_URL } from '../js/fhir/urls/snomed.js';
+import { W3C_URL } from '../js/fhir/urls/w3c.js';
 
 const _tree = [];
 const _questVariables = [];
@@ -250,7 +254,7 @@ describe('buildFHIRObject — questMeta', () => {
   });
 
   it('exports versionAlgorithmCoding (R5 native) when set', () => {
-    _questMeta._versionAlgorithmCoding = { system: 'http://hl7.org/fhir/version-algorithm', code: 'semver' };
+    _questMeta._versionAlgorithmCoding = { system: FHIR.versionAlgorithm, code: 'semver' };
     const q = buildFHIRObject();
     expect(q.versionAlgorithmCoding.code).toBe('semver');
   });
@@ -378,13 +382,13 @@ describe('buildFHIRObject — Questionnaire.text (Narrative)', () => {
   });
 
   it('when _rawText is set, preserves status exactly', () => {
-    _questMeta._rawText = { status: 'extensions', div: '<div xmlns="http://www.w3.org/1999/xhtml">custom</div>' };
+    _questMeta._rawText = { status: 'extensions', div: `<div xmlns="${W3C_URL.xhtml}">custom</div>` };
     const q = buildFHIRObject();
     expect(q.text.status).toBe('extensions');
   });
 
   it('when _rawText is set, preserves div unchanged', () => {
-    const div = '<div xmlns="http://www.w3.org/1999/xhtml"><p>Custom narrative</p></div>';
+    const div = `<div xmlns="${W3C_URL.xhtml}"><p>Custom narrative</p></div>`;
     _questMeta._rawText = { status: 'generated', div };
     const q = buildFHIRObject();
     expect(q.text.div).toBe(div);
@@ -409,19 +413,19 @@ describe('buildFHIRObject — Questionnaire.text (Narrative)', () => {
 // ── _codes round-trip ─────────────────────────────────────────────────────────
 describe('buildFHIRObject — _codes', () => {
   it('exports item.code[] when _codes is set', () => {
-    const codes = [{ system: 'http://loinc.org', code: '44249-1', display: 'PHQ-9 total' }];
+    const codes = [{ system: LOINC_URL.system, code: '44249-1', display: 'PHQ-9 total' }];
     const q = build([{ id: 'q1', type: 'item', itemType: 'number', title: 'Score', _codes: codes }]);
     expect(q.item[0].code).toEqual(codes);
   });
 
   it('exports multiple codes', () => {
     const codes = [
-      { system: 'http://loinc.org', code: '44249-1', display: 'PHQ-9 total' },
-      { system: 'http://snomed.info/sct', code: '720433000' },
+      { system: LOINC_URL.system, code: '44249-1', display: 'PHQ-9 total' },
+      { system: SNOMED_URL.system, code: '720433000' },
     ];
     const q = build([{ id: 'q1', type: 'item', itemType: 'text', title: 'Q', _codes: codes }]);
     expect(q.item[0].code).toHaveLength(2);
-    expect(q.item[0].code[1].system).toBe('http://snomed.info/sct');
+    expect(q.item[0].code[1].system).toBe(SNOMED_URL.system);
   });
 
   it('omits item.code[] when _codes is empty', () => {
@@ -470,7 +474,7 @@ describe('buildFHIRObject — _rawCode pass-through', () => {
   afterEach(() => { _questMeta._rawCode = null; });
 
   it('writes Questionnaire.code[] back when _rawCode is set', () => {
-    const codes = [{ system: 'http://loinc.org', code: '44249-1', display: 'Test' }];
+    const codes = [{ system: LOINC_URL.system, code: '44249-1', display: 'Test' }];
     _questMeta._rawCode = codes;
     const q = buildFHIRObject();
     expect(q.code).toEqual(codes);
@@ -537,7 +541,7 @@ describe('buildFHIRObject — multi-initial for repeating items', () => {
 
 // ── sdc-questionnaire-entryFormat ────────────────────────────────────────────
 describe('buildFHIRObject — entryFormat', () => {
-  const EF_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat';
+  const EF_URL = FHIR.entryFormatSdc;
 
   it('exports _entryFormat as sdc-questionnaire-entryFormat extension', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _entryFormat: 'MM/DD/YYYY' }]);
@@ -563,7 +567,7 @@ describe('buildFHIRObject — entryFormat', () => {
 
 // ── questionnaire-choiceOrientation ──────────────────────────────────────────
 describe('buildFHIRObject — choiceOrientation', () => {
-  const CO_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation';
+  const CO_URL = FHIR.choiceOrientation;
 
   it('exports _choiceOrientation=vertical as valueCode extension', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A', _choiceOrientation: 'vertical' }]);
@@ -589,7 +593,7 @@ describe('buildFHIRObject — choiceOrientation', () => {
 
 // ── sdc-questionnaire-choiceColumn ───────────────────────────────────────────
 describe('buildFHIRObject — choiceColumn', () => {
-  const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn';
+  const CC_URL = FHIR.choiceColumn;
 
   it('exports _choiceColumns as complex extensions', () => {
     const q = build([{
@@ -619,7 +623,7 @@ describe('buildFHIRObject — choiceColumn', () => {
 
 // ── questionnaire-displayCategory ────────────────────────────────────────────
 describe('buildFHIRObject — displayCategory', () => {
-  const DC_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory';
+  const DC_URL = FHIR.displayCategory;
 
   it('suppresses displayCategory on display-type items (R4 only allows it on groups)', () => {
     const q = build([{ id: 'd1', type: 'item', title: 'Info', itemType: 'display', _displayCategory: 'instructions' }]);

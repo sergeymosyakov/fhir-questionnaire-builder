@@ -1,5 +1,6 @@
 // ── Unit tests: format registry (versionRegistry facade + per-format builds) ─
 import { describe, it, expect, beforeEach } from 'vitest';
+import { FHIR } from '../js/fhir/urls/fhir.js';
 
 const VERSION_EXT_URL =
   'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/builder-target-version';
@@ -172,12 +173,12 @@ describe('R4 format', () => {
   });
 
   it('downgrades R5-only root fields to official artifact-* extensions', () => {
-    const ARTIFACT_VERSION_ALGO_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm';
-    const ARTIFACT_COPYRIGHT_LABEL_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel';
+    const ARTIFACT_VERSION_ALGO_URL    = FHIR.artifactVersionAlgorithm;
+    const ARTIFACT_COPYRIGHT_LABEL_URL = FHIR.artifactCopyrightLabel;
     const base = {
       resourceType: 'Questionnaire',
       copyrightLabel: 'All rights reserved',
-      versionAlgorithmCoding: { system: 'http://hl7.org/fhir/version-algorithm', code: 'semver' },
+      versionAlgorithmCoding: { system: FHIR.versionAlgorithm, code: 'semver' },
       item: [],
     };
     const result = fmt.build(base);
@@ -190,7 +191,7 @@ describe('R4 format', () => {
   });
 
   it('downgrades a string-form versionAlgorithm to a valueString extension', () => {
-    const ARTIFACT_VERSION_ALGO_URL = 'http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm';
+    const ARTIFACT_VERSION_ALGO_URL = FHIR.artifactVersionAlgorithm;
     const base = { resourceType: 'Questionnaire', versionAlgorithmString: '%version1 > %version2', item: [] };
     const result = fmt.build(base);
     expect(result.versionAlgorithmString).toBeUndefined();

@@ -3,6 +3,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { buildQR as _buildQR } from '../js/fhir/qr-builder.js';
+import { FHIR } from '../js/fhir/urls/fhir.js';
 
 // The store now represents answers as a tree { linkId: [rows] }. These tests were
 // written with scalar value maps { linkId: value }; wrap scalars into single-row
@@ -258,7 +259,7 @@ describe('buildQR — type to value[x] mapping', () => {
 });
 
 // ── ordinalValue in QR answers ────────────────────────────────────────────────
-const ORDINAL_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+const ORDINAL_URL = FHIR.ordinalValue;
 
 describe('buildQR — ordinalValue in valueCoding answers', () => {
   const mkChoiceFhir = answerOption => ({

@@ -3,6 +3,8 @@ import { describe, it, expect } from 'vitest';
 import { parseCSV } from '../js/fhir/converters/redcap/parse-csv.js';
 import { toFHIR }   from '../js/fhir/converters/redcap/to-fhir.js';
 import { fromFHIR } from '../js/fhir/converters/redcap/from-fhir.js';
+import { FHIR } from '../js/fhir/urls/fhir.js';
+import { APP_URL } from '../js/fhir/urls/app.js';
 
 // ── Minimal CSV builder ───────────────────────────────────────────────────────
 const H = 'Variable / Field Name,Form Name,Section Header,Field Type,Field Label,"Choices, Calculations, OR Slider Labels",Field Note,Text Validation Type OR Show Slider Number,Text Validation Min,Text Validation Max,Identifier?,Branching Logic (Show field only if...),Required Field?,Custom Alignment,Question Number (surveys only),Matrix Group Name,Matrix Ranking?,Field Annotation';
@@ -80,7 +82,7 @@ describe('toFHIR', () => {
     const item = q.item[0].item[0];
     expect(item.type).toBe('integer');
     const ctrl = item.extension?.find(e =>
-      e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl');
+      e.url === FHIR.itemControl);
     expect(ctrl?.valueCodeableConcept?.coding?.[0]?.code).toBe('slider');
   });
 
@@ -98,7 +100,7 @@ describe('toFHIR', () => {
     const q = make([mkrow('total', 'f', 'calc', 'Total', '[a] + [b]')]);
     const item = q.item[0].item[0];
     expect(item.type).toBe('decimal');
-    const ext = item.extension?.find(e => e.url === 'http://fhir-qb.app/redcap/calc-expression');
+    const ext = item.extension?.find(e => e.url === APP_URL.redcapNs + 'calc-expression');
     expect(ext?.valueString).toBe('[a] + [b]');
   });
 
@@ -118,7 +120,7 @@ describe('toFHIR', () => {
     // Mixed AND/OR is too complex to convert
     const q = make([mkrow('q2', 'f', 'text', 'Q2', '', { branch: "[a] = '1' AND [b] = '2' OR [c] = '3'" })]);
     const item = q.item[0].item[0];
-    const ext = item.extension?.find(e => e.url === 'http://fhir-qb.app/redcap/branching-logic');
+    const ext = item.extension?.find(e => e.url === APP_URL.redcapNs + 'branching-logic');
     expect(ext?.valueString).toContain('AND');
   });
 
@@ -135,8 +137,8 @@ describe('toFHIR', () => {
   it('sets min/max value extensions', () => {
     const q = make([mkrow('age', 'f', 'text', 'Age', '', { valid: 'integer', vmin: '0', vmax: '120' })]);
     const item = q.item[0].item[0];
-    const minExt = item.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/minValue');
-    const maxExt = item.extension?.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxValue');
+    const minExt = item.extension?.find(e => e.url === FHIR.minValue);
+    const maxExt = item.extension?.find(e => e.url === FHIR.maxValue);
     expect(minExt?.valueInteger).toBe(0);
     expect(maxExt?.valueInteger).toBe(120);
   });
@@ -166,7 +168,7 @@ describe('toFHIR', () => {
 
   it('stores annotation as extension', () => {
     const q = make([mkrow('q1', 'f', 'text', 'Q1', '', { ann: '@HIDDEN' })]);
-    const ext = q.item[0].item[0].extension?.find(e => e.url === 'http://fhir-qb.app/redcap/annotation');
+    const ext = q.item[0].item[0].extension?.find(e => e.url === APP_URL.redcapNs + 'annotation');
     expect(ext?.valueString).toBe('@HIDDEN');
   });
 });
@@ -185,7 +187,7 @@ describe('fromFHIR', () => {
       resourceType: 'Questionnaire',
       item: [{
         linkId: 'my_form', text: 'My Form', type: 'group',
-        extension: [{ url: 'http://fhir-qb.app/redcap/form-name', valueString: 'My Form' }],
+        extension: [{ url: APP_URL.redcapNs + 'form-name', valueString: 'My Form' }],
         item: [{
           linkId: 'age', text: 'Age', type: 'string',
         }],
@@ -201,7 +203,7 @@ describe('fromFHIR', () => {
     const q = {
       resourceType: 'Questionnaire',
       item: [{ linkId: 'f', text: 'F', type: 'group',
-        extension: [{ url: 'http://fhir-qb.app/redcap/form-name', valueString: 'f' }],
+        extension: [{ url: APP_URL.redcapNs + 'form-name', valueString: 'f' }],
         item: [{ linkId: 'ok', text: 'OK?', type: 'boolean' }],
       }],
     };
@@ -213,7 +215,7 @@ describe('fromFHIR', () => {
     const q = {
       resourceType: 'Questionnaire',
       item: [{ linkId: 'f', text: 'F', type: 'group',
-        extension: [{ url: 'http://fhir-qb.app/redcap/form-name', valueString: 'f' }],
+        extension: [{ url: APP_URL.redcapNs + 'form-name', valueString: 'f' }],
         item: [{
           linkId: 'gender', text: 'Gender', type: 'choice',
           answerOption: [
@@ -232,7 +234,7 @@ describe('fromFHIR', () => {
     const q = {
       resourceType: 'Questionnaire',
       item: [{ linkId: 'f', text: 'F', type: 'group',
-        extension: [{ url: 'http://fhir-qb.app/redcap/form-name', valueString: 'f' }],
+        extension: [{ url: APP_URL.redcapNs + 'form-name', valueString: 'f' }],
         item: [{ linkId: 'name', text: 'Name', type: 'string', required: true }],
       }],
     };

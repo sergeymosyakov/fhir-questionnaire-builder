@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { LOINC_URL } from '../js/fhir/urls/loinc.js';
 
 // validate.js calls window.fhirpath for FHIRPath syntax checks.
 // Provide a minimal stub so the module loads in Node.
@@ -481,14 +482,14 @@ describe('validateTree — que-11 initial + answerOption conflict', () => {
 // ── que-3: display items cannot have code[] ───────────────────────────────────
 describe('validateTree — que-3 display item with code[]', () => {
   it('warns when display item has _codes', () => {
-    const item = makeItem({ id: 'q1', itemType: 'display', _codes: [{ system: 'http://loinc.org', code: '1234-5' }] });
+    const item = makeItem({ id: 'q1', itemType: 'display', _codes: [{ system: LOINC_URL.system, code: '1234-5' }] });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
     expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-3|code\[\]/))).toBeTruthy();
   });
 
   it('no warning when non-display item has _codes', () => {
-    const item = makeItem({ id: 'q1', itemType: 'text', _codes: [{ system: 'http://loinc.org', code: '1234-5' }] });
+    const item = makeItem({ id: 'q1', itemType: 'text', _codes: [{ system: LOINC_URL.system, code: '1234-5' }] });
     const issues = validateTree([item]);
     expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/que-3/))).toHaveLength(0);
   });

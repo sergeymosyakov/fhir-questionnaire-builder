@@ -2,6 +2,7 @@
 // Shares the same mock setup as import.test.js.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { FHIR } from '../js/fhir/urls/fhir.js';
 
 globalThis.CustomEvent = class CustomEvent {
   constructor(type, init) { this.type = type; this.detail = init?.detail; }
@@ -43,9 +44,9 @@ vi.mock('../js/ui/toast.js', () => ({ showError: vi.fn(), showWarn: vi.fn() }));
 // ── group import (fhirItemToNode group branch) ────────────────────────────────
 describe('importFHIR — group items', () => {
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'Test', item: items });
-  const CONSTRAINT_URL  = 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint';
-  const SUPPORT_URL     = 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink';
-  const HIDDEN_URL_SDC  = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden';
+  const CONSTRAINT_URL  = FHIR.constraint;
+  const SUPPORT_URL     = FHIR.supportLink;
+  const HIDDEN_URL_SDC  = FHIR.hiddenSdc;
   const ITLH_KEY_GROUP_OR = 'e3a8c2f1-6b4d-4e9a-87c5:group-or';
 
   it('sets logicWithParent=OR when group-or constraint key is detected', () => {
@@ -128,7 +129,7 @@ describe('importFHIR — unknown extensions', () => {
   it('does not collect known extensions (e.g. minLength) as unknown', () => {
     importFHIR(minQ([{
       linkId: 'q1', type: 'string', text: 'Q',
-      extension: [{ url: 'http://hl7.org/fhir/StructureDefinition/minLength', valueInteger: 3 }],
+      extension: [{ url: FHIR.minLength, valueInteger: 3 }],
     }]));
     expect(_tree[0]._unknownExtensions).toBeUndefined();
     expect(_tree[0]._minLength).toBe(3);
@@ -138,7 +139,7 @@ describe('importFHIR — unknown extensions', () => {
     importFHIR(minQ([{
       linkId: 'q1', type: 'string', text: 'Q',
       extension: [
-        { url: 'http://hl7.org/fhir/StructureDefinition/minLength', valueInteger: 2 },
+        { url: FHIR.minLength, valueInteger: 2 },
         { url: 'http://vendor.example.com/custom', valueString: 'val' },
       ],
     }]));
@@ -167,7 +168,7 @@ describe('importFHIR — unknown extensions', () => {
 
 // ── replaces extension ────────────────────────────────────────────────────────
 describe('importFHIR — replaces extension', () => {
-  const REPLACES_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
+  const REPLACES_URL = FHIR.replaces;
   beforeEach(() => { _tree.splice(0); _questMeta.replaces = []; });
 
   const minQ = (exts = []) => ({
@@ -210,7 +211,7 @@ describe('importFHIR — replaces extension', () => {
 
 // ── sdc-questionnaire-collapsible ─────────────────────────────────────────────
 describe('importFHIR — sdc-questionnaire-collapsible', () => {
-  const COLL_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible';
+  const COLL_URL = FHIR.collapsible;
   beforeEach(() => { _tree.splice(0); });
 
   const minQ = items => ({ resourceType: 'Questionnaire', title: 'T', item: items });
@@ -254,7 +255,7 @@ describe('importFHIR — sdc-questionnaire-collapsible', () => {
 
 // ── sdc-questionnaire-openLabel ───────────────────────────────────────────────
 describe('importFHIR — sdc-questionnaire-openLabel', () => {
-  const OL_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel';
+  const OL_URL = FHIR.openLabel;
   beforeEach(() => { _tree.splice(0); });
 
   const minQ = items => ({ resourceType: 'Questionnaire', title: 'T', item: items });
@@ -292,7 +293,7 @@ describe('importFHIR — sdc-questionnaire-openLabel', () => {
 
 // ── designNote ───────────────────────────────────────────────────────────────
 describe('importFHIR — designNote', () => {
-  const DN_URL = 'http://hl7.org/fhir/StructureDefinition/designNote';
+  const DN_URL = FHIR.designNote;
   beforeEach(() => { _tree.splice(0); });
   const minQ = items => ({ resourceType: 'Questionnaire', title: 'T', item: items });
 
@@ -346,7 +347,7 @@ describe('importFHIR — designNote', () => {
 
 // ── answerExpression import ───────────────────────────────────────────────────
 describe('importFHIR — answerExpression', () => {
-  const AE_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression';
+  const AE_URL = FHIR.answerExpression;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
 
   beforeEach(() => { _tree.splice(0); });
@@ -494,7 +495,7 @@ describe('importFHIR — columnCount', () => {
 
 // ── regex ──────────────────────────────────────────────────────────────────
 describe('_regex', () => {
-  const RX_URL = 'http://hl7.org/fhir/StructureDefinition/regex';
+  const RX_URL = FHIR.regex;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
 
   beforeEach(() => { _tree.splice(0); });
@@ -524,7 +525,7 @@ describe('_regex', () => {
 
 // ── optionExclusive ─────────────────────────────────────────────────────────
 describe('_optionExclusives', () => {
-  const OE_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive';
+  const OE_URL = FHIR.optionExclusive;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
 
   beforeEach(() => { _tree.splice(0); });
@@ -553,7 +554,7 @@ describe('_optionExclusives', () => {
 
 // ── usageMode ──────────────────────────────────────────────────────────────
 describe('usageMode', () => {
-  const UM_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode';
+  const UM_URL = FHIR.usageMode;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
   beforeEach(() => { _tree.splice(0); });
 
@@ -575,7 +576,7 @@ describe('usageMode', () => {
 
 // ── itemMedia ──────────────────────────────────────────────────────────────
 describe('itemMedia', () => {
-  const IM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia';
+  const IM_URL = FHIR.itemMedia;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
   beforeEach(() => { _tree.splice(0); });
 
@@ -587,7 +588,7 @@ describe('itemMedia', () => {
 
 // ── itemWeight (answerOption-level) ────────────────────────────────────────
 describe('itemWeight', () => {
-  const IW_URL = 'http://hl7.org/fhir/StructureDefinition/itemWeight';
+  const IW_URL = FHIR.itemWeight;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
   beforeEach(() => { _tree.splice(0); });
 
@@ -620,7 +621,7 @@ describe('itemWeight', () => {
 
 // ── referenceFilter ───────────────────────────────────────────────────────────
 describe('referenceFilter', () => {
-  const RF_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter';
+  const RF_URL = FHIR.referenceFilter;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
   beforeEach(() => { _tree.splice(0); });
 
@@ -640,7 +641,7 @@ describe('referenceFilter', () => {
 
 // ── referenceProfile ──────────────────────────────────────────────────────────
 describe('referenceProfile', () => {
-  const RP_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile';
+  const RP_URL = FHIR.referenceProfile;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
   beforeEach(() => { _tree.splice(0); });
 
@@ -663,7 +664,7 @@ describe('referenceProfile', () => {
 
 // ── signatureRequired (item-level) ────────────────────────────────────────────
 describe('signatureRequired (item)', () => {
-  const SIG_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired';
+  const SIG_URL = FHIR.signatureRequired;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
   beforeEach(() => { _tree.splice(0); });
 
@@ -737,8 +738,8 @@ describe('import answerConstraint', () => {
 
 // ── questionnaire-baseType / questionnaire-fhirType ───────────────────────────
 describe('import baseType / fhirType', () => {
-  const BASE_TYPE_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType';
-  const FHIR_TYPE_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType';
+  const BASE_TYPE_URL = FHIR.baseType;
+  const FHIR_TYPE_URL = FHIR.fhirType;
   const minQ = (items = []) => ({ resourceType: 'Questionnaire', title: 'T', item: items });
   beforeEach(() => { _tree.splice(0); });
 
@@ -785,14 +786,14 @@ describe('import baseType / fhirType', () => {
 
 // ── versionAlgorithm[x] / copyrightLabel (R5 native + R4 artifact extensions) ──
 describe('import versionAlgorithm / copyrightLabel', () => {
-  const VA_EXT = 'http://hl7.org/fhir/StructureDefinition/artifact-versionAlgorithm';
-  const CL_EXT = 'http://hl7.org/fhir/StructureDefinition/artifact-copyrightLabel';
+  const VA_EXT = FHIR.artifactVersionAlgorithm;
+  const CL_EXT = FHIR.artifactCopyrightLabel;
   const q = (extra = {}) => ({ resourceType: 'Questionnaire', title: 'T', item: [], ...extra });
   beforeEach(() => { _tree.splice(0); });
 
   it('reads R5 native versionAlgorithmCoding + copyrightLabel', () => {
     importFHIR(q({
-      versionAlgorithmCoding: { system: 'http://hl7.org/fhir/version-algorithm', code: 'semver' },
+      versionAlgorithmCoding: { system: FHIR.versionAlgorithm, code: 'semver' },
       copyrightLabel: 'All rights reserved',
     }));
     expect(_questMeta._versionAlgorithmCoding.code).toBe('semver');
@@ -809,7 +810,7 @@ describe('import versionAlgorithm / copyrightLabel', () => {
   it('reads R4 artifact-versionAlgorithm + artifact-copyrightLabel extensions', () => {
     importFHIR(q({
       extension: [
-        { url: VA_EXT, valueCoding: { system: 'http://hl7.org/fhir/version-algorithm', code: 'integer' } },
+        { url: VA_EXT, valueCoding: { system: FHIR.versionAlgorithm, code: 'integer' } },
         { url: CL_EXT, valueString: 'Some rights reserved' },
       ],
     }));

@@ -5,6 +5,9 @@
 // usageMode, itemMedia, itemWeight).
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
+import { FHIR } from '../js/fhir/urls/fhir.js';
+import { LOINC_URL } from '../js/fhir/urls/loinc.js';
+import { UCUM_URL } from '../js/fhir/urls/ucum.js';
 
 const _tree = [];
 const _questVariables = [];
@@ -62,7 +65,7 @@ describe('buildFHIRObject — _renderXhtml', () => {
 
 // ── questionnaire-supportLink ─────────────────────────────────────────────────
 describe('buildFHIRObject — _supportLinks', () => {
-  const SL_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink';
+  const SL_URL = FHIR.supportLink;
 
   it('exports a single support link as one extension entry', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text',
@@ -100,7 +103,7 @@ describe('buildFHIRObject — _supportLinks', () => {
 
 // ── sdc-questionnaire-hidden ───────────────────────────────────────────────────
 describe('buildFHIRObject — _hidden', () => {
-  const HIDDEN_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden';
+  const HIDDEN_URL = FHIR.hiddenSdc;
 
   it('exports sdc-questionnaire-hidden = true when _hidden is set', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _hidden: true }]);
@@ -131,7 +134,7 @@ describe('buildFHIRObject — _hidden', () => {
 });
 
 describe('buildFHIRObject — _minLength', () => {
-  const ML_URL = 'http://hl7.org/fhir/StructureDefinition/minLength';
+  const ML_URL = FHIR.minLength;
 
   it('exports minLength as SDC extension with valueInteger', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _minLength: 5 }]);
@@ -155,7 +158,7 @@ describe('buildFHIRObject — _minLength', () => {
 
 // ── sliderStepValue ───────────────────────────────────────────────────────────
 describe('buildFHIRObject — _sliderStep', () => {
-  const SLIDER_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue';
+  const SLIDER_URL = FHIR.sliderStepValue;
 
   it('exports integer slider step as valueInteger', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'integer', _sliderStep: 5 }]);
@@ -176,7 +179,7 @@ describe('buildFHIRObject — _sliderStep', () => {
 
 // ── maxDecimalPlaces ──────────────────────────────────────────────────────────
 describe('buildFHIRObject — _maxDecimalPlaces', () => {
-  const MDP_URL = 'http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces';
+  const MDP_URL = FHIR.maxDecimalPlaces;
 
   it('exports maxDecimalPlaces as valueInteger', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _maxDecimalPlaces: 2 }]);
@@ -255,7 +258,7 @@ describe('buildFHIRObject — resource meta', () => {
 
 // ── maxValue ──────────────────────────────────────────────────────────────────
 describe('buildFHIRObject — _maxValue', () => {
-  const MAX_URL = 'http://hl7.org/fhir/StructureDefinition/maxValue';
+  const MAX_URL = FHIR.maxValue;
 
   it('exports integer _maxValue as valueInteger', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'integer', _maxValue: 100 }]);
@@ -272,8 +275,8 @@ describe('buildFHIRObject — _maxValue', () => {
 
 // ── minOccurs / maxOccurs ─────────────────────────────────────────────────────
 describe('buildFHIRObject — minOccurs/maxOccurs', () => {
-  const MIN_OCC = 'http://hl7.org/fhir/StructureDefinition/questionnaire-minOccurs';
-  const MAX_OCC = 'http://hl7.org/fhir/StructureDefinition/questionnaire-maxOccurs';
+  const MIN_OCC = FHIR.minOccurs;
+  const MAX_OCC = FHIR.maxOccurs;
 
   it('exports minOccurs when repeats=true, required=true, and _minOccurs is set', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: true, required: true, _minOccurs: 2 }]);
@@ -315,7 +318,7 @@ describe('buildFHIRObject — minOccurs/maxOccurs', () => {
 
 // ── _minValue ─────────────────────────────────────────────────────────────────
 describe('buildFHIRObject — _minValue', () => {
-  const MIN_URL = 'http://hl7.org/fhir/StructureDefinition/minValue';
+  const MIN_URL = FHIR.minValue;
 
   it('exports integer _minValue as valueInteger', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'integer', _minValue: 1 }]);
@@ -332,7 +335,7 @@ describe('buildFHIRObject — _minValue', () => {
 
 // ── _optionOrdinals ───────────────────────────────────────────────────────────
 describe('buildFHIRObject — _optionOrdinals', () => {
-  const ORD_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+  const ORD_URL = FHIR.ordinalValue;
 
   it('adds ordinalValue extension to answerOption when _optionOrdinals is set', () => {
     const q = build([{
@@ -358,8 +361,8 @@ describe('buildFHIRObject — _optionOrdinals', () => {
 
 // ── _optionPrefixes ───────────────────────────────────────────────────────────
 describe('buildFHIRObject — _optionPrefixes', () => {
-  const PFX_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix';
-  const ORD_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+  const PFX_URL = FHIR.optionPrefix;
+  const ORD_URL = FHIR.ordinalValue;
 
   it('adds questionnaire-optionPrefix extension to answerOption', () => {
     const q = build([{
@@ -414,13 +417,13 @@ describe('buildFHIRObject — _optionSystems', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'select',
       options: 'a=Option A,b=Option B',
-      _optionSystems: { a: 'http://example.org/codes', b: 'http://loinc.org' },
+      _optionSystems: { a: 'http://example.org/codes', b: LOINC_URL.system },
     }]);
     const opts = q.item[0].answerOption || [];
     const optA = opts.find(o => o.valueCoding?.code === 'a');
     const optB = opts.find(o => o.valueCoding?.code === 'b');
     expect(optA?.valueCoding?.system).toBe('http://example.org/codes');
-    expect(optB?.valueCoding?.system).toBe('http://loinc.org');
+    expect(optB?.valueCoding?.system).toBe(LOINC_URL.system);
   });
 
   it('omits system in valueCoding when _optionSystems is absent', () => {
@@ -457,11 +460,11 @@ describe('buildFHIRObject — _optionSystems', () => {
 
 // ── referenceResource / quantityUnit / calculatedExpr / initialExpr ───────────
 describe('buildFHIRObject — reference, quantity, expr extensions', () => {
-  const REF_URL      = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource';
-  const UNIT_URL     = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit';
-  const UNIT_OPT_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption';
-  const CALC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression';
-  const INIT_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression';
+  const REF_URL      = FHIR.referenceResource;
+  const UNIT_URL     = FHIR.unit;
+  const UNIT_OPT_URL = FHIR.unitOption;
+  const CALC_URL = FHIR.calculatedExpression;
+  const INIT_URL = FHIR.initialExpression;
 
   it('exports referenceResource for reference item type', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference', referenceResource: 'Patient' }]);
@@ -494,15 +497,15 @@ describe('buildFHIRObject — reference, quantity, expr extensions', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'quantity',
       _unitOptions: [
-        { system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' },
-        { system: 'http://unitsofmeasure.org', code: '[lb_av]', display: 'lb' },
+        { system: UCUM_URL.system, code: 'kg', display: 'kg' },
+        { system: UCUM_URL.system, code: '[lb_av]', display: 'lb' },
       ],
     }]);
     const ext = q.item[0].extension || [];
     const uoExts = ext.filter(e => e.url === UNIT_OPT_URL);
     expect(uoExts).toHaveLength(2);
-    expect(uoExts[0].valueCoding).toEqual({ system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' });
-    expect(uoExts[1].valueCoding).toEqual({ system: 'http://unitsofmeasure.org', code: '[lb_av]', display: 'lb' });
+    expect(uoExts[0].valueCoding).toEqual({ system: UCUM_URL.system, code: 'kg', display: 'kg' });
+    expect(uoExts[1].valueCoding).toEqual({ system: UCUM_URL.system, code: '[lb_av]', display: 'lb' });
   });
 
   it('does not emit unitOption when _unitOptions is absent', () => {
@@ -575,7 +578,7 @@ describe('_unknownExtensions pass-through', () => {
     const q = build([node]);
     const ext = q.item[0].extension;
     expect(ext.length).toBeGreaterThanOrEqual(2);
-    const minLen = ext.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/minLength');
+    const minLen = ext.find(e => e.url === FHIR.minLength);
     const custom = ext.find(e => e.url === 'http://vendor.example.com/custom');
     expect(minLen).toBeDefined();
     expect(custom).toBeDefined();
@@ -603,7 +606,7 @@ describe('_unknownExtensions pass-through', () => {
 
 // ── maxSize (attachment) ──────────────────────────────────────────────────────
 describe('buildFHIRObject — _maxFileSizeMB', () => {
-  const MS_URL = 'http://hl7.org/fhir/StructureDefinition/maxSize';
+  const MS_URL = FHIR.maxSize;
 
   it('exports maxFileSizeMB as maxSize extension with valueDecimal', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment', _maxFileSizeMB: 5 }]);
@@ -633,7 +636,7 @@ describe('buildFHIRObject — _maxFileSizeMB', () => {
 
 // ── mimeType (attachment) ─────────────────────────────────────────────────────
 describe('buildFHIRObject — _mimeTypes', () => {
-  const MT_URL = 'http://hl7.org/fhir/StructureDefinition/mimeType';
+  const MT_URL = FHIR.mimeType;
 
   it('exports each mimeType as a separate extension entry with valueCode', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment', _mimeTypes: ['image/jpeg', 'application/pdf'] }]);
@@ -667,14 +670,14 @@ describe('buildFHIRObject — _mimeTypes', () => {
   it('can export both maxFileSizeMB and mimeTypes on the same item', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'attachment', _maxFileSizeMB: 5, _mimeTypes: ['image/jpeg'] }]);
     const ext = q.item[0].extension || [];
-    expect(ext.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/maxSize')?.valueDecimal).toBe(5);
+    expect(ext.find(e => e.url === FHIR.maxSize)?.valueDecimal).toBe(5);
     expect(ext.find(e => e.url === MT_URL)?.valueCode).toBe('image/jpeg');
   });
 });
 
 // ── replaces extension ────────────────────────────────────────────────────────
 describe('buildFHIRObject — replaces extension', () => {
-  const REPLACES_URL = 'http://hl7.org/fhir/StructureDefinition/replaces';
+  const REPLACES_URL = FHIR.replaces;
   afterEach(() => { _questMeta.replaces = []; });
 
   it('exports a single replaces URL as one extension entry', () => {
@@ -721,7 +724,7 @@ describe('buildFHIRObject — replaces extension', () => {
 
 // ── sdc-questionnaire-collapsible ─────────────────────────────────────────────
 describe('buildFHIRObject — sdc-questionnaire-collapsible', () => {
-  const COLL_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible';
+  const COLL_URL = FHIR.collapsible;
 
   it('exports default-closed as valueCode on a group', () => {
     const q = build([{ id: 'g1', type: 'group', title: 'G', _collapsible: 'default-closed', children: [] }]);
@@ -751,7 +754,7 @@ describe('buildFHIRObject — sdc-questionnaire-collapsible', () => {
 
 // ── sdc-questionnaire-openLabel ───────────────────────────────────────────────
 describe('buildFHIRObject — sdc-questionnaire-openLabel', () => {
-  const OL_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel';
+  const OL_URL = FHIR.openLabel;
 
   it('exports openLabel as valueString on open-choice', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'open-choice', _openLabel: 'Other (please specify)' }]);
@@ -774,7 +777,7 @@ describe('buildFHIRObject — sdc-questionnaire-openLabel', () => {
 
 // ── designNote ───────────────────────────────────────────────────────────────
 describe('buildFHIRObject — designNote', () => {
-  const DN_URL = 'http://hl7.org/fhir/StructureDefinition/designNote';
+  const DN_URL = FHIR.designNote;
   const build = nodes => { _tree.splice(0, _tree.length, ...nodes); return buildFHIRObject(); };
 
   it('exports _designNote on item as valueMarkdown extension', () => {
@@ -806,7 +809,7 @@ describe('buildFHIRObject — designNote', () => {
 
 // ── answerExpression export ───────────────────────────────────────────────────
 describe('buildFHIRObject — answerExpression', () => {
-  const AE_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression';
+  const AE_URL = FHIR.answerExpression;
   const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
 
   it('exports _answerExpression as valueExpression extension', () => {
@@ -928,7 +931,7 @@ describe('buildFHIRObject — columnCount', () => {
 
 // ── regex ──────────────────────────────────────────────────────────────────
 describe('buildFHIRObject — _regex', () => {
-  const RX_URL = 'http://hl7.org/fhir/StructureDefinition/regex';
+  const RX_URL = FHIR.regex;
 
   it('exports regex extension when _regex is set', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _regex: '^[A-Z]+$' }]);
@@ -946,7 +949,7 @@ describe('buildFHIRObject — _regex', () => {
 
 // ── optionExclusive ─────────────────────────────────────────────────────────
 describe('buildFHIRObject — _optionExclusives', () => {
-  const OE_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive';
+  const OE_URL = FHIR.optionExclusive;
 
   it('exports optionExclusive extension on the matching answerOption', () => {
     const q = build([{
@@ -981,7 +984,7 @@ describe('buildFHIRObject — _optionExclusives', () => {
 
 // ── usageMode ──────────────────────────────────────────────────────────────
 describe('usageMode export', () => {
-  const UM_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode';
+  const UM_URL = FHIR.usageMode;
 
   it('exports _usageMode as valueCode extension', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _usageMode: 'capture' }]);
@@ -998,7 +1001,7 @@ describe('usageMode export', () => {
 
 // ── itemMedia ──────────────────────────────────────────────────────────────
 describe('itemMedia export', () => {
-  const IM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia';
+  const IM_URL = FHIR.itemMedia;
 
   it('exports _itemMedia as valueAttachment', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _itemMedia: { url: 'https://ex.com/i.png', contentType: 'image/png' } }]);
@@ -1009,7 +1012,7 @@ describe('itemMedia export', () => {
 
 // ── itemWeight (answerOption level) ────────────────────────────────────────
 describe('itemWeight export', () => {
-  const IW_URL = 'http://hl7.org/fhir/StructureDefinition/itemWeight';
+  const IW_URL = FHIR.itemWeight;
 
   it('exports _optionWeights as itemWeight extension on answerOption', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A,b=B', _optionWeights: { a: 1.5, b: 3 } }]);
@@ -1027,7 +1030,7 @@ describe('itemWeight export', () => {
   });
 
   it('exports answerMedia on raw answerOptions', () => {
-    const AM_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia';
+    const AM_URL = FHIR.answerMedia;
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A',
       _rawAnswerOptions: [{ valueCoding: { code: 'a', display: 'A' } }],
@@ -1040,7 +1043,7 @@ describe('itemWeight export', () => {
 
 // ── referenceFilter ───────────────────────────────────────────────────────────
 describe('referenceFilter export', () => {
-  const RF_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter';
+  const RF_URL = FHIR.referenceFilter;
 
   it('exports _referenceFilter as extension', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference', _referenceFilter: "status = 'active'" }]);
@@ -1057,7 +1060,7 @@ describe('referenceFilter export', () => {
 
 // ── referenceProfile ──────────────────────────────────────────────────────────
 describe('referenceProfile export', () => {
-  const RP_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile';
+  const RP_URL = FHIR.referenceProfile;
 
   it('exports _referenceProfiles as repeating extension', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference', _referenceProfiles: ['http://ex.com/P1', 'http://ex.com/P2'] }]);
@@ -1076,7 +1079,7 @@ describe('referenceProfile export', () => {
 
 // ── signatureRequired (item-level) ────────────────────────────────────────────
 describe('signatureRequired export (item)', () => {
-  const SIG_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired';
+  const SIG_URL = FHIR.signatureRequired;
 
   it('exports _signatureRequired as repeating extension', () => {
     const q = build([{
@@ -1118,8 +1121,8 @@ describe('answerConstraint export (item)', () => {
 
 // ── questionnaire-baseType / questionnaire-fhirType ───────────────────────────
 describe('buildFHIRObject — _baseType / _fhirType', () => {
-  const BASE_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-baseType';
-  const FHIR_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType';
+  const BASE_URL = FHIR.baseType;
+  const FHIR_URL = FHIR.fhirType;
 
   it('exports _baseType as questionnaire-baseType extension with valueCode', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string', _baseType: 'string' }]);

@@ -2,6 +2,10 @@
 // import.js depends on state.js (CDN) — mocked below.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { FHIR } from '../js/fhir/urls/fhir.js';
+import { LOINC_URL } from '../js/fhir/urls/loinc.js';
+import { SNOMED_URL } from '../js/fhir/urls/snomed.js';
+import { UCUM_URL } from '../js/fhir/urls/ucum.js';
 
 // DOM stub — import.js dispatches REINIT_FORM after tree is built
 globalThis.CustomEvent = class CustomEvent {
@@ -350,7 +354,7 @@ describe('applyVisibility', () => {
     applyVisibility(node, {
       enableWhen: [],
       extension: [{
-        url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression',
+        url: FHIR.enableWhenExpression,
         valueExpression: { language: 'text/fhirpath', expression: '%age > 18' }
       }]
     }, {});
@@ -451,7 +455,7 @@ describe('importFHIR', () => {
   });
 
   it('imports questionnaire-level SDC variables', () => {
-    const SDC_VAR_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable';
+    const SDC_VAR_URL = FHIR.variable;
     importFHIR(minQ([], [
       { url: SDC_VAR_URL, valueExpression: { name: 'bmi', expression: '%w/%h' } },
     ]));
@@ -651,19 +655,19 @@ describe('importFHIR', () => {
   // ── _codes import ───────────────────────────────────────────────────────────
   describe('_codes', () => {
     it('imports item.code[] into node._codes', () => {
-      const codes = [{ system: 'http://loinc.org', code: '44249-1', display: 'PHQ-9 total' }];
+      const codes = [{ system: LOINC_URL.system, code: '44249-1', display: 'PHQ-9 total' }];
       importFHIR(minQ([{ linkId: 'q1', type: 'decimal', text: 'Score', code: codes }]));
       expect(_tree[0]._codes).toEqual(codes);
     });
 
     it('imports multiple codes', () => {
       const codes = [
-        { system: 'http://loinc.org', code: '44249-1' },
-        { system: 'http://snomed.info/sct', code: '720433000', display: 'PHQ-9' },
+        { system: LOINC_URL.system, code: '44249-1' },
+        { system: SNOMED_URL.system, code: '720433000', display: 'PHQ-9' },
       ];
       importFHIR(minQ([{ linkId: 'q1', type: 'decimal', text: 'Score', code: codes }]));
       expect(_tree[0]._codes).toHaveLength(2);
-      expect(_tree[0]._codes[1].system).toBe('http://snomed.info/sct');
+      expect(_tree[0]._codes[1].system).toBe(SNOMED_URL.system);
     });
 
     it('does not set _codes when item.code[] is absent', () => {
@@ -705,7 +709,7 @@ describe('importFHIR', () => {
   // ── Questionnaire.code[] pass-through ──────────────────────────────────────
   describe('_rawCode pass-through', () => {
     it('stores Questionnaire.code[] as _rawCode', () => {
-      const code = [{ system: 'http://loinc.org', code: '44249-1', display: 'PHQ-9' }];
+      const code = [{ system: LOINC_URL.system, code: '44249-1', display: 'PHQ-9' }];
       importFHIR({ resourceType: 'Questionnaire', code, item: [] });
       expect(_questMeta._rawCode).toEqual(code);
     });
@@ -903,8 +907,8 @@ describe('importFHIR', () => {
 
   // ── sdc-questionnaire-entryFormat ────────────────────────────────────────
   describe('_entryFormat', () => {
-    const EF_URL     = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat';
-    const EF_URL_R4  = 'http://hl7.org/fhir/StructureDefinition/entryFormat';
+    const EF_URL     = FHIR.entryFormatSdc;
+    const EF_URL_R4  = FHIR.entryFormat;
 
     it('reads entryFormat valueString into node._entryFormat', () => {
       importFHIR(minQ([{
@@ -949,7 +953,7 @@ describe('importFHIR', () => {
 
   // ── questionnaire-choiceOrientation ──────────────────────────────────────
   describe('_choiceOrientation', () => {
-    const CO_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation';
+    const CO_URL = FHIR.choiceOrientation;
 
     it('reads vertical valueCode into node._choiceOrientation', () => {
       importFHIR(minQ([{
@@ -978,7 +982,7 @@ describe('importFHIR', () => {
 
   // ── sdc-questionnaire-choiceColumn ───────────────────────────────────────
   describe('_choiceColumns', () => {
-    const CC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn';
+    const CC_URL = FHIR.choiceColumn;
 
     it('reads multiple choiceColumn extensions into node._choiceColumns', () => {
       importFHIR(minQ([{
@@ -1012,7 +1016,7 @@ describe('importFHIR', () => {
 
   // ── questionnaire-displayCategory ────────────────────────────────────────
   describe('_displayCategory', () => {
-    const DC_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory';
+    const DC_URL = FHIR.displayCategory;
 
     it('reads instructions code into node._displayCategory', () => {
       importFHIR(minQ([{
@@ -1049,7 +1053,7 @@ describe('importFHIR', () => {
     it('reads rendering-xhtml into node._renderXhtml', () => {
       importFHIR(minQ([{
         linkId: 'q1', type: 'string', text: 'Plain',
-        _text: { extension: [{ url: 'http://hl7.org/fhir/StructureDefinition/rendering-xhtml', valueString: '<b>Bold</b>' }] }
+        _text: { extension: [{ url: FHIR.renderingXhtml, valueString: '<b>Bold</b>' }] }
       }]));
       expect(_tree[0]._renderXhtml).toBe('<b>Bold</b>');
     });
@@ -1058,8 +1062,8 @@ describe('importFHIR', () => {
       importFHIR(minQ([{
         linkId: 'q1', type: 'string', text: 'Mixed',
         _text: { extension: [
-          { url: 'http://hl7.org/fhir/StructureDefinition/rendering-style', valueString: 'color: red' },
-          { url: 'http://hl7.org/fhir/StructureDefinition/rendering-xhtml',  valueString: '<em>Mixed</em>' }
+          { url: FHIR.renderingStyle, valueString: 'color: red' },
+          { url: FHIR.renderingXhtml,  valueString: '<em>Mixed</em>' }
         ]}
       }]));
       expect(_tree[0]._renderStyle).toBe('color: red');
@@ -1074,7 +1078,7 @@ describe('importFHIR', () => {
 
   // ── questionnaire-supportLink ─────────────────────────────────────────────
   describe('_supportLinks import', () => {
-    const SL_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink';
+    const SL_URL = FHIR.supportLink;
 
     it('reads a single supportLink URI into _supportLinks array', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
@@ -1108,8 +1112,8 @@ describe('importFHIR', () => {
 
   // ── sdc-questionnaire-hidden ───────────────────────────────────────────────
   describe('_hidden import', () => {
-    const HIDDEN_URL    = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden';
-    const HIDDEN_URL_R4 = 'http://hl7.org/fhir/StructureDefinition/questionnaire-hidden';
+    const HIDDEN_URL    = FHIR.hiddenSdc;
+    const HIDDEN_URL_R4 = FHIR.hidden;
 
     it('sets _hidden = true for an item with sdc-questionnaire-hidden = true', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q',
@@ -1165,7 +1169,7 @@ describe('importFHIR', () => {
 
   // ── minLength ────────────────────────────────────────────────────────────
   describe('_minLength', () => {
-    const ML_URL = 'http://hl7.org/fhir/StructureDefinition/minLength';
+    const ML_URL = FHIR.minLength;
 
     it('reads minLength valueInteger into node._minLength', () => {
       importFHIR(minQ([{
@@ -1191,8 +1195,8 @@ describe('importFHIR', () => {
 
   // ── _minValue / _maxValue ─────────────────────────────────────────────────
   describe('_minValue / _maxValue', () => {
-    const MIN_URL = 'http://hl7.org/fhir/StructureDefinition/minValue';
-    const MAX_URL = 'http://hl7.org/fhir/StructureDefinition/maxValue';
+    const MIN_URL = FHIR.minValue;
+    const MAX_URL = FHIR.maxValue;
 
     it('reads minValue integer extension into _minValue', () => {
       importFHIR(minQ([{
@@ -1213,10 +1217,10 @@ describe('importFHIR', () => {
 
   // ── referenceResource / quantityUnit / calculatedExpr / initialExpr ────────
   describe('reference, quantity, calculated/initial expressions', () => {
-    const REF_URL  = 'http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource';
-    const UNIT_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit';
-    const CALC_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression';
-    const INIT_URL = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression';
+    const REF_URL  = FHIR.referenceResource;
+    const UNIT_URL = FHIR.unit;
+    const CALC_URL = FHIR.calculatedExpression;
+    const INIT_URL = FHIR.initialExpression;
 
     it('reads referenceResource from reference item', () => {
       importFHIR(minQ([{
@@ -1229,23 +1233,23 @@ describe('importFHIR', () => {
     it('reads quantityUnit from questionnaire-unit extension', () => {
       importFHIR(minQ([{
         linkId: 'q1', type: 'quantity', text: 'Q',
-        extension: [{ url: UNIT_URL, valueCoding: { code: 'kg', system: 'http://unitsofmeasure.org' } }],
+        extension: [{ url: UNIT_URL, valueCoding: { code: 'kg', system: UCUM_URL.system } }],
       }]));
       expect(_tree[0].quantityUnit).toBe('kg');
     });
 
     it('reads _unitOptions from questionnaire-unitOption extensions', () => {
-      const UO_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption';
+      const UO_URL = FHIR.unitOption;
       importFHIR(minQ([{
         linkId: 'q1', type: 'quantity', text: 'Q',
         extension: [
-          { url: UO_URL, valueCoding: { system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' } },
-          { url: UO_URL, valueCoding: { system: 'http://unitsofmeasure.org', code: '[lb_av]', display: 'lb' } },
+          { url: UO_URL, valueCoding: { system: UCUM_URL.system, code: 'kg', display: 'kg' } },
+          { url: UO_URL, valueCoding: { system: UCUM_URL.system, code: '[lb_av]', display: 'lb' } },
         ],
       }]));
       expect(_tree[0]._unitOptions).toHaveLength(2);
-      expect(_tree[0]._unitOptions[0]).toEqual({ system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' });
-      expect(_tree[0]._unitOptions[1]).toEqual({ system: 'http://unitsofmeasure.org', code: '[lb_av]', display: 'lb' });
+      expect(_tree[0]._unitOptions[0]).toEqual({ system: UCUM_URL.system, code: 'kg', display: 'kg' });
+      expect(_tree[0]._unitOptions[1]).toEqual({ system: UCUM_URL.system, code: '[lb_av]', display: 'lb' });
     });
 
     it('does not set _unitOptions when extension is absent', () => {
@@ -1272,7 +1276,7 @@ describe('importFHIR', () => {
 
   // ── _sliderStep ───────────────────────────────────────────────────────────
   describe('_sliderStep', () => {
-    const SLIDER_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue';
+    const SLIDER_URL = FHIR.sliderStepValue;
 
     it('reads sliderStepValue integer into _sliderStep', () => {
       importFHIR(minQ([{
@@ -1285,7 +1289,7 @@ describe('importFHIR', () => {
 
   // ── _maxDecimalPlaces ─────────────────────────────────────────────────────
   describe('_maxDecimalPlaces', () => {
-    const MDP_URL = 'http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces';
+    const MDP_URL = FHIR.maxDecimalPlaces;
 
     it('reads maxDecimalPlaces valueInteger into _maxDecimalPlaces', () => {
       importFHIR(minQ([{
@@ -1311,8 +1315,8 @@ describe('importFHIR', () => {
 
   // ── questionnaire-itemControl ─────────────────────────────────────────────
   describe('questionnaire-itemControl', () => {
-    const IC_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl';
-    const ic = code => ({ url: IC_URL, valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code }] } });
+    const IC_URL = FHIR.itemControl;
+    const ic = code => ({ url: IC_URL, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code }] } });
 
     it('check-box on choice → checklist itemType', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', extension: [ic('check-box')] }]));
@@ -1387,7 +1391,7 @@ describe('importFHIR', () => {
 
   // ── _maxFileSizeMB ────────────────────────────────────────────────────────
   describe('_maxFileSizeMB', () => {
-    const MS_URL = 'http://hl7.org/fhir/StructureDefinition/maxSize';
+    const MS_URL = FHIR.maxSize;
 
     it('reads maxSize valueDecimal into node._maxFileSizeMB', () => {
       importFHIR(minQ([{
@@ -1421,7 +1425,7 @@ describe('importFHIR', () => {
 
   // ── _mimeTypes ────────────────────────────────────────────────────────────
   describe('_mimeTypes', () => {
-    const MT_URL = 'http://hl7.org/fhir/StructureDefinition/mimeType';
+    const MT_URL = FHIR.mimeType;
 
     it('reads multiple mimeType extensions into node._mimeTypes array', () => {
       importFHIR(minQ([{
@@ -1469,7 +1473,7 @@ describe('importFHIR', () => {
 
   // ── _optionOrdinals ───────────────────────────────────────────────────────
   describe('_optionOrdinals', () => {
-    const ORD_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+    const ORD_URL = FHIR.ordinalValue;
 
     it('reads ordinalValue from answerOption.extension', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
@@ -1496,7 +1500,7 @@ describe('importFHIR', () => {
 
   // ── _optionPrefixes ───────────────────────────────────────────────────────
   describe('_optionPrefixes', () => {
-    const PFX_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-optionPrefix';
+    const PFX_URL = FHIR.optionPrefix;
 
     it('reads questionnaire-optionPrefix from answerOption.extension', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
@@ -1537,7 +1541,7 @@ describe('importFHIR', () => {
     });
 
     it('reads prefix alongside ordinalValue on the same option', () => {
-      const ORD_URL = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
+      const ORD_URL = FHIR.ordinalValue;
       importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
         answerOption: [{
           valueCoding: { code: 'a', display: 'Option A' },
@@ -1622,7 +1626,7 @@ describe('importFHIR', () => {
 
 // ── signatureRequired (root-level) ────────────────────────────────────────────
 describe('signatureRequired on Questionnaire root', () => {
-  const SIG_URL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired';
+  const SIG_URL = FHIR.signatureRequired;
   beforeEach(() => {
     _tree.splice(0);
     _questMeta._signatureRequired = [];

@@ -3,9 +3,13 @@
 
 import { describe, it, expect } from 'vitest';
 import { extractObservations } from '../js/fhir/extract.js';
+import { FHIR } from '../js/fhir/urls/fhir.js';
+import { LOINC_URL } from '../js/fhir/urls/loinc.js';
+import { SNOMED_URL } from '../js/fhir/urls/snomed.js';
+import { UCUM_URL } from '../js/fhir/urls/ucum.js';
 
-const OBS_EXT = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract';
-const UNIT    = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit';
+const OBS_EXT = FHIR.observationExtract;
+const UNIT    = FHIR.unit;
 
 function flag(value = true) {
   return { url: OBS_EXT, valueBoolean: value };
@@ -27,7 +31,7 @@ describe('extractObservations — basics', () => {
 
   it('extracts a flagged coded leaf as a final Observation', () => {
     const q = { resourceType: 'Questionnaire', item: [
-      { linkId: 'a', type: 'integer', code: [{ system: 'http://loinc.org', code: '1234-5', display: 'X' }], extension: [flag()] },
+      { linkId: 'a', type: 'integer', code: [{ system: LOINC_URL.system, code: '1234-5', display: 'X' }], extension: [flag()] },
     ] };
     const qr = { resourceType: 'QuestionnaireResponse', id: 'qr1', authored: '2026-06-15T10:00:00Z',
       subject: { reference: 'Patient/p1' }, item: [
@@ -38,7 +42,7 @@ describe('extractObservations — basics', () => {
     const obs = bundle.entry[0].resource;
     expect(obs.resourceType).toBe('Observation');
     expect(obs.status).toBe('final');
-    expect(obs.code.coding).toEqual([{ system: 'http://loinc.org', code: '1234-5', display: 'X' }]);
+    expect(obs.code.coding).toEqual([{ system: LOINC_URL.system, code: '1234-5', display: 'X' }]);
     expect(obs.valueInteger).toBe(5);
     expect(obs.subject).toEqual({ reference: 'Patient/p1' });
     expect(obs.effectiveDateTime).toBe('2026-06-15T10:00:00Z');
@@ -127,12 +131,12 @@ describe('extractObservations — value mapping', () => {
     const q = { resourceType: 'Questionnaire', item: [
       { linkId: 'w', type: 'decimal', code: [{ code: '29463-7' }], extension: [
         flag(),
-        { url: UNIT, valueCoding: { system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' } },
+        { url: UNIT, valueCoding: { system: UCUM_URL.system, code: 'kg', display: 'kg' } },
       ] },
     ] };
     const qr = { item: [{ linkId: 'w', answer: [{ valueDecimal: 72.5 }] }] };
     const obs = extractObservations(qr, q).entry[0].resource;
-    expect(obs.valueQuantity).toEqual({ value: 72.5, unit: 'kg', system: 'http://unitsofmeasure.org', code: 'kg' });
+    expect(obs.valueQuantity).toEqual({ value: 72.5, unit: 'kg', system: UCUM_URL.system, code: 'kg' });
     expect(obs.valueDecimal).toBeUndefined();
   });
 
@@ -140,9 +144,9 @@ describe('extractObservations — value mapping', () => {
     const q = { resourceType: 'Questionnaire', item: [
       { linkId: 's', type: 'choice', code: [{ code: '72166-2' }], extension: [flag()] },
     ] };
-    const qr = { item: [{ linkId: 's', answer: [{ valueCoding: { system: 'http://snomed.info/sct', code: '8517006', display: 'Ex-smoker' } }] }] };
+    const qr = { item: [{ linkId: 's', answer: [{ valueCoding: { system: SNOMED_URL.system, code: '8517006', display: 'Ex-smoker' } }] }] };
     const obs = extractObservations(qr, q).entry[0].resource;
-    expect(obs.valueCodeableConcept).toEqual({ coding: [{ system: 'http://snomed.info/sct', code: '8517006', display: 'Ex-smoker' }] });
+    expect(obs.valueCodeableConcept).toEqual({ coding: [{ system: SNOMED_URL.system, code: '8517006', display: 'Ex-smoker' }] });
   });
 
   it('maps string, boolean and date answers', () => {

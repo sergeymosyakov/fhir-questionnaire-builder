@@ -2,6 +2,7 @@
 // export.js imports reactive state — we mock ../js/state.js.
 
 import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { FHIR } from '../js/fhir/urls/fhir.js';
 
 // Minimal state mock — buildFHIRObject reads questDoc via _svc
 const _tree = [];
@@ -212,7 +213,7 @@ describe('buildFHIRObject — constraint', () => {
       }],
     }]);
     const ext = q.item[0].extension || [];
-    const c = ext.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint');
+    const c = ext.find(e => e.url === FHIR.constraint);
     expect(c).toBeDefined();
     expect(c.extension.find(e => e.url === 'key')?.valueId).toBe('bmi-ok');
     expect(c.extension.find(e => e.url === 'expression')?.valueString).toBe('%bmi < 50');
@@ -477,7 +478,7 @@ describe('buildFHIRObject — OR group constraint', () => {
       ],
     }]);
     const ext = q.item[0].extension || [];
-    const orExt = ext.find(e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint');
+    const orExt = ext.find(e => e.url === FHIR.constraint);
     expect(orExt).toBeDefined();
     const key = orExt.extension.find(e => e.url === 'key')?.valueId;
     expect(key).toMatch(/group-or/);
@@ -494,7 +495,7 @@ describe('buildFHIRObject — OR group constraint', () => {
     }]);
     const ext = q.item[0].extension || [];
     const orExt = ext.find(e =>
-      e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint' &&
+      e.url === FHIR.constraint &&
       e.extension?.find(x => x.url === 'key' && String(x.valueId).includes('group-or'))
     );
     expect(orExt).toBeUndefined();
@@ -507,7 +508,7 @@ describe('buildFHIRObject — OR group constraint', () => {
       children: [{ id: 'c1', type: 'item', title: 'A', itemType: 'text' }],
     }]);
     const allConstraints = (q.item[0].extension || []).filter(
-      e => e.url === 'http://hl7.org/fhir/StructureDefinition/questionnaire-constraint'
+      e => e.url === FHIR.constraint
     );
     expect(allConstraints).toHaveLength(2);
     const keys = allConstraints.map(c => c.extension.find(e => e.url === 'key')?.valueId);

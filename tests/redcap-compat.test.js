@@ -5,6 +5,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 globalThis.document = globalThis.document || { addEventListener: () => {} };
 
 import { REDCapCompatValidator } from '../js/fhir/validators/redcap-compat.js';
+import { FHIR } from '../js/fhir/urls/fhir.js';
+import { LOINC_URL } from '../js/fhir/urls/loinc.js';
+import { APP_URL } from '../js/fhir/urls/app.js';
 
 function makeQ(items) {
   return { resourceType: 'Questionnaire', item: items };
@@ -20,7 +23,7 @@ function item(linkId, text, type, extra = {}) {
   return { linkId, text, type, ...extra };
 }
 
-const RC = 'http://fhir-qb.app/redcap/';
+const RC = APP_URL.redcapNs;
 
 describe('REDCapCompatValidator', () => {
   let validator;
@@ -84,7 +87,7 @@ describe('REDCapCompatValidator', () => {
   it('warns on item.code', async () => {
     const q = makeQ([
       group('f', 'F', [
-        item('q1', 'Q1', 'string', { code: [{ system: 'http://loinc.org', code: '1234-5' }] }),
+        item('q1', 'Q1', 'string', { code: [{ system: LOINC_URL.system, code: '1234-5' }] }),
       ]),
     ]);
     const issues = await validator._run(q, [], {});
@@ -108,7 +111,7 @@ describe('REDCapCompatValidator', () => {
       group('f', 'F', [
         item('q1', 'Q1', 'choice', {
           extension: [{
-            url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression',
+            url: FHIR.answerExpression,
             valueExpression: { language: 'text/fhirpath', expression: '%choices' },
           }],
         }),
@@ -143,7 +146,7 @@ describe('REDCapCompatValidator', () => {
       group('f', 'F', [
         item('total', 'Total', 'decimal', {
           extension: [{
-            url: 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression',
+            url: FHIR.calculatedExpression,
             valueExpression: { language: 'text/fhirpath', expression: 'answers()' },
           }],
         }),

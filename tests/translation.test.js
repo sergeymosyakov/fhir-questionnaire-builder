@@ -1,11 +1,12 @@
 // ── Unit tests: translation import / export round-trip ───────────────────────
 import { describe, test, expect } from 'vitest';
+import { FHIR } from '../js/fhir/urls/fhir.js';
 
 // ── Import helpers ────────────────────────────────────────────────────────────
 // Replicate the _importTranslations and _exportTranslations logic in isolation
 // (no DOM, no module side-effects).
 
-const TRANSLATION_URL = 'http://hl7.org/fhir/StructureDefinition/translation';
+const TRANSLATION_URL = FHIR.translation;
 
 function importTranslations(q, translations) {
   const titleExts = (q._title?.extension || []).filter(e => e.url === TRANSLATION_URL);
