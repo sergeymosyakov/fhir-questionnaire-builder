@@ -290,7 +290,7 @@ export class ChoiceNode extends ItemNode {
       if (node._itemControl !== 'autocomplete' && node._itemControl !== 'lookup') {
         document.addEventListener('keydown', _onKey, true);
         const optEls = _optEls();
-        const sel = opts.findIndex(o => o.dataset.code === selected);
+        const sel = optEls.findIndex(o => o.dataset.code === selected);
         _setActive(sel >= 0 ? sel : 0);
       }
     };
@@ -321,7 +321,7 @@ export class RadioNode extends ItemNode {
     const wrap = createWrap();
 
     const opts = _evalAnswerOpts(node, ctx._fpCtx);
-    if (!optEls.length) {
+    if (!opts.length) {
       const msg = document.createElement('span');
       msg.className = 'radio-no-opts';
       msg.textContent = '(no options)';
@@ -487,7 +487,7 @@ export class ChecklistNode extends ItemNode {
     const wrap = createWrap();
 
     const opts = _evalAnswerOpts(node, ctx._fpCtx);
-    if (!optEls.length) {
+    if (!opts.length) {
       const msg = document.createElement('span');
       msg.className = 'radio-no-opts';
       msg.textContent = '(no options)';
