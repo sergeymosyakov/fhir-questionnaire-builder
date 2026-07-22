@@ -97,8 +97,8 @@ export function evaluateNode(node, ctx, results, _insideHidden = false, path = [
   // calculatedExpression still runs; they are excluded from PASS/FAIL validation.
   if (node._hidden || _insideHidden) {
     const isRoot = !!node._hidden && !_insideHidden;
-    const entry = { node, visible: true, ok: true, hidden: true, hiddenRoot: isRoot };
-    results.push(entry);
+    const hiddenEntry = { node, visible: true, ok: true, hidden: true, hiddenRoot: isRoot };
+    results.push(hiddenEntry);
     if (node.children?.length) {
       for (const ch of node.children) evaluateNode(ch, ctx, results, true, path);
     }

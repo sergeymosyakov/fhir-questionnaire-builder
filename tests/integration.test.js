@@ -26,9 +26,9 @@ function makeRealFp() {
       // Flatten all items recursively
       function flatItems(items) {
         const out = [];
-        for (const it of (items || [])) {
-          out.push(it);
-          if (it.item) out.push(...flatItems(it.item));
+        for (const fhirItem of (items || [])) {
+          out.push(fhirItem);
+          if (fhirItem.item) out.push(...flatItems(fhirItem.item));
         }
         return out;
       }

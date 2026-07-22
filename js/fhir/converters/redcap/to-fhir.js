@@ -55,8 +55,8 @@ function parseChoices(choices) {
   return choices.split('|').map(part => {
     const comma = part.indexOf(',');
     if (comma === -1) {
-      const code = part.trim();
-      return { valueCoding: { code, display: code } };
+      const itemCode = part.trim();
+      return { valueCoding: { code: itemCode, display: itemCode } };
     }
     const code    = part.slice(0, comma).trim();
     const display = part.slice(comma + 1).trim();

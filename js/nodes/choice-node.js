@@ -96,28 +96,28 @@ export class ChoiceNode extends ItemNode {
     // Keyboard navigation (standard dropdown): highlight an option and pick it.
     const _optEls = () => dropEl ? [...dropEl.querySelectorAll('[role="option"]')] : [];
     const _setActive = (idx) => {
-      const opts = _optEls();
-      if (!opts.length) return;
-      _activeIdx = Math.max(0, Math.min(idx, opts.length - 1));
-      opts.forEach((o, i) => {
+      const optEls = _optEls();
+      if (!optEls.length) return;
+      _activeIdx = Math.max(0, Math.min(idx, optEls.length - 1));
+      optEls.forEach((o, i) => {
         if (!o.id) o.id = _uid + '-opt-' + i;
         o.classList.toggle('oc-opt--active', i === _activeIdx);
       });
-      trigger.setAttribute('aria-activedescendant', opts[_activeIdx].id);
-      opts[_activeIdx].scrollIntoView({ block: 'nearest' });
+      trigger.setAttribute('aria-activedescendant', optEls[_activeIdx].id);
+      optEls[_activeIdx].scrollIntoView({ block: 'nearest' });
     };
     const _onKey = e => {
       if (!_open) return;
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); trigger.focus(); return; }
-      const opts = _optEls();
-      if (!opts.length) return;
+      const optEls = _optEls();
+      if (!optEls.length) return;
       if (e.key === 'ArrowDown')    { e.preventDefault(); e.stopPropagation(); _setActive(_activeIdx + 1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); _setActive(_activeIdx - 1); }
       else if (e.key === 'Home')    { e.preventDefault(); e.stopPropagation(); _setActive(0); }
-      else if (e.key === 'End')     { e.preventDefault(); e.stopPropagation(); _setActive(opts.length - 1); }
+      else if (e.key === 'End')     { e.preventDefault(); e.stopPropagation(); _setActive(optEls.length - 1); }
       else if (e.key === 'Enter') {
         e.preventDefault(); e.stopPropagation();
-        const el = opts[_activeIdx] || opts[0];
+        const el = optEls[_activeIdx] || opts[0];
         if (el && el.dataset.code !== undefined) _pick(el.dataset.code);
       }
     };
@@ -289,7 +289,7 @@ export class ChoiceNode extends ItemNode {
       // own text-input-focused behaviour.
       if (node._itemControl !== 'autocomplete' && node._itemControl !== 'lookup') {
         document.addEventListener('keydown', _onKey, true);
-        const opts = _optEls();
+        const optEls = _optEls();
         const sel = opts.findIndex(o => o.dataset.code === selected);
         _setActive(sel >= 0 ? sel : 0);
       }
@@ -321,7 +321,7 @@ export class RadioNode extends ItemNode {
     const wrap = createWrap();
 
     const opts = _evalAnswerOpts(node, ctx._fpCtx);
-    if (!opts.length) {
+    if (!optEls.length) {
       const msg = document.createElement('span');
       msg.className = 'radio-no-opts';
       msg.textContent = '(no options)';
@@ -487,7 +487,7 @@ export class ChecklistNode extends ItemNode {
     const wrap = createWrap();
 
     const opts = _evalAnswerOpts(node, ctx._fpCtx);
-    if (!opts.length) {
+    if (!optEls.length) {
       const msg = document.createElement('span');
       msg.className = 'radio-no-opts';
       msg.textContent = '(no options)';

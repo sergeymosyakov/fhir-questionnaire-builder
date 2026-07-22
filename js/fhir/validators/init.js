@@ -27,8 +27,8 @@ export async function initValidators(override = {}) {
   const _ls = (key, def) => {
     try {
       if (typeof localStorage === 'undefined') return def;
-      const v = localStorage.getItem('fhirqb.' + key);
-      return v === null ? def : v !== 'false';
+      const raw = localStorage.getItem('fhirqb.' + key);
+      return raw === null ? def : raw !== 'false';
     } catch { return def; }
   };
   const localEnabled    = override.localEnabled    ?? _ls('validate', true);

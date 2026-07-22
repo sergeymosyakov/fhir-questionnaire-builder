@@ -44,8 +44,8 @@ export class GroupNode extends BaseNode {
     // aggregate icon.
     if (this._calculatedExpr) {
       if (this.constraint?.length) {
-        const { ctx, cEnv } = rc;
-        return { hasCondition: true, displayOk: rc.evalConstraints(this, ctx.fp, ctx.qr, cEnv) };
+        const { ctx: rcCtx, cEnv: rcCEnv } = rc;
+        return { hasCondition: true, displayOk: rc.evalConstraints(this, rcCtx.fp, rcCtx.qr, rcCEnv) };
       }
       return { hasCondition: false, displayOk: true };
     }

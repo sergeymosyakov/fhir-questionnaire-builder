@@ -160,10 +160,10 @@ export class CopyPaste {
   _uniqueId(base, usedInBatch) {
     const existing = new Set(this._allLinkIds(this._questDoc.tree));
     if (usedInBatch) for (const id of usedInBatch) existing.add(id);
-    let id = base;
+    let candidate = base;
     let n = 2;
-    while (existing.has(id)) { id = base + '-' + n++; }
-    return id;
+    while (existing.has(candidate)) { candidate = base + '-' + n++; }
+    return candidate;
   }
 
   _rewriteIds(item, idMap) {

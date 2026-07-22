@@ -144,8 +144,8 @@ describe('evalCalcNodes', () => {
     const fpChain = {
       evaluate: (qr, expr) => {
         const readDec = (lid) => {
-          const it = (qr.item || []).find(i => i.linkId === lid);
-          return it?.answer?.[0]?.valueDecimal;
+          const fhirItem = (qr.item || []).find(i => i.linkId === lid);
+          return fhirItem?.answer?.[0]?.valueDecimal;
         };
         if (expr.includes("linkId='a'")) { const v = readDec('a'); return v !== undefined ? [v * 2] : []; }
         if (expr.includes("linkId='b'")) { const v = readDec('b'); return v !== undefined ? [v + 1] : []; }

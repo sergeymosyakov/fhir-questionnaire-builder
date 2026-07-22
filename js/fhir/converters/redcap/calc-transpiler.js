@@ -80,15 +80,15 @@ function extractLeftToken(s) {
   const last = s[s.length - 1];
   if (last === ')') {
     let depth = 0;
-    for (let i = s.length - 1; i >= 0; i--) {
-      if (s[i] === ')') depth++;
-      else if (s[i] === '(') { depth--; if (depth === 0) return { left: s.slice(i), prefix: s.slice(0, i) }; }
+    for (let ci = s.length - 1; ci >= 0; ci--) {
+      if (s[ci] === ')') depth++;
+      else if (s[ci] === '(') { depth--; if (depth === 0) return { left: s.slice(ci), prefix: s.slice(0, ci) }; }
     }
     return { left: s, prefix: '' };
   }
-  let i = s.length - 1;
-  while (i >= 0 && /[\w.]/.test(s[i])) i--;
-  return { left: s.slice(i + 1), prefix: s.slice(0, i + 1) };
+  let ci = s.length - 1;
+  while (ci >= 0 && /[\w.]/.test(s[ci])) ci--;
+  return { left: s.slice(ci + 1), prefix: s.slice(0, ci + 1) };
 }
 
 /**

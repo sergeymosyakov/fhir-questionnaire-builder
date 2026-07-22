@@ -778,7 +778,7 @@ describe('buildFHIRObject — sdc-questionnaire-openLabel', () => {
 // ── designNote ───────────────────────────────────────────────────────────────
 describe('buildFHIRObject — designNote', () => {
   const DN_URL = FHIR.designNote;
-  const build = nodes => { _tree.splice(0, _tree.length, ...nodes); return buildFHIRObject(); };
+  const buildQ = nodes => { _tree.splice(0, _tree.length, ...nodes); return buildFHIRObject(); };
 
   it('exports _designNote on item as valueMarkdown extension', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'string', _designNote: 'Check this.' }]);
