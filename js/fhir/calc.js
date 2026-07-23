@@ -99,7 +99,16 @@ export function evalCalcNodes(nodes, qr, fp, values, envVars = {}, base = null, 
       if (qrMap && fhirMap) {
         const qrItem = qrMap.get(node.id);
         const fhirItem = fhirMap.get(node.id);
-        if (qrItem && fhirItem) qrItem.answer = [buildAnswer(fhirItem, value)];
+        if (qrItem && fhirItem) {
+          const answer = buildAnswer(fhirItem, value);
+          // Preserve nested child answers (answer[0].item) for parent items that
+          // have children — buildAnswer() only carries the value, so without this
+          // the write-back would drop the child answers, corrupting the QR (and
+          // any expression / downstream calc that traverses answer.item).
+          const prevItem = qrItem.answer?.[0]?.item;
+          if (prevItem) answer.item = prevItem;
+          qrItem.answer = [answer];
+        }
       }
     } catch (_e) {
       // silently skip nodes whose expression fails

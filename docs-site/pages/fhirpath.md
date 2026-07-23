@@ -74,6 +74,16 @@ short example of the kind of expression you might write:
 %age > 18 and %gender = 'male'
 ```
 
+## Testing expressions (FHIRPath tester)
+
+To try an expression without wiring it into an item, open **⚙ Settings ▾ → 🧪
+FHIRPath tester…**. A small console opens above the preview and evaluates whatever
+you type against the **current** `QuestionnaireResponse` — the same runtime the
+preview uses — with `%resource` and all questionnaire `%variables` in scope,
+showing the result (or a parse error) live. Because it sits above the form, you
+can keep editing answers with it open and watch the value change, e.g.
+`%resource.descendants().where(linkId='bmi').answer.valueDecimal`.
+
 ---
 
 Next: [Extensions & SDC](extensions-sdc.md).

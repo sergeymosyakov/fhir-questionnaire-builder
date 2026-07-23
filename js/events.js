@@ -76,6 +76,7 @@ export const AppEvents = Object.freeze({
   // detail: { lang: string } — BCP-47 code, e.g. 'es', 'fr', '' = source lang
   LANGUAGE_CHANGED:    'language-changed',
   TRANSLATE_REQUESTED: 'translate-requested',
+  FHIRPATH_TESTER_REQUESTED: 'fhirpath-tester-requested',
 
   // ── Builder utilities ──────────────────────────────────────────────────────
   // Dispatched by nodes/modals when they change FHIR data that requires

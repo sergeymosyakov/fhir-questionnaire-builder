@@ -1,0 +1,72 @@
+/* ── FHIRPath console (dev-console block above the preview) ──────────────────── */
+.fhirpath-console[hidden] { display: none !important; }
+.fhirpath-console {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--c-border, #e5e7eb);
+  border-radius: 10px;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 10px 12px 12px;
+  margin: 0 0 10px;
+}
+
+.fhirpath-console-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fhirpath-console-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+.fhirpath-count {
+  font-size: 11px;
+  color: #94a3b8;
+  flex: 1;
+}
+.fhirpath-close {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  color: #94a3b8;
+  padding: 2px 4px;
+}
+.fhirpath-close:hover { color: #f8fafc; }
+
+.fhirpath-input {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  background: #1e293b;
+  color: #e2e8f0;
+}
+.fhirpath-input::placeholder { color: #64748b; }
+.fhirpath-input:focus { outline: 2px solid #3b82f6; outline-offset: 0; }
+
+.fhirpath-result {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #1e293b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow: auto;
+  color: #a7f3d0;
+}
+.fhirpath-result:empty { display: none; }
+.fhirpath-result--error { background: #3f1d1d; color: #fca5a5; }

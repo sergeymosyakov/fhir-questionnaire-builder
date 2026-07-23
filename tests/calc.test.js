@@ -115,6 +115,29 @@ describe('evalCalcNodes', () => {
     expect(values.inner).toBe(true);
   });
 
+  it('preserves nested child answers (answer[0].item) when writing back a parent calc value', () => {
+    // Regression: a readOnly boolean parent with children (its own value is
+    // computed) must keep answer[0].item after write-back — otherwise the QR is
+    // corrupted and any expression traversing answer.item (or a downstream calc)
+    // sees the children as gone.
+    const base = { item: [
+      { linkId: 'p', type: 'boolean', item: [{ linkId: 'c', type: 'boolean' }] },
+    ] };
+    const qr = { resourceType: 'QuestionnaireResponse', item: [
+      { linkId: 'p', answer: [{ item: [{ linkId: 'c', answer: [{ valueBoolean: true }] }] }] },
+    ] };
+    const tree = [
+      { id: 'p', type: 'item', itemType: 'checkbox', _calculatedExpr: 'true', _readOnly: true,
+        children: [{ id: 'c', type: 'item', itemType: 'checkbox', children: [] }] },
+    ];
+    const values = {};
+    evalCalcNodes(tree, qr, fpMock, values, {}, base);
+    const p = qr.item.find(i => i.linkId === 'p');
+    expect(p.answer[0].valueBoolean).toBe(true);                    // value written back
+    expect(p.answer[0].item?.[0]?.linkId).toBe('c');               // children preserved
+    expect(p.answer[0].item[0].answer[0].valueBoolean).toBe(true); // child answer intact
+  });
+
   it('does not crash on expression error, leaves value undefined', () => {
     const fpBad = { evaluate: vi.fn(() => { throw new Error('bad expr'); }) };
     const nodes = [{ id: 'q1', type: 'item', itemType: 'checkbox', _calculatedExpr: 'bad', _readOnly: true }];

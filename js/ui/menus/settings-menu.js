@@ -62,8 +62,7 @@ export class SettingsMenu extends DropdownMenu {
       this._expandItem,
       this._collapseItem,
       this._sep(),
-      this._item('translateItem', '🌐 Translate questionnaire\u2026', 'translate-item'),
-    );
+      this._item('translateItem', '🌐 Translate questionnaire\u2026', 'translate-item'),      this._item('fhirpathTesterItem', '🧪 FHIRPath tester…', 'fhirpath-tester-item'),    );
 
     // Keep menu open on checkbox toggle
     [this._tipsRow, this._autosaveRow, this._validateLocalRow, this._validateExternalRow]
@@ -109,6 +108,11 @@ export class SettingsMenu extends DropdownMenu {
     this._menu.querySelector('[data-testid="translate-item"]')?.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       document.dispatchEvent(new CustomEvent(AppEvents.TRANSLATE_REQUESTED));
+    });
+
+    this._menu.querySelector('[data-testid="fhirpath-tester-item"]')?.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
+      document.dispatchEvent(new CustomEvent(AppEvents.FHIRPATH_TESTER_REQUESTED));
     });
 
     // Receive initial checkbox states from tooltip/autosave after their async init()

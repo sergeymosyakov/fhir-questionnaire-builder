@@ -18,6 +18,7 @@ import './ui/header-actions.js';
 import './ui/left-header-actions.js';
 import './ui/modals/index.js';
 import './ui/variables-panel.js';
+import './ui/fhirpath-console.js';
 import _containedPanel        from './ui/panels/contained-panel.js';
 import _answerValueSetPanel   from './ui/panels/answer-valueset-panel.js';
 import { PatientProfile } from './ui/patient-panel.js';
