@@ -388,8 +388,12 @@ export class ItemNode extends BaseNode {
       badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
     }
     // Store updater closure — called on REFRESH_CALC_BADGES without full DOM rebuild.
+    // Must mirror the initial build's patient/design split: in patient view the
+    // calc value always renders as a plain preview-calc-value (never the design
+    // ✓/✗ calc-badge), otherwise a recompute would flip a patient-view field into
+    // the design-preview badge style.
     this._refreshCalcBadge = () => {
-      if (this.itemType === 'checkbox') {
+      if (this.itemType === 'checkbox' && rc.previewMode !== 'patient') {
         const v = rc.getValue(this.id);
         badge.className = 'calc-badge ' + (v ? 'calc-true' : 'calc-false') + ' calc-badge--explain';
         badge.textContent = v ? '\u2713 true' : '\u2717 false';

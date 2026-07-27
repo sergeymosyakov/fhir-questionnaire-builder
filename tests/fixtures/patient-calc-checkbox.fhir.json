@@ -1,0 +1,27 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "title": "Patient-view calculated checkbox",
+  "item": [
+    {
+      "linkId": "trigger",
+      "type": "boolean",
+      "text": "Trigger"
+    },
+    {
+      "linkId": "calc",
+      "type": "boolean",
+      "text": "Computed flag",
+      "readOnly": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%resource.repeat(item).where(linkId='trigger').answer.valueBoolean"
+          }
+        }
+      ]
+    }
+  ]
+}
