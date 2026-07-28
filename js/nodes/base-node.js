@@ -8,6 +8,7 @@ import * as bh from './builder-helpers.js';
 import { AppEvents } from '../events.js';
 import { compareValue } from '../eval.js';
 import { isDescendant } from '../utils.js';
+import { parseRenderStyle } from '../fhir/render-style.js';
 
 // Build a multi-line condition audit string for the enableWhen tooltip.
 // Shows each condition with its operator, expected value, actual value, and result.
@@ -54,17 +55,10 @@ export function isRelevantItem(node, rc) {
     (node._minValue !== undefined || node._maxValue !== undefined);
 }
 
-// Safe allowlist for node._renderStyle — only these CSS properties are applied.
-const _STYLE_ALLOWLIST = new Set(['font-weight', 'font-style', 'color', 'font-size', 'text-decoration']);
+// Safe allowlist for node._renderStyle lives in the shared js/fhir/render-style.js parser.
 export function applyRenderStyle(el, raw) {
-  if (!raw) return;
-  raw.split(';').forEach(part => {
-    const sep = part.indexOf(':');
-    if (sep < 1) return;
-    const prop = part.slice(0, sep).trim().toLowerCase();
-    const val  = part.slice(sep + 1).trim();
-    if (_STYLE_ALLOWLIST.has(prop) && val) el.style.setProperty(prop, val);
-  });
+  const style = parseRenderStyle(raw);
+  for (const prop of Object.keys(style)) el.style.setProperty(prop, style[prop]);
 }
 
 export class BaseNode {
