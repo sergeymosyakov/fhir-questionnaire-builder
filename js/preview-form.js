@@ -23,6 +23,9 @@ import { languageMenu } from './ui/header-actions.js';
 const fhirpath = window.fhirpath;
 
 function _yield() {
+  if (typeof document !== 'undefined' && document.hidden) {
+    return new Promise(resolve => setTimeout(resolve, 0));
+  }
   return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
 
