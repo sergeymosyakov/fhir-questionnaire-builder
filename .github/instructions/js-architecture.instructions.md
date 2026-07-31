@@ -43,3 +43,8 @@ injection.
 
 - **`innerHTML`** — never assign unsanitized external or user-supplied content to `innerHTML`. Any HTML string from outside the codebase (FHIR `_renderXhtml`, imported JSON, etc.) must be wrapped in `DOMPurify.sanitize(...)` (`window.DOMPurify` from `lib/dompurify.min.js`). Clearing a container with `el.innerHTML = ''` is always safe.
 - **URL matching** — never decide trust/routing by substring-matching a full URL string (`url.includes('host')`, `url.toString().includes(...)`). A substring check matches attacker-controlled URLs like `https://host.evil.com` and is flagged by CodeQL ("Incomplete URL substring sanitization"). Always parse the URL and compare the exact `hostname` (`new URL(u).hostname === 'tx.fhir.org'`). Applies to app code, the CORS worker allow-list, and Playwright `page.route` predicates alike.
+
+## Comments & commits — lean, essence only
+
+- **Comments** — write only short comments that add non-obvious meaning; explain the _why_, not the _what_. A file/class header is **one line** saying what it is. No verbose JSDoc blocks that restate the name or narrate what the code obviously does, no multi-paragraph history/phase narration. Don't comment self-evident lines. Keep design rationale in the commit message or memory, not the file.
+- **Commits** — same discipline: subject + short essence-only bullets stating the why/what in a few words. No essays, no phase/slice narration, no restating the diff.
