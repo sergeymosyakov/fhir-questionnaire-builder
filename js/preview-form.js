@@ -206,9 +206,7 @@ export class PreviewForm {
     this._lastRepDataSz  = null;
     if (!silent) progress.show('Building questionnaire response\u2026');
     await _yield();
-    const base = this._rawFhir.value
-      ? JSON.parse(JSON.stringify(this._rawFhir.value))
-      : { resourceType: 'Questionnaire', item: [] };
+    const base = { resourceType: 'Questionnaire', item: [] };
     const qr = buildQR(base, this._answerStore.toValueMap());
     if (!silent) progress.show('Evaluating variables…');
     await _yield();
@@ -258,9 +256,7 @@ export class PreviewForm {
   _reCalc() {
     if (fhirpath) {
       let qr, envVars;
-      const base = this._rawFhir.value
-        ? JSON.parse(JSON.stringify(this._rawFhir.value))
-        : buildFHIRObject();
+      const base = buildFHIRObject();
       if (this._preQR) {
         qr = this._preQR; envVars = this._preEnvVars;
         this._preQR = null; this._preEnvVars = null;
