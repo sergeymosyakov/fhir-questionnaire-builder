@@ -15,7 +15,7 @@
     "@playwright/test": "^1.61.1",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^10.7.0",
-    "globals": "^17.7.0",
+    "globals": "^17.9.0",
     "serve": "^14.0.0",
     "vitest": "^4.1.10"
   }
