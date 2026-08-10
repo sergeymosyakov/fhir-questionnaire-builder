@@ -57,6 +57,12 @@
         "note": "sdc-questionnaire-answerExpression + candidateExpression: dynamic options from PHQ-2 score"
       },
       {
+        "label": "Procedure Codes Pipeline Demo",
+        "file": "pipeline-codes-demo.fhir.json",
+        "type": "questionnaire",
+        "note": "calculatedExpression collection pipeline: repeat(item) + intersect(code set) + join \u2014 built via the Expression Builder \"Codes \u2192 text\" mode"
+      },
+      {
         "label": "Lifestyle & Social History",
         "file": "valueset-demo.fhir.json",
         "type": "questionnaire"

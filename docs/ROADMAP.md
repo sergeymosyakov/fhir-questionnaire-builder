@@ -32,6 +32,12 @@ The following translation improvements are still outstanding:
 - [ ] **Configurable translation provider** — the endpoint **URL** is now configurable in Settings (**Translation API → Endpoint URL**, stored under `serverConfig` key `translateApiUrl`, falling back to Google `gtx`). Still deferred: a full **provider picker** to switch protocol/auth between `gtx` (free, no key), DeepL free tier (requires key), LibreTranslate (self-hosted), or OpenAI — currently only `gtx`-compatible endpoints (same query params/response shape) are supported, so a custom URL must speak the `gtx` protocol.
 - [ ] **`atable` itemControl support for translated answer option labels** — the `atable` renderer (when implemented) needs to read `rc.translations[lang].opts` for column headers.
 
+### Visual Expression Builder — follow-ups
+
+- [ ] **Escape `linkId` in emitted FHIRPath** — `emit.js` interpolates `linkId='…'` and set/compare literals without escaping embedded single quotes (consistent with the pre-existing `emitItemRef`). Harmless for the controlled linkIds we generate; centralise quote-escaping across `emit.js` if arbitrary linkIds become possible.
+- [ ] **Type-aware pipeline compare operators** — the "keep where value …" filter offers all six comparators (`= ≠ > < ≥ ≤`) regardless of the source answer type; numeric/date vs. string cases could be filtered once type metadata flows into the filter row.
+- [ ] **Undo for expression-field edits** — editing `enableWhenExpression` / `calculatedExpression` (via the textarea *or* the visual builder) dispatches `CALC_RECALC_REQUESTED` but not `RESPONSE_CHANGED`/`REINIT_FORM`, so `history.js` takes no snapshot — these edits aren't individually undoable. Pre-existing (affects the manual textarea too); the builder is consistent with it. Wire a history snapshot for expression edits without forcing a full `REINIT_FORM` rebuild.
+
 ## Later
 
 - [ ] **Sub-questionnaire / modular questionnaires** — SDC `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-subQuestionnaire`; requires FHIR server for resolution; out of scope until server integration exists

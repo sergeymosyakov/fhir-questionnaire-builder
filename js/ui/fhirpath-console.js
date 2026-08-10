@@ -7,6 +7,7 @@
 //
 // Self-mounts on [data-mount="fhirpath-panel"]; opened via FHIRPATH_TESTER_REQUESTED.
 import { _rc } from '../preview/render-ctx.js';
+import { evalFhirpath } from '../preview/eval-fhirpath.js';
 import { AppEvents } from '../events.js';
 
 class FhirpathConsole {
@@ -74,19 +75,12 @@ class FhirpathConsole {
   }
 
   _evaluate() {
-    const expr = this._input.value.trim();
-    if (!expr) { this._show('', null, false); return; }
-    const ctx = _rc.ctx;
-    if (!ctx || !ctx.fp || !ctx.qr) {
-      this._show('Preview not ready \u2014 load or build a questionnaire first.', null, true);
-      return;
-    }
-    try {
-      const env = { resource: ctx.qr, ...(ctx.envVars || {}) };
-      const res = ctx.fp.evaluate(ctx.qr, expr, env);
-      this._show(JSON.stringify(res, null, 2), Array.isArray(res) ? res.length : null, false);
-    } catch (e) {
-      this._show(e?.message ? 'Error: ' + e.message : String(e), null, true);
+    const r = evalFhirpath(_rc.ctx, this._input.value);
+    switch (r.status) {
+      case 'empty':     this._show('', null, false); break;
+      case 'not-ready': this._show('Preview not ready \u2014 load or build a questionnaire first.', null, true); break;
+      case 'ok':        this._show(JSON.stringify(r.result, null, 2), r.count, false); break;
+      default:          this._show('Error: ' + r.error, null, true); break;
     }
   }
 

@@ -38,6 +38,7 @@ class ExpressionModal extends ExprAwareModal {
     this.body.appendChild(makeExprField(
       cfg.fhirLabel, this._pending.draft, null, cfg.placeholder || '',
       val => { this._pending.draft = val; },
+      { node: cfg.node },
     ));
     super.open();
     setTimeout(() => this.body.querySelector('textarea')?.focus(), 50);

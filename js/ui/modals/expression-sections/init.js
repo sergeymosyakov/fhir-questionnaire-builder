@@ -16,6 +16,7 @@ class InitSection extends ExpressionSection {
       'expr-init-ta',
       'e.g. %age > 18 or %today',
       val => { pending.initExpr = val; },
+      { node: pending.node },
     );
   }
 

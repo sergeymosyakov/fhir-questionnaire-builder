@@ -16,6 +16,7 @@ class CalcSection extends ExpressionSection {
       'expr-calc-ta',
       "%resource.item.where(linkId='...')",
       val => { pending.calcExpr = val; },
+      { node: pending.node },
     );
   }
 

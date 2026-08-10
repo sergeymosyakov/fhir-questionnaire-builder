@@ -1,9 +1,10 @@
 ﻿// ── Action panel builders ─────────────────────────────────────────────────────
 import { parseOptions } from '../utils.js';
 import { getAllItems } from './_shared.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { createDatePicker } from '../ui/date-picker.js';
+import { expressionBuilderModal } from '../ui/modals/expression-builder-modal.js';
 
 // ── Panel factory helper ──────────────────────────────────────────────────────
 export function addPanel(key, buildFn, div, panels) {
@@ -405,6 +406,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
   const exprInp = document.createElement('textarea');
   exprInp.rows = 3;
   exprInp.className = 'expr-textarea';
+  exprInp.dataset.testid = 'enablewhen-expr-input';
   exprInp.value = node.enableWhenExpression || '';
   exprInp.placeholder = "e.g. %age > 18 and %gender = 'male'";
   const _resizeExpr = () => { exprInp.style.height = 'auto'; exprInp.style.height = exprInp.scrollHeight + 'px'; };
@@ -419,6 +421,32 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
   };
   exprInp.onblur = () => { document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED)); };
   p.appendChild(exprInp);
+
+  // Open the visual builder; it hands back a FHIRPath string to drop into the textarea.
+  const buildBtn = document.createElement('button');
+  buildBtn.type = 'button';
+  buildBtn.className = 'vis-build-btn';
+  buildBtn.textContent = '\uD83E\uDDE9 Build\u2026';
+  buildBtn.dataset.testid = 'enablewhen-build-btn';
+  buildBtn.addEventListener('click', () => {
+    expressionBuilderModal.open({
+      tree,
+      variables: EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.variables || [],
+      resultKind: 'boolean',
+      initialExpr: exprInp.value,
+      excludeId: node.id,
+      onInsert: (str) => {
+        exprInp.value = str;
+        node.enableWhenExpression = str;
+        exprIcon.dataset.exprIcon = str.trim();
+        _resizeExpr();
+        syncActive();
+        document.dispatchEvent(new CustomEvent(AppEvents.REFRESH_EXPR_ICONS));
+        document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
+      },
+    });
+  });
+  p.appendChild(buildBtn);
 
   syncActive();
 }

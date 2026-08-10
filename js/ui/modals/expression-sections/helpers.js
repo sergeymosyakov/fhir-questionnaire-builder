@@ -1,10 +1,12 @@
-import { AppEvents } from '../../../events.js';
+import { AppEvents, EventState } from '../../../events.js';
+import { expressionBuilderModal } from '../expression-builder-modal.js';
 
 /**
  * Build a label-row + auto-resize textarea for a FHIRPath expression.
+ * opts.node enables a "Build…" button that opens the visual value builder.
  * Returns a DocumentFragment.
  */
-export function makeExprField(labelText, exprValue, testid, placeholder, onInput) {
+export function makeExprField(labelText, exprValue, testid, placeholder, onInput, opts = {}) {
   const frag = document.createDocumentFragment();
 
   const iconRow = document.createElement('div');
@@ -29,13 +31,33 @@ export function makeExprField(labelText, exprValue, testid, placeholder, onInput
   ta.addEventListener('input', resize);
   setTimeout(resize, 0);
 
-  ta.oninput = () => {
+  const emitChange = () => {
     icon.dataset.exprIcon = ta.value.trim();
     clearTimeout(ta._d);
     ta._d = setTimeout(() => document.dispatchEvent(new CustomEvent(AppEvents.REFRESH_EXPR_ICONS)), 400);
     onInput(ta.value);
   };
+  ta.oninput = emitChange;
   frag.appendChild(ta);
+
+  if (opts.node) {
+    const buildBtn = document.createElement('button');
+    buildBtn.type = 'button';
+    buildBtn.className = 'vis-build-btn';
+    buildBtn.textContent = '\uD83E\uDDE9 Build\u2026';
+    buildBtn.dataset.testid = (testid ? testid + '-' : '') + 'build-btn';
+    buildBtn.addEventListener('click', () => {
+      expressionBuilderModal.open({
+        tree: EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.tree || [],
+        variables: EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.variables || [],
+        resultKind: 'value',
+        initialExpr: ta.value,
+        excludeId: opts.node.id,
+        onInsert: (str) => { ta.value = str; resize(); emitChange(); },
+      });
+    });
+    frag.appendChild(buildBtn);
+  }
   return frag;
 }
 
@@ -43,7 +65,7 @@ export function makeExprField(labelText, exprValue, testid, placeholder, onInput
  * Build a section header + hint paragraph + expr field.
  * Returns a DocumentFragment.
  */
-export function makeSectionBlock(title, fhirKey, hint, exprValue, testid, placeholder, onInput) {
+export function makeSectionBlock(title, fhirKey, hint, exprValue, testid, placeholder, onInput, opts = {}) {
   const frag = document.createDocumentFragment();
 
   const hdr = document.createElement('div');
@@ -62,6 +84,6 @@ export function makeSectionBlock(title, fhirKey, hint, exprValue, testid, placeh
   hintEl.textContent = hint;
   frag.appendChild(hintEl);
 
-  frag.appendChild(makeExprField('FHIRPath expression:', exprValue, testid, placeholder, onInput));
+  frag.appendChild(makeExprField('FHIRPath expression:', exprValue, testid, placeholder, onInput, opts));
   return frag;
 }

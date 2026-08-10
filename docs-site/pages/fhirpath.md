@@ -54,6 +54,33 @@ The same engine powers several features, each backed by a different FHIR field:
 | Dynamic options | `answerExpression` (SDC) | Produce choice options at render time |
 | Validation | `questionnaire-constraint` expression | Must return `true` to pass — uses `%resource` and `%questionnaire` |
 
+## Build expressions visually
+
+You don't have to write FHIRPath by hand. Wherever an expression field appears, a
+**🧩 Build…** button opens a small block builder that assembles the correct
+FHIRPath for you and shows a live result as you go — pick questions, variables and
+values instead of typing paths and accessors:
+
+- **Conditions** (`enableWhenExpression`) — shown as a **tree** of nested **ALL
+  (AND)** / **ANY (OR)** groups; each leaf is one rule (question, comparison or
+  "has answer"), with a live ✓/✗ on every node. Any expression, however nested,
+  stays visible — unrecognised parts are editable as text only at the leaf.
+- **Values** (`calculatedExpression`, `initialExpression`) — an arithmetic chain of
+  questions, variables and numbers joined by × ÷ + −, plus **aggregates** (count,
+  sum, average, min, max) over a repeating question's answers.
+- **Answers → value** (`calculatedExpression`) — a **collection pipeline** over a
+  question's answers: pick a source question, filter the answers — keep or drop
+  values against a set (`intersect` / `exclude`), take unique values, or keep where
+  the value compares to a number/string (`> ≥ < ≤ = ≠`) — then reduce to a value:
+  join into text, count, "any exists", first or last. This builds expressions such
+  as `…answer.valueCoding.code.intersect(('43633'|'43644')).join(', ')` or
+  `…answer.valueInteger.where($this > 5).count()` without typing.
+
+On an empty value field the builder first asks what the expression should produce
+(**Number**, **Yes / No condition**, or **Answers → value**). Press **Apply** to drop
+the result into the field. Opening the builder on an existing expression reads it
+back into blocks where possible; anything it can't represent stays editable as text.
+
 ## Evaluation order
 
 Calculated fields often depend on one another (A → B → C). The runtime builds a

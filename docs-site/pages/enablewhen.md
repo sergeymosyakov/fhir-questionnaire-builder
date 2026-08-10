@@ -71,6 +71,17 @@ same variable environment used elsewhere in the runtime. If an
 `enableWhen` list is present it takes precedence; the expression is used when no
 simple conditions are defined.
 
+### Build it visually
+
+You don't have to write the FHIRPath by hand. Next to the field is a **🧩 Build…**
+button that opens a condition builder. It shows the condition as a **tree**: nested
+**ALL (AND)** / **ANY (OR)** groups, each leaf a single rule (pick a question, a
+comparison or "has answer" / "has no answer", and a value — or edit that one leaf as
+text). Every node shows a live ✓/✗ result. Add conditions and sub-groups, and press
+**Apply** to drop the generated expression into the field. Opening the builder on an
+existing expression reads it back into the tree, so even complex conditions stay
+visible and editable.
+
 ## Copying to other items
 
 The **Show When** dialog can copy the current visibility setup — conditions,

@@ -1,0 +1,48 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "pipeline-codes-demo",
+  "url": "https://fhir-questionnaire-builder.example/Questionnaire/pipeline-codes-demo",
+  "version": "1.0.0",
+  "name": "PipelineCodesDemo",
+  "title": "Procedure Codes Pipeline Demo",
+  "status": "active",
+  "subjectType": ["Patient"],
+  "description": "Demonstrates a collection pipeline in calculatedExpression: the codes selected in a multi-select question are filtered against a covered set and joined into a comma-separated string. Built visually via the Expression Builder \"Codes \u2192 text\" mode (repeat(item) + intersect(set) + join).",
+  "item": [
+    {
+      "linkId": "precert",
+      "text": "Pre-certification",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "selected-procedures",
+          "text": "Requested procedures",
+          "type": "choice",
+          "repeats": true,
+          "answerOption": [
+            { "valueCoding": { "system": "http://www.ama-assn.org/go/cpt", "code": "43633", "display": "Gastrectomy with Roux-en-Y" } },
+            { "valueCoding": { "system": "http://www.ama-assn.org/go/cpt", "code": "43644", "display": "Laparoscopic gastric bypass" } },
+            { "valueCoding": { "system": "http://www.ama-assn.org/go/cpt", "code": "43770", "display": "Laparoscopic gastric band" } },
+            { "valueCoding": { "system": "http://www.ama-assn.org/go/cpt", "code": "43775", "display": "Laparoscopic sleeve gastrectomy" } },
+            { "valueCoding": { "system": "http://www.ama-assn.org/go/cpt", "code": "99999", "display": "Non-covered procedure" } }
+          ]
+        },
+        {
+          "linkId": "covered-procedures",
+          "text": "Pre-certified procedure codes",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='selected-procedures').answer.valueCoding.code.intersect(('43633'|'43644'|'43770'|'43775')).join(', ')"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -3,7 +3,24 @@
 // All logic is pure — no DOM, no state, no mocks required for parseExprTree.
 
 import { describe, it, expect, vi } from 'vitest';
-import { parseExprTree, evaluateExprTree } from '../js/fhir/explain.js';
+import { parseExprTree, evaluateExprTree, emitExprTree } from '../js/fhir/explain.js';
+
+// ── emitExprTree (round-trip with parseExprTree) ──────────────────────────────
+
+describe('emitExprTree', () => {
+  const roundtrips = [
+    'age > 18',
+    'a and b',
+    'a or b or c',
+    '(a or b) and (c or d)',
+    'not(a and b)',
+    "x = 'y' and z > 1",
+  ];
+  it.each(roundtrips)('round-trips %s', (expr) => {
+    const emitted = emitExprTree(parseExprTree(expr));
+    expect(parseExprTree(emitted)).toEqual(parseExprTree(expr));
+  });
+});
 
 // ── parseExprTree ─────────────────────────────────────────────────────────────
 

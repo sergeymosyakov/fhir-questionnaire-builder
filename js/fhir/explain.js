@@ -137,3 +137,23 @@ export function evaluateExprTree(node, fp, resource, env) {
   }
   return node;
 }
+
+// ── Public: serialize (inverse of parseExprTree) ──────────────────────────────
+
+/** Serialize an AND/OR/NOT/LEAF tree back to a FHIRPath string. */
+export function emitExprTree(node) {
+  switch (node.type) {
+    case 'LEAF': return node.expr || '';
+    case 'NOT':  return `not(${emitExprTree(node.child)})`;
+    case 'AND':  return node.children.map(c => _wrapChild(c)).join(' and ');
+    case 'OR':   return node.children.map(c => _wrapChild(c)).join(' or ');
+    default:     return '';
+  }
+}
+
+// Parenthesize nested AND/OR groups so structure survives a re-parse.
+function _wrapChild(node) {
+  if (node.type === 'AND' || node.type === 'OR') return `(${emitExprTree(node)})`;
+  return emitExprTree(node);
+}
+
