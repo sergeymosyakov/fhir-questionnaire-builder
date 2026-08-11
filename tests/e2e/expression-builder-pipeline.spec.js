@@ -319,6 +319,45 @@ test.describe('Expression Builder — pipeline filters & reduce', () => {
     await expect(page.getByTestId('eb-pipe-cmp-value')).toHaveValue('5');
   });
 
+  test('ordering comparators only appear for ordered sources', async ({ page }) => {
+    await freshStart(page);
+    await makeItems(page, 3);
+    await setItemType(page, '1.2', 'text');
+    await setItemType(page, '1.3', 'integer');
+
+    await openPipeline(page);
+    await pick(page, 'eb-pipe-source', '1.2');
+    await page.getByTestId('eb-pipe-add-filter').click();
+
+    // String source: only = / != offered, no ordering ops.
+    await page.getByTestId('eb-pipe-filter-op').click();
+    const drop = page.locator('[data-testid="csel-drop"]');
+    await expect(drop.locator('[data-val="cmp:="]')).toBeVisible();
+    await expect(drop.locator('[data-val="cmp:>"]')).toHaveCount(0);
+    await drop.locator('[data-val="cmp:="]').click(); // close dropdown without Escape (closes modal)
+
+    // Numeric source: ordering ops become available.
+    await pick(page, 'eb-pipe-source', '1.3');
+    await page.getByTestId('eb-pipe-filter-op').click();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="cmp:>"]')).toBeVisible();
+  });
+
+  test('switching to an equality-only source downgrades an ordering comparator', async ({ page }) => {
+    await freshStart(page);
+    await makeItems(page, 3);
+    await setItemType(page, '1.3', 'integer');
+    await setItemType(page, '1.2', 'text');
+
+    await openPipeline(page);
+    await pick(page, 'eb-pipe-source', '1.3');
+    await page.getByTestId('eb-pipe-add-filter').click();
+    await pick(page, 'eb-pipe-filter-op', 'cmp:>');
+    await expect(page.getByTestId('eb-pipe-filter-op')).toHaveAttribute('data-value', 'cmp:>');
+
+    await pick(page, 'eb-pipe-source', '1.2');
+    await expect(page.getByTestId('eb-pipe-filter-op')).toHaveAttribute('data-value', 'cmp:=');
+  });
+
   test('clearing the source yields an empty expression', async ({ page }) => {
     await freshStart(page);
     await makeItems(page, 2);

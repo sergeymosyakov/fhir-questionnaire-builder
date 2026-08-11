@@ -13,6 +13,9 @@ const FILTER_OPS = [
   { value: 'distinct', label: 'unique' },
   { value: 'cmp:=', label: 'keep where value =' },
   { value: 'cmp:!=', label: 'keep where value \u2260' },
+];
+// Ordering comparators only make sense on ordered (numeric/date) answers.
+const ORDER_FILTER_OPS = [
   { value: 'cmp:>', label: 'keep where value >' },
   { value: 'cmp:<', label: 'keep where value <' },
   { value: 'cmp:>=', label: 'keep where value \u2265' },
@@ -123,6 +126,8 @@ class PipelineEditor {
       onChange: (id) => {
         const it = this._items.find((x) => x.id === id) || null;
         this._source = { linkId: it?.id || '', accessor: it ? accessorFor(it) : '' };
+        this._coerceFilterOps();
+        this._renderFilters();
         this._onChange();
       },
     });
@@ -141,7 +146,7 @@ class PipelineEditor {
     row.dataset.testid = 'eb-pipe-filter';
 
     const opSel = createCustomSelect({
-      items: FILTER_OPS,
+      items: this._filterOps(),
       value: filterOpValue(f),
       className: 'sc-trigger--sm',
       testid: 'eb-pipe-filter-op',
@@ -169,6 +174,23 @@ class PipelineEditor {
 
   _numericSource() {
     return /valueInteger|valueDecimal|valueQuantity/.test(this._source.accessor || ''); // NOSONAR — fixed value-accessor alternation, not user input
+  }
+
+  _orderedSource() {
+    return /valueInteger|valueDecimal|valueQuantity|valueDate|valueDateTime|valueInstant|valueTime/.test(this._source.accessor || ''); // NOSONAR — fixed value-accessor alternation, not user input
+  }
+
+  // Comparators offered for the current source: ordering ops only when ordered.
+  _filterOps() {
+    return this._orderedSource() ? [...FILTER_OPS, ...ORDER_FILTER_OPS] : FILTER_OPS;
+  }
+
+  // Downgrade order-only comparators when the source becomes equality-only.
+  _coerceFilterOps() {
+    if (this._orderedSource()) return;
+    for (const f of this._filters) {
+      if (f.op === 'compare' && f.cmp !== '=' && f.cmp !== '!=') f.cmp = '=';
+    }
   }
 
   _setFilterOp(f, v) {
