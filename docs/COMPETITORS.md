@@ -57,6 +57,7 @@ authoring/runtime slice.
 | Gap | Who does it better | Why it matters |
 |---|---|---|
 | **StructureMap-based extraction/population** (`targetStructureMap` / `sourceStructureMap`) | Aidbox, Firely | Round-tripped only — **not executed.** This is the core of industrial-grade SDC extraction. Biggest single gap. |
+| **CQL execution** (`text/cql-identifier` + `cqf-library`) | Any CQL/ELM-capable engine (CQF Ruler, cql-engine, Firely .NET) | Round-tripped only — **not executed.** SDC forms that populate inputs via CQL (e.g. WHO SMART Guidelines) render with every CQL-gated item hidden. Distinct from StructureMap — CQL computes clinical values. Needs a CQL engine (external `$cql`/`$evaluate` server, or embedded ELM runtime). |
 | **Licensed terminology** (LOINC, SNOMED CT) | Any platform with a real tx server | Public HAPI doesn't load these, so validation of coded answers is partial. |
 | **Persistence / API / auth as a product** | Aidbox, Medplum, Firely | We have Supabase-backed cloud save, but we are not a FHIR store and have no server API. |
 | **Renderer maturity / accessibility audit** | LHC-Forms (battle-tested at NIH scale) | Their renderer has years of production hardening and formal a11y review. Ours now has a broad in-house a11y pass \u2014 accessible names on all controls, AA contrast, modal focus-trap/return, keyboard-operable dropdowns and builder tree, ARIA roles, and `aria-live` validation announcements (all e2e-guarded) \u2014 but still lacks a formal external a11y audit and production hardening. |
