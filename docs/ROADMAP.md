@@ -21,7 +21,6 @@ Supports Scenario 1 (round-trip) and Scenario 3 (logic testing). This is where m
 
 ## Near-term
 
-- [ ] **Performance regression test** — automated test with 200–300 item questionnaire covering deep nesting (depth 6–8), heavy `enableWhen`, and multiple `calculatedExpression` chains; assert render time stays under threshold
 
 ## Technical Debt
 

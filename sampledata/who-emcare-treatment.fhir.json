@@ -1,0 +1,4447 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "emcare.treatment",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+      "valueCode": "shareable"
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+      "valueCode": "computable"
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+      "valueCode": "publishable"
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+      "valueCode": "structured"
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-targetStructureMap",
+      "valueCanonical": "https://fhir.dk.swisstph-mis.ch/matchbox/fhir/StructureMap/emcare.treatment"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
+      "valueCanonical": "https://fhir.dk.swisstph-mis.ch/matchbox/fhir/Library/emcaretreatment|0.0.142"
+    }
+  ],
+  "url": "https://fhir.dk.swisstph-mis.ch/matchbox/fhir/Questionnaire/emcare.treatment",
+  "name": "EmCare.Treatment",
+  "title": "EmCare.Treatment",
+  "status": "active",
+  "experimental": false,
+  "subjectType": [
+    "Patient"
+  ],
+  "item": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "AgeInMonths"
+          }
+        }
+      ],
+      "linkId": "AgeInMonths",
+      "type": "integer",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%resource.repeat(item).where(linkId='AgeInMonths').answer.first().value>=2"
+          }
+        }
+      ],
+      "linkId": "child",
+      "type": "group",
+      "required": false,
+      "repeats": false,
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE01').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE01",
+          "text": "<h1>Episode of Obstructed or Absent Breathing</h1>\n\n\t<p>➢ <b>Administer diazepam immediately if seizure</b></p>\n\n\t<p>➢ <b>Quickly complete the full assessment of the child</b></p>\n\n\t<p>➢ <b>Administer the pre-referral treatment</b></p>\n\n\t<p>➢ <b>Warm up the child</b></p>\n\n\t<p>➢ <b>Treat the child to prevent hypoglycemia</b></p>\n\n\t<p>➢ <b>Urgently refer to the hospital</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE02').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE02",
+          "text": "<h1>Very Severe Disease</h1>\n\n\t<p>➢ <b>Give one dose of rectal diazepam if convulsing now, repeat after 10 minutes if convulsion has not stopped</b></p>\n\n\t<p>➢ <b>Give any pre-referral treatment immediately</b></p>\n\n\t<p>➢ <b>Treat to prevent low blood sugar</b></p>\n\n\t<p>➢ <b>Keep the child warm</b></p>\n\n\t<p>➢ <b>Refer <span class=\"caps\">URGENTLY</span> to hospital*.</b></p>\n\n\t<p>*Exception: If lethargy is the only sign and child is dehydrated, rehydrated and assess.</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE03').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE03",
+          "text": "<h1>Severe Pneumonia or Very Severe Disease</h1>\n\n\t<p>➢ <b>Give first dose of Ampicillin IM 100mg/kg 2x/d (200mg/kg/day) <span class=\"caps\">PRE</span>-<span class=\"caps\">REFERRAL</span> and Gentamicin IM 5mg/kg <span class=\"caps\">PRE</span>-<span class=\"caps\">REFERRAL</span>.</b></p>\n\n\t<p>➢ <b>Treat the child to prevent low blood sugar</b></p>\n\n\t<p>➢ <b>Refer <span class=\"caps\">URGENTLY</span> to hospital</b></p>\n\n\t<p>*Nebulized salbutamol, salbutamol inhaler with spacer, or subcutaneous epinephrine (adrenaline)</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE05').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE05",
+          "text": "<h1>Pneumonia</h1>\n\n\t<p>➢**Give oral Amoxicillin twice daily for 5 days**</p>\n\n\t<p>➢**If amoxicillin is not available give amoxicillin-clavulanic acid.**</p>\n\n\t<p>➢Soothe the throat and relieve the cough with a safe remedy.</p>\n\n\t<p>➢Dangerous remedies to avoid:Commercial remedies</p>\n\n\t<p>➢Advise mother when to return immediately</p>\n\n\t<p>➢Follow-up in 2 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE08').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE08",
+          "text": "<h1>Cough or Cold</h1>\n\n\t<p>➢Soothe the throat and relieve the cough with a safe remedy.</p>\n\n\t<p>➢Advise mother when to return immediately</p>\n\n\t<p>➢Follow-up in 5 days if not improving</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE10').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE10",
+          "text": "<h1>Recurrent Wheezing</h1>\n\n\t<p>➢Salbutamol (inhaler) 3 puffs every 8 hours. If wheezing persists repeat 3 times every 30 minutes</p>\n\n\t<p>➢ Give Prednisone as per dosing for 3 days</p>\n\n\t<p>➢ If improvement continue with the bronchodilator for 5 days</p>\n\n\t<p>➢ Follow up after 2 days</p>\n\n\t<p>➢ If there is no improvement, worsening of symptoms, or multiple episodes of wheeze, refer for asthma assessment</p>\n\n\t<p>NB : prednisone should be administered for 3 days only</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE11').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE11",
+          "text": "<h1>Wheezing (first episode)</h1>\n\n\t<p>➢Salbutamol (inhaler) 3 puffs every 8 hours. If wheezing persists repeat 3 times every 30 minutes</p>\n\n\t<p>➢ Give Prednisone if any other severe classification present 1-2mg/kg for the first dose, then 0.5mg – 1mg/kg 2x/day for 3 days</p>\n\n\t<p>NB : prednisone should be administered for 3 days only</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE12').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE12",
+          "text": "<h1>Severe Dehydration</h1>\n\n\t<p>➢ If child has no other severe classification:* Give fluid for Severe Dehydration (plan C) OR</p>\n\n\t<p>➢ <b>If child also has another severe classification:</b></p>\n\n    ** <b>Refer <span class=\"caps\">URGENTLY</span> to hospital with mother giving frequent sips of <span class=\"caps\">ORS</span> on the way.</b>\n    ** <b>Advise the mother to continue breastfeeding.</b>\n\n\t<p>➢If child is 2 years or older and there is cholera in your area, give appropriate dose of Doxycycline.</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE13').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE13",
+          "text": "<h1>Some Dehydration</h1>\n\n\t<p>➢Give Plan B for Some Dehydration:</p>\n\n\t<ul>\n\t\t<li>Give <span class=\"caps\">ORS</span> over 4 hrs in clinic, reassess for dehydration and select appropriate plan to continue treatment</li>\n\t</ul>\n\n\t<ul>\n\t\t<li>If mother must leave before completing treatment, give <span class=\"caps\">ORS</span> for 4 hr Plan B treatment plus 2 packets as recommended in Plan A</li>\n\t</ul>\n\n\t<ul>\n\t\t<li>At home, give extra fluid (as much as the child will take)</li>\n\t</ul>\n\n\t<ul>\n\t\t<li>Give oral Zinc once daily for 10 days</li>\n\t</ul>\n\n\t<ul>\n\t\t<li>Continue feeding (exclusive breastfeeding if under 6 months)</li>\n\t</ul>\n\n\t<p>➢ <b>If child also has another severe classification:</b></p>\n\n\t<ul>\n\t\t<li><b>Refer <span class=\"caps\">URGENTLY</span> to hospital with mother giving frequent sips of <span class=\"caps\">ORS</span> on the way.</b></li>\n\t\t<li><b>Advise the mother to continue breastfeeding.</b></li>\n\t</ul>\n\n\t<p>➢Advise mother when to return immediately.</p>\n\n\t<p>➢Follow-up in 5 days if not improving.</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE14').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE14",
+          "text": "<h1>No Dehydration</h1>\n\n\t<p>➢Give Plan A for no dehydration:</p>\n\n\t<ul>\n\t\t<li>Give extra fluid (as much as the child will take)</li>\n\t\t<li>Teach mother how to give <span class=\"caps\">ORS</span> and give 2 packets to use at home</li>\n\t\t<li>Give oral Zinc once daily for 14 days</li>\n\t\t<li>Continue feeding (exclusive breastfeeding if under 6 months)</li>\n\t</ul>\n\n\t<p>➢ <b>If child also has another severe classification:</b></p>\n\n\t<ul>\n\t\t<li><b>Refer <span class=\"caps\">URGENTLY</span> to hospital with mother giving frequent sips of <span class=\"caps\">ORS</span> on the way.</b></li>\n\t\t<li><b>Advise the mother to continue breastfeeding.</b></li>\n\t</ul>\n\n\t<p>➢Advise mother when to return immediately.</p>\n\n\t<p>➢Follow-up in 5 days if not improving.</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE15').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE15",
+          "text": "<h1>Severe Persistent Diarrhoea</h1>\n\n\t<p>➢Treat dehydration before referral unless the child has another severe classification.</p>\n\n\t<p>➢Refer to hospital.</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE16').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE16",
+          "text": "<h1>Dehydration in the malnourished</h1>\n\n\t<p>➢ <b>Urgently refer to the hospital or <span class=\"caps\">ITNC</span>/CNTI</b><br />\n➢ <b>Give ReSoMal or half strength <span class=\"caps\">ORS</span> on the way to hospital</b><br />\n➢ <b>If the infant or child can drink, give the mother ReSoMal or half strength <span class=\"caps\">ORS</span> solution, and show her how to give frequent sips during the trip</b></p>\n\n\t<p>➢Preparation instructions for <span class=\"caps\">RESOMAL</span>: <br />\nDissolve entire content of packet in one litre of clean drinking water</p>\n\n\t<p>➢Preparation instructions for <span class=\"caps\">ORS</span> solution: <br />\nDilute a sachet in 2 liters of potable water instead of 1 liter and add 50 g (i.e. 5 cubes) of sugar and 4 ampoules of potassium chloride</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE17').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE17",
+          "text": "<h1>Persistent Diarrhoea</h1>\n\n\t<p>➢Advise the mother on feeding a child who has persistent diarrhoea.</p>\n\n\t<p>➢Give multivitamins and minerals (including zinc once daily) for 14 days.</p>\n\n\t<p>➢Follow-up in 5 days.</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE19').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE19",
+          "text": "<h1>Dysentery</h1>\n\n\t<p>➢ <b>Give Oral Ciprofloxacine twice a day for 3 days</b></p>\n\n\t<p>➢Follow-up in 3 days.</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE20').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE20",
+          "text": "<h1>Mastoiditis</h1>\n\n\t<p>➢ <b>Give first dose of Ampicillin IM and Gentamicin IM pre-referral</b></p>\n\n\t<p>➢ <b>Give one dose of oral Paracetamol for pain or high fever (38.5°C or above)</b></p>\n\n\t<p>➢ <b>Refer <span class=\"caps\">URGENTLY</span> to hospital</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE21').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE21",
+          "text": "<h1>Acute Ear Infection</h1>\n\n\t<p>➢ <b>Give an appropriate oral antibiotic:</b></p>\n\n\t<p>     ** <b>First-line: Oral Amoxicillin twice daily for 5 days</b></p>\n\n\t<p>     ** <b>Second-line: Oral Amoxicillin &#8211; Clavulanic acid twice daily for 5 days</b></p>\n\n\t<p>➢ <b>Give oral paracetamol for pain or high fever (38.5°C or above), continue to give every 6 hours (4 times / day) until pain/high fever gone.</b></p>\n\n\t<p>➢ If ear discharge: Dry the ear by wicking at least 3 times daily</p>\n\n\t<p>➢ Advise the mother when to return immediately.</p>\n\n\t<p>➢ Follow-up in 5 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE22').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE22",
+          "text": "<h1>Chronic Ear Infection</h1>\n\n\t<p>➢ Dry the ear by wicking</p>\n\n\t<p>➢**Give one dose of oral Paracetamol in clinic for pain or high fever (38.5°C or above),** continue to give every 6 hours (4 times / day) until pain/high fever gone. </p>\n\n\t<p>➢Follow-up in 5 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE23').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE23",
+          "text": "<h1>No Ear Infection</h1>\n\n\t<p>➢No treatment</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE24').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE24",
+          "text": "<h1>Very Severe Febrile Disease</h1>\n\n\t<p>➢ <b>Give the first dose of the ampicillin and gentamicin IM</b></p>\n\n\t<p>➢ <b>Give 1st dose of artesunate inj for severe malaria</b></p>\n\n\t<p>➢ <b>Treat the child to avoid hypoglycemia</b></p>\n\n\t<p>➢ **Administer, at the dispensary, a dose of paracetamol if the fever is high (38.5 °C or more ) **</p>\n\n\t<p>➢ <b><span class=\"caps\">URGENTLY</span> refer to the hospital</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE24A').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE24A",
+          "text": "<h1>Severe Malaria</h1>\n\n\t<p>➢ <b>Give the first dose of the ampicillin and gentamicin IM</b></p>\n\n\t<p>➢ <b>Give 1st dose of artesunate inj for severe malaria</b></p>\n\n\t<p>➢ <b>Treat the child to avoid hypoglycemia</b></p>\n\n\t<p>➢ **Administer, at the dispensary, a dose of <br />\nparacetamol if the fever is high (38.5 °C or more )**</p>\n\n\t<p>➢ <b><span class=\"caps\">URGENTLY</span> refer to the hospital</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE25').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE25",
+          "text": "<h1>Uncomplicated Malaria</h1>\n\n\t<p>➢ <b>Give recommended first line oral antimalarial (Artemether-Lumefantrine -20 mg artemether and 120 mg lumefantrine ) as per dosing</b></p>\n\n\t<p>➢ <b>Give 1 dose of paracetomal in clinic for high fever (38.5 degrees or above)</b></p>\n\n\t<p>➢Advise mother when to return immediately</p>\n\n\t<p>➢Follow-up in 2 days if fever persists.If fever is present every day for more than 7 days, refer for assessment</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE26').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE26",
+          "text": "<h1>Uncomplicated Malaria &#8211; Fever present every day for more than 7 days</h1>\n\n\t<p>➢ <b>Give recommended first line oral antimalarial (Artemether-Lumefantrine -20 mg artemether and 120 mg lumefantrine ) as per dosing</b></p>\n\n\t<p>➢ <b>Give 1 dose of paracetomal in clinic for high fever (38.5 degrees or above)</b></p>\n\n\t<p>➢Advise mother when to return immediately</p>\n\n\t<p>➢Follow-up in 2 days if fever persists.If fever is present every day for more than 7 days, refer for assessment</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE27').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE27",
+          "text": "<h1>Uncomplicated Malaria &#8211; Malaria Unconfirmed (no test available or performed)</h1>\n\n\t<p>➢ <b>Give recommended first line oral antimalarial (Artemether-Lumefantrine -20 mg artemether and 120 mg lumefantrine ) as per dosing</b></p>\n\n\t<p>➢ <b>Give 1 dose of paracetomal in clinic for high fever (38.5 degrees or above)</b></p>\n\n\t<p>➢Advise mother when to return immediately</p>\n\n\t<p>➢Follow-up in 2 days if fever persists.If fever is present every day for more than 7 days, refer for assessment</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE28').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE28",
+          "text": "<h1>Uncomplicated Malaria &#8211; Fever present every day for more than 7 days &#8211; Malaria Unconfirmed (no test available or performed)</h1>\n\n\t<p>➢ <b>Give recommended first line oral antimalarial (Artemether-Lumefantrine -20 mg artemether and 120 mg lumefantrine ) as per dosing</b></p>\n\n\t<p>➢ <b>Give 1 dose of paracetomal in clinic for high fever (38.5 degrees or above)</b></p>\n\n\t<p>➢Advise mother when to return immediately</p>\n\n\t<p>➢Follow-up in 2 days if fever persists.If fever is present every day for more than 7 days, refer for assessment</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE29').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE29",
+          "text": "<h1>Possible Bone/Joint Infection</h1>\n\n\t<p>➢ <b>Give Cloxacillin IM and Gentamicin IM</b></p>\n\n\t<p>➢ <b>Refer Urgently</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE30').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE30",
+          "text": "<h1>Possible cystitis</h1>\n\n\t<p>➢Give Cotrimoxazole po for 3 days</p>\n\n\t<p>➢Follow-up in 3 days if fever</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE31').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE31",
+          "text": "<h1>Non-malarial febrile disease</h1>\n\n\t<p>➢ <b>Give one dose of oral Paracetamol in clinic for high fever (38.5°C or above)</b><br />\n➢ Advise mother when to return immediately<br />\n➢ Follow-up in 3 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE32').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE32",
+          "text": "<h1>Non-malarial febrile disease &#8211; Fever present every day for more than 7 days</h1>\n\n\t<p>➢ <b>Give one dose of oral Paracetamol in clinic for high fever (38.5°C or above)</b><br />\n➢ Advise mother when to return immediately<br />\n➢ Follow-up in 3 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE33').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE33",
+          "text": "<h1>Severe Complicated Measles</h1>\n\n\t<p>➢ <b>Give first dose of oral Vitamin A if the child has not had a dose within the past month and is not on <span class=\"caps\">RUTF</span></b></p>\n\n\t<p>➢ <b>Give first dose of Intramuscular Cefotaxime</b></p>\n\n\t<p>➢ <b>Give one dose of oral Paracetamol for high fever (38.5°C or above).</b></p>\n\n\t<p>➢ <b>If clouding of the of cornea or pus draining from the eye, apply Tetracycline eye ointment 4 times daily until there is no pus discharge</b></p>\n\n\t<p>➢ <b>Treat to prevent low blood sugar.</b></p>\n\n\t<p>➢ <b>Refer <span class=\"caps\">URGENTLY</span> to hospital.</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE34').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE34",
+          "text": "<h1>Measles with eye or mouth complication</h1>\n\n\t<p>➢ <b>Give oral Vitamin A if the child has not had a dose within the past month and is not on <span class=\"caps\">RUTF</span> &#8211; first dose in clinic</b> and one dose to give at home the next day</p>\n\n\t<p>➢ <b>If pus draining from the eye, apply Tetracycline eye ointment 4 times daily until there is no pus discharge</b></p>\n\n\t<p>➢ If mouth ulcers, treat twice daily with gentian violet until 48 hrs after the ulcers have been cured</p>\n\n\t<p>➢ **Give one dose of oral Paracetamol in clinic for pain or high fever (38.5°C or above), continue to give every 6 hours (4 times / day) until pain/high fever gone. </p>\n\n\t<p>➢ Follow up in 3 days</p>\n\n\t<p>➢ Advise mother when to return immediately</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE35').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE35",
+          "text": "<h1>Measles</h1>\n\n\t<p>➢ <b>Give oral Vitamin A if the child has not had a dose within the past month and is not on <span class=\"caps\">RUTF</span> &#8211; first dose in clinic</b> and one dose to give at home the next day</p>\n\n\t<p>➢Advise mother when to return immediately</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE36').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE36",
+          "text": "<h1>Severe Anaemia</h1>\n\n\t<p>➢Treat to prevent low blood sugar</p>\n\n\t<p>➢Refer <b><span class=\"caps\">URGENTLY</span></b> to hospital.</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE36A').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE36A",
+          "text": "<h1>Anaemia</h1>\n\n\t<p>➢Assess the child`s feeding and counsel the mother on feeding according to the <span class=\"caps\">FOOD</span> box or the <span class=\"caps\">COUNSEL</span> <span class=\"caps\">THE</span> <span class=\"caps\">MOTHER</span> chart if the child is less than 2 years old</p>\n\n\t<p>➢Advise mother when to return immediately</p>\n\n\t<p>➢Give one dose of iron po*</p>\n\n\t<p>➢If feeding problem, follow-up in 5 days.</p>\n\n\t<p>➢Follow -up in 14 days</p>\n\n\t<p>*Except if the child has  thalassaemia or family history of any hemolytic disease e.g., G6PD which need urgent treatment.<br />\nSigns of hemolysis: Jaundice, change color of urine, sudden severe pallor, weakness</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE38').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE38",
+          "text": "<h1>Anaemia &#8211; Sickle disease</h1>\n\n\t<p>➢Assess the child`s feeding and counsel the mother on feeding according to the <span class=\"caps\">FOOD</span> box or the <span class=\"caps\">COUNSEL</span> <span class=\"caps\">THE</span> <span class=\"caps\">MOTHER</span> chart if the child is less than 2 years old</p>\n\n\t<p>➢Advise mother when to return immediately</p>\n\n\t<p>➢Give one dose of iron po*</p>\n\n\t<p>➢If feeding problem, follow-up in 5 days.</p>\n\n\t<p>➢Follow -up in 14 days</p>\n\n\t<p>*Except if the child has  thalassaemia or family history of any hemolytic disease e.g., G6PD which need urgent treatment.<br />\nSigns of hemolysis: Jaundice, change color of urine, sudden severe pallor, weakness</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE39').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE39",
+          "text": "<h1>No Anaemia</h1>\n\n\t<p>➢Counsel the mother on feeding if the child is less than 2 years old</p>\n\n\t<p>➢If feeding problem, follow-up in 5 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE40').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE40",
+          "text": "<h1>Eye Infection</h1>\n\n\t<p>➢ <b>If pus draining from the eye, apply Tetracycline eye ointment 4 times daily until there is no pus discharge</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE41').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE41",
+          "text": "<h1>Clouding of the Cornea new and not previously treated</h1>\n\n\t<p>➢ <b>If pus draining from the eye, apply Tetracycline eye ointment 4 times daily until there is no pus discharge</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE42').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE42",
+          "text": "<h1>Clouding of the Cornea</h1>\n\n\t<p>➢If clouding of the cornea is new or not previously treated, <span class=\"caps\">REFER</span></p>\n\n\t<p>➢Give oral Vitamin A if the child has not had a dose within the past month and is not on <span class=\"caps\">RUTF</span> &#8211; first dose in clinic and one dose to give at home the next day</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE43').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE43",
+          "text": "<h1>Abscess </h1>\n\n\t<p>➢ <b>Give oral antibiotic Cloxacillin as per recommended dosing</b></p>\n\n\t<p>➢If possible at health facility incise and drain the abscess </p>\n\n\t<p>➢Be sure to only use sterile material and dissinfect the skin before incision</p>\n\n\t<p>➢Follow up in 3 days if fever persists</p>\n\n\t<p>➢Follow up in 5 days if no incision and drainage and not improving</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE44').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE44",
+          "text": "<h1>Abscess Deep or Extends to muscle, or with measured Fever</h1>\n\n\t<p>➢ <b>Give oral antibiotic Cloxacillin  as per recommended dosing</b></p>\n\n\t<p>➢ <b>Refer <span class=\"caps\">URGENTLY</span> to hospital</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE45').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE45",
+          "text": "<h1>Cellulitis</h1>\n\n\t<p>➢ <b>Give oral antibiotic Cloxacillin as per recommended dosing</b></p>\n\n\t<p>➢ Follow up in 3 days if fever persists and cellulitis spreading</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE46').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE46",
+          "text": "<h1>Cellulitis &#8211; Rapidly spreading, extensive, or not responding to oral antibiotics</h1>\n\n\t<p>➢ <b>Give Cloxacillin (IM) and Gentamicin (IM) as per recommended dosing</b></p>\n\n\t<p>➢ <b>Refer <span class=\"caps\">URGENTLY</span> to hospital</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE47').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE47",
+          "text": "<h1>Papular Itching Rash (Prurigo)</h1>\n\n\t<p>➢Trim finger nails and avoid scratching.</p>\n\n\t<p>➢Betamethasone o.1% (skin)  to new, inflamed lesions for five days</p>\n\n\t<p>➢Give oral antihistamine and calamine lotion to relieve itch</p>\n\n\t<p>*Short term use: Chlorphenamine, oral, 0.1mg/kg/ dose 6-8 hourly\n*Long term use for children 2-6 years: Cetirizine,oral, 5mg once daily</p>\n\n\t<p>➢Caution: Do not give antihistamines to children< 2 years of age.</p>\n\n\t<p>➢Follow up in 7 days if not improving</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE48').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE48",
+          "text": "<h1>Ringworm (tinea)</h1>\n\n\t<p>➢Apply Miconazole cream (skin) to affected skin 2 times/day for 4 weeks</p>\n\n\t<p>➢Explain and check understanding with caregiver </p>\n\n\t<p>➢If in hair shave hair</p>\n\n\t<p>➢If itching treat with calamine lotion and/or antihistamine oral and 1% hydrocortisone cream if no improvement</p>\n\n\t<p>➢Follow up in 14 days if not improving</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE49').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE49",
+          "text": "<h1>Ringworm (tinea) &#8211; Extensive Ringworm (Tinea)</h1>\n\n\t<p>➢Apply Miconazole cream (skin) to affected skin 2 times/day for 4 weeks</p>\n\n\t<p>➢Explain and check understanding with caregiver </p>\n\n\t<p>➢If extensive: Treat with Griseofulvin 10mg/kg/day if 12 months up to 5 years</p>\n\n\t<p>➢If in hair shave hair</p>\n\n\t<p>➢If itching treat with calamine lotion and/or antihistamine oral and 1% hydrocortisone cream if no improvement</p>\n\n\t<p>➢Follow up in 14 days if not improving</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE50').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE50",
+          "text": "<h1>Scabies</h1>\n\n ➢Apply Betamethasone  0.1% cream to affected areas 2x/d for up to 5 days (only apply after completion of treatment of measles)\n\n ➢Give Antihistamine(oral) for Itching\n\n ➢Apply Benzyl Benzoate (skin) at night after washing for 3 days\n\n ➢Apply Lindne skin cream once 12 hours after last application of benzyl benzoate\n\n ➢Follow up after 14 days",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE51').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE51",
+          "text": "<h1>Chickenpox</h1>\n\n\t<p>➢Apply calamine lotion and Antiseptic solution (skin)</p>\n\n\t<p>➢In severe cases, give an oral antihistamine:Chlorphenamine 0.1 mg/kg/dose 6–8 hourly NB: Only children >2 years</p>\n\n\t<p>➢Refer urgently if jaundice appears</p>\n\n\t<p>➢Follow up in 5 days if fever persists</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE53').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE53",
+          "text": "<h1>Herpes Zoster</h1>\n\n\t<p>➢Keep lesions clean and dry</p>\n\n\t<p>➢Give oral Paracetamol for pain relief, continue to give every 6 hours (4 times / day) until pain gone</p>\n\n\t<p>➢Follow up in 7 days if not improving</p>\n\n\t<p>➢Refer if involvement of the eye, pneumonia or features meningitis</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE54').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE54",
+          "text": "<h1>Herpes Zoster &#8211; with eye involvement</h1>\n\n\t<p>➢Impetigo or Folliculitis treatment\n      *Clean sores with antiseptic \n      *Drain if Pus Fluctuant </p>\n\n\t<p>➢Give oral antibiotic Cloxacillin as per recommended dosing </p>\n\n\t<p>➢Follow up in 5 days if fever persists.</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE55').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE55",
+          "text": "<h1>Impetigo</h1>\n\n\t<p>➢Impetigo or Folliculitis treatment</p>\n\n      *Clean sores with antiseptic \n\n      * Drain if Pus Fluctuant \n\n\t<p>➢Give oral antibiotic Cloxacillin as per recommended dosing </p>\n\n\t<p>➢Follow up in 5 days if fever persists.</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE56').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE56",
+          "text": "<h1>Impetigo or Folliculitis &#8211; extends to muscle or with measured fever</h1>\n\n\t<p>➢Impetigo or Folliculitis treatment\n      *Clean sores with antiseptic \n      *Drain if Pus Fluctuant  </p>\n\n\t<p>➢ <b>Give oral antibiotic Cloxacillin IM and Gentamicin IM as per recommended dosing</b></p>\n\n\t<p>➢ Refer urgently</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE57').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE57",
+          "text": "<h1>Impetigo or Folliculitis &#8211; size larger than 4cm, red streaks, tender nodes or multiple abscesses</h1>\n\n\t<p>➢Impetigo or Folliculitis treatment\n      *Clean sores with antiseptic \n      *Drain if Pus Fluctuant </p>\n\n\t<p>➢Give oral antibiotic Cloxacillin as per recommended dosing</p>\n\n\t<p>➢Follow up in 5 days if fever persists</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE58').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE58",
+          "text": "<h1>Molluscum Contagiosum</h1>\n\n\t<p>➢ Allow to heal spontaneously if few in number.</p>\n\n\t<p>➢ Apply a tincture of iodine BP to the core of individual lesions using an applicator.</p>\n\n\t<p>➢ Refer children with:</p>\n\n\t<ul>\n\t\t<li>Extensive lesions</li>\n\t\t<li>No response to treatment</li>\n\t\t<li>Lesions close to the eye (to an ophthalmologist)</li>\n\t</ul>\n\n\t<p>➢Non-urgent referral for assessment and treatment if molluscum contagiosum infected</p>\n\n\n\t<p>        &#8211; No response to treatment</p>\n\n\t<p>        &#8211; Lesions close to the eye (to an ophthalmologist).</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE59').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE59",
+          "text": "<h1>Warts</h1>\n\n\t<p>➢May be left alone to wait for improvement</p>\n\n\t<p>➢Apply salicylic acid 15-20% to the warts\n\t<ul>\n\t\t<li>Protect surrounding skin with petroleum jelly</li>\n\t\t<li>Apply daily to the wart and allow to dry</li>\n\t\t<li>Occlude for 24 hours-Soften lesions by soaking in warm water, and remove loosened keratin.</li>\n\t\t<li>Repeat process daily until the warts disappear.</li>\n\t</ul></p>\n\n\t<p>➢Refer if extensive</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE60').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE60",
+          "text": "<h1>Seborrhoeic Dermatitis</h1>\n\n\t<p>➢ Apply Ketoconazole shampoo to the damp skin of the affected area and a wide margin surrounding this area</p>\n\n\t<p>➢ Leave it in place for 5 minutes, and then rinse off with water</p>\n\n\t<p>➢ Apply 2x/week for 2-4 weeks</p>\n\n\t<p>➢ If no improvement after 7 days advise to return for assessment</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE61').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE61",
+          "text": "<h1>Seborrhoea &#8211; Severe Seborrhoea</h1>\n\n\t<p>➢Apply Ketoconazole shampoo to the damp skin of the affected area and a wide margin surrounding this area</p>\n\n\t<p>➢Leave it in place for 5 minutes, and then rinse off with water</p>\n\n\t<p>➢Apply 2x/week for 2-4 weeks</p>\n\n\t<p>➢Refer to hospital for assessment</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE62').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE62",
+          "text": "<h1>Fixed Drug Reaction</h1>\n\n\t<p>➢ Stop the offending medication.</p>\n\n\t<p>➢ In mild cases, apply Betamethasone 0.1% (skin) for five days</p>\n\n\t<p>➢ Use Antiseptic solution (skin)</p>\n\n\t<p>➢ Discuss all cases with a doctor</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE63').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE63",
+          "text": "<h1>Eczema</h1>\n\n\t<p>➢Soak sores with clean water to remove crusts (no soap)</p>\n\n\t<p>➢Dry skin gently</p>\n\n\t<p>➢Short time use of topical steroid cream not on face (Betamethasone 0.1% (skin) 2 times/day)</p>\n\n\t<p>➢Treat itching (calamine lotion)</p>\n\n\t<p>➢If no improvement after 7 days advise to return for assessment</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE64').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE64",
+          "text": "<h1>Steven Johnson Syndrome (<span class=\"caps\">SJS</span>)</h1>\n\n\t<p>➢ Stop medication</p>\n\n\t<ul>\n\t\t<li><span class=\"caps\">REFER</span> <span class=\"caps\">URGENTLY</span></li>\n\t\t<li>Give frequent sips of <span class=\"caps\">ORS</span> on way to hospital</li>\n\t\t<li>Give one dose of oral Paracetamol for pain pre-referral</li>\n\t</ul>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE65').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE65",
+          "text": "<p>h1.Mouth Sores or Ulcer</p>\n\n\t<p>➢ Treat mouth ulcers twice daily with gentian violet until 48 hrs after the ulcers have been cured</p>\n\n\t<p>➢ Give oral Paracetamol every 6 hours (4 times / day) for pain until pain is gone</p>\n\n\t<p>➢ Refer if mouth ulcers deep or extensive</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE66').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE66",
+          "text": "<p>h1.Mouth Sores or Ulcer &#8211; Deep or Extensive</p>\n\n\t<p>➢ Treat mouth ulcers twice daily with gentian violet until 48 hrs after the ulcers have been cured</p>\n\n\t<p>➢ Give oral Paracetamol every 6 hours (4 times / day) for pain until pain is gone</p>\n\n\t<p>➢ Refer to a hospital for assessment</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE67').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE67",
+          "text": "<h1>Oral Thrush</h1>\n\n\t<p>➢Treat thrush four times daily for 7 days\n    *Wash hands\n    *Wet a soft wash cloth with salt water and use it wash the child&#8217;s mouth</p>\n\n\t<p>➢Instill nystatin 1ml four times a day and give Paracetamol (oral).</p>\n\n\t<p>➢ Avoid feeding for 20 minutes after medication</p>\n\n\t<p>➢Follow up in 3 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE68').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE68",
+          "text": "<h1>Severe Acute Malnutrition (or Very Low Weight for Age if less than 12 months old) with Medical Complications</h1>\n\n\t<p>➢ <b>Write a referral note for the caregiver to take to the hospital or <span class=\"caps\">ITNC</span>/CNTI</b></p>\n\n\t<p>➢ <b>Give the first dose of the ampicillin and gentamicin IM</b></p>\n\n\t<p>➢ <b>Treat the child to prevent low blood sugar and give extra fluids</b></p>\n\n\t<p>➢ <b>Keep the child warm</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE69').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE69",
+          "text": "<h1>Severe Acute Malnutrition (or Very Low Weight for Age if less than 12 months old)</h1>\n\n\t<p>➢ <b>Give first dose of amoxilcillin antibiotic</b></p>\n\n\t<p>➢ <b>Treat the child to prevent low bloodsugar</b></p>\n\n\t<p>➢ <b>Keep the child warm and give extra fluids</b></p>\n\n\t<p>➢ <b>Urgently refer to the hospital or <span class=\"caps\">ITNC</span>/CNTI</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE70').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE70",
+          "text": "<h1>Severe Acute Malnutrition (or Very Low Weight for Age if less than 12 months old) without Medical Complications</h1>\n\n\t<p>➢ <b>Treat the child to prevent low blood sugar</b></p>\n\n\t<p>➢If the child is able to breastfeed \n      ➢Ask the mother to breastfeed the child</p>\n\n\t<p>➢ <b>Give first dose of amoxilcillin antibiotic</b></p>\n\n\t<p>➢ <b>Give supplement of Ready-to-Use Therapeutic Food (<span class=\"caps\">RUTF</span>)</b></p>\n\n\t<p>➢ <b>Urgently refer to the <span class=\"caps\">OTNC</span> / <span class=\"caps\">CNAS</span></b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE71').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE71",
+          "text": "<h1>Moderate Acute Malnutrition</h1>\n\n\t<p>➢Assess the child&#8217;s feeding and counsel the mother on the feeding recommendations if feeding problem</p>\n\n\t<p>➢Advise mother when to return immediately</p>\n\n\t<p>➢Give fortified flours and ready-to-use supplement foods</p>\n\n\t<p>➢Follow up in 30 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE73').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE73",
+          "text": "<h1>Prevention, Screenning and Other Problems &#8211; Vitamin A Needed</h1>\n\n\t<p>➢Give Vitamin(A) dose Supplementation</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE74').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE74",
+          "text": "<h1>Prevention, Screenning and Other Problems &#8211; Deworming Needed</h1>\n\n\t<p>➢Give Mebendazole (oral) for Deworming</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE75').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE75",
+          "text": "<h1>Confirmed <span class=\"caps\">HIV</span> Infection</h1>\n\n\t<p>➢ Refer for <span class=\"caps\">HIV</span> Care</p>\n\n\t<p>➢ Counsel the mother about her own health concerning <span class=\"caps\">HIV</span></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE76').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE76",
+          "text": "<h1><span class=\"caps\">HIV</span> Exposed</h1>\n\n\t<p>➢ Refer for <span class=\"caps\">HIV</span> Care</p>\n\n\t<p>➢ Counsel the mother about her own health concerning <span class=\"caps\">HIV</span></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE77').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE77",
+          "text": "<h1><span class=\"caps\">HIV</span> Infection Unlikely</h1>\n\n\t<p>➢Remind when <span class=\"caps\">HIV</span> testing is necessary for mother and child</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE78').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE78",
+          "text": "<h1><span class=\"caps\">HIV</span> Infection Status Unknown</h1>\n\n\t<p>➢ Refer for <span class=\"caps\">HIV</span> testing</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE79').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE79",
+          "text": "<h1>Prevention, Screenning and Other Problems &#8211; Immunization(s) incomplete for Age</h1>\n\n\t<p>➢Administer missing vaccination(s) provided no contraindication(s) or refer to vaccination clinic</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE80').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE80",
+          "text": "<h1>Prevention, Screenning and Other Problems &#8211; Immunization Status Unknown</h1>\n\n\t<p>➢Begin primary vaccination series provided no contraindication(s) or refer to vaccination clinic</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE81').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE81",
+          "text": "<h1><span class=\"caps\">PTMCT</span> Follow up &#8211; <span class=\"caps\">HIV</span> Exposed</h1>\n\n\t<p>➢Counsel the mother about her own health concerning <span class=\"caps\">HIV</span></p>\n\n\t<p>➢Refer for <span class=\"caps\">HIV</span> Care</p>\n\n\t<p>➢Assess the child&#8217;s feeding and provide appropriate counselling to the mother</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE82').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE82",
+          "text": "<h1><span class=\"caps\">PTMCT</span> Follow up &#8211; <span class=\"caps\">HIV</span> Confirmed</h1>\n\n\t<p>➢Counsel the mother about her own health concerning <span class=\"caps\">HIV</span></p>\n\n\t<p>➢Refer for <span class=\"caps\">HIV</span> Care</p>\n\n\t<p>➢Assess the child&#8217;s feeding and provide appropriate counselling to the mother</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE83').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE83",
+          "text": "<h1>Mumps (parotitis)</h1>\n\n\t<p>➢Give oral paracetamol for pain or high fever (38.5°C or above), continue to give every 6 hours (4 times / day) until pain/high fever gone or for a total of 5 days</p>\n\n\t<p>➢Follow up if persistence of Mumps after 10 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE84').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE84",
+          "text": "<h1>Persistant Mumps</h1>\n\n\t<p>➢Give oral paracetamol for pain or high fever (38.5°C or above), continue to give every 6 hours (4 times / day) until pain/high fever gone or for a total of 5 days</p>\n\n\t<p>➢Refer for evaluation at hospital</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE85').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE85",
+          "text": "<h1>Possible symptomatic <span class=\"caps\">HIV</span> infection</h1>\n\n\t<p>➢ Refer for <span class=\"caps\">HIV</span> testing</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE86').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE86",
+          "text": "<h1>Possible Tuberculosis</h1>\n\n\t<p>➢Refer for TB investigations</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%resource.repeat(item).where(linkId='AgeInMonths').answer.first().value<2"
+          }
+        }
+      ],
+      "linkId": "yi",
+      "type": "group",
+      "required": false,
+      "repeats": false,
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE87').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE87",
+          "text": "<h1>Episode of obstructed or absent breathing</h1>\n\n\t<p>➢ <b>Treat the young infant to prevent low blood sugar</b></p>\n\n\t<p>➢ <b>Advise the mother how to keep the young infant warm on the way to hospital</b></p>\n\n\t<p>➢ <b>Refer <span class=\"caps\">URGENTLY</span> to the hospital</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE88').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE88",
+          "text": "<h1>Possible Serious Bacterial Infection or Very Severe Disease</h1>\n\n\t<p>➢Give first dose of Ampicillin (IM) 100 mg/kg body weight and of Gentamicin (IM) (5 mg/kg body weight)<br />\nOR if IM Ampicillin is not avaialble, give Gentamicin IM 5 mg/kg body weight and give a first dose of Amoxicillin (oral) 50 mg/kg per dose. </p>\n\n\t<p>➢Treat the young infant to prevent low blood sugar</p>\n\n\t<p>➢Advise the mother how to keep infant warm on the way to hospital</p>\n\n\t<p>➢Refer <span class=\"caps\">URGENTLY</span> to hospital<br />\nOR if referral to hospital is refused or not feasible,  treat in the clinic untill referral is feasible . See charts in link.</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE90').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE90",
+          "text": "<h1>Local Infection</h1>\n\n\t<p>➢Teach the mother how to treat local infections at home</p>\n\n\t<p>➢Bathe infant in a bath with a cap full of chlorhexiidine in 5 litres bath water 2 times per day until lesions are gone.  </p>\n\n\t<p>➢If chlorhexidine is not available, apply gentian violet full strength 0.5% 2 times per day until lesions are gone or up to 5 days. </p>\n\n\t<p>➢Advise the mother on giving home care for the young infant</p>\n\n\t<p>➢Follow up in 2 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE91').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE91",
+          "text": "<h1>Local Infection &#8211; Conjunctivitis</h1>\n\n\t<p>➢Teach the mother how to treat local infections at home</p>\n\n\t<p>➢ Treat with Tetracycline opthalmic ointment 1%, 3 times per day to affected area until redness subsides </p>\n\n\t<p>➢Advise the mother to give home care for the young infant</p>\n\n\t<p>➢Follow up in 2 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE92').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE92",
+          "text": "<h1>Infection Unlikely</h1>\n\n\t<p>➢Advise the mother on giving home care for the young infant</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE93').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE93",
+          "text": "<p>Severe Jaundice</p>\n\n\t<p>➢ <b>Treat to prevent low blood sugar</b></p>\n\n\t<p>➢ <b>Advise the mother how to keep the infant warm on the way to the hospital</b></p>\n\n\t<p>➢ <b>Refer <span class=\"caps\">URGENTLY</span> to hospital</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE94').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE94",
+          "text": "<h1>Jaundice</h1>\n\n\t<p>➢Advise the mother to give home care for the young infant</p>\n\n\t<p>➢Advise the mother to return immediately if the infant&#8217;s palms or soles appear yellow</p>\n\n\t<p>➢If young infant is older than 3 weeks, refer to hospital for assessment</p>\n\n\t<p>➢Follow-up in 1 day</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE95').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE95",
+          "text": "<h1>Jaundice &#8211; Prolonged Jaundice</h1>\n\n\t<p>➢Advise the mother to give home care for the young infant</p>\n\n\t<p>➢Advise the mother to return immediately if the infant&#8217;s palms or soles appear yellow</p>\n\n\t<p>➢Refer to a hospital for assessment for jaundice in an infant 14 days or older</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE96').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE96",
+          "text": "<h1>No Jaundice</h1>\n\n\t<p>➢Advise the mother on giving home care to the young infant</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE97').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE97",
+          "text": "<h1>Severe Dehydration</h1>\n\n\t<p><b>If infant has no other severe classification:</b><br />\n➢ <b>Give fluid for Severe Dehydration (Plan C )</b><br />\n➢ <b>If rehydration is possible at your facility, re-assess dehydration every 1-2 hours</b><br />\n➢ <b>Advise the mother to continue  breastfeeding</b><br />\n➢ <b>If rehydration is sucessful and severe dehydration resolves, assess infant&#8217;s eligibility for immunization and immunize infant prior to discharge if eligible</b><br />\n<b>OR</b><br />\n<b>If infant has another severe classification or rehydration at the facility is not possible (IV treatment not available and rehydration by naso-gastric tube is not available and the infant cannot drink):</b><br />\n➢ <b>Refer <span class=\"caps\">URGENTLY</span> to hospital with the mother giving frequent sips of oral rehydration salts (<span class=\"caps\">ORS</span>) on the way (if able to drink)</b><br />\n➢ **If being referred urgently and referral facility is not reachable within 30 minutes and infant is unable to drink, attempt to give IV fluids prior to transfer if possible at this facility **<br />\n➢ <b>Advise the mother how to keep the infant warm on the way to the hospital</b><br />\n➢ <b>Advise the mother to continue  breastfeeding (if able to drink)</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE98').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE98",
+          "text": "<h1>Some Dehydration</h1>\n\n\t<p>If the infant has no other severe classification:<br />\n➢ Give fluid and breastmilk for Some Dehydration (Plan B)<br />\n➢ Advise the mother to continue breast feeding<br />\n➢ Advise the mother when to return immediately<br />\n➢ Follow-up in 2 days if no improvement<br />\nOR<br />\n<b>If the infant has another severe classification:</b><br />\n➢ <b>Refer <span class=\"caps\">URGENTLY</span> to hospital with the  mother giving frequent sips of <span class=\"caps\">ORS</span> on the  way (if able to drink)</b><br />\n➢ <b>Advise the mother to continue breast feeding (if able to drink)</b><br />\n➢ <b>Advise the mother how to keep the infant warm on the way to the hospital</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE99').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE99",
+          "text": "<h1>No Dehydration</h1>\n\n\t<p>➢Give fluids and breastmilk to treat diarrhoea at home (Plan A)</p>\n\n\t<p>➢Advise the mother when to return immediately</p>\n\n\t<p>➢Follow-up in 2 days if no improvement</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE100').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE100",
+          "text": "<h1>Blood in stool</h1>\n\n\t<p>➢**Give the first dose of Ampicillin (IM) 100 mg/kg body weight and of Gentamin (IM) 5 mg/kg body weight**<br />\n➢**Advise the mother how to keep the young infant warm on the way to hospital**<br />\n➢**Treat the young infant to prevent low blood sugar**<br />\n➢**Refer <span class=\"caps\">URGENTLY</span>**</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE101').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE101",
+          "text": "<h1>Very low birth weight or very low weight for age</h1>\n\n\t<p>➢**Give the first dose of Ampicillin (IM) 100 mg/kg body weight and of Gentamin (IM) 5 mg/kg body weight**</p>\n\n\t<p>➢ <b>Treat the young infant to prevent low blood sugar</b></p>\n\n\t<p>➢ <b>Refer to a hospital for Kangaroo Mother Care (<span class=\"caps\">KMC</span>)</b></p>\n\n\t<p>➢ <b>Advise the mother how to keep the young infant warm on the way to hospital</b></p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE102').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE102",
+          "text": "<h1>Feeding Problem and / or Low Weight for Age &#8211; Feeding problem</h1>\n\n\t<p>➢Among infants who are breastfed:\n *If not well attached or not sucking effectively, teach correct positioning and attachment\n *If breastfeeding less than 8 times in 24 hours, advise the mother to increase the frequency and to breastfeed as often and for as long as the infant wants, day and night \n *If the infant is receiving other foods or drinks, counsel the mother to increase breastfeeding, reduce other foods and drinks\n ➢Among infants who are not breastfed: \n *Counsel about feeding\n *Explain the guidelines for safe replacement feeding and correct preparation of breastmilk substitutes\n *Identify concerns of mother and family about feeding\n  *Refer for breastfeeding counselling and possible relactation if the mother is alive and caring for the infant</p>\n\n ➢Advise the mother on giving home care to the young infant\n\n ➢Follow up in 2 days. Then, give recommendation to continue to follow up until progress is seen. Then, recommend follow up in 14 days.",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE103').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE103",
+          "text": "<h1>Feeding Problem and / or Low Weight for Age &#8211; Feeding problem &#8211; Oral thrush</h1>\n\n\t<p>➢Among infants who are breastfed:\n *If not well attached or not sucking effectively, teach correct positioning and attachment\n *If breastfeeding less than 8 times in 24 hours, advise the mother to increase the frequency and to breastfeed as often and for as long as the infant wants, day and night \n *If the infant is receiving other foods or drinks, counsel the mother to increase breastfeeding, reduce other foods and drinks\n ➢Among infants who are not breastfed: \n *Counsel about feeding\n *Explain the guidelines for safe replacement feeding and correct preparation of breastmilk substitutes\n *Identify concerns of mother and family about feeding\n  *Refer for breastfeeding counselling and possible relactation if the mother is alive and caring for the infant</p>\n\n ➢Advise the mother on how to feed and keep the low-weight infant warm at home\n\n ➢Advise the mother on giving home care to the young infant\n\n ➢Follow up in 2 days. Then, give recommendation to continue to follow up until progress is seen. Then, recommend follow up in 14 days.",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE104').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE104",
+          "text": "<h1>Feeding Problem and / or Low Weight for Age &#8211; Low weight for age</h1>\n\n\t<p>➢Among infants who are breastfed:\n *If not well attached or not sucking effectively, teach correct positioning and attachment\n *If breastfeeding less than 8 times in 24 hours, advise the mother to increase the frequency and to breastfeed as often and for as long as the infant wants, day and night \n *If the infant is receiving other foods or drinks, counsel the mother to increase breastfeeding, reduce other foods and drinks\n ➢Among infants who are not breastfed: \n *Counsel about feeding\n *Explain the guidelines for safe replacement feeding and correct preparation of breastmilk substitutes\n *Identify concerns of mother and family about feeding\n  *Refer for breastfeeding counselling and possible relactation if the mother is alive and caring for the infant</p>\n\n ➢Teach the mother to treat thrush at home\n  *Swab the mouth with gentian violet 0.25% or with Nystatin 4 times per day for 3 days\n\n ➢Advise the mother on giving home care to the young infant\n\n ➢Follow up in 2 days. Then, give recommendation to continue to follow up until progress is seen. Then, recommend follow up in 14 days.",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE105').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE105",
+          "text": "<h1>Feeding Problem and / or Low Weight for Age &#8211; Feeding problem &#8211; Low weight for age &#8211; Oral thrush</h1>\n\n\t<p>➢Among infants who are breastfed:\n *If not well attached or not sucking effectively, teach correct positioning and attachment\n *If breastfeeding less than 8 times in 24 hours, advise the mother to increase the frequency and to breastfeed as often and for as long as the infant wants, day and night \n *If the infant is receiving other foods or drinks, counsel the mother to increase breastfeeding, reduce other foods and drinks\n ➢Among infants who are not breastfed: \n *Counsel about feeding\n *Explain the guidelines for safe replacement feeding and correct preparation of breastmilk substitutes\n *Identify concerns of mother and family about feeding\n  *Refer for breastfeeding counselling and possible relactation if the mother is alive and caring for the infant</p>\n\n ➢Advise the mother on how to feed and keep the low-weight infant warm at home\n\n ➢Teach the mother to treat thrush at home\n   *Swab the mouth with gentian violet 0.25% or with Nystatin 4 times per day for 3 days\n\n ➢Advise the mother on giving home care to the young infant\n\n ➢Follow up in 2 days. Then, give recommendation to continue to follow up until progress is seen. Then, recommend follow up in 14 days.",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE106').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE106",
+          "text": "<h1>Feeding Problem and / or Low Weight for Age &#8211; Oral thrush</h1>\n\n\t<p>➢Among infants who are breastfed:\n *If not well attached or not sucking effectively, teach correct positioning and attachment\n *If breastfeeding less than 8 times in 24 hours, advise the mother to increase the frequency and to breastfeed as often and for as long as the infant wants, day and night \n *If the infant is receiving other foods or drinks, counsel the mother to increase breastfeeding, reduce other foods and drinks\n ➢Among infants who are not breastfed: \n *Counsel about feeding\n *Explain the guidelines for safe replacement feeding and correct preparation of breastmilk substitutes\n *Identify concerns of mother and family about feeding\n  *Refer for breastfeeding counselling and possible relactation if the mother is alive and caring for the infant</p>\n\n ➢Teach the mother to treat thrush at home\n    *Swab the mouth with gentian violet 0.25% or with Nystatin 4 times per day for 3 days\n\n ➢Advise the mother on giving home care to the young infant\n\n ➢Follow up in 2 days. Then, give recommendation to continue to follow up until progress is seen. Then, recommend follow up in 14 days.",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE107').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE107",
+          "text": "<h1>Feeding Problem and / or Low Weight for Age &#8211; Low weight for age\n➢Among infants who are breastfed:\n *If not well attached or not sucking effectively, teach correct positioning and attachment\n *If breastfeeding less than 8 times in 24 hours, advise the mother to increase the frequency and to breastfeed as often and for as long as the infant wants, day and night \n *If the infant is receiving other foods or drinks, counsel the mother to increase breastfeeding, reduce other foods and drinks\n ➢Among infants who are not breastfed: \n *Counsel about feeding\n *Explain the guidelines for safe replacement feeding and correct preparation of breastmilk substitutes\n *Identify concerns of mother and family about feeding\n  *Refer for breastfeeding counselling and possible relactation if the mother is alive and caring for the infant</h1>\n\n ➢Advise the mother on how to feed and keep the low-weight infant warm at home\n\n ➢Advise the mother on giving home care to the young infant\n\n ➢Follow up in 2 days. Then, give recommendation to continue to follow up until progress is seen. Then, recommend follow up in 14 days.",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE108').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE108",
+          "text": "<h1>No Feeding Problem</h1>\n\n\t<p>➢Advise mother on giving home care to the young infant</p>\n\n\t<p>➢Praise the mother for feeding the infant well</p>\n\n\t<p>➢If not breastfed, advise mother to continue feeding, and ensure good hygiene</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE109').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE109",
+          "text": "<h1><span class=\"caps\">HIV</span> Exposed</h1>\n\n\t<p>➢Advise the mother on giving home care for the young infant</p>\n\n\t<p>➢Follow-up regularly as per national guidelines</p>\n\n\t<p>➢Refer for <span class=\"caps\">HIV</span> testing</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE110').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE110",
+          "text": "<h1> <span class=\"caps\">HIV</span> Infection Unlikely</h1>\n\n\t<p>➢Remind caregiver of when <span class=\"caps\">HIV</span> counseling and testing is necessary for the mother and infant</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE111').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE111",
+          "text": "<h1> <span class=\"caps\">HIV</span> Infection Status Unknown</h1>\n\n\t<p>➢Refer for <span class=\"caps\">HIV</span> testing</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE112').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE112",
+          "text": "<h1>Prevention, Screenning and Other Problems &#8211; Immunization(s) incomplete for Age</h1>\n\n\t<p>➢Administer missing vaccination(s) provided no contraindication(s) or refer to vaccination clinic</p>\n\n\t<p>➢Advise caregiver when next vaccination(s) are needed</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE113').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE113",
+          "text": "<h1>Prevention, Screenning and Other Problems &#8211; Immunization Status Unknown</h1>\n\n\t<p>➢Begin primary vaccination series provided no contraindication(s) or refer to vaccination clinic</p>\n\n\t<p>➢Advise caregiver when next vaccination(s) are needed</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE114').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE114",
+          "text": "<h1>Low birth weight</h1>\n\n\t<p>➢Advise the mother on how to feed and keep the low-weight infant warm at home</p>\n\n\t<p>➢Follow up in 7 days</p>\n\n\t<p>Among infants who are breastfed:\n ➢If not well attached or not sucking effectively, teach correct positioning and attachment</p>\n\n ➢If not able to attach well immediately, teach the mother to express breastmilk and feed from a cup\n\n ➢If breastfeeding less than 8 times in 24 hours, advise the mother to increase the frequency and to breastfeed as often and for as long as the infant wants, day and night \n\n ➢If the infant is receiving other foods or drinks, counsel the mother to increase breastfeeding, reduce other foods and drink and use a cup\nAmong infants who are not breastfed: \n\n  ➢Counsel about feeding\n\n  ➢ Identify concerns of mother and family about feeding\n\n  ➢Explain the guidelines for safe replacement feeding \n\n  ➢Refer for breastfeeding counselling and possible relactation if the mother is alive and caring for the infant",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE115').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE115",
+          "text": "<h1>Risk of newborn infection</h1>\n\n\t<p>➢Consider conducting <span class=\"caps\">CRP</span> and FS if available to inform the infant&#8217;s risk of infection</p>\n\n\t<p>➢Follow up in 3 days</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE116').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE116",
+          "text": "<h1>Newborn at risk of exposure to hepatitis B</h1>\n\n\t<p>➢Administer the vaccine against viral hepatitis B and specific immunoglobulins to the newborn within 12 hours of birth, or at the latest 72 hours after birth</p>\n\n\t<p>➢If immunoglobulins are not available, administer the vaccine alone</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE117').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE117",
+          "text": "<h1>Newborn not exposed to or at risk of hepatitis B</h1>\n\n\t<p>➢Advise the mother on giving home care to the young infant</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='load-EmCare.C10.IT.DE118').answer.first().value=true"
+              }
+            }
+          ],
+          "linkId": "EmCare.C10.IT.DE118",
+          "text": "<h1>Advice for caregivers of sick young infants</h1>\n\n\t<p>➢ Assess other problems <br />\n➢ Assess the mother&#8217;s health needs<br />\n➢ Advise the mother on giving home care to the sick young infant<br />\n1. <span class=\"caps\">EXCLUSIVELY</span> <span class=\"caps\">BREASTFEED</span> <span class=\"caps\">THE</span> <span class=\"caps\">YOUNG</span> <span class=\"caps\">INFANT</span> (for breastfeeding mothers)\n * Give only breastmilk to the young infant\n * Breastfeed frequently, as often and for as long as the infant wants, day and night, when sick and healthy</p>\n\n\t<p>2. <span class=\"caps\">MAKE</span> <span class=\"caps\">SURE</span> <span class=\"caps\">THAT</span> <span class=\"caps\">THE</span> <span class=\"caps\">YOUNG</span> <span class=\"caps\">INFANT</span> IS <span class=\"caps\">KEPT</span> <span class=\"caps\">WARM</span> AT <span class=\"caps\">ALL</span> <span class=\"caps\">TIMES</span>.\n * In cool weather, cover the infant’s head and feet, and add extra clothing</p>\n\n\t<p>3. <span class=\"caps\">KNOW</span> <span class=\"caps\">WHEN</span> TO <span class=\"caps\">RETURN</span>: \n * Return for follow-up visit as per the recommendation for the infant&#8217;s illness(es) or problem(s)\n * Advise the caretaker to return immediately if the young infant has any of these signs:\n     **Breastfeeding or feeding poorly\n     **Doesn&#8217;t move at all or only moves when stimulated\n     **Becomes sicker\n     **Develops a fever\n     **Feels unusually cold\n     **Develops fast breathing\n     **Develops difficulty breathing\n     **Palms or soles appear yellow\n     **Blood in stool</p>",
+          "type": "display",
+          "required": false,
+          "repeats": false
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE01"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE01",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE02"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE02",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE03"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE03",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE05"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE05",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE08"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE08",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE10"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE10",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE11"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE11",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE12"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE12",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE13"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE13",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE14"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE14",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE15"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE15",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE16"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE16",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE17"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE17",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE19"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE19",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE20"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE20",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE21"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE21",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE22"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE22",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE23"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE23",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE24"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE24",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE24A"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE24A",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE25"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE25",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE26"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE26",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE27"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE27",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE28"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE28",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE29"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE29",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE30"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE30",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE31"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE31",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE32"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE32",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE33"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE33",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE34"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE34",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE35"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE35",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE36"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE36",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE36A"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE36A",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE38"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE38",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE39"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE39",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE40"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE40",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE41"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE41",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE42"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE42",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE43"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE43",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE44"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE44",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE45"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE45",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE46"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE46",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE47"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE47",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE48"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE48",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE49"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE49",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE50"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE50",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE51"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE51",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE53"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE53",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE54"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE54",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE55"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE55",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE56"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE56",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE57"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE57",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE58"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE58",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE59"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE59",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE60"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE60",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE61"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE61",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE62"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE62",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE63"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE63",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE64"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE64",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE65"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE65",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE66"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE66",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE67"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE67",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE68"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE68",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE69"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE69",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE70"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE70",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE71"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE71",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE73"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE73",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE74"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE74",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE75"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE75",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE76"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE76",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE77"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE77",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE78"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE78",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE79"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE79",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE80"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE80",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE81"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE81",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE82"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE82",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE83"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE83",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE84"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE84",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE85"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE85",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE86"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE86",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE87"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE87",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE88"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE88",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE90"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE90",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE91"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE91",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE92"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE92",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE93"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE93",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE94"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE94",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE95"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE95",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE96"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE96",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE97"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE97",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE98"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE98",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE99"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE99",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE100"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE100",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE101"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE101",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE102"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE102",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE103"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE103",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE104"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE104",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE105"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE105",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE106"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE106",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE107"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE107",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE108"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE108",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE109"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE109",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE110"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE110",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE111"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE111",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE112"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE112",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE113"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE113",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE114"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE114",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE115"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE115",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE116"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE116",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE117"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE117",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+          "valueCode": "horizontal"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "load-EmCare.C10.IT.DE118"
+          }
+        }
+      ],
+      "linkId": "load-EmCare.C10.IT.DE118",
+      "type": "boolean",
+      "required": false,
+      "repeats": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "now()"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        }
+      ],
+      "linkId": "timestamp",
+      "type": "dateTime",
+      "required": false
+    }
+  ],
+  "publisher": "World Health Organization",
+  "copyright": "Source: WHO SMART Guidelines EmCare/IMCI (github.com/WorldHealthOrganization/smart-emcare-cmr, input/resources/questionnaire/questionnaire-emcare.treatment.json), retrieved 2026-08-11. No LICENSE file was present upstream at retrieval; WHO content is generally CC BY-NC-SA 3.0 IGO. All rights remain with WHO; no endorsement implied. Included ONLY as a performance-test fixture in this non-commercial project (not part of the sample library). Rights holders may request removal via the project issue tracker and it will be deleted promptly. See README “Third-party content notices”."
+}

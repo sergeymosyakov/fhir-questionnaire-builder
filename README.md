@@ -98,6 +98,18 @@ The NLM Clinical Tables Search Service is provided free of charge by the U.S. Na
 
 Sample files sourced from HL7 Implementation Guides are published under Creative Commons Attribution 4.0 (CC BY 4.0). Source URLs are preserved in each file's `url` field.
 
+### WHO SMART Guidelines performance-test fixture
+
+`sampledata/who-emcare-treatment.fhir.json` is a copy of `questionnaire-emcare.treatment.json`, retrieved on 2026-08-11 from the World Health Organization SMART Guidelines "EmCare" (IMCI) repository at [github.com/WorldHealthOrganization/smart-emcare-cmr](https://github.com/WorldHealthOrganization/smart-emcare-cmr) (`input/resources/questionnaire/`). We include it **solely as a performance-regression test fixture** (a genuinely large, real-world ~226-item questionnaire); it is **not** registered in the sample library (`sampledata/library.json`) and is not presented as an example.
+
+We are making this provenance explicit in the interest of transparency and good faith:
+
+- **License status:** at the time of retrieval the upstream repository contained **no `LICENSE` file**. WHO SMART Guidelines content is generally published under [CC BY-NC-SA 3.0 IGO](https://creativecommons.org/licenses/by-nc-sa/3.0/igo/). This project itself is licensed for **non-commercial use with attribution** (see `LICENSE`), which is consistent with those terms.
+- **No ownership claim / no endorsement:** all rights in this content remain with the World Health Organization. WHO does not endorse this project.
+- **Takedown commitment:** if you are a rights holder (or represent one) and object to its inclusion for any reason, please [open an issue](https://github.com/sergeymosyakov/fhir-questionnaire-builder/issues) or contact the maintainer, and we will **remove the file promptly, no questions asked**.
+
+The file's own `copyright` field records the same source and intent.
+
 ---
 
 ## Feedback welcome
