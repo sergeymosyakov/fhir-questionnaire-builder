@@ -1,0 +1,25 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "title": "Repeating select dedup",
+  "item": [
+    {
+      "linkId": "g",
+      "type": "group",
+      "text": "Codes",
+      "item": [
+        {
+          "linkId": "q-sel",
+          "type": "choice",
+          "text": "Pick a code",
+          "repeats": true,
+          "answerOption": [
+            { "valueCoding": { "code": "A", "display": "Alpha" } },
+            { "valueCoding": { "code": "B", "display": "Beta" } },
+            { "valueCoding": { "code": "C", "display": "Gamma" } }
+          ]
+        }
+      ]
+    }
+  ]
+}

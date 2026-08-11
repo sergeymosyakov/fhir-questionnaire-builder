@@ -11,6 +11,7 @@ import { nextUid } from '../id.js';
 import {
   _nodeOpts, _evalAnswerOpts, _resolveColValue, _findRawOpt,
   _getColDisplayLabel, _buildColHeader, _buildColRow, _appendOptionExtras,
+  siblingSelectedCodes, filterSiblingSelected, baseRowId,
 } from './choice-helpers.js';
 
 export class ChoiceNode extends ItemNode {
@@ -24,8 +25,12 @@ export class ChoiceNode extends ItemNode {
     const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
 
-    const opts   = _evalAnswerOpts(node, ctx._fpCtx);
     let selected = getValue(node.id) || '';
+    let opts     = _evalAnswerOpts(node, ctx._fpCtx);
+    // Repeating select: hide codes already chosen in sibling rows (keep own).
+    if (node.repeats) {
+      opts = filterSiblingSelected(opts, selected, siblingSelectedCodes(baseRowId(node.id), node.id, getValue));
+    }
     // display cache for codes selected via live lookup — stored on node to survive re-renders
     if (!node._lookupDisplayCache) node._lookupDisplayCache = {};
 

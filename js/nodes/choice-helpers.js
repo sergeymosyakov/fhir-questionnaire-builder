@@ -26,6 +26,33 @@ export function _evalAnswerOpts(node, fpCtx) {
   return _evalExpr(node, expr, fpCtx);
 }
 
+// Repeating single-select dedup (shared by vanilla + React render layers).
+// getValue is injected (rc.getValue / answerStore.get) — no state import here.
+
+// Codes chosen by the OTHER rows of a repeating item (excludes ownId).
+export function siblingSelectedCodes(baseId, ownId, getValue) {
+  const n = Number(getValue(baseId + '$$n')) || 0;
+  const set = new Set();
+  for (let j = 0; j <= n; j++) {
+    const rowId = j === 0 ? baseId : baseId + '$$' + j;
+    if (rowId === ownId) continue;
+    const v = getValue(rowId);
+    if (v) set.add(v);
+  }
+  return set;
+}
+
+// Drop options already picked by sibling rows; always keep this row's own value.
+export function filterSiblingSelected(opts, ownValue, siblingSet) {
+  if (!siblingSet || !siblingSet.size) return opts;
+  return opts.filter(o => o.code === ownValue || !siblingSet.has(o.code));
+}
+
+// Strip the repeat row-address suffix (`$$3`) to get the base linkId.
+export function baseRowId(id) {
+  return String(id).replace(/\$\$\d+$/, '');
+}
+
 // Evaluate a FHIRPath answer-source expression (answerExpression /
 // candidateExpression) and map each result item to a {code, display} option.
 // Falls back to the node's static options when the result is empty or errors.
