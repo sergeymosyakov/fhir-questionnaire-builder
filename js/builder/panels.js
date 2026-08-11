@@ -25,7 +25,8 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
   trigger.className = 'vis-q-sel-trigger';
   const found = allItems.find(it => it.id === selectedId);
   trigger.textContent = found ? found.label : '\u2014 question \u2014';
-  trigger.dataset.tipTitle = found ? found.id : '';
+  // Tooltip shows the full (possibly truncated) question text; linkId as secondary.
+  if (found) { trigger.dataset.tipTitle = found.label; trigger.dataset.tipBody = found.id; }
 
   let dropEl = null;
 
@@ -59,6 +60,7 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
     blank.addEventListener('mousedown', () => {
       trigger.textContent = '\u2014 question \u2014';
       delete trigger.dataset.tipTitle;
+      delete trigger.dataset.tipBody;
       onSelect('', null);
       close();
     });
@@ -69,11 +71,13 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
       const opt = document.createElement('div');
       opt.className = 'vis-q-sel-opt' + (it.id === selectedId ? ' vis-q-sel-opt--sel' : '');
       opt.textContent = it.label;
-      opt.dataset.tipTitle = it.id;
+      opt.dataset.tipTitle = it.label;
+      opt.dataset.tipBody = it.id;
       opt.dataset.id = it.id;
       opt.addEventListener('mousedown', () => {
         trigger.textContent = it.label;
-        trigger.dataset.tipTitle = it.id;
+        trigger.dataset.tipTitle = it.label;
+        trigger.dataset.tipBody = it.id;
         onSelect(it.id, it);
         close();
       });

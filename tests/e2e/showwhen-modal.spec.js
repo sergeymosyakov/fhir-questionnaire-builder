@@ -206,3 +206,33 @@ test.describe('Show When modal — draft pattern', () => {
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
   });
 });
+
+test.describe('Show When modal — question picker tooltip', () => {
+  // The expanded question list must reveal the full option text on hover:
+  // data-tip-title = full label, data-tip-body = linkId (not the linkId alone).
+  test('option tooltip shows the full label, linkId as secondary', async ({ page }) => {
+    await freshStart(page);
+    await addTextItem(page, 'First Question'); // referenceable item 1.1
+
+    // Second item (1.2) — the one we configure Show When on.
+    const group = page.locator('[data-node-id="1"]');
+    await group.getByTestId('group-add-btn').click();
+    await page.locator('[data-testid="add-menu-item"]').first().click();
+    await expect(page.locator('[data-node-id="1.2"]').getByTestId('action-vis')).toBeVisible();
+
+    await openShowWhenModal(page, '1.2');
+    await showWhenModalBody(page).getByText('+ Add condition').click();
+
+    const trigger = showWhenModalBody(page).locator('.vis-q-sel-trigger').first();
+    await expect(trigger).toBeVisible();
+    await trigger.click();
+
+    const opt = page.locator('.vis-q-sel-opt[data-id="1.1"]');
+    await expect(opt).toBeVisible();
+    await expect(opt).toContainText('First Question');
+    const label = (await opt.textContent()).trim();
+    await expect(opt).toHaveAttribute('data-tip-title', label); // full text, not the linkId
+    await expect(opt).toHaveAttribute('data-tip-body', '1.1');
+    expect(label).not.toBe('1.1');
+  });
+});
