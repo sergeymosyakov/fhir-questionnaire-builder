@@ -20,28 +20,31 @@ export function emit(block) {
   }
 }
 
+// FHIRPath single-quoted string literal with embedded quotes escaped.
+function q(s) {
+  return `'${String(s).replace(/'/g, "\\'")}'`;
+}
+
 function emitSet(b) {
-  return `(${(b.members || []).map((m) => `'${String(m).replace(/'/g, "\\'")}'`).join('|')})`;
+  return `(${(b.members || []).map((m) => q(m)).join('|')})`;
 }
 
 function emitPipeline(b) {
   const acc = b.source.accessor ? `.${b.source.accessor}` : '';
-  let out = `%resource.repeat(item).where(linkId='${b.source.linkId}').answer${acc}`;
+  let out = `%resource.repeat(item).where(linkId=${q(b.source.linkId)}).answer${acc}`;
   for (const f of b.filters || []) {
     if (f.op === 'distinct') out += '.distinct()';
     else if (f.op === 'compare') out += `.where($this ${f.cmp} ${emitFilterLiteral(f)})`;
     else out += `.${f.op}(${emit(f.set)})`;
   }
   if (b.reduce) {
-    out += b.reduce.fn === 'join'
-      ? `.join('${String(b.reduce.sep ?? '').replace(/'/g, "\\'")}')`
-      : `.${b.reduce.fn}()`;
+    out += b.reduce.fn === 'join' ? `.join(${q(b.reduce.sep ?? '')})` : `.${b.reduce.fn}()`;
   }
   return out;
 }
 
 function emitFilterLiteral(f) {
-  if (f.dataType === 'string') return `'${String(f.value).replace(/'/g, "\\'")}'`;
+  if (f.dataType === 'string') return q(f.value);
   return String(f.value);
 }
 
@@ -52,12 +55,12 @@ function emitAggregate(b) {
 
 function emitItemRef(b) {
   const at = b.answerAt || [];
-  const path = b.segments.map((s, i) => `${at[i] ? '.answer' : ''}.item.where(linkId='${s}')`).join('');
+  const path = b.segments.map((s, i) => `${at[i] ? '.answer' : ''}.item.where(linkId=${q(s)})`).join('');
   return `%resource${path}${b.value ? `.answer.${b.value}` : '.answer'}`;
 }
 
 function emitLiteral(b) {
-  if (b.dataType === 'string') return `'${String(b.value).replace(/'/g, "\\'")}'`;
+  if (b.dataType === 'string') return q(b.value);
   return String(b.value);
 }
 

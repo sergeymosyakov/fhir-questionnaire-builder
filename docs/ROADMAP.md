@@ -34,7 +34,7 @@ The following translation improvements are still outstanding:
 
 ### Visual Expression Builder — follow-ups
 
-- [ ] **Escape `linkId` in emitted FHIRPath** — `emit.js` interpolates `linkId='…'` and set/compare literals without escaping embedded single quotes (consistent with the pre-existing `emitItemRef`). Harmless for the controlled linkIds we generate; centralise quote-escaping across `emit.js` if arbitrary linkIds become possible.
+- [ ] **"Build…" launcher in the FHIRPath tester** — the dev console (`js/ui/fhirpath-console.js`, ⚙ Settings) shares `evalFhirpath` with the builder but has no visual builder button. Add a **🧩 Build…** launcher (resultKind `auto`/chooser) whose `onInsert` drops the assembled expression into the console input (scratch eval, not written to a node).
 - [ ] **Type-aware pipeline compare operators** — the "keep where value …" filter offers all six comparators (`= ≠ > < ≥ ≤`) regardless of the source answer type; numeric/date vs. string cases could be filtered once type metadata flows into the filter row.
 - [ ] **Undo for expression-field edits** — editing `enableWhenExpression` / `calculatedExpression` (via the textarea *or* the visual builder) dispatches `CALC_RECALC_REQUESTED` but not `RESPONSE_CHANGED`/`REINIT_FORM`, so `history.js` takes no snapshot — these edits aren't individually undoable. Pre-existing (affects the manual textarea too); the builder is consistent with it. Wire a history snapshot for expression edits without forcing a full `REINIT_FORM` rebuild.
 

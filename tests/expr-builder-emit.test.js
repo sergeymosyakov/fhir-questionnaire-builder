@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   itemRef, variable, literal, compare, logic, arith, exists, aggregate, raw,
+  setLiteral, pipeline,
 } from '../js/fhir/expr-builder/model.js';
 import { emit } from '../js/fhir/expr-builder/emit.js';
 import { valueAccessor, hasAnswer } from '../js/fhir/expr-builder/value-paths.js';
@@ -89,6 +90,15 @@ describe('emit', () => {
       .toBe("%resource.item.where(linkId='pain').answer.count()");
     expect(emit(aggregate('sum', itemRef(['pain'], 'valueDecimal'))))
       .toBe("%resource.item.where(linkId='pain').answer.valueDecimal.sum()");
+  });
+
+  it('escapes embedded single quotes in linkIds and literals', () => {
+    expect(emit(itemRef(["a'b"], 'valueDecimal')))
+      .toBe("%resource.item.where(linkId='a\\'b').answer.valueDecimal");
+    expect(emit(literal('string', "O'Brien"))).toBe("'O\\'Brien'");
+    expect(emit(setLiteral(["x'y", 'z']))).toBe("('x\\'y'|'z')");
+    expect(emit(pipeline({ linkId: "it's", accessor: 'valueCoding.code' }, [], { fn: 'join', sep: ", " })))
+      .toBe("%resource.repeat(item).where(linkId='it\\'s').answer.valueCoding.code.join(', ')");
   });
 
   it('passes raw text through unchanged', () => {
