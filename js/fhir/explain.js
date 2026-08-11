@@ -7,6 +7,7 @@
 //   { type: 'OR',  children: Node[], result: boolean }
 //   { type: 'NOT', child:    Node,   result: boolean }
 //   { type: 'LEAF', expr: string,    result: boolean, error?: string }
+import { fhirModel } from './fhir-model.js';
 
 // ── Parsing helpers ────────────────────────────────────────────────────────────
 
@@ -107,7 +108,7 @@ export function evaluateExprTree(node, fp, resource, env) {
   switch (node.type) {
     case 'LEAF': {
       try {
-        const raw    = fp.evaluate(resource || {}, node.expr, env || {});
+        const raw    = fp.evaluate(resource || {}, node.expr, env || {}, fhirModel());
         const first  = Array.isArray(raw) ? raw[0] : raw;
         node.result  = first === true || first === 'true' ||
                        (typeof first === 'number' && first !== 0) ? true

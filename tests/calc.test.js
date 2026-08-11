@@ -262,6 +262,7 @@ describe('evalInitialExprNodes', () => {
       { id: 'qr1' },
       'expr',
       expect.objectContaining({ resource: { id: 'qr1' }, myVar: 1 }),
+      undefined,
     );
   });
 });

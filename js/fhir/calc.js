@@ -3,6 +3,7 @@
 
 import { buildDepGraph, topoOrder } from './dep-graph.js';
 import { buildAnswer } from './qr-builder.js';
+import { fhirModel } from './fhir-model.js';
 
 // Pre-compute questionnaire-level SDC variables into an environment object.
 // Variables are evaluated in order; later ones may reference earlier ones via %name.
@@ -11,7 +12,7 @@ export function buildVarEnv(variables, qr, fp) {
   for (const v of variables) {
     if (!v.name || !v.expression) continue;
     try {
-      const result = fp.evaluate(qr, v.expression, { resource: qr, ...env });
+      const result = fp.evaluate(qr, v.expression, { resource: qr, ...env }, fhirModel());
       env[v.name] = Array.isArray(result) && result.length === 1 ? result[0] : result;
     } catch (_e) { /* skip variables whose expression fails */ }
   }
@@ -92,7 +93,7 @@ export function evalCalcNodes(nodes, qr, fp, values, envVars = {}, base = null, 
     const node = nodeMap.get(id);
     if (!node || !(node._calculatedExpr && node._readOnly)) continue;
     try {
-      const result = fp.evaluate(qr, node._calculatedExpr, env);
+      const result = fp.evaluate(qr, node._calculatedExpr, env, fhirModel());
       const value = coerceResult(node, result);
       values[node.id] = value;
       // Propagate into the live QR so downstream calc nodes see the new value.
@@ -123,7 +124,7 @@ export function evalInitialExprNodes(nodes, qr, fp, values, envVars = {}) {
   for (const node of nodes) {
     if (node._initialExpr) {
       try {
-        const result = fp.evaluate(qr, node._initialExpr, env);
+        const result = fp.evaluate(qr, node._initialExpr, env, fhirModel());
         if (node.itemType === 'checkbox') {
           values[node.id] = result[0] === true || result[0] === 'true';
         } else {

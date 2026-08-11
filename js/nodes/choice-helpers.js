@@ -2,6 +2,7 @@
 // Pure option-resolution and choiceColumn rendering helpers shared by
 // ChoiceNode / RadioNode / OpenChoiceNode (js/nodes/choice-node.js).
 import { parseOptions, rawOptsToPairs } from '../utils.js';
+import { fhirModel } from '../fhir/fhir-model.js';
 
 // Evaluate the answer-source expression (SDC answerExpression or
 // candidateExpression) against the current FHIRPath context.
@@ -58,7 +59,7 @@ export function baseRowId(id) {
 // Falls back to the node's static options when the result is empty or errors.
 function _evalExpr(node, expr, fpCtx) {
   try {
-    const raw = fpCtx.fp.evaluate(fpCtx.qr, expr, fpCtx.env || {});
+    const raw = fpCtx.fp.evaluate(fpCtx.qr, expr, fpCtx.env || {}, fhirModel());
     if (!raw || !raw.length) return _nodeOpts(node);
     return raw.map(v => {
       if (v === null || v === undefined) return null;

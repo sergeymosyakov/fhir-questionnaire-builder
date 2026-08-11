@@ -2,6 +2,7 @@
 // ctx: { fp, qr, envVars } — fhirpath + QuestionnaireResponse + variable env
 // (optional; needed only for enableWhenExpression FHIRPath evaluation)
 import { answerStore } from './answer-store.js';
+import { fhirModel } from './fhir/fhir-model.js';
 
 // Marks every node in a subtree as visible-but-disabled.
 export function markAllDisabled(nodes, results) {
@@ -81,7 +82,7 @@ function isNodeVisible(node, ctx, path) {
   if (node.enableWhenExpression && ctx && ctx.fp && ctx.qr) {
     try {
       const env = { resource: ctx.qr, ...(ctx.envVars || {}) };
-      const result = ctx.fp.evaluate(ctx.qr, node.enableWhenExpression, env);
+      const result = ctx.fp.evaluate(ctx.qr, node.enableWhenExpression, env, fhirModel());
       return result[0] === true;
     } catch { return false; }
   }

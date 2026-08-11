@@ -188,7 +188,7 @@ describe('evalConstraints — environment', () => {
     const fp = { evaluate: vi.fn(() => [true]) };
     evalConstraints(node, fp, qr, varEnv);
     expect(fp.evaluate).toHaveBeenCalledWith(
-      qr, 'expr', { resource: qr, someVar: 42 }
+      qr, 'expr', { resource: qr, someVar: 42 }, undefined
     );
   });
 });

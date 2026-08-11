@@ -5,6 +5,7 @@
 // Usage:
 //   import { calcFormOk, isMandatory, evalConstraints,
 //            CHECKABLE_TYPES, NONEMPTY_TYPES } from './form-checks.js';
+import { fhirModel } from './fhir-model.js';
 
 // Item types that have form-value validation logic in the preview.
 // CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
@@ -24,7 +25,7 @@ export function evalConstraints(node, fp, qr, varEnv) {
   for (const c of node.constraint) {
     if (!c.expression || c.severity !== 'error') continue;
     try {
-      const result = fp.evaluate(qr, c.expression, env);
+      const result = fp.evaluate(qr, c.expression, env, fhirModel());
       if (!result || result.length === 0 || result[0] === false) return false;
     } catch { return false; }
   }

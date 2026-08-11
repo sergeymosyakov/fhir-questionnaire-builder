@@ -4,6 +4,7 @@
 // evaluates them on every REFRESH_EXPR_ICONS event (form value changes, typing).
 import { Modal } from './modal-base.js';
 import { AppEvents } from '../../events.js';
+import { fhirModel } from '../../fhir/fhir-model.js';
 
 export class ExprAwareModal extends Modal {
   static _fpCtx = null;
@@ -44,7 +45,7 @@ export class ExprAwareModal extends Modal {
       const expr = el.dataset.exprIcon;
       if (!expr) { el.className = 'expr-live-icon'; el.textContent = ''; continue; }
       try {
-        const raw = fp.evaluate(qr || {}, expr, env || {});
+        const raw = fp.evaluate(qr || {}, expr, env || {}, fhirModel());
         const ok  = Array.isArray(raw) ? (raw.length > 0 && raw[0] !== false) : Boolean(raw);
         el.className  = 'expr-live-icon ' + (ok ? 'expr-live-icon--ok' : 'expr-live-icon--fail');
         el.textContent = ok ? '\u2713' : '\u2717';
