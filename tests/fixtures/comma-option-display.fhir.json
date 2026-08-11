@@ -1,0 +1,47 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "title": "Comma option display",
+  "item": [
+    {
+      "linkId": "root",
+      "type": "group",
+      "text": "Procedure codes",
+      "item": [
+        {
+          "linkId": "q-radio-comma",
+          "type": "choice",
+          "text": "Select the procedure code",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button",
+                    "display": "Radio Button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "E1220",
+                "display": "E1220 - Wheelchair, adult size, heavy duty, elevating legrests"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "E1039",
+                "display": "E1039 - Transport chair"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -10,6 +10,7 @@ import {
   fhirTypeToItemType,
   fhirOptsToStr,
   hasNonCodingOpts,
+  hasCommaInCodingOpts,
   applyVisibility,
   applyConstraints,
   resolveContainedValueSet,
@@ -48,10 +49,11 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // Preserve full answerOption array when needed:
   //  - non-valueCoding types (valueString, valueInteger, etc.) for round-trip
   //  - choiceColumn requires access to full Coding properties (system, code, display)
+  //  - a coding display/code with a comma can't survive the comma-delimited options string
   const hasChoiceCol = (fhirItem.extension || []).some(
     e => e.url === FHIR.choiceColumn
   );
-  if (fhirItem.answerOption && (hasNonCodingOpts(fhirItem.answerOption) || hasChoiceCol)) {
+  if (fhirItem.answerOption && (hasNonCodingOpts(fhirItem.answerOption) || hasChoiceCol || hasCommaInCodingOpts(fhirItem.answerOption))) {
     node._rawAnswerOptions = JSON.parse(JSON.stringify(fhirItem.answerOption));
   }
 

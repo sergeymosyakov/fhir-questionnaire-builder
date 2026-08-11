@@ -118,6 +118,13 @@ export function hasNonCodingOpts(opts) {
   return (opts || []).some(o => !o.valueCoding);
 }
 
+// True if any valueCoding code/display contains a comma — the comma-delimited
+// `options` string can't hold it losslessly, so _rawAnswerOptions must be kept.
+export function hasCommaInCodingOpts(opts) {
+  return (opts || []).some(o => o.valueCoding &&
+    [o.valueCoding.code, o.valueCoding.display].some(v => typeof v === 'string' && v.includes(',')));
+}
+
 // Build linkId → question text map for human-friendly display
 export function buildLinkIdMap(items, map = {}) {
   for (const item of items || []) {
