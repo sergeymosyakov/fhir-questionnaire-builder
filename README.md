@@ -10,10 +10,37 @@ The right-side **preview panel is a live SDC-compliant runtime**: it executes FH
 
 ---
 
+## 📦 Embed the renderer as a widget
+
+The right-side runtime ships as a standalone, embeddable **`QuestionnaireRenderer`**
+widget — drop a FHIR R4 `Questionnaire` into any web page and get a live, fillable
+form that runs the SDC logic and returns a `QuestionnaireResponse`. No builder
+shell, no iframe, no framework.
+
+```html
+<link rel="stylesheet" href="questionnaire-widget.css">
+<div id="form"></div>
+<script type="module">
+  import { QuestionnaireRenderer } from './questionnaire-widget.js';
+  const questionnaire = await (await fetch('my-questionnaire.json')).json();
+  const widget = new QuestionnaireRenderer(document.getElementById('form'), {
+    questionnaire, config: { previewMode: 'patient', validation: true },
+  });
+  document.querySelector('#save').onclick = () => save(widget.getResponse());
+</script>
+```
+
+- **Full guide & API reference:** [WIDGET.md](WIDGET.md)
+- **Download the bundle:** [GitHub Releases](https://github.com/sergeymosyakov/fhir-questionnaire-builder/releases)
+- **Live demo:** [widget-demo.html](widget-demo.html) — three isolated widgets + a custom “Export FHIR R4” button
+
+---
+
 ## Documentation
 
 | Doc | Contents |
 |---|---|
+| [WIDGET.md](WIDGET.md) | **Embeddable renderer widget** — install, config, API, events, examples |
 | [docs/CONTEXT.md](docs/CONTEXT.md) | Architecture, file map, node model, UX features, build rules |
 | [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) | FHIR R4 field mapping, supported extensions, known gaps |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Feature backlog |

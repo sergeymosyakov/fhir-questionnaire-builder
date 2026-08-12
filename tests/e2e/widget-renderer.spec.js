@@ -135,10 +135,38 @@ test.describe('QuestionnaireRenderer widget', () => {
     // A calc badge is always visible in design mode and carries a data-tip.
     const tipEl = page.locator('[data-mode="preview"] .calc-badge--explain[data-tip-title]').first();
     await expect(tipEl).toBeVisible({ timeout: 10_000 });
-    await tipEl.hover();
+    // Trigger the document-delegated tooltip (real hover is flaky headless).
+    await tipEl.dispatchEvent('mouseover');
     const tip = page.locator('.rich-tooltip');
     await expect(tip).toBeVisible();
     await expect(tip).not.toBeEmpty();
+  });
+
+  test('host Export button pulls answers via getResponse() as FHIR R4', async ({ page }) => {
+    await page.goto(DEMO);
+    await page.getByTestId('widget-mount').locator('[data-preview-id]').first().waitFor({ timeout: 10_000 });
+    await page.evaluate(() => window.__widgets.patient.setResponse({
+      resourceType: 'QuestionnaireResponse', status: 'in-progress',
+      item: [{ linkId: 'height', answer: [{ valueDecimal: 180 }] }],
+    }));
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('.export-btn[data-export="patient"]').click(),
+    ]);
+    const stream = await download.createReadStream();
+    const chunks = [];
+    for await (const c of stream) chunks.push(c);
+    const qr = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    expect(qr.resourceType).toBe('QuestionnaireResponse');
+    const findHeight = items => {
+      for (const it of items || []) {
+        if (it.linkId === 'height' && it.answer) return it.answer[0]?.valueDecimal;
+        const hit = findHeight(it.item);
+        if (hit !== undefined) return hit;
+      }
+      return undefined;
+    };
+    expect(findHeight(qr.item)).toBe(180);
   });
 });
 
