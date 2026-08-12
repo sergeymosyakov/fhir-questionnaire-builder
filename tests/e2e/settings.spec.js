@@ -64,8 +64,8 @@ test.describe('Settings page', () => {
     await gotoSettings(page);
 
     const providers = page.locator('#providersDisplay .s-provider-badge');
-    const count = await providers.count();
-    expect(count).toBeGreaterThan(0);
+    // Provider list renders after serverConfig.ready() resolves (async) — wait for it.
+    await expect(providers.first()).toBeVisible();
 
     // Default config.json provider should be listed
     const labels = await providers.allTextContents();
