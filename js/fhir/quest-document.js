@@ -6,6 +6,7 @@
 // document. Import it wherever document state is needed.
 import { destroyTree } from '../utils.js';
 import { AppEvents } from '../events.js';
+import { defaultBus } from '../core/events/bus.js';
 
 export class QuestDocument {
   /** @type {import('../nodes/base-node.js').BaseNode[]} Root-level tree nodes. */
@@ -83,10 +84,15 @@ export class QuestDocument {
 
   /** Convenience getter — same as meta.fhirTarget. */
   get fhirTarget() { return this.meta.fhirTarget; }
-
   /** Returns contained[] entries that are ValueSet resources. */
   get containedValueSets() {
     return this.contained.filter(r => r.resourceType === 'ValueSet');
+  }
+
+  /** @param {import('../core/events/bus.js').EventBus} [bus]  channel for VARIABLES_APPLY */
+  constructor(bus = defaultBus) {
+    // Self-wire: any module can dispatch VARIABLES_APPLY without knowing about this doc.
+    bus.on(AppEvents.VARIABLES_APPLY, e => this.applyVariables(e.detail.variables));
   }
 
   /**
@@ -131,11 +137,3 @@ export class QuestDocument {
 
 /** Singleton — the currently loaded (or empty) questionnaire document. */
 export const questDoc = new QuestDocument();
-
-// The singleton wires itself to VARIABLES_APPLY so any module can
-// dispatch the event without knowing about questDoc directly.
-if (typeof document !== 'undefined') {
-  document.addEventListener(AppEvents.VARIABLES_APPLY, e => {
-    questDoc.applyVariables(e.detail.variables);
-  });
-}

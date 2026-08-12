@@ -47,13 +47,13 @@ export class AttachmentNode extends ItemNode {
         showError(`File too large \u2014 max ${node._maxFileSizeMB} MB allowed`);
         el.value = '';
         setValue(node.id, null);
-        _reCalc(); onChange(); BaseNode.notifyChanged();
+        _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus);
         return;
       }
       nameTag.classList.remove('file-name-tag--error');
       setValue(node.id, file ? { name: file.name, size: file.size, type: file.type } : null);
       nameTag.textContent = file ? file.name : 'No file chosen';
-      _reCalc(); onChange(); BaseNode.notifyChanged();
+      _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus);
     };
 
     wrap.appendChild(el);

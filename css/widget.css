@@ -1,0 +1,22 @@
+/* ── Renderer widget CSS manifest ────────────────────────────────────────────
+   Bundled by esbuild into dist/questionnaire-widget.css. Contains only the
+   styles the right-side renderer needs at runtime. The full-app index.html
+   still links these files individually; this manifest is the widget's subset.
+   Refined in Phase D/F (docs/WIDGET-EXTRACTION-PLAN.md). */
+
+/* Design tokens first — everything below references these custom properties. */
+@import "./design-tokens.css";
+
+/* Preview structure + patient/table view + controls */
+@import "./preview-structure.css";
+@import "./preview-ui.css";
+@import "./preview-controls.css";
+@import "./preview-search.css";
+@import "./controls.css";
+@import "./date-picker.css";
+
+/* Shared widgets used by preview controls */
+@import "./tooltip.css";
+@import "./toast.css";
+@import "./status-badge.css";
+@import "./explain-modal.css";

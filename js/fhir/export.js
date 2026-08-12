@@ -492,8 +492,7 @@ export function nodeToFHIRItem(node) {
   return fhirItem;
 }
 
-export function buildFHIRObject() {
-  const { questDoc } = _svc;
+export function buildFHIRObject(questDoc = _svc.questDoc) {
   const { tree, meta: questMeta, rawFhir, variables: questVariables, contained: questContained, translations } = questDoc;
   const SDC_VAR_URL = FHIR.variable;
   const q = {

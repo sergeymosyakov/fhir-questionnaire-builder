@@ -106,7 +106,7 @@ export class GTableRenderer {
         addBtn.dataset.tipTitle = `Maximum ${max} row${max === 1 ? '' : 's'} reached`;
       }
       addBtn.addEventListener('click', () => {
-        if (!atMax) { rc.addInstance(group.id, instancePath); BaseNode.notifyChanged(); }
+        if (!atMax) { rc.addInstance(group.id, instancePath); BaseNode.notifyChanged(rc.bus); }
       });
 
       footTd.appendChild(addBtn);
@@ -149,7 +149,7 @@ export class GTableRenderer {
         const _i = i;
         rm.addEventListener('click', () => {
           rc.removeInstance(group.id, _i, instancePath);
-          BaseNode.notifyChanged();
+          BaseNode.notifyChanged(rc.bus);
         });
         actionTd.appendChild(rm);
       }

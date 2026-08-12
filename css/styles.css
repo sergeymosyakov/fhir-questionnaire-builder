@@ -1,31 +1,4 @@
-﻿/* === Design tokens ============================================================ */
-:root {
-  --c-primary:     #1565c0;
-  --c-primary-lt:  #e3f2fd;
-  --c-primary-dk:  #003c8f;
-  --c-teal:        #00897b;
-  --c-teal-lt:     #e0f2f1;
-  --c-amber:       #e65100;
-  --c-amber-lt:    #fff3e0;
-  --c-bg:          #eef2f7;
-  --c-surface:     #ffffff;
-  --c-border:      #dde3ec;
-  --c-text:        #1c2b3a;
-  --c-text-1:      #1c2b3a;
-  --c-text-2:      #637083;
-  --c-hover:       #f0f2f5;
-  --c-accent:      #1565c0;
-  --c-ok:          #2e7d32;
-  --c-ok-bg:       #e8f5e9;
-  --c-ok-border:   #66bb6a;
-  --c-err:         #b71c1c;
-  --c-err-bg:      #ffebee;
-  --c-err-border:  #ef5350;
-  --shadow:        0 2px 8px rgba(21,101,192,.10);
-  --shadow-sm:     0 1px 4px rgba(0,0,0,.07);
-  --r:             8px;
-  --r-sm:          4px;
-}
+﻿@import "./design-tokens.css";
 
 /* === Base reset ============================================================== */
 *, *::before, *::after { box-sizing: border-box; }

@@ -1,0 +1,52 @@
+/* === Preview toolbar + search =================================================
+   Shared by the full app (right-panel toolbar) and the embeddable renderer
+   widget. Loaded via <link> in index.html and @import in css/widget.css. */
+
+.fhir-toolbar {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.fhir-toolbar-sep { flex: 1; }
+
+.search-wrap { display: inline-flex; align-items: center; gap: 3px; }
+.search-input {
+  width: 140px;
+  height: 26px;
+  padding: 0 7px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  color: var(--c-text);
+  background: var(--c-surface);
+  transition: border-color .15s, width .2s;
+  outline: none;
+}
+.search-input:focus { border-color: var(--c-primary); width: 200px; }
+.search-input--empty { border-color: var(--c-err); background: var(--c-err-bg); }
+.search-nav-btn {
+  width: 24px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  background: var(--c-surface);
+  color: var(--c-text);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .1s;
+}
+.search-nav-btn:hover { background: var(--c-primary-lt); color: var(--c-primary); }
+.search-counter {
+  font-size: 11px;
+  color: var(--c-text-2);
+  min-width: 44px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.search-counter--empty { color: var(--c-err); font-weight: 600; }
+.search-match         { background: #fff9c4 !important; }
+.search-match--active { background: #ffe082 !important; outline: 2px solid #f9a825; outline-offset: -1px; }

@@ -33,7 +33,7 @@ export class CheckboxNode extends ItemNode {
       setValue(node.id, el.checked);
       _reCalc();
       onChange();
-      BaseNode.notifyChanged();
+      BaseNode.notifyChanged(ctx.bus);
     };
 
     wrap.appendChild(el);

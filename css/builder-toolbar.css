@@ -1,12 +1,5 @@
 /* === Builder toolbar ========================================================= */
-.fhir-toolbar {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-bottom: 6px;
-}
-.fhir-toolbar-sep { flex: 1; }
+/* .fhir-toolbar + .fhir-toolbar-sep moved to css/preview-search.css (shared with widget). */
 .fhir-toolbar-gap { margin-left: 12px; }
 .btn-fhir {
   flex: none;

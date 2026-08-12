@@ -23,6 +23,7 @@ export const languageMenu       = new LanguageMenu();
 
 export function mount() {
   const wrap = document.querySelector('[data-mount="header-actions"]');
+  if (!wrap) return;   // absent on headless widget pages
   [questionnairesMenu, answersMenu, saveMenu, previewModeMenu, viewOptionsMenu, settingsMenu, languageMenu]
     .forEach(m => wrap.appendChild(m.el));
 }

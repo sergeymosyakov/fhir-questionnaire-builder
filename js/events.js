@@ -14,6 +14,8 @@
 //   RENUMBER_PROGRESS            detail: { done, total }
 //   QUESTIONNAIRE_RESET          (no detail) — triggers _doReset() in app.js
 
+import { defaultBus, createEventState } from './core/events/bus.js';
+
 export const AppEvents = Object.freeze({
   // ── Questionnaire lifecycle ───────────────────────────────────────────────
   QUESTIONNAIRE_LOADED:          'questionnaire-loaded',
@@ -191,6 +193,7 @@ export const AppEvents = Object.freeze({
 //
 // Usage: EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc
 //
+// Backed by the default page bus (wraps `document`) — see js/core/events/bus.js.
 // Only events listed in STATEFUL_EVENTS are cached.
 const STATEFUL_EVENTS = new Set([
   AppEvents.APP_CONTEXT_READY,
@@ -204,17 +207,5 @@ const STATEFUL_EVENTS = new Set([
   AppEvents.LANGUAGE_CHANGED,
 ]);
 
-const _cache = new Map();
-
-export const EventState = {
-  /** @returns {object|undefined} last detail for the event, or undefined if never fired */
-  get(eventName) { return _cache.get(eventName); },
-  /** For testing only — seed the cache without dispatching an event */
-  _set(eventName, detail) { _cache.set(eventName, detail); },
-};
-
-if (typeof document !== 'undefined') {
-  for (const name of STATEFUL_EVENTS) {
-    document.addEventListener(name, e => _cache.set(name, e.detail ?? {}));
-  }
-}
+export const EventState = createEventState(defaultBus, STATEFUL_EVENTS);
+export { EventBus, defaultBus } from './core/events/bus.js';

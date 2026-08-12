@@ -22,6 +22,10 @@ Supports Scenario 1 (round-trip) and Scenario 3 (logic testing). This is where m
 
 ## Near-term
 
+### Embeddable renderer widget — _in progress_
+
+Extract the right-side preview into `QuestionnaireRenderer(mountEl, { questionnaire, response, config })` — an in-page, multi-instance, isolated widget that host apps embed without the builder shell (see [WIDGET-EXTRACTION-PLAN.md](WIDGET-EXTRACTION-PLAN.md)). Done: Core session (`js/core/*`), preview-only node layer + builder extension, fully parameterized `PreviewForm`, config-driven chrome (opt-in search + validation badge, `navButton`/`explain` flags), whole render path off the global `document` bus onto the session bus (multi-instance isolation), 3-widget dogfood demo. Remaining: session-scoped config provider (terminology / CORS / FHIR base / language), Explain modal inside the widget, packaging/docs (Phase F).
+
 
 ## Technical Debt
 

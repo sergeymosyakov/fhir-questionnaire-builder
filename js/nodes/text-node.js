@@ -83,7 +83,7 @@ export class TextNode extends ItemNode {
       clearTimeout(_debounce);
       _debounce = setTimeout(() => { _reCalc(); onChange(); }, 200);
     };
-    el.onchange = () => { BaseNode.notifyChanged(); };
+    el.onchange = () => { BaseNode.notifyChanged(ctx.bus); };
 
     wrap.appendChild(el);
     if (counter) wrap.appendChild(counter);

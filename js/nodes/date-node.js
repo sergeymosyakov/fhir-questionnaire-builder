@@ -18,7 +18,7 @@ export class DateNode extends ItemNode {
     const wrap = createWrap();
     const dp = createDatePicker({
       value:    getValue(node.id) || '',
-      onChange: v => { setValue(node.id, v || undefined); _reCalc(); onChange(); BaseNode.notifyChanged(); },
+      onChange: v => { setValue(node.id, v || undefined); _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus); },
       className: 'ctrl-input--date',
       testid:   'date-input',
     });
@@ -39,7 +39,7 @@ export class DateTimeNode extends ItemNode {
     const wrap = createWrap();
     const dp = createDatePicker({
       value:    getValue(node.id) || '',
-      onChange: v => { setValue(node.id, v || undefined); _reCalc(); onChange(); BaseNode.notifyChanged(); },
+      onChange: v => { setValue(node.id, v || undefined); _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus); },
       withTime:  true,
       className: 'ctrl-input--date',
       testid:   'datetime-input',
@@ -70,7 +70,7 @@ export class TimeNode extends ItemNode {
     el.addEventListener('change', () => {
       const v = el.value;
       setValue(node.id, v ? v + ':00' : undefined);
-      _reCalc(); onChange(); BaseNode.notifyChanged();
+      _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus);
     });
 
     wrap.appendChild(el);

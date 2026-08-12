@@ -4,8 +4,8 @@
 import { nextId } from '../id.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
 import { uiStr } from '../preview/render-ctx.js';
-import * as bh from './builder-helpers.js';
 import { AppEvents } from '../events.js';
+import { defaultBus } from '../core/events/bus.js';
 import { compareValue } from '../eval.js';
 import { isDescendant } from '../utils.js';
 import { parseRenderStyle } from '../fhir/render-style.js';
@@ -75,23 +75,33 @@ export class BaseNode {
     this._previewCollapsed    = false;
     if (typeof document !== 'undefined') {
       this._ac = new AbortController();
-      this._initPreviewNavListener();
-      document.addEventListener(AppEvents.REFRESH_CALC_BADGES, () => this._refreshCalcBadge?.(), { signal: this._ac.signal });
+      // COPY_TO_NODES is a builder-only (app) event — always on the page bus.
       document.addEventListener(AppEvents.COPY_TO_NODES, e => {
         const { ids, patch, nodeType } = e.detail;
         if (!ids.includes(this.id)) return;
         if (nodeType && this.type !== nodeType) return; // type mismatch — skip
         this.applyPatch(patch);
       }, { signal: this._ac.signal });
-      // Preview collapse/expand — shared by any node with children.
-      document.addEventListener(AppEvents.BUILDER_NAVIGATE, e => {
-        if (!this._previewCollapsed) return;
-        if (!isDescendant(e.detail.id, this)) return;
-        this._previewCollapsed = false;
-      }, { signal: this._ac.signal });
-      document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._previewCollapsed = true;  }, { signal: this._ac.signal });
-      document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._previewCollapsed = false; }, { signal: this._ac.signal });
     }
+  }
+
+  // Preview-scoped listeners live on the render session bus (not `document`) so
+  // embedded widgets on their own bus stay isolated. Wired lazily on first render
+  // via renderPreview(); idempotent.
+  _ensureBusListeners(rc) {
+    if (this._busWired || !this._ac) return;
+    this._busWired = true;
+    const bus = rc?.bus || defaultBus;
+    this._bus = bus; // used by render-path dispatchers (e.g. collapse toggle)
+    bus.on(AppEvents.REFRESH_CALC_BADGES, () => this._refreshCalcBadge?.(), { signal: this._ac.signal });
+    bus.on(AppEvents.BUILDER_NAVIGATE, e => {
+      if (!this._previewCollapsed) return;
+      if (!isDescendant(e.detail.id, this)) return;
+      this._previewCollapsed = false;
+    }, { signal: this._ac.signal });
+    bus.on(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._previewCollapsed = true;  }, { signal: this._ac.signal });
+    bus.on(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._previewCollapsed = false; }, { signal: this._ac.signal });
+    this._initPreviewNavListener(bus);
   }
 
   /** Abort all document listeners owned by this node. */
@@ -130,9 +140,10 @@ export class BaseNode {
     }
   }
 
-  /** Dispatch a preview:response-changed event so PreviewForm re-renders. */
-  static notifyChanged() {
-    document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
+  /** Dispatch a preview:response-changed event so PreviewForm re-renders.
+   *  @param {import('../core/events/bus.js').EventBus} [bus] session bus (falls back to page bus) */
+  static notifyChanged(bus) {
+    (bus || defaultBus).dispatch(AppEvents.RESPONSE_CHANGED);
   }
 
   // ── Static dispatcher ────────────────────────────────────────────────────
@@ -148,6 +159,7 @@ export class BaseNode {
   // ── Preview rendering entry point ─────────────────────────────────────────
   // Called by BaseNode.dispatch(). rc = _rc from render-ctx.js.
   renderPreview(res, container, rc) {
+    this._ensureBusListeners(rc);
     if (!res.visible && !res.showDimmed) return;
     const isPatient = rc.previewMode === 'patient';
     if (res.hidden && (isPatient || !rc.viewPrefs.showHiddenItems)) return;
@@ -190,9 +202,11 @@ export class BaseNode {
   // disabledDisplay — the author always sees the full form. The hidden/protected
   // distinction only takes effect in patient view.
   _renderDimmed(res, container, rc) {
-    const row = this._makePreviewRow('lform-item lform-waiting preview-row--pointer');
-    row.dataset.tipTitle = 'Click to navigate to builder node';
-    row.addEventListener('click', () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: this.id } })));
+    const row = this._makePreviewRow('lform-item lform-waiting' + (rc.showNavBtn ? ' preview-row--pointer' : ''));
+    if (rc.showNavBtn) {
+      row.dataset.tipTitle = 'Click to navigate to builder node';
+      row.addEventListener('click', () => rc.bus.dispatch(AppEvents.BUILDER_NAVIGATE_TO, { nodeId: this.id }));
+    }
     const ph = document.createElement('span');
     ph.className = 'preview-icon-ph';
     row.appendChild(ph);
@@ -206,16 +220,18 @@ export class BaseNode {
     const dimText = this._enableWhenText || this.enableWhenExpression || 'condition not met';
     hint.textContent = '\uD83D\uDD12 ' + dimText;
     if (this.enableWhenExpression) {
-      hint.classList.add('preview-condition-hint--explain');
       hint.dataset.tipTitle = 'Visibility condition';
-      hint.dataset.tipBody  = 'Not met. FHIRPath: ' + this.enableWhenExpression + '\n\nClick to explain.';
+      hint.dataset.tipBody  = 'Not met. FHIRPath: ' + this.enableWhenExpression + (rc.showExplain ? '\n\nClick to explain.' : '');
       hint.dataset.tipFhir  = 'sdc-questionnaire-enableWhenExpression';
       hint.dataset.tipSpec  = 'SDC';
-      const expr = this.enableWhenExpression;
-      hint.addEventListener('click', e => {
-        e.stopPropagation();
-        if (rc.lastCtx.fp) explainModal.show(expr, rc.lastCtx.fp, rc.lastCtx.qr, rc.lastCtx.env);
-      });
+      if (rc.showExplain) {
+        hint.classList.add('preview-condition-hint--explain');
+        const expr = this.enableWhenExpression;
+        hint.addEventListener('click', e => {
+          e.stopPropagation();
+          if (rc.lastCtx.fp) explainModal.show(expr, rc.lastCtx.fp, rc.lastCtx.qr, rc.lastCtx.env);
+        });
+      }
     } else {
       const audit = buildEnableWhenAudit(this.enableWhen, this.enableBehavior, rc.getAll);
       hint.dataset.tipTitle = 'Visibility condition';
@@ -236,8 +252,10 @@ export class BaseNode {
   // ── Disabled state (group conditionRule not met → N/A) ───────────────────
   _renderDisabled(res, container, rc) {
     if (rc.previewMode === 'patient') return;
-    const row = this._makePreviewRow('lform-item lform-disabled preview-row--pointer');
-    row.addEventListener('click', () => document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: this.id } })));
+    const row = this._makePreviewRow('lform-item lform-disabled' + (rc.showNavBtn ? ' preview-row--pointer' : ''));
+    if (rc.showNavBtn) {
+      row.addEventListener('click', () => rc.bus.dispatch(AppEvents.BUILDER_NAVIGATE_TO, { nodeId: this.id }));
+    }
     const naIcon = document.createElement('span');
     naIcon.className = 'icon-na';
     row.appendChild(naIcon);
@@ -258,14 +276,14 @@ export class BaseNode {
     const row = this._makePreviewRow('lform-item');
     if (res.hiddenRoot || res._usageModeHidden) row.classList.add('lform-item--hidden');
 
-    if (!isPatient) {
+    if (!isPatient && rc.showNavBtn) {
       const navBtn = document.createElement('span');
       navBtn.className = 'preview-nav-btn';
       navBtn.dataset.testid = 'preview-nav-btn';
       navBtn.textContent = '\u2197';
       navBtn.dataset.tipTitle = 'Go to builder node';
       navBtn.dataset.tipBody  = 'Scroll and highlight the corresponding node in the builder panel.';
-      navBtn.addEventListener('click', e => { e.stopPropagation(); document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: this.id } })); });
+      navBtn.addEventListener('click', e => { e.stopPropagation(); rc.bus.dispatch(AppEvents.BUILDER_NAVIGATE_TO, { nodeId: this.id }); });
       row.appendChild(navBtn);
     }
 
@@ -483,15 +501,17 @@ export class BaseNode {
       hint.dataset.testid = 'preview-condition-hint';
       hint.textContent = '\uD83D\uDC41\uFE0F ' + visText;
       if (this.enableWhenExpression) {
-        hint.classList.add('preview-condition-hint--explain');
         hint.dataset.tipTitle = 'Visibility condition';
-        hint.dataset.tipBody  = 'FHIRPath: ' + this.enableWhenExpression + '\n\nClick to explain.';
+        hint.dataset.tipBody  = 'FHIRPath: ' + this.enableWhenExpression + (rc.showExplain ? '\n\nClick to explain.' : '');
         hint.dataset.tipFhir  = 'sdc-questionnaire-enableWhenExpression';
         hint.dataset.tipSpec  = 'SDC';
-        const expr = this.enableWhenExpression;
-        hint.addEventListener('click', () => {
-          if (rc.lastCtx.fp) explainModal.show(expr, rc.lastCtx.fp, rc.lastCtx.qr, rc.lastCtx.env);
-        });
+        if (rc.showExplain) {
+          hint.classList.add('preview-condition-hint--explain');
+          const expr = this.enableWhenExpression;
+          hint.addEventListener('click', () => {
+            if (rc.lastCtx.fp) explainModal.show(expr, rc.lastCtx.fp, rc.lastCtx.qr, rc.lastCtx.env);
+          });
+        }
       } else {
         hint.dataset.tipTitle = 'Visibility condition';
         hint.dataset.tipBody  = 'This item is shown only when: ' + visText + '\n\nThis label is auto-generated from the enableWhen condition. To change it \u2014 edit the Show When panel in the builder.';
@@ -538,7 +558,7 @@ export class BaseNode {
     toggle.addEventListener('click', e => {
       e.stopPropagation();
       node._previewCollapsed = !node._previewCollapsed;
-      BaseNode.notifyChanged();
+      BaseNode.notifyChanged(node._bus);
     });
     row.insertBefore(toggle, row.firstChild);
   }
@@ -587,18 +607,9 @@ export class BaseNode {
   // Render children into target. No-op in base; overridden in GroupNode and ItemNode.
   _renderChildren(_res, _target, _rc) { /* no-op */ }
 
-  // ── Shared builder-panel helpers ──────────────────────────────────────────
-  // Implementations live in builder-helpers.js; thin delegators here.
-  _buildInlineTitleEditor() { return bh.buildInlineTitleEditor(this); }
-  _buildLinkIdInput()       { return bh.buildLinkIdInput(this); }
-  _buildPrefixInput(ph)     { return bh.buildPrefixInput(this, ph); }
-  _makeActionLink(l, k, t, c) { return bh.makeActionLink(this, l, k, t, c); }
-
   // ── DnD ownership ─────────────────────────────────────────────────────────
   /** Whether this node can be dragged. Override to return false to lock. */
   isDraggable() { return true; }
-  _buildDragHandle()    { return bh.buildDragHandle(this); }
-  _buildDropZoneAbove() { return bh.buildDropZoneAbove(this); }
 
   // ── Collapse button (shared by GroupNode and ItemNode-with-children) ──────
   // `div` is the outer node card element; used to find `.node-body` on toggle.
@@ -621,9 +632,6 @@ export class BaseNode {
     };
     return btn;
   }
-
-  // ── "Add Sub-group / Add Sub-item" gear items (shared) ───────────────────
-  _addChildGearItems(gear) { bh.addChildGearItems(gear, this); }
 
   // ── Builder event dispatch ─────────────────────────────────────────────────
   // Breaks circular imports: index.js and preview-form.js both import nodes,
@@ -696,8 +704,8 @@ export class BaseNode {
    * If _previewEl is already in DOM — scroll immediately.
    * Otherwise set _scrollAfterRender so _makePreviewRow scrolls after the next render.
    */
-  _initPreviewNavListener() {
-    document.addEventListener(AppEvents.PREVIEW_NAVIGATE_TO, e => {
+  _initPreviewNavListener(bus) {
+    bus.on(AppEvents.PREVIEW_NAVIGATE_TO, e => {
       if (e.detail?.id !== this.id) return;
       if (this._previewEl && document.contains(this._previewEl)) {
         this._scrollIntoView();

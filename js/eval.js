@@ -63,9 +63,9 @@ export function compareValue(val, ew) {
 // For repeating items: condition is met if ANY answer satisfies it (FHIR R4 spec).
 // `path` scopes the read to the current repeating-group instance; falls back to
 // the root scope when the referenced field is not present in the instance.
-function checkOneEnableWhen(ew, path) {
-  let all = answerStore.getAll(ew.question, path);
-  if (all.length === 0 && path && path.length) all = answerStore.getAll(ew.question);
+function checkOneEnableWhen(ew, path, store) {
+  let all = store.getAll(ew.question, path);
+  if (all.length === 0 && path && path.length) all = store.getAll(ew.question);
   if (all.length === 0) return compareValue(undefined, ew);
   return all.some(v => compareValue(v, ew));
 }
@@ -75,8 +75,9 @@ function checkOneEnableWhen(ew, path) {
 // 2. enableWhenExpression (SDC) — evaluate via FHIRPath
 // 3. Neither present → always visible
 function isNodeVisible(node, ctx, path) {
+  const store = ctx?.answerStore || answerStore;
   if (node.enableWhen && node.enableWhen.length) {
-    const checks = node.enableWhen.map(ew => checkOneEnableWhen(ew, path));
+    const checks = node.enableWhen.map(ew => checkOneEnableWhen(ew, path, store));
     return node.enableBehavior === 'any' ? checks.some(Boolean) : checks.every(Boolean);
   }
   if (node.enableWhenExpression && ctx && ctx.fp && ctx.qr) {

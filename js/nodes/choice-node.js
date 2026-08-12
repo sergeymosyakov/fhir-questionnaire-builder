@@ -93,7 +93,7 @@ export class ChoiceNode extends ItemNode {
       selected = code;
       setValue(node.id, code);
       setLabel();
-      _reCalc(); onChange(); BaseNode.notifyChanged();
+      _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus);
       close();
       trigger.focus();
     };
@@ -348,7 +348,7 @@ export class RadioNode extends ItemNode {
       const rb = document.createElement('input');
       rb.type = 'radio'; rb.name = rbName; rb.value = code;
       rb.checked = getValue(node.id) === code;
-      rb.onchange = () => { if (rb.checked) { setValue(node.id, code); _reCalc(); onChange(); BaseNode.notifyChanged(); } };
+      rb.onchange = () => { if (rb.checked) { setValue(node.id, code); _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus); } };
       lbl.appendChild(rb);
       if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
         const pfx = document.createElement('span');
@@ -426,7 +426,7 @@ export class OpenChoiceNode extends ItemNode {
     const _pick = display => {
       el.value = display;
       setValue(node.id, display);
-      _reCalc(); onChange(); BaseNode.notifyChanged();
+      _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus);
       close();
       el.focus();
     };
@@ -465,7 +465,7 @@ export class OpenChoiceNode extends ItemNode {
     };
 
     el.addEventListener('input', () => { if (optionsOnly) return; setValue(node.id, el.value); _reCalc(); onChange(); openDrop(el.value); });
-    el.addEventListener('change', () => { BaseNode.notifyChanged(); });
+    el.addEventListener('change', () => { BaseNode.notifyChanged(ctx.bus); });
     el.addEventListener('focus', () => { if (parsed.length) openDrop(el.value); });
     el.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
     btn.addEventListener('click', e => { e.stopPropagation(); if (_open) { close(); } else { el.focus(); openDrop(el.value); } });
@@ -550,7 +550,7 @@ export class ChecklistNode extends ItemNode {
         }
         const v = serializeSelected(sel);
         setValue(node.id, v || undefined);
-        _reCalc(); onChange(); BaseNode.notifyChanged();
+        _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus);
       };
       lbl.appendChild(cb);
       if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {

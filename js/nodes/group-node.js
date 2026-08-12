@@ -1,12 +1,5 @@
-import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
-import * as dnd from '../builder/dnd.js';
-import { createCustomSelect } from '../ui/custom-select.js';
-import { AppEvents } from '../events.js';
 import { NODE_REGISTRY } from './registry.js';
-import { NodeGearMenu } from '../ui/node-gear-menu.js';
-import { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem, buildInsideDropZone } from './builder-helpers.js';
 import { GTableRenderer } from './gtable-renderer.js';
-import { FHIR } from '../fhir/urls/fhir.js';
 // ── GroupNode ─────────────────────────────────────────────────────────────────
 // Represents a FHIR Questionnaire group item (type: 'group').
 // Children are other GroupNode or ItemNode instances.
@@ -244,7 +237,7 @@ export class GroupNode extends BaseNode {
         rm.dataset.testid = 'rg-remove-btn';
         rm.dataset.tipTitle = 'Remove this entry';
         const _i = i;
-        rm.onclick = () => { rc.removeInstance(this.id, _i, parentPath); BaseNode.notifyChanged(); };
+        rm.onclick = () => { rc.removeInstance(this.id, _i, parentPath); BaseNode.notifyChanged(rc.bus); };
         block.appendChild(rm);
       }
 
@@ -269,7 +262,7 @@ export class GroupNode extends BaseNode {
       add.disabled = true;
       add.dataset.tipTitle = 'Maximum ' + max + ' entr' + (max === 1 ? 'y' : 'ies') + ' reached';
     }
-    add.onclick = () => { if (!atMax) { rc.addInstance(this.id, parentPath); BaseNode.notifyChanged(); } };
+    add.onclick = () => { if (!atMax) { rc.addInstance(this.id, parentPath); BaseNode.notifyChanged(rc.bus); } };
     wrap.appendChild(add);
 
     target.appendChild(wrap);
@@ -293,209 +286,6 @@ export class GroupNode extends BaseNode {
         GroupNode.resetCollapsedFromTree(n.children);
       }
     }
-  }
-
-  // ── Builder panel ─────────────────────────────────────────────────────────
-  // Renders the left-panel (builder tree) row for this group node.
-
-  /** Returns a <div class="drop-zone drop-zone-inside"> wired for drop-inside-last. */
-  _buildDropZoneInside() {
-    const div = document.createElement('div');
-    div.className   = 'drop-zone drop-zone-inside';
-    div.textContent = 'Drop here to add as last child';
-    dnd.attachDropZone(div, this, 'inside-last');
-    return div;
-  }
-
-  buildBuilder() {
-    const node = this;
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'node-wrap';
-
-    const div = document.createElement('div');
-    div.className = 'node node-group';
-    div.dataset.nodeId = node.id;
-    node._initNavListener(div);
-
-    wrapper.appendChild(node._buildDropZoneAbove());
-
-    const header = document.createElement('div');
-    header.className = 'node-header';
-
-    const titleWrap = document.createElement('div');
-    titleWrap.className = 'node-title';
-
-    const toggleBtn = node._buildCollapseBtn(div);
-    titleWrap.appendChild(toggleBtn);
-    const dragHandle = node._buildDragHandle();
-    if (dragHandle) titleWrap.insertBefore(dragHandle, titleWrap.firstChild);
-
-    const isEmptyGroupNode = node.children.length === 0;
-    const typeLabel = document.createElement('span');
-    typeLabel.className = 'node-type-label ' + (isEmptyGroupNode ? 'lbl-info' : 'lbl-group');
-    typeLabel.dataset.testid = 'node-type-label';
-    typeLabel.textContent = isEmptyGroupNode ? '[Info]' : '[Group]';
-    titleWrap.appendChild(typeLabel);
-
-    const linkIdInput = node._buildLinkIdInput();
-
-    const prefixInput = node._buildPrefixInput('\u2014');
-
-    const { titleRow, titleDisplay, titleTextarea } = node._buildInlineTitleEditor();
-
-    titleWrap.addEventListener('click', e => {
-      if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput || e.target === prefixInput) return;
-      node._dispatchNavigate();
-    });
-
-    const actions = document.createElement('div');
-    actions.className = 'node-actions';
-
-    const setActive = (el, active) => el.classList.toggle('action-edit--active', active);
-
-    const statesLink = node._makeActionLink('States', 'states', {
-      title: 'Item / group states',
-      body:  'Required \u2014 must be answered to pass validation.\nHidden \u2014 excluded from patient view; participates in logic.\nCollapsible \u2014 group starts collapsed or expanded in patient view.',
-      fhir:  'item.required / sdc-questionnaire-hidden / sdc-questionnaire-collapsible',
-      spec:  'R4 \u00B7 SDC',
-    }, actions);
-    statesLink.onclick = () => MODAL_REGISTRY.get('states').open(node, statesLink, setActive);
-
-    const visLink = node._makeActionLink('Show When', 'vis', {
-      title: 'Show When (enableWhen)',
-      body:  'Add enableWhen conditions to control when this group is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden groups are dimmed \uD83D\uDD12 in the preview.',
-      fhir:  'Questionnaire.item.enableWhen[]',
-      spec:  'R4 \u00B7 optional',
-    }, actions);
-    visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive);
-
-    const exprLink = node._makeActionLink('Expression', 'expr', {
-      title: 'Calculated Expression',
-      body:  'SDC FHIRPath calculatedExpression on this group item. Evaluated on Test click. Supports questionnaire-level %variables.',
-      fhir:  'sdc-questionnaire-calculatedExpression',
-      spec:  'SDC \u00B7 optional',
-    }, actions);
-    exprLink.onclick = () => MODAL_REGISTRY.get('expression').open({
-      node, link: exprLink, setActive,
-      field:       '_calculatedExpr',
-      label:       'Calculated Expression',
-      fhirLabel:   'FHIRPath calculatedExpression:',
-      placeholder: "%resource.item.where(linkId='...')",
-      onApply: () => document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED)),
-    });
-
-    const repeatLink = node._makeActionLink('Repeatable', 'repeatable', {
-      title: 'Repeatable group',
-      body:  'When enabled the group repeats \u2014 the respondent can fill in multiple entries. Stored as FHIR item.repeats. Use min/max occurrences to constrain the number of entries.',
-      fhir:  'Questionnaire.item.repeats',
-      spec:  'R4',
-    }, actions);
-    repeatLink.onclick = () => MODAL_REGISTRY.get('repeatable').open(node, repeatLink, setActive);
-
-    const styleLink = node._makeActionLink('Appearance', 'style', {
-      title: 'Appearance (rendering-style)',
-      body:  'Inline CSS applied to the group title in the preview. Stored in the standard FHIR rendering-style extension on the _text element.',
-      fhir:  'Questionnaire.item._text.extension[rendering-style]',
-      spec:  'R4 \u00B7 optional',
-    }, actions);
-    styleLink.onclick = () => MODAL_REGISTRY.get('appearance').open(node, styleLink, setActive);
-
-    const propsLink = node._makeActionLink('Props', 'codes', {
-      title: 'Group Properties',
-      body:  'Edit group-level metadata: definition URL, terminology codes (item.code[]) and support links (questionnaire-supportLink).',
-      fhir:  'Questionnaire.item.definition / item.code[] / questionnaire-supportLink',
-      spec:  'R4 \u00B7 optional',
-    }, actions);
-    propsLink.onclick = () => MODAL_REGISTRY.get('codes').open(node, propsLink, setActive);
-
-    const noteLink = node._makeActionLink('Note', 'note', {
-      title: 'Design Note',
-      body:  'Internal author note \u2014 stored as FHIR designNote extension. Never shown to patients.',
-      fhir:  FHIR.designNote,
-      spec:  'R4 \u00B7 optional',
-    }, actions);
-    noteLink.onclick = () => MODAL_REGISTRY.get('note').open(node, noteLink, setActive);
-    setActive(noteLink, !!node._designNote);
-
-    // ⚙ gear menu (Add Group / Add Item / Copy / Paste / Delete)
-    const gear = new NodeGearMenu('group-add-btn');
-    addMetaRowGearItem(gear, node);
-    gear.addSep();
-    node._addChildGearItems(gear);
-    gear.addSep();
-    addCopyPasteGearItems(gear, node, BaseNode._hasClipboard);
-    gear.addSep();
-    gear.addItem('Delete', 'node-delete-btn', () => {
-      document.dispatchEvent(new CustomEvent(AppEvents.NODE_DELETE_REQUESTED,
-        { detail: { id: node.id, label: node.title || node.id } }));
-    }, { destructive: true });
-
-    const headerTop = document.createElement('div');
-    headerTop.className = 'node-header-top';
-    headerTop.appendChild(titleWrap);
-
-    const metaRow = document.createElement('div');
-    metaRow.className = 'node-meta-row';
-    const prefixLbl = document.createElement('span');
-    prefixLbl.className = 'node-meta-label node-meta-label--prefix';
-    prefixLbl.textContent = 'prefix:';
-    const idLbl = document.createElement('span');
-    idLbl.className = 'node-meta-label node-meta-label--id';
-    idLbl.textContent = 'id:';
-    applyMetaLabelTips(idLbl, prefixLbl);
-    metaRow.appendChild(idLbl);
-    metaRow.appendChild(linkIdInput);
-    metaRow.appendChild(prefixLbl);
-    metaRow.appendChild(prefixInput);
-
-    header.appendChild(headerTop);
-    header.appendChild(titleRow);
-    header.appendChild(metaRow);
-    header.appendChild(actions);
-
-    div.appendChild(header);
-    div.appendChild(gear.el);
-
-
-    setActive(visLink,    !!(node.enableWhen?.length) || !!node.enableWhenExpression);
-    setActive(exprLink,   !!node._calculatedExpr);
-    setActive(styleLink,  !!(node._renderStyle || node._renderXhtml || node._itemControl === 'header' || node._itemControl === 'footer'));
-    setActive(statesLink, node.mandatory === true || !!node._hidden || node._observationExtract != null || !!node._collapsible || !!node._usageMode || !!node._signatureRequired?.length);
-    setActive(propsLink,  !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length) || !!node._shortText);
-    setActive(repeatLink, !!node.repeats);
-
-    const body = document.createElement('div');
-    body.className = 'node-body';
-    if (BaseNode._collapseMap.get(node.id)) body.style.display = 'none';
-
-    const logicRow = document.createElement('div');
-    logicRow.className = 'logic-row';
-    logicRow.textContent = 'Logic between children: ';
-    const logicSel = createCustomSelect({
-      items:    [{ value: 'AND', label: 'AND' }, { value: 'OR', label: 'OR' }],
-      value:    node.logicWithParent || 'AND',
-      className: 'sc-trigger--sm',
-      testid:   'group-logic-select',
-      onChange: v => { node.logicWithParent = v; document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED)); },
-    });
-    logicRow.appendChild(logicSel.el);
-    body.appendChild(logicRow);
-
-    for (let i = 0; i < node.children.length; i++) {
-      const childWrap = node.children[i].buildBuilder();
-      if (i === 0) {
-        const firstDrop = childWrap.querySelector('.drop-zone-above');
-        if (firstDrop) firstDrop.textContent = 'Drop here to add as first child';
-      }
-      body.appendChild(childWrap);
-    }
-
-    body.appendChild(buildInsideDropZone(node));
-
-    div.appendChild(body);
-    wrapper.appendChild(div);
-    return wrapper;
   }
 }
 

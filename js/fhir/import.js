@@ -1,6 +1,7 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
 import { showError } from '../ui/toast.js';
 import { AppEvents } from '../events.js';
+import { defaultBus } from '../core/events/bus.js';
 import { normaliseSTU3 } from './stu3-shim.js';
 import { destroyTree } from '../utils.js';
 import { resetSeq } from '../id.js';
@@ -37,24 +38,25 @@ export {
 };
 
 // Walk the tree and pre-populate answers from node._initialValue / _initialValues
-function applyInitialValues(nodes) {
+function applyInitialValues(nodes, bus) {
   for (const node of nodes) {
     if (node.repeats && node._initialValues && node._initialValues.length > 1) {
-      document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: node.id, value: node._initialValues[0] } }));
+      bus.dispatch(AppEvents.ANSWER_SET, { id: node.id, value: node._initialValues[0] });
       for (let i = 1; i < node._initialValues.length; i++) {
-        document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: node.id + '$$' + i, value: node._initialValues[i] } }));
+        bus.dispatch(AppEvents.ANSWER_SET, { id: node.id + '$$' + i, value: node._initialValues[i] });
       }
-      document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: node.id + '$$n', value: node._initialValues.length - 1 } }));
+      bus.dispatch(AppEvents.ANSWER_SET, { id: node.id + '$$n', value: node._initialValues.length - 1 });
     } else if (node._initialValue !== undefined) {
-      document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: node.id, value: node._initialValue } }));
+      bus.dispatch(AppEvents.ANSWER_SET, { id: node.id, value: node._initialValue });
     }
-    if (node.type === 'group') applyInitialValues(node.children);
+    if (node.type === 'group') applyInitialValues(node.children, bus);
   }
 }
 
 // Main import entry point
-export function importFHIR(fhirJson) {
-  const { questDoc } = _svc;
+export function importFHIR(fhirJson, opts = {}) {
+  const questDoc = opts.questDoc || _svc.questDoc;
+  const bus = opts.bus || defaultBus;
   const { tree, meta: questMeta, variables: questVariables, contained: questContained } = questDoc;
   let q = fhirJson;
   if (typeof q === 'string') {
@@ -66,7 +68,7 @@ export function importFHIR(fhirJson) {
   }
   q = normaliseSTU3(q); // no-op for R4; converts STU3 fields to R4 equivalents
   destroyTree(tree);
-  document.dispatchEvent(new CustomEvent(AppEvents.ANSWERS_CLEAR));
+  bus.dispatch(AppEvents.ANSWERS_CLEAR);
   questDoc.rawFhir = q;
   // Clear translations in-place so existing rc.translations reference stays valid
   // (??= initialises the property when the questDoc mock in unit tests lacks it)
@@ -186,14 +188,14 @@ export function importFHIR(fhirJson) {
       const n = fhirItemToNode(item, linkIdMap, q.contained);
       if (n) tree.push(n);
     }
-    applyInitialValues(tree);
+    applyInitialValues(tree, bus);
     // Read existing translation extensions into questDoc.translations
     _importTranslations(q, tree, questDoc.translations);
   } finally {
     // tree is fully built — notify preview to reinitialise
-    document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
+    bus.dispatch(AppEvents.REINIT_FORM);
   }
-  document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
+  bus.dispatch(AppEvents.BUILDER_RERENDER);
 }
 
 // ── Translation import ────────────────────────────────────────────────────────

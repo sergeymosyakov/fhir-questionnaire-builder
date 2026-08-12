@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FHIR Questionnaire Renderer — embed demo</title>
+  <link rel="stylesheet" href="css/widget.css">
+  <script src="lib/marked.min.js"></script>
+  <script src="lib/dompurify.min.js"></script>
+  <script src="lib/fhirpath.min.js"></script>
+  <script src="lib/fhirpath.r4.min.js"></script>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; color: #222; background: #f6f7f9; }
+    header { padding: 16px 24px; background: #fff; border-bottom: 1px solid #e3e6ea; }
+    header h1 { font-size: 18px; margin: 0; }
+    header p  { margin: 4px 0 0; color: #666; font-size: 13px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 16px 24px; align-items: start; }
+    .col { background: #fff; border: 1px solid #e3e6ea; border-radius: 8px; overflow: hidden; }
+    .col > h2 { font-size: 13px; margin: 0; padding: 10px 12px; background: #f0f2f5; border-bottom: 1px solid #e3e6ea; text-transform: uppercase; letter-spacing: .04em; color: #444; }
+    .col > .mount { padding: 12px; }
+    @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Embedded FHIR Questionnaire Renderer</h1>
+    <p>One page, three independent <code>QuestionnaireRenderer</code> widgets — each with its own isolated session.</p>
+  </header>
+
+  <div class="grid">
+    <section class="col">
+      <h2>previewMode: preview (design)</h2>
+      <div class="mount" data-mode="preview"></div>
+    </section>
+    <section class="col">
+      <h2>previewMode: patient (fill)</h2>
+      <div class="mount" data-testid="widget-mount" data-mode="patient"></div>
+    </section>
+    <section class="col">
+      <h2>previewMode: json</h2>
+      <div class="mount" data-mode="json"></div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { QuestionnaireRenderer } from './js/renderer/index.js';
+
+    const questionnaire = await (await fetch('sampledata/annual-health-check.fhir.json')).json();
+    const mount = mode => document.querySelector(`[data-mode="${mode}"]`);
+
+    // Same questionnaire, three independent widgets — one per previewMode.
+    // Each opts into the search box + live validation badge via config.
+    const preview = new QuestionnaireRenderer(mount('preview'), {
+      questionnaire,
+      config: { previewMode: 'preview', search: true, validation: true, viewPrefs: { showLinkId: true, showPrefix: true, showBadges: true, showHiddenItems: true } },
+    });
+    const patient = new QuestionnaireRenderer(mount('patient'), {
+      questionnaire,
+      config: { previewMode: 'patient', search: true, validation: true },
+    });
+    const json = new QuestionnaireRenderer(mount('json'), {
+      questionnaire,
+      config: { previewMode: 'json', search: true, validation: true },
+    });
+
+    // Expose for the demo / e2e.
+    window.__widgets = { preview, patient, json };
+    window.__widget  = patient;   // primary instance used by the render/getResponse e2e
+    patient.on('response-changed', qr => { window.__lastQR = qr; });
+    patient.on('ready', () => { window.__widgetReady = true; });
+  </script>
+</body>
+</html>

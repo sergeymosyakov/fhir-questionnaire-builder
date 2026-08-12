@@ -1,12 +1,4 @@
-import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
-import { AppEvents, EventState } from '../events.js';
-import { NodeGearMenu } from '../ui/node-gear-menu.js';
-import { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem, buildInsideDropZone } from './builder-helpers.js';
-import { createCustomSelect } from '../ui/custom-select.js';
 import { uiStr } from '../preview/render-ctx.js';
-import { ITEM_TYPES } from '../ui/modals/answer-type/data.js';
-import { changeNodeType, nodeTypeNeedsConfig, nodeHasTypeConfig } from './change-type.js';
-import { FHIR } from '../fhir/urls/fhir.js';
 // Abstract base for all question item nodes (type: 'item').
 // Concrete subclasses set `this.itemType` and may add type-specific defaults.
 // Optional FHIR-imported properties set after construction (all item types):
@@ -16,77 +8,6 @@ import { FHIR } from '../fhir/urls/fhir.js';
 //   _initialValue, _initialValues, _initialSelected
 import { BaseNode, applyRenderStyle } from './base-node.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
-
-// Builds the inline answer-type row shown in every builder card (both view
-// modes). A compact type dropdown that fills the row + a config button opening
-// the full Answer Type modal (highlighted for choice-family types, whose answer
-// options are defined in that modal). Replaces the old "Answer Type" action link.
-const _TUNE_SVG =
-  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-  'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-  '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>' +
-  '<line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>' +
-  '<line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>' +
-  '<line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/>' +
-  '<line x1="17" y1="16" x2="23" y2="16"/></svg>';
-
-function buildInlineTypeRow(node, setActive) {
-  const row = document.createElement('div');
-  row.className = 'node-inline-type';
-
-  const lbl = document.createElement('span');
-  lbl.className = 'node-meta-label node-meta-label--type';
-  lbl.textContent = 'type:';
-  lbl.dataset.tipTitle = 'Answer type';
-  lbl.dataset.tipBody  = 'The FHIR data type for answers to this item (text, integer, choice, date, \u2026). Determines which control renders in the preview.';
-  lbl.dataset.tipFhir  = 'Questionnaire.item.type';
-  lbl.dataset.tipSpec  = 'R4';
-  row.appendChild(lbl);
-
-  const ctx = EventState.get(AppEvents.APP_CONTEXT_READY);
-  const fhirTarget = ctx?.questDoc?.fhirTarget ?? 'R4';
-  const types = fhirTarget === 'R5' ? ITEM_TYPES.filter(t => t !== 'open-choice') : ITEM_TYPES;
-
-  const sel = createCustomSelect({
-    items:     types.map(t => ({ value: t, label: t })),
-    value:     node.itemType,
-    className: 'sc-trigger--sm',
-    testid:    'inline-answer-type',
-    onChange:  v => {
-      if (v === node.itemType) return;
-      const _ctx = EventState.get(AppEvents.APP_CONTEXT_READY);
-      changeNodeType(node, v, _ctx?.questDoc?.tree, _ctx?.answerStore);
-      document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
-      document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
-    },
-  });
-  row.appendChild(sel.el);
-
-  const isChoice  = nodeTypeNeedsConfig(node);
-  const hasConfig = !isChoice && nodeHasTypeConfig(node);
-  const cfg = document.createElement('button');
-  cfg.type = 'button';
-  cfg.className = 'node-inline-type-config'
-    + (isChoice  ? ' node-inline-type-config--attn'   : '')
-    + (hasConfig ? ' node-inline-type-config--active'  : '');
-  cfg.dataset.testid = 'action-type';
-  cfg.innerHTML = _TUNE_SVG;
-  cfg.dataset.tipTitle = isChoice  ? 'Answer options'
-                       : hasConfig ? 'Answer type settings (configured)'
-                       :             'Answer type settings';
-  cfg.dataset.tipBody  = isChoice
-    ? 'Answer options for this type are configured in the Answer Type dialog. Click to open.'
-    : hasConfig
-    ? 'This item has Answer Type settings configured. Click to view or change them.'
-    : 'Configure options, value sets, units, and other advanced settings for this answer type.';
-  cfg.onclick = () => {
-    const _ctx = EventState.get(AppEvents.APP_CONTEXT_READY);
-    MODAL_REGISTRY.get('answerType').open(node, null, setActive, _ctx?.questDoc, _ctx?.answerStore);
-  };
-  row.appendChild(cfg);
-
-  return row;
-}
 
 export class ItemNode extends BaseNode {
   constructor(data = {}) {
@@ -229,7 +150,7 @@ export class ItemNode extends BaseNode {
     cb.dataset.tipFhir  = 'Questionnaire.item.extension[questionnaire-constraint]';
     cb.dataset.tipSpec  = 'R4';
     const firstExpr = this.constraint.find(c => c.expression?.trim())?.expression;
-    if (firstExpr) {
+    if (firstExpr && rc.showExplain) {
       cb.classList.add('preview-condition-hint--explain');
       cb.dataset.tipBody += '\n\nClick to explain.';
       cb.addEventListener('click', () => {
@@ -324,7 +245,7 @@ export class ItemNode extends BaseNode {
           for (let j = _i; j < n; j++) rc.set(rowKey(j), rc.getValue(rowKey(j + 1)));
           rc.remove(rowKey(n));
           rc.set(id + '$$n', n - 1);
-          BaseNode.notifyChanged();
+          BaseNode.notifyChanged(rc.bus);
         };
         rowEl.appendChild(rm);
       }
@@ -344,7 +265,7 @@ export class ItemNode extends BaseNode {
       addBtn.disabled = true;
       addBtn.dataset.tipTitle = 'Maximum ' + maxOccurs + ' answer' + (maxOccurs === 1 ? '' : 's') + ' reached';
     }
-    addBtn.onclick = () => { if (!atMax) { rc.set(id + '$$n', n + 1); BaseNode.notifyChanged(); } };
+    addBtn.onclick = () => { if (!atMax) { rc.set(id + '$$n', n + 1); BaseNode.notifyChanged(rc.bus); } };
     wrap.appendChild(addBtn);
 
     return wrap;
@@ -372,16 +293,18 @@ export class ItemNode extends BaseNode {
       badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
     } else if (this.itemType === 'checkbox') {
       const calcVal = rc.getValue(this.id);
-      badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false') + ' calc-badge--explain';
+      badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false') + (rc.showExplain ? ' calc-badge--explain' : '');
       badge.textContent = calcVal ? '\u2713 true' : '\u2717 false';
       badge.dataset.tipTitle = 'Calculated value';
-      badge.dataset.tipBody  = 'FHIRPath: ' + this._calculatedExpr + '\n\nClick to explain.';
+      badge.dataset.tipBody  = 'FHIRPath: ' + this._calculatedExpr + (rc.showExplain ? '\n\nClick to explain.' : '');
       badge.dataset.tipFhir  = 'sdc-questionnaire-calculatedExpression';
       badge.dataset.tipSpec  = 'SDC';
-      const expr = this._calculatedExpr;
-      badge.addEventListener('click', () => {
-        if (rc.lastCtx.fp) explainModal.show(expr, rc.lastCtx.fp, rc.lastCtx.qr, rc.lastCtx.env);
-      });
+      if (rc.showExplain) {
+        const expr = this._calculatedExpr;
+        badge.addEventListener('click', () => {
+          if (rc.lastCtx.fp) explainModal.show(expr, rc.lastCtx.fp, rc.lastCtx.qr, rc.lastCtx.env);
+        });
+      }
     } else {
       const s = rc.getValue(this.id);
       badge.className = 'preview-calc-value';
@@ -395,7 +318,7 @@ export class ItemNode extends BaseNode {
     this._refreshCalcBadge = () => {
       if (this.itemType === 'checkbox' && rc.previewMode !== 'patient') {
         const v = rc.getValue(this.id);
-        badge.className = 'calc-badge ' + (v ? 'calc-true' : 'calc-false') + ' calc-badge--explain';
+        badge.className = 'calc-badge ' + (v ? 'calc-true' : 'calc-false') + (rc.showExplain ? ' calc-badge--explain' : '');
         badge.textContent = v ? '\u2713 true' : '\u2717 false';
       } else {
         const s = rc.getValue(this.id);
@@ -412,215 +335,5 @@ export class ItemNode extends BaseNode {
       row.querySelectorAll('input, select, textarea').forEach(el => { el.disabled = true; });
     }
     return super._appendRow(row, res, container);
-  }
-
-  // ── Builder panel ─────────────────────────────────────────────────────────
-  // Renders the left-panel (builder tree) row for this item node.
-  // All external deps (modals, DnD, utils) are injected via ctx.
-  buildBuilder() {
-    const node = this;
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'node-wrap';
-
-    const div = document.createElement('div');
-    div.className = 'node node-item';
-    div.dataset.nodeId = node.id;
-    node._initNavListener(div);
-
-    wrapper.appendChild(node._buildDropZoneAbove());
-
-    const header = document.createElement('div');
-    header.className = 'node-header';
-
-    const titleWrap = document.createElement('div');
-    titleWrap.className = 'node-title';
-    const dragHandle = node._buildDragHandle();
-    if (dragHandle) titleWrap.insertBefore(dragHandle, titleWrap.firstChild);
-
-    // Collapse button — shown when item has sub-items
-    if (node.children.length > 0) {
-      titleWrap.appendChild(node._buildCollapseBtn(div));
-    }
-
-    const typeLabel = document.createElement('span');
-    typeLabel.className = 'node-type-label lbl-item';
-    typeLabel.dataset.testid = 'node-type-label';
-    typeLabel.textContent = '[Item]';
-    titleWrap.appendChild(typeLabel);
-
-    const prefixInput = node._buildPrefixInput('prefix');
-    titleWrap.appendChild(prefixInput);
-
-    const linkIdInput = node._buildLinkIdInput();
-    titleWrap.appendChild(linkIdInput);
-
-    const { titleRow, titleDisplay, titleTextarea } = node._buildInlineTitleEditor();
-
-    titleWrap.addEventListener('click', e => {
-      if (e.target === titleTextarea || e.target === titleDisplay || e.target === linkIdInput || e.target === prefixInput) return;
-      node._dispatchNavigate();
-    });
-
-    const actions = document.createElement('div');
-    actions.className = 'node-actions';
-
-    const setActive = (el, active) => el.classList.toggle('action-edit--active', active);
-
-    const statesLink = node._makeActionLink('States', 'states', {
-      title: 'Item / group states',
-      body:  'Required \u2014 must be answered to pass validation.\nRead-only \u2014 value set programmatically, not editable (items only).\nHidden \u2014 excluded from patient view; participates in logic.',
-      fhir:  'item.required / item.readOnly / sdc-questionnaire-hidden',
-      spec:  'R4 \u00B7 SDC',
-    }, actions);
-    statesLink.dataset.testid   = 'action-states';
-    statesLink.onclick = () => MODAL_REGISTRY.get('states').open(node, statesLink, setActive);
-    actions.appendChild(statesLink);
-
-    const visLink = node._makeActionLink('Show When', 'vis', {
-      title: 'Show When (enableWhen)',
-      body:  'Add enableWhen conditions to control when this item is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden items are dimmed \uD83D\uDD12 in the preview.',
-      fhir:  'Questionnaire.item.enableWhen[]',
-      spec:  'R4 \u00B7 optional',
-    }, actions);
-    visLink.onclick = () => MODAL_REGISTRY.get('showWhen').open(node, visLink, setActive);
-
-    const exprLink = node._makeActionLink('Expression', 'expr', {
-      title: 'FHIRPath Expressions',
-      body:  'Edit both FHIRPath expression fields: calculatedExpression (evaluated on every preview render) and initialExpression (evaluated once on load or re-init). Both support questionnaire-level %variables.',
-      fhir:  'sdc-questionnaire-calculatedExpression / initialExpression',
-      spec:  'SDC \u00B7 optional',
-    }, actions);
-    exprLink.onclick = () => MODAL_REGISTRY.get('expression').openDual(node, exprLink, setActive,
-      () => document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED)));
-
-    const repeatLink = node._makeActionLink('Repeatable', 'repeatable', {
-      title: 'Repeatable',
-      body:  'Allow multiple answers for this item. Opens a dialog to configure item.repeats and optional cardinality (minOccurs / maxOccurs extensions).',
-      fhir:  'Questionnaire.item.repeats',
-      spec:  'R4',
-    }, actions);
-    repeatLink.onclick = () => MODAL_REGISTRY.get('repeatable').open(node, repeatLink, setActive);
-
-    const initLink = node._makeActionLink('Default', 'default', {
-      title: 'Default Value (initial)',
-      body:  'Pre-fills the answer when the form loads. The user can change it unless readOnly is set. Only the first entry (initial[0]) is used. Supports all item types.',
-      fhir:  'Questionnaire.item.initial[]',
-      spec:  'R4 \u00B7 optional',
-    }, actions);
-    initLink.onclick = () => MODAL_REGISTRY.get('initial').open(node, initLink, setActive);
-
-    const constraintLink = node._makeActionLink('Constraint', 'constraint', {
-      title: 'Validation Constraints (questionnaire-constraint)',
-      body:  'FHIR questionnaire-constraint extensions on this item. Each entry has a FHIRPath expression, human-readable message, and severity. Error-severity constraints must pass for the item to show \u2714 in the preview.',
-      fhir:  'Questionnaire.item.extension[questionnaire-constraint]',
-      spec:  'R4 \u00B7 optional',
-    }, actions);
-    constraintLink.onclick = () => MODAL_REGISTRY.get('constraint').open(node, constraintLink, setActive);
-
-    const styleLink = node._makeActionLink('Appearance', 'appearance', {
-      title: 'Appearance (rendering-style)',
-      body:  'Inline CSS applied to the item title in the preview. Supports bold, italic, text colour, and raw CSS. Stored in the standard FHIR rendering-style extension on the _text element.',
-      fhir:  'Questionnaire.item._text.extension[rendering-style]',
-      spec:  'R4 \u00B7 optional',
-    }, actions);
-    styleLink.onclick = () => MODAL_REGISTRY.get('appearance').open(node, styleLink, setActive);
-
-    const codesLink = node._makeActionLink('Props', 'codes', {
-      title: 'Item Properties',
-      body:  'Edit item-level metadata: definition URL (item.definition \u2014 points to a StructureDefinition element) and terminology codes (item.code[] \u2014 LOINC, SNOMED, etc.).',
-      fhir:  'Questionnaire.item.definition / item.code[]',
-      spec:  'R4 \u00B7 optional',
-    }, actions);
-    codesLink.onclick = () => MODAL_REGISTRY.get('codes').open(node, codesLink, setActive);
-
-    const noteLink = node._makeActionLink('Note', 'note', {
-      title: 'Design Note',
-      body:  'Internal author note \u2014 stored as FHIR designNote extension. Never shown to patients.',
-      fhir:  FHIR.designNote,
-      spec:  'R4 \u00B7 optional',
-    }, actions);
-    noteLink.onclick = () => MODAL_REGISTRY.get('note').open(node, noteLink, setActive);
-    setActive(noteLink, !!node._designNote);
-
-    const termLink = node._makeActionLink('Terminology', 'terminology', {
-      title: 'Preferred Terminology Server',
-      body:  'Per-item override for the FHIR terminology server used to expand ValueSets. Falls back to the Questionnaire-level default.',
-      fhir:  'item.extension[sdc-questionnaire-preferredTerminologyServer].valueUrl',
-      spec:  'SDC',
-    }, actions);
-    termLink.onclick = () => MODAL_REGISTRY.get('terminology').open(node, termLink, setActive);
-    setActive(termLink, !!node._preferredTermServer);
-
-
-    const headerTop = document.createElement('div');
-    headerTop.className = 'node-header-top';
-    headerTop.appendChild(titleWrap);
-
-    const metaRow = document.createElement('div');
-    metaRow.className = 'node-meta-row';
-    const prefixLbl = document.createElement('span');
-    prefixLbl.className = 'node-meta-label node-meta-label--prefix';
-    prefixLbl.textContent = 'prefix:';
-    const idLbl = document.createElement('span');
-    idLbl.className = 'node-meta-label node-meta-label--id';
-    idLbl.textContent = 'id:';
-    applyMetaLabelTips(idLbl, prefixLbl);
-    metaRow.appendChild(idLbl);
-    metaRow.appendChild(linkIdInput);
-    metaRow.appendChild(prefixLbl);
-    metaRow.appendChild(prefixInput);
-
-    header.appendChild(headerTop);
-    header.appendChild(titleRow);
-    header.appendChild(buildInlineTypeRow(node, setActive));
-    header.appendChild(metaRow);
-    header.appendChild(actions);
-
-    // ⚙ gear menu (Add Sub-group / Add Sub-item / Copy / Paste / Delete)
-    const gear = new NodeGearMenu('node-gear-btn');
-    addMetaRowGearItem(gear, node);
-    gear.addSep();
-    node._addChildGearItems(gear);
-    gear.addSep();
-    addCopyPasteGearItems(gear, node, BaseNode._hasClipboard);
-    gear.addSep();
-    gear.addItem('Delete', 'node-delete-btn', () => {
-      document.dispatchEvent(new CustomEvent(AppEvents.NODE_DELETE_REQUESTED,
-        { detail: { id: node.id, label: node.title || node.id } }));
-    }, { destructive: true });
-
-    div.appendChild(header);
-    div.appendChild(gear.el);
-
-    setActive(visLink,        !!(node.enableWhen?.length) || !!node.enableWhenExpression);
-    setActive(exprLink,       !!(node._calculatedExpr || node._initialExpr));
-    setActive(statesLink,     node.mandatory === true || !!node._readOnly || !!node._hidden || node._observationExtract != null || !!node._usageMode || !!node._signatureRequired?.length);
-    setActive(repeatLink,     !!node.repeats);
-    if (!node.supportsRepeat()) repeatLink.style.display = 'none';
-    setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
-    setActive(styleLink,      !!(node._renderStyle || node._renderXhtml));
-    setActive(constraintLink, !!(node.constraint?.length));
-    setActive(codesLink,      !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.some(u => u)) || !!node._shortText);
-    setActive(termLink,        !!node._preferredTermServer);
-
-    if (node.children.length > 0) {
-      const body = document.createElement('div');
-      body.className = 'node-body';
-      if (BaseNode._collapseMap.get(node.id)) body.style.display = 'none';
-      for (let i = 0; i < node.children.length; i++) {
-        const childWrap = node.children[i].buildBuilder();
-        if (i === 0) {
-          const firstDrop = childWrap.querySelector('.drop-zone-above');
-          if (firstDrop) firstDrop.textContent = 'Drop here to add as first sub-item';
-        }
-        body.appendChild(childWrap);
-      }
-      body.appendChild(buildInsideDropZone(node));
-      div.appendChild(body);
-    }
-
-    wrapper.appendChild(div);
-    return wrapper;
   }
 }

@@ -4,6 +4,7 @@
 import { BuilderPanel } from './builder-panel.js';
 import { MetadataCard } from '../ui/metadata-card.js';
 import { CopyPaste }    from '../ui/copy-paste.js';
+import './node-builder-ext.js';   // augments node prototypes with buildBuilder (builder-only)
 import '../fhir/version-compat/open-choice.js';
 import '../fhir/version-compat/r5-downgrade.js';
 import '../fhir/formats/r4.js';

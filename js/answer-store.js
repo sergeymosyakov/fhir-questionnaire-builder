@@ -18,6 +18,7 @@
 // toValueMap() and write results back via merge() / replaceAll(); no external code
 // touches the raw backing object directly.
 import { AppEvents } from './events.js';
+import { defaultBus } from './core/events/bus.js';
 
 export class AnswerStore {
   /** Internal tree { linkId: [row0, row1, …] } — access only via facade methods.
@@ -147,12 +148,10 @@ export class AnswerStore {
   /** Replace all answers with the given map (clear + merge). */
   replaceAll(map) { this.clear(); this.merge(map); }
 
-  constructor() {
-    if (typeof document !== 'undefined') {
-      document.addEventListener(AppEvents.ANSWER_SET,    e => this.set(e.detail.id, e.detail.value, e.detail.path));
-      document.addEventListener(AppEvents.ANSWER_DELETE, e => this.remove(e.detail.id, e.detail.path));
-      document.addEventListener(AppEvents.ANSWERS_CLEAR, () => this.clear());
-    }
+  constructor(bus = defaultBus) {
+    bus.on(AppEvents.ANSWER_SET,    e => this.set(e.detail.id, e.detail.value, e.detail.path));
+    bus.on(AppEvents.ANSWER_DELETE, e => this.remove(e.detail.id, e.detail.path));
+    bus.on(AppEvents.ANSWERS_CLEAR, () => this.clear());
   }
 }
 

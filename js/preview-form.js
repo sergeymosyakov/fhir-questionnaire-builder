@@ -1,5 +1,5 @@
 // ── Right panel: reactive preview form ─────────────────────────────────────────
-import { _rc } from './preview/render-ctx.js';
+import { _rc as _defaultRc } from './preview/render-ctx.js';
 import { BaseNode } from './nodes/index.js';
 import { GroupNode } from './nodes/group-node.js';
 import { AppEvents, EventState } from './events.js';
@@ -13,12 +13,9 @@ import { importQRAnswers } from './fhir/qr-import.js';
 import { populateFromServer } from './fhir/sdc-populate.js';
 import { serverConfig, CONFIG_KEYS } from './fhir/server-config.js';
 import { showError, showInfo } from './ui/toast.js';
+import { defaultSession } from './core/session.js';
 
-import * as search from './ui/search.js';
-import * as statusBadge from './ui/status-badge.js';
 import './ui/modals/explain-modal.js';
-import * as progress from './ui/progress.js';
-import { languageMenu } from './ui/header-actions.js';
 
 const fhirpath = window.fhirpath;
 
@@ -37,16 +34,35 @@ export class PreviewForm {
    * @param {object} deps.questDoc
    * @param {object} deps.answerStore
    */
-  constructor() {
+  constructor(opts = {}) {
     _instance = this;
+    // Session (questDoc + answerStore + bus) — injectable; defaults to the app session.
+    this._session = opts.session || defaultSession;
+    this._bus = this._session.bus;
+    // Render context — injectable per instance; defaults to the app singleton.
+    this._rc = opts.rc || _defaultRc;
+    this._rc.bus = this._bus; // nodes wire preview-scoped listeners on this session bus
+    // Progress overlay is an app-level concern — injectable; defaults to a no-op
+    // (app supplies the real one via opts.progress) so preview-form stays free of
+    // the self-initialising progress module.
+    this._progress = opts.progress || { show() {}, hide() {} };
+    // Preview-panel chrome — injectable; a headless widget uses the no-op defaults.
+    // The app supplies the real search / status-badge / language-menu via chrome so
+    // preview-form stays free of self-initialising app-shell modules.
+    this._chrome = { search: { refresh() {} }, statusBadge: { update() {} }, languageMenu: { rebuild() {} }, ...(opts.chrome || {}) };
+    // Primary render mount — injectable; defaults to the app's preview-lform.
+    this._mountEl = opts.mountEl || null;
+    // Optional JSON-view element (widget provides its own; app uses the shell one).
+    this._jsonEl = opts.jsonEl || null;
+    const _rc = this._rc;
     this._tree            = null;
     this._answerStore     = null;
     this._rawFhir         = null;
     this._questVariables  = null;
     this._calcFormOk      = null;
 
-    this._viewPrefs     = { showLinkId: true, showPrefix: true, showBadges: true, showHiddenItems: true };
-    this._previewMode   = 'preview';
+    this._viewPrefs     = opts.viewPrefs || { showLinkId: true, showPrefix: true, showBadges: true, showHiddenItems: true };
+    this._previewMode   = opts.previewMode || 'preview';
     this._lastCtx       = { fp: null, qr: null, env: {} };
     this._preQR         = null;
     this._preEnvVars    = null;
@@ -91,26 +107,28 @@ export class PreviewForm {
         return r;
       };
     };
-    const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
-    if (cached?.questDoc) {
-      _initData(cached);
+    if (opts.session) {
+      // Explicit session (embedded widget): wire data synchronously.
+      _initData({ questDoc: this._session.questDoc, answerStore: this._session.answerStore });
     } else {
-      document.addEventListener(AppEvents.APP_CONTEXT_READY, e => _initData(e.detail), { once: true });
+      const cached = EventState.get(AppEvents.APP_CONTEXT_READY);
+      if (cached?.questDoc) _initData(cached);
+      else this._bus.on(AppEvents.APP_CONTEXT_READY, e => _initData(e.detail), { once: true });
     }
 
     // ── Event listeners ─────────────────────────────────────────────────────
-    document.addEventListener(AppEvents.VIEW_PREF_CHANGE,   e => this._onViewPrefChange(e));
-    document.addEventListener(AppEvents.PREVIEW_MODE_CHANGE,e => this._onPreviewModeChange(e));
-    document.addEventListener(AppEvents.REINIT_FORM,        e => this.reinitForm({ silent: e.detail?.silent }));
-    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => {
+    this._bus.on(AppEvents.VIEW_PREF_CHANGE,   e => this._onViewPrefChange(e));
+    this._bus.on(AppEvents.PREVIEW_MODE_CHANGE,e => this._onPreviewModeChange(e));
+    this._bus.on(AppEvents.REINIT_FORM,        e => this.reinitForm({ silent: e.detail?.silent }));
+    this._bus.on(AppEvents.QUESTIONNAIRE_LOADED, () => {
       this._els.lform?.closest('.right-panel-body')?.scrollTo({ top: 0 });
       // Rebuild unconditionally here (not inside _asyncRender which may be cancelled)
-      languageMenu.rebuild(this._rawFhir?.translations);
+      this._chrome.languageMenu.rebuild(this._rawFhir?.translations);
     });
-    document.addEventListener(AppEvents.BUILDER_NAVIGATE,   e => {
-      document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_NAVIGATE_TO, { detail: { id: e.detail.id } }));
+    this._bus.on(AppEvents.BUILDER_NAVIGATE,   e => {
+      this._bus.dispatch(AppEvents.PREVIEW_NAVIGATE_TO, { id: e.detail.id });
     });
-    document.addEventListener(AppEvents.RESPONSE_CHANGED, () => {
+    this._bus.on(AppEvents.RESPONSE_CHANGED, () => {
       ++this._renderVersion;
       clearTimeout(this._renderTimer);
       this._renderTimer = setTimeout(() => this._asyncRender(this._renderVersion), 30);
@@ -118,7 +136,7 @@ export class PreviewForm {
     // Builder-side structural changes (modal apply, type change, expression edit)
     // dispatch CALC_RECALC_REQUESTED. Invalidate all render caches so the next
     // _asyncRender does a full rebuild rather than taking the fast/partial path.
-    document.addEventListener(AppEvents.CALC_RECALC_REQUESTED, () => {
+    this._bus.on(AppEvents.CALC_RECALC_REQUESTED, () => {
       this._lastVisibleSig = null;
       this._lastRepCounts  = null;
       this._lastRepDataSz  = null;
@@ -126,27 +144,29 @@ export class PreviewForm {
     });
     // QR answers load does not dispatch REINIT_FORM — reset caches so the next
     // _asyncRender takes the full-rebuild path and re-renders all controls.
-    document.addEventListener(AppEvents.QR_LOADED, () => {
+    this._bus.on(AppEvents.QR_LOADED, () => {
       this._lastVisibleSig = null;
       this._lastRepCounts  = null;
       this._lastRepDataSz  = null;
     });
-    document.addEventListener(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null; this._asyncRender(++this._renderVersion); });
-    document.addEventListener(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null; this._asyncRender(++this._renderVersion); });
-    document.addEventListener(AppEvents.SDC_POPULATE_REQUESTED, e => this._populate(e.detail.patientRef));
-    document.addEventListener(AppEvents.LANGUAGE_CHANGED, e => {
+    this._bus.on(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null; this._asyncRender(++this._renderVersion); });
+    this._bus.on(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null; this._asyncRender(++this._renderVersion); });
+    this._bus.on(AppEvents.SDC_POPULATE_REQUESTED, e => this._populate(e.detail.patientRef));
+    this._bus.on(AppEvents.LANGUAGE_CHANGED, e => {
       _rc.activeLanguage  = e.detail?.lang ?? '';
       _rc.translations    = this._rawFhir?.translations ?? {};
       this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null;  // text content changes — full rebuild required
       this._asyncRender(++this._renderVersion);
     });
 
-    // mount() needs viewOptionsWrap/previewModeWrap which are created by mountHeaderActions()
-    // — defer until APP_CONTEXT_READY which fires after mountHeaderActions()
-    if (EventState.get(AppEvents.APP_CONTEXT_READY)) {
+    // mount() needs shell wraps created by mountHeaderActions() (app only); the
+    // widget mounts manually after setup.
+    if (opts.session) {
+      // Widget: caller mounts after setup.
+    } else if (EventState.get(AppEvents.APP_CONTEXT_READY)) {
       this.mount();
     } else {
-      document.addEventListener(AppEvents.APP_CONTEXT_READY, () => this.mount(), { once: true });
+      this._bus.on(AppEvents.APP_CONTEXT_READY, () => this.mount(), { once: true });
     }
   }
 
@@ -155,17 +175,17 @@ export class PreviewForm {
   getLastCtx() { return this._lastCtx; }
 
   collapseAll() {
-    document.dispatchEvent(new CustomEvent(AppEvents.COLLAPSE_ALL_PREVIEW));
+    this._bus.dispatch(AppEvents.COLLAPSE_ALL_PREVIEW);
   }
 
   expandAll() {
-    document.dispatchEvent(new CustomEvent(AppEvents.EXPAND_ALL_PREVIEW));
+    this._bus.dispatch(AppEvents.EXPAND_ALL_PREVIEW);
   }
 
   mount() {
     const elements = {
-      lform:           document.querySelector('[data-mount="preview-lform"]'),
-      fhirJsonView:    document.querySelector('[data-mount="fhir-json-view"]'),
+      lform:           this._mountEl || document.querySelector('[data-mount="preview-lform"]'),
+      fhirJsonView:    this._jsonEl || document.querySelector('[data-mount="fhir-json-view"]'),
       leftPanelBody:   document.querySelector('[data-mount="left-panel-body"]'),
       viewOptionsWrap: document.querySelector('[data-mount="viewOptionsWrap"]'),
       previewModeWrap: document.querySelector('[data-mount="previewModeWrap"]'),
@@ -175,22 +195,27 @@ export class PreviewForm {
 
     const syncToolbarVisibility = () => {
       const d = this._tree.length > 0 ? '' : 'none';
-      elements.viewOptionsWrap.style.display = d;
-      elements.searchWrap.style.display      = d;
-      elements.previewModeWrap.style.display = d;
+      if (elements.viewOptionsWrap) elements.viewOptionsWrap.style.display = d;
+      if (elements.searchWrap)      elements.searchWrap.style.display      = d;
+      if (elements.previewModeWrap) elements.previewModeWrap.style.display = d;
     };
     syncToolbarVisibility();
-    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  syncToolbarVisibility);
-    document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,     syncToolbarVisibility);
-    document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, syncToolbarVisibility);
+    this._bus.on(AppEvents.QUESTIONNAIRE_LOADED,  syncToolbarVisibility);
+    this._bus.on(AppEvents.QUESTIONNAIRE_NEW,     syncToolbarVisibility);
+    this._bus.on(AppEvents.QUESTIONNAIRE_CLEARED, syncToolbarVisibility);
 
-    elements.lform.classList.toggle('preview--no-badges', !this._viewPrefs.showBadges);
-    elements.lform.classList.toggle('preview--no-linkid', !this._viewPrefs.showLinkId);
-    elements.lform.classList.toggle('preview--no-prefix', !this._viewPrefs.showPrefix);
-    elements.lform.classList.toggle('preview--no-hidden', !this._viewPrefs.showHiddenItems);
-    elements.lform.classList.toggle('patient-view', this._previewMode === 'patient');
-    elements.lform.style.display        = this._previewMode === 'json' ? 'none' : '';
-    elements.fhirJsonView.style.display = this._previewMode === 'json' ? '' : 'none';
+    const lform = elements.lform;
+    if (lform) {
+      lform.classList.toggle('preview--no-badges', !this._viewPrefs.showBadges);
+      lform.classList.toggle('preview--no-linkid', !this._viewPrefs.showLinkId);
+      lform.classList.toggle('preview--no-prefix', !this._viewPrefs.showPrefix);
+      lform.classList.toggle('preview--no-hidden', !this._viewPrefs.showHiddenItems);
+      lform.classList.toggle('patient-view', this._previewMode === 'patient');
+      lform.style.display = this._previewMode === 'json' ? 'none' : '';
+    }
+    if (elements.fhirJsonView) {
+      elements.fhirJsonView.style.display = this._previewMode === 'json' ? '' : 'none';
+    }
 
     // Initial render (shows placeholder when tree is empty)
     this._asyncRender(++this._renderVersion);
@@ -198,6 +223,7 @@ export class PreviewForm {
 
   async reinitForm({ silent = false } = {}) {
     if (!fhirpath) return;
+    const progress = this._progress;
     // Questionnaire structure changed — all cached state is stale.
     this._calcCache      = null;
     this._pendingCtx     = null;
@@ -247,7 +273,7 @@ export class PreviewForm {
     if (lform) {
       const isJson = this._previewMode === 'json';
       lform.style.display                    = isJson ? 'none' : '';
-      this._els.fhirJsonView.style.display   = isJson ? '' : 'none';
+      if (this._els.fhirJsonView) this._els.fhirJsonView.style.display = isJson ? '' : 'none';
     }
     this._lastVisibleSig = null; this._lastRepCounts = null;  // mode change — full rebuild
     this._asyncRender(++this._renderVersion);
@@ -256,7 +282,7 @@ export class PreviewForm {
   _reCalc() {
     if (fhirpath) {
       let qr, envVars;
-      const base = buildFHIRObject();
+      const base = buildFHIRObject(this._session.questDoc);
       if (this._preQR) {
         qr = this._preQR; envVars = this._preEnvVars;
         this._preQR = null; this._preEnvVars = null;
@@ -273,8 +299,8 @@ export class PreviewForm {
       this._answerStore.merge(calcMap);
       const env = { resource: qr, ...envVars };
       this._lastCtx.fp = fhirpath; this._lastCtx.qr = qr; this._lastCtx.env = env;
-      document.dispatchEvent(new CustomEvent(AppEvents.FHIRPATH_CTX_UPDATED, { detail: { fp: fhirpath, qr, env } }));
-      document.dispatchEvent(new CustomEvent(AppEvents.REFRESH_EXPR_ICONS));
+      this._bus.dispatch(AppEvents.FHIRPATH_CTX_UPDATED, { fp: fhirpath, qr, env });
+      this._bus.dispatch(AppEvents.REFRESH_EXPR_ICONS);
       const ctx = { fp: fhirpath, qr, envVars };
       // Stash so the next _asyncRender (triggered by RESPONSE_CHANGED) can reuse
       // this result instead of running evalCalcNodes a second time.
@@ -285,6 +311,7 @@ export class PreviewForm {
   }
 
   _buildControl(node, iconEl, onAfterChange) {
+    const _rc = this._rc;
     const isPatient = this._previewMode === 'patient';
     const path = _rc.instancePath && _rc.instancePath.length ? _rc.instancePath.slice() : undefined;
     const updateOwnIcon = () => {
@@ -300,12 +327,13 @@ export class PreviewForm {
     const onChange = () => { updateOwnIcon(); if (onAfterChange) onAfterChange(); };
     const reCalcAndRefresh = () => {
       this._reCalc();
-      document.dispatchEvent(new CustomEvent(AppEvents.REFRESH_CALC_BADGES));
+      this._bus.dispatch(AppEvents.REFRESH_CALC_BADGES);
     };
     const ctx = {
       getValue: id => this._answerStore.get(id, path),
-      setValue: (id, v) => document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id, value: v, path } })),
+      setValue: (id, v) => this._bus.dispatch(AppEvents.ANSWER_SET, { id, value: v, path }),
       onChange, _reCalc: reCalcAndRefresh,
+      bus: this._bus,
       _fpCtx: this._lastCtx,
     };
     const el = node.buildControl(ctx);
@@ -338,6 +366,9 @@ export class PreviewForm {
   }
 
   async _asyncRender(version) {
+    const _rc = this._rc;
+    const progress = this._progress;
+    const { search, statusBadge, languageMenu } = this._chrome;
     // Reuse the context stashed by the last _reCalc() call (e.g. from a node's
     // _reCalc callback) so we don't run evalCalcNodes a second time per change.
     const ctx = this._pendingCtx || this._reCalc();
@@ -421,7 +452,7 @@ export class PreviewForm {
         search.refresh();
         this._updateJsonView();
         progress.hide();
-        document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_RENDER_DONE));
+        this._bus.dispatch(AppEvents.PREVIEW_RENDER_DONE);
         return;
       }
 
@@ -478,7 +509,7 @@ export class PreviewForm {
       search.refresh();
       this._updateJsonView();
       progress.hide();
-      document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_RENDER_DONE));
+      this._bus.dispatch(AppEvents.PREVIEW_RENDER_DONE);
       return;
     }
 
@@ -541,22 +572,23 @@ export class PreviewForm {
     // Rebuild language menu in case translations changed (e.g. after translate modal apply)
     languageMenu.rebuild(this._rawFhir?.translations);
     progress.hide();
-    document.dispatchEvent(new CustomEvent(AppEvents.PREVIEW_RENDER_DONE));
+    this._bus.dispatch(AppEvents.PREVIEW_RENDER_DONE);
   }
 
   /** Call $populate on the configured FHIR server and load the resulting answers. */
   async _populate(patientRef) {
+    const progress = this._progress;
     const fhirBase = serverConfig.get(CONFIG_KEYS.FHIR_BASE);
     if (!fhirBase) { showError('No FHIR Base Server configured. Open Settings to set one.'); return; }
 
     progress.show('Populating from server\u2026');
     try {
-      const questJson = buildFHIRObject();
+      const questJson = buildFHIRObject(this._session.questDoc);
       const qr = await populateFromServer(fhirBase, questJson, patientRef);
       const values = this._answerStore.toValueMap();
       const { loaded } = importQRAnswers(qr, values, this._tree);
       this._answerStore.replaceAll(values);
-      document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
+      this._bus.dispatch(AppEvents.REINIT_FORM);
       showInfo(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} from server.`);
     } catch (err) {
       showError(err.message);
@@ -568,8 +600,8 @@ export class PreviewForm {
   _updateJsonView() {
     if (this._previewMode !== 'json') return;
     if (!this._els.fhirJsonView) return;
-    const q = buildFHIRObject();
+    const q = buildFHIRObject(this._session.questDoc);
     this._els.fhirJsonView.innerHTML = highlightJson(JSON.stringify(q, null, 2));
-    search.refresh();
+    this._chrome.search.refresh();
   }
 }

@@ -107,7 +107,7 @@ export class QuantityNode extends ItemNode {
     };
 
     numInput.oninput  = update;
-    numInput.onchange = () => { BaseNode.notifyChanged(); };
+    numInput.onchange = () => { BaseNode.notifyChanged(ctx.bus); };
 
     wrap.appendChild(numInput);
     wrap.appendChild(unitSel.el);

@@ -67,7 +67,7 @@ export class UrlNode extends ItemNode {
       clearTimeout(_debounce);
       _debounce = setTimeout(() => { _reCalc(); onChange(); }, 200);
     };
-    el.onchange = () => { BaseNode.notifyChanged(); };
+    el.onchange = () => { BaseNode.notifyChanged(ctx.bus); };
     el.addEventListener('blur', () => { node._interacted = true; validateErr(); });
 
     wrap.appendChild(el);

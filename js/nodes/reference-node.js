@@ -70,7 +70,7 @@ export class ReferenceNode extends ItemNode {
       items:     typeItems,
       value:     initType || '',
       className: 'ref-type-sel',
-      onChange:  () => { update(); BaseNode.notifyChanged(); },
+      onChange:  () => { update(); BaseNode.notifyChanged(ctx.bus); },
     });
 
     const sep = document.createElement('span');
@@ -110,7 +110,7 @@ export class ReferenceNode extends ItemNode {
     };
 
     idInput.oninput  = update;
-    idInput.onchange = () => { BaseNode.notifyChanged(); };
+    idInput.onchange = () => { BaseNode.notifyChanged(ctx.bus); };
 
     // ── Search autocomplete (when fhirBaseUrl is configured) ─────────────────
     if (serverConfig.get(CONFIG_KEYS.FHIR_BASE)) {
@@ -163,7 +163,7 @@ export class ReferenceNode extends ItemNode {
               e.preventDefault();
               idInput.value = r.id;
               update();
-              BaseNode.notifyChanged();
+              BaseNode.notifyChanged(ctx.bus);
               closeDropdown();
             });
             dropdown.appendChild(item);

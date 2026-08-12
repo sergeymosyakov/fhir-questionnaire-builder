@@ -34,7 +34,7 @@ export class NumberNode extends ItemNode {
       valLabel.textContent = sl.value;
 
       sl.oninput  = () => { const v = parseFloat(sl.value); setValue(node.id, v); valLabel.textContent = sl.value; _reCalc(); onChange(); };
-      sl.onchange = () => { BaseNode.notifyChanged(); };
+      sl.onchange = () => { BaseNode.notifyChanged(ctx.bus); };
 
       wrap.appendChild(sl);
       wrap.appendChild(valLabel);
@@ -78,7 +78,7 @@ export class NumberNode extends ItemNode {
     };
 
     el.oninput  = () => { const v = el.value === '' ? undefined : (node.itemType === 'integer' ? parseInt(el.value, 10) : parseFloat(el.value)); setValue(node.id, v); validate(v); _reCalc(); onChange(); };
-    el.onchange = () => { BaseNode.notifyChanged(); };
+    el.onchange = () => { BaseNode.notifyChanged(ctx.bus); };
 
     validate(getValue(node.id));
 
