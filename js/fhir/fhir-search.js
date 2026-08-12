@@ -17,8 +17,8 @@ const CORS_ENABLED_HOSTS = [
  * @param {string} url
  * @returns {string}
  */
-export function proxiedUrl(url) {
-  const proxy = (serverConfig.get(CONFIG_KEYS.CORS_PROXY) || '').replace(/\/$/, '');
+export function proxiedUrl(url, corsProxy) {
+  const proxy = ((corsProxy ?? serverConfig.get(CONFIG_KEYS.CORS_PROXY)) || '').replace(/\/$/, '');
   if (!proxy) return url;
   try {
     const { hostname } = new URL(url);
@@ -74,14 +74,14 @@ function _searchParam(resourceType) {
  * @param {number} [count=10]   - Max results
  * @returns {Promise<Array<{id: string, display: string}>>}
  */
-export async function searchFhir(resourceType, query, count = 10) {
-  const base = (serverConfig.get(CONFIG_KEYS.FHIR_BASE) || '').replace(/\/$/, '');
+export async function searchFhir(resourceType, query, count = 10, opts = {}) {
+  const base = ((opts.fhirBase ?? serverConfig.get(CONFIG_KEYS.FHIR_BASE)) || '').replace(/\/$/, '');
   if (!base || !resourceType || !query.trim()) return [];
 
   const params = new URLSearchParams({ _count: String(count) });
   params.set(_searchParam(resourceType), query);
 
-  const url = proxiedUrl(`${base}/${resourceType}?${params}`);
+  const url = proxiedUrl(`${base}/${resourceType}?${params}`, opts.corsProxy);
   const res = await fetch(url, {
     headers: { Accept: 'application/fhir+json' },
     signal: AbortSignal.timeout(6000),

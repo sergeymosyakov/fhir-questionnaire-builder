@@ -9,13 +9,12 @@ import { defaultBus } from '../core/events/bus.js';
 import { compareValue } from '../eval.js';
 import { isDescendant } from '../utils.js';
 import { parseRenderStyle } from '../fhir/render-style.js';
-
-// Build a multi-line condition audit string for the enableWhen tooltip.
-// Shows each condition with its operator, expected value, actual value, and result.
-function buildEnableWhenAudit(enableWhen, enableBehavior, getAll) {
+// Structured enableWhen breakdown: each condition with expected/actual + pass.
+// Shared by the tooltip audit string and the click-to-explain modal.
+export function buildEnableWhenRows(enableWhen, enableBehavior, getAll) {
   if (!getAll) return null;
   const logic = enableBehavior === 'any' ? 'ANY' : 'ALL';
-  const lines = enableWhen.map(ew => {
+  const rows = enableWhen.map(ew => {
     const all = getAll(ew.question);
     const actual = all.length === 0 ? '(no answer)' : all.map(v => JSON.stringify(v)).join(', ');
     const expected = ew.operator === 'exists'
@@ -27,12 +26,18 @@ function buildEnableWhenAudit(enableWhen, enableBehavior, getAll) {
           ew.answerDecimal  !== undefined ? ew.answerDecimal  :
           ew.answerCoding   !== undefined ? (ew.answerCoding.code || ew.answerCoding.display) : '?'
         );
-    const passed = all.length === 0
-      ? compareValue(undefined, ew)
-      : all.some(v => compareValue(v, ew));
-    return `${passed ? '\u2713' : '\u2717'} [${ew.question}] ${ew.operator} ${expected}  \u2192  actual: ${actual}`;
+    const ok = all.length === 0 ? compareValue(undefined, ew) : all.some(v => compareValue(v, ew));
+    return { ok, text: `[${ew.question}] ${ew.operator} ${expected}  \u2192  actual: ${actual}` };
   });
-  return `Enable when (${logic}):\n` + lines.join('\n');
+  return { logic, rows };
+}
+
+// Build a multi-line condition audit string for the enableWhen tooltip.
+function buildEnableWhenAudit(enableWhen, enableBehavior, getAll) {
+  const data = buildEnableWhenRows(enableWhen, enableBehavior, getAll);
+  if (!data) return null;
+  const lines = data.rows.map(r => `${r.ok ? '\u2713' : '\u2717'} ${r.text}`);
+  return `Enable when (${data.logic}):\n` + lines.join('\n');
 }
 
 // Shared wrapper factory used by every buildControl() implementation.
@@ -240,10 +245,24 @@ export class BaseNode {
         : 'Not yet met: ' + dimText + '\n\nThis label is auto-generated from the enableWhen condition. To change it \u2014 edit the Show When panel in the builder.';
       hint.dataset.tipFhir  = 'Questionnaire.item.enableWhen[]';
       hint.dataset.tipSpec  = 'R4';
+      this._attachEnableWhenAudit(hint, rc);
     }
     row.appendChild(hint);
     container.appendChild(row);
     this._renderDimmedChildren(res, container, rc);
+  }
+
+  // Make a standard-enableWhen condition hint clickable → open a modal explaining
+  // why the item is hidden (each condition, expected vs actual). Useful in the
+  // embedded widget where there is no builder Show When panel to inspect.
+  _attachEnableWhenAudit(hint, rc) {
+    if (!rc.showExplain || !this.enableWhen?.length) return;
+    hint.classList.add('preview-condition-hint--explain');
+    hint.addEventListener('click', e => {
+      e.stopPropagation();
+      const data = buildEnableWhenRows(this.enableWhen, this.enableBehavior, rc.getAll);
+      if (data) explainModal.showAudit('Visibility condition', data);
+    });
   }
 
   // Override in GroupNode to render children even when dimmed (keeps counts in sync).
@@ -517,6 +536,7 @@ export class BaseNode {
         hint.dataset.tipBody  = 'This item is shown only when: ' + visText + '\n\nThis label is auto-generated from the enableWhen condition. To change it \u2014 edit the Show When panel in the builder.';
         hint.dataset.tipFhir  = 'Questionnaire.item.enableWhen[]';
         hint.dataset.tipSpec  = 'R4';
+        this._attachEnableWhenAudit(hint, rc);
       }
       row.appendChild(hint);
     }

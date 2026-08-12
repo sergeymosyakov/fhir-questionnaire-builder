@@ -7,7 +7,7 @@
 import { BaseNode } from '../nodes/base-node.js';
 import { GroupNode } from '../nodes/group-node.js';
 import { ItemNode } from '../nodes/item-node.js';
-import * as bh from '../nodes/builder-helpers.js';
+import * as bh from './builder-helpers.js';
 import { MODAL_REGISTRY } from '../ui/modals/modal-registry.js';
 import { NodeGearMenu } from '../ui/node-gear-menu.js';
 import { createCustomSelect } from '../ui/custom-select.js';

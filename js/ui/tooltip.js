@@ -13,6 +13,7 @@ import { AppEvents } from '../events.js';
 
 const LS_KEY = 'tooltips-enabled';
 let _enabled = true; // initialised from storage in init()
+let _inited = false;
 let _el = null;
 
 /** Returns current enabled state. */
@@ -118,7 +119,11 @@ function _hide() {
 }
 
 export async function init() {
-  _enabled = await storage.getItem(LS_KEY) !== 'false';
+  if (_inited) return; // document-delegated — one init covers the whole page
+  _inited = true;
+  // Tooltips must not depend on persistence (the embedded widget has no storage
+  // adapter registered) — fall back to enabled if storage is unavailable.
+  try { _enabled = await storage.getItem(LS_KEY) !== 'false'; } catch { _enabled = true; }
   // Sync badge to initial persisted state
   const badge = document.getElementById('tooltipsOffBadge');
   if (badge) badge.style.display = _enabled ? 'none' : '';

@@ -16,6 +16,7 @@ class ExplainModal extends Modal {
   }
 
   show(expr, fp, resource, env) {
+    this.setTitle('Expression Explain');
     this.body.innerHTML = '';
 
     try {
@@ -39,6 +40,32 @@ class ExplainModal extends Modal {
     code.textContent = expr;
     strip.append(label, code);
     this.body.appendChild(strip);
+
+    super.open();
+  }
+
+  // Show a standard enableWhen breakdown (no FHIRPath): why an item is hidden —
+  // each condition with expected vs actual value and a ✓/✗ result.
+  showAudit(title, data) {
+    this.setTitle(title);
+    this.body.innerHTML = '';
+
+    const head = document.createElement('div');
+    head.className   = 'explain-audit-head';
+    head.textContent = `Shown only when ${data.logic} of these conditions are met:`;
+    this.body.appendChild(head);
+
+    for (const r of data.rows) {
+      const row = document.createElement('div');
+      row.className = 'explain-row';
+      row.style.setProperty('--explain-depth', 0);
+      row.appendChild(_icon(r.ok));
+      const span = document.createElement('span');
+      span.className   = 'explain-expr';
+      span.textContent = r.text;
+      row.appendChild(span);
+      this.body.appendChild(row);
+    }
 
     super.open();
   }
@@ -96,4 +123,5 @@ function _renderNode(node, depth) {
 let _inst = null;
 const _modal = () => (_inst ??= new ExplainModal());
 export const show = (expr, fp, resource, env) => _modal().show(expr, fp, resource, env);
+export const showAudit = (title, data) => _modal().showAudit(title, data);
 export const hide = () => _inst?.close();

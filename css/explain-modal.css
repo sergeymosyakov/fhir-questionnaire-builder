@@ -2,6 +2,13 @@
 
 /* Expression Explain — tree content only; structure comes from shared modals.css */
 
+.explain-audit-head {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--c-text-2);
+  border-bottom: 1px solid var(--c-border);
+}
+
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 
@@ -100,10 +107,13 @@
 /* ── Clickable calc badge hint ───────────────────────────────────────────── */
 
 .calc-badge--explain,
-.preview-condition-hint--explain {
+.preview-condition-hint--explain,
+.preview-calc-value--explain {
   cursor: pointer;
 }
+.preview-calc-value--explain { text-decoration: underline dotted; text-underline-offset: 2px; }
 .calc-badge--explain:hover,
-.preview-condition-hint--explain:hover {
+.preview-condition-hint--explain:hover,
+.preview-calc-value--explain:hover {
   filter: brightness(0.92);
 }

@@ -5,7 +5,6 @@ import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
-import { serverConfig, CONFIG_KEYS } from '../fhir/server-config.js';
 import { searchFhir, displayName as _displayName } from '../fhir/fhir-search.js';
 import { refTypeMismatch } from '../fhir/form-checks.js';
 
@@ -79,7 +78,7 @@ export class ReferenceNode extends ItemNode {
 
     const idInput = document.createElement('input');
     idInput.type        = 'text';
-    idInput.placeholder = serverConfig.get(CONFIG_KEYS.FHIR_BASE) ? 'search or enter id' : 'id';
+    idInput.placeholder = ctx.fhirBase ? 'search or enter id' : 'id';
     idInput.value       = initId;
     idInput.className   = 'ref-id-input';
 
@@ -113,7 +112,7 @@ export class ReferenceNode extends ItemNode {
     idInput.onchange = () => { BaseNode.notifyChanged(ctx.bus); };
 
     // ── Search autocomplete (when fhirBaseUrl is configured) ─────────────────
-    if (serverConfig.get(CONFIG_KEYS.FHIR_BASE)) {
+    if (ctx.fhirBase) {
       const searchWrap = document.createElement('div');
       searchWrap.className = 'ref-search-wrap';
 
@@ -182,7 +181,7 @@ export class ReferenceNode extends ItemNode {
         dropdown.appendChild(loading);
         openDropdown();
         try {
-          const results = await searchFhir(resourceType, query);
+          const results = await searchFhir(resourceType, query, 10, { fhirBase: ctx.fhirBase, corsProxy: ctx.corsProxy });
           showResults(results, query);
         } catch (e) {
           const err = document.createElement('div');

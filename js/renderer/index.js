@@ -12,6 +12,7 @@ import { AppEvents } from '../events.js';
 import { PreviewForm } from '../preview-form.js';
 import { PreviewSearch } from '../ui/search.js';
 import { StatusBadge } from '../ui/status-badge.js';
+import * as tooltip from '../ui/tooltip.js';
 
 // Headless chrome — the widget renders no toolbar/menus; the host owns UI.
 const NOOP_CHROME = {
@@ -57,6 +58,10 @@ export class QuestionnaireRenderer {
     this._jsonEl = document.createElement('pre');
     this._jsonEl.className = 'fhir-json-view';
     this._jsonEl.style.display = 'none';
+
+    // Rich tooltips (data-tip-*) are host-controlled and page-wide (document
+    // delegation) — opt-in via config; init is idempotent across instances.
+    if (config.tooltips) tooltip.init();
 
     const chrome = this._buildChrome(config, bus);
     mountEl.append(this._lformEl, this._jsonEl);

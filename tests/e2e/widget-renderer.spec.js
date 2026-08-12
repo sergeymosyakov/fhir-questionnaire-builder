@@ -115,5 +115,30 @@ test.describe('QuestionnaireRenderer widget', () => {
     expect(r.patient).toBe(182);          // typed widget updated via its own bus/store
     expect(r.preview).not.toBe(182);      // sibling widget untouched (isolated session)
   });
+
+  test('config.explain opens the Expression Explain modal from a calc badge', async ({ page }) => {
+    await page.goto(DEMO);
+    // Design-mode widget renders calculated checkboxes as a clickable calc-badge--explain.
+    const badge = page.locator('[data-mode="preview"] .calc-badge--explain').first();
+    await expect(badge).toBeVisible({ timeout: 10_000 });
+    await badge.click();
+    const modal = page.locator('[data-testid="explainModal"]');
+    await expect(modal).toBeVisible();
+    await expect(modal.locator('.explain-row').first()).toBeVisible();
+    // Modal structure comes from modals.css — must be a real centered overlay,
+    // not an unstyled block (regression guard: modals.css in the widget manifest).
+    await expect(modal).toHaveCSS('position', 'fixed');
+  });
+
+  test('config.tooltips shows rich tooltips on hover', async ({ page }) => {
+    await page.goto(DEMO);
+    // A calc badge is always visible in design mode and carries a data-tip.
+    const tipEl = page.locator('[data-mode="preview"] .calc-badge--explain[data-tip-title]').first();
+    await expect(tipEl).toBeVisible({ timeout: 10_000 });
+    await tipEl.hover();
+    const tip = page.locator('.rich-tooltip');
+    await expect(tip).toBeVisible();
+    await expect(tip).not.toBeEmpty();
+  });
 });
 

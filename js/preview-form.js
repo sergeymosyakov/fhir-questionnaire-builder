@@ -334,6 +334,8 @@ export class PreviewForm {
       setValue: (id, v) => this._bus.dispatch(AppEvents.ANSWER_SET, { id, value: v, path }),
       onChange, _reCalc: reCalcAndRefresh,
       bus: this._bus,
+      fhirBase: this._fhirBase(),
+      corsProxy: this._session.config?.corsProxy ?? serverConfig.get(CONFIG_KEYS.CORS_PROXY),
       _fpCtx: this._lastCtx,
     };
     const el = node.buildControl(ctx);
@@ -575,10 +577,15 @@ export class PreviewForm {
     this._bus.dispatch(AppEvents.PREVIEW_RENDER_DONE);
   }
 
+  /** FHIR base URL — session config override (widget) → global serverConfig (app). */
+  _fhirBase() {
+    return this._session.config?.fhirBaseUrl ?? serverConfig.get(CONFIG_KEYS.FHIR_BASE);
+  }
+
   /** Call $populate on the configured FHIR server and load the resulting answers. */
   async _populate(patientRef) {
     const progress = this._progress;
-    const fhirBase = serverConfig.get(CONFIG_KEYS.FHIR_BASE);
+    const fhirBase = this._fhirBase();
     if (!fhirBase) { showError('No FHIR Base Server configured. Open Settings to set one.'); return; }
 
     progress.show('Populating from server\u2026');

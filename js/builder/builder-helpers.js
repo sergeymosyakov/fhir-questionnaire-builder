@@ -2,9 +2,9 @@
 // Extracted from base-node.js to keep it under the 500-line threshold.
 // Each function takes the node instance as its first argument.
 // Called via thin delegators on BaseNode: node._buildInlineTitleEditor(), etc.
-import * as dnd from '../builder/dnd.js';
+import * as dnd from './dnd.js';
 import { AppEvents, EventState } from '../events.js';
-import { NODE_REGISTRY } from './registry.js';
+import { NODE_REGISTRY } from '../nodes/registry.js';
 
 const _notify = () => document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 

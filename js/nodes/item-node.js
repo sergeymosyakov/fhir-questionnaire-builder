@@ -291,6 +291,7 @@ export class ItemNode extends BaseNode {
       const s = rc.getValue(this.id);
       badge.className = 'preview-calc-value';
       badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
+      this._attachCalcExplain(badge, rc);
     } else if (this.itemType === 'checkbox') {
       const calcVal = rc.getValue(this.id);
       badge.className = 'calc-badge ' + (calcVal ? 'calc-true' : 'calc-false') + (rc.showExplain ? ' calc-badge--explain' : '');
@@ -309,6 +310,7 @@ export class ItemNode extends BaseNode {
       const s = rc.getValue(this.id);
       badge.className = 'preview-calc-value';
       badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
+      this._attachCalcExplain(badge, rc);
     }
     // Store updater closure — called on REFRESH_CALC_BADGES without full DOM rebuild.
     // Must mirror the initial build's patient/design split: in patient view the
@@ -322,11 +324,26 @@ export class ItemNode extends BaseNode {
         badge.textContent = v ? '\u2713 true' : '\u2717 false';
       } else {
         const s = rc.getValue(this.id);
-        badge.className = 'preview-calc-value';
+        badge.className = 'preview-calc-value' + (rc.showExplain && this._calculatedExpr ? ' preview-calc-value--explain' : '');
         badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
       }
     };
     row.appendChild(badge);
+  }
+
+  // Make a plain calc value (`.preview-calc-value`, e.g. a numeric BMI) clickable
+  // to open the FHIRPath Explain modal — only when the surface enables Explain.
+  _attachCalcExplain(badge, rc) {
+    if (!rc.showExplain || !this._calculatedExpr) return;
+    badge.classList.add('preview-calc-value--explain');
+    badge.dataset.tipTitle = 'Calculated value';
+    badge.dataset.tipBody  = 'FHIRPath: ' + this._calculatedExpr + '\n\nClick to explain.';
+    badge.dataset.tipFhir  = 'sdc-questionnaire-calculatedExpression';
+    badge.dataset.tipSpec  = 'SDC';
+    const expr = this._calculatedExpr;
+    badge.addEventListener('click', () => {
+      if (rc.lastCtx.fp) explainModal.show(expr, rc.lastCtx.fp, rc.lastCtx.qr, rc.lastCtx.env);
+    });
   }
 
   // Override _appendRow to also disable hidden-item inputs.
