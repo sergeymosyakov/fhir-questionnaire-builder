@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 concurrency:
   group: release-widget
@@ -31,6 +32,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
+          registry-url: https://npm.pkg.github.com
 
       - run: npm ci
       - run: npm run lint
@@ -49,6 +51,7 @@ jobs:
           PATCH=$(git tag -l "widget-v${MAJOR}.${MINOR}.*" | wc -l | tr -d ' ')
           TAG="widget-v${MAJOR}.${MINOR}.${PATCH}"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "semver=${MAJOR}.${MINOR}.${PATCH}" >> "$GITHUB_OUTPUT"
           echo "Releasing $TAG"
 
       - name: Checksums
@@ -73,3 +76,31 @@ jobs:
             --latest \
             --title "QuestionnaireRenderer widget $TAG" \
             --notes-file /tmp/notes.md
+
+      # Also publish the bundle to GitHub Packages (npm registry) so it shows up
+      # under the repo's Packages tab and can be `npm install`ed.
+      - name: Publish to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+          PKG_VERSION: ${{ steps.ver.outputs.semver }}
+          PKG_OWNER: ${{ github.repository_owner }}
+          PKG_REPO: ${{ github.repository }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const pkg = {
+              name: "@" + process.env.PKG_OWNER + "/questionnaire-widget",
+              version: process.env.PKG_VERSION,
+              description: "Embeddable FHIR R4 QuestionnaireRenderer widget",
+              type: "module",
+              main: "questionnaire-widget.js",
+              module: "questionnaire-widget.js",
+              exports: { ".": "./questionnaire-widget.js", "./global": "./questionnaire-widget.global.js", "./css": "./questionnaire-widget.css" },
+              files: ["questionnaire-widget.js", "questionnaire-widget.global.js", "questionnaire-widget.css"],
+              repository: "git+https://github.com/" + process.env.PKG_REPO + ".git",
+              publishConfig: { registry: "https://npm.pkg.github.com" },
+              license: "SEE LICENSE IN LICENSE"
+            };
+            fs.writeFileSync("dist/package.json", JSON.stringify(pkg, null, 2));
+          '
+          cd dist && npm publish
