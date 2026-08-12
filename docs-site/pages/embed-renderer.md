@@ -30,8 +30,8 @@ answers, calculations and validation state, with no cross-talk.
 ```
 
 That renders the questionnaire as a patient-facing form. See
-[`widget-demo.html`](https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/widget-demo.html)
-in the repository for a complete three-widget example.
+in the repository for a complete three-widget example, or open the
+[live demo](https://fhirbuilder.com/widget-demo.html).
 
 ## Modes
 

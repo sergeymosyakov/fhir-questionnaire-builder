@@ -121,7 +121,7 @@ validation badge.
 widget.getResponse();          // → current answers as a FHIR QuestionnaireResponse
 widget.setResponse(qr);        // load answers from a QuestionnaireResponse
 widget.setLanguage('es');      // switch active language ('' = source)
-widget.setConfig({ validation: true });  // update config at runtime
+widget.setConfig({ language: 'es' });    // runtime config — only `language` takes effect
 widget.on(event, cb);          // subscribe (returns the widget)
 widget.off(event, cb);         // unsubscribe
 widget.destroy();              // remove the widget and free all listeners
@@ -130,6 +130,11 @@ widget.destroy();              // remove the widget and free all listeners
 `getResponse()` always returns a fresh, valid FHIR R4 `QuestionnaireResponse`
 built from the current answers — this is your integration point for saving,
 submitting, or exporting.
+
+> **Note:** the chrome flags (`search`, `validation`, `explain`, `tooltips`,
+> `navButton`) are **construction-time** — set them in the initial `config`.
+> `setConfig()` only applies `language` at runtime; to change chrome, `destroy()`
+> and create a new instance.
 
 ---
 
@@ -178,7 +183,7 @@ object is a ready-to-save FHIR R4 `QuestionnaireResponse`:
 </script>
 ```
 
-A working version of this button is in [`widget-demo.html`](widget-demo.html).
+A working version of this button is in the [live demo](https://fhirbuilder.com/widget-demo.html).
 
 ---
 
@@ -203,7 +208,7 @@ const b = new QuestionnaireRenderer(elB, { questionnaire: qB });
 // answering a never touches b
 ```
 
-See [`widget-demo.html`](widget-demo.html) for a three-widget page (one per
+See the [live demo](https://fhirbuilder.com/widget-demo.html) for a three-widget page (one per
 preview mode) over the same questionnaire.
 
 ---

@@ -1,0 +1,68 @@
+# Build the widget bundle, run the full test suite, and publish a GitHub Release.
+#
+# Versioning: version.json holds { major, minor } (hand-edited). The patch number
+# auto-increments from 0 per major.minor — it is the count of existing
+# `widget-vMAJOR.MINOR.*` tags. So the first release of a minor is x.y.0, the
+# next x.y.1, etc.; bump minor/major in version.json to reset the patch to 0.
+#
+# Trigger: manual (Actions → "Release widget" → Run workflow). The release is
+# only cut when lint + unit + e2e all pass.
+name: Release widget
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-widget
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # all history + tags needed to compute the patch number
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --grep-invert @perf --max-failures=1
+
+      - run: npm run build:widget
+
+      - name: Compute version
+        id: ver
+        run: |
+          MAJOR=$(node -p "require('./version.json').major")
+          MINOR=$(node -p "require('./version.json').minor")
+          git fetch --tags --force
+          PATCH=$(git tag -l "widget-v${MAJOR}.${MINOR}.*" | wc -l | tr -d ' ')
+          TAG="widget-v${MAJOR}.${MINOR}.${PATCH}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Releasing $TAG"
+
+      - name: Checksums
+        run: (cd dist && sha256sum questionnaire-widget.js questionnaire-widget.global.js questionnaire-widget.css > SHA256SUMS.txt)
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.ver.outputs.tag }}" \
+            dist/questionnaire-widget.js \
+            dist/questionnaire-widget.global.js \
+            dist/questionnaire-widget.css \
+            dist/SHA256SUMS.txt \
+            --latest \
+            --title "QuestionnaireRenderer widget ${{ steps.ver.outputs.tag }}" \
+            --notes-file .github/release-notes-widget.md

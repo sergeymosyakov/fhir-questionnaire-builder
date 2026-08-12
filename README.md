@@ -32,7 +32,7 @@ shell, no iframe, no framework.
 
 - **Full guide & API reference:** [WIDGET.md](WIDGET.md)
 - **Download the bundle:** [GitHub Releases](https://github.com/sergeymosyakov/fhir-questionnaire-builder/releases)
-- **Live demo:** [widget-demo.html](widget-demo.html) — three isolated widgets + a custom “Export FHIR R4” button
+- **Live demo:** [fhirbuilder.com/widget-demo.html](https://fhirbuilder.com/widget-demo.html) — three isolated widgets + a custom “Export FHIR R4” button
 
 ---
 

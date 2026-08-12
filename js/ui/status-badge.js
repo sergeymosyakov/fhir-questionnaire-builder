@@ -21,6 +21,7 @@ export class StatusBadge {
     this._bus      = bus;
     this._getStore = getStore || (() => EventState.get(AppEvents.APP_CONTEXT_READY)?.answerStore);
     this._open     = false;
+    this._ac       = new AbortController();
 
     // Announce PASS/FAIL changes to screen readers (a11y).
     this._btn.setAttribute('aria-live', 'polite');
@@ -30,9 +31,12 @@ export class StatusBadge {
       e.stopPropagation();
       this._open = !this._open;
       this._dropdown.style.display = this._open ? 'block' : 'none';
-    });
-    document.addEventListener('click', () => { if (this._open) this._close(); });
+    }, { signal: this._ac.signal });
+    document.addEventListener('click', () => { if (this._open) this._close(); }, { signal: this._ac.signal });
   }
+
+  /** Remove the document-level (outside-click) listener this badge owns. */
+  destroy() { this._ac.abort(); }
 
   update({ visible, ctx }) {
     if (!this._btn) return;

@@ -15,11 +15,12 @@ import { StatusBadge } from '../ui/status-badge.js';
 import * as tooltip from '../ui/tooltip.js';
 
 // Headless chrome — the widget renders no toolbar/menus; the host owns UI.
-const NOOP_CHROME = {
-  search:      { refresh() {} },
-  statusBadge: { update() {} },
-  languageMenu:{ rebuild() {} },
-};
+// Frozen: shared across widgets that opt out of chrome; must stay immutable.
+const NOOP_CHROME = Object.freeze({
+  search:      Object.freeze({ refresh() {} }),
+  statusBadge: Object.freeze({ update() {} }),
+  languageMenu:Object.freeze({ rebuild() {} }),
+});
 
 // Tiny per-instance event emitter (scoped — NOT the global document bus).
 class Emitter {
@@ -64,6 +65,7 @@ export class QuestionnaireRenderer {
     if (config.tooltips) tooltip.init();
 
     const chrome = this._buildChrome(config, bus);
+    this._chrome = chrome;
     mountEl.append(this._lformEl, this._jsonEl);
 
     // Widget defaults: no go-to-builder arrow (there is no builder); Explain off
@@ -188,6 +190,9 @@ export class QuestionnaireRenderer {
     this._session.bus.dispatch(AppEvents.LANGUAGE_CHANGED, { lang });
   }
 
+  /** Update runtime-changeable config. Only `language` takes effect after
+   *  construction; chrome flags (search/validation/explain/tooltips/navButton)
+   *  are construction-time and ignored here. */
   setConfig(partial) {
     Object.assign(this._config, partial);
     if (partial.language !== undefined) this.setLanguage(partial.language);
@@ -196,7 +201,18 @@ export class QuestionnaireRenderer {
   destroy() {
     this._offs?.forEach(off => off());
     this._offs = null;
+    // Tear down every node's own listeners (each node adds a document-level
+    // COPY_TO_NODES listener + session-bus listeners via its AbortController).
+    const walk = nodes => { for (const n of nodes || []) { n.destroy?.(); walk(n.children); } };
+    walk(this._session?.questDoc?.tree);
+    // Chrome instances own document-level listeners (search Ctrl+F, badge click).
+    this._chrome?.search?.destroy?.();
+    this._chrome?.statusBadge?.destroy?.();
+    this._renderer?.destroy?.();
     if (this.mountEl) this.mountEl.innerHTML = '';
-    this._emitter = null;
+    this._renderer = null;
+    this._session  = null;
+    this._chrome   = null;
+    this._emitter  = null;
   }
 }

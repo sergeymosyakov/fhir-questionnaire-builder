@@ -26,8 +26,6 @@ function _yield() {
   return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
 
-let _instance = null;
-
 export class PreviewForm {
   /**
    * @param {object} deps — injected state
@@ -35,7 +33,6 @@ export class PreviewForm {
    * @param {object} deps.answerStore
    */
   constructor(opts = {}) {
-    _instance = this;
     // Session (questDoc + answerStore + bus) — injectable; defaults to the app session.
     this._session = opts.session || defaultSession;
     this._bus = this._session.bus;
@@ -180,6 +177,12 @@ export class PreviewForm {
 
   expandAll() {
     this._bus.dispatch(AppEvents.EXPAND_ALL_PREVIEW);
+  }
+
+  /** Stop pending work. Session-bus listeners are released when the session is
+   *  dereferenced; this just cancels the debounced render timer. */
+  destroy() {
+    clearTimeout(this._renderTimer);
   }
 
   mount() {

@@ -24,20 +24,22 @@ export class PreviewSearch {
     this._matches     = [];
     this._idx         = -1;
     this._previewMode = previewMode;
-    this._bus.on(AppEvents.PREVIEW_MODE_CHANGE, e => { this._previewMode = e.detail.mode; });
+    this._ac          = new AbortController();
+    this._bus.on(AppEvents.PREVIEW_MODE_CHANGE, e => { this._previewMode = e.detail.mode; }, { signal: this._ac.signal });
     this._wire();
   }
 
   _wire() {
-    const el = this._el;
-    el.input.addEventListener('input', () => this._onInput());
+    const el  = this._el;
+    const sig = { signal: this._ac.signal };
+    el.input.addEventListener('input', () => this._onInput(), sig);
     el.input.addEventListener('keydown', e => {
       if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); this._navigate(+1); }
       if (e.key === 'ArrowUp')   { e.preventDefault(); this._navigate(-1); }
       if (e.key === 'Escape')    { el.input.value = ''; this._clear(); }
-    });
-    el.nextBtn.addEventListener('click', () => this._navigate(+1));
-    el.prevBtn.addEventListener('click', () => this._navigate(-1));
+    }, sig);
+    el.nextBtn.addEventListener('click', () => this._navigate(+1), sig);
+    el.prevBtn.addEventListener('click', () => this._navigate(-1), sig);
 
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
@@ -46,8 +48,11 @@ export class PreviewSearch {
         el.input.focus();
         el.input.select();
       }
-    });
+    }, sig);
   }
+
+  /** Remove the document-level (Ctrl+F) + bus listeners this search owns. */
+  destroy() { this._ac.abort(); }
 
   // Called by preview-form.js after every re-render so stale references update.
   refresh() {

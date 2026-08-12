@@ -8243,7 +8243,6 @@ function _yield() {
   }
   return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
-var _instance = null;
 var PreviewForm = class {
   /**
    * @param {object} deps — injected state
@@ -8251,7 +8250,6 @@ var PreviewForm = class {
    * @param {object} deps.answerStore
    */
   constructor(opts = {}) {
-    _instance = this;
     this._session = opts.session || defaultSession;
     this._bus = this._session.bus;
     this._rc = opts.rc || _rc;
@@ -8383,6 +8381,11 @@ var PreviewForm = class {
   }
   expandAll() {
     this._bus.dispatch(AppEvents.EXPAND_ALL_PREVIEW);
+  }
+  /** Stop pending work. Session-bus listeners are released when the session is
+   *  dereferenced; this just cancels the debounced render timer. */
+  destroy() {
+    clearTimeout(this._renderTimer);
   }
   mount() {
     const elements = {
@@ -8783,14 +8786,16 @@ var PreviewSearch = class {
     this._matches = [];
     this._idx = -1;
     this._previewMode = previewMode;
+    this._ac = new AbortController();
     this._bus.on(AppEvents.PREVIEW_MODE_CHANGE, (e) => {
       this._previewMode = e.detail.mode;
-    });
+    }, { signal: this._ac.signal });
     this._wire();
   }
   _wire() {
     const el = this._el;
-    el.input.addEventListener("input", () => this._onInput());
+    const sig = { signal: this._ac.signal };
+    el.input.addEventListener("input", () => this._onInput(), sig);
     el.input.addEventListener("keydown", (e) => {
       if (e.key === "ArrowDown" || e.key === "Enter") {
         e.preventDefault();
@@ -8804,9 +8809,9 @@ var PreviewSearch = class {
         el.input.value = "";
         this._clear();
       }
-    });
-    el.nextBtn.addEventListener("click", () => this._navigate(1));
-    el.prevBtn.addEventListener("click", () => this._navigate(-1));
+    }, sig);
+    el.nextBtn.addEventListener("click", () => this._navigate(1), sig);
+    el.prevBtn.addEventListener("click", () => this._navigate(-1), sig);
     document.addEventListener("keydown", (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "f") {
         if (el.searchWrap && el.searchWrap.style.display === "none") return;
@@ -8814,7 +8819,11 @@ var PreviewSearch = class {
         el.input.focus();
         el.input.select();
       }
-    });
+    }, sig);
+  }
+  /** Remove the document-level (Ctrl+F) + bus listeners this search owns. */
+  destroy() {
+    this._ac.abort();
   }
   // Called by preview-form.js after every re-render so stale references update.
   refresh() {
@@ -8941,16 +8950,21 @@ var StatusBadge = class {
     this._bus = bus;
     this._getStore = getStore || (() => EventState.get(AppEvents.APP_CONTEXT_READY)?.answerStore);
     this._open = false;
+    this._ac = new AbortController();
     this._btn.setAttribute("aria-live", "polite");
     this._btn.setAttribute("aria-atomic", "true");
     this._btn.addEventListener("click", (e) => {
       e.stopPropagation();
       this._open = !this._open;
       this._dropdown.style.display = this._open ? "block" : "none";
-    });
+    }, { signal: this._ac.signal });
     document.addEventListener("click", () => {
       if (this._open) this._close();
-    });
+    }, { signal: this._ac.signal });
+  }
+  /** Remove the document-level (outside-click) listener this badge owns. */
+  destroy() {
+    this._ac.abort();
   }
   update({ visible, ctx }) {
     if (!this._btn) return;
@@ -9183,14 +9197,14 @@ if (typeof document !== "undefined") {
 }
 
 // js/renderer/index.js
-var NOOP_CHROME = {
-  search: { refresh() {
-  } },
-  statusBadge: { update() {
-  } },
-  languageMenu: { rebuild() {
-  } }
-};
+var NOOP_CHROME = Object.freeze({
+  search: Object.freeze({ refresh() {
+  } }),
+  statusBadge: Object.freeze({ update() {
+  } }),
+  languageMenu: Object.freeze({ rebuild() {
+  } })
+});
 var Emitter = class {
   constructor() {
     this._map = /* @__PURE__ */ new Map();
@@ -9225,6 +9239,7 @@ var QuestionnaireRenderer = class {
     this._jsonEl.style.display = "none";
     if (config.tooltips) init3();
     const chrome = this._buildChrome(config, bus);
+    this._chrome = chrome;
     mountEl.append(this._lformEl, this._jsonEl);
     const rc = createRenderCtx();
     rc.showNavBtn = !!config.navButton;
@@ -9341,6 +9356,9 @@ var QuestionnaireRenderer = class {
   setLanguage(lang) {
     this._session.bus.dispatch(AppEvents.LANGUAGE_CHANGED, { lang });
   }
+  /** Update runtime-changeable config. Only `language` takes effect after
+   *  construction; chrome flags (search/validation/explain/tooltips/navButton)
+   *  are construction-time and ignored here. */
   setConfig(partial) {
     Object.assign(this._config, partial);
     if (partial.language !== void 0) this.setLanguage(partial.language);
@@ -9348,7 +9366,20 @@ var QuestionnaireRenderer = class {
   destroy() {
     this._offs?.forEach((off) => off());
     this._offs = null;
+    const walk2 = (nodes) => {
+      for (const n of nodes || []) {
+        n.destroy?.();
+        walk2(n.children);
+      }
+    };
+    walk2(this._session?.questDoc?.tree);
+    this._chrome?.search?.destroy?.();
+    this._chrome?.statusBadge?.destroy?.();
+    this._renderer?.destroy?.();
     if (this.mountEl) this.mountEl.innerHTML = "";
+    this._renderer = null;
+    this._session = null;
+    this._chrome = null;
     this._emitter = null;
   }
 };
