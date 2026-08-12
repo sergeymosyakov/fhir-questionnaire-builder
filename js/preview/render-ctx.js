@@ -50,9 +50,10 @@ export function createRenderCtx() {
     // translations store — same reference as questDoc.translations
     translations:   null,
 
-    // Surface-configurable chrome (default off; app shell opts in):
-    showNavBtn:  false, // '↗' go-to-builder arrow on preview rows
-    showExplain: false, // clickable Explain on calc badges / condition hints
+    // Surface-configurable chrome. Default = builder-present (the app shell);
+    // the embedded widget always overrides both from its config (opt-in).
+    showNavBtn:  true, // '↗' go-to-builder arrow on preview rows
+    showExplain: true, // clickable Explain on calc badges / condition hints
   };
 }
 

@@ -52,7 +52,7 @@ class FhirpathConsole {
 
     this._input = document.createElement('textarea');
     this._input.className = 'fhirpath-input';
-    this._input.rows = 2;
+    this._input.rows = 3;
     this._input.spellcheck = false;
     this._input.dataset.testid = 'fhirpath-input';
     this._input.setAttribute('aria-label', 'FHIRPath expression');

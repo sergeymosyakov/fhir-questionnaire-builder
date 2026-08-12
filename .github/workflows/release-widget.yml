@@ -82,7 +82,7 @@ jobs:
             dist/questionnaire-widget.css \
             dist/SHA256SUMS.txt \
             --latest \
-            --title "QuestionnaireRenderer widget $TAG" \
+            --title "QuestionnaireRenderer widget ${{ steps.ver.outputs.semver }}" \
             --notes-file /tmp/notes.md
 
       # Also publish the bundle to GitHub Packages (npm registry) so it shows up

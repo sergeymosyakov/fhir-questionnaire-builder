@@ -9,8 +9,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "lint": "eslint js/ tests/",
-    "build:widget:js": "esbuild js/renderer/index.js --bundle --format=esm --outfile=dist/questionnaire-widget.js && esbuild js/renderer/index.js --bundle --format=iife --global-name=FhirQuestionnaireWidget --outfile=dist/questionnaire-widget.global.js",
-    "build:widget:css": "esbuild css/widget.css --bundle --outfile=dist/questionnaire-widget.css",
+    "build:widget:js": "esbuild js/renderer/index.js --bundle --minify --format=esm --outfile=dist/questionnaire-widget.js && esbuild js/renderer/index.js --bundle --minify --format=iife --global-name=FhirQuestionnaireWidget --outfile=dist/questionnaire-widget.global.js",
+    "build:widget:css": "esbuild css/widget.css --bundle --minify --outfile=dist/questionnaire-widget.css",
     "build:widget": "npm run build:widget:js && npm run build:widget:css",
     "build:widget:watch": "esbuild js/renderer/index.js --bundle --format=esm --outfile=dist/questionnaire-widget.js --watch"
   },

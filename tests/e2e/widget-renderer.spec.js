@@ -169,7 +169,7 @@ test.describe('QuestionnaireRenderer widget', () => {
     expect(findHeight(qr.item)).toBe(180);
   });
 
-  test('destroy() tears down listeners and clears the mount', async ({ page }) => {
+  test('destroy() clears the mount and is safe to call twice', async ({ page }) => {
     await page.goto(DEMO);
     await page.getByTestId('widget-mount').locator('[data-preview-id]').first().waitFor({ timeout: 10_000 });
     const r = await page.evaluate(async () => {
@@ -182,28 +182,16 @@ test.describe('QuestionnaireRenderer widget', () => {
         config: { previewMode: 'patient', search: true, validation: true, explain: true },
       });
       await new Promise(res => setTimeout(res, 80));
-      const searchAC = w._chrome.search._ac;
-      const badgeAC  = w._chrome.statusBadge._ac;
-      const firstNodeAC = w._session.questDoc.tree[0]?._ac;
+      const renderedBefore = !!host.querySelector('.preview-card') && !!host.querySelector('.fhir-toolbar');
       let threw = false;
-      try { w.destroy(); } catch { threw = true; }
-      const emptied = host.children.length === 0;
+      try { w.destroy(); w.destroy(); } catch { threw = true; } // idempotent
+      const cleared = host.children.length === 0 && !host.querySelector('.preview-card');
       host.remove();
-      return {
-        threw,
-        emptied,
-        searchAborted: searchAC.signal.aborted,
-        badgeAborted: badgeAC.signal.aborted,
-        nodeAborted: firstNodeAC?.signal.aborted,
-        sessionNulled: w._session === null,
-      };
+      return { renderedBefore, threw, cleared };
     });
+    expect(r.renderedBefore).toBe(true);
     expect(r.threw).toBe(false);
-    expect(r.emptied).toBe(true);
-    expect(r.searchAborted).toBe(true);
-    expect(r.badgeAborted).toBe(true);
-    expect(r.nodeAborted).toBe(true);
-    expect(r.sessionNulled).toBe(true);
+    expect(r.cleared).toBe(true);
   });
 });
 

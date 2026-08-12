@@ -167,6 +167,7 @@ body {
   color: var(--s-muted);
 }
 .s-validator-url {
+  grid-column: 3 / span 2;
   font-family: monospace;
   font-size: 12px;
   padding: 4px 8px;
@@ -183,6 +184,21 @@ body {
 }
 
 /* ── Provider badge ──────────────────────────────────────────────────────── */
+.s-provider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.s-provider-row:last-child { border-bottom: none; }
+.s-provider-rank {
+  font-size: 11px;
+  color: #aaa;
+  width: 20px;
+  text-align: right;
+  flex-shrink: 0;
+}
 .s-provider-badge {
   display: inline-block;
   font-size: 10px;

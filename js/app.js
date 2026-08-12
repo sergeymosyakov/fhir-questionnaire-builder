@@ -14,7 +14,6 @@ import './ui/modals/obs-export-modal.js';
 import { UndoRedo } from './ui/undo-redo.js';
 import './builder/index.js';
 import { PreviewForm } from './preview-form.js';
-import { _rc } from './preview/render-ctx.js';
 import { languageMenu } from './ui/header-actions.js';
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
@@ -51,9 +50,6 @@ new PatientProfile();
 // ── Self-wiring singletons — each subscribes to APP_CONTEXT_READY ─────────
 new QRAnswersManager();
 new QuestionnaireLoader();
-// App shell opts into the go-to-builder arrow + clickable Explain (widget defaults off).
-_rc.showNavBtn  = true;
-_rc.showExplain = true;
 new PreviewForm({ chrome: { search, statusBadge, languageMenu }, progress });
 TranslateModal.configure({ questDoc });
 

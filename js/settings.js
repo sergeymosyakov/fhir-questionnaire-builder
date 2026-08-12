@@ -112,7 +112,6 @@ function _renderValidators(validators) {
 
     const urlEl = document.createElement('span');
     urlEl.className = 's-validator-url';
-    urlEl.style.gridColumn = '3 / span 2';
     urlEl.textContent = v.url || '(built-in)';
 
     row.append(typeEl, nameEl, urlEl);
@@ -127,11 +126,10 @@ function _renderProviders() {
   wrap.innerHTML = '';
   providers.forEach((p, i) => {
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f0f0f0;';
-    if (i === providers.length - 1) row.style.borderBottom = 'none';
+    row.className = 's-provider-row';
 
     const rank = document.createElement('span');
-    rank.style.cssText = 'font-size:11px;color:#aaa;width:20px;text-align:right;flex-shrink:0;';
+    rank.className = 's-provider-rank';
     rank.textContent = '#' + (i + 1);
 
     const badge = document.createElement('span');

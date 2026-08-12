@@ -12,7 +12,7 @@ injection.
 ## Modularity & file size
 
 - **Modularity** — new UI widget or control → `js/ui/<name>.js`; new CSS concern → `css/<name>.css` + `<link>` in index.html. Do not add logically separate code into existing modules.
-- **500-line rule** — a file exceeding 500 lines is a signal that it needs logical splitting. Before adding more code to an oversized file, identify natural seams (independent concerns, repeated patterns, composable units) and extract them. Applies to JS modules, test specs, and CSS files alike.
+- **500-line guideline** — ideally a file stays under ~500 lines, but this is a **soft guideline, not a show-stopper**. Length alone is not a reason to split. Split only when there is a genuine natural seam (independent concerns, repeated patterns, composable units) that makes the code clearer — never purely to hit a line count. Applies to JS modules, test specs, and CSS files alike.
 - **UI behavior rule** — any self-contained UI behavior (resize, toggle, autosave, undo/redo, drag-and-drop, scroll restoration, etc.) that manages its own DOM elements and internal state must be extracted into a dedicated class in `js/ui/<name>.js`. No inline `{ ... }` blocks or imperative top-level code in `app.js` for behaviors that have a clear class boundary. The class: creates or receives its mount/elements in the constructor; wires all its own event handlers; communicates cross-module via `AppEvents` or injected callbacks only.
 
 ## OOP / DRY / DI
