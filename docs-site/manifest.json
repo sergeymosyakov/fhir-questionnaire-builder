@@ -32,6 +32,7 @@
         { "id": "populate", "title": "Fill from a FHIR server ($populate)", "file": "populate.md" },
         { "id": "definition-extract", "title": "Definition-based extraction", "file": "definition-extract.md" },
         { "id": "resolve-profile", "title": "Resolve from profile", "file": "resolve-profile.md" },
+        { "id": "embed-renderer", "title": "Embed the renderer", "file": "embed-renderer.md" },
         { "id": "redcap", "title": "REDCap import/export", "file": "redcap.md" },
         { "id": "cloud-save", "title": "Cloud save", "file": "cloud-save.md" }
       ]
