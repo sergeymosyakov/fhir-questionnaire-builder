@@ -22,9 +22,9 @@ its default.
   some external servers.
 - **NLM Clinical Tables API** — an endpoint for searching clinical terminology
   (LOINC, SNOMED, ICD); it is CORS-enabled so no proxy is required.
-- **Translation API** — the endpoint used by [Translate](translate.md). Defaults
-  to the free, key-less Google `gtx` endpoint; can point at a compatible
-  self-hosted proxy.
+- **Translation API** — the machine-translation provider used by
+  [Translate](translate.md): Google `gtx` (free, no key), DeepL, LibreTranslate
+  or OpenAI. Pick a provider, set its endpoint, and (for DeepL/OpenAI) an API key.
 
 ## Validators
 

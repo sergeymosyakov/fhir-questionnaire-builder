@@ -13,9 +13,11 @@ a zero-backend browser app.
   one, use a server that supports `$transform`. See [Extraction](extraction.md).
 - **`atable` answer-table rendering** — rendering a group as a repeating answer
   table (`itemControl = atable`) is not yet implemented.
-- **Translation providers** — machine translation currently supports only
-  Google-`gtx`-compatible endpoints; other providers (DeepL, LibreTranslate, …)
-  are not yet selectable. See [Translate](translate.md).
+- **Translation providers** — machine translation supports Google `gtx` (free,
+  no key), DeepL, LibreTranslate and OpenAI, selectable in
+  [Settings](settings.md). Caveats for a browser-only app: provider API keys are
+  stored client-side, and DeepL has no browser CORS so it needs a configured CORS
+  proxy. See [Translate](translate.md).
 - **Sub-questionnaires** — modular / sub-questionnaire resolution needs a FHIR
   server and is out of scope until server integration exists.
 - **Instance-level profile conformance** — the builder can derive an item's type

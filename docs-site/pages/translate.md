@@ -6,7 +6,7 @@ round-trip through import/export like any other FHIR data.
 
 ## Translating
 
-Open **Tools ▾ → Translate questionnaire…**:
+Open **Settings ▾ → Translate questionnaire…**:
 
 1. **Pick a target language** from the list.
 2. Click **Translate**. Every translatable string — item text, the questionnaire
@@ -20,9 +20,9 @@ Open **Tools ▾ → Translate questionnaire…**:
 Machine translation is a **starting point** — always review medical wording before
 using a translated form for real.
 
-The translation service is the unofficial Google Translate endpoint by default and
-requires no API key; you can point it at a compatible self-hosted endpoint in
-[Settings](settings.md).
+The default provider is the unofficial Google Translate endpoint (free, no API
+key). In [Settings](settings.md) you can switch the provider to DeepL,
+LibreTranslate or OpenAI, and set the endpoint and API key each one needs.
 
 ## Switching language
 

@@ -56,3 +56,91 @@ describe('translate-api endpoint configuration', () => {
     expect(fetchMock.mock.calls[0][0]).toContain('tl=fr');
   });
 });
+
+// ── Provider dispatch ─────────────────────────────────────────────────────────
+describe('translate-api provider dispatch', () => {
+  afterEach(() => { vi.restoreAllMocks(); });
+
+  function configure(overrides) {
+    const provider = new MapProvider();
+    for (const [k, v] of Object.entries(overrides)) provider.set(k, v);
+    serverConfig.register(provider); // highest priority
+  }
+
+  it('DeepL: POSTs form data via the CORS proxy with the auth key', async () => {
+    configure({
+      [CONFIG_KEYS.TRANSLATE_PROVIDER]: 'deepl',
+      [CONFIG_KEYS.TRANSLATE_API_KEY]:  'secret',
+      [CONFIG_KEYS.TRANSLATE_API]:       '',
+      [CONFIG_KEYS.CORS_PROXY]:          'https://proxy.example.com',
+    });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true, json: async () => ({ translations: [{ text: 'hola' }] }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const out = await translateBatch(['hello'], 'es');
+
+    expect(out).toEqual(['hola']);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toContain('https://proxy.example.com?url=');
+    expect(url).toContain('deepl');
+    expect(init.method).toBe('POST');
+    expect(init.headers.Authorization).toBe('DeepL-Auth-Key secret');
+    expect(init.body).toContain('text=hello');
+    expect(init.body).toContain('target_lang=ES');
+  });
+
+  it('DeepL: throws a helpful error when no API key is set', async () => {
+    configure({
+      [CONFIG_KEYS.TRANSLATE_PROVIDER]: 'deepl',
+      [CONFIG_KEYS.TRANSLATE_API_KEY]:  '',
+    });
+    vi.stubGlobal('fetch', vi.fn());
+    await expect(translateBatch(['hello'], 'es')).rejects.toThrow(/DeepL requires an API key/);
+  });
+
+  it('LibreTranslate: POSTs JSON to the configured endpoint', async () => {
+    configure({
+      [CONFIG_KEYS.TRANSLATE_PROVIDER]: 'libre',
+      [CONFIG_KEYS.TRANSLATE_API]:       'https://libre.example.com/translate',
+      [CONFIG_KEYS.TRANSLATE_API_KEY]:  '',
+      [CONFIG_KEYS.CORS_PROXY]:          '',
+    });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true, json: async () => ({ translatedText: ['bonjour'] }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const out = await translateBatch(['hello'], 'fr');
+
+    expect(out).toEqual(['bonjour']);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://libre.example.com/translate');
+    expect(init.method).toBe('POST');
+    const body = JSON.parse(init.body);
+    expect(body).toMatchObject({ q: ['hello'], target: 'fr', format: 'text' });
+  });
+
+  it('OpenAI: parses the JSON translations object from the completion', async () => {
+    configure({
+      [CONFIG_KEYS.TRANSLATE_PROVIDER]: 'openai',
+      [CONFIG_KEYS.TRANSLATE_API_KEY]:  'sk-test',
+      [CONFIG_KEYS.TRANSLATE_API]:       '',
+      [CONFIG_KEYS.CORS_PROXY]:          '',
+    });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: '{"translations":["hallo"]}' } }] }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const out = await translateBatch(['hello'], 'de');
+
+    expect(out).toEqual(['hallo']);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://api.openai.com/v1/chat/completions');
+    expect(init.headers.Authorization).toBe('Bearer sk-test');
+  });
+});
+

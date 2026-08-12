@@ -1,5 +1,5 @@
 // ── TranslateModal ────────────────────────────────────────────────────────────
-// Tools ▾ → Translate questionnaire…
+// Settings ▾ → Translate questionnaire…
 //
 // Flow:
 //   1. Language picker (custom-select) + Translate button

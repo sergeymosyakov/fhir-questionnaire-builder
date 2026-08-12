@@ -138,6 +138,32 @@ test.describe('Settings page', () => {
     expect(val).toBe('https://my-translate-proxy.example.com/translate');
   });
 
+  test('provider picker toggles the API key field and persists', async ({ page }) => {
+    await gotoSettings(page);
+
+    const trigger = page.getByTestId('translate-provider-select');
+    await expect(trigger).toBeVisible();
+    // Default gtx has no key → key field hidden
+    await expect(page.locator('#translateKeyField')).toBeHidden();
+
+    // Pick DeepL → key field appears
+    await trigger.click();
+    await page.locator('.csel-drop .oc-opt[data-val="deepl"]').click();
+    await expect(trigger).toHaveAttribute('data-value', 'deepl');
+    await expect(page.locator('#translateKeyField')).toBeVisible();
+
+    // Enter a key and save
+    await page.locator('#translateApiKeyInput').fill('secret-key');
+    await page.locator('#saveBtn').click();
+
+    // Reload → provider selection and key persist
+    await page.reload();
+    await page.waitForSelector('#termServerInput');
+    await expect(page.getByTestId('translate-provider-select')).toHaveAttribute('data-value', 'deepl');
+    await expect(page.locator('#translateKeyField')).toBeVisible();
+    expect(await page.locator('#translateApiKeyInput').inputValue()).toBe('secret-key');
+  });
+
   test('settings link opens settings.html from main app via \u22ef menu', async ({ page }) => {    await page.goto('/');
     await page.waitForSelector('[data-testid="add-root-group-btn"]');
     // settings-page-btn is inside the ⋯ More menu

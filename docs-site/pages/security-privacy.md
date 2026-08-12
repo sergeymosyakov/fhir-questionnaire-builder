@@ -18,7 +18,8 @@ External requests happen **only for features you configure or trigger**:
 
 - Terminology expansion, `$populate`, and external validation call the servers you
   set in [Settings](settings.md).
-- Translation calls the configured translation endpoint (Google `gtx` by default).
+- Translation calls the configured provider (Google `gtx` by default; optionally
+  DeepL, LibreTranslate or OpenAI). Provider API keys are stored client-side.
 - A CORS proxy, when configured, forwards requests only to allowlisted FHIR
   servers and stores no data.
 

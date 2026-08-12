@@ -8,6 +8,8 @@ import {
 } from './fhir/server-config.js';
 import * as auth       from './auth/auth.js';
 import { loadSettings, saveSettings, supabaseProvider } from './fhir/server-config-cloud.js';
+import { createCustomSelect } from './ui/custom-select.js';
+import { TRANSLATE_PROVIDERS, getProvider } from './fhir/translate-providers.js';
 
 // ── Defaults (fallback labels shown in placeholders) ─────────────────────────
 const DEFAULTS = {
@@ -17,7 +19,46 @@ const DEFAULTS = {
   [CONFIG_KEYS.NLM_API_BASE]:       'https://clinicaltables.nlm.nih.gov/api',
   [CONFIG_KEYS.SDC_SERVER]:          '',
   [CONFIG_KEYS.TRANSLATE_API]:      'https://translate.googleapis.com/translate_a/single',
+  [CONFIG_KEYS.TRANSLATE_PROVIDER]: 'gtx',
+  [CONFIG_KEYS.TRANSLATE_API_KEY]:  '',
 };
+
+// ── Translation provider picker ──────────────────────────────────────────────
+let _translateProvider = 'gtx';
+let _provSelect = null;
+
+function _applyProviderUI(id) {
+  const p = getProvider(id);
+  const keyField = _el('translateKeyField');
+  if (keyField) keyField.hidden = !p.keyLabel;
+  const keyLabel = _el('translateApiKeyLabel');
+  if (keyLabel) keyLabel.textContent = p.keyLabel || 'API Key';
+  const ep = _el('translateApiInput');
+  if (ep) ep.placeholder = p.endpointPlaceholder || '';
+  const hint = _el('translateEndpointHint');
+  if (hint) hint.textContent = p.hint;
+}
+
+function _renderTranslateProvider() {
+  const mount = _el('translateProviderMount');
+  if (!mount) return;
+  _translateProvider = serverConfig.get(CONFIG_KEYS.TRANSLATE_PROVIDER) || 'gtx';
+  _provSelect = createCustomSelect({
+    items: TRANSLATE_PROVIDERS.map(p => ({ value: p.id, label: p.label })),
+    value: _translateProvider,
+    testid: 'translate-provider-select',
+    ariaLabel: 'Translation provider',
+    onChange: (v) => { _translateProvider = v; _applyProviderUI(v); },
+  });
+  mount.appendChild(_provSelect.el);
+  _applyProviderUI(_translateProvider);
+}
+
+function _collectProvider() {
+  const val = _translateProvider === 'gtx' ? null : _translateProvider;
+  _lsProvider.set(CONFIG_KEYS.TRANSLATE_PROVIDER, val);
+  if (_currentUser) supabaseProvider.set(CONFIG_KEYS.TRANSLATE_PROVIDER, val);
+}
 
 // ── Register providers (same order as app.js but settings page is standalone) ─
 const _lsProvider = new LocalStorageConfigProvider();
@@ -197,11 +238,15 @@ function _refreshAllFields() {
     [CONFIG_KEYS.NLM_API_BASE]:       'nlmApiInput',
     [CONFIG_KEYS.SDC_SERVER]:         'sdcServerInput',
     [CONFIG_KEYS.TRANSLATE_API]:      'translateApiInput',
+    [CONFIG_KEYS.TRANSLATE_API_KEY]:  'translateApiKeyInput',
   };
   for (const [key, inputId] of Object.entries(map)) {
     const inp = _el(inputId);
     if (inp) inp.value = serverConfig.get(key) || '';
   }
+  _translateProvider = serverConfig.get(CONFIG_KEYS.TRANSLATE_PROVIDER) || 'gtx';
+  _provSelect?.setValue(_translateProvider);
+  _applyProviderUI(_translateProvider);
 }
 
 _el('saveBtn').addEventListener('click', () => {
@@ -211,6 +256,8 @@ _el('saveBtn').addEventListener('click', () => {
   _collectField('nlmApiInput',     CONFIG_KEYS.NLM_API_BASE);
   _collectField('sdcServerInput',  CONFIG_KEYS.SDC_SERVER);
   _collectField('translateApiInput', CONFIG_KEYS.TRANSLATE_API);
+  _collectField('translateApiKeyInput', CONFIG_KEYS.TRANSLATE_API_KEY);
+  _collectProvider();
   // Re-sync all reset button states and input custom styles
   document.querySelectorAll('[data-reset]').forEach(btn => {
     const key = btn.dataset.reset;
@@ -222,6 +269,7 @@ _el('saveBtn').addEventListener('click', () => {
       [CONFIG_KEYS.NLM_API_BASE]:       'nlmApiInput',
       [CONFIG_KEYS.SDC_SERVER]:         'sdcServerInput',
       [CONFIG_KEYS.TRANSLATE_API]:      'translateApiInput',
+      [CONFIG_KEYS.TRANSLATE_API_KEY]:  'translateApiKeyInput',
     };
     const inp = _el(map[key]);
     if (inp) inp.classList.toggle('is-custom', _lsProvider.get(key) != null);
@@ -245,6 +293,8 @@ async function init() {
   _wireField('nlmApiInput',     null, CONFIG_KEYS.NLM_API_BASE);
   _wireField('sdcServerInput',  null, CONFIG_KEYS.SDC_SERVER);
   _wireField('translateApiInput', null, CONFIG_KEYS.TRANSLATE_API);
+  _wireField('translateApiKeyInput', null, CONFIG_KEYS.TRANSLATE_API_KEY);
+  _renderTranslateProvider();
 
   // Wire reset buttons by data-reset attribute
   document.querySelectorAll('[data-reset]').forEach(btn => {
@@ -260,6 +310,7 @@ async function init() {
         [CONFIG_KEYS.NLM_API_BASE]:       'nlmApiInput',
         [CONFIG_KEYS.SDC_SERVER]:         'sdcServerInput',
         [CONFIG_KEYS.TRANSLATE_API]:      'translateApiInput',
+        [CONFIG_KEYS.TRANSLATE_API_KEY]:  'translateApiKeyInput',
       };
       const inp = _el(map[key]);
       if (inp) {

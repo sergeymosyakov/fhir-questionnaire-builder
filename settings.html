@@ -94,12 +94,22 @@
     <!-- ── Translation API ──────────────────────────────────────────────── -->
     <div class="s-card">
       <div class="s-card-title">Translation API</div>
-      <div class="s-card-desc">Endpoint used to auto-translate questionnaire text (Translate modal). Defaults to the unofficial Google Translate <code>gtx</code> endpoint (free, no key). Point this at a self-hosted <code>gtx</code>-compatible proxy if needed.</div>
+      <div class="s-card-desc">Machine-translation provider used by the Translate modal. API keys are stored in your browser and synced to your account &mdash; treat them as sensitive, since browser-side calls expose the key to the target service.</div>
+      <div class="s-field">
+        <label class="s-label">Provider</label>
+        <div id="translateProviderMount"></div>
+      </div>
       <div class="s-field">
         <label class="s-label" for="translateApiInput">Endpoint URL</label>
         <input id="translateApiInput" class="s-input" type="url" placeholder="https://translate.googleapis.com/translate_a/single" autocomplete="off" spellcheck="false">
         <button class="s-reset-btn" data-reset="translateApiUrl" disabled>Reset</button>
-        <span class="s-hint">Query params (<code>client=gtx&amp;sl&amp;tl&amp;dt=t&amp;q</code>) are appended automatically. Leave blank to use the default Google endpoint.</span>
+        <span class="s-hint" id="translateEndpointHint">Leave blank to use the provider default.</span>
+      </div>
+      <div class="s-field" id="translateKeyField">
+        <label class="s-label" for="translateApiKeyInput" id="translateApiKeyLabel">API Key</label>
+        <input id="translateApiKeyInput" class="s-input" type="password" autocomplete="off" spellcheck="false">
+        <button class="s-reset-btn" data-reset="translateApiKey" disabled>Reset</button>
+        <span class="s-hint">Stored in your browser and cloud account. Never sent anywhere except the chosen provider.</span>
       </div>
     </div>
 
