@@ -1,0 +1,111 @@
+# Widget Extraction Plan — Core module + Renderer widget
+
+> **Goal:** Split the app into three layers **without duplication**, in-place (transform, not fork):
+> - **Core** (`js/core/*`) — single pluggable module, no DOM, instantiable, no global singletons. Imported by BOTH the builder app AND the renderer widget.
+> - **Renderer** (`js/renderer/*`) — the right side as `QuestionnaireRenderer(mountEl, {questionnaire, response, config})`; in-page, multi-instance, isolated, **no menus** (all behavior via config/API).
+> - **Builder app** (`js/builder/*`, `js/app.js`, `index.html`) — left side + shell; consumes Core and dogfoods the Renderer for its right panel.
+>
+> Every phase keeps the app green: `npm run lint` (0 errors) + `npx vitest run` (1653+ pass) + relevant e2e.
+
+## Locked decisions
+- **In-page true widget**, multiple isolated instances per page.
+- **Both interactive-fill and read-only** via `config.readOnly`.
+- Widget covers validation/PASS-FAIL, calculations, language switch, view-options (linkId/prefix/hidden), preview-mode, search, Fill-from-server ($populate) — **but no dropdown menus**; only configurable options in `config`. Host builds its own UI.
+- **Core is a shared module** — the widget must not duplicate core logic.
+- **Bundler now** (esbuild, Phase 0).
+- `uiStr`/`render-ctx` → Renderer by default; anything used outside preview/renderer → Core (decide per-symbol by actual usage).
+- Names: `QuestionnaireRenderer`, `js/renderer/`, `js/core/`.
+- Legacy `questDoc`/`answerStore` proxy shims allowed as a temporary migration bridge (removed by Phase E).
+
+## Public contract (in-page)
+
+```js
+import { QuestionnaireRenderer } from './js/renderer/index.js';
+const w = new QuestionnaireRenderer(mountEl, {
+  questionnaire,                 // FHIR Questionnaire JSON (required)
+  response,                      // optional QR JSON (initial answers)
+  config: {
+    readOnly, language, previewMode,
+    viewPrefs: { showLinkId, showPrefix, showHidden },
+    features: { validation, calculations, populate, search, languageSwitcher },
+    terminology: { server, corsProxy }, fhirBaseUrl,
+  },
+});
+w.on('ready' | 'response-changed' | 'validated' | 'language-changed', cb);
+w.getResponse(); w.setResponse(qr); w.setLanguage(l);
+w.setConfig(partial); w.validate(); w.destroy();
+```
+
+## Progress tracker
+
+| Phase | Description | Status | Verified (lint/vitest/e2e) | Notes |
+|-------|-------------|--------|----------------------------|-------|
+| 0 | Bundler setup (esbuild): `build:widget` JS + `build:widget:css`; bundle vendored libs into the widget; app stays raw-ESM | ⬜ Not started | — | dist/ gitignored (confirm at F) |
+| A | Core skeleton + event-bus de-globalization (`js/core/events/bus.js`, per-bus `EventState`, `defaultBus` bridges document) | ⬜ Not started | — | behavior identical (single bus) |
+| B | `QuestionnaireSession` container + factories; `eval.js` DI; legacy singleton proxy shims | ⬜ Not started | — | — |
+| C | Node layer split: preview-only core nodes + builder extension (buildBuilder/dnd out of `js/nodes/*`); per family base→group→item→choice→leaf | ⬜ Not started | — | biggest phase |
+| D | `PreviewForm` → `js/renderer/preview-renderer.js` + public `QuestionnaireRenderer`; config-driven chrome, no menus; `PreviewForm` = thin adapter | ⬜ Not started | — | app visually identical |
+| E | Multi-instance isolation: per-session bus + config provider; drop document bridge for widget path; two-widgets-on-one-page e2e | ⬜ Not started | — | definitive isolation proof |
+| F | Packaging: `js/renderer/index.js` entry, `widget-demo.html`, docs (CONTEXT / docs-site "Embed the renderer" / ROADMAP) | ⬜ Not started | — | — |
+
+_Status legend: ⬜ Not started · 🟨 In progress · ✅ Done_
+
+## Key files to touch
+
+- `js/preview-form.js` — render engine → extract to `js/renderer/preview-renderer.js`; drop shell-mount + global-bus deps.
+- `js/nodes/base-node.js`, `js/nodes/group-node.js`, `js/nodes/item-node.js` — split preview/builder; remove builder imports.
+- `js/preview/render-ctx.js` — `_rc` DI surface (move to renderer).
+- `js/fhir/quest-document.js`, `js/answer-store.js` — singletons → session members.
+- `js/events.js` — global bus / `EventState` → per-bus.
+- `js/eval.js` — remove direct `answerStore` singleton import.
+- `js/app.js` — create one session; mount `QuestionnaireRenderer` on the right panel.
+
+## Scope
+
+- **Included:** Core module, Renderer widget, in-page multi-instance, config-driven chrome, dogfood in app, esbuild bundle.
+- **Excluded (unchanged, stay in shell):** builder authoring UX, export/REDCap, translate modal, auth/cloud, settings page.
+
+## Findings that shaped the plan
+
+- Right side = `PreviewForm` + `js/nodes/*` over singletons `questDoc`/`answerStore`, DI via `_rc`, on the **global `document` event bus** + `EventState` cache + window globals (`fhirpath`, `fhirpath_r4_model`, `DOMPurify`, `marked`).
+- Core compute mostly pure (`calc`, `dep-graph`, `form-checks`, `qr-builder`, `qr-import`); impure spots: `eval.js` imports the `answerStore` singleton; `fhirModel` = `window.fhirpath_r4_model` accessor (stateless).
+- Hardest seam = `js/nodes/*`: same classes do `renderPreview` (right) AND `buildBuilder` (left) + import `builder/dnd.js`.
+- Isolation blockers: global bus, global `EventState`, singletons, `eval.js` direct singleton import.
+- No bundler today; raw ESM + global `<script>` libs + scattered CSS; embedding precedent = `#embedded` iframe.
+
+## Phase detail
+
+### Phase 0 — Bundler setup (esbuild)
+- Add esbuild devDep + npm scripts: `build:widget` (bundle future `js/renderer/index.js` → `dist/questionnaire-widget.js`), `build:widget:css` (concat/minify the preview CSS manifest → `dist/questionnaire-widget.css`), plus a watch script for dev.
+- Vendored libs (`fhirpath`, `fhirpath.r4` model, `DOMPurify`, `marked`): bundle **into** the widget for self-containment (removes window-global coupling on the widget path; aligns with Phase E isolation). App `index.html` keeps global `<script>` tags until the app is migrated.
+- Right-side CSS manifest: `preview-structure`, `preview-ui`, `preview-controls`, `status-badge`, `explain-modal` + `controls`, `date-picker`, `tooltip`, `toast`, `layout` (subset), `custom-select`.
+- Verify: `build:widget` produces dist artifacts (stub entry OK until Phase D); lint/vitest unaffected.
+
+### Phase A — Core skeleton + event-bus de-globalization
+- `js/core/events/bus.js`: `EventBus` wraps an `EventTarget` (`dispatch`/`on`/`off`). `defaultBus` bridges to `document` for back-compat during migration. `EventState` becomes per-bus (default seeded on `defaultBus`).
+- Migrate core + render `document.dispatchEvent`/`addEventListener` to an injected bus (default = `defaultBus`). Keep `AppEvents` names.
+- Verify: green; behavior identical (single default bus).
+
+### Phase B — Session container + de-singleton state
+- `js/core/session.js`: `QuestionnaireSession { questDoc, answerStore, bus, config }`; `createSession(config?)`. App makes `defaultSession`; legacy `questDoc`/`answerStore` exports become proxies to `defaultSession`, migrate imports gradually.
+- `eval.js`: store via ctx/param (drop singleton import). `import.js` / `qr-answers-manager` point at the session.
+
+### Phase C — Node layer split (biggest; per family)
+- Move `buildBuilder()` + `builder/dnd` + `builder-helpers` OUT of `js/nodes/*` into a builder-side extension (`js/builder/node-builder-ext.js` augmenting node prototypes, or subclasses). Core nodes = `renderPreview` / `_buildControl` only.
+- Move `uiStr` / `render-ctx` so nodes don't import a preview-coupled path (`uiStr` → renderer; shared live-ctx + `eval-fhirpath` → core).
+- Order: base → group → item → choice → leaf types. Green after each family.
+
+### Phase D — Renderer extraction
+- `js/renderer/preview-renderer.js`: engine takes `{ mountEl, session, config }`; owns `_rc` + async render pipeline + `_reCalc` + `_buildControl` + node dispatch. No shell-mount queries.
+- Chrome (validation/status, calc badges, language, search, view-options, preview-mode, populate) = config-driven internal optional pieces; NO menus. App menus stay in the shell and call `renderer.setConfig()`/API.
+- `QuestionnaireRenderer` public class = session + renderer + API; imports questionnaire + response via Core.
+- `PreviewForm` becomes a thin app adapter: mounts a `QuestionnaireRenderer` on the right panel + bridges existing app menus to its config/API. App visually identical.
+
+### Phase E — Multi-instance isolation hardening
+- Audit: no module-global STATE reads in the core + render path (window libs are stateless = OK). Drop the default-bus→document bridge for the widget path (own bus only). Session-scoped config provider (terminology/cors/fhirBase/language) instead of global `serverConfig` for the widget path; app feeds its `serverConfig` into its session.
+- e2e: TWO `QuestionnaireRenderer` instances on one page, independent answers, zero cross-talk.
+
+### Phase F — Packaging + dogfood + docs
+- `js/renderer/index.js` ESM entry exporting `QuestionnaireRenderer`. CSS manifest. Finalize esbuild `build:widget` → `dist/questionnaire-widget.{js,css}` (+ vendored libs).
+- `widget-demo.html` host page (sample Questionnaire + QR) — dogfood + manual check.
+- Docs: CONTEXT (core/renderer manifest), docs-site "Embed the renderer", ROADMAP.
