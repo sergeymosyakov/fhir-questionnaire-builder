@@ -11,6 +11,10 @@ name: Release widget
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Tests"]      # auto-release after the Tests workflow succeeds
+    types: [completed]
+    branches: [master, main]
 
 permissions:
   contents: write
@@ -23,6 +27,10 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # Only release on a manual run or a *successful* Tests run.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v5
         with:
