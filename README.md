@@ -31,6 +31,7 @@ shell, no iframe, no framework.
 ```
 
 - **Full guide & API reference:** [WIDGET.md](WIDGET.md)
+- **Use via CDN (no install):** `https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.3/dist/questionnaire-widget.js` (+ `.css`)
 - **Download the bundle:** [GitHub Releases](https://github.com/sergeymosyakov/fhir-questionnaire-builder/releases)
 - **Live demo:** [fhirbuilder.com/widget-demo.html](https://fhirbuilder.com/widget-demo.html) — three isolated widgets + a custom “Export FHIR R4” button
 

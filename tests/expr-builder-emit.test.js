@@ -101,6 +101,11 @@ describe('emit', () => {
       .toBe("%resource.repeat(item).where(linkId='it\\'s').answer.valueCoding.code.join(', ')");
   });
 
+  it('escapes embedded backslashes (before quotes) in literals', () => {
+    expect(emit(literal('string', 'a\\b'))).toBe("'a\\\\b'");        // a\b → 'a\\b'
+    expect(emit(literal('string', "a\\'b"))).toBe("'a\\\\\\'b'");    // a\'b → 'a\\\'b'
+  });
+
   it('passes raw text through unchanged', () => {
     expect(emit(raw('%weird.stuff().foo'))).toBe('%weird.stuff().foo');
   });

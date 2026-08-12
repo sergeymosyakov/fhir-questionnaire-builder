@@ -31,9 +31,32 @@ page and get a live, fillable form that runs the SDC logic (enableWhen,
 
 ## Install
 
-Download the release bundle from the
+### Fastest: CDN (no install, no auth)
+
+Load the widget straight from [jsDelivr](https://www.jsdelivr.com/), pinned to a
+release tag — nothing to download, no npm, no token:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.3/dist/questionnaire-widget.css">
+<script type="module">
+  import { QuestionnaireRenderer } from 'https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.3/dist/questionnaire-widget.js';
+  // …
+</script>
+```
+
+Or the classic global build (`window.FhirQuestionnaireWidget`):
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.3/dist/questionnaire-widget.global.js"></script>
+```
+
+> Pin to a specific `@widget-v1.0.x` tag for stability; jsDelivr caches immutably.
+
+### Download the release bundle
+
+Grab the files from the
 [**GitHub Releases**](https://github.com/sergeymosyakov/fhir-questionnaire-builder/releases)
-page. Each release contains three files:
+page and self-host them. Each release contains:
 
 | File | Use it when… |
 |------|--------------|
@@ -50,6 +73,21 @@ Verify the download with the `SHA256SUMS.txt` published alongside the assets.
   // …
 </script>
 ```
+
+### npm (optional, for bundler projects)
+
+If a maintainer has published to npm, bundler users (React / Vite / webpack) can:
+
+```bash
+npm install @sergeymosyakov/questionnaire-widget
+```
+```js
+import { QuestionnaireRenderer } from '@sergeymosyakov/questionnaire-widget';
+import '@sergeymosyakov/questionnaire-widget/css';
+```
+
+> npm publishing is opt-in (requires an `NPM_TOKEN`); the CDN and Release above
+> need no install and no auth and are the primary channels.
 
 Or build it yourself from source:
 

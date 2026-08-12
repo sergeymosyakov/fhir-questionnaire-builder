@@ -18,7 +18,6 @@ on:
 
 permissions:
   contents: write
-  packages: write
 
 concurrency:
   group: release-widget
@@ -40,7 +39,6 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          registry-url: https://npm.pkg.github.com
 
       - run: npm ci
       - run: npm run lint
@@ -85,15 +83,20 @@ jobs:
             --title "QuestionnaireRenderer widget ${{ steps.ver.outputs.semver }}" \
             --notes-file /tmp/notes.md
 
-      # Also publish the bundle to GitHub Packages (npm registry) so it shows up
-      # under the repo's Packages tab and can be `npm install`ed.
-      - name: Publish to GitHub Packages
+      # Optional: publish to npmjs.com for a password-less `npm install`.
+      # Runs only when an NPM_TOKEN repo secret is set; otherwise skips (the
+      # Release assets + jsDelivr CDN remain the primary, no-auth channels).
+      - name: Publish to npm (npmjs.com, optional)
         env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           PKG_VERSION: ${{ steps.ver.outputs.semver }}
           PKG_OWNER: ${{ github.repository_owner }}
           PKG_REPO: ${{ github.repository }}
         run: |
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "NPM_TOKEN not set — skipping npm publish (Release + CDN remain the primary channels)."
+            exit 0
+          fi
           node -e '
             const fs = require("fs");
             const pkg = {
@@ -106,9 +109,9 @@ jobs:
               exports: { ".": "./questionnaire-widget.js", "./global": "./questionnaire-widget.global.js", "./css": "./questionnaire-widget.css" },
               files: ["questionnaire-widget.js", "questionnaire-widget.global.js", "questionnaire-widget.css"],
               repository: "git+https://github.com/" + process.env.PKG_REPO + ".git",
-              publishConfig: { registry: "https://npm.pkg.github.com" },
               license: "SEE LICENSE IN LICENSE"
             };
             fs.writeFileSync("dist/package.json", JSON.stringify(pkg, null, 2));
           '
-          cd dist && npm publish
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > dist/.npmrc
+          cd dist && npm publish --access public

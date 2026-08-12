@@ -20,9 +20,10 @@ export function emit(block) {
   }
 }
 
-// FHIRPath single-quoted string literal with embedded quotes escaped.
+// FHIRPath single-quoted string literal. Escape backslash first, then the quote
+// (order matters — otherwise the backslashes we add get double-escaped).
 function q(s) {
-  return `'${String(s).replace(/'/g, "\\'")}'`;
+  return `'${String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 }
 
 function emitSet(b) {
