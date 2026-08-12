@@ -22,11 +22,4 @@ Embeddable **FHIR R4 QuestionnaireRenderer** — the builder's right-side runtim
 </script>
 ```
 
-## Features
-- Live SDC runtime: enableWhen / enableWhenExpression, calculatedExpression/initialExpression chains, constraints, PASS/FAIL validation.
-- Opt-in chrome via `config`: `search`, `validation`, `explain`, `tooltips`, `navButton`.
-- Per-widget server: `fhirBaseUrl`, `corsProxy` (reference search + `$populate`).
-- API: `getResponse()`, `setResponse(qr)`, `setLanguage()`, `setConfig()`, `on/off`, `destroy()`.
-- Multiple isolated widgets per page (own bus + answer store, zero cross-talk).
-
 Full guide: [WIDGET.md](https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/WIDGET.md) · Live demo: [fhirbuilder.com/widget-demo.html](https://fhirbuilder.com/widget-demo.html)

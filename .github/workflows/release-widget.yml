@@ -58,11 +58,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ steps.ver.outputs.tag }}" \
+          TAG="${{ steps.ver.outputs.tag }}"
+          # Previous widget tag = newest existing one (the new tag isn't created yet).
+          PREV=$(git tag -l 'widget-v*' | sort -V | tail -1)
+          # Auto-generate the "What's Changed" changelog from the commits since PREV.
+          CHANGELOG=$(gh api "repos/${{ github.repository }}/releases/generate-notes" \
+            -f tag_name="$TAG" ${PREV:+-f previous_tag_name="$PREV"} --jq '.body' || true)
+          { cat .github/release-notes-widget.md; echo; echo "$CHANGELOG"; } > /tmp/notes.md
+          gh release create "$TAG" \
             dist/questionnaire-widget.js \
             dist/questionnaire-widget.global.js \
             dist/questionnaire-widget.css \
             dist/SHA256SUMS.txt \
             --latest \
-            --title "QuestionnaireRenderer widget ${{ steps.ver.outputs.tag }}" \
-            --notes-file .github/release-notes-widget.md
+            --title "QuestionnaireRenderer widget $TAG" \
+            --notes-file /tmp/notes.md
