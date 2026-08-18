@@ -1,3 +1,39 @@
+/* === Item body (label + badges + control) ==================================== */
+/* Mobile-first: icons inline, label inline — text wraps to col 0. */
+.item-icons { display: inline; }
+.item-icons > * { margin-right: 4px; }
+.item-body  { display: inline; vertical-align: baseline; }
+/* Higher specificity than individual badge rules so margin-top:0 wins. */
+.item-icons .preview-linkid,
+.item-icons .preview-prefix,
+.item-icons .preview-hidden-badge,
+.item-icons .preview-short-text-badge,
+.item-icons .preview-meta-badge,
+.item-icons .icon-ok,
+.item-icons .icon-fail,
+.item-icons .preview-icon-ph { margin-top: 0; }
+/* Controls are full-width blocks on mobile; ctrl-wrap stays flex to keep slider+value on same line. */
+.item-body .ctrl-wrap {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
+}
+.item-body .repeat-wrap,
+.item-body .gtable-wrap,
+.item-body input[type=text],
+.item-body input[type=number],
+.item-body input[type=date],
+.item-body input[type=url],
+.item-body textarea,
+.item-body select,
+.item-body input[type=range] {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
+}
+.item-body .sc-trigger { width: 100%; max-width: none; min-width: 0; }
 /* === Preview card ============================================================ */
 .preview-card {
   background: var(--c-surface);
@@ -7,43 +43,141 @@
   box-shadow: var(--shadow);
 }
 .preview-card:empty { display: none; }
+/* Mobile-first: lform-item is a block; icons float inline, toggle is absolute. */
 .lform-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 14px;
-  /* Reserve the 3px left-border gutter on every row so the coloured
-     success/error/required borders never shift the row content (prefix
-     numbers) sideways — keeps the ordinal column aligned. */
+  display: block;
+  overflow: hidden;
+  position: relative;
+  padding: 8px 10px;
   border-left: 3px solid transparent;
   transition: background .12s;
+  font-size: 15px;
+  line-height: 1.45;
 }
+/* Reserve padding-right for the absolute toggle on groups. */
+.lform-item:has(> .item-icons ~ .preview-collapse-toggle) { padding-right: 40px; cursor: pointer; }
+/* All text elements within a row: consistent font-size, no vertical drift, middle-aligned. */
+.lform-item .preview-linkid,
+.lform-item .preview-prefix,
+.lform-item .preview-optional-badge,
+.lform-item .preview-required-star,
+.lform-item .preview-condition-hint,
+.lform-item .preview-constraint-badge,
+.lform-item .preview-meta-badge,
+.lform-item .preview-hidden-badge,
+.lform-item .preview-short-text-badge,
+.lform-item .preview-group-ctrl-badge,
+.lform-item .preview-logic-badge,
+.lform-item .group-label,
+.lform-item .display-info-label,
+.lform-item .icon-ok,
+.lform-item .icon-fail,
+.lform-item .icon-na,
+.lform-item .calc-badge {
+  font-size: inherit;
+  margin-top: 0;
+  vertical-align: middle;
+}
+/* Visual breathing room between label and logic/optional badges */
+.lform-item .preview-logic-badge { margin-left: 8px; }
+.lform-item .preview-optional-badge { margin-left: 8px; }
 .lform-item:last-child { border-bottom: none; }
 .lform-item:hover { background: #f5f8fc; }
-.lform-item.success {
-  background: var(--c-ok-bg);
-  border-left: 3px solid var(--c-ok-border);
+.lform-item.success { background: var(--c-ok-bg); border-left: 3px solid var(--c-ok-border); }
+.lform-item.error   { background: var(--c-err-bg); border-left: 3px solid var(--c-err-border); }
+
+/* === Collapse toggle in preview ============================================== */
+/* Mobile: absolute top-right button. */
+.preview-collapse-toggle {
+  position: absolute;
+  top: 2px; right: 2px;
+  width: 36px; height: 36px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  color: var(--c-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s;
 }
-.lform-item.error {
-  background: var(--c-err-bg);
-  border-left: 3px solid var(--c-err-border);
+.preview-collapse-toggle::before {
+  content: '';
+  display: inline-block;
+  width: 12px; height: 12px;
+  border-top: 2.5px solid currentColor;
+  border-right: 2.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform .18s ease;
+}
+.preview-collapse-toggle--open::before { transform: rotate(135deg); }
+.preview-collapse-toggle:hover,
+.preview-collapse-toggle:active { background: var(--c-primary-lt); }
+
+/* === Desktop layout (≥1024px) ================================================= */
+@media (min-width: 1024px) {
+  /* Switch item-icons back to flex strip, item-body to layout-transparent. */
+  .item-icons { display: flex; align-items: baseline; gap: 6px; flex-shrink: 0; vertical-align: unset; margin-right: 0; }
+  .item-body  { display: contents; }
+  /* Reset controls — flex row handles spacing. */
+  .item-body .ctrl-wrap     { display: inline-flex; width: auto; margin-top: 0; }
+  .item-body .repeat-wrap   { display: flex;         width: auto; margin-top: 0; }
+  .item-body .gtable-wrap   { display: block;        width: auto; margin-top: 0; }
+  .item-body input[type=text],
+  .item-body input[type=number],
+  .item-body input[type=date],
+  .item-body input[type=url],
+  .item-body textarea,
+  .item-body select { display: inline-block; width: auto; margin-top: 0; }
+  .item-body input[type=range] { display: inline-block; width: auto; margin-top: 0; }
+  .item-body .sc-trigger    { width: auto; max-width: none; }
+  /* lform-item: flex row on desktop. */
+  .lform-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    position: static;
+    overflow: visible;
+  }
+  .lform-item:has(> .item-icons ~ .preview-collapse-toggle) { padding-right: 14px; cursor: default; }
+  /* Collapse toggle: right edge of the flex row on desktop, same style as mobile. */
+  .preview-collapse-toggle {
+    position: static;
+    order: 10;
+    margin-left: auto;
+    align-self: center;
+    width: 28px; height: 28px;
+    color: var(--c-primary);
+    border-radius: 6px;
+    flex-shrink: 0;
+    transition: background .15s;
+  }
+  .preview-collapse-toggle::before { width: 8px; height: 8px; border-width: 2px; }
+  .preview-collapse-toggle:hover,
+  .preview-collapse-toggle:active { background: var(--c-primary-lt); }
 }
 
 /* === Nested group children =================================================== */
 .preview-nested {
   border-left: 3px solid var(--c-primary-lt);
-  margin-left: 45px;
+  margin-left: 18px;
   background: #f7f9fc;
+}
+@media (min-width: 1024px) {
+  .preview-nested { margin-left: 45px; }
 }
 .preview-nested .lform-item {
   padding-left: 14px;
-  font-size: 13px;
+  /* font-size inherits 15px from .lform-item — no override */
 }
 .preview-nested .preview-nested {
-  margin-left: 35px;
+  margin-left: 12px;
   border-left-color: var(--c-border);
 }
-.group-label       { font-weight: 600; color: var(--c-primary); font-size: 13px; line-height: 20px; }
+@media (min-width: 1024px) {
+  .preview-nested .preview-nested { margin-left: 35px; }
+}
+.group-label       { font-weight: 600; color: var(--c-primary); }
 .display-info-label { font-style: italic; color: var(--c-text-2); font-size: 12px; }
 
 /* === Group itemControl: header / footer ===================================== */
@@ -78,21 +212,6 @@
   cursor: help;
 }
 
-/* === Collapse toggle in preview ============================================== */
-.preview-collapse-toggle {
-  font-size: 11px;
-  line-height: 20px;
-  color: #999;
-  width: 16px;
-  flex-shrink: 0;
-  display: inline-block;
-  text-align: center;
-  cursor: pointer;
-  user-select: none;
-  margin-right: 2px;
-}
-.preview-collapse-toggle:hover { color: #444; }
-
 /* === AND/OR badge ============================================================ */
 .preview-logic-badge {
   display: inline-block;
@@ -124,6 +243,7 @@
   white-space: nowrap;
   flex-shrink: 0;
   margin-top: 3px;
+  margin-left: 5px;
   font-style: italic;
 }
 
@@ -210,7 +330,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 360px;
+  max-width: min(360px, 100%);
   cursor: default;
 }
 
@@ -330,11 +450,20 @@
 .logic-separator-or::after { background: #ffe0b2; }
 
 /* === Group table layout (questionnaire-itemControl: gtable) ================ */
+/* Wrapper provides horizontal scroll on narrow screens. */
+.gtable-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 6px 14px 8px;
+}
+@media (max-width: 1023px) {
+  .gtable-wrap { margin: 6px 0 8px; }
+}
 .gtable {
   border-collapse: collapse;
-  margin: 6px 14px 8px;
   font-size: 0.87rem;
-  width: calc(100% - 28px);
+  width: 100%;
+  margin: 0;
 }
 .gtable th.gtable-th {
   text-align: left;

@@ -113,7 +113,10 @@ export class GTableRenderer {
       footTr.appendChild(footTd);
     }
 
-    target.appendChild(table);
+    const wrap = document.createElement('div');
+    wrap.className = 'gtable-wrap';
+    wrap.appendChild(table);
+    target.appendChild(wrap);
   }
 
   // ── Repeating rows: one <tr> per instance ────────────────────────────────
