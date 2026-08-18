@@ -5,16 +5,11 @@
 # `widget-vMAJOR.MINOR.*` tags. So the first release of a minor is x.y.0, the
 # next x.y.1, etc.; bump minor/major in version.json to reset the patch to 0.
 #
-# Trigger: manual (Actions → "Release widget" → Run workflow). The release is
-# only cut when lint + unit + e2e all pass.
+# Trigger: manual only (Actions → "Release widget" → Run workflow).
 name: Release widget
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Tests"]      # auto-release after the Tests workflow succeeds
-    types: [completed]
-    branches: [master, main]
 
 permissions:
   contents: write
@@ -26,10 +21,7 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
-    # Only release on a manual run or a *successful* Tests run.
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v5
         with:
