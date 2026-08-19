@@ -35,13 +35,13 @@ test.describe('Preview — individual collapse/expand toggle', () => {
     // Collapse: child must disappear (full rebuild forced by collapse-aware signature)
     await toggle.click();
     await expect(childRow).toHaveCount(0);
-    // The group row itself stays; the toggle now shows the expand glyph.
+    // The group row itself stays; toggle loses the --open class.
     await expect(groupRow).toBeVisible();
-    await expect(groupRow.locator('.preview-collapse-toggle')).toHaveText('\u25B6');
+    await expect(groupRow.locator('.preview-collapse-toggle')).not.toHaveClass('preview-collapse-toggle--open');
 
     // Expand: child comes back
     await groupRow.locator('.preview-collapse-toggle').click();
     await expect(page.locator('[data-preview-id="1.1"]')).toBeVisible();
-    await expect(page.locator('[data-preview-id="1"] .preview-collapse-toggle')).toHaveText('\u25BC');
+    await expect(page.locator('[data-preview-id="1"] .preview-collapse-toggle')).toHaveClass(/preview-collapse-toggle--open/);
   });
 });

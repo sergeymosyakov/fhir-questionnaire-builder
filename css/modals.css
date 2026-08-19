@@ -576,20 +576,12 @@
 /* === Library modal ========================================================== */
 [data-testid="libraryModal"] .modal-box  { max-width: 640px; width: 90vw; }
 
-/* Mobile: all per-modal widths overridden — placed last to beat per-modal specificity. */
+/* Mobile: body ancestor raises specificity to [0,2,1] > per-modal [0,2,0] — no !important needed. */
 @media not all and (min-width: 1024px) {
-  [data-testid] .modal-box {
+  body [data-testid] .modal-box {
     width: 100%;
     max-width: 100%;
     min-width: 0;
-  }
-}
-/* Mobile override — placed last so it wins over all per-modal width rules above. */
-@media not all and (min-width: 1024px) {
-  [data-testid] .modal-box {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
   }
 }
 [data-testid="libraryModal"] .modal-body { padding: 6px 0; max-height: 65vh; overflow-y: auto; }

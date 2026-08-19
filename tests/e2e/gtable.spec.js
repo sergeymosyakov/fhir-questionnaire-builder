@@ -413,3 +413,63 @@ test.describe('gtable — column header indicators (mirror of row-level badge te
     await expect(medicationTh.locator('.gtable-col-ind--optional')).toHaveCount(0);
   });
 });
+
+// ── Collapse / expand regression ─────────────────────────────────────────────
+// Regression: stacked groups inside repeating gtable cells were not updating
+// on collapse/expand because their state wasn't tracked in nodesSig (the partial
+// rebuild path left duplicate DOM elements). Fixed by:
+//   1. dataset.gtableId on .gtable-wrap (so partial rebuild cleanup finds it)
+//   2. doToggle dispatching CALC_RECALC_REQUESTED to force a full rebuild
+
+test.describe('gtable — collapse/expand regression', () => {
+  test('stacked group inside gtable cell collapses and expands without DOM duplication', async ({ page }) => {
+    await loadFixture(page);
+
+    // The appointments gtable has a stacked "appt-provider" group with a toggle.
+    const apptToggle = page.locator('[data-preview-id="appt-provider"] .preview-collapse-toggle');
+    await expect(apptToggle).toBeVisible({ timeout: 5_000 });
+
+    // Count toggles before collapse.
+    const countBefore = await page.locator('.preview-collapse-toggle').count();
+    expect(countBefore).toBeGreaterThanOrEqual(5);
+
+    // Collapse appt-provider.
+    await apptToggle.click();
+    // appt-provider's sub-rows (prov-name, prov-phone) should disappear.
+    await expect(page.locator('[data-preview-id="prov-name"]')).toHaveCount(0);
+    // No DOM duplication — toggle count must not increase.
+    const countAfterCollapse = await page.locator('.preview-collapse-toggle').count();
+    expect(countAfterCollapse).toBeLessThan(countBefore);
+
+    // Expand — sub-rows come back.
+    const apptToggleAfter = page.locator('[data-preview-id="appt-provider"] .preview-collapse-toggle');
+    await expect(apptToggleAfter).toBeVisible();
+    await apptToggleAfter.click();
+    await expect(page.locator('[data-preview-id="prov-name"]')).toBeVisible();
+    // Toggle count returns to original.
+    const countAfterExpand = await page.locator('.preview-collapse-toggle').count();
+    expect(countAfterExpand).toBe(countBefore);
+  });
+
+  test('repeated collapse/expand cycles stay stable (no DOM accumulation)', async ({ page }) => {
+    await loadFixture(page);
+
+    const countInitial = await page.locator('.preview-collapse-toggle').count();
+
+    for (let i = 0; i < 3; i++) {
+      const toggle = page.locator('[data-preview-id="appt-provider"] .preview-collapse-toggle');
+      await expect(toggle).toBeVisible({ timeout: 3_000 });
+      await toggle.click();
+      await expect(page.locator('[data-preview-id="prov-name"]')).toHaveCount(0);
+
+      const toggleExpand = page.locator('[data-preview-id="appt-provider"] .preview-collapse-toggle');
+      await expect(toggleExpand).toBeVisible();
+      await toggleExpand.click();
+      await expect(page.locator('[data-preview-id="prov-name"]')).toBeVisible();
+    }
+
+    // Toggle count must equal the initial count (no accumulation).
+    const countFinal = await page.locator('.preview-collapse-toggle').count();
+    expect(countFinal).toBe(countInitial);
+  });
+});
