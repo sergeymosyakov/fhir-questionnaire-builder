@@ -70,6 +70,7 @@ jobs:
   # regressions only.
   perf:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5

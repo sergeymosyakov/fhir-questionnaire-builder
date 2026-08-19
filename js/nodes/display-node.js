@@ -94,9 +94,12 @@ export class DisplayNode extends ItemNode {
 
     const label = this._buildLabel(res, rc);
     if (this._renderStyle) applyRenderStyle(label, this._renderStyle);
-    row.appendChild(label);
-    this._buildSupportLinks(row, rc);
-    this._buildVisHint(row, rc);
+    const body = document.createElement('div');
+    body.className = 'item-body';
+    body.appendChild(label);
+    this._buildSupportLinks(body, rc);
+    this._buildVisHint(body, rc);
+    row.appendChild(body);
     // display items have no badges or controls
   }
 }

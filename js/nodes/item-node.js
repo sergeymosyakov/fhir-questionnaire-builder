@@ -120,18 +120,23 @@ export class ItemNode extends BaseNode {
       }
     }
 
-    row.appendChild(label);
-    if (optionalBadge) row.appendChild(optionalBadge);
-    this._buildSupportLinks(row, rc);
-    this._buildVisHint(row, rc);
-    this._buildConstraintBadge(row, rc);
-    this._buildReadOnlyBadge(row, rc);
-    this._buildInitialBadge(row, rc);
-    this._buildItemMedia(row);
-    this._buildControl(row, res, rc);
-    this._buildReadOnlyValue(row, rc);
-    this._buildCalcBadge(row, res, rc);
-    // Collapse toggle for items with sub-items
+    // .item-body wraps label + badges + control so CSS can stack them on mobile
+    // (display: contents on desktop keeps current flex-row layout unchanged).
+    const body = document.createElement('div');
+    body.className = 'item-body';
+    body.appendChild(label);
+    if (optionalBadge) body.appendChild(optionalBadge);
+    this._buildSupportLinks(body, rc);
+    this._buildVisHint(body, rc);
+    this._buildConstraintBadge(body, rc);
+    this._buildReadOnlyBadge(body, rc);
+    this._buildInitialBadge(body, rc);
+    this._buildItemMedia(body);
+    this._buildControl(body, res, rc);
+    this._buildReadOnlyValue(body, rc);
+    this._buildCalcBadge(body, res, rc);
+    row.appendChild(body);
+    // Collapse toggle inserts itself as row.firstChild (before the icon strip).
     this._buildPreviewCollapseToggle(row);
   }
 

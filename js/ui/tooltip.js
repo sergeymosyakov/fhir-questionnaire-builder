@@ -33,6 +33,13 @@ function _getEl() {
     _el = document.createElement('div');
     _el.className = 'rich-tooltip';
     _el.setAttribute('aria-hidden', 'true');
+    // Close button — only visible in bottom-sheet mode (CSS controls display).
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'rich-tooltip__close';
+    closeBtn.textContent = '×';
+    closeBtn.setAttribute('aria-label', 'Close');
+    closeBtn.addEventListener('click', e => { e.stopPropagation(); _hide(); });
+    _el.appendChild(closeBtn);
     document.body.appendChild(_el);
   }
   return _el;
@@ -43,7 +50,8 @@ function _build(target) {
   if (!title && !body) return false;
 
   const tip = _getEl();
-  tip.innerHTML = '';
+  // Remove content children but keep the close button.
+  [...tip.children].forEach(c => { if (!c.classList.contains('rich-tooltip__close')) c.remove(); });
 
   if (title) {
     const h = document.createElement('div');
@@ -115,7 +123,30 @@ function _show(target) {
 }
 
 function _hide() {
-  if (_el) _el.style.display = 'none';
+  if (!_el) return;
+  _el.style.display = 'none';
+  _el.classList.remove('rich-tooltip--sheet');
+  _shownByClick = false;
+  _shownTarget  = null;
+}
+
+/** True when the viewport is in mobile mode (our 1024px breakpoint). */
+const _isMobile = () => window.innerWidth < 1024;
+
+let _shownByClick = false;
+let _shownTarget  = null; // element whose tooltip is currently shown
+
+/** Show as a bottom-sheet on tap (mobile). */
+function _showSheet(target) {
+  if (!_enabled) return;
+  if (!_build(target)) return;
+  const tip = _getEl();
+  tip.classList.add('rich-tooltip--sheet');
+  tip.style.left = '';
+  tip.style.top  = '';
+  tip.style.display = 'block';
+  _shownByClick = true;
+  _shownTarget  = target;
 }
 
 export async function init() {
@@ -127,14 +158,50 @@ export async function init() {
   // Sync badge to initial persisted state
   const badge = document.getElementById('tooltipsOffBadge');
   if (badge) badge.style.display = _enabled ? 'none' : '';
+
+  // Desktop: hover shows/hides the floating tooltip.
   document.addEventListener('mouseover', e => {
+    if (_isMobile()) return;
     const t = e.target.closest('[data-tip-title],[data-tip-body]');
     if (t) _show(t);
   });
   document.addEventListener('mouseout', e => {
+    if (_isMobile()) return;
     const t = e.target.closest('[data-tip-title],[data-tip-body]');
     if (t) _hide();
   });
+
+  // Mobile: tap on tipped element shows bottom-sheet.
+  // capture:true fires before any element-level stopPropagation calls.
+  document.addEventListener('click', e => {
+    if (!_isMobile()) return;
+    const t = e.target.closest('[data-tip-title],[data-tip-body]');
+    // Close sheet if tap outside.
+    if (!t) {
+      if (_shownByClick && _el && !_el.contains(e.target)) _hide();
+      return;
+    }
+    // Skip elements that have their own tap action.
+    const hasOwnAction = !!t.closest(
+      'button, a, [role="button"], .calc-badge--explain, ' +
+      '.preview-condition-hint--explain, .preview-calc-value--explain, ' +
+      '.status-dropdown-row, .support-link-patient-btn, .preview-nav-btn'
+    );
+    if (hasOwnAction) return;
+    // Same element: toggle (close). Different element: switch immediately.
+    if (_shownByClick) {
+      _hide();
+      if (t === _shownTarget) return; // was same element → just close
+    }
+    _showSheet(t);
+  }, { capture: true });
+
+  // Close sheet when clicking outside on desktop too.
+  document.addEventListener('click', e => {
+    if (_isMobile()) return;
+    if (_shownByClick && _el && !_el.contains(e.target)) _hide();
+  });
+
   // Hide on scroll / resize to avoid stale position
   window.addEventListener('scroll', _hide, true);
   window.addEventListener('resize', _hide);

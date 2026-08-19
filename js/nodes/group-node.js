@@ -102,6 +102,7 @@ export class GroupNode extends BaseNode {
   // ── Row content: super + logic badge + collapse toggle (groups with children) ─
   _buildRowContent(row, res, rc) {
     super._buildRowContent(row, res, rc);
+    const body = row._itemBody;
     const isPatient = rc.previewMode === 'patient';
     const isEmptyGroup = this.children.length === 0;
 
@@ -118,7 +119,7 @@ export class GroupNode extends BaseNode {
           : 'This group is rendered as a footer — continuously visible at the bottom of the questionnaire.';
         badge.dataset.tipFhir = 'item.extension[questionnaire-itemControl].valueCodeableConcept.coding.code = ' + this._itemControl;
         badge.dataset.tipSpec = 'R4';
-        row.appendChild(badge);
+        body.appendChild(badge);
       }
     }
 
@@ -132,7 +133,7 @@ export class GroupNode extends BaseNode {
       badge.dataset.tipBody = 'This group is rendered as a table — each child item is a column, each repeat instance is a row.';
       badge.dataset.tipFhir = 'item.extension[questionnaire-itemControl].valueCodeableConcept.coding.code = gtable';
       badge.dataset.tipSpec = 'R4 · SDC';
-      row.appendChild(badge);
+      body.appendChild(badge);
     }
 
     // Repeatable group badge (item.repeats on a group)
@@ -144,7 +145,7 @@ export class GroupNode extends BaseNode {
       rb.dataset.tipBody = 'This group repeats \u2014 the respondent can add multiple entries.';
       rb.dataset.tipFhir = 'Questionnaire.item.repeats';
       rb.dataset.tipSpec = 'R4';
-      row.appendChild(rb);
+      body.appendChild(rb);
     }
 
     if (!isPatient && !isEmptyGroup) {
@@ -163,7 +164,7 @@ export class GroupNode extends BaseNode {
           : 'Group is satisfied only when all child items have valid answers.\nThis is the default FHIR behaviour \u2014 no extra constraint is generated.';
         lb.dataset.tipFhir = isOr ? 'questionnaire-constraint (key: ITLH_NS:group-or)' : 'item.required (default AND)';
         lb.dataset.tipSpec = 'R4';
-        row.appendChild(lb);
+        body.appendChild(lb);
       }
     }
 

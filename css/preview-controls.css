@@ -1,20 +1,33 @@
 /* === Preview card inputs ===================================================== */
+/* Mobile-first: larger touch-friendly sizes. */
 .preview-card input[type=text],
 .preview-card input[type=number] {
-  padding: 3px 6px;
+  padding: 8px 10px;
   border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
-  font-size: 12px;
+  font-size: 15px;
   color: var(--c-text);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+@media (min-width: 1024px) {
+  .preview-card input[type=text],
+  .preview-card input[type=number] { padding: 3px 6px; font-size: 12px; }
 }
 .preview-card .oc-input[type=text] { border-right: none; border-radius: var(--r-sm) 0 0 var(--r-sm); }
-.preview-card input[type=checkbox] { accent-color: var(--c-primary); }
+.preview-card input[type=checkbox] { accent-color: var(--c-primary); width: 20px; height: 20px; }
+@media (min-width: 1024px) {
+  .preview-card input[type=checkbox] { width: auto; height: auto; }
+}
 .preview-card select {
-  padding: 3px 6px;
+  padding: 8px 10px;
   border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
-  font-size: 12px;
+  font-size: 15px;
   color: var(--c-text);
+}
+@media (min-width: 1024px) {
+  .preview-card select { padding: 3px 6px; font-size: 12px; }
 }
 
 /* === Final result banner ===================================================== */
@@ -109,6 +122,18 @@
 }
 .calc-badge.calc-true  { background: var(--c-ok-bg);  color: var(--c-ok);  border-color: var(--c-ok-border); }
 .calc-badge.calc-false { background: var(--c-err-bg); color: var(--c-err); border-color: var(--c-err-border); }
+/* Mobile: full-width result panel, no pill shape; block so it gets own line. */
+@media (max-width: 1023px) {
+  .item-body .calc-badge {
+    display: block;
+    border-radius: 3px;
+    margin-left: 0;
+    margin-top: 6px;
+    padding: 5px 8px;
+    font-size: 12px;
+    text-align: center;
+  }
+}
 
 /* === questionnaire-supportLink ============================================== */
 .support-link-icon {

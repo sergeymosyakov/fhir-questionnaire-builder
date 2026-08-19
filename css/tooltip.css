@@ -1,3 +1,13 @@
+/* cursor:help on mobile only — iOS needs it to fire click; desktop has hover, no override needed. */
+@media (max-width: 1023px) {
+  [data-tip-title], [data-tip-body] { cursor: help; }
+  /* Restore pointer on elements that are also clickable for another purpose. */
+  .preview-linkid[data-tip-title],
+  .calc-badge--explain[data-tip-title],
+  .preview-condition-hint--explain[data-tip-title],
+  .preview-nav-btn[data-tip-title] { cursor: pointer; }
+}
+
 /* === Rich tooltip ============================================================
    Shown on elements with [data-tip-title] / [data-tip-body].
    Dark card with optional FHIR field reference at the bottom.
@@ -14,7 +24,7 @@
   border-radius: 7px;
   box-shadow: 0 6px 24px rgba(0,0,0,.35), 0 1px 4px rgba(0,0,0,.2);
   pointer-events: none;
-  font-size: 12px;
+  font-size: 12px !important;  /* prevent lform-item font-size from leaking in */
   line-height: 1.5;
 }
 
@@ -80,3 +90,39 @@
   color: #607d8b;
   margin-left: auto;
 }
+
+/* Close button — hidden on desktop, visible in bottom-sheet mode. */
+.rich-tooltip__close {
+  display: none;
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #b8c9db;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* Mobile bottom-sheet: full-width panel at bottom, tap to close. */
+.rich-tooltip--sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: auto;
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+  max-height: 55vh;
+  overflow-y: auto;
+  border-radius: 0;
+  pointer-events: auto;
+  padding: 40px 16px 24px;
+  font-size: 14px;
+}
+.rich-tooltip--sheet .rich-tooltip__close { display: block; }
+.rich-tooltip--sheet .rich-tooltip__title { font-size: 15px; margin-bottom: 8px; }
+.rich-tooltip--sheet .rich-tooltip__body  { font-size: 14px; max-height: none; }

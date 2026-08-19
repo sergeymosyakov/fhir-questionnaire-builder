@@ -63,7 +63,10 @@ export function isRelevantItem(node, rc) {
 // Safe allowlist for node._renderStyle lives in the shared js/fhir/render-style.js parser.
 export function applyRenderStyle(el, raw) {
   const style = parseRenderStyle(raw);
-  for (const prop of Object.keys(style)) el.style.setProperty(prop, style[prop]);
+  for (const prop of Object.keys(style)) {
+    if (prop === 'font-size') continue; // font-size is controlled by CSS, not FHIR data
+    el.style.setProperty(prop, style[prop]);
+  }
 }
 
 export class BaseNode {
@@ -321,7 +324,7 @@ export class BaseNode {
       }
     }
     res._iconEl = iconEl;
-    this._iconEl = iconEl;   // also on node — survives across renders for fast-path icon refresh
+    this._iconEl = iconEl;
 
     if (rc.viewPrefs.showLinkId && !isPatient) row.appendChild(this._buildLinkIdTag(rc));
 
@@ -387,6 +390,10 @@ export class BaseNode {
       pfx.className = 'preview-prefix';
       if (this.type === 'group') pfx.classList.add('preview-prefix--group');
       pfx.textContent = this._prefix;
+      pfx.dataset.tipTitle = 'Item prefix';
+      pfx.dataset.tipBody  = 'Prefix label assigned to this item (item.prefix).';
+      pfx.dataset.tipFhir  = 'Questionnaire.item.prefix';
+      pfx.dataset.tipSpec  = 'R4';
       row.appendChild(pfx);
     }
 
@@ -546,9 +553,13 @@ export class BaseNode {
   _buildRowContent(row, res, rc) {
     const label = this._buildLabel(res, rc);
     if (this._renderStyle) applyRenderStyle(label, this._renderStyle);
-    row.appendChild(label);
-    this._buildSupportLinks(row, rc);
-    this._buildVisHint(row, rc);
+    const body = document.createElement('div');
+    body.className = 'item-body';
+    body.appendChild(label);
+    this._buildSupportLinks(body, rc);
+    this._buildVisHint(body, rc);
+    row.appendChild(body);
+    row._itemBody = body; // stash for subclass badge insertion
   }
 
   // Append row to container, handling hidden-group wrapper. Returns actual target element.
@@ -572,15 +583,25 @@ export class BaseNode {
     const collapsed = this._previewCollapsed;
     const toggle = document.createElement('span');
     toggle.className = 'preview-collapse-toggle';
-    toggle.textContent = collapsed ? '\u25B6' : '\u25BC';
+    toggle.setAttribute('role', 'button');
+    toggle.setAttribute('tabindex', '0');
+    if (!collapsed) toggle.classList.add('preview-collapse-toggle--open');
     toggle.dataset.tipTitle = collapsed ? 'Expand section' : 'Collapse section';
     const node = this;
-    toggle.addEventListener('click', e => {
-      e.stopPropagation();
+    const doToggle = () => {
       node._previewCollapsed = !node._previewCollapsed;
+      const bus = node._bus || defaultBus;
+      // CALC_RECALC_REQUESTED clears the signature cache so the next render
+      // always does a full rebuild — needed because collapsed state of children
+      // inside repeating groups is not tracked in nodesSig.
+      bus.dispatch(AppEvents.CALC_RECALC_REQUESTED);
+      // Fallback RESPONSE_CHANGED ensures a re-render even if CALC handler misses.
       BaseNode.notifyChanged(node._bus);
-    });
-    row.insertBefore(toggle, row.firstChild);
+    };
+    toggle.addEventListener('click', e => { e.stopPropagation(); doToggle(); });
+    toggle.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doToggle(); } });
+    // Insert toggle as last child of row; CSS positions it absolutely.
+    row.appendChild(toggle);
   }
 
   // Render children with AND/OR separators, skipping separators adjacent to display/info items.
