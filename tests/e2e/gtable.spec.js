@@ -437,9 +437,9 @@ test.describe('gtable — collapse/expand regression', () => {
     await apptToggle.click();
     // appt-provider's sub-rows (prov-name, prov-phone) should disappear.
     await expect(page.locator('[data-preview-id="prov-name"]')).toHaveCount(0);
-    // No DOM duplication — toggle count must not increase.
+    // No DOM duplication — count must not increase (children are strings, no child toggles).
     const countAfterCollapse = await page.locator('.preview-collapse-toggle').count();
-    expect(countAfterCollapse).toBeLessThan(countBefore);
+    expect(countAfterCollapse).toBeLessThanOrEqual(countBefore);
 
     // Expand — sub-rows come back.
     const apptToggleAfter = page.locator('[data-preview-id="appt-provider"] .preview-collapse-toggle');
