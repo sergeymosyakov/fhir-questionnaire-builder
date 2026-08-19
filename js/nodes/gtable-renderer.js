@@ -115,6 +115,7 @@ export class GTableRenderer {
 
     const wrap = document.createElement('div');
     wrap.className = 'gtable-wrap';
+    wrap.dataset.gtableId = group.id;  // needed by partial-rebuild cleanup in preview-form.js
     wrap.appendChild(table);
     target.appendChild(wrap);
   }

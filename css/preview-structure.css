@@ -1,17 +1,10 @@
 /* === Item body (label + badges + control) ==================================== */
-/* Mobile-first: icons inline, label inline — text wraps to col 0. */
-.item-icons { display: inline; }
-.item-icons > * { margin-right: 4px; }
+/* Mobile-first: icons are direct inline children of lform-item, label follows inline. */
 .item-body  { display: inline; vertical-align: baseline; }
-/* Higher specificity than individual badge rules so margin-top:0 wins. */
-.item-icons .preview-linkid,
-.item-icons .preview-prefix,
-.item-icons .preview-hidden-badge,
-.item-icons .preview-short-text-badge,
-.item-icons .preview-meta-badge,
-.item-icons .icon-ok,
-.item-icons .icon-fail,
-.item-icons .preview-icon-ph { margin-top: 0; }
+/* Spacing between inline icon elements and the label. */
+.preview-nav-btn, .icon-ok, .icon-fail, .preview-icon-ph,
+.preview-linkid, .preview-hidden-badge, .preview-short-text-badge,
+.preview-meta-badge, .preview-prefix { margin-right: 4px; }
 /* Controls are full-width blocks, capped at 1024px so they don't stretch too wide. */
 .item-body .ctrl-wrap {
   display: flex;
@@ -59,10 +52,9 @@
   box-shadow: var(--shadow);
 }
 .preview-card:empty { display: none; }
-/* Mobile-first: lform-item is a block; icons float inline, toggle is absolute. */
+/* Mobile-first: lform-item is a block; icons inline, toggle is absolute. */
 .lform-item {
   display: block;
-  overflow: hidden;
   position: relative;
   padding: 8px 10px;
   border-left: 3px solid transparent;
@@ -70,8 +62,8 @@
   font-size: 15px;
   line-height: 1.45;
 }
-/* Reserve padding-right for the absolute toggle on groups. */
-.lform-item:has(> .item-icons ~ .preview-collapse-toggle) { padding-right: 40px; cursor: pointer; }
+/* Reserve right padding for the absolute collapse toggle. */
+.lform-item:has(.preview-collapse-toggle) { padding-right: 40px; cursor: pointer; }
 /* All text elements within a row: consistent font-size, no vertical drift, middle-aligned. */
 .lform-item .preview-linkid,
 .lform-item .preview-prefix,
@@ -94,9 +86,13 @@
   margin-top: 0;
   vertical-align: middle;
 }
-/* Visual breathing room between label and logic/optional badges */
-.lform-item .preview-logic-badge { margin-left: 8px; }
-.lform-item .preview-optional-badge { margin-left: 8px; }
+/* Visual breathing room between label and badges */
+.lform-item .preview-logic-badge,
+.lform-item .preview-optional-badge,
+.lform-item .preview-group-ctrl-badge,
+.lform-item .preview-condition-hint,
+.lform-item .preview-constraint-badge,
+.lform-item .preview-meta-badge { margin-left: 6px; }
 .lform-item:last-child { border-bottom: none; }
 .lform-item:hover { background: #f5f8fc; }
 .lform-item.success { background: var(--c-ok-bg); border-left: 3px solid var(--c-ok-border); }
@@ -106,8 +102,10 @@
 /* Mobile: absolute top-right button. */
 .preview-collapse-toggle {
   position: absolute;
-  top: 2px; right: 2px;
-  width: 36px; height: 36px;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  width: 24px; height: 24px;
   display: inline-flex;
   align-items: center; justify-content: center;
   color: var(--c-primary);
@@ -149,7 +147,7 @@
 @media (min-width: 1024px) {
   .preview-nested .preview-nested { margin-left: 35px; }
 }
-.group-label       { font-weight: 600; color: var(--c-primary); }
+.group-label       { font-weight: 600; color: var(--c-text); }
 .display-info-label { font-style: italic; color: var(--c-text-2); }
 
 /* === Group itemControl: header / footer ===================================== */
@@ -452,7 +450,7 @@
 .gtable td.gtable-td {
   padding: 4px 8px;
   border-bottom: 1px solid var(--c-border-light, #edf0f5);
-  vertical-align: middle;
+  vertical-align: top;
 }
 .gtable td.gtable-td-action {
   width: 2.2rem;
@@ -471,6 +469,7 @@
   padding: 0;
   gap: 4px;
 }
+.gtable td .lform-item + .preview-nested { margin-top: 6px; }
 .gtable td .lform-item:hover { background: transparent; }
 /* Remove button */
 .gtable-rm-btn {

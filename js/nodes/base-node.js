@@ -298,10 +298,6 @@ export class BaseNode {
     const row = this._makePreviewRow('lform-item');
     if (res.hiddenRoot || res._usageModeHidden) row.classList.add('lform-item--hidden');
 
-    // All icon/badge elements go into .item-icons so mobile CSS can float them left.
-    const iconStrip = document.createElement('div');
-    iconStrip.className = 'item-icons';
-
     if (!isPatient && rc.showNavBtn) {
       const navBtn = document.createElement('span');
       navBtn.className = 'preview-nav-btn';
@@ -310,7 +306,7 @@ export class BaseNode {
       navBtn.dataset.tipTitle = 'Go to builder node';
       navBtn.dataset.tipBody  = 'Scroll and highlight the corresponding node in the builder panel.';
       navBtn.addEventListener('click', e => { e.stopPropagation(); rc.bus.dispatch(AppEvents.BUILDER_NAVIGATE_TO, { nodeId: this.id }); });
-      iconStrip.appendChild(navBtn);
+      row.appendChild(navBtn);
     }
 
     const { hasCondition, displayOk } = this._evalCondition(res, rc);
@@ -320,17 +316,17 @@ export class BaseNode {
         iconEl = document.createElement('span');
         iconEl.className   = displayOk ? 'icon-ok' : 'icon-fail';
         iconEl.textContent = displayOk ? '\u2713' : '\u2717';
-        iconStrip.appendChild(iconEl);
+        row.appendChild(iconEl);
       } else {
         const ph = document.createElement('span');
         ph.className = 'preview-icon-ph';
-        iconStrip.appendChild(ph);
+        row.appendChild(ph);
       }
     }
     res._iconEl = iconEl;
     this._iconEl = iconEl;
 
-    if (rc.viewPrefs.showLinkId && !isPatient) iconStrip.appendChild(this._buildLinkIdTag(rc));
+    if (rc.viewPrefs.showLinkId && !isPatient) row.appendChild(this._buildLinkIdTag(rc));
 
     if (res.hiddenRoot && !isPatient) {
       const b = document.createElement('span');
@@ -340,7 +336,7 @@ export class BaseNode {
       b.dataset.tipBody  = 'This item is permanently hidden from patients. It still participates in calculatedExpression logic. Controls are disabled in preview.';
       b.dataset.tipFhir  = 'sdc-questionnaire-hidden';
       b.dataset.tipSpec  = 'SDC';
-      iconStrip.appendChild(b);
+      row.appendChild(b);
     }
 
     if (this._usageMode && !isPatient) {
@@ -351,7 +347,7 @@ export class BaseNode {
       um.dataset.tipBody  = `Usage mode: "${this._usageMode}". Controls when this item is shown:\n\u2022 capture \u2014 only during data entry\n\u2022 display \u2014 only when displaying completed data\n\u2022 display-non-empty \u2014 display only if answered\n\u2022 capture-display \u2014 both modes\n\u2022 capture-display-non-empty \u2014 capture always, display only if answered`;
       um.dataset.tipFhir  = 'item.extension[questionnaire-usageMode].valueCode';
       um.dataset.tipSpec  = 'R4';
-      iconStrip.appendChild(um);
+      row.appendChild(um);
     }
 
     if (this._shortText && !isPatient) {
@@ -362,7 +358,7 @@ export class BaseNode {
       st.dataset.tipBody  = `Short Text: "${this._shortText}" — abbreviated label used in summary views.`;
       st.dataset.tipFhir  = 'item.extension[sdc-questionnaire-shortText].valueString';
       st.dataset.tipSpec  = 'SDC';
-      iconStrip.appendChild(st);
+      row.appendChild(st);
     }
 
     if (this._signatureRequired?.length) {
@@ -374,7 +370,7 @@ export class BaseNode {
       sb.dataset.tipBody  = 'A digital signature is required for this item.\nType(s): ' + labels;
       sb.dataset.tipFhir  = 'item.extension[questionnaire-signatureRequired].valueCodeableConcept';
       sb.dataset.tipSpec  = 'R4';
-      iconStrip.appendChild(sb);
+      row.appendChild(sb);
     }
 
     if (this._isSubject && !isPatient) {
@@ -386,7 +382,7 @@ export class BaseNode {
       sub.dataset.tipBody  = 'This item\u2019s answer identifies the subject of the QuestionnaireResponse (QuestionnaireResponse.subject). Used by SDC servers when generating the response \u2014 has no effect on the patient-facing control.';
       sub.dataset.tipFhir  = 'item.extension[sdc-questionnaire-isSubject].valueBoolean';
       sub.dataset.tipSpec  = 'SDC';
-      iconStrip.appendChild(sub);
+      row.appendChild(sub);
     }
 
     if (this._prefix && rc.viewPrefs.showPrefix) {
@@ -394,11 +390,9 @@ export class BaseNode {
       pfx.className = 'preview-prefix';
       if (this.type === 'group') pfx.classList.add('preview-prefix--group');
       pfx.textContent = this._prefix;
-      iconStrip.appendChild(pfx);
+      row.appendChild(pfx);
     }
 
-    row.appendChild(iconStrip);
-    row._iconStrip = iconStrip;
     return row;
   }
 
@@ -592,22 +586,15 @@ export class BaseNode {
     const node = this;
     const doToggle = () => {
       node._previewCollapsed = !node._previewCollapsed;
-      BaseNode.notifyChanged(node._bus);
+      // CALC_RECALC_REQUESTED clears the signature cache so the next render
+      // always does a full rebuild — needed because collapsed state of children
+      // inside repeating groups is not tracked in nodesSig.
+      (node._bus || defaultBus).dispatch(AppEvents.CALC_RECALC_REQUESTED);
     };
     toggle.addEventListener('click', e => { e.stopPropagation(); doToggle(); });
     toggle.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doToggle(); } });
-    // Tapping anywhere on the header row also collapses — skip interactive elements.
-    row.addEventListener('click', e => {
-      if (e.target.closest('button, input, select, textarea, a, [role="button"]')) return;
-      doToggle();
-    });
-    // Insert toggle after iconStrip (before item-body) so it float-rights correctly.
-    const iconStrip = row._iconStrip;
-    if (iconStrip?.nextSibling) {
-      row.insertBefore(toggle, iconStrip.nextSibling);
-    } else {
-      row.appendChild(toggle);
-    }
+    // Insert toggle as last child of row; CSS positions it absolutely.
+    row.appendChild(toggle);
   }
 
   // Render children with AND/OR separators, skipping separators adjacent to display/info items.
