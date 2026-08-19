@@ -102,10 +102,8 @@
 /* Mobile: absolute top-right button. */
 .preview-collapse-toggle {
   position: absolute;
-  top: 50%;
-  right: 4px;
-  transform: translateY(-50%);
-  width: 24px; height: 24px;
+  top: 4px; right: 4px;
+  width: 36px; height: 36px;
   display: inline-flex;
   align-items: center; justify-content: center;
   color: var(--c-primary);
@@ -344,6 +342,7 @@
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
+  margin-top: 8px;
 }
 .repeat-add-btn:hover {
   background: #e3f2fd;

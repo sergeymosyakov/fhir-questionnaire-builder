@@ -390,6 +390,10 @@ export class BaseNode {
       pfx.className = 'preview-prefix';
       if (this.type === 'group') pfx.classList.add('preview-prefix--group');
       pfx.textContent = this._prefix;
+      pfx.dataset.tipTitle = 'Item prefix';
+      pfx.dataset.tipBody  = 'Prefix label assigned to this item (item.prefix).';
+      pfx.dataset.tipFhir  = 'Questionnaire.item.prefix';
+      pfx.dataset.tipSpec  = 'R4';
       row.appendChild(pfx);
     }
 
@@ -586,10 +590,13 @@ export class BaseNode {
     const node = this;
     const doToggle = () => {
       node._previewCollapsed = !node._previewCollapsed;
+      const bus = node._bus || defaultBus;
       // CALC_RECALC_REQUESTED clears the signature cache so the next render
       // always does a full rebuild — needed because collapsed state of children
       // inside repeating groups is not tracked in nodesSig.
-      (node._bus || defaultBus).dispatch(AppEvents.CALC_RECALC_REQUESTED);
+      bus.dispatch(AppEvents.CALC_RECALC_REQUESTED);
+      // Fallback RESPONSE_CHANGED ensures a re-render even if CALC handler misses.
+      BaseNode.notifyChanged(node._bus);
     };
     toggle.addEventListener('click', e => { e.stopPropagation(); doToggle(); });
     toggle.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doToggle(); } });
