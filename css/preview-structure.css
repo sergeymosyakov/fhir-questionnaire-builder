@@ -46,6 +46,7 @@
 .preview-card .ctrl-slider-value,
 .preview-card .oc-opt,
 .preview-card .sc-trigger,
+.preview-card .ctrl-err,
 .preview-card .sw-dd-select,
 .preview-card .sw-disabled-display-row label { font-size: inherit; }
 
@@ -149,7 +150,7 @@
   .preview-nested .preview-nested { margin-left: 35px; }
 }
 .group-label       { font-weight: 600; color: var(--c-primary); }
-.display-info-label { font-style: italic; color: var(--c-text-2); font-size: 12px; }
+.display-info-label { font-style: italic; color: var(--c-text-2); }
 
 /* === Group itemControl: header / footer ===================================== */
 .lform-group-header { border-bottom: 2px solid var(--c-primary, #2563eb); padding-bottom: 6px; }
