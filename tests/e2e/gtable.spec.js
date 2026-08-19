@@ -56,7 +56,7 @@ test.describe('gtable — basic rendering', () => {
   test('gtable shows column headers for each child item', async ({ page }) => {
     await loadFixture(page);
     // medications gtable: Medication, Dose, Unit, Frequency, Start date
-    const table = page.locator('[data-gtable-id="medications"]');
+    const table = page.locator('table[data-gtable-id="medications"]');
     await expect(table.locator('th.gtable-th').filter({ hasText: 'Medication' })).toBeVisible();
     await expect(table.locator('th.gtable-th').filter({ hasText: 'Dose' })).toBeVisible();
     await expect(table.locator('th.gtable-th').filter({ hasText: 'Frequency' })).toBeVisible();
@@ -64,14 +64,14 @@ test.describe('gtable — basic rendering', () => {
 
   test('required column header shows asterisk', async ({ page }) => {
     await loadFixture(page);
-    const table = page.locator('[data-gtable-id="medications"]');
+    const table = page.locator('table[data-gtable-id="medications"]');
     const medicationTh = table.locator('th.gtable-th').filter({ hasText: 'Medication' });
     await expect(medicationTh.locator('.gtable-required-star')).toBeVisible();
   });
 
   test('non-repeating gtable (vitals) renders a single data row', async ({ page }) => {
     await loadFixture(page);
-    const vitalsTable = page.locator('[data-gtable-id="vitals"]');
+    const vitalsTable = page.locator('table[data-gtable-id="vitals"]');
     await expect(vitalsTable).toBeVisible();
     const rows = vitalsTable.locator('tbody tr');
     await expect(rows).toHaveCount(1);
@@ -120,7 +120,7 @@ test.describe('gtable — controls in cells', () => {
   test('no label visible in table cells (cell mode strips labels)', async ({ page }) => {
     await loadFixture(page);
     // In cell mode, .lform-item-label should NOT appear inside table cells
-    const medsTable = page.locator('[data-gtable-id="medications"]');
+    const medsTable = page.locator('table[data-gtable-id="medications"]');
     // The items inside cells use display:contents on the wrapper, labels not rendered
     const labelCount = await medsTable.locator('td .lform-item-label, td .preview-label').count();
     expect(labelCount).toBe(0);
@@ -132,26 +132,26 @@ test.describe('gtable — controls in cells', () => {
 test.describe('gtable — repeating rows', () => {
   test('repeating gtable starts with one data row (minOccurs=1)', async ({ page }) => {
     await loadFixture(page);
-    const medsTable = page.locator('[data-gtable-id="medications"]');
+    const medsTable = page.locator('table[data-gtable-id="medications"]');
     await expect(medsTable.locator('tbody tr')).toHaveCount(1);
   });
 
   test('+ Add row button is visible on repeating gtable', async ({ page }) => {
     await loadFixture(page);
-    const medsTable = page.locator('[data-gtable-id="medications"]');
+    const medsTable = page.locator('table[data-gtable-id="medications"]');
     await expect(medsTable.locator('[data-testid="gtable-add-btn"]')).toBeVisible();
   });
 
   test('clicking + Add row adds a second row', async ({ page }) => {
     await loadFixture(page);
-    const medsTable = page.locator('[data-gtable-id="medications"]');
+    const medsTable = page.locator('table[data-gtable-id="medications"]');
     await medsTable.locator('[data-testid="gtable-add-btn"]').click();
     await expect(medsTable.locator('tbody tr')).toHaveCount(2, { timeout: 5_000 });
   });
 
   test('× Remove button appears when there are more rows than minOccurs', async ({ page }) => {
     await loadFixture(page);
-    const medsTable = page.locator('[data-gtable-id="medications"]');
+    const medsTable = page.locator('table[data-gtable-id="medications"]');
     // Initially 1 row = minOccurs → no remove button
     await expect(medsTable.locator('[data-testid="gtable-remove-btn"]')).toHaveCount(0);
     // Add a row
@@ -163,7 +163,7 @@ test.describe('gtable — repeating rows', () => {
 
   test('removing a row decreases row count', async ({ page }) => {
     await loadFixture(page);
-    const medsTable = page.locator('[data-gtable-id="medications"]');
+    const medsTable = page.locator('table[data-gtable-id="medications"]');
     await medsTable.locator('[data-testid="gtable-add-btn"]').click();
     await expect(medsTable.locator('tbody tr')).toHaveCount(2, { timeout: 5_000 });
     await medsTable.locator('[data-testid="gtable-remove-btn"]').first().click();
@@ -172,7 +172,7 @@ test.describe('gtable — repeating rows', () => {
 
   test('values in each row are independent (row isolation)', async ({ page }) => {
     await loadFixture(page);
-    const medsTable = page.locator('[data-gtable-id="medications"]');
+    const medsTable = page.locator('table[data-gtable-id="medications"]');
     await medsTable.locator('[data-testid="gtable-add-btn"]').click();
     await expect(medsTable.locator('tbody tr')).toHaveCount(2, { timeout: 5_000 });
 
@@ -190,7 +190,7 @@ test.describe('gtable — repeating rows', () => {
     await loadFixture(page);
     // medications maxOccurs=10 — add until disabled; just verify the button has disabled attr at limit
     // For this test we just verify the button attribute logic exists (not add 10 rows in e2e)
-    const medsTable = page.locator('[data-gtable-id="medications"]');
+    const medsTable = page.locator('table[data-gtable-id="medications"]');
     const addBtn = medsTable.locator('[data-testid="gtable-add-btn"]');
     await expect(addBtn).not.toBeDisabled();
   });
@@ -239,7 +239,7 @@ test.describe('gtable — nested groups in cells', () => {
   test('nested gtable inside a table cell renders as a nested table (lab-values)', async ({ page }) => {
     await loadFixture(page);
     // lab-values is a gtable inside lab-results gtable
-    const labResultsTable = page.locator('[data-gtable-id="lab-results"]');
+    const labResultsTable = page.locator('table[data-gtable-id="lab-results"]');
     await expect(labResultsTable).toBeVisible();
     // Inside a cell there should be another nested gtable
     const nestedTable = labResultsTable.locator('[data-testid="gtable"]');
@@ -248,14 +248,14 @@ test.describe('gtable — nested groups in cells', () => {
 
   test('nested gtable has its own + Add row button', async ({ page }) => {
     await loadFixture(page);
-    const labResultsTable = page.locator('[data-gtable-id="lab-results"]');
-    const nestedTable = labResultsTable.locator('[data-gtable-id="lab-values"]');
+    const labResultsTable = page.locator('table[data-gtable-id="lab-results"]');
+    const nestedTable = labResultsTable.locator('table[data-gtable-id="lab-values"]');
     await expect(nestedTable.locator('[data-testid="gtable-add-btn"]')).toBeVisible();
   });
 
   test('nested gtable can add rows independently', async ({ page }) => {
     await loadFixture(page);
-    const nestedTable = page.locator('[data-gtable-id="lab-values"]');
+    const nestedTable = page.locator('table[data-gtable-id="lab-values"]');
     await expect(nestedTable.locator('tbody tr')).toHaveCount(1);
     await nestedTable.locator('[data-testid="gtable-add-btn"]').click();
     await expect(nestedTable.locator('tbody tr')).toHaveCount(2, { timeout: 5_000 });
@@ -312,7 +312,7 @@ test.describe('gtable — FHIR round-trip', () => {
 test.describe('gtable — column header indicators (mirror of row-level badge tests)', () => {
   test('enableWhen condition: 👁 indicator visible in column header', async ({ page }) => {
     await loadFixture(page);
-    const featTable = page.locator('[data-gtable-id="features"]');
+    const featTable = page.locator('table[data-gtable-id="features"]');
     // feat-conditional column has enableWhen → should show 👁 in its <th>
     const condTh = featTable.locator('th.gtable-th').filter({ hasText: 'Conditional' });
     await expect(condTh).toBeVisible();
@@ -346,7 +346,7 @@ test.describe('gtable — column header indicators (mirror of row-level badge te
 
   test('readOnly: 🔒 indicator visible in column header', async ({ page }) => {
     await loadFixture(page);
-    const featTable = page.locator('[data-gtable-id="features"]');
+    const featTable = page.locator('table[data-gtable-id="features"]');
     const roTh = featTable.locator('th.gtable-th').filter({ hasText: 'Read-only' });
     await expect(roTh.locator('.gtable-col-ind').filter({ hasText: '🔒' })).toBeVisible();
   });
@@ -362,7 +362,7 @@ test.describe('gtable — column header indicators (mirror of row-level badge te
 
   test('calculatedExpression: ⚡ indicator visible in column header', async ({ page }) => {
     await loadFixture(page);
-    const featTable = page.locator('[data-gtable-id="features"]');
+    const featTable = page.locator('table[data-gtable-id="features"]');
     const calcTh = featTable.locator('th.gtable-th').filter({ hasText: 'Doubled' });
     await expect(calcTh.locator('.gtable-col-ind').filter({ hasText: '⚡' })).toBeVisible();
   });
@@ -380,14 +380,14 @@ test.describe('gtable — column header indicators (mirror of row-level badge te
 
   test('constraint: ⚠️ indicator visible in column header', async ({ page }) => {
     await loadFixture(page);
-    const featTable = page.locator('[data-gtable-id="features"]');
+    const featTable = page.locator('table[data-gtable-id="features"]');
     const constrTh = featTable.locator('th.gtable-th').filter({ hasText: 'Range 1-10' });
     await expect(constrTh.locator('.gtable-col-ind').filter({ hasText: '⚠' })).toBeVisible();
   });
 
   test('support link: 🔗 indicator visible in column header', async ({ page }) => {
     await loadFixture(page);
-    const featTable = page.locator('[data-gtable-id="features"]');
+    const featTable = page.locator('table[data-gtable-id="features"]');
     const linkTh = featTable.locator('th.gtable-th').filter({ hasText: 'With support link' });
     await expect(linkTh.locator('a.gtable-col-ind')).toBeVisible();
     const href = await linkTh.locator('a.gtable-col-ind').getAttribute('href');
@@ -398,14 +398,14 @@ test.describe('gtable — column header indicators (mirror of row-level badge te
     await loadFixture(page);
     await enablePatientView(page);
     // In patient view, no gtable-col-ind elements should appear
-    const featTable = page.locator('[data-gtable-id="features"]');
+    const featTable = page.locator('table[data-gtable-id="features"]');
     await expect(featTable).toBeVisible();
     await expect(featTable.locator('.gtable-col-ind')).toHaveCount(0);
   });
 
   test('required column shows * but NOT optional for required items', async ({ page }) => {
     await loadFixture(page);
-    const medsTable = page.locator('[data-gtable-id="medications"]');
+    const medsTable = page.locator('table[data-gtable-id="medications"]');
     const medicationTh = medsTable.locator('th.gtable-th').filter({ hasText: 'Medication' });
     // Required → star exists
     await expect(medicationTh.locator('.gtable-required-star')).toBeVisible();
