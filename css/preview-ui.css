@@ -199,19 +199,8 @@
   background: #f9fafb;
   min-width: 0;
   width: 100%;
-  max-width: 100%;
+  max-width: 1024px;
   box-sizing: border-box;
-}
-@media (min-width: 1024px) {
-  .patient-view input[type="text"],
-  .patient-view input[type="number"],
-  .patient-view input[type="date"],
-  .patient-view input[type="url"],
-  .patient-view textarea,
-  .patient-view select {
-    min-width: 180px;
-    width: auto;
-  }
 }
 .patient-view input[type="text"]:focus,
 .patient-view input[type="number"]:focus,
@@ -289,7 +278,8 @@
   border-radius: var(--r);
   border: 1px solid #1e293b;
   box-shadow: var(--shadow);
-  white-space: pre;
+  white-space: pre-wrap;
+  word-break: break-all;
   tab-size: 2;
   /* fill right panel just like preview-card */
   min-height: 100%;

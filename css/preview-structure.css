@@ -12,15 +12,15 @@
 .item-icons .icon-ok,
 .item-icons .icon-fail,
 .item-icons .preview-icon-ph { margin-top: 0; }
-/* Controls are full-width blocks on mobile; ctrl-wrap stays flex to keep slider+value on same line. */
+/* Controls are full-width blocks, capped at 1024px so they don't stretch too wide. */
 .item-body .ctrl-wrap {
   display: flex;
   width: 100%;
+  max-width: 1024px;
   box-sizing: border-box;
   margin-top: 4px;
 }
 .item-body .repeat-wrap,
-.item-body .gtable-wrap,
 .item-body input[type=text],
 .item-body input[type=number],
 .item-body input[type=date],
@@ -30,10 +30,25 @@
 .item-body input[type=range] {
   display: block;
   width: 100%;
+  max-width: 1024px;
   box-sizing: border-box;
   margin-top: 4px;
 }
-.item-body .sc-trigger { width: 100%; max-width: none; min-width: 0; }
+.item-body .sc-trigger { width: 100%; max-width: 1024px; min-width: 0; }
+/* gtable-wrap: no max-width — table may be wider, scrolls horizontally. */
+.item-body .gtable-wrap {
+  display: block;
+  margin-top: 4px;
+}
+/* Controls inside preview-card: override controls.css font-size values to inherit 15px. */
+.preview-card .radio-label,
+.preview-card .radio-no-opts,
+.preview-card .ctrl-slider-value,
+.preview-card .oc-opt,
+.preview-card .sc-trigger,
+.preview-card .sw-dd-select,
+.preview-card .sw-disabled-display-row label { font-size: inherit; }
+
 /* === Preview card ============================================================ */
 .preview-card {
   background: var(--c-surface);
@@ -112,50 +127,6 @@
 .preview-collapse-toggle--open::before { transform: rotate(135deg); }
 .preview-collapse-toggle:hover,
 .preview-collapse-toggle:active { background: var(--c-primary-lt); }
-
-/* === Desktop layout (≥1024px) ================================================= */
-@media (min-width: 1024px) {
-  /* Switch item-icons back to flex strip, item-body to layout-transparent. */
-  .item-icons { display: flex; align-items: baseline; gap: 6px; flex-shrink: 0; vertical-align: unset; margin-right: 0; }
-  .item-body  { display: contents; }
-  /* Reset controls — flex row handles spacing. */
-  .item-body .ctrl-wrap     { display: inline-flex; width: auto; margin-top: 0; }
-  .item-body .repeat-wrap   { display: flex;         width: auto; margin-top: 0; }
-  .item-body .gtable-wrap   { display: block;        width: auto; margin-top: 0; }
-  .item-body input[type=text],
-  .item-body input[type=number],
-  .item-body input[type=date],
-  .item-body input[type=url],
-  .item-body textarea,
-  .item-body select { display: inline-block; width: auto; margin-top: 0; }
-  .item-body input[type=range] { display: inline-block; width: auto; margin-top: 0; }
-  .item-body .sc-trigger    { width: auto; max-width: none; }
-  /* lform-item: flex row on desktop. */
-  .lform-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    position: static;
-    overflow: visible;
-  }
-  .lform-item:has(> .item-icons ~ .preview-collapse-toggle) { padding-right: 14px; cursor: default; }
-  /* Collapse toggle: right edge of the flex row on desktop, same style as mobile. */
-  .preview-collapse-toggle {
-    position: static;
-    order: 10;
-    margin-left: auto;
-    align-self: center;
-    width: 28px; height: 28px;
-    color: var(--c-primary);
-    border-radius: 6px;
-    flex-shrink: 0;
-    transition: background .15s;
-  }
-  .preview-collapse-toggle::before { width: 8px; height: 8px; border-width: 2px; }
-  .preview-collapse-toggle:hover,
-  .preview-collapse-toggle:active { background: var(--c-primary-lt); }
-}
 
 /* === Nested group children =================================================== */
 .preview-nested {

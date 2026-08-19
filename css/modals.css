@@ -49,8 +49,15 @@
   margin: 12px auto 4px;
   align-self: center;
 }
+/* On mobile, all per-modal width rules are overridden to full-width bottom sheet. */
+[data-testid] .modal-box {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
 @media (min-width: 1024px) {
   .modal-backdrop { align-items: center; }
+  /* Per-modal sizes only apply on desktop — override any width from per-modal rules on mobile. */
   .modal-box {
     border: 1px solid var(--c-border);
     border-radius: 0;
