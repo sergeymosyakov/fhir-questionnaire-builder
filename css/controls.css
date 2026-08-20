@@ -180,7 +180,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointe
 .oc-wrap:focus-within .oc-btn { border-color: var(--c-primary); }
 .oc-drop {
   position: fixed;
-  max-width: 320px;
+  max-width: 400px;
   max-height: 200px;
   overflow-y: auto;
   background: #fff;
@@ -191,7 +191,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointe
 }
 .oc-opt {
   padding: 5px 10px;
-  font-size: 13px;
+  font-size: inherit;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;

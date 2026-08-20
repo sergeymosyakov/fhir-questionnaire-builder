@@ -14,6 +14,26 @@ import {
   siblingSelectedCodes, filterSiblingSelected, baseRowId,
 } from './choice-helpers.js';
 
+/** Position a portal dropdown below (or above) its anchor; copy font-size from fontSrc. */
+function _positionDropEl(dropEl, anchor, fontSrc) {
+  const rect = anchor.getBoundingClientRect();
+  const vh = window.innerHeight;
+  const spaceBelow = vh - rect.bottom - 4;
+  const spaceAbove = rect.top - 4;
+  const maxAllowed = parseInt(getComputedStyle(dropEl).maxHeight) || 200;
+  dropEl.style.left     = rect.left + 'px';
+  dropEl.style.minWidth = rect.width + 'px';
+  dropEl.style.fontSize = getComputedStyle(fontSrc || anchor).fontSize;
+  const cap = Math.min(maxAllowed, Math.max(spaceBelow >= Math.min(maxAllowed, spaceAbove) ? spaceBelow : spaceAbove, 60));
+  dropEl.style.maxHeight = cap + 'px';
+  if (spaceBelow >= Math.min(maxAllowed, spaceAbove)) {
+    dropEl.style.top = (rect.bottom + 2) + 'px';
+  } else {
+    dropEl.style.top = Math.max(4, rect.top - Math.min(cap, dropEl.offsetHeight || cap) - 2) + 'px';
+  }
+  return rect;
+}
+
 export class ChoiceNode extends ItemNode {
   constructor(data = {}) {
     super(data);
@@ -247,28 +267,12 @@ export class ChoiceNode extends ItemNode {
 
     const _reposition = () => {
       if (!dropEl) return;
-      const rect       = trigger.getBoundingClientRect();
-      const vh         = window.innerHeight;
-      const spaceBelow = vh - rect.bottom - 4;
-      const spaceAbove = rect.top - 4;
-      const maxAllowed = 200;
-
-      dropEl.style.left = rect.left + 'px';
+      const rect = _positionDropEl(dropEl, trigger);
       if (node._choiceColumns && node._choiceColumns.length) {
         dropEl.style.minWidth = rect.width + 'px';
         dropEl.style.width = 'auto';
       } else {
         dropEl.style.width = rect.width + 'px';
-      }
-
-      if (spaceBelow >= Math.min(maxAllowed, spaceAbove)) {
-        const cap = Math.min(maxAllowed, Math.max(spaceBelow, 60));
-        dropEl.style.maxHeight = cap + 'px';
-        dropEl.style.top = (rect.bottom + 2) + 'px';
-      } else {
-        const cap = Math.min(maxAllowed, Math.max(spaceAbove, 60));
-        dropEl.style.maxHeight = cap + 'px';
-        dropEl.style.top = (rect.top - Math.min(cap, dropEl.offsetHeight || cap) - 2) + 'px';
       }
     };
 
@@ -452,15 +456,7 @@ export class OpenChoiceNode extends ItemNode {
       }
       document.body.appendChild(dropEl);
       _open = true;
-      const rect = el.getBoundingClientRect();
-      dropEl.style.left     = rect.left + 'px';
-      dropEl.style.minWidth = rect.width + 'px';
-      const dropH = dropEl.offsetHeight;
-      if (rect.bottom + dropH + 4 <= window.innerHeight) {
-        dropEl.style.top = (rect.bottom + 2) + 'px';
-      } else {
-        dropEl.style.top = Math.max(4, rect.top - dropH - 2) + 'px';
-      }
+      _positionDropEl(dropEl, box, el);
       document.addEventListener('mousedown', _onOutside, true);
     };
 

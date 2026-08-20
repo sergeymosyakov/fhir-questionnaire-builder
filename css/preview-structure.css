@@ -11,7 +11,7 @@
   width: 100%;
   max-width: 1024px;
   box-sizing: border-box;
-  margin-top: 4px;
+  margin-top: 7px;
 }
 .item-body .repeat-wrap,
 .item-body input[type=text],
@@ -31,8 +31,8 @@
 .item-body input[type=time],
 .item-body input[type=datetime-local] {
   display: block;
-  width: auto;
-  max-width: 200px;
+  width: 100%;
+  max-width: 1024px;
   box-sizing: border-box;
   margin-top: 4px;
 }
@@ -93,7 +93,7 @@
 .lform-item .calc-badge {
   font-size: inherit;
   margin-top: 0;
-  vertical-align: middle;
+  vertical-align: top;
 }
 /* Visual breathing room between label and badges */
 .lform-item .preview-logic-badge,
@@ -167,7 +167,7 @@
 }
 .lform-group-footer { border-top: 1px solid var(--c-border, #e0e0e0); padding-top: 6px; }
 .lform-group-footer .group-label {
-  font-size: 11px;
+  font-size: inherit;
   font-weight: 400;
   font-style: italic;
   color: var(--c-text-2, #6b7280);
@@ -206,7 +206,7 @@
 /* === Required star / optional badge ========================================= */
 .preview-required-star {
   color: var(--c-err);
-  font-size: 13px;
+  font-size: inherit;
   line-height: 1;
   margin-left: 2px;
   font-weight: 700;
@@ -222,11 +222,12 @@
   margin-top: 3px;
   margin-left: 5px;
   font-style: italic;
+  vertical-align: middle;
 }
 
 /* === enableWhen condition hint =============================================== */
 .preview-condition-hint {
-  font-size: 11px;
+  font-size: inherit;
   color: var(--c-text-2);
   background: #f5f5f5;
   border: 1px solid var(--c-border);
@@ -247,7 +248,7 @@
 
 /* === questionnaire-constraint badge ========================================= */
 .preview-constraint-badge {
-  font-size: 11px;
+  font-size: inherit;
   color: #795548;
   background: #fff8e1;
   border: 1px solid #ffe082;
@@ -257,6 +258,7 @@
   flex-shrink: 0;
   margin-top: 3px;
   cursor: default;
+  vertical-align: middle;
 }
 .preview-constraint-badge--fail {
   color: #b71c1c;
@@ -266,7 +268,7 @@
 
 /* === read-only / initial value meta badges ================================== */
 .preview-meta-badge {
-  font-size: 11px;
+  font-size: inherit;
   color: #546e7a;
   background: #eceff1;
   border: 1px solid #b0bec5;
@@ -276,6 +278,7 @@
   flex-shrink: 0;
   margin-top: 3px;
   cursor: default;
+  vertical-align: middle;
 }
 .preview-meta-badge--init {
   color: #4527a0;
@@ -301,7 +304,7 @@
 /* Reference info hints (profile / filter) */
 .ctrl-ref-info {
   display: block;
-  font-size: 11px;
+  font-size: inherit;
   color: #78909c;
   margin-top: 3px;
   white-space: nowrap;
@@ -349,7 +352,7 @@
   background: #f0f7ff;
   color: #1565c0;
   cursor: pointer;
-  font-size: 12px;
+  font-size: inherit;
   font-weight: 500;
   margin-top: 8px;
 }
@@ -381,7 +384,7 @@
 }
 .preview-readonly-value {
   display: inline-block;
-  font-size: 13px;
+  font-size: inherit;
   color: var(--c-text-2, #546e7a);
   background: #f5f7fa;
   border: 1px solid var(--c-border, #dde3ec);
@@ -392,7 +395,7 @@
 }
 .preview-calc-value {
   display: inline-block;
-  font-size: 12px;
+  font-size: inherit;
   padding: 1px 7px;
   border-radius: 4px;
   margin-left: 6px;

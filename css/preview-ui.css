@@ -31,7 +31,7 @@
 
 /* === Auto-fill badge ========================================================= */
 .auto-badge {
-  font-size: 13px;
+  font-size: inherit;
   cursor: help;
   transition: opacity .2s;
   flex-shrink: 0;
@@ -69,7 +69,7 @@
 }
 
 /* === Preview helpers ========================================================= */
-.preview-no-visible   { color: #999; font-size: 13px; padding: 12px; }
+.preview-no-visible   { color: #999; font-size: inherit; padding: 12px; }
 .preview-icon-ph      { flex-shrink: 0; display: inline-block; margin-top: 1px; }
 .preview-row--pointer { cursor: pointer; }
 
@@ -208,6 +208,20 @@
   max-width: 1024px;
   box-sizing: border-box;
 }
+/* Number/date inputs compact in patient view on desktop. */
+.patient-view input[type="number"],
+.patient-view input[type="date"],
+.patient-view input[type="time"],
+.patient-view input[type="datetime-local"] {
+  width: 100%;
+  max-width: 1024px;
+}
+@media (min-width: 1024px) {
+  .patient-view input[type="number"],
+  .patient-view input[type="date"],
+  .patient-view input[type="time"],
+  .patient-view input[type="datetime-local"] { width: 400px; max-width: 100%; }
+}
 .patient-view input[type="text"]:focus,
 .patient-view input[type="number"]:focus,
 .patient-view input[type="date"]:focus,
@@ -249,7 +263,7 @@
   background: none;
   border: none;
   color: var(--c-text-2);
-  font-size: 11px;
+  font-size: inherit;
   font-weight: normal;
   padding: 0;
   border-radius: 0;
