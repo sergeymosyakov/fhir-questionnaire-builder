@@ -1,0 +1,25 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "boolean-segmented",
+  "title": "Boolean Segmented Control Demo",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "consent",
+      "text": "Do you consent?",
+      "type": "boolean"
+    },
+    {
+      "linkId": "smoker",
+      "text": "Are you a current smoker?",
+      "type": "boolean",
+      "initial": [{ "valueBoolean": true }]
+    },
+    {
+      "linkId": "diabetic",
+      "text": "Do you have diabetes?",
+      "type": "boolean",
+      "initial": [{ "valueBoolean": false }]
+    }
+  ]
+}

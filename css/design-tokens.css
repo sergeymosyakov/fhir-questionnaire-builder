@@ -28,4 +28,6 @@
   --shadow-sm:     0 1px 4px rgba(0,0,0,.07);
   --r:             8px;
   --r-sm:          4px;
+  --fs-preview:    15px;
+  --ctrl-h:        30px;
 }

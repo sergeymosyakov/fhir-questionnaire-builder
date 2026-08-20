@@ -1,20 +1,30 @@
 /* === Preview card inputs ===================================================== */
 /* Mobile-first: larger touch-friendly sizes. */
+/* Shared min-height — applies to all views without media-query overrides. */
+.preview-card input[type=text],
+.preview-card input[type=number],
+.preview-card select,
+.preview-card .sc-trigger,
+.preview-card input[type=file] {
+  min-height: var(--ctrl-h);
+}
 .preview-card input[type=text],
 .preview-card input[type=number] {
   padding: 8px 10px;
   border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
-  font-size: 15px;
+  font-size: var(--fs-preview);
   color: var(--c-text);
   max-width: 100%;
   box-sizing: border-box;
 }
 @media (min-width: 1024px) {
   .preview-card input[type=text],
-  .preview-card input[type=number] { padding: 3px 6px; font-size: 12px; }
+  .preview-card input[type=number] { padding: 3px 6px; }
 }
-.preview-card .oc-input[type=text] { border-right: none; border-radius: var(--r-sm) 0 0 var(--r-sm); }
+.preview-card .oc-wrap { display: flex; margin-top: 4px; }
+.preview-card .oc-input[type=text] { border-right: none; border-radius: var(--r-sm) 0 0 var(--r-sm); height: var(--ctrl-h); min-height: var(--ctrl-h); margin-top: 0; }
+.preview-card .oc-btn { height: var(--ctrl-h); }
 .preview-card input[type=checkbox] { accent-color: var(--c-primary); width: 20px; height: 20px; }
 @media (min-width: 1024px) {
   .preview-card input[type=checkbox] { width: auto; height: auto; }
@@ -23,11 +33,11 @@
   padding: 8px 10px;
   border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
-  font-size: 15px;
+  font-size: var(--fs-preview);
   color: var(--c-text);
 }
 @media (min-width: 1024px) {
-  .preview-card select { padding: 3px 6px; font-size: 12px; }
+  .preview-card select { padding: 3px 6px; }
 }
 
 /* === Final result banner ===================================================== */
@@ -58,7 +68,7 @@
 .lform-item--instructions { background: #eef6ff; border-left: 3px solid var(--c-primary-lt, #a3c4ef); }
 .lform-item--security     { background: #fffbec; border-left: 3px solid #f0b429; }
 .lform-item--help         { background: #f8f8f8; border-left: 3px solid #c0c0c0; }
-.display-cat-icon { flex-shrink: 0; font-size: 14px; line-height: 1; margin-top: 1px; }
+.display-cat-icon { flex-shrink: 0; font-size: var(--fs-preview); line-height: 1; margin-top: 1px; }
 .display-cat-icon--instructions { color: var(--c-primary); }
 .display-cat-icon--security     { color: #c88a00; }
 .display-help-wrap   { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }

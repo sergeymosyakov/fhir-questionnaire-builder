@@ -85,7 +85,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: var(--fs-preview);
   cursor: pointer;
   border-radius: 4px;
   opacity: 0.15;
@@ -179,6 +179,7 @@
 }
 .patient-view .preview-calc-value {
   font-weight: 600;
+  font-size: var(--fs-preview);
   color: #1d4ed8;
   background: #eff6ff;
   border: 1px solid #bfdbfe;
@@ -197,7 +198,7 @@
 .patient-view input[type="url"],
 .patient-view textarea,
 .patient-view select {
-  font-size: 14px;
+  font-size: var(--fs-preview);
   padding: 7px 10px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -309,4 +310,43 @@
 
 /* calc-badge: hide entirely in no-badges mode */
 .preview--no-badges .calc-badge { display: none; }
+
+/* === Boolean segmented control (Yes / No / Not Answered) =================== */
+.bool-seg {
+  display: inline-flex;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  max-width: 360px;
+}
+.bool-seg__btn {
+  flex: 1;
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  border-right: 1.5px solid var(--c-border);
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  color: var(--c-text);
+  min-height: var(--ctrl-h);
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s;
+}
+.bool-seg__btn:last-child { border-right: none; }
+.bool-seg__btn:hover:not(.bool-seg__btn--active) { background: var(--c-primary-lt); }
+.bool-seg__btn--active {
+  background: var(--c-primary);
+  color: #fff;
+  font-weight: 600;
+}
+/* "Not Answered" active = grey, visually distinct from Yes/No */
+.bool-seg__btn:last-child.bool-seg__btn--active {
+  background: #c3c3c3;
+  color: #fff;
+}
+/* Mobile: stretch to full row width */
+@media (max-width: 1023px) {
+  .bool-seg { display: flex; width: 100%; max-width: 100%; }
+}
 
