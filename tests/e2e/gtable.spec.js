@@ -20,7 +20,6 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
-import { clickBoolOption } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/gtable-demo.fhir.json');
 

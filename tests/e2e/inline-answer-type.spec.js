@@ -17,7 +17,7 @@
 //   type-select          type dropdown inside the Answer Type modal
 
 import { test, expect } from '@playwright/test';
-import { freshStart, addRootGroup, addItemToGroup, clickBoolOption } from './helpers/builder.js';
+import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
 async function seed(page) {
