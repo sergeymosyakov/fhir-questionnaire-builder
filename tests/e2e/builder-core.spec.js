@@ -211,7 +211,7 @@ test.describe('Builder → preview: item type changes', () => {
     await expect(modal).not.toBeVisible();
   }
 
-  test('type = checkbox → preview renders a checkbox input', async ({ page }) => {
+  test('type = checkbox → preview renders a boolean segmented control', async ({ page }) => {
     await freshStart(page);
     const groupId = await addRootGroup(page);
     const itemId  = await addItemToGroup(page, groupId);
@@ -219,7 +219,7 @@ test.describe('Builder → preview: item type changes', () => {
     await changeType(page, itemId, 'checkbox');
 
     await expect(
-      page.locator(`[data-preview-id="${itemId}"] input[type="checkbox"]`)
+      page.locator(`[data-preview-id="${itemId}"] .bool-seg`)
     ).toBeVisible();
   });
 

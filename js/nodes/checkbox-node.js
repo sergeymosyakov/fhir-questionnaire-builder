@@ -27,7 +27,7 @@ export class CheckboxNode extends ItemNode {
     const seg = document.createElement('div');
     seg.className = 'bool-seg';
     seg.setAttribute('role', 'group');
-    seg.setAttribute('aria-label', node.text || 'Boolean');
+    seg.setAttribute('aria-label', node.text || 'Yes/No question');
 
     const currentVal = getValue(node.id);
 
@@ -36,9 +36,7 @@ export class CheckboxNode extends ItemNode {
       btn.type = 'button';
       btn.className = 'bool-seg__btn';
       btn.textContent = opt.label;
-      // undefined === undefined needs explicit check since === works for primitives
-      const isActive = opt.value === currentVal ||
-        (opt.value === undefined && currentVal === undefined);
+      const isActive = opt.value === currentVal;
       btn.classList.toggle('bool-seg__btn--active', isActive);
       btn.setAttribute('aria-pressed', String(isActive));
 

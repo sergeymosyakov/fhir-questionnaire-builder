@@ -333,7 +333,7 @@
   background: #fff;
   color: #999;
   cursor: pointer;
-  font-size: 14px;
+  font-size: inherit;
   line-height: 1;
 }
 .repeat-remove-btn:hover {
@@ -429,13 +429,14 @@
 
 /* === Group table layout (questionnaire-itemControl: gtable) ================ */
 /* Wrapper provides horizontal scroll on narrow screens. */
+/* Mobile-first: no side margin on small screens. */
 .gtable-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  margin: 6px 14px 8px;
+  margin: 6px 0 8px;
 }
-@media (max-width: 1023px) {
-  .gtable-wrap { margin: 6px 0 8px; }
+@media (min-width: 1024px) {
+  .gtable-wrap { margin: 6px 14px 8px; }
 }
 .gtable {
   border-collapse: collapse;

@@ -19,6 +19,19 @@ import {
 } from './import-helpers.js';
 
 // Build our item node from a FHIR leaf question
+
+/** Read SDC rendering-style/xhtml/markdown from item._text.extension onto node. */
+function applyRenderingExtensions(fhirItem, node) {
+  const exts = fhirItem._text?.extension;
+  if (!exts) return;
+  const rs = exts.find(x => x.url === FHIR.renderingStyle);
+  if (rs) node._renderStyle = rs.valueString || '';
+  const rx = exts.find(x => x.url === FHIR.renderingXhtml);
+  if (rx) node._renderXhtml = rx.valueString || '';
+  const rm = exts.find(x => x.url === FHIR.renderingMarkdown);
+  if (rm) node._renderMarkdown = rm.valueMarkdown || rm.valueString || '';
+}
+
 function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // Determine itemType before construction so the correct class is instantiated.
   let itemType = fhirTypeToItemType(fhirItem.type || 'string');
@@ -183,12 +196,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     }
   }
 
-  const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));
-  if (rs) node._renderStyle = rs.valueString || '';
-  const rx = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-xhtml'));
-  if (rx) node._renderXhtml = rx.valueString || '';
-  const rm = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-markdown'));
-  if (rm) node._renderMarkdown = rm.valueMarkdown || rm.valueString || '';
+  applyRenderingExtensions(fhirItem, node);
 
   // SDC calculatedExpression
   const calcExpr = (fhirItem.extension || []).find(
@@ -515,12 +523,7 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
       e => e.url === FHIR.maxOccurs
     );
     if (grpMaxOccExt?.valueInteger !== undefined) node._maxOccurs = grpMaxOccExt.valueInteger;
-    const rs = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-style'));
-    if (rs) node._renderStyle = rs.valueString || '';
-    const rx = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-xhtml'));
-    if (rx) node._renderXhtml = rx.valueString || '';
-    const rm = fhirItem._text?.extension?.find(x => x.url && x.url.includes('rendering-markdown'));
-    if (rm) node._renderMarkdown = rm.valueMarkdown || rm.valueString || '';
+    applyRenderingExtensions(fhirItem, node);
     if (fhirItem.prefix) node._prefix = fhirItem.prefix;
     if (fhirItem.definition) node._definition = fhirItem.definition;
     const grpBaseTypeExt = (fhirItem.extension || []).find(

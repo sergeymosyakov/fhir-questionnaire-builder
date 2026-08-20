@@ -312,12 +312,17 @@
 .preview--no-badges .calc-badge { display: none; }
 
 /* === Boolean segmented control (Yes / No / Not Answered) =================== */
+/* Mobile-first: full width on small screens, compact pill on desktop. */
 .bool-seg {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
+  max-width: 100%;
   border: 1.5px solid var(--c-border);
   border-radius: var(--r-sm);
   overflow: hidden;
-  max-width: 360px;
+}
+@media (min-width: 1024px) {
+  .bool-seg { display: inline-flex; width: auto; max-width: 360px; }
 }
 .bool-seg__btn {
   flex: 1;
@@ -345,8 +350,5 @@
   background: #c3c3c3;
   color: #fff;
 }
-/* Mobile: stretch to full row width */
-@media (max-width: 1023px) {
-  .bool-seg { display: flex; width: 100%; max-width: 100%; }
-}
+
 

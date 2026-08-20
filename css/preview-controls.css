@@ -46,7 +46,7 @@
   padding: 6px 12px;
   border-radius: var(--r-sm);
   font-weight: 700;
-  font-size: 12px;
+  font-size: inherit;
   background: var(--c-surface);
   border: 1px solid var(--c-border);
   color: var(--c-text-2);
@@ -85,7 +85,7 @@
   transition: background .12s, color .12s, border-color .12s;
 }
 .display-help-toggle--open    { background: var(--c-primary-lt, #d9eafc); color: var(--c-primary); border-color: var(--c-primary); }
-.display-help-content         { display: none; font-size: 12px; color: var(--c-text-2); line-height: 1.5; }
+.display-help-content         { display: none; font-size: inherit; color: var(--c-text-2); line-height: 1.5; }
 .display-help-content--open   { display: block; }
 
 /* === Flyover (itemControl) — text revealed on hover ========================= */
@@ -120,35 +120,36 @@
 .preview-flash { animation: preview-flash .9s ease-out; }
 
 /* === FHIRPath calculatedExpression badge ==================================== */
+/* Mobile-first: block badge on small screens, inline pill on desktop. */
 .calc-badge {
-  display: inline-block;
-  font-size: 11px;
-  padding: 1px 6px;
-  border-radius: 10px;
-  margin-left: 6px;
+  display: block;
+  font-size: inherit;
+  padding: 5px 8px;
+  border-radius: 3px;
+  margin-left: 0;
+  margin-top: 6px;
   background: #f0f0f0;
   color: #888;
   border: 1px solid #ccc;
+  text-align: center;
 }
 .calc-badge.calc-true  { background: var(--c-ok-bg);  color: var(--c-ok);  border-color: var(--c-ok-border); }
 .calc-badge.calc-false { background: var(--c-err-bg); color: var(--c-err); border-color: var(--c-err-border); }
-/* Mobile: full-width result panel, no pill shape; block so it gets own line. */
-@media (max-width: 1023px) {
+@media (min-width: 1024px) {
   .item-body .calc-badge {
-    display: block;
-    border-radius: 3px;
-    margin-left: 0;
-    margin-top: 6px;
-    padding: 5px 8px;
-    font-size: 12px;
-    text-align: center;
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 6px;
+    margin-top: 0;
+    text-align: unset;
   }
 }
 
 /* === questionnaire-supportLink ============================================== */
 .support-link-icon {
   flex-shrink: 0;
-  font-size: 13px;
+  font-size: inherit;
   text-decoration: none;
   opacity: 0.35;
   margin-top: 1px;
@@ -260,7 +261,7 @@ div.lform-item--hidden {
   border: none;
   cursor: pointer;
   text-align: left;
-  font-size: 13px;
+  font-size: inherit;
   color: #212529;
   transition: background .1s;
 }
@@ -269,7 +270,7 @@ div.lform-item--hidden {
 .ref-search-id   { font-family: monospace; font-size: 11px; color: #888; flex-shrink: 0; }
 .ref-search-empty {
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: inherit;
   color: #888;
   text-align: center;
 }
