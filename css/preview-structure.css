@@ -15,8 +15,6 @@
 }
 .item-body .repeat-wrap,
 .item-body input[type=text],
-.item-body input[type=number],
-.item-body input[type=date],
 .item-body input[type=url],
 .item-body textarea,
 .item-body select,
@@ -27,13 +25,24 @@
   box-sizing: border-box;
   margin-top: 4px;
 }
+/* Number and date inputs: compact — steppers/pickers make full-width awkward. */
+.item-body input[type=number],
+.item-body input[type=date],
+.item-body input[type=time],
+.item-body input[type=datetime-local] {
+  display: block;
+  width: auto;
+  max-width: 200px;
+  box-sizing: border-box;
+  margin-top: 4px;
+}
 .item-body .sc-trigger { width: 100%; max-width: 1024px; min-width: 0; }
 /* gtable-wrap: no max-width — table may be wider, scrolls horizontally. */
 .item-body .gtable-wrap {
   display: block;
   margin-top: 4px;
 }
-/* Controls inside preview-card: override controls.css font-size values to inherit 15px. */
+/* Controls inside preview-card: override controls.css font-size values to inherit --fs-preview. */
 .preview-card .radio-label,
 .preview-card .radio-no-opts,
 .preview-card .ctrl-slider-value,
@@ -59,7 +68,7 @@
   padding: 8px 10px;
   border-left: 3px solid transparent;
   transition: background .12s;
-  font-size: 15px;
+  font-size: var(--fs-preview);
   line-height: 1.45;
 }
 /* Reserve right padding for the absolute collapse toggle. */
@@ -136,7 +145,7 @@
 }
 .preview-nested .lform-item {
   padding-left: 14px;
-  /* font-size inherits 15px from .lform-item — no override */
+  /* font-size inherits var(--fs-preview) from .lform-item — no override */
 }
 .preview-nested .preview-nested {
   margin-left: 12px;
@@ -151,7 +160,7 @@
 /* === Group itemControl: header / footer ===================================== */
 .lform-group-header { border-bottom: 2px solid var(--c-primary, #2563eb); padding-bottom: 6px; }
 .lform-group-header .group-label {
-  font-size: 15px;
+  font-size: var(--fs-preview);
   font-weight: 700;
   letter-spacing: .2px;
   text-transform: uppercase;
@@ -324,7 +333,7 @@
   background: #fff;
   color: #999;
   cursor: pointer;
-  font-size: 14px;
+  font-size: inherit;
   line-height: 1;
 }
 .repeat-remove-btn:hover {
@@ -420,13 +429,14 @@
 
 /* === Group table layout (questionnaire-itemControl: gtable) ================ */
 /* Wrapper provides horizontal scroll on narrow screens. */
+/* Mobile-first: no side margin on small screens. */
 .gtable-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  margin: 6px 14px 8px;
+  margin: 6px 0 8px;
 }
-@media (max-width: 1023px) {
-  .gtable-wrap { margin: 6px 0 8px; }
+@media (min-width: 1024px) {
+  .gtable-wrap { margin: 6px 14px 8px; }
 }
 .gtable {
   border-collapse: collapse;

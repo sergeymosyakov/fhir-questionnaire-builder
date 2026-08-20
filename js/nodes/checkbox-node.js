@@ -1,9 +1,15 @@
 // ── CheckboxNode ──────────────────────────────────────────────────────────────
-// Boolean yes/no input. itemType: 'checkbox'
-// Optional FHIR-imported: _calculatedExpr (read-only computed boolean)
+// Boolean yes/no input rendered as a 3-segment control (Yes / No / Not Answered).
+// itemType: 'checkbox'
 import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
+
+const SEGMENTS = [
+  { label: 'Yes',         value: true      },
+  { label: 'No',          value: false     },
+  { label: 'Not Answered', value: undefined },
+];
 
 export class CheckboxNode extends ItemNode {
   constructor(data = {}) {
@@ -16,27 +22,41 @@ export class CheckboxNode extends ItemNode {
   buildControl(ctx) {
     const node = this;
     const { getValue, setValue, onChange, _reCalc } = ctx;
+
     const wrap = createWrap();
+    const seg = document.createElement('div');
+    seg.className = 'bool-seg';
+    seg.setAttribute('role', 'group');
+    seg.setAttribute('aria-label', node.text || 'Yes/No question');
 
-    const el = document.createElement('input');
-    el.type = 'checkbox';
+    const currentVal = getValue(node.id);
 
-    const initialVal = getValue(node.id);
-    if (initialVal === undefined) {
-      el.indeterminate = true;
-      el.dataset.testid = 'checkbox-indeterminate';
-    } else {
-      el.checked = initialVal === true;
+    for (const opt of SEGMENTS) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'bool-seg__btn';
+      btn.textContent = opt.label;
+      const isActive = opt.value === currentVal;
+      btn.classList.toggle('bool-seg__btn--active', isActive);
+      btn.setAttribute('aria-pressed', String(isActive));
+
+      btn.addEventListener('click', () => {
+        seg.querySelectorAll('.bool-seg__btn').forEach(b => {
+          b.classList.remove('bool-seg__btn--active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('bool-seg__btn--active');
+        btn.setAttribute('aria-pressed', 'true');
+        setValue(node.id, opt.value);
+        _reCalc();
+        onChange();
+        BaseNode.notifyChanged(ctx.bus);
+      });
+
+      seg.appendChild(btn);
     }
 
-    el.onchange = () => {
-      setValue(node.id, el.checked);
-      _reCalc();
-      onChange();
-      BaseNode.notifyChanged(ctx.bus);
-    };
-
-    wrap.appendChild(el);
+    wrap.appendChild(seg);
     return wrap;
   }
 }

@@ -7,6 +7,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { clickBoolOption } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/repeating-group-demo.fhir.json');
 
@@ -79,7 +80,7 @@ test.describe('repeating group — per-instance enableWhen', () => {
     const inst0 = medsInsts(page).first();
     const inst1 = medsInsts(page).nth(1);
 
-    await inst0.locator('[data-preview-id="med-prn"] input[type=checkbox]').click();
+    await clickBoolOption(inst0, 'med-prn', 'Yes');
     await commitInput(page);
 
     await expect(inst0.locator('[data-preview-id="med-prn-note"] textarea, [data-preview-id="med-prn-note"] input')).toBeVisible({ timeout: 5_000 });
@@ -89,11 +90,10 @@ test.describe('repeating group — per-instance enableWhen', () => {
   test('unchecking PRN hides PRN note again in that instance', async ({ page }) => {
     await freshLoad(page);
     const inst0 = medsInsts(page).first();
-    const cb = inst0.locator('[data-preview-id="med-prn"] input[type=checkbox]');
-    await cb.click();
+    await clickBoolOption(inst0, 'med-prn', 'Yes');
     await commitInput(page);
     await expect(inst0.locator('[data-preview-id="med-prn-note"] textarea, [data-preview-id="med-prn-note"] input')).toBeVisible({ timeout: 5_000 });
-    await cb.click();
+    await clickBoolOption(inst0, 'med-prn', 'No');
     await commitInput(page);
     await expect(inst0.locator('[data-preview-id="med-prn-note"] textarea, [data-preview-id="med-prn-note"] input')).toHaveCount(0, { timeout: 5_000 });
   });
@@ -106,7 +106,7 @@ test.describe('repeating group — per-instance enableWhen', () => {
     const inst0 = medsInsts(page).first();
     const inst1 = medsInsts(page).nth(1);
 
-    await inst1.locator('[data-preview-id="med-prn"] input[type=checkbox]').click();
+    await clickBoolOption(inst1, 'med-prn', 'Yes');
     await commitInput(page);
 
     await expect(inst1.locator('[data-preview-id="med-prn-note"] textarea, [data-preview-id="med-prn-note"] input')).toBeVisible({ timeout: 5_000 });

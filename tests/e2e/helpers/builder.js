@@ -14,6 +14,20 @@ export async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
 }
 
+/** Click a boolean segmented control option. Accepts page or a scoped locator. */
+export async function clickBoolOption(pageOrLocator, previewId, option) {
+  await pageOrLocator.locator(`[data-preview-id="${previewId}"] .bool-seg__btn`)
+    .filter({ hasText: new RegExp(`^${option}$`) })
+    .click();
+}
+
+/** Assert the active segment of a boolean control equals the expected label. */
+export async function expectBoolValue(pageOrLocator, previewId, expected, opts = {}) {
+  await expect(
+    pageOrLocator.locator(`[data-preview-id="${previewId}"] .bool-seg__btn--active`)
+  ).toHaveText(expected, { timeout: 8_000, ...opts });
+}
+
 /** Start from a clean empty state: navigate and wait for the app to boot. */
 export async function freshStart(page) {
   await page.goto('/');

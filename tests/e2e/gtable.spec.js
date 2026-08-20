@@ -331,10 +331,10 @@ test.describe('gtable — column header indicators (mirror of row-level badge te
 
   test('enableWhen: conditional cell appears after trigger is checked', async ({ page }) => {
     await loadFixture(page);
-    // Check the trigger checkbox
-    const triggerCheckbox = page.locator('[data-preview-id="feat-trigger"]').first()
-      .locator('input[type="checkbox"]').first();
-    await triggerCheckbox.click();
+    // Click Yes in the bool-seg control for feat-trigger (first row)
+    const triggerCell = page.locator('[data-preview-id="feat-trigger"]').first();
+    await expect(triggerCell.locator('.bool-seg')).toBeVisible({ timeout: 5_000 });
+    await triggerCell.locator('.bool-seg__btn').filter({ hasText: /^Yes$/ }).click();
     await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
     await page.getByTestId('preview-search-input').click();
     await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));

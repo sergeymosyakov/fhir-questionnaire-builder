@@ -12,6 +12,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { expectBoolValue } from './helpers/builder.js';
 
 const PHQ9_FIXTURE = path.resolve('sampledata/phq-9.fhir.json');
 const PHQ9_QR      = path.resolve('sampledata/phq-9-response.qr.json');
@@ -117,11 +118,10 @@ test.describe('QR Answers — answer population by type', () => {
     await loadBariatric(page);
     await page.locator('[data-testid="qr-file-input"]').setInputFiles(BARIATRIC_QR);
 
-    // q-diet-program has valueBoolean: true
+    // q-diet-program has valueBoolean: true → "Yes" segment must be active
     const item = page.locator('[data-preview-id="q-diet-program"]');
     await expect(item).toBeVisible({ timeout: 8_000 });
-    const checkbox = item.locator('input[type="checkbox"]').first();
-    await expect(checkbox).toBeChecked({ timeout: 8_000 });
+    await expectBoolValue(page, 'q-diet-program', 'Yes');
   });
 
   test('QR load preserves existing answers in other items (no data loss)', async ({ page }) => {

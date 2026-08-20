@@ -91,11 +91,10 @@ test.describe('inline answer-type selector', () => {
       .first()).toBeVisible({ timeout: 5_000 });
   });
 
-  test('changing type to checkbox renders a checkbox input in preview', async ({ page }) => {
+  test('changing type to checkbox renders a boolean segmented control in preview', async ({ page }) => {
     const id = await seed(page);
     await setInlineType(page, id, 'checkbox');
-    // checkbox renders as input[type="checkbox"] in preview
-    await expect(page.locator(`[data-preview-id="${id}"]`).locator('input[type="checkbox"]').first())
+    await expect(page.locator(`[data-preview-id="${id}"]`).locator('.bool-seg').first())
       .toBeVisible({ timeout: 5_000 });
   });
 

@@ -19,7 +19,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
-import { freshStart } from './helpers/builder.js';
+import { freshStart, clickBoolOption } from './helpers/builder.js';
 
 test.describe('enableWhen (standard)', () => {
   test('set condition on item → preview shows dimmed; fill trigger answer → item becomes visible', async ({ page }) => {
@@ -225,13 +225,13 @@ test.describe('enableWhen — fixture-based (annual-health-check)', () => {
     // Initially cigs is dimmed
     await expect(page.locator('[data-preview-id="cigs"]')).toHaveClass(/lform-waiting/);
 
-    // Check smoker → cigs visible
-    await page.locator('[data-preview-id="smoker"] input[type="checkbox"]').click();
+    // Set smoker = Yes → cigs visible
+    await clickBoolOption(page, 'smoker', 'Yes');
     await commitInput(page);
     await expect(page.locator('[data-preview-id="cigs"]')).not.toHaveClass(/lform-waiting/, { timeout: 5_000 });
 
-    // Uncheck smoker → cigs dimmed again
-    await page.locator('[data-preview-id="smoker"] input[type="checkbox"]').click();
+    // Set smoker = Not Answered → cigs dimmed again
+    await clickBoolOption(page, 'smoker', 'Not Answered');
     await commitInput(page);
     await expect(page.locator('[data-preview-id="cigs"]')).toHaveClass(/lform-waiting/, { timeout: 5_000 });
   });
@@ -242,8 +242,8 @@ test.describe('enableWhen — fixture-based (annual-health-check)', () => {
     const hint = page.locator('[data-preview-id="cigs"]').getByTestId('preview-condition-hint');
     await expect(hint).toBeVisible();
 
-    // Fill trigger and verify audit shows pass (✓)
-    await page.locator('[data-preview-id="smoker"] input[type="checkbox"]').click();
+    // Set smoker = Yes → cigs visible
+    await clickBoolOption(page, 'smoker', 'Yes');
     await commitInput(page);
     await expect(page.locator('[data-preview-id="cigs"]')).not.toHaveClass(/lform-waiting/, { timeout: 5_000 });
   });

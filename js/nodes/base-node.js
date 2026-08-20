@@ -64,7 +64,6 @@ export function isRelevantItem(node, rc) {
 export function applyRenderStyle(el, raw) {
   const style = parseRenderStyle(raw);
   for (const prop of Object.keys(style)) {
-    if (prop === 'font-size') continue; // font-size is controlled by CSS, not FHIR data
     el.style.setProperty(prop, style[prop]);
   }
 }
