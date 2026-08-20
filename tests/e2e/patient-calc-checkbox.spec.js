@@ -14,6 +14,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { clickBoolOption } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/patient-calc-checkbox.fhir.json');
 
@@ -42,7 +43,7 @@ test('patient view: calc checkbox keeps preview-calc-value after recompute', asy
   await expect(calcRow.locator('.calc-badge')).toHaveCount(0);
 
   // Toggle the trigger → the calculatedExpression recomputes (REFRESH_CALC_BADGES).
-  await page.locator('[data-preview-id="trigger"] input[type="checkbox"]').check();
+  await clickBoolOption(page, 'trigger', 'Yes');
 
   // It must STILL be a plain patient value, never the design ✓/✗ calc-badge.
   await expect(calcRow.locator('.calc-badge')).toHaveCount(0);

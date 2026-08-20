@@ -21,6 +21,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { clickBoolOption } from './helpers/builder.js';
 
 const ANNUAL  = path.resolve('sampledata/annual-health-check.fhir.json');
 const CALC    = path.resolve('sampledata/patient-scenario-calc-chain.fhir.json');
@@ -222,7 +223,7 @@ test.describe('H3 — enableWhen: items show/hide based on trigger answers', () 
     // In design view, enableWhen items are always rendered but dim (lform-waiting class)
     await expect(page.locator('[data-preview-id="cigs"]')).toHaveClass(/lform-waiting/);
 
-    await page.locator('[data-preview-id="smoker"] input[type="checkbox"]').click();
+    await clickBoolOption(page, 'smoker', 'Yes');
     await commitInput(page);
 
     // Condition met → lform-waiting removed and input is active
@@ -236,12 +237,12 @@ test.describe('H3 — enableWhen: items show/hide based on trigger answers', () 
     await expect(page.locator('[data-preview-id="smoker"]')).toBeVisible({ timeout: 8_000 });
 
     // Check → condition met
-    await page.locator('[data-preview-id="smoker"] input[type="checkbox"]').click();
+    await clickBoolOption(page, 'smoker', 'Yes');
     await commitInput(page);
     await expect(page.locator('[data-preview-id="cigs"]')).not.toHaveClass(/lform-waiting/, { timeout: 5_000 });
 
     // Uncheck → condition no longer met
-    await page.locator('[data-preview-id="smoker"] input[type="checkbox"]').click();
+    await clickBoolOption(page, 'smoker', 'Not Answered');
     await commitInput(page);
     await expect(page.locator('[data-preview-id="cigs"]')).toHaveClass(/lform-waiting/, { timeout: 5_000 });
   });
@@ -261,7 +262,7 @@ test.describe('H3 — enableWhen: items show/hide based on trigger answers', () 
     await loadFile(page, ANNUAL);
     await expect(page.locator('[data-preview-id="smoker"]')).toBeVisible({ timeout: 8_000 });
 
-    await page.locator('[data-preview-id="smoker"] input[type="checkbox"]').click();
+    await clickBoolOption(page, 'smoker', 'Yes');
     await commitInput(page);
 
     await enablePatientView(page);
