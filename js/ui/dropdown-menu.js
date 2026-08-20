@@ -84,7 +84,7 @@ export class DropdownMenu {
     el.className = 'load-menu-item';
     if (id)     el.id = id;
     if (testid) el.dataset.testid = testid;
-    el.innerHTML = html;
+    el.innerHTML = window.DOMPurify ? window.DOMPurify.sanitize(html) : html;
     return el;
   }
 

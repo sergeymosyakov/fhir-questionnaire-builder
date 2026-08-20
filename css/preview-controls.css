@@ -18,26 +18,16 @@
   max-width: 100%;
   box-sizing: border-box;
 }
-@media (min-width: 1024px) {
-  .preview-card input[type=text],
-  .preview-card input[type=number] { padding: 3px 6px; }
-}
-.preview-card .oc-wrap { display: flex; margin-top: 4px; }
-.preview-card .oc-input[type=text] { border-right: none; border-radius: var(--r-sm) 0 0 var(--r-sm); height: var(--ctrl-h); min-height: var(--ctrl-h); margin-top: 0; }
+.preview-card .oc-wrap { display: flex; margin-top: 4px; width: 100%; }
+.preview-card .oc-input[type=text] { flex: 1; min-width: 0; border-right: none; border-radius: var(--r-sm) 0 0 var(--r-sm); height: var(--ctrl-h); min-height: var(--ctrl-h); margin-top: 0; }
 .preview-card .oc-btn { height: var(--ctrl-h); }
 .preview-card input[type=checkbox] { accent-color: var(--c-primary); width: 20px; height: 20px; }
-@media (min-width: 1024px) {
-  .preview-card input[type=checkbox] { width: auto; height: auto; }
-}
 .preview-card select {
   padding: 8px 10px;
   border: 1px solid var(--c-border);
   border-radius: var(--r-sm);
   font-size: var(--fs-preview);
   color: var(--c-text);
-}
-@media (min-width: 1024px) {
-  .preview-card select { padding: 3px 6px; }
 }
 
 /* === Final result banner ===================================================== */
@@ -135,16 +125,6 @@
 }
 .calc-badge.calc-true  { background: var(--c-ok-bg);  color: var(--c-ok);  border-color: var(--c-ok-border); }
 .calc-badge.calc-false { background: var(--c-err-bg); color: var(--c-err); border-color: var(--c-err-border); }
-@media (min-width: 1024px) {
-  .item-body .calc-badge {
-    display: inline-block;
-    padding: 1px 6px;
-    border-radius: 10px;
-    margin-left: 6px;
-    margin-top: 0;
-    text-align: unset;
-  }
-}
 
 /* === questionnaire-supportLink ============================================== */
 .support-link-icon {
@@ -278,3 +258,32 @@ div.lform-item--hidden {
 /* Inside preview-card: follow --fs-preview via inherit */
 .preview-card .ref-search-item  { font-size: inherit; }
 .preview-card .ref-search-empty { font-size: inherit; }
+.preview-card .btn-file         { font-size: inherit; }
+.preview-card .file-name-tag    { font-size: inherit; }
+/* ref-id-input gets margin-top from the generic input rule — cancel it */
+.preview-card .ref-search-wrap .ref-id-input { margin-top: 0; }
+/* ref-sep top/bottom borders create visual noise in preview */
+.preview-card .ref-sep { border-top: none; border-bottom: none; }
+
+/* === Desktop overrides (≥1024px) ============================================ */
+@media (min-width: 1024px) {
+  .preview-card input[type=text],
+  .preview-card input[type=number] { padding: 3px 6px; }
+  .preview-card select { padding: 3px 6px; }
+  .preview-card input[type=number],
+  .preview-card input[type=date],
+  .preview-card input[type=time],
+  .preview-card input[type=datetime-local],
+  .preview-card .sc-trigger,
+  .preview-card .dp-trigger { width: 400px; max-width: 100%; }
+  .preview-card .oc-wrap { width: 400px; max-width: 100%; }
+  .preview-card input[type=checkbox] { width: auto; height: auto; }
+  .item-body .calc-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 6px;
+    margin-top: 0;
+    text-align: unset;
+  }
+}

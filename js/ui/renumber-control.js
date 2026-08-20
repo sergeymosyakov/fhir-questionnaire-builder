@@ -38,7 +38,7 @@ export class RenumberControl {
     btn.onclick = async () => {
       btn.disabled = true;
       progress.show('Renumbering…');
-      const onProgress = e => progress.update(e.detail.done, e.detail.total);
+      const onProgress = e => progress.update(e.detail?.done, e.detail?.total);
       const cleanup = () => {
         progress.hide();
         btn.disabled = false;

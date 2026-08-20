@@ -62,6 +62,6 @@ export const clearConfirmModal = new ClearConfirmModal();
 if (typeof document !== 'undefined') {
   document.addEventListener(AppEvents.CLEAR_CONFIRM_REQUESTED, async e => {
     const choice = await clearConfirmModal.open();
-    e.detail.resolve(choice);
+    e.detail?.resolve(choice);
   });
 }

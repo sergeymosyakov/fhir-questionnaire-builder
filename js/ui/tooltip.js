@@ -211,5 +211,5 @@ export async function init() {
 
 // Self-wire: settings-menu dispatches TIPS_TOGGLED; apply and persist.
 if (typeof document !== 'undefined') {
-  document.addEventListener(AppEvents.TIPS_TOGGLED, e => setEnabled(e.detail.enabled));
+  document.addEventListener(AppEvents.TIPS_TOGGLED, e => setEnabled(e.detail?.enabled));
 }
