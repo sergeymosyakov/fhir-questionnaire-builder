@@ -14,7 +14,7 @@ class JsonViewerModal extends Modal {
     this.body.appendChild(this.pre);
     // alias: tests use fhirJsonModalCloseBtn for the footer Close button
     if (this.cancelBtn) this.cancelBtn.dataset.testid = 'fhirJsonModalCloseBtn';
-    document.addEventListener(AppEvents.SHOW_JSON, e => this.show(e.detail.title, e.detail.data));
+    document.addEventListener(AppEvents.SHOW_JSON, e => this.show(e.detail?.title, e.detail?.data));
   }
 
   show(title, data) {

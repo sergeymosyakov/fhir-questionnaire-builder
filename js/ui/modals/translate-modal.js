@@ -20,7 +20,7 @@ import { Modal }                  from './modal-base.js';
 import { createCustomSelect }     from '../custom-select.js';
 import { translateBatch, SUPPORTED_LANGUAGES } from '../../fhir/translate-api.js';
 import { UI_STRINGS }             from '../../fhir/ui-strings.js';
-import { AppEvents }              from '../../events.js';
+import { AppEvents, EventState }      from '../../events.js';
 import { showError }              from '../toast.js';
 
 export class TranslateModal extends Modal {
@@ -31,12 +31,8 @@ export class TranslateModal extends Modal {
     this._questDoc    = null;
   }
 
-  static configure({ questDoc }) {
-    TranslateModal._questDoc = questDoc;
-  }
-
   open() {
-    this._questDoc = TranslateModal._questDoc;
+    this._questDoc = EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc ?? null;
     this._targetLang = '';
     this._reviewRows = [];
     this._renderPicker();

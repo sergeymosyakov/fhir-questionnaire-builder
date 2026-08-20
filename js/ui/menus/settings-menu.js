@@ -117,13 +117,13 @@ export class SettingsMenu extends DropdownMenu {
 
     // Receive initial checkbox states from tooltip/autosave after their async init()
     document.addEventListener(AppEvents.TIPS_INIT_DONE,
-      e => { this._inp(this._tipsRow).checked = e.detail.enabled; });
+      e => { this._inp(this._tipsRow).checked = e.detail?.enabled; });
     document.addEventListener(AppEvents.AUTOSAVE_INIT_DONE,
-      e => { this._inp(this._autosaveRow).checked = e.detail.enabled; });
+      e => { this._inp(this._autosaveRow).checked = e.detail?.enabled; });
 
     // Update autosave label on each save
     document.addEventListener(AppEvents.AUTOSAVE_SAVED, e => {
-      const d = e.detail.date;
+      const d = e.detail?.date;
       const label = d
         ? 'Autosave \u00b7 ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')
         : 'Autosave';

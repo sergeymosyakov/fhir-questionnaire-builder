@@ -24,11 +24,11 @@ export class CopyPaste {
       () => { this._questDoc = null; });
 
     document.addEventListener(AppEvents.NODE_COPY_REQUESTED,
-      e => this.copy(e.detail.id));
+      e => this.copy(e.detail?.id));
     document.addEventListener(AppEvents.NODE_PASTE_AFTER_REQUESTED,
-      e => this.paste(e.detail.id));
+      e => this.paste(e.detail?.id));
     document.addEventListener(AppEvents.NODE_PASTE_BEFORE_REQUESTED,
-      e => this.pasteBefore(e.detail.id));
+      e => this.pasteBefore(e.detail?.id));
   }
 
   /** Returns true if there is something in the clipboard. */
