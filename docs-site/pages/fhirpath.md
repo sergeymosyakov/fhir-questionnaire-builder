@@ -81,6 +81,15 @@ On an empty value field the builder first asks what the expression should produc
 the result into the field. Opening the builder on an existing expression reads it
 back into blocks where possible; anything it can't represent stays editable as text.
 
+- **Number** — an arithmetic chain: questions, variables and numbers joined by `× ÷ + −`,
+  plus aggregate functions (`count`, `sum`, `avg`, `min`, `max`) over repeating answers.
+  Use this for scoring, BMI formulas, or any derived number.
+- **Yes / No condition** — a boolean condition tree (the same editor used for
+  `enableWhenExpression`): nested AND / ANY groups with leaf comparisons and "has answer"
+  checks. Use this when the calculated result is `true`/`false` — for example, to compute
+  a boolean flag from several criteria that drives a downstream `enableWhen`.
+- **Answers → value** — see the pipeline description above.
+
 ## Evaluation order
 
 Calculated fields often depend on one another (A → B → C). The runtime builds a

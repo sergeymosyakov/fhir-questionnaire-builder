@@ -78,6 +78,8 @@ class ExpressionBuilderModal extends Modal {
     const fp = _rc.ctx?.fp;
     const block = fp ? parseExpression(text, fp) : null;
     if (block && block.kind === BlockKind.PIPELINE) { this._strategy = 'pipeline'; this._pipelineBlock = block; return; }
+    // Single comparison (e.g. item.answer.valueBoolean = true) — use tree editor
+    if (block && block.kind === BlockKind.COMPARE) { this._strategy = 'tree'; return; }
 
     const ve = createValueEditor(this._valueEditorOpts(text));
     if (ve.seeded) { this._strategy = 'value'; this._pendingValueEditor = ve; return; }
