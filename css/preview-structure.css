@@ -377,7 +377,9 @@
   z-index: 1;
 }
 .preview-readonly-value {
-  display: inline-block;
+  display: block;
+  width: fit-content;
+  margin-top: 7px;
   font-size: inherit;
   color: var(--c-text-2, #546e7a);
   background: #f5f7fa;
@@ -388,11 +390,12 @@
   cursor: not-allowed;
 }
 .preview-calc-value {
-  display: inline-block;
+  display: block;
+  width: fit-content;
+  margin-top: 7px;
   font-size: inherit;
   padding: 1px 7px;
   border-radius: 4px;
-  margin-left: 6px;
   background: #f0f4ff;
   color: #3b4db8;
   border: 1px solid #c7d2fe;
