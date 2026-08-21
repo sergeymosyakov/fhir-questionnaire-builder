@@ -236,10 +236,10 @@
       }
       const tr = document.createElement('tr');
       tr.innerHTML =
-        `<td class="col-field"><code>${escHtml(row.field)}</code></td>` +
-        `<td class="col-desc">${escHtml(row.desc)}</td>` +
-        `<td class="col-where">${escHtml(row.where)}</td>` +
-        `<td class="col-how">${escHtml(row.how)}</td>`;
+        `<td class="col-field" data-label="FHIR Field / Extension"><code>${escHtml(row.field)}</code></td>` +
+        `<td class="col-desc" data-label="Description">${escHtml(row.desc)}</td>` +
+        `<td class="col-where" data-label="Where in UI">${escHtml(row.where)}</td>` +
+        `<td class="col-how" data-label="How to access">${escHtml(row.how)}</td>`;
       tbody.appendChild(tr);
       count++;
     });
