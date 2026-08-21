@@ -41,8 +41,15 @@ html, body {
 /* ── Table ───────────────────────────────────────────────────────────────────── */
 #helpTable {
   width: 100%;
+  min-width: 640px; /* below this content width, .help-wrap scrolls instead of squishing columns */
   border-collapse: collapse;
-  table-layout: fixed;
+}
+
+@media (min-width: 768px) {
+  #helpTable {
+    min-width: 0;
+    table-layout: fixed;
+  }
 }
 
 #helpTable thead th {
@@ -60,10 +67,12 @@ html, body {
   white-space: nowrap;
 }
 
-.col-field { width: 22%; }
-.col-desc  { width: 32%; }
-.col-where { width: 20%; }
-.col-how   { width: 26%; }
+@media (min-width: 768px) {
+  .col-field { width: 22%; }
+  .col-desc  { width: 32%; }
+  .col-where { width: 20%; }
+  .col-how   { width: 26%; }
+}
 
 #helpTable tbody tr {
   border-bottom: 1px solid var(--help-border);
