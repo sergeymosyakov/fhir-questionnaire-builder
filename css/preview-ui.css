@@ -118,9 +118,6 @@
   transition: none;
   cursor: default;
 }
-@media (min-width: 1024px) {
-  .patient-view .lform-item { padding: 16px 24px; gap: 14px; }
-}
 .patient-view .lform-item:hover { background: #fff; }
 .patient-view .lform-item--invalid {
   border-left: 3px solid #ef4444;
@@ -138,14 +135,8 @@
   padding-left: 14px;
   background: transparent;
 }
-@media (min-width: 1024px) {
-  .patient-view .preview-nested { padding-left: 24px; }
-}
 .patient-view .preview-nested .lform-item {
   padding: 8px 14px;
-}
-@media (min-width: 1024px) {
-  .patient-view .preview-nested .lform-item { padding: 12px 24px; }
 }
 .patient-view .group-label {
   font-weight: 700;
@@ -215,12 +206,6 @@
 .patient-view input[type="datetime-local"] {
   width: 100%;
   max-width: 1024px;
-}
-@media (min-width: 1024px) {
-  .patient-view input[type="number"],
-  .patient-view input[type="date"],
-  .patient-view input[type="time"],
-  .patient-view input[type="datetime-local"] { width: 400px; max-width: 100%; }
 }
 .patient-view input[type="text"]:focus,
 .patient-view input[type="number"]:focus,
@@ -335,9 +320,6 @@
   border-radius: var(--r-sm);
   overflow: hidden;
 }
-@media (min-width: 1024px) {
-  .bool-seg { display: inline-flex; width: auto; max-width: 360px; }
-}
 .bool-seg__btn {
   flex: 1;
   padding: 6px 14px;
@@ -363,6 +345,18 @@
 .bool-seg__btn:last-child.bool-seg__btn--active {
   background: #c3c3c3;
   color: #fff;
+}
+
+/* === Responsive =============================================================== */
+@media (min-width: 1024px) {
+  .patient-view .lform-item { padding: 16px 24px; gap: 14px; }
+  .patient-view .preview-nested { padding-left: 24px; }
+  .patient-view .preview-nested .lform-item { padding: 12px 24px; }
+  .patient-view input[type="number"],
+  .patient-view input[type="date"],
+  .patient-view input[type="time"],
+  .patient-view input[type="datetime-local"] { width: 400px; max-width: 100%; }
+  .bool-seg { display: inline-flex; width: auto; max-width: 360px; }
 }
 
 
