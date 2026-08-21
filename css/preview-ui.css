@@ -40,14 +40,12 @@
 /* === linkId tag in preview =================================================== */
 .preview-linkid {
   font-family: monospace;
-  font-size: 10px;
   font-weight: 600;
   color: var(--c-primary);
   background: var(--c-primary-lt);
   border-radius: 20px;
   padding: 1px 8px;
   flex-shrink: 0;
-  margin-top: 3px;
   cursor: pointer;
   white-space: nowrap;
   transition: background .15s;
@@ -57,14 +55,12 @@
 /* === item.prefix badge ======================================================= */
 .preview-prefix {
   font-family: monospace;
-  font-size: 10px;
   font-weight: 600;
   color: #b34700; /* darker amber — WCAG AA contrast on --c-amber-lt background */
   background: var(--c-amber-lt);
   border-radius: 20px;
   padding: 1px 8px;
   flex-shrink: 0;
-  margin-top: 3px;
   white-space: nowrap;
 }
 
