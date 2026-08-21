@@ -5,20 +5,12 @@ import './formats/r4b.js';
 import './formats/r5.js';
 import './formats/redcap.js';
 
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 import { downloadJSON } from './download.js';
 import { FHIR } from './urls/fhir.js';
 import { APP_URL } from './urls/app.js';
 import { UCUM_URL } from './urls/ucum.js';
 import { W3C_URL } from './urls/w3c.js';
-
-let _svc = {};
-/** @param {{ questDoc: import('./quest-document.js').QuestDocument }} svc */
-export function configure(svc) { _svc = { ..._svc, ...svc }; }
-if (typeof document !== 'undefined') {
-  document.addEventListener(AppEvents.APP_CONTEXT_READY,
-    e => { if (e.detail?.questDoc) configure({ questDoc: e.detail.questDoc }); });
-}
 
 // Escape text for embedding in XHTML
 function _esc(s) {
@@ -492,7 +484,7 @@ export function nodeToFHIRItem(node) {
   return fhirItem;
 }
 
-export function buildFHIRObject(questDoc = _svc.questDoc) {
+export function buildFHIRObject(questDoc = EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc) {
   const { tree, meta: questMeta, rawFhir, variables: questVariables, contained: questContained, translations } = questDoc;
   const SDC_VAR_URL = FHIR.variable;
   const q = {

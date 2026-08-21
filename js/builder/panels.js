@@ -381,6 +381,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
   const addBtn = document.createElement('button');
   addBtn.type = 'button';
   addBtn.className = 'vis-add-btn';
+  addBtn.dataset.testid = 'vis-add-condition-btn';
   addBtn.textContent = '+ Add condition';
   addBtn.onclick = () => {
     const newEw = { question: '', operator: '=', answerBoolean: true };

@@ -297,7 +297,7 @@ test.describe('repeating group — Repeatable action link in builder', () => {
     await expect(repeatBtn).toBeVisible({ timeout: 5_000 });
     await repeatBtn.click();
     await expect(page.locator('[data-testid="repeatableModal"]')).toBeVisible({ timeout: 5_000 });
-    await page.locator('[data-testid="repeatableModal"]').getByRole('button', { name: 'Cancel' }).click();
+    await page.getByTestId('repeatableModalCancel').click();
   });
 
   test('toggling Repeatable on in modal activates the action link and shows preview instances', async ({ page }) => {
@@ -319,7 +319,7 @@ test.describe('repeating group — Repeatable action link in builder', () => {
     await repeatBtn.click();
     await expect(page.locator('[data-testid="repeatableModal"]')).toBeVisible({ timeout: 5_000 });
     await page.getByTestId('repeat-modal-toggle').check();
-    await page.locator('[data-testid="repeatableModal"]').getByRole('button', { name: /apply/i }).click();
+    await page.getByTestId('repeatableModalApply').click();
     await expect(repeatBtn).toHaveClass(/action-edit--active/, { timeout: 5_000 });
     await expect(page.locator('[data-testid="rg-add-btn"]').first()).toBeVisible({ timeout: 5_000 });
   });

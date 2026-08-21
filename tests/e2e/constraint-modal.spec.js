@@ -10,6 +10,7 @@
 //   node-title-display    read-only title span
 //   node-title-input      title textarea
 //   action-constraint     "Constraint" action link on an item node
+//   constraint-add-btn    "+ Add constraint" button in the panel
 //
 // ── element IDs ──────────────────────────────────────────────────────────────
 //   constraintModal       backdrop (display:flex when open)
@@ -142,7 +143,7 @@ test.describe('Constraint modal — draft pattern', () => {
     await addTextItem(page);
 
     await openConstraintModal(page);
-    await constraintModalBody(page).getByText('+ Add constraint').click();
+    await constraintModalBody(page).getByTestId('constraint-add-btn').click();
     await expect(constraintModalBody(page).locator('.constraint-card')).toHaveCount(1);
   });
 
@@ -154,7 +155,7 @@ test.describe('Constraint modal — draft pattern', () => {
     await expect(item.getByTestId('action-constraint')).toBeVisible();
     await item.getByTestId('action-constraint').click();
     await expect(constraintModal(page)).toBeVisible();
-    await constraintModalBody(page).getByText('+ Add constraint').click();
+    await constraintModalBody(page).getByTestId('constraint-add-btn').click();
     await constraintModalCancel(page).click();
 
     // Re-open: still empty
@@ -172,7 +173,7 @@ test.describe('Constraint modal — draft pattern', () => {
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
 
     await actionLink.click();
-    await constraintModalBody(page).getByText('+ Add constraint').click();
+    await constraintModalBody(page).getByTestId('constraint-add-btn').click();
 
     // Fill key and message
     const keyInp = constraintModalBody(page).locator('input[placeholder*="key"]').first();
@@ -194,7 +195,7 @@ test.describe('Constraint modal — draft pattern', () => {
 
     // Add one constraint first
     await actionLink.click();
-    await constraintModalBody(page).getByText('+ Add constraint').click();
+    await constraintModalBody(page).getByTestId('constraint-add-btn').click();
     await constraintModalApply(page).click();
     await expect(actionLink).toHaveClass(/action-edit--active/);
 

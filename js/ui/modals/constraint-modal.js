@@ -156,6 +156,7 @@ class ConstraintModal extends Modal {
     const addBtn = document.createElement('button');
     addBtn.type = 'button';
     addBtn.className = 'vis-add-btn vis-add-btn--mt';
+    addBtn.dataset.testid = 'constraint-add-btn';
     addBtn.textContent = '+ Add constraint';
     addBtn.onclick = () => {
       draft.push({ key: '', severity: 'error', human: '', expression: '' });

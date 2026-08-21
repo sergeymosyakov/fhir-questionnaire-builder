@@ -89,6 +89,12 @@
         "note": "check-box, columnCount, autocomplete, text-area, spinner, drop-down, slider, lookup, regex, optionExclusive, usageMode, itemMedia, itemWeight, flyover, header, footer"
       },
       {
+        "label": "Repeating Group Demo",
+        "file": "repeating-group-demo.fhir.json",
+        "type": "questionnaire",
+        "note": "Repeating groups with per-instance validation/enableWhen; nested repeating group (dose schedule)"
+      },
+      {
         "label": "Answer Option Types Demo",
         "file": "answer-option-types-demo.fhir.json",
         "type": "questionnaire",

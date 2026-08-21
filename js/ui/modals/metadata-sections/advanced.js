@@ -40,7 +40,11 @@ class AdvancedSection extends Section {
       body:  'Mechanism used to compare versions to determine which is more current. Coding values come from the standard Version Algorithm value set; "Custom expression" stores a FHIRPath string instead. R5 native field; on R4/R4B export it is written as the official artifact-versionAlgorithm extension.',
       fhir:  'Questionnaire.versionAlgorithm[x]', spec: 'R5',
     }));
-    const exprRow = makeRow(pending, 'versionAlgoExpr', 'Custom expression', 'text', 'e.g. %version1 > %version2', 'meta-version-algorithm-expr', null);
+    const exprRow = makeRow(pending, 'versionAlgoExpr', 'Custom expression', 'text', 'e.g. %version1 > %version2', 'meta-version-algorithm-expr', {
+      title: 'Questionnaire.versionAlgorithmString',
+      body:  'Custom FHIRPath expression used to compare two version strings when the standard Coding value set doesn\u2019t fit. Stored as versionAlgorithmString instead of versionAlgorithmCoding.',
+      fhir:  'Questionnaire.versionAlgorithm[x]', spec: 'R5',
+    });
     exprRow.style.display = pending.versionAlgo === '__custom__' ? '' : 'none';
     wrap.append(exprRow);
     // Toggle the expression row when the selection changes.

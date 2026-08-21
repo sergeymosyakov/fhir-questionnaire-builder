@@ -111,7 +111,7 @@
 /* Mobile: absolute top-right button. */
 .preview-collapse-toggle {
   position: absolute;
-  top: 4px; right: 4px;
+  top: 0; right: 4px;
   width: 36px; height: 36px;
   display: inline-flex;
   align-items: center; justify-content: center;
@@ -140,9 +140,6 @@
   margin-left: 18px;
   background: #f7f9fc;
 }
-@media (min-width: 1024px) {
-  .preview-nested { margin-left: 45px; }
-}
 .preview-nested .lform-item {
   padding-left: 14px;
   /* font-size inherits var(--fs-preview) from .lform-item — no override */
@@ -150,9 +147,6 @@
 .preview-nested .preview-nested {
   margin-left: 12px;
   border-left-color: var(--c-border);
-}
-@media (min-width: 1024px) {
-  .preview-nested .preview-nested { margin-left: 35px; }
 }
 .group-label       { font-weight: 600; color: var(--c-text); }
 .display-info-label { font-style: italic; color: var(--c-text-2); }
@@ -175,14 +169,12 @@
 }
 .preview-group-ctrl-badge {
   display: inline-block;
-  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .4px;
   padding: 1px 7px;
   border-radius: 8px;
   flex-shrink: 0;
-  margin-top: 3px;
   background: transparent;
   color: var(--c-primary, #2563eb);
   border: 1px solid currentColor;
@@ -192,12 +184,10 @@
 /* === AND/OR badge ============================================================ */
 .preview-logic-badge {
   display: inline-block;
-  font-size: 10px;
   font-weight: 500;
   padding: 1px 7px;
   border-radius: 10px;
   flex-shrink: 0;
-  margin-top: 3px;
   cursor: help;
 }
 .preview-logic-and { background: #ecf0f1; color: #5d6d7e; }
@@ -212,14 +202,12 @@
   font-weight: 700;
 }
 .preview-optional-badge {
-  font-size: 10px;
   color: #6b6b6b;
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 1px 7px;
   white-space: nowrap;
   flex-shrink: 0;
-  margin-top: 3px;
   margin-left: 5px;
   font-style: italic;
   vertical-align: middle;
@@ -238,7 +226,6 @@
   text-overflow: ellipsis;
   max-width: 280px;
   flex-shrink: 1;
-  margin-top: 3px;
 }
 .preview-condition-hint.preview-condition-waiting {
   background: #fff8e1;
@@ -256,7 +243,6 @@
   padding: 1px 8px;
   white-space: nowrap;
   flex-shrink: 0;
-  margin-top: 3px;
   cursor: default;
   vertical-align: middle;
 }
@@ -276,7 +262,6 @@
   padding: 1px 8px;
   white-space: nowrap;
   flex-shrink: 0;
-  margin-top: 3px;
   cursor: default;
   vertical-align: middle;
 }
@@ -383,7 +368,9 @@
   z-index: 1;
 }
 .preview-readonly-value {
-  display: inline-block;
+  display: block;
+  width: fit-content;
+  margin-top: 7px;
   font-size: inherit;
   color: var(--c-text-2, #546e7a);
   background: #f5f7fa;
@@ -394,11 +381,12 @@
   cursor: not-allowed;
 }
 .preview-calc-value {
-  display: inline-block;
+  display: block;
+  width: fit-content;
+  margin-top: 7px;
   font-size: inherit;
   padding: 1px 7px;
   border-radius: 4px;
-  margin-left: 6px;
   background: #f0f4ff;
   color: #3b4db8;
   border: 1px solid #c7d2fe;
@@ -410,7 +398,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 10px;
+  font-size: inherit;
   font-weight: 700;
   letter-spacing: .08em;
   color: #aaa;
@@ -437,9 +425,6 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   margin: 6px 0 8px;
-}
-@media (min-width: 1024px) {
-  .gtable-wrap { margin: 6px 14px 8px; }
 }
 .gtable {
   border-collapse: collapse;
@@ -539,5 +524,12 @@
   border-radius: 3px;
   padding: 0 3px;
   line-height: 1.4;
+}
+
+/* === Responsive =============================================================== */
+@media (min-width: 1024px) {
+  .preview-nested { margin-left: 45px; }
+  .preview-nested .preview-nested { margin-left: 35px; }
+  .gtable-wrap { margin: 6px 14px 8px; }
 }
 

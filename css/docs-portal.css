@@ -30,19 +30,19 @@ html, body {
 /* ── Layout ───────────────────────────────────────────────────────────────── */
 .doc-layout {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr) 220px;
+  grid-template-columns: 1fr;
   align-items: start;
   max-width: 1400px;
   margin: 0 auto;
 }
 
 .doc-sidebar {
-  position: sticky;
-  top: var(--doc-header-h);
-  height: calc(100vh - var(--doc-header-h));
+  position: static;
+  height: auto;
   overflow-y: auto;
   padding: 20px 14px 40px;
-  border-right: 1px solid var(--doc-border);
+  border-right: none;
+  border-bottom: 1px solid var(--doc-border);
   background: var(--doc-sidebar);
 }
 .doc-nav-section {
@@ -66,11 +66,12 @@ html, body {
 .doc-nav-link:hover { background: #eef2ff; }
 .doc-nav-link--active { background: #e0e7ff; color: var(--doc-accent); font-weight: 600; }
 
-.doc-main { min-width: 0; padding: 28px 40px 80px; }
+.doc-main { min-width: 0; padding: 20px; }
 .doc-content { max-width: 780px; }
 .doc-content:focus { outline: none; }
 
 .doc-toc {
+  display: none;
   position: sticky;
   top: var(--doc-header-h);
   max-height: calc(100vh - var(--doc-header-h));
@@ -137,19 +138,22 @@ html, body {
 
 .doc-hidden { display: none !important; }
 
+.page-header-title span { display: none; }
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
-@media (max-width: 1080px) {
+@media (min-width: 768px) {
   .doc-layout { grid-template-columns: 240px minmax(0, 1fr); }
-  .doc-toc { display: none; }
-}
-@media (max-width: 760px) {
-  .doc-layout { grid-template-columns: 1fr; }
   .doc-sidebar {
-    position: static;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--doc-border);
+    position: sticky;
+    top: var(--doc-header-h);
+    height: calc(100vh - var(--doc-header-h));
+    border-right: 1px solid var(--doc-border);
+    border-bottom: none;
   }
-  .doc-main { padding: 20px; }
-  .page-header-title span { display: none; }
+  .doc-main { padding: 28px 40px 80px; }
+  .page-header-title span { display: inline; }
+}
+@media (min-width: 1024px) {
+  .doc-layout { grid-template-columns: 260px minmax(0, 1fr) 220px; }
+  .doc-toc { display: block; }
 }

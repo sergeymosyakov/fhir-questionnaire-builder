@@ -3,14 +3,7 @@ import { buildFHIRObject } from './export.js';
 import { buildQR } from './qr-builder.js';
 import { downloadJSON } from './download.js';
 
-import { AppEvents } from '../events.js';
-
-let _svc = {};
-export function configure(svc) { _svc = { ..._svc, ...svc }; }
-if (typeof document !== 'undefined') {
-  document.addEventListener(AppEvents.APP_CONTEXT_READY,
-    e => { if (e.detail?.answerStore) configure({ answerStore: e.detail.answerStore }); });
-}
+import { AppEvents, EventState } from '../events.js';
 
 /**
  * Build and download a QuestionnaireResponse JSON.
@@ -18,7 +11,7 @@ if (typeof document !== 'undefined') {
  * @param {{ status?, subject?, author?, id?, language?, metaVersionId?, metaSource?, metaProfile?, metaTag?, metaSecurity? }} [meta]
  */
 export function exportQR(fileName, meta) {
-  const { answerStore } = _svc;
+  const { answerStore } = EventState.get(AppEvents.APP_CONTEXT_READY) || {};
   const fhirQ = buildFHIRObject();
   const qr    = buildQR(fhirQ, answerStore.toValueMap());
   qr.status   = (meta && meta.status)  || 'in-progress';

@@ -35,8 +35,9 @@ vi.mock('../js/state.js', () => ({
 
 vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
-const { importFHIR, configure: configureImport } = await import('../js/fhir/import.js');
-configureImport({ questDoc: _questDoc });
+const { importFHIR } = await import('../js/fhir/import.js');
+const { AppEvents, EventState } = await import('../js/events.js');
+EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc: _questDoc });
 
 vi.stubGlobal('alert', vi.fn());
 vi.mock('../js/ui/toast.js', () => ({ showError: vi.fn(), showWarn: vi.fn() }));

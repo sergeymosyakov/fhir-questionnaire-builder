@@ -42,8 +42,8 @@ html, body {
 #helpTable {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
 }
+#helpTable thead { display: none; }
 
 #helpTable thead th {
   position: sticky;
@@ -60,22 +60,32 @@ html, body {
   white-space: nowrap;
 }
 
-.col-field { width: 22%; }
-.col-desc  { width: 32%; }
-.col-where { width: 20%; }
-.col-how   { width: 26%; }
+#helpTable, #helpTable tbody, #helpTable tr, #helpTable td { display: block; }
 
-#helpTable tbody tr {
-  border-bottom: 1px solid var(--help-border);
+#helpTable tbody tr:not(.help-cat-sep) {
+  border: 1px solid var(--help-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 0 0 10px;
   transition: background .1s;
 }
-#helpTable tbody tr:hover { background: #f0f4ff; }
+#helpTable tbody tr:not(.help-cat-sep):hover { background: #f0f4ff; }
 
 #helpTable tbody td {
-  padding: 7px 10px;
+  padding: 4px 0;
   vertical-align: top;
   font-size: 12.5px;
   line-height: 1.45;
+}
+#helpTable tbody tr:not(.help-cat-sep) td::before {
+  content: attr(data-label);
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--help-muted);
+  margin-bottom: 2px;
 }
 
 .col-field code {
@@ -128,4 +138,28 @@ tr:has(.cat-ns) ~ tr td {
   text-align: center;
   color: var(--help-muted);
   font-size: 14px;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  #helpTable thead { display: table-header-group; }
+  #helpTable { display: table; table-layout: fixed; }
+  #helpTable tbody { display: table-row-group; }
+  #helpTable tr { display: table-row; }
+  #helpTable td { display: table-cell; }
+
+  #helpTable tbody tr:not(.help-cat-sep) {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid var(--help-border);
+  }
+  #helpTable tbody td { padding: 7px 10px; }
+  #helpTable tbody tr:not(.help-cat-sep) td::before { content: none; }
+
+  .col-field { width: 22%; }
+  .col-desc  { width: 32%; }
+  .col-where { width: 20%; }
+  .col-how   { width: 26%; }
 }

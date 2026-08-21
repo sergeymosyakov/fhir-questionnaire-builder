@@ -22,12 +22,13 @@ vi.mock('../js/fhir/qr-builder.js', () => ({
 
 // ── Imports (resolved AFTER vi.mock hoisting) ─────────────────────────────────
 
-import { exportQR, configure as configureQrExport } from '../js/fhir/qr-export.js';
+import { exportQR } from '../js/fhir/qr-export.js';
 import { buildFHIRObject } from '../js/fhir/export.js';
 import { buildQR }         from '../js/fhir/qr-builder.js';
+import { AppEvents, EventState } from '../js/events.js';
 
-// _svc injection — exportQR needs answerStore from _svc, not state.js
-configureQrExport({ answerStore: { data: {}, toValueMap() { return this.data; } } });
+// EventState seed — exportQR reads answerStore from the shared APP_CONTEXT_READY cache
+EventState._set(AppEvents.APP_CONTEXT_READY, { answerStore: { data: {}, toValueMap() { return this.data; } } });
 
 // ── DOM stub helpers ──────────────────────────────────────────────────────────
 

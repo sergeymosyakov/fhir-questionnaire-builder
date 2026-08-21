@@ -37,7 +37,8 @@ class ShowWhenModal extends ExprAwareModal {
 
     this.setTitle('Show When', node.title || node.id || 'Item');
     this.body.innerHTML = '';
-    buildVisPanel(draft, this.constructor._svc.questDoc.tree, this.body, visLink, () => {});
+    const questDoc = EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc;
+    buildVisPanel(draft, questDoc?.tree, this.body, visLink, () => {});
 
     const ddRow = document.createElement('div');
     ddRow.className = 'sw-disabled-display-row';
@@ -74,7 +75,7 @@ class ShowWhenModal extends ExprAwareModal {
     if (node.enableWhen && node.enableWhen.length) {
       const map = {};
       const walk = nodes => { for (const n of nodes || []) { map[n.id] = n.title || n.id || ''; walk(n.children); } };
-      walk(this.constructor._svc.questDoc.tree);
+      walk(EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc?.tree);
       node._enableWhenText = humanEnableWhen(node.enableWhen, node.enableBehavior, map);
     } else {
       delete node._enableWhenText;

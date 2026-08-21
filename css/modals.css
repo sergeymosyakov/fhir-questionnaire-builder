@@ -49,22 +49,14 @@
   margin: 12px auto 4px;
   align-self: center;
 }
+/* Position-sensitive: must stay before the per-modal [data-testid="x"] .modal-box
+   overrides below — equal specificity, so source order decides the winner. */
 @media (min-width: 1024px) {
-  .modal-backdrop { align-items: center; }
-  /* Reset full-width base rule — [data-testid] specificity matches the base rule above. */
   [data-testid] .modal-box {
     width: auto;
     max-width: 80vw;
     min-width: 0;
   }
-  .modal-box {
-    border: 1px solid var(--c-border);
-    border-radius: 0;
-    min-width: 500px;
-    max-width: 80vw;
-    max-height: 80vh;
-  }
-  .modal-box::before { display: none; }
 }
 .modal-header {
   display: flex;
@@ -112,10 +104,6 @@
   width: 100%;
   text-align: center;
   justify-content: center;
-}
-@media (min-width: 1024px) {
-  .modal-footer { flex-direction: row; justify-content: flex-end; gap: 8px; padding: 10px 16px 12px; }
-  .modal-btn { padding: 6px 14px; font-size: 12px; width: auto; text-align: left; }
 }
 .modal-btn--cancel { background: none; color: var(--c-text-2); }
 .modal-btn--cancel:hover { background: var(--c-hover); }
@@ -577,13 +565,6 @@
 [data-testid="libraryModal"] .modal-box  { max-width: 640px; width: 90vw; }
 
 /* Mobile: body ancestor raises specificity to [0,2,1] > per-modal [0,2,0] — no !important needed. */
-@media not all and (min-width: 1024px) {
-  body [data-testid] .modal-box {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-  }
-}
 [data-testid="libraryModal"] .modal-body { padding: 6px 0; max-height: 65vh; overflow-y: auto; }
 
 .lib-group + .lib-group   { border-top: 1px solid var(--c-border); }
@@ -766,11 +747,32 @@
   margin-right: auto;
   order: -1;
 }
-@media (min-width: 1024px) {
-  .modal-btn--copy-to { margin-right: auto; order: 0; }
-}
 /* Explain tree rows: bigger tap target on mobile */
 .explain-row { padding-top: 7px; padding-bottom: 7px; }
+
+/* === Responsive =============================================================== */
 @media (min-width: 1024px) {
+  .modal-backdrop { align-items: center; }
+  .modal-box {
+    border: 1px solid var(--c-border);
+    border-radius: 0;
+    min-width: 500px;
+    max-width: 80vw;
+    max-height: 80vh;
+  }
+  .modal-box::before { display: none; }
+
+  .modal-footer { flex-direction: row; justify-content: flex-end; gap: 8px; padding: 10px 16px 12px; }
+  .modal-btn { padding: 6px 14px; font-size: 12px; width: auto; text-align: left; }
+
+  .modal-btn--copy-to { margin-right: auto; order: 0; }
   .explain-row { padding-top: 4px; padding-bottom: 4px; }
+}
+/* Mobile: body ancestor raises specificity to [0,2,1] > per-modal [0,2,0] — no !important needed. */
+@media not all and (min-width: 1024px) {
+  body [data-testid] .modal-box {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
 }

@@ -14,7 +14,7 @@
 // Each validator gets its own section with a loading spinner (import/validate mode)
 // or pre-filled results (export mode).
 import { Modal } from './modal-base.js';
-import { AppEvents } from '../../events.js';
+import { AppEvents, EventState } from '../../events.js';
 import { validatorRegistry } from '../../fhir/validators/registry.js';
 
 class ValidateModal extends Modal {
@@ -320,7 +320,7 @@ if (typeof document !== 'undefined') {
   // Self-wire: settings-menu Validate button dispatches VALIDATE_REQUESTED
   document.addEventListener(AppEvents.VALIDATE_REQUESTED, () => {
     import('../../fhir/export.js').then(({ buildFHIRObjectVersioned }) => {
-      const { questDoc, answerStore } = ValidateModal._svc;
+      const { questDoc, answerStore } = EventState.get(AppEvents.APP_CONTEXT_READY) || {};
       _modal.show('Validate \u2014 Report', 'validate', {
         questJson: buildFHIRObjectVersioned(questDoc.fhirTarget),
         tree:      questDoc.tree,
