@@ -10,6 +10,7 @@
 //   node-title-display        read-only title span
 //   node-title-input          title textarea
 //   action-vis                "Show When" action link on item or group node
+//   vis-add-condition-btn     "+ Add condition" button in the panel
 //   showwhen-copy-to-btn      "Copy to…" button in ShowWhenModal footer
 //   showWhenModal             ShowWhenModal backdrop
 //   showWhenModalBody         scrollable body
@@ -190,7 +191,7 @@ test.describe('Node Picker modal UI', () => {
     await addSecondItem(page, '1', 'Target');
 
     await openShowWhenModal(page);
-    await modalBody(page).getByText('+ Add condition').click();
+    await modalBody(page).getByTestId('vis-add-condition-btn').click();
     await copyToBtn(page).click();
 
     await page.getByTestId('nodePickerModalCancel').click();
@@ -210,7 +211,7 @@ test.describe('Copy to — apply behaviour', () => {
     await addSecondItem(page, '1', 'Target');
 
     await openShowWhenModal(page);
-    await modalBody(page).getByText('+ Add condition').click();
+    await modalBody(page).getByTestId('vis-add-condition-btn').click();
     await copyToBtn(page).click();
 
     await pickerCb(page, '1.2').check();
@@ -228,7 +229,7 @@ test.describe('Copy to — apply behaviour', () => {
     await addSecondItem(page, '1', 'Target');
 
     await openShowWhenModal(page);
-    await modalBody(page).getByText('+ Add condition').click();
+    await modalBody(page).getByTestId('vis-add-condition-btn').click();
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();
     await pickerConfirm(page).click();
@@ -247,7 +248,7 @@ test.describe('Copy to — apply behaviour', () => {
     await addSecondItem(page, '1', 'Target');
 
     await openShowWhenModal(page);
-    await modalBody(page).getByText('+ Add condition').click();
+    await modalBody(page).getByTestId('vis-add-condition-btn').click();
     await copyToBtn(page).click();
     await pickerCb(page, '1.2').check();
     await pickerConfirm(page).click();

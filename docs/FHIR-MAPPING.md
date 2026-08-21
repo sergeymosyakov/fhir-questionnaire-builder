@@ -86,7 +86,7 @@ Every node in the tree is either a **group** or an **item**:
 
 ## Questionnaire-Level Metadata
 
-Stored in `questMeta` (plain object in `js/state.js`). Populated on import, written back on export, editable via the Properties modal. Reset to defaults when the questionnaire is cleared.
+Stored in `questDoc.meta` (`js/fhir/quest-document.js`). Populated on import, written back on export, editable via the Properties modal. Reset to defaults when the questionnaire is cleared.
 
 | Field | FHIR field | Import | Export |
 |---|---|---|---|

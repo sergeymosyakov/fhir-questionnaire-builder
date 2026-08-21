@@ -46,8 +46,9 @@ vi.mock('../js/state.js', () => ({
 
 vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
-const { fhirTypeToItemType, fhirOptsToStr, hasNonCodingOpts, humanEnableWhen, applyVisibility, importFHIR, configure: configureImport } = await import('../js/fhir/import.js');
-configureImport({ questDoc: _questDoc });
+const { fhirTypeToItemType, fhirOptsToStr, hasNonCodingOpts, humanEnableWhen, applyVisibility, importFHIR } = await import('../js/fhir/import.js');
+const { AppEvents, EventState } = await import('../js/events.js');
+EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc: _questDoc });
 
 vi.stubGlobal('alert', vi.fn());
 

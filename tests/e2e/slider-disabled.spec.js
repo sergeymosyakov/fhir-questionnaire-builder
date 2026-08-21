@@ -34,7 +34,6 @@ async function moveSlider(page, value) {
     el.dispatchEvent(new Event('input', { bubbles: true }));
     el.dispatchEvent(new Event('change', { bubbles: true }));
   }, String(value));
-  await page.waitForTimeout(300);
 }
 
 // ── Slider rendering ───────────────────────────────────────────────────────────

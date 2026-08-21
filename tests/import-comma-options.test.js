@@ -30,10 +30,10 @@ vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 vi.mock('../js/ui/toast.js', () => ({ showError: vi.fn(), showWarn: vi.fn() }));
 vi.stubGlobal('alert', vi.fn());
 
-const { importFHIR, configure: configureImport } = await import('../js/fhir/import.js');
-const { nodeToFHIRItem, configure: configureExport } = await import('../js/fhir/export.js');
-configureImport({ questDoc: _questDoc });
-configureExport({ questDoc: _questDoc });
+const { importFHIR } = await import('../js/fhir/import.js');
+const { nodeToFHIRItem } = await import('../js/fhir/export.js');
+const { AppEvents, EventState } = await import('../js/events.js');
+EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc: _questDoc });
 
 const COMMA_DISPLAY = 'E1220 - Wheelchair, adult size, heavy duty, elevating legrests';
 const minQ = items => ({ resourceType: 'Questionnaire', title: 'Test', item: items });

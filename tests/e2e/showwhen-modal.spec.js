@@ -10,6 +10,7 @@
 //   node-title-display    read-only title span
 //   node-title-input      title textarea
 //   action-vis            "Show When" action link on an item node
+//   vis-add-condition-btn  "+ Add condition" button in the panel
 //
 // ── element IDs ──────────────────────────────────────────────────────────────
 //   showWhenModal         backdrop (display:flex when open)
@@ -133,7 +134,7 @@ test.describe('Show When modal — draft pattern', () => {
     await addTextItem(page);
 
     await openShowWhenModal(page);
-    await expect(showWhenModalBody(page).getByText('+ Add condition')).toBeVisible();
+    await expect(showWhenModalBody(page).getByTestId('vis-add-condition-btn')).toBeVisible();
   });
 
   test('Cancel after adding condition does not save', async ({ page }) => {
@@ -144,7 +145,7 @@ test.describe('Show When modal — draft pattern', () => {
     const actionLink = item.getByTestId('action-vis');
 
     await actionLink.click();
-    await showWhenModalBody(page).getByText('+ Add condition').click();
+    await showWhenModalBody(page).getByTestId('vis-add-condition-btn').click();
     await showWhenModalCancel(page).click();
 
     // Action link must remain inactive
@@ -161,7 +162,7 @@ test.describe('Show When modal — draft pattern', () => {
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
 
     await actionLink.click();
-    await showWhenModalBody(page).getByText('+ Add condition').click();
+    await showWhenModalBody(page).getByTestId('vis-add-condition-btn').click();
     await showWhenModalApply(page).click();
 
     await expect(showWhenModal(page)).not.toBeVisible();
@@ -194,7 +195,7 @@ test.describe('Show When modal — draft pattern', () => {
 
     // Add condition and apply
     await actionLink.click();
-    await showWhenModalBody(page).getByText('+ Add condition').click();
+    await showWhenModalBody(page).getByTestId('vis-add-condition-btn').click();
     await showWhenModalApply(page).click();
     await expect(actionLink).toHaveClass(/action-edit--active/);
 
@@ -221,7 +222,7 @@ test.describe('Show When modal — question picker tooltip', () => {
     await expect(page.locator('[data-node-id="1.2"]').getByTestId('action-vis')).toBeVisible();
 
     await openShowWhenModal(page, '1.2');
-    await showWhenModalBody(page).getByText('+ Add condition').click();
+    await showWhenModalBody(page).getByTestId('vis-add-condition-btn').click();
 
     const trigger = showWhenModalBody(page).locator('.vis-q-sel-trigger').first();
     await expect(trigger).toBeVisible();

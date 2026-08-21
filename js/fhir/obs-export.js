@@ -6,15 +6,8 @@ import { buildQR } from './qr-builder.js';
 import { extractObservations } from './extract.js';
 import { downloadJSON } from './download.js';
 
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 import { FHIR } from './urls/fhir.js';
-
-let _svc = {};
-export function configure(svc) { _svc = { ..._svc, ...svc }; }
-if (typeof document !== 'undefined') {
-  document.addEventListener(AppEvents.APP_CONTEXT_READY,
-    e => { if (e.detail?.answerStore) configure({ answerStore: e.detail.answerStore }); });
-}
 
 const SDC_OBS_PROFILE = FHIR.sdcObservation;
 
@@ -25,7 +18,7 @@ const SDC_OBS_PROFILE = FHIR.sdcObservation;
  * @returns {object} the generated Bundle (also useful for tests).
  */
 export function exportObservations(fileName, meta) {
-  const { answerStore } = _svc;
+  const { answerStore } = EventState.get(AppEvents.APP_CONTEXT_READY) || {};
   const fhirQ = buildFHIRObject();
   const qr    = buildQR(fhirQ, answerStore.toValueMap());
   qr.status   = 'completed';

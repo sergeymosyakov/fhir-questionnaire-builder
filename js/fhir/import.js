@@ -1,6 +1,6 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
 import { showError } from '../ui/toast.js';
-import { AppEvents } from '../events.js';
+import { AppEvents, EventState } from '../events.js';
 import { defaultBus } from '../core/events/bus.js';
 import { normaliseSTU3 } from './stu3-shim.js';
 import { destroyTree } from '../utils.js';
@@ -8,13 +8,6 @@ import { resetSeq } from '../id.js';
 import { FHIR } from './urls/fhir.js';
 import { APP_URL } from './urls/app.js';
 
-let _svc = {};
-/** @param {{ questDoc?: import('./quest-document.js').QuestDocument }} svc */
-export function configure(svc) { _svc = { ..._svc, ...svc }; }
-if (typeof document !== 'undefined') {
-  document.addEventListener(AppEvents.APP_CONTEXT_READY,
-    e => { if (e.detail?.questDoc) configure({ questDoc: e.detail.questDoc }); });
-}
 import {
   buildLinkIdMap,
   fhirTypeToItemType,
@@ -55,7 +48,7 @@ function applyInitialValues(nodes, bus) {
 
 // Main import entry point
 export function importFHIR(fhirJson, opts = {}) {
-  const questDoc = opts.questDoc || _svc.questDoc;
+  const questDoc = opts.questDoc || EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc;
   const bus = opts.bus || defaultBus;
   const { tree, meta: questMeta, variables: questVariables, contained: questContained } = questDoc;
   let q = fhirJson;

@@ -7,8 +7,6 @@
 //   applyLabel:  string|null  — apply btn text;         null = omit  (default: 'Apply')
 //   maxWidth:    string|null  — CSS max-width for the modal box      (default: null)
 //   bodyClass:   string|null  — extra CSS class on .modal-body       (default: null)
-import { questDoc as _questDoc } from '../../fhir/quest-document.js';
-import { answerStore as _answerStore } from '../../answer-store.js';
 
 // Single shared Escape handler — closes the topmost open modal.
 const _registry = new Map(); // backdrop → cancel callback
@@ -33,12 +31,7 @@ function _mk(tag, className) {
 const _FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 let _modalSeq = 0;
 
-import { questDoc } from '../../fhir/quest-document.js';
-import { answerStore } from '../../answer-store.js';
 export class Modal {
-  /** Direct references to singleton document and answer store — always current. */
-  static _svc = { get questDoc() { return questDoc; }, get answerStore() { return answerStore; } };
-
   /** Override in subclass to assign data-testid attributes to modal DOM elements. */
   getName() { return null; }
 

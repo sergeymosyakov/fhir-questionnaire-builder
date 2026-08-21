@@ -22,9 +22,9 @@ Supports Scenario 1 (round-trip) and Scenario 3 (logic testing). This is where m
 
 ## Near-term
 
-### Embeddable renderer widget — _in progress_
+### Embeddable renderer widget — session-scoped terminology server
 
-Extract the right-side preview into `QuestionnaireRenderer(mountEl, { questionnaire, response, config })` — an in-page, multi-instance, isolated widget that host apps embed without the builder shell (see [WIDGET-EXTRACTION-PLAN.md](WIDGET-EXTRACTION-PLAN.md)). Done: Core session (`js/core/*`), preview-only node layer + builder extension, fully parameterized `PreviewForm`, config-driven chrome (opt-in `search`/`validation`/`explain`/`navButton`/`tooltips`, `fhirBaseUrl`/`corsProxy`), whole render path off the global `document` bus onto the session bus (multi-instance isolation), click-to-explain for FHIRPath **and** standard `enableWhen` (why an item is hidden), 3-widget dogfood demo. Remaining: session-scoped terminology server for the widget path, packaging/docs (Phase F).
+The embeddable `QuestionnaireRenderer` (`js/renderer/index.js`, see [WIDGET-EXTRACTION-PLAN.md](WIDGET-EXTRACTION-PLAN.md)) is complete — core session, preview-only node layer, parameterized `PreviewForm`, config-driven chrome, multi-instance isolation, explain, packaging/docs all shipped. Remaining gap: the widget path has no session-scoped terminology server — `answerValueSet` expansion (`$expand`) is not wired for widget-embedded questionnaires.
 
 
 ## Technical Debt
