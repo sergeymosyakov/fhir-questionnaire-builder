@@ -97,6 +97,30 @@ npm install
 npm run build:widget       # → dist/questionnaire-widget.{js,global.js,css}
 ```
 
+### NuGet (for .NET web apps)
+
+For Blazor, Razor Pages, or MVC apps that want the widget's static JS/CSS
+assets without touching npm:
+
+```bash
+dotnet add package FhirQuestionnaireWidget
+```
+
+Reference it from a Razor/HTML page — the assets are served under
+`_content/FhirQuestionnaireWidget/`:
+
+```html
+<link rel="stylesheet" href="_content/FhirQuestionnaireWidget/questionnaire-widget.css">
+<script type="module">
+  import { QuestionnaireRenderer } from '/_content/FhirQuestionnaireWidget/questionnaire-widget.js';
+  // …
+</script>
+```
+
+> Same publishing model as npm above — [NuGet Trusted Publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
+> (OIDC from GitHub Actions, no token/secret). It's a static-asset-only
+> package — no C# API surface, just the built widget files.
+
 ---
 
 ## Quick start

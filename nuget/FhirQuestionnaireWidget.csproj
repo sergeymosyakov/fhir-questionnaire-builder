@@ -1,0 +1,28 @@
+<!-- Static-asset-only package: ships the built widget JS/CSS for .NET web apps
+     (Blazor/Razor Pages/MVC). No C# API surface. wwwroot/ is populated at pack
+     time by release-widget.yml (from ../dist/), not committed to git. -->
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <AddRazorSupportForMvc>false</AddRazorSupportForMvc>
+    <StaticWebAssetBasePath>fhir-questionnaire-widget</StaticWebAssetBasePath>
+
+    <PackageId>FhirQuestionnaireWidget</PackageId>
+    <!-- Overridden at pack time: dotnet pack -p:PackageVersion=X.Y.Z -->
+    <Version>0.0.0</Version>
+    <Authors>Sergey Mosyakov;Huthaifa Khan;Roko Labs Inc.</Authors>
+    <Description>Embeddable FHIR R4 QuestionnaireRenderer widget — static JS/CSS assets for .NET web apps (Blazor, Razor Pages, MVC). Vanilla ES module, no framework dependency, in-page and multi-instance.</Description>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/sergeymosyakov/fhir-questionnaire-builder</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/sergeymosyakov/fhir-questionnaire-builder</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>fhir;questionnaire;sdc;healthcare;blazor;razor;widget</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE" Pack="true" PackagePath="LICENSE" Visible="false" />
+  </ItemGroup>
+
+</Project>

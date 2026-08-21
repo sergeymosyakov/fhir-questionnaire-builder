@@ -17,3 +17,9 @@ coverage/
 
 # CI site assembly
 _site/
+
+# NuGet packaging: staged at pack time from dist/, not committed
+nuget/wwwroot/
+nuget/bin/
+nuget/obj/
+nuget-out/
