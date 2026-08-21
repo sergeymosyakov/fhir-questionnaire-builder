@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { parseExpression, astToBlocks, expandAggregateOverSet } from '../js/fhir/expr-builder/parse.js';
 import { emit } from '../js/fhir/expr-builder/emit.js';
 import {
-  itemRef, variable, literal, compare, logic, arith, exists, aggregate,
+  itemRef, variable, literal, compare, logic, arith, exists, aggregate, mathFn,
 } from '../js/fhir/expr-builder/model.js';
 import { loadFhirpath } from './helpers/fhirpath-node.js';
 
@@ -71,6 +71,35 @@ describe('parseExpression — recognised shapes', () => {
       itemRef(['weight'], 'valueDecimal'),
       arith('*', itemRef(['height'], 'valueDecimal'), itemRef(['height'], 'valueDecimal')),
     ));
+  });
+
+  it('reads the BMI expression with a trailing .round(n) wrapper', () => {
+    const src = "(%resource.item.where(linkId='vitals').item.where(linkId='weight').answer.valueDecimal * 10000 / (%resource.item.where(linkId='vitals').item.where(linkId='height').answer.valueDecimal * %resource.item.where(linkId='vitals').item.where(linkId='height').answer.valueDecimal)).round(1)";
+    expect(parse(src)).toEqual(mathFn('round', 1, arith(
+      '/',
+      arith('*', itemRef(['vitals', 'weight'], 'valueDecimal'), literal('number', 10000)),
+      arith('*', itemRef(['vitals', 'height'], 'valueDecimal'), itemRef(['vitals', 'height'], 'valueDecimal')),
+    )));
+  });
+
+  it('reads round() with no precision arg on a plain path', () => {
+    expect(parse("%resource.item.where(linkId='age').answer.valueDecimal.round()"))
+      .toEqual(mathFn('round', null, itemRef(['age'], 'valueDecimal')));
+  });
+
+  it('reads abs/ceiling/floor/truncate wrapping a plain path', () => {
+    expect(parse("%resource.item.where(linkId='delta').answer.valueDecimal.abs()"))
+      .toEqual(mathFn('abs', null, itemRef(['delta'], 'valueDecimal')));
+    expect(parse("%resource.item.where(linkId='delta').answer.valueDecimal.ceiling()"))
+      .toEqual(mathFn('ceiling', null, itemRef(['delta'], 'valueDecimal')));
+    expect(parse("%resource.item.where(linkId='delta').answer.valueDecimal.floor()"))
+      .toEqual(mathFn('floor', null, itemRef(['delta'], 'valueDecimal')));
+    expect(parse("%resource.item.where(linkId='delta').answer.valueDecimal.truncate()"))
+      .toEqual(mathFn('truncate', null, itemRef(['delta'], 'valueDecimal')));
+  });
+
+  it('reads .round(n) wrapping a simple arithmetic sum', () => {
+    expect(parse('(%a + %b).round(2)')).toEqual(mathFn('round', 2, arith('+', variable('a'), variable('b'))));
   });
 
   it('reads exists / empty', () => {
@@ -182,6 +211,9 @@ describe('round-trip: parse(emit(block)) === block', () => {
     aggregate('count', itemRef(['pain'], '')),
     aggregate('sum', itemRef(['pain'], 'valueDecimal')),
     exists(itemRef(['g', 'q', 'sub'], 'valueBoolean', [false, false, true]), false),
+    mathFn('round', 1, arith('/', itemRef(['weight'], 'valueDecimal'), arith('*', itemRef(['height'], 'valueDecimal'), itemRef(['height'], 'valueDecimal')))),
+    mathFn('round', null, itemRef(['age'], 'valueDecimal')),
+    mathFn('abs', null, itemRef(['delta'], 'valueDecimal')),
   ];
 
   it.each(blocks.map((b) => [emit(b), b]))('%s', (str, block) => {

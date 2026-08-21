@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   itemRef, variable, literal, compare, logic, arith, exists, aggregate, raw,
-  setLiteral, pipeline,
+  setLiteral, pipeline, mathFn,
 } from '../js/fhir/expr-builder/model.js';
 import { emit } from '../js/fhir/expr-builder/emit.js';
 import { valueAccessor, hasAnswer } from '../js/fhir/expr-builder/value-paths.js';
@@ -108,5 +108,22 @@ describe('emit', () => {
 
   it('passes raw text through unchanged', () => {
     expect(emit(raw('%weird.stuff().foo'))).toBe('%weird.stuff().foo');
+  });
+
+  it('emits a rounded arithmetic result, parenthesizing the target', () => {
+    const bmi = arith('/', itemRef(['weight'], 'valueDecimal'), arith('*', itemRef(['height'], 'valueDecimal'), itemRef(['height'], 'valueDecimal')));
+    expect(emit(mathFn('round', 1, bmi)))
+      .toBe("(%resource.item.where(linkId='weight').answer.valueDecimal / (%resource.item.where(linkId='height').answer.valueDecimal * %resource.item.where(linkId='height').answer.valueDecimal)).round(1)");
+  });
+
+  it('emits round() with no precision arg, and other wrap functions with no args', () => {
+    expect(emit(mathFn('round', null, itemRef(['age'], 'valueDecimal'))))
+      .toBe("%resource.item.where(linkId='age').answer.valueDecimal.round()");
+    expect(emit(mathFn('abs', null, itemRef(['delta'], 'valueDecimal'))))
+      .toBe("%resource.item.where(linkId='delta').answer.valueDecimal.abs()");
+  });
+
+  it('does not parenthesize a simple target for a math-wrap function', () => {
+    expect(emit(mathFn('ceiling', null, variable('score')))).toBe('%score.ceiling()');
   });
 });

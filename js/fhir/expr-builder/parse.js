@@ -1,7 +1,7 @@
 // Maps a fhirpath.js parse CST into the block model (two-way editing). Pure over
 // the CST: the browser calls fhirpath.parse(str), this maps the result. Anything
 // not modeled collapses to a `raw` block so round-trips stay lossless.
-import { itemRef, variable, literal, compare, logic, arith, exists, aggregate, raw, setLiteral, pipeline, BlockKind } from './model.js';
+import { itemRef, variable, literal, compare, logic, arith, exists, aggregate, raw, setLiteral, pipeline, mathFn, MATH_WRAP_FNS, BlockKind } from './model.js';
 import { emit } from './emit.js';
 
 // Public entry: parse a string via an injected fhirpath instance.
@@ -73,7 +73,7 @@ function mapBinary(n, make) {
 function mapPathOrTerm(n) {
   const { head, steps } = flatten(n);
   if (steps.length === 0) return mapTerm(head);
-  return interpretPipeline(head, steps) || interpretPath(head, steps);
+  return interpretPipeline(head, steps) || interpretPath(head, steps) || interpretMathWrap(head, steps);
 }
 
 // Flattens left-nested InvocationExpression into { head: term, steps: [...] }.
@@ -156,7 +156,8 @@ function interpretPath(head, rawSteps) {
 
   let tail = null;
   const last = steps[steps.length - 1];
-  if (last && last.kind === 'func' && last.args.length === 0) {
+  const mw = mathWrapOf(last);
+  if (mw) { tail = { type: 'mathFn', ...mw }; steps.pop(); } else if (last && last.kind === 'func' && last.args.length === 0) {
     if (last.name === 'exists' || last.name === 'empty') { tail = { type: 'exists', negate: last.name === 'empty' }; steps.pop(); } else if (AGG_FNS.has(last.name)) { tail = { type: 'agg', fn: last.name }; steps.pop(); }
   }
 
@@ -190,10 +191,40 @@ function interpretPath(head, rawSteps) {
   if (segments.length === 0) return null;
   if (tail?.type === 'exists') return exists(ref, tail.negate);
   if (tail?.type === 'agg') return aggregate(tail.fn, ref);
+  if (tail?.type === 'mathFn') return mathFn(tail.fn, tail.arg, ref);
   return ref;
 }
 
 const AGG_FNS = new Set(['count', 'sum', 'avg', 'min', 'max']);
+const MATH_WRAP_FN_SET = new Set(MATH_WRAP_FNS);
+
+// Reads a trailing round([n])/abs()/ceiling()/floor()/truncate() step. Returns
+// { fn, arg } or null (not a recognized math-wrap step).
+function mathWrapOf(step) {
+  if (!step || step.kind !== 'func' || !MATH_WRAP_FN_SET.has(step.name)) return null;
+  if (step.name !== 'round') return step.args.length === 0 ? { fn: step.name, arg: null } : null;
+  if (step.args.length === 0) return { fn: 'round', arg: null };
+  if (step.args.length !== 1) return null;
+  const arg = numericLiteralArg(step.args[0]);
+  return arg == null ? null : { fn: 'round', arg };
+}
+
+function numericLiteralArg(node) {
+  const t = unwrapTerm(node);
+  if (!t || t.type !== 'LiteralTerm') return null;
+  const lit = mapLiteral(t);
+  return lit && lit.dataType === 'number' ? lit.value : null;
+}
+
+// A trailing `.round(n)` / `.abs()` / … applied to a result that isn't itself a
+// resource-path (e.g. `(a * b / c).round(1)`) — head is re-parsed as its own block.
+function interpretMathWrap(head, steps) {
+  if (steps.length !== 1) return null;
+  const mw = mathWrapOf(steps[0]);
+  if (!mw) return null;
+  const target = astToBlocks(head);
+  return target ? mathFn(mw.fn, mw.arg, target) : null;
+}
 
 // Reads a collection pipeline anchored at %resource.repeat(item).where(linkId='X'):
 //   .answer<accessor> ( .intersect(set) | .exclude(set) | .distinct() )* [ reduce ]
