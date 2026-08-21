@@ -33,6 +33,10 @@ jobs:
           node-version: 24
           cache: npm
 
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
       - run: npm ci
       - run: npm run lint
       - run: npm test
@@ -105,3 +109,25 @@ jobs:
           '
           cp LICENSE dist/LICENSE
           cd dist && npm publish --access public --provenance
+
+      # Publishes via NuGet Trusted Publishing (OIDC) — no token/secret involved.
+      # Requires the "release-widget-github-actions" trusted publisher policy
+      # configured on nuget.org for this repo + workflow file. Non-blocking:
+      # the GitHub Release and npm publish above already succeeded.
+      - name: NuGet Trusted Publishing login
+        id: nuget-login
+        continue-on-error: true
+        uses: NuGet/login@v1
+        with:
+          user: sergeymosyakov
+
+      - name: Publish to NuGet
+        if: steps.nuget-login.outcome == 'success'
+        continue-on-error: true
+        env:
+          PKG_VERSION: ${{ steps.ver.outputs.semver }}
+        run: |
+          mkdir -p nuget/wwwroot
+          cp dist/questionnaire-widget.js dist/questionnaire-widget.global.js dist/questionnaire-widget.css nuget/wwwroot/
+          dotnet pack nuget/FhirQuestionnaireWidget.csproj -c Release -p:PackageVersion="$PKG_VERSION" -o nuget-out
+          dotnet nuget push nuget-out/*.nupkg --source https://api.nuget.org/v3/index.json --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --skip-duplicate
