@@ -86,8 +86,9 @@ import { QuestionnaireRenderer } from '@sergeymosyakov/questionnaire-widget';
 import '@sergeymosyakov/questionnaire-widget/css';
 ```
 
-> npm publishing is opt-in (requires an `NPM_TOKEN`); the CDN and Release above
-> need no install and no auth and are the primary channels.
+> npm publishing uses [Trusted Publishing](https://docs.npmjs.com/trusted-publishers)
+> (OIDC from GitHub Actions — no token/secret involved); the CDN and Release
+> above need no install and no auth and remain the primary channels.
 
 Or build it yourself from source:
 

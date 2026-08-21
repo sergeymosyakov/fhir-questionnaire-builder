@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write   # required for npm Trusted Publishing (OIDC), no NPM_TOKEN needed
 
 concurrency:
   group: release-widget
@@ -75,20 +76,17 @@ jobs:
             --title "QuestionnaireRenderer widget ${{ steps.ver.outputs.semver }}" \
             --notes-file /tmp/notes.md
 
-      # Optional: publish to npmjs.com for a password-less `npm install`.
-      # Runs only when an NPM_TOKEN repo secret is set; otherwise skips (the
-      # Release assets + jsDelivr CDN remain the primary, no-auth channels).
-      - name: Publish to npm (npmjs.com, optional)
+      # Publishes via npm Trusted Publishing (OIDC) — no token/secret involved.
+      # Requires a trusted publisher configured on npmjs.com for this repo +
+      # workflow file. Non-blocking: the GitHub Release above already succeeded.
+      - name: Publish to npm (npmjs.com, Trusted Publishing)
+        continue-on-error: true
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           PKG_VERSION: ${{ steps.ver.outputs.semver }}
           PKG_OWNER: ${{ github.repository_owner }}
           PKG_REPO: ${{ github.repository }}
         run: |
-          if [ -z "$NPM_TOKEN" ]; then
-            echo "NPM_TOKEN not set — skipping npm publish (Release + CDN remain the primary channels)."
-            exit 0
-          fi
+          npm install -g npm@latest
           node -e '
             const fs = require("fs");
             const pkg = {
@@ -99,11 +97,11 @@ jobs:
               main: "questionnaire-widget.js",
               module: "questionnaire-widget.js",
               exports: { ".": "./questionnaire-widget.js", "./global": "./questionnaire-widget.global.js", "./css": "./questionnaire-widget.css" },
-              files: ["questionnaire-widget.js", "questionnaire-widget.global.js", "questionnaire-widget.css"],
+              files: ["questionnaire-widget.js", "questionnaire-widget.global.js", "questionnaire-widget.css", "LICENSE"],
               repository: "git+https://github.com/" + process.env.PKG_REPO + ".git",
               license: "SEE LICENSE IN LICENSE"
             };
             fs.writeFileSync("dist/package.json", JSON.stringify(pkg, null, 2));
           '
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > dist/.npmrc
-          cd dist && npm publish --access public
+          cp LICENSE dist/LICENSE
+          cd dist && npm publish --access public --provenance
