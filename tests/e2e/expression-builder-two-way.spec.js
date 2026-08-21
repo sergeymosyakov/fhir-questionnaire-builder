@@ -15,6 +15,7 @@
 //   eb-group-type / eb-add-condition                                    condition group
 //   eb-operand-kind / eb-operand-num / eb-arith-op / eb-add-operand     value operands
 //   eb-agg-fn / eb-agg-item                                             value aggregate
+//   eb-group / eb-group-add / eb-wrap-row / eb-wrap-fn / eb-wrap-arg    value grouping/rounding
 //   eb-preview-str                                                      live preview
 //   csel-drop [data-val]                                               custom-select option
 // ─────────────────────────────────────────────────────────────────────────────
@@ -89,6 +90,18 @@ async function openCalc(page, nodeId = '1.1') {
 }
 
 async function reopenCalc(page) {
+  await page.getByTestId('expr-calc-ta-build-btn').click();
+  await expect(page.getByTestId('expressionBuilderModal')).toBeVisible();
+}
+
+// Seeds the calc field directly with raw FHIRPath text, then opens the builder
+// (used to prove a given expression auto-detects into visual mode, or stays raw).
+async function openCalcRaw(page, expr, nodeId = '1.1') {
+  const link = page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-expr');
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(page.getByTestId('expressionModal')).toBeVisible();
+  await page.getByTestId('expr-calc-ta').fill(expr);
   await page.getByTestId('expr-calc-ta-build-btn').click();
   await expect(page.getByTestId('expressionBuilderModal')).toBeVisible();
 }
@@ -341,5 +354,162 @@ test.describe('Two-way — values', () => {
 
     await reopenCalc(page);
     await expect(page.getByTestId('eb-arith-op')).toHaveAttribute('data-value', '/');
+  });
+});
+
+// ── Values — grouping & rounding ──────────────────────────────────────────────
+
+test.describe('Two-way — values (grouping & rounding)', () => {
+  test('reported bug: BMI expression (group + round) now opens visual instead of raw', async ({ page }) => {
+    await freshStart(page);
+    await makeItems(page, 3);
+    const bmi = "(%resource.item.where(linkId='1.2').answer.valueDecimal * 10000 / (%resource.item.where(linkId='1.3').answer.valueDecimal * %resource.item.where(linkId='1.3').answer.valueDecimal)).round(1)";
+    await openCalcRaw(page, bmi);
+    await expect(page.getByTestId('eb-chain')).toBeVisible();
+    await expect(page.getByTestId('eb-raw-input')).toHaveCount(0);
+    await expect(page.getByTestId('eb-group')).toBeVisible();
+    await expect(page.getByTestId('eb-wrap-fn')).toHaveAttribute('data-value', 'round');
+    await expect(page.getByTestId('eb-wrap-arg')).toHaveValue('1');
+  });
+
+  test('round wrap with a precision arg round-trips', async ({ page }) => {
+    await freshStart(page);
+    await makeItems(page, 1);
+    await openCalc(page);
+
+    await page.getByTestId('eb-operand-num').fill('7');
+    await pick(page.getByTestId('eb-wrap-row'), page, 'eb-wrap-fn', 'round');
+    await page.getByTestId('eb-wrap-arg').fill('2');
+    await expect(page.getByTestId('eb-preview-str')).toContainText('7.round(2)');
+    await insert(page);
+    await expect(page.getByTestId('expr-calc-ta')).toHaveValue('7.round(2)');
+
+    await reopenCalc(page);
+    await expect(page.getByTestId('eb-wrap-fn')).toHaveAttribute('data-value', 'round');
+    await expect(page.getByTestId('eb-wrap-arg')).toHaveValue('2');
+  });
+
+  test('a non-round wrap function (floor) round-trips with no arg input', async ({ page }) => {
+    await freshStart(page);
+    await makeItems(page, 1);
+    await openCalc(page);
+
+    await page.getByTestId('eb-operand-num').fill('9');
+    await pick(page.getByTestId('eb-wrap-row'), page, 'eb-wrap-fn', 'floor');
+    await expect(page.getByTestId('eb-wrap-arg')).toHaveCount(0);
+    await expect(page.getByTestId('eb-preview-str')).toContainText('9.floor()');
+    await insert(page);
+    await expect(page.getByTestId('expr-calc-ta')).toHaveValue('9.floor()');
+
+    await reopenCalc(page);
+    await expect(page.getByTestId('eb-wrap-fn')).toHaveAttribute('data-value', 'floor');
+  });
+
+  test('a Group operand used within a larger chain round-trips', async ({ page }) => {
+    await freshStart(page);
+    await makeItems(page, 1);
+    await openCalc(page);
+
+    await page.getByTestId('eb-operand-num').fill('10000');
+    await page.getByTestId('eb-add-operand').click();
+    await pick(page.getByTestId('eb-chain'), page, 'eb-arith-op', '/');
+    await pick(page.getByTestId('eb-operand').nth(1), page, 'eb-operand-kind', 'group');
+    await expect(page.getByTestId('eb-group')).toBeVisible();
+    await page.getByTestId('eb-group').getByTestId('eb-operand-num').first().fill('3');
+    await page.getByTestId('eb-group').getByTestId('eb-group-add').click();
+    await pick(page.getByTestId('eb-group'), page, 'eb-arith-op', '*');
+    await page.getByTestId('eb-group').getByTestId('eb-operand-num').nth(1).fill('3');
+    await expect(page.getByTestId('eb-preview-str')).toContainText('10000 / (3 * 3)');
+    await insert(page);
+    await expect(page.getByTestId('expr-calc-ta')).toHaveValue('10000 / (3 * 3)');
+
+    await reopenCalc(page);
+    await expect(page.getByTestId('eb-operand-kind').nth(1)).toHaveAttribute('data-value', 'group');
+    await expect(page.getByTestId('eb-group').getByTestId('eb-operand-num').nth(0)).toHaveValue('3');
+    await expect(page.getByTestId('eb-group').getByTestId('eb-operand-num').nth(1)).toHaveValue('3');
+  });
+
+  test('full BMI shape (group + outer round) built from scratch inserts correctly', async ({ page }) => {
+    await freshStart(page);
+    await makeItems(page, 2);
+    await setItemType(page, '1.2', 'decimal');
+    await openCalc(page);
+
+    // weight * 10000 / (height * height), then round(1)
+    await pick(page.getByTestId('eb-operand').first(), page, 'eb-operand-item', '1.2');
+    await page.getByTestId('eb-add-operand').click();
+    await pick(page.getByTestId('eb-chain'), page, 'eb-arith-op', '*');
+    await pick(page.getByTestId('eb-operand').nth(1), page, 'eb-operand-kind', 'num');
+    await page.getByTestId('eb-operand-num').fill('10000');
+    await page.getByTestId('eb-add-operand').click();
+    await page.getByTestId('eb-chain').getByTestId('eb-arith-op').nth(1).click();
+    await page.locator('[data-testid="csel-drop"] [data-val="/"]').click();
+    await pick(page.getByTestId('eb-operand').nth(2), page, 'eb-operand-kind', 'group');
+    const group = page.getByTestId('eb-group');
+    await expect(group).toBeVisible();
+    await pick(group.getByTestId('eb-operand').first(), page, 'eb-operand-item', '1.2');
+    await group.getByTestId('eb-group-add').click();
+    await pick(group, page, 'eb-arith-op', '*');
+    await pick(group.getByTestId('eb-operand').nth(1), page, 'eb-operand-item', '1.2');
+    await pick(page.getByTestId('eb-wrap-row'), page, 'eb-wrap-fn', 'round');
+    await page.getByTestId('eb-wrap-arg').fill('1');
+    await expect(page.getByTestId('eb-preview-str')).toContainText('.round(1)');
+    await insert(page);
+    await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/\.round\(1\)$/); // NOSONAR — literal pattern over controlled builder output
+
+    await reopenCalc(page);
+    await expect(page.getByTestId('eb-group')).toBeVisible();
+    await expect(page.getByTestId('eb-wrap-fn')).toHaveAttribute('data-value', 'round');
+  });
+
+  test('adding an operand inside a group persists after insert and reopen', async ({ page }) => {
+    await freshStart(page);
+    await makeItems(page, 1);
+    await openCalc(page);
+
+    // 10 / (2 + 3 + 4) — division keeps the group from flattening into the outer chain.
+    await page.getByTestId('eb-operand-num').fill('10');
+    await page.getByTestId('eb-add-operand').click();
+    await pick(page.getByTestId('eb-chain'), page, 'eb-arith-op', '/');
+    await pick(page.getByTestId('eb-operand').nth(1), page, 'eb-operand-kind', 'group');
+    const group = page.getByTestId('eb-group');
+    await group.getByTestId('eb-operand-num').first().fill('2');
+    await group.getByTestId('eb-group-add').click();
+    await group.getByTestId('eb-operand-num').nth(1).fill('3');
+    await group.getByTestId('eb-group-add').click();
+    await group.getByTestId('eb-operand-num').nth(2).fill('4');
+    await expect(page.getByTestId('eb-preview-str')).toContainText('10 / ((2 + 3) + 4)');
+    await insert(page);
+
+    await reopenCalc(page);
+    await expect(page.getByTestId('eb-group').getByTestId('eb-operand-num')).toHaveCount(3);
+    await expect(page.getByTestId('eb-group').getByTestId('eb-operand-num').nth(2)).toHaveValue('4');
+  });
+
+  test('turning rounding back off after setting it reverts cleanly', async ({ page }) => {
+    await freshStart(page);
+    await makeItems(page, 1);
+    await openCalc(page);
+
+    await page.getByTestId('eb-operand-num').fill('5');
+    await pick(page.getByTestId('eb-wrap-row'), page, 'eb-wrap-fn', 'round');
+    await page.getByTestId('eb-wrap-arg').fill('1');
+    await expect(page.getByTestId('eb-preview-str')).toContainText('5.round(1)');
+    await pick(page.getByTestId('eb-wrap-row'), page, 'eb-wrap-fn', '');
+    await expect(page.getByTestId('eb-wrap-arg')).toHaveCount(0);
+    await expect(page.getByTestId('eb-preview-str')).toContainText('5');
+    await expect(page.getByTestId('eb-preview-str')).not.toContainText('round');
+    await insert(page);
+    await expect(page.getByTestId('expr-calc-ta')).toHaveValue('5');
+  });
+
+  test('an expression beyond the supported grouping depth still falls back to raw (no crash)', async ({ page }) => {
+    await freshStart(page);
+    await makeItems(page, 1);
+    // Two levels of nested grouping — deliberately beyond the one-level-deep scope.
+    const tooDeep = '((%a + %b) * (%c - (%d / %e))).round(1)';
+    await openCalcRaw(page, tooDeep);
+    await expect(page.getByTestId('eb-raw-input')).toBeVisible();
+    await expect(page.getByTestId('eb-raw-input')).toHaveValue(tooDeep);
   });
 });

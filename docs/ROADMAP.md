@@ -39,6 +39,7 @@ The following translation improvements are still outstanding:
 
 - [ ] **"Build…" launcher in the FHIRPath tester** — the dev console (`js/ui/fhirpath-console.js`, ⚙ Settings) shares `evalFhirpath` with the builder but has no visual builder button. Add a **🧩 Build…** launcher (resultKind `auto`/chooser) whose `onInsert` drops the assembled expression into the console input (scratch eval, not written to a node).
 - [ ] **Undo for expression-field edits** — editing `enableWhenExpression` / `calculatedExpression` (via the textarea *or* the visual builder) dispatches `CALC_RECALC_REQUESTED` but not `RESPONSE_CHANGED`/`REINIT_FORM`, so `history.js` takes no snapshot — these edits aren't individually undoable. Pre-existing (affects the manual textarea too); the builder is consistent with it. Wire a history snapshot for expression edits without forcing a full `REINIT_FORM` rebuild.
+- [ ] **Deeper grouping / more math wrap functions** — the value editor's "Group" operand supports exactly one level of parenthesized nesting, and the final-result wrapper covers only `round`/`abs`/`ceiling`/`floor`/`truncate`. Expressions needing two+ levels of nesting or other FHIRPath math functions (`sqrt`, `ln`, `log`, `exp`, `power`) still fall back to raw text — a deliberate scope boundary, not a bug.
 
 ## Later
 

@@ -15,6 +15,7 @@ export function emit(block) {
     case BlockKind.DESCENDANTS: return '%resource.descendants()';
     case BlockKind.SET_LITERAL: return emitSet(block);
     case BlockKind.PIPELINE: return emitPipeline(block);
+    case BlockKind.MATH_FN: return emitMathFn(block);
     case BlockKind.RAW: return block.text || '';
     default: return '';
   }
@@ -52,6 +53,11 @@ function emitFilterLiteral(f) {
 function emitAggregate(b) {
   const filter = b.filter ? `.where(${emit(b.filter)})` : '';
   return `${emit(b.source)}${filter}.${b.fn}()`;
+}
+
+function emitMathFn(b) {
+  const args = b.fn === 'round' && b.arg != null ? String(b.arg) : '';
+  return `${wrap(b.target)}.${b.fn}(${args})`;
 }
 
 function emitItemRef(b) {

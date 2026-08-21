@@ -4,7 +4,7 @@
 // strategy (condition = expr-tree, value = here, pipeline = expr-pipeline).
 import { createCustomSelect } from '../../custom-select.js';
 import {
-  itemRef, variable, literal, arith, aggregate, BlockKind,
+  itemRef, variable, literal, arith, aggregate, mathFn, MATH_WRAP_FNS, BlockKind,
 } from '../../../fhir/expr-builder/model.js';
 import { emit } from '../../../fhir/expr-builder/emit.js';
 import { valueAccessor } from '../../../fhir/expr-builder/value-paths.js';
@@ -18,6 +18,8 @@ const AGG_FN_ITEMS = [
   { value: 'min', label: 'minimum of' },
   { value: 'max', label: 'maximum of' },
 ];
+const MATH_WRAP_LABELS = { round: 'round', abs: 'absolute value', ceiling: 'round up (ceiling)', floor: 'round down (floor)', truncate: 'truncate' };
+const MATH_WRAP_ITEMS = MATH_WRAP_FNS.map((v) => ({ value: v, label: MATH_WRAP_LABELS[v] }));
 
 // { items: numeric-answerable, allItems: every answerable, variables, fp,
 //   initialExpr, onChange, onEditAsText } → { el, getExpr }.
@@ -35,13 +37,23 @@ class ValueEditor {
     this._onEditAsText = onEditAsText || (() => {});
     this._operands = [];
     this._valOps = [];
+    this._wrapFn = '';
+    this._wrapArg = '';
     this._seed(initialExpr);
   }
 
   _seed(text) {
     const t = (text || '').trim();
     const block = t && this._fp ? parseExpression(t, this._fp) : null;
-    const seed = block && this._blockToOperands(block);
+    let target = block;
+    this._wrapFn = '';
+    this._wrapArg = '';
+    if (block && block.kind === BlockKind.MATH_FN) {
+      this._wrapFn = block.fn;
+      this._wrapArg = block.arg != null ? String(block.arg) : '';
+      target = block.target;
+    }
+    const seed = target && this._blockToOperands(target);
     this.seeded = !!seed;
     if (seed) { this._operands = seed.operands; this._valOps = seed.ops; } else { this._operands = [this._blankOperand()]; this._valOps = []; }
   }
@@ -56,7 +68,7 @@ class ValueEditor {
 
     const hint = document.createElement('div');
     hint.className = 'eb-note';
-    hint.textContent = 'Combine questions, variables and numbers with \u00d7 \u00f7 + \u2212. Use \u201cEdit as text\u201d for complex grouping.';
+    hint.textContent = 'Combine questions, variables and numbers with \u00d7 \u00f7 + \u2212. Group with parentheses, optionally round the result. Use \u201cEdit as text\u201d for complex grouping.';
     this.el.appendChild(hint);
 
     this._chain = document.createElement('div');
@@ -64,6 +76,12 @@ class ValueEditor {
     this._chain.dataset.testid = 'eb-chain';
     this.el.appendChild(this._chain);
     this._renderChain();
+
+    this._wrapRow = document.createElement('div');
+    this._wrapRow.className = 'eb-wrap-row';
+    this._wrapRow.dataset.testid = 'eb-wrap-row';
+    this.el.appendChild(this._wrapRow);
+    this._renderWrapRow();
 
     const addBtn = document.createElement('button');
     addBtn.type = 'button';
@@ -105,30 +123,36 @@ class ValueEditor {
 
   _renderChain() {
     this._chain.innerHTML = '';
+    const ctx = { operands: this._operands, ops: this._valOps, rerender: () => this._renderChain(), topLevel: true };
     this._operands.forEach((operand, i) => {
-      if (i > 0) this._chain.appendChild(this._renderOperator(i - 1));
-      this._chain.appendChild(this._renderOperand(operand));
+      if (i > 0) this._chain.appendChild(this._renderOperator(i - 1, this._valOps));
+      this._chain.appendChild(this._renderOperand(operand, ctx));
     });
   }
 
-  _renderOperator(opIdx) {
+  _renderOperator(opIdx, ops) {
     const sel = createCustomSelect({
       items: ['+', '-', '*', '/'].map((o) => ({ value: o, label: ARITH_LABEL[o] })),
-      value: this._valOps[opIdx] || '+',
+      value: ops[opIdx] || '+',
       className: 'sc-trigger--sm eb-arith-op',
       testid: 'eb-arith-op',
-      onChange: (v) => { this._valOps[opIdx] = v; this._onChange(); },
+      onChange: (v) => { ops[opIdx] = v; this._onChange(); },
     });
     return sel.el;
   }
 
-  _renderOperand(operand) {
+  _renderOperand(operand, ctx) {
     const el = document.createElement('span');
     el.className = 'eb-operand';
     el.dataset.testid = 'eb-operand';
 
-    const kinds = [{ value: 'item', label: 'Question' }, { value: 'var', label: 'Variable' }, { value: 'num', label: 'Number' }, { value: 'agg', label: 'Aggregate' }]
-      .filter((k) => (k.value !== 'item' || this._items.length) && (k.value !== 'var' || this._variables.length) && (k.value !== 'agg' || this._allItems.length));
+    const kinds = [
+      { value: 'item', label: 'Question' },
+      { value: 'var', label: 'Variable' },
+      { value: 'num', label: 'Number' },
+      { value: 'agg', label: 'Aggregate' },
+      ...(ctx.topLevel ? [{ value: 'group', label: 'Group ( \u2026 )' }] : []),
+    ].filter((k) => (k.value !== 'item' || this._items.length) && (k.value !== 'var' || this._variables.length) && (k.value !== 'agg' || this._allItems.length));
     const valWrap = document.createElement('span');
     valWrap.className = 'eb-operand-val';
 
@@ -137,7 +161,12 @@ class ValueEditor {
       value: operand.kind,
       className: 'sc-trigger--sm',
       testid: 'eb-operand-kind',
-      onChange: (v) => { operand.kind = v; operand.item = null; operand.varName = ''; operand.value = ''; this._renderOperandVal(operand, valWrap); this._onChange(); },
+      onChange: (v) => {
+        operand.kind = v; operand.item = null; operand.varName = ''; operand.value = '';
+        if (v === 'group') { operand.groupOperands = [this._blankOperand()]; operand.groupOps = []; }
+        this._renderOperandVal(operand, valWrap);
+        this._onChange();
+      },
     });
 
     const rm = document.createElement('button');
@@ -145,13 +174,13 @@ class ValueEditor {
     rm.className = 'eb-rm';
     rm.textContent = '\u2715';
     rm.dataset.testid = 'eb-remove-operand';
-    rm.style.display = this._operands.length > 1 ? '' : 'none';
+    rm.style.display = ctx.operands.length > 1 ? '' : 'none';
     rm.addEventListener('click', () => {
-      const idx = this._operands.indexOf(operand);
+      const idx = ctx.operands.indexOf(operand);
       if (idx < 0) return;
-      this._operands.splice(idx, 1);
-      this._valOps.splice(idx > 0 ? idx - 1 : 0, 1);
-      this._renderChain();
+      ctx.operands.splice(idx, 1);
+      ctx.ops.splice(idx > 0 ? idx - 1 : 0, 1);
+      ctx.rerender();
       this._onChange();
     });
 
@@ -160,9 +189,67 @@ class ValueEditor {
     return el;
   }
 
+  _renderGroupOperand(operand, valWrap) {
+    if (!operand.groupOperands || !operand.groupOperands.length) operand.groupOperands = [this._blankOperand()];
+    operand.groupOps = operand.groupOps || [];
+    const box = document.createElement('span');
+    box.className = 'eb-val-group';
+    box.dataset.testid = 'eb-group';
+    const open = document.createElement('span');
+    open.className = 'eb-val-group-paren';
+    open.textContent = '(';
+    const chain = document.createElement('span');
+    chain.className = 'eb-val-group-chain';
+    const close = document.createElement('span');
+    close.className = 'eb-val-group-paren';
+    close.textContent = ')';
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'eb-add eb-add--sm';
+    addBtn.textContent = '+';
+    addBtn.dataset.testid = 'eb-group-add';
+    const groupCtx = { operands: operand.groupOperands, ops: operand.groupOps, rerender: () => rerenderGroup(), topLevel: false };
+    const rerenderGroup = () => {
+      chain.innerHTML = '';
+      operand.groupOperands.forEach((inner, i) => {
+        if (i > 0) chain.appendChild(this._renderOperator(i - 1, operand.groupOps));
+        chain.appendChild(this._renderOperand(inner, groupCtx));
+      });
+    };
+    addBtn.addEventListener('click', () => { operand.groupOps.push('+'); operand.groupOperands.push(this._blankOperand()); rerenderGroup(); this._onChange(); });
+    rerenderGroup();
+    box.append(open, chain, close, addBtn);
+    valWrap.appendChild(box);
+  }
+
+  _renderWrapRow() {
+    this._wrapRow.innerHTML = '';
+    const fnSel = createCustomSelect({
+      items: [{ value: '', label: 'No rounding' }, ...MATH_WRAP_ITEMS],
+      value: this._wrapFn,
+      className: 'sc-trigger--sm',
+      testid: 'eb-wrap-fn',
+      onChange: (v) => { this._wrapFn = v; this._renderWrapRow(); this._onChange(); },
+    });
+    this._wrapRow.appendChild(fnSel.el);
+    if (this._wrapFn === 'round') {
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.step = '1';
+      inp.min = '0';
+      inp.className = 'eb-val-inp eb-wrap-arg';
+      inp.placeholder = 'decimals';
+      inp.dataset.testid = 'eb-wrap-arg';
+      inp.value = this._wrapArg;
+      inp.addEventListener('input', () => { this._wrapArg = inp.value; this._onChange(); });
+      this._wrapRow.appendChild(inp);
+    }
+  }
+
   _renderOperandVal(operand, valWrap) {
     valWrap.innerHTML = '';
     if (operand.kind === 'agg') { this._renderAggOperand(operand, valWrap); return; }
+    if (operand.kind === 'group') { this._renderGroupOperand(operand, valWrap); return; }
     if (operand.kind === 'item') {
       const sel = createCustomSelect({
         items: [{ value: '', label: '\u2014 question \u2014' }, ...this._items.map((it) => ({ value: it.id, label: it.label }))],
@@ -224,26 +311,26 @@ class ValueEditor {
   _blockToOperands(block) {
     const operands = [];
     const ops = [];
-    const ok = this._walkArith(block, operands, ops);
+    const ok = this._walkArith(block, operands, ops, true);
     return ok ? { operands, ops } : null;
   }
 
-  _walkArith(block, operands, ops) {
+  _walkArith(block, operands, ops, allowGroup) {
     if (block.kind === BlockKind.ARITH) {
-      if (!this._walkArith(block.left, operands, ops)) return false;
+      if (!this._walkArith(block.left, operands, ops, allowGroup)) return false;
       ops.push(block.op);
-      const right = this._blockToOperand(block.right);
+      const right = this._blockToOperand(block.right, allowGroup);
       if (!right) return false;
       operands.push(right);
       return true;
     }
-    const o = this._blockToOperand(block);
+    const o = this._blockToOperand(block, allowGroup);
     if (!o) return false;
     operands.push(o);
     return true;
   }
 
-  _blockToOperand(block) {
+  _blockToOperand(block, allowGroup) {
     if (block.kind === BlockKind.ITEM_REF) {
       const item = this._itemBySegments(block.segments);
       return item ? { kind: 'item', item, varName: '', value: '' } : null;
@@ -256,10 +343,21 @@ class ValueEditor {
       const item = this._itemBySegments(block.source.segments);
       return item ? { kind: 'agg', item: null, varName: '', value: '', aggFn: block.fn, aggItem: item } : null;
     }
+    // One level of parenthesized grouping only — leaves must be simple operands.
+    if (allowGroup && block.kind === BlockKind.ARITH) {
+      const operands = [];
+      const ops = [];
+      const ok = this._walkArith(block, operands, ops, false);
+      return ok ? { kind: 'group', item: null, varName: '', value: '', groupOperands: operands, groupOps: ops } : null;
+    }
     return null;
   }
 
   _operandBlock(operand) {
+    if (operand.kind === 'group') {
+      const blocks = (operand.groupOperands || []).map((o) => this._operandBlock(o));
+      return this._reduceChain(blocks, operand.groupOps || []);
+    }
     if (operand.kind === 'agg') {
       if (!operand.aggItem) return null;
       const fn = operand.aggFn || 'count';
@@ -275,12 +373,25 @@ class ValueEditor {
     return literal('number', Number(operand.value));
   }
 
+  _reduceChain(blocks, ops) {
+    if (!blocks.length || blocks.some((b) => !b)) return null;
+    let acc = blocks[0];
+    for (let i = 1; i < blocks.length; i++) acc = arith(ops[i - 1] || '+', acc, blocks[i]);
+    return acc;
+  }
+
   _valueRoot() {
     const blocks = this._operands.map((o) => this._operandBlock(o));
-    if (blocks.some((b) => !b)) return null;
-    if (blocks.length === 0) return null;
-    let acc = blocks[0];
-    for (let i = 1; i < blocks.length; i++) acc = arith(this._valOps[i - 1] || '+', acc, blocks[i]);
-    return acc;
+    const root = this._reduceChain(blocks, this._valOps);
+    if (!root) return null;
+    if (!this._wrapFn) return root;
+    const arg = this._wrapFn === 'round' ? this._roundArgNum() : null;
+    return mathFn(this._wrapFn, arg, root);
+  }
+
+  _roundArgNum() {
+    if (this._wrapArg === '' || this._wrapArg == null) return null;
+    const n = Number(this._wrapArg);
+    return isNaN(n) ? null : n;
   }
 }

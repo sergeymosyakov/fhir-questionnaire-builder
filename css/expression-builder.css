@@ -60,6 +60,22 @@
 .eb-operand-val { display: inline-flex; }
 .eb-arith-op { min-width: 56px; }
 
+.eb-val-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border: 1px dashed var(--c-border, #d1d5db);
+  border-radius: 6px;
+  background: #f8fafc;
+}
+.eb-val-group-chain { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.eb-val-group-paren { font-weight: 700; color: #6b7280; }
+.eb-add--sm { font-size: 16px; line-height: 1; padding: 0 4px; }
+
+.eb-wrap-row { display: flex; align-items: center; gap: 8px; }
+.eb-wrap-arg { min-width: 90px; }
+
 .eb-preview {
   display: flex;
   align-items: center;

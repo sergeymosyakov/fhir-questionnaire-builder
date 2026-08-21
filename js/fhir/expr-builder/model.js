@@ -13,6 +13,7 @@ export const BlockKind = {
   DESCENDANTS: 'descendants',
   SET_LITERAL: 'setLiteral',
   PIPELINE: 'pipeline',
+  MATH_FN: 'mathFn',
   RAW: 'raw',
 };
 
@@ -20,6 +21,8 @@ export const COMPARE_OPS = ['=', '!=', '>', '<', '>=', '<='];
 export const ARITH_OPS = ['+', '-', '*', '/'];
 export const LOGIC_OPS = ['and', 'or'];
 export const AGG_FNS = ['count', 'sum', 'avg', 'min', 'max'];
+// Trailing wrapper applied to a numeric result: round takes an optional precision arg.
+export const MATH_WRAP_FNS = ['round', 'abs', 'ceiling', 'floor', 'truncate'];
 // Collection pipeline: filters keep/drop members, reducers collapse to a scalar.
 export const PIPE_FILTERS = ['intersect', 'exclude', 'distinct'];
 export const PIPE_REDUCERS = ['join', 'count', 'exists', 'first', 'last'];
@@ -33,6 +36,7 @@ export const compare = (op, left, right) => ({ kind: BlockKind.COMPARE, op, left
 export const logic = (op, operands) => ({ kind: BlockKind.LOGIC, op, operands: [...operands] });
 export const arith = (op, left, right) => ({ kind: BlockKind.ARITH, op, left, right });
 export const exists = (target, negate = false) => ({ kind: BlockKind.EXISTS, target, negate });
+export const mathFn = (fn, arg, target) => ({ kind: BlockKind.MATH_FN, fn, arg: arg ?? null, target });
 export const raw = (text) => ({ kind: BlockKind.RAW, text: text || '' });
 
 // Aggregate a collection: source.(where(filter)).fn(). source = itemRef (a
