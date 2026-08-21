@@ -16,10 +16,6 @@ These are the honest feature gaps vs. competitors (see [COMPETITORS.md](COMPETIT
 2. [ ] **CQL execution** — _deferred._ Actually **execute** Clinical Quality Language used by SDC via `text/cql-identifier` expressions (`initialExpression` / `calculatedExpression`) backed by a `cqf-library`. Currently round-tripped only, not executed — so forms whose inputs are CQL-populated (e.g. WHO SMART Guidelines EmCare/IMCI) render with **all conditional items hidden**: the FHIRPath `enableWhen` we *do* evaluate reads answers that only CQL would populate (`AgeInMonths`, `load-*` danger-sign booleans). Distinct from StructureMap execution — CQL computes clinical **values**, not data-structure transforms. **Blockers:** the logic isn't in the questionnaire (only a canonical `Library` URL, e.g. `.../Library/emcaretreatment|0.0.142`); CQL→ELM compilation is Java-only (no mature browser path); JS `cql-execution` runs **ELM**, not CQL source, and still needs a wired FHIR data provider + terminology provider + patient context. Options when revisited: (A) integrate an external `$cql` / `$evaluate`-capable server (mirrors the `$populate` / `$validate` flow, needs a server); or (B) consume precompiled ELM from the referenced `Library` and embed a JS ELM engine (`cql-execution` + `cql-exec-fhir`) with an in-memory data bundle. In the meantime a CQL-driven form can be revived without an engine by supplying the input values directly (a QuestionnaireResponse, static `item.initial`, or by un-hiding the inputs). Kept as an honest open gap.
 3. [ ] **`atable` itemControl renderer** — _deferred._ Render a group as an answer table (`itemControl = atable`): column headers, repeating rows. Unblocks the deferred "translate `atable` column headers" item below.
 
-### Horizon 2 — SDC completeness (extraction & population)
-
-Supports Scenario 1 (round-trip) and Scenario 3 (logic testing). This is where most industrial-grade SDC complexity lives.
-
 ## Near-term
 
 ### Embeddable renderer widget — session-scoped terminology server
