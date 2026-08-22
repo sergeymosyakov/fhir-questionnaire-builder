@@ -44,6 +44,8 @@ Domain rules live in scoped instruction files (auto-loaded by their `applyTo` gl
 | [instructions/fhir.instructions.md](instructions/fhir.instructions.md) | `js/**`, `docs/**`, `help.html`, `sampledata/**` | Mandatory FHIR tooltips, implemented→remove-from-Not-Supported/ROADMAP, `help.html` sync, sample-data requirement, two-layer preview validation |
 | [instructions/e2e.instructions.md](instructions/e2e.instructions.md) | `tests/e2e/**` | `data-testid` selector policy, flaky-test patterns, fixture validity, no silent workarounds |
 | [skills/add-fhir-extension/SKILL.md](skills/add-fhir-extension/SKILL.md) | on-demand | End-to-end recipe for adding a FHIR field/extension/SDC feature |
+| [skills/security-review/SKILL.md](skills/security-review/SKILL.md) | on-demand | AI-reasoned OWASP-style codebase security scan (injection, secrets, access control, crypto, deps) — report only, no auto-applied patches |
+| [skills/github-actions-hardening/SKILL.md](skills/github-actions-hardening/SKILL.md) | on-demand | Security review for `.github/workflows/*.yml` — script injection, privileged triggers, action pinning, token scopes — report only |
 
 ---
 
