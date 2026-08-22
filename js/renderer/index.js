@@ -13,6 +13,8 @@ import { PreviewForm } from '../preview-form.js';
 import { PreviewSearch } from '../ui/search.js';
 import { StatusBadge } from '../ui/status-badge.js';
 import * as tooltip from '../ui/tooltip.js';
+import { TerminologyService } from '../fhir/terminology-service.js';
+import { DefaultConfigProvider, CONFIG_KEYS } from '../fhir/server-config.js';
 
 // Headless chrome — the widget renders no toolbar/menus; the host owns UI.
 // Frozen: shared across widgets that opt out of chrome; must stay immutable.
@@ -35,7 +37,9 @@ class Emitter {
  *
  * @param {HTMLElement} mountEl
  * @param {{ questionnaire?: object, response?: object, config?: object }} [opts]
- *   config: { language?, previewMode?, viewPrefs?, onProgress? }
+ *   config: { language?, previewMode?, viewPrefs?, onProgress?, terminology? }
+ *   terminology: { server?, corsProxy?, nlmApiBase? } — own terminology server
+ *     config for this widget instance (independent of the app's Settings page).
  */
 export class QuestionnaireRenderer {
   constructor(mountEl, { questionnaire = null, response = null, config = {} } = {}) {
@@ -44,6 +48,11 @@ export class QuestionnaireRenderer {
     this._emitter = new Emitter();
     this._session = createSession(config);
     const bus = this._session.bus;
+    this._terminology = new TerminologyService(new DefaultConfigProvider({
+      [CONFIG_KEYS.TERMINOLOGY_SERVER]: config.terminology?.server,
+      [CONFIG_KEYS.CORS_PROXY]:         config.terminology?.corsProxy,
+      [CONFIG_KEYS.NLM_API_BASE]:       config.terminology?.nlmApiBase,
+    }));
 
     // Progress is host-owned: forward to config.onProgress, else no-op.
     const progress = config.onProgress
@@ -101,6 +110,15 @@ export class QuestionnaireRenderer {
 
   _loadQuestionnaire(questionnaire) {
     importFHIR(questionnaire, { questDoc: this._session.questDoc, bus: this._session.bus });
+    this._expandValueSets();
+  }
+
+  // Renders immediately with empty ValueSet caches, then expands external
+  // answerValueSets in the background and re-renders silently once ready —
+  // mirrors the app's questionnaire-loader.js so choice controls fill in.
+  async _expandValueSets() {
+    await this._terminology.expandAll(this._session.questDoc.tree, this._session.questDoc.meta);
+    this._session.bus.dispatch(AppEvents.REINIT_FORM, { silent: true });
   }
 
   // Opt-in preview chrome (config.search / config.validation). Builds the toolbar
