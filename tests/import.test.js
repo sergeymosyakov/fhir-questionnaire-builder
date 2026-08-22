@@ -1337,6 +1337,18 @@ describe('importFHIR', () => {
       expect(_tree[0].itemType).toBe('radio');
     });
 
+    it('atable on a non-repeating choice → radio itemType with _itemControl', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', extension: [ic('atable')] }]));
+      expect(_tree[0].itemType).toBe('radio');
+      expect(_tree[0]._itemControl).toBe('atable');
+    });
+
+    it('atable on a repeating choice → checklist itemType with _itemControl', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', repeats: true, extension: [ic('atable')] }]));
+      expect(_tree[0].itemType).toBe('checklist');
+      expect(_tree[0]._itemControl).toBe('atable');
+    });
+
     it('autocomplete on choice → select with _itemControl', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q', extension: [ic('autocomplete')] }]));
       expect(_tree[0].itemType).toBe('select');

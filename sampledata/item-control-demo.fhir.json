@@ -410,6 +410,55 @@
       ]
     },
     {
+      "linkId": "atable-radio-demo",
+      "text": "How would you rate your overall health?",
+      "type": "choice",
+      "answerOption": [
+        { "valueCoding": { "system": "https://example.org/demo-codes", "code": "poor", "display": "Poor" } },
+        { "valueCoding": { "system": "https://example.org/demo-codes", "code": "fair", "display": "Fair" } },
+        { "valueCoding": { "system": "https://example.org/demo-codes", "code": "good", "display": "Good" } },
+        { "valueCoding": { "system": "https://example.org/demo-codes", "code": "excellent", "display": "Excellent" } }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "atable"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "atable-checklist-demo",
+      "text": "Which symptoms have you had in the past week? (select all that apply)",
+      "type": "choice",
+      "repeats": true,
+      "answerConstraint": "optionsOnly",
+      "answerOption": [
+        { "valueCoding": { "system": "https://example.org/demo-codes", "code": "headache", "display": "Headache" } },
+        { "valueCoding": { "system": "https://example.org/demo-codes", "code": "fatigue", "display": "Fatigue" } },
+        { "valueCoding": { "system": "https://example.org/demo-codes", "code": "nausea", "display": "Nausea" } }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "atable"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
       "linkId": "flyover-demo",
       "text": "Exercise means any activity that raises your heart rate for 10+ minutes, including brisk walking, cycling, or swimming.",
       "type": "display",

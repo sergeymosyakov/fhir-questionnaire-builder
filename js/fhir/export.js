@@ -220,9 +220,9 @@ export function nodeToFHIRItem(node) {
   }
   // questionnaire-itemControl
   if (node.itemType === 'radio')
-    ext.push({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'radio-button' }] } });
+    ext.push({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: node._itemControl === 'atable' ? 'atable' : 'radio-button' }] } });
   else if (node.itemType === 'checklist')
-    ext.push({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'check-box' }] } });
+    ext.push({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: node._itemControl === 'atable' ? 'atable' : 'check-box' }] } });
   else if (node._itemControl)
     ext.push({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: node._itemControl }] } });
 

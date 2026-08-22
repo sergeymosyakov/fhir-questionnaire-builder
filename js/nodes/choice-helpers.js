@@ -143,6 +143,40 @@ export function _buildColRow(columns, rawOpt, code, display) {
   return row;
 }
 
+// Renders answer options as an HL7 itemControl=atable ("Answer Table" — one row
+// for the question, permitted answers as columns): a <table> whose header cells
+// are the option displays and whose single body row holds one input per column.
+// buildInput(code, index) creates & wires that column's radio/checkbox; the
+// change-handling logic (single-select vs. exclusive multi-select) stays with
+// the caller. Option prefixes/ordinals/weight/media extras are not shown in this
+// compact layout — a deliberate scope limit (they target the vertical list view).
+export function _buildAtableControl(opts, buildInput) {
+  const table = document.createElement('table');
+  table.className = 'atable-item';
+  table.dataset.testid = 'atable-item';
+
+  const headRow = document.createElement('tr');
+  const bodyRow = document.createElement('tr');
+  opts.forEach(({ code, display }, i) => {
+    const th = document.createElement('th');
+    th.className = 'atable-th';
+    th.textContent = display;
+    headRow.appendChild(th);
+
+    const td = document.createElement('td');
+    td.className = 'atable-td';
+    td.appendChild(buildInput(code, i));
+    bodyRow.appendChild(td);
+  });
+
+  const thead = document.createElement('thead');
+  thead.appendChild(headRow);
+  const tbody = document.createElement('tbody');
+  tbody.appendChild(bodyRow);
+  table.append(thead, tbody);
+  return table;
+}
+
 /** Append weight badge and answerMedia image/audio/video to a choice label. */
 export function _appendOptionExtras(lbl, node, code) {
   if (node._optionWeights && node._optionWeights[code] !== undefined) {

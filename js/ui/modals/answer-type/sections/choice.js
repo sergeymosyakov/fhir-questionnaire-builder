@@ -104,6 +104,9 @@ class ChoiceSection extends AnswerTypeSection {
       const isExtVS = p?.draftSrc === 'valueset' && p?.draftAVS && !p.draftAVS.startsWith('#');
       this._lookupRowEl.style.display = (type === 'select' && !!isExtVS) ? '' : 'none';
     }
+    if (this._atableRowEl) {
+      this._atableRowEl.style.display = (type === 'radio' || type === 'checklist') ? '' : 'none';
+    }
   }
 
   build(pending, questDoc, _answerStore) {
@@ -329,6 +332,22 @@ class ChoiceSection extends AnswerTypeSection {
     section.appendChild(lookupRow);
     this._lookupRowEl = lookupRow;
 
+    // ── Answer table toggle (radio + checklist only) ────────────────────
+    const atableRow = document.createElement('label');
+    atableRow.className = 'at-modal-multiline-row';
+    atableRow.style.display = (pending.draftType === 'radio' || pending.draftType === 'checklist') ? '' : 'none';
+    const atableCb = Object.assign(document.createElement('input'), { type: 'checkbox', checked: !!pending.draftAtable });
+    atableCb.dataset.testid = 'atable-toggle';
+    atableCb.onchange = () => { pending.draftAtable = atableCb.checked; };
+    const atableLbl = document.createTextNode(' Answer table (options as columns)');
+    atableRow.dataset.tipTitle = 'Answer table (atable)';
+    atableRow.dataset.tipBody  = 'Renders the answer options as table columns with one radio/checkbox per column, instead of a vertical list — one row for the question. Exports as questionnaire-itemControl = atable.';
+    atableRow.dataset.tipFhir  = 'item.extension[questionnaire-itemControl].valueCodeableConcept.coding.code = atable';
+    atableRow.dataset.tipSpec  = 'R4';
+    atableRow.append(atableCb, atableLbl);
+    section.appendChild(atableRow);
+    this._atableRowEl = atableRow;
+
     // ── _updateItemControlRows: sync acRow/lookupRow visibility ───────────────
     const _updateItemControlRows = () => {
       const isSelect = pending.draftType === 'select';
@@ -528,7 +547,9 @@ class ChoiceSection extends AnswerTypeSection {
       node._itemControl = 'lookup';
     } else if (node.itemType === 'select' && pending.draftAutocomplete) {
       node._itemControl = 'autocomplete';
-    } else if (node._itemControl === 'autocomplete' || node._itemControl === 'lookup') {
+    } else if ((node.itemType === 'radio' || node.itemType === 'checklist') && pending.draftAtable) {
+      node._itemControl = 'atable';
+    } else if (node._itemControl === 'autocomplete' || node._itemControl === 'lookup' || node._itemControl === 'atable') {
       delete node._itemControl;
     }
     if (pending.draftAnswerConstraint) node._answerConstraint = pending.draftAnswerConstraint;
@@ -549,6 +570,7 @@ class ChoiceSection extends AnswerTypeSection {
                       : 'options',
       draftAutocomplete:      node._itemControl === 'autocomplete',
       draftLookup:            node._itemControl === 'lookup',
+      draftAtable:            node._itemControl === 'atable',
       draftAnswerConstraint:  node._answerConstraint || '',
     };
   }

@@ -46,7 +46,11 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   if (itemType === 'select' || itemType === 'open-choice') {
     if (ctrlCode === 'radio-button') itemType = 'radio';
     else if (ctrlCode === 'check-box') itemType = 'checklist';
-    else if (ctrlCode === 'autocomplete' || ctrlCode === 'drop-down') {
+    else if (ctrlCode === 'atable') {
+      // atable ("Answer Table") implies a per-option control of its own —
+      // radio-button/checkbox aren't spelled out separately, so infer from repeats.
+      itemType = fhirItem.repeats ? 'checklist' : 'radio';
+    } else if (ctrlCode === 'autocomplete' || ctrlCode === 'drop-down') {
       // store for round-trip; rendering adapts in ChoiceNode
     }
   }

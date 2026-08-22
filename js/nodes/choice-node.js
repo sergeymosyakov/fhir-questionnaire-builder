@@ -11,7 +11,7 @@ import { nextUid } from '../id.js';
 import {
   _nodeOpts, _evalAnswerOpts, _resolveColValue, _findRawOpt,
   _getColDisplayLabel, _buildColHeader, _buildColRow, _appendOptionExtras,
-  siblingSelectedCodes, filterSiblingSelected, baseRowId,
+  _buildAtableControl, siblingSelectedCodes, filterSiblingSelected, baseRowId,
 } from './choice-helpers.js';
 
 /** Position a portal dropdown below (or above) its anchor; copy font-size from fontSrc. */
@@ -346,6 +346,18 @@ export class RadioNode extends ItemNode {
 
     const rbName = 'radio_' + node.id;
 
+    // itemControl=atable: one row for the question, answers as table columns.
+    if (node._itemControl === 'atable') {
+      wrap.appendChild(_buildAtableControl(opts, code => {
+        const rb = document.createElement('input');
+        rb.type = 'radio'; rb.name = rbName; rb.value = code;
+        rb.checked = getValue(node.id) === code;
+        rb.onchange = () => { if (rb.checked) { setValue(node.id, code); _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus); } };
+        return rb;
+      }));
+      return wrap;
+    }
+
     for (const { code, display } of opts) {
       const lbl = document.createElement('label');
       lbl.className = 'radio-label';
@@ -513,9 +525,7 @@ export class ChecklistNode extends ItemNode {
     const exclusives = node._optionExclusives || {};
     const allCheckboxes = [];
 
-    for (const { code, display } of opts) {
-      const lbl = document.createElement('label');
-      lbl.className = 'radio-label';
+    const makeCheckbox = code => {
       const cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.value = code;
@@ -548,6 +558,19 @@ export class ChecklistNode extends ItemNode {
         setValue(node.id, v || undefined);
         _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus);
       };
+      return cb;
+    };
+
+    // itemControl=atable: one row for the question, answers as table columns.
+    if (node._itemControl === 'atable') {
+      wrap.appendChild(_buildAtableControl(opts, makeCheckbox));
+      return wrap;
+    }
+
+    for (const { code, display } of opts) {
+      const lbl = document.createElement('label');
+      lbl.className = 'radio-label';
+      const cb = makeCheckbox(code);
       lbl.appendChild(cb);
       if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
         const pfx = document.createElement('span');

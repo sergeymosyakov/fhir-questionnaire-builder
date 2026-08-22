@@ -580,7 +580,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 
 | Extension | Status | Notes |
 |---|---|---|
-| `questionnaire-itemControl` | ✅ | FHIR codes: radio-button, check-box, drop-down, autocomplete, lookup, text-box, spinner, slider, flyover; group codes: header, footer, **gtable**. **`text-area`** is a widely-used **de-facto** code (not defined in the FHIR item-control code system; the extension's *Extensible* binding permits it). Other FHIR codes (list, table, htable, atable, inline, prompt, unit, lower, upper) are preserved in `_itemControl` on round-trip but not specially rendered. |
+| `questionnaire-itemControl` | ✅ | FHIR codes: radio-button, check-box, drop-down, autocomplete, lookup, text-box, spinner, slider, flyover, **atable** (radio/checklist rendered as a table — options as columns, one row); group codes: header, footer, **gtable**. **`text-area`** is a widely-used **de-facto** code (not defined in the FHIR item-control code system; the extension's *Extensible* binding permits it). Other FHIR codes (list, table, htable, inline, prompt, unit, lower, upper) are preserved in `_itemControl` on round-trip but not specially rendered. |
 | `rendering-style` | ✅ | Inline CSS on `item._text` |
 | `rendering-xhtml` | ✅ | Raw XHTML, sanitized via DOMPurify |
 | `rendering-markdown` | ✅ | Parsed by marked.js + DOMPurify |
@@ -616,7 +616,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `questionnaire-baseType` | ✅ | Base FHIR type (editable via Props) |
 | `questionnaire-fhirType` | ✅ | Specific FHIR type (editable via Props) |
 | `questionnaire-itemControl: gtable` | ✅ | Group table layout — children become columns, repeat instances become rows. Non-repeating groups render a single data row. Nested groups inside cells render using their own `_itemControl` (stacked default or nested gtable). GTABLE badge shown in builder. Sample: `sampledata/gtable-demo.fhir.json`. |
-| `questionnaire-itemControl: atable` | ❌ | Answer table (Likert matrix) — group children become rows, their shared `answerOption[]` values become columns; each cell is a radio button. Widely used in clinical scales (PHQ-9, AUDIT, GAD-7). Round-tripped verbatim; falls back to stacked layout in preview. |
+| `questionnaire-itemControl: atable` | ✅ | Answer table — **one row for a single choice question**, its permitted answers become columns (one radio/checkbox per column). Applies to `radio`/`checklist` items (toggle in Answer Type modal); on import, non-repeating choice → radio, repeating → checklist. Sample: `sampledata/item-control-demo.fhir.json`. |
 
 > Note: `title` is **not** a valid `questionnaire-item-control` code in FHIR R4 — the code system defines group controls (`list`, `table`, `htable`, `gtable`, `atable`, `header`, `footer`), text/display controls (`inline`, `prompt`, `unit`, `lower`, `upper`, `flyover`, `help`), and question controls only.
 
