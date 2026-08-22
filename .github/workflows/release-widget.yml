@@ -129,5 +129,6 @@ jobs:
         run: |
           mkdir -p nuget/wwwroot
           cp dist/questionnaire-widget.js dist/questionnaire-widget.global.js dist/questionnaire-widget.css nuget/wwwroot/
+          cp LICENSE nuget/LICENSE
           dotnet pack nuget/FhirQuestionnaireWidget.csproj -c Release -p:PackageVersion="$PKG_VERSION" -o nuget-out
           dotnet nuget push nuget-out/*.nupkg --source https://api.nuget.org/v3/index.json --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --skip-duplicate
