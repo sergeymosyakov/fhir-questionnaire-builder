@@ -45,8 +45,9 @@ const defaultImpl = (url) => {
 };
 mockFetch.mockImplementation(defaultImpl);
 
-const { terminologyService } =
+const { terminologyService, TerminologyService } =
   await import('../js/fhir/terminology-service.js');
+const { DefaultConfigProvider, CONFIG_KEYS } = await import('../js/fhir/server-config.js');
 const DEFAULT_TERMINOLOGY_SERVER = 'https://tx.fhir.org/r4';
 
 // Warmup: serverConfig.ready() resolves immediately (no config.json fetch needed).
@@ -470,5 +471,35 @@ describe('_fetchWithRetry (via expandValueSet)', () => {
     const result = await promise;
     expect(result).toHaveLength(2);
     vi.useRealTimers();
+  });
+});
+
+// ── Constructor DI: independent instances, own config source (widget use case) ──
+describe('TerminologyService — dependency injection', () => {
+  it('two instances with different config providers resolve different servers independently', () => {
+    const a = new TerminologyService({ get: key => (key === CONFIG_KEYS.TERMINOLOGY_SERVER ? 'https://server-a.example.com' : null) });
+    const b = new TerminologyService({ get: key => (key === CONFIG_KEYS.TERMINOLOGY_SERVER ? 'https://server-b.example.com' : null) });
+    expect(a.getServer(null, null)).toBe('https://server-a.example.com');
+    expect(b.getServer(null, null)).toBe('https://server-b.example.com');
+  });
+
+  it('falls back to the default server when the config provider has no override', () => {
+    const svc = new TerminologyService({ get: () => null });
+    expect(svc.getServer(null, null)).toBe(DEFAULT_TERMINOLOGY_SERVER);
+  });
+
+  it('works with a plain DefaultConfigProvider (no .ready() method)', async () => {
+    mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
+    const svc = new TerminologyService(new DefaultConfigProvider({ [CONFIG_KEYS.TERMINOLOGY_SERVER]: 'https://custom.example.com' }));
+    const result = await svc.expandValueSet('https://vs', null);
+    expect(result).toHaveLength(2);
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('https://custom.example.com'), expect.anything());
+  });
+
+  it("doesn't leak CORS proxy config between instances", () => {
+    const withProxy = new TerminologyService({ get: key => (key === CONFIG_KEYS.CORS_PROXY ? 'https://proxy.example.com' : null) });
+    const withoutProxy = new TerminologyService({ get: () => null });
+    expect(withProxy._proxyUrl('https://target')).toContain('proxy.example.com');
+    expect(withoutProxy._proxyUrl('https://target')).toBe('https://target');
   });
 });

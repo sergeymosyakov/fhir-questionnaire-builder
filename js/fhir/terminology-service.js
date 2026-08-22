@@ -1,21 +1,21 @@
 // ── TerminologyService ────────────────────────────────────────────────────────
-// Singleton service for all FHIR terminology server interactions.
-// Handles ValueSet/$expand and server health checks (GET /metadata).
+// FHIR terminology server interactions (ValueSet/$expand, /metadata health check).
+// Config source is injected — any object exposing .get(key) (sync) and
+// optionally .ready() (async), e.g. the app's `serverConfig` singleton or a
+// widget's own `DefaultConfigProvider`. Decouples the implementation from where
+// settings live, so the app and the embeddable widget can each supply their own.
 //
 // Usage:
-//   terminologyService.getServer(node, questMeta)        → string (server URL)
-//   terminologyService.expandValueSet(vsUrl, serverUrl)  → Promise<option[]>
-//   terminologyService.testServer(serverUrl)             → Promise<{ok, message}>
-//   terminologyService.expandAll(treeNodes, questMeta)   → Promise<failure[]>
+//   const svc = new TerminologyService(configProvider);
+//   svc.getServer(node, questMeta)        → string (server URL)
+//   svc.expandValueSet(vsUrl, serverUrl)  → Promise<option[]>
+//   svc.testServer(serverUrl)             → Promise<{ok, message}>
+//   svc.expandAll(treeNodes, questMeta)   → Promise<failure[]>
 
 import { serverConfig, CONFIG_KEYS } from './server-config.js';
 
 // Default terminology server — falls back to HL7 public server.
 const FALLBACK_TERMINOLOGY_SERVER = 'https://tx.fhir.org/r4';
-
-function _corsProxy()    { return (serverConfig.get(CONFIG_KEYS.CORS_PROXY)    || '').replace(/\/$/, ''); }
-function _termServer()   { return (serverConfig.get(CONFIG_KEYS.TERMINOLOGY_SERVER) || FALLBACK_TERMINOLOGY_SERVER).replace(/\/$/, ''); }
-function _nlmApiBase()   { return (serverConfig.get(CONFIG_KEYS.NLM_API_BASE)   || 'https://clinicaltables.nlm.nih.gov/api').replace(/\/$/, ''); }
 
 const EXPAND_COUNT        = 500;
 const FETCH_TIMEOUT       = 15_000;
@@ -91,10 +91,19 @@ function _collectUnitVsNodes(nodes, out = []) {
   return out;
 }
 
-class TerminologyService {
+export class TerminologyService {
+  /** @param {{get(key: string): string|null, ready?(): Promise<any>}} configProvider */
+  constructor(configProvider) {
+    this._cfg = configProvider;
+  }
+
+  _corsProxy()  { return (this._cfg.get(CONFIG_KEYS.CORS_PROXY) || '').replace(/\/$/, ''); }
+  _termServer() { return (this._cfg.get(CONFIG_KEYS.TERMINOLOGY_SERVER) || FALLBACK_TERMINOLOGY_SERVER).replace(/\/$/, ''); }
+  _nlmApiBase() { return (this._cfg.get(CONFIG_KEYS.NLM_API_BASE) || 'https://clinicaltables.nlm.nih.gov/api').replace(/\/$/, ''); }
+
   /** Wrap a target URL through the CORS proxy if configured. */
   _proxyUrl(url) {
-    const proxy = _corsProxy();
+    const proxy = this._corsProxy();
     return proxy ? `${proxy}?url=${encodeURIComponent(url)}` : url;
   }
 
@@ -107,15 +116,15 @@ class TerminologyService {
    * @returns {Promise<string>}
    */
   async nlmUrl(relativePath) {
-    await serverConfig.ready();
-    return `${_nlmApiBase()}/${relativePath}`;
+    await this._cfg.ready?.();
+    return `${this._nlmApiBase()}/${relativePath}`;
   }
 
   /** Resolve the server URL for a node using the full fallback chain. */
   getServer(node, questMeta) {
     const url = node?._preferredTermServer
       || questMeta?.preferredTermServer
-      || _termServer();
+      || this._termServer();
     return url.replace(/\/$/, '');
   }
 
@@ -126,8 +135,8 @@ class TerminologyService {
    * @returns {Promise<Array<{code: string, display: string, system: string}>>}
    */
   async expandValueSet(vsUrl, serverUrl) {
-    await serverConfig.ready();
-    const base   = (serverUrl || _termServer()).replace(/\/$/, '');
+    await this._cfg.ready?.();
+    const base   = (serverUrl || this._termServer()).replace(/\/$/, '');
     const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?url=${encodeURIComponent(vsUrl)}&_count=${EXPAND_COUNT}`);
     const res = await _fetchWithRetry(reqUrl, {
       headers: { Accept: 'application/fhir+json' },
@@ -152,8 +161,8 @@ class TerminologyService {
    * @returns {Promise<Array<{code: string, display: string, system: string}>>}
    */
   async expandWithFilter(vsUrl, serverUrl, filter = '', count = 50) {
-    await serverConfig.ready();
-    const base   = (serverUrl || _termServer()).replace(/\/$/, '');
+    await this._cfg.ready?.();
+    const base   = (serverUrl || this._termServer()).replace(/\/$/, '');
     const params = new URLSearchParams({ url: vsUrl, _count: String(count) });
     if (filter && filter.trim()) params.set('filter', filter.trim());
     const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?${params}`);
@@ -176,7 +185,7 @@ class TerminologyService {
    * @returns {Promise<{ok: boolean, message: string}>}
    */
   async testServer(serverUrl, { onRetry } = {}) {
-    await serverConfig.ready();
+    await this._cfg.ready?.();
     const base = (serverUrl || '').trim().replace(/\/$/, '');
     if (!base) return { ok: false, message: 'No URL provided' };
     try {
@@ -205,7 +214,7 @@ class TerminologyService {
   async testExpand(vsUrl, serverUrl) {
     if (!vsUrl) return { ok: false, message: 'No URL provided' };
     try {
-      const codes = await this.expandValueSet(vsUrl, serverUrl || _termServer());
+      const codes = await this.expandValueSet(vsUrl, serverUrl || this._termServer());
       return { ok: true, message: `${codes.length} code${codes.length !== 1 ? 's' : ''}`, count: codes.length };
     } catch (err) {
       return { ok: false, message: err.message };
@@ -254,4 +263,4 @@ class TerminologyService {
   }
 }
 
-export const terminologyService = new TerminologyService();
+export const terminologyService = new TerminologyService(serverConfig);

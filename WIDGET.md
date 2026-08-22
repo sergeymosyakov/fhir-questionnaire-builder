@@ -173,6 +173,7 @@ validation badge.
 | `language` | `string` | `''` | Show a translated language if the questionnaire carries translations (`''` = source). |
 | `fhirBaseUrl` | `string` | — | FHIR base server for reference search and server-side `$populate`. |
 | `corsProxy` | `string` | — | CORS proxy for the FHIR/terminology requests. |
+| `terminology` | `object` | — | This widget's own terminology server for external `answerValueSet` expansion: `{ server, corsProxy, nlmApiBase }`. Independent per instance — two widgets on the same page can point to two different terminology servers. Falls back to the public HL7 server (`tx.fhir.org/r4`) when omitted. |
 | `readOnly` | `boolean` | `false` | Render answers without editable controls. |
 | `onProgress` | `(msg\|null) => void` | — | Called with a message while long operations run, `null` when done. |
 
