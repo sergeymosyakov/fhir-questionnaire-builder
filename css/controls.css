@@ -321,6 +321,22 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointe
   break-inside: avoid;
 }
 
+/* itemControl=atable: answers as table columns (one row for the question) */
+.atable-item {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-collapse: collapse;
+}
+.atable-th, .atable-td {
+  border: 1px solid var(--c-border);
+  padding: 6px 10px;
+  text-align: center;
+  font-size: 13px;
+}
+.atable-th { font-weight: 600; color: var(--c-text-2); background: var(--c-hover); }
+.atable-td input { cursor: pointer; }
+
 /* === Shared: success-value sub-UI =========================================== */
 .shared-success-hdr { margin-top: 6px; }
 .shared-success-inp { margin-top: 2px; }

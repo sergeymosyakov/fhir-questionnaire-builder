@@ -11,8 +11,6 @@ a zero-backend browser app.
   Language transforms in the browser (there is no mature, permissively-licensed,
   browser-capable engine). StructureMaps are round-tripped but not run. To apply
   one, use a server that supports `$transform`. See [Extraction](extraction.md).
-- **`atable` answer-table rendering** — rendering a group as a repeating answer
-  table (`itemControl = atable`) is not yet implemented.
 - **Translation providers** — machine translation supports Google `gtx` (free,
   no key), DeepL, LibreTranslate and OpenAI, selectable in
   [Settings](settings.md). Caveats for a browser-only app: provider API keys are

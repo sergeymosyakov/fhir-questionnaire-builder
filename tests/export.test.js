@@ -276,6 +276,22 @@ describe('buildFHIRObject — answerOption', () => {
     expect(ic.valueCodeableConcept.coding[0].code).toBe('check-box');
   });
 
+  it('exports atable itemControl for a radio item, not radio-button', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A,b=B', _itemControl: 'atable',
+    }]);
+    const ic = (q.item[0].extension || []).find(e => e.url.includes('questionnaire-itemControl'));
+    expect(ic.valueCodeableConcept.coding[0].code).toBe('atable');
+  });
+
+  it('exports atable itemControl for a checklist item, not check-box', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'checklist', options: 'a=A,b=B', _itemControl: 'atable',
+    }]);
+    const ic = (q.item[0].extension || []).find(e => e.url.includes('questionnaire-itemControl'));
+    expect(ic.valueCodeableConcept.coding[0].code).toBe('atable');
+  });
+
   it('checklist exports as FHIR type choice with repeats true', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'checklist', options: 'a=A,b=B',
