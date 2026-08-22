@@ -22,7 +22,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="../LICENSE" Pack="true" PackagePath="LICENSE" Visible="false" />
+    <!-- Copied here at pack time (release-widget.yml) — packing a file via a
+         "../" path outside the project directory hits NU5030 with the Razor SDK. -->
+    <None Include="LICENSE" Pack="true" PackagePath="LICENSE" Visible="false" />
   </ItemGroup>
 
 </Project>
