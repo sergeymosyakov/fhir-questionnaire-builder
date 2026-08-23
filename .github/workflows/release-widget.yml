@@ -5,11 +5,20 @@
 # `widget-vMAJOR.MINOR.*` tags. So the first release of a minor is x.y.0, the
 # next x.y.1, etc.; bump minor/major in version.json to reset the patch to 0.
 #
+# nuget_only: recovery path when NuGet publish alone failed for the current
+# release (npm + GitHub Release already succeeded). Skips lint/test/e2e/tag/
+# release/npm and republishes the existing latest widget-v* version to NuGet.
+#
 # Trigger: manual only (Actions → "Release widget" → Run workflow).
 name: Release widget
 
 on:
   workflow_dispatch:
+    inputs:
+      nuget_only:
+        description: "Republish only NuGet for the current version (skip tag/release/npm)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -39,9 +48,13 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+        if: ${{ !inputs.nuget_only }}
       - run: npm test
+        if: ${{ !inputs.nuget_only }}
       - run: npx playwright install --with-deps chromium
+        if: ${{ !inputs.nuget_only }}
       - run: npx playwright test --grep-invert @perf --max-failures=1
+        if: ${{ !inputs.nuget_only }}
 
       - run: npm run build:widget
 
@@ -51,16 +64,23 @@ jobs:
           MAJOR=$(node -p "require('./version.json').major")
           MINOR=$(node -p "require('./version.json').minor")
           git fetch --tags --force
-          PATCH=$(git tag -l "widget-v${MAJOR}.${MINOR}.*" | wc -l | tr -d ' ')
-          TAG="widget-v${MAJOR}.${MINOR}.${PATCH}"
+          if [ "${{ inputs.nuget_only }}" = "true" ]; then
+            TAG=$(git tag -l "widget-v${MAJOR}.${MINOR}.*" | sort -V | tail -1)
+            if [ -z "$TAG" ]; then echo "No existing widget-v${MAJOR}.${MINOR}.* tag found" >&2; exit 1; fi
+          else
+            PATCH=$(git tag -l "widget-v${MAJOR}.${MINOR}.*" | wc -l | tr -d ' ')
+            TAG="widget-v${MAJOR}.${MINOR}.${PATCH}"
+          fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "semver=${MAJOR}.${MINOR}.${PATCH}" >> "$GITHUB_OUTPUT"
+          echo "semver=${TAG#widget-v}" >> "$GITHUB_OUTPUT"
           echo "Releasing $TAG"
 
       - name: Checksums
+        if: ${{ !inputs.nuget_only }}
         run: (cd dist && sha256sum questionnaire-widget.js questionnaire-widget.global.js questionnaire-widget.css > SHA256SUMS.txt)
 
       - name: Create release
+        if: ${{ !inputs.nuget_only }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -84,6 +104,7 @@ jobs:
       # Requires a trusted publisher configured on npmjs.com for this repo +
       # workflow file. Non-blocking: the GitHub Release above already succeeded.
       - name: Publish to npm (npmjs.com, Trusted Publishing)
+        if: ${{ !inputs.nuget_only }}
         continue-on-error: true
         env:
           PKG_VERSION: ${{ steps.ver.outputs.semver }}
