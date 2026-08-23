@@ -17,6 +17,19 @@ export const ITEM_TYPES = [
   'reference','quantity','display',
 ];
 
+// Display labels for the Answer Type modal's type dropdown. Several itemType
+// values are rendering-control aliases rather than the underlying FHIR
+// item.type (e.g. 'checkbox' → boolean, 'radio'/'checklist' → choice) — shown
+// here as "FHIR type (visualization)" so the dropdown doesn't imply they are
+// distinct FHIR types. Falls back to the raw itemType string when absent.
+export const ITEM_TYPE_LABELS = {
+  text:        'String',
+  checkbox:    'Boolean (checkbox)',
+  select:      'Choice (dropdown)',
+  radio:       'Choice (radio buttons)',
+  checklist:   'Choice (checkboxes)',
+};
+
 // FHIR R4 resource types for the reference type picker.
 export const FHIR_R4_TYPES = [
   'Patient','Practitioner','PractitionerRole','RelatedPerson','Organization',

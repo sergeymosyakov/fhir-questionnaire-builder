@@ -13,7 +13,7 @@ import { NodeGearMenu } from '../ui/node-gear-menu.js';
 import { createCustomSelect } from '../ui/custom-select.js';
 import { AppEvents, EventState } from '../events.js';
 import { FHIR } from '../fhir/urls/fhir.js';
-import { ITEM_TYPES } from '../ui/modals/answer-type/data.js';
+import { ITEM_TYPES, ITEM_TYPE_LABELS } from '../ui/modals/answer-type/data.js';
 import { changeNodeType, nodeTypeNeedsConfig, nodeHasTypeConfig } from '../nodes/change-type.js';
 
 const { addCopyPasteGearItems, applyMetaLabelTips, addMetaRowGearItem, buildInsideDropZone } = bh;
@@ -251,7 +251,7 @@ function buildInlineTypeRow(node, setActive) {
   const types = fhirTarget === 'R5' ? ITEM_TYPES.filter(t => t !== 'open-choice') : ITEM_TYPES;
 
   const sel = createCustomSelect({
-    items:     types.map(t => ({ value: t, label: t })),
+    items:     types.map(t => ({ value: t, label: ITEM_TYPE_LABELS[t] || t })),
     value:     node.itemType,
     className: 'sc-trigger--sm',
     testid:    'inline-answer-type',

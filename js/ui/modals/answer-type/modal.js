@@ -5,7 +5,7 @@ import { Modal } from '../modal-base.js';
 import { AppEvents } from '../../../events.js';
 import { changeNodeType } from '../../../nodes/change-type.js';
 import { createCustomSelect } from '../../custom-select.js';
-import { ITEM_TYPES } from './data.js';
+import { ITEM_TYPES, ITEM_TYPE_LABELS } from './data.js';
 import { ANSWER_TYPE_SECTIONS } from './index.js';
 
 class AnswerTypeModal extends Modal {
@@ -68,7 +68,7 @@ class AnswerTypeModal extends Modal {
       ? ITEM_TYPES.filter(t => t !== 'open-choice')
       : ITEM_TYPES;
     const typeSel = createCustomSelect({
-      items:     filteredTypes.map(t => ({ value: t, label: t })),
+      items:     filteredTypes.map(t => ({ value: t, label: ITEM_TYPE_LABELS[t] || t })),
       value:     this._pending.draftType,
       className: 'at-modal-type-sel sc-trigger--full',
       testid:    'type-select',
