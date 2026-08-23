@@ -4,20 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; img-src 'self' data: blob: https://avatars.githubusercontent.com;">
-<title>FHIR Questionnaire Logic Builder</title>
-<meta name="description" content="Visual drag-and-drop builder for FHIR R4 Questionnaires — enableWhen / enableWhenExpression, SDC variables, patient presets, FHIRPath evaluation, FHIR JSON import/export.">
+<title>FHIR Questionnaire Builder — Visual Logic &amp; FHIRPath Editor for FHIR R4/R5</title>
+<meta name="description" content="FHIR Questionnaire Builder — a visual drag-and-drop editor for FHIR R4 Questionnaires with conditional logic (enableWhen / enableWhenExpression), SDC variables, patient presets, FHIRPath evaluation, and FHIR JSON import/export.">
 <!-- Open Graph -->
 <meta property="og:type"        content="website">
-<meta property="og:title"       content="FHIR Questionnaire Logic Builder">
-<meta property="og:description" content="Visual drag-and-drop builder for FHIR R4 Questionnaires — enableWhen / enableWhenExpression, SDC variables, patient presets, FHIRPath evaluation, FHIR JSON import/export.">
+<meta property="og:title"       content="FHIR Questionnaire Builder — Visual Logic &amp; FHIRPath Editor">
+<meta property="og:description" content="FHIR Questionnaire Builder — a visual drag-and-drop editor for FHIR R4 Questionnaires with conditional logic, SDC variables, patient presets, FHIRPath evaluation, and FHIR JSON import/export.">
 <meta property="og:url"         content="https://fhirbuilder.com/">
 <meta property="og:image"       content="https://fhirbuilder.com/docs/social-preview.png">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="FHIR Questionnaire Logic Builder">
-<meta name="twitter:description" content="Visual drag-and-drop builder for FHIR R4 Questionnaires — enableWhen, SDC variables, FHIRPath evaluation.">
+<meta name="twitter:title"       content="FHIR Questionnaire Builder — Visual Logic &amp; FHIRPath Editor">
+<meta name="twitter:description" content="FHIR Questionnaire Builder — visual drag-and-drop editor with conditional logic, SDC variables, FHIRPath evaluation.">
 <meta name="twitter:image"       content="https://fhirbuilder.com/docs/social-preview.png">
 <link rel="canonical" href="https://fhirbuilder.com/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "FHIR Questionnaire Builder",
+  "alternateName": "FHIR Questionnaire Logic Builder",
+  "url": "https://fhirbuilder.com/",
+  "description": "Visual drag-and-drop builder for FHIR R4 Questionnaires with conditional logic, FHIRPath expressions, SDC variables, and FHIR JSON import/export. No backend required.",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any (browser-based)",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Sergey Mosyakov", "url": "https://github.com/sergeymosyakov" }
+}
+</script>
 <link rel="sitemap" type="application/xml" href="sitemap.xml">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="css/styles.css">
@@ -46,6 +60,7 @@
 <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
+<h1 class="visually-hidden">FHIR Questionnaire Builder — Visual Logic & FHIRPath Editor</h1>
 <div id="progressWrap" class="progress-wrap" data-mount="progress-wrap">
   <div id="progressBar" class="progress-bar" data-mount="progress-bar"></div>
   <span id="progressLabel" class="progress-label" data-mount="progress-label"></span>
@@ -147,7 +162,7 @@
 
 <noscript>
   <main class="noscript-main">
-    <h1>FHIR Questionnaire Logic Builder</h1>
+    <h1>FHIR Questionnaire Builder — Visual Logic & FHIRPath Editor</h1>
     <p>
       A free, open-source visual builder for <strong>FHIR R4 Questionnaires</strong>.
       Build complex clinical questionnaires with drag-and-drop, then export valid FHIR JSON —

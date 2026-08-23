@@ -1,4 +1,4 @@
-# QuestionaryPrototype — FHIR Questionnaire Logic Builder
+# QuestionaryPrototype — FHIR Questionnaire Builder
 
 A prototype **visual logic builder** for medical prior authorization questionnaires based on [FHIR R4 / R4B / R5 Questionnaire](https://hl7.org/fhir/R4/questionnaire.html).
 
