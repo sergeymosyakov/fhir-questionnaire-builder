@@ -116,7 +116,7 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
 
   function renderRow() {
     const itemSel = createCustomSelect({
-      items: [{ value: '', label: '\u2014 question \u2014' }, ...items.map((it) => ({ value: it.id, label: it.label }))],
+      items: [{ value: '', label: '\u2014 question \u2014' }, ...items.map((it) => ({ value: it.id, label: it.label, title: it.label, tipBody: 'linkId: ' + it.id }))],
       value: row.item?.id || '',
       className: 'sc-trigger--sm eb-item',
       testid: 'eb-leaf-item',
