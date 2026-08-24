@@ -85,7 +85,7 @@ GroupNode.prototype.buildBuilder = function () {
 
   const visLink = node._makeActionLink('Show When', 'vis', {
     title: 'Show When (enableWhen)',
-    body:  'Add enableWhen conditions to control when this group is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden groups are dimmed \uD83D\uDD12 in the preview.',
+    body:  'Add enableWhen conditions to control when this group is visible. Supports FHIR R4 enableWhen[] (AND/OR) rows and SDC enableWhenExpression (FHIRPath) as alternatives \u2014 they are not combined; enableWhen[] rows win if any are present. Hidden groups are dimmed \uD83D\uDD12 in the preview.',
     fhir:  'Questionnaire.item.enableWhen[]',
     spec:  'R4 \u00B7 optional',
   }, actions);
@@ -354,7 +354,7 @@ ItemNode.prototype.buildBuilder = function () {
 
   const visLink = node._makeActionLink('Show When', 'vis', {
     title: 'Show When (enableWhen)',
-    body:  'Add enableWhen conditions to control when this item is visible. Supports FHIR R4 enableWhen[] (AND/OR) and SDC enableWhenExpression (FHIRPath). Hidden items are dimmed \uD83D\uDD12 in the preview.',
+    body:  'Add enableWhen conditions to control when this item is visible. Supports FHIR R4 enableWhen[] (AND/OR) rows and SDC enableWhenExpression (FHIRPath) as alternatives \u2014 they are not combined; enableWhen[] rows win if any are present. Hidden items are dimmed \uD83D\uDD12 in the preview.',
     fhir:  'Questionnaire.item.enableWhen[]',
     spec:  'R4 \u00B7 optional',
   }, actions);

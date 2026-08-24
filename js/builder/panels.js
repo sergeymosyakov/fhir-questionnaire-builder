@@ -132,7 +132,13 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
   // ── AND / ANY behavior selector ──────────────────────────────────────────
   const behaviorRow = document.createElement('div');
   behaviorRow.className = 'vis-behavior-row';
-  behaviorRow.appendChild(Object.assign(document.createElement('span'), { textContent: 'Show when ' }));
+  const behaviorLbl = document.createElement('span');
+  behaviorLbl.textContent = 'Show when ';
+  behaviorLbl.dataset.tipTitle = 'Show When conditions (enableWhen)';
+  behaviorLbl.dataset.tipBody = 'Row-based conditions per FHIR R4. Multiple rows combine via ALL (AND) or ANY (OR). Alternative to the enableWhenExpression field below \u2014 if any row exists here, that FHIRPath expression is ignored.';
+  behaviorLbl.dataset.tipFhir = 'Questionnaire.item.enableWhen[]';
+  behaviorLbl.dataset.tipSpec = 'R4';
+  behaviorRow.appendChild(behaviorLbl);
   const behaviorSel = createCustomSelect({
     items:    [{ value: 'all', label: 'ALL (AND)' }, { value: 'any', label: 'ANY (OR)' }],
     value:    node.enableBehavior || 'all',
@@ -404,6 +410,10 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
   exprLbl.className = 'panel-raw-lbl panel-raw-lbl--sm panel-lbl-row';
   const exprLblTxt = document.createElement('span');
   exprLblTxt.textContent = 'enableWhenExpression (SDC):';
+  exprLblTxt.dataset.tipTitle = 'enableWhenExpression (SDC)';
+  exprLblTxt.dataset.tipBody = 'A single FHIRPath expression, evaluated as the visibility condition. Alternative to the enableWhen rows above \u2014 ignored whenever any row exists there.';
+  exprLblTxt.dataset.tipFhir = 'sdc-questionnaire-enableWhenExpression';
+  exprLblTxt.dataset.tipSpec = 'SDC';
   const exprIcon = document.createElement('span');
   exprIcon.className = 'expr-live-icon';
   exprIcon.dataset.exprIcon = node.enableWhenExpression || '';
