@@ -479,8 +479,10 @@ export class BaseNode {
 
   // Build the label element. Overridden in GroupNode, ItemNode, DisplayNode.
   // rc is optional — passed during preview render for translation lookup.
+  // item-label marks this as the row's label span for CSS, independent of DOM position.
   _buildLabel(_res, rc) {
     const el = document.createElement('span');
+    el.className = 'item-label';
     this._applyLabelContent(el, rc);
     return el;
   }
