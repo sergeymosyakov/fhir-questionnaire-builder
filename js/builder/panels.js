@@ -214,7 +214,10 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
           { value: 'exists|false', label: 'has no answer' },
         ];
         opSel.setOptions(items);
-        opSel.setValue(ew.operator + '|' + (ew.answerBoolean === false ? 'false' : 'true'));
+        // setValue() only updates the widget display — persist the visually-
+        // defaulted value, or a never-touched dropdown leaves answerBoolean unset.
+        ew.answerBoolean = ew.answerBoolean === false ? false : true;
+        opSel.setValue(ew.operator + '|' + (ew.answerBoolean ? 'true' : 'false'));
         opSel.setOnChange(v => {
           const [op, boolStr] = v.split('|');
           ew.operator = op;

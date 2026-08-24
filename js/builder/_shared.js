@@ -8,7 +8,9 @@ export function getAllItems(nodes, result = [], prefix = '') {
   for (const n of nodes) {
     if (n.type === 'item') {
       result.push({ id: n.id, label: (prefix ? prefix + ' › ' : '') + n.title, itemType: n.itemType, options: n.options });
-    } else if (n.children?.length) {
+    }
+    // Non-group items can also carry nested item.item[] (FHIR R4) — always recurse.
+    if (n.children?.length) {
       getAllItems(n.children, result, (prefix ? prefix + ' › ' : '') + n.title);
     }
   }

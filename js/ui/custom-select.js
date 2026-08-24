@@ -168,6 +168,7 @@ export function createCustomSelect({ items = [], value = '', onChange, className
       opt.textContent = item.label;
       opt.dataset.val = item.value;
       if (item.title) opt.dataset.tipTitle = item.title;
+      if (item.tipBody) opt.dataset.tipBody = item.tipBody;
       opt.addEventListener('mousedown', e => { e.preventDefault(); _pick(item); });
       container.appendChild(opt);
       created.push(opt);
