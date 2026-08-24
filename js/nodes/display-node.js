@@ -53,9 +53,11 @@ export class DisplayNode extends ItemNode {
         toggle.classList.toggle('display-help-toggle--open', this._helpOpen);
       });
       wrap.append(toggle, content);
+      wrap.classList.add('item-label');
       return wrap;
     }
     const el = document.createElement('span');
+    el.className = 'item-label';
     this._applyLabelContent(el, rc);
     return el;
   }

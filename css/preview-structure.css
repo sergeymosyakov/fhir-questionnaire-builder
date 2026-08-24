@@ -1,10 +1,15 @@
 /* === Item body (label + badges + control) ==================================== */
 /* Mobile-first: icons are direct inline children of lform-item, label follows inline. */
 .item-body  { display: inline; vertical-align: baseline; }
+/* Label span (all node types set this class) — align to line-box top so a tall
+   inline sibling (e.g. preview-item-media) doesn't push the text down to baseline. */
+.item-label { vertical-align: top; }
 /* Spacing between inline icon elements and the label. */
 .preview-nav-btn, .icon-ok, .icon-fail, .preview-icon-ph,
 .preview-linkid, .preview-hidden-badge, .preview-short-text-badge,
 .preview-meta-badge, .preview-prefix { margin-right: 4px; }
+/* sdc-questionnaire-itemMedia: breathing room from the preceding label/badges. */
+.preview-item-media { margin-left: 8px; }
 /* Controls are full-width blocks, capped at 1024px so they don't stretch too wide. */
 .item-body .ctrl-wrap {
   display: flex;
