@@ -17,7 +17,7 @@
         { "id": "enablewhen", "title": "enableWhen & visibility", "file": "enablewhen.md" },
         { "id": "fhirpath", "title": "FHIRPath in the builder", "file": "fhirpath.md" },
         { "id": "extensions-sdc", "title": "Extensions & SDC", "file": "extensions-sdc.md" },
-        { "id": "extraction", "title": "Extraction (definition & StructureMap)", "file": "extraction.md" },
+        { "id": "extraction", "title": "Extraction (observation, definition & StructureMap)", "file": "extraction.md" },
         { "id": "preview-modes", "title": "Preview, Patient View & FHIR JSON", "file": "preview-modes.md" }
       ]
     },
@@ -30,7 +30,9 @@
         { "id": "validation", "title": "Validation", "file": "validation.md" },
         { "id": "translate", "title": "Translate a questionnaire", "file": "translate.md" },
         { "id": "populate", "title": "Fill from a FHIR server ($populate)", "file": "populate.md" },
+        { "id": "observation-extract", "title": "Observation-based extraction", "file": "observation-extract.md" },
         { "id": "definition-extract", "title": "Definition-based extraction", "file": "definition-extract.md" },
+        { "id": "structuremap-extract", "title": "StructureMap-based extraction", "file": "structuremap-extract.md" },
         { "id": "resolve-profile", "title": "Resolve from profile", "file": "resolve-profile.md" },
         { "id": "embed-renderer", "title": "Embed the renderer", "file": "embed-renderer.md" },
         { "id": "redcap", "title": "REDCap import/export", "file": "redcap.md" },

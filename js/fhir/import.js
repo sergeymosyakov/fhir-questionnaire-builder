@@ -150,6 +150,9 @@ export function importFHIR(fhirJson, opts = {}) {
   const PREF_TERM_URL = FHIR.preferredTerminologyServer;
   const prefTermQuestExt = (q.extension || []).find(e => e.url === PREF_TERM_URL);
   questMeta.preferredTermServer = prefTermQuestExt?.valueUrl || '';
+  const TARGET_SM_URL = FHIR.targetStructureMap;
+  const targetSmExt = (q.extension || []).find(e => e.url === TARGET_SM_URL);
+  questMeta.targetStructureMap = targetSmExt?.valueCanonical || '';
   const SIG_REQ_URL = FHIR.signatureRequired;
   const sigReqExts = (q.extension || []).filter(e => e.url === SIG_REQ_URL);
   questMeta._signatureRequired = sigReqExts.length
@@ -158,7 +161,7 @@ export function importFHIR(fhirJson, opts = {}) {
         return { system: c.system || '', code: c.code || '', display: c.display || '' };
       })
     : [];
-  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL && e.url !== SIG_REQ_URL && e.url !== BUILDER_VERSION_EXTENSION_URL && e.url !== LAUNCH_CTX_URL && e.url !== ARTIFACT_VERSION_ALGO_URL && e.url !== ARTIFACT_COPYRIGHT_LABEL_URL);
+  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL && e.url !== TARGET_SM_URL && e.url !== SIG_REQ_URL && e.url !== BUILDER_VERSION_EXTENSION_URL && e.url !== LAUNCH_CTX_URL && e.url !== ARTIFACT_VERSION_ALGO_URL && e.url !== ARTIFACT_COPYRIGHT_LABEL_URL);
   questMeta._rawQuestExtensions = nonVarExts.length ? JSON.parse(JSON.stringify(nonVarExts)) : [];
 
   // sdc-questionnaire-launchContext (0..*)

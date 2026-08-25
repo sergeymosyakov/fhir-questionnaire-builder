@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import fhirpath from 'fhirpath';
-import { StructureMapEngine, parseFMLToDocument } from 'fhir-structuremap-js';
+import { StructureMapEngine, parseFMLToDocument } from '../lib/fhir-structuremap-js.esm.js';
 import { createStructureMapEngine } from '../js/fhir/structuremap-engine.js';
 
 // Proves the wrapper wires a working StructureMapEngine — the library's own

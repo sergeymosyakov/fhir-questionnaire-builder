@@ -61,6 +61,7 @@ export const AppEvents = Object.freeze({
   // detail: { patientRef: string } — e.g. 'Patient/123'
   SDC_POPULATE_REQUESTED:  'sdc:populate-requested',
   DEF_EXTRACT_REQUESTED:   'sdc:def-extract-requested',
+  STRUCTUREMAP_EXTRACT_REQUESTED: 'sdc:structuremap-extract-requested',
   BUILDER_RENDER_DONE:  'builder:render-done',
 
   // ── Patient / QR ─────────────────────────────────────────────────────────

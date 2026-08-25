@@ -43,4 +43,4 @@ an `Observation`. Both are described in [Extraction](extraction.md).
 
 ---
 
-Next: [Resolve from profile](resolve-profile.md).
+Next: [StructureMap-based extraction](structuremap-extract.md).

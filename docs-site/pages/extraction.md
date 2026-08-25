@@ -3,8 +3,7 @@
 **Extraction** is the step that turns a completed questionnaire into *other* FHIR
 resources — for example creating `Observation`, `Condition` or `Patient` records
 from the answers, rather than keeping them only as a `QuestionnaireResponse`. The
-SDC guide defines a few ways to do this; the builder implements two of them and
-is honest about the one it does not.
+SDC guide defines a few ways to do this; the builder implements all three.
 
 ## Observation-based extraction
 
@@ -15,7 +14,8 @@ down the tree, so flagging a group opts in the questions beneath it; an explicit
 "off" on a child overrides an inherited "on".
 
 Produce the output from **Save ▾ → 🧪 Observations · FHIR JSON Bundle** — a
-transaction `Bundle` of the extracted Observations.
+transaction `Bundle` of the extracted Observations. There is a dedicated how-to
+for this: [Observation-based extraction](observation-extract.md).
 
 *(Uses the SDC `observationExtract` flag and `questionnaire-unit` for numeric
 units.)*
@@ -36,22 +36,27 @@ Produce the output from **Save ▾ → 🧩 Definition Extract · FHIR JSON Bund
 transaction `Bundle` of the mapped resources. There is a dedicated how-to for
 this: [Definition-based extraction](definition-extract.md).
 
-## StructureMap-based extraction — not executed here
+## StructureMap-based extraction
 
 The SDC guide also defines a third, most powerful mechanism where a
-**StructureMap** transforms the response into target resources. Running a
-StructureMap requires a FHIR mapping-language engine, and the builder is a
-dependency-free browser app with **no in-browser StructureMap engine**. So while
-a questionnaire may *reference* a StructureMap, this tool does **not execute** that
-transformation — you would run it on a FHIR server that supports the mapping
-language. The two mechanisms above cover the common cases without a server.
+**StructureMap** — its own FHIR resource describing a set of transform rules —
+transforms the response into target resources. The builder runs this **in the
+browser**, via a real, independent FHIR Mapping Language engine
+([fhir-structuremap-js](https://github.com/sergeymosyakov/fhir-structuremap-js)),
+no server required. The StructureMap must be added to the questionnaire's
+Contained Resources (there's no server to fetch an external one from). There is
+a dedicated how-to for this: [StructureMap-based extraction](structuremap-extract.md).
+
+Only the extraction direction is executed today — *population* from a
+`sourceStructureMap` (pre-filling a response from source resources) is still
+round-tripped but not run; see [Roadmap & limitations](roadmap-limitations.md).
 
 ## Where extraction runs
 
-Both supported extractions are pure, in-browser transformations of the current
-`Questionnaire` plus its live `QuestionnaireResponse` — no server round-trip is
-needed. Fill in the form in the preview, then export the extracted Bundle from the
-**Save** menu.
+All three extraction mechanisms are pure, in-browser transformations of the
+current `Questionnaire` plus its live `QuestionnaireResponse` — no server
+round-trip is needed. Fill in the form in the preview, then export the extracted
+Bundle from the **Save** menu.
 
 ---
 

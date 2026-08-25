@@ -1,0 +1,111 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "structuremap-extract-demo",
+  "url": "https://example.org/fhir/Questionnaire/structuremap-extract-demo",
+  "version": "1.0.0",
+  "title": "StructureMap Extraction Demo",
+  "status": "active",
+  "publisher": "FHIR Questionnaire Builder",
+  "description": "Demonstrates sdc-questionnaire-targetStructureMap: fill in the answers, then use Save \u25be \u2192 StructureMap Extract \u00b7 FHIR JSON Bundle to run the contained StructureMap (FHIR Mapping Language) against the current QuestionnaireResponse in-browser, producing a Patient resource. No server required \u2014 executed by fhir-structuremap-js.",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-targetStructureMap",
+      "valueCanonical": "#qr-to-patient-demo"
+    }
+  ],
+  "contained": [
+    {
+      "resourceType": "StructureMap",
+      "id": "qr-to-patient-demo",
+      "url": "http://fhir-qb.app/StructureMap/QRToPatientDemo",
+      "name": "QRToPatientDemo",
+      "status": "active",
+      "structure": [],
+      "import": [],
+      "const": [],
+      "group": [
+        {
+          "name": "main",
+          "typeMode": "none",
+          "input": [
+            { "name": "qr", "mode": "source", "type": "QuestionnaireResponse" },
+            { "name": "patient", "mode": "target", "type": "Patient" }
+          ],
+          "rule": [
+            {
+              "source": [{ "context": "qr" }],
+              "target": [{ "context": "patient", "element": "name", "variable": "_sub0", "listMode": [] }],
+              "rule": [
+                {
+                  "source": [{ "context": "_sub0" }],
+                  "target": [{
+                    "context": "_sub0", "element": "family", "listMode": [],
+                    "transform": "evaluate",
+                    "parameter": [{ "valueId": "qr" }, { "valueString": "item.where(linkId='family-name').answer.valueString" }]
+                  }],
+                  "rule": [],
+                  "dependent": []
+                }
+              ],
+              "dependent": []
+            },
+            {
+              "source": [{ "context": "qr" }],
+              "target": [{ "context": "patient", "element": "name", "variable": "_sub1", "listMode": [] }],
+              "rule": [
+                {
+                  "source": [{ "context": "_sub1" }],
+                  "target": [{
+                    "context": "_sub1", "element": "given", "listMode": [],
+                    "transform": "evaluate",
+                    "parameter": [{ "valueId": "qr" }, { "valueString": "item.where(linkId='given-name').answer.valueString" }]
+                  }],
+                  "rule": [],
+                  "dependent": []
+                }
+              ],
+              "dependent": []
+            },
+            {
+              "source": [{ "context": "qr" }],
+              "target": [{
+                "context": "patient", "element": "birthDate", "listMode": [],
+                "transform": "evaluate",
+                "parameter": [{ "valueId": "qr" }, { "valueString": "item.where(linkId='birth-date').answer.valueDate" }]
+              }],
+              "rule": [],
+              "dependent": []
+            },
+            {
+              "source": [{ "context": "qr" }],
+              "target": [{
+                "context": "patient", "element": "resourceType", "listMode": [],
+                "transform": "copy",
+                "parameter": [{ "valueString": "Patient" }]
+              }],
+              "rule": [],
+              "dependent": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "item": [
+    {
+      "linkId": "family-name",
+      "text": "Family name",
+      "type": "string"
+    },
+    {
+      "linkId": "given-name",
+      "text": "Given name",
+      "type": "string"
+    },
+    {
+      "linkId": "birth-date",
+      "text": "Date of birth",
+      "type": "date"
+    }
+  ]
+}

@@ -6,11 +6,12 @@ a zero-backend browser app.
 
 ## Known limitations
 
-- **StructureMap execution** — questionnaires may *reference* a StructureMap for
-  extraction or population, but the builder does **not execute** FHIR Mapping
-  Language transforms in the browser (there is no mature, permissively-licensed,
-  browser-capable engine). StructureMaps are round-tripped but not run. To apply
-  one, use a server that supports `$transform`. See [Extraction](extraction.md).
+- **StructureMap execution for population** — a questionnaire may *reference* a
+  `sourceStructureMap` to pre-fill a response from source resources, but the
+  builder does **not** yet execute that direction in the browser (it's
+  round-tripped but not run). **Extraction** (`targetStructureMap`) *is*
+  executed in the browser via a real FHIR Mapping Language engine — see
+  [StructureMap-based extraction](structuremap-extract.md).
 - **Translation providers** — machine translation supports Google `gtx` (free,
   no key), DeepL, LibreTranslate and OpenAI, selectable in
   [Settings](settings.md). Caveats for a browser-only app: provider API keys are
