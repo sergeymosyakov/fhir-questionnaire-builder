@@ -20,6 +20,7 @@ import { languageMenu } from './ui/header-actions.js';
 import * as search from './ui/search.js';
 import * as statusBadge from './ui/status-badge.js';
 import * as progress from './ui/progress.js';
+import { showError, showInfo } from './ui/toast.js';
 import './ui/left-header-actions.js';
 import './ui/modals/index.js';
 import './ui/variables-panel.js';
@@ -55,7 +56,7 @@ new PatientProfile();
 // ── Self-wiring singletons — each subscribes to APP_CONTEXT_READY ─────────
 new QRAnswersManager();
 new QuestionnaireLoader();
-new PreviewForm({ chrome: { search, statusBadge, languageMenu }, progress });
+new PreviewForm({ chrome: { search, statusBadge, languageMenu }, progress, notify: { error: showError, info: showInfo } });
 
 // header-actions and builder self-mount on import
 

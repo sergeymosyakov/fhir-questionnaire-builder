@@ -151,22 +151,25 @@ export async function searchFhir(resourceType, query, count = 10, opts = {}) {
  * Same auth/retry/proxy handling as searchFhir.
  * @param {string} reference - '<ResourceType>/<id>' reference string
  * @param {object} [opts]
+ * @param {object} [opts.authHeader] - explicit auth header (e.g. a widget host's
+ *   own token via config.getAuthToken) — bypasses the app's OAuth/debug-bridge
+ *   resolution entirely when provided.
  * @returns {Promise<object>} the fetched FHIR resource
  */
 export async function getResourceByReference(reference, opts = {}) {
   const base = ((opts.fhirBase ?? serverConfig.get(CONFIG_KEYS.FHIR_BASE)) || '').replace(/\/$/, '');
   const m = /^([A-Za-z]+)\/([^/]+)$/.exec((reference || '').trim());
-  if (!base) throw new Error('No FHIR Base Server configured. Open Settings to set one.');
+  if (!base) throw new Error('FHIR Base Server not configured.');
   if (!m) throw new Error(`Invalid reference: "${reference}" (expected "<ResourceType>/<id>")`);
 
   const targetUrl = `${base}/${m[1]}/${m[2]}`;
   const url = proxiedUrl(targetUrl, opts.corsProxy);
   const signal = opts.signal ? AbortSignal.any([opts.signal, AbortSignal.timeout(6000)]) : AbortSignal.timeout(6000);
   let res = await fetch(url, {
-    headers: { Accept: 'application/fhir+json', ...await fhirAuthHeaderFor(targetUrl, 'FHIR_BASE') },
+    headers: { Accept: 'application/fhir+json', ...(opts.authHeader ?? await fhirAuthHeaderFor(targetUrl, 'FHIR_BASE')) },
     signal,
   });
-  if (res.status === 401) {
+  if (res.status === 401 && !opts.authHeader) {
     res = await fetch(url, {
       headers: { Accept: 'application/fhir+json', ...await reauthHeaderFor(targetUrl, 'FHIR_BASE') },
       signal,
