@@ -11,6 +11,7 @@ export class SdcPopulateModal extends Modal {
     super({ applyLabel: 'Fill from Server', cancelLabel: 'Cancel', maxWidth: '440px' });
     this.title.textContent = 'Fill from FHIR Server ($populate)';
     this._debounce = null;
+    this._searchAbort = null;
     this._drop = null;
     this._build();
   }
@@ -96,6 +97,7 @@ export class SdcPopulateModal extends Modal {
       const q = this._searchInput.value.trim();
       this._selectedRef = q.includes('/') ? q : '';
       clearTimeout(this._debounce);
+      this._searchAbort?.abort(); // supersede any still-in-flight search
       if (!q) { closeDrop(); return; }
       if (!serverConfig.get(CONFIG_KEYS.FHIR_BASE)) { closeDrop(); return; }
       const loading = document.createElement('div');
@@ -105,10 +107,14 @@ export class SdcPopulateModal extends Modal {
       this._drop.appendChild(loading);
       openDrop();
       this._debounce = setTimeout(async () => {
+        const controller = new AbortController();
+        this._searchAbort = controller;
         try {
-          const results = await searchFhir('Patient', q);
+          const results = await searchFhir('Patient', q, 10, { signal: controller.signal });
+          if (controller.signal.aborted) return; // a newer search superseded this one
           showResults(results, q);
         } catch (e) {
+          if (controller.signal.aborted || e.name === 'AbortError') return;
           const err = document.createElement('div');
           err.className = 'ref-search-empty ref-search-error';
           err.textContent = e.message;

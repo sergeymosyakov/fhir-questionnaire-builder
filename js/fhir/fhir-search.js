@@ -106,6 +106,8 @@ function _searchParam(resourceType) {
  * @param {string} resourceType - FHIR resource type (e.g. 'Patient')
  * @param {string} query        - Search text
  * @param {number} [count=10]   - Max results
+ * @param {object} [opts]
+ * @param {AbortSignal} [opts.signal] - external signal to cancel a superseded search
  * @returns {Promise<Array<{id: string, display: string}>>}
  */
 export async function searchFhir(resourceType, query, count = 10, opts = {}) {
@@ -117,14 +119,15 @@ export async function searchFhir(resourceType, query, count = 10, opts = {}) {
 
   const targetUrl = `${base}/${resourceType}?${params}`;
   const url = proxiedUrl(targetUrl, opts.corsProxy);
+  const signal = opts.signal ? AbortSignal.any([opts.signal, AbortSignal.timeout(6000)]) : AbortSignal.timeout(6000);
   let res = await fetch(url, {
     headers: { Accept: 'application/fhir+json', ...await fhirAuthHeaderFor(targetUrl, 'FHIR_BASE') },
-    signal: AbortSignal.timeout(6000),
+    signal,
   });
   if (res.status === 401) {
     res = await fetch(url, {
       headers: { Accept: 'application/fhir+json', ...await reauthHeaderFor(targetUrl, 'FHIR_BASE') },
-      signal: AbortSignal.timeout(6000),
+      signal,
     });
   }
   if (!res.ok) {

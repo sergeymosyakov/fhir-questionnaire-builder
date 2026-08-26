@@ -135,6 +135,7 @@ export class ReferenceNode extends ItemNode {
       };
 
       let _debounceTimer = null;
+      let _searchAbort = null;
 
       const closeDropdown = () => { dropdown.style.display = 'none'; };
       const openDropdown  = () => { positionDrop(); dropdown.style.display = 'block'; };
@@ -174,6 +175,9 @@ export class ReferenceNode extends ItemNode {
       const doSearch = async (query) => {
         const resourceType = sel.getValue();
         if (!resourceType) { closeDropdown(); return; }
+        _searchAbort?.abort(); // supersede any still-in-flight search
+        const controller = new AbortController();
+        _searchAbort = controller;
         const loading = document.createElement('div');
         loading.className = 'ref-search-empty';
         loading.textContent = 'Searching…';
@@ -181,9 +185,11 @@ export class ReferenceNode extends ItemNode {
         dropdown.appendChild(loading);
         openDropdown();
         try {
-          const results = await searchFhir(resourceType, query, 10, { fhirBase: ctx.fhirBase, corsProxy: ctx.corsProxy });
+          const results = await searchFhir(resourceType, query, 10, { fhirBase: ctx.fhirBase, corsProxy: ctx.corsProxy, signal: controller.signal });
+          if (controller.signal.aborted) return; // a newer search superseded this one
           showResults(results, query);
         } catch (e) {
+          if (controller.signal.aborted || e.name === 'AbortError') return;
           const err = document.createElement('div');
           err.className = 'ref-search-empty ref-search-error';
           err.textContent = e.message || 'Search failed';
