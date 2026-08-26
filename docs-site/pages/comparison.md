@@ -28,8 +28,9 @@ slice is a meaningful comparison.
 - Nothing to install or host — open a URL and build.
 - The preview is a genuine SDC runtime, so logic behaves like a real client.
 - Broad FHIR R4/R4B/R5 + SDC support with faithful round-tripping.
-- Extras that many builders lack: Observation and definition-based extraction,
-  machine translation, and REDCap ↔ FHIR conversion.
+- Extras that many builders lack: Observation, definition-based **and**
+  StructureMap-based extraction, machine translation, and REDCap ↔ FHIR
+  conversion.
 
 ## Where it's not the right tool
 
@@ -37,7 +38,8 @@ slice is a meaningful comparison.
   server-side storage beyond optional personal cloud save.
 - Some server-dependent SDC operations (like `$populate`) require you to point it
   at an external server.
-- StructureMap-based transformation is not executed in the browser — see
+- StructureMap-based *population* (pre-filling a response) is not executed in
+  the browser yet — extraction is; see
   [Roadmap & limitations](roadmap-limitations.md).
 
 If you need a hosted, multi-user clinical data platform, use one of the platforms

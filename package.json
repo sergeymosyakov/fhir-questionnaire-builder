@@ -9,6 +9,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "lint": "eslint js/ tests/",
+    "vendor:structuremap": "esbuild node_modules/fhir-structuremap-js/src/index.js --bundle --minify --format=esm --outfile=lib/fhir-structuremap-js.esm.js",
     "build:widget:js": "esbuild js/renderer/index.js --bundle --minify --format=esm --outfile=dist/questionnaire-widget.js && esbuild js/renderer/index.js --bundle --minify --format=iife --global-name=FhirQuestionnaireWidget --outfile=dist/questionnaire-widget.global.js",
     "build:widget:css": "esbuild css/widget.css --bundle --minify --outfile=dist/questionnaire-widget.css",
     "build:widget": "npm run build:widget:js && npm run build:widget:css",
@@ -20,6 +21,8 @@
     "@vitest/coverage-v8": "^4.1.11",
     "esbuild": "^0.28.2",
     "eslint": "^10.9.0",
+    "fhir-structuremap-js": "^1.1.0",
+    "fhirpath": "^4.3.0",
     "globals": "^17.11.0",
     "serve": "^14.0.0",
     "vitest": "^4.1.11"

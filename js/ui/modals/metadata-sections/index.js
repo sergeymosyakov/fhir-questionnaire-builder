@@ -3,6 +3,7 @@ import './hint.js';
 import './core-fields.js';
 import './narrative.js';
 import './terminology-server.js';
+import './structure-map.js';
 import './advanced.js';
 import './subject-type.js';
 import './launch-context.js';

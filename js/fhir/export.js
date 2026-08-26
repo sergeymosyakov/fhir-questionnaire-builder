@@ -543,6 +543,10 @@ export function buildFHIRObject(questDoc = EventState.get(AppEvents.APP_CONTEXT_
       url: FHIR.preferredTerminologyServer,
       valueUrl: questMeta.preferredTermServer.trim()
     }] : []),
+    ...(questMeta.targetStructureMap?.trim() ? [{
+      url: FHIR.targetStructureMap,
+      valueCanonical: questMeta.targetStructureMap.trim()
+    }] : []),
     ...(questMeta._signatureRequired || []).map(sig => ({
       url: FHIR.signatureRequired,
       valueCodeableConcept: { coding: [{ system: sig.system, code: sig.code, display: sig.display }] },

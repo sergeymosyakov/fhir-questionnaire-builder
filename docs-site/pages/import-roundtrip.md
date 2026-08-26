@@ -46,8 +46,9 @@ Use the **Save ▾** menu to download FHIR JSON:
 
 - **📄 Questionnaire · FHIR JSON** — the questionnaire itself.
 - **📋 QuestionnaireResponse · FHIR JSON** — the current answers as a response.
-- **🧪 Observations · FHIR JSON Bundle** and **🧩 Definition Extract · FHIR JSON
-  Bundle** — extracted resources (see [Extraction](extraction.md)).
+- **🧪 Observations · FHIR JSON Bundle**, **🧩 Definition Extract · FHIR JSON
+  Bundle**, and **🗺️ StructureMap Extract · FHIR JSON Bundle** — extracted
+  resources (see [Extraction](extraction.md)).
 
 ## Resuming a filled-in form
 

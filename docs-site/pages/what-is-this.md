@@ -9,7 +9,9 @@ It runs entirely in your browser. There is **no backend, no account required, an
 - **Build** a `Questionnaire` visually — groups, items, answer types, answer options, and value-set bindings.
 - **Import & round-trip** existing FHIR `Questionnaire` JSON (R4, with STU3 normalised on import and R5-only fields preserved), with a documented, transparent mapping.
 - **Test the logic live** — `enableWhen` / `enableWhenExpression` visibility, `calculatedExpression` / `initialExpression` chains, and FHIRPath constraints are evaluated in the browser against a patient context you choose.
-- **Extract data** — definition-based extraction turns questionnaire answers into FHIR resources (a transaction `Bundle`).
+- **Extract data** — definition-based, Observation-based, and StructureMap-based
+  extraction turn questionnaire answers into FHIR resources (a transaction
+  `Bundle`) — all in the browser.
 - **Translate** a questionnaire into other languages and preview it per language.
 - **Validate** — a built-in validator plus optional external FHIR `$validate`.
 - **Export** clean FHIR JSON, or convert to/from a REDCap data dictionary.
@@ -19,7 +21,9 @@ It runs entirely in your browser. There is **no backend, no account required, an
 Being honest about the boundaries matters more than marketing:
 
 - It is **not** a FHIR server or a data store. It has no server-side API.
-- It is **not** an industrial SDC engine — it does **not** execute StructureMap-based extraction/population (those are round-tripped but not run), and it does not resolve profiles against a terminology server for licensed code systems.
+- It is **not** an industrial SDC engine — it does **not** execute
+  StructureMap-based *population* (round-tripped but not run), and it does not
+  resolve profiles against a terminology server for licensed code systems.
 - It is **not** designed for direct use by clinicians without FHIR knowledge. It deliberately surfaces FHIR concepts (linkId, extensions, FHIRPath) rather than hiding them — see [Who it's for](who-its-for.md).
 
 ## Why use it

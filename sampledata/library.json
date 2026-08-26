@@ -117,6 +117,12 @@
         "file": "prapare-sdoh.fhir.json",
         "type": "questionnaire",
         "note": "Real SDOH clinical form: LOINC-coded, drop-down itemControl, itemWeight, optionPrefix, StructureMap extraction"
+      },
+      {
+        "label": "StructureMap Extraction Demo",
+        "file": "structuremap-extract-demo.fhir.json",
+        "type": "questionnaire",
+        "note": "sdc-questionnaire-targetStructureMap: Save \u25be \u2192 StructureMap Extract runs the contained StructureMap (FML) in-browser via fhir-structuremap-js, producing a Patient resource"
       }
     ]
   },
