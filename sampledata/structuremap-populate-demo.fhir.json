@@ -79,7 +79,7 @@
                       "target": [{
                         "context": "_ans0", "element": "valueString", "listMode": [],
                         "transform": "evaluate",
-                        "parameter": [{ "valueId": "patient" }, { "valueString": "name.family" }]
+                        "parameter": [{ "valueId": "patient" }, { "valueString": "name.first().family" }]
                       }],
                       "rule": [],
                       "dependent": []
@@ -117,7 +117,7 @@
                       "target": [{
                         "context": "_ans1", "element": "valueString", "listMode": [],
                         "transform": "evaluate",
-                        "parameter": [{ "valueId": "patient" }, { "valueString": "name.given.first()" }]
+                        "parameter": [{ "valueId": "patient" }, { "valueString": "name.first().given.first()" }]
                       }],
                       "rule": [],
                       "dependent": []

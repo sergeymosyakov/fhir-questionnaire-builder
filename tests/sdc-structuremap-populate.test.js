@@ -165,4 +165,25 @@ describe('structureMapPopulate — sampledata/structuremap-populate-demo.fhir.js
     expect(byLinkId['given-name'].answer[0].valueString).toBe('Alex');
     expect(byLinkId['birth-date'].answer[0].valueDate).toBe('1975-06-15');
   });
+
+  // Regression: real patients often carry more than one name entry (official +
+  // nickname/maiden/etc.) — name.family alone then returns multiple values and
+  // errors on a non-repeating target (evaluate() must be narrowed to one entry).
+  it('handles a Patient with multiple name entries (e.g. official + nickname)', async () => {
+    const fs = await import('node:fs/promises');
+    const questJson = JSON.parse(await fs.readFile(new URL('../sampledata/structuremap-populate-demo.fhir.json', import.meta.url)));
+    const multiNamePatient = {
+      resourceType: 'Patient',
+      name: [
+        { use: 'official', family: 'Smith', given: ['Alex', 'Middle'] },
+        { use: 'nickname', given: ['Al'] },
+      ],
+      birthDate: '1975-06-15',
+    };
+    const { qr, warnings } = structureMapPopulate(questJson, multiNamePatient, { engine: realEngine });
+    expect(warnings).toHaveLength(0);
+    const byLinkId = Object.fromEntries(qr.item.map(i => [i.linkId, i]));
+    expect(byLinkId['family-name'].answer[0].valueString).toBe('Smith');
+    expect(byLinkId['given-name'].answer[0].valueString).toBe('Alex');
+  });
 });
