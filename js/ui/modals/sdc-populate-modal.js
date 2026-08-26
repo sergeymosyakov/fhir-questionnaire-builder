@@ -3,16 +3,14 @@
 // Has a live search autocomplete (same as reference field in preview).
 import { Modal } from './modal-base.js';
 import { AppEvents } from '../../events.js';
-import { searchFhir } from '../../fhir/fhir-search.js';
+import { createRefSearchAutocomplete } from '../ref-search.js';
 import { serverConfig, CONFIG_KEYS } from '../../fhir/server-config.js';
 
 export class SdcPopulateModal extends Modal {
   constructor() {
     super({ applyLabel: 'Fill from Server', cancelLabel: 'Cancel', maxWidth: '440px' });
     this.title.textContent = 'Fill from FHIR Server ($populate)';
-    this._debounce = null;
-    this._searchAbort = null;
-    this._drop = null;
+    this._autocomplete = null;
     this._build();
   }
 
@@ -48,83 +46,21 @@ export class SdcPopulateModal extends Modal {
 
     this._selectedRef = '';
 
-    this._drop = document.createElement('div');
-    this._drop.className = 'ref-search-drop sdc-pop-drop';
-    document.body.appendChild(this._drop);
-
-    const positionDrop = () => {
-      const r = this._searchInput.getBoundingClientRect();
-      this._drop.style.top   = (r.bottom + 3) + 'px';
-      this._drop.style.left  = r.left + 'px';
-      this._drop.style.width = r.width + 'px';
-    };
-
-    const closeDrop = () => { this._drop.style.display = 'none'; };
-    const openDrop  = () => { positionDrop(); this._drop.style.display = 'block'; };
-
-    const showResults = (results, query) => {
-      this._drop.innerHTML = '';
-      if (!results.length) {
-        const empty = document.createElement('div');
-        empty.className = 'ref-search-empty';
-        empty.textContent = query ? 'No results' : 'Type to search\u2026';
-        this._drop.appendChild(empty);
-      } else {
-        results.forEach(r => {
-          const item = document.createElement('button');
-          item.type = 'button';
-          item.className = 'ref-search-item';
-          const nameSpan = document.createElement('span');
-          nameSpan.className = 'ref-search-name';
-          nameSpan.textContent = r.display;
-          const idSpan = document.createElement('span');
-          idSpan.className = 'ref-search-id';
-          idSpan.textContent = r.id;
-          item.append(nameSpan, idSpan);
-          item.addEventListener('mousedown', e => {
-            e.preventDefault();
-            this._searchInput.value = r.display + ' (' + r.id + ')';
-            this._selectedRef = 'Patient/' + r.id;
-            closeDrop();
-          });
-          this._drop.appendChild(item);
-        });
-      }
-      openDrop();
-    };
+    this._autocomplete = createRefSearchAutocomplete(this._searchInput, {
+      getResourceType: () => 'Patient',
+      isEnabled: () => !!serverConfig.get(CONFIG_KEYS.FHIR_BASE),
+      extraClassName: 'sdc-pop-drop',
+      onSelect: (r) => {
+        this._searchInput.value = r.display + ' (' + r.id + ')';
+        this._selectedRef = 'Patient/' + r.id;
+      },
+    });
 
     this._searchInput.addEventListener('input', () => {
       const q = this._searchInput.value.trim();
       this._selectedRef = q.includes('/') ? q : '';
-      clearTimeout(this._debounce);
-      this._searchAbort?.abort(); // supersede any still-in-flight search
-      if (!q) { closeDrop(); return; }
-      if (!serverConfig.get(CONFIG_KEYS.FHIR_BASE)) { closeDrop(); return; }
-      const loading = document.createElement('div');
-      loading.className = 'ref-search-empty';
-      loading.textContent = 'Searching\u2026';
-      this._drop.innerHTML = '';
-      this._drop.appendChild(loading);
-      openDrop();
-      this._debounce = setTimeout(async () => {
-        const controller = new AbortController();
-        this._searchAbort = controller;
-        try {
-          const results = await searchFhir('Patient', q, 10, { signal: controller.signal });
-          if (controller.signal.aborted) return; // a newer search superseded this one
-          showResults(results, q);
-        } catch (e) {
-          if (controller.signal.aborted || e.name === 'AbortError') return;
-          const err = document.createElement('div');
-          err.className = 'ref-search-empty ref-search-error';
-          err.textContent = e.message;
-          this._drop.innerHTML = '';
-          this._drop.appendChild(err);
-        }
-      }, 350);
     });
 
-    this._searchInput.addEventListener('blur', () => setTimeout(closeDrop, 150));
     searchRow.append(lbl, this._searchInput);
     this.body.appendChild(searchRow);
   }
@@ -132,7 +68,7 @@ export class SdcPopulateModal extends Modal {
   open() {
     this._selectedRef = '';
     this._searchInput.value = '';
-    if (this._drop) { this._drop.style.display = 'none'; this._drop.innerHTML = ''; }
+    this._autocomplete?.close();
     super.open();
     setTimeout(() => this._searchInput.focus(), 50);
   }
@@ -149,7 +85,7 @@ export class SdcPopulateModal extends Modal {
   }
 
   _cancel() {
-    if (this._drop) this._drop.style.display = 'none';
+    this._autocomplete?.close();
     this.close();
   }
 }

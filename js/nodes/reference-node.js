@@ -5,7 +5,7 @@ import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
-import { searchFhir, displayName as _displayName } from '../fhir/fhir-search.js';
+import { createRefSearchAutocomplete } from '../ui/ref-search.js';
 import { refTypeMismatch } from '../fhir/form-checks.js';
 
 const FHIR_R4_RESOURCES = [
@@ -116,106 +116,31 @@ export class ReferenceNode extends ItemNode {
       const searchWrap = document.createElement('div');
       searchWrap.className = 'ref-search-wrap';
 
-      // Portal: mount dropdown on body to escape overflow:hidden parents
-      const dropdown = document.createElement('div');
-      dropdown.className = 'ref-search-drop';
-      dropdown.style.display = 'none';
-      document.body.appendChild(dropdown);
-
-      const positionDrop = () => {
-        const r = idInput.getBoundingClientRect();
-        const dropW = 240;
-        dropdown.style.position = 'fixed';
-        dropdown.style.top  = (r.bottom + 4) + 'px';
-        dropdown.style.width = dropW + 'px';
-        dropdown.style.maxHeight = '220px';
-        // flip left if would overflow viewport
-        const left = r.right - dropW;
-        dropdown.style.left = Math.max(4, left) + 'px';
-      };
-
-      let _debounceTimer = null;
-      let _searchAbort = null;
-
-      const closeDropdown = () => { dropdown.style.display = 'none'; };
-      const openDropdown  = () => { positionDrop(); dropdown.style.display = 'block'; };
-
-      const showResults = (results, query) => {
-        dropdown.innerHTML = '';
-        if (results.length === 0) {
-          const empty = document.createElement('div');
-          empty.className = 'ref-search-empty';
-          empty.textContent = query.trim() ? 'No results' : 'Type to search…';
-          dropdown.appendChild(empty);
-        } else {
-          results.forEach(r => {
-            const item = document.createElement('button');
-            item.type = 'button';
-            item.className = 'ref-search-item';
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'ref-search-name';
-            nameSpan.textContent = r.display;
-            const idSpan = document.createElement('span');
-            idSpan.className = 'ref-search-id';
-            idSpan.textContent = r.id;
-            item.append(nameSpan, idSpan);
-            item.addEventListener('mousedown', e => {
-              e.preventDefault();
-              idInput.value = r.id;
-              update();
-              BaseNode.notifyChanged(ctx.bus);
-              closeDropdown();
-            });
-            dropdown.appendChild(item);
-          });
-        }
-        openDropdown();
-      };
-
-      const doSearch = async (query) => {
-        const resourceType = sel.getValue();
-        if (!resourceType) { closeDropdown(); return; }
-        _searchAbort?.abort(); // supersede any still-in-flight search
-        const controller = new AbortController();
-        _searchAbort = controller;
-        const loading = document.createElement('div');
-        loading.className = 'ref-search-empty';
-        loading.textContent = 'Searching…';
-        dropdown.innerHTML = '';
-        dropdown.appendChild(loading);
-        openDropdown();
-        try {
-          const results = await searchFhir(resourceType, query, 10, { fhirBase: ctx.fhirBase, corsProxy: ctx.corsProxy, signal: controller.signal });
-          if (controller.signal.aborted) return; // a newer search superseded this one
-          showResults(results, query);
-        } catch (e) {
-          if (controller.signal.aborted || e.name === 'AbortError') return;
-          const err = document.createElement('div');
-          err.className = 'ref-search-empty ref-search-error';
-          err.textContent = e.message || 'Search failed';
-          dropdown.innerHTML = '';
-          dropdown.appendChild(err);
-        }
-      };
-
-      idInput.addEventListener('input', () => {
-        clearTimeout(_debounceTimer);
-        const q = idInput.value.trim();
-        if (!q) { closeDropdown(); return; }
-        _debounceTimer = setTimeout(() => doSearch(q), 350);
-      });
-
-      idInput.addEventListener('focus', () => {
-        if (idInput.value.trim()) doSearch(idInput.value.trim());
-      });
-
-      idInput.addEventListener('blur', () => {
-        setTimeout(closeDropdown, 150);
+      const autocomplete = createRefSearchAutocomplete(idInput, {
+        getResourceType: () => sel.getValue(),
+        getContext: () => ({ fhirBase: ctx.fhirBase, corsProxy: ctx.corsProxy }),
+        searchOnFocus: true,
+        positionDrop: (input, dropdown) => {
+          const r = input.getBoundingClientRect();
+          const dropW = 240;
+          dropdown.style.position = 'fixed';
+          dropdown.style.top  = (r.bottom + 4) + 'px';
+          dropdown.style.width = dropW + 'px';
+          dropdown.style.maxHeight = '220px';
+          // flip left if would overflow viewport
+          const left = r.right - dropW;
+          dropdown.style.left = Math.max(4, left) + 'px';
+        },
+        onSelect: (r) => {
+          idInput.value = r.id;
+          update();
+          BaseNode.notifyChanged(ctx.bus);
+        },
       });
 
       // Clean up portal element when node is destroyed (AbortController signal)
       if (node._ac?.signal) {
-        node._ac.signal.addEventListener('abort', () => { dropdown.remove(); }, { once: true });
+        node._ac.signal.addEventListener('abort', () => autocomplete.destroy(), { once: true });
       }
 
       searchWrap.appendChild(idInput);
