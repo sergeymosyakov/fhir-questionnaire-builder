@@ -206,6 +206,14 @@ export class PreviewForm {
     this._bus.on(AppEvents.QUESTIONNAIRE_LOADED,  syncToolbarVisibility);
     this._bus.on(AppEvents.QUESTIONNAIRE_NEW,     syncToolbarVisibility);
     this._bus.on(AppEvents.QUESTIONNAIRE_CLEARED, syncToolbarVisibility);
+    // Clearing the form empties the tree but (unlike load) doesn't dispatch
+    // QUESTIONNAIRE_LOADED — rebuild here so the preview reflects the empty tree.
+    this._bus.on(AppEvents.QUESTIONNAIRE_CLEARED, () => {
+      this._lastVisibleSig = null;
+      this._lastRepCounts  = null;
+      this._lastRepDataSz  = null;
+      this._asyncRender(++this._renderVersion);
+    });
 
     const lform = elements.lform;
     if (lform) {

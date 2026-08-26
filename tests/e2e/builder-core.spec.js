@@ -76,6 +76,7 @@ test.describe('Clear form', () => {
     await page.getByTestId('clear-confirm-clear-btn').click();
 
     await expect(page.locator('[data-testid="tree-container"] [data-node-id]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="preview-panel"] [data-preview-id]')).toHaveCount(0);
   });
 });
 
