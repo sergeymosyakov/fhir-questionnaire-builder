@@ -1,55 +1,63 @@
-// ── FHIR debug login (client_credentials) ────────────────────────────────────
+// ── FHIR debug login (client_credentials, fresh token per request) ───────────
 // Interim local-testing bridge — issue #63. NOT the production OAuth flow
-// (see docs/FHIR-SERVER-AUTH-PLAN.md). Gets a Bearer token via client_credentials
-// and stores it where fhir-search.js / sdc-populate.js read it (getFhirAuthHeader).
-import { serverConfig, CONFIG_KEYS, LocalStorageConfigProvider } from '../fhir/server-config.js';
+// (see docs/FHIR-SERVER-AUTH-PLAN.md). Saves client_credentials to
+// sessionStorage; js/fhir/server-config.js's getFhirAuthHeader() fetches a
+// brand-new token from them on every FHIR call (some partner servers issue
+// single-use tokens — a cached/reused one gets rejected as "already used").
 import { showError, showInfo } from '../ui/toast.js';
 
-serverConfig.register(new LocalStorageConfigProvider());
-
-// Convenience-only fields (Token URL / Client ID / Client Secret) — separate
-// from CONFIG_KEYS since no production code reads them, just this page.
-const LS_PREFIX = 'fhirqb.debugLogin.';
+const SS_PREFIX = 'fhirqb.debugLogin.';
+const FIELDS = ['tokenUrl', 'clientId', 'clientSecret'];
 
 function _el(id) { return document.getElementById(id); }
 
-function _restoreFields() {
-  _el('tokenUrl').value     = localStorage.getItem(LS_PREFIX + 'tokenUrl') || '';
-  _el('clientId').value     = localStorage.getItem(LS_PREFIX + 'clientId') || '';
-  _el('clientSecret').value = localStorage.getItem(LS_PREFIX + 'clientSecret') || '';
+function _isSaved() {
+  return FIELDS.every(f => sessionStorage.getItem(SS_PREFIX + f));
 }
 
-function _rememberFields() {
-  localStorage.setItem(LS_PREFIX + 'tokenUrl', _el('tokenUrl').value.trim());
-  localStorage.setItem(LS_PREFIX + 'clientId', _el('clientId').value.trim());
-  localStorage.setItem(LS_PREFIX + 'clientSecret', _el('clientSecret').value);
+function _restoreFields() {
+  FIELDS.forEach(f => { _el(f).value = sessionStorage.getItem(SS_PREFIX + f) || ''; });
 }
 
 function _renderStatus() {
-  const token     = serverConfig.get(CONFIG_KEYS.FHIR_ACCESS_TOKEN);
-  const expiresAt = Number(serverConfig.get(CONFIG_KEYS.FHIR_TOKEN_EXPIRES_AT));
-  const statusEl  = _el('status');
-  if (!token || !expiresAt || Date.now() >= expiresAt) {
-    statusEl.textContent = 'No active token.';
+  const statusEl = _el('status');
+  if (_isSaved()) {
+    statusEl.textContent = 'Saved — a fresh token is requested automatically for every FHIR request.';
+    statusEl.className = 'dev-fhir-login-status dev-fhir-login-status--ok';
+  } else {
+    statusEl.textContent = 'Not configured.';
     statusEl.className = 'dev-fhir-login-status dev-fhir-login-status--none';
-    return;
   }
-  const mins = Math.max(0, Math.round((expiresAt - Date.now()) / 60000));
-  statusEl.textContent = `Token active — expires in ~${mins} min.`;
-  statusEl.className = 'dev-fhir-login-status dev-fhir-login-status--ok';
 }
 
-async function _getToken() {
-  const tokenUrl     = _el('tokenUrl').value.trim();
-  const clientId     = _el('clientId').value.trim();
-  const clientSecret = _el('clientSecret').value;
+function _fieldValues() {
+  return {
+    tokenUrl:     _el('tokenUrl').value.trim(),
+    clientId:     _el('clientId').value.trim(),
+    clientSecret: _el('clientSecret').value, // don't trim a secret
+  };
+}
+
+function _save() {
+  const { tokenUrl, clientId, clientSecret } = _fieldValues();
   if (!tokenUrl || !clientId || !clientSecret) {
     showError('Token URL, Client ID and Client Secret are all required.');
     return;
   }
-  _rememberFields();
+  sessionStorage.setItem(SS_PREFIX + 'tokenUrl', tokenUrl);
+  sessionStorage.setItem(SS_PREFIX + 'clientId', clientId);
+  sessionStorage.setItem(SS_PREFIX + 'clientSecret', clientSecret);
+  showInfo('Saved.');
+  _renderStatus();
+}
 
-  const btn = _el('getTokenBtn');
+async function _test() {
+  const { tokenUrl, clientId, clientSecret } = _fieldValues();
+  if (!tokenUrl || !clientId || !clientSecret) {
+    showError('Token URL, Client ID and Client Secret are all required.');
+    return;
+  }
+  const btn = _el('testBtn');
   btn.disabled = true;
   try {
     const res = await fetch(tokenUrl, {
@@ -68,26 +76,23 @@ async function _getToken() {
     }
     const data = await res.json();
     if (!data.access_token) throw new Error('Response did not contain an access_token.');
-
-    serverConfig.set(CONFIG_KEYS.FHIR_ACCESS_TOKEN, data.access_token);
-    serverConfig.set(CONFIG_KEYS.FHIR_TOKEN_EXPIRES_AT, String(Date.now() + (Number(data.expires_in) || 3600) * 1000));
-    showInfo('Token acquired.');
-    _renderStatus();
+    // Verify-only — this token is not stored or reused (see file header).
+    showInfo('Credentials work — token endpoint returned an access_token.');
   } catch (err) {
-    showError(`Token request failed: ${err.message}`);
+    showError(`Test failed: ${err.message}`);
   } finally {
     btn.disabled = false;
   }
 }
 
-function _forgetToken() {
-  serverConfig.set(CONFIG_KEYS.FHIR_ACCESS_TOKEN, null);
-  serverConfig.set(CONFIG_KEYS.FHIR_TOKEN_EXPIRES_AT, null);
-  showInfo('Token cleared.');
+function _reset() {
+  FIELDS.forEach(f => { sessionStorage.removeItem(SS_PREFIX + f); _el(f).value = ''; });
+  showInfo('Reset.');
   _renderStatus();
 }
 
 _restoreFields();
 _renderStatus();
-_el('getTokenBtn').addEventListener('click', _getToken);
-_el('forgetTokenBtn').addEventListener('click', _forgetToken);
+_el('saveBtn').addEventListener('click', _save);
+_el('testBtn').addEventListener('click', _test);
+_el('resetBtn').addEventListener('click', _reset);

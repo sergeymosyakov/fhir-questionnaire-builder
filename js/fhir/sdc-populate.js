@@ -38,7 +38,7 @@ export async function populateFromServer(fhirBase, questJson, patientRef) {
 }
 
 async function _postPopulate(url, targetUrl, serverKey, body, retry = false) {
-  const authHeader = retry ? await reauthHeaderFor(targetUrl, serverKey) : fhirAuthHeaderFor(targetUrl, serverKey);
+  const authHeader = retry ? await reauthHeaderFor(targetUrl, serverKey) : await fhirAuthHeaderFor(targetUrl, serverKey);
   return fetch(url, {
     method:  'POST',
     headers: {

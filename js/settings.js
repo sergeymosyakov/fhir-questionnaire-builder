@@ -190,7 +190,7 @@ async function _testFhirServer(url, resultEl, testBtn, serverKey) {
     const proxy = serverConfig.get(CONFIG_KEYS.CORS_PROXY) || '';
     const fetchUrl = proxy ? `${proxy}?url=${encodeURIComponent(targetUrl)}` : targetUrl;
     const res = await fetch(fetchUrl, {
-      headers: { Accept: 'application/fhir+json', ...fhirAuthHeaderFor(targetUrl, serverKey) },
+      headers: { Accept: 'application/fhir+json', ...await fhirAuthHeaderFor(targetUrl, serverKey) },
       signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) { _setResult(resultEl, { ok: false, message: `HTTP ${res.status}` }); return; }

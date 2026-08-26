@@ -30,13 +30,14 @@ export function proxiedUrl(url, corsProxy) {
 
 /**
  * Auth header for a FHIR request — real per-server OAuth token (issue #63)
- * if logged in, else the interim debug token; empty for known public demo
- * servers (neither is meant for them).
+ * if logged in, else the interim debug bridge (fetches a fresh token per
+ * call — see getFhirAuthHeader); empty for known public demo servers
+ * (neither is meant for them).
  * @param {string} url
  * @param {'FHIR_BASE'|'SDC_SERVER'} [serverKey]
- * @returns {{Authorization?: string}}
+ * @returns {Promise<{Authorization?: string}>}
  */
-export function fhirAuthHeaderFor(url, serverKey) {
+export async function fhirAuthHeaderFor(url, serverKey) {
   try {
     if (CORS_ENABLED_HOSTS.includes(new URL(url).hostname)) return {};
   } catch { /* invalid URL, fall through */ }
@@ -117,7 +118,7 @@ export async function searchFhir(resourceType, query, count = 10, opts = {}) {
   const targetUrl = `${base}/${resourceType}?${params}`;
   const url = proxiedUrl(targetUrl, opts.corsProxy);
   let res = await fetch(url, {
-    headers: { Accept: 'application/fhir+json', ...fhirAuthHeaderFor(targetUrl, 'FHIR_BASE') },
+    headers: { Accept: 'application/fhir+json', ...await fhirAuthHeaderFor(targetUrl, 'FHIR_BASE') },
     signal: AbortSignal.timeout(6000),
   });
   if (res.status === 401) {

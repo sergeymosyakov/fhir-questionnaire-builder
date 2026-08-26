@@ -348,31 +348,85 @@ describe('serverConfig', () => {
   });
 });
 
-// ── getFhirAuthHeader (interim debug-tool token, issue #63) ──────────────────
+// ── getFhirAuthHeader (interim debug-tool bridge, issue #63) ─────────────────
+// Some partner FHIR servers issue single-use tokens (confirmed empirically),
+// so this fetches a fresh token per call from sessionStorage-saved
+// client_credentials rather than caching one — see dev-fhir-login.html.
+
+function _fakeSessionStorage(initial = {}) {
+  const store = new Map(Object.entries(initial));
+  return {
+    getItem: k => (store.has(k) ? store.get(k) : null),
+    setItem: (k, v) => store.set(k, String(v)),
+    removeItem: k => store.delete(k),
+  };
+}
 
 describe('getFhirAuthHeader', () => {
-  beforeEach(() => {
-    serverConfig._clear();
-    serverConfig.register(new DefaultConfigProvider({}));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('returns {} when no debug credentials are saved', async () => {
+    vi.stubGlobal('sessionStorage', _fakeSessionStorage());
+    expect(await getFhirAuthHeader()).toEqual({});
   });
 
-  it('returns {} when no token is stored', () => {
-    expect(getFhirAuthHeader()).toEqual({});
-  });
-
-  it('returns {} when the token is expired', () => {
-    serverConfig.register(new DefaultConfigProvider({
-      [CONFIG_KEYS.FHIR_ACCESS_TOKEN]: 'abc',
-      [CONFIG_KEYS.FHIR_TOKEN_EXPIRES_AT]: String(Date.now() - 1000),
+  it('returns {} when only some fields are saved', async () => {
+    vi.stubGlobal('sessionStorage', _fakeSessionStorage({
+      'fhirqb.debugLogin.tokenUrl': 'https://idp.example.com/token',
     }));
-    expect(getFhirAuthHeader()).toEqual({});
+    expect(await getFhirAuthHeader()).toEqual({});
   });
 
-  it('returns the Authorization header for a valid, non-expired token', () => {
-    serverConfig.register(new DefaultConfigProvider({
-      [CONFIG_KEYS.FHIR_ACCESS_TOKEN]: 'abc',
-      [CONFIG_KEYS.FHIR_TOKEN_EXPIRES_AT]: String(Date.now() + 60_000),
+  it('fetches a fresh token via client_credentials and returns the Authorization header', async () => {
+    vi.stubGlobal('sessionStorage', _fakeSessionStorage({
+      'fhirqb.debugLogin.tokenUrl': 'https://idp.example.com/token',
+      'fhirqb.debugLogin.clientId': 'cid',
+      'fhirqb.debugLogin.clientSecret': 'csecret',
     }));
-    expect(getFhirAuthHeader()).toEqual({ Authorization: 'Bearer abc' });
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ access_token: 'fresh-token' }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    expect(await getFhirAuthHeader()).toEqual({ Authorization: 'Bearer fresh-token' });
+    expect(fetchMock).toHaveBeenCalledWith('https://idp.example.com/token', expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('fetches a brand-new token on every call (no caching)', async () => {
+    vi.stubGlobal('sessionStorage', _fakeSessionStorage({
+      'fhirqb.debugLogin.tokenUrl': 'https://idp.example.com/token',
+      'fhirqb.debugLogin.clientId': 'cid',
+      'fhirqb.debugLogin.clientSecret': 'csecret',
+    }));
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ access_token: 'fresh-token' }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await getFhirAuthHeader();
+    await getFhirAuthHeader();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns {} when the token endpoint fails', async () => {
+    vi.stubGlobal('sessionStorage', _fakeSessionStorage({
+      'fhirqb.debugLogin.tokenUrl': 'https://idp.example.com/token',
+      'fhirqb.debugLogin.clientId': 'cid',
+      'fhirqb.debugLogin.clientSecret': 'csecret',
+    }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 400 }));
+    expect(await getFhirAuthHeader()).toEqual({});
+  });
+
+  it('returns {} when the response has no access_token', async () => {
+    vi.stubGlobal('sessionStorage', _fakeSessionStorage({
+      'fhirqb.debugLogin.tokenUrl': 'https://idp.example.com/token',
+      'fhirqb.debugLogin.clientId': 'cid',
+      'fhirqb.debugLogin.clientSecret': 'csecret',
+    }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({}) }));
+    expect(await getFhirAuthHeader()).toEqual({});
   });
 });

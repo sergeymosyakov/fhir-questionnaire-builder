@@ -136,21 +136,28 @@ Everything in "Locked decisions" above is implemented for `FHIR_BASE` and
 ## Interim debug tool (implemented, issue #63)
 
 - `dev-fhir-login.html` + `js/dev/fhir-login-debug.js` — a standalone,
-  unlinked page (not part of the builder's nav) that runs an OAuth2
-  `client_credentials` exchange (Token URL / Client ID / Client Secret typed
-  in by hand, saved to `localStorage`) purely for local testing against a
-  real dev/QA server ahead of the production flow above.
-- **One shared token**, not per-server — stored via
-  `CONFIG_KEYS.FHIR_ACCESS_TOKEN` / `FHIR_TOKEN_EXPIRES_AT` in
-  [server-config.js](../js/fhir/server-config.js), read by
-  `getFhirAuthHeader()`. Wired into the two calls on the critical path for
-  testing "Fill from FHIR Server": `searchFhir()` in
-  [fhir-search.js](../js/fhir/fhir-search.js) and `populateFromServer()` in
-  [sdc-populate.js](../js/fhir/sdc-populate.js) — both skip attaching it for
-  the known public demo hosts (`CORS_ENABLED_HOSTS`).
-- **Not** the production flow: no PKCE, no popup, no per-server config, no
-  renewal — `client_credentials` requires a client secret typed directly
-  into a browser field (never written to disk, never committed) and is a
+  unlinked page (not part of the builder's nav) with three actions:
+  **Save** (persists Token URL / Client ID / Client Secret to
+  `sessionStorage` — cleared when the tab closes, no network call), **Test**
+  (one-off `client_credentials` fetch to verify the credentials work — never
+  stored/reused), **Reset** (clears the saved fields).
+- **Fresh token per request, not cached** — confirmed empirically against a
+  real partner sandbox server that its access tokens are **single-use**
+  (reusing one returns `OperationOutcome: "Invalid Token. Token has already
+  been used."`). So `getFhirAuthHeader()` in
+  [server-config.js](../js/fhir/server-config.js) reads the saved
+  credentials from `sessionStorage` and performs a brand-new
+  `client_credentials` exchange on **every** call — no caching, no shared
+  token, no expiry tracking. It is `async` (a real network round-trip per
+  call), so every call site (`fhir-search.js`, `sdc-populate.js`,
+  `settings.js` `_testFhirServer`) awaits it.
+- Wired into the two calls on the critical path for testing "Fill from FHIR
+  Server": `searchFhir()` in [fhir-search.js](../js/fhir/fhir-search.js) and
+  `populateFromServer()` in [sdc-populate.js](../js/fhir/sdc-populate.js) —
+  both skip it for the known public demo hosts (`CORS_ENABLED_HOSTS`).
+- **Not** the production flow: no PKCE, no popup, no per-server config —
+  `client_credentials` requires a client secret typed directly into a
+  browser field (never written to disk, never committed) and is a
   local-testing-only bridge, not something the product ships to end users.
 
 ## Progress tracker

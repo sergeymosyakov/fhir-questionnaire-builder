@@ -20,13 +20,13 @@
       <h1 class="page-header-title">FHIR Debug Login</h1>
       <a href="index.html" class="page-header-back" target="_parent" data-back-link>← Back to Builder</a>
     </div>
-    <p class="page-header-subtitle">Local testing only — gets a Bearer token via OAuth2 <code>client_credentials</code> and stores it for the builder's FHIR calls to use. Not part of the shipped product; see issue #63 for the real login flow.</p>
+    <p class="page-header-subtitle">Local testing only — saves OAuth2 <code>client_credentials</code> for the builder's FHIR calls to fetch a fresh token from on every request (some servers issue single-use tokens). Cleared when this tab closes. Not part of the shipped product; see issue #63 for the real login flow.</p>
   </div>
 
   <div class="settings-wrap">
     <div class="s-card">
       <div class="s-card-title">Client credentials</div>
-      <div class="s-card-desc">Nothing here is sent anywhere except the Token URL below, and it only stays in this browser's local storage.</div>
+      <div class="s-card-desc">Nothing here is sent anywhere except the Token URL below, and it only stays in this tab's session storage — cleared when the tab closes.</div>
 
       <div class="s-field">
         <label class="s-label" for="tokenUrl">Token URL</label>
@@ -42,11 +42,12 @@
       </div>
 
       <div class="dev-fhir-login-actions">
-        <button class="s-test-btn" id="getTokenBtn" data-testid="dev-login-get-token-btn">Get token</button>
-        <button class="s-reset-btn" id="forgetTokenBtn" data-testid="dev-login-forget-token-btn">Forget token</button>
+        <button class="s-test-btn" id="saveBtn" data-testid="dev-login-save-btn">Save</button>
+        <button class="s-test-btn" id="testBtn" data-testid="dev-login-test-btn">Test</button>
+        <button class="s-reset-btn" id="resetBtn" data-testid="dev-login-reset-btn">Reset</button>
       </div>
 
-      <p class="dev-fhir-login-status" id="status" data-testid="dev-login-status">No active token.</p>
+      <p class="dev-fhir-login-status" id="status" data-testid="dev-login-status">Not configured.</p>
     </div>
   </div>
 
