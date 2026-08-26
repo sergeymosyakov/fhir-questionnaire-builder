@@ -44,6 +44,7 @@ class MetadataModal extends Modal {
       jurisdictions:  JSON.parse(JSON.stringify(questMeta._rawJurisdiction || [])),
       preferredTermServer: questMeta.preferredTermServer || '',
       targetStructureMap: questMeta.targetStructureMap || '',
+      sourceStructureMap: questMeta.sourceStructureMap || '',
       launchContexts: JSON.parse(JSON.stringify(questMeta.launchContexts || [])),
       copyrightLabel:  questMeta.copyrightLabel || '',
       versionAlgo:     questMeta._versionAlgorithmCoding?.code || (questMeta._versionAlgorithmString ? '__custom__' : ''),
@@ -110,6 +111,7 @@ class MetadataModal extends Modal {
     questMeta._rawJurisdiction = filteredJur.length ? filteredJur : null;
     questMeta.preferredTermServer = p.preferredTermServer.trim();
     questMeta.targetStructureMap = p.targetStructureMap.trim();
+    questMeta.sourceStructureMap = p.sourceStructureMap.trim();
     questMeta.launchContexts = p.launchContexts.filter(lc => lc.name.trim());
     questMeta._rawModifierExtension = p._rawModifierExtension || [];
     this._cancel();

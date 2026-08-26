@@ -62,6 +62,8 @@ export const AppEvents = Object.freeze({
   SDC_POPULATE_REQUESTED:  'sdc:populate-requested',
   DEF_EXTRACT_REQUESTED:   'sdc:def-extract-requested',
   STRUCTUREMAP_EXTRACT_REQUESTED: 'sdc:structuremap-extract-requested',
+  // detail: { patientRef: string } — e.g. 'Patient/123'
+  STRUCTUREMAP_POPULATE_REQUESTED: 'sdc:structuremap-populate-requested',
   BUILDER_RENDER_DONE:  'builder:render-done',
 
   // detail: { serverKey: 'FHIR_BASE' | 'SDC_SERVER' } — the background renewal

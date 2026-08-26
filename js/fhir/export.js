@@ -547,6 +547,10 @@ export function buildFHIRObject(questDoc = EventState.get(AppEvents.APP_CONTEXT_
       url: FHIR.targetStructureMap,
       valueCanonical: questMeta.targetStructureMap.trim()
     }] : []),
+    ...(questMeta.sourceStructureMap?.trim() ? [{
+      url: FHIR.sourceStructureMap,
+      valueCanonical: questMeta.sourceStructureMap.trim()
+    }] : []),
     ...(questMeta._signatureRequired || []).map(sig => ({
       url: FHIR.signatureRequired,
       valueCodeableConcept: { coding: [{ system: sig.system, code: sig.code, display: sig.display }] },

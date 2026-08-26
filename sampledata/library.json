@@ -123,6 +123,12 @@
         "file": "structuremap-extract-demo.fhir.json",
         "type": "questionnaire",
         "note": "sdc-questionnaire-targetStructureMap: Save \u25be \u2192 StructureMap Extract runs the contained StructureMap (FML) in-browser via fhir-structuremap-js, producing a Patient resource"
+      },
+      {
+        "label": "StructureMap Population Demo",
+        "file": "structuremap-populate-demo.fhir.json",
+        "type": "questionnaire",
+        "note": "sdc-questionnaire-sourceStructureMap: Answers \u25be \u2192 Fill via StructureMap fetches a Patient from the FHIR Base Server and runs the contained StructureMap in-browser via fhir-structuremap-js to pre-fill answers"
       }
     ]
   },

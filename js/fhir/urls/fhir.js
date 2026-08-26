@@ -87,6 +87,7 @@ export const FHIR = {
   definitionExtract:    SDC + '/sdc-questionnaire-definitionExtract',
   definitionExtractContext: SDC + '/sdc-questionnaire-definitionExtractContext',
   targetStructureMap:   SDC + '/sdc-questionnaire-targetStructureMap',
+  sourceStructureMap:   SDC + '/sdc-questionnaire-sourceStructureMap',
   sdcQuestionnaire:     SDC + '/sdc-questionnaire',
   sdcObservation:       SDC + '/sdc-observation',
   launchContextCS:      SDCS + '/launchContext',

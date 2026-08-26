@@ -11,6 +11,8 @@ import { buildFHIRObject } from './fhir/export.js';
 import { calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './fhir/form-checks.js';
 import { importQRAnswers } from './fhir/qr-import.js';
 import { populateFromServer } from './fhir/sdc-populate.js';
+import { structureMapPopulate } from './fhir/sdc-structuremap-populate.js';
+import { getResourceByReference } from './fhir/fhir-search.js';
 import { serverConfig, CONFIG_KEYS } from './fhir/server-config.js';
 import { ensureLoggedIn } from './fhir/oauth-client.js';
 import { startScheduler } from './fhir/oauth-scheduler.js';
@@ -151,6 +153,7 @@ export class PreviewForm {
     this._bus.on(AppEvents.EXPAND_ALL_PREVIEW,   () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null; this._asyncRender(++this._renderVersion); });
     this._bus.on(AppEvents.COLLAPSE_ALL_PREVIEW, () => { this._lastVisibleSig = null; this._lastRepCounts = null; this._lastRepDataSz = null; this._asyncRender(++this._renderVersion); });
     this._bus.on(AppEvents.SDC_POPULATE_REQUESTED, e => this._populate(e.detail.patientRef));
+    this._bus.on(AppEvents.STRUCTUREMAP_POPULATE_REQUESTED, e => this._structureMapPopulate(e.detail.patientRef));
     this._bus.on(AppEvents.LANGUAGE_CHANGED, e => {
       _rc.activeLanguage  = e.detail?.lang ?? '';
       _rc.translations    = this._rawFhir?.translations ?? {};
@@ -621,6 +624,44 @@ export class PreviewForm {
       this._answerStore.replaceAll(values);
       this._bus.dispatch(AppEvents.REINIT_FORM);
       showInfo(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} from server.`);
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      progress.hide();
+    }
+  }
+
+  /**
+   * Run the questionnaire's sourceStructureMap against a resource fetched from
+   * the FHIR server (e.g. Patient), producing a QuestionnaireResponse to
+   * pre-fill answers — the StructureMap-based alternative to $populate.
+   */
+  async _structureMapPopulate(patientRef) {
+    const progress = this._progress;
+    const fhirBase = this._fhirBase();
+    if (!fhirBase) { showError('No FHIR Base Server configured. Open Settings to set one.'); return; }
+
+    // Called first (before any other await) so a login popup, if needed,
+    // still counts as triggered by the original button click.
+    try {
+      await ensureLoggedIn('FHIR_BASE');
+      startScheduler('FHIR_BASE');
+    } catch (err) {
+      if (err.message !== 'login-cancelled') showError(`Login failed: ${err.message}`);
+      return;
+    }
+
+    progress.show('Running StructureMap population\u2026');
+    try {
+      const questJson = buildFHIRObject(this._session.questDoc);
+      const sourceResource = await getResourceByReference(patientRef, { fhirBase });
+      const { qr, warnings } = structureMapPopulate(questJson, sourceResource);
+      if (!qr) { showError(warnings.join(' ') || 'StructureMap produced no output.'); return; }
+      const values = this._answerStore.toValueMap();
+      const { loaded } = importQRAnswers(qr, values, this._tree);
+      this._answerStore.replaceAll(values);
+      this._bus.dispatch(AppEvents.REINIT_FORM);
+      showInfo(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} via StructureMap.`);
     } catch (err) {
       showError(err.message);
     } finally {
