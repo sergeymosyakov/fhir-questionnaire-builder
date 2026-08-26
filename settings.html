@@ -56,6 +56,18 @@
           <span class="s-test-result" id="testFhirBaseResult"></span>
         </div>
       </div>
+      <div class="s-field s-field--oauth">
+        <div class="s-card-subtitle">OAuth login (optional)</div>
+        <span class="s-hint">Only needed if this server requires login. Leave all blank to keep using it unauthenticated.</span>
+        <label class="s-label" for="fhirBaseOauthAuthorizeInput">Authorize URL</label>
+        <input id="fhirBaseOauthAuthorizeInput" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/authorize" autocomplete="off" spellcheck="false">
+        <label class="s-label" for="fhirBaseOauthTokenInput">Token URL</label>
+        <input id="fhirBaseOauthTokenInput" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/token" autocomplete="off" spellcheck="false">
+        <label class="s-label" for="fhirBaseOauthClientIdInput">Client ID</label>
+        <input id="fhirBaseOauthClientIdInput" class="s-input" type="text" autocomplete="off" spellcheck="false">
+        <label class="s-label" for="fhirBaseOauthScopeInput">Scope</label>
+        <input id="fhirBaseOauthScopeInput" class="s-input" type="text" placeholder="openid fhirUser" autocomplete="off" spellcheck="false">
+      </div>
     </div>
       <div class="s-card">
         <div class="s-card-title">SDC Server</div>
@@ -69,6 +81,18 @@
             <button class="s-test-btn" id="testSdcServerBtn">Test connection</button>
             <span class="s-test-result" id="testSdcServerResult"></span>
           </div>
+        </div>
+        <div class="s-field s-field--oauth">
+          <div class="s-card-subtitle">OAuth login (optional)</div>
+          <span class="s-hint">Only needed if this server requires login. Leave all blank to keep using it unauthenticated.</span>
+          <label class="s-label" for="sdcServerOauthAuthorizeInput">Authorize URL</label>
+          <input id="sdcServerOauthAuthorizeInput" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/authorize" autocomplete="off" spellcheck="false">
+          <label class="s-label" for="sdcServerOauthTokenInput">Token URL</label>
+          <input id="sdcServerOauthTokenInput" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/token" autocomplete="off" spellcheck="false">
+          <label class="s-label" for="sdcServerOauthClientIdInput">Client ID</label>
+          <input id="sdcServerOauthClientIdInput" class="s-input" type="text" autocomplete="off" spellcheck="false">
+          <label class="s-label" for="sdcServerOauthScopeInput">Scope</label>
+          <input id="sdcServerOauthScopeInput" class="s-input" type="text" placeholder="openid fhirUser" autocomplete="off" spellcheck="false">
         </div>
       </div>
     <!-- ── CORS Proxy ────────────────────────────────────────────────────── -->

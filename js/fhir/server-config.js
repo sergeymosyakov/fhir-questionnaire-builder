@@ -22,6 +22,18 @@ export const CONFIG_KEYS = {
   TRANSLATE_API:      'translateApiUrl',  // translation endpoint (provider-specific)
   TRANSLATE_PROVIDER: 'translateProvider',// active machine-translation provider id
   TRANSLATE_API_KEY:  'translateApiKey',  // API key for key-based providers (DeepL/OpenAI)
+  // Production OAuth2 Authorization Code + PKCE config (issue #63). Only the
+  // non-secret config (URLs/client id/scope) lives here — the resulting
+  // access/refresh tokens are NOT stored via serverConfig (would sync to
+  // Supabase cloud); see js/fhir/oauth-client.js for token storage.
+  FHIR_BASE_OAUTH_AUTHORIZE_URL:  'fhirBaseOauthAuthorizeUrl',
+  FHIR_BASE_OAUTH_TOKEN_URL:      'fhirBaseOauthTokenUrl',
+  FHIR_BASE_OAUTH_CLIENT_ID:      'fhirBaseOauthClientId',
+  FHIR_BASE_OAUTH_SCOPE:          'fhirBaseOauthScope',
+  SDC_SERVER_OAUTH_AUTHORIZE_URL: 'sdcServerOauthAuthorizeUrl',
+  SDC_SERVER_OAUTH_TOKEN_URL:     'sdcServerOauthTokenUrl',
+  SDC_SERVER_OAUTH_CLIENT_ID:     'sdcServerOauthClientId',
+  SDC_SERVER_OAUTH_SCOPE:         'sdcServerOauthScope',
 };
 
 const LS_PREFIX = 'fhirqb.server.';
@@ -199,3 +211,47 @@ function _makeServerConfig() {
 }
 
 export const serverConfig = _makeServerConfig();
+
+// Interim debug-tool bridge (see dev-fhir-login.html / issue #63) — NOT via
+// serverConfig (would sync to Supabase cloud). sessionStorage (not
+// localStorage) — cleared when the tab closes, this is throwaway local-test
+// credentials, not something to leave sitting around indefinitely.
+const DEBUG_LOGIN_SS_PREFIX = 'fhirqb.debugLogin.';
+
+function _debugLoginCreds() {
+  const tokenUrl     = sessionStorage.getItem(DEBUG_LOGIN_SS_PREFIX + 'tokenUrl');
+  const clientId     = sessionStorage.getItem(DEBUG_LOGIN_SS_PREFIX + 'clientId');
+  const clientSecret = sessionStorage.getItem(DEBUG_LOGIN_SS_PREFIX + 'clientSecret');
+  if (!tokenUrl || !clientId || !clientSecret) return null;
+  return { tokenUrl, clientId, clientSecret };
+}
+
+/**
+ * Interim debug-tool auth header (see dev-fhir-login.html / issue #63).
+ * Some partner FHIR servers issue **single-use** access tokens (confirmed
+ * empirically — a cached/reused token is rejected with "already been used"),
+ * so this fetches a brand-new token via `client_credentials` for every call
+ * rather than caching one. Returns `{}` if no debug credentials are saved.
+ * @returns {Promise<{Authorization?: string}>}
+ */
+export async function getFhirAuthHeader() {
+  const creds = _debugLoginCreds();
+  if (!creds) return {};
+  try {
+    const res = await fetch(creds.tokenUrl, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: creds.clientId,
+        client_secret: creds.clientSecret,
+      }),
+    });
+    if (!res.ok) return {};
+    const data = await res.json();
+    if (!data.access_token) return {};
+    return { Authorization: `Bearer ${data.access_token}` };
+  } catch {
+    return {};
+  }
+}

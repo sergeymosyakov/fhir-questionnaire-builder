@@ -6,6 +6,8 @@ import { questDoc } from './fhir/quest-document.js';
 import { answerStore } from './answer-store.js';
 import { serverConfig, LocalStorageConfigProvider } from './fhir/server-config.js';
 import './fhir/server-config-cloud.js';
+import { resumeSchedulersFromStorage } from './fhir/oauth-scheduler.js';
+import './ui/oauth-login-banner.js';
 import './fhir/import.js';
 import './fhir/qr-export.js';
 import './fhir/obs-export.js';
@@ -43,6 +45,9 @@ storage.register(new SupabaseAdapter(supabase));
 // ── Server config — register providers (low to high priority) ────────────────
 serverConfig.register(new LocalStorageConfigProvider());   // user overrides
 serverConfig.load('./config.json');                         // base defaults (async, non-blocking)
+
+// Resume background token-renewal for any server already logged in (issue #63).
+resumeSchedulersFromStorage();
 
 // ── Patient profile widget ────────────────────────────────────────────────────
 new PatientProfile();

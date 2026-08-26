@@ -64,6 +64,10 @@ export const AppEvents = Object.freeze({
   STRUCTUREMAP_EXTRACT_REQUESTED: 'sdc:structuremap-extract-requested',
   BUILDER_RENDER_DONE:  'builder:render-done',
 
+  // detail: { serverKey: 'FHIR_BASE' | 'SDC_SERVER' } — the background renewal
+  // scheduler can no longer silently renew this server's session (issue #63).
+  OAUTH_LOGIN_REQUIRED: 'oauth:login-required',
+
   // ── Patient / QR ─────────────────────────────────────────────────────────
   PATIENT_CTX_APPLIED: 'patient-ctx-applied',
   QR_LOADED:           'qr-loaded',

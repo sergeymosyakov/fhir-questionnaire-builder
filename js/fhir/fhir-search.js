@@ -1,7 +1,8 @@
 // ── FHIR resource search utility ─────────────────────────────────────────────
 // Shared by ReferenceNode (preview) and SdcPopulateModal.
 // Requires fhirBaseUrl and optional corsProxyUrl from serverConfig.
-import { serverConfig, CONFIG_KEYS } from './server-config.js';
+import { serverConfig, CONFIG_KEYS, getFhirAuthHeader } from './server-config.js';
+import { getValidAccessToken, refreshAccessToken, clearStoredToken } from './oauth-client.js';
 
 const CORS_ENABLED_HOSTS = [
   'hapi.fhir.org',
@@ -25,6 +26,39 @@ export function proxiedUrl(url, corsProxy) {
     if (CORS_ENABLED_HOSTS.includes(hostname)) return url;
   } catch { /* invalid URL */ }
   return `${proxy}?url=${encodeURIComponent(url)}`;
+}
+
+/**
+ * Auth header for a FHIR request — real per-server OAuth token (issue #63)
+ * if logged in, else the interim debug bridge (fetches a fresh token per
+ * call — see getFhirAuthHeader); empty for known public demo servers
+ * (neither is meant for them).
+ * @param {string} url
+ * @param {'FHIR_BASE'|'SDC_SERVER'} [serverKey]
+ * @returns {Promise<{Authorization?: string}>}
+ */
+export async function fhirAuthHeaderFor(url, serverKey) {
+  try {
+    if (CORS_ENABLED_HOSTS.includes(new URL(url).hostname)) return {};
+  } catch { /* invalid URL, fall through */ }
+  const oauthToken = serverKey && getValidAccessToken(serverKey);
+  if (oauthToken) return { Authorization: `Bearer ${oauthToken}` };
+  return getFhirAuthHeader();
+}
+
+/**
+ * Refresh serverKey's OAuth token (if any) after a 401 and return a fresh
+ * auth header for a retry. Clears the token if the refresh itself fails, so
+ * the next feature use re-triggers a lazy login.
+ * @param {string} url
+ * @param {'FHIR_BASE'|'SDC_SERVER'} [serverKey]
+ */
+export async function reauthHeaderFor(url, serverKey) {
+  if (serverKey) {
+    try { await refreshAccessToken(serverKey); }
+    catch { clearStoredToken(serverKey); }
+  }
+  return fhirAuthHeaderFor(url, serverKey);
 }
 
 /**
@@ -72,6 +106,8 @@ function _searchParam(resourceType) {
  * @param {string} resourceType - FHIR resource type (e.g. 'Patient')
  * @param {string} query        - Search text
  * @param {number} [count=10]   - Max results
+ * @param {object} [opts]
+ * @param {AbortSignal} [opts.signal] - external signal to cancel a superseded search
  * @returns {Promise<Array<{id: string, display: string}>>}
  */
 export async function searchFhir(resourceType, query, count = 10, opts = {}) {
@@ -81,11 +117,19 @@ export async function searchFhir(resourceType, query, count = 10, opts = {}) {
   const params = new URLSearchParams({ _count: String(count) });
   params.set(_searchParam(resourceType), query);
 
-  const url = proxiedUrl(`${base}/${resourceType}?${params}`, opts.corsProxy);
-  const res = await fetch(url, {
-    headers: { Accept: 'application/fhir+json' },
-    signal: AbortSignal.timeout(6000),
+  const targetUrl = `${base}/${resourceType}?${params}`;
+  const url = proxiedUrl(targetUrl, opts.corsProxy);
+  const signal = opts.signal ? AbortSignal.any([opts.signal, AbortSignal.timeout(6000)]) : AbortSignal.timeout(6000);
+  let res = await fetch(url, {
+    headers: { Accept: 'application/fhir+json', ...await fhirAuthHeaderFor(targetUrl, 'FHIR_BASE') },
+    signal,
   });
+  if (res.status === 401) {
+    res = await fetch(url, {
+      headers: { Accept: 'application/fhir+json', ...await reauthHeaderFor(targetUrl, 'FHIR_BASE') },
+      signal,
+    });
+  }
   if (!res.ok) {
     let msg = `HTTP ${res.status}`;
     try {

@@ -12,6 +12,8 @@ import { calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './fhi
 import { importQRAnswers } from './fhir/qr-import.js';
 import { populateFromServer } from './fhir/sdc-populate.js';
 import { serverConfig, CONFIG_KEYS } from './fhir/server-config.js';
+import { ensureLoggedIn } from './fhir/oauth-client.js';
+import { startScheduler } from './fhir/oauth-scheduler.js';
 import { showError, showInfo } from './ui/toast.js';
 import { defaultSession } from './core/session.js';
 
@@ -598,6 +600,17 @@ export class PreviewForm {
     const progress = this._progress;
     const fhirBase = this._fhirBase();
     if (!fhirBase) { showError('No FHIR Base Server configured. Open Settings to set one.'); return; }
+
+    // Called first (before any other await) so a login popup, if needed,
+    // still counts as triggered by the original button click.
+    const serverKey = serverConfig.get(CONFIG_KEYS.SDC_SERVER) ? 'SDC_SERVER' : 'FHIR_BASE';
+    try {
+      await ensureLoggedIn(serverKey);
+      startScheduler(serverKey);
+    } catch (err) {
+      if (err.message !== 'login-cancelled') showError(`Login failed: ${err.message}`);
+      return;
+    }
 
     progress.show('Populating from server\u2026');
     try {
