@@ -71,9 +71,17 @@ serverConfig.load('./config.json');
 
 // ── Track current user ────────────────────────────────────────────────────────
 let _currentUser = null;
+// Load settings + populate fields once (on the initial auth check). Supabase
+// re-fires onAuthChange periodically (e.g. TOKEN_REFRESHED) while the user
+// stays logged in on this page — reloading/re-rendering fields on those would
+// clobber whatever the user is actively typing, so we deliberately don't react
+// to auth events again after the first one.
+let _initialAuthLoadDone = false;
 auth.onAuthChange(async (_event, user) => {
   _currentUser = user;
   _updateCloudBadge(user);
+  if (_initialAuthLoadDone) return;
+  _initialAuthLoadDone = true;
   if (user) await loadSettings(user.id);
   await serverConfig.ready();
   _refreshAllFields();
@@ -263,7 +271,8 @@ function _refreshAllFields() {
   };
   for (const [key, inputId] of Object.entries(map)) {
     const inp = _el(inputId);
-    if (inp) inp.value = serverConfig.get(key) || '';
+    // Never overwrite a field the user is actively editing.
+    if (inp && document.activeElement !== inp) inp.value = serverConfig.get(key) || '';
   }
   _translateProvider = serverConfig.get(CONFIG_KEYS.TRANSLATE_PROVIDER) || 'gtx';
   _provSelect?.setValue(_translateProvider);
