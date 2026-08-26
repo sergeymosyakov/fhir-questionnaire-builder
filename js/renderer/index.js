@@ -88,6 +88,13 @@ export class QuestionnaireRenderer {
       rc,
       chrome,
       progress,
+      // Errors/info (e.g. $populate / StructureMap-populate results) are
+      // emitted as widget events, not a page-blocking toast — silent by
+      // default; the host decides whether/how to show anything.
+      notify: {
+        error: msg => this._emitter.emit('error', msg),
+        info:  msg => this._emitter.emit('info', msg),
+      },
       mountEl:     this._lformEl,
       jsonEl:      this._jsonEl,
       previewMode: config.previewMode,
@@ -206,6 +213,27 @@ export class QuestionnaireRenderer {
   /** Switch the active preview language ('' = source). */
   setLanguage(lang) {
     this._session.bus.dispatch(AppEvents.LANGUAGE_CHANGED, { lang });
+  }
+
+  /**
+   * Fetch `patientRef` from `config.fhirBaseUrl` (SDC $populate) and merge the
+   * resulting answers into the form. Auth: config.getAuthToken() if supplied,
+   * else the interim debug bridge — never the app's own OAuth login (that is
+   * app-global and must not be triggered by an embedded widget).
+   * @param {string} patientRef e.g. 'Patient/123'
+   */
+  populate(patientRef) {
+    this._session.bus.dispatch(AppEvents.SDC_POPULATE_REQUESTED, { patientRef });
+  }
+
+  /**
+   * Fetch `patientRef` from `config.fhirBaseUrl` and run the questionnaire's
+   * sdc-questionnaire-sourceStructureMap against it client-side (fhir-structuremap-js),
+   * merging the resulting answers into the form. Same auth rules as populate().
+   * @param {string} patientRef e.g. 'Patient/123'
+   */
+  structureMapPopulate(patientRef) {
+    this._session.bus.dispatch(AppEvents.STRUCTUREMAP_POPULATE_REQUESTED, { patientRef });
   }
 
   /** Update runtime-changeable config. Only `language` takes effect after

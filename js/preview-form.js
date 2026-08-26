@@ -16,7 +16,6 @@ import { getResourceByReference } from './fhir/fhir-search.js';
 import { serverConfig, CONFIG_KEYS } from './fhir/server-config.js';
 import { ensureLoggedIn } from './fhir/oauth-client.js';
 import { startScheduler } from './fhir/oauth-scheduler.js';
-import { showError, showInfo } from './ui/toast.js';
 import { defaultSession } from './core/session.js';
 
 import './ui/modals/explain-modal.js';
@@ -47,6 +46,11 @@ export class PreviewForm {
     // (app supplies the real one via opts.progress) so preview-form stays free of
     // the self-initialising progress module.
     this._progress = opts.progress || { show() {}, hide() {} };
+    // Notifications (errors/info) — injectable; defaults to silent no-op so a
+    // headless widget with no host listener doesn't force a page-blocking toast.
+    // The app supplies the real toast-based notifier (js/ui/toast.js); the
+    // widget supplies one that emits 'error'/'info' events instead.
+    this._notify = opts.notify || { error() {}, info() {} };
     // Preview-panel chrome — injectable; a headless widget uses the no-op defaults.
     // The app supplies the real search / status-badge / language-menu via chrome so
     // preview-form stays free of self-initialising app-shell modules.
@@ -593,39 +597,70 @@ export class PreviewForm {
     this._bus.dispatch(AppEvents.PREVIEW_RENDER_DONE);
   }
 
-  /** FHIR base URL — session config override (widget) → global serverConfig (app). */
+  /**
+   * FHIR base URL — session config override always wins. Falls back to the
+   * app's global Settings-configured server only for the app's own default
+   * session; a widget session must get its FHIR base passed in via config —
+   * it never silently inherits whatever the host page's app Settings has.
+   */
   _fhirBase() {
-    return this._session.config?.fhirBaseUrl ?? serverConfig.get(CONFIG_KEYS.FHIR_BASE);
+    const fromConfig = this._session.config?.fhirBaseUrl;
+    if (fromConfig) return fromConfig;
+    return this._session === defaultSession ? serverConfig.get(CONFIG_KEYS.FHIR_BASE) : '';
+  }
+
+  /**
+   * Auth header for widget-initiated FHIR calls, when the host manages its own
+   * auth (e.g. the host's own app is already logged into the FHIR server) and
+   * hands the widget a token via config.getAuthToken() instead of letting the
+   * widget run its own OAuth flow. Per-instance — nothing is cached/stored
+   * here, so multiple widgets on one page never share or clobber a token.
+   * Returns null (meaning "use the default OAuth/debug-bridge resolution")
+   * when the app's own session is rendering, or no getAuthToken was supplied.
+   */
+  async _resolveAuthHeader() {
+    if (this._session === defaultSession) return null;
+    const getAuthToken = this._session.config?.getAuthToken;
+    if (typeof getAuthToken !== 'function') return null;
+    const token = await getAuthToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
   /** Call $populate on the configured FHIR server and load the resulting answers. */
   async _populate(patientRef) {
     const progress = this._progress;
     const fhirBase = this._fhirBase();
-    if (!fhirBase) { showError('No FHIR Base Server configured. Open Settings to set one.'); return; }
+    if (!fhirBase) { this._notify.error('FHIR Base Server not configured.'); return; }
 
     // Called first (before any other await) so a login popup, if needed,
-    // still counts as triggered by the original button click.
-    const serverKey = serverConfig.get(CONFIG_KEYS.SDC_SERVER) ? 'SDC_SERVER' : 'FHIR_BASE';
-    try {
-      await ensureLoggedIn(serverKey);
-      startScheduler(serverKey);
-    } catch (err) {
-      if (err.message !== 'login-cancelled') showError(`Login failed: ${err.message}`);
-      return;
+    // still counts as triggered by the original button click. OAuth is an
+    // app-global concern (config + token storage keyed only by FHIR_BASE/
+    // SDC_SERVER, backed by the app's own Settings) — a widget session (which
+    // may be one of several on the page, each with its own fhirBaseUrl) must
+    // never engage it, or instances would read/overwrite each other's tokens.
+    if (this._session === defaultSession) {
+      const serverKey = serverConfig.get(CONFIG_KEYS.SDC_SERVER) ? 'SDC_SERVER' : 'FHIR_BASE';
+      try {
+        await ensureLoggedIn(serverKey);
+        startScheduler(serverKey);
+      } catch (err) {
+        if (err.message !== 'login-cancelled') this._notify.error(`Login failed: ${err.message}`);
+        return;
+      }
     }
 
     progress.show('Populating from server\u2026');
     try {
       const questJson = buildFHIRObject(this._session.questDoc);
-      const qr = await populateFromServer(fhirBase, questJson, patientRef);
+      const authHeader = await this._resolveAuthHeader();
+      const qr = await populateFromServer(fhirBase, questJson, patientRef, { authHeader });
       const values = this._answerStore.toValueMap();
       const { loaded } = importQRAnswers(qr, values, this._tree);
       this._answerStore.replaceAll(values);
       this._bus.dispatch(AppEvents.REINIT_FORM);
-      showInfo(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} from server.`);
+      this._notify.info(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} from server.`);
     } catch (err) {
-      showError(err.message);
+      this._notify.error(err.message);
     } finally {
       progress.hide();
     }
@@ -639,31 +674,36 @@ export class PreviewForm {
   async _structureMapPopulate(patientRef) {
     const progress = this._progress;
     const fhirBase = this._fhirBase();
-    if (!fhirBase) { showError('No FHIR Base Server configured. Open Settings to set one.'); return; }
+    if (!fhirBase) { this._notify.error('FHIR Base Server not configured.'); return; }
 
     // Called first (before any other await) so a login popup, if needed,
-    // still counts as triggered by the original button click.
-    try {
-      await ensureLoggedIn('FHIR_BASE');
-      startScheduler('FHIR_BASE');
-    } catch (err) {
-      if (err.message !== 'login-cancelled') showError(`Login failed: ${err.message}`);
-      return;
+    // still counts as triggered by the original button click. See _populate's
+    // comment: OAuth is app-global (Settings-backed), so a widget session
+    // (possibly one of several, each with its own fhirBaseUrl) skips it.
+    if (this._session === defaultSession) {
+      try {
+        await ensureLoggedIn('FHIR_BASE');
+        startScheduler('FHIR_BASE');
+      } catch (err) {
+        if (err.message !== 'login-cancelled') this._notify.error(`Login failed: ${err.message}`);
+        return;
+      }
     }
 
     progress.show('Running StructureMap population\u2026');
     try {
       const questJson = buildFHIRObject(this._session.questDoc);
-      const sourceResource = await getResourceByReference(patientRef, { fhirBase });
+      const authHeader = await this._resolveAuthHeader();
+      const sourceResource = await getResourceByReference(patientRef, { fhirBase, authHeader });
       const { qr, warnings } = structureMapPopulate(questJson, sourceResource);
-      if (!qr) { showError(warnings.join(' ') || 'StructureMap produced no output.'); return; }
+      if (!qr) { this._notify.error(warnings.join(' ') || 'StructureMap produced no output.'); return; }
       const values = this._answerStore.toValueMap();
       const { loaded } = importQRAnswers(qr, values, this._tree);
       this._answerStore.replaceAll(values);
       this._bus.dispatch(AppEvents.REINIT_FORM);
-      showInfo(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} via StructureMap.`);
+      this._notify.info(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} via StructureMap.`);
     } catch (err) {
-      showError(err.message);
+      this._notify.error(err.message);
     } finally {
       progress.hide();
     }

@@ -171,7 +171,8 @@ validation badge.
 | `navButton` | `boolean` | `false` | A “go to builder node” arrow on each row (only meaningful when a builder is present). |
 | `viewPrefs` | `object` | `{}` | Design-view toggles: `{ showLinkId, showPrefix, showBadges, showHiddenItems }`. |
 | `language` | `string` | `''` | Show a translated language if the questionnaire carries translations (`''` = source). |
-| `fhirBaseUrl` | `string` | — | FHIR base server for reference search and server-side `$populate`. |
+| `fhirBaseUrl` | `string` | — | FHIR base server for reference search, server-side `$populate`, and `populate()`/`structureMapPopulate()` below. |
+| `getAuthToken` | `() => string \| Promise<string>` | — | Returns a Bearer token for `fhirBaseUrl` requests (your host's own auth — e.g. you're already logged into the FHIR server in your own app). The widget **never** runs its own OAuth login popup; without this, requests go out with no `Authorization` header (fine for public/CORS-open test servers). Independent per instance. |
 | `corsProxy` | `string` | — | CORS proxy for the FHIR/terminology requests. |
 | `terminology` | `object` | — | This widget's own terminology server for external `answerValueSet` expansion: `{ server, corsProxy, nlmApiBase }`. Independent per instance — two widgets on the same page can point to two different terminology servers. Falls back to the public HL7 server (`tx.fhir.org/r4`) when omitted. |
 | `readOnly` | `boolean` | `false` | Render answers without editable controls. |
@@ -186,10 +187,16 @@ widget.getResponse();          // → current answers as a FHIR QuestionnaireRes
 widget.setResponse(qr);        // load answers from a QuestionnaireResponse
 widget.setLanguage('es');      // switch active language ('' = source)
 widget.setConfig({ language: 'es' });    // runtime config — only `language` takes effect
+widget.populate('Patient/123');            // SDC $populate against config.fhirBaseUrl
+widget.structureMapPopulate('Patient/123'); // run the Questionnaire's sourceStructureMap against a fetched resource
 widget.on(event, cb);          // subscribe (returns the widget)
 widget.off(event, cb);         // unsubscribe
 widget.destroy();              // remove the widget and free all listeners
 ```
+
+`populate()`/`structureMapPopulate()` merge the resulting answers in place and
+emit `info` on success or `error` on failure (see [Events](#events)) — nothing
+is shown on the page unless you subscribe.
 
 `getResponse()` always returns a fresh, valid FHIR R4 `QuestionnaireResponse`
 built from the current answers — this is your integration point for saving,
@@ -212,6 +219,8 @@ Subscribe with `widget.on(name, cb)`:
 | `response-changed` | `QuestionnaireResponse` | Any answer changes. |
 | `language-changed` | `string` (lang) | The active language changes. |
 | `render` | — | The form re-renders. |
+| `info` | `string` | `populate()`/`structureMapPopulate()` succeeded. |
+| `error` | `string` | `populate()`/`structureMapPopulate()` failed (e.g. `fhirBaseUrl` not set) — nothing is shown unless you listen. |
 
 ---
 

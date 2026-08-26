@@ -14,9 +14,13 @@ import { serverConfig, CONFIG_KEYS } from './server-config.js';
  * @param {string}  fhirBase   - Base FHIR server URL (fallback)
  * @param {object}  questJson  - FHIR Questionnaire resource
  * @param {string}  patientRef - Patient reference string (e.g. 'Patient/123')
+ * @param {object}  [opts]
+ * @param {object}  [opts.authHeader] - explicit auth header (e.g. a widget host's
+ *   own token via config.getAuthToken) — bypasses the app's OAuth/debug-bridge
+ *   resolution entirely when provided.
  * @returns {Promise<object>} FHIR QuestionnaireResponse resource
  */
-export async function populateFromServer(fhirBase, questJson, patientRef) {
+export async function populateFromServer(fhirBase, questJson, patientRef, opts = {}) {
   const sdcConfigured = serverConfig.get(CONFIG_KEYS.SDC_SERVER);
   const sdcBase   = sdcConfigured || fhirBase;
   const base      = sdcBase.replace(/\/$/, '');
@@ -32,13 +36,13 @@ export async function populateFromServer(fhirBase, questJson, patientRef) {
     ],
   });
 
-  let res = await _postPopulate(url, targetUrl, serverKey, body);
-  if (res.status === 401) res = await _postPopulate(url, targetUrl, serverKey, body, /* retry */ true);
+  let res = await _postPopulate(url, targetUrl, serverKey, body, false, opts.authHeader);
+  if (res.status === 401 && !opts.authHeader) res = await _postPopulate(url, targetUrl, serverKey, body, /* retry */ true);
   return _parsePopulateResponse(res);
 }
 
-async function _postPopulate(url, targetUrl, serverKey, body, retry = false) {
-  const authHeader = retry ? await reauthHeaderFor(targetUrl, serverKey) : await fhirAuthHeaderFor(targetUrl, serverKey);
+async function _postPopulate(url, targetUrl, serverKey, body, retry = false, explicitAuthHeader = null) {
+  const authHeader = explicitAuthHeader ?? (retry ? await reauthHeaderFor(targetUrl, serverKey) : await fhirAuthHeaderFor(targetUrl, serverKey));
   return fetch(url, {
     method:  'POST',
     headers: {
