@@ -484,7 +484,8 @@ Server-side SDC operations that the builder integrates with, and the extensions 
 |---|---|---|
 | `Questionnaire/$populate` | **Answers ▾ → ↧ Fill from FHIR Server…** (enabled when a questionnaire is loaded) → search for a Patient by name (live FHIR search against the FHIR Base Server) or type `Patient/{id}` → click **Fill from Server** | Sends `POST {SDC Server || FHIR Base}/Questionnaire/$populate` with `Parameters { questionnaire, subject }`. Merges returned `QuestionnaireResponse` answers into the current form via `importQRAnswers`. Accepts both direct QR result and Parameters-wrapped QR. Requires a server implementing the SDC IG (e.g. Matchbox). |
 | Definition-based extraction | **Save ▾ → Definition Extract · FHIR JSON Bundle** (after filling answers) → review the extracted resources → **Download Bundle** | Client-side `definitionExtract(questJson, qr)` walks groups carrying the `sdc-questionnaire-definitionExtract` extension, maps each child `item.definition` answer to its FHIR resource element path, and produces a transaction `Bundle`. Repeating field values promote to arrays; repeating extract groups produce one resource per QR instance. No server required. |
-| StructureMap-based extraction | Properties → set **Target StructureMap** to a `#id` reference to a StructureMap added via the Contained Resources panel → fill answers → **Save ▾ → StructureMap Extract · FHIR JSON Bundle** → **Download Bundle** | Client-side `structureMapExtract(questJson, qr)` resolves the `sdc-questionnaire-targetStructureMap` canonical reference against `contained[]` and executes it via [`fhir-structuremap-js`](https://github.com/sergeymosyakov/fhir-structuremap-js) (a real FML/StructureMap engine, vendored in `lib/`), producing a transaction `Bundle`. Only `#id` contained references are resolvable — no server to fetch an external canonical URL. `sourceStructureMap` (population) is not yet executed. |
+| StructureMap-based extraction | Properties → set **Target StructureMap** to a `#id` reference to a StructureMap added via the Contained Resources panel → fill answers → **Save ▾ → StructureMap Extract · FHIR JSON Bundle** → **Download Bundle** | Client-side `structureMapExtract(questJson, qr)` resolves the `sdc-questionnaire-targetStructureMap` canonical reference against `contained[]` and executes it via [`fhir-structuremap-js`](https://github.com/sergeymosyakov/fhir-structuremap-js) (a real FML/StructureMap engine, vendored in `lib/`), producing a transaction `Bundle`. Only `#id` contained references are resolvable — no server to fetch an external canonical URL. |
+| StructureMap-based population | Properties → set **Source StructureMap** to a `#id` reference to a StructureMap added via the Contained Resources panel → **Answers ▾ → Fill via StructureMap…** → search for a patient → **Run StructureMap** | Client-side `structureMapPopulate(questJson, sourceResource)` resolves the `sdc-questionnaire-sourceStructureMap` canonical reference against `contained[]` and executes it via `fhir-structuremap-js` against a resource fetched from the FHIR Base Server (`getResourceByReference`), producing a `QuestionnaireResponse` merged into the current form via `importQRAnswers`. Only `#id` contained references are resolvable — no server-side `$populate` support required, but a configured FHIR Base Server (+ login) is needed to fetch the source resource. |
 
 ### SDC extensions — population and extraction
 
@@ -496,7 +497,6 @@ Extensions that configure how the server-side engine populates or extracts field
 | `sdc-questionnaire-definitionExtract` | 🔧 Partial | Client-side extraction via **Save ▾ → Definition Extract**; `itemExtractionContext` and StructureMap-based extraction not evaluated |
 | `sdc-questionnaire-itemContext` | 🔄 Round-trip only | Not evaluated client-side |
 | `sdc-questionnaire-sourceQueries` / `contextExpression` | 🔄 Round-trip only | Server-side batch queries |
-| `sdc-questionnaire-sourceStructureMap` | 🔄 Round-trip only | Requires server StructureMap engine |
 | `sdc-questionnaire-width` | 🔄 Round-trip only | Table column width; table layout not implemented |
 | `sdc-questionnaire-lookupQuestionnaire` | 🔄 Round-trip only | Server-side reference lookup |
 
@@ -664,7 +664,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `sdc-questionnaire-performerType` | 🔄 | Performer type restriction; round-tripped |
 | `sdc-questionnaire-sourceQueries` / `contextExpression` | 🔄 | Server-side batch queries; round-tripped |
 | `sdc-questionnaire-targetStructureMap` | ✅ | QR→resource StructureMap; executed client-side via **Save ▾ → StructureMap Extract** (fhir-structuremap-js), resolving a `#id` contained StructureMap |
-| `sdc-questionnaire-sourceStructureMap` | 🔄 | Pre-population StructureMap; round-tripped; requires server engine to execute |
+| `sdc-questionnaire-sourceStructureMap` | ✅ | Resource→QR StructureMap; executed client-side via **Answers ▾ → Fill via StructureMap** (fhir-structuremap-js), resolving a `#id` contained StructureMap against a resource fetched from the FHIR Base Server |
 | `sdc-questionnaire-lookupQuestionnaire` | 🔄 | Server-side lookup reference; round-tripped |
 | `sdc-questionnaire-width` | 🔄 | Table column width hint; round-tripped; table layout not implemented |
 

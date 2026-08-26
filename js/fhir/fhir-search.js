@@ -145,3 +145,41 @@ export async function searchFhir(resourceType, query, count = 10, opts = {}) {
     .map(e => ({ id: e.resource?.id || '', display: displayName(e.resource) }))
     .filter(r => r.id);
 }
+
+/**
+ * Fetch a single FHIR resource by reference (e.g. 'Patient/123').
+ * Same auth/retry/proxy handling as searchFhir.
+ * @param {string} reference - '<ResourceType>/<id>' reference string
+ * @param {object} [opts]
+ * @returns {Promise<object>} the fetched FHIR resource
+ */
+export async function getResourceByReference(reference, opts = {}) {
+  const base = ((opts.fhirBase ?? serverConfig.get(CONFIG_KEYS.FHIR_BASE)) || '').replace(/\/$/, '');
+  const m = /^([A-Za-z]+)\/([^/]+)$/.exec((reference || '').trim());
+  if (!base) throw new Error('No FHIR Base Server configured. Open Settings to set one.');
+  if (!m) throw new Error(`Invalid reference: "${reference}" (expected "<ResourceType>/<id>")`);
+
+  const targetUrl = `${base}/${m[1]}/${m[2]}`;
+  const url = proxiedUrl(targetUrl, opts.corsProxy);
+  const signal = opts.signal ? AbortSignal.any([opts.signal, AbortSignal.timeout(6000)]) : AbortSignal.timeout(6000);
+  let res = await fetch(url, {
+    headers: { Accept: 'application/fhir+json', ...await fhirAuthHeaderFor(targetUrl, 'FHIR_BASE') },
+    signal,
+  });
+  if (res.status === 401) {
+    res = await fetch(url, {
+      headers: { Accept: 'application/fhir+json', ...await reauthHeaderFor(targetUrl, 'FHIR_BASE') },
+      signal,
+    });
+  }
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`;
+    try {
+      const oo = await res.json();
+      const diag = oo?.issue?.[0]?.diagnostics;
+      if (diag) msg += ' — ' + diag.substring(0, 120);
+    } catch { /* keep default */ }
+    throw new Error(msg);
+  }
+  return res.json();
+}

@@ -67,6 +67,7 @@ export class QuestDocument {
     _rawQuestExtensions: [],
     preferredTermServer: '',
     targetStructureMap:  '',
+    sourceStructureMap:  '',
     _signatureRequired:  [],
     _implicitRules:      '',
     // Target FHIR version — drives UI gates and export meta.fhirVersion
@@ -130,7 +131,7 @@ export class QuestDocument {
       _metaVersionId: '', _metaSource: '', _metaLastUpdated: '',
       _rawMetaProfile: [], _rawMetaTag: [], _rawMetaSecurity: [],
       _rawQuestExtensions: [],
-      preferredTermServer: '', targetStructureMap: '', _signatureRequired: [], _implicitRules: '',
+      preferredTermServer: '', targetStructureMap: '', sourceStructureMap: '', _signatureRequired: [], _implicitRules: '',
       fhirTarget: 'R4',
     });
   }
