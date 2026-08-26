@@ -22,6 +22,22 @@ export const CONFIG_KEYS = {
   TRANSLATE_API:      'translateApiUrl',  // translation endpoint (provider-specific)
   TRANSLATE_PROVIDER: 'translateProvider',// active machine-translation provider id
   TRANSLATE_API_KEY:  'translateApiKey',  // API key for key-based providers (DeepL/OpenAI)
+  // Interim single shared debug token — see dev-fhir-login.html. Not the
+  // production per-server OAuth flow (issue #63); local-testing-only bridge.
+  FHIR_ACCESS_TOKEN:      'fhirAccessToken',
+  FHIR_TOKEN_EXPIRES_AT:  'fhirTokenExpiresAt', // epoch ms
+  // Production OAuth2 Authorization Code + PKCE config (issue #63). Only the
+  // non-secret config (URLs/client id/scope) lives here — the resulting
+  // access/refresh tokens are NOT stored via serverConfig (would sync to
+  // Supabase cloud); see js/fhir/oauth-client.js for token storage.
+  FHIR_BASE_OAUTH_AUTHORIZE_URL:  'fhirBaseOauthAuthorizeUrl',
+  FHIR_BASE_OAUTH_TOKEN_URL:      'fhirBaseOauthTokenUrl',
+  FHIR_BASE_OAUTH_CLIENT_ID:      'fhirBaseOauthClientId',
+  FHIR_BASE_OAUTH_SCOPE:          'fhirBaseOauthScope',
+  SDC_SERVER_OAUTH_AUTHORIZE_URL: 'sdcServerOauthAuthorizeUrl',
+  SDC_SERVER_OAUTH_TOKEN_URL:     'sdcServerOauthTokenUrl',
+  SDC_SERVER_OAUTH_CLIENT_ID:     'sdcServerOauthClientId',
+  SDC_SERVER_OAUTH_SCOPE:         'sdcServerOauthScope',
 };
 
 const LS_PREFIX = 'fhirqb.server.';
@@ -199,3 +215,16 @@ function _makeServerConfig() {
 }
 
 export const serverConfig = _makeServerConfig();
+
+/**
+ * Interim debug-tool auth header (see dev-fhir-login.html / issue #63).
+ * Returns `{ Authorization: 'Bearer <token>' }` if a non-expired token is
+ * stored, otherwise `{}` — spread into a fetch() headers object.
+ * @returns {{Authorization?: string}}
+ */
+export function getFhirAuthHeader() {
+  const token     = serverConfig.get(CONFIG_KEYS.FHIR_ACCESS_TOKEN);
+  const expiresAt = Number(serverConfig.get(CONFIG_KEYS.FHIR_TOKEN_EXPIRES_AT));
+  if (!token || !expiresAt || Date.now() >= expiresAt) return {};
+  return { Authorization: `Bearer ${token}` };
+}

@@ -1,14 +1,17 @@
 /**
- * Cloudflare Worker — CORS proxy for FHIR terminology server requests.
+ * Cloudflare Worker — CORS proxy for FHIR terminology + limited resource
+ * requests (Patient search, $populate).
  *
  * Deploy: https://dash.cloudflare.com → Workers → Create → paste this file.
  * Usage:  GET https://<your-worker>.workers.dev/?url=<encoded-fhir-url>
  *
- * Only proxies HTTPS requests to FHIR server paths (/$expand, /metadata,
- * /$validate). Refuses to proxy arbitrary URLs to prevent misuse.
+ * Only proxies HTTPS requests whose path matches ALLOWED_PATHS (substring
+ * match, not a full server allowlist — the target host itself is not
+ * restricted). Forwards an incoming Authorization header upstream as-is (for
+ * OAuth-protected FHIR servers, issue #63) — never logged, never stored.
  */
 
-const ALLOWED_PATHS = ['/ValueSet/$expand', '/metadata', '/ValueSet/', '/Questionnaire/$validate'];
+const ALLOWED_PATHS = ['/ValueSet/$expand', '/metadata', '/ValueSet/', '/Questionnaire/$validate', '/Questionnaire/$populate', '/Patient'];
 
 export default {
   async fetch(request) {
@@ -42,10 +45,12 @@ export default {
 
     try {
       const isBodyMethod = request.method !== 'GET' && request.method !== 'HEAD';
+      const authHeader = request.headers.get('Authorization');
       const upstream = await fetch(targetUrl.toString(), {
         method:  request.method,
         headers: {
           Accept: 'application/fhir+json',
+          ...(authHeader ? { Authorization: authHeader } : {}),
           ...(isBodyMethod
             ? { 'Content-Type': request.headers.get('Content-Type') || 'application/fhir+json' }
             : {}),
@@ -70,6 +75,6 @@ function corsHeaders() {
   return {
     'Access-Control-Allow-Origin':  '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Accept, Content-Type',
+    'Access-Control-Allow-Headers': 'Accept, Content-Type, Authorization',
   };
 }

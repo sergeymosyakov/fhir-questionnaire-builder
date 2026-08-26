@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FHIR Debug Login — FHIR Questionnaire Builder</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/page-header.css">
+  <link rel="stylesheet" href="css/settings.css">
+  <link rel="stylesheet" href="css/design-tokens.css">
+  <link rel="stylesheet" href="css/modals.css">
+  <link rel="stylesheet" href="css/toast.css">
+  <link rel="stylesheet" href="css/dev-fhir-login.css">
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="page-header-bar">
+      <h1 class="page-header-title">FHIR Debug Login</h1>
+      <a href="index.html" class="page-header-back" target="_parent" data-back-link>← Back to Builder</a>
+    </div>
+    <p class="page-header-subtitle">Local testing only — gets a Bearer token via OAuth2 <code>client_credentials</code> and stores it for the builder's FHIR calls to use. Not part of the shipped product; see issue #63 for the real login flow.</p>
+  </div>
+
+  <div class="settings-wrap">
+    <div class="s-card">
+      <div class="s-card-title">Client credentials</div>
+      <div class="s-card-desc">Nothing here is sent anywhere except the Token URL below, and it only stays in this browser's local storage.</div>
+
+      <div class="s-field">
+        <label class="s-label" for="tokenUrl">Token URL</label>
+        <input id="tokenUrl" class="s-input" type="url" placeholder="https://your-idp.example.com/oauth2/token" autocomplete="off" spellcheck="false" data-testid="dev-login-token-url">
+      </div>
+      <div class="s-field">
+        <label class="s-label" for="clientId">Client ID</label>
+        <input id="clientId" class="s-input" type="text" autocomplete="off" spellcheck="false" data-testid="dev-login-client-id">
+      </div>
+      <div class="s-field">
+        <label class="s-label" for="clientSecret">Client Secret</label>
+        <input id="clientSecret" class="s-input" type="password" autocomplete="off" spellcheck="false" data-testid="dev-login-client-secret">
+      </div>
+
+      <div class="dev-fhir-login-actions">
+        <button class="s-test-btn" id="getTokenBtn" data-testid="dev-login-get-token-btn">Get token</button>
+        <button class="s-reset-btn" id="forgetTokenBtn" data-testid="dev-login-forget-token-btn">Forget token</button>
+      </div>
+
+      <p class="dev-fhir-login-status" id="status" data-testid="dev-login-status">No active token.</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/dev/fhir-login-debug.js"></script>
+</body>
+</html>

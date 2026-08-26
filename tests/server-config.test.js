@@ -10,6 +10,7 @@ import {
   SupabaseConfigProvider,
   CONFIG_KEYS,
   serverConfig,
+  getFhirAuthHeader,
 } from '../js/fhir/server-config.js';
 
 // ── CONFIG_KEYS ───────────────────────────────────────────────────────────────
@@ -344,5 +345,34 @@ describe('serverConfig', () => {
     // ready() should resolve to {} again after _clear
     const result = await serverConfig.ready();
     expect(result).toEqual({});
+  });
+});
+
+// ── getFhirAuthHeader (interim debug-tool token, issue #63) ──────────────────
+
+describe('getFhirAuthHeader', () => {
+  beforeEach(() => {
+    serverConfig._clear();
+    serverConfig.register(new DefaultConfigProvider({}));
+  });
+
+  it('returns {} when no token is stored', () => {
+    expect(getFhirAuthHeader()).toEqual({});
+  });
+
+  it('returns {} when the token is expired', () => {
+    serverConfig.register(new DefaultConfigProvider({
+      [CONFIG_KEYS.FHIR_ACCESS_TOKEN]: 'abc',
+      [CONFIG_KEYS.FHIR_TOKEN_EXPIRES_AT]: String(Date.now() - 1000),
+    }));
+    expect(getFhirAuthHeader()).toEqual({});
+  });
+
+  it('returns the Authorization header for a valid, non-expired token', () => {
+    serverConfig.register(new DefaultConfigProvider({
+      [CONFIG_KEYS.FHIR_ACCESS_TOKEN]: 'abc',
+      [CONFIG_KEYS.FHIR_TOKEN_EXPIRES_AT]: String(Date.now() + 60_000),
+    }));
+    expect(getFhirAuthHeader()).toEqual({ Authorization: 'Bearer abc' });
   });
 });

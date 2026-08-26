@@ -4,7 +4,7 @@
 //
 // SDC spec: https://hl7.org/fhir/uv/sdc/OperationDefinition-Questionnaire-populate.html
 
-import { proxiedUrl } from './fhir-search.js';
+import { proxiedUrl, fhirAuthHeaderFor, reauthHeaderFor } from './fhir-search.js';
 import { serverConfig, CONFIG_KEYS } from './server-config.js';
 
 /**
@@ -17,10 +17,12 @@ import { serverConfig, CONFIG_KEYS } from './server-config.js';
  * @returns {Promise<object>} FHIR QuestionnaireResponse resource
  */
 export async function populateFromServer(fhirBase, questJson, patientRef) {
-  const sdcBase   = serverConfig.get(CONFIG_KEYS.SDC_SERVER) || fhirBase;
+  const sdcConfigured = serverConfig.get(CONFIG_KEYS.SDC_SERVER);
+  const sdcBase   = sdcConfigured || fhirBase;
   const base      = sdcBase.replace(/\/$/, '');
   const targetUrl = `${base}/Questionnaire/$populate`;
   const url       = proxiedUrl(targetUrl);
+  const serverKey = sdcConfigured ? 'SDC_SERVER' : 'FHIR_BASE';
 
   const body = JSON.stringify({
     resourceType: 'Parameters',
@@ -30,16 +32,26 @@ export async function populateFromServer(fhirBase, questJson, patientRef) {
     ],
   });
 
-  const res = await fetch(url, {
+  let res = await _postPopulate(url, targetUrl, serverKey, body);
+  if (res.status === 401) res = await _postPopulate(url, targetUrl, serverKey, body, /* retry */ true);
+  return _parsePopulateResponse(res);
+}
+
+async function _postPopulate(url, targetUrl, serverKey, body, retry = false) {
+  const authHeader = retry ? await reauthHeaderFor(targetUrl, serverKey) : fhirAuthHeaderFor(targetUrl, serverKey);
+  return fetch(url, {
     method:  'POST',
     headers: {
       'Content-Type': 'application/fhir+json',
       'Accept':        'application/fhir+json',
+      ...authHeader,
     },
     body,
     signal: AbortSignal.timeout(30_000),
   });
+}
 
+async function _parsePopulateResponse(res) {
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     let detail = text.substring(0, 150);

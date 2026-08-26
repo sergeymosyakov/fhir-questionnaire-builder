@@ -86,6 +86,20 @@ body {
   color: var(--s-muted);
 }
 
+/* ── Optional per-server OAuth config (issue #63) ───────────────────────────── */
+.s-field--oauth {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--s-border);
+  gap: 6px 8px;
+}
+.s-card-subtitle {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--s-text);
+}
+
 .s-input {
   width: 100%;
   font-family: monospace;

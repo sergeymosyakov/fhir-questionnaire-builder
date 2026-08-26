@@ -10,6 +10,9 @@ import * as auth       from './auth/auth.js';
 import { loadSettings, saveSettings, supabaseProvider } from './fhir/server-config-cloud.js';
 import { createCustomSelect } from './ui/custom-select.js';
 import { TRANSLATE_PROVIDERS, getProvider } from './fhir/translate-providers.js';
+import { ensureLoggedIn } from './fhir/oauth-client.js';
+import { startScheduler } from './fhir/oauth-scheduler.js';
+import { fhirAuthHeaderFor } from './fhir/fhir-search.js';
 
 // ── Defaults (fallback labels shown in placeholders) ─────────────────────────
 const DEFAULTS = {
@@ -169,15 +172,27 @@ function _wireField(inputId, resetId, key) {
 }
 
 // ── Test connection ───────────────────────────────────────────────────────────
-async function _testFhirServer(url, resultEl, testBtn) {
+async function _testFhirServer(url, resultEl, testBtn, serverKey) {
   if (!url) { _setResult(resultEl, { ok: false, message: 'No URL entered' }); return; }
   _setResult(resultEl, { ok: false, message: '', loading: true });
   testBtn.disabled = true;
   try {
-    const proxy = serverConfig.get(CONFIG_KEYS.CORS_PROXY) || '';
     const targetUrl = url.replace(/\/$/, '') + '/metadata';
+    // Log in first (if this server has OAuth configured) — still inside this
+    // click handler, so a login popup is allowed by the browser.
+    if (serverKey) {
+      try { await ensureLoggedIn(serverKey); startScheduler(serverKey); }
+      catch (err) {
+        if (err.message === 'login-cancelled') { _setResult(resultEl, { ok: false, message: 'Login cancelled' }); return; }
+        _setResult(resultEl, { ok: false, message: `Login failed: ${err.message}` }); return;
+      }
+    }
+    const proxy = serverConfig.get(CONFIG_KEYS.CORS_PROXY) || '';
     const fetchUrl = proxy ? `${proxy}?url=${encodeURIComponent(targetUrl)}` : targetUrl;
-    const res = await fetch(fetchUrl, { headers: { Accept: 'application/fhir+json' }, signal: AbortSignal.timeout(8000) });
+    const res = await fetch(fetchUrl, {
+      headers: { Accept: 'application/fhir+json', ...fhirAuthHeaderFor(targetUrl, serverKey) },
+      signal: AbortSignal.timeout(8000),
+    });
     if (!res.ok) { _setResult(resultEl, { ok: false, message: `HTTP ${res.status}` }); return; }
     const body = await res.json();
     if (body.resourceType !== 'CapabilityStatement') {
@@ -237,6 +252,14 @@ function _refreshAllFields() {
     [CONFIG_KEYS.SDC_SERVER]:         'sdcServerInput',
     [CONFIG_KEYS.TRANSLATE_API]:      'translateApiInput',
     [CONFIG_KEYS.TRANSLATE_API_KEY]:  'translateApiKeyInput',
+    [CONFIG_KEYS.FHIR_BASE_OAUTH_AUTHORIZE_URL]:  'fhirBaseOauthAuthorizeInput',
+    [CONFIG_KEYS.FHIR_BASE_OAUTH_TOKEN_URL]:      'fhirBaseOauthTokenInput',
+    [CONFIG_KEYS.FHIR_BASE_OAUTH_CLIENT_ID]:      'fhirBaseOauthClientIdInput',
+    [CONFIG_KEYS.FHIR_BASE_OAUTH_SCOPE]:          'fhirBaseOauthScopeInput',
+    [CONFIG_KEYS.SDC_SERVER_OAUTH_AUTHORIZE_URL]: 'sdcServerOauthAuthorizeInput',
+    [CONFIG_KEYS.SDC_SERVER_OAUTH_TOKEN_URL]:     'sdcServerOauthTokenInput',
+    [CONFIG_KEYS.SDC_SERVER_OAUTH_CLIENT_ID]:     'sdcServerOauthClientIdInput',
+    [CONFIG_KEYS.SDC_SERVER_OAUTH_SCOPE]:         'sdcServerOauthScopeInput',
   };
   for (const [key, inputId] of Object.entries(map)) {
     const inp = _el(inputId);
@@ -255,6 +278,14 @@ _el('saveBtn').addEventListener('click', () => {
   _collectField('sdcServerInput',  CONFIG_KEYS.SDC_SERVER);
   _collectField('translateApiInput', CONFIG_KEYS.TRANSLATE_API);
   _collectField('translateApiKeyInput', CONFIG_KEYS.TRANSLATE_API_KEY);
+  _collectField('fhirBaseOauthAuthorizeInput', CONFIG_KEYS.FHIR_BASE_OAUTH_AUTHORIZE_URL);
+  _collectField('fhirBaseOauthTokenInput',     CONFIG_KEYS.FHIR_BASE_OAUTH_TOKEN_URL);
+  _collectField('fhirBaseOauthClientIdInput',  CONFIG_KEYS.FHIR_BASE_OAUTH_CLIENT_ID);
+  _collectField('fhirBaseOauthScopeInput',     CONFIG_KEYS.FHIR_BASE_OAUTH_SCOPE);
+  _collectField('sdcServerOauthAuthorizeInput', CONFIG_KEYS.SDC_SERVER_OAUTH_AUTHORIZE_URL);
+  _collectField('sdcServerOauthTokenInput',     CONFIG_KEYS.SDC_SERVER_OAUTH_TOKEN_URL);
+  _collectField('sdcServerOauthClientIdInput',  CONFIG_KEYS.SDC_SERVER_OAUTH_CLIENT_ID);
+  _collectField('sdcServerOauthScopeInput',     CONFIG_KEYS.SDC_SERVER_OAUTH_SCOPE);
   _collectProvider();
   // Re-sync all reset button states and input custom styles
   document.querySelectorAll('[data-reset]').forEach(btn => {
@@ -292,6 +323,14 @@ async function init() {
   _wireField('sdcServerInput',  null, CONFIG_KEYS.SDC_SERVER);
   _wireField('translateApiInput', null, CONFIG_KEYS.TRANSLATE_API);
   _wireField('translateApiKeyInput', null, CONFIG_KEYS.TRANSLATE_API_KEY);
+  _wireField('fhirBaseOauthAuthorizeInput', null, CONFIG_KEYS.FHIR_BASE_OAUTH_AUTHORIZE_URL);
+  _wireField('fhirBaseOauthTokenInput',     null, CONFIG_KEYS.FHIR_BASE_OAUTH_TOKEN_URL);
+  _wireField('fhirBaseOauthClientIdInput',  null, CONFIG_KEYS.FHIR_BASE_OAUTH_CLIENT_ID);
+  _wireField('fhirBaseOauthScopeInput',     null, CONFIG_KEYS.FHIR_BASE_OAUTH_SCOPE);
+  _wireField('sdcServerOauthAuthorizeInput', null, CONFIG_KEYS.SDC_SERVER_OAUTH_AUTHORIZE_URL);
+  _wireField('sdcServerOauthTokenInput',     null, CONFIG_KEYS.SDC_SERVER_OAUTH_TOKEN_URL);
+  _wireField('sdcServerOauthClientIdInput',  null, CONFIG_KEYS.SDC_SERVER_OAUTH_CLIENT_ID);
+  _wireField('sdcServerOauthScopeInput',     null, CONFIG_KEYS.SDC_SERVER_OAUTH_SCOPE);
   _renderTranslateProvider();
 
   // Wire reset buttons by data-reset attribute
@@ -334,12 +373,12 @@ async function init() {
   });
   _el('testSdcServerBtn').addEventListener('click', () => {
     const url = _el('sdcServerInput').value.trim() || serverConfig.get(CONFIG_KEYS.SDC_SERVER);
-    _testFhirServer(url, _el('testSdcServerResult'), _el('testSdcServerBtn'));
+    _testFhirServer(url, _el('testSdcServerResult'), _el('testSdcServerBtn'), 'SDC_SERVER');
   });
 
   _el('testFhirBaseBtn').addEventListener('click', () => {
     const url = _el('fhirBaseInput').value.trim() || serverConfig.get(CONFIG_KEYS.FHIR_BASE);
-    _testFhirServer(url, _el('testFhirBaseResult'), _el('testFhirBaseBtn'));
+    _testFhirServer(url, _el('testFhirBaseResult'), _el('testFhirBaseBtn'), 'FHIR_BASE');
   });
 }
 

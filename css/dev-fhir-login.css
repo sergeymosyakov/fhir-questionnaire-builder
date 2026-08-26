@@ -1,0 +1,15 @@
+/* ── Debug FHIR login page — bits not already covered by settings.css ───────── */
+
+.dev-fhir-login-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.dev-fhir-login-status {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.dev-fhir-login-status.dev-fhir-login-status--ok   { color: var(--s-success); }
+.dev-fhir-login-status.dev-fhir-login-status--none { color: var(--s-muted); }
