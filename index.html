@@ -100,8 +100,18 @@
 
 <div class="layout" id="mainLayout">
   <div class="left-panel" data-mount="left-panel">
+    <button type="button" class="left-panel-rail-tab" data-mount="left-panel-rail-tab" data-testid="left-panel-rail-tab"
+      data-tip-title="Show Builder"
+      data-tip-body="Expand the logic builder over the full screen.">
+      <span class="left-panel-rail-tab-icon">&#x2699;&#xFE0F;</span>
+      <span class="left-panel-rail-tab-label">Builder</span>
+    </button>
+    <div class="left-panel-content">
     <div class="left-panel-header">
       <div class="left-panel-title-row">
+        <button type="button" class="left-panel-minimize-btn" data-mount="left-panel-minimize-btn" data-testid="left-panel-minimize-btn"
+          data-tip-title="Hide Builder"
+          data-tip-body="Collapse the builder back to the preview.">&#x2039;</button>
         <span class="section-title">Logic Builder<span id="tooltipsOffBadge" class="tips-off-badge" style="display:none">tooltips off</span></span>
         <span id="fhirVersionSelectMount" class="fhir-version-select-mount" data-mount="fhir-version-select"
           data-tip-title="FHIR Target Version"
@@ -132,6 +142,7 @@
     <div id="variablesCardMount" data-mount="variables-panel"></div>
     <div class="left-panel-body" data-mount="left-panel-body">
       <div id="treeContainer" data-testid="tree-container" data-mount="tree-container"></div>
+    </div>
     </div>
   </div>
   <div class="panel-resizer" id="panelResizer" data-mount="panel-resizer"></div>

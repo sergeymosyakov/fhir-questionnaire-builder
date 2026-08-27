@@ -30,4 +30,5 @@
   --r-sm:          4px;
   --fs-preview:    15px;
   --ctrl-h:        30px;
+  --rail-w:        44px; /* collapsed-panel rail — WCAG 2.5.5 min touch target */
 }
