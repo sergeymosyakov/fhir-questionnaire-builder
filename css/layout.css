@@ -213,8 +213,8 @@
   flex-shrink: 0;
 }
 .top-panel-copyright {
+  display: none;
   margin-left: auto;
-  display: flex;
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
@@ -393,6 +393,10 @@
 /* Desktop (≥768px): rail/expand-toggle is mobile-only — always show both
    panels in full, resizable left panel restored. */
 @media (min-width: 768px) {
+  /* GitHub link + copyright — decorative, dropped from the narrow top-panel
+     row (issue #75 Phase 3) to leave room for Patient Preset / Sign in. */
+  .top-panel-copyright { display: flex; }
+
   .panel-resizer {
     display: block;
     width: 5px;

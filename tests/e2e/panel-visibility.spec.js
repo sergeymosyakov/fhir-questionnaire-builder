@@ -120,3 +120,15 @@ test.describe('Panel visibility toggle — desktop (no-op)', () => {
     await expect(rightPanel(page)).toBeVisible();
   });
 });
+
+test.describe('Top-panel narrow-screen cleanup', () => {
+  test('GitHub link + copyright are hidden below 768px, visible at/above it', async ({ page }) => {
+    await page.setViewportSize({ width: 480, height: 800 });
+    await page.goto('/');
+    await waitForLoad(page);
+    await expect(page.locator('.top-panel-copyright')).toBeHidden();
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(page.locator('.top-panel-copyright')).toBeVisible();
+  });
+});
