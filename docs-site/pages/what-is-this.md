@@ -21,9 +21,10 @@ It runs entirely in your browser. There is **no backend, no account required, an
 Being honest about the boundaries matters more than marketing:
 
 - It is **not** a FHIR server or a data store. It has no server-side API.
-- It is **not** an industrial SDC engine — it does **not** execute
-  StructureMap-based *population* (round-tripped but not run), and it does not
-  resolve profiles against a terminology server for licensed code systems.
+- It is **not** an industrial SDC engine — it does not resolve profiles against
+  a terminology server for licensed code systems, and it cannot resolve an
+  external canonical `StructureMap`/CQL `Library` from a live FHIR server (only
+  ones added as contained resources).
 - It is **not** designed for direct use by clinicians without FHIR knowledge. It deliberately surfaces FHIR concepts (linkId, extensions, FHIRPath) rather than hiding them — see [Who it's for](who-its-for.md).
 
 ## Why use it

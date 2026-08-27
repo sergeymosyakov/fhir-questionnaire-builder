@@ -42,6 +42,7 @@ authoring/runtime slice.
 | Visual expression authoring | Build `enableWhen` / `calculatedExpression` / `initialExpression` and collection pipelines (`repeat(item).where(linkId=…).answer…intersect(…).join(…)`) visually — condition trees, arithmetic chains (with one level of parenthesized grouping and a final round/abs/ceiling/floor/truncate wrapper), and answer→value pipelines — with **two-way** parsing (existing FHIRPath re-opens as editable blocks) and type-aware comparators. LHC-Forms and Smart Forms require hand-writing FHIRPath; few browser tools offer a visual FHIRPath builder. |
 | Embeddable renderer widget | The live runtime ships as a standalone `QuestionnaireRenderer` — a **framework-agnostic vanilla ES module + IIFE global** (downloadable GitHub Release, npm package, and a NuGet static-asset package for .NET/Blazor apps), drop-in with a `<script>`/`import`, **multiple isolated instances per page**, no iframe, driven by config + a small API. Smart Forms (React) and LHC-Forms (Angular/web-component) also offer embeddable renderers, so this is **parity on the capability** — our differentiator is a **zero-framework, zero-dependency** drop-in for teams not standardized on a specific stack. |
 | Validation | HAPI `$validate` integration plus formal R4 invariants and cross-field semantic warnings. |
+| Client-side transform/logic engines | Both directions of StructureMap execution (`targetStructureMap` extraction, `sourceStructureMap` population — real FML via `fhir-structuremap-js`) and CQL execution (`text/cql-identifier` initialExpression via a `cqf-library`'s embedded ELM, using `cql-execution`/`cql-exec-fhir`) run entirely client-side, no server. Rare among browser-only tools — most either skip StructureMap/CQL entirely or require a server-side engine. |
 
 ## Where we are at parity (with caveats)
 
@@ -57,8 +58,7 @@ authoring/runtime slice.
 
 | Gap | Who does it better | Why it matters |
 |---|---|---|
-| **StructureMap-based extraction/population** (`targetStructureMap` / `sourceStructureMap`) | Aidbox, Firely | Round-tripped only — **not executed.** This is the core of industrial-grade SDC extraction. Biggest single gap. |
-| **CQL execution** (`text/cql-identifier` + `cqf-library`) | Any CQL/ELM-capable engine (CQF Ruler, cql-engine, Firely .NET) | Round-tripped only — **not executed.** SDC forms that populate inputs via CQL (e.g. WHO SMART Guidelines) render with every CQL-gated item hidden. Distinct from StructureMap — CQL computes clinical values. Needs a CQL engine (external `$cql`/`$evaluate` server, or embedded ELM runtime). |
+| **CQL execution — external Library resolution** (`cqf-library` pointing at a live FHIR server, not a `#contained` resource) | Any CQL/ELM-capable engine (CQF Ruler, cql-engine, Firely .NET) | A `#contained` `Library` with embedded precompiled ELM *is* executed client-side (`cql-execution` + `cql-exec-fhir`) — see [FHIR-MAPPING.md](FHIR-MAPPING.md). External absolute canonical `Library` URLs (e.g. the real WHO SMART Guidelines EmCare/IMCI library) and VSAC-backed terminology CQL are not yet resolved. |
 | **Licensed terminology** (LOINC, SNOMED CT) | Any platform with a real tx server | Public HAPI doesn't load these, so validation of coded answers is partial. |
 | **Persistence / API / auth as a product** | Aidbox, Medplum, Firely | We have Supabase-backed cloud save, but we are not a FHIR store and have no server API. |
 | **Renderer maturity / accessibility audit** | LHC-Forms (battle-tested at NIH scale) | Their renderer has years of production hardening and formal a11y review. Ours now has a broad in-house a11y pass — accessible names on all controls, AA contrast, modal focus-trap/return, keyboard-operable dropdowns and builder tree, ARIA roles, and `aria-live` validation announcements (all e2e-guarded) — but still lacks a formal external a11y audit and production hardening. |
@@ -71,13 +71,14 @@ authoring/runtime slice.
 - As a **free, browser-only FHIR questionnaire builder + tester with trustworthy
   export**, this is competitive today and arguably ahead of LHC-Forms on UX
   (including visual, two-way FHIRPath expression authoring).
-- It is **not** an industrial SDC engine: no StructureMap execution, no profile
-  resolution, no licensed terminology, no server.
+- It is **not** an industrial SDC engine: no external-canonical `StructureMap`/
+  `Library` resolution, no profile resolution, no licensed terminology, no server.
 - It is **not** a platform and should not be evaluated against Aidbox / Medplum /
   Firely as if it were one.
 - It is an **early-stage prototype** by adoption and hardening, regardless of
   feature breadth. Feature count ≠ production maturity.
 
 **The two things that would move us from "good prototype" to "industrial-grade":**
-StructureMap-based transform execution, and integration with a real terminology
-server. Everything else is polish.
+resolving external canonical resources (StructureMap/Library) from a live FHIR
+server, and integration with a real (licensed) terminology server. Everything
+else is polish.
