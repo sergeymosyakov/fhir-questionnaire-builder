@@ -111,6 +111,7 @@ class PatientEditModal extends Modal {
         if (def.name === 'comorb') inp.placeholder = 'e.g. diabetes, hypertension';
       }
       this._inputs[def.name] = { inp, def };
+      inp.dataset.testid = 'patient-ctx-' + def.name;
       row.appendChild(lbl);
       row.appendChild(inp);
       this.body.appendChild(row);

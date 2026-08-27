@@ -209,10 +209,10 @@ export function nodeToFHIRItem(node) {
   }
   // calculatedExpression
   if (node._calculatedExpr)
-    ext.push({ url: FHIR.calculatedExpression, valueExpression: { language: 'text/fhirpath', expression: node._calculatedExpr } });
+    ext.push({ url: FHIR.calculatedExpression, valueExpression: { language: node._calculatedExprLanguage || 'text/fhirpath', expression: node._calculatedExpr } });
   // initialExpression
   if (node._initialExpr)
-    ext.push({ url: FHIR.initialExpression, valueExpression: { language: 'text/fhirpath', expression: node._initialExpr } });
+    ext.push({ url: FHIR.initialExpression, valueExpression: { language: node._initialExprLanguage || 'text/fhirpath', expression: node._initialExpr } });
   // answer-source expressions (SDC) — dynamic answer options (answerExpression / candidateExpression)
   for (const { url, prop } of ANSWER_SOURCE_EXPR_EXTS) {
     if (node[prop])

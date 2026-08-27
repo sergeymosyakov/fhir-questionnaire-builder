@@ -22,10 +22,11 @@ class InitSection extends ExpressionSection {
 
   commit(pending, node) {
     node._initialExpr = pending.initExpr.trim() || undefined;
+    node._initialExprLanguage = undefined; // manual edit here is always FHIRPath
   }
 
   buildPatch(pending, _node) {
-    return { _initialExpr: pending.initExpr.trim() || null };
+    return { _initialExpr: pending.initExpr.trim() || null, _initialExprLanguage: null };
   }
 }
 

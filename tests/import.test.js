@@ -1274,6 +1274,36 @@ describe('importFHIR', () => {
       }]));
       expect(_tree[0]._initialExpr).toBe('%patient.name');
     });
+
+    it('preserves a non-FHIRPath calculatedExpression language (text/cql-identifier)', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'integer', text: 'Q',
+        extension: [{ url: CALC_URL, valueExpression: { language: 'text/cql-identifier', expression: 'AgeInMonths' } }],
+      }]));
+      expect(_tree[0]._calculatedExpr).toBe('AgeInMonths');
+      expect(_tree[0]._calculatedExprLanguage).toBe('text/cql-identifier');
+    });
+
+    it('preserves a non-FHIRPath initialExpression language (text/cql-identifier)', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'integer', text: 'Q',
+        extension: [{ url: INIT_URL, valueExpression: { language: 'text/cql-identifier', expression: 'AgeInMonths' } }],
+      }]));
+      expect(_tree[0]._initialExpr).toBe('AgeInMonths');
+      expect(_tree[0]._initialExprLanguage).toBe('text/cql-identifier');
+    });
+
+    it('does not set _calculatedExprLanguage/_initialExprLanguage for plain text/fhirpath', () => {
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'decimal', text: 'Q',
+        extension: [
+          { url: CALC_URL, valueExpression: { language: 'text/fhirpath', expression: '%total * 2' } },
+          { url: INIT_URL, valueExpression: { language: 'text/fhirpath', expression: '%patient.name' } },
+        ],
+      }]));
+      expect(_tree[0]._calculatedExprLanguage).toBeUndefined();
+      expect(_tree[0]._initialExprLanguage).toBeUndefined();
+    });
   });
 
   // ── _sliderStep ───────────────────────────────────────────────────────────

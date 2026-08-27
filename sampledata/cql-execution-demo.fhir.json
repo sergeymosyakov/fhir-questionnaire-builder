@@ -1,0 +1,59 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "cql-execution-demo",
+  "url": "https://example.org/Questionnaire/cql-execution-demo",
+  "name": "CQLExecutionDemo",
+  "title": "CQL Execution Demo — Age in Months",
+  "status": "active",
+  "description": "Demonstrates real CQL execution (not just round-tripping): the first item's sdc-questionnaire-initialExpression (language text/cql-identifier, expression \"AgeInMonths\") is resolved against the cqf-library Library contained below \u2014 a self-contained, precompiled ELM library, no external server required \u2014 and the computed value drives an enableWhenExpression on the second item, exactly the WHO SMART Guidelines EmCare/IMCI pattern where FHIRPath enableWhen reads an answer only CQL can populate. Select the Child patient preset and click \u21BA Re-init (Variables panel) to recompute.",
+  "subjectType": ["Patient"],
+  "extension": [
+    { "url": "http://hl7.org/fhir/StructureDefinition/cqf-library", "valueCanonical": "#age-months-library" }
+  ],
+  "contained": [
+    {
+      "resourceType": "Library",
+      "id": "age-months-library",
+      "url": "https://example.org/Library/age-months-demo",
+      "version": "1.0.0",
+      "name": "AgeMonthsDemo",
+      "status": "active",
+      "type": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/library-type", "code": "logic-library" }] },
+      "content": [
+        {
+          "contentType": "text/cql",
+          "data": "bGlicmFyeSBBZ2VNb250aHNEZW1vIHZlcnNpb24gJzEuMC4wJwoKdXNpbmcgRkhJUiB2ZXJzaW9uICc0LjAuMScKCmNvbnRleHQgUGF0aWVudAoKZGVmaW5lIEFnZUluTW9udGhzOiBBZ2VJbk1vbnRocygpCg=="
+        },
+        {
+          "contentType": "application/elm+json",
+          "data": "eyJsaWJyYXJ5Ijp7ImFubm90YXRpb24iOlt7InR5cGUiOiJDcWxUb0VsbUluZm8iLCJ0cmFuc2xhdG9yVmVyc2lvbiI6IjUuMi4wIiwidHJhbnNsYXRvck9wdGlvbnMiOiIiLCJzaWduYXR1cmVMZXZlbCI6Ik5vbmUifV0sImlkZW50aWZpZXIiOnsiaWQiOiJBZ2VNb250aHNEZW1vIiwidmVyc2lvbiI6IjEuMC4wIn0sInNjaGVtYUlkZW50aWZpZXIiOnsiaWQiOiJ1cm46aGw3LW9yZzplbG0iLCJ2ZXJzaW9uIjoicjEifSwidXNpbmdzIjp7ImRlZiI6W3sibG9jYWxJZGVudGlmaWVyIjoiU3lzdGVtIiwidXJpIjoidXJuOmhsNy1vcmc6ZWxtLXR5cGVzOnIxIiwiYW5ub3RhdGlvbiI6W119LHsibG9jYWxJZGVudGlmaWVyIjoiRkhJUiIsInVyaSI6Imh0dHA6Ly9obDcub3JnL2ZoaXIiLCJ2ZXJzaW9uIjoiNC4wLjEiLCJhbm5vdGF0aW9uIjpbXX1dfSwiY29udGV4dHMiOnsiZGVmIjpbeyJuYW1lIjoiUGF0aWVudCIsImFubm90YXRpb24iOltdfV19LCJzdGF0ZW1lbnRzIjp7ImRlZiI6W3sibmFtZSI6IlBhdGllbnQiLCJjb250ZXh0IjoiUGF0aWVudCIsImFubm90YXRpb24iOltdLCJleHByZXNzaW9uIjp7InR5cGUiOiJTaW5nbGV0b25Gcm9tIiwiYW5ub3RhdGlvbiI6W10sInNpZ25hdHVyZSI6W10sIm9wZXJhbmQiOnsidHlwZSI6IlJldHJpZXZlIiwiZGF0YVR5cGUiOiJ7aHR0cDovL2hsNy5vcmcvZmhpcn1QYXRpZW50IiwidGVtcGxhdGVJZCI6Imh0dHA6Ly9obDcub3JnL2ZoaXIvU3RydWN0dXJlRGVmaW5pdGlvbi9QYXRpZW50IiwiYW5ub3RhdGlvbiI6W10sImluY2x1ZGUiOltdLCJjb2RlRmlsdGVyIjpbXSwiZGF0ZUZpbHRlciI6W10sIm90aGVyRmlsdGVyIjpbXX19fSx7Im5hbWUiOiJBZ2VJbk1vbnRocyIsImNvbnRleHQiOiJQYXRpZW50IiwiYWNjZXNzTGV2ZWwiOiJQdWJsaWMiLCJhbm5vdGF0aW9uIjpbXSwiZXhwcmVzc2lvbiI6eyJ0eXBlIjoiQ2FsY3VsYXRlQWdlIiwicHJlY2lzaW9uIjoiTW9udGgiLCJhbm5vdGF0aW9uIjpbXSwic2lnbmF0dXJlIjpbXSwib3BlcmFuZCI6eyJ0eXBlIjoiUHJvcGVydHkiLCJwYXRoIjoiYmlydGhEYXRlLnZhbHVlIiwiYW5ub3RhdGlvbiI6W10sInNvdXJjZSI6eyJ0eXBlIjoiRXhwcmVzc2lvblJlZiIsIm5hbWUiOiJQYXRpZW50IiwiYW5ub3RhdGlvbiI6W119fX19XX19fQ=="
+        }
+      ]
+    }
+  ],
+  "item": [
+    {
+      "linkId": "age-in-months",
+      "type": "integer",
+      "text": "Age in months (computed by CQL)",
+      "readOnly": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": { "language": "text/cql-identifier", "expression": "AgeInMonths" }
+        }
+      ]
+    },
+    {
+      "linkId": "infant-protocol-alert",
+      "type": "display",
+      "text": "Infant protocol: this patient is under 24 months old \u2014 follow the infant assessment pathway.",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression",
+          "valueExpression": { "language": "text/fhirpath", "expression": "%resource.repeat(item).where(linkId='age-in-months').answer.first().value < 24" }
+        }
+      ]
+    }
+  ]
+}

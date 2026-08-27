@@ -12,6 +12,7 @@ import { calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './fhi
 import { importQRAnswers } from './fhir/qr-import.js';
 import { populateFromServer } from './fhir/sdc-populate.js';
 import { structureMapPopulate } from './fhir/sdc-structuremap-populate.js';
+import { resolveCqlInitialValues } from './fhir/sdc-cql-eval.js';
 import { getResourceByReference } from './fhir/fhir-search.js';
 import { serverConfig, CONFIG_KEYS } from './fhir/server-config.js';
 import { ensureLoggedIn } from './fhir/oauth-client.js';
@@ -257,12 +258,21 @@ export class PreviewForm {
     if (!silent) progress.show('Evaluating variables…');
     await _yield();
     const envVars = buildVarEnv(this._questVariables, qr, fhirpath);
+    if (!silent) progress.show('Evaluating CQL expressions…');
+    await _yield();
+    const questJson = buildFHIRObject(this._session.questDoc);
+    const cqlValues = await resolveCqlInitialValues(questJson, this._tree, envVars);
     if (!silent) progress.show('Applying initial values…');
     await _yield();
     const initMap = this._answerStore.toValueMap();
-    evalInitialExprNodes(this._tree, qr, fhirpath, initMap, envVars);
+    evalInitialExprNodes(this._tree, qr, fhirpath, initMap, envVars, cqlValues);
     this._answerStore.merge(initMap);
-    this._preQR = qr;
+    // Rebuild qr from the now-merged answers, using the real item defs (questJson,
+    // not the empty `base` stub above) — the `qr` above reflects the pre-init
+    // snapshot, so an enableWhenExpression/calculatedExpression evaluated against it
+    // during the upcoming render would miss values initialExpression just wrote
+    // (notably a CQL-computed value driving a downstream enableWhenExpression).
+    this._preQR = buildQR(questJson, this._answerStore.toValueMap());
     this._preEnvVars = envVars;
     if (!silent) progress.show('Refreshing preview\u2026');
     await _yield();
