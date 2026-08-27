@@ -1,9 +1,9 @@
 // ── E2E: Narrow-screen panel visibility toggle (builder ↔ preview) ───────────
-// Mobile-only builder/preview switch (issue #75 Phases 1-2). Below the 768px
+// Mobile-only builder/preview switch (issue #75 Phases 1-3). Below the 768px
 // layout breakpoint the builder defaults to a collapsed rail (preview full);
 // tapping the rail, the top-panel button, or the in-panel minimize button
-// toggles between the two. At/above 768px both panels are always visible and
-// all three controls are hidden/no-op.
+// toggles between the two, persisted in localStorage. At/above 768px both
+// panels are always visible and all three controls are hidden/no-op.
 //
 // data-testid:
 //   panel-toggle-btn          mobile-only builder/preview switch button (top-panel)
@@ -66,6 +66,41 @@ test.describe('Panel visibility toggle — narrow screens', () => {
     await expect(rightPanel(page)).toBeHidden();
 
     await toggleBtn(page).click();
+    await expect(rightPanel(page)).toBeVisible();
+    await expect(railTab(page)).toBeVisible();
+  });
+});
+
+test.describe('Panel visibility persistence', () => {
+  test.use({ viewport: { width: 480, height: 800 } });
+
+  test('expanded state survives reload', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+    // One-time clear (not addInitScript — that would also fire on the reload
+    // below, wiping the very value we're persisting).
+    await page.evaluate(() => localStorage.clear());
+
+    await railTab(page).click();
+    await expect(rightPanel(page)).toBeHidden();
+
+    await page.reload();
+    await waitForLoad(page);
+    await expect(rightPanel(page)).toBeHidden();
+    await expect(minimizeBtn(page)).toBeVisible();
+  });
+
+  test('collapsed state (default) survives reload after expanding then minimizing', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+    await page.evaluate(() => localStorage.clear());
+
+    await railTab(page).click();
+    await minimizeBtn(page).click();
+    await expect(rightPanel(page)).toBeVisible();
+
+    await page.reload();
+    await waitForLoad(page);
     await expect(rightPanel(page)).toBeVisible();
     await expect(railTab(page)).toBeVisible();
   });

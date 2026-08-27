@@ -1,10 +1,13 @@
 // ── Narrow-screen panel visibility toggle (builder ↔ preview) ─────────────────
 // Below the 768px layout breakpoint, the builder collapses to a narrow rail by
 // default (preview full-screen); expanding shows the builder full-screen and
-// hides the preview instead. Mirrors SimpleMode's event → class → CSS pattern
-// (js/ui/simple-mode.js). Both panels stay mounted and live throughout; no
-// persistence yet (issue #75 Phase 3). No-op at ≥768px.
+// hides the preview instead. Mirrors SimpleMode's event → class → CSS →
+// localStorage pattern (js/ui/simple-mode.js). Both panels stay mounted and
+// live throughout. No-op at ≥768px.
 import { AppEvents } from '../events.js';
+
+const STORAGE_KEY    = 'panelLeftExpanded';
+const DEFAULT_VALUE  = false; // collapsed rail, preview full
 
 export class PanelVisibility {
   constructor() {
@@ -18,7 +21,11 @@ export class PanelVisibility {
     });
     this._railTab?.addEventListener('click', () => this._dispatch(true));
     this._minimizeBtn?.addEventListener('click', () => this._dispatch(false));
-    this._apply(false);
+
+    let saved = null;
+    try { saved = localStorage.getItem(STORAGE_KEY); } catch { /* storage unavailable */ }
+    const leftExpanded = saved === 'true' || saved === 'false' ? saved === 'true' : DEFAULT_VALUE;
+    this._dispatch(leftExpanded);
   }
 
   _dispatch(leftExpanded) {
@@ -28,6 +35,7 @@ export class PanelVisibility {
   _apply(leftExpanded) {
     this._layout?.classList.toggle('layout--left-expanded', leftExpanded);
     if (this._btn) this._btn.textContent = leftExpanded ? '\u{1F441}\uFE0F Preview' : '\u2699\uFE0F Builder';
+    try { localStorage.setItem(STORAGE_KEY, String(leftExpanded)); } catch { /* storage unavailable */ }
   }
 }
 
