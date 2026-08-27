@@ -33,6 +33,7 @@
         { "id": "observation-extract", "title": "Observation-based extraction", "file": "observation-extract.md" },
         { "id": "definition-extract", "title": "Definition-based extraction", "file": "definition-extract.md" },
         { "id": "structuremap-extract", "title": "StructureMap-based extraction", "file": "structuremap-extract.md" },
+        { "id": "cql-execution", "title": "CQL execution", "file": "cql-execution.md" },
         { "id": "resolve-profile", "title": "Resolve from profile", "file": "resolve-profile.md" },
         { "id": "embed-renderer", "title": "Embed the renderer", "file": "embed-renderer.md" },
         { "id": "redcap", "title": "REDCap import/export", "file": "redcap.md" },

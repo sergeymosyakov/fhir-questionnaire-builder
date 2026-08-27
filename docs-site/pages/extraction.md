@@ -47,9 +47,10 @@ no server required. The StructureMap must be added to the questionnaire's
 Contained Resources (there's no server to fetch an external one from). There is
 a dedicated how-to for this: [StructureMap-based extraction](structuremap-extract.md).
 
-Only the extraction direction is executed today — *population* from a
-`sourceStructureMap` (pre-filling a response from source resources) is still
-round-tripped but not run; see [Roadmap & limitations](roadmap-limitations.md).
+Both directions are executed today: this **extraction** direction, and
+*population* from a `sourceStructureMap` (pre-filling a response from source
+resources, via **Answers ▾ → Fill via StructureMap**) — see
+[StructureMap-based extraction](structuremap-extract.md) for both.
 
 ## Where extraction runs
 

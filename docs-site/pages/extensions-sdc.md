@@ -19,7 +19,9 @@ These make a form *react* to what the user enters (all powered by
 - **Calculated answers** — fill a read-only field automatically from other
   answers, e.g. compute BMI from height and weight (`calculatedExpression`).
 - **Initial values from an expression** — pre-fill an answer when the form opens,
-  e.g. today's date or a value pulled from the patient (`initialExpression`).
+  e.g. today's date or a value pulled from the patient (`initialExpression`). Can
+  also name a `define` from an external CQL Library instead of a FHIRPath formula
+  — see [CQL execution](cql-execution.md).
 - **Expression-based visibility** — show or hide an item using a formula when the
   simple condition rows aren't enough (`enableWhenExpression`).
 - **Dynamic option lists** — build the choices for a question at run time from a

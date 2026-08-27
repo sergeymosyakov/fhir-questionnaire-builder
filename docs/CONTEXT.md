@@ -1,6 +1,6 @@
 ﻿# QuestionaryPrototype — Build Context
 
-> Internal architecture and codebase notes. See [README.md](../README.md) for quick-start and sample data; [FHIR-MAPPING.md](FHIR-MAPPING.md) for FHIR field coverage; [ROADMAP.md](ROADMAP.md) for the feature backlog.
+> Internal architecture and codebase notes. See [README.md](../README.md) for quick-start and sample data; [FHIR-MAPPING.md](FHIR-MAPPING.md) for FHIR field coverage; [GitHub issues labeled `roadmap`](https://github.com/sergeymosyakov/fhir-questionnaire-builder/issues?q=is%3Aissue+is%3Aopen+label%3Aroadmap) for the feature backlog.
 
 > **⚠️ Critical workflow rules:** See [`.github/copilot-instructions.md`](../.github/copilot-instructions.md) for THE MUST and WORKFLOW RULES (git push policy, testing checklist, modularity, English-only, etc.).
 
@@ -303,7 +303,6 @@ Load any FHIR questionnaire and simulate different patient profiles in the patie
 | `sampledata/repeating-group-demo.fhir.json` | **Repeating Group Demo** — repeating groups with per-instance required validation and per-instance `enableWhen` (PRN note shown only when that instance's "As needed?" is Yes); nested repeating group (dose schedule) inside each medication instance |
 | `sampledata/patient-profile.sd.json` | **Patient demo profile** — trimmed Patient `StructureDefinition`; not a Library item — uploaded directly via Item Properties → Definition → "Resolve from profile" to demo `definition-resolver.js` |
 | `sampledata/choice-column-demo.fhir.json` | **Choice Column Demo** — `sdc-questionnaire-choiceColumn`: multi-column dropdown display for choice items; medication selector (3 columns: code/display/system with widths) and condition selector (2 columns: ICD-10 code/description) |
-| `docs/ROADMAP.md` | Prioritized feature backlog |
 | `docs/FHIR-MAPPING.md` | Full FHIR ↔ internal model mapping + not-supported list |
 | `package.json` | Node dev tooling — Vitest (`npm test`) + Playwright (`npm run test:e2e`); `serve` devDep used by Playwright webServer |
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |

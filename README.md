@@ -44,7 +44,7 @@ shell, no iframe, no framework.
 | [WIDGET.md](WIDGET.md) | **Embeddable renderer widget** — install, config, API, events, examples |
 | [docs/CONTEXT.md](docs/CONTEXT.md) | Architecture, file map, node model, UX features, build rules |
 | [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) | FHIR R4 field mapping, supported extensions, known gaps |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Feature backlog |
+| [Issues labeled `roadmap`](https://github.com/sergeymosyakov/fhir-questionnaire-builder/issues?q=is%3Aissue+is%3Aopen+label%3Aroadmap) | Feature backlog |
 | [docs/COMPETITORS.md](docs/COMPETITORS.md) | Honest, no-spin comparison vs LHC-Forms, Smart Forms, Aidbox, Medplum, Firely |
 
 ---

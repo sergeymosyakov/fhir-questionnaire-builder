@@ -50,9 +50,9 @@ one).
 ## Current scope
 
 - Only the **extraction** direction (`targetStructureMap`, response → resources)
-  is executed. **Population** (`sourceStructureMap`, pre-filling a response from
-  source resources) is round-tripped but not yet run — see
-  [Roadmap & limitations](roadmap-limitations.md).
+  is documented on this page. **Population** (`sourceStructureMap`, pre-filling a
+  response from source resources) is also executed in the browser — see
+  Answers ▾ → Fill via StructureMap.
 - Auto-created target resources are untyped unless your StructureMap rules set
   `resourceType` explicitly (there's no injected profile resolver) — the sample
   below shows the pattern.
@@ -67,4 +67,4 @@ end.
 
 ---
 
-Next: [Resolve from profile](resolve-profile.md).
+Next: [CQL execution](cql-execution.md).

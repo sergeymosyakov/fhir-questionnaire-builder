@@ -6,8 +6,8 @@
 // SDC spec: https://hl7.org/fhir/uv/sdc/expressions.html#initialExpression
 //
 // v1 scope: only a `#contained` Library is supported (self-contained, offline,
-// deterministic — see docs/ROADMAP.md). An external absolute canonical Library URL
-// (e.g. a live FHIR server) is a documented follow-up gap, not silently guessed at.
+// deterministic). An external absolute canonical Library URL (e.g. a live FHIR
+// server) is a documented follow-up gap (issue #70), not silently guessed at.
 import { FHIR } from './urls/fhir.js';
 import { runCqlLibrary } from './cql-engine.js';
 
