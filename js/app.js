@@ -35,6 +35,7 @@ import { FhirVersionSelect } from './ui/fhir-version-select.js';
 import { AuthPanel } from './ui/auth-panel.js';
 import { PanelResizer } from './ui/panel-resizer.js';
 import { SimpleMode } from './ui/simple-mode.js';
+import { PanelVisibility } from './ui/panel-visibility.js';
 import { BuilderMetaToggle } from './ui/builder-meta-toggle.js';
 import { QRAnswersManager } from './fhir/qr-answers-manager.js';
 import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
@@ -91,6 +92,9 @@ new UndoRedo();
 
 // ── Simple / Advanced builder view mode (self-finds left-panel) ───────────────
 new SimpleMode();
+
+// ── Narrow-screen builder/preview panel toggle (self-finds .layout + button) ──
+new PanelVisibility();
 
 // ── id/prefix meta row visibility (self-finds left-panel) ────────────────────
 new BuilderMetaToggle();

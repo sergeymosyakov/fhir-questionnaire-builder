@@ -332,8 +332,23 @@
 }
 
 /* === Responsive ============================================================== */
+/* Narrow-screen panel visibility toggle (issue #75 Phase 1) — default: preview
+   shown, builder hidden; .layout--left-expanded (js/ui/panel-visibility.js)
+   flips it. Placed after the base .left-panel/.right-panel rules above so it
+   wins on source order; overridden back to "always both" at ≥768px below. */
+.left-panel { display: none; }
+.layout--left-expanded .left-panel { display: flex; }
+.layout--left-expanded .right-panel { display: none; }
+
 @media (min-width: 768px) {
   .layout { flex-direction: row; overflow: hidden; }
+
+  /* Panel-visibility toggle (see base rules above) is mobile-only. */
+  .left-panel,
+  .layout--left-expanded .left-panel { display: flex; }
+  .right-panel,
+  .layout--left-expanded .right-panel { display: flex; }
+  .panel-toggle-btn { display: none; }
 
   .panel-resizer {
     display: block;
