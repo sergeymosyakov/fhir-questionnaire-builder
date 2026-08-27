@@ -129,6 +129,12 @@
         "file": "structuremap-populate-demo.fhir.json",
         "type": "questionnaire",
         "note": "sdc-questionnaire-sourceStructureMap: Answers \u25be \u2192 Fill via StructureMap fetches a Patient from the FHIR Base Server and runs the contained StructureMap in-browser via fhir-structuremap-js to pre-fill answers"
+      },
+      {
+        "label": "CQL Execution Demo",
+        "file": "cql-execution-demo.fhir.json",
+        "type": "questionnaire",
+        "note": "cqf-library: a contained Library carries embedded precompiled ELM; the hidden AgeInMonths initialExpression (text/cql-identifier) is executed in-browser via cql-execution + cql-exec-fhir and drives an enableWhenExpression \u2014 select the Child patient preset and click \u21ba Re-init"
       }
     ]
   },

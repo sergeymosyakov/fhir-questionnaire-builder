@@ -119,10 +119,14 @@ export function evalCalcNodes(nodes, qr, fp, values, envVars = {}, base = null, 
 
 // Evaluate sdc-questionnaire-initialExpression on all nodes and write to values[].
 // Called once on form load and on manual re-init (↺ button in Variables panel).
-export function evalInitialExprNodes(nodes, qr, fp, values, envVars = {}) {
+// `cqlValues` (nodeId -> value) carries pre-resolved text/cql-identifier results —
+// see js/fhir/sdc-cql-eval.js; CQL execution is async and runs before this (sync) pass.
+export function evalInitialExprNodes(nodes, qr, fp, values, envVars = {}, cqlValues = {}) {
   const env = { resource: qr, ...envVars };
   for (const node of nodes) {
-    if (node._initialExpr) {
+    if (node._initialExprLanguage === 'text/cql-identifier') {
+      if (node.id in cqlValues) values[node.id] = cqlValues[node.id];
+    } else if (node._initialExpr) {
       try {
         const result = fp.evaluate(qr, node._initialExpr, env, fhirModel());
         if (node.itemType === 'checkbox') {
@@ -134,6 +138,7 @@ export function evalInitialExprNodes(nodes, qr, fp, values, envVars = {}) {
         // silently skip nodes whose expression fails
       }
     }
-    if (node.children?.length) evalInitialExprNodes(node.children, qr, fp, values, envVars);
+    if (node.children?.length) evalInitialExprNodes(node.children, qr, fp, values, envVars, cqlValues);
   }
 }
+

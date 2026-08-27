@@ -62,6 +62,7 @@ export const FHIR = {
   artifactVersionAlgorithm: SD + '/artifact-versionAlgorithm',
   artifactCopyrightLabel:   SD + '/artifact-copyrightLabel',
   replaces:             SD + '/replaces',
+  cqfLibrary:           SD + '/cqf-library',
 
   // ── SDC (sdc-questionnaire-*) extensions ──────────────────────────────────
   calculatedExpression: SDC + '/sdc-questionnaire-calculatedExpression',

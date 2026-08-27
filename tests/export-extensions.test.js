@@ -526,6 +526,24 @@ describe('buildFHIRObject — reference, quantity, expr extensions', () => {
     const ext = q.item[0].extension || [];
     expect(ext.find(e => e.url === INIT_URL)?.valueExpression?.expression).toBe('%patient.name');
   });
+
+  it('defaults calculatedExpression/initialExpression language to text/fhirpath', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _calculatedExpr: '%total * 2', _initialExpr: '%x' }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === CALC_URL)?.valueExpression?.language).toBe('text/fhirpath');
+    expect(ext.find(e => e.url === INIT_URL)?.valueExpression?.language).toBe('text/fhirpath');
+  });
+
+  it('exports a preserved non-FHIRPath language (text/cql-identifier) instead of hardcoding text/fhirpath', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'integer',
+      _calculatedExpr: 'AgeInMonths', _calculatedExprLanguage: 'text/cql-identifier',
+      _initialExpr: 'AgeInMonths', _initialExprLanguage: 'text/cql-identifier',
+    }]);
+    const ext = q.item[0].extension || [];
+    expect(ext.find(e => e.url === CALC_URL)?.valueExpression).toEqual({ language: 'text/cql-identifier', expression: 'AgeInMonths' });
+    expect(ext.find(e => e.url === INIT_URL)?.valueExpression).toEqual({ language: 'text/cql-identifier', expression: 'AgeInMonths' });
+  });
 });
 
 // ── exportFHIR ────────────────────────────────────────────────────────────────

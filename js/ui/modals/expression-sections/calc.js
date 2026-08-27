@@ -22,10 +22,11 @@ class CalcSection extends ExpressionSection {
 
   commit(pending, node) {
     node._calculatedExpr = pending.calcExpr.trim() || undefined;
+    node._calculatedExprLanguage = undefined; // manual edit here is always FHIRPath
   }
 
   buildPatch(pending, _node) {
-    return { _calculatedExpr: pending.calcExpr.trim() || null };
+    return { _calculatedExpr: pending.calcExpr.trim() || null, _calculatedExprLanguage: null };
   }
 }
 

@@ -208,6 +208,10 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (calcExpr?.valueExpression) {
     node._calculatedExpr = calcExpr.valueExpression.expression || '';
+    // Preserve a non-FHIRPath language (e.g. text/cql-identifier) instead of losing it on export.
+    if (calcExpr.valueExpression.language && calcExpr.valueExpression.language !== 'text/fhirpath') {
+      node._calculatedExprLanguage = calcExpr.valueExpression.language;
+    }
   }
 
   // SDC initialExpression
@@ -216,6 +220,9 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (initExpr?.valueExpression) {
     node._initialExpr = initExpr.valueExpression.expression || '';
+    if (initExpr.valueExpression.language && initExpr.valueExpression.language !== 'text/fhirpath') {
+      node._initialExprLanguage = initExpr.valueExpression.language;
+    }
   }
 
   // SDC answer-source expressions — dynamic answer options computed via FHIRPath
@@ -592,11 +599,21 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     const groupCalcExt = (fhirItem.extension || []).find(
       e => e.url === FHIR.calculatedExpression
     );
-    if (groupCalcExt?.valueExpression) node._calculatedExpr = groupCalcExt.valueExpression.expression || '';
+    if (groupCalcExt?.valueExpression) {
+      node._calculatedExpr = groupCalcExt.valueExpression.expression || '';
+      if (groupCalcExt.valueExpression.language && groupCalcExt.valueExpression.language !== 'text/fhirpath') {
+        node._calculatedExprLanguage = groupCalcExt.valueExpression.language;
+      }
+    }
     const groupInitExt = (fhirItem.extension || []).find(
       e => e.url === FHIR.initialExpression
     );
-    if (groupInitExt?.valueExpression) node._initialExpr = groupInitExt.valueExpression.expression || '';
+    if (groupInitExt?.valueExpression) {
+      node._initialExpr = groupInitExt.valueExpression.expression || '';
+      if (groupInitExt.valueExpression.language && groupInitExt.valueExpression.language !== 'text/fhirpath') {
+        node._initialExprLanguage = groupInitExt.valueExpression.language;
+      }
+    }
     // Preserve any unrecognised extensions for round-trip pass-through
     const groupUnknown = _collectUnknownExtensions(fhirItem);
     if (groupUnknown) node._unknownExtensions = groupUnknown;

@@ -47,7 +47,9 @@ Every node in the tree is either a **group** or an **item**:
   _renderXhtml:        string,           // raw XHTML markup (from rendering-xhtml extension; sanitized via DOMPurify and rendered as innerHTML in preview)
   _renderMarkdown:     string,           // Markdown text (from rendering-markdown extension; parsed by marked.js + sanitized via DOMPurify; rendering-xhtml takes priority)
   _calculatedExpr:     string,           // FHIRPath expression (SDC calculatedExpression)
-  _initialExpr:        string,           // FHIRPath expression (SDC initialExpression) — evaluated once on import + Re-init
+  _initialExpr:        string,           // FHIRPath expression, or a CQL define name when _initialExprLanguage is set (SDC initialExpression) — evaluated once on import + Re-init
+  _calculatedExprLanguage: string,       // valueExpression.language when not text/fhirpath; round-trip only, builder always authors FHIRPath here
+  _initialExprLanguage: string,          // valueExpression.language when not text/fhirpath, e.g. text/cql-identifier — see "CQL execution" below
   _readOnly:           boolean,          // FHIR item.readOnly
   _enableWhenText:     string,           // human-readable condition label (UI only, not persisted)
   _initialValue:       any,              // FHIR item.initial[0] value; pre-fills values[] on import
@@ -221,7 +223,8 @@ Stored in `questDoc.meta` (`js/fhir/quest-document.js`). Populated on import, wr
 | `_renderStyle` | `item._text.extension[rendering-style]` | standard FHIR `rendering-style` extension |
 | `_renderXhtml` | `item._text.extension[rendering-xhtml]` | raw XHTML markup; sanitized via DOMPurify + rendered as `innerHTML` in preview; editable in Appearance modal |
 | `_calculatedExpr` | SDC `sdc-questionnaire-calculatedExpression` extension (`valueExpression.expression`) | FHIRPath |
-| `_initialExpr` | SDC `sdc-questionnaire-initialExpression` extension (`valueExpression.expression`) | FHIRPath; evaluated once on import and on Re-init; result pre-fills `values[]` |
+| `_initialExpr` | SDC `sdc-questionnaire-initialExpression` extension (`valueExpression.expression`) | FHIRPath, or a CQL `define` name when `_initialExprLanguage` is `text/cql-identifier`; evaluated once on import and on Re-init; result pre-fills `values[]` |
+| `_calculatedExprLanguage` / `_initialExprLanguage` | `valueExpression.language` on the same two extensions | Preserved only when not `text/fhirpath` (e.g. `text/cql-identifier`); defaults to `text/fhirpath` on export when unset; reset to `text/fhirpath` by any manual edit in the Expression modal |
 | `_readOnly` | `item.readOnly` | |
 | `_prefix` | `item.prefix` | imported and exported; displayed as amber badge in preview; editable in builder meta-row |
 | `_answerConstraint` | `item.answerConstraint` (R5 native) | `optionsOnly` / `optionsOrType` / `optionsOrString`; import + export + Answer Type modal dropdown; `optionsOnly` makes open-choice preview read-only; on R4/R4B export it is downgraded to the builder-private extension `item-answerConstraint` (field is absent from R4/R4B) |
@@ -628,7 +631,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 |---|---|---|
 | `sdc-questionnaire-variable` | ✅ | Questionnaire-level and item-level; editable in Variables panel |
 | `sdc-questionnaire-calculatedExpression` | ✅ | FHIRPath; evaluated in topological order |
-| `sdc-questionnaire-initialExpression` | ✅ | FHIRPath; evaluated on load and Re-init |
+| `sdc-questionnaire-initialExpression` | ✅ | FHIRPath, or `language: text/cql-identifier` resolved via the questionnaire's `cqf-library` (see "CQL execution" below); evaluated on load and Re-init |
 | `sdc-questionnaire-enableWhenExpression` | ✅ | FHIRPath visibility condition |
 | `sdc-questionnaire-answerExpression` | ✅ | Dynamic answer options |
 | `sdc-questionnaire-candidateExpression` | ✅ | Candidate/suggested answers |
@@ -667,6 +670,21 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `sdc-questionnaire-sourceStructureMap` | ✅ | Resource→QR StructureMap; executed client-side via **Answers ▾ → Fill via StructureMap** (fhir-structuremap-js), resolving a `#id` contained StructureMap against a resource fetched from the FHIR Base Server |
 | `sdc-questionnaire-lookupQuestionnaire` | 🔄 | Server-side lookup reference; round-tripped |
 | `sdc-questionnaire-width` | 🔄 | Table column width hint; round-tripped; table layout not implemented |
+| `cqf-library` (core FHIR, not SDC-namespaced) | ✅ | Resolves a `#id` contained `Library` and executes its embedded ELM to answer `text/cql-identifier` initialExpression fields — see "CQL execution" below |
+
+---
+
+### CQL execution
+
+SDC's `initialExpression` supports `language: text/cql-identifier` — the `expression` string names a `define` in a CQL `Library`, referenced via the questionnaire-root `cqf-library` extension (a core FHIR extension, not SDC-specific). Unlike StructureMap execution, no new engine library was written: a mature JS ELM interpreter already exists and is actively maintained by the CQL Framework/MITRE team — [`cql-execution`](https://github.com/cqframework/cql-execution) + [`cql-exec-fhir`](https://github.com/cqframework/cql-exec-fhir) (vendored at `lib/cql-execution.esm.js` / `lib/cql-exec-fhir.esm.js`, `npm run vendor:cql` / `vendor:cql-fhir`).
+
+- `js/fhir/cql-engine.js` — `runCqlLibrary(elmJson, patient)` lazy-loads the two vendored modules (dynamic `import()` — `cql-exec-fhir` bundles all 4 FHIR model-info versions, ~3MB, only fetched when a questionnaire actually references a `cqf-library`) and executes an ELM library against a FHIR `Bundle` built from `patient`.
+- `js/fhir/sdc-cql-eval.js` — `resolveCqlInitialValues(questJson, tree, envVars)` resolves the `cqf-library` canonical reference against `contained[]`, extracts the `Library`'s embedded precompiled ELM (`content[]` entry with `contentType: application/elm+json`, base64-decoded), synthesizes a minimal `Patient` from the active Patient-preset `%age` variable (this app has no other "current Patient resource" concept), and maps each CQL `define` result back onto the node whose `_initialExpr` names it. Called from `reinitForm()` before the existing (synchronous) `evalInitialExprNodes` pass — CQL results are pre-resolved once per Re-init, never on every keystroke.
+- Scoped to `initialExpression` only (not `calculatedExpression`) — matches real-world usage (a CQL-computed clinical fact is meant to populate once, like `initialExpression`'s own semantics, not recompute on every render) and keeps the frequently-invoked calc pass fully synchronous.
+
+**Supported (v1, self-contained):** a `#id` contained `Library` resource with `application/elm+json` content — fully offline, deterministic, no network call. See `sampledata/cql-execution-demo.fhir.json`.
+
+**Not supported (honest gap, see [ROADMAP.md](ROADMAP.md)):** resolving an **external absolute canonical** `Library` URL from a live FHIR server (e.g. the real WHO SMART Guidelines EmCare/IMCI `Library` referenced by `sampledata/who-emcare-treatment.fhir.json`) — needs canonical+version fetch and CORS, and CQL→ELM compilation itself is Java-only industry-wide (no browser path), so an external Library must already carry precompiled ELM. Also not supported: terminology/VSAC-backed CQL (`cql-exec-vsac`) for `define`s that do real ValueSet membership checks. Not authorable via the builder UI — the Expression modal always writes plain FHIRPath and resets the language marker on any manual edit; a CQL-driven field can only arrive via import.
 
 ---
 
