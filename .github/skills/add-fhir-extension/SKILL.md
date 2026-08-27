@@ -46,7 +46,7 @@ invent a URL or cardinality.
 ## 8. Docs
 - `docs/FHIR-MAPPING.md`: move the field OUT of any Not Supported table INTO a
   supported table (never leave a ✅ in Not Supported).
-- `docs/ROADMAP.md`: DELETE the item if it was listed (do not mark `[x]`).
+- If tracked as a `roadmap`-labeled GitHub issue: close it (`Closes #<n>` in the PR) — the backlog lives as issues, not a file.
 - `help.html`: add/update the row in the `HELP_DATA` array.
 - `docs/CONTEXT.md`: update file table / feature list if structure changed.
 

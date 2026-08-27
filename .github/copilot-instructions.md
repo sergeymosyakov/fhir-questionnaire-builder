@@ -1,7 +1,7 @@
 # GitHub Copilot Instructions for FHIR Questionnaire Builder
 
 > **Critical workflow rules for AI agents working on this codebase.**  
-> Full architecture docs: `docs/CONTEXT.md`, `docs/FHIR-MAPPING.md`, `docs/ROADMAP.md`
+> Full architecture docs: `docs/CONTEXT.md`, `docs/FHIR-MAPPING.md`. Feature backlog: [GitHub issues labeled `roadmap`](https://github.com/sergeymosyakov/fhir-questionnaire-builder/issues?q=is%3Aissue+is%3Aopen+label%3Aroadmap) (not a file).
 
 ---
 
@@ -14,7 +14,7 @@
 1. **Stop and ask after one failed attempt.** If a bug or issue is not resolved on the first real attempt — STOP immediately. Ask the user to reproduce manually and provide more details. Do NOT keep iterating or running more diagnostics.
    **STOP command is absolute.** If the user writes "стоп", "stop", "стоять", "прекрати", "остановись", "стой" — immediately stop ALL actions, output one sentence max, and wait. No explanations, no tool calls, no "I'll just quickly check one more thing". Zero tolerance.
 2. **Never guess. Never infer. Ask.** If any detail is unclear or missing — stop and ask exactly what information is needed. Do not proceed on assumptions.
-3. **FHIR support ⇄ docs must stay in sync.** Implemented FHIR fields are removed from the Not Supported tables in `docs/FHIR-MAPPING.md` and from `docs/ROADMAP.md`; `help.html` and `sampledata/` are updated; every FHIR-mapped control carries the four `data-tip-*` attributes. Full details in [instructions/fhir.instructions.md](instructions/fhir.instructions.md).
+3. **FHIR support ⇄ docs must stay in sync.** Implemented FHIR fields are removed from the Not Supported tables in `docs/FHIR-MAPPING.md`; any matching `roadmap`-labeled GitHub issue is closed; `help.html` and `sampledata/` are updated; every FHIR-mapped control carries the four `data-tip-*` attributes. Full details in [instructions/fhir.instructions.md](instructions/fhir.instructions.md).
 
 ---
 
@@ -26,7 +26,7 @@
    - "commit and push" / "пушай" = permission for both in one step.
    - "move / create / fix" without explicit commit/push instruction = only edit files, do NOT commit or push.
    - **PRs default to squash auto-merge** (`gh pr create` then `gh pr merge <branch> --squash --auto`), unless the change is large/needs manual review (say so explicitly when skipping auto-merge, e.g. a big feature branch). After a PR merges, delete the branch both locally and on origin (`git branch -d`, `git push origin --delete`) — don't leave merged branches lying around.
-2. **Before every push** — announce "I'm about to push, running pre-push checklist first", then: run `npm run lint` (must pass, zero errors); run `npx vitest run` (must pass); update relevant `docs/` files: `docs/CONTEXT.md` (file table, UX features, architecture), `docs/FHIR-MAPPING.md` (if FHIR mapping changed), `docs/ROADMAP.md` (if features completed or new features planned). `README.md` — only update for major changes (running instructions, sample data list, tech stack summary). **E2E (Playwright) tests are on-demand only** — run only when the user explicitly asks ("run e2e"). Do NOT run playwright as part of the default pre-push checklist.
+2. **Before every push** — announce "I'm about to push, running pre-push checklist first", then: run `npm run lint` (must pass, zero errors); run `npx vitest run` (must pass); update relevant `docs/` files: `docs/CONTEXT.md` (file table, UX features, architecture), `docs/FHIR-MAPPING.md` (if FHIR mapping changed); close or open GitHub issues labeled `roadmap` (if features completed or new features planned) — the backlog lives as issues, not a file. `README.md` — only update for major changes (running instructions, sample data list, tech stack summary). **E2E (Playwright) tests are on-demand only** — run only when the user explicitly asks ("run e2e"). Do NOT run playwright as part of the default pre-push checklist.
 3. **English only** — all code comments, doc strings, commit messages, CONTEXT.md, README.md, any in-repo text, **and all UI labels, button text, and tooltip text in HTML and JS** must be in English. No Russian anywhere in the codebase.
 4. **Every new feature ships with tests + sample coverage.** For any new user-facing functionality: (a) add **e2e (Playwright)** coverage under `tests/e2e/` proving the feature works end-to-end (plus unit tests for any pure logic); (b) if the feature is data-driven (FHIR field/extension, item type, control), either **add a new `sampledata/` file or extend an existing one** so the feature is visible to users, and keep `sampledata/library.json` + docs in sync. A feature that exists only in `tests/fixtures/` is not considered shipped.
 5. **New rules go into the repo, not just memory** — whenever a new rule is established (in conversation, from a bug, from a lesson learned), add it immediately to the correct customization file (see layout below), without asking. Do not store rules only in local memory.
