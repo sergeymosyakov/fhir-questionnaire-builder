@@ -18,6 +18,8 @@ export class PreviewModeMenu extends DropdownMenu {
       testid:   'preview-mode-btn',
     });
 
+    this._menu.classList.add('load-menu--right');
+
     this._wrap.style.display = 'none';
     this._buildMenu();
     this._applyMode('preview');

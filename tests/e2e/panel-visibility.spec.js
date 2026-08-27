@@ -1,14 +1,15 @@
 // ── E2E: Narrow-screen panel visibility toggle (builder ↔ preview) ───────────
-// Mobile-only builder/preview switch (issue #75 Phases 1-3). Below the 768px
+// Mobile-only builder/preview switch (issue #75 Phases 1-3). Below the 1024px
 // layout breakpoint the builder defaults to a collapsed rail (preview full);
 // tapping the rail, the top-panel button, or the in-panel minimize button
-// toggles between the two, persisted in localStorage. At/above 768px both
+// toggles between the two, persisted in localStorage. At/above 1024px both
 // panels are always visible and all three controls are hidden/no-op.
 //
 // data-testid:
 //   panel-toggle-btn          mobile-only builder/preview switch button (top-panel)
 //   left-panel-rail-tab       collapsed-state rail — tap to expand the builder
 //   left-panel-minimize-btn   expanded-state button (builder header) — collapse back
+//   sign-in-btn               top-panel auth button — must stay pinned to the right edge
 //
 // Run: npx playwright test tests/e2e/panel-visibility.spec.js
 
@@ -122,7 +123,7 @@ test.describe('Panel visibility toggle — desktop (no-op)', () => {
 });
 
 test.describe('Top-panel narrow-screen cleanup', () => {
-  test('GitHub link + copyright are hidden below 768px, visible at/above it', async ({ page }) => {
+  test('GitHub link + copyright are hidden below 1024px, visible at/above it', async ({ page }) => {
     await page.setViewportSize({ width: 480, height: 800 });
     await page.goto('/');
     await waitForLoad(page);
@@ -130,5 +131,55 @@ test.describe('Top-panel narrow-screen cleanup', () => {
 
     await page.setViewportSize({ width: 1280, height: 800 });
     await expect(page.locator('.top-panel-copyright')).toBeVisible();
+  });
+});
+
+test.describe('Top-panel — no horizontal overflow at narrow widths', () => {
+  test('sign-in button always stays fully within the viewport, no scroll needed', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+
+    for (const width of [320, 360, 400, 480]) {
+      await page.setViewportSize({ width, height: 800 });
+
+      await expect(async () => {
+        const overflow = await page.evaluate(() => {
+          const tp = document.querySelector('.top-panel');
+          return tp.scrollWidth - tp.clientWidth;
+        });
+        expect(overflow).toBeLessThanOrEqual(0);
+      }).toPass();
+
+      const signInBox = await page.getByTestId('sign-in-btn').boundingBox();
+      expect(signInBox.x + signInBox.width).toBeLessThanOrEqual(width);
+    }
+  });
+});
+
+test.describe('Dropdown menus stay within the viewport', () => {
+  test.use({ viewport: { width: 400, height: 800 } });
+
+  test('Questionnaires menu never grows past the screen width even with a very long item label', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+
+    // Regression test for issue #75 follow-up: .load-menu used to size itself
+    // to its widest child (e.g. a long "Recent draft: <title> (<timestamp>)"
+    // label) with no upper bound, pushing it off-screen to the left.
+    const box = await page.evaluate(() => {
+      const menu = document.querySelector('#loadFhirBtn').closest('.load-wrap').querySelector('.load-menu');
+      const longItem = document.createElement('div');
+      longItem.className = 'load-menu-item';
+      longItem.textContent = 'Recent draft: ' + 'X'.repeat(120) + ' (8/27/2026 11:46 PM)';
+      menu.insertBefore(longItem, menu.firstChild);
+      menu.style.display = 'block';
+      const r = menu.getBoundingClientRect();
+      menu.style.display = 'none';
+      longItem.remove();
+      return { x: r.x, right: r.x + r.width };
+    });
+
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.right).toBeLessThanOrEqual(400);
   });
 });

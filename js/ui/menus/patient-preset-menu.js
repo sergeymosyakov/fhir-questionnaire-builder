@@ -41,11 +41,13 @@ export class PatientPresetMenu extends DropdownMenu {
     this._menu.style.position = 'fixed';
   }
 
-  /** Position the fixed menu below the button on every open. */
+  /** Position the fixed menu below the button on every open, right-anchored
+      so it opens toward screen-left instead of overflowing past the right edge. */
   _onOpen() {
     const r = this._btn.getBoundingClientRect();
-    this._menu.style.top  = (r.bottom + 4) + 'px';
-    this._menu.style.left = r.left + 'px';
+    this._menu.style.top   = (r.bottom + 4) + 'px';
+    this._menu.style.left  = 'auto';
+    this._menu.style.right = (window.innerWidth - r.right) + 'px';
   }
 
   /** @param {{ onPreset(preset): void, onCustom(): void }} handlers */

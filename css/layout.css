@@ -3,13 +3,12 @@
   background: var(--c-primary-dk);
   color: #fff;
   padding: 0 16px;
-  height: 56px;
   min-height: 56px;
   display: flex;
   align-items: center;
   gap: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,.25);
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   overflow-x: auto;
   flex-shrink: 0;
   z-index: 100;
@@ -174,7 +173,7 @@
 
 /* === Two-column layout ======================================================= */
 /* Row layout at all sizes — builder (left) + preview (right) side by side.
-   Below 768px the left panel defaults to a collapsed rail (issue #75 Phase 2,
+   Below 1024px the left panel defaults to a collapsed rail (issue #75 Phase 2,
    rules further below); desktop widens it into a resizable full panel. */
 .layout {
   display: flex;
@@ -214,7 +213,6 @@
 }
 .top-panel-copyright {
   display: none;
-  margin-left: auto;
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
@@ -238,7 +236,7 @@
 .top-panel-github-link:hover { color: #fff !important; }
 
 .top-panel-auth {
-  margin-left: 20px;
+  margin-left: auto;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -251,7 +249,7 @@
 
 /* Narrow-screen panel visibility (issue #75 Phase 2) — collapsed default shows
    only the rail tab; .layout--left-expanded (js/ui/panel-visibility.js) swaps
-   in the full content and hides the rail/preview. No-op at ≥768px, see below.
+   in the full content and hides the rail/preview. No-op at ≥1024px, see below.
    flex-direction/flex/min-height live here (not on the expanded/desktop
    display:flex overrides) so they always apply once display becomes non-none. */
 .left-panel-content {
@@ -390,9 +388,9 @@
 }
 
 /* === Responsive ============================================================== */
-/* Desktop (≥768px): rail/expand-toggle is mobile-only — always show both
+/* Desktop (≥1024px): rail/expand-toggle is mobile-only — always show both
    panels in full, resizable left panel restored. */
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   /* GitHub link + copyright — decorative, dropped from the narrow top-panel
      row (issue #75 Phase 3) to leave room for Patient Preset / Sign in. */
   .top-panel-copyright { display: flex; }

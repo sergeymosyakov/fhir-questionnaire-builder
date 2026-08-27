@@ -149,9 +149,9 @@
   border-radius: var(--r-sm);
   box-shadow: 0 4px 16px rgba(0,0,0,.14);
   min-width: 230px;
+  max-width: min(340px, calc(100vw - 24px));
   overflow: hidden;
 }
-.load-menu--right { left: auto; right: 0; }
 .load-menu--right { left: auto; right: 0; }
 .load-menu-item {
   display: block;
@@ -170,6 +170,8 @@
   border-radius: 0;
   transition: background .1s;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .load-menu-item:hover { background: var(--c-primary-lt); color: var(--c-primary); }
 .load-menu-item:disabled,

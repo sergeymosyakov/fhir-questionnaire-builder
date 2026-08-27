@@ -43,6 +43,7 @@ export class DropdownMenu {
     this._menu = document.createElement('div');
     this._menu.className = 'load-menu';
     this._menu.id = menuId;
+    if (menuId) this._menu.dataset.testid = menuId.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
     this._menu.style.display = 'none';
 
     this._wrap.appendChild(this._btn);

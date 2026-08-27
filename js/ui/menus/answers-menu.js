@@ -19,6 +19,8 @@ export class AnswersMenu extends DropdownMenu {
       tipBody:  'Load answers from a QuestionnaireResponse file, or pick a sample response for the current questionnaire.',
     });
 
+    this._menu.classList.add('load-menu--right');
+
     // Hidden file input for QR file picker
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
