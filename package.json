@@ -25,7 +25,7 @@
     "cql-exec-fhir": "^2.1.6",
     "cql-execution": "^3.3.2",
     "esbuild": "^0.28.2",
-    "eslint": "^10.9.0",
+    "eslint": "^10.9.1",
     "events": "^3.3.0",
     "fhir-structuremap-js": "^1.1.0",
     "fhirpath": "^4.3.0",
