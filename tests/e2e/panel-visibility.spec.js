@@ -46,6 +46,16 @@ test.describe('Panel visibility toggle — narrow screens', () => {
     await expect(rightRailTab(page)).toBeVisible();
   });
 
+  test('rail tabs show the shared copyright notice next to the panel name', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+
+    await expect(leftRailTab(page)).toContainText('Sergey Mosyakov');
+
+    await leftRailTab(page).click();
+    await expect(rightRailTab(page)).toContainText('Sergey Mosyakov');
+  });
+
   test('tapping the left rail expands the builder; tapping the right rail collapses it back', async ({ page }) => {
     await page.goto('/');
     await waitForLoad(page);

@@ -277,10 +277,8 @@
 }
 .left-panel-rail-tab {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   width: 100%;
   height: 100%;
   border: none;
@@ -290,14 +288,37 @@
   padding: 16px 4px;
 }
 .left-panel-rail-tab:hover { background: #bbdefb; }
-.left-panel-rail-tab-icon { font-size: 1.2em; }
+/* Fixed footprint sized for the rotated content — transform alone doesn't
+   change what the flex layout reserves, so .left-panel-rail-tab-text needs an
+   explicit (narrow, tall) box for the rotated .left-panel-rail-tab-inner to
+   center within. */
+.left-panel-rail-tab-text {
+  width: 32px;
+  height: 290px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.left-panel-rail-tab-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transform: rotate(90deg);
+}
 .left-panel-rail-tab-label {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .5px;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+.left-panel-rail-tab-icon { font-size: 1.1em; }
+.left-panel-rail-tab-copyright {
+  font-size: 9px;
+  color: var(--c-primary);
+  opacity: .7;
+  white-space: nowrap;
 }
 
 /* Right (preview) panel mirrors the left: visible/expanded by default (no
@@ -310,10 +331,8 @@
 }
 .right-panel-rail-tab {
   display: none;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   width: 100%;
   height: 100%;
   border: none;
@@ -323,14 +342,34 @@
   padding: 16px 4px;
 }
 .right-panel-rail-tab:hover { background: #bbdefb; }
-.right-panel-rail-tab-icon { font-size: 1.2em; }
+.right-panel-rail-tab-text {
+  width: 32px;
+  height: 290px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.right-panel-rail-tab-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  /* opposite sign from the left/builder side — explicit request, not mirrored */
+  transform: rotate(-90deg);
+}
 .right-panel-rail-tab-label {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .5px;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+.right-panel-rail-tab-icon { font-size: 1.1em; }
+.right-panel-rail-tab-copyright {
+  font-size: 9px;
+  color: var(--c-primary);
+  opacity: .7;
+  white-space: nowrap;
 }
 
 .layout--left-expanded .left-panel { flex: 1; max-width: none; }

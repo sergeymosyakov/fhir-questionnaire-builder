@@ -22,6 +22,7 @@ import * as statusBadge from './ui/status-badge.js';
 import * as progress from './ui/progress.js';
 import { showError, showInfo } from './ui/toast.js';
 import './ui/left-header-actions.js';
+import './ui/copyright-notice.js';
 import './ui/modals/index.js';
 import './ui/variables-panel.js';
 import './ui/fhirpath-console.js';
