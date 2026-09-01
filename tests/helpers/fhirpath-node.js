@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { runInThisContext } from 'node:vm';
 
 let cached = null;
 
@@ -13,8 +14,9 @@ export function loadFhirpath() {
   const g = globalThis;
   g.window = g;
   g.self = g;
-  const mod = { exports: {} };
-  new Function('module', 'exports', 'window', 'self', 'globalThis', src)(mod, mod.exports, g, g, g);
-  cached = mod.exports && mod.exports.parse ? mod.exports : (g.fhirpath || g.window.fhirpath);
+  // runInThisContext (not new Function) so a bare top-level `var` from an esbuild
+  // --global-name IIFE hoists onto globalThis, same as a real browser <script> tag.
+  runInThisContext(src, { filename: 'lib/fhirpath.min.js' });
+  cached = g.fhirpath || g.window.fhirpath;
   return cached;
 }
