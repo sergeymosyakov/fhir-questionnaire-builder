@@ -8,6 +8,7 @@ export class ViewOptionsMenu extends DropdownMenu {
       menuId:   'viewOptionsMenu',
       wrapId:   'viewOptionsWrap',
       label:    '&#x2699;&#xFE0F; View &#x25BE;',
+      menuTitle: 'View Options',
       testid:   'view-options-btn',
       tipTitle: 'View Options',
       tipBody:  'Toggle display of preview elements: id, prefix, badges, and hidden items.',

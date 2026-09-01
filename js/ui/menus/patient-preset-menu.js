@@ -8,6 +8,7 @@ export class PatientPresetMenu extends DropdownMenu {
   constructor(presets) {
     super({
       label:    '&#x1F464; Patient &#x25BE;',
+      menuTitle: 'Patient',
       btnClass: 'btn-fhir',
       testid:   'patient-preset-btn',
       tipTitle: 'Patient Preset',

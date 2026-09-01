@@ -15,6 +15,7 @@ export const DESKTOP_MIN_WIDTH = 1024; // must match css/builder-toolbar.css bre
 //   btnId, menuId     — HTML ids for button and menu div
 //   wrapId            — optional id for the .load-wrap element
 //   label             — innerHTML for the button
+//   menuTitle         — mobile-only header title naming the menu (e.g. 'Answers')
 //   btnClass          — CSS classes for the button (default: 'btn-fhir')
 //   testid            — data-testid on the button
 //   tipTitle/tipBody  — rich tooltip attributes on the button
@@ -29,7 +30,7 @@ export class DropdownMenu {
     }
   }
 
-  constructor({ btnId, menuId, wrapId, label, btnClass = 'btn-fhir',
+  constructor({ btnId, menuId, wrapId, label = '', menuTitle, btnClass = 'btn-fhir',
                 testid, tipTitle, tipBody, tipFhir, tipSpec } = {}) {
     this._wrap = document.createElement('div');
     this._wrap.className = 'load-wrap';
@@ -64,7 +65,16 @@ export class DropdownMenu {
     this._closeBtn.dataset.tipTitle = 'Close';
     this._closeBtn.textContent = '\u2715';
     this._closeBtn.addEventListener('click', e => { e.stopPropagation(); this.close(); });
-    this._menu.appendChild(this._closeBtn);
+
+    this._menuHeader = document.createElement('div');
+    this._menuHeader.className = 'load-menu-header';
+    this._menuHeader.dataset.testid = 'load-menu-header';
+    const titleEl = document.createElement('span');
+    titleEl.className = 'load-menu-title';
+    titleEl.dataset.testid = 'load-menu-title';
+    titleEl.textContent = menuTitle || '';
+    this._menuHeader.append(titleEl, this._closeBtn);
+    this._menu.appendChild(this._menuHeader);
 
     this._wrap.appendChild(this._btn);
     this._wrap.appendChild(this._menu);

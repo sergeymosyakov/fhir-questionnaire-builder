@@ -207,11 +207,27 @@
   accent-color: var(--c-primary);
 }
 
-/* Mobile-only dismiss button — lives inside .load-menu; hidden by inheriting
-   the parent's display:none, no separate JS toggle needed. Desktop hides it
-   explicitly below (small anchored dropdown, click-outside is enough there). */
-.load-menu-close {
+/* Mobile-only header row (title + dismiss button) — lives inside .load-menu;
+   hidden by inheriting the parent's display:none, no separate JS toggle needed.
+   Desktop hides it explicitly below (small anchored dropdown, no title needed,
+   click-outside is enough there). Styled like .modal-header (css/modals.css). */
+.load-menu-header {
   display: none;
+}
+.load-menu-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text-1);
+}
+.load-menu-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--c-text-2);
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  transition: background .12s;
 }
 
 /* Mobile (<1024px): dropdowns become a bottom sheet — full width, pinned to
@@ -240,18 +256,13 @@
     /* Replays from the start every time display flips none→block/flex. */
     animation: load-menu-slide-up .2s ease-out;
   }
-  .load-menu-close {
-    display: block;
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 15px;
-    color: var(--c-text-2);
-    padding: 4px 6px;
-    border-radius: var(--r-sm);
+  .load-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 11px;
+    border-bottom: 1px solid var(--c-border);
+    flex-shrink: 0;
   }
   .load-menu-close:hover { background: var(--c-hover); }
   .load-wrap > .btn-fhir.load-btn--active {

@@ -17,6 +17,7 @@ export class LanguageMenu extends DropdownMenu {
       btnId:    'langMenuBtn',
       menuId:   'langMenu',
       label:    '🌐 Original &#x25BE;',
+      menuTitle: 'Language',
       btnClass: 'btn-fhir',
       testid:   'lang-menu-btn',
     });
@@ -41,7 +42,7 @@ export class LanguageMenu extends DropdownMenu {
    */
   rebuild(translations) {
     this._menu.innerHTML = '';
-    this._menu.appendChild(this._closeBtn); // survives the wipe, unlike appended items
+    this._menu.appendChild(this._menuHeader); // survives the wipe, unlike appended items
     const langs = Object.keys(translations || {});
 
     // Reset to Original only if the active language is no longer in the available set

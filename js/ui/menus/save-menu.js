@@ -11,6 +11,7 @@ export class SaveMenu extends DropdownMenu {
       menuId:   'exportMenu',
       wrapId:   'exportWrap',
       label:    '&#x2B07; Save &#x25BE;',
+      menuTitle: 'Save',
       btnClass: 'btn-fhir btn-fhir-export',
       testid:   'export-btn',
       tipTitle: 'Save / Export',
