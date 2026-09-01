@@ -207,22 +207,47 @@
   accent-color: var(--c-primary);
 }
 
-/* Mobile (<1024px): dropdowns become a shared fixed full-height panel pinned
-   to the right edge — same spot no matter which toolbar button opened it
-   (top is set per-instance in JS, see DropdownMenu._positionMenu). The
-   trigger button gets a pressed look while its menu is open. */
+/* Mobile-only dismiss button — lives inside .load-menu; hidden by inheriting
+   the parent's display:none, no separate JS toggle needed. Desktop hides it
+   explicitly below (small anchored dropdown, click-outside is enough there). */
+.load-menu-close {
+  display: none;
+}
+
+/* Mobile (<1024px): dropdowns become a bottom sheet — full width, pinned to
+   the bottom, height fits the content (capped), matches .status-dropdown
+   (css/status-badge.css). Same spot no matter which toolbar button opened it.
+   The trigger button gets a pressed look while its menu is open. */
 @media not all and (min-width: 1024px) {
   .load-menu {
     position: fixed;
-    left: auto;
-    /* !important: beats a stale inline `right` a subclass (PatientPresetMenu)
-       may have set for its desktop-only anchoring — inline always outranks
-       plain specificity, this is the one case where !important is the fix. */
+    left: 0;
+    /* !important: beats a stale inline `top`/`right` a subclass
+       (PatientPresetMenu) may have set for its desktop-only anchoring —
+       inline always outranks plain specificity, this is the one case where
+       !important is the fix. */
+    top: auto !important;
     right: 0 !important;
     bottom: 0;
-    min-width: 33vw;
+    width: 100%;
+    max-width: 100%;
+    max-height: 70vh;
     overflow-y: auto;
   }
+  .load-menu-close {
+    display: block;
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--c-text-2);
+    padding: 4px 6px;
+    border-radius: var(--r-sm);
+  }
+  .load-menu-close:hover { background: var(--c-hover); }
   .load-wrap > .btn-fhir.load-btn--active {
     background: var(--c-active-bg);
     color: var(--c-active-text);

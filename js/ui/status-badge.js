@@ -119,6 +119,17 @@ export class StatusBadge {
     if (!this._dropdown) return;
     this._dropdown.innerHTML = '';
 
+    // Mobile-only (CSS hides it at desktop) — the bottom-sheet variant has no
+    // other obvious dismiss affordance besides tapping outside.
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'status-dropdown-close';
+    closeBtn.dataset.testid = 'status-dropdown-close';
+    closeBtn.dataset.tipTitle = 'Close';
+    closeBtn.textContent = '\u2715';
+    closeBtn.addEventListener('click', e => { e.stopPropagation(); this._close(); });
+    this._dropdown.appendChild(closeBtn);
+
     if (items.length === 0) {
       const msg = document.createElement('div');
       msg.className   = 'status-dropdown-msg';

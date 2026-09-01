@@ -66,8 +66,25 @@
   border-radius: 2px;
   margin: 12px auto 6px;
 }
+/* Mobile-only dismiss button — the bottom-sheet has no other obvious close
+   affordance besides tapping outside; hidden on desktop's small anchored dropdown. */
+.status-dropdown-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: #8a9bb0;
+  padding: 4px 6px;
+  border-radius: var(--r-sm);
+  transition: background .12s, color .12s;
+}
+.status-dropdown-close:hover { background: #243247; color: #dce6f0; }
 /* Desktop: restore positioned dropdown with caret */
 @media (min-width: 1024px) {
+  .status-dropdown-close { display: none; }
   .status-dropdown {
     position: absolute;
     top: calc(100% + 7px);

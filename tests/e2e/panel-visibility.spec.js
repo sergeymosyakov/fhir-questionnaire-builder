@@ -10,6 +10,10 @@
 //   left-panel-rail-tab        collapsed-builder rail — tap to expand it (collapses preview)
 //   right-panel-rail-tab       collapsed-preview rail — tap to expand it (collapses builder)
 //   sign-in-btn                top-panel auth button — must stay pinned to the right edge
+//   load-fhir-btn              "Questionnaires ▾" toolbar dropdown trigger
+//   load-menu                  "Questionnaires ▾" dropdown panel
+//   load-menu-close            × dismiss button inside a dropdown panel (mobile only)
+//   patient-preset-btn         "Patient ▾" toolbar dropdown trigger
 //
 // Run: npx playwright test tests/e2e/panel-visibility.spec.js
 
@@ -174,5 +178,95 @@ test.describe('Dropdown menus stay within the viewport', () => {
 
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.right).toBeLessThanOrEqual(400);
+  });
+});
+
+test.describe('Expanded panel never overflows the viewport', () => {
+  test.use({ viewport: { width: 480, height: 800 } });
+
+  // Regression test: .layout--left-expanded .left-panel used to be width:100%
+  // while the right rail added another 44px alongside it in the same flex row,
+  // pushing the right rail fully off-screen (it was still display:flex — just
+  // not visible on screen — so a plain toBeVisible() assertion never caught it).
+  test('left expanded: both panels stay within the horizontal viewport bounds', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+    await leftRailTab(page).click();
+    await expect(rightRailTab(page)).toBeVisible();
+
+    const leftBox  = await leftPanel(page).boundingBox();
+    const rightBox = await rightPanel(page).boundingBox();
+    expect(leftBox.x).toBeGreaterThanOrEqual(0);
+    expect(leftBox.x + leftBox.width).toBeLessThanOrEqual(480);
+    expect(rightBox.x).toBeGreaterThanOrEqual(0);
+    expect(rightBox.x + rightBox.width).toBeLessThanOrEqual(480);
+  });
+
+  test('right expanded (default): both panels stay within the horizontal viewport bounds', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+
+    const leftBox  = await leftPanel(page).boundingBox();
+    const rightBox = await rightPanel(page).boundingBox();
+    expect(leftBox.x + leftBox.width).toBeLessThanOrEqual(480);
+    expect(rightBox.x + rightBox.width).toBeLessThanOrEqual(480);
+  });
+});
+
+test.describe('Toolbar dropdowns — mobile toggle-button behavior', () => {
+  test.use({ viewport: { width: 480, height: 800 } });
+
+  test('trigger gets an active/expanded state while its menu is open, clears on repeat click', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+
+    const trigger = page.getByTestId('load-fhir-btn');
+    await expect(trigger).toBeVisible();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    await trigger.click();
+    await expect(trigger).toHaveClass(/load-btn--active/);
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    await trigger.click();
+    await expect(trigger).not.toHaveClass(/load-btn--active/);
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('opening a different menu deactivates the previously-open trigger', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+
+    const questionnairesBtn = page.getByTestId('load-fhir-btn');
+    const patientBtn        = page.getByTestId('patient-preset-btn');
+
+    await questionnairesBtn.click();
+    await expect(questionnairesBtn).toHaveClass(/load-btn--active/);
+
+    await patientBtn.click();
+    await expect(questionnairesBtn).not.toHaveClass(/load-btn--active/);
+    await expect(patientBtn).toHaveClass(/load-btn--active/);
+  });
+
+  test('open menu panel is a full-width bottom sheet reaching the bottom of the viewport', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+
+    await page.getByTestId('load-fhir-btn').click();
+    const box = await page.getByTestId('load-menu').boundingBox();
+    expect(box.x).toBeCloseTo(0, 0);
+    expect(box.width).toBeCloseTo(480, 0);
+    expect(box.y + box.height).toBeCloseTo(800, 0);
+  });
+
+  test('menu has a close button that dismisses it', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+
+    await page.getByTestId('load-fhir-btn').click();
+    const menu = page.getByTestId('load-menu');
+    await expect(menu).toBeVisible();
+    await menu.getByTestId('load-menu-close').click();
+    await expect(menu).toBeHidden();
   });
 });

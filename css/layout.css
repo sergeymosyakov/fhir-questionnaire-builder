@@ -163,13 +163,19 @@
 }
 /* Loaded file name gets its own line below the "Questionnaire Preview" label
    (FileNameDisplay appends .loaded-file-name-wrap into this same element) —
-   more room for long titles instead of squeezing both onto one row. */
+   more room for long titles instead of squeezing both onto one row.
+   min-width matches .search-wrap (search input + nav buttons, below) for a
+   consistent minimum footprint; align-self:flex-start keeps it pinned to the
+   top of the row instead of centering against the (often taller, wrapped)
+   toolbar-buttons column next to it. */
 .right-panel-header-top .section-title {
   margin-bottom: 0;
   flex-direction: column;
   align-items: flex-start;
+  align-self: flex-start;
   gap: 4px;
   padding: 4px 0;
+  min-width: 200px;
 }
 .right-panel-header-top .section-title [data-testid="preview-panel-title"]:focus { outline: none; }
 .preview-header-actions {
