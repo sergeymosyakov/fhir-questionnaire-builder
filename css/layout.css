@@ -125,13 +125,13 @@
 }
 .preview-mode-btn:hover { background: #e5e7eb; }
 .preview-mode-btn.btn-fhir--active {
-  background: #1e293b;
-  color: #f8fafc;
-  border-color: #1e293b;
+  background: var(--c-active-bg);
+  color: var(--c-active-text);
+  border-color: var(--c-active-bg);
 }
 .preview-mode-btn.btn-fhir--active:hover {
-  background: #334155;
-  border-color: #334155;
+  background: var(--c-active-hover);
+  border-color: var(--c-active-hover);
 }
 /* Radio-style dropdown items reserve a fixed checkmark gutter so the active
    item's ✓ lines up with the (blank) gutter of the inactive ones. */
@@ -159,9 +159,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
 }
-.right-panel-header-top .section-title { margin-bottom: 0; }
+/* Loaded file name gets its own line below the "Questionnaire Preview" label
+   (FileNameDisplay appends .loaded-file-name-wrap into this same element) —
+   more room for long titles instead of squeezing both onto one row. */
+.right-panel-header-top .section-title {
+  margin-bottom: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 4px 0;
+}
 .right-panel-header-top .section-title [data-testid="preview-panel-title"]:focus { outline: none; }
 .preview-header-actions {
   display: flex;

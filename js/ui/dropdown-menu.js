@@ -1,9 +1,14 @@
 import { AppEvents } from '../events.js';
 
+export const DESKTOP_MIN_WIDTH = 1024; // must match css/builder-toolbar.css breakpoint
+
 // ── DropdownMenu base class ───────────────────────────────────────────────────
 // Subclass this to build a .load-wrap button+menu dropdown.
 // Listens for CLOSE_DROPDOWNS CustomEvent to close itself.
 // Button click dispatches CLOSE_DROPDOWNS (closes all others) then opens own menu.
+// Below 1024px the menu becomes a fixed full-height panel pinned to the right
+// edge (css/builder-toolbar.css) — same spot regardless of which trigger opened
+// it; the trigger gets a pressed/active look while its menu is open.
 //
 // Constructor options:
 //   btnId, menuId     — HTML ids for button and menu div
@@ -54,8 +59,10 @@ export class DropdownMenu {
       const wasOpen = this._menu.style.display !== 'none';
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       if (!wasOpen) {
+        this._positionMenu();
         this._onOpen?.();
         this._menu.style.display = 'block';
+        this._btn.classList.add('load-btn--active');
       }
     });
 
@@ -65,7 +72,7 @@ export class DropdownMenu {
   /** Root element to append to the DOM. */
   get el() { return this._wrap; }
 
-  close() { this._menu.style.display = 'none'; }
+  close() { this._menu.style.display = 'none'; this._btn.classList.remove('load-btn--active'); }
   show()  { this._wrap.style.display = ''; }
   hide()  { this._wrap.style.display = 'none'; }
 
@@ -75,6 +82,15 @@ export class DropdownMenu {
     document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => this.show());
     document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,    () => this.show());
     document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED,() => this.hide());
+  }
+
+  // Mobile (<1024px): pin below this trigger's own row — right/left/bottom/
+  // width come from CSS, so every menu lands in the same spot regardless of
+  // which button opened it. Desktop: clear it, CSS-anchored dropdown applies.
+  _positionMenu() {
+    this._menu.style.top = window.innerWidth < DESKTOP_MIN_WIDTH
+      ? this._wrap.getBoundingClientRect().bottom + 'px'
+      : '';
   }
 
   // ── DOM helpers for subclasses ─────────────────────────────────────────────

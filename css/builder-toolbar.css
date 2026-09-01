@@ -153,6 +153,10 @@
   overflow: hidden;
 }
 .load-menu--right { left: auto; right: 0; }
+/* PatientPresetMenu: .top-panel has overflow-x:auto, position:fixed escapes
+   the clipping; left:auto lets the (JS-computed) right take effect instead
+   of being forced to span between two opposing constraints. */
+.load-menu--escape-clip { position: fixed; left: auto; }
 .load-menu-item {
   display: block;
   width: 100%;
@@ -201,6 +205,33 @@
 }
 .load-menu-item--checkbox:hover input[type="checkbox"] {
   accent-color: var(--c-primary);
+}
+
+/* Mobile (<1024px): dropdowns become a shared fixed full-height panel pinned
+   to the right edge — same spot no matter which toolbar button opened it
+   (top is set per-instance in JS, see DropdownMenu._positionMenu). The
+   trigger button gets a pressed look while its menu is open. */
+@media not all and (min-width: 1024px) {
+  .load-menu {
+    position: fixed;
+    left: auto;
+    /* !important: beats a stale inline `right` a subclass (PatientPresetMenu)
+       may have set for its desktop-only anchoring — inline always outranks
+       plain specificity, this is the one case where !important is the fix. */
+    right: 0 !important;
+    bottom: 0;
+    min-width: 33vw;
+    overflow-y: auto;
+  }
+  .load-wrap > .btn-fhir.load-btn--active {
+    background: var(--c-active-bg);
+    color: var(--c-active-text);
+    border-color: var(--c-active-bg);
+  }
+  .load-wrap > .btn-fhir.load-btn--active:hover {
+    background: var(--c-active-hover);
+    border-color: var(--c-active-hover);
+  }
 }
 
 
