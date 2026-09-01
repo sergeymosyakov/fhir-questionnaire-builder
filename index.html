@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; img-src 'self' data: blob: https://avatars.githubusercontent.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; img-src 'self' data: blob: https://avatars.githubusercontent.com;">
 <title>FHIR Questionnaire Builder — Visual Logic &amp; FHIRPath Editor for FHIR R4/R5</title>
 <meta name="description" content="FHIR Questionnaire Builder — a visual drag-and-drop editor for FHIR R4 Questionnaires with conditional logic (enableWhen / enableWhenExpression), SDC variables, patient presets, FHIRPath evaluation, and FHIR JSON import/export.">
 <!-- Open Graph -->
@@ -214,6 +214,6 @@
 <script src="lib/fhirpath.min.js"></script>
 <script src="lib/fhirpath.r4.min.js"></script>
 <script type="module" src="js/app.js"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="lib/supabase.min.js"></script>
 </body>
 </html>
