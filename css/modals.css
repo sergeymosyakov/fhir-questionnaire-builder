@@ -564,8 +564,9 @@
 /* === Library modal ========================================================== */
 [data-testid="libraryModal"] .modal-box  { max-width: 640px; width: 90vw; }
 
-/* Mobile: body ancestor raises specificity to [0,2,1] > per-modal [0,2,0] — no !important needed. */
-[data-testid="libraryModal"] .modal-body { padding: 6px 0; max-height: 65vh; overflow-y: auto; }
+/* max-height is desktop-only (see @media block below) — on mobile the body
+   must flex to fill the now-full-height modal box, not cap short of it. */
+[data-testid="libraryModal"] .modal-body { padding: 6px 0; overflow-y: auto; }
 
 .lib-group + .lib-group   { border-top: 1px solid var(--c-border); }
 
@@ -663,7 +664,8 @@
 
 /* ── Node Picker modal ─────────────────────────────────────────────────────── */
 [data-testid="nodePickerModal"] { z-index: 10100; }
-[data-testid="nodePickerModal"] .modal-body { padding: 0; display: flex; flex-direction: column; max-height: 60vh; }
+/* max-height is desktop-only (see @media block below) — same reason as libraryModal. */
+[data-testid="nodePickerModal"] .modal-body { padding: 0; display: flex; flex-direction: column; }
 .node-picker-search-wrap {
   padding: 10px 12px 8px;
   border-bottom: 1px solid var(--c-border);
@@ -767,6 +769,10 @@
 
   .modal-btn--copy-to { margin-right: auto; order: 0; }
   .explain-row { padding-top: 4px; padding-bottom: 4px; }
+
+  /* Body max-height that only made sense against the old bottom-sheet cap. */
+  [data-testid="libraryModal"] .modal-body    { max-height: 65vh; }
+  [data-testid="nodePickerModal"] .modal-body { max-height: 60vh; }
 }
 /* Mobile: body ancestor raises specificity to [0,2,1] > per-modal [0,2,0] — no !important needed. */
 @media not all and (min-width: 1024px) {
@@ -774,5 +780,7 @@
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    height: 100%;
+    max-height: 100%;
   }
 }

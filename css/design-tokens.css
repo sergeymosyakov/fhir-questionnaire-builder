@@ -24,10 +24,14 @@
   --c-err:         #b71c1c;
   --c-err-bg:      #ffebee;
   --c-err-border:  #ef5350;
+  --c-active-bg:    #1e293b; /* pressed/selected toggle button (preview-mode, mobile toolbar dropdowns) */
+  --c-active-text:  #f8fafc;
+  --c-active-hover: #334155;
   --shadow:        0 2px 8px rgba(21,101,192,.10);
   --shadow-sm:     0 1px 4px rgba(0,0,0,.07);
   --r:             8px;
   --r-sm:          4px;
   --fs-preview:    15px;
   --ctrl-h:        30px;
+  --rail-w:        44px; /* collapsed-panel rail — WCAG 2.5.5 min touch target */
 }

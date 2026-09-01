@@ -3,6 +3,8 @@
 // Persists the panel width to storage across sessions.
 import * as storage from '../storage/storage.js';
 
+const DESKTOP_MIN_WIDTH = 1024; // must match css/layout.css breakpoint
+
 export class PanelResizer {
   /**
    * @param {object} opts
@@ -16,15 +18,28 @@ export class PanelResizer {
     this._storageKey = storageKey;
     this._min        = min;
     this._max        = max;
+    this._savedWidth = null;
     this._bind();
     this._restoreWidth(); // async, fire-and-forget
+    window.addEventListener('resize', () => this._applyForViewport());
   }
 
   /** Restore saved width from storage. */
   async _restoreWidth() {
     let saved;
     try { saved = await storage.getItem(this._storageKey); } catch { /* private mode / quota */ }
-    if (saved) this._panel.style.width = saved + 'px';
+    this._savedWidth = saved || null;
+    this._applyForViewport();
+  }
+
+  // Custom drag width is desktop-only — below the breakpoint the panel must
+  // follow the responsive rail/expanded CSS, never a stale inline width.
+  _applyForViewport() {
+    if (window.innerWidth >= DESKTOP_MIN_WIDTH && this._savedWidth) {
+      this._panel.style.width = this._savedWidth + 'px';
+    } else {
+      this._panel.style.width = '';
+    }
   }
 
   _bind() {
@@ -47,7 +62,8 @@ export class PanelResizer {
       const onUp = () => {
         this._resizer.classList.remove('resizing');
         overlay.remove();
-        try { storage.setItem(this._storageKey, parseInt(this._panel.style.width)); } catch { /* ignore */ }
+        this._savedWidth = parseInt(this._panel.style.width);
+        try { storage.setItem(this._storageKey, this._savedWidth); } catch { /* ignore */ }
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
       };

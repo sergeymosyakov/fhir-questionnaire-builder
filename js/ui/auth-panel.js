@@ -112,16 +112,17 @@ export class AuthPanel {
 
     this._userMenuBtn.addEventListener('click', e => {
       e.stopPropagation();
-      if (this._userMenu.style.display === 'none') {
+      const wasOpen = this._userMenu.style.display !== 'none';
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
+      if (!wasOpen) {
         const r = this._userMenuBtn.getBoundingClientRect();
         this._userMenu.style.top      = (r.bottom + 4) + 'px';
         this._userMenu.style.right    = (window.innerWidth - r.right) + 'px';
         this._userMenu.style.minWidth = r.width + 'px';
         this._userMenu.style.display  = 'block';
-      } else {
-        this._userMenu.style.display = 'none';
       }
     });
+    document.addEventListener(AppEvents.CLOSE_DROPDOWNS, () => { this._userMenu.style.display = 'none'; });
 
     this._signOutItem.addEventListener('click', async () => {
       this._userMenu.style.display = 'none';

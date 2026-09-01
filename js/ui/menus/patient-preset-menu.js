@@ -2,7 +2,7 @@
 // Header dropdown for patient preset profiles.
 // Extends DropdownMenu — inherits close-dropdowns listener and toggle logic.
 // Receives presets[] in constructor; handlers injected via setHandlers().
-import { DropdownMenu } from '../dropdown-menu.js';
+import { DropdownMenu, DESKTOP_MIN_WIDTH } from '../dropdown-menu.js';
 
 export class PatientPresetMenu extends DropdownMenu {
   constructor(presets) {
@@ -36,16 +36,20 @@ export class PatientPresetMenu extends DropdownMenu {
     customItem.addEventListener('click', () => { this.close(); this._onCustom?.(); });
     this._menu.appendChild(customItem);
 
-    // The menu lives inside .top-panel which has overflow-x:auto.
-    // Use position:fixed so the dropdown escapes the overflow clipping.
-    this._menu.style.position = 'fixed';
+    // .top-panel has overflow-x:auto — position:fixed (via CSS) escapes the clipping.
+    this._menu.classList.add('load-menu--escape-clip');
   }
 
-  /** Position the fixed menu below the button on every open. */
+  /** Position the fixed menu below the button on every open, right-anchored
+      so it opens toward screen-left instead of overflowing past the right edge.
+      Below 1024px the base class already set `top` and the shared mobile
+      .load-menu rule forces `right:0 !important` (beats our own stale desktop
+      inline value — inline can't be overridden by plain CSS, only !important). */
   _onOpen() {
+    if (window.innerWidth < DESKTOP_MIN_WIDTH) return;
     const r = this._btn.getBoundingClientRect();
-    this._menu.style.top  = (r.bottom + 4) + 'px';
-    this._menu.style.left = r.left + 'px';
+    this._menu.style.top   = (r.bottom + 4) + 'px';
+    this._menu.style.right = (window.innerWidth - r.right) + 'px';
   }
 
   /** @param {{ onPreset(preset): void, onCustom(): void }} handlers */

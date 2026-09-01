@@ -13,6 +13,8 @@ export class ViewOptionsMenu extends DropdownMenu {
       tipBody:  'Toggle display of preview elements: id, prefix, badges, and hidden items.',
     });
 
+    this._menu.classList.add('load-menu--right');
+
     this._wrap.style.display = 'none';
     this._buildMenu();
 

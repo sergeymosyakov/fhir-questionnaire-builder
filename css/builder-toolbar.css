@@ -149,10 +149,14 @@
   border-radius: var(--r-sm);
   box-shadow: 0 4px 16px rgba(0,0,0,.14);
   min-width: 230px;
+  max-width: min(340px, calc(100vw - 24px));
   overflow: hidden;
 }
 .load-menu--right { left: auto; right: 0; }
-.load-menu--right { left: auto; right: 0; }
+/* PatientPresetMenu: .top-panel has overflow-x:auto, position:fixed escapes
+   the clipping; left:auto lets the (JS-computed) right take effect instead
+   of being forced to span between two opposing constraints. */
+.load-menu--escape-clip { position: fixed; left: auto; }
 .load-menu-item {
   display: block;
   width: 100%;
@@ -170,6 +174,8 @@
   border-radius: 0;
   transition: background .1s;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .load-menu-item:hover { background: var(--c-primary-lt); color: var(--c-primary); }
 .load-menu-item:disabled,
@@ -199,6 +205,64 @@
 }
 .load-menu-item--checkbox:hover input[type="checkbox"] {
   accent-color: var(--c-primary);
+}
+
+/* Mobile-only dismiss button — lives inside .load-menu; hidden by inheriting
+   the parent's display:none, no separate JS toggle needed. Desktop hides it
+   explicitly below (small anchored dropdown, click-outside is enough there). */
+.load-menu-close {
+  display: none;
+}
+
+/* Mobile (<1024px): dropdowns become a bottom sheet — full width, pinned to
+   the bottom, height fits the content (capped), matches .status-dropdown
+   (css/status-badge.css). Same spot no matter which toolbar button opened it.
+   The trigger button gets a pressed look while its menu is open. */
+@keyframes load-menu-slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@media not all and (min-width: 1024px) {
+  .load-menu {
+    position: fixed;
+    left: 0;
+    /* !important: beats a stale inline `top`/`right` a subclass
+       (PatientPresetMenu) may have set for its desktop-only anchoring —
+       inline always outranks plain specificity, this is the one case where
+       !important is the fix. */
+    top: auto !important;
+    right: 0 !important;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 70vh;
+    overflow-y: auto;
+    /* Replays from the start every time display flips none→block/flex. */
+    animation: load-menu-slide-up .2s ease-out;
+  }
+  .load-menu-close {
+    display: block;
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--c-text-2);
+    padding: 4px 6px;
+    border-radius: var(--r-sm);
+  }
+  .load-menu-close:hover { background: var(--c-hover); }
+  .load-wrap > .btn-fhir.load-btn--active {
+    background: var(--c-active-bg);
+    color: var(--c-active-text);
+    border-color: var(--c-active-bg);
+  }
+  .load-wrap > .btn-fhir.load-btn--active:hover {
+    background: var(--c-active-hover);
+    border-color: var(--c-active-hover);
+  }
 }
 
 

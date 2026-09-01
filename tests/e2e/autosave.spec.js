@@ -185,6 +185,31 @@ test.describe('Panel width persistence', () => {
     );
     expect(width).toBeCloseTo(380, -1); // within ±10 px
   });
+
+  test('custom width is ignored below 1024px and re-applied back above it', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.clear();
+      localStorage.setItem('leftPanelWidth', '380');
+    });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    await waitForLoad(page);
+
+    const widthAt = () => page.locator('.left-panel').evaluate(
+      el => parseInt(window.getComputedStyle(el).width)
+    );
+    // PanelResizer's own `resize` handler runs asynchronously relative to
+    // setViewportSize() resolving — poll instead of reading immediately.
+    await expect(async () => expect(await widthAt()).toBeCloseTo(380, -1)).toPass();
+
+    // Below the responsive breakpoint the stale desktop drag width must not
+    // block the rail layout (issue: inline style used to win over all CSS).
+    await page.setViewportSize({ width: 480, height: 800 });
+    await expect(async () => expect(await widthAt()).toBeLessThan(100)).toPass();
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(async () => expect(await widthAt()).toBeCloseTo(380, -1)).toPass();
+  });
 });
 
 // ── Load confirm dialog ───────────────────────────────────────────────────────

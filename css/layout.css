@@ -3,13 +3,12 @@
   background: var(--c-primary-dk);
   color: #fff;
   padding: 0 16px;
-  height: 56px;
   min-height: 56px;
   display: flex;
   align-items: center;
   gap: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,.25);
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   overflow-x: auto;
   flex-shrink: 0;
   z-index: 100;
@@ -126,13 +125,13 @@
 }
 .preview-mode-btn:hover { background: #e5e7eb; }
 .preview-mode-btn.btn-fhir--active {
-  background: #1e293b;
-  color: #f8fafc;
-  border-color: #1e293b;
+  background: var(--c-active-bg);
+  color: var(--c-active-text);
+  border-color: var(--c-active-bg);
 }
 .preview-mode-btn.btn-fhir--active:hover {
-  background: #334155;
-  border-color: #334155;
+  background: var(--c-active-hover);
+  border-color: var(--c-active-hover);
 }
 /* Radio-style dropdown items reserve a fixed checkmark gutter so the active
    item's ✓ lines up with the (blank) gutter of the inactive ones. */
@@ -160,9 +159,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
 }
-.right-panel-header-top .section-title { margin-bottom: 0; }
+/* Loaded file name gets its own line below the "Questionnaire Preview" label
+   (FileNameDisplay appends .loaded-file-name-wrap into this same element) —
+   more room for long titles instead of squeezing both onto one row.
+   min-width matches .search-wrap (search input + nav buttons, below) for a
+   consistent minimum footprint; align-self:flex-start keeps it pinned to the
+   top of the row instead of centering against the (often taller, wrapped)
+   toolbar-buttons column next to it. */
+.right-panel-header-top .section-title {
+  margin-bottom: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: flex-start;
+  gap: 4px;
+  padding: 4px 0;
+  min-width: 200px;
+}
 .right-panel-header-top .section-title [data-testid="preview-panel-title"]:focus { outline: none; }
 .preview-header-actions {
   display: flex;
@@ -173,14 +187,15 @@
 }
 
 /* === Two-column layout ======================================================= */
-/* Mobile-first: single column. Two-column at ≥768px. */
+/* Row layout at all sizes — builder (left) + preview (right) side by side.
+   Below 1024px the left panel defaults to a collapsed rail (issue #75 Phase 2,
+   rules further below); desktop widens it into a resizable full panel. */
 .layout {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .panel-resizer {
@@ -188,13 +203,14 @@
 }
 
 .left-panel {
-  width: 100%;
-  min-width: 0;
+  width: var(--rail-w);
+  min-width: var(--rail-w);
+  max-width: var(--rail-w);
   flex-shrink: 0;
   background: var(--c-surface);
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden;
 }
 .left-panel-header {
   padding: 10px 14px 8px;
@@ -211,8 +227,7 @@
   flex-shrink: 0;
 }
 .top-panel-copyright {
-  margin-left: auto;
-  display: flex;
+  display: none;
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
@@ -236,25 +251,109 @@
 .top-panel-github-link:hover { color: #fff !important; }
 
 .top-panel-auth {
-  margin-left: 20px;
+  margin-left: auto;
   flex-shrink: 0;
   display: flex;
   align-items: center;
 }
 .left-panel-body {
-  overflow-y: visible;
+  flex: 1;
+  overflow-y: auto;
   padding: 10px 14px 14px;
 }
 
-.right-panel {
-  flex-shrink: 0;
+/* Narrow-screen panel visibility (issue #75) — exactly one panel is expanded
+   at a time, the other collapses to a rail tab. Default: left=rail, right=full.
+   .layout--left-expanded (js/ui/panel-visibility.js) flips it: left=full,
+   right=rail. No-op at ≥1024px, see below. flex-direction/flex/min-height for
+   left-panel-content live on its base (display:none-by-default) rule so they
+   always apply once display becomes non-none; right-panel-content is visible
+   by default so needs no such care. */
+.left-panel-content {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.left-panel-rail-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
-  min-height: 300px;
+  height: 100%;
+  border: none;
+  background: var(--c-primary-lt);
+  color: var(--c-primary);
+  cursor: pointer;
+  padding: 16px 4px;
+}
+.left-panel-rail-tab:hover { background: #bbdefb; }
+.left-panel-rail-tab-icon { font-size: 1.2em; }
+.left-panel-rail-tab-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+/* Right (preview) panel mirrors the left: visible/expanded by default (no
+   rail-tab needed until the LEFT side expands and bumps this one to a rail). */
+.right-panel-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.right-panel-rail-tab {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: var(--c-primary-lt);
+  color: var(--c-primary);
+  cursor: pointer;
+  padding: 16px 4px;
+}
+.right-panel-rail-tab:hover { background: #bbdefb; }
+.right-panel-rail-tab-icon { font-size: 1.2em; }
+.right-panel-rail-tab-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.layout--left-expanded .left-panel { flex: 1; max-width: none; }
+.layout--left-expanded .left-panel-content { display: flex; }
+.layout--left-expanded .left-panel-rail-tab { display: none; }
+.layout--left-expanded .right-panel {
+  flex: none;
+  width: var(--rail-w);
+  min-width: var(--rail-w);
+  max-width: var(--rail-w);
+}
+.layout--left-expanded .right-panel-content { display: none; }
+.layout--left-expanded .right-panel-rail-tab { display: flex; }
+
+.right-panel {
+  flex: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  min-height: 0;
   background: var(--c-bg);
   display: flex;
   flex-direction: column;
-  overflow: visible;
-  border-top: 1px solid var(--c-border);
+  overflow: hidden;
 }
 
 .right-panel-header {
@@ -264,7 +363,8 @@
 }
 
 .right-panel-body {
-  overflow-y: visible;
+  flex: 1;
+  overflow-y: auto;
   padding: 8px 10px 30px;
 }
 
@@ -332,8 +432,12 @@
 }
 
 /* === Responsive ============================================================== */
-@media (min-width: 768px) {
-  .layout { flex-direction: row; overflow: hidden; }
+/* Desktop (≥1024px): rail/expand-toggle is mobile-only — always show both
+   panels in full, resizable left panel restored. */
+@media (min-width: 1024px) {
+  /* GitHub link + copyright — decorative, dropped from the narrow top-panel
+     row (issue #75 Phase 3) to leave room for Patient Preset / Sign in. */
+  .top-panel-copyright { display: flex; }
 
   .panel-resizer {
     display: block;
@@ -348,26 +452,30 @@
   .panel-resizer:hover,
   .panel-resizer.resizing { background: var(--c-primary); }
 
-  .left-panel {
+  .left-panel,
+  .layout--left-expanded .left-panel {
+    flex: none;
     width: 470px;
     min-width: 200px;
     max-width: 70vw;
-    overflow: hidden;
   }
-  .left-panel-body { flex: 1; overflow-y: auto; }
-
-  .right-panel {
+  .left-panel-content,
+  .layout--left-expanded .left-panel-content { display: flex; }
+  .left-panel-rail-tab,
+  .layout--left-expanded .left-panel-rail-tab { display: none; }
+  .right-panel,
+  .layout--left-expanded .right-panel {
+    display: flex;
     flex: 1;
-    flex-shrink: 1;
+    width: auto;
     min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-    border-top: none;
+    max-width: none;
   }
+  .right-panel-content,
+  .layout--left-expanded .right-panel-content { display: flex; }
+  .right-panel-rail-tab,
+  .layout--left-expanded .right-panel-rail-tab { display: none; }
+
   .right-panel-header { padding: 14px 14px 8px; }
-  .right-panel-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px 14px 50px;
-  }
+  .right-panel-body { padding: 10px 14px 50px; }
 }

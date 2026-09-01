@@ -36,6 +36,10 @@
 
 /* === Dropdown (matches rich-tooltip aesthetic) ============================== */
 /* Mobile: bottom sheet, full-width, same pattern as modal */
+@keyframes status-dropdown-slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
 .status-dropdown {
   position: fixed;
   bottom: 0;
@@ -48,6 +52,8 @@
   color: #dce6f0;
   border-radius: 0;
   box-shadow: 0 -4px 32px rgba(0,0,0,.4);
+  /* Replays from the start every time display flips none→block. */
+  animation: status-dropdown-slide-up .2s ease-out;
   padding: 0 0 6px;
   z-index: 1000;
   scrollbar-width: thin;
@@ -66,8 +72,25 @@
   border-radius: 2px;
   margin: 12px auto 6px;
 }
+/* Mobile-only dismiss button — the bottom-sheet has no other obvious close
+   affordance besides tapping outside; hidden on desktop's small anchored dropdown. */
+.status-dropdown-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: #8a9bb0;
+  padding: 4px 6px;
+  border-radius: var(--r-sm);
+  transition: background .12s, color .12s;
+}
+.status-dropdown-close:hover { background: #243247; color: #dce6f0; }
 /* Desktop: restore positioned dropdown with caret */
 @media (min-width: 1024px) {
+  .status-dropdown-close { display: none; }
   .status-dropdown {
     position: absolute;
     top: calc(100% + 7px);
@@ -80,6 +103,7 @@
     box-shadow: 0 6px 24px rgba(0,0,0,.35), 0 1px 4px rgba(0,0,0,.2);
     padding: 6px 0;
     z-index: 200;
+    animation: none;
   }
   .status-dropdown::before {
     content: '';

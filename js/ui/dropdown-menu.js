@@ -1,9 +1,15 @@
 import { AppEvents } from '../events.js';
 
+export const DESKTOP_MIN_WIDTH = 1024; // must match css/builder-toolbar.css breakpoint
+
 // ── DropdownMenu base class ───────────────────────────────────────────────────
 // Subclass this to build a .load-wrap button+menu dropdown.
 // Listens for CLOSE_DROPDOWNS CustomEvent to close itself.
 // Button click dispatches CLOSE_DROPDOWNS (closes all others) then opens own menu.
+// Below 1024px the menu becomes a bottom-sheet (css/builder-toolbar.css,
+// matches css/status-badge.css's .status-dropdown) — full width, pinned to the
+// bottom, height fits its content; the trigger gets a pressed/active look
+// while its menu is open.
 //
 // Constructor options:
 //   btnId, menuId     — HTML ids for button and menu div
@@ -39,11 +45,26 @@ export class DropdownMenu {
     if (tipFhir)  this._btn.dataset.tipFhir  = tipFhir;
     if (tipSpec)  this._btn.dataset.tipSpec  = tipSpec;
     this._btn.innerHTML = label;
+    this._btn.setAttribute('aria-haspopup', 'menu');
+    this._btn.setAttribute('aria-expanded', 'false');
 
     this._menu = document.createElement('div');
     this._menu.className = 'load-menu';
     this._menu.id = menuId;
+    if (menuId) this._menu.dataset.testid = menuId.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
     this._menu.style.display = 'none';
+
+    // Mobile-only (CSS hides/positions it) — lives inside .load-menu so it
+    // survives normal item appends; subclasses that fully rebuild their menu
+    // content (LanguageMenu.rebuild()) must re-append it after clearing.
+    this._closeBtn = document.createElement('button');
+    this._closeBtn.type = 'button';
+    this._closeBtn.className = 'load-menu-close';
+    this._closeBtn.dataset.testid = 'load-menu-close';
+    this._closeBtn.dataset.tipTitle = 'Close';
+    this._closeBtn.textContent = '\u2715';
+    this._closeBtn.addEventListener('click', e => { e.stopPropagation(); this.close(); });
+    this._menu.appendChild(this._closeBtn);
 
     this._wrap.appendChild(this._btn);
     this._wrap.appendChild(this._menu);
@@ -55,6 +76,8 @@ export class DropdownMenu {
       if (!wasOpen) {
         this._onOpen?.();
         this._menu.style.display = 'block';
+        this._btn.classList.add('load-btn--active');
+        this._btn.setAttribute('aria-expanded', 'true');
       }
     });
 
@@ -64,7 +87,11 @@ export class DropdownMenu {
   /** Root element to append to the DOM. */
   get el() { return this._wrap; }
 
-  close() { this._menu.style.display = 'none'; }
+  close() {
+    this._menu.style.display = 'none';
+    this._btn.classList.remove('load-btn--active');
+    this._btn.setAttribute('aria-expanded', 'false');
+  }
   show()  { this._wrap.style.display = ''; }
   hide()  { this._wrap.style.display = 'none'; }
 
