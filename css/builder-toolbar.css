@@ -218,6 +218,10 @@
    the bottom, height fits the content (capped), matches .status-dropdown
    (css/status-badge.css). Same spot no matter which toolbar button opened it.
    The trigger button gets a pressed look while its menu is open. */
+@keyframes load-menu-slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
 @media not all and (min-width: 1024px) {
   .load-menu {
     position: fixed;
@@ -233,6 +237,8 @@
     max-width: 100%;
     max-height: 70vh;
     overflow-y: auto;
+    /* Replays from the start every time display flips none→block/flex. */
+    animation: load-menu-slide-up .2s ease-out;
   }
   .load-menu-close {
     display: block;

@@ -36,6 +36,10 @@
 
 /* === Dropdown (matches rich-tooltip aesthetic) ============================== */
 /* Mobile: bottom sheet, full-width, same pattern as modal */
+@keyframes status-dropdown-slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
 .status-dropdown {
   position: fixed;
   bottom: 0;
@@ -48,6 +52,8 @@
   color: #dce6f0;
   border-radius: 0;
   box-shadow: 0 -4px 32px rgba(0,0,0,.4);
+  /* Replays from the start every time display flips none→block. */
+  animation: status-dropdown-slide-up .2s ease-out;
   padding: 0 0 6px;
   z-index: 1000;
   scrollbar-width: thin;
@@ -97,6 +103,7 @@
     box-shadow: 0 6px 24px rgba(0,0,0,.35), 0 1px 4px rgba(0,0,0,.2);
     padding: 6px 0;
     z-index: 200;
+    animation: none;
   }
   .status-dropdown::before {
     content: '';
