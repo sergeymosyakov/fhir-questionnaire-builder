@@ -88,7 +88,9 @@ export class LanguageMenu extends DropdownMenu {
     const label = this._activeLang
       ? (SUPPORTED_LANGUAGES?.get(this._activeLang) || this._activeLang)
       : 'Original';
-    this._btn.innerHTML = `🌐 ${label} &#x25BE;`;
+    // textContent, not innerHTML: label can be an attacker-controlled language
+    // code from an imported FHIR file's translations object.
+    this._btn.textContent = `\u{1F310} ${label} \u25BE`;
     this._syncChecked();
   }
 

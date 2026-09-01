@@ -11,6 +11,7 @@
     "lint": "eslint js/ tests/",
     "vendor:fhirpath": "esbuild node_modules/fhirpath/src/fhirpath.js --bundle --minify --format=iife --global-name=fhirpath --outfile=lib/fhirpath.min.js",
     "vendor:fhirpath:r4": "esbuild node_modules/fhirpath/fhir-context/r4/index.js --bundle --minify --format=iife --global-name=fhirpath_r4_model --outfile=lib/fhirpath.r4.min.js",
+    "vendor:supabase": "esbuild node_modules/@supabase/supabase-js/dist/umd/supabase.js --minify --outfile=lib/supabase.min.js",
     "vendor:structuremap": "esbuild node_modules/fhir-structuremap-js/src/index.js --bundle --minify --format=esm --outfile=lib/fhir-structuremap-js.esm.js",
     "vendor:cql": "esbuild node_modules/cql-execution/lib/cql.js --bundle --minify --format=esm --outfile=lib/cql-execution.esm.js",
     "vendor:cql-fhir": "esbuild node_modules/cql-exec-fhir/lib/index.js --bundle --minify --format=esm --alias:fs=./scripts/shims/fs-shim.cjs --alias:timers=./scripts/shims/timers-shim.cjs --outfile=lib/cql-exec-fhir.esm.js",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
+    "@supabase/supabase-js": "^2.112.4",
     "@vitest/coverage-v8": "^4.1.11",
     "buffer": "^6.0.3",
     "cql-exec-fhir": "^2.1.6",
