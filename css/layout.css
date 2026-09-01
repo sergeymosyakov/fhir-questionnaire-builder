@@ -247,11 +247,13 @@
   padding: 10px 14px 14px;
 }
 
-/* Narrow-screen panel visibility (issue #75 Phase 2) — collapsed default shows
-   only the rail tab; .layout--left-expanded (js/ui/panel-visibility.js) swaps
-   in the full content and hides the rail/preview. No-op at ≥1024px, see below.
-   flex-direction/flex/min-height live here (not on the expanded/desktop
-   display:flex overrides) so they always apply once display becomes non-none. */
+/* Narrow-screen panel visibility (issue #75) — exactly one panel is expanded
+   at a time, the other collapses to a rail tab. Default: left=rail, right=full.
+   .layout--left-expanded (js/ui/panel-visibility.js) flips it: left=full,
+   right=rail. No-op at ≥1024px, see below. flex-direction/flex/min-height for
+   left-panel-content live on its base (display:none-by-default) rule so they
+   always apply once display becomes non-none; right-panel-content is visible
+   by default so needs no such care. */
 .left-panel-content {
   display: none;
   flex-direction: column;
@@ -282,24 +284,51 @@
   letter-spacing: .5px;
   text-transform: uppercase;
 }
-.left-panel-minimize-btn {
-  display: none;
-  flex-shrink: 0;
-  border: none;
-  background: transparent;
-  color: var(--c-text-2);
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0 4px 0 0;
-}
-.left-panel-minimize-btn:hover { color: var(--c-text); }
 
-.layout--left-expanded .left-panel { width: 100%; max-width: 100%; }
+/* Right (preview) panel mirrors the left: visible/expanded by default (no
+   rail-tab needed until the LEFT side expands and bumps this one to a rail). */
+.right-panel-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.right-panel-rail-tab {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: var(--c-primary-lt);
+  color: var(--c-primary);
+  cursor: pointer;
+  padding: 16px 4px;
+}
+.right-panel-rail-tab:hover { background: #bbdefb; }
+.right-panel-rail-tab-icon { font-size: 1.2em; }
+.right-panel-rail-tab-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.layout--left-expanded .left-panel { flex: 1; max-width: none; }
 .layout--left-expanded .left-panel-content { display: flex; }
 .layout--left-expanded .left-panel-rail-tab { display: none; }
-.layout--left-expanded .left-panel-minimize-btn { display: inline-flex; }
-.layout--left-expanded .right-panel { display: none; }
+.layout--left-expanded .right-panel {
+  flex: none;
+  width: var(--rail-w);
+  min-width: var(--rail-w);
+  max-width: var(--rail-w);
+}
+.layout--left-expanded .right-panel-content { display: none; }
+.layout--left-expanded .right-panel-rail-tab { display: flex; }
 
 .right-panel {
   flex: 1;
@@ -410,6 +439,7 @@
 
   .left-panel,
   .layout--left-expanded .left-panel {
+    flex: none;
     width: 470px;
     min-width: 200px;
     max-width: 70vw;
@@ -418,11 +448,18 @@
   .layout--left-expanded .left-panel-content { display: flex; }
   .left-panel-rail-tab,
   .layout--left-expanded .left-panel-rail-tab { display: none; }
-  .left-panel-minimize-btn,
-  .layout--left-expanded .left-panel-minimize-btn { display: none; }
-  .panel-toggle-btn { display: none; }
   .right-panel,
-  .layout--left-expanded .right-panel { display: flex; }
+  .layout--left-expanded .right-panel {
+    display: flex;
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+  }
+  .right-panel-content,
+  .layout--left-expanded .right-panel-content { display: flex; }
+  .right-panel-rail-tab,
+  .layout--left-expanded .right-panel-rail-tab { display: none; }
 
   .right-panel-header { padding: 14px 14px 8px; }
   .right-panel-body { padding: 10px 14px 50px; }

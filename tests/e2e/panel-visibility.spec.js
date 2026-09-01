@@ -1,74 +1,68 @@
 // ── E2E: Narrow-screen panel visibility toggle (builder ↔ preview) ───────────
-// Mobile-only builder/preview switch (issue #75 Phases 1-3). Below the 1024px
-// layout breakpoint the builder defaults to a collapsed rail (preview full);
-// tapping the rail, the top-panel button, or the in-panel minimize button
-// toggles between the two, persisted in localStorage. At/above 1024px both
-// panels are always visible and all three controls are hidden/no-op.
+// Mobile-only, fully symmetric builder/preview rail (issue #75). Below the
+// 1024px layout breakpoint exactly one panel is expanded at a time; the other
+// collapses to a narrow rail tab. Default: left (builder) = rail, right
+// (preview) = full. Each side's rail-tab is the only control — tapping the
+// visible (collapsed) side's rail expands it and collapses the other. At/above
+// 1024px both panels are always visible and both rail-tabs are hidden/no-op.
 //
 // data-testid:
-//   panel-toggle-btn          mobile-only builder/preview switch button (top-panel)
-//   left-panel-rail-tab       collapsed-state rail — tap to expand the builder
-//   left-panel-minimize-btn   expanded-state button (builder header) — collapse back
-//   sign-in-btn               top-panel auth button — must stay pinned to the right edge
+//   left-panel-rail-tab        collapsed-builder rail — tap to expand it (collapses preview)
+//   right-panel-rail-tab       collapsed-preview rail — tap to expand it (collapses builder)
+//   sign-in-btn                top-panel auth button — must stay pinned to the right edge
 //
 // Run: npx playwright test tests/e2e/panel-visibility.spec.js
 
 import { test, expect } from '@playwright/test';
 
 async function waitForLoad(page) {
-  // Attached (not necessarily visible) — the builder's own Add-Root-Group
-  // button lives in .left-panel-content, hidden while the rail is collapsed.
-  await page.waitForSelector('[data-testid="panel-toggle-btn"]', { state: 'attached', timeout: 10_000 });
+  // Attached (not necessarily visible) — always in the DOM regardless of
+  // which side is currently the rail.
+  await page.waitForSelector('[data-testid="left-panel-rail-tab"]', { state: 'attached', timeout: 10_000 });
 }
 
-const toggleBtn = page => page.getByTestId('panel-toggle-btn');
-const railTab = page => page.getByTestId('left-panel-rail-tab');
-const minimizeBtn = page => page.getByTestId('left-panel-minimize-btn');
-const leftPanel = page => page.locator('.left-panel');
-const rightPanel = page => page.locator('.right-panel');
+const leftRailTab  = page => page.getByTestId('left-panel-rail-tab');
+const rightRailTab = page => page.getByTestId('right-panel-rail-tab');
+const leftPanel    = page => page.locator('.left-panel');
+const rightPanel   = page => page.locator('.right-panel');
 
 test.describe('Panel visibility toggle — narrow screens', () => {
   test.use({ viewport: { width: 480, height: 800 } });
 
-  test('collapsed rail shown, preview full by default; toggle button expands builder', async ({ page }) => {
+  test('collapsed rail shown, preview full by default; right rail is hidden until builder expands', async ({ page }) => {
     await page.goto('/');
     await waitForLoad(page);
 
-    await expect(toggleBtn(page)).toBeVisible();
-    await expect(railTab(page)).toBeVisible();
-    await expect(minimizeBtn(page)).toBeHidden();
-    await expect(rightPanel(page)).toBeVisible();
+    await expect(leftRailTab(page)).toBeVisible();
+    await expect(rightRailTab(page)).toBeHidden();
 
-    await toggleBtn(page).click();
+    await leftRailTab(page).click();
 
-    await expect(railTab(page)).toBeHidden();
-    await expect(minimizeBtn(page)).toBeVisible();
-    await expect(rightPanel(page)).toBeHidden();
+    await expect(leftRailTab(page)).toBeHidden();
+    await expect(rightRailTab(page)).toBeVisible();
   });
 
-  test('tapping the rail expands the builder; minimize button collapses it back', async ({ page }) => {
+  test('tapping the left rail expands the builder; tapping the right rail collapses it back', async ({ page }) => {
     await page.goto('/');
     await waitForLoad(page);
 
-    await railTab(page).click();
-    await expect(rightPanel(page)).toBeHidden();
-    await expect(minimizeBtn(page)).toBeVisible();
+    await leftRailTab(page).click();
+    await expect(rightRailTab(page)).toBeVisible();
 
-    await minimizeBtn(page).click();
-    await expect(rightPanel(page)).toBeVisible();
-    await expect(railTab(page)).toBeVisible();
+    await rightRailTab(page).click();
+    await expect(leftRailTab(page)).toBeVisible();
+    await expect(rightRailTab(page)).toBeHidden();
   });
 
-  test('toggling twice via top-panel button returns to collapsed rail', async ({ page }) => {
+  test('toggling twice via the rail tabs returns to the default state', async ({ page }) => {
     await page.goto('/');
     await waitForLoad(page);
 
-    await toggleBtn(page).click();
-    await expect(rightPanel(page)).toBeHidden();
+    await leftRailTab(page).click();
+    await expect(rightRailTab(page)).toBeVisible();
 
-    await toggleBtn(page).click();
-    await expect(rightPanel(page)).toBeVisible();
-    await expect(railTab(page)).toBeVisible();
+    await rightRailTab(page).click();
+    await expect(leftRailTab(page)).toBeVisible();
   });
 });
 
@@ -82,41 +76,40 @@ test.describe('Panel visibility persistence', () => {
     // below, wiping the very value we're persisting).
     await page.evaluate(() => localStorage.clear());
 
-    await railTab(page).click();
-    await expect(rightPanel(page)).toBeHidden();
+    await leftRailTab(page).click();
+    await expect(rightRailTab(page)).toBeVisible();
 
     await page.reload();
     await waitForLoad(page);
-    await expect(rightPanel(page)).toBeHidden();
-    await expect(minimizeBtn(page)).toBeVisible();
+    await expect(rightRailTab(page)).toBeVisible();
+    await expect(leftRailTab(page)).toBeHidden();
   });
 
-  test('collapsed state (default) survives reload after expanding then minimizing', async ({ page }) => {
+  test('collapsed state (default) survives reload after expanding then collapsing', async ({ page }) => {
     await page.goto('/');
     await waitForLoad(page);
     await page.evaluate(() => localStorage.clear());
 
-    await railTab(page).click();
-    await minimizeBtn(page).click();
-    await expect(rightPanel(page)).toBeVisible();
+    await leftRailTab(page).click();
+    await rightRailTab(page).click();
+    await expect(leftRailTab(page)).toBeVisible();
 
     await page.reload();
     await waitForLoad(page);
-    await expect(rightPanel(page)).toBeVisible();
-    await expect(railTab(page)).toBeVisible();
+    await expect(leftRailTab(page)).toBeVisible();
+    await expect(rightRailTab(page)).toBeHidden();
   });
 });
 
 test.describe('Panel visibility toggle — desktop (no-op)', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
-  test('both panels always visible, rail/toggle/minimize controls hidden', async ({ page }) => {
+  test('both panels always visible, both rail tabs hidden', async ({ page }) => {
     await page.goto('/');
     await waitForLoad(page);
 
-    await expect(toggleBtn(page)).toBeHidden();
-    await expect(railTab(page)).toBeHidden();
-    await expect(minimizeBtn(page)).toBeHidden();
+    await expect(leftRailTab(page)).toBeHidden();
+    await expect(rightRailTab(page)).toBeHidden();
     await expect(leftPanel(page)).toBeVisible();
     await expect(rightPanel(page)).toBeVisible();
   });

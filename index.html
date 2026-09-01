@@ -72,10 +72,6 @@
   <span class="top-panel-title">Logic Builder</span>
   <div class="top-panel-sep"></div>
 
-  <button type="button" data-mount="panel-toggle-btn" class="btn-fhir panel-toggle-btn" data-testid="panel-toggle-btn"
-    data-tip-title="Switch panel"
-    data-tip-body="On narrow screens, switch between the logic builder and the live preview.">&#x2699;&#xFE0F; Builder</button>
-
   <div class="load-wrap" id="patientPresetWrap" data-mount="patient-preset">
     <button type="button" id="patientPresetBtn" data-testid="patient-preset-btn" class="btn-fhir"
       data-tip-title="Patient Preset"
@@ -109,9 +105,6 @@
     <div class="left-panel-content">
     <div class="left-panel-header">
       <div class="left-panel-title-row">
-        <button type="button" class="left-panel-minimize-btn" data-mount="left-panel-minimize-btn" data-testid="left-panel-minimize-btn"
-          data-tip-title="Hide Builder"
-          data-tip-body="Collapse the builder back to the preview.">&#x2039;</button>
         <span class="section-title">Logic Builder<span id="tooltipsOffBadge" class="tips-off-badge" style="display:none">tooltips off</span></span>
         <span id="fhirVersionSelectMount" class="fhir-version-select-mount" data-mount="fhir-version-select"
           data-tip-title="FHIR Target Version"
@@ -147,6 +140,13 @@
   </div>
   <div class="panel-resizer" id="panelResizer" data-mount="panel-resizer"></div>
   <div class="right-panel">
+    <button type="button" class="right-panel-rail-tab" data-mount="right-panel-rail-tab" data-testid="right-panel-rail-tab"
+      data-tip-title="Show Preview"
+      data-tip-body="Expand the questionnaire preview over the full screen.">
+      <span class="right-panel-rail-tab-icon">&#x1F441;&#xFE0F;</span>
+      <span class="right-panel-rail-tab-label">Preview</span>
+    </button>
+    <div class="right-panel-content">
     <div class="right-panel-header">
       <div class="right-panel-header-top">
         <span class="section-title" data-mount="file-name">
@@ -172,6 +172,7 @@
       <div data-mount="fhirpath-panel"></div>
       <div class="preview-card" id="lform" data-testid="preview-panel" data-mount="preview-lform"></div>
       <pre id="fhirJsonView" class="fhir-json-view" style="display:none" data-mount="fhir-json-view"></pre>
+    </div>
     </div>
   </div>
 </div>

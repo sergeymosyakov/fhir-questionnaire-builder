@@ -1,26 +1,24 @@
 // ── Narrow-screen panel visibility toggle (builder ↔ preview) ─────────────────
-// Below the 768px layout breakpoint, the builder collapses to a narrow rail by
-// default (preview full-screen); expanding shows the builder full-screen and
-// hides the preview instead. Mirrors SimpleMode's event → class → CSS →
-// localStorage pattern (js/ui/simple-mode.js). Both panels stay mounted and
-// live throughout. No-op at ≥768px.
+// Below the 1024px layout breakpoint, exactly one panel is expanded at a time;
+// the other collapses to a narrow rail tab. Default: left (builder) = rail,
+// right (preview) = full. Each side's rail-tab is the only control — tapping
+// the visible (collapsed) side's rail expands it and collapses the other.
+// Mirrors SimpleMode's event → class → CSS → localStorage pattern
+// (js/ui/simple-mode.js). Both panels stay mounted and live throughout.
+// No-op at ≥1024px.
 import { AppEvents } from '../events.js';
 
 const STORAGE_KEY    = 'panelLeftExpanded';
-const DEFAULT_VALUE  = false; // collapsed rail, preview full
+const DEFAULT_VALUE  = false; // left collapsed to rail, right (preview) full
 
 export class PanelVisibility {
   constructor() {
     this._layout = document.querySelector('.layout');
-    this._btn = document.querySelector('[data-mount="panel-toggle-btn"]');
-    this._railTab = document.querySelector('[data-mount="left-panel-rail-tab"]');
-    this._minimizeBtn = document.querySelector('[data-mount="left-panel-minimize-btn"]');
+    this._leftRailTab = document.querySelector('[data-mount="left-panel-rail-tab"]');
+    this._rightRailTab = document.querySelector('[data-mount="right-panel-rail-tab"]');
     document.addEventListener(AppEvents.PANEL_VISIBILITY_CHANGE, e => this._apply(!!e.detail?.leftExpanded));
-    this._btn?.addEventListener('click', () => {
-      this._dispatch(!this._layout?.classList.contains('layout--left-expanded'));
-    });
-    this._railTab?.addEventListener('click', () => this._dispatch(true));
-    this._minimizeBtn?.addEventListener('click', () => this._dispatch(false));
+    this._leftRailTab?.addEventListener('click', () => this._dispatch(true));
+    this._rightRailTab?.addEventListener('click', () => this._dispatch(false));
 
     let saved = null;
     try { saved = localStorage.getItem(STORAGE_KEY); } catch { /* storage unavailable */ }
@@ -34,7 +32,6 @@ export class PanelVisibility {
 
   _apply(leftExpanded) {
     this._layout?.classList.toggle('layout--left-expanded', leftExpanded);
-    if (this._btn) this._btn.textContent = leftExpanded ? '\u{1F441}\uFE0F Preview' : '\u2699\uFE0F Builder';
     try { localStorage.setItem(STORAGE_KEY, String(leftExpanded)); } catch { /* storage unavailable */ }
   }
 }
