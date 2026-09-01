@@ -13,6 +13,8 @@
 //   load-fhir-btn              "Questionnaires ▾" toolbar dropdown trigger
 //   load-menu                  "Questionnaires ▾" dropdown panel
 //   load-menu-close            × dismiss button inside a dropdown panel (mobile only)
+//   load-menu-header           title + close-button row inside a dropdown panel (mobile only)
+//   load-menu-title            menu-name text inside load-menu-header
 //   patient-preset-btn         "Patient ▾" toolbar dropdown trigger
 //
 // Run: npx playwright test tests/e2e/panel-visibility.spec.js
@@ -275,5 +277,19 @@ test.describe('Toolbar dropdowns — mobile toggle-button behavior', () => {
     await expect(menu).toBeVisible();
     await menu.getByTestId('load-menu-close').click();
     await expect(menu).toBeHidden();
+  });
+
+  test('menu shows a header row with the menu name next to the close button', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+
+    await page.getByTestId('load-fhir-btn').click();
+    const menu = page.getByTestId('load-menu');
+    await expect(menu).toBeVisible();
+
+    const header = menu.getByTestId('load-menu-header');
+    await expect(header).toBeVisible();
+    await expect(header.getByTestId('load-menu-title')).toHaveText('Questionnaires');
+    await expect(header.getByTestId('load-menu-close')).toBeVisible();
   });
 });

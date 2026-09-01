@@ -41,10 +41,10 @@
   white-space: nowrap;
 }
 
-/* User dropdown menu — fixed so top-panel overflow:auto doesn't clip it */
+/* User dropdown menu — min-width only; position:fixed/left:auto (escaping the
+   top-panel's overflow:auto clipping) now comes from the shared
+   .load-menu--escape-clip class (see css/builder-toolbar.css). */
 .auth-user-menu {
-  position: fixed;
-  left: auto;
   min-width: 140px;
 }
 

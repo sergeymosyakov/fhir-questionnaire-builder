@@ -14,6 +14,7 @@ export class PreviewModeMenu extends DropdownMenu {
       menuId:   'previewModeMenu',
       wrapId:   'previewModeWrap',
       label:    _LABELS.preview,
+      menuTitle: 'Preview Mode',
       btnClass: 'btn-fhir preview-mode-btn',
       testid:   'preview-mode-btn',
     });

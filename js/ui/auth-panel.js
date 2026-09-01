@@ -1,6 +1,6 @@
 // ── Auth + Cloud panel ────────────────────────────────────────────────────────
-// Owns the sign-in button and user chip DOM in the top bar.
-// Manages auth state changes and cloud save / load operations.
+// Owns the sign-in button + composes a UserMenu (avatar/Sign out dropdown) in
+// the top bar. Manages auth state changes and cloud save / load operations.
 // Cloud save/load triggered via CLOUD_SAVE_REQUESTED / CLOUD_LOAD_REQUESTED events.
 // Mount: pass an empty container element from app.js.
 import * as auth from '../auth/auth.js';
@@ -10,6 +10,7 @@ import * as cloudModal from './modals/cloud-modal.js';
 import { confirmModal } from './modals/confirm-modal.js';
 import * as progress from './progress.js';
 import { buildFHIRObject } from '../fhir/export.js';
+import { UserMenu } from './menus/user-menu.js';
 
 const _GITHUB_SVG = '<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">'
   + '<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38'
@@ -63,43 +64,11 @@ export class AuthPanel {
     this._signInBtn.dataset.tipBody  = 'Save questionnaires to the cloud and access them from any device.';
     this._signInBtn.innerHTML = _GITHUB_SVG + ' Sign in';
 
-    // User chip (hidden until signed in)
-    this._userChip = document.createElement('div');
-    this._userChip.className = 'load-wrap top-panel-auth';
-    this._userChip.style.display = 'none';
+    // User avatar + Sign out dropdown (hidden until signed in)
+    this._userMenu = new UserMenu();
+    this._userMenu.setSignOutHandler(() => this._signOut());
 
-    // User menu toggle button
-    this._userMenuBtn = document.createElement('button');
-    this._userMenuBtn.type = 'button';
-    this._userMenuBtn.className = 'btn-fhir auth-user-btn';
-
-    this._userAvatar = document.createElement('img');
-    this._userAvatar.className = 'auth-user-avatar';
-    this._userAvatar.src = '';
-    this._userAvatar.alt = '';
-    this._userAvatar.width = 18;
-    this._userAvatar.height = 18;
-
-    this._userName = document.createElement('span');
-    this._userName.className = 'auth-user-name';
-
-    const chevron = document.createElement('span');
-    chevron.innerHTML = '&#x25BE;';
-    this._userMenuBtn.append(this._userAvatar, this._userName, chevron);
-
-    // Dropdown menu
-    this._userMenu = document.createElement('div');
-    this._userMenu.className = 'load-menu auth-user-menu';
-    this._userMenu.style.display = 'none';
-
-    this._signOutItem = document.createElement('div');
-    this._signOutItem.className = 'load-menu-item';
-    this._signOutItem.dataset.testid = 'sign-out-btn';
-    this._signOutItem.textContent = 'Sign out';
-
-    this._userMenu.appendChild(this._signOutItem);
-    this._userChip.append(this._userMenuBtn, this._userMenu);
-    this._mount.append(this._signInBtn, this._userChip);
+    this._mount.append(this._signInBtn, this._userMenu.el);
   }
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -109,36 +78,21 @@ export class AuthPanel {
       try { await auth.signInWithGitHub(); }
       catch (err) { import('./toast.js').then(m => m.showError('Sign in failed: ' + err.message)); }
     });
+  }
 
-    this._userMenuBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      const wasOpen = this._userMenu.style.display !== 'none';
-      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
-      if (!wasOpen) {
-        const r = this._userMenuBtn.getBoundingClientRect();
-        this._userMenu.style.top      = (r.bottom + 4) + 'px';
-        this._userMenu.style.right    = (window.innerWidth - r.right) + 'px';
-        this._userMenu.style.minWidth = r.width + 'px';
-        this._userMenu.style.display  = 'block';
-      }
-    });
-    document.addEventListener(AppEvents.CLOSE_DROPDOWNS, () => { this._userMenu.style.display = 'none'; });
-
-    this._signOutItem.addEventListener('click', async () => {
-      this._userMenu.style.display = 'none';
-      if ((AuthPanel._questDocTree?.length ?? 0) > 0) {
-        const answer = await confirmModal.open({
-          title:       'Sign out?',
-          msg:         'Your unsaved work will be lost. Sign out anyway?',
-          okLabel:     'Sign out',
-          cancelLabel: 'Cancel',
-        });
-        if (answer !== 'ok') return;
-        document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_RESET));
-      }
-      try { await auth.signOut(); }
-      catch (err) { import('./toast.js').then(m => m.showError('Sign out failed: ' + err.message)); }
-    });
+  async _signOut() {
+    if ((AuthPanel._questDocTree?.length ?? 0) > 0) {
+      const answer = await confirmModal.open({
+        title:       'Sign out?',
+        msg:         'Your unsaved work will be lost. Sign out anyway?',
+        okLabel:     'Sign out',
+        cancelLabel: 'Cancel',
+      });
+      if (answer !== 'ok') return;
+      document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_RESET));
+    }
+    try { await auth.signOut(); }
+    catch (err) { import('./toast.js').then(m => m.showError('Sign out failed: ' + err.message)); }
   }
 
   // ── Cloud operations (triggered by menu events) ───────────────────────────
@@ -189,9 +143,6 @@ export class AuthPanel {
     document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => {
       this._cloudId = null;
     });
-    document.addEventListener(AppEvents.CLOSE_DROPDOWNS, () => {
-      this._userMenu.style.display = 'none';
-    });
     document.addEventListener(AppEvents.CLOUD_SAVE_REQUESTED, () => this._doCloudSave());
     document.addEventListener(AppEvents.CLOUD_LOAD_REQUESTED, () => this._doCloudLoad());
   }
@@ -202,7 +153,7 @@ export class AuthPanel {
     const syncCloudSave = () => {
       const saveBtn = this._cloudSaveBtn;
       const saveSep = this._cloudSaveSep;
-      const loggedIn = this._userChip.style.display !== 'none';
+      const loggedIn = this._userMenu.el.style.display !== 'none';
       const hasNodes = (AuthPanel._questDocTree?.length ?? 0) > 0;
       const show = loggedIn && hasNodes ? '' : 'none';
       if (saveBtn) saveBtn.style.display = show;
@@ -222,14 +173,12 @@ export class AuthPanel {
     const loadSep  = this._cloudLoadSep;
     if (user) {
       this._signInBtn.style.display  = 'none';
-      this._userChip.style.display   = 'inline-flex';
-      this._userAvatar.src           = user.user_metadata?.avatar_url || '';
-      this._userName.textContent     = user.user_metadata?.user_name || user.email || '';
+      this._userMenu.setUser(user);
       if (loadItem) loadItem.style.display = '';
       if (loadSep)  loadSep.style.display  = '';
     } else {
       this._signInBtn.style.display  = '';
-      this._userChip.style.display   = 'none';
+      this._userMenu.setUser(null);
       if (loadItem) loadItem.style.display = 'none';
       if (loadSep)  loadSep.style.display  = 'none';
       if (saveBtn)  saveBtn.style.display  = 'none';

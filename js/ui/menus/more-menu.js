@@ -12,6 +12,7 @@ export class MoreMenu extends DropdownMenu {
       menuId:   'moreMenu',
       wrapId:   'moreWrap',
       label:    'More &#x25BE;',
+      menuTitle: 'More',
       testid:   'more-btn',
       tipTitle: 'More',
       tipBody:  'View mode, tree controls, Undo, Redo, Help and Settings.',

@@ -14,6 +14,7 @@ export class AnswersMenu extends DropdownMenu {
       menuId:   'answersMenu',
       wrapId:   'answersWrap',
       label:    '&#x1F4E5; Answers &#x25BE;',
+      menuTitle: 'Answers',
       testid:   'answers-btn',
       tipTitle: 'Load Answers',
       tipBody:  'Load answers from a QuestionnaireResponse file, or pick a sample response for the current questionnaire.',

@@ -18,6 +18,7 @@ export class SettingsMenu extends DropdownMenu {
       menuId:   'toolsMenu',
       wrapId:   'toolsWrap',
       label:    '&#x2699;&#xFE0F; Settings &#x25BE;',
+      menuTitle: 'Settings',
       testid:   'tools-btn',
       tipTitle: 'Settings',
       tipBody:  'Toggle tooltips, autosave and validation; validate questionnaire; expand or collapse all.',

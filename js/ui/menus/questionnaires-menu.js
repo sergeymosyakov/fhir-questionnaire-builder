@@ -12,6 +12,7 @@ export class QuestionnairesMenu extends DropdownMenu {
       btnId:    'loadFhirBtn',
       menuId:   'loadMenu',
       label:    'Questionnaires &#x25BE;',
+      menuTitle: 'Questionnaires',
       testid:   'load-fhir-btn',
       tipTitle: 'Load questionnaire',
       tipBody:  'Open a FHIR R4 Questionnaire JSON from a file or pick one of the built-in samples. Replaces the current questionnaire (you will be asked to export first if unsaved changes exist).',
