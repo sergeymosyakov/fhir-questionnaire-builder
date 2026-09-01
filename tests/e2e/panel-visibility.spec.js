@@ -253,7 +253,14 @@ test.describe('Toolbar dropdowns — mobile toggle-button behavior', () => {
     await waitForLoad(page);
 
     await page.getByTestId('load-fhir-btn').click();
-    const box = await page.getByTestId('load-menu').boundingBox();
+    const menu = page.getByTestId('load-menu');
+    // Wait out the slide-up entrance animation — measuring mid-transform
+    // catches the panel still partway off-screen below the viewport.
+    await menu.evaluate(el => new Promise(r => {
+      if (getComputedStyle(el).animationName === 'none') return r();
+      el.addEventListener('animationend', r, { once: true });
+    }));
+    const box = await menu.boundingBox();
     expect(box.x).toBeCloseTo(0, 0);
     expect(box.width).toBeCloseTo(480, 0);
     expect(box.y + box.height).toBeCloseTo(800, 0);
