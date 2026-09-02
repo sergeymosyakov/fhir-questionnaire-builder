@@ -57,7 +57,7 @@ export class GroupNode extends BaseNode {
   }
 
   // ── Re-evaluate pass/fail icon for this group after a value change ────────
-  // Called by render-node.js updateGroupIcons() which iterates groupIconMap.
+  // Called by GroupNode.updateAll() (wired as rc.updateGroupIcons in preview-form.js), which iterates groupIconMap.
   refreshIcon(rc) {
     const entry = rc.groupIconMap.get(this.id);
     if (!entry) return;

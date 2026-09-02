@@ -48,7 +48,7 @@ invent a URL or cardinality.
   supported table (never leave a ✅ in Not Supported).
 - If tracked as a `roadmap`-labeled GitHub issue: close it (`Closes #<n>` in the PR) — the backlog lives as issues, not a file.
 - `help.html`: add/update the row in the `HELP_DATA` array.
-- `docs/CONTEXT.md`: update file table / feature list if structure changed.
+- `docs/CONTEXT.md` / `docs/context/file-manifest.md`: update file table / feature list if structure changed.
 
 ## 9. Tests
 - Unit (Vitest, node env, no DOM): cover import + export round-trip and any pure logic.
