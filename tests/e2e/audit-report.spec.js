@@ -24,7 +24,24 @@ import { freshStart, addRootGroup, waitForLoad } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/audit-issues.fhir.json');
 
+// q-external-vs's answerValueSet is a deliberately-nonexistent URL on a real,
+// reachable host (tx.fhir.org, via the app's default corsProxyUrl worker) -
+// mock the $expand call so import never races a real network round-trip
+// (this is what caused CI-only flakiness: a real failure response opens the
+// "ValueSet Expansion Errors" import modal, but only if it resolves before
+// the test's own interactions - unreachable/slow locally, fast in CI).
+async function mockTerminologyExpand(page) {
+  await page.route(url => url.hostname === 'fhir-cors-proxy.sergeymosyakov.workers.dev', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/fhir+json',
+      body: JSON.stringify({ resourceType: 'ValueSet', expansion: { contains: [] } }),
+    });
+  });
+}
+
 async function loadFixture(page) {
+  await mockTerminologyExpand(page);
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
