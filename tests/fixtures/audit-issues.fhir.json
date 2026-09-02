@@ -1,0 +1,35 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "title": "Audit Issues Demo",
+  "item": [
+    {
+      "linkId": "g1",
+      "type": "group",
+      "text": "Section",
+      "item": [
+        {
+          "linkId": "q-broken-ref",
+          "type": "string",
+          "text": "Depends on a missing item",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "item.where(linkId='ghost').answer.exists()"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "q-external-vs",
+          "type": "choice",
+          "text": "External value set question",
+          "answerValueSet": "https://tx.fhir.org/r4/ValueSet/some-external-vs"
+        }
+      ]
+    }
+  ]
+}

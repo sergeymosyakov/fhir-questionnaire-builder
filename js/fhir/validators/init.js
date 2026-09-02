@@ -16,6 +16,7 @@
 import { validatorRegistry } from './registry.js';
 import { LocalValidator }    from './local.js';
 import { ExternalValidator } from './external.js';
+import { AuditValidator }    from './audit.js';
 import { AppEvents }         from '../../events.js';
 import { serverConfig, CONFIG_KEYS } from '../server-config.js';
 
@@ -33,6 +34,18 @@ export async function initValidators(override = {}) {
   };
   const localEnabled    = override.localEnabled    ?? _ls('validate', true);
   const externalEnabled = override.externalEnabled ?? _ls('validateExternal', false);
+  const auditEnabled    = override.auditEnabled    ?? _ls('validateAudit', true);
+
+  // Audit is not part of config.json (not server-backed) — register it right away
+  // instead of after the serverConfig await below, so it can't lose a race with a
+  // slow/degraded config.json fetch (that left its Validate-modal section missing).
+  const audit = new AuditValidator();
+  audit.enabled = auditEnabled;
+  validatorRegistry.register(audit);
+  if (typeof document !== 'undefined') {
+    document.dispatchEvent(new CustomEvent(AppEvents.VALIDATOR_TOGGLE, { detail: { id: 'audit', enabled: auditEnabled } }));
+  }
+
   try {
     await serverConfig.ready();
     const defs = serverConfig.getParsed(CONFIG_KEYS.VALIDATORS) || [{ type: 'local', name: 'Built-in' }];
@@ -54,6 +67,7 @@ export async function initValidators(override = {}) {
     v.enabled = localEnabled;
     validatorRegistry.register(v);
   }
+
   // Broadcast initial states so listeners (QuestionnaireLoader, QRAnswersManager) sync up
   if (typeof document !== 'undefined') {
     document.dispatchEvent(new CustomEvent(AppEvents.VALIDATOR_TOGGLE, { detail: { id: 'local',    enabled: localEnabled } }));

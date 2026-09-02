@@ -2,9 +2,11 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { Validator }         from '../js/fhir/validators/base.js';
 import { LocalValidator }    from '../js/fhir/validators/local.js';
+import { AuditValidator }    from '../js/fhir/validators/audit.js';
 import { ValidatorRegistry } from '../js/fhir/validators/registry.js';
 import { initValidators }    from '../js/fhir/validators/init.js';
 import { serverConfig, DefaultConfigProvider } from '../js/fhir/server-config.js';
+import { AppEvents, EventState } from '../js/events.js';
 
 describe('Validator base class', () => {
   it('returns [] without calling _run() when disabled', async () => {
@@ -27,10 +29,11 @@ describe('Validator base class', () => {
     expect(() => v.name).toThrow();
   });
 
-  it('defaults: enabled=true, type="local", _run()=[]', async () => {
+  it('defaults: enabled=true, type="local", advisory=false, _run()=[]', async () => {
     const v = new Validator();
     expect(v.enabled).toBe(true);
     expect(v.type).toBe('local');
+    expect(v.advisory).toBe(false);
     expect(await v._run({}, [], {})).toEqual([]);
   });
 });
@@ -70,6 +73,37 @@ describe('LocalValidator', () => {
     const v = new LocalValidator();
     const issues = await v.run({ name: 'GoodName' }, [], {});
     expect(issues.some(i => /modifierExtension/.test(i.message))).toBe(false);
+  });
+});
+
+describe('AuditValidator', () => {
+  it('exposes the expected id/name/type and is advisory (excluded from export/import)', () => {
+    const v = new AuditValidator();
+    expect(v.id).toBe('audit');
+    expect(v.name).toBe('Quality audit');
+    expect(v.type).toBe('local');
+    expect(v.advisory).toBe(true);
+  });
+
+  it('surfaces auditTree issues for the given tree', async () => {
+    const v = new AuditValidator();
+    const tree = [{ id: 'q1', type: 'item', enableWhen: [{ question: 'ghost', operator: '=', answerBoolean: true }] }];
+    const issues = await v.run({}, tree, {});
+    expect(issues.some(i => i.nodeId === 'q1')).toBe(true);
+  });
+
+  it('reads variables from EventState (questDoc.variables) to resolve %refs', async () => {
+    const v = new AuditValidator();
+    const tree = [{ id: 'q1', type: 'item', _calculatedExpr: "item.where(linkId='age').answer.exists()" }];
+
+    // Without 'age' declared as a variable, the linkId-shaped reference is unknown.
+    const before = await v.run({}, tree, {});
+    expect(before.some(i => i.nodeId === 'q1')).toBe(true);
+
+    // 'age' declared as a %variable — buildDepGraph excludes known variable names.
+    EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc: { variables: [{ name: 'age', expression: '30' }] } });
+    const after = await v.run({}, tree, {});
+    expect(after).toEqual([]);
   });
 });
 
@@ -131,9 +165,9 @@ describe('initValidators', () => {
     const before = validatorRegistry.getAll().length;
     await initValidators({ localEnabled: true });
     const added = validatorRegistry.getAll().slice(before);
-    expect(added).toHaveLength(1);
-    expect(added[0].id).toBe('local');
-    expect(added[0].enabled).toBe(true);
+    // audit registers first (no config.json dependency), local follows after serverConfig.ready()
+    expect(added.map(v => v.id)).toEqual(['audit', 'local']);
+    expect(added.find(v => v.id === 'local').enabled).toBe(true);
   });
 
   it('skips external definitions that have no url', async () => {
@@ -143,6 +177,20 @@ describe('initValidators', () => {
     const { validatorRegistry } = await import('../js/fhir/validators/registry.js');
     const before = validatorRegistry.getAll().length;
     await initValidators({});
-    expect(validatorRegistry.getAll().length).toBe(before);
+    // Nothing config-driven added (external skipped, no local def) — audit is
+    // not config.json-driven and is always registered regardless.
+    const added = validatorRegistry.getAll().slice(before);
+    expect(added.map(v => v.id)).toEqual(['audit']);
+  });
+
+  it('registers the audit validator with its own enabled state, independent of local/external', async () => {
+    const { validatorRegistry } = await import('../js/fhir/validators/registry.js');
+    const before = validatorRegistry.getAll().length;
+    await initValidators({ localEnabled: false, externalEnabled: false, auditEnabled: true });
+    const added = validatorRegistry.getAll().slice(before);
+    const audit = added.find(v => v.id === 'audit');
+    expect(audit.enabled).toBe(true);
+    expect(audit.name).toBe('Quality audit');
+    expect(audit.type).toBe('local');
   });
 });
