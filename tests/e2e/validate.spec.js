@@ -99,7 +99,7 @@ test.describe('Validate modal — all good', () => {
     await openValidateModal(page);
 
     await expect(validateModalTitle(page)).toHaveText('Validate — All good', { timeout: 10_000 });
-    await expect(validateModalBody(page).locator('.validate-ok')).toBeVisible();
+    await expect(validateModalBody(page).locator('[data-testid="validate-section-local"] .validate-ok')).toBeVisible();
   });
 
   test('"Great!" button closes the modal', async ({ page }) => {

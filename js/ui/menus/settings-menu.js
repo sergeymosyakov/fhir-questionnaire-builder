@@ -36,10 +36,12 @@ export class SettingsMenu extends DropdownMenu {
     this._autosaveRow         = this._checkItem('settings-autosave-check',          'Autosave');
     this._validateLocalRow    = this._checkItem('settings-validate-local-check',    'Local validation');
     this._validateExternalRow = this._checkItem('settings-validate-external-check', 'Server validation');
+    this._validateAuditRow    = this._checkItem('settings-validate-audit-check',    'Quality audit', 'settings-validate-audit-check');
 
     // Set initial checked states
     this._inp(this._validateLocalRow).checked    = this._prefs.get('validate');
     this._inp(this._validateExternalRow).checked = this._prefs.get('validateExternal');
+    this._inp(this._validateAuditRow).checked    = this._prefs.get('validateAudit');
 
     // ── Section label: Tools ───────────────────────────────────────────────
     this._validateItem = this._item('validateItem',
@@ -57,6 +59,7 @@ export class SettingsMenu extends DropdownMenu {
       this._autosaveRow,
       this._validateLocalRow,
       this._validateExternalRow,
+      this._validateAuditRow,
       this._sep(),
       this._validateItem,
       this._sep(),
@@ -66,7 +69,7 @@ export class SettingsMenu extends DropdownMenu {
       this._item('translateItem', '🌐 Translate questionnaire\u2026', 'translate-item'),      this._item('fhirpathTesterItem', '🧪 FHIRPath tester…', 'fhirpath-tester-item'),    );
 
     // Keep menu open on checkbox toggle
-    [this._tipsRow, this._autosaveRow, this._validateLocalRow, this._validateExternalRow]
+    [this._tipsRow, this._autosaveRow, this._validateLocalRow, this._validateExternalRow, this._validateAuditRow]
       .forEach(row => row.addEventListener('click', e => e.stopPropagation()));
 
     // Tips toggle — dispatch event; tooltip.js listens and calls setEnabled()
@@ -89,6 +92,12 @@ export class SettingsMenu extends DropdownMenu {
       const enabled = e.target.checked;
       this._prefs.set('validateExternal', enabled);
       document.dispatchEvent(new CustomEvent(AppEvents.VALIDATOR_TOGGLE, { detail: { id: 'external', enabled } }));
+    });
+
+    this._inp(this._validateAuditRow).addEventListener('change', e => {
+      const enabled = e.target.checked;
+      this._prefs.set('validateAudit', enabled);
+      document.dispatchEvent(new CustomEvent(AppEvents.VALIDATOR_TOGGLE, { detail: { id: 'audit', enabled } }));
     });
 
     this._validateItem.addEventListener('click', () => {

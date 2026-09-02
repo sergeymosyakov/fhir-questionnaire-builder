@@ -33,6 +33,12 @@ export class Validator {
   /** @returns {'local'|'external'} */
   get type() { return 'local'; }
 
+  /** @returns {boolean} advisory validators never block export/import — they only run in the explicit 'validate' mode (see ValidateModal.show) */
+  get advisory() { return false; }
+
+  /** @returns {boolean} validates against a FHIR server/spec — meaningless for non-FHIR export formats (e.g. REDCap CSV) */
+  get fhirOnly() { return false; }
+
   /**
    * Entry point. Returns [] immediately if disabled.
    * Subclasses override _run(), not this method.

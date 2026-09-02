@@ -8,6 +8,9 @@
 //   use to exclude validators that are irrelevant for the export format
 //   (e.g. external FHIR server validator is meaningless for REDCap CSV output).
 //
+// Validators with `advisory: true` (see validators/base.js) are excluded outside
+// 'validate' mode via the same filter composition — they never block export/import.
+//
 // Validators control themselves via VALIDATOR_TOGGLE events (see validators/base.js).
 // Disabled validators return [] automatically — no filtering needed here.
 //
@@ -31,7 +34,12 @@ class ValidateModal extends Modal {
    */
   show(title, mode, { questJson = null, tree = [], values = {}, onExport = null, extraIssues = [], validatorFilter = null } = {}) {
     this._onExport = onExport;
-    const _filter = v => v.enabled && (!validatorFilter || validatorFilter(v));
+    // Advisory validators (e.g. audit) only run in the explicit 'validate' mode —
+    // composed the same way as validatorFilter, no per-validator special-casing here.
+    const _modeFilter = mode === 'validate' ? null : (v => !v.advisory);
+    const _filter = v => v.enabled
+      && (!_modeFilter || _modeFilter(v))
+      && (!validatorFilter || validatorFilter(v));
 
     if (mode === 'export') {
       // Run all validators first (disabled ones return [] automatically).
@@ -66,10 +74,10 @@ class ValidateModal extends Modal {
       return;
     }
 
-    const sectionEls = validators.map(v => this._renderSection(v.name, v.type));
+    const sectionEls = validators.map(v => this._renderSection(v.name, v.type, v.id));
 
     if (extraIssues.length > 0) {
-      const extraSection = this._renderSection('Response check', 'local');
+      const extraSection = this._renderSection('Response check', 'local', 'response-check');
       const spinner = extraSection.querySelector('[data-role="spinner"]');
       if (spinner) spinner.remove();
       this._fillSection(extraSection, extraIssues, null);
@@ -114,14 +122,14 @@ class ValidateModal extends Modal {
 
     for (const { validator, issues, error } of results) {
       if (!validator.enabled) continue; // skip disabled validators — they returned [] and don't need a section
-      const sectionEl = this._renderSection(validator.name, validator.type);
+      const sectionEl = this._renderSection(validator.name, validator.type, validator.id);
       const spinner = sectionEl.querySelector('[data-role="spinner"]');
       if (spinner) spinner.remove();
       this._fillSection(sectionEl, issues, error);
     }
 
     if (extraIssues.length > 0) {
-      const extraSection = this._renderSection('Response check', 'local');
+      const extraSection = this._renderSection('Response check', 'local', 'response-check');
       const spinner = extraSection.querySelector('[data-role="spinner"]');
       if (spinner) spinner.remove();
       this._fillSection(extraSection, extraIssues, null);
@@ -135,9 +143,10 @@ class ValidateModal extends Modal {
 
   // ── Section helpers ─────────────────────────────────────────────────────────
 
-  _renderSection(name, type) {
+  _renderSection(name, type, id) {
     const section = document.createElement('div');
     section.className = 'validate-section';
+    section.dataset.testid = 'validate-section-' + id;
 
     const header = document.createElement('div');
     header.className = 'validate-section-header';

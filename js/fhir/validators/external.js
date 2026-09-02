@@ -95,6 +95,7 @@ export class ExternalValidator extends Validator {
     return target ? `${this._name} ${target}` : this._name;
   }
   get type() { return 'external'; }
+  get fhirOnly() { return true; }
 
   /** Build the version-specific base URL for the active FHIR target. */
   _baseUrl() {

@@ -26,6 +26,10 @@ function makeFetchMock() {
 describe('ExternalValidator', () => {
   let fetchMock;
 
+  it('is fhirOnly (excluded from non-FHIR export formats like REDCap)', () => {
+    expect(new ExternalValidator({ name: 'HAPI', url: 'https://x' }).fhirOnly).toBe(true);
+  });
+
   beforeEach(() => {
     fetchMock = makeFetchMock();
     // First fetch is config.json (proxy lookup), the rest are validation POSTs.
