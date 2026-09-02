@@ -8,6 +8,15 @@ The right-side **preview panel is a live SDC-compliant runtime**: it executes FH
 
 > © 2026 [Sergey Mosyakov](https://github.com/sergeymosyakov) / [Roko Labs Inc.](https://www.rokolabs.com) — Non-commercial use with attribution. Commercial use requires prior written permission.
 
+<p align="center">
+  <img src="docs/screenshot-builder-desktop.png" alt="Desktop: Logic Builder panel on the left, live Questionnaire Preview on the right, showing conditional logic tags and a filled-in bariatric surgery questionnaire" width="800">
+</p>
+<p align="center"><sub>Desktop — Logic Builder (left) + live SDC Questionnaire Preview (right)</sub></p>
+<p align="center">
+  <img src="docs/screenshot-builder-mobile.png" alt="Mobile: responsive single-column preview with a collapsible Builder rail" width="280">
+</p>
+<p align="center"><sub>Mobile — responsive layout, collapsible Builder rail</sub></p>
+
 ---
 
 ## 📦 Embed the renderer as a widget
@@ -16,6 +25,11 @@ The right-side runtime ships as a standalone, embeddable **`QuestionnaireRendere
 widget — drop a FHIR R4 `Questionnaire` into any web page and get a live, fillable
 form that runs the SDC logic and returns a `QuestionnaireResponse`. No builder
 shell, no iframe, no framework.
+
+<p align="center">
+  <img src="docs/screenshot-widget.png" alt="Embedded QuestionnaireRenderer widget showing auto-calculated BMI and a hidden enableWhen-driving field" width="700">
+</p>
+<p align="center"><sub>The embeddable widget — same live SDC runtime, no builder shell</sub></p>
 
 ```html
 <link rel="stylesheet" href="questionnaire-widget.css">
