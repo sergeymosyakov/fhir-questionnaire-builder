@@ -48,7 +48,7 @@ See [context/file-manifest.md](context/file-manifest.md) for the full per-file r
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`, vendored at `npm run vendor:fhirpath` / `vendor:fhirpath:r4` after a version bump — no CDN, CSP blocks arbitrary script hosts); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
 - **StructureMap execution** — [`fhir-structuremap-js`](https://github.com/sergeymosyakov/fhir-structuremap-js), a real FML/StructureMap engine, vendored at `lib/fhir-structuremap-js.esm.js` (`npm run vendor:structuremap` to rebuild after a version bump — not loaded from a CDN, CSP's `script-src` only allows `'self'`); executes `sdc-questionnaire-targetStructureMap` for **Save ▾ → StructureMap Extract** and `sdc-questionnaire-sourceStructureMap` for **Answers ▾ → Fill via StructureMap** (fetches the source resource from the FHIR Base Server, then runs the map in-browser — no server-side `$populate` support required)
 - **CQL execution** — [`cql-execution`](https://github.com/cqframework/cql-execution) + [`cql-exec-fhir`](https://github.com/cqframework/cql-exec-fhir), vendored at `lib/cql-execution.esm.js` / `lib/cql-exec-fhir.esm.js` (`npm run vendor:cql` / `vendor:cql-fhir`, lazy dynamic-imported — no CDN); resolves `initialExpression` fields with `language: text/cql-identifier` against a `#id` contained `Library`'s embedded precompiled ELM (`cqf-library` extension) — self-contained/offline only, see `docs/FHIR-MAPPING.md` "CQL execution"
-- **Playwright** — E2E test suite; 128 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
+- **Playwright** — E2E test suite; 131 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
 - **Dependency injection** — `dnd.js` receives callbacks from `BuilderPanel`; `_shared.js` is pure-function only (no injected state)
 - **Event-driven calc** — nodes/modals dispatch `CALC_RECALC_REQUESTED`; `BuilderPanel` listens and runs `evalCalcNodes` + dispatches `RESPONSE_CHANGED`
 - **Confirm dialog** — `ConfirmDialog.show(label)` in `js/ui/confirm-dialog.js` — no DI, standalone `Promise<boolean>`
@@ -65,17 +65,20 @@ See [context/file-manifest.md](context/file-manifest.md) for the full per-file r
 Each node type owns its own DOM rendering via the `renderPreview(res, container, rc)` method:
 
 ```
-BaseNode            — js/nodes/base-node.js       shared scaffold, dimmed/disabled rows
+BaseNode            — js/nodes/base-node.js       shared scaffold, dimmed/disabled rows; static dispatch(res, container, rc)
   ├─ GroupNode      — js/nodes/group-node.js       group rows, AND/OR logic, collapse, refreshIcon()
-  └─ ItemNode       — js/nodes/item-node.js        all item types, badges, controls
-       ├─ DisplayNode   — js/nodes/display-node.js   display items, category icons, help toggle
-       └─ ChecklistNode — js/nodes/choice-node.js    multi-select checkboxes (check-box itemControl)
+  └─ ItemNode       — js/nodes/item-node.js        shared item scaffold, badges, controls; 15 concrete classes extend it directly:
+       ├─ TextNode, NumberNode, UrlNode, CheckboxNode         — js/nodes/{text,number,url,checkbox}-node.js
+       ├─ ChoiceNode, RadioNode, OpenChoiceNode, ChecklistNode — js/nodes/choice-node.js
+       ├─ DateNode, DateTimeNode, TimeNode                     — js/nodes/date-node.js
+       ├─ AttachmentNode, ReferenceNode, QuantityNode          — js/nodes/{attachment,reference,quantity}-node.js
+       └─ DisplayNode                                          — js/nodes/display-node.js (display items, category icons, help toggle)
 ```
 
-- **`NODE_REGISTRY`** (`js/nodes/index.js`) — `Map<itemType → class>`; dispatch: `NODE_REGISTRY.get(node.itemType)?.prototype.renderPreview.call(node, …)`
+- **`NODE_REGISTRY`** (`js/nodes/index.js`) — `Map<itemType → class>`; used to construct new nodes by type (`createItemNode`); preview dispatch does **not** go through it — `BaseNode.dispatch(res, container, rc)` calls `res.node.renderPreview(res, container, rc)` directly, since every node instance already carries its correct class prototype
 - **`_rc`** (`js/preview/render-ctx.js`) — dependency injection hub; node classes read stable refs (`buildControl`, `isMandatory`, etc.) from `_rc` instead of importing `js/fhir/form-checks.js` / `js/fhir/quest-document.js` directly (avoids circular deps)
 - **Circular dep rule**: node class files **must not** import `js/fhir/form-checks.js` or `js/fhir/quest-document.js` directly. Inject via `_rc` instead.
-- **`js/controls/{type}.js`** — per-type interactive control factories (date picker, select, checkbox, etc.); called via `rc.buildControl(node, ctx)`. Control files do **not** own row rendering.
+- **Controls** — no separate `js/controls/` directory; each node class implements its own `buildControl(ctx)` method (the actual DOM-building logic); `PreviewForm._buildControl(node, iconEl, onAfterChange)` in `js/preview-form.js` builds the shared `ctx` (`getValue`/`setValue`/`onChange`/`bus`/`fhirBase`/`corsProxy`/`_fpCtx`) and calls `node.buildControl(ctx)`; exposed to node/group code as `rc.buildControl` (see `_rc` above)
 
 ### State
 
