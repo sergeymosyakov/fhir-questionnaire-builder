@@ -3,7 +3,7 @@ import { ITEM_SECTIONS } from './registry.js';
 import { resolveDefinition } from '../../../fhir/definition-resolver.js';
 import { changeNodeType } from '../../../nodes/change-type.js';
 import { AppEvents, EventState } from '../../../events.js';
-import { showError, showInfo } from '../../toast.js';
+import { showError } from '../../toast.js';
 
 const CHOICE_TYPES = new Set(['select', 'radio', 'checklist', 'open-choice']);
 
@@ -232,7 +232,6 @@ class DefinitionSection extends ItemSection {
 
     document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
-    showInfo(`Resolved ${resolved.elementId} from profile.`);
   }
 
   commit(pending, node) {
