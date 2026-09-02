@@ -165,9 +165,8 @@ describe('initValidators', () => {
     const before = validatorRegistry.getAll().length;
     await initValidators({ localEnabled: true });
     const added = validatorRegistry.getAll().slice(before);
-    // audit registers first (no config.json dependency), local follows after serverConfig.ready()
-    expect(added.map(v => v.id)).toEqual(['audit', 'local']);
-    expect(added.find(v => v.id === 'local').enabled).toBe(true);
+    expect(added.map(v => v.id)).toEqual(['local', 'audit']);
+    expect(added[0].enabled).toBe(true);
   });
 
   it('skips external definitions that have no url', async () => {
