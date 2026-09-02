@@ -50,6 +50,8 @@ await page.getByTestId('export-quest-item').click();
 
 **Modal title empty** — assert `toBeVisible()` on the backdrop before `toContainText()` on the title span.
 
+**Async app-bootstrap ordering** — CI-only failures (pass locally, fail intermittently on GitHub Actions with "element(s) not found", not just "not visible") can mean a feature registers itself in a promise chain gated behind an unrelated network call in app init (e.g. a validator registered only after `await serverConfig.ready()` even though it has no config.json dependency), racing the test's own setup wait. Fix the bootstrap ordering in the app code, not the test — don't paper over it with a longer timeout or an extra wait in the spec. To confirm the theory before trusting a fix, reproduce with `page.route()` delaying the slow request by a few seconds and check the feature still appears.
+
 **rAF yield before commitInput** — after `fill()` for reactive DOM, yield two rAF before committing.
 
 **Preserve `data-testid` when moving/consolidating UI** — when a control moves to a new home (e.g. a title-row icon → a gear-menu item), keep the **same** `data-testid` on the new element so existing specs keep resolving it. Only the *interaction* changes (e.g. open the gear menu first), not the id. This avoids mass spec churn. If the surrounding container now contains sibling nodes carrying the same testid (a group whose children reuse `node-copy-btn` etc.), scope the locator to the node's own menu with `.first()` (the node's own header/menu precedes its children in the DOM).
