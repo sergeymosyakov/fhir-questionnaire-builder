@@ -2,7 +2,7 @@
 // Header dropdown for patient preset profiles.
 // Extends DropdownMenu — inherits close-dropdowns listener and toggle logic.
 // Receives presets[] in constructor; handlers injected via setHandlers().
-import { DropdownMenu, DESKTOP_MIN_WIDTH } from '../dropdown-menu.js';
+import { DropdownMenu } from '../dropdown-menu.js';
 
 export class PatientPresetMenu extends DropdownMenu {
   constructor(presets) {
@@ -43,11 +43,10 @@ export class PatientPresetMenu extends DropdownMenu {
 
   /** Position the fixed menu below the button on every open, right-anchored
       so it opens toward screen-left instead of overflowing past the right edge.
-      Below 1024px the base class already set `top` and the shared mobile
-      .load-menu rule forces `right:0 !important` (beats our own stale desktop
-      inline value — inline can't be overridden by plain CSS, only !important). */
+      Always computed (even on mobile) — the shared mobile .load-menu rule
+      forces top/right back with !important, the one legitimate use for it
+      (inline always outranks plain CSS specificity). */
   _onOpen() {
-    if (window.innerWidth < DESKTOP_MIN_WIDTH) return;
     const r = this._btn.getBoundingClientRect();
     this._menu.style.top   = (r.bottom + 4) + 'px';
     this._menu.style.right = (window.innerWidth - r.right) + 'px';

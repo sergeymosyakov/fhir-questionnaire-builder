@@ -1,9 +1,10 @@
 // ── Panel resize drag ─────────────────────────────────────────────────────────
 // Manages the horizontal drag handle between left and right panels.
-// Persists the panel width to storage across sessions.
+// Persists the panel width to storage across sessions. The saved width is
+// applied via the --saved-panel-width custom property, read by a desktop-only
+// media query in css/layout.css (width: var(--saved-panel-width, 470px)) —
+// no JS viewport check needed, the breakpoint lives in CSS alone.
 import * as storage from '../storage/storage.js';
-
-const DESKTOP_MIN_WIDTH = 1024; // must match css/layout.css breakpoint
 
 export class PanelResizer {
   /**
@@ -21,7 +22,6 @@ export class PanelResizer {
     this._savedWidth = null;
     this._bind();
     this._restoreWidth(); // async, fire-and-forget
-    window.addEventListener('resize', () => this._applyForViewport());
   }
 
   /** Restore saved width from storage. */
@@ -29,17 +29,7 @@ export class PanelResizer {
     let saved;
     try { saved = await storage.getItem(this._storageKey); } catch { /* private mode / quota */ }
     this._savedWidth = saved || null;
-    this._applyForViewport();
-  }
-
-  // Custom drag width is desktop-only — below the breakpoint the panel must
-  // follow the responsive rail/expanded CSS, never a stale inline width.
-  _applyForViewport() {
-    if (window.innerWidth >= DESKTOP_MIN_WIDTH && this._savedWidth) {
-      this._panel.style.width = this._savedWidth + 'px';
-    } else {
-      this._panel.style.width = '';
-    }
+    if (this._savedWidth) this._panel.style.setProperty('--saved-panel-width', this._savedWidth + 'px');
   }
 
   _bind() {
@@ -63,6 +53,8 @@ export class PanelResizer {
         this._resizer.classList.remove('resizing');
         overlay.remove();
         this._savedWidth = parseInt(this._panel.style.width);
+        this._panel.style.width = ''; // hand off to the --saved-panel-width CSS rule
+        this._panel.style.setProperty('--saved-panel-width', this._savedWidth + 'px');
         try { storage.setItem(this._storageKey, this._savedWidth); } catch { /* ignore */ }
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);

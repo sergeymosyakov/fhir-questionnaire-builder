@@ -6,13 +6,21 @@
 ─────────────────────────────────────────────────────────────────── */
 
 .notif-backdrop {
-  z-index: 9000;
+  /* must outrank every other modal/dropdown z-index so alerts are never hidden behind an open dialog */
+  z-index: 20000;
   transition: opacity 0.15s ease;
 }
 
-.notif-box {
-  width: min(360px, calc(100vw - 40px));
+/* Desktop only: below 1024px, fall through to .modal-box's base full-width
+   bottom-sheet rule, same as every other modal. min-width:0 cancels the
+   generic desktop .modal-box{min-width:500px} floor (modals.css). */
+@media (min-width: 1024px) {
+  .notif-box { width: min(360px, calc(100vw - 40px)); min-width: 0; }
 }
+
+/* single-action dialog: OK stays full-width even past the desktop breakpoint
+   where .modal-btn otherwise shrinks to content width */
+.notif-box .modal-btn { width: 100%; }
 
 .notif-box.notif--error { border-top: 3px solid #b91c1c; }
 .notif-box.notif--warn  { border-top: 3px solid #d97706; }

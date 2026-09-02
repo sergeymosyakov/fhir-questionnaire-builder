@@ -1,6 +1,9 @@
 // ── Pure utility functions ────────────────────────────────────────────────────
 // No imports, no side effects — safe to use from anywhere.
 
+// Global mobile→desktop breakpoint — matches every css/*.css @media (min-width: …).
+export const DESKTOP_MIN_WIDTH = 1024;
+
 // ── Internal namespace ────────────────────────────────────────────────────────
 // UUID-based prefix for all system-generated constraint keys.
 // Guarantees no collision with user-defined keys.

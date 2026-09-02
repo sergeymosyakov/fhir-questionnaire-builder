@@ -1,7 +1,5 @@
 import { AppEvents } from '../events.js';
 
-export const DESKTOP_MIN_WIDTH = 1024; // must match css/builder-toolbar.css breakpoint
-
 // ── DropdownMenu base class ───────────────────────────────────────────────────
 // Subclass this to build a .load-wrap button+menu dropdown.
 // Listens for CLOSE_DROPDOWNS CustomEvent to close itself.

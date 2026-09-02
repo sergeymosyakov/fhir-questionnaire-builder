@@ -54,7 +54,9 @@
 @media (min-width: 1024px) {
   [data-testid] .modal-box {
     width: auto;
-    max-width: 80vw;
+    /* per-instance cap from the Modal({ maxWidth }) option, set as a custom
+       property in modal-base.js — falls back to 80vw when not given. */
+    max-width: var(--modal-max-width, 80vw);
     min-width: 0;
   }
 }
@@ -598,6 +600,8 @@
 .preview-placeholder-icon  { font-size: 40px; margin-bottom: 12px; opacity: .5; }
 .preview-placeholder-title { font-size: 16px; font-weight: 600; color: #bbb; margin-bottom: 8px; }
 .preview-placeholder-hint  { font-size: 13px; line-height: 1.6; color: #bbb; }
+.preview-placeholder-hint a { color: var(--c-primary); text-decoration: none; }
+.preview-placeholder-hint a:hover { text-decoration: underline; }
 
 /* ── Design Note modal textarea ─────────────────────────────────────────────── */
 .note-modal-textarea {

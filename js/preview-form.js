@@ -423,7 +423,8 @@ export class PreviewForm {
             '<strong>From file\u2026</strong> \u2014 upload a FHIR R4 or STU3 JSON file from your computer,<br>' +
             '<strong>From Library\u2026</strong> \u2014 pick one of the built-in samples,<br>' +
             '<strong>From Cloud\u2026</strong> \u2014 access your saved questionnaires (sign in required).<br>' +
-            'Or start from scratch: click <strong>+ Add Root Group</strong> in the left panel.' +
+            'Or start from scratch: click <strong>+ Add Root Group</strong> in the left panel.<br><br>' +
+            'New here? Read the <a href="docs.html#/quick-tour" data-testid="preview-placeholder-docs-link">Quick tour</a> \u2014 five minutes, end to end.' +
           '</div>';
         lform.appendChild(placeholder);
       }
