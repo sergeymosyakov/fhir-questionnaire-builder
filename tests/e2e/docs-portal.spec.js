@@ -2,7 +2,8 @@
 // The standalone docs site (docs.html + docs-site/) renders Markdown pages from
 // a manifest with a sidebar, search, and per-page "coming soon" placeholders.
 //
-// data-testid registry: (none — the docs portal is a separate static page)
+// data-testid registry: preview-placeholder-docs-link (Quick tour link in the
+//                        empty-preview placeholder)
 // Selectors used: #docSidebar, .doc-nav-link, #docContent, #docSearch,
 //                 .doc-placeholder; app opens docs via ⋯ More → Docs (docs-page-btn)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,5 +40,12 @@ test.describe('documentation portal', () => {
     const docsItem = page.getByTestId('docs-page-btn');
     await expect(docsItem).toBeVisible();
     await expect(docsItem).toHaveAttribute('href', 'docs.html');
+  });
+
+  test('the empty-preview placeholder links to the Quick tour page', async ({ page }) => {
+    await page.goto('/');
+    const link = page.getByTestId('preview-placeholder-docs-link');
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute('href', 'docs.html#/quick-tour');
   });
 });

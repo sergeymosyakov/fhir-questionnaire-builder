@@ -242,12 +242,13 @@
   .load-menu {
     position: fixed;
     left: 0;
-    /* !important: beats a stale inline `top`/`right` a subclass
-       (PatientPresetMenu) may have set for its desktop-only anchoring —
-       inline always outranks plain specificity, this is the one case where
-       !important is the fix. */
+    /* !important: beats a stale inline `top`/`right`/`min-width` a subclass
+       (PatientPresetMenu, UserMenu) may have set for its desktop-only
+       anchoring — inline always outranks plain specificity, this is the one
+       case where !important is the fix. */
     top: auto !important;
     right: 0 !important;
+    min-width: 0 !important;
     bottom: 0;
     width: 100%;
     max-width: 100%;

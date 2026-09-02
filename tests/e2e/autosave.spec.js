@@ -198,8 +198,8 @@ test.describe('Panel width persistence', () => {
     const widthAt = () => page.locator('.left-panel').evaluate(
       el => parseInt(window.getComputedStyle(el).width)
     );
-    // PanelResizer's own `resize` handler runs asynchronously relative to
-    // setViewportSize() resolving — poll instead of reading immediately.
+    // Width comes from a CSS media query (var(--saved-panel-width)), not a JS
+    // resize handler — toPass() just absorbs normal layout/paint timing.
     await expect(async () => expect(await widthAt()).toBeCloseTo(380, -1)).toPass();
 
     // Below the responsive breakpoint the stale desktop drag width must not

@@ -2,7 +2,7 @@
 // Signed-in user avatar + "Sign out" dropdown, shown in the top panel.
 // Extends DropdownMenu — inherits toggle/active-state/header/close-dropdowns
 // logic instead of duplicating it (was a bespoke implementation in AuthPanel).
-import { DropdownMenu, DESKTOP_MIN_WIDTH } from '../dropdown-menu.js';
+import { DropdownMenu } from '../dropdown-menu.js';
 
 export class UserMenu extends DropdownMenu {
   constructor() {
@@ -37,11 +37,10 @@ export class UserMenu extends DropdownMenu {
     this._menu.appendChild(this._signOutItem);
   }
 
-  /** Desktop-only: anchor below the button, right-edge aligned. Below
-      DESKTOP_MIN_WIDTH the shared mobile .load-menu rule takes over (see
-      PatientPresetMenu for the identical pattern). */
+  /** Anchor below the button, right-edge aligned. Always computed (even on
+      mobile) — the shared mobile .load-menu rule forces top/right/min-width
+      back with !important (see PatientPresetMenu for the identical pattern). */
   _onOpen() {
-    if (window.innerWidth < DESKTOP_MIN_WIDTH) return;
     const r = this._btn.getBoundingClientRect();
     this._menu.style.top      = (r.bottom + 4) + 'px';
     this._menu.style.right    = (window.innerWidth - r.right) + 'px';

@@ -8,8 +8,6 @@
 //   maxWidth:    string|null  — CSS max-width for the modal box      (default: null)
 //   bodyClass:   string|null  — extra CSS class on .modal-body       (default: null)
 
-const DESKTOP_MIN_WIDTH = 1024; // must match css/modals.css breakpoint
-
 // Single shared Escape handler — closes the topmost open modal.
 const _registry = new Map(); // backdrop → cancel callback
 if (typeof document !== 'undefined') document.addEventListener('keydown', e => {
@@ -44,11 +42,10 @@ export class Modal {
     const box = _mk('div', 'modal-box');
     // Dialog semantics for assistive tech + focus management.
     this.box = box;
-    this._maxWidth = maxWidth;
-    if (maxWidth) {
-      this._applyMaxWidth();
-      window.addEventListener('resize', () => this._applyMaxWidth());
-    }
+    // Desktop-only cap — css/modals.css's media query reads this via
+    // var(--modal-max-width, 80vw) and ignores it below the breakpoint,
+    // no window.innerWidth check or resize listener needed.
+    if (maxWidth) box.style.setProperty('--modal-max-width', maxWidth);
     box.setAttribute('role', 'dialog');
     box.setAttribute('aria-modal', 'true');
     box.tabIndex = -1;
@@ -102,12 +99,6 @@ export class Modal {
     _registry.set(this.backdrop, () => this._cancel());
 
     document.body.appendChild(this.backdrop);
-  }
-
-  // Desktop-only sizing — below the breakpoint the modal must fill the
-  // responsive width/height CSS, never a stale inline max-width.
-  _applyMaxWidth() {
-    this.box.style.maxWidth = window.innerWidth >= DESKTOP_MIN_WIDTH ? this._maxWidth : '';
   }
 
   open()  {
