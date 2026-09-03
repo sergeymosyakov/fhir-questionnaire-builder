@@ -22,6 +22,7 @@ _site/
 # NuGet packaging: staged at pack time from dist/, not committed
 nuget/wwwroot/
 nuget/LICENSE
+nuget/README.md
 nuget/bin/
 nuget/obj/
 nuget-out/
