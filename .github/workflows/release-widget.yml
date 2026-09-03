@@ -122,13 +122,14 @@ jobs:
               main: "questionnaire-widget.js",
               module: "questionnaire-widget.js",
               exports: { ".": "./questionnaire-widget.js", "./global": "./questionnaire-widget.global.js", "./css": "./questionnaire-widget.css" },
-              files: ["questionnaire-widget.js", "questionnaire-widget.global.js", "questionnaire-widget.css", "LICENSE"],
+              files: ["questionnaire-widget.js", "questionnaire-widget.global.js", "questionnaire-widget.css", "LICENSE", "README.md"],
               repository: "git+https://github.com/" + process.env.PKG_REPO + ".git",
               license: "SEE LICENSE IN LICENSE"
             };
             fs.writeFileSync("dist/package.json", JSON.stringify(pkg, null, 2));
           '
           cp LICENSE dist/LICENSE
+          cp WIDGET.md dist/README.md
           cd dist && npm publish --access public --provenance
 
       # Publishes via NuGet Trusted Publishing (OIDC) — no token/secret involved.
