@@ -22,6 +22,7 @@ function renderTranslations(list, indent) {
 // above them) since that's how the operator naturally reads; NOT stays a
 // prefix label since it has a single child.
 function renderCondNode(node, pad) {
+  if (!node) return `${pad}- [malformed condition, unable to parse]`;
   if (node.type === 'LEAF') {
     return node.human != null ? `${pad}- ${node.human}` : `${pad}- [not recognized] ${node.code}`;
   }

@@ -131,6 +131,13 @@ describe('renderDocAsText — structure items', () => {
     expect(text).toMatch(/- \[not recognized\] today\(\)\.foo-bar\(\)/);
   });
 
+  it('renders a malformed/missing condition node as a fallback note instead of throwing', () => {
+    const rich = { ...item, calculated: { tree: undefined, code: 'some-bad-expr()' } };
+    expect(() => renderDocAsText(baseDoc({ items: [rich] }))).not.toThrow();
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('[malformed condition, unable to parse]');
+  });
+
   it('renders AND between siblings (not as a header) and NOT as a prefix label', () => {
     const rich = {
       ...item,

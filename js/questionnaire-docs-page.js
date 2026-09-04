@@ -35,6 +35,13 @@ function translationList(list, extraClass = '') {
 // AND/OR sit BETWEEN sibling children (not as a header above them); NOT stays
 // a prefix label since it has a single child.
 function renderCondNode(node, nested = true) {
+  // Defensive: a malformed/missing tree node must not take down the whole
+  // report — surface it as an unrecognized leaf instead of throwing.
+  if (!node) {
+    return el('div', { className: 'qdoc-cond-row' }, [
+      el('span', { className: 'qdoc-cond-unknown', text: 'Malformed condition (unable to parse)' }),
+    ]);
+  }
   if (node.type === 'LEAF') {
     const row = el('div', { className: 'qdoc-cond-row' });
     if (node.human != null) {
