@@ -480,7 +480,7 @@ test.describe('M2 — Large form (AHRQ 30+ items) renders without JS errors', ()
 
     const modal = page.locator('[data-testid="validateModal"]');
     await expect(modal).toBeVisible({ timeout: 5_000 });
-    await modal.getByRole('button').first().click();
+    await modal.getByTestId('validateModalClose').click();
     await expect(modal).not.toBeVisible({ timeout: 3_000 });
   });
 });

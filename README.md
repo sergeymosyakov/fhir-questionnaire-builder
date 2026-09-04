@@ -121,6 +121,10 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **Vanilla JS DOM** — builder and preview rendered imperatively via OOP node classes; state propagated through `AppEvents` custom events
 - **FHIRPath** — `lib/fhirpath.min.js` (global); powers calc, visibility, and constraint expressions
 - **DOMPurify** — `lib/dompurify.min.js`; sanitizes XHTML content before rendering
+- **marked** — `lib/marked.min.js`; renders markdown in display-item content
+- **fhir-structuremap-js** — `lib/fhir-structuremap-js.esm.js`; executes FHIR StructureMap transforms for SDC populate/extract (author's own library)
+- **cql-execution / cql-exec-fhir** — `lib/cql-execution.esm.js`, `lib/cql-exec-fhir.esm.js`; CQL/ELM execution engine + FHIR data source, powers `initialExpression` CQL evaluation
+- **Supabase** — `lib/supabase.min.js`; auth + optional cloud sync backend
 - **Vitest** — 1197 unit tests across 26 files; CI via GitHub Actions (`npm test`)
 - **Playwright** — e2e tests (Chromium); CI + HTML report on GitHub Pages
 
