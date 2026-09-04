@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Questionnaire Documentation — FHIR Questionnaire Builder</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/page-header.css">
+  <link rel="stylesheet" href="css/questionnaire-docs.css">
+</head>
+<body>
+  <div class="page-header qdoc-no-print">
+    <div class="page-header-bar">
+      <h1 class="page-header-title">Questionnaire Documentation</h1>
+      <button type="button" class="qdoc-btn" data-testid="qdoc-print-btn">&#x1F5A8;&#xFE0F; Print / Save as PDF</button>
+      <button type="button" class="qdoc-btn" data-testid="qdoc-download-btn">&#x2B07; Download as Text</button>
+    </div>
+    <p class="page-header-subtitle">Generated, human-readable description of the loaded questionnaire — structure, visibility logic, expressions, and a validation/audit report.</p>
+  </div>
+
+  <div id="qdocRoot" class="qdoc-root" data-testid="qdoc-root">
+    <p class="qdoc-empty" data-testid="qdoc-empty">No questionnaire documentation is available in this tab. Open it from the builder's Save &#x25BE; &rarr; Generate Docs&hellip; menu.</p>
+  </div>
+
+  <script type="module" src="js/questionnaire-docs-page.js"></script>
+</body>
+</html>

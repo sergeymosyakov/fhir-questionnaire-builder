@@ -7,6 +7,26 @@
     "Patient"
   ],
   "date": "2024-01-01",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "bmi",
+        "language": "text/fhirpath",
+        "expression": "%patient.weight / (%patient.height.power(2))"
+      }
+    }
+  ],
+  "contained": [
+    {
+      "resourceType": "ValueSet",
+      "id": "bmi-criteria-vs",
+      "status": "active",
+      "compose": {
+        "include": [{ "system": "http://example.org/bmi-criteria" }]
+      }
+    }
+  ],
   "item": [
     {
       "linkId": "g-eligibility",

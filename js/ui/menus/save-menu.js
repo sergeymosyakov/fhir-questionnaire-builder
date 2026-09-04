@@ -3,6 +3,9 @@ import { AppEvents, EventState } from '../../events.js';
 import * as qrExportModal from '../modals/qr-export-modal.js';
 import * as obsExportModal from '../modals/obs-export-modal.js';
 import { saveFormatModal } from '../modals/save-format-modal.js';
+import { generateQuestionnaireDoc } from '../../fhir/doc-generator.js';
+
+const DOCS_STORAGE_KEY = 'fhirqb.generatedDocs';
 
 export class SaveMenu extends DropdownMenu {
   constructor() {
@@ -67,6 +70,7 @@ export class SaveMenu extends DropdownMenu {
     this._exportObsItem   = this._item(null, '&#x1F9EA; Observations &middot; FHIR JSON Bundle', 'export-obs-item');
     this._exportDefItem   = this._item(null, '&#x1F9E9; Definition Extract &middot; FHIR JSON Bundle', 'export-def-extract-item');
     this._exportSmItem    = this._item(null, '&#x1F5FA;&#xFE0F; StructureMap Extract &middot; FHIR JSON Bundle', 'export-structuremap-extract-item');
+    this._generateDocsItem = this._item(null, '&#x1F4D6; Generate Docs&hellip;', 'generate-docs-item');
 
     this._menu.append(
       this._cloudSaveBtn,
@@ -76,6 +80,7 @@ export class SaveMenu extends DropdownMenu {
       this._exportObsItem,
       this._exportDefItem,
       this._exportSmItem,
+      this._generateDocsItem,
     );
 
     this._cloudSaveBtn.addEventListener('click', () => {
@@ -116,5 +121,28 @@ export class SaveMenu extends DropdownMenu {
       document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
       document.dispatchEvent(new CustomEvent(AppEvents.STRUCTUREMAP_EXTRACT_REQUESTED));
     });
+
+    this._generateDocsItem.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent(AppEvents.CLOSE_DROPDOWNS));
+      this._openGeneratedDocs();
+    });
+  }
+
+  /** Build the doc model for the current questionnaire and open it in a new tab. */
+  _openGeneratedDocs() {
+    if (!this._questDoc) return;
+    const doc = generateQuestionnaireDoc({
+      tree:         this._questDoc.tree,
+      questMeta:    this._questDoc.meta,
+      values:       this._answerStore?.toValueMap() ?? {},
+      variables:    this._questDoc.variables,
+      contained:    this._questDoc.contained,
+      translations: this._questDoc.translations,
+      fp:           window.fhirpath,
+    });
+    try {
+      sessionStorage.setItem(DOCS_STORAGE_KEY, JSON.stringify(doc));
+    } catch { /* storage unavailable — page will show its empty state */ }
+    window.open('questionnaire-docs.html', '_blank');
   }
 }

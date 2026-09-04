@@ -1,0 +1,236 @@
+@import url('./design-tokens.css');
+
+/* ── Questionnaire Documentation page ─────────────────────────────────────────
+   Report-style layout for the generated doc (questionnaire-docs.html): serif
+   body text for readability/print, indented item tree, screen-only chrome
+   hidden via @media print so Ctrl+P produces a clean PDF. */
+
+body {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--c-text-1);
+  background: var(--c-surface);
+}
+
+.qdoc-btn {
+  margin-inline-start: 8px;
+  padding: 8px 14px;
+  min-height: var(--ctrl-h);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r);
+  background: var(--c-surface);
+  color: var(--c-text-1);
+  font-size: 14px;
+  cursor: pointer;
+}
+.qdoc-btn:hover { background: var(--c-hover); }
+
+.qdoc-root {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+  line-height: 1.6;
+}
+
+.qdoc-empty {
+  padding: 3em 1em;
+  text-align: center;
+  color: var(--c-text-2);
+}
+
+.qdoc-root h1 { font-size: 28px; margin-bottom: 4px; }
+.qdoc-root h2 {
+  font-size: 20px;
+  margin-top: 2em;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--c-border);
+}
+
+.qdoc-translation-list {
+  list-style: none;
+  margin: 2px 0 8px;
+  padding-inline-start: 0;
+  font-size: 0.9em;
+  color: var(--c-text-2);
+}
+
+.qdoc-toc a {
+  display: block;
+  padding: 2px 0;
+  color: var(--c-accent);
+  text-decoration: none;
+}
+.qdoc-toc a:hover { text-decoration: underline; }
+
+.qdoc-legend-list { list-style: none; padding: 0; }
+.qdoc-legend-list li { padding: 3px 0; }
+
+.qdoc-meta-list { list-style: none; padding-inline-start: 0; }
+.qdoc-meta-list li { padding: 2px 0; }
+
+/* Structure tree — same connector-line technique as .qdoc-cond-group: a
+   nested <ul>'s border-left is exactly as tall as its own <li> children, so
+   every group gets its own trunk line with no manual depth/last-child CSS.
+   Every node gets one horizontal branch to its own row via ::before; only
+   NESTED <ul>s draw the vertical trunk (the root has nothing above it to
+   connect siblings through, matching the plain-text tree/git-log-graph style). */
+.qdoc-tree { list-style: none; margin: 0; padding: 0; padding-inline-start: 20px; }
+.qdoc-tree .qdoc-tree {
+  border-inline-start: 1px solid var(--c-border);
+  margin-inline-start: 9px;
+}
+.qdoc-tree-node { position: relative; }
+.qdoc-tree-node::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: -20px;
+  width: 16px;
+  height: 1px;
+  background: var(--c-border);
+}
+
+.qdoc-node-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  vertical-align: middle;
+}
+.qdoc-node-badge--group { background: #0f766e; }
+.qdoc-node-badge--item  { background: #6b7280; }
+
+.qdoc-item {
+  margin: 10px 0;
+  padding-inline-start: 12px;
+}
+.qdoc-item-head { font-size: 1em; }
+
+/* linkId/prefix/type pills — exact colors from the main app's own preview
+   badges (css/preview-ui.css .preview-linkid/.preview-prefix) for visual
+   consistency; type reuses the teal design token (no existing convention to
+   match, but keeps it a real token instead of a one-off literal). */
+.qdoc-linkid, .qdoc-prefix, .qdoc-type {
+  display: inline-block;
+  font-family: 'Courier New', Consolas, monospace;
+  font-weight: 600;
+  font-size: 0.8em;
+  border-radius: 20px;
+  padding: 1px 8px;
+  margin-inline-end: 4px;
+}
+.qdoc-linkid { color: var(--c-primary); background: var(--c-primary-lt); }
+.qdoc-prefix { color: #b34700; background: var(--c-amber-lt); }
+.qdoc-type   { color: var(--c-teal); background: var(--c-teal-lt); }
+
+/* cardinality — same pill treatment, neutral gray (no id/type-like meaning). */
+.qdoc-card {
+  display: inline-block;
+  font-family: 'Courier New', Consolas, monospace;
+  font-weight: 600;
+  font-size: 0.8em;
+  border-radius: 20px;
+  padding: 1px 8px;
+  margin-inline-end: 4px;
+  color: var(--c-text-2);
+  background: var(--c-hover);
+}
+
+.qdoc-detail { margin: 6px 0; font-size: 0.92em; color: var(--c-text-2); }
+.qdoc-detail-label { font-weight: 600; margin-bottom: 2px; }
+.qdoc-code {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 5px 12px;
+  border-radius: var(--r-sm);
+  background: var(--c-hover);
+  color: var(--c-text-1);
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 0.85em;
+}
+.qdoc-code-block {
+  display: block;
+  margin: 6px 0 16px;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  background: var(--c-hover);
+  color: var(--c-text-1);
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 0.82em;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+/* Appearance callout — same visual pattern documentation sites use for an
+   admonition/note box (colored left border + tinted background), but neutral
+   (not literally colored as a warning/danger — having custom presentation
+   isn't a problem). */
+.qdoc-appearance {
+  margin: 6px 0;
+  padding: 6px 10px;
+  border-inline-start: 3px solid #b45309;
+  background: #fffbeb;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  font-size: 0.9em;
+}
+.qdoc-appearance-label { font-weight: 600; }
+
+/* Condition tree — mirrors explain-modal.css's row/op-pill pattern, minus the
+   live ✓/✗ icon (this document has no patient/answer context to evaluate).
+   Each NESTED AND/OR/NOT is a real .qdoc-cond-group, so its colored left
+   border spans exactly its own children — nesting shows as stacked stripes,
+   one per ancestor group, automatically from normal box nesting. The
+   outermost group (.qdoc-cond-root) gets no stripe — it always wraps the
+   whole tree, so a border there wouldn't distinguish it from anything. */
+.qdoc-cond-tree { margin: 2px 0 6px; }
+.qdoc-cond-row { padding: 2px 0; line-height: 1.5; }
+.qdoc-cond-root { margin-block: 2px; }
+.qdoc-cond-group {
+  margin-block: 2px;
+  padding: 1px 0 1px 12px;
+  border-inline-start: 3px solid var(--c-border);
+}
+.qdoc-cond-group--and { border-inline-start-color: #1d4ed8; }
+.qdoc-cond-group--or  { border-inline-start-color: #7e22ce; }
+.qdoc-cond-group--not { border-inline-start-color: #c2410c; }
+.qdoc-cond-op {
+  display: inline-block;
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 1px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+.qdoc-cond-op--and { background: #eff6ff; color: #1d4ed8; }
+.qdoc-cond-op--or  { background: #fdf4ff; color: #7e22ce; }
+.qdoc-cond-op--not { background: #fff7ed; color: #c2410c; }
+.qdoc-cond-leaf { color: var(--c-text-1); }
+.qdoc-cond-unknown { color: var(--c-amber); font-style: italic; font-size: 0.85em; }
+.qdoc-cond-fhirpath { margin-top: 4px; font-size: 0.85em; color: var(--c-text-2); }
+
+.qdoc-options { margin: 4px 0; padding-inline-start: 1.4em; }
+
+.qdoc-issues { padding-inline-start: 1.2em; }
+.qdoc-issue--error   { color: var(--c-err); }
+.qdoc-issue--warning { color: var(--c-amber); }
+
+.qdoc-footer {
+  margin-top: 2em;
+  padding-top: 12px;
+  border-top: 1px solid var(--c-border);
+  font-size: 0.85em;
+  color: var(--c-text-2);
+}
+
+@media print {
+  .qdoc-no-print { display: none !important; }
+  body { background: #fff; }
+  .qdoc-root { max-width: none; padding: 0; }
+  .qdoc-item { break-inside: avoid; }
+}
