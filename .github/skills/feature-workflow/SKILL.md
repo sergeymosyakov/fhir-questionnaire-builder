@@ -9,6 +9,7 @@ The same flow applies to every feature, fix, or chore that touches code (not jus
 
 ## 1. Issue
 - If there's no tracking issue yet, create one (`gh issue create`) describing the gap/bug — for multi-step features, include a phased checklist (`- [ ] Phase N — ...`) so progress is visible over multiple branches/sessions.
+- **Business requirement only — no implementation details.** An issue states the *problem*: current behavior vs. expected/desired behavior (or just the desired behavior, for a from-scratch feature). No class/function/file names, no CSS selectors, no chosen mechanism, no code. A checklist item is a testable outcome ("X can be toggled back to its original size"), not an implementation step ("add class Y to file Z"). Implementation details belong in the PR description and commit messages, once a solution is chosen.
 - If one already exists, read it first (`gh issue view <n>`) — don't guess scope from memory or from a stale summary.
 
 ## 2. Branch
