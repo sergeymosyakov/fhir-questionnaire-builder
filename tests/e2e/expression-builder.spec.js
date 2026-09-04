@@ -234,4 +234,19 @@ test.describe('Expression Builder — value / calculatedExpression', () => {
     await expect(page.getByTestId('expressionBuilderModal')).toBeHidden();
     await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/\.answer\.count\(\)/); // NOSONAR — literal pattern over controlled builder output
   });
+
+  test('maximize widens the question dropdown past its default cap', async ({ page }) => {
+    await freshStart(page);
+    await twoItems(page);
+    await openBuilder(page, '1.1');
+
+    const itemSelect = page.getByTestId('eb-leaf-item');
+    const before = await itemSelect.boundingBox();
+    expect(before.width).toBeLessThan(210); // .sc-trigger--sm cap (180px) + border/padding
+
+    await page.getByTestId('expressionBuilderModalMaximize').click();
+
+    const after = await itemSelect.boundingBox();
+    expect(after.width).toBeGreaterThan(before.width * 2);
+  });
 });

@@ -13,6 +13,9 @@
   gap: 8px;
   flex-wrap: wrap;
 }
+/* .eb-item already flexes (below); maximized has room to actually use —
+   .sc-trigger--sm's max-width: 180px otherwise caps it regardless of space. */
+.modal-box--maximized .eb-item { max-width: none; }
 .eb-item { min-width: 200px; flex: 1 1 auto; }
 .eb-val-inp {
   min-width: 120px;
