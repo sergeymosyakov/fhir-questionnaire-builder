@@ -6,6 +6,9 @@
 //   • libraryModal/nodePickerModal .modal-body max-height (65vh/60vh) being a
 //     bottom-sheet-era leftover that capped the body short of the new
 //     full-height box, leaving the footer floating above the viewport bottom
+//   • Same footer-floats-above-the-bottom bug recurring for the maximize
+//     toggle (issue #99): a per-modal .modal-body max-height cap (libraryModal)
+//     must be neutralized when .modal-box--maximized, not just the box itself
 //
 // data-testid:
 //   load-fhir-btn            "Questionnaires ▾" toolbar dropdown trigger
@@ -13,6 +16,8 @@
 //   load-library-item        "From Library…" menu item — opens libraryModal
 //   loadFormatModal          format-picker modal backdrop
 //   libraryModal             library-browse modal backdrop
+//   loadFormatModalMaximize  maximize/restore toggle (Modal base class, desktop-only)
+//   libraryModalMaximize     same toggle, on the modal with a per-modal body max-height cap
 //
 // Run: npx playwright test tests/e2e/modal-responsive.spec.js
 
@@ -52,6 +57,14 @@ test.describe('Modal sizing — mobile (<1024px) fills the viewport', () => {
     expect(boxRect.width).toBeCloseTo(480, 0);
     expect(footerRect.y + footerRect.height).toBeCloseTo(boxRect.y + boxRect.height, 0);
   });
+
+  test('maximize toggle is not shown (modal already fills the viewport)', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+    await openModal(page, 'load-from-file-item', 'loadFormatModal');
+
+    await expect(page.getByTestId('loadFormatModalMaximize')).not.toBeVisible();
+  });
 });
 
 test.describe('Modal sizing — desktop (\u22651024px) stays centered/capped', () => {
@@ -65,5 +78,40 @@ test.describe('Modal sizing — desktop (\u22651024px) stays centered/capped', (
     const box = await page.locator('[data-testid="loadFormatModal"] .modal-box').boundingBox();
     expect(box.width).toBeLessThan(1280);
     expect(box.height).toBeLessThan(800);
+  });
+
+  test('maximize toggle expands the box to fill the viewport, restore reverts it', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+    await openModal(page, 'load-from-file-item', 'loadFormatModal');
+
+    const boxLocator = page.locator('[data-testid="loadFormatModal"] .modal-box');
+    const original = await boxLocator.boundingBox();
+    expect(original.width).toBeLessThan(1280);
+
+    const maximizeBtn = page.getByTestId('loadFormatModalMaximize');
+    await expect(maximizeBtn).toBeVisible();
+    await maximizeBtn.click();
+
+    const maximized = await boxLocator.boundingBox();
+    expect(maximized.width).toBeCloseTo(1280, 0);
+    expect(maximized.height).toBeCloseTo(800, 0);
+
+    await maximizeBtn.click();
+    const restored = await boxLocator.boundingBox();
+    expect(restored.width).toBeCloseTo(original.width, 0);
+  });
+
+  test('maximized libraryModal footer still reaches the bottom despite its .modal-body max-height cap', async ({ page }) => {
+    await page.goto('/');
+    await waitForLoad(page);
+    await openModal(page, 'load-library-item', 'libraryModal');
+
+    await page.getByTestId('libraryModalMaximize').click();
+
+    const boxRect    = await page.locator('[data-testid="libraryModal"] .modal-box').boundingBox();
+    const footerRect = await page.locator('[data-testid="libraryModal"] .modal-footer').boundingBox();
+    expect(boxRect.height).toBeCloseTo(800, 0);
+    expect(footerRect.y + footerRect.height).toBeCloseTo(boxRect.y + boxRect.height, -1);
   });
 });
