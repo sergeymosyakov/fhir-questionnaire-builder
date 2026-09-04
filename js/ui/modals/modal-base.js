@@ -54,11 +54,19 @@ export class Modal {
     this.title    = _mk('span');
     this.title.id = 'modal-title-' + (++_modalSeq);
     box.setAttribute('aria-labelledby', this.title.id);
+    // Desktop-only (css/modals.css hides it below 1024px) — mobile modals already fill the viewport.
+    this.maximizeBtn = _mk('button', 'modal-maximize');
+    this.maximizeBtn.type = 'button';
+    this.maximizeBtn.dataset.tipTitle = 'Maximize';
     this.closeBtn = _mk('button', 'modal-close');
     this.closeBtn.type = 'button';
     this.closeBtn.dataset.tipTitle = 'Close';
     this.closeBtn.textContent = '\u2715';
-    header.append(this.title, this.closeBtn);
+    // Grouped so `justify-content: space-between` on .modal-header keeps them
+    // pinned together on the right, instead of spreading 3 children evenly.
+    const headerActions = _mk('div', 'modal-header-actions');
+    headerActions.append(this.maximizeBtn, this.closeBtn);
+    header.append(this.title, headerActions);
 
     this.body   = _mk('div', bodyClass ? `modal-body ${bodyClass}` : 'modal-body');
     this.footer = _mk('div', 'modal-footer');
@@ -86,6 +94,7 @@ export class Modal {
     if (n) {
       this.backdrop.dataset.testid = n;
       this.title.dataset.testid    = n + 'Title';
+      this.maximizeBtn.dataset.testid = n + 'Maximize';
       this.closeBtn.dataset.testid = n + 'Close';
       this.body.dataset.testid     = n + 'Body';
       if (this.cancelBtn) this.cancelBtn.dataset.testid = n + 'Cancel';
@@ -95,6 +104,7 @@ export class Modal {
     this.closeBtn.addEventListener('click',  () => this._cancel());
     if (this.cancelBtn) this.cancelBtn.addEventListener('click', () => this._cancel());
     if (this.applyBtn)  this.applyBtn.addEventListener('click',  () => this._apply());
+    this.maximizeBtn.addEventListener('click', () => this._toggleMaximize());
     this.backdrop.addEventListener('click', e => { if (e.target === this.backdrop) this._cancel(); });
     _registry.set(this.backdrop, () => this._cancel());
 
@@ -142,6 +152,12 @@ export class Modal {
       e.preventDefault(); first.focus();
     }
   }
+  /** Toggle the modal box to fill the viewport (desktop only, see css/modals.css). */
+  _toggleMaximize() {
+    const maximized = this.box.classList.toggle('modal-box--maximized');
+    this.maximizeBtn.dataset.tipTitle = maximized ? 'Restore' : 'Maximize';
+  }
+
   /** Render the standard two-part title: bold label + muted subject. */
   setTitle(label, subject) {
     this.title.innerHTML = '';
