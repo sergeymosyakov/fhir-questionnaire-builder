@@ -23,10 +23,12 @@ export const DOC_LEGEND = [
   { icon: '\uD83D\uDC41', label: 'Conditional', desc: 'Item is shown only when a visibility condition is met (enableWhen / enableWhenExpression)' },
   { icon: '\u26A0\uFE0F', label: 'Constraint', desc: 'Item carries a validation rule beyond basic type/cardinality (questionnaire-constraint)' },
   { icon: '\uD83D\uDD17', label: 'Support link', desc: 'Item carries an external reference link (questionnaire-supportLink)' },
+  { icon: '\uD83D\uDE48', label: 'Hidden', desc: 'Item is never shown in any view (patient or design) — present in the resource only (questionnaire-hidden)' },
   { icon: 'G',        label: 'Group',       desc: 'Row is a structural container (Questionnaire.item with type=group)', badges: [{ text: 'G', cls: 'group' }] },
   { icon: 'Q',        label: 'Question',    desc: 'Row is an answerable item (any non-group Questionnaire.item type)', badges: [{ text: 'Q', cls: 'item' }] },
   { icon: '\uD83C\uDF10', label: 'Translation', desc: 'One or more translated language versions are listed below the original text (questDoc.translations)' },
   { icon: '\uD83C\uDFA8', label: 'Appearance', desc: 'Item has custom presentation — rendering-style, rendering-xhtml, or rendering-markdown — shown in a highlighted box' },
+  { icon: '\uD83D\uDCDD', label: 'Design note', desc: 'Author-facing note not shown to respondents (designNote extension) — shown in a highlighted box' },
 ];
 
 function buildLinkIdMap(nodes, map = {}) {
@@ -53,6 +55,7 @@ function flags(node) {
   if (node.enableWhen?.length || node.enableWhenExpression) f.push('\uD83D\uDC41');
   if (node.constraint?.length) f.push('\u26A0\uFE0F');
   if (node._supportLinks?.length) f.push('\uD83D\uDD17');
+  if (node._hidden) f.push('\uD83D\uDE48');
   return f.join(' ');
 }
 
@@ -159,9 +162,36 @@ function exprOf(text, linkIdMap, fp) {
   return text ? { tree: describeExprTree(text, fp, linkIdMap), code: text } : null;
 }
 
-// Plain-text note for the Appearance callout — describes custom presentation
-// (rendering-style/xhtml/markdown) rather than reproducing it; the doc is a
-// structural reference, not a pixel-accurate re-render of the styled form.
+// _initialValue is a normalized primitive (boolean/string) or a small object
+// (Quantity → {value,unit}, Reference → {reference,...}) — never the raw FHIR
+// value[x]; format it for display without reproducing that FHIR shape.
+function formatInitialValue(v) {
+  if (v == null) return null;
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+  if (typeof v === 'object') {
+    if (v.reference) return v.reference;
+    if (v.value !== undefined) return `${v.value}${v.unit ? ' ' + v.unit : ''}`;
+    return JSON.stringify(v);
+  }
+  return String(v);
+}
+
+// answerValueSet is either an external canonical URL or a '#id' reference into
+// Questionnaire.contained[] — resolve the local case against the contained
+// resources already threaded through the doc model so the report can name it
+// and cross-link to the Contained Resources section instead of a bare '#id'.
+function describeAnswerValueSet(ref, contained) {
+  if (!ref) return null;
+  if (!ref.startsWith('#')) return { ref, local: false };
+  const id = ref.slice(1);
+  const vs = (contained || []).find(r => r.resourceType === 'ValueSet' && r.id === id);
+  return { ref, local: true, id, name: (vs && (vs.title || vs.name)) || null, found: !!vs };
+}
+
+// Appearance callout — a plain-English summary of custom presentation
+// (rendering-style/xhtml/markdown), plus the raw xhtml/markdown source itself
+// (shown verbatim as a code block by both renderers — the doc is a source
+// reference, not a pixel-accurate re-render of the styled form).
 function appearanceOf(node) {
   const style = parseRenderStyle(node._renderStyle);
   const parts = [];
@@ -174,10 +204,11 @@ function appearanceOf(node) {
   if (parts.length) notes.push(parts.join(', '));
   if (node._renderXhtml) notes.push('custom XHTML formatting');
   if (node._renderMarkdown) notes.push('custom Markdown formatting');
-  return notes.length ? notes.join('; ') : null;
+  if (!notes.length) return null;
+  return { summary: notes.join('; '), xhtml: node._renderXhtml || null, markdown: node._renderMarkdown || null };
 }
 
-function walkNode(node, linkIdMap, translations, fp, depth, out) {
+function walkNode(node, linkIdMap, translations, fp, depth, out, contained) {
   out.push({
     depth,
     id: node.id,
@@ -192,15 +223,44 @@ function walkNode(node, linkIdMap, translations, fp, depth, out) {
     visibility: visibilityOf(node, linkIdMap, fp),
     calculated: exprOf(node._calculatedExpr, linkIdMap, fp),
     initial: exprOf(node._initialExpr, linkIdMap, fp),
+    initialValue: node._initialValues?.length
+      ? node._initialValues.map(formatInitialValue)
+      : (node._initialValue !== undefined ? [formatInitialValue(node._initialValue)] : null),
+    disabledDisplay: node._disabledDisplay || null,
+    designNote: node._designNote || null,
+    itemControl: node._itemControl || null,
+    answerSource: {
+      valueSet: describeAnswerValueSet(node._answerValueSet, contained),
+      expression: exprOf(node._answerExpression, linkIdMap, fp),
+      candidate: exprOf(node._candidateExpression, linkIdMap, fp),
+    },
+    itemMedia: node._itemMedia || null,
+    shortText: node._shortText || null,
+    entryFormat: node._entryFormat || null,
+    columnCount: node._columnCount || null,
+    choiceColumns: node._choiceColumns?.length ? node._choiceColumns : null,
+    collapsible: node._collapsible || null,
+    openLabel: node._openLabel || null,
+    isSubject: !!node._isSubject,
+    observationExtract: node._observationExtract ?? null,
+    maxLength: node._maxLength ?? null,
+    maxDecimalPlaces: node._maxDecimalPlaces ?? null,
+    answerConstraint: node._answerConstraint || null,
+    codes: node._codes?.length ? node._codes : null,
     constraints: (node.constraint || []).map(c => ({
       key: c.key, severity: c.severity, human: c.human, expression: c.expression,
     })),
     options: node.options ? parseOptions(node.options).map(o => ({
       ...o,
       translations: translationsFor('opt', node.id + '__' + o.code, translations),
+      answerMedia: node._answerMedias?.[o.code] || null,
+      ordinal: node._optionOrdinals?.[o.code] ?? null,
+      prefix: node._optionPrefixes?.[o.code] || null,
+      exclusive: !!node._optionExclusives?.[o.code],
+      weight: node._optionWeights?.[o.code] ?? null,
     })) : [],
   });
-  for (const c of node.children || []) walkNode(c, linkIdMap, translations, fp, depth + 1, out);
+  for (const c of node.children || []) walkNode(c, linkIdMap, translations, fp, depth + 1, out, contained);
 }
 
 /**
@@ -212,7 +272,7 @@ function walkNode(node, linkIdMap, translations, fp, depth, out) {
 export function generateQuestionnaireDoc({ tree, questMeta, values, variables, contained, translations, fp }) {
   const linkIdMap = buildLinkIdMap(tree);
   const items = [];
-  for (const n of tree) walkNode(n, linkIdMap, translations, fp, 0, items);
+  for (const n of tree) walkNode(n, linkIdMap, translations, fp, 0, items, contained);
 
   return {
     generatedAt: new Date().toISOString(),

@@ -28,6 +28,7 @@
         { "id": "import-roundtrip", "title": "Import & round-trip", "file": "import-roundtrip.md" },
         { "id": "answer-types", "title": "Answer types & options", "file": "answer-types.md" },
         { "id": "validation", "title": "Validation", "file": "validation.md" },
+        { "id": "generate-docs", "title": "Generate a documentation report", "file": "generate-docs.md" },
         { "id": "translate", "title": "Translate a questionnaire", "file": "translate.md" },
         { "id": "populate", "title": "Fill from a FHIR server ($populate)", "file": "populate.md" },
         { "id": "observation-extract", "title": "Observation-based extraction", "file": "observation-extract.md" },

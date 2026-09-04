@@ -64,6 +64,189 @@ describe('generateQuestionnaireDoc — variables & contained resources', () => {
   });
 });
 
+describe('generateQuestionnaireDoc — answerValueSet', () => {
+  it('is null when the item has no answerValueSet', () => {
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem()]));
+    expect(doc.items[0].answerSource.valueSet).toBeNull();
+  });
+
+  it('describes an external URL reference as non-local', () => {
+    const item = makeItem({ _answerValueSet: 'http://example.org/fhir/ValueSet/smoking-status' });
+    const doc = generateQuestionnaireDoc(baseDeps([item]));
+    expect(doc.items[0].answerSource.valueSet).toEqual({ ref: 'http://example.org/fhir/ValueSet/smoking-status', local: false });
+  });
+
+  it('resolves a local #contained reference by name/title', () => {
+    const item = makeItem({ _answerValueSet: '#ussg-fhh' });
+    const contained = [{ resourceType: 'ValueSet', id: 'ussg-fhh', title: 'USSG Family Health History' }];
+    const doc = generateQuestionnaireDoc(baseDeps([item], { contained }));
+    expect(doc.items[0].answerSource.valueSet).toEqual({
+      ref: '#ussg-fhh', local: true, id: 'ussg-fhh', name: 'USSG Family Health History', found: true,
+    });
+  });
+
+  it('flags a local reference that has no matching contained resource', () => {
+    const item = makeItem({ _answerValueSet: '#missing' });
+    const doc = generateQuestionnaireDoc(baseDeps([item], { contained: [] }));
+    expect(doc.items[0].answerSource.valueSet).toEqual({ ref: '#missing', local: true, id: 'missing', name: null, found: false });
+  });
+});
+
+describe('generateQuestionnaireDoc — answerExpression & candidateExpression', () => {
+  it('are null when absent', () => {
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem()]));
+    expect(doc.items[0].answerSource.expression).toBeNull();
+    expect(doc.items[0].answerSource.candidate).toBeNull();
+  });
+
+  it('carry the raw FHIRPath as code, same {tree,code} shape as calculated/initial', () => {
+    const item = makeItem({ _answerExpression: '%resource.descendants()', _candidateExpression: '%context.repeat(item)' });
+    const doc = generateQuestionnaireDoc(baseDeps([item]));
+    const { expression, candidate } = doc.items[0].answerSource;
+    expect(expression.code).toBe('%resource.descendants()');
+    expect(candidate.code).toBe('%context.repeat(item)');
+  });
+});
+
+describe('generateQuestionnaireDoc — media attachments', () => {
+  it('itemMedia is null when absent, passed through verbatim when present', () => {
+    const attachment = { contentType: 'image/png', url: 'https://example.org/x.png', title: 'Diagram' };
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem({ _itemMedia: attachment })]));
+    expect(doc.items[0].itemMedia).toEqual(attachment);
+    expect(generateQuestionnaireDoc(baseDeps([makeItem()])).items[0].itemMedia).toBeNull();
+  });
+
+  it('attaches per-option answerMedia by option code, null when absent', () => {
+    const media = { contentType: 'image/png', url: 'https://example.org/y.png' };
+    const item = makeItem({ options: 'y=Yes,n=No', _answerMedias: { y: media } });
+    const doc = generateQuestionnaireDoc(baseDeps([item]));
+    const opts = doc.items[0].options;
+    expect(opts.find(o => o.code === 'y').answerMedia).toEqual(media);
+    expect(opts.find(o => o.code === 'n').answerMedia).toBeNull();
+  });
+});
+
+describe('generateQuestionnaireDoc — extended item properties', () => {
+  it('default to null/false/empty when the underlying node property is absent', () => {
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem()]));
+    const e = doc.items[0];
+    expect(e.shortText).toBeNull();
+    expect(e.entryFormat).toBeNull();
+    expect(e.columnCount).toBeNull();
+    expect(e.choiceColumns).toBeNull();
+    expect(e.collapsible).toBeNull();
+    expect(e.openLabel).toBeNull();
+    expect(e.isSubject).toBe(false);
+    expect(e.observationExtract).toBeNull();
+    expect(e.maxLength).toBeNull();
+    expect(e.maxDecimalPlaces).toBeNull();
+    expect(e.answerConstraint).toBeNull();
+    expect(e.codes).toBeNull();
+    expect(e.disabledDisplay).toBeNull();
+    expect(e.designNote).toBeNull();
+    expect(e.itemControl).toBeNull();
+    expect(e.initialValue).toBeNull();
+  });
+
+  it('surface each property verbatim from the node when present', () => {
+    const item = makeItem({
+      _shortText: 'BMI', _entryFormat: 'MM/DD/YYYY', _columnCount: 2,
+      _choiceColumns: [{ path: 'code', label: 'Code' }],
+      _collapsible: 'default-closed', _openLabel: 'Other, please specify',
+      _isSubject: true, _observationExtract: false,
+      _maxLength: 100, _maxDecimalPlaces: 2, _answerConstraint: 'optionsOrString',
+      _codes: [{ system: 'http://loinc.org', code: '12345-6', display: 'Test code' }],
+      _disabledDisplay: 'protected', _designNote: 'Ask gently — sensitive topic', _itemControl: 'autocomplete',
+    });
+    const doc = generateQuestionnaireDoc(baseDeps([item]));
+    const e = doc.items[0];
+    expect(e.shortText).toBe('BMI');
+    expect(e.entryFormat).toBe('MM/DD/YYYY');
+    expect(e.columnCount).toBe(2);
+    expect(e.choiceColumns).toEqual([{ path: 'code', label: 'Code' }]);
+    expect(e.collapsible).toBe('default-closed');
+    expect(e.openLabel).toBe('Other, please specify');
+    expect(e.isSubject).toBe(true);
+    expect(e.observationExtract).toBe(false);
+    expect(e.maxLength).toBe(100);
+    expect(e.maxDecimalPlaces).toBe(2);
+    expect(e.answerConstraint).toBe('optionsOrString');
+    expect(e.codes).toEqual([{ system: 'http://loinc.org', code: '12345-6', display: 'Test code' }]);
+    expect(e.disabledDisplay).toBe('protected');
+    expect(e.designNote).toBe('Ask gently — sensitive topic');
+    expect(e.itemControl).toBe('autocomplete');
+  });
+
+  it('keeps observationExtract tri-state: true is distinct from "not set" (null)', () => {
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem({ _observationExtract: true })]));
+    expect(doc.items[0].observationExtract).toBe(true);
+  });
+});
+
+describe('generateQuestionnaireDoc — Hidden flag', () => {
+  it('adds the Hidden icon to flags and documents it in the legend', () => {
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem({ _hidden: true })]));
+    expect(doc.items[0].flags).toContain('\uD83D\uDE48');
+    expect(DOC_LEGEND.map(l => l.label)).toContain('Hidden');
+  });
+
+  it('omits the icon when the item is not hidden', () => {
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem()]));
+    expect(doc.items[0].flags).not.toContain('\uD83D\uDE48');
+  });
+});
+
+describe('generateQuestionnaireDoc — initialValue (fixed, non-expression)', () => {
+  it('is null when absent', () => {
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem()]));
+    expect(doc.items[0].initialValue).toBeNull();
+  });
+
+  it('formats a boolean initial value as Yes/No', () => {
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem({ _initialValue: true })]));
+    expect(doc.items[0].initialValue).toEqual(['Yes']);
+  });
+
+  it('formats a Quantity-shaped initial value as "value unit"', () => {
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem({ _initialValue: { value: '5', unit: 'kg' } })]));
+    expect(doc.items[0].initialValue).toEqual(['5 kg']);
+  });
+
+  it('formats a Reference-shaped initial value as the reference string', () => {
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem({ _initialValue: { reference: 'Patient/123' } })]));
+    expect(doc.items[0].initialValue).toEqual(['Patient/123']);
+  });
+
+  it('formats multiple initial values (repeating item) as one entry per value', () => {
+    const doc = generateQuestionnaireDoc(baseDeps([makeItem({ _initialValues: ['a', 'b'] })]));
+    expect(doc.items[0].initialValue).toEqual(['a', 'b']);
+  });
+});
+
+describe('generateQuestionnaireDoc — per-option ordinal/prefix/exclusive/weight', () => {
+  it('default to null/false when absent', () => {
+    const item = makeItem({ options: 'y=Yes,n=No' });
+    const doc = generateQuestionnaireDoc(baseDeps([item]));
+    for (const o of doc.items[0].options) {
+      expect(o.ordinal).toBeNull();
+      expect(o.prefix).toBeNull();
+      expect(o.exclusive).toBe(false);
+      expect(o.weight).toBeNull();
+    }
+  });
+
+  it('are attached per-option by code when present', () => {
+    const item = makeItem({
+      options: 'y=Yes,n=No',
+      _optionOrdinals: { y: 1 }, _optionPrefixes: { y: 'A.' }, _optionExclusives: { n: true }, _optionWeights: { y: 2.5 },
+    });
+    const doc = generateQuestionnaireDoc(baseDeps([item]));
+    const [y, n] = doc.items[0].options;
+    expect(y).toMatchObject({ ordinal: 1, prefix: 'A.', exclusive: false, weight: 2.5 });
+    expect(n).toMatchObject({ ordinal: null, prefix: null, exclusive: true, weight: null });
+  });
+});
+
 describe('generateQuestionnaireDoc — prefix', () => {
   it('is null when the item has no _prefix', () => {
     const doc = generateQuestionnaireDoc(baseDeps([makeItem()]));
@@ -128,21 +311,21 @@ describe('generateQuestionnaireDoc — appearance', () => {
     expect(doc.items[0].appearance).toBeNull();
   });
 
-  it('describes bold/italic/color from _renderStyle', () => {
+  it('describes bold/italic/color from _renderStyle, with no xhtml/markdown source', () => {
     const doc = generateQuestionnaireDoc(baseDeps([makeItem({ _renderStyle: 'font-weight:bold;font-style:italic;color:#ff0000' })]));
-    expect(doc.items[0].appearance).toBe('bold, italic, color: #ff0000');
+    expect(doc.items[0].appearance).toEqual({ summary: 'bold, italic, color: #ff0000', xhtml: null, markdown: null });
   });
 
-  it('notes custom XHTML/Markdown formatting without reproducing it', () => {
+  it('notes custom XHTML/Markdown formatting and carries the raw source verbatim', () => {
     const doc = generateQuestionnaireDoc(baseDeps([makeItem({ _renderXhtml: '<b>hi</b>' })]));
-    expect(doc.items[0].appearance).toBe('custom XHTML formatting');
+    expect(doc.items[0].appearance).toEqual({ summary: 'custom XHTML formatting', xhtml: '<b>hi</b>', markdown: null });
     const doc2 = generateQuestionnaireDoc(baseDeps([makeItem({ _renderMarkdown: '**hi**' })]));
-    expect(doc2.items[0].appearance).toBe('custom Markdown formatting');
+    expect(doc2.items[0].appearance).toEqual({ summary: 'custom Markdown formatting', xhtml: null, markdown: '**hi**' });
   });
 
   it('combines style and rich-text notes when both are present', () => {
     const doc = generateQuestionnaireDoc(baseDeps([makeItem({ _renderStyle: 'font-weight:bold', _renderMarkdown: '**hi**' })]));
-    expect(doc.items[0].appearance).toBe('bold; custom Markdown formatting');
+    expect(doc.items[0].appearance).toEqual({ summary: 'bold; custom Markdown formatting', xhtml: null, markdown: '**hi**' });
   });
 });
 
@@ -410,8 +593,8 @@ describe('generateQuestionnaireDoc — answer options + translations', () => {
     const doc = generateQuestionnaireDoc(baseDeps([item], { translations }));
     const opts = doc.items[0].options;
     expect(opts).toEqual([
-      { code: 'y', display: 'Yes', translations: [{ lang: 'es', label: 'Spanish', text: 'S\u00ED' }] },
-      { code: 'n', display: 'No', translations: [] },
+      { code: 'y', display: 'Yes', translations: [{ lang: 'es', label: 'Spanish', text: 'S\u00ED' }], answerMedia: null, ordinal: null, prefix: null, exclusive: false, weight: null },
+      { code: 'n', display: 'No', translations: [], answerMedia: null, ordinal: null, prefix: null, exclusive: false, weight: null },
     ]);
   });
 
