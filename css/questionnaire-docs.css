@@ -71,12 +71,15 @@ body {
 /* Structure tree — same connector-line technique as .qdoc-cond-group: a
    nested <ul>'s border-left is exactly as tall as its own <li> children, so
    every group gets its own trunk line with no manual depth/last-child CSS.
-   Every node gets one horizontal branch to its own row via ::before; only
-   NESTED <ul>s draw the vertical trunk (the root has nothing above it to
-   connect siblings through, matching the plain-text tree/git-log-graph style). */
-.qdoc-tree { list-style: none; margin: 0; padding: 0; padding-inline-start: 20px; }
-.qdoc-tree .qdoc-tree {
+   The root gets the same trunk as any nested list — it has its own set of
+   direct sibling items that need connecting too, exactly like any other
+   level. Every node also gets a horizontal branch stub via ::before,
+   spanning the padding-inline-start gap back to its own trunk line. */
+.qdoc-tree {
+  list-style: none; margin: 0; padding: 0; padding-inline-start: 20px;
   border-inline-start: 1px solid var(--c-border);
+}
+.qdoc-tree .qdoc-tree {
   margin-inline-start: 9px;
 }
 .qdoc-tree-node { position: relative; }
@@ -215,6 +218,7 @@ body {
 .qdoc-cond-fhirpath { margin-top: 4px; font-size: 0.85em; color: var(--c-text-2); }
 
 .qdoc-options { margin: 4px 0; padding-inline-start: 1.4em; }
+.qdoc-props-list { margin: 4px 0; padding-inline-start: 1.4em; font-size: 0.92em; color: var(--c-text-2); }
 
 .qdoc-issues { padding-inline-start: 1.2em; }
 .qdoc-issue--error   { color: var(--c-err); }

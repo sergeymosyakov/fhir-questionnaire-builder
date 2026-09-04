@@ -40,22 +40,95 @@ function renderExpr(label, field, indent) {
   return out;
 }
 
+function renderMedia(label, media, indent) {
+  if (!media) return '';
+  return `${indent}    ${label}: ${media.contentType || 'media'}${media.title ? ' - ' + media.title : ''}${media.url ? ' (' + media.url + ')' : ''}\n`;
+}
+
+// Raw multi-line text (xhtml/markdown source) indented to match the
+// surrounding block, verbatim — never re-flowed or escaped.
+function indentBlock(text, indent) {
+  return text.split('\n').map(l => `${indent}${l}`).join('\n') + '\n';
+}
+
+// { summary, xhtml, markdown } — summary is the plain-English note; xhtml/markdown,
+// when present, are printed verbatim right after it.
+function renderAppearance(appearance, indent) {
+  let out = `${indent}    \u{1F3A8} Appearance: ${appearance.summary}\n`;
+  if (appearance.xhtml) out += indentBlock(appearance.xhtml, indent + '      ');
+  if (appearance.markdown) out += indentBlock(appearance.markdown, indent + '      ');
+  return out;
+}
+
+// answerValueSet/answerExpression/candidateExpression are alternatives to a
+// static answerOption[] list — an item uses at most one to source its choices.
+function renderAnswerSource(answerSource, indent) {
+  if (!answerSource) return '';
+  let out = '';
+  const vs = answerSource.valueSet;
+  if (vs) {
+    out += vs.local
+      ? `${indent}    Answer options from ValueSet: ${vs.name || vs.ref} (see Contained Resources: ${vs.id})\n`
+      : `${indent}    Answer options from ValueSet: ${vs.ref}\n`;
+  }
+  out += renderExpr('Answer options (computed dynamically via answerExpression)', answerSource.expression, indent);
+  out += renderExpr('Candidate options (computed dynamically via candidateExpression)', answerSource.candidate, indent);
+  return out;
+}
+
+// A per-option code/display label, with ordinal/prefix/exclusive/weight
+// appended as a parenthetical when any are present.
+function optionLabel(o) {
+  const extra = [];
+  if (o.prefix) extra.push(o.prefix);
+  if (o.ordinal != null) extra.push(`ordinal ${o.ordinal}`);
+  if (o.weight != null) extra.push(`weight ${o.weight}`);
+  if (o.exclusive) extra.push('exclusive');
+  return `${o.code} = ${o.display}${extra.length ? ` (${extra.join(', ')})` : ''}`;
+}
+
+// Remaining scalar SDC/core properties with no dedicated block of their own.
+function renderAdditionalProps(entry, indent) {
+  const rows = [];
+  if (entry.shortText) rows.push(['Short text', entry.shortText]);
+  if (entry.entryFormat) rows.push(['Entry format', entry.entryFormat]);
+  if (entry.columnCount) rows.push(['Column count', String(entry.columnCount)]);
+  if (entry.choiceColumns?.length) rows.push(['Choice columns', entry.choiceColumns.map(c => c.label || c.path || '(unlabeled)').join(', ')]);
+  if (entry.itemControl) rows.push(['Item control', entry.itemControl]);
+  if (entry.collapsible) rows.push(['Collapsible', entry.collapsible]);
+  if (entry.openLabel) rows.push(['Open label', entry.openLabel]);
+  if (entry.disabledDisplay) rows.push(['Disabled display', entry.disabledDisplay]);
+  if (entry.isSubject) rows.push(['Subject item', 'Yes']);
+  if (entry.observationExtract != null) rows.push(['Observation extract', entry.observationExtract ? 'Yes' : 'No']);
+  if (entry.maxLength != null) rows.push(['Max length', String(entry.maxLength)]);
+  if (entry.maxDecimalPlaces != null) rows.push(['Max decimal places', String(entry.maxDecimalPlaces)]);
+  if (entry.answerConstraint) rows.push(['Answer constraint', entry.answerConstraint]);
+  if (entry.codes?.length) rows.push(['Codes', entry.codes.map(c => `${c.system ? c.system + '|' : ''}${c.code}`).join(', ')]);
+  return rows.map(([k, v]) => `${indent}    ${k}: ${v}\n`).join('');
+}
+
 function renderItem(entry, headPrefix, detailIndent) {
   const kind = entry.type === 'group' ? 'Group' : entry.itemType;
   const prefixTag = entry.prefix ? ` [${entry.prefix}]` : '';
   let out = `${headPrefix}[${entry.id}]${prefixTag} (${kind}, ${entry.cardinality}${entry.flags ? ', ' + entry.flags : ''}) ${entry.title}\n`;
   out += renderTranslations(entry.translations, detailIndent);
-  if (entry.appearance) out += `${detailIndent}    \u{1F3A8} Appearance: ${entry.appearance}\n`;
+  if (entry.appearance) out += renderAppearance(entry.appearance, detailIndent);
+  if (entry.designNote) out += `${detailIndent}    \u{1F4DD} Design note: ${entry.designNote}\n`;
+  out += renderMedia('\u{1F5BC} Item media', entry.itemMedia, detailIndent);
   out += renderExpr('This item is shown only when this condition is true', entry.visibility, detailIndent);
   out += renderExpr('Calculated', entry.calculated, detailIndent);
   out += renderExpr('Initial value', entry.initial, detailIndent);
+  if (entry.initialValue) out += `${detailIndent}    Initial value (fixed): ${entry.initialValue.join(', ')}\n`;
+  out += renderAnswerSource(entry.answerSource, detailIndent);
   for (const c of entry.constraints) {
     out += `${detailIndent}    Constraint [${c.severity}] ${c.human || c.key}: ${c.expression}\n`;
   }
   for (const o of entry.options) {
-    out += `${detailIndent}    Option: ${o.code} = ${o.display}\n`;
+    const mediaTag = o.answerMedia ? ` [${o.answerMedia.title || o.answerMedia.contentType || 'media'}]` : '';
+    out += `${detailIndent}    Option: ${optionLabel(o)}${mediaTag}\n`;
     out += renderTranslations(o.translations, detailIndent + '  ');
   }
+  out += renderAdditionalProps(entry, detailIndent);
   return out;
 }
 

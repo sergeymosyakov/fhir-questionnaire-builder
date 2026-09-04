@@ -25,9 +25,59 @@
       "compose": {
         "include": [{ "system": "http://example.org/bmi-criteria" }]
       }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "ussg-fhh",
+      "title": "USSG Family Health History",
+      "status": "active",
+      "compose": {
+        "include": [{ "system": "http://example.org/family-health-history" }]
+      }
     }
   ],
   "item": [
+    {
+      "linkId": "q-family-history",
+      "text": "Family history of conditions relevant to bariatric surgery",
+      "type": "open-choice",
+      "repeats": true,
+      "answerValueSet": "#ussg-fhh",
+      "extension": [
+        { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText", "valueString": "Family Hx" },
+        { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-openLabel", "valueString": "Other condition, please specify" }
+      ]
+    },
+    {
+      "linkId": "q-recommended-procedure",
+      "text": "Recommended procedure",
+      "type": "choice",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression",
+          "valueExpression": { "language": "text/fhirpath", "expression": "%resource.item.where(linkId='q-bmi-criterion').answer.valueCoding" }
+        }
+      ]
+    },
+    {
+      "linkId": "q-instructions-xhtml",
+      "text": "Please review the following before proceeding.",
+      "_text": {
+        "extension": [
+          { "url": "http://hl7.org/fhir/StructureDefinition/rendering-xhtml", "valueString": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Please review <b>before</b> proceeding.</div>" }
+        ]
+      },
+      "type": "display"
+    },
+    {
+      "linkId": "q-hidden-audit-marker",
+      "text": "Internal audit marker",
+      "type": "string",
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden", "valueBoolean": true },
+        { "url": "http://hl7.org/fhir/StructureDefinition/designNote", "valueString": "Internal use only \u2014 populated by StructureMap extraction, not shown to patients" }
+      ]
+    },
     {
       "linkId": "g-eligibility",
       "prefix": "1.",

@@ -42,5 +42,6 @@ Use the **Save ▾** menu:
 - **📄 Questionnaire · FHIR JSON** — the questionnaire you built.
 - **📋 QuestionnaireResponse · FHIR JSON** — the answers you entered.
 - **🧪 Observations · FHIR JSON Bundle** — for `observationExtract` items.
+- **📖 Generate Docs…** — a human-readable report of the questionnaire's structure and logic, for sharing outside the builder (see [Generate a documentation report](generate-docs.md)).
 
 That's the loop: load → edit → test → export. From here, dig into [Core Concepts](questionnaire-items.md) or the [How-to Guides](build-from-scratch.md).

@@ -82,6 +82,10 @@ describe('renderDocAsText — structure items', () => {
     depth: 0, id: 'q1', type: 'item', itemType: 'text', title: 'Do you smoke?',
     translations: [], cardinality: '0..1', flags: '*', visibility: null, calculated: null,
     initial: null, constraints: [], options: [],
+    answerSource: { valueSet: null, expression: null, candidate: null },
+    itemMedia: null, shortText: null, entryFormat: null, columnCount: null, choiceColumns: null,
+    collapsible: null, openLabel: null, isSubject: false, observationExtract: null,
+    maxLength: null, maxDecimalPlaces: null, answerConstraint: null, codes: null,
   };
 
   it('renders linkId, kind, cardinality, flags, and title with a tree connector', () => {
@@ -169,12 +173,114 @@ describe('renderDocAsText — structure items', () => {
   });
 
   it('renders the Appearance note when present, omits it otherwise', () => {
-    const rich = { ...item, appearance: 'bold, color: #ff0000' };
+    const rich = { ...item, appearance: { summary: 'bold, color: #ff0000', xhtml: null, markdown: null } };
     const text = renderDocAsText(baseDoc({ items: [rich] }));
     expect(text).toContain('\u{1F3A8} Appearance: bold, color: #ff0000');
 
     const plain = renderDocAsText(baseDoc({ items: [{ ...item, appearance: null }] }));
     expect(plain).not.toContain('Appearance:');
+  });
+
+  it('renders the raw xhtml/markdown source verbatim (not reflowed) right after the Appearance note', () => {
+    const rich = { ...item, appearance: { summary: 'custom XHTML formatting', xhtml: '<div>\n  <b>Hi</b>\n</div>', markdown: null } };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('\u{1F3A8} Appearance: custom XHTML formatting');
+    expect(text).toContain('<div>');
+    expect(text).toContain('<b>Hi</b>');
+    expect(text).toContain('</div>');
+  });
+
+  it('renders a design note when present, omits it otherwise', () => {
+    const rich = { ...item, designNote: 'Ask gently \u2014 sensitive topic' };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('\u{1F4DD} Design note: Ask gently \u2014 sensitive topic');
+    expect(renderDocAsText(baseDoc({ items: [item] }))).not.toContain('Design note:');
+  });
+
+  it('renders a fixed (non-expression) initial value, joining multiple values', () => {
+    const single = renderDocAsText(baseDoc({ items: [{ ...item, initialValue: ['Yes'] }] }));
+    expect(single).toContain('Initial value (fixed): Yes');
+    const multi = renderDocAsText(baseDoc({ items: [{ ...item, initialValue: ['a', 'b'] }] }));
+    expect(multi).toContain('Initial value (fixed): a, b');
+  });
+
+  it('renders itemControl and disabledDisplay in the extended properties block', () => {
+    const rich = { ...item, itemControl: 'autocomplete', disabledDisplay: 'protected' };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('Item control: autocomplete');
+    expect(text).toContain('Disabled display: protected');
+  });
+
+  it('appends ordinal/prefix/exclusive/weight to an option label when present', () => {
+    const rich = { ...item, options: [{ code: 'y', display: 'Yes', translations: [], answerMedia: null, ordinal: 1, prefix: 'A.', exclusive: true, weight: 2.5 }] };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('Option: y = Yes (A., ordinal 1, weight 2.5, exclusive)');
+  });
+
+  it('renders item media with content type, title, and url', () => {
+    const rich = { ...item, itemMedia: { contentType: 'image/png', url: 'https://example.org/x.png', title: 'Diagram' } };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('\u{1F5BC} Item media: image/png - Diagram (https://example.org/x.png)');
+  });
+
+  it('renders an external answerValueSet as a bare reference', () => {
+    const rich = { ...item, answerSource: { valueSet: { ref: 'http://example.org/vs', local: false }, expression: null, candidate: null } };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('Answer options from ValueSet: http://example.org/vs');
+  });
+
+  it('renders a local #contained answerValueSet by name with a Contained Resources pointer', () => {
+    const rich = { ...item, answerSource: { valueSet: { ref: '#vs1', local: true, id: 'vs1', name: 'USSG Family Health History', found: true }, expression: null, candidate: null } };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('Answer options from ValueSet: USSG Family Health History (see Contained Resources: vs1)');
+  });
+
+  it('renders answerExpression/candidateExpression using the same condition-tree shape as calculated/initial', () => {
+    const rich = {
+      ...item,
+      answerSource: {
+        valueSet: null,
+        expression: { tree: { type: 'LEAF', human: null, code: '%resource.descendants()' }, code: '%resource.descendants()' },
+        candidate: { tree: { type: 'LEAF', human: null, code: '%context.repeat(item)' }, code: '%context.repeat(item)' },
+      },
+    };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('Answer options (computed dynamically via answerExpression):');
+    expect(text).toContain('Candidate options (computed dynamically via candidateExpression):');
+    expect(text).toContain('FHIRPath: %resource.descendants()');
+    expect(text).toContain('FHIRPath: %context.repeat(item)');
+  });
+
+  it('tags an option with its answerMedia inline', () => {
+    const rich = { ...item, options: [{ code: 'y', display: 'Yes', translations: [], answerMedia: { contentType: 'image/png', title: 'Yes icon' } }] };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('Option: y = Yes [Yes icon]');
+  });
+
+  it('renders the extended properties block only for properties that are present', () => {
+    const rich = {
+      ...item,
+      shortText: 'BMI', entryFormat: 'MM/DD/YYYY', columnCount: 2,
+      choiceColumns: [{ label: 'Code' }, { path: 'display' }],
+      collapsible: 'default-closed', openLabel: 'Other', isSubject: true,
+      observationExtract: false, maxLength: 100, maxDecimalPlaces: 2,
+      answerConstraint: 'optionsOrString', codes: [{ system: 'http://loinc.org', code: '12345-6', display: 'Test' }],
+    };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('Short text: BMI');
+    expect(text).toContain('Entry format: MM/DD/YYYY');
+    expect(text).toContain('Column count: 2');
+    expect(text).toContain('Choice columns: Code, display');
+    expect(text).toContain('Collapsible: default-closed');
+    expect(text).toContain('Open label: Other');
+    expect(text).toContain('Subject item: Yes');
+    expect(text).toContain('Observation extract: No');
+    expect(text).toContain('Max length: 100');
+    expect(text).toContain('Max decimal places: 2');
+    expect(text).toContain('Answer constraint: optionsOrString');
+    expect(text).toContain('Codes: http://loinc.org|12345-6');
+
+    expect(renderDocAsText(baseDoc({ items: [item] }))).not.toContain('Short text:');
   });
 });
 

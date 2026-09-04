@@ -82,6 +82,48 @@ test.describe('Questionnaire Documentation generator', () => {
     await docsPage.close();
   });
 
+  test('an item bound to a local #contained ValueSet names it and links to Contained Resources', async ({ page }) => {
+    await loadFixture(page);
+    const docsPage = await openDocsPage(page);
+    const link = docsPage.getByRole('link', { name: 'USSG Family Health History' });
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute('href', '#qdoc-contained-ussg-fhh');
+    await expect(docsPage.locator('#qdoc-contained-ussg-fhh')).toHaveText('ValueSet/ussg-fhh');
+    await docsPage.close();
+  });
+
+  test('an item with a dynamic answerExpression shows the computed-options label and raw FHIRPath', async ({ page }) => {
+    await loadFixture(page);
+    const docsPage = await openDocsPage(page);
+    await expect(docsPage.getByText(/Answer options \(computed dynamically via answerExpression\)/)).toBeVisible();
+    await expect(docsPage.getByText(/q-bmi-criterion/).first()).toBeVisible();
+    await docsPage.close();
+  });
+
+  test('shortText and openLabel appear in the extended properties list', async ({ page }) => {
+    await loadFixture(page);
+    const docsPage = await openDocsPage(page);
+    await expect(docsPage.getByText('Short text: Family Hx')).toBeVisible();
+    await expect(docsPage.getByText('Open label: Other condition, please specify')).toBeVisible();
+    await docsPage.close();
+  });
+
+  test('an item with rendering-xhtml shows the Appearance note and the raw xhtml source verbatim', async ({ page }) => {
+    await loadFixture(page);
+    const docsPage = await openDocsPage(page);
+    await expect(docsPage.getByText(/Appearance: custom XHTML formatting/)).toBeVisible();
+    await expect(docsPage.getByText('<div xmlns="http://www.w3.org/1999/xhtml">Please review <b>before</b> proceeding.</div>')).toBeVisible();
+    await docsPage.close();
+  });
+
+  test('a hidden item shows the Hidden flag and its design note', async ({ page }) => {
+    await loadFixture(page);
+    const docsPage = await openDocsPage(page);
+    await expect(docsPage.getByTestId('qdoc-item-q-hidden-audit-marker')).toContainText('\uD83D\uDE48');
+    await expect(docsPage.getByText(/Design note: Internal use only/)).toBeVisible();
+    await docsPage.close();
+  });
+
   test('documentation page shows a visibility condition in plain English', async ({ page }) => {
     await loadFixture(page);
     const docsPage = await openDocsPage(page);

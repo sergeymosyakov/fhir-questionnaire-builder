@@ -46,4 +46,4 @@ browser with no server.
 
 ---
 
-Next: [Translate a questionnaire](translate.md).
+Next: [Generate a documentation report](generate-docs.md).
