@@ -147,6 +147,33 @@ describe('expandAggregateOverSet', () => {
     expect(f.leaves[0]).toContain('= false');
   });
 
+  it('expands the count() >= 1 spelling of "any true" (real-world SDC generator output)', () => {
+    const ex = expandAggregateOverSet(base + '.answer.valueBoolean.where($this = true).count() >= 1', fp);
+    expect(ex.op).toBe('or');
+    expect(ex.leaves).toEqual([
+      "%resource.item.where(linkId='1').item.where(linkId='1.3').answer.item.where(linkId='1.3.1').answer.valueBoolean = true",
+      "%resource.item.where(linkId='1').item.where(linkId='1.3').answer.item.where(linkId='1.3.2').answer.valueBoolean = true",
+      "%resource.item.where(linkId='1').item.where(linkId='1.3').answer.item.where(linkId='1.3.3').answer.valueBoolean = true",
+    ]);
+  });
+
+  it('expands count() >= 1 with $this = false the same as anyFalse', () => {
+    const ex = expandAggregateOverSet(base + '.answer.valueBoolean.where($this = false).count() >= 1', fp);
+    expect(ex.op).toBe('or');
+    expect(ex.leaves[0]).toContain('= false');
+  });
+
+  it('expands the equivalent count() > 0 spelling the same as >= 1', () => {
+    const ex = expandAggregateOverSet(base + '.answer.valueBoolean.where($this = true).count() > 0', fp);
+    expect(ex.op).toBe('or');
+    expect(ex.leaves).toHaveLength(3);
+  });
+
+  it('does not recognize count() >= N for N other than 1, or count() > N for N other than 0 (not yet supported)', () => {
+    expect(expandAggregateOverSet(base + '.answer.valueBoolean.where($this = true).count() >= 2', fp)).toBeNull();
+    expect(expandAggregateOverSet(base + '.answer.valueBoolean.where($this = true).count() > 1', fp)).toBeNull();
+  });
+
   it('expands exists over a set → OR of per-item exists()', () => {
     const ex = expandAggregateOverSet(base + '.answer.exists()', fp);
     expect(ex.op).toBe('or');
