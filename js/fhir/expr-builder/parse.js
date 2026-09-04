@@ -308,6 +308,16 @@ function isThisTerm(node) {
   return !!t && t.type === 'InvocationTerm' && kids(t)[0]?.type === 'ThisInvocation';
 }
 
+// A `$this = true` / `$this = false` predicate → the boolean value, else null.
+function thisEqualsBoolean(node) {
+  if (!node || node.type !== 'EqualityExpression' || node.text !== '=') return null;
+  if (!isThisTerm(kids(node)[0])) return null;
+  const litTerm = unwrapTerm(kids(node)[1]);
+  if (!litTerm || litTerm.type !== 'LiteralTerm') return null;
+  const lit = mapLiteral(litTerm);
+  return lit && lit.dataType === 'boolean' ? lit.value : null;
+}
+
 function isResourceTerm(head) {
   const t = unwrapTerm(head);
   return !!t && t.type === 'ExternalConstantTerm' && identText(t) === 'resource';
@@ -359,16 +369,43 @@ const SET_OP = {
 export function expandAggregateOverSet(expr, fp) {
   let ast;
   try { ast = unwrap(fp.parse((expr || '').trim())); } catch { return null; }
-  if (!ast || ast.type !== 'InvocationExpression') return null;
+  if (!ast) return null;
+
+  if (ast.type === 'InequalityExpression' && (ast.text === '>=' || ast.text === '>')) return expandCountAtLeastOne(ast);
+  if (ast.type !== 'InvocationExpression') return null;
   const { head, steps } = flatten(ast);
   if (steps.some((s) => s.kind === 'bad')) return null;
   if (!isResourceTerm(head)) return null;
 
   const last = steps[steps.length - 1];
   if (!(last && last.kind === 'func' && last.args.length === 0 && SET_OP[last.name])) return null;
-  const spec = SET_OP[last.name];
-  const body = steps.slice(0, -1);
+  return expandBody(steps.slice(0, -1), SET_OP[last.name]);
+}
 
+// `X.where($this = true).count() >= 1` (or the equivalent `count() > 0`) — same
+// "at least one is true" semantics as anyTrue(), spelled differently (seen in
+// real-world generated questionnaires). Deliberately not generalized to N > 1:
+// "at least N of M" has no flat AND/OR-of-leaves representation to expand into.
+function expandCountAtLeastOne(ast) {
+  const threshold = ast.text === '>=' ? 1 : 0;
+  if (numericLiteralArg(kids(ast)[1]) !== threshold) return null;
+  const left = unwrap(kids(ast)[0]);
+  if (!left || left.type !== 'InvocationExpression') return null;
+  const { head, steps } = flatten(left);
+  if (steps.some((s) => s.kind === 'bad') || steps.length < 2) return null;
+  if (!isResourceTerm(head)) return null;
+
+  const last = steps[steps.length - 1];
+  if (!(last && last.kind === 'func' && last.name === 'count' && last.args.length === 0)) return null;
+  const whereStep = steps[steps.length - 2];
+  if (!isWhere(whereStep) || whereStep.args.length !== 1) return null;
+  const boolVal = thisEqualsBoolean(unwrap(whereStep.args[0]));
+  if (boolVal == null) return null;
+
+  return expandBody(steps.slice(0, -2), boolVal ? SET_OP.anyTrue : SET_OP.anyFalse);
+}
+
+function expandBody(body, spec) {
   const segs = []; // { ids: string[], answerAt: boolean }
   let i = 0;
   while (i < body.length) {
