@@ -144,6 +144,10 @@ The NLM Clinical Tables Search Service is provided free of charge by the U.S. Na
 
 Sample files sourced from HL7 Implementation Guides are published under Creative Commons Attribution 4.0 (CC BY 4.0). Source URLs are preserved in each file's `url` field.
 
+### Vendored JavaScript libraries
+
+`lib/cql-execution.esm.js` and `lib/cql-exec-fhir.esm.js` are built from [cql-execution](https://www.npmjs.com/package/cql-execution) and [cql-exec-fhir](https://www.npmjs.com/package/cql-exec-fhir), both licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
 ### WHO SMART Guidelines performance-test fixture
 
 `sampledata/who-emcare-treatment.fhir.json` is a copy of `questionnaire-emcare.treatment.json`, retrieved on 2026-08-11 from the World Health Organization SMART Guidelines "EmCare" (IMCI) repository at [github.com/WorldHealthOrganization/smart-emcare-cmr](https://github.com/WorldHealthOrganization/smart-emcare-cmr) (`input/resources/questionnaire/`). We include it **solely as a performance-regression test fixture** (a genuinely large, real-world ~226-item questionnaire); it is **not** registered in the sample library (`sampledata/library.json`) and is not presented as an example.
