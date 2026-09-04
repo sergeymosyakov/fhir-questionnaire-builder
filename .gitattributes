@@ -1,0 +1,4 @@
+# Force LF so Dependabot/CI (Linux) regenerating these files never diffs
+# the whole file against a CRLF copy committed from Windows.
+package.json text eol=lf
+package-lock.json text eol=lf

@@ -30,7 +30,7 @@
     "buffer": "^6.0.3",
     "cql-exec-fhir": "^2.1.6",
     "cql-execution": "^3.3.2",
-    "dompurify": "^3.4.5",
+    "dompurify": "^3.4.13",
     "esbuild": "^0.28.2",
     "eslint": "^10.9.1",
     "events": "^3.3.0",
