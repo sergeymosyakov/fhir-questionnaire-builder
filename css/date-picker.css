@@ -47,7 +47,15 @@
   color: var(--c-text);
   flex: 1;
   text-align: center;
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  padding: 2px 4px;
 }
+.dp-month-lbl:hover:not(:disabled) { background: var(--c-primary-lt, #eef2ff); color: var(--c-primary); }
+.dp-month-lbl:disabled { cursor: default; }
 
 /* Day name row + day grid (7 columns) */
 .dp-grid {
@@ -56,6 +64,24 @@
   padding: 4px 4px 0;
   gap: 2px;
 }
+/* Month/year drill-down grids — 4 columns x 3 rows of 12 cells */
+.dp-grid--4col { grid-template-columns: repeat(4, 1fr); padding: 6px; gap: 4px; }
+.dp-cell {
+  text-align: center;
+  padding: 10px 0;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--c-text);
+}
+.dp-cell:hover { background: #f0f4ff; color: var(--c-primary); }
+.dp-cell--today { font-weight: 700; color: var(--c-primary); }
+.dp-cell--sel {
+  background: var(--c-primary);
+  color: #fff !important;
+  font-weight: 600;
+}
+.dp-cell--sel.dp-cell--today { background: var(--c-primary); }
 .dp-dn {
   font-size: 10px;
   font-weight: 600;
