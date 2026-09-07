@@ -19,6 +19,7 @@
   --cat-ns:    #9ca3af;
   --cat-qr:    #06b6d4;
   --cat-redcap: #e11d48;
+  --cat-sd:    #0891b2;
 }
 
 html, body {
@@ -125,6 +126,7 @@ html, body {
 .cat-ns    { background: var(--cat-ns); }
 .cat-qr    { background: var(--cat-qr); }
 .cat-redcap { background: var(--cat-redcap); }
+.cat-sd    { background: var(--cat-sd); }
 
 /* ── Not-supported rows ─────────────────────────────────────────────────────── */
 tr:has(.cat-ns) ~ tr .col-field code,
