@@ -1,0 +1,129 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "generate-docs-completeness",
+  "url": "http://example.org/Questionnaire/generate-docs-completeness",
+  "version": "1.0",
+  "name": "GenerateDocsCompleteness",
+  "title": "Generate Docs Completeness Demo",
+  "status": "active",
+  "identifier": [
+    { "system": "http://example.org/questionnaire-ids", "value": "GDOC-001" }
+  ],
+  "derivedFrom": ["http://example.org/Questionnaire/v1"],
+  "code": [
+    { "system": "http://loinc.org", "code": "12345-6", "display": "Demo panel" }
+  ],
+  "meta": {
+    "versionId": "3",
+    "source": "http://example.org/source-system",
+    "tag": [{ "system": "http://example.org/tags", "code": "demo", "display": "Demo tag" }],
+    "security": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality", "code": "R", "display": "Restricted" }]
+  },
+  "extension": [
+    { "url": "http://hl7.org/fhir/StructureDefinition/replaces", "valueCanonical": "http://example.org/Questionnaire/old" },
+    { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer", "valueUrl": "https://tx.example.org/fhir" },
+    { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-targetStructureMap", "valueCanonical": "http://example.org/StructureMap/target" },
+    { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-sourceStructureMap", "valueCanonical": "http://example.org/StructureMap/source" },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext",
+      "extension": [
+        { "url": "name", "valueCoding": { "system": "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext", "code": "patient" } },
+        { "url": "type", "valueCode": "Patient" }
+      ]
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired",
+      "valueCodeableConcept": {
+        "coding": [{ "system": "urn:iso-astm:E1762-95:2013", "code": "1.2.840.10065.1.12.1.1", "display": "Author's Signature" }]
+      }
+    }
+  ],
+  "item": [
+    {
+      "linkId": "item-multi",
+      "text": "Item combining several definitional extensions",
+      "type": "string",
+      "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient.birthDate",
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/regex", "valueString": "^[A-Z]{2}\\d{4}$" },
+        { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer", "valueUrl": "https://tx.example.org/fhir" },
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-baseType", "valueCode": "Patient" },
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType", "valueCode": "date" },
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode", "valueCode": "capture-display" },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "urn:iso-astm:E1762-95:2013", "code": "1.2.840.10065.1.12.1.1", "display": "Author's Signature" }]
+          }
+        },
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink", "valueUri": "https://example.org/help/item-multi" },
+        { "url": "http://example.org/fhir/StructureDefinition/custom-item-note", "valueString": "custom pass-through" }
+      ]
+    },
+    {
+      "linkId": "item-integer",
+      "text": "Item with numeric range and slider step",
+      "type": "integer",
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/minValue", "valueInteger": 0 },
+        { "url": "http://hl7.org/fhir/StructureDefinition/maxValue", "valueInteger": 100 },
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-sliderStepValue", "valueInteger": 5 }
+      ]
+    },
+    {
+      "linkId": "item-choice",
+      "text": "Item with choice orientation and a default-selected option",
+      "type": "choice",
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation", "valueCode": "horizontal" }
+      ],
+      "answerOption": [
+        { "valueCoding": { "code": "y", "display": "Yes" }, "initialSelected": true },
+        { "valueCoding": { "code": "n", "display": "No" } }
+      ]
+    },
+    {
+      "linkId": "item-display",
+      "text": "This item is an instructional note",
+      "type": "display",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory",
+          "valueCodeableConcept": {
+            "coding": [{ "system": "http://hl7.org/fhir/questionnaire-display-category", "code": "instructions" }]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "item-attachment",
+      "text": "Item with a max file size and allowed types",
+      "type": "attachment",
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/maxSize", "valueDecimal": 5 },
+        { "url": "http://hl7.org/fhir/StructureDefinition/mimeType", "valueCode": "image/png" },
+        { "url": "http://hl7.org/fhir/StructureDefinition/mimeType", "valueCode": "application/pdf" }
+      ]
+    },
+    {
+      "linkId": "item-reference",
+      "text": "Item referencing a Practitioner",
+      "type": "reference",
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource", "valueCode": "Practitioner" },
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile", "valueCanonical": "http://example.org/fhir/StructureDefinition/my-practitioner" },
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter", "valueString": "active=true" }
+      ]
+    },
+    {
+      "linkId": "item-quantity",
+      "text": "Item with a fixed unit and unit ValueSet",
+      "type": "quantity",
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit", "valueCoding": { "system": "http://unitsofmeasure.org", "code": "kg" } },
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption", "valueCoding": { "system": "http://unitsofmeasure.org", "code": "kg", "display": "kg" } },
+        { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet", "valueCanonical": "http://example.org/fhir/ValueSet/weight-units" }
+      ]
+    }
+  ]
+}

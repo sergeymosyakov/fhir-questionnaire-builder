@@ -14,7 +14,7 @@ loaded — nothing is sent to a server.
 ## What's in the report
 
 1. **Legend** — every icon/badge used below, explained once.
-2. **Metadata** — title, URL, version, status, publisher, description.
+2. **Metadata** — title, URL, version, status, publisher, description, and (when set) the rest of the questionnaire's identifying details: purpose/business identifiers, codes, where it was derived from or what it replaces, resource version/source info, and any terminology server, StructureMap, or launch-context settings configured in Questionnaire Properties.
 3. **Variables** — questionnaire-level SDC `%variable` declarations, as
    formatted JSON.
 4. **Contained Resources** — every `Questionnaire.contained[]` resource (e.g. a
@@ -30,8 +30,11 @@ loaded — nothing is sent to a server.
      `#`-reference, shown as a bare URL otherwise), or a dynamically computed
      `answerExpression` / `candidateExpression`.
    - **Constraints**, translated **language versions** (🌐), custom
-     **Appearance** (🎨) notes, and any other SDC properties the item carries
-     (short text, entry format, column layout, codes, etc.).
+     **Appearance** (🎎) notes, and any other property the item carries —
+     short text, entry format, column layout, codes, numeric/slider limits,
+     attachment size and file-type restrictions, the allowed resource type for
+     a reference question, the unit for a quantity question, a validation
+     pattern, a per-item terminology server override, etc.
 6. **Validation & Audit** — the same checks as the builder's own Validate and
    Audit tools.
 
