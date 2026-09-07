@@ -15,6 +15,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { freshStart } from './helpers/builder.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { mockTerminologyExpand } from './helpers/terminology.js';
 
 const FIXTURE = path.resolve('tests/fixtures/example-bariatric.fhir.json');
 
@@ -165,7 +166,10 @@ test.describe('Questionnaire Documentation generator', () => {
 test.describe('Questionnaire Documentation generator — extended field coverage', () => {
   const COMPLETENESS_FIXTURE = path.resolve('tests/fixtures/generate-docs-completeness.fhir.json');
 
+  // item-quantity's unitValueSet is external - mockTerminologyExpand() keeps
+  // import from racing a real network round-trip (see helpers/terminology.js).
   async function loadCompletenessFixture(page) {
+    await mockTerminologyExpand(page);
     await freshStart(page);
     await page.locator('[data-testid="fhir-file-input"]').setInputFiles(COMPLETENESS_FIXTURE);
     await page.waitForSelector('[data-testid="tree-container"] [data-node-id]', { timeout: 15_000 });
