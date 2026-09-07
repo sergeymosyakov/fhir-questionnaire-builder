@@ -54,6 +54,8 @@ await page.getByTestId('export-quest-item').click();
 
 **rAF yield before commitInput** — after `fill()` for reactive DOM, yield two rAF before committing.
 
+**Terminology-expand race (CI-only)** — any fixture with an external (non-`#contained`) `answerValueSet`/`unitValueSet` makes import fire a real, un-awaited `expandAll()` network call; a failure response opens a page-covering "ValueSet Expansion Errors" modal whenever it resolves before the test's next interaction — timing differs by environment, so it can pass locally and hang-to-timeout in CI (or vice versa). Unless the test is specifically about that broken/external reference, mock it with `mockTerminologyExpand(page)` from `helpers/terminology.js` before loading the fixture.
+
 **Preserve `data-testid` when moving/consolidating UI** — when a control moves to a new home (e.g. a title-row icon → a gear-menu item), keep the **same** `data-testid` on the new element so existing specs keep resolving it. Only the *interaction* changes (e.g. open the gear menu first), not the id. This avoids mass spec churn. If the surrounding container now contains sibling nodes carrying the same testid (a group whose children reuse `node-copy-btn` etc.), scope the locator to the node's own menu with `.first()` (the node's own header/menu precedes its children in the DOM).
 
 ## Fixtures
