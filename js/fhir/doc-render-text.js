@@ -5,6 +5,17 @@ import { buildItemTree } from './doc-generator.js';
 
 function rule(char, len = 70) { return char.repeat(len); }
 
+// Push [label, formattedValue] only when value is present. entry.* fields are
+// already normalized to null/undefined-when-absent by doc-generator.js; call
+// sites for raw doc.meta.* fields normalize inline (empty array -> null) first.
+function addRow(rows, label, value, format = String) {
+  if (value == null) return;
+  rows.push([label, format(value)]);
+}
+const joinList = v => v.join(', ');
+const formatSystemCode = list => list.map(c => `${c.system ? c.system + '|' : ''}${c.code}`).join(', ');
+const formatCodingDisplay = list => list.map(c => c.display || c.code).join(', ');
+
 function plainCopyright(html) {
   return html
     .replace(/<a[^>]*>([^<]*)<\/a>/g, '$1')
@@ -84,26 +95,49 @@ function optionLabel(o) {
   if (o.ordinal != null) extra.push(`ordinal ${o.ordinal}`);
   if (o.weight != null) extra.push(`weight ${o.weight}`);
   if (o.exclusive) extra.push('exclusive');
+  if (o.initialSelected) extra.push('initially selected');
   return `${o.code} = ${o.display}${extra.length ? ` (${extra.join(', ')})` : ''}`;
 }
 
 // Remaining scalar SDC/core properties with no dedicated block of their own.
 function renderAdditionalProps(entry, indent) {
   const rows = [];
-  if (entry.shortText) rows.push(['Short text', entry.shortText]);
-  if (entry.entryFormat) rows.push(['Entry format', entry.entryFormat]);
-  if (entry.columnCount) rows.push(['Column count', String(entry.columnCount)]);
-  if (entry.choiceColumns?.length) rows.push(['Choice columns', entry.choiceColumns.map(c => c.label || c.path || '(unlabeled)').join(', ')]);
-  if (entry.itemControl) rows.push(['Item control', entry.itemControl]);
-  if (entry.collapsible) rows.push(['Collapsible', entry.collapsible]);
-  if (entry.openLabel) rows.push(['Open label', entry.openLabel]);
-  if (entry.disabledDisplay) rows.push(['Disabled display', entry.disabledDisplay]);
+  addRow(rows, 'Short text', entry.shortText);
+  addRow(rows, 'Entry format', entry.entryFormat);
+  addRow(rows, 'Regex pattern', entry.regex);
+  addRow(rows, 'Column count', entry.columnCount, String);
+  addRow(rows, 'Choice orientation', entry.choiceOrientation);
+  addRow(rows, 'Choice columns', entry.choiceColumns, v => v.map(c => c.label || c.path || '(unlabeled)').join(', '));
+  addRow(rows, 'Item control', entry.itemControl);
+  addRow(rows, 'Display category', entry.displayCategory);
+  addRow(rows, 'Collapsible', entry.collapsible);
+  addRow(rows, 'Open label', entry.openLabel);
+  addRow(rows, 'Disabled display', entry.disabledDisplay);
+  addRow(rows, 'Usage mode', entry.usageMode);
   if (entry.isSubject) rows.push(['Subject item', 'Yes']);
   if (entry.observationExtract != null) rows.push(['Observation extract', entry.observationExtract ? 'Yes' : 'No']);
-  if (entry.maxLength != null) rows.push(['Max length', String(entry.maxLength)]);
-  if (entry.maxDecimalPlaces != null) rows.push(['Max decimal places', String(entry.maxDecimalPlaces)]);
-  if (entry.answerConstraint) rows.push(['Answer constraint', entry.answerConstraint]);
-  if (entry.codes?.length) rows.push(['Codes', entry.codes.map(c => `${c.system ? c.system + '|' : ''}${c.code}`).join(', ')]);
+  addRow(rows, 'Max length', entry.maxLength, String);
+  addRow(rows, 'Min value', entry.minValue, String);
+  addRow(rows, 'Max value', entry.maxValue, String);
+  addRow(rows, 'Slider step', entry.sliderStep, String);
+  addRow(rows, 'Max decimal places', entry.maxDecimalPlaces, String);
+  addRow(rows, 'Answer constraint', entry.answerConstraint);
+  addRow(rows, 'Codes', entry.codes, formatSystemCode);
+  addRow(rows, 'Definition', entry.definition);
+  addRow(rows, 'Base type', entry.baseType);
+  addRow(rows, 'FHIR type', entry.fhirType);
+  addRow(rows, 'Reference resource type', entry.referenceResourceType);
+  addRow(rows, 'Reference profiles', entry.referenceProfiles, joinList);
+  addRow(rows, 'Reference filter', entry.referenceFilter);
+  addRow(rows, 'Unit', entry.unit);
+  addRow(rows, 'Unit options', entry.unitOptions, v => v.map(u => u.display || u.code).join(', '));
+  addRow(rows, 'Unit ValueSet', entry.unitValueSet);
+  addRow(rows, 'Max file size (MB)', entry.maxFileSizeMB, String);
+  addRow(rows, 'Allowed file types', entry.mimeTypes, joinList);
+  addRow(rows, 'Preferred terminology server', entry.preferredTermServer);
+  addRow(rows, 'Signature required', entry.signatureRequired, formatCodingDisplay);
+  addRow(rows, 'Support links', entry.supportLinks, joinList);
+  addRow(rows, 'Other extensions', entry.unknownExtensionCount, v => `${v} preserved (round-trip only)`);
   return rows.map(([k, v]) => `${indent}    ${k}: ${v}\n`).join('');
 }
 
@@ -188,10 +222,32 @@ export function renderDocAsText(doc) {
 
   lines.push('2. METADATA', rule('-'));
   const m = doc.meta;
-  for (const [k, v] of [
-    ['URL', m.url], ['Version', m.version], ['Status', m.status], ['Date', m.date],
-    ['Publisher', m.publisher], ['Description', m.description], ['Purpose', m.purpose],
-  ]) if (v) lines.push(`  ${k}: ${v}`);
+  const metaRows = [];
+  addRow(metaRows, 'URL', m.url);
+  addRow(metaRows, 'Version', m.version);
+  addRow(metaRows, 'Status', m.status);
+  addRow(metaRows, 'Date', m.date);
+  addRow(metaRows, 'Publisher', m.publisher);
+  addRow(metaRows, 'Description', m.description);
+  addRow(metaRows, 'Purpose', m.purpose);
+  addRow(metaRows, 'Preferred terminology server', m.preferredTermServer);
+  addRow(metaRows, 'Target StructureMap', m.targetStructureMap);
+  addRow(metaRows, 'Source StructureMap', m.sourceStructureMap);
+  addRow(metaRows, 'Resource version', m._metaVersionId);
+  addRow(metaRows, 'Resource source', m._metaSource);
+  addRow(metaRows, 'Resource last updated', m._metaLastUpdated);
+  addRow(metaRows, 'Derived from', m.derivedFrom?.length ? m.derivedFrom : null, joinList);
+  addRow(metaRows, 'Replaces', m.replaces?.length ? m.replaces : null, joinList);
+  addRow(metaRows, 'Profiles', m._rawMetaProfile?.length ? m._rawMetaProfile : null, joinList);
+  addRow(metaRows, 'Identifiers', m._rawIdentifier?.length ? m._rawIdentifier : null, v => v.map(i => i.value || '(no value)').join(', '));
+  addRow(metaRows, 'Codes', m._rawCode?.length ? m._rawCode : null, formatSystemCode);
+  addRow(metaRows, 'Tags', m._rawMetaTag?.length ? m._rawMetaTag : null, formatCodingDisplay);
+  addRow(metaRows, 'Security labels', m._rawMetaSecurity?.length ? m._rawMetaSecurity : null, formatCodingDisplay);
+  const namedLaunchContexts = m.launchContexts?.filter(l => l.name) || [];
+  addRow(metaRows, 'Launch context', namedLaunchContexts.length ? namedLaunchContexts : null, v => v.map(l => l.name).join(', '));
+  addRow(metaRows, 'Signature required', m._signatureRequired?.length ? m._signatureRequired : null, formatCodingDisplay);
+  addRow(metaRows, 'Other extensions', m._rawQuestExtensions?.length || null, v => `${v} preserved (round-trip only)`);
+  for (const [k, v] of metaRows) lines.push(`  ${k}: ${v}`);
   lines.push('');
 
   lines.push('3. VARIABLES', rule('-'));

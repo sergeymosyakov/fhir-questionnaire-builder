@@ -36,6 +36,58 @@ describe('renderDocAsText — document shell', () => {
     expect(text).toContain('Status: active');
   });
 
+  it('renders questionnaire-level terminology/StructureMap/resource-meta fields when present', () => {
+    const text = renderDocAsText(baseDoc({
+      meta: {
+        title: 'Demo', preferredTermServer: 'https://tx.example.org/fhir',
+        targetStructureMap: 'http://example.org/StructureMap/target',
+        sourceStructureMap: 'http://example.org/StructureMap/source',
+        _metaVersionId: '3', _metaSource: 'http://example.org/source', _metaLastUpdated: '2026-01-01T00:00:00Z',
+      },
+    }));
+    expect(text).toContain('Preferred terminology server: https://tx.example.org/fhir');
+    expect(text).toContain('Target StructureMap: http://example.org/StructureMap/target');
+    expect(text).toContain('Source StructureMap: http://example.org/StructureMap/source');
+    expect(text).toContain('Resource version: 3');
+    expect(text).toContain('Resource source: http://example.org/source');
+    expect(text).toContain('Resource last updated: 2026-01-01T00:00:00Z');
+  });
+
+  it('renders questionnaire-level derivedFrom/replaces/profiles/identifiers/codes/tags/security/launchContext/signature/other-extensions', () => {
+    const text = renderDocAsText(baseDoc({
+      meta: {
+        title: 'Demo',
+        derivedFrom: ['http://example.org/Questionnaire/v1'],
+        replaces: ['http://example.org/Questionnaire/old'],
+        _rawMetaProfile: ['http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire'],
+        _rawIdentifier: [{ system: 'http://example.org/ids', value: 'Q-001' }],
+        _rawCode: [{ system: 'http://loinc.org', code: '12345-6' }],
+        _rawMetaTag: [{ code: 'demo', display: 'Demo tag' }],
+        _rawMetaSecurity: [{ code: 'R', display: 'Restricted' }],
+        launchContexts: [{ name: 'patient', type: 'Patient' }, { name: '', type: '' }],
+        _signatureRequired: [{ system: 'urn:x', code: '1.2.3', display: 'Author' }],
+        _rawQuestExtensions: [{ url: 'http://example.org/custom', valueString: 'x' }],
+      },
+    }));
+    expect(text).toContain('Derived from: http://example.org/Questionnaire/v1');
+    expect(text).toContain('Replaces: http://example.org/Questionnaire/old');
+    expect(text).toContain('Profiles: http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire');
+    expect(text).toContain('Identifiers: Q-001');
+    expect(text).toContain('Codes: http://loinc.org|12345-6');
+    expect(text).toContain('Tags: Demo tag');
+    expect(text).toContain('Security labels: Restricted');
+    expect(text).toContain('Launch context: patient');
+    expect(text).toContain('Signature required: Author');
+    expect(text).toContain('Other extensions: 1 preserved (round-trip only)');
+  });
+
+  it('omits every optional metadata row when absent', () => {
+    const text = renderDocAsText(baseDoc());
+    for (const label of ['Preferred terminology server', 'Target StructureMap', 'Derived from', 'Replaces', 'Profiles', 'Identifiers', 'Tags', 'Security labels', 'Launch context', 'Signature required', 'Other extensions']) {
+      expect(text).not.toContain(`${label}:`);
+    }
+  });
+
   it('renders a plain-text copyright line without HTML tags or entities', () => {
     const text = renderDocAsText(baseDoc());
     expect(text).toContain('\u00A9 2026 Jane Doe \u00B7 Free to use');
@@ -281,6 +333,67 @@ describe('renderDocAsText — structure items', () => {
     expect(text).toContain('Codes: http://loinc.org|12345-6');
 
     expect(renderDocAsText(baseDoc({ items: [item] }))).not.toContain('Short text:');
+  });
+
+  it('renders answer-type layout, numeric/slider constraints, and regex in the extended properties block', () => {
+    const rich = {
+      ...item, choiceOrientation: 'horizontal', displayCategory: 'instructions',
+      minValue: 1, maxValue: 10, sliderStep: 1, regex: '^[A-Z]{2}\\d{4}$',
+    };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('Choice orientation: horizontal');
+    expect(text).toContain('Display category: instructions');
+    expect(text).toContain('Min value: 1');
+    expect(text).toContain('Max value: 10');
+    expect(text).toContain('Slider step: 1');
+    expect(text).toContain('Regex pattern: ^[A-Z]{2}\\d{4}$');
+  });
+
+  it('renders support links, attachment constraints, usage mode, and states in the extended properties block', () => {
+    const rich = {
+      ...item, supportLinks: ['https://example.org/help'],
+      maxFileSizeMB: 5, mimeTypes: ['image/png', 'application/pdf'], usageMode: 'capture-display',
+      signatureRequired: [{ system: 'urn:x', code: '1.2.3', display: 'Author' }],
+    };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('Support links: https://example.org/help');
+    expect(text).toContain('Max file size (MB): 5');
+    expect(text).toContain('Allowed file types: image/png, application/pdf');
+    expect(text).toContain('Usage mode: capture-display');
+    expect(text).toContain('Signature required: Author');
+  });
+
+  it('renders definition binding, reference/quantity config, and terminology server in the extended properties block', () => {
+    const rich = {
+      ...item, definition: 'http://hl7.org/fhir/StructureDefinition/Patient#Patient.birthDate',
+      baseType: 'Patient', fhirType: 'date',
+      referenceResourceType: 'Practitioner', referenceProfiles: ['http://example.org/my-profile'], referenceFilter: 'active=true',
+      unit: 'kg', unitOptions: [{ code: 'kg', display: 'kg' }], unitValueSet: 'http://example.org/units',
+      preferredTermServer: 'https://tx.example.org/fhir',
+    };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('Definition: http://hl7.org/fhir/StructureDefinition/Patient#Patient.birthDate');
+    expect(text).toContain('Base type: Patient');
+    expect(text).toContain('FHIR type: date');
+    expect(text).toContain('Reference resource type: Practitioner');
+    expect(text).toContain('Reference profiles: http://example.org/my-profile');
+    expect(text).toContain('Reference filter: active=true');
+    expect(text).toContain('Unit: kg');
+    expect(text).toContain('Unit options: kg');
+    expect(text).toContain('Unit ValueSet: http://example.org/units');
+    expect(text).toContain('Preferred terminology server: https://tx.example.org/fhir');
+  });
+
+  it('renders the preserved-unknown-extensions count, omitting the row when zero/absent', () => {
+    const withCount = renderDocAsText(baseDoc({ items: [{ ...item, unknownExtensionCount: 3 }] }));
+    expect(withCount).toContain('Other extensions: 3 preserved (round-trip only)');
+    expect(renderDocAsText(baseDoc({ items: [{ ...item, unknownExtensionCount: null }] }))).not.toContain('Other extensions:');
+  });
+
+  it('tags the initially-selected option in its label', () => {
+    const rich = { ...item, options: [{ code: 'y', display: 'Yes', translations: [], answerMedia: null, initialSelected: true }] };
+    const text = renderDocAsText(baseDoc({ items: [rich] }));
+    expect(text).toContain('Option: y = Yes (initially selected)');
   });
 });
 

@@ -1,11 +1,13 @@
 // ── E2E: Questionnaire Documentation generator (issue #95) ────────────────────
 // Tests: Save menu has Generate Docs item, opens questionnaire-docs.html in a
 // new tab, key sections render, Print and Download-as-text buttons work.
+// Also covers issue #111 (extended item/metadata field completeness).
 //
 // Tested elements:
 //   generate-docs-item — menu item in Save ▾
 //   qdoc-root, qdoc-title, qdoc-legend, qdoc-metadata, qdoc-variables, qdoc-contained,
 //   qdoc-structure, qdoc-validation — sections
+//   qdoc-item-<linkId> — per-item report block
 //   qdoc-print-btn, qdoc-download-btn — action buttons
 //   qdoc-code — expression/JSON code blocks
 
@@ -155,6 +157,132 @@ test.describe('Questionnaire Documentation generator', () => {
       docsPage.getByTestId('qdoc-download-btn').click(),
     ]);
     expect(download.suggestedFilename()).toMatch(/-documentation\.txt$/);
+    await docsPage.close();
+  });
+});
+
+// ── Coverage for issue #111: fields previously missing from the report ────────
+test.describe('Questionnaire Documentation generator — extended field coverage', () => {
+  const COMPLETENESS_FIXTURE = path.resolve('tests/fixtures/generate-docs-completeness.fhir.json');
+
+  async function loadCompletenessFixture(page) {
+    await freshStart(page);
+    await page.locator('[data-testid="fhir-file-input"]').setInputFiles(COMPLETENESS_FIXTURE);
+    await page.waitForSelector('[data-testid="tree-container"] [data-node-id]', { timeout: 15_000 });
+  }
+
+  test('item-level fields: regex, terminology server, definition/baseType/fhirType, usage mode, signature, support link, custom extension', async ({ page }) => {
+    await loadCompletenessFixture(page);
+    const docsPage = await openDocsPage(page);
+    const item = docsPage.getByTestId('qdoc-item-item-multi');
+    await expect(item).toContainText('Regex pattern: ^[A-Z]{2}\\d{4}$');
+    await expect(item).toContainText('Preferred terminology server: https://tx.example.org/fhir');
+    await expect(item).toContainText('Definition: http://hl7.org/fhir/StructureDefinition/Patient#Patient.birthDate');
+    await expect(item).toContainText('Base type: Patient');
+    await expect(item).toContainText('FHIR type: date');
+    await expect(item).toContainText('Usage mode: capture-display');
+    await expect(item).toContainText("Signature required: Author's Signature");
+    await expect(item).toContainText('Support links: https://example.org/help/item-multi');
+    await expect(item).toContainText('Other extensions: 1 preserved (round-trip only)');
+    await docsPage.close();
+  });
+
+  test('item-level fields: min/max value and slider step', async ({ page }) => {
+    await loadCompletenessFixture(page);
+    const docsPage = await openDocsPage(page);
+    const item = docsPage.getByTestId('qdoc-item-item-integer');
+    await expect(item).toContainText('Min value: 0');
+    await expect(item).toContainText('Max value: 100');
+    await expect(item).toContainText('Slider step: 5');
+    await docsPage.close();
+  });
+
+  test('item-level fields: choice orientation and initially-selected option', async ({ page }) => {
+    await loadCompletenessFixture(page);
+    const docsPage = await openDocsPage(page);
+    const item = docsPage.getByTestId('qdoc-item-item-choice');
+    await expect(item).toContainText('Choice orientation: horizontal');
+    await expect(item).toContainText('y = Yes (initially selected)');
+    await docsPage.close();
+  });
+
+  test('item-level fields: display category', async ({ page }) => {
+    await loadCompletenessFixture(page);
+    const docsPage = await openDocsPage(page);
+    await expect(docsPage.getByTestId('qdoc-item-item-display')).toContainText('Display category: instructions');
+    await docsPage.close();
+  });
+
+  test('item-level fields: attachment max size and allowed file types', async ({ page }) => {
+    await loadCompletenessFixture(page);
+    const docsPage = await openDocsPage(page);
+    const item = docsPage.getByTestId('qdoc-item-item-attachment');
+    await expect(item).toContainText('Max file size (MB): 5');
+    await expect(item).toContainText('Allowed file types: image/png, application/pdf');
+    await docsPage.close();
+  });
+
+  test('item-level fields: reference resource type, profile, and filter', async ({ page }) => {
+    await loadCompletenessFixture(page);
+    const docsPage = await openDocsPage(page);
+    const item = docsPage.getByTestId('qdoc-item-item-reference');
+    await expect(item).toContainText('Reference resource type: Practitioner');
+    await expect(item).toContainText('Reference profiles: http://example.org/fhir/StructureDefinition/my-practitioner');
+    await expect(item).toContainText('Reference filter: active=true');
+    await docsPage.close();
+  });
+
+  test('item-level fields: quantity unit and unit ValueSet', async ({ page }) => {
+    await loadCompletenessFixture(page);
+    const docsPage = await openDocsPage(page);
+    const item = docsPage.getByTestId('qdoc-item-item-quantity');
+    await expect(item).toContainText('Unit: kg');
+    await expect(item).toContainText('Unit options: kg');
+    await expect(item).toContainText('Unit ValueSet: http://example.org/fhir/ValueSet/weight-units');
+    await docsPage.close();
+  });
+
+  test('questionnaire-level metadata: identifiers, codes, derived from, replaces, resource meta, tags, security', async ({ page }) => {
+    await loadCompletenessFixture(page);
+    const docsPage = await openDocsPage(page);
+    const meta = docsPage.getByTestId('qdoc-metadata').locator('xpath=following-sibling::*[1]');
+    await expect(meta).toContainText('Identifiers: GDOC-001');
+    await expect(meta).toContainText('Codes: http://loinc.org|12345-6');
+    await expect(meta).toContainText('Derived from: http://example.org/Questionnaire/v1');
+    await expect(meta).toContainText('Replaces: http://example.org/Questionnaire/old');
+    await expect(meta).toContainText('Resource version: 3');
+    await expect(meta).toContainText('Resource source: http://example.org/source-system');
+    await expect(meta).toContainText('Tags: Demo tag');
+    await expect(meta).toContainText('Security labels: Restricted');
+    await docsPage.close();
+  });
+
+  test('questionnaire-level metadata: terminology server, structure maps, launch context, signature', async ({ page }) => {
+    await loadCompletenessFixture(page);
+    const docsPage = await openDocsPage(page);
+    const meta = docsPage.getByTestId('qdoc-metadata').locator('xpath=following-sibling::*[1]');
+    await expect(meta).toContainText('Preferred terminology server: https://tx.example.org/fhir');
+    await expect(meta).toContainText('Target StructureMap: http://example.org/StructureMap/target');
+    await expect(meta).toContainText('Source StructureMap: http://example.org/StructureMap/source');
+    await expect(meta).toContainText('Launch context: patient');
+    await expect(meta).toContainText("Signature required: Author's Signature");
+    await docsPage.close();
+  });
+
+  test('Download as Text includes the same extended fields as the HTML report', async ({ page }) => {
+    await loadCompletenessFixture(page);
+    const docsPage = await openDocsPage(page);
+    const [download] = await Promise.all([
+      docsPage.waitForEvent('download'),
+      docsPage.getByTestId('qdoc-download-btn').click(),
+    ]);
+    const streamPath = await download.path();
+    const fs = await import('node:fs');
+    const text = fs.readFileSync(streamPath, 'utf-8');
+    expect(text).toContain('Regex pattern: ^[A-Z]{2}\\d{4}$');
+    expect(text).toContain('Min value: 0');
+    expect(text).toContain('Choice orientation: horizontal');
+    expect(text).toContain('Derived from: http://example.org/Questionnaire/v1');
     await docsPage.close();
   });
 });

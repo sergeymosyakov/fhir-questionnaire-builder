@@ -146,6 +146,28 @@ describe('generateQuestionnaireDoc — extended item properties', () => {
     expect(e.designNote).toBeNull();
     expect(e.itemControl).toBeNull();
     expect(e.initialValue).toBeNull();
+    expect(e.choiceOrientation).toBeNull();
+    expect(e.displayCategory).toBeNull();
+    expect(e.usageMode).toBeNull();
+    expect(e.signatureRequired).toBeNull();
+    expect(e.definition).toBeNull();
+    expect(e.baseType).toBeNull();
+    expect(e.fhirType).toBeNull();
+    expect(e.minValue).toBeNull();
+    expect(e.maxValue).toBeNull();
+    expect(e.sliderStep).toBeNull();
+    expect(e.supportLinks).toBeNull();
+    expect(e.maxFileSizeMB).toBeNull();
+    expect(e.mimeTypes).toBeNull();
+    expect(e.referenceResourceType).toBeNull();
+    expect(e.referenceProfiles).toBeNull();
+    expect(e.referenceFilter).toBeNull();
+    expect(e.unit).toBeNull();
+    expect(e.unitOptions).toBeNull();
+    expect(e.unitValueSet).toBeNull();
+    expect(e.regex).toBeNull();
+    expect(e.preferredTermServer).toBeNull();
+    expect(e.unknownExtensionCount).toBeNull();
   });
 
   it('surface each property verbatim from the node when present', () => {
@@ -180,6 +202,78 @@ describe('generateQuestionnaireDoc — extended item properties', () => {
   it('keeps observationExtract tri-state: true is distinct from "not set" (null)', () => {
     const doc = generateQuestionnaireDoc(baseDeps([makeItem({ _observationExtract: true })]));
     expect(doc.items[0].observationExtract).toBe(true);
+  });
+
+  it('surfaces answer-type layout and numeric/slider constraints verbatim', () => {
+    const item = makeItem({
+      _choiceOrientation: 'horizontal', _displayCategory: 'instructions',
+      _minValue: 1, _maxValue: 10, _sliderStep: 1,
+    });
+    const doc = generateQuestionnaireDoc(baseDeps([item]));
+    const e = doc.items[0];
+    expect(e.choiceOrientation).toBe('horizontal');
+    expect(e.displayCategory).toBe('instructions');
+    expect(e.minValue).toBe(1);
+    expect(e.maxValue).toBe(10);
+    expect(e.sliderStep).toBe(1);
+  });
+
+  it('surfaces support link URLs, attachment constraints, states, and definition binding', () => {
+    const item = makeItem({
+      _supportLinks: ['https://example.org/help'],
+      _maxFileSizeMB: 5, _mimeTypes: ['image/png', 'application/pdf'],
+      _usageMode: 'capture-display',
+      _signatureRequired: [{ system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.1', display: 'Author' }],
+      _definition: 'http://hl7.org/fhir/StructureDefinition/Patient#Patient.birthDate',
+      _baseType: 'Patient', _fhirType: 'date',
+    });
+    const doc = generateQuestionnaireDoc(baseDeps([item]));
+    const e = doc.items[0];
+    expect(e.supportLinks).toEqual(['https://example.org/help']);
+    expect(e.maxFileSizeMB).toBe(5);
+    expect(e.mimeTypes).toEqual(['image/png', 'application/pdf']);
+    expect(e.usageMode).toBe('capture-display');
+    expect(e.signatureRequired).toEqual([{ system: 'urn:iso-astm:E1762-95:2013', code: '1.2.840.10065.1.12.1.1', display: 'Author' }]);
+    expect(e.definition).toBe('http://hl7.org/fhir/StructureDefinition/Patient#Patient.birthDate');
+    expect(e.baseType).toBe('Patient');
+    expect(e.fhirType).toBe('date');
+  });
+
+  it('surfaces reference/quantity item config, regex, and per-item terminology server', () => {
+    const item = makeItem({
+      itemType: 'reference', referenceResource: 'Practitioner',
+      _referenceProfiles: ['http://example.org/fhir/StructureDefinition/my-practitioner'],
+      _referenceFilter: 'active=true',
+      quantityUnit: 'kg', _unitOptions: [{ system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' }],
+      _unitValueSet: 'http://example.org/fhir/ValueSet/weight-units',
+      _regex: '^[A-Z]{2}\\d{4}$',
+      _preferredTermServer: 'https://tx.example.org/fhir',
+    });
+    const doc = generateQuestionnaireDoc(baseDeps([item]));
+    const e = doc.items[0];
+    expect(e.referenceResourceType).toBe('Practitioner');
+    expect(e.referenceProfiles).toEqual(['http://example.org/fhir/StructureDefinition/my-practitioner']);
+    expect(e.referenceFilter).toBe('active=true');
+    expect(e.unit).toBe('kg');
+    expect(e.unitOptions).toEqual([{ system: 'http://unitsofmeasure.org', code: 'kg', display: 'kg' }]);
+    expect(e.unitValueSet).toBe('http://example.org/fhir/ValueSet/weight-units');
+    expect(e.regex).toBe('^[A-Z]{2}\\d{4}$');
+    expect(e.preferredTermServer).toBe('https://tx.example.org/fhir');
+  });
+
+  it('counts preserved unknown extensions, and omits the count when none exist', () => {
+    const withUnknown = makeItem({ _unknownExtensions: [{ url: 'http://example.org/custom', valueString: 'x' }] });
+    const doc = generateQuestionnaireDoc(baseDeps([withUnknown]));
+    expect(doc.items[0].unknownExtensionCount).toBe(1);
+    expect(generateQuestionnaireDoc(baseDeps([makeItem()])).items[0].unknownExtensionCount).toBeNull();
+  });
+
+  it('flags the initially-selected answer option, and only that one', () => {
+    const item = makeItem({ options: 'y=Yes,n=No', _initialSelected: 'y' });
+    const doc = generateQuestionnaireDoc(baseDeps([item]));
+    const opts = doc.items[0].options;
+    expect(opts.find(o => o.code === 'y').initialSelected).toBe(true);
+    expect(opts.find(o => o.code === 'n').initialSelected).toBe(false);
   });
 });
 
@@ -593,8 +687,8 @@ describe('generateQuestionnaireDoc — answer options + translations', () => {
     const doc = generateQuestionnaireDoc(baseDeps([item], { translations }));
     const opts = doc.items[0].options;
     expect(opts).toEqual([
-      { code: 'y', display: 'Yes', translations: [{ lang: 'es', label: 'Spanish', text: 'S\u00ED' }], answerMedia: null, ordinal: null, prefix: null, exclusive: false, weight: null },
-      { code: 'n', display: 'No', translations: [], answerMedia: null, ordinal: null, prefix: null, exclusive: false, weight: null },
+      { code: 'y', display: 'Yes', translations: [{ lang: 'es', label: 'Spanish', text: 'S\u00ED' }], answerMedia: null, ordinal: null, prefix: null, exclusive: false, weight: null, initialSelected: false },
+      { code: 'n', display: 'No', translations: [], answerMedia: null, ordinal: null, prefix: null, exclusive: false, weight: null, initialSelected: false },
     ]);
   });
 
