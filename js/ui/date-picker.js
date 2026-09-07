@@ -14,6 +14,7 @@
 
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
+const MONTH_ABBR  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DAY_NAMES   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
 function _parseISO(s) {
@@ -63,8 +64,9 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
 
   // ── Calendar portal ───────────────────────────────────────────────────────
   let calEl = null;
-  // Current calendar view (which month/year is shown)
+  // Current calendar view (which month/year is shown) + drill-down level
   let _viewY = 0, _viewM = 0;
+  let _calMode = 'days'; // 'days' | 'months' | 'years'
 
   // Pending selection — only used in withTime mode, reset on each open()
   let _pendY = null, _pendM = null, _pendD = null;
@@ -73,6 +75,8 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
     if (calEl) { calEl.remove(); calEl = null; }
     document.removeEventListener('mousedown', _onOutside, true);
     document.removeEventListener('keydown',   _onEsc,     true);
+    window.removeEventListener('scroll', _position, true);
+    window.removeEventListener('resize', _position);
   };
 
   const _onOutside = e => {
@@ -85,8 +89,9 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
 
     const parsed = _parseISO(_value);
     const today  = new Date();
-    _viewY = parsed ? parsed.y : today.getFullYear();
-    _viewM = parsed ? parsed.m : today.getMonth();
+    _viewY   = parsed ? parsed.y : today.getFullYear();
+    _viewM   = parsed ? parsed.m : today.getMonth();
+    _calMode = 'days';
 
     // Initialise pending from current value
     _pendY   = parsed ? parsed.y   : null;
@@ -103,12 +108,18 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
 
     document.addEventListener('mousedown', _onOutside, true);
     document.addEventListener('keydown',   _onEsc,     true);
+    // Popup is `position:fixed` — re-anchor on scroll (capture catches nested
+    // scroll containers too, e.g. the builder panels) so it tracks the field.
+    window.addEventListener('scroll', _position, true);
+    window.addEventListener('resize', _position);
   };
 
   const _position = () => {
     if (!calEl) return;
-    const rect = trigger.getBoundingClientRect();
-    calEl.style.left = rect.left + 'px';
+    const rect    = trigger.getBoundingClientRect();
+    const calW    = calEl.offsetWidth;
+    const maxLeft = Math.max(4, window.innerWidth - calW - 4);
+    calEl.style.left = Math.min(Math.max(rect.left, 4), maxLeft) + 'px';
     const calH = calEl.offsetHeight;
     if (rect.bottom + calH + 4 <= window.innerHeight) {
       calEl.style.top = (rect.bottom + 2) + 'px';
@@ -117,8 +128,100 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
     }
   };
 
-  const _renderCal = () => {
-    calEl.innerHTML = '';
+  // Shared header row: ‹ prev | clickable label (drill up a level) | next ›
+  const _buildHeader = (labelText, onPrev, onNext, onLabelClick) => {
+    const hdr = document.createElement('div');
+    hdr.className = 'dp-hdr';
+
+    const prevBtn = document.createElement('button');
+    prevBtn.type = 'button';
+    prevBtn.className = 'dp-nav-btn';
+    prevBtn.textContent = '\u2039';
+    prevBtn.addEventListener('mousedown', e => { e.preventDefault(); onPrev(); });
+
+    const lbl = document.createElement('button');
+    lbl.type = 'button';
+    lbl.className = 'dp-month-lbl';
+    lbl.textContent = labelText;
+    lbl.disabled = !onLabelClick;
+    if (onLabelClick) lbl.addEventListener('mousedown', e => { e.preventDefault(); onLabelClick(); });
+
+    const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.className = 'dp-nav-btn';
+    nextBtn.textContent = '\u203a';
+    nextBtn.addEventListener('mousedown', e => { e.preventDefault(); onNext(); });
+
+    hdr.append(prevBtn, lbl, nextBtn);
+    return hdr;
+  };
+
+  // ── Years grid — drill-down level 2 (top) ─────────────────────────────────
+  const _renderYearsView = () => {
+    const start = _viewY - 5;
+    const end   = start + 11;
+    calEl.appendChild(_buildHeader(`${start}\u2013${end}`,
+      () => { _viewY -= 12; _renderCal(); },
+      () => { _viewY += 12; _renderCal(); },
+      null));
+
+    const grid  = document.createElement('div');
+    grid.className = 'dp-grid dp-grid--4col';
+    const todayY = new Date().getFullYear();
+    const selY   = withTime ? _pendY : (_parseISO(_value)?.y ?? null);
+
+    for (let y = start; y <= end; y++) {
+      const cell = document.createElement('div');
+      cell.className = 'dp-cell'
+        + (y === todayY ? ' dp-cell--today' : '')
+        + (y === selY   ? ' dp-cell--sel'   : '');
+      cell.textContent = y;
+      cell.addEventListener('mousedown', e => {
+        e.preventDefault();
+        _viewY   = y;
+        _calMode = 'months';
+        _renderCal();
+      });
+      grid.appendChild(cell);
+    }
+    calEl.appendChild(grid);
+  };
+
+  // ── Months grid — drill-down level 1 ──────────────────────────────────────
+  const _renderMonthsView = () => {
+    calEl.appendChild(_buildHeader(String(_viewY),
+      () => { _viewY--; _renderCal(); },
+      () => { _viewY++; _renderCal(); },
+      () => { _calMode = 'years'; _renderCal(); }));
+
+    const grid  = document.createElement('div');
+    grid.className = 'dp-grid dp-grid--4col';
+    const today = new Date();
+    const selParsed = withTime
+      ? (_pendY !== null ? { y: _pendY, m: _pendM } : null)
+      : _parseISO(_value);
+
+    MONTH_ABBR.forEach((label, m) => {
+      const cell    = document.createElement('div');
+      const isToday = _viewY === today.getFullYear() && m === today.getMonth();
+      const isSel   = selParsed && _viewY === selParsed.y && m === selParsed.m;
+      cell.className = 'dp-cell'
+        + (isToday ? ' dp-cell--today' : '')
+        + (isSel   ? ' dp-cell--sel'   : '');
+      cell.textContent = label;
+      cell.addEventListener('mousedown', e => {
+        e.preventDefault();
+        _viewM   = m;
+        _calMode = 'days';
+        _renderCal();
+      });
+      grid.appendChild(cell);
+    });
+    calEl.appendChild(grid);
+  };
+
+  // ── Day grid — default view ───────────────────────────────────────────────
+  const _renderDaysView = () => {
     const y = _viewY, m = _viewM;
     const today  = new Date();
     const todayY = today.getFullYear();
@@ -130,36 +233,10 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
       ? (_pendY !== null ? { y: _pendY, m: _pendM, d: _pendD } : null)
       : _parseISO(_value);
 
-    // ── Header ────────────────────────────────────────────────────────────────
-    const hdr = document.createElement('div');
-    hdr.className = 'dp-hdr';
-
-    const prevBtn = document.createElement('button');
-    prevBtn.type = 'button';
-    prevBtn.className = 'dp-nav-btn';
-    prevBtn.textContent = '\u2039';
-    prevBtn.addEventListener('mousedown', e => {
-      e.preventDefault();
-      if (_viewM === 0) { _viewM = 11; _viewY--; } else { _viewM--; }
-      _renderCal();
-    });
-
-    const monthLbl = document.createElement('span');
-    monthLbl.className = 'dp-month-lbl';
-    monthLbl.textContent = `${MONTH_NAMES[m]} ${y}`;
-
-    const nextBtn = document.createElement('button');
-    nextBtn.type = 'button';
-    nextBtn.className = 'dp-nav-btn';
-    nextBtn.textContent = '\u203a';
-    nextBtn.addEventListener('mousedown', e => {
-      e.preventDefault();
-      if (_viewM === 11) { _viewM = 0; _viewY++; } else { _viewM++; }
-      _renderCal();
-    });
-
-    hdr.append(prevBtn, monthLbl, nextBtn);
-    calEl.appendChild(hdr);
+    calEl.appendChild(_buildHeader(`${MONTH_NAMES[m]} ${y}`,
+      () => { if (_viewM === 0) { _viewM = 11; _viewY--; } else { _viewM--; } _renderCal(); },
+      () => { if (_viewM === 11) { _viewM = 0; _viewY++; } else { _viewM++; } _renderCal(); },
+      () => { _calMode = 'months'; _renderCal(); }));
 
     // ── Day names row ─────────────────────────────────────────────────────────
     const dayNamesRow = document.createElement('div');
@@ -310,6 +387,13 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
     }
 
     calEl.appendChild(footer);
+  };
+
+  const _renderCal = () => {
+    calEl.innerHTML = '';
+    if (_calMode === 'years')       _renderYearsView();
+    else if (_calMode === 'months') _renderMonthsView();
+    else                            _renderDaysView();
     setTimeout(_position, 0);
   };
 
