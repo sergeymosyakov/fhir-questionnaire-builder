@@ -276,8 +276,8 @@
   border-color: #b39ddb;
 }
 .preview-meta-badge--repeats {
-  color: #1565c0;
-  background: #e3f2fd;
+  color: var(--c-primary);
+  background: var(--c-primary-lt);
   border-color: #90caf9;
 }
 .preview-meta-badge--sig {
@@ -340,14 +340,14 @@
   border: 1px dashed #90caf9;
   border-radius: 4px;
   background: #f0f7ff;
-  color: #1565c0;
+  color: var(--c-primary);
   cursor: pointer;
   font-size: inherit;
   font-weight: 500;
   margin-top: 8px;
 }
 .repeat-add-btn:hover {
-  background: #e3f2fd;
+  background: var(--c-primary-lt);
   border-color: #42a5f5;
 }
 

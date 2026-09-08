@@ -42,7 +42,7 @@
   cursor: pointer;
   transition: color .15s, background .15s;
 }
-.node-gear-btn:hover { color: var(--c-primary); background: #eef2f7; }
+.node-gear-btn:hover { color: var(--c-primary); background: var(--c-bg); }
 .node-gear-menu {
   position: absolute;
   top: calc(100% + 4px);
