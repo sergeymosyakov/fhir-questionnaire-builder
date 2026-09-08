@@ -3,6 +3,7 @@
 //
 // open(focusGroupId, onSelect, typeFilter) — render tree, expand the given group, show modal
 // onSelect(item) called with { label, file, type } when user clicks an entry.
+// typeFilter — a single type string, or an array of types to allow through.
 import { Modal } from './modal-base.js';
 
 const LIBRARY_URL = 'sampledata/library.json';
@@ -11,6 +12,7 @@ const TYPE_ICONS = {
   'questionnaire': '\u2605',  // ★
   'qr':            '\uD83D\uDCCB', // 📋
   'redcap':        '\uD83D\uDCCA', // 📊
+  'sd':            '\uD83D\uDCD0', // 📐
 };
 
 class LibraryModal extends Modal {
@@ -29,7 +31,7 @@ class LibraryModal extends Modal {
     const render = data => {
       const groups = typeFilter
         ? data
-            .map(g => ({ ...g, items: g.items.filter(i => i.type === typeFilter) }))
+            .map(g => ({ ...g, items: g.items.filter(i => Array.isArray(typeFilter) ? typeFilter.includes(i.type) : i.type === typeFilter) }))
             .filter(g => g.items.length > 0)
         : data;
       this._render(groups, focusGroupId);

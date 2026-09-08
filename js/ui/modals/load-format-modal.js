@@ -14,7 +14,7 @@ import * as progress from '../progress.js';
 import { showError } from '../toast.js';
 import * as validateModal from './validate-modal.js';
 import { parseCSV, validateCSV, toFHIR } from '../../fhir/converters/redcap/index.js';
-import { generateQuestionnaireFromSD } from '../../fhir/sd-to-questionnaire.js';
+import { applyStructureDefinition } from '../../fhir/sd-import.js';
 
 const LS_KEY = 'fhirqb-load-format';
 
@@ -161,17 +161,8 @@ class LoadFormatModal extends Modal {
     try {
       const { data } = await readFileAsJSON(e);
       progress.hide();
-      if (data?.resourceType !== 'StructureDefinition') {
-        showError('The selected file is not a FHIR StructureDefinition.');
-        return;
-      }
-      const { questionnaire, warnings } = generateQuestionnaireFromSD(data, { title: fileName.replace(/\.json$/i, '') });
-      if (warnings.length > 0) {
-        validateModal.show('StructureDefinition Generation \u2014 Warnings', 'import', {
-          extraIssues: warnings.map(message => ({ severity: 'warning', nodeId: '', message })),
-        });
-      }
-      this._onLoaded?.(questionnaire, fileName);
+      const questionnaire = applyStructureDefinition(data, fileName.replace(/\.json$/i, ''));
+      if (questionnaire) this._onLoaded?.(questionnaire, fileName);
     } catch (err) {
       progress.hide();
       if (err) showError('StructureDefinition generation failed: ' + err.message);

@@ -3,11 +3,13 @@
 // snapshot in one step (issue #94) — a starting skeleton, not a finished form.
 // Reuses definition-resolver.js's single-element resolution for every leaf, so
 // item.definition round-trips back to "Resolve from profile" for manual re-sync.
+// itemTypeToFHIRType converts the resolver's internal itemType to a valid FHIR
+// Questionnaire.item.type — the resolver's value alone is NOT wire-format-safe.
 //
-// Known v1 limitations (see issue #94), both reported via `warnings`:
-//   - Profile slicing collapses to the base (unsliced) element.
-//   - Multi-type elements (e.g. value[x]) map from type[0] only.
-import { resolveDefinition } from './definition-resolver.js';
+// Slices generate their own item (never collapsed); multi-type (value[x])
+// elements explode into one item per type, named after FHIR's own convention.
+import { resolveDefinition, fhirDatatypeToItemType } from './definition-resolver.js';
+import { itemTypeToFHIRType } from './export.js';
 
 /**
  * @param {object} sd            StructureDefinition (must have snapshot.element[])
@@ -29,22 +31,12 @@ export function generateQuestionnaireFromSD(sd, opts = {}) {
   const canonical = sd.url || '';
 
   // Drop the root element itself and profile-excluded (max:'0') elements.
+  // Slices (':sliceName' id suffix) are kept as their own item — each slice
+  // constrains the base element differently and deserves its own question.
   const usable = elements.filter(el => el.id && el.id !== rootId && el.max !== '0');
 
-  // Slices show up as an extra ':sliceName' path segment (e.g.
-  // 'Patient.identifier:mrn') — collapse to the unsliced base, first wins.
-  const seen    = new Set();
-  const deduped = [];
-  for (const el of usable) {
-    const baseId = el.id.replace(/:[^.]+/g, '');
-    if (baseId !== el.id) warnings.push(`Slice "${el.id}" collapsed to base element "${baseId}"`);
-    if (seen.has(baseId)) continue;
-    seen.add(baseId);
-    deduped.push({ ...el, id: baseId });
-  }
-
-  // A base id is a group iff some other base id is a strict dot-descendant of it.
-  const idSet = new Set(deduped.map(el => el.id));
+  // A base id is a group iff some other id is a strict dot-descendant of it.
+  const idSet = new Set(usable.map(el => el.id));
   const isGroup = id => {
     const prefix = id + '.';
     for (const other of idSet) if (other !== id && other.startsWith(prefix)) return true;
@@ -53,8 +45,24 @@ export function generateQuestionnaireFromSD(sd, opts = {}) {
 
   const parentIdOf = id => id.includes('.') ? id.slice(0, id.lastIndexOf('.')) : rootId;
 
+  // value[x]-style multi-type elements explode into one item per type, named
+  // after FHIR's own convention (deceased[x] + boolean -> deceasedBoolean).
+  // All variants are optional — Questionnaire has no "exactly one of N" construct.
+  const explodeMultiType = (el, resolved) => {
+    warnings.push(`Element "${el.id}" has ${el.type.length} possible types — generated as ${el.type.length} separate optional questions (only one should be filled in)`);
+    const base = el.id.replace(/\[x]$/i, '');
+    return el.type.map(({ code }) => ({
+      linkId: `${base}${code.charAt(0).toUpperCase()}${code.slice(1)}`,
+      type: itemTypeToFHIRType(fhirDatatypeToItemType(code)),
+      text: `${resolved.text || el.id} (${code})`,
+      repeats: resolved.repeats || undefined,
+      definition: `${canonical}#${el.id}`,
+      _parentId: parentIdOf(el.id),
+    }));
+  };
+
   const nodesById = new Map();
-  for (const el of deduped) {
+  for (const el of usable) {
     if (isGroup(el.id)) {
       nodesById.set(el.id, {
         linkId: el.id, type: 'group', text: el.short || el.label || el.id, item: [],
@@ -64,12 +72,15 @@ export function generateQuestionnaireFromSD(sd, opts = {}) {
     }
     const resolved = resolveDefinition(sd, `${canonical}#${el.id}`);
     if (!resolved) { warnings.push(`Could not resolve element "${el.id}", skipped`); continue; }
+
     if ((el.type?.length || 0) > 1) {
-      warnings.push(`Element "${el.id}" has ${el.type.length} possible types — used "${el.type[0].code}" only`);
+      for (const variant of explodeMultiType(el, resolved)) nodesById.set(variant.linkId, variant);
+      continue;
     }
+
     nodesById.set(el.id, {
       linkId: el.id,
-      type: resolved.itemType,
+      type: itemTypeToFHIRType(resolved.itemType),
       text: resolved.text || el.id,
       required: resolved.mandatory || undefined,
       repeats: resolved.repeats || undefined,
