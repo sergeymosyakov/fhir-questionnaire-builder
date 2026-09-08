@@ -240,5 +240,17 @@
         "note": "Same instrument converted to FHIR R4 — demonstrates REDCap → FHIR mapping with round-trip extensions."
       }
     ]
+  },
+  {
+    "id": "structuredefinition",
+    "label": "StructureDefinition Examples",
+    "items": [
+      {
+        "label": "Demo Patient Profile (generate draft)",
+        "file": "sd-demo-patient.json",
+        "type": "sd",
+        "note": "FHIR StructureDefinition, not a Questionnaire — generates a draft: BackboneElement group, profile slicing, multi-type (value[x]) explosion, max:\"0\" exclusion."
+      }
+    ]
   }
 ]

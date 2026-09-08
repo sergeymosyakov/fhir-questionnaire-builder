@@ -45,14 +45,20 @@ describe('generateQuestionnaireFromSD', () => {
     expect(generateQuestionnaireFromSD(bare).questionnaire.title).toBe('Patient');
   });
 
-  it('maps a leaf element to a top-level item with type, text, definition', () => {
+  it('maps a leaf element to a top-level item with a valid FHIR item.type, text, definition', () => {
     const sd = makeSD([el('Patient.active', { short: 'Active flag', type: [{ code: 'boolean' }] })]);
     const { questionnaire } = generateQuestionnaireFromSD(sd);
     const item = questionnaire.item[0];
     expect(item.linkId).toBe('Patient.active');
-    expect(item.type).toBe('checkbox');
+    expect(item.type).toBe('boolean');
     expect(item.text).toBe('Active flag');
     expect(item.definition).toBe('http://example.org/StructureDefinition/DemoPatient#Patient.active');
+  });
+
+  it('maps a coded element to FHIR item.type "choice", not the internal alias', () => {
+    const sd = makeSD([el('Patient.gender', { short: 'Gender', type: [{ code: 'code' }] })]);
+    const { questionnaire } = generateQuestionnaireFromSD(sd);
+    expect(questionnaire.item[0].type).toBe('choice');
   });
 
   it('turns a BackboneElement with children into a nested group item', () => {
@@ -85,23 +91,28 @@ describe('generateQuestionnaireFromSD', () => {
     expect(questionnaire.item[0].linkId).toBe('Patient.active');
   });
 
-  it('collapses a sliced element to its base and reports a warning', () => {
+  it('generates a separate item for each slice, alongside the base element', () => {
     const sd = makeSD([
       el('Patient.identifier', { type: [{ code: 'Identifier' }] }),
       el('Patient.identifier:mrn', { short: 'MRN', type: [{ code: 'Identifier' }] }),
     ]);
     const { questionnaire, warnings } = generateQuestionnaireFromSD(sd);
-    expect(questionnaire.item).toHaveLength(1);
+    expect(questionnaire.item).toHaveLength(2);
     expect(questionnaire.item[0].linkId).toBe('Patient.identifier');
-    expect(warnings.some(w => w.includes('Patient.identifier:mrn'))).toBe(true);
+    expect(questionnaire.item[1].linkId).toBe('Patient.identifier:mrn');
+    expect(questionnaire.item[1].text).toBe('MRN');
+    expect(warnings).toHaveLength(0);
   });
 
-  it('uses only the first type of a multi-type element and reports a warning', () => {
+  it('explodes a multi-type element into one item per type, FHIR-named', () => {
     const sd = makeSD([
-      el('Patient.multipleBirth[x]', { type: [{ code: 'boolean' }, { code: 'integer' }] }),
+      el('Patient.multipleBirth[x]', { short: 'Multiple birth', type: [{ code: 'boolean' }, { code: 'integer' }] }),
     ]);
     const { questionnaire, warnings } = generateQuestionnaireFromSD(sd);
-    expect(questionnaire.item[0].type).toBe('checkbox');
+    expect(questionnaire.item).toHaveLength(2);
+    expect(questionnaire.item[0]).toMatchObject({ linkId: 'Patient.multipleBirthBoolean', type: 'boolean', text: 'Multiple birth (boolean)' });
+    expect(questionnaire.item[1]).toMatchObject({ linkId: 'Patient.multipleBirthInteger', type: 'integer', text: 'Multiple birth (integer)' });
+    expect(questionnaire.item[0].required).toBeUndefined();
     expect(warnings.some(w => w.includes('Patient.multipleBirth[x]'))).toBe(true);
   });
 });

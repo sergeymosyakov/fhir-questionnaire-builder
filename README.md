@@ -110,6 +110,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 | `slider-disabled-demo.fhir.json` | ~12 | Sliders, `disabledDisplay` (hidden/protected), ordinalValue radios. |
 | `patient-scenario-*.fhir.json` | — | Load + select preset + Re-init to test `initialExpression` / `enableWhenExpression` pipelines. |
 | `redcap-clinical-demo.fhir.json` | 30 | Converted from REDCap Data Dictionary. Includes branching logic, calc expressions (BMI via FHIRPath), slider, radio, checkbox fields. |
+| `sd-demo-patient.json` | — | A FHIR **StructureDefinition** (not a Questionnaire) — pick "Generate draft from StructureDefinition" in the format picker, or load it via Library, to see BackboneElement groups, profile slicing, and multi-type (`value[x]`) explosion. |
 | `r4b-demo.fhir.json` | ~10 | FHIR R4B — `answerConstraint`, native `disabledDisplay`; auto-detected as R4B on import. |
 | `r5-demo.fhir.json` | ~10 | FHIR R5 — `answerConstraint`, native `disabledDisplay`; exported with `meta.fhirVersion: 5.0.0`. |
 

@@ -5,6 +5,7 @@ import * as progress from '../progress.js';
 import { AppEvents } from '../../events.js';
 import { showError } from '../toast.js';
 import { loadFormatModal } from '../modals/load-format-modal.js';
+import { applyStructureDefinition } from '../../fhir/sd-import.js';
 
 export class QuestionnairesMenu extends DropdownMenu {
   constructor() {
@@ -112,12 +113,21 @@ export class QuestionnairesMenu extends DropdownMenu {
           .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
           .then(data => {
             progress.update(0, 1);
+            if (item.type === 'sd') {
+              const questionnaire = applyStructureDefinition(data, item.label);
+              if (questionnaire) {
+                document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOAD_REQUESTED, {
+                  detail: { data: questionnaire, fileName: item.label },
+                }));
+              }
+              return;
+            }
             document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOAD_REQUESTED, {
               detail: { data, fileName: item.label },
             }));
           })
           .catch(err => { progress.hide(); showError('Could not load sample: ' + err.message); });
-      }, 'questionnaire');
+      }, ['questionnaire', 'sd']);
     });
   }
 

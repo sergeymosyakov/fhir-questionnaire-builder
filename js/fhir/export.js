@@ -48,7 +48,7 @@ export function generateNarrativeDiv(q) {
   return parts.join('');
 }
 
-function itemTypeToFHIRType(t) {
+export function itemTypeToFHIRType(t) {
   if (t === 'checkbox')    return 'boolean';
   if (t === 'integer')       return 'integer';
   if (t === 'decimal')        return 'decimal';

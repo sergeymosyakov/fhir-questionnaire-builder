@@ -7,6 +7,7 @@
 // ── data-testid registry ─────────────────────────────────────────────────────
 //   load-fhir-btn                     "Questionnaires ▾" dropdown trigger
 //   load-from-file-item               "From file…" menu item
+//   load-library-item                 "From Library…" menu item
 //   loadFormatModal                   format picker modal backdrop
 //   loadFormatModalApply              "Choose file…" button
 //   load-format-select                custom select trigger inside load modal
@@ -59,7 +60,49 @@ test.describe('StructureDefinition → generate draft Questionnaire', () => {
     await expect(page.locator('[data-node-id="Patient.maritalStatus"]')).toHaveCount(0);
   });
 
-  test('shows a warnings modal for a collapsed slice and a multi-type element', async ({ page }) => {
+  test('generates a separate item for a slice, alongside the base element', async ({ page }) => {
+    await freshStart(page);
+    await loadStructureDefinition(page, FIXTURE);
+    await expect(page.locator('[data-node-id="Patient.identifier"]')).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('[data-node-id="Patient.identifier:mrn"]')).toBeVisible();
+  });
+
+  test('explodes a multi-type element into one item per type', async ({ page }) => {
+    await freshStart(page);
+    await loadStructureDefinition(page, FIXTURE);
+    await expect(page.locator('[data-node-id="Patient.deceasedBoolean"]')).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('[data-node-id="Patient.deceasedDateTime"]')).toBeVisible();
+  });
+
+  test('renders a boolean leaf as a Yes/No control, not a text box', async ({ page }) => {
+    await freshStart(page);
+    await loadStructureDefinition(page, FIXTURE);
+    const row = page.locator('[data-preview-id="Patient.active"]');
+    await expect(row).toBeVisible({ timeout: 15_000 });
+    await expect(row.locator('.bool-seg')).toBeVisible();
+    await expect(row.locator('textarea')).toHaveCount(0);
+  });
+
+  test('renders a coded leaf as a select control, not a text box', async ({ page }) => {
+    await freshStart(page);
+    await loadStructureDefinition(page, FIXTURE);
+    const row = page.locator('[data-preview-id="Patient.gender"]');
+    await expect(row).toBeVisible({ timeout: 15_000 });
+    await expect(row.locator('.sc-trigger')).toBeVisible();
+    await expect(row.locator('textarea')).toHaveCount(0);
+  });
+
+  test('renders each exploded multi-type variant with its own correct control', async ({ page }) => {
+    await freshStart(page);
+    await loadStructureDefinition(page, FIXTURE);
+    const boolRow = page.locator('[data-preview-id="Patient.deceasedBoolean"]');
+    const dateRow = page.locator('[data-preview-id="Patient.deceasedDateTime"]');
+    await expect(boolRow).toBeVisible({ timeout: 15_000 });
+    await expect(boolRow.locator('.bool-seg')).toBeVisible();
+    await expect(dateRow.locator('.ctrl-input--date')).toBeVisible();
+  });
+
+  test('shows an informational warnings modal for the multi-type explosion', async ({ page }) => {
     await freshStart(page);
     await loadStructureDefinition(page, FIXTURE);
 
@@ -67,12 +110,25 @@ test.describe('StructureDefinition → generate draft Questionnaire', () => {
     await expect(modal).toBeVisible({ timeout: 10_000 });
     await expect(page.getByTestId('validateModalTitle')).toContainText('StructureDefinition Generation');
     const body = page.getByTestId('validateModalBody');
-    await expect(body).toContainText('Patient.identifier:mrn');
     await expect(body).toContainText('Patient.deceased[x]');
+    await expect(body).toContainText('separate optional questions');
+    await expect(body).not.toContainText('collapsed');
     await page.getByTestId('validateModalClose').click();
     await expect(modal).not.toBeVisible();
+  });
 
-    // The collapsed slice still produced its base (unsliced) item, once.
-    await expect(page.locator('[data-node-id="Patient.identifier"]')).toHaveCount(1);
+  test('loads the sample StructureDefinition from the Library and generates a draft', async ({ page }) => {
+    await freshStart(page);
+    await openDropdownItem(page, 'load-fhir-btn', 'load-library-item');
+    await page.getByTestId('lib-group-hdr-structuredefinition').click();
+    await page.locator('[data-sample="sd-demo-patient.json"]').waitFor({ timeout: 10_000 });
+    await page.click('[data-sample="sd-demo-patient.json"]');
+
+    const modal = page.getByTestId('validateModal');
+    await expect(modal).toBeVisible({ timeout: 15_000 });
+    await page.getByTestId('validateModalClose').click();
+
+    await expect(page.locator('[data-node-id="Patient.active"]')).toBeVisible();
+    await expect(page.locator('[data-node-id="Patient.identifier:mrn"]')).toBeVisible();
   });
 });
