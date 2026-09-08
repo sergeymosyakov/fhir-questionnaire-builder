@@ -4,7 +4,8 @@
 //
 // data-testid: loadFormatModal, loadFormatModalTitle, loadFormatModalClose,
 //              loadFormatModalBody, loadFormatModalCancel, loadFormatModalApply,
-//              load-format-select, fhir-file-input, redcap-csv-input
+//              load-format-select, fhir-file-input, redcap-csv-input,
+//              structuredefinition-file-input
 
 import { Modal } from './modal-base.js';
 import { createCustomSelect } from '../custom-select.js';
@@ -13,12 +14,14 @@ import * as progress from '../progress.js';
 import { showError } from '../toast.js';
 import * as validateModal from './validate-modal.js';
 import { parseCSV, validateCSV, toFHIR } from '../../fhir/converters/redcap/index.js';
+import { generateQuestionnaireFromSD } from '../../fhir/sd-to-questionnaire.js';
 
 const LS_KEY = 'fhirqb-load-format';
 
 const FORMATS = [
   { val: 'fhir',   label: 'FHIR R4 JSON (.json)' },
   { val: 'redcap', label: 'REDCap CSV — Data Dictionary (.csv)' },
+  { val: 'sd',     label: 'FHIR StructureDefinition (.json) — generate draft' },
 ];
 
 function _savedFormat() {
@@ -64,8 +67,9 @@ class LoadFormatModal extends Modal {
     // ── Hidden file inputs ────────────────────────────────────────────────────
     this._jsonInput = this._makeInput('.json,application/json', 'fhir-file-input', this._onJson.bind(this));
     this._csvInput  = this._makeInput('.csv,text/csv',          'redcap-csv-input',  this._onCsv.bind(this));
+    this._sdInput   = this._makeInput('.json,application/json', 'structuredefinition-file-input', this._onStructureDefinition.bind(this));
 
-    document.body.append(this._jsonInput, this._csvInput);
+    document.body.append(this._jsonInput, this._csvInput, this._sdInput);
   }
 
   _makeInput(accept, testid, handler) {
@@ -91,6 +95,9 @@ class LoadFormatModal extends Modal {
     if (this._format === 'redcap') {
       this._csvInput.value = '';
       this._csvInput.click();
+    } else if (this._format === 'sd') {
+      this._sdInput.value = '';
+      this._sdInput.click();
     } else {
       this._jsonInput.value = '';
       this._jsonInput.click();
@@ -143,6 +150,31 @@ class LoadFormatModal extends Modal {
     } catch (err) {
       progress.hide();
       showError('REDCap import failed: ' + err.message);
+    }
+  }
+
+  async _onStructureDefinition(e) {
+    const fileName = e.target.files[0]?.name;
+    if (!fileName) return;
+    this.close();
+    progress.show('Generating from ' + fileName + '\u2026');
+    try {
+      const { data } = await readFileAsJSON(e);
+      progress.hide();
+      if (data?.resourceType !== 'StructureDefinition') {
+        showError('The selected file is not a FHIR StructureDefinition.');
+        return;
+      }
+      const { questionnaire, warnings } = generateQuestionnaireFromSD(data, { title: fileName.replace(/\.json$/i, '') });
+      if (warnings.length > 0) {
+        validateModal.show('StructureDefinition Generation \u2014 Warnings', 'import', {
+          extraIssues: warnings.map(message => ({ severity: 'warning', nodeId: '', message })),
+        });
+      }
+      this._onLoaded?.(questionnaire, fileName);
+    } catch (err) {
+      progress.hide();
+      if (err) showError('StructureDefinition generation failed: ' + err.message);
     }
   }
 }

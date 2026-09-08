@@ -2,7 +2,7 @@
 
 A prototype **visual logic builder** for medical prior authorization questionnaires based on [FHIR R4 / R4B / R5 Questionnaire](https://hl7.org/fhir/R4/questionnaire.html).
 
-Lets you build questionnaire logic visually, test it against patient data, and import/export FHIR R4/R4B/R5 JSON or REDCap CSV. The target version is set from a dropdown in the builder toolbar; version is auto-detected on import from `meta.fhirVersion`.
+Lets you build questionnaire logic visually, test it against patient data, and import/export FHIR R4/R4B/R5 JSON or REDCap CSV, or generate a draft questionnaire from a FHIR StructureDefinition/profile. The target version is set from a dropdown in the builder toolbar; version is auto-detected on import from `meta.fhirVersion`.
 
 The right-side **preview panel is a live SDC-compliant runtime**: it executes FHIRPath expressions, resolves `enableWhen` / `enableWhenExpression`, evaluates `calculatedExpression` and `initialExpression` chains against an injected Patient resource, and produces a valid `QuestionnaireResponse`. Import an existing QR to resume a partially-filled session. The builder and the runtime are always in sync — edits to item logic are immediately reflected in the live form.
 
