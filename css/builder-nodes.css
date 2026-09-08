@@ -283,7 +283,7 @@ body.dragging .drop-zone-root { color: #bbb; border-color: #ddd; pointer-events:
   transition: color .15s, background .15s;
 }
 .node-inline-type-config svg { display: block; }
-.node-inline-type-config:hover { color: var(--c-primary); background: #eef2f7; }
+.node-inline-type-config:hover { color: var(--c-primary); background: var(--c-bg); }
 .node-inline-type-config--active { color: var(--c-primary); background: var(--c-primary-lt); }
 .node-inline-type-config--active:hover { color: var(--c-primary); filter: brightness(0.9); }
 .node-inline-type-config--attn { color: var(--c-amber); background: var(--c-amber-lt); }

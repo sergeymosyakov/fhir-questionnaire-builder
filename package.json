@@ -1,6 +1,7 @@
 {
   "name": "fhir-questionnaire-builder",
   "private": true,
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "scripts": {
     "test": "vitest run",

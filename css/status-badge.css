@@ -129,7 +129,7 @@
   font-weight: 700;
   letter-spacing: .5px;
   text-transform: uppercase;
-  color: #637083;
+  color: var(--c-text-2);
   border-bottom: 1px solid #2e3f55;
   margin-bottom: 3px;
 }

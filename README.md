@@ -79,7 +79,7 @@ https://fhirbuilder.com/
 
 ### Tests
 ```powershell
-npm test             # unit tests — single run (Vitest, 1178 tests)
+npm test             # unit tests — single run (Vitest, 1899 tests)
 npm run test:watch   # unit tests — watch mode
 npm run test:e2e     # e2e tests — Playwright/Chromium
 npm run test:e2e:ui  # e2e tests — Playwright UI mode
@@ -126,7 +126,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **fhir-structuremap-js** — `lib/fhir-structuremap-js.esm.js`; executes FHIR StructureMap transforms for SDC populate/extract (author's own library)
 - **cql-execution / cql-exec-fhir** — `lib/cql-execution.esm.js`, `lib/cql-exec-fhir.esm.js`; CQL/ELM execution engine + FHIR data source, powers `initialExpression` CQL evaluation
 - **Supabase** — `lib/supabase.min.js`; auth + optional cloud sync backend
-- **Vitest** — 1197 unit tests across 26 files; CI via GitHub Actions (`npm test`)
+- **Vitest** — 1899 unit tests across 57 files; CI via GitHub Actions (`npm test`)
 - **Playwright** — e2e tests (Chromium); CI + HTML report on GitHub Pages
 
 ---
@@ -148,6 +148,8 @@ Sample files sourced from HL7 Implementation Guides are published under Creative
 ### Vendored JavaScript libraries
 
 `lib/cql-execution.esm.js` and `lib/cql-exec-fhir.esm.js` are built from [cql-execution](https://www.npmjs.com/package/cql-execution) and [cql-exec-fhir](https://www.npmjs.com/package/cql-exec-fhir), both licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+`lib/supabase.min.js` is built from [@supabase/supabase-js](https://www.npmjs.com/package/@supabase/supabase-js), licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ### WHO SMART Guidelines performance-test fixture
 
