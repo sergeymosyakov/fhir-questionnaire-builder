@@ -331,6 +331,9 @@ export class PreviewForm {
       this._lastCtx.fp = fhirpath; this._lastCtx.qr = qr; this._lastCtx.env = env;
       this._bus.dispatch(AppEvents.FHIRPATH_CTX_UPDATED, { fp: fhirpath, qr, env });
       this._bus.dispatch(AppEvents.REFRESH_EXPR_ICONS);
+      // Keeps calc badges/controls current even on the fast render path below,
+      // which skips rebuilding controls when the visible node set is unchanged.
+      this._bus.dispatch(AppEvents.REFRESH_CALC_BADGES);
       const ctx = { fp: fhirpath, qr, envVars };
       // Stash so the next _asyncRender (triggered by RESPONSE_CHANGED) can reuse
       // this result instead of running evalCalcNodes a second time.
@@ -355,10 +358,9 @@ export class PreviewForm {
       }
     };
     const onChange = () => { updateOwnIcon(); if (onAfterChange) onAfterChange(); };
-    const reCalcAndRefresh = () => {
-      this._reCalc();
-      this._bus.dispatch(AppEvents.REFRESH_CALC_BADGES);
-    };
+    // _reCalc() itself now dispatches REFRESH_CALC_BADGES — this alias just
+    // documents the intent at call sites (see ctx._reCalc usages).
+    const reCalcAndRefresh = () => this._reCalc();
     const ctx = {
       getValue: id => this._answerStore.get(id, path),
       setValue: (id, v) => this._bus.dispatch(AppEvents.ANSWER_SET, { id, value: v, path }),

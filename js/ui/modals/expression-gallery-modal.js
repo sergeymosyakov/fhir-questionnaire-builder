@@ -1,0 +1,158 @@
+// ── Expression Gallery modal ──────────────────────────────────────────────────
+// Browse named FHIRPath calculation templates (issue #122), fill each slot by
+// picking a questionnaire item (+ optional unit/rounding transform), and hand
+// the resolved FHIRPath string back to the opening Expression Builder — which
+// treats it exactly like any other raw text (its own "Switch to visual" still
+// applies if the result happens to parse).
+import { Modal } from './modal-base.js';
+import { createCustomSelect } from '../custom-select.js';
+import { itemRef } from '../../fhir/expr-builder/model.js';
+import { emit } from '../../fhir/expr-builder/emit.js';
+import { valueAccessor } from '../../fhir/expr-builder/value-paths.js';
+import { flattenItems } from '../../fhir/expr-builder/flatten-items.js';
+import { EXPR_GALLERY, resolveGalleryPattern } from '../../fhir/expr-builder/gallery.js';
+
+function itemRefExpr(item) {
+  return emit(itemRef(item.segments, valueAccessor(item.itemType), item.answerAt));
+}
+
+class ExpressionGalleryModal extends Modal {
+  getName() { return 'expressionGalleryModal'; }
+
+  constructor() {
+    super({ applyLabel: 'Insert', cancelLabel: 'Cancel', maxWidth: '560px', bodyClass: 'eg-body' });
+  }
+
+  open({ tree, onInsert } = {}) {
+    this._onInsert = onInsert;
+    this._allItems = flattenItems(tree || []);
+    this._pattern = null;
+    this._selections = {};
+    this.setTitle('Choose from gallery');
+    this._render();
+    super.open();
+  }
+
+  _render() {
+    this.body.innerHTML = '';
+    if (!this._pattern) this._renderList();
+    else this._renderSlots();
+  }
+
+  _renderList() {
+    const list = document.createElement('div');
+    list.className = 'eg-list';
+    list.dataset.testid = 'eg-list';
+    for (const pattern of EXPR_GALLERY) {
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'eg-row';
+      row.dataset.testid = 'eg-row-' + pattern.id;
+      const name = document.createElement('div');
+      name.className = 'eg-row-name';
+      name.textContent = pattern.name;
+      const desc = document.createElement('div');
+      desc.className = 'eg-row-desc';
+      desc.textContent = pattern.description;
+      row.append(name, desc);
+      row.addEventListener('click', () => { this._pattern = pattern; this._selections = {}; this._render(); });
+      list.appendChild(row);
+    }
+    this.body.appendChild(list);
+  }
+
+  _renderSlots() {
+    const back = document.createElement('button');
+    back.type = 'button';
+    back.className = 'eg-back';
+    back.textContent = '\u2190 Back to gallery';
+    back.dataset.testid = 'eg-back';
+    back.addEventListener('click', () => { this._pattern = null; this._render(); });
+    this.body.appendChild(back);
+
+    const desc = document.createElement('div');
+    desc.className = 'eg-note';
+    desc.textContent = this._pattern.description;
+    this.body.appendChild(desc);
+
+    const eligible = this._allItems.filter((it) => this._pattern.itemTypes.includes(it.itemType));
+    const slotsWrap = document.createElement('div');
+    slotsWrap.className = 'eg-slots';
+    for (const slot of this._pattern.slots) {
+      slotsWrap.appendChild(this._renderSlot(slot, eligible));
+    }
+    this.body.appendChild(slotsWrap);
+
+    this._preview = document.createElement('code');
+    this._preview.className = 'eg-preview';
+    this._preview.dataset.testid = 'eg-preview';
+    this.body.appendChild(this._preview);
+    this._refreshPreview();
+  }
+
+  _renderSlot(slot, eligible) {
+    const row = document.createElement('div');
+    row.className = 'eg-slot-row';
+    row.dataset.testid = 'eg-slot-' + slot.key;
+
+    const lbl = document.createElement('span');
+    lbl.className = 'eg-slot-label';
+    lbl.textContent = slot.label;
+    row.appendChild(lbl);
+
+    const itemSel = createCustomSelect({
+      items: eligible.map((it) => ({ value: it.id, label: it.label })),
+      value: this._selections[slot.key]?.itemId || '',
+      className: 'sc-trigger--sm eg-slot-item',
+      testid: 'eg-slot-item-' + slot.key,
+      searchable: true,
+      onChange: (v) => {
+        const item = eligible.find((it) => it.id === v);
+        this._selections[slot.key] = { ...this._selections[slot.key], itemId: v, ref: item ? itemRefExpr(item) : null };
+        this._refreshPreview();
+      },
+    });
+    row.appendChild(itemSel.el);
+
+    if (slot.transforms.length) {
+      const transformSel = createCustomSelect({
+        items: slot.transforms.map((t) => ({ value: t.id, label: t.label })),
+        value: this._selections[slot.key]?.transformId || slot.transforms[0].id,
+        className: 'sc-trigger--sm eg-slot-transform',
+        testid: 'eg-slot-transform-' + slot.key,
+        onChange: (v) => {
+          this._selections[slot.key] = { ...this._selections[slot.key], transformId: v };
+          this._refreshPreview();
+        },
+      });
+      row.appendChild(transformSel.el);
+      this._selections[slot.key] = { ...this._selections[slot.key], transformId: slot.transforms[0].id };
+    }
+    return row;
+  }
+
+  _refreshPreview() {
+    if (!this._preview) return;
+    const expr = resolveGalleryPattern(this._pattern, this._selections);
+    this._preview.textContent = expr || 'Pick an item for every slot\u2026';
+  }
+
+  _apply() {
+    const expr = this._pattern && resolveGalleryPattern(this._pattern, this._selections);
+    if (!expr) return; // incomplete — stay open, preview already says what's missing
+    if (typeof this._onInsert === 'function') this._onInsert(expr);
+    this._reset();
+    this.close();
+  }
+
+  _cancel() { this._reset(); this.close(); }
+
+  _reset() {
+    this._onInsert = null;
+    this._pattern = null;
+    this._selections = {};
+    this.body.innerHTML = '';
+  }
+}
+
+export const expressionGalleryModal = typeof document !== 'undefined' ? new ExpressionGalleryModal() : null;

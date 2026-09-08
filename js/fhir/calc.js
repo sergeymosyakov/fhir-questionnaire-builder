@@ -91,7 +91,9 @@ export function evalCalcNodes(nodes, qr, fp, values, envVars = {}, base = null, 
 
   for (const id of order) {
     const node = nodeMap.get(id);
-    if (!node || !(node._calculatedExpr && node._readOnly)) continue;
+    // Evaluated regardless of readOnly — a non-readOnly calc field can be
+    // overwritten by the user (validate.js already warns about this).
+    if (!node || !node._calculatedExpr) continue;
     try {
       const result = fp.evaluate(qr, node._calculatedExpr, env, fhirModel());
       const value = coerceResult(node, result);

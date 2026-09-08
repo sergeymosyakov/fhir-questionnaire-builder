@@ -9,34 +9,18 @@ import { _rc } from '../../preview/render-ctx.js';
 import { evalFhirpath } from '../../preview/eval-fhirpath.js';
 import { BlockKind } from '../../fhir/expr-builder/model.js';
 import { parseExpression } from '../../fhir/expr-builder/parse.js';
-import { hasAnswer } from '../../fhir/expr-builder/value-paths.js';
+import { flattenItems, NUMERIC_TYPES } from '../../fhir/expr-builder/flatten-items.js';
 import { parseExprTree } from '../../fhir/explain.js';
 import { createExprTreeEditor } from './expr-tree/tree-editor.js';
 import { createValueEditor } from './expr-value/value-editor.js';
 import { createPipelineEditor } from './expr-pipeline/pipeline-editor.js';
-
-const NUMERIC_TYPES = new Set(['integer', 'decimal', 'quantity']);
+import { expressionGalleryModal } from './expression-gallery-modal.js';
 
 // A boolean/tree-shaped expression (top-level and/or/not) is best edited as a tree.
 function _isBooleanTree(text) {
   if (!text) return false;
   const t = parseExprTree(text);
   return t.type === 'AND' || t.type === 'OR' || t.type === 'NOT';
-}
-
-// Flattens the tree to answerable items, tracking the ancestor linkId chain and
-// which segments are nested under a parent item's answer, so references emit an
-// exact path.
-function flattenItems(nodes, ctx = { chain: [], at: [], parentType: 'group' }, out = []) {
-  for (const n of nodes || []) {
-    const segments = [...ctx.chain, n.id];
-    const answerAt = [...ctx.at, ctx.parentType === 'item'];
-    if (n.type === 'item' && hasAnswer(n.itemType)) {
-      out.push({ id: n.id, label: n.title || n.id, itemType: n.itemType, options: n.options || '', segments, answerAt: answerAt.some(Boolean) ? answerAt : [] });
-    }
-    if (n.children?.length) flattenItems(n.children, { chain: segments, at: answerAt, parentType: n.type }, out);
-  }
-  return out;
 }
 
 class ExpressionBuilderModal extends Modal {
@@ -51,7 +35,8 @@ class ExpressionBuilderModal extends Modal {
     this._resultKind = resultKind || 'boolean';
     this._isValue = this._resultKind === 'value';
     this._variables = variables || [];
-    const answerable = flattenItems(tree || []).filter((it) => it.id !== excludeId);
+    this._tree = tree || [];
+    const answerable = flattenItems(this._tree).filter((it) => it.id !== excludeId);
     this._allItems = answerable;
     this._items = this._isValue ? answerable.filter((it) => NUMERIC_TYPES.has(it.itemType)) : answerable;
     this._resetEditors();
@@ -122,6 +107,7 @@ class ExpressionBuilderModal extends Modal {
       { key: 'value', label: '\uD83D\uDD22 Number', testid: 'eb-choose-number' },
       { key: 'tree', label: '\u2714 Yes / No condition', testid: 'eb-choose-condition' },
       { key: 'pipeline', label: '\uD83C\uDFF7 Answers \u2192 value', testid: 'eb-choose-codes' },
+      { key: 'gallery', label: '\uD83D\uDCD0 From gallery', testid: 'eb-choose-gallery' },
     ];
     for (const o of opts) {
       const btn = document.createElement('button');
@@ -129,7 +115,7 @@ class ExpressionBuilderModal extends Modal {
       btn.className = 'eb-chooser-btn';
       btn.textContent = o.label;
       btn.dataset.testid = o.testid;
-      btn.addEventListener('click', () => { this._strategy = o.key; this._render(); });
+      btn.addEventListener('click', () => { if (o.key === 'gallery') this._openGallery(); else { this._strategy = o.key; this._render(); } });
       pick.appendChild(btn);
     }
     this.body.appendChild(pick);
@@ -150,6 +136,7 @@ class ExpressionBuilderModal extends Modal {
     this._valueEditor = this._pendingValueEditor || createValueEditor(this._valueEditorOpts(this._initialExpr));
     this._pendingValueEditor = null;
     this.body.appendChild(this._valueEditor.el);
+    this.body.appendChild(this._galleryAction());
   }
 
   _renderPipeline() {
@@ -173,6 +160,26 @@ class ExpressionBuilderModal extends Modal {
     btn.addEventListener('click', () => { this._rawText = this._currentExpr(); this._strategy = 'raw'; this._render(); });
     actions.appendChild(btn);
     return actions;
+  }
+
+  _galleryAction() {
+    const actions = document.createElement('div');
+    actions.className = 'eb-actions';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'eb-text-toggle';
+    btn.textContent = '\uD83D\uDCD0 Choose from gallery';
+    btn.dataset.testid = 'eb-open-gallery';
+    btn.addEventListener('click', () => this._openGallery());
+    actions.appendChild(btn);
+    return actions;
+  }
+
+  _openGallery() {
+    expressionGalleryModal.open({
+      tree: this._tree,
+      onInsert: (expr) => { this._rawText = expr; this._strategy = 'raw'; this._render(); },
+    });
   }
 
   // ── Raw (text) mode ──────────────────────────────────────────────────────────
