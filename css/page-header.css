@@ -20,6 +20,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .page-header-title {
@@ -76,6 +77,13 @@
 }
 .page-header-search--inline + .page-header-back {
   margin-left: 0;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  /* Mobile lets the bar wrap (e.g. action buttons dropping below a long title
+     instead of overflowing); desktop has room for the tight single-row look. */
+  .page-header-bar { flex-wrap: nowrap; }
 }
 
 .page-header-count {

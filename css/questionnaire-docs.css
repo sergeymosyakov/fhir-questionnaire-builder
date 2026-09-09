@@ -12,8 +12,15 @@ body {
   background: var(--c-surface);
 }
 
+.qdoc-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  /* Keeps both buttons moving to a new row together instead of each
+     wrapping independently below the title. */
+}
+
 .qdoc-btn {
-  margin-inline-start: 8px;
   padding: 8px 14px;
   min-height: var(--ctrl-h);
   border: 1px solid var(--c-border);
@@ -230,6 +237,13 @@ body {
   border-top: 1px solid var(--c-border);
   font-size: 0.85em;
   color: var(--c-text-2);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  /* Mobile lets the action buttons wrap below the title, left-aligned;
+     desktop has room to keep them pinned to the right on the same row. */
+  .qdoc-actions { margin-inline-start: auto; }
 }
 
 @media print {
