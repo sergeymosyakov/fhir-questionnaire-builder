@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import fhirpath from 'fhirpath';
 import fhirpath_r4_model from 'fhirpath/fhir-context/r4/index.js';
-import { EXPR_GALLERY, resolveGalleryPattern } from '../js/fhir/expr-builder/gallery.js';
+import { EXPR_GALLERY, resolveGalleryPattern } from '../js/fhir/expr-builder/gallery/index.js';
 
 function pattern(id) {
   return EXPR_GALLERY.find((p) => p.id === id);
@@ -33,6 +33,14 @@ describe('resolveGalleryPattern', () => {
     const expr = resolveGalleryPattern(pattern('unit-convert'), { value: { ref: '%V', transformId: 'f-c' } });
     expect(expr).toBe('((%V - 32) / 1.8)');
   });
+
+  it('bmi-imperial substitutes plain refs with no transform', () => {
+    const expr = resolveGalleryPattern(pattern('bmi-imperial'), {
+      weight: { ref: '%W', transformId: 'lb' },
+      height: { ref: '%H', transformId: 'in' },
+    });
+    expect(expr).toBe('(((%W) * 703) / ((%H) * (%H))).round(1)');
+  });
 });
 
 describe('resolveGalleryPattern — resolved expressions are real, correct FHIRPath', () => {
@@ -55,6 +63,22 @@ describe('resolveGalleryPattern — resolved expressions are real, correct FHIRP
     const [result] = fhirpath.evaluate(qr, expr, env, fhirpath_r4_model);
     // 220 lb ≈ 99.79 kg, 180 cm = 1.8 m → BMI ≈ 30.8
     expect(result).toBeCloseTo(30.8, 1);
+  });
+
+  it('bmi-imperial (lb/in, no conversion) matches the real formula used in bariatric-extended.fhir.json', () => {
+    const qrImperial = {
+      resourceType: 'QuestionnaireResponse',
+      item: [
+        { linkId: 'weight', answer: [{ valueDecimal: 200 }] }, // lb
+        { linkId: 'height', answer: [{ valueDecimal: 70 }] },  // in
+      ],
+    };
+    const expr = resolveGalleryPattern(pattern('bmi-imperial'), {
+      weight: { ref: ref('weight', 'valueDecimal'), transformId: 'lb' },
+      height: { ref: ref('height', 'valueDecimal'), transformId: 'in' },
+    });
+    const [result] = fhirpath.evaluate(qrImperial, expr, { resource: qrImperial }, fhirpath_r4_model);
+    expect(result).toBe(28.7);
   });
 
   it('age-from-birthdate correctly subtracts a year when this-year birthday has not occurred yet', () => {

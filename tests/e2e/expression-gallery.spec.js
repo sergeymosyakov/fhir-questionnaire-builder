@@ -9,7 +9,7 @@
 //   action-type / answerTypeModal / type-select / answerTypeModalApply  item type
 //   action-expr / expr-calc-ta / expr-calc-ta-build-btn                 value host
 //   expressionBuilderModal / eb-choose-gallery                          builder entry
-//   expressionGalleryModal / eg-row-<id> / eg-slot-item-<key> /
+//   expressionGalleryModal / eg-search / eg-row-<id> / eg-slot-item-<key> /
 //     eg-slot-transform-<key> / eg-preview / expressionGalleryModalApply gallery modal
 //   csel-drop [data-val]                                                custom-select option
 // ─────────────────────────────────────────────────────────────────────────────
@@ -96,6 +96,33 @@ test.describe('Expression Gallery', () => {
     await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/round\(1\)/);
   });
 
+  test('bmi-imperial pattern resolves without unit conversion (already lb/in)', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await addItem(page, '1', '1.1', 'Weight');
+    await setItemType(page, '1.1', 'decimal');
+    await addItem(page, '1', '1.2', 'Height');
+    await setItemType(page, '1.2', 'decimal');
+    await addItem(page, '1', '1.3', 'BMI');
+    await setItemType(page, '1.3', 'decimal');
+
+    await openValueBuilder(page, '1.3');
+    await page.getByTestId('eb-choose-gallery').click();
+    await expect(page.getByTestId('expressionGalleryModal')).toBeVisible();
+    await page.getByTestId('eg-row-bmi-imperial').click();
+
+    await pick(page, page, 'eg-slot-item-weight', '1.1');
+    await pick(page, page, 'eg-slot-item-height', '1.2');
+
+    await expect(page.getByTestId('eg-preview')).toContainText('703');
+    await expect(page.getByTestId('eg-preview')).not.toContainText('0.453592');
+
+    await page.getByTestId('expressionGalleryModalApply').click();
+    await page.getByTestId('expressionBuilderModalApply').click();
+    await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/703/);
+  });
+
   test('gallery Cancel returns to the builder chooser without inserting anything', async ({ page }) => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
@@ -110,5 +137,27 @@ test.describe('Expression Gallery', () => {
     await expect(page.getByTestId('expressionGalleryModal')).toBeHidden();
     await expect(page.getByTestId('expressionBuilderModal')).toBeVisible();
     await expect(page.getByTestId('expr-calc-ta')).toHaveValue('');
+  });
+
+  test('search filters the pattern list by name/description', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await addItem(page, '1', '1.1', 'Score');
+    await setItemType(page, '1.1', 'decimal');
+
+    await openValueBuilder(page, '1.1');
+    await page.getByTestId('eb-choose-gallery').click();
+    await expect(page.getByTestId('expressionGalleryModal')).toBeVisible();
+
+    await expect(page.getByTestId('eg-row-bmi')).toBeVisible();
+    await expect(page.getByTestId('eg-row-age-from-birthdate')).toBeVisible();
+
+    await page.getByTestId('eg-search').fill('body mass');
+    await expect(page.getByTestId('eg-row-bmi')).toBeVisible();
+    await expect(page.getByTestId('eg-row-age-from-birthdate')).toBeHidden();
+
+    await page.getByTestId('eg-search').fill('nonexistent pattern xyz');
+    await expect(page.getByTestId('eg-search-empty')).toBeVisible();
   });
 });

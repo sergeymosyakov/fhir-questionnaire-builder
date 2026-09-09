@@ -233,10 +233,12 @@
    extra room a maximized modal provides — same fix as .eb-item above. */
 .modal-box--maximized .eg-slot-item,
 .modal-box--maximized .eg-slot-transform { max-width: none; }
-/* sc-trigger--sm's max-width: 180px otherwise caps these regardless of the
-   extra room a maximized modal provides — same fix as .eb-item above. */
-.modal-box--maximized .eg-slot-item,
-.modal-box--maximized .eg-slot-transform { max-width: none; }
+.eg-search {
+  padding: 6px 10px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+}
 .eg-preview {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;

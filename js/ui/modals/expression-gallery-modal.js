@@ -10,7 +10,7 @@ import { itemRef } from '../../fhir/expr-builder/model.js';
 import { emit } from '../../fhir/expr-builder/emit.js';
 import { valueAccessor } from '../../fhir/expr-builder/value-paths.js';
 import { flattenItems } from '../../fhir/expr-builder/flatten-items.js';
-import { EXPR_GALLERY, resolveGalleryPattern } from '../../fhir/expr-builder/gallery.js';
+import { EXPR_GALLERY, resolveGalleryPattern } from '../../fhir/expr-builder/gallery/index.js';
 
 function itemRefExpr(item) {
   return emit(itemRef(item.segments, valueAccessor(item.itemType), item.answerAt));
@@ -28,6 +28,7 @@ class ExpressionGalleryModal extends Modal {
     this._allItems = flattenItems(tree || []);
     this._pattern = null;
     this._selections = {};
+    this._listSearch = '';
     this.setTitle('Choose from gallery');
     this._render();
     super.open();
@@ -40,10 +41,38 @@ class ExpressionGalleryModal extends Modal {
   }
 
   _renderList() {
-    const list = document.createElement('div');
-    list.className = 'eg-list';
-    list.dataset.testid = 'eg-list';
-    for (const pattern of EXPR_GALLERY) {
+    const search = document.createElement('input');
+    search.type = 'search';
+    search.className = 'eg-search';
+    search.placeholder = 'Search patterns\u2026';
+    search.dataset.testid = 'eg-search';
+    search.value = this._listSearch;
+    search.addEventListener('input', () => { this._listSearch = search.value; this._renderRows(); });
+    this.body.appendChild(search);
+
+    this._listEl = document.createElement('div');
+    this._listEl.className = 'eg-list';
+    this._listEl.dataset.testid = 'eg-list';
+    this.body.appendChild(this._listEl);
+    this._renderRows();
+  }
+
+  _renderRows() {
+    const q = this._listSearch.trim().toLowerCase();
+    const matches = !q
+      ? EXPR_GALLERY
+      : EXPR_GALLERY.filter((p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
+
+    this._listEl.innerHTML = '';
+    if (!matches.length) {
+      const empty = document.createElement('div');
+      empty.className = 'eg-note';
+      empty.dataset.testid = 'eg-search-empty';
+      empty.textContent = 'No patterns match your search.';
+      this._listEl.appendChild(empty);
+      return;
+    }
+    for (const pattern of matches) {
       const row = document.createElement('button');
       row.type = 'button';
       row.className = 'eg-row';
@@ -56,9 +85,8 @@ class ExpressionGalleryModal extends Modal {
       desc.textContent = pattern.description;
       row.append(name, desc);
       row.addEventListener('click', () => { this._pattern = pattern; this._selections = {}; this._render(); });
-      list.appendChild(row);
+      this._listEl.appendChild(row);
     }
-    this.body.appendChild(list);
   }
 
   _renderSlots() {
