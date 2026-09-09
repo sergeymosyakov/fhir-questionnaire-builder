@@ -11,6 +11,7 @@
 //   expressionBuilderModal / eb-choose-gallery                          builder entry
 //   expressionGalleryModal / eg-search / eg-row-<id> / eg-slot-item-<key> /
 //     eg-slot-transform-<key> / eg-preview / expressionGalleryModalApply gallery modal
+//   eg-slot-add-<key> / eg-slot-row-<key>-<i> / eg-slot-remove-<key>-<i>       repeatable slot
 //   csel-drop [data-val]                                                custom-select option
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -124,6 +125,37 @@ test.describe('Expression Gallery', () => {
     await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/703/);
   });
 
+  test('bmi-category pattern resolves to a threshold-category iif() chain', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await addItem(page, '1', '1.1', 'Weight');
+    await setItemType(page, '1.1', 'decimal');
+    await addItem(page, '1', '1.2', 'Height');
+    await setItemType(page, '1.2', 'decimal');
+    await addItem(page, '1', '1.3', 'BMI Category');
+    await setItemType(page, '1.3', 'text');
+
+    await openValueBuilder(page, '1.3');
+    await page.getByTestId('eb-choose-gallery').click();
+    await expect(page.getByTestId('expressionGalleryModal')).toBeVisible();
+    await page.getByTestId('eg-row-bmi-category').click();
+
+    await pick(page, page, 'eg-slot-item-weight', '1.1');
+    await pick(page, page, 'eg-slot-item-height', '1.2');
+
+    await expect(page.getByTestId('eg-preview')).toContainText('iif(');
+    await expect(page.getByTestId('eg-preview')).toContainText('Underweight');
+    await expect(page.getByTestId('eg-preview')).toContainText('Obese');
+
+    await page.getByTestId('expressionGalleryModalApply').click();
+    await expect(page.getByTestId('eb-raw-input')).toHaveValue(/iif\(/);
+    await expect(page.getByTestId('eb-raw-input')).toHaveValue(/'Normal weight'/);
+
+    await page.getByTestId('expressionBuilderModalApply').click();
+    await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/iif\(/);
+  });
+
   test('gallery Cancel returns to the builder chooser without inserting anything', async ({ page }) => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
@@ -160,5 +192,94 @@ test.describe('Expression Gallery', () => {
 
     await page.getByTestId('eg-search').fill('nonexistent pattern xyz');
     await expect(page.getByTestId('eg-search-empty')).toBeVisible();
+  });
+
+  test('sum-of-items repeatable slot supports adding and removing rows', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await addItem(page, '1', '1.1', 'Score A');
+    await setItemType(page, '1.1', 'decimal');
+    await addItem(page, '1', '1.2', 'Score B');
+    await setItemType(page, '1.2', 'decimal');
+    await addItem(page, '1', '1.3', 'Score C');
+    await setItemType(page, '1.3', 'decimal');
+    await addItem(page, '1', '1.4', 'Total');
+    await setItemType(page, '1.4', 'decimal');
+
+    await openValueBuilder(page, '1.4');
+    await page.getByTestId('eb-choose-gallery').click();
+    await expect(page.getByTestId('expressionGalleryModal')).toBeVisible();
+    await page.getByTestId('eg-row-sum-of-items').click();
+
+    // starts with 2 rows (min: 2) and no remove button yet
+    await expect(page.getByTestId('eg-slot-row-items-0')).toBeVisible();
+    await expect(page.getByTestId('eg-slot-row-items-1')).toBeVisible();
+    await expect(page.getByTestId('eg-slot-remove-items-0')).toBeHidden();
+
+    await pick(page, page, 'eg-slot-item-items-0', '1.1');
+    await pick(page, page, 'eg-slot-item-items-1', '1.2');
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.1'");
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.2'");
+
+    // add a 3rd row — now removable
+    await page.getByTestId('eg-slot-add-items').click();
+    await expect(page.getByTestId('eg-slot-row-items-2')).toBeVisible();
+    await pick(page, page, 'eg-slot-item-items-2', '1.3');
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.3'");
+    await expect(page.getByTestId('eg-slot-remove-items-0')).toBeVisible();
+
+    // remove the middle row — its item drops out, the others survive
+    await page.getByTestId('eg-slot-remove-items-1').click();
+    await expect(page.getByTestId('eg-slot-row-items-2')).toBeHidden();
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.1'");
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.3'");
+    await expect(page.getByTestId('eg-preview')).not.toContainText("linkId='1.2'");
+
+    await page.getByTestId('expressionGalleryModalApply').click();
+    await expect(page.getByTestId('expressionBuilderModal')).toBeVisible();
+    await expect(page.getByTestId('eb-raw-input')).toHaveValue(/linkId='1\.1'/);
+    await expect(page.getByTestId('eb-raw-input')).toHaveValue(/linkId='1\.3'/);
+
+    await page.getByTestId('expressionBuilderModalApply').click();
+    await expect(page.getByTestId('expressionBuilderModal')).toBeHidden();
+    await expect(page.getByTestId('expr-calc-ta')).not.toHaveValue('');
+  });
+
+  test('charlson-comorbidity-index hides an already-picked condition from other rows', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await addItem(page, '1', '1.1', 'Has MI');
+    await setItemType(page, '1.1', 'checkbox');
+    await addItem(page, '1', '1.2', 'Has AIDS');
+    await setItemType(page, '1.2', 'checkbox');
+    await addItem(page, '1', '1.3', 'Age');
+    await setItemType(page, '1.3', 'integer');
+    await addItem(page, '1', '1.4', 'CCI Score');
+    await setItemType(page, '1.4', 'decimal');
+
+    await openValueBuilder(page, '1.4');
+    await page.getByTestId('eb-choose-gallery').click();
+    await expect(page.getByTestId('expressionGalleryModal')).toBeVisible();
+    await page.getByTestId('eg-row-charlson-comorbidity-index').click();
+
+    await pick(page, page, 'eg-slot-item-conditions-0', '1.1');
+    await pick(page, page, 'eg-slot-transform-conditions-0', 'mi');
+
+    await page.getByTestId('eg-slot-add-conditions').click();
+    await page.getByTestId('eg-slot-transform-conditions-1').click();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="mi"]')).toBeHidden();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="aids"]')).toBeVisible();
+    await page.locator('[data-testid="csel-drop"] [data-val="aids"]').click();
+    await pick(page, page, 'eg-slot-item-conditions-1', '1.2');
+
+    await pick(page, page, 'eg-slot-item-age', '1.3');
+    await page.getByTestId('eg-slot-transform-age').click();
+    await page.locator('[data-testid="csel-drop"] [data-val="age-bonus"]').click();
+
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.1'");
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.2'");
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.3'");
   });
 });

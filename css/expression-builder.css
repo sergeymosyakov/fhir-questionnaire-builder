@@ -233,6 +233,29 @@
    extra room a maximized modal provides — same fix as .eb-item above. */
 .modal-box--maximized .eg-slot-item,
 .modal-box--maximized .eg-slot-transform { max-width: none; }
+.eg-slot-repeat { display: flex; flex-direction: column; gap: 6px; }
+.eg-slot-repeat-rows { display: flex; flex-direction: column; gap: 6px; }
+.eg-repeat-add {
+  align-self: flex-start;
+  border: 1px dashed var(--c-border);
+  background: none;
+  color: var(--c-accent, #2563eb);
+  cursor: pointer;
+  font-size: 12px;
+  border-radius: var(--r-sm);
+  padding: 4px 8px;
+}
+.eg-repeat-add:hover { background: var(--c-hover); }
+.eg-repeat-remove {
+  border: none;
+  background: none;
+  color: var(--c-text-2);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+.eg-repeat-remove:hover { color: #dc2626; }
 .eg-search {
   padding: 6px 10px;
   border: 1px solid var(--c-border);
