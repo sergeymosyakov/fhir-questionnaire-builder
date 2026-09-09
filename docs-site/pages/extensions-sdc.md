@@ -51,6 +51,21 @@ Rules that restrict what counts as a valid answer:
 - **Unit** — the unit label for a numeric quantity, e.g. `kg` or `mmHg`
   (`questionnaire-unit`).
 
+## Repeating groups
+
+Any **group**, not just a question, can be made repeating via its **Repeatable**
+control (`item.repeats`) — the respondent then gets an **+ Add** button that
+appends another full copy of the group's fields (an "instance"), and each
+instance has its own **✕ remove**. Use `minOccurs` / `maxOccurs` on the group to
+require a minimum number of instances (fewer than the minimum are auto-created
+empty) or cap the maximum.
+
+Each instance is evaluated independently — a calculated value, an `enableWhen`
+condition, or a validation rule inside a repeating group's fields is scoped to
+that one instance, not shared or cross-checked across instances. A **GTABLE**
+layout (`itemControl = gtable`) renders a repeating group's instances as rows of
+a table instead of stacked blocks — see below.
+
 ## Presentation & rendering
 
 How an item looks and how the user interacts with it:
@@ -100,7 +115,9 @@ How choice options are sourced and scored:
 - **Usage mode** — control whether an item is for data entry, display-only, or
   only shown when it has a value (`questionnaire-usageMode`).
 - **Disabled display** — when a visibility condition fails, choose whether the
-  item is greyed-out or removed entirely (`disabledDisplay`).
+  item is greyed-out or removed entirely (`disabledDisplay`) — see [enableWhen
+  & visibility](enablewhen.md#when-not-visible) for the two options and how a
+  hidden item still participates in logic.
 - **Data-element typing** — link an item to an external data-element definition
   and carry its underlying data type (`item.definition`,
   `questionnaire-baseType`, `questionnaire-fhirType`).
