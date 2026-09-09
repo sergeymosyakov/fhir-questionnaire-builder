@@ -209,17 +209,31 @@ export class ItemNode extends BaseNode {
 
   // Build interactive control (or repeat controls).
   _buildControl(row, res, rc) {
-    if (this._readOnly || this._calculatedExpr) return;
+    if (this._readOnly) return;
     // Multi-select controls (checkbox / checklist) express repeats via their own
     // multiple selection — supportsRepeat() is false for them, so no "Add another".
     if (this.repeats && this.supportsRepeat()) {
       row.appendChild(this._buildRepeatContainer(res._iconEl, () => rc.updateGroupIcons(), rc));
     } else {
-      row.appendChild(rc.buildControl(this, res._iconEl, () => rc.updateGroupIcons()));
+      const el = rc.buildControl(this, res._iconEl, () => rc.updateGroupIcons());
+      row.appendChild(el);
+      if (this._calculatedExpr) this._wireCalcControlRefresh(el, rc);
     }
     if (rc.previewMode === 'patient' && this._previewEl) {
       this._previewEl.classList.toggle('lform-item--invalid', !rc.calcFormOk(this));
     }
+  }
+
+  // Keeps a non-readOnly calculated control's live value in sync on
+  // REFRESH_CALC_BADGES, mirroring _buildCalcBadge's read-only refresh path
+  // (otherwise typing elsewhere recomputes the value but never touches the DOM).
+  _wireCalcControlRefresh(el, rc) {
+    const field = el?.querySelector?.('input, select, textarea');
+    if (!field) return;
+    this._refreshCalcBadge = () => {
+      const v = rc.getValue(this.id);
+      field.value = (v !== undefined && v !== null) ? v : '';
+    };
   }
 
   // Render N+1 repeat rows with add/remove buttons.

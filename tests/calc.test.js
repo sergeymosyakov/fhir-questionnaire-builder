@@ -97,11 +97,11 @@ describe('evalCalcNodes', () => {
     expect(values.note).toBe('hello');
   });
 
-  it('skips non-readOnly calc nodes', () => {
-    const nodes = [{ id: 'q1', type: 'item', _calculatedExpr: 'true', _readOnly: false }];
+  it('evaluates a calc node even when not read-only (issue #122 — user can still overwrite it)', () => {
+    const nodes = [{ id: 'q1', type: 'item', itemType: 'checkbox', _calculatedExpr: 'true', _readOnly: false }];
     const values = {};
     evalCalcNodes(nodes, {}, fpMock, values);
-    expect(values.q1).toBeUndefined();
+    expect(values.q1).toBe(true);
   });
 
   it('recurses into group children', () => {

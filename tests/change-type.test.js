@@ -48,6 +48,30 @@ describe('changeNodeType', () => {
     expect(out._maxOccurs).toBeUndefined();
   });
 
+  // Regression: Object.assign(newNode, node, ...) was copying the old node's
+  // _busWired flag onto the new instance, so _ensureBusListeners (gated on
+  // _busWired) never (re-)registered REFRESH_CALC_BADGES for it — a
+  // calculatedExpression set after any type change (i.e. every item added via
+  // the builder UI) never refreshed its control live.
+  it('gives the new node its own fresh bus-listener bookkeeping, not the old instance\'s', () => {
+    const node = createItemNode('text', { id: '1' });
+    const oldAc = new AbortController();
+    node._ac = oldAc;
+    node._busWired = true;
+    const out = changeNodeType(node, 'decimal');
+    expect(out._busWired).toBe(false);
+    expect(out._ac).toBeInstanceOf(AbortController);
+    expect(out._ac).not.toBe(oldAc);
+  });
+
+  it('destroys the old node instance it replaces', () => {
+    const node = createItemNode('text', { id: '1' });
+    let destroyed = false;
+    node.destroy = () => { destroyed = true; };
+    changeNodeType(node, 'decimal');
+    expect(destroyed).toBe(true);
+  });
+
   it('keeps the same type without throwing (no-op type)', () => {
     const node = createItemNode('text', { id: '1' });
     const out = changeNodeType(node, 'text');

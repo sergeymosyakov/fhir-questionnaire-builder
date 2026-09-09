@@ -46,6 +46,15 @@ export function changeNodeType(node, newType, tree, _answerStore) {
   const Cls = NODE_REGISTRY.get(newType) ?? NODE_REGISTRY.get('text');
   const newNode = new Cls({ title: node.title || 'New Item', id: node.id, itemType: newType });
   Object.assign(newNode, node, { itemType: newType });
+  // Object.assign also copied the old instance's bus-listener bookkeeping
+  // (_busWired, _ac) — left as-is, _ensureBusListeners sees _busWired=true and
+  // never (re-)registers REFRESH_CALC_BADGES etc. for this actually-new
+  // instance, so e.g. a calculatedExpression set after a type change never
+  // updates its control live. Give the new node its own fresh listener
+  // lifecycle and let the old one's listeners get cleaned up.
+  newNode._ac = new AbortController();
+  newNode._busWired = false;
+  node.destroy?.();
   if (tree) replaceInTree(tree, node.id, newNode);
 
   if (newNode.impliesRepeats()) {

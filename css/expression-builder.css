@@ -1,6 +1,8 @@
 /* ── Expression Builder modal ────────────────────────────────────────────────── */
 /* Opens over the Show When modal (base 10000); stays below csel-drop (10200). */
 [data-testid="expressionBuilderModal"] { z-index: 10150; }
+/* Gallery opens on top of the builder modal itself. */
+[data-testid="expressionGalleryModal"] { z-index: 10160; }
 
 .eb-body { display: flex; flex-direction: column; gap: 10px; min-width: 520px; }
 
@@ -197,6 +199,55 @@
   font-size: 13px;
   border-radius: 8px;
   padding: 14px 12px;
+}
+
+/* ── Expression Gallery modal ────────────────────────────────────────────────── */
+.eg-body { display: flex; flex-direction: column; gap: 10px; min-width: 480px; }
+.eg-list { display: flex; flex-direction: column; gap: 8px; }
+.eg-row {
+  text-align: left;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+.eg-row:hover { background: var(--c-hover); }
+.eg-row-name { font-weight: 600; font-size: 13px; }
+.eg-row-desc { font-size: 12px; color: var(--c-text-2); margin-top: 2px; }
+.eg-back {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  color: var(--c-accent, #2563eb);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 0;
+}
+.eg-back:hover { text-decoration: underline; }
+.eg-slots { display: flex; flex-direction: column; gap: 10px; }
+.eg-slot-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.eg-slot-label { font-size: 13px; min-width: 110px; }
+.eg-slot-item, .eg-slot-transform { min-width: 200px; flex: 1 1 auto; }
+/* sc-trigger--sm's max-width: 180px otherwise caps these regardless of the
+   extra room a maximized modal provides — same fix as .eb-item above. */
+.modal-box--maximized .eg-slot-item,
+.modal-box--maximized .eg-slot-transform { max-width: none; }
+.eg-search {
+  padding: 6px 10px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+}
+.eg-preview {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 6px 8px;
+  color: var(--c-text);
+  word-break: break-all;
 }
 .eb-chooser-btn:hover { border-color: var(--c-accent, #2563eb); background: #f8fafc; }
 
