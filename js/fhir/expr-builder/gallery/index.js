@@ -11,10 +11,11 @@ import { gad7Severity } from './gad7-severity.js';
 import { phq9Severity } from './phq9-severity.js';
 import { cha2ds2Vasc } from './cha2ds2-vasc.js';
 import { sumOfItems } from './sum-of-items.js';
+import { charlsonComorbidityIndex } from './charlson-comorbidity-index.js';
 
 export const EXPR_GALLERY = [
   bmi, bmiImperial, bmiCategory, ageFromBirthdate, unitConvert,
-  gad7Severity, phq9Severity, cha2ds2Vasc, sumOfItems,
+  gad7Severity, phq9Severity, cha2ds2Vasc, sumOfItems, charlsonComorbidityIndex,
 ];
 
 // Applies a slot's transform (if any) and wraps the result in parens, unless

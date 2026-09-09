@@ -58,7 +58,7 @@ describe('resolveGalleryPattern', () => {
     const expr = resolveGalleryPattern(pattern('sum-of-items'), {
       items: [
         { ref: '%A', transformId: 'raw' },
-        { ref: '%B', transformId: 'lb-to-kg' },
+        { ref: '%B', transformId: 'lb-kg' },
       ],
     });
     expect(expr).toBe('((%A) + (%B * 0.453592))');
@@ -209,5 +209,34 @@ describe('resolveGalleryPattern — cha2ds2-vasc', () => {
     const expr = resolveGalleryPattern(pattern('cha2ds2-vasc'), selections);
     const [result] = fhirpath.evaluate(qr, expr, { resource: qr }, fhirpath_r4_model);
     expect(result).toBe(4); // 1 (chf) + 0 (htn) + 2 (age75) + 1 (female)
+  });
+});
+
+describe('resolveGalleryPattern — charlson-comorbidity-index', () => {
+  it('sums the picked conditions\u2019 weights plus the age bonus', () => {
+    // metastatic malignancy (+6) + renal disease (+2), age 72 (+3 bonus) = 11
+    const qr = {
+      resourceType: 'QuestionnaireResponse',
+      item: [
+        { linkId: 'mets', answer: [{ valueBoolean: true }] },
+        { linkId: 'renal', answer: [{ valueBoolean: true }] },
+        { linkId: 'age', answer: [{ valueInteger: 72 }] },
+      ],
+    };
+    const expr = resolveGalleryPattern(pattern('charlson-comorbidity-index'), {
+      conditions: [
+        { ref: "%resource.item.where(linkId='mets').answer.valueBoolean", transformId: 'malignancyMets' },
+        { ref: "%resource.item.where(linkId='renal').answer.valueBoolean", transformId: 'renal' },
+      ],
+      age: { ref: "%resource.item.where(linkId='age').answer.valueInteger", transformId: 'age-bonus' },
+    });
+    const [result] = fhirpath.evaluate(qr, expr, { resource: qr }, fhirpath_r4_model);
+    expect(result).toBe(11);
+  });
+
+  it('resolves with just the required condition row and no age picked yet returns null', () => {
+    expect(resolveGalleryPattern(pattern('charlson-comorbidity-index'), {
+      conditions: [{ ref: '%X', transformId: 'mi' }],
+    })).toBeNull();
   });
 });

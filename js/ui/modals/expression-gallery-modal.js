@@ -103,10 +103,13 @@ class ExpressionGalleryModal extends Modal {
     desc.textContent = this._pattern.description;
     this.body.appendChild(desc);
 
-    const eligible = this._allItems.filter((it) => this._pattern.itemTypes.includes(it.itemType));
     const slotsWrap = document.createElement('div');
     slotsWrap.className = 'eg-slots';
     for (const slot of this._pattern.slots) {
+      // A slot can narrow the pattern-level itemTypes (e.g. Charlson's boolean
+      // condition rows vs its numeric age slot).
+      const itemTypes = slot.itemTypes || this._pattern.itemTypes;
+      const eligible = this._allItems.filter((it) => itemTypes.includes(it.itemType));
       slotsWrap.appendChild(this._renderSlot(slot, eligible));
     }
     this.body.appendChild(slotsWrap);
@@ -231,14 +234,25 @@ class ExpressionGalleryModal extends Modal {
     row.appendChild(itemSel.el);
 
     if (slot.transforms?.length) {
-      const currentTransformId = sel.transformId || slot.transforms[0].id;
+      // uniqueTransforms (e.g. a weighted condition list): each option can only
+      // be picked in one row at a time, so hide it from every other row once chosen.
+      const usedElsewhere = slot.uniqueTransforms
+        ? new Set(rows.filter((_, i) => i !== index).map((r) => r.transformId).filter(Boolean))
+        : null;
+      const availableTransforms = usedElsewhere
+        ? slot.transforms.filter((t) => !usedElsewhere.has(t.id))
+        : slot.transforms;
+      const currentTransformId = sel.transformId || availableTransforms[0]?.id;
       const transformSel = createCustomSelect({
-        items: slot.transforms.map((t) => ({ value: t.id, label: t.label })),
-        value: currentTransformId,
+        items: availableTransforms.map((t) => ({ value: t.id, label: t.label })),
+        value: currentTransformId || '',
         className: 'sc-trigger--sm eg-slot-transform',
         testid: 'eg-slot-transform-' + slot.key + '-' + index,
+        searchable: !!slot.uniqueTransforms,
         onChange: (v) => {
           rows[index] = { ...rows[index], transformId: v };
+          // Only unique-transform slots need siblings' option lists refreshed.
+          if (slot.uniqueTransforms) renderRows();
           this._refreshPreview();
         },
       });

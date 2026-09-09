@@ -125,6 +125,37 @@ test.describe('Expression Gallery', () => {
     await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/703/);
   });
 
+  test('bmi-category pattern resolves to a threshold-category iif() chain', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await addItem(page, '1', '1.1', 'Weight');
+    await setItemType(page, '1.1', 'decimal');
+    await addItem(page, '1', '1.2', 'Height');
+    await setItemType(page, '1.2', 'decimal');
+    await addItem(page, '1', '1.3', 'BMI Category');
+    await setItemType(page, '1.3', 'text');
+
+    await openValueBuilder(page, '1.3');
+    await page.getByTestId('eb-choose-gallery').click();
+    await expect(page.getByTestId('expressionGalleryModal')).toBeVisible();
+    await page.getByTestId('eg-row-bmi-category').click();
+
+    await pick(page, page, 'eg-slot-item-weight', '1.1');
+    await pick(page, page, 'eg-slot-item-height', '1.2');
+
+    await expect(page.getByTestId('eg-preview')).toContainText('iif(');
+    await expect(page.getByTestId('eg-preview')).toContainText('Underweight');
+    await expect(page.getByTestId('eg-preview')).toContainText('Obese');
+
+    await page.getByTestId('expressionGalleryModalApply').click();
+    await expect(page.getByTestId('eb-raw-input')).toHaveValue(/iif\(/);
+    await expect(page.getByTestId('eb-raw-input')).toHaveValue(/'Normal weight'/);
+
+    await page.getByTestId('expressionBuilderModalApply').click();
+    await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/iif\(/);
+  });
+
   test('gallery Cancel returns to the builder chooser without inserting anything', async ({ page }) => {
     await freshStart(page);
     await page.getByTestId('add-root-group-btn').click();
@@ -213,5 +244,42 @@ test.describe('Expression Gallery', () => {
     await page.getByTestId('expressionBuilderModalApply').click();
     await expect(page.getByTestId('expressionBuilderModal')).toBeHidden();
     await expect(page.getByTestId('expr-calc-ta')).not.toHaveValue('');
+  });
+
+  test('charlson-comorbidity-index hides an already-picked condition from other rows', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await addItem(page, '1', '1.1', 'Has MI');
+    await setItemType(page, '1.1', 'checkbox');
+    await addItem(page, '1', '1.2', 'Has AIDS');
+    await setItemType(page, '1.2', 'checkbox');
+    await addItem(page, '1', '1.3', 'Age');
+    await setItemType(page, '1.3', 'integer');
+    await addItem(page, '1', '1.4', 'CCI Score');
+    await setItemType(page, '1.4', 'decimal');
+
+    await openValueBuilder(page, '1.4');
+    await page.getByTestId('eb-choose-gallery').click();
+    await expect(page.getByTestId('expressionGalleryModal')).toBeVisible();
+    await page.getByTestId('eg-row-charlson-comorbidity-index').click();
+
+    await pick(page, page, 'eg-slot-item-conditions-0', '1.1');
+    await pick(page, page, 'eg-slot-transform-conditions-0', 'mi');
+
+    await page.getByTestId('eg-slot-add-conditions').click();
+    await page.getByTestId('eg-slot-transform-conditions-1').click();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="mi"]')).toBeHidden();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="aids"]')).toBeVisible();
+    await page.locator('[data-testid="csel-drop"] [data-val="aids"]').click();
+    await pick(page, page, 'eg-slot-item-conditions-1', '1.2');
+
+    await pick(page, page, 'eg-slot-item-age', '1.3');
+    await page.getByTestId('eg-slot-transform-age').click();
+    await page.locator('[data-testid="csel-drop"] [data-val="age-bonus"]').click();
+
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.1'");
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.2'");
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.3'");
   });
 });

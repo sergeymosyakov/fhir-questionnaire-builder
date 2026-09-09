@@ -65,6 +65,30 @@ template: '%items%', // substituted with (row1 + row2 + ...)
 ```
 
 See `sum-of-items.js`. A pattern can mix fixed and repeatable slots freely.
+A slot can also set its own `itemTypes` to narrow (not extend) the pattern's
+default for just that slot — e.g. a numeric age slot alongside boolean
+condition rows (see `charlson-comorbidity-index.js`).
+
+## Weighted condition lists (`uniqueTransforms`)
+
+A repeatable slot's `transforms` don't have to be unit conversions — each entry
+can represent a distinct, fixed-weight condition instead (label communicates
+the weight, template applies it via `iif(%value%, weight, 0)` against a
+boolean item). Set `uniqueTransforms: true` so picking a condition in one row
+hides it from every other row's dropdown — prevents accidentally double-adding
+the same condition, at zero cost to patterns that legitimately reuse the same
+transform across rows (e.g. converting several weight items lb\u2192kg):
+
+```js
+transforms: [
+  { id: 'mi', label: 'Myocardial infarction (+1)', template: 'iif(%value%, 1, 0)' },
+  { id: 'aids', label: 'AIDS (+6)', template: 'iif(%value%, 6, 0)' },
+  // ...
+],
+uniqueTransforms: true,
+```
+
+See `charlson-comorbidity-index.js`.
 
 ## Threshold-category output
 
