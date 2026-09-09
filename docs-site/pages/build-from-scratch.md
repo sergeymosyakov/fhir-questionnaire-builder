@@ -52,6 +52,15 @@ Each question exposes a row of controls for its behaviour:
   ([FHIRPath in the builder](fhirpath.md)).
 - **Repeatable** — allow more than one answer, with optional min/max counts.
 - **Default** — a starting value for the answer.
+- **Note** — an internal **Design Note** attached to the item or group, visible
+  only in the builder (never exported into the patient-facing form) — useful for
+  leaving yourself or a collaborator a reminder about why a field is set up a
+  certain way.
+
+Most of these controls (States, Show When, Expression, Repeatable, Note, and
+Appearance) have a **Copy to…** button in their dialog that applies the same
+setting to a set of other items you pick, so you don't have to repeat the setup
+one item at a time.
 
 ## 6. Test it live
 

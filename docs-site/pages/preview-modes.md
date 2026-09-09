@@ -33,6 +33,14 @@ of the patient's form. A **View options** menu toggles each one:
 These toggles only affect the Preview display — they never change the underlying
 questionnaire.
 
+## Jumping between builder and preview
+
+Each preview row has a small **↗** icon that scrolls to and briefly highlights the
+matching node in the builder tree on the left — handy on a long form where
+scrolling to find an item by hand is slow. It works the other way too: clicking
+an item's title in the builder tree scrolls to and highlights that item's row in
+the preview.
+
 ## Testing with patient data
 
 Logic like calculations and `enableWhen` often depends on facts about the patient

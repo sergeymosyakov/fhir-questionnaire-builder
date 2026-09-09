@@ -90,6 +90,36 @@ back into blocks where possible; anything it can't represent stays editable as t
   a boolean flag from several criteria that drives a downstream `enableWhen`.
 - **Answers → value** — see the pipeline description above.
 
+## Expression Gallery
+
+On a value field, the type chooser's **📐 Choose from gallery** option opens a
+searchable library of named, ready-made calculation patterns instead of building
+from scratch. Pick a pattern, fill in which item answers each slot (with an
+optional unit conversion where relevant), and the resolved FHIRPath is dropped
+into the field as ordinary editable text — the gallery is a starting point, not a
+locked-in choice. Some patterns add rows ("+ Add item") for a variable number of
+inputs, or resolve to a named category instead of a raw number. Patterns
+currently in the gallery:
+
+| Pattern | Produces |
+|---|---|
+| BMI (metric), BMI (imperial), BMI Category (WHO) | Body-mass index, or its underweight/normal/overweight/obese category |
+| Age from birthdate | Whole years since a birthdate item |
+| Unit conversion | A single value converted between common clinical units (lb↔kg, cm↔m, °F↔°C) |
+| GAD-7 total + severity | Sum of 7 items mapped to its anxiety severity band |
+| PHQ-9 total + severity | Sum of 9 items mapped to its depression severity band |
+| CHA₂DS₂-VASc | Weighted stroke-risk score from yes/no criteria |
+| Charlson Comorbidity Index | Weighted comorbidity score (pick which conditions apply) plus an age-based bonus |
+| Sum of items | Add together as many numeric items as you need |
+
+## Understanding a result (Expression Explain)
+
+Next to a calculated value or a visibility condition, a small ✓/✗ icon appears
+once the expression has a result. Clicking it opens **Expression Explain** — a
+breakdown of the expression as a tree (for conditions: each AND/OR branch and
+leaf comparison with its own ✓/✗) so you can see exactly which part of a
+condition passed or failed, not just the overall outcome.
+
 ## Evaluation order
 
 Calculated fields often depend on one another (A → B → C). The runtime builds a

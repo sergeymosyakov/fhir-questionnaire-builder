@@ -50,12 +50,31 @@ one).
 ## Current scope
 
 - Only the **extraction** direction (`targetStructureMap`, response → resources)
-  is documented on this page. **Population** (`sourceStructureMap`, pre-filling a
-  response from source resources) is also executed in the browser — see
-  Answers ▾ → Fill via StructureMap.
+  is set up above. See **Population** below for the reverse direction.
 - Auto-created target resources are untyped unless your StructureMap rules set
   `resourceType` explicitly (there's no injected profile resolver) — the sample
   below shows the pattern.
+
+## Population (pre-filling a response from a source resource)
+
+The reverse direction — using a StructureMap to **pre-fill** answers from an
+existing resource, instead of extracting resources from the answers — runs the
+same way, entirely in the browser:
+
+1. **Get or write a `StructureMap`** that transforms a source resource (e.g.
+   `Patient`) into a `QuestionnaireResponse`.
+2. **Add it to this questionnaire** via **Contained Resources**, same as for
+   extraction.
+3. **Point the questionnaire at it**: open **Properties** → **Source
+   StructureMap** → enter `#` followed by the StructureMap's `id`, e.g.
+   `#patient-to-qr`. Like Target StructureMap, only a contained `#id` reference
+   can be resolved — there's no server to fetch an external canonical URL from.
+4. **Run it**: **Answers ▾ → 🗺️ Fill via StructureMap…** opens a dialog to
+   search for a patient by name (against your configured FHIR Base Server); the
+   StructureMap then runs in-browser against that patient record to pre-fill the
+   form's answers. No server-side `$populate` support is required — this is a
+   client-side alternative to [`$populate`](populate.md) for questionnaires that
+   already have a source StructureMap.
 
 ## Example
 

@@ -57,7 +57,16 @@ How an item looks and how the user interacts with it:
 
 - **Control type** — choose how a choice question appears: radio buttons, a
   drop-down, or check-boxes; render groups as headers/footers or as a table; show
-  hover "flyover" help (`questionnaire-itemControl`).
+  hover "flyover" help (`questionnaire-itemControl`). A choice question's radio/
+  checkbox options can also render as an **answer table** (one row for the
+  question, one column per option) via its own toggle in the answer-type editor
+  (`itemControl = atable`); a **group** renders as an HTML table (one column per
+  child item, one row per repeat instance) via the group's **Appearance → Group
+  display** setting (`itemControl = gtable`).
+- **Collapsible groups** — a group can render as a collapsible section in the
+  patient-facing view, via **States → Collapsible**: *Default open* starts
+  expanded but collapsible, *Default closed* starts collapsed
+  (`sdc-questionnaire-collapsible`).
 - **Slider** — present a number as a drag slider with a fixed step
   (`sliderStepValue`).
 - **Multi-column options** — lay a long list of choices out across several

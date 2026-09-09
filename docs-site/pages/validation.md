@@ -44,6 +44,18 @@ up, the builder can send the questionnaire (or response) to a validator and show
 the returned issues. This is optional — the live checks above work entirely in the
 browser with no server.
 
+## Quality audit (advisory, separate from validation)
+
+Alongside validation there's a separate **Quality audit** — a set of advisory
+checks that flag things which aren't strictly invalid FHIR but are usually
+authoring mistakes, e.g. an `enableWhen` condition that can never be true, or a
+choice item that would benefit from an `answerValueSet` binding it doesn't have.
+Unlike validation, the audit **never blocks import or export** — it's purely
+informational and only runs when you explicitly ask for it (**⋯ More → Validate**,
+with the **Audit** check enabled in that menu). Its findings show up alongside
+the validation results but are visually distinct so they're never mistaken for
+errors that must be fixed before exporting.
+
 ---
 
 Next: [Generate a documentation report](generate-docs.md).

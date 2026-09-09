@@ -42,6 +42,13 @@ previewing, import/export, extraction, translation — works without an account,
 your most recent work is kept as a local **Recent draft** you can restore from the
 **Questionnaires** menu.
 
+That local draft is kept up to date by **autosave** — it writes the current
+questionnaire to your browser's local storage every 15 seconds while you work, so
+a crashed tab or an accidental close doesn't lose your edits. It's on by default;
+to turn it off, uncheck **Autosave** in **⋯ More**, next to the tooltip and
+validation toggles. The same menu row shows the time of the last save once it has
+run at least once.
+
 ---
 
 Next: [FHIR field reference](field-reference.md).

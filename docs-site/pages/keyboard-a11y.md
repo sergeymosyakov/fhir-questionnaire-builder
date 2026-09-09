@@ -23,6 +23,17 @@ Modal dialogs manage focus properly:
 - **Escape** closes the dialog.
 - Focus returns to a sensible place when the dialog closes.
 
+## Undo, redo & search
+
+- **Ctrl+Z** (or **Cmd+Z**) — undo the last change; **Ctrl+Y** or **Ctrl+Shift+Z**
+  (**Cmd+Shift+Z** on Mac) — redo. The same **Undo** / **Redo** buttons are
+  always visible in the toolbar and disable themselves when there's nothing to
+  undo/redo. History covers both structural edits (add/delete/move/rename) and
+  answer changes in the preview, up to 50 steps back.
+- **Ctrl+F** (or **Cmd+F**) — jump to the preview's search box (searches the
+  visible form text, or the FHIR JSON when that view is active) instead of the
+  browser's own page search.
+
 ## Screen-reader support
 
 The interface exposes semantic roles and labels so assistive technology can make
