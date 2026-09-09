@@ -240,6 +240,13 @@ describe('validateTree — enableWhen linkId references', () => {
   it('no error when enableWhen[] is absent', () => {
     expect(errIds(validateTree([makeItem({ id: 'q1' })]))).toHaveLength(0);
   });
+
+  it('errors when an enableWhen entry is missing the question field entirely', () => {
+    const item = makeItem({ id: 'q3', enableWhen: [{ operator: 'exists', answerBoolean: true }] });
+    const issues = validateTree([item]);
+    expect(errIds(issues)).toContain('q3');
+    expect(issues.find(i => i.nodeId === 'q3').message).toMatch(/missing the required "question" field/);
+  });
 });
 
 // ── constraint key: ITLH group-or system key ──────────────────────────────────
