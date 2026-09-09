@@ -130,7 +130,9 @@ export function validateTree(tree, _values = {}, questMeta = null) {
 
     if (Array.isArray(node.enableWhen)) {
       for (const ew of node.enableWhen) {
-        if (ew.question && !allIds.includes(ew.question)) {
+        if (!ew.question) {
+          issues.push({ severity: 'error', nodeId: id, message: `Show When condition is missing the required "question" field — FHIR R4 requires every enableWhen entry to reference a source question (enableWhen.question, 1..1).` });
+        } else if (!allIds.includes(ew.question)) {
           issues.push({ severity: 'error', nodeId: id, message: `Show When references unknown linkId "${ew.question}" — the target question does not exist.` });
         }
       }
