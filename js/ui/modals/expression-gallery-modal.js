@@ -119,6 +119,8 @@ class ExpressionGalleryModal extends Modal {
   }
 
   _renderSlot(slot, eligible) {
+    if (slot.repeatable) return this._renderRepeatableSlot(slot, eligible);
+
     const row = document.createElement('div');
     row.className = 'eg-slot-row';
     row.dataset.testid = 'eg-slot-' + slot.key;
@@ -143,9 +145,13 @@ class ExpressionGalleryModal extends Modal {
     row.appendChild(itemSel.el);
 
     if (slot.transforms.length) {
+      // Idempotent: keeps an already-picked transform instead of stomping it
+      // back to the default on every re-render (e.g. triggered by a sibling
+      // repeatable slot's add/remove row).
+      const currentTransformId = this._selections[slot.key]?.transformId || slot.transforms[0].id;
       const transformSel = createCustomSelect({
         items: slot.transforms.map((t) => ({ value: t.id, label: t.label })),
-        value: this._selections[slot.key]?.transformId || slot.transforms[0].id,
+        value: currentTransformId,
         className: 'sc-trigger--sm eg-slot-transform',
         testid: 'eg-slot-transform-' + slot.key,
         onChange: (v) => {
@@ -154,8 +160,107 @@ class ExpressionGalleryModal extends Modal {
         },
       });
       row.appendChild(transformSel.el);
-      this._selections[slot.key] = { ...this._selections[slot.key], transformId: slot.transforms[0].id };
+      this._selections[slot.key] = { ...this._selections[slot.key], transformId: currentTransformId };
     }
+    return row;
+  }
+
+  // Repeatable slot: selections[slot.key] is an array of { itemId, ref, transformId? }
+  // rows, one per "+ Add" click. Re-renders only its own rows on add/remove,
+  // never the whole modal body.
+  _renderRepeatableSlot(slot, eligible) {
+    if (!this._selections[slot.key]) {
+      this._selections[slot.key] = Array.from({ length: slot.min ?? 1 }, () => ({}));
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'eg-slot-repeat';
+    wrap.dataset.testid = 'eg-slot-' + slot.key;
+
+    const lbl = document.createElement('div');
+    lbl.className = 'eg-slot-label';
+    lbl.textContent = slot.label;
+    wrap.appendChild(lbl);
+
+    const rowsWrap = document.createElement('div');
+    rowsWrap.className = 'eg-slot-repeat-rows';
+    wrap.appendChild(rowsWrap);
+
+    const renderRows = () => {
+      const rows = this._selections[slot.key];
+      rowsWrap.innerHTML = '';
+      rows.forEach((_, i) => rowsWrap.appendChild(this._renderRepeatRow(slot, eligible, i, renderRows)));
+    };
+    renderRows();
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'eg-repeat-add';
+    addBtn.textContent = '+ Add item';
+    addBtn.dataset.testid = 'eg-slot-add-' + slot.key;
+    addBtn.addEventListener('click', () => {
+      this._selections[slot.key].push({});
+      renderRows();
+      this._refreshPreview();
+    });
+    wrap.appendChild(addBtn);
+
+    return wrap;
+  }
+
+  _renderRepeatRow(slot, eligible, index, renderRows) {
+    const rows = this._selections[slot.key];
+    const sel = rows[index] || (rows[index] = {});
+
+    const row = document.createElement('div');
+    row.className = 'eg-slot-row eg-slot-repeat-row';
+    row.dataset.testid = 'eg-slot-row-' + slot.key + '-' + index;
+
+    const itemSel = createCustomSelect({
+      items: eligible.map((it) => ({ value: it.id, label: it.label })),
+      value: sel.itemId || '',
+      className: 'sc-trigger--sm eg-slot-item',
+      testid: 'eg-slot-item-' + slot.key + '-' + index,
+      searchable: true,
+      onChange: (v) => {
+        const item = eligible.find((it) => it.id === v);
+        rows[index] = { ...rows[index], itemId: v, ref: item ? itemRefExpr(item) : null };
+        this._refreshPreview();
+      },
+    });
+    row.appendChild(itemSel.el);
+
+    if (slot.transforms?.length) {
+      const currentTransformId = sel.transformId || slot.transforms[0].id;
+      const transformSel = createCustomSelect({
+        items: slot.transforms.map((t) => ({ value: t.id, label: t.label })),
+        value: currentTransformId,
+        className: 'sc-trigger--sm eg-slot-transform',
+        testid: 'eg-slot-transform-' + slot.key + '-' + index,
+        onChange: (v) => {
+          rows[index] = { ...rows[index], transformId: v };
+          this._refreshPreview();
+        },
+      });
+      row.appendChild(transformSel.el);
+      rows[index] = { ...rows[index], transformId: currentTransformId };
+    }
+
+    if (rows.length > (slot.min ?? 1)) {
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'eg-repeat-remove';
+      removeBtn.textContent = '\u2715';
+      removeBtn.dataset.tipTitle = 'Remove item';
+      removeBtn.dataset.testid = 'eg-slot-remove-' + slot.key + '-' + index;
+      removeBtn.addEventListener('click', () => {
+        rows.splice(index, 1);
+        renderRows();
+        this._refreshPreview();
+      });
+      row.appendChild(removeBtn);
+    }
+
     return row;
   }
 
