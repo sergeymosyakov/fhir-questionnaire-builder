@@ -88,8 +88,9 @@ test.describe('Expression Gallery', () => {
     await page.getByTestId('expressionGalleryModalApply').click();
     await expect(page.getByTestId('expressionGalleryModal')).toBeHidden();
     await expect(page.getByTestId('expressionBuilderModal')).toBeVisible();
-    await expect(page.getByTestId('eb-raw-input')).toContainText("linkId='1.1'");
-    await expect(page.getByTestId('eb-raw-input')).toContainText("linkId='1.2'");
+    // textarea current value lives in .value, not textContent — toHaveValue, not toContainText
+    await expect(page.getByTestId('eb-raw-input')).toHaveValue(/linkId='1\.1'/);
+    await expect(page.getByTestId('eb-raw-input')).toHaveValue(/linkId='1\.2'/);
 
     await page.getByTestId('expressionBuilderModalApply').click();
     await expect(page.getByTestId('expressionBuilderModal')).toBeHidden();
