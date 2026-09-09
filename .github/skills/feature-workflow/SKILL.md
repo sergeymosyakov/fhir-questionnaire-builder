@@ -8,6 +8,7 @@ description: "Standard end-to-end workflow for shipping any feature or fix in th
 The same flow applies to every feature, fix, or chore that touches code (not just a one-line doc tweak). Follow it in order — don't skip steps or reorder them.
 
 ## 1. Issue
+- Before creating one, search existing open issues for the same feature/gap (`gh issue list --search "<keywords>"`, including closed roadmap items) — a `roadmap`-labeled entry may already cover it. Creating a duplicate instead of reusing/closing the existing one is a real mistake caught in practice (see fhir-qb #96 vs #122), not just a theoretical risk.
 - If there's no tracking issue yet, create one (`gh issue create`) describing the gap/bug — for multi-step features, include a phased checklist (`- [ ] Phase N — ...`) so progress is visible over multiple branches/sessions.
 - **Business requirement only — no implementation details.** An issue states the *problem*: current behavior vs. expected/desired behavior (or just the desired behavior, for a from-scratch feature). No class/function/file names, no CSS selectors, no chosen mechanism, no code. A checklist item is a testable outcome ("X can be toggled back to its original size"), not an implementation step ("add class Y to file Z"). Implementation details belong in the PR description and commit messages, once a solution is chosen.
 - If one already exists, read it first (`gh issue view <n>`) — don't guess scope from memory or from a stale summary.
