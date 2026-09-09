@@ -48,6 +48,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: sudo rm -f /etc/apt/sources.list.d/google-chrome.list*
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --grep-invert @perf --max-failures=1
       # Upload the HTML report even when tests fail so it can be deployed / inspected.
@@ -78,6 +79,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: sudo rm -f /etc/apt/sources.list.d/google-chrome.list*
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --grep @perf
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

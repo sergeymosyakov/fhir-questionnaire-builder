@@ -51,6 +51,8 @@ jobs:
         if: ${{ !inputs.nuget_only }}
       - run: npm test
         if: ${{ !inputs.nuget_only }}
+      - run: sudo rm -f /etc/apt/sources.list.d/google-chrome.list*
+        if: ${{ !inputs.nuget_only }}
       - run: npx playwright install --with-deps chromium
         if: ${{ !inputs.nuget_only }}
       - run: npx playwright test --grep-invert @perf --max-failures=1
