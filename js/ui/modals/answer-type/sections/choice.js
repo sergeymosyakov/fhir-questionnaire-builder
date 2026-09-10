@@ -454,10 +454,13 @@ class ChoiceSection extends AnswerTypeSection {
         node.options = rows.map(r => r.code.trim() + '=' + r.label.trim()).join(',');
 
         // Sync _rawAnswerOptions: preserve extra Coding properties (system, etc.)
-        // and use each row's valueType to write the correct value[x] key.
-        if (node._rawAnswerOptions) {
+        // and use each row's valueType to write the correct value[x] key. Also
+        // kicks in (even if not already set) when a code/label contains a comma
+        // — the comma-joined node.options string can't hold that losslessly.
+        const needsRawOpts = rows.some(r => r.code.includes(',') || r.label.includes(','));
+        if (node._rawAnswerOptions || needsRawOpts) {
           const oldByCode = new Map();
-          for (const raw of node._rawAnswerOptions) {
+          for (const raw of node._rawAnswerOptions || []) {
             const c = raw.valueCoding;
             if (c) oldByCode.set(c.code || c.display || '', raw);
           }
