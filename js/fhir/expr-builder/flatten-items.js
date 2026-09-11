@@ -12,7 +12,7 @@ export function flattenItems(nodes, ctx = { chain: [], at: [], parentType: 'grou
     const segments = [...ctx.chain, n.id];
     const answerAt = [...ctx.at, ctx.parentType === 'item'];
     if (n.type === 'item' && hasAnswer(n.itemType)) {
-      out.push({ id: n.id, label: n.title || n.id, itemType: n.itemType, options: n.options || '', segments, answerAt: answerAt.some(Boolean) ? answerAt : [] });
+      out.push({ id: n.id, label: n.title || n.id, itemType: n.itemType, options: n.options || '', _rawAnswerOptions: n._rawAnswerOptions, segments, answerAt: answerAt.some(Boolean) ? answerAt : [] });
     }
     if (n.children?.length) flattenItems(n.children, { chain: segments, at: answerAt, parentType: n.type }, out);
   }

@@ -1,5 +1,5 @@
 ﻿// ── Action panel builders ─────────────────────────────────────────────────────
-import { parseOptions } from '../utils.js';
+import { parseOptions, rawOptsToPairs } from '../utils.js';
 import { getAllItems } from './_shared.js';
 import { AppEvents, EventState } from '../events.js';
 import { createCustomSelect } from '../ui/custom-select.js';
@@ -17,12 +17,13 @@ export function addPanel(key, buildFn, div, panels) {
 }
 
 // ── Custom question picker (styled dropdown, handles long titles) ────────────
-function buildQuestionSelect(allItems, selectedId, onSelect) {
+function buildQuestionSelect(allItems, selectedId, onSelect, idx) {
   const wrap = document.createElement('div');
   wrap.className = 'vis-q-sel';
 
   const trigger = document.createElement('div');
   trigger.className = 'vis-q-sel-trigger';
+  trigger.dataset.testid = 'vis-cond-q-trigger-' + idx;
   const found = allItems.find(it => it.id === selectedId);
   trigger.textContent = found ? found.label : '\u2014 question \u2014';
   // Tooltip shows the full (possibly truncated) question text; linkId as secondary.
@@ -45,6 +46,7 @@ function buildQuestionSelect(allItems, selectedId, onSelect) {
 
     dropEl = document.createElement('div');
     dropEl.className = 'vis-q-sel-drop';
+    dropEl.dataset.testid = 'vis-cond-q-drop';
 
     // ── Search input ─────────────────────────────────────────────────────
     const searchInp = document.createElement('input');
@@ -163,10 +165,10 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
       delete ew.answerBoolean; delete ew.answerString; delete ew.answerCoding;
       delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate; delete ew.answerQuantity;
       ew.operator = '=';
-      if (it) buildOpVal(it.itemType || '', it.options || '');
+      if (it) buildOpVal(it.itemType || '', it.options || '', it._rawAnswerOptions);
       else opSel.setOptions([{ value: '', label: '\u2014' }]);
       syncActive();
-    });
+    }, idx);
 
     const opSel = createCustomSelect({ items: [], value: '', className: 'sc-trigger--sm vis-cond-op-wrap' });
 
@@ -184,7 +186,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
       syncActive();
     };
 
-    const buildOpVal = (itype, opts) => {
+    const buildOpVal = (itype, opts, rawOpts) => {
       valWrap.innerHTML = '';
 
       // Adds "has answer" / "has no answer" to any operator items array
@@ -206,7 +208,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
             const sel = v;
             ew.operator = sel;
             delete ew.answerBoolean;
-            buildOpVal(itype, opts);
+            buildOpVal(itype, opts, rawOpts);
             opSel.setValue(sel);
           }
         });
@@ -240,9 +242,10 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
           opSel.setValue(ew.operator || '=');
           if (opts) {
             const valCsel = createCustomSelect({
-              items:    parseOptions(opts).map(({ code, display }) => ({ value: code, label: display || code })),
+              items:    (rawOpts ? rawOptsToPairs(rawOpts) : parseOptions(opts)).map(({ code, display }) => ({ value: code, label: display || code })),
               value:    ew.answerCoding?.code || '',
               className: 'sc-trigger--sm vis-cond-val-inp',
+              testid:   'vis-cond-val-sel-' + idx,
               onChange: (v, item) => { ew.answerCoding = { code: v, display: item.label }; },
             });
             valWrap.appendChild(valCsel.el);
@@ -374,7 +377,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
     };
 
     const selItem = allItems.find(it => it.id === ew.question);
-    if (selItem) buildOpVal(selItem.itemType || '', selItem.options || '');
+    if (selItem) buildOpVal(selItem.itemType || '', selItem.options || '', selItem._rawAnswerOptions);
     else opSel.setOptions([{ value: '', label: '\u2014' }]);
 
     row.appendChild(qWidget);
