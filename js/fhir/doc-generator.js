@@ -5,7 +5,7 @@
 // live builder exactly. No DOM, no EventState — all state is passed in.
 import { validateTree } from './validate.js';
 import { auditTree } from './audit.js';
-import { parseOptions } from '../utils.js';
+import { parseOptions, rawOptsToPairs } from '../utils.js';
 import { LANGUAGES_MAP } from './languages.js';
 import { COPYRIGHT_HTML } from '../ui/copyright-notice.js';
 import { parseExprTree } from './explain.js';
@@ -272,7 +272,7 @@ function walkNode(node, linkIdMap, translations, fp, depth, out, contained) {
     constraints: (node.constraint || []).map(c => ({
       key: c.key, severity: c.severity, human: c.human, expression: c.expression,
     })),
-    options: node.options ? parseOptions(node.options).map(o => ({
+    options: node.options ? (node._rawAnswerOptions ? rawOptsToPairs(node._rawAnswerOptions) : parseOptions(node.options)).map(o => ({
       ...o,
       translations: translationsFor('opt', node.id + '__' + o.code, translations),
       answerMedia: node._answerMedias?.[o.code] || null,
