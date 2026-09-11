@@ -4,6 +4,7 @@
 // leaf text stays editable. Reuses the block model, emit and parse.
 import { createCustomSelect } from '../../custom-select.js';
 import { parseOptions } from '../../../utils.js';
+import { rawOptsToPairs } from '../../../utils.js';
 import { itemRef, literal, compare, exists, BlockKind } from '../../../fhir/expr-builder/model.js';
 import { emit } from '../../../fhir/expr-builder/emit.js';
 import { parseExpression } from '../../../fhir/expr-builder/parse.js';
@@ -174,7 +175,8 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
       return sel.el;
     }
     if ((t === 'select' || t === 'radio' || t === 'open-choice' || t === 'checklist') && row.item.options) {
-      const opts = parseOptions(row.item.options).map(({ code, display }) => ({ value: code, label: display || code }));
+      const opts = (row.item._rawAnswerOptions ? rawOptsToPairs(row.item._rawAnswerOptions) : parseOptions(row.item.options))
+        .map(({ code, display }) => ({ value: code, label: display || code }));
       const sel = createCustomSelect({
         items: opts.length ? opts : [{ value: '', label: '\u2014' }],
         value: row.value || (opts[0]?.value ?? ''),
