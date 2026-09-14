@@ -8,6 +8,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { FHIR } from '../js/fhir/urls/fhir.js';
 import { LOINC_URL } from '../js/fhir/urls/loinc.js';
 import { UCUM_URL } from '../js/fhir/urls/ucum.js';
+import { parseOptions } from '../js/utils.js';
 
 const _tree = [];
 const _questVariables = [];
@@ -33,8 +34,22 @@ const { buildFHIRObject, exportFHIR } = await import('../js/fhir/export.js');
 const { AppEvents, EventState } = await import('../js/events.js');
 EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc: _questDoc });
 
+// `options` shorthand ("code=label,...") is converted to _rawAnswerOptions —
+// the only field the production code reads.
+function _withRawOpts(n) {
+  const out = { ...n };
+  if (out.options !== undefined) {
+    if (!out._rawAnswerOptions && out.options) {
+      out._rawAnswerOptions = parseOptions(out.options).map(({ code, display }) => ({ valueCoding: { code, display } }));
+    }
+    delete out.options;
+  }
+  if (out.children) out.children = out.children.map(_withRawOpts);
+  return out;
+}
+
 function build(nodes, title = 'Test Q', vars = []) {
-  _tree.splice(0, _tree.length, ...nodes);
+  _tree.splice(0, _tree.length, ...nodes.map(_withRawOpts));
   _questVariables.splice(0, _questVariables.length, ...vars);
   _questDoc.rawFhir = { title };
   return buildFHIRObject();
@@ -414,11 +429,13 @@ describe('buildFHIRObject — _optionPrefixes', () => {
 
 // ── _optionSystems ────────────────────────────────────────────────────────────
 describe('buildFHIRObject — _optionSystems', () => {
-  it('includes system in valueCoding when _optionSystems is set', () => {
+  it('includes system in valueCoding when set on the raw option', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'select',
-      options: 'a=Option A,b=Option B',
-      _optionSystems: { a: 'https://example.org/codes', b: LOINC_URL.system },
+      _rawAnswerOptions: [
+        { valueCoding: { system: 'https://example.org/codes', code: 'a', display: 'Option A' } },
+        { valueCoding: { system: LOINC_URL.system, code: 'b', display: 'Option B' } },
+      ],
     }]);
     const opts = q.item[0].answerOption || [];
     const optA = opts.find(o => o.valueCoding?.code === 'a');
@@ -427,20 +444,22 @@ describe('buildFHIRObject — _optionSystems', () => {
     expect(optB?.valueCoding?.system).toBe(LOINC_URL.system);
   });
 
-  it('omits system in valueCoding when _optionSystems is absent', () => {
+  it('omits system in valueCoding when absent from the raw option', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'select',
-      options: 'a=Option A',
+      _rawAnswerOptions: [{ valueCoding: { code: 'a', display: 'Option A' } }],
     }]);
     const opts = q.item[0].answerOption || [];
     expect(opts[0].valueCoding?.system).toBeUndefined();
   });
 
-  it('only includes system for codes present in _optionSystems', () => {
+  it('only includes system for options that carry one', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'select',
-      options: 'a=Option A,b=Option B',
-      _optionSystems: { a: 'https://example.org/codes' },
+      _rawAnswerOptions: [
+        { valueCoding: { system: 'https://example.org/codes', code: 'a', display: 'Option A' } },
+        { valueCoding: { code: 'b', display: 'Option B' } },
+      ],
     }]);
     const opts = q.item[0].answerOption || [];
     const optB = opts.find(o => o.valueCoding?.code === 'b');
@@ -450,11 +469,11 @@ describe('buildFHIRObject — _optionSystems', () => {
   it('system appears before code in valueCoding (FHIR property order)', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'select',
-      options: 'a=Option A',
-      _optionSystems: { a: 'https://example.org/codes' },
+      _rawAnswerOptions: [{ valueCoding: { system: 'https://example.org/codes', code: 'a', display: 'Option A' } }],
     }]);
     const coding = q.item[0].answerOption[0].valueCoding;
     const keys = Object.keys(coding);
+    expect(keys).toContain('system');
     expect(keys.indexOf('system')).toBeLessThan(keys.indexOf('code'));
   });
 });
@@ -828,7 +847,7 @@ describe('buildFHIRObject — designNote', () => {
 // ── answerExpression export ───────────────────────────────────────────────────
 describe('buildFHIRObject — answerExpression', () => {
   const AE_URL = FHIR.answerExpression;
-  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
+  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes.map(_withRawOpts)); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
 
   it('exports _answerExpression as valueExpression extension', () => {
     const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: '', _answerExpression: "'a' | 'b'" }]);
@@ -865,7 +884,7 @@ describe('buildFHIRObject — answerExpression', () => {
 // ── candidateExpression export ────────────────────────────────────────────────
 describe('buildFHIRObject — candidateExpression', () => {
   const CE_URL = FHIR.candidateExpression;
-  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
+  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes.map(_withRawOpts)); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
 
   it('exports _candidateExpression as valueExpression extension', () => {
     const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: '', _candidateExpression: "'a' | 'b'" }]);
@@ -896,7 +915,7 @@ describe('buildFHIRObject — candidateExpression', () => {
 // ── isSubject export ──────────────────────────────────────────────────────────
 describe('buildFHIRObject — isSubject', () => {
   const IS_URL = FHIR.isSubject;
-  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
+  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes.map(_withRawOpts)); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
 
   it('exports _isSubject as valueBoolean extension', () => {
     const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'reference', _isSubject: true }]);
@@ -920,7 +939,7 @@ describe('buildFHIRObject — isSubject', () => {
 // ── columnCount export ────────────────────────────────────────────────────────
 describe('buildFHIRObject — columnCount', () => {
   const CC_URL = FHIR.columnCount;
-  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
+  const _build = nodes => { _tree.splice(0, _tree.length, ...nodes.map(_withRawOpts)); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
 
   it('exports _columnCount as valueInteger extension', () => {
     const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A,b=B', _columnCount: 3 }]);

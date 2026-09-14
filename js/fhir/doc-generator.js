@@ -5,7 +5,7 @@
 // live builder exactly. No DOM, no EventState — all state is passed in.
 import { validateTree } from './validate.js';
 import { auditTree } from './audit.js';
-import { parseOptions, rawOptsToPairs } from '../utils.js';
+import { rawOptsToPairs } from '../utils.js';
 import { LANGUAGES_MAP } from './languages.js';
 import { COPYRIGHT_HTML } from '../ui/copyright-notice.js';
 import { parseExprTree } from './explain.js';
@@ -272,7 +272,7 @@ function walkNode(node, linkIdMap, translations, fp, depth, out, contained) {
     constraints: (node.constraint || []).map(c => ({
       key: c.key, severity: c.severity, human: c.human, expression: c.expression,
     })),
-    options: node.options ? (node._rawAnswerOptions ? rawOptsToPairs(node._rawAnswerOptions) : parseOptions(node.options)).map(o => ({
+    options: rawOptsToPairs(node._rawAnswerOptions).map(o => ({
       ...o,
       translations: translationsFor('opt', node.id + '__' + o.code, translations),
       answerMedia: node._answerMedias?.[o.code] || null,
@@ -281,7 +281,7 @@ function walkNode(node, linkIdMap, translations, fp, depth, out, contained) {
       exclusive: !!node._optionExclusives?.[o.code],
       weight: node._optionWeights?.[o.code] ?? null,
       initialSelected: node._initialSelected !== undefined && String(o.code) === String(node._initialSelected),
-    })) : [],
+    })),
   });
   for (const c of node.children || []) walkNode(c, linkIdMap, translations, fp, depth + 1, out, contained);
 }

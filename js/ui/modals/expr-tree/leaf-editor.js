@@ -3,7 +3,6 @@
 // shape (item compare / exists) it shows friendly controls; otherwise the raw
 // leaf text stays editable. Reuses the block model, emit and parse.
 import { createCustomSelect } from '../../custom-select.js';
-import { parseOptions } from '../../../utils.js';
 import { rawOptsToPairs } from '../../../utils.js';
 import { itemRef, literal, compare, exists, BlockKind } from '../../../fhir/expr-builder/model.js';
 import { emit } from '../../../fhir/expr-builder/emit.js';
@@ -174,9 +173,8 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
       row.value = row.value === 'false' ? 'false' : 'true';
       return sel.el;
     }
-    if ((t === 'select' || t === 'radio' || t === 'open-choice' || t === 'checklist') && row.item.options) {
-      const opts = (row.item._rawAnswerOptions ? rawOptsToPairs(row.item._rawAnswerOptions) : parseOptions(row.item.options))
-        .map(({ code, display }) => ({ value: code, label: display || code }));
+    if ((t === 'select' || t === 'radio' || t === 'open-choice' || t === 'checklist') && row.item._rawAnswerOptions?.length) {
+      const opts = rawOptsToPairs(row.item._rawAnswerOptions).map(({ code, display }) => ({ value: code, label: display || code }));
       const sel = createCustomSelect({
         items: opts.length ? opts : [{ value: '', label: '\u2014' }],
         value: row.value || (opts[0]?.value ?? ''),

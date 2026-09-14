@@ -4,9 +4,10 @@ import { uiStr } from '../preview/render-ctx.js';
 // Optional FHIR-imported properties set after construction (all item types):
 //   _readOnly, _prefix, _definition, _codes, _hidden, _designNote,
 //   _renderXhtml, _renderStyle, _supportLinks, _disabledDisplay,
-//   _enableWhenText, _unknownExtensions, _answerValueSet,
+//   _enableWhenText, _unknownExtensions, _answerValueSet, _rawAnswerOptions,
 //   _initialValue, _initialValues, _initialSelected
 import { BaseNode, applyRenderStyle } from './base-node.js';
+import { parseOptions } from '../utils.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
 
 export class ItemNode extends BaseNode {
@@ -14,10 +15,16 @@ export class ItemNode extends BaseNode {
     super(data);
     this.type           = 'item';
     this.repeats         = data.repeats         ?? false;
-    this.options         = data.options         ?? '';
     this.constraint      = data.constraint      ?? [];
     this.children        = data.children        ?? [];
     this.logicWithParent = data.logicWithParent ?? 'AND';
+    // _rawAnswerOptions is the only stored answer-options field. `options`
+    // ("code=label,code=label") is accepted here only as construction shorthand.
+    if (data._rawAnswerOptions) {
+      this._rawAnswerOptions = data._rawAnswerOptions;
+    } else if (data.options) {
+      this._rawAnswerOptions = parseOptions(data.options).map(({ code, display }) => ({ valueCoding: { code, display } }));
+    }
   }
 
   /** Abort own listeners and recursively destroy children. */
