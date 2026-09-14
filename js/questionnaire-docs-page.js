@@ -269,7 +269,7 @@ function renderItem(entry) {
     children.push(p);
   }
   if (entry.options.length) {
-    children.push(el('ul', { className: 'qdoc-options' }, entry.options.map(o => {
+    children.push(el('ul', { className: 'qdoc-options', testid: 'qdoc-options-' + entry.id }, entry.options.map(o => {
       const li = el('li', { text: optionLabel(o) });
       const ott = translationList(o.translations);
       if (ott) li.appendChild(ott);
