@@ -45,7 +45,7 @@ export function createItemNodeFromTemplate(title, template) {
     title,
     mandatory:  template.mandatory,
     repeats:    template.repeats || false,
-    options:    template.options,
+    _rawAnswerOptions: template._rawAnswerOptions ? structuredClone(template._rawAnswerOptions) : undefined,
     constraint: template.constraint ? template.constraint.map(c => ({ ...c })) : [],
   });
 }

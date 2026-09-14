@@ -1,7 +1,7 @@
 // ── ChoiceNode helpers ────────────────────────────────────────────────────────
 // Pure option-resolution and choiceColumn rendering helpers shared by
 // ChoiceNode / RadioNode / OpenChoiceNode (js/nodes/choice-node.js).
-import { parseOptions, rawOptsToPairs } from '../utils.js';
+import { rawOptsToPairs } from '../utils.js';
 import { fhirModel } from '../fhir/fhir-model.js';
 
 // Evaluate the answer-source expression (SDC answerExpression or
@@ -11,8 +11,7 @@ import { fhirModel } from '../fhir/fhir-model.js';
 // For external answerValueSet items, reads node._vsCache populated by
 // terminologyService.expandAll() — returns [] if expansion not yet done.
 export function _nodeOpts(node) {
-  if (node._rawAnswerOptions) return rawOptsToPairs(node._rawAnswerOptions);
-  return parseOptions(node.options);
+  return rawOptsToPairs(node._rawAnswerOptions);
 }
 
 export function _evalAnswerOpts(node, fpCtx) {

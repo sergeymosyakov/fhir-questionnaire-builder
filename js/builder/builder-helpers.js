@@ -192,7 +192,7 @@ export function addChildGearItems(gear, node) {
     const n = template
       ? new Cls({ title: 'New Item', itemType: template.itemType,
                   mandatory: template.mandatory, repeats: template.repeats || false,
-                  options: template.options,
+                  _rawAnswerOptions: template._rawAnswerOptions ? structuredClone(template._rawAnswerOptions) : undefined,
                   constraint: template.constraint ? template.constraint.map(c => ({ ...c })) : [] })
       : new Cls({ title: 'New Item', itemType: 'text' });
     n.id = node.id + '.' + String(node.children.length + 1);

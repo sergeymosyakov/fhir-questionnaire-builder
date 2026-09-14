@@ -67,13 +67,13 @@ describe('import → export round-trip with comma in option display', () => {
     expect(out.answerOption[0].valueCoding.code).toBe('E1220');
   });
 
-  it('leaves comma-free coding options on the plain options path', () => {
+  it('leaves comma-free coding options intact too (single canonical field)', () => {
     importFHIR(minQ([choiceItem([
       { code: 'E1039', display: 'E1039 - Transport chair' },
       { code: 'K0002', display: 'K0002 - Standard hemi wheelchair' },
     ])]));
 
-    expect(_tree[0]._rawAnswerOptions).toBeUndefined();
+    expect(_tree[0]._rawAnswerOptions).toHaveLength(2);
     const out = nodeToFHIRItem(_tree[0]);
     expect(out.answerOption).toHaveLength(2);
   });

@@ -86,7 +86,8 @@ describe('createGroupNode / createItemNode', () => {
     expect(n.title).toBe('Copy');
     expect(n.mandatory).toBe(false);
     expect(n.repeats).toBe(true);
-    expect(n.options).toBe('a|b');
+    expect(n._rawAnswerOptions).toEqual([{ valueCoding: { code: 'a|b', display: 'a|b' } }]);
+    expect(n._rawAnswerOptions).not.toBe(tpl._rawAnswerOptions); // deep copy
     expect(n.constraint).toEqual([{ key: 'k1' }]);
     expect(n.constraint).not.toBe(tpl.constraint); // deep copy
     expect(n.id).not.toBe(tpl.id);

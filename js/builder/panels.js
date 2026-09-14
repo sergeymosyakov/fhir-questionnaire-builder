@@ -1,5 +1,5 @@
 ﻿// ── Action panel builders ─────────────────────────────────────────────────────
-import { parseOptions, rawOptsToPairs } from '../utils.js';
+import { rawOptsToPairs } from '../utils.js';
 import { getAllItems } from './_shared.js';
 import { AppEvents, EventState } from '../events.js';
 import { createCustomSelect } from '../ui/custom-select.js';
@@ -165,7 +165,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
       delete ew.answerBoolean; delete ew.answerString; delete ew.answerCoding;
       delete ew.answerDecimal; delete ew.answerInteger; delete ew.answerDate; delete ew.answerQuantity;
       ew.operator = '=';
-      if (it) buildOpVal(it.itemType || '', it.options || '', it._rawAnswerOptions);
+      if (it) buildOpVal(it.itemType || '', it._rawAnswerOptions);
       else opSel.setOptions([{ value: '', label: '\u2014' }]);
       syncActive();
     }, idx);
@@ -186,7 +186,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
       syncActive();
     };
 
-    const buildOpVal = (itype, opts, rawOpts) => {
+    const buildOpVal = (itype, rawOpts) => {
       valWrap.innerHTML = '';
 
       // Adds "has answer" / "has no answer" to any operator items array
@@ -208,7 +208,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
             const sel = v;
             ew.operator = sel;
             delete ew.answerBoolean;
-            buildOpVal(itype, opts, rawOpts);
+            buildOpVal(itype, rawOpts);
             opSel.setValue(sel);
           }
         });
@@ -240,9 +240,9 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
           opSel.setValue('exists|' + (ew.answerBoolean === false ? 'false' : 'true'));
         } else {
           opSel.setValue(ew.operator || '=');
-          if (opts) {
+          if (rawOpts?.length) {
             const valCsel = createCustomSelect({
-              items:    (rawOpts ? rawOptsToPairs(rawOpts) : parseOptions(opts)).map(({ code, display }) => ({ value: code, label: display || code })),
+              items:    rawOptsToPairs(rawOpts).map(({ code, display }) => ({ value: code, label: display || code })),
               value:    ew.answerCoding?.code || '',
               className: 'sc-trigger--sm vis-cond-val-inp',
               testid:   'vis-cond-val-sel-' + idx,
@@ -377,7 +377,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
     };
 
     const selItem = allItems.find(it => it.id === ew.question);
-    if (selItem) buildOpVal(selItem.itemType || '', selItem.options || '', selItem._rawAnswerOptions);
+    if (selItem) buildOpVal(selItem.itemType || '', selItem._rawAnswerOptions);
     else opSel.setOptions([{ value: '', label: '\u2014' }]);
 
     row.appendChild(qWidget);

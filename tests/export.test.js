@@ -4,6 +4,7 @@
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { FHIR } from '../js/fhir/urls/fhir.js';
 import { APP_URL } from '../js/fhir/urls/app.js';
+import { parseOptions } from '../js/utils.js';
 
 // Minimal state mock — buildFHIRObject reads questDoc via _svc
 const _tree = [];
@@ -30,9 +31,23 @@ const { buildFHIRObject } = await import('../js/fhir/export.js');
 const { AppEvents, EventState } = await import('../js/events.js');
 EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc: _questDoc });
 
+// `options` shorthand ("code=label,...") is converted to _rawAnswerOptions —
+// the only field the production code reads.
+function _withRawOpts(n) {
+  const out = { ...n };
+  if (out.options !== undefined) {
+    if (!out._rawAnswerOptions && out.options) {
+      out._rawAnswerOptions = parseOptions(out.options).map(({ code, display }) => ({ valueCoding: { code, display } }));
+    }
+    delete out.options;
+  }
+  if (out.children) out.children = out.children.map(_withRawOpts);
+  return out;
+}
+
 // Helper: reset tree and run buildFHIRObject
 function build(nodes, title = 'Test Q', vars = []) {
-  _tree.splice(0, _tree.length, ...nodes);
+  _tree.splice(0, _tree.length, ...nodes.map(_withRawOpts));
   _questVariables.splice(0, _questVariables.length, ...vars);
   _questDoc.rawFhir = { title };
   return buildFHIRObject();
@@ -756,7 +771,8 @@ describe('buildFHIRObject — translations export', () => {
     _tree.length = 0;
     _tree.push({
       id: 'q1', type: 'item', itemType: 'radio', title: 'Choice Q',
-      enableWhen: [], constraint: [], options: 'M, F', mandatory: false, repeats: false, children: [],
+      enableWhen: [], constraint: [], mandatory: false, repeats: false, children: [],
+      _rawAnswerOptions: [{ valueCoding: { code: 'M', display: 'M' } }, { valueCoding: { code: 'F', display: 'F' } }],
     });
     _questDoc.translations = {
       de: { title: '', items: {}, opts: { 'q1__M': 'Männlich' }, ui: {}, xhtml: {} },

@@ -515,7 +515,7 @@ describe('importFHIR', () => {
     expect(_tree[0]._answerValueSet).toBeUndefined();
   });
 
-  it('resolves local #vs-id answerValueSet into node.options from contained[]', () => {
+  it('resolves local #vs-id answerValueSet into _rawAnswerOptions from contained[]', () => {
     importFHIR({
       resourceType: 'Questionnaire',
       contained: [{
@@ -529,16 +529,19 @@ describe('importFHIR', () => {
       item: [{ linkId: 'q1', type: 'choice', text: 'Diet', answerValueSet: '#vs-diet' }],
     });
     expect(_tree[0]._answerValueSet).toBe('#vs-diet');
-    expect(_tree[0].options).toBe('veg=Vegetarian,omn=Omnivore');
+    expect(_tree[0]._rawAnswerOptions).toEqual([
+      { valueCoding: { code: 'veg', display: 'Vegetarian' } },
+      { valueCoding: { code: 'omn', display: 'Omnivore' } },
+    ]);
   });
 
-  it('leaves options empty for external answerValueSet URL', () => {
+  it('leaves _rawAnswerOptions unset for external answerValueSet URL', () => {
     importFHIR(minQ([{
       linkId: 'q1', type: 'choice', text: 'Occupation',
       answerValueSet: FHIR.vs + '/occupation-snomed-ct',
     }]));
     expect(_tree[0]._answerValueSet).toBe(FHIR.vs + '/occupation-snomed-ct');
-    expect(_tree[0].options).toBe('');
+    expect(_tree[0]._rawAnswerOptions).toBeUndefined();
   });
 
   // ── questMeta population ──────────────────────────────────────────────────────
@@ -825,21 +828,17 @@ describe('importFHIR', () => {
       expect(_tree[0]._rawAnswerOptions).toHaveLength(2);
     });
 
-    it('is NOT set when all answerOptions are valueCoding', () => {
+    it('is set when all answerOptions are valueCoding too (single canonical field)', () => {
       importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
         answerOption: [
           { valueCoding: { code: 'y', display: 'Yes' } },
           { valueCoding: { code: 'n', display: 'No' } },
         ],
       }]));
-      expect(_tree[0]._rawAnswerOptions).toBeUndefined();
-    });
-
-    it('node.options string is still populated for display', () => {
-      importFHIR(minQ([{ linkId: 'q1', type: 'choice', text: 'Q',
-        answerOption: [{ valueString: 'Email' }, { valueString: 'Phone' }],
-      }]));
-      expect(_tree[0].options).toBe('Email, Phone');
+      expect(_tree[0]._rawAnswerOptions).toEqual([
+        { valueCoding: { code: 'y', display: 'Yes' } },
+        { valueCoding: { code: 'n', display: 'No' } },
+      ]);
     });
   });
   describe('item.initial[] multi-value', () => {

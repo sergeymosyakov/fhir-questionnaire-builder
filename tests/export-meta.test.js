@@ -6,6 +6,7 @@ import { FHIR } from '../js/fhir/urls/fhir.js';
 import { LOINC_URL } from '../js/fhir/urls/loinc.js';
 import { SNOMED_URL } from '../js/fhir/urls/snomed.js';
 import { W3C_URL } from '../js/fhir/urls/w3c.js';
+import { parseOptions } from '../js/utils.js';
 
 const _tree = [];
 const _questVariables = [];
@@ -32,8 +33,22 @@ const { generateNarrativeDiv } = await import('../js/fhir/export.js');
 const { AppEvents, EventState } = await import('../js/events.js');
 EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc: _questDoc });
 
+// `options` shorthand ("code=label,...") is converted to _rawAnswerOptions —
+// the only field the production code reads.
+function _withRawOpts(n) {
+  const out = { ...n };
+  if (out.options !== undefined) {
+    if (!out._rawAnswerOptions && out.options) {
+      out._rawAnswerOptions = parseOptions(out.options).map(({ code, display }) => ({ valueCoding: { code, display } }));
+    }
+    delete out.options;
+  }
+  if (out.children) out.children = out.children.map(_withRawOpts);
+  return out;
+}
+
 function build(nodes, title = 'Test Q', vars = []) {
-  _tree.splice(0, _tree.length, ...nodes);
+  _tree.splice(0, _tree.length, ...nodes.map(_withRawOpts));
   _questVariables.splice(0, _questVariables.length, ...vars);
   _questDoc.rawFhir = { title };
   return buildFHIRObject();

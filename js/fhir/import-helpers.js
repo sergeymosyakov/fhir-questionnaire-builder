@@ -192,17 +192,17 @@ export function applyConstraints(node, fhirItem) {
   return hasOrGroup;
 }
 
-// Extract options string from a contained[] ValueSet referenced by '#id'
+// Extract a _rawAnswerOptions-shaped array from a contained[] ValueSet referenced by '#id'
 export function resolveContainedValueSet(contained, ref) {
-  if (!ref || !ref.startsWith('#')) return '';
+  if (!ref || !ref.startsWith('#')) return [];
   const id = ref.slice(1);
   const vs = (contained || []).find(r => r.resourceType === 'ValueSet' && r.id === id);
-  if (!vs) return '';
+  if (!vs) return [];
   const parts = [];
   for (const inc of vs.compose?.include || []) {
     for (const c of inc.concept || []) {
-      if (c.code) parts.push(c.code + (c.display ? '=' + c.display : ''));
+      if (c.code) parts.push({ valueCoding: { code: c.code, ...(c.display ? { display: c.display } : {}) } });
     }
   }
-  return parts.join(',');
+  return parts;
 }

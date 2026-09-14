@@ -9,16 +9,26 @@ beforeAll(() => {
 
 const { generateQuestionnaireDoc, DOC_LEGEND, buildItemTree } = await import('../js/fhir/doc-generator.js');
 const { COPYRIGHT_HTML } = await import('../js/ui/copyright-notice.js');
+const { parseOptions } = await import('../js/utils.js');
 const { loadFhirpath } = await import('./helpers/fhirpath-node.js');
 const fp = loadFhirpath();
 
-const makeItem = (overrides = {}) => ({
-  id: 'q1', type: 'item', title: 'Question 1',
-  itemType: 'text', options: '', mandatory: false, repeats: false,
-  enableWhen: [], enableBehavior: 'all', enableWhenExpression: '',
-  constraint: [], children: [],
-  ...overrides,
-});
+// `options` shorthand ("code=label,...") is converted to _rawAnswerOptions —
+// the only field the production code reads.
+const makeItem = (overrides = {}) => {
+  const item = {
+    id: 'q1', type: 'item', title: 'Question 1',
+    itemType: 'text', options: '', mandatory: false, repeats: false,
+    enableWhen: [], enableBehavior: 'all', enableWhenExpression: '',
+    constraint: [], children: [],
+    ...overrides,
+  };
+  if (!item._rawAnswerOptions && item.options) {
+    item._rawAnswerOptions = parseOptions(item.options).map(({ code, display }) => ({ valueCoding: { code, display } }));
+  }
+  delete item.options;
+  return item;
+};
 
 const baseDeps = (tree, extra = {}) => ({
   tree, questMeta: { title: 'Demo', status: 'draft' }, values: {}, variables: [], translations: {},

@@ -1,5 +1,5 @@
 ﻿// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
-import { parseOptions, ITLH_KEY_GROUP_OR } from '../utils.js';
+import { ITLH_KEY_GROUP_OR } from '../utils.js';
 import { formatRegistry } from './format-registry.js';import { ANSWER_SOURCE_EXPR_EXTS } from './import-helpers.js';import './formats/r4.js';
 import './formats/r4b.js';
 import './formats/r5.js';
@@ -108,7 +108,7 @@ export function nodeToFHIRItem(node) {
   // que-11: must be absent when answerOption[] is present (use answerOption[].initialSelected instead)
   // Also suppressed when answerValueSet or an answer-source expression is set (same constraint applies)
   const hasAnswerOptions = node.type === 'item' && (
-    node.options || node._rawAnswerOptions || node._answerValueSet || node._answerExpression || node._candidateExpression
+    node._rawAnswerOptions || node._answerValueSet || node._answerExpression || node._candidateExpression
   );
   // que-8: display items cannot have initial[] (R4 invariant)
   if (node.type === 'item' && node.itemType !== 'display' && !hasAnswerOptions) {
@@ -235,72 +235,45 @@ export function nodeToFHIRItem(node) {
 
   if (node.type === 'group') {
     fhirItem.item = node.children.map(nodeToFHIRItem);
-  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice' || node.itemType === 'checklist') && (node.options || node._rawAnswerOptions) && !node._answerValueSet && !node._answerExpression && !node._candidateExpression) {
-    if (node._rawAnswerOptions) {
-      // Round-trip: preserve the original non-valueCoding FHIR answerOption[] types
-      fhirItem.answerOption = node._rawAnswerOptions.map(opt => {
-        const key = opt.valueCoding
-          ? (opt.valueCoding.code || opt.valueCoding.display || '')
-          : opt.valueString  !== undefined ? opt.valueString
-          : opt.valueInteger !== undefined ? String(opt.valueInteger)
-          : opt.valueDate    !== undefined ? opt.valueDate
-          : opt.valueTime    !== undefined ? opt.valueTime
-          : opt.valueReference ? (typeof opt.valueReference === 'string' ? opt.valueReference : (opt.valueReference.reference || ''))
-          : '';
-        const optOut = { ...opt };
-        const MANAGED_OPT_EXTS = new Set([
-          FHIR.ordinalValue,
-          FHIR.optionPrefix,
-          FHIR.optionExclusive,
-          FHIR.itemWeight,
-          FHIR.answerMedia,
-        ]);
-        const optExts = (opt.extension || []).filter(e => !MANAGED_OPT_EXTS.has(e.url));
-        if (node._optionOrdinals?.[key] !== undefined) {
-          optExts.push({ url: FHIR.ordinalValue, valueDecimal: node._optionOrdinals[key] });
-        }
-        if (node._optionPrefixes?.[key]) {
-          optExts.push({ url: FHIR.optionPrefix, valueString: node._optionPrefixes[key] });
-        }
-        if (node._optionExclusives?.[key]) {
-          optExts.push({ url: FHIR.optionExclusive, valueBoolean: true });
-        }
-        if (node._optionWeights?.[key] !== undefined) {
-          optExts.push({ url: FHIR.itemWeight, valueDecimal: node._optionWeights[key] });
-        }
-        if (node._answerMedias?.[key]) {
-          optExts.push({ url: FHIR.answerMedia, valueAttachment: node._answerMedias[key] });
-        }
-        if (optExts.length) optOut.extension = optExts;
-        if (node._initialSelected === key) optOut.initialSelected = true;
-        return optOut;
-      });
-    } else {
-    fhirItem.answerOption = parseOptions(node.options)
-      .map(({ code, display }) => {
-        const coding = { ...(node._optionSystems?.[code] ? { system: node._optionSystems[code] } : {}), code, display };
-        const answerOpt = { valueCoding: coding };
-        const optExts = [];
-        if (node._optionOrdinals && node._optionOrdinals[code] !== undefined) {
-          optExts.push({ url: FHIR.ordinalValue, valueDecimal: node._optionOrdinals[code] });
-        }
-        if (node._optionPrefixes && node._optionPrefixes[code] !== undefined) {
-          optExts.push({ url: FHIR.optionPrefix, valueString: node._optionPrefixes[code] });
-        }
-        if (node._optionExclusives && node._optionExclusives[code]) {
-          optExts.push({ url: FHIR.optionExclusive, valueBoolean: true });
-        }
-        if (node._optionWeights && node._optionWeights[code] !== undefined) {
-          optExts.push({ url: FHIR.itemWeight, valueDecimal: node._optionWeights[code] });
-        }
-        if (node._answerMedias && node._answerMedias[code]) {
-          optExts.push({ url: FHIR.answerMedia, valueAttachment: node._answerMedias[code] });
-        }
-        if (optExts.length) answerOpt.extension = optExts;
-        if (node._initialSelected === code) answerOpt.initialSelected = true;
-        return answerOpt;
-      });
-    }
+  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice' || node.itemType === 'checklist') && node._rawAnswerOptions && !node._answerValueSet && !node._answerExpression && !node._candidateExpression) {
+    // Round-trip: preserve the original non-valueCoding FHIR answerOption[] types
+    fhirItem.answerOption = node._rawAnswerOptions.map(opt => {
+      const key = opt.valueCoding
+        ? (opt.valueCoding.code || opt.valueCoding.display || '')
+        : opt.valueString  !== undefined ? opt.valueString
+        : opt.valueInteger !== undefined ? String(opt.valueInteger)
+        : opt.valueDate    !== undefined ? opt.valueDate
+        : opt.valueTime    !== undefined ? opt.valueTime
+        : opt.valueReference ? (typeof opt.valueReference === 'string' ? opt.valueReference : (opt.valueReference.reference || ''))
+        : '';
+      const optOut = { ...opt };
+      const MANAGED_OPT_EXTS = new Set([
+        FHIR.ordinalValue,
+        FHIR.optionPrefix,
+        FHIR.optionExclusive,
+        FHIR.itemWeight,
+        FHIR.answerMedia,
+      ]);
+      const optExts = (opt.extension || []).filter(e => !MANAGED_OPT_EXTS.has(e.url));
+      if (node._optionOrdinals?.[key] !== undefined) {
+        optExts.push({ url: FHIR.ordinalValue, valueDecimal: node._optionOrdinals[key] });
+      }
+      if (node._optionPrefixes?.[key]) {
+        optExts.push({ url: FHIR.optionPrefix, valueString: node._optionPrefixes[key] });
+      }
+      if (node._optionExclusives?.[key]) {
+        optExts.push({ url: FHIR.optionExclusive, valueBoolean: true });
+      }
+      if (node._optionWeights?.[key] !== undefined) {
+        optExts.push({ url: FHIR.itemWeight, valueDecimal: node._optionWeights[key] });
+      }
+      if (node._answerMedias?.[key]) {
+        optExts.push({ url: FHIR.answerMedia, valueAttachment: node._answerMedias[key] });
+      }
+      if (optExts.length) optOut.extension = optExts;
+      if (node._initialSelected === key) optOut.initialSelected = true;
+      return optOut;
+    });
   }
 
   // maxLength — que-10: only valid for boolean/decimal/integer/string/text/url/open-choice

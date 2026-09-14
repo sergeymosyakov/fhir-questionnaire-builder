@@ -359,19 +359,11 @@ export class TranslateModal extends Modal {
 
 // ── Helper: extract answer option codes + labels from a node ─────────────────
 function _getOptionLabels(node) {
-  if (!node.options && !node._rawAnswerOptions) return [];
   const results = [];
-  if (node._rawAnswerOptions) {
-    for (const ao of node._rawAnswerOptions) {
-      const code    = ao.valueCoding?.code ?? ao.valueString ?? ao.valueInteger?.toString();
-      const display = ao.valueCoding?.display ?? ao.valueString ?? ao.valueInteger?.toString();
-      if (code) results.push({ code, display: display || '' });
-    }
-  } else if (node.options) {
-    for (const part of node.options.split(',')) {
-      const trimmed = part.trim();
-      if (trimmed) results.push({ code: trimmed, display: trimmed });
-    }
+  for (const ao of node._rawAnswerOptions || []) {
+    const code    = ao.valueCoding?.code ?? ao.valueString ?? ao.valueInteger?.toString();
+    const display = ao.valueCoding?.display ?? ao.valueString ?? ao.valueInteger?.toString();
+    if (code) results.push({ code, display: display || '' });
   }
   return results;
 }

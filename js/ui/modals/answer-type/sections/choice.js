@@ -3,8 +3,6 @@ import { ANSWER_TYPE_SECTIONS } from '../registry.js';
 import { resolveContainedValueSet } from '../../../../fhir/import.js';
 import { createCustomSelect } from '../../../custom-select.js';
 import { CHOICE_TYPES } from '../data.js';
-import { parseOptions } from '../../../../utils.js';
-import { fhirOptsToStr } from '../../../../fhir/import-helpers.js';
 import { createOptionsEditor } from '../../../answer-options-editor.js';
 import { terminologyService } from '../../../../fhir/terminology-service.js';
 import { FHIR } from '../../../../fhir/urls/fhir.js';
@@ -15,7 +13,6 @@ function _buildRows(node) {
   const prefixes   = node._optionPrefixes  || {};
   const exclusives = node._optionExclusives || {};
   const weights    = node._optionWeights   || {};
-  const systems    = node._optionSystems   || {};
 
   if (node._rawAnswerOptions) {
     return node._rawAnswerOptions.map(o => {
@@ -49,16 +46,7 @@ function _buildRows(node) {
     });
   }
 
-  const pairs = parseOptions(node.options || '');
-  return pairs.map(({ code, display }) => ({
-    code,
-    label:     display,
-    system:    systems[code] || '',
-    score:     ords[code]     !== undefined ? String(ords[code])     : '',
-    prefix:    prefixes[code] || '',
-    weight:    weights[code]  !== undefined ? String(weights[code])  : '',
-    exclusive: !!exclusives[code],
-  }));
+  return [];
 }
 
 // Build a labelled FHIRPath textarea sub-section for an answer-source expression
@@ -148,7 +136,7 @@ class ChoiceSection extends AnswerTypeSection {
 
     const optEditor = createOptionsEditor({
       rows:         pending.draftOptionRows,
-      showType:     !!pending.draftHasRawOpts,
+      showType:     !!pending.draftHasNonCodingOpts,
       testidPrefix: 'opt',
       onchange:     rows => { pending.draftOptionRows = rows; },
     });
@@ -431,7 +419,8 @@ class ChoiceSection extends AnswerTypeSection {
         delete node._answerMedias;
       } else if (pending.draftAVS) {
         node._answerValueSet = pending.draftAVS;
-        node.options = resolveContainedValueSet(questDoc?.contained ?? [], pending.draftAVS);
+        const resolved = resolveContainedValueSet(questDoc?.contained ?? [], pending.draftAVS);
+        node._rawAnswerOptions = resolved.length ? resolved : undefined;
         delete node._optionOrdinals;
         delete node._optionPrefixes;
         delete node._optionExclusives;
@@ -451,43 +440,35 @@ class ChoiceSection extends AnswerTypeSection {
             return { ...r, code, label };
           })
           .filter(r => r.code);
-        node.options = rows.map(r => r.code.trim() + '=' + r.label.trim()).join(',');
 
-        // Sync _rawAnswerOptions: preserve extra Coding properties (system, etc.)
-        // and use each row's valueType to write the correct value[x] key. Also
-        // kicks in (even if not already set) when a code/label contains a comma
-        // — the comma-joined node.options string can't hold that losslessly.
-        const needsRawOpts = rows.some(r => r.code.includes(',') || r.label.includes(','));
-        if (node._rawAnswerOptions || needsRawOpts) {
-          const oldByCode = new Map();
-          for (const raw of node._rawAnswerOptions || []) {
-            const c = raw.valueCoding;
-            if (c) oldByCode.set(c.code || c.display || '', raw);
-          }
-          const synced = rows.map(r => {
-            const code  = r.code.trim();
-            const label = r.label.trim();
-            const vt    = r.valueType || 'coding';
-            if (vt === 'string')    return { valueString: code };
-            if (vt === 'integer')   { const n = parseInt(code, 10); return { valueInteger: isNaN(n) ? 0 : n }; }
-            if (vt === 'date')      return { valueDate: code };
-            if (vt === 'time')      return { valueTime: code };
-            if (vt === 'reference') return { valueReference: { reference: code, ...(label && label !== code ? { display: label } : {}) } };
-            // coding: preserve existing entry (system, version, etc.) but apply system/code/display from row
-            const existing = oldByCode.get(code);
-            const newSys = (r.system || '').trim() || undefined;
-            if (existing?.valueCoding) {
-              const vCoding = { ...existing.valueCoding, code, display: label };
-              if (newSys) vCoding.system = newSys;
-              else delete vCoding.system;
-              return { ...existing, valueCoding: vCoding };
-            }
-            return { valueCoding: { ...(newSys ? { system: newSys } : {}), code, display: label } };
-          });
-          node._rawAnswerOptions = synced.length ? synced : undefined;
-          // keep node.options in sync for builder display
-          node.options = fhirOptsToStr(node._rawAnswerOptions || []);
+        // _rawAnswerOptions is the only stored representation — preserve extra
+        // Coding properties (system, etc.) from any pre-existing entry.
+        const oldByCode = new Map();
+        for (const raw of node._rawAnswerOptions || []) {
+          const c = raw.valueCoding;
+          if (c) oldByCode.set(c.code || c.display || '', raw);
         }
+        const synced = rows.map(r => {
+          const code  = r.code.trim();
+          const label = r.label.trim();
+          const vt    = r.valueType || 'coding';
+          if (vt === 'string')    return { valueString: code };
+          if (vt === 'integer')   { const n = parseInt(code, 10); return { valueInteger: isNaN(n) ? 0 : n }; }
+          if (vt === 'date')      return { valueDate: code };
+          if (vt === 'time')      return { valueTime: code };
+          if (vt === 'reference') return { valueReference: { reference: code, ...(label && label !== code ? { display: label } : {}) } };
+          // coding: preserve existing entry (system, version, etc.) but apply system/code/display from row
+          const existing = oldByCode.get(code);
+          const newSys = (r.system || '').trim() || undefined;
+          if (existing?.valueCoding) {
+            const vCoding = { ...existing.valueCoding, code, display: label };
+            if (newSys) vCoding.system = newSys;
+            else delete vCoding.system;
+            return { ...existing, valueCoding: vCoding };
+          }
+          return { valueCoding: { ...(newSys ? { system: newSys } : {}), code, display: label } };
+        });
+        node._rawAnswerOptions = synced.length ? synced : undefined;
 
         const newOrdinals = {};
         const newPrefixes = {};
@@ -536,7 +517,7 @@ class ChoiceSection extends AnswerTypeSection {
       delete node._optionExclusives;
       delete node._optionWeights;
       delete node._optionSystems;
-      node.options = '';
+      delete node._rawAnswerOptions;
     }
 
     if (node.itemType === 'open-choice' && pending.draftOpenLabel.trim()) {
@@ -560,9 +541,10 @@ class ChoiceSection extends AnswerTypeSection {
   }
 
   initPending(node) {
+    const draftOptionRows = _buildRows(node);
     return {
-      draftOptionRows:  _buildRows(node),
-      draftHasRawOpts:  !!node._rawAnswerOptions,
+      draftOptionRows,
+      draftHasNonCodingOpts: draftOptionRows.some(r => r.valueType && r.valueType !== 'coding'),
       draftAVS:         node._answerValueSet || '',
       draftOpenLabel:   node._openLabel || '',
       draftAnswerExpr:  node._answerExpression || '',

@@ -14,13 +14,23 @@ beforeAll(() => {
 });
 
 const { validateTree } = await import('../js/fhir/validate.js');
+const { parseOptions } = await import('../js/utils.js');
 
 // ── helpers ───────────────────────────────────────────────────────────────────
-const makeItem = (overrides = {}) => ({
-  id: 'q1', type: 'item', title: 'Question 1',
-  itemType: 'text', options: '', mandatory: false,
-  ...overrides,
-});
+// `options` shorthand ("code=label,...") is converted to _rawAnswerOptions —
+// the only field the production code reads.
+const makeItem = (overrides = {}) => {
+  const item = {
+    id: 'q1', type: 'item', title: 'Question 1',
+    itemType: 'text', options: '', mandatory: false,
+    ...overrides,
+  };
+  if (!item._rawAnswerOptions && item.options) {
+    item._rawAnswerOptions = parseOptions(item.options).map(({ code, display }) => ({ valueCoding: { code, display } }));
+  }
+  delete item.options;
+  return item;
+};
 const makeGroup = (overrides = {}) => ({
   id: 'g1', type: 'group', title: 'Group 1', children: [],
   ...overrides,
@@ -503,19 +513,14 @@ describe('validateTree — que-3 display item with code[]', () => {
 });
 
 // ── que-4: answerOption[] and answerValueSet cannot both be present ────────────
-describe('validateTree — que-4 answerOption + answerValueSet conflict', () => {
-  it('no error when only options string and _answerValueSet are set (options may come from contained VS resolution)', () => {
-    // node.options can be populated during import from a contained ValueSet — export already
-    // suppresses answerOption[] when _answerValueSet is set, so this is not a real que-4 violation.
-    const item = makeItem({ id: 'q1', itemType: 'select', options: 'a=A,b=B', _answerValueSet: 'https://example.com/vs' });
-    const issues = validateTree([item]);
-    expect(errIds(issues)).not.toContain('q1');
-  });
-
-  it('errors when both _rawAnswerOptions and _answerValueSet are set', () => {
-    const item = makeItem({ id: 'q1', itemType: 'select', options: '', _rawAnswerOptions: [{ valueCoding: { code: 'a' } }], _answerValueSet: 'https://example.com/vs' });
-    const issues = validateTree([item]);
-    expect(errIds(issues)).toContain('q1');
+// Not flagged: export always prioritizes _answerValueSet and suppresses
+// answerOption[] when both are present (see buildFHIRObject), so this can
+// never actually violate que-4 on export. _rawAnswerOptions may legitimately
+// coexist with _answerValueSet as a display cache resolved from a contained VS.
+describe('validateTree — que-4 answerOption + answerValueSet co-presence', () => {
+  it('no error when both _rawAnswerOptions and _answerValueSet are set', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', _rawAnswerOptions: [{ valueCoding: { code: 'a' } }], _answerValueSet: 'https://example.com/vs' });
+    expect(errIds(validateTree([item]))).toHaveLength(0);
   });
 
   it('no error when only _answerValueSet is set', () => {
