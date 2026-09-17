@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.62.1",
+    "@playwright/test": "^1.63.0",
     "@supabase/supabase-js": "^2.116.0",
     "@vitest/coverage-v8": "^5.0.0",
     "buffer": "^6.0.3",
