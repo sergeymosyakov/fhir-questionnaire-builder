@@ -354,6 +354,36 @@ describe('buildFHIRObject — answerOption', () => {
     expect(q.item[0].type).toBe('group');
   });
 
+  it('exports _helpText as a nested display+itemControl=help item on a question', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'string', _helpText: 'Some guidance',
+    }]);
+    expect(q.item[0].item).toHaveLength(1);
+    const helpItem = q.item[0].item[0];
+    expect(helpItem.linkId).toBe('q1-help');
+    expect(helpItem.type).toBe('display');
+    expect(helpItem.text).toBe('Some guidance');
+    const ic = (helpItem.extension || []).find(e => e.url.includes('questionnaire-itemControl'));
+    expect(ic.valueCodeableConcept.coding[0].code).toBe('help');
+  });
+
+  it('exports _helpText alongside real children on a group', () => {
+    const q = build([{
+      id: 'g1', type: 'group', title: 'Section', _helpText: 'Group guidance',
+      children: [{ id: 'g1.1', type: 'item', title: 'Q', itemType: 'text' }],
+    }]);
+    expect(q.item[0].item).toHaveLength(2);
+    expect(q.item[0].item[0].linkId).toBe('g1.1');
+    expect(q.item[0].item[1].linkId).toBe('g1-help');
+  });
+
+  it('never exports _helpText on a display item (que-1 forbids nested items there)', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Text', itemType: 'display', _helpText: 'Should not export',
+    }]);
+    expect(q.item[0].item).toBeUndefined();
+  });
+
   it('exports _itemControl as itemControl extension (text-area)', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'text', _itemControl: 'text-area',

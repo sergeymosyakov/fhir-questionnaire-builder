@@ -557,10 +557,64 @@ export class BaseNode {
     const body = document.createElement('div');
     body.className = 'item-body';
     body.appendChild(label);
+    if (this._helpText) body.appendChild(this._buildHelpToggle(c => { c.textContent = this._helpText; }, { spaced: true }));
     this._buildSupportLinks(body, rc);
     this._buildVisHint(body, rc);
     row.appendChild(body);
     row._itemBody = body; // stash for subclass badge insertion
+  }
+
+  // ── Shared "? Help" toggle + floating popup (questionnaire-itemControl=help) ──
+  // Used by DisplayNode's own standalone row (renderContent = its own title, via
+  // _applyLabelContent) and by _helpText attached directly to a question/group —
+  // collapsed from a nested display+help child on import, see import-item.js.
+  // `spaced` adds left margin for the "attached after a label" placement (not
+  // wanted when this is the only content in a standalone display item's row).
+  _buildHelpToggle(renderContent, { spaced = false } = {}) {
+    const wrap = document.createElement('span');
+    wrap.className = 'display-help-wrap' + (spaced ? ' display-help-wrap--spaced' : '');
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'display-help-toggle';
+    toggle.dataset.testid = 'display-itemcontrol-help-toggle';
+    toggle.textContent = '? Help';
+    const popup = document.createElement('span');
+    popup.className = 'display-help-popup';
+    popup.dataset.testid = 'display-itemcontrol-help-content';
+    renderContent(popup);
+
+    const position = () => {
+      const rect = toggle.getBoundingClientRect();
+      const w = popup.offsetWidth || 260;
+      const left = Math.max(8, Math.min(rect.left, window.innerWidth - w - 8));
+      const h = popup.offsetHeight || 60;
+      const above = window.innerHeight - rect.bottom < h + 12;
+      popup.style.left = left + 'px';
+      popup.style.top  = (above ? rect.top - h - 8 : rect.bottom + 8) + 'px';
+    };
+    const close = () => {
+      popup.classList.remove('display-help-popup--open');
+      toggle.classList.remove('display-help-toggle--open');
+      document.removeEventListener('click', onDocClick, true);
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('scroll', position, true);
+      window.removeEventListener('resize', position);
+    };
+    const onDocClick = e => { if (!popup.contains(e.target) && e.target !== toggle) close(); };
+    const onKey = e => { if (e.key === 'Escape') close(); };
+    toggle.addEventListener('click', e => {
+      e.stopPropagation();
+      if (popup.classList.contains('display-help-popup--open')) { close(); return; }
+      popup.classList.add('display-help-popup--open');
+      toggle.classList.add('display-help-toggle--open');
+      requestAnimationFrame(position);
+      document.addEventListener('click', onDocClick, true);
+      document.addEventListener('keydown', onKey);
+      window.addEventListener('scroll', position, true);
+      window.addEventListener('resize', position);
+    });
+    wrap.append(toggle, popup);
+    return wrap;
   }
 
   // Append row to container, handling hidden-group wrapper. Returns actual target element.

@@ -80,6 +80,14 @@ export class DisplayNode extends ItemNode {
       return;
     }
 
+    // Help-Button itemControl: standalone row (no parent absorbed this into _helpText).
+    if (this._itemControl === 'help') {
+      row.appendChild(this._buildHelpToggle(c => this._applyLabelContent(c, rc)));
+      this._buildSupportLinks(row, rc);
+      this._buildVisHint(row, rc);
+      return;
+    }
+
     // Category icon appears BEFORE the label (non-help categories)
     const cat = this._displayCategory;
     if (cat && cat !== 'help') {

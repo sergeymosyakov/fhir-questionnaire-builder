@@ -56,7 +56,7 @@ class CodesModal extends Modal {
     node.applyPatch(this._buildPayload());
     const isActive = !!(node._codes?.length) || !!node._definition ||
                      !!(node._supportLinks?.length) || !!(node._unknownExtensions?.length) ||
-                     !!node._shortText;
+                     !!node._shortText || !!node._helpText;
     setActive(link, isActive);
     document.dispatchEvent(new CustomEvent(AppEvents.CALC_RECALC_REQUESTED));
     this._cancel();

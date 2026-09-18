@@ -183,7 +183,7 @@ GroupNode.prototype.buildBuilder = function () {
   setActive(exprLink,   !!node._calculatedExpr);
   setActive(styleLink,  !!(node._renderStyle || node._renderXhtml || node._itemControl === 'header' || node._itemControl === 'footer'));
   setActive(statesLink, node.mandatory === true || !!node._hidden || node._observationExtract != null || !!node._collapsible || !!node._usageMode || !!node._signatureRequired?.length);
-  setActive(propsLink,  !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length) || !!node._shortText);
+  setActive(propsLink,  !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.length) || !!node._shortText || !!node._helpText);
   setActive(repeatLink, !!node.repeats);
 
   const body = document.createElement('div');
@@ -277,10 +277,13 @@ function buildInlineTypeRow(node, setActive) {
   cfg.dataset.tipTitle = isChoice  ? 'Answer options'
                        : hasConfig ? 'Answer type settings (configured)'
                        :             'Answer type settings';
+  const controlDesc = node._itemControl === 'flyover' ? 'Display control: Flyover (show on hover).'
+                     : node._itemControl === 'help'    ? 'Display control: Help button (show on click).'
+                     : null;
   cfg.dataset.tipBody  = isChoice
     ? 'Answer options for this type are configured in the Answer Type dialog. Click to open.'
     : hasConfig
-    ? 'This item has Answer Type settings configured. Click to view or change them.'
+    ? (controlDesc || 'This item has Answer Type settings configured.') + ' Click to view or change.'
     : 'Configure options, value sets, units, and other advanced settings for this answer type.';
   cfg.onclick = () => {
     const _ctx = EventState.get(AppEvents.APP_CONTEXT_READY);
@@ -476,7 +479,7 @@ ItemNode.prototype.buildBuilder = function () {
   setActive(initLink,       node._initialValue !== undefined && node._initialValue !== '');
   setActive(styleLink,      !!(node._renderStyle || node._renderXhtml));
   setActive(constraintLink, !!(node.constraint?.length));
-  setActive(codesLink,      !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.some(u => u)) || !!node._shortText);
+  setActive(codesLink,      !!(node._codes?.length) || !!node._definition || !!(node._supportLinks?.some(u => u)) || !!node._shortText || !!node._helpText);
   setActive(termLink,        !!node._preferredTermServer);
 
   if (node.children.length > 0) {

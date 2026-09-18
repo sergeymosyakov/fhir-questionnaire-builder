@@ -1414,6 +1414,12 @@ describe('importFHIR', () => {
       expect(_tree[0]._itemControl).toBe('flyover');
     });
 
+    it('help on display → display with _itemControl', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'display', text: 'Click help', extension: [ic('help')] }]));
+      expect(_tree[0].itemType).toBe('display');
+      expect(_tree[0]._itemControl).toBe('help');
+    });
+
     it('header on group → group with _itemControl', () => {
       importFHIR(minQ([{ linkId: 'g1', type: 'group', text: 'G', extension: [ic('header')], item: [{ linkId: 'g1.1', type: 'string', text: 'Q' }] }]));
       expect(_tree[0].type).toBe('group');
@@ -1643,6 +1649,19 @@ describe('importFHIR', () => {
       expect(_tree[0].children).toHaveLength(2);
       expect(_tree[0].children[0].id).toBe('q1.1');
       expect(_tree[0].children[1].id).toBe('q1.2');
+    });
+
+    it('collapses a nested display+itemControl=help child into _helpText, not a real child node', () => {
+      const IC_URL = FHIR.itemControl;
+      importFHIR(minQ([{
+        linkId: 'q1', type: 'choice', text: 'Parent question',
+        item: [{
+          linkId: 'q1-help', type: 'display', text: 'Help text',
+          extension: [{ url: IC_URL, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'help' }] } }],
+        }],
+      }]));
+      expect(_tree[0]._helpText).toBe('Help text');
+      expect(_tree[0].children).toHaveLength(0);
     });
 
     it('preserves linkId unchanged — no -grp suffix', () => {

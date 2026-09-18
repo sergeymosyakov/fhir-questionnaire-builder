@@ -61,7 +61,8 @@
 .display-cat-icon { flex-shrink: 0; font-size: var(--fs-preview); line-height: 1; margin-top: 1px; }
 .display-cat-icon--instructions { color: var(--c-primary); }
 .display-cat-icon--security     { color: #c88a00; }
-.display-help-wrap   { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.display-help-wrap   { display: inline-flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.display-help-wrap--spaced { margin-left: 5px; flex: 0 0 auto; }
 .display-help-toggle {
   align-self: flex-start;
   font-size: 11px;
@@ -77,6 +78,23 @@
 .display-help-toggle--open    { background: var(--c-primary-lt, #d9eafc); color: var(--c-primary); border-color: var(--c-primary); }
 .display-help-content         { display: none; font-size: inherit; color: var(--c-text-2); line-height: 1.5; }
 .display-help-content--open   { display: block; }
+
+/* === Help-Button popup (questionnaire-itemControl=help) — floating, click-toggled === */
+.display-help-popup {
+  display: none;
+  position: fixed;
+  z-index: 10500;
+  max-width: 320px;
+  padding: 10px 12px;
+  background: var(--c-surface, #fff);
+  border: 1px solid var(--c-border, #d0d0d0);
+  border-radius: var(--r-sm);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .18);
+  font-size: inherit;
+  color: var(--c-text-2);
+  line-height: 1.5;
+}
+.display-help-popup--open { display: block; }
 
 /* === Flyover (itemControl) — text revealed on hover ========================= */
 .display-flyover {
