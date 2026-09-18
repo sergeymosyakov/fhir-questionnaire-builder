@@ -17,6 +17,17 @@ function _esc(s) {
   return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// Synthesize the nested display+itemControl=help item for _helpText — the
+// reverse of import-item.js's _isHelpAttachment/_importChildren collapsing.
+function _helpTextItem(node) {
+  return {
+    linkId: node.id + '-help',
+    text: node._helpText,
+    type: 'display',
+    extension: [{ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'help' }] } }],
+  };
+}
+
 // Generate FHIR Narrative div from a fully-built Questionnaire object
 export function generateNarrativeDiv(q) {
   const meta = [];
@@ -235,6 +246,7 @@ export function nodeToFHIRItem(node) {
 
   if (node.type === 'group') {
     fhirItem.item = node.children.map(nodeToFHIRItem);
+    if (node._helpText) fhirItem.item.push(_helpTextItem(node));
   } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice' || node.itemType === 'checklist') && node._rawAnswerOptions && !node._answerValueSet && !node._answerExpression && !node._candidateExpression) {
     // Round-trip: preserve the original non-valueCoding FHIR answerOption[] types
     fhirItem.answerOption = node._rawAnswerOptions.map(opt => {
@@ -281,8 +293,12 @@ export function nodeToFHIRItem(node) {
   if (node._maxLength !== undefined && node._maxLength !== null && _maxLengthAllowed.has(node.itemType)) fhirItem.maxLength = node._maxLength;
 
   // Non-group item with nested sub-items (FHIR R4 allows this).
-  if (node.type === 'item' && node.children?.length > 0) {
-    fhirItem.item = node.children.map(nodeToFHIRItem);
+  // que-1 invariant: display items cannot have their own nested items, so
+  // _helpText (itself only meaningful attached to a real question) never
+  // synthesizes an item[] on a display-type node.
+  if (node.type === 'item' && node.itemType !== 'display' && (node.children?.length > 0 || node._helpText)) {
+    fhirItem.item = (node.children || []).map(nodeToFHIRItem);
+    if (node._helpText) fhirItem.item.push(_helpTextItem(node));
   }
 
   // answerConstraint (R5 native; downgraded to a cross-version extension for R4/R4B)

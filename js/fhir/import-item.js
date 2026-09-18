@@ -29,6 +29,24 @@ function applyRenderingExtensions(fhirItem, node) {
   if (rm) node._renderMarkdown = rm.valueMarkdown || rm.valueString || '';
 }
 
+// A nested display item whose only job is to hold questionnaire-itemControl=help
+// text is an attachment, not a real tree node — collapsed onto the parent's
+// _helpText instead (see js/fhir/export.js for the reverse synthesis).
+function _isHelpAttachment(fhirChild) {
+  if (fhirChild.type !== 'display') return false;
+  const ext = (fhirChild.extension || []).find(e => e.url === FHIR.itemControl);
+  return ext?.valueCodeableConcept?.coding?.[0]?.code === 'help';
+}
+
+/** Import fhirItem.item[] into node.children, collapsing the first help attachment into node._helpText. */
+function _importChildren(fhirItem, node, linkIdMap, contained) {
+  for (const child of fhirItem.item || []) {
+    if (!node._helpText && _isHelpAttachment(child)) { node._helpText = child.text || ''; continue; }
+    const n = fhirItemToNode(child, linkIdMap, contained);
+    if (n) node.children.push(n);
+  }
+}
+
 function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   // Determine itemType before construction so the correct class is instantiated.
   let itemType = fhirTypeToItemType(fhirItem.type || 'string');
@@ -606,10 +624,7 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     // Preserve any unrecognised extensions for round-trip pass-through
     const groupUnknown = _collectUnknownExtensions(fhirItem);
     if (groupUnknown) node._unknownExtensions = groupUnknown;
-    for (const child of fhirItem.item || []) {
-      const n = fhirItemToNode(child, linkIdMap, contained);
-      if (n) node.children.push(n);
-    }
+    _importChildren(fhirItem, node, linkIdMap, contained);
     return node;
   }
 
@@ -618,10 +633,7 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
   // Sub-items become node.children and render below the parent's control.
   if ((fhirItem.item || []).length > 0) {
     const node = fhirQuestionToItem(fhirItem, linkIdMap, contained);
-    for (const child of fhirItem.item) {
-      const n = fhirItemToNode(child, linkIdMap, contained);
-      if (n) node.children.push(n);
-    }
+    _importChildren(fhirItem, node, linkIdMap, contained);
     return node;
   }
 

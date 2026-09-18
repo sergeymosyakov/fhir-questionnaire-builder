@@ -4,8 +4,8 @@
 //   2. Hover reveals the display text in the rich tooltip.
 //   3. A plain display item shows its text inline (no flyover marker).
 //   4. Round-trip — the flyover itemControl survives import → export.
-//   5. Builder UI — toggling the Flyover checkbox turns a plain display item
-//      into a flyover marker in the preview.
+//   5. Builder UI — selecting Flyover in the Display control turns a plain
+//      display item into a flyover marker in the preview.
 //
 // Fixture: tests/fixtures/flyover.fhir.json
 //
@@ -16,7 +16,7 @@
 //   display-flyover           the ⓘ marker rendered in the preview
 //   action-type               "Answer Type" config button on an item node
 //   answerTypeModal           Answer Type modal backdrop
-//   display-flyover-toggle    the Flyover checkbox in the Answer Type modal
+//   display-control-select    the Display control dropdown in the Answer Type modal
 //   answerTypeModalApply      Apply button
 //   export-btn / export-quest-item / saveFormatModalApply / prompt-save — export flow
 // ─────────────────────────────────────────────────────────────────────────────
@@ -92,10 +92,10 @@ test.describe('flyover — round-trip', () => {
   });
 });
 
-// ── 5. Builder UI — toggle flyover on ─────────────────────────────────────────
+// ── 5. Builder UI — set flyover control on ────────────────────────────────────
 
 test.describe('flyover — builder toggle', () => {
-  test('checking the Flyover toggle turns a plain display item into a marker', async ({ page }) => {
+  test('selecting Flyover in Display control turns a plain display item into a marker', async ({ page }) => {
     await loadFixture(page);
 
     // plain-note starts as inline text.
@@ -108,9 +108,10 @@ test.describe('flyover — builder toggle', () => {
     await card.getByTestId('action-type').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
 
-    const toggle = page.locator('[data-testid="answerTypeModal"]').getByTestId('display-flyover-toggle');
-    await expect(toggle).toBeVisible();
-    await toggle.check();
+    const select = page.locator('[data-testid="answerTypeModal"]').getByTestId('display-control-select');
+    await expect(select).toBeVisible();
+    await select.click();
+    await page.locator('[data-testid="csel-drop"] [data-val="flyover"]').click();
     await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
 

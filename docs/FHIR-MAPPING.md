@@ -583,7 +583,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 
 | Extension | Status | Notes |
 |---|---|---|
-| `questionnaire-itemControl` | ✅ | FHIR codes: radio-button, check-box, drop-down, autocomplete, lookup, text-box, spinner, slider, flyover, **atable** (radio/checklist rendered as a table — options as columns, one row); group codes: header, footer, **gtable**. **`text-area`** is a widely-used **de-facto** code (not defined in the FHIR item-control code system; the extension's *Extensible* binding permits it). Other FHIR codes (list, table, htable, inline, prompt, unit, lower, upper) are preserved in `_itemControl` on round-trip but not specially rendered. |
+| `questionnaire-itemControl` | ✅ | FHIR codes: radio-button, check-box, drop-down, autocomplete, lookup, text-box, spinner, slider, flyover, **help** (Help-Button — text hidden until a click reveals it; when nested under a question/group, imported as a plain `_helpText` property — editable via the Props modal — rather than a manipulable child node; a genuinely standalone/unattached display item keeps its own itemControl setting), **atable** (radio/checklist rendered as a table — options as columns, one row); group codes: header, footer, **gtable**. **`text-area`** is a widely-used **de-facto** code (not defined in the FHIR item-control code system; the extension's *Extensible* binding permits it). Other FHIR codes (list, table, htable, inline, prompt, unit, lower, upper) are preserved in `_itemControl` on round-trip but not specially rendered. |
 | `rendering-style` | ✅ | Inline CSS on `item._text` |
 | `rendering-xhtml` | ✅ | Raw XHTML, sanitized via DOMPurify |
 | `rendering-markdown` | ✅ | Parsed by marked.js + DOMPurify |

@@ -72,7 +72,8 @@ How an item looks and how the user interacts with it:
 
 - **Control type** — choose how a choice question appears: radio buttons, a
   drop-down, or check-boxes; render groups as headers/footers or as a table; show
-  hover "flyover" help (`questionnaire-itemControl`). A choice question's radio/
+  hover "flyover" help, or hide text behind a click-to-reveal "Help button"
+  (`questionnaire-itemControl`). A choice question's radio/
   checkbox options can also render as an **answer table** (one row for the
   question, one column per option) via its own toggle in the answer-type editor
   (`itemControl = atable`); a **group** renders as an HTML table (one column per

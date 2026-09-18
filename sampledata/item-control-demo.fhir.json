@@ -477,6 +477,55 @@
       ]
     },
     {
+      "linkId": "help-demo",
+      "text": "A government-issued ID is a driver's license, passport, or state/national identity card. Photocopies and expired documents are not accepted.",
+      "type": "display",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "help",
+                "display": "Help-Button"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "help-nested-demo",
+      "text": "Level of care requested",
+      "type": "choice",
+      "answerOption": [
+        { "valueCoding": { "code": "outpatient", "display": "Outpatient" } },
+        { "valueCoding": { "code": "inpatient", "display": "Inpatient" } }
+      ],
+      "item": [
+        {
+          "linkId": "help-nested-demo-help",
+          "text": "Selecting the level of care will define what questions you will need to answer for this request.",
+          "type": "display",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "help",
+                    "display": "Help-Button"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "linkId": "form-footer",
       "text": "All responses are confidential and used for quality-improvement purposes only.",
       "type": "group",

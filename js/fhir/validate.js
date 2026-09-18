@@ -255,6 +255,12 @@ export function validateTree(tree, _values = {}, questMeta = null) {
       issues.push({ severity: 'warning', nodeId: id, message: `questionnaire-displayCategory is only valid on group items in R4. On display items it is R5-only and will be omitted from the export.` });
     }
 
+    // _helpText synthesizes a nested display+itemControl=help item — que-1 forbids
+    // display items from having their own nested items, so it never applies to one.
+    if (node._helpText && node.itemType === 'display') {
+      issues.push({ severity: 'warning', nodeId: id, message: 'Help text is not valid on a display item (FHIR que-1 forbids nested items on display items) and will be omitted from the export.' });
+    }
+
     // ── Warnings ──────────────────────────────────────────────────────────────
     if (!node.title || !node.title.trim()) {
       issues.push({ severity: 'warning', nodeId: id || '(empty)', message: 'Empty item text (title) — FHIR R4 requires text on every item.' });

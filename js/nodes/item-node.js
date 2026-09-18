@@ -5,7 +5,7 @@ import { uiStr } from '../preview/render-ctx.js';
 //   _readOnly, _prefix, _definition, _codes, _hidden, _designNote,
 //   _renderXhtml, _renderStyle, _supportLinks, _disabledDisplay,
 //   _enableWhenText, _unknownExtensions, _answerValueSet, _rawAnswerOptions,
-//   _initialValue, _initialValues, _initialSelected
+//   _initialValue, _initialValues, _initialSelected, _helpText
 import { BaseNode, applyRenderStyle } from './base-node.js';
 import { parseOptions } from '../utils.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
@@ -133,6 +133,7 @@ export class ItemNode extends BaseNode {
     const body = document.createElement('div');
     body.className = 'item-body';
     body.appendChild(label);
+    if (this._helpText) body.appendChild(this._buildHelpToggle(c => { c.textContent = this._helpText; }, { spaced: true }));
     if (optionalBadge) body.appendChild(optionalBadge);
     this._buildSupportLinks(body, rc);
     this._buildVisHint(body, rc);

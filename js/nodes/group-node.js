@@ -5,7 +5,7 @@ import { GTableRenderer } from './gtable-renderer.js';
 // Children are other GroupNode or ItemNode instances.
 // Optional FHIR-imported properties set after construction:
 //   _collapsible, _renderXhtml, _renderStyle, _prefix, _definition,
-//   _codes, _supportLinks, _hidden, _designNote, _unknownExtensions
+//   _codes, _supportLinks, _hidden, _designNote, _unknownExtensions, _helpText
 import { BaseNode, isRelevantItem } from './base-node.js';
 import { isDescendant } from '../utils.js';
 
