@@ -50,6 +50,7 @@ Domain rules live in scoped instruction files (auto-loaded by their `applyTo` gl
 | [skills/feature-workflow/SKILL.md](skills/feature-workflow/SKILL.md) | on-demand | Standard issue → branch → implement/validate → commit → push → PR-with-auto-merge → close-out flow for any feature/fix |
 | [skills/security-review/SKILL.md](skills/security-review/SKILL.md) | on-demand | AI-reasoned OWASP-style codebase security scan (injection, secrets, access control, crypto, deps) — report only, no auto-applied patches |
 | [skills/github-actions-hardening/SKILL.md](skills/github-actions-hardening/SKILL.md) | on-demand | Security review for `.github/workflows/*.yml` — script injection, privileged triggers, action pinning, token scopes — report only |
+| [skills/release-widget/SKILL.md](skills/release-widget/SKILL.md) | on-demand | Recipe for releasing the embeddable QuestionnaireRenderer widget (GitHub Release + npm + NuGet) via `release-widget.yml`, incl. NuGet-only recovery mode |
 
 ---
 
