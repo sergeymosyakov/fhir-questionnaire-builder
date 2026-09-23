@@ -40,7 +40,7 @@
     "globals": "^17.12.0",
     "marked": "^18.0.13",
     "serve": "^14.0.0",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.1"
   },
   "overrides": {
     "csv-parse": "^7.0.2"
