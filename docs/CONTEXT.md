@@ -53,7 +53,7 @@ See [context/file-manifest.md](context/file-manifest.md) for the full per-file r
 - **Event-driven calc** — nodes/modals dispatch `CALC_RECALC_REQUESTED`; `BuilderPanel` listens and runs `evalCalcNodes` + dispatches `RESPONSE_CHANGED`
 - **Confirm dialog** — `ConfirmDialog.show(label)` in `js/ui/confirm-dialog.js` — no DI, standalone `Promise<boolean>`
 - **`ctx` object** — `{ renderTree, renderNode, tree, collapsed }` passed down to renderers and panels
-- **Vitest** — unit test suite for pure-function modules; **1899 tests** across 57 files; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules; **2165 tests** across 66 files; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://fhirbuilder.com/
 
 ---
@@ -170,8 +170,8 @@ _shortText         // string — sdc-questionnaire-shortText ext; abbreviated la
 ### Informational badges (per row)
 - **Calc badge** — blue pill with current computed value; refreshed in-place by `refreshCalcBadges()` without full DOM rebuild; tooltip shows FHIRPath expression + SDC spec footer
 - **Constraint badge** — amber ⚠️ (warning) or red ✘ (error) when `node.constraint[]` non-empty; tooltip shows key/human/expression; error + fail blocks Final Result
-- **Read-only badge** — grey 🔒 `read-only` pill when `_readOnly === true` and no `_calculatedExpr`; `.preview-meta-badge` in `css/preview.css`
-- **Default badge** — purple ↺ `default` pill when `_initialValue` is defined; `.preview-meta-badge--init` in `css/preview.css`
+- **Read-only badge** — grey 🔒 `read-only` pill when `_readOnly === true` and no `_calculatedExpr`; `.preview-meta-badge` in `css/preview-structure.css`
+- **Default badge** — purple ↺ `default` pill when `_initialValue` is defined; `.preview-meta-badge--init` in `css/preview-structure.css`
 
 ---
 

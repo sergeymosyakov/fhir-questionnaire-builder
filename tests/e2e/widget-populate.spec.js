@@ -225,7 +225,8 @@ test.describe('Widget populate (config.fhirBaseUrl / config.getAuthToken)', () =
 
     // No .on('error', ...) listener attached — nothing should appear in the DOM.
     await page.evaluate(() => window.__popWidgets['pop-none'].populate('Patient/1'));
-    await page.waitForTimeout(200);
+    await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await expect(page.getByTestId('pop-none')).toBeVisible();
     await expect(page.locator('.notif-box, .modal-backdrop.notif-backdrop')).toHaveCount(0);
 
     // Attach a listener — the host is told, with a widget-appropriate message

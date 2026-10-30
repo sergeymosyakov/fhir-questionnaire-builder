@@ -5,6 +5,7 @@
 import { Modal } from './modal-base.js';
 import * as storage from '../../storage/storage.js';
 import { showError } from '../toast.js';
+import { confirmModal } from './confirm-modal.js';
 
 /** Format an ISO date string as a human-readable relative time label. */
 function _relTime(isoStr) {
@@ -115,7 +116,12 @@ class CloudModal extends Modal {
     delBtn.dataset.tipTitle = 'Delete from cloud';
     delBtn.dataset.testid = 'cloud-delete-' + row.id;
     delBtn.addEventListener('click', async () => {
-      if (!confirm(`Delete "${row.title}" from the cloud?`)) return;
+      const answer = await confirmModal.open({
+        title:   'Delete from cloud?',
+        msg:     `Delete "${row.title}" from the cloud?`,
+        okLabel: 'Delete',
+      });
+      if (answer !== 'ok') return;
       delBtn.disabled = true;
       try {
         await storage.cloudDelete(row.id);

@@ -12,6 +12,23 @@ export function markAllDisabled(nodes, results) {
   }
 }
 
+function timeToSeconds(t) {
+  const m = /^(\d{1,2}):(\d{2})(?::(\d{2}(?:\.\d+)?))?$/.exec(t);
+  return m ? Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3] || 0) : NaN;
+}
+
+function compareNumbers(a, b, op) {
+  switch (op) {
+    case '=':  return a === b;
+    case '!=': return a !== b;
+    case '>':  return a > b;
+    case '<':  return a < b;
+    case '>=': return a >= b;
+    case '<=': return a <= b;
+  }
+  return false;
+}
+
 // Compare a single value against one enableWhen condition.
 // Exported so that base-node.js can reuse it for the condition audit tooltip.
 export function compareValue(val, ew) {
@@ -36,6 +53,21 @@ export function compareValue(val, ew) {
       case '>=': return curNum >= ansNum;
       case '<=': return curNum <= ansNum;
     }
+    return false;
+  }
+  const temporalKey = ['answerDate', 'answerDateTime', 'answerTime'].find(k => ew[k] !== undefined);
+  if (temporalKey) {
+    const toNum = temporalKey === 'answerTime' ? timeToSeconds : Date.parse;
+    const cur = val !== undefined && val !== null && val !== '' ? toNum(String(val)) : NaN;
+    const ans = toNum(String(ew[temporalKey]));
+    if (Number.isNaN(cur) || Number.isNaN(ans)) return ew.operator === '!=';
+    return compareNumbers(cur, ans, ew.operator);
+  }
+  if (ew.answerReference !== undefined) {
+    const cur = val && typeof val === 'object' ? val.reference : val;
+    const same = (cur ?? '') === (ew.answerReference?.reference ?? '');
+    if (ew.operator === '=')  return same;
+    if (ew.operator === '!=') return !same;
     return false;
   }
   let answer;

@@ -16,6 +16,10 @@ import { SNOMED_URL } from '../fhir/urls/snomed.js';
 import { LOINC_URL } from '../fhir/urls/loinc.js';
 
 const LOINC_TOU_KEY  = 'loinc-tou-accepted';
+
+function _touAccepted() {
+  try { return !!localStorage.getItem(LOINC_TOU_KEY); } catch { return false; }
+}
 const LOINC_SYSTEM   = LOINC_URL.system;
 const ICD10_SYSTEM   = FHIR.icd10cm;
 const SNOMED_SYSTEM  = SNOMED_URL.system;
@@ -82,7 +86,7 @@ export class TermSearch {
     this.el.className = 'ts-wrap';
     this.el.dataset.testid = testid;
 
-    if (localStorage.getItem(LOINC_TOU_KEY)) {
+    if (_touAccepted()) {
       this._renderSearch();
     } else {
       this._renderTou();
@@ -140,7 +144,7 @@ export class TermSearch {
     btn.textContent = 'Accept & enable search';
     btn.dataset.testid = 'term-search-tou-accept';
     btn.addEventListener('click', () => {
-      localStorage.setItem(LOINC_TOU_KEY, '1');
+      try { localStorage.setItem(LOINC_TOU_KEY, '1'); } catch { /* ignore */ }
       this.el.innerHTML = '';
       this._renderSearch();
     });

@@ -30,10 +30,11 @@ export class ConfirmDialog {
         ' and all its children will be permanently removed.'));
       backdrop.appendChild(box);
       document.body.appendChild(backdrop);
-      const esc = e => { if (e.key === 'Escape') close(false); };
-      document.addEventListener('keydown', esc);
+      // Capture + stopPropagation so Escape doesn't also cancel a modal underneath.
+      const esc = e => { if (e.key === 'Escape') { e.stopPropagation(); close(false); } };
+      document.addEventListener('keydown', esc, true);
       const close = ok => {
-        document.removeEventListener('keydown', esc);
+        document.removeEventListener('keydown', esc, true);
         backdrop.remove();
         resolve(ok);
       };

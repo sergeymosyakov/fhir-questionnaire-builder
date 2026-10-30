@@ -6,8 +6,13 @@
 //   using FHIR version '4.0.1'
 //   context Patient
 //   define AgeInMonths: AgeInMonths()
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { runCqlLibrary } from '../js/fhir/cql-engine.js';
+
+// Warm the vendored CQL libs so the first test doesn't pay the cold dynamic-import cost.
+beforeAll(async () => {
+  await Promise.all([import('../lib/cql-execution.esm.js'), import('../lib/cql-exec-fhir.esm.js')]);
+}, 60_000);
 
 const AGE_MONTHS_ELM = {
   library: {

@@ -5,6 +5,7 @@
 import { renderDocAsText } from './fhir/doc-render-text.js';
 import { downloadText } from './fhir/download.js';
 import { buildItemTree } from './fhir/doc-generator.js';
+import { COPYRIGHT_HTML } from './ui/copyright-notice.js';
 
 const STORAGE_KEY = 'fhirqb.generatedDocs';
 
@@ -109,11 +110,15 @@ function renderAppearance(appearance) {
 
 // { url, title, contentType } Attachment — same shape for itemMedia and a
 // per-option answerMedia entry.
-function renderMedia(label, media) {
+export function renderMedia(label, media) {
   if (!media) return null;
   const p = el('p', { className: 'qdoc-detail' });
   p.appendChild(document.createTextNode(`${label}: ${media.contentType || 'media'}${media.title ? ' \u2014 ' + media.title : ''} `));
-  if (media.url) p.appendChild(el('a', { href: media.url, text: media.url }));
+  if (media.url) {
+    // Imported URL is untrusted: only http(s) becomes a link, anything else stays plain text.
+    if (/^https?:/i.test(String(media.url).trim())) p.appendChild(el('a', { href: media.url, text: media.url }));
+    else p.appendChild(document.createTextNode(media.url));
+  }
   return p;
 }
 
@@ -416,10 +421,10 @@ function render(doc) {
   const footer = el('div', { className: 'qdoc-footer' }, [
     el('p', { text: `Generated on ${doc.generatedAt} by FHIR Questionnaire Builder` }),
   ]);
-  // Copyright is a fixed, trusted constant from copyright-notice.js — the one
+  // Copyright is a fixed, trusted constant (not the sessionStorage copy) — the one
   // deliberate innerHTML use on this page (everything else is textContent).
   const copyrightP = document.createElement('p');
-  copyrightP.innerHTML = doc.copyrightHtml;
+  copyrightP.innerHTML = COPYRIGHT_HTML;
   footer.appendChild(copyrightP);
   root.appendChild(footer);
 }

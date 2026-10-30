@@ -171,6 +171,7 @@ export function createExprTreeEditor({ initialExpr, items, fp, onChange } = {}) 
     b.className = 'eb-rm';
     b.dataset.testid = 'eb-remove-node';
     b.textContent = '\u2715';
+    b.setAttribute('aria-label', 'Remove node');
     b.addEventListener('click', () => {
       const i = parentChildren.indexOf(node);
       if (i >= 0) parentChildren.splice(i, 1);

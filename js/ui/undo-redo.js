@@ -30,6 +30,9 @@ export class UndoRedo {
     this._redoBtn.addEventListener('click', () => { history.redo(); this._sync(); });
 
     document.addEventListener('keydown', e => {
+      // Leave native text undo to editable fields, and don't rewrite the form behind an open modal.
+      if (e.target?.closest?.('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
+      if ([...document.querySelectorAll('.modal-backdrop')].some(b => b.style.display !== 'none')) return;
       if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
         e.preventDefault(); history.undo(); this._sync();
       } else if (

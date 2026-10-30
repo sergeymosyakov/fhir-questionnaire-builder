@@ -20,6 +20,9 @@
 import { AppEvents } from './events.js';
 import { defaultBus } from './core/events/bus.js';
 
+// linkIds are untrusted object keys: read own props only, never assign '__proto__'.
+const own = (obj, k) => (Object.hasOwn(obj, k) ? obj[k] : undefined);
+
 export class AnswerStore {
   /** Internal tree { linkId: [row0, row1, …] } — access only via facade methods.
    *  A repeating group's linkId holds an array of INSTANCE MAPS ({ childId: [...] }),
@@ -38,7 +41,7 @@ export class AnswerStore {
   _scope(path) {
     let cur = this.data;
     for (const seg of path || []) {
-      const arr = cur[seg.id];
+      const arr = own(cur, seg.id);
       const inst = Array.isArray(arr) ? arr[seg.idx] : undefined;
       if (!inst || typeof inst !== 'object') return null;
       cur = inst;
@@ -50,7 +53,8 @@ export class AnswerStore {
   _scopeOrCreate(path) {
     let cur = this.data;
     for (const seg of path || []) {
-      let arr = cur[seg.id];
+      if (seg.id === '__proto__') return null;
+      let arr = own(cur, seg.id);
       if (!Array.isArray(arr)) arr = cur[seg.id] = [];
       if (!arr[seg.idx] || typeof arr[seg.idx] !== 'object') arr[seg.idx] = {};
       cur = arr[seg.idx];
@@ -63,7 +67,7 @@ export class AnswerStore {
     const scope = this._scope(path);
     if (!scope) return undefined;
     const p = AnswerStore._parse(key);
-    const arr = scope[p.base];
+    const arr = own(scope, p.base);
     if (p.kind === 'count') return Array.isArray(arr) ? Math.max(0, arr.length - 1) : 0;
     return Array.isArray(arr) ? arr[p.index] : undefined;
   }
@@ -71,7 +75,7 @@ export class AnswerStore {
   /** Return all defined answer rows for a linkId. */
   getAll(id, path) {
     const scope = this._scope(path);
-    const arr = scope && scope[id];
+    const arr = scope && own(scope, id);
     return Array.isArray(arr) ? arr.filter(v => v !== undefined) : [];
   }
 
@@ -79,7 +83,8 @@ export class AnswerStore {
   set(key, v, path) {
     const scope = this._scopeOrCreate(path);
     const p = AnswerStore._parse(key);
-    const arr = scope[p.base] || (scope[p.base] = []);
+    if (!scope || p.base === '__proto__') return;
+    const arr = own(scope, p.base) || (scope[p.base] = []);
     if (p.kind === 'count') {
       const len = v + 1;
       if (arr.length > len) arr.length = len;                 // truncate extra rows
@@ -95,12 +100,12 @@ export class AnswerStore {
     if (!scope) return;
     const p = AnswerStore._parse(key);
     if (p.kind === 'count') {
-      const arr = scope[p.base];
+      const arr = own(scope, p.base);
       if (arr) arr.length = 1;                                // keep only row 0
       return;
     }
     if (key === p.base) { delete scope[p.base]; return; }     // plain id → drop all rows
-    const arr = scope[p.base];
+    const arr = own(scope, p.base);
     if (arr) delete arr[p.index];                            // single row → leave hole
   }
 
@@ -109,14 +114,15 @@ export class AnswerStore {
   /** Number of instances of a repeating group at the given path. */
   instanceCount(groupId, path) {
     const scope = this._scope(path);
-    const arr = scope && scope[groupId];
+    const arr = scope && own(scope, groupId);
     return Array.isArray(arr) ? arr.length : 0;
   }
 
   /** Append a new (empty) instance to a repeating group; returns the new count. */
   addInstance(groupId, path) {
     const scope = this._scopeOrCreate(path);
-    const arr = scope[groupId] || (scope[groupId] = []);
+    if (!scope || groupId === '__proto__') return 0;
+    const arr = own(scope, groupId) || (scope[groupId] = []);
     arr.push({});
     return arr.length;
   }
@@ -124,7 +130,7 @@ export class AnswerStore {
   /** Remove instance `idx` of a repeating group at the given path. */
   removeInstance(groupId, idx, path) {
     const scope = this._scope(path);
-    const arr = scope && scope[groupId];
+    const arr = scope && own(scope, groupId);
     if (Array.isArray(arr)) arr.splice(idx, 1);
   }
 
@@ -141,6 +147,7 @@ export class AnswerStore {
   /** Merge a tree/scalar map into the current answers (scalars are wrapped as single rows). */
   merge(map) {
     for (const k of Object.keys(map)) {
+      if (k === '__proto__') continue;
       this.data[k] = Array.isArray(map[k]) ? map[k].slice() : [map[k]];
     }
   }

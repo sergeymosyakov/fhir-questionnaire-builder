@@ -97,6 +97,18 @@ describe('QuestionnaireLoader.confirmBeforeLoad', () => {
   });
 });
 
+// ── load — rejected import ────────────────────────────────────────────────────
+describe('QuestionnaireLoader.load — importFHIR returns false', () => {
+  it('stops without dispatching load events or touching the tree', async () => {
+    importFHIR.mockImplementation(() => false);
+    await makeLoader().load({ resourceType: 'Patient' }, 'bad.json');
+    expect(GroupNode.resetCollapsedFromTree).not.toHaveBeenCalled();
+    expect(document.dispatchEvent).not.toHaveBeenCalled();
+    expect(terminologyService.expandAll).not.toHaveBeenCalled();
+    expect(progress.hide).toHaveBeenCalled();
+  });
+});
+
 // ── load — happy path ─────────────────────────────────────────────────────────
 describe('QuestionnaireLoader.load — success', () => {
   it('calls importFHIR with the raw data', async () => {

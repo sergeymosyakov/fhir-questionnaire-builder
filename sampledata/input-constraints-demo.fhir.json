@@ -1,0 +1,74 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "input-constraints-demo",
+  "title": "Input Constraints and Authoring Metadata Demo",
+  "status": "draft",
+  "derivedFrom": [
+    "http://example.org/fhir/Questionnaire/intake-base"
+  ],
+  "effectivePeriod": {
+    "start": "2026-01-01",
+    "end": "2026-12-31"
+  },
+  "description": "Demonstrates entryFormat hints, attachment maxSize/mimeType limits, designNote, rendering-markdown, derivedFrom and effectivePeriod.",
+  "item": [
+    {
+      "linkId": "phone",
+      "text": "Phone number",
+      "type": "string",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/entryFormat",
+          "valueString": "(000) 000-0000"
+        }
+      ]
+    },
+    {
+      "linkId": "visit-date",
+      "text": "Preferred visit date",
+      "type": "date",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat",
+          "valueString": "yyyy-mm-dd"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/designNote",
+          "valueMarkdown": "Confirm the **clinic calendar** before changing this item."
+        }
+      ]
+    },
+    {
+      "linkId": "referral-letter",
+      "text": "Referral letter",
+      "type": "attachment",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/maxSize",
+          "valueDecimal": 5
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/mimeType",
+          "valueCode": "application/pdf"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/mimeType",
+          "valueCode": "image/png"
+        }
+      ]
+    },
+    {
+      "linkId": "consent-text",
+      "text": "Consent: **read carefully** before signing.",
+      "type": "display",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-markdown",
+            "valueMarkdown": "Consent: **read carefully** before signing."
+          }
+        ]
+      }
+    }
+  ]
+}

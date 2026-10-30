@@ -53,7 +53,17 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   FHIR.itemWeight,
   FHIR.baseType,
   FHIR.fhirType,
+  FHIR.shortText,
+  FHIR.maxDecimalPlaces,
 ]);
+
+// Known URLs whose importer only parses some value shapes; other shapes stay in pass-through.
+const PARSED_VALUE = {
+  [FHIR.minValue]:         e => e.valueDecimal !== undefined || e.valueInteger !== undefined,
+  [FHIR.maxValue]:         e => e.valueDecimal !== undefined || e.valueInteger !== undefined,
+  [FHIR.shortText]:        e => !!e.valueString,
+  [FHIR.maxDecimalPlaces]: e => e.valueInteger !== undefined,
+};
 
 // ── SDC answer-source expressions ─────────────────────────────────────────────
 // FHIRPath expressions that resolve to a list of answer options at render time.
@@ -67,7 +77,9 @@ export const ANSWER_SOURCE_EXPR_EXTS = [
 ];
 
 export function _collectUnknownExtensions(fhirItem) {
-  const unknown = (fhirItem.extension || []).filter(e => !KNOWN_ITEM_EXTENSION_URLS.has(e.url));
+  const unknown = (fhirItem.extension || []).filter(
+    e => !KNOWN_ITEM_EXTENSION_URLS.has(e.url) || (PARSED_VALUE[e.url] && !PARSED_VALUE[e.url](e))
+  );
   return unknown.length ? unknown.map(e => JSON.parse(JSON.stringify(e))) : null;
 }
 
@@ -148,6 +160,10 @@ export function humanEnableWhen(enableWhen, enableBehavior, linkIdMap) {
     else if (ew.answerDecimal  !== undefined) val = ew.answerDecimal;
     else if (ew.answerQuantity !== undefined) val = (ew.answerQuantity.value ?? '?') + (ew.answerQuantity.unit || ew.answerQuantity.code ? ' ' + (ew.answerQuantity.unit || ew.answerQuantity.code) : '');
     else if (ew.answerCoding)                 val = ew.answerCoding.display || ew.answerCoding.code || '?';
+    else if (ew.answerDate     !== undefined) val = ew.answerDate;
+    else if (ew.answerDateTime !== undefined) val = ew.answerDateTime;
+    else if (ew.answerTime     !== undefined) val = ew.answerTime;
+    else if (ew.answerReference)              val = ew.answerReference.display || ew.answerReference.reference || '?';
     else val = '?';
     const opLabel = { '=': '=', '!=': '\u2260', '>': '>', '<': '<', '>=': '\u2265', '<=': '\u2264' }[ew.operator] || ew.operator;
     return '\u00AB' + qText + '\u00BB ' + opLabel + ' ' + val;

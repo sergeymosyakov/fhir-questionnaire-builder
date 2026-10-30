@@ -22,7 +22,7 @@ Release, npm (`@sergeymosyakov/questionnaire-widget`), NuGet (`FhirQuestionnaire
 ## Release steps
 This is a **real, hard-to-reverse action** (mints a tag + GitHub Release, publishes
 to npm and NuGet) — always state the predicted next tag and get explicit
-confirmation before triggering, per this repo's THE-MUST rule 0.
+confirmation before triggering, per WORKFLOW RULE 1 in `.github/copilot-instructions.md` (git commit/push only on explicit instruction).
 
 1. Confirm the intended feature(s) are already merged to `master` (`gh pr list
    --state all --head <branch>` if unsure) — the workflow releases whatever is on

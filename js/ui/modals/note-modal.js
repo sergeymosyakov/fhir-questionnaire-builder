@@ -70,6 +70,7 @@ class NoteModal extends Modal {
 
     const ta = document.createElement('textarea');
     ta.className = 'note-modal-textarea';
+    ta.rows = 3;
     ta.dataset.testid = 'design-note-input';
     ta.placeholder = 'e.g. "Discuss with clinical lead — threshold may change."';
     ta.value = this._pending.draftNote;

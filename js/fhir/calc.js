@@ -109,8 +109,11 @@ export function evalCalcNodes(nodes, qr, fp, values, envVars = {}, base = null, 
           // the write-back would drop the child answers, corrupting the QR (and
           // any expression / downstream calc that traverses answer.item).
           const prevItem = qrItem.answer?.[0]?.item;
-          if (prevItem) answer.item = prevItem;
-          qrItem.answer = [answer];
+          if (!answer) delete qrItem.answer;
+          else {
+            if (prevItem) answer.item = prevItem;
+            qrItem.answer = [answer];
+          }
         }
       }
     } catch (_e) {

@@ -176,7 +176,7 @@ test.describe('Dropdown menus stay within the viewport', () => {
     // to its widest child (e.g. a long "Recent draft: <title> (<timestamp>)"
     // label) with no upper bound, pushing it off-screen to the left.
     const box = await page.evaluate(() => {
-      const menu = document.querySelector('#loadFhirBtn').closest('.load-wrap').querySelector('.load-menu');
+      const menu = document.querySelector('[data-testid="load-fhir-btn"]').closest('.load-wrap').querySelector('.load-menu');
       const longItem = document.createElement('div');
       longItem.className = 'load-menu-item';
       longItem.textContent = 'Recent draft: ' + 'X'.repeat(120) + ' (8/27/2026 11:46 PM)';

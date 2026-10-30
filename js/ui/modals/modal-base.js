@@ -58,9 +58,11 @@ export class Modal {
     this.maximizeBtn = _mk('button', 'modal-maximize');
     this.maximizeBtn.type = 'button';
     this.maximizeBtn.dataset.tipTitle = 'Maximize';
+    this.maximizeBtn.setAttribute('aria-label', 'Maximize');
     this.closeBtn = _mk('button', 'modal-close');
     this.closeBtn.type = 'button';
     this.closeBtn.dataset.tipTitle = 'Close';
+    this.closeBtn.setAttribute('aria-label', 'Close');
     this.closeBtn.textContent = '\u2715';
     // Grouped so `justify-content: space-between` on .modal-header keeps them
     // pinned together on the right, instead of spreading 3 children evenly.
@@ -156,6 +158,7 @@ export class Modal {
   _toggleMaximize() {
     const maximized = this.box.classList.toggle('modal-box--maximized');
     this.maximizeBtn.dataset.tipTitle = maximized ? 'Restore' : 'Maximize';
+    this.maximizeBtn.setAttribute('aria-label', maximized ? 'Restore' : 'Maximize');
   }
 
   /** Render the standard two-part title: bold label + muted subject. */

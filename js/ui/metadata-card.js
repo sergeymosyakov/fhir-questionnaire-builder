@@ -15,10 +15,12 @@ const _CARD_HTML = `
   data-tip-body="experimental=true means this questionnaire is for testing only and should not be used in production. experimental=false means it is production-ready."
   data-tip-fhir="Questionnaire.experimental"
   data-tip-spec="R4 &middot; optional"
-  style="display:none"></span>
+  hidden></span>
 <button type="button" class="quest-meta-edit-btn" data-testid="properties-btn"
   data-tip-title="Questionnaire Properties"
-  data-tip-body="Edit questionnaire-level metadata: id, url, version, title, status, publisher and description. These fields are preserved on import and written back on export.">Edit</button>`;
+  data-tip-body="Edit questionnaire-level metadata: id, url, version, title, status, publisher and description. These fields are preserved on import and written back on export."
+  data-tip-fhir="Questionnaire"
+  data-tip-spec="R4">Edit</button>`;
 
 export class MetadataCard {
   constructor() {
@@ -52,9 +54,9 @@ export class MetadataCard {
     this._status.dataset.status = questMeta.status || 'draft';
     const exp = questMeta.experimental;
     if (exp === null || exp === undefined) {
-      this._experimental.style.display = 'none';
+      this._experimental.hidden = true;
     } else {
-      this._experimental.style.display  = '';
+      this._experimental.hidden         = false;
       this._experimental.textContent    = exp ? '\u2697 experimental' : '\u2713 production';
       this._experimental.dataset.exp    = String(exp);
     }

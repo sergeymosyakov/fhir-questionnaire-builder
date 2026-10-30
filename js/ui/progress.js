@@ -4,7 +4,7 @@
 //   progress.update(done, total)    — update fill + counter
 //   progress.hide()                 — hide bar
 //
-// DOM nodes injected via init(elements) — no getElementById inside this module.
+// init() looks up its DOM nodes by data-mount.
 
 let _el  = null;
 let _op  = '';

@@ -64,12 +64,17 @@ describe('changeNodeType', () => {
     expect(out._ac).not.toBe(oldAc);
   });
 
-  it('destroys the old node instance it replaces', () => {
+  it('aborts the old node\'s own listeners without destroying its children', () => {
     const node = createItemNode('text', { id: '1' });
-    let destroyed = false;
-    node.destroy = () => { destroyed = true; };
-    changeNodeType(node, 'decimal');
-    expect(destroyed).toBe(true);
+    const child = createItemNode('text', { id: '1.1' });
+    node.children.push(child);
+    node._ac = new AbortController();
+    child._ac = new AbortController();
+    const oldAc = node._ac;
+    const out = changeNodeType(node, 'decimal');
+    expect(oldAc.signal.aborted).toBe(true);
+    expect(child._ac.signal.aborted).toBe(false);
+    expect(out.children).toContain(child);
   });
 
   it('keeps the same type without throwing (no-op type)', () => {

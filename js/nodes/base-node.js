@@ -459,7 +459,8 @@ export class BaseNode {
     // 2. Translated Markdown (per-language)
     if (lang && rc?.translations?.[lang]?.markdown?.[this.id] != null) {
       const md = rc.translations[lang].markdown[this.id];
-      el.innerHTML = (domPurify && marked) ? domPurify.sanitize(marked.parseInline(md)) : md;
+      if (domPurify && marked) el.innerHTML = domPurify.sanitize(marked.parseInline(md));
+      else el.textContent = md;
       return;
     }
     // 3. Translated plain text

@@ -106,6 +106,15 @@ export function calcFormOk(node, store, path) {
     if (isMandatory(node)) return val !== undefined && val !== '' && val !== null;
     return true;
   }
+  // Format rules apply to any non-empty text, mandatory or not.
+  if (node._minLength) {
+    const val = store.get(node.id);
+    if (val && typeof val !== 'object' && String(val).length < node._minLength) return false;
+  }
+  if (node._regex) {
+    const val = store.get(node.id);
+    if (val && typeof val !== 'object') { try { if (!new RegExp(node._regex).test(String(val))) return false; } catch { /* invalid regex — skip */ } }
+  }
   if (node.mandatory === false) return true;
   if (node.itemType === 'reference') {
     if (!isMandatory(node)) return true;
@@ -116,14 +125,6 @@ export function calcFormOk(node, store, path) {
     if (!isMandatory(node)) return true;
     const val = store.get(node.id);
     return val != null && typeof val === 'object' && val.value !== undefined && !!val.unit;
-  }
-  if (node._minLength) {
-    const val = store.get(node.id);
-    if (val && String(val).length > 0 && String(val).length < node._minLength) return false;
-  }
-  if (node._regex) {
-    const val = store.get(node.id);
-    if (val && String(val).length > 0) { try { if (!new RegExp(node._regex).test(String(val))) return false; } catch { /* invalid regex — skip */ } }
   }
   if (isMandatory(node) && NONEMPTY_TYPES.has(node.itemType)) {
     const val = store.get(node.id);

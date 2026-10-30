@@ -101,6 +101,7 @@ class ConstraintModal extends Modal {
 
       const rmBtn = document.createElement('button');
       rmBtn.type = 'button'; rmBtn.className = 'vis-cond-rm'; rmBtn.textContent = '\u2715';
+      rmBtn.setAttribute('aria-label', 'Remove constraint');
       rmBtn.onclick = () => { draft.splice(idx, 1); this._renderBody(draft); };
       hdr.appendChild(rmBtn);
       sevSel.el.dataset.tipTitle = 'Constraint severity';

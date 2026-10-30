@@ -53,11 +53,11 @@ export function importFHIR(fhirJson, opts = {}) {
   const { tree, meta: questMeta, variables: questVariables, contained: questContained } = questDoc;
   let q = fhirJson;
   if (typeof q === 'string') {
-    try { q = JSON.parse(q); } catch (e) { showError('Invalid JSON:\n' + e.message); return; }
+    try { q = JSON.parse(q); } catch (e) { showError('Invalid JSON:\n' + e.message); return false; }
   }
   if (!q || q.resourceType !== 'Questionnaire') {
     showError('Not a FHIR Questionnaire resource (resourceType must be "Questionnaire").');
-    return;
+    return false;
   }
   q = normaliseSTU3(q); // no-op for R4; converts STU3 fields to R4 equivalents
   destroyTree(tree);
@@ -195,6 +195,7 @@ export function importFHIR(fhirJson, opts = {}) {
     bus.dispatch(AppEvents.REINIT_FORM);
   }
   bus.dispatch(AppEvents.BUILDER_RERENDER);
+  return true;
 }
 
 // ── Translation import ────────────────────────────────────────────────────────
@@ -210,7 +211,7 @@ function _importTranslations(q, tree, translations) {
   for (const ext of titleExts) {
     const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
     const content = (ext.extension || []).find(s => s.url === 'content')?.valueString;
-    if (!lang || content == null) continue;
+    if (!_isSafeLang(lang) || content == null) continue;
     _ensureLang(translations, lang);
     translations[lang].title = content;
   }
@@ -222,7 +223,7 @@ function _importTranslations(q, tree, translations) {
       for (const ext of textExts) {
         const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
         const content = (ext.extension || []).find(s => s.url === 'content')?.valueString;
-        if (!lang || content == null) continue;
+        if (!_isSafeLang(lang) || content == null) continue;
         _ensureLang(translations, lang);
         translations[lang].items[fi.linkId] = content;
       }
@@ -235,7 +236,7 @@ function _importTranslations(q, tree, translations) {
         for (const ext of optExts) {
           const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
           const content = (ext.extension || []).find(s => s.url === 'content')?.valueString;
-          if (!lang || content == null) continue;
+          if (!_isSafeLang(lang) || content == null) continue;
           _ensureLang(translations, lang);
           translations[lang].opts[fi.linkId + '__' + code] = content;
         }
@@ -250,7 +251,7 @@ function _importTranslations(q, tree, translations) {
   for (const ext of (q.extension || []).filter(e => e.url === UI_TRANS_URL)) {
     const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
     const strings = (ext.extension || []).find(s => s.url === 'strings')?.valueString;
-    if (!lang || !strings) continue;
+    if (!_isSafeLang(lang) || !strings) continue;
     try {
       const parsed = JSON.parse(strings);
       _ensureLang(translations, lang);
@@ -263,7 +264,7 @@ function _importTranslations(q, tree, translations) {
   for (const ext of (q.extension || []).filter(e => e.url === XHTML_TRANS_URL)) {
     const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
     const strings = (ext.extension || []).find(s => s.url === 'strings')?.valueString;
-    if (!lang || !strings) continue;
+    if (!_isSafeLang(lang) || !strings) continue;
     try {
       const parsed = JSON.parse(strings);
       _ensureLang(translations, lang);
@@ -277,13 +278,18 @@ function _importTranslations(q, tree, translations) {
   for (const ext of (q.extension || []).filter(e => e.url === MD_TRANS_URL)) {
     const lang    = (ext.extension || []).find(s => s.url === 'lang')?.valueCode;
     const strings = (ext.extension || []).find(s => s.url === 'strings')?.valueString;
-    if (!lang || !strings) continue;
+    if (!_isSafeLang(lang) || !strings) continue;
     try {
       const parsed = JSON.parse(strings);
       _ensureLang(translations, lang);
       Object.assign(translations[lang].markdown, parsed);
     } catch { /* ignore malformed */ }
   }
+}
+
+// Lang codes become object keys; block prototype-chain keys.
+function _isSafeLang(lang) {
+  return !!lang && lang !== '__proto__' && lang !== 'constructor' && lang !== 'prototype';
 }
 
 function _ensureLang(translations, lang) {

@@ -15,8 +15,11 @@ const _GEAR_SVG =
   '</svg>';
 
 export class NodeGearMenu {
-  /** @param {string} testid data-testid for the gear button */
-  constructor(testid) {
+  /**
+   * @param {string} testid data-testid for the gear button
+   * @param {{ signal?: AbortSignal }} [opts] aborting removes the global CLOSE_DROPDOWNS listener
+   */
+  constructor(testid, { signal } = {}) {
     this._wrap = document.createElement('div');
     this._wrap.className = 'node-gear-wrap';
 
@@ -58,7 +61,7 @@ export class NodeGearMenu {
       }
     });
 
-    document.addEventListener(AppEvents.CLOSE_DROPDOWNS, () => this.close());
+    document.addEventListener(AppEvents.CLOSE_DROPDOWNS, () => this.close(), { signal });
   }
 
   /** Root element to append to the DOM. */

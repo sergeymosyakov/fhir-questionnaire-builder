@@ -74,6 +74,7 @@ export function showToast(message, type = 'error') {
   btn.focus();
 
   const onKey = e => {
+    if (e.key === 'Escape') e.stopPropagation();
     if (e.key === 'Escape' || e.key === 'Enter') _close(backdrop, onKey);
   };
   document.addEventListener('keydown', onKey, true);
@@ -151,7 +152,7 @@ export function showPrompt(label, defaultValue, onConfirm) {
 
   const onKey = e => {
     if (e.key === 'Enter')  { e.preventDefault(); confirm(); }
-    if (e.key === 'Escape') cancel();
+    if (e.key === 'Escape') { e.stopPropagation(); cancel(); }
   };
   document.addEventListener('keydown', onKey, true);
   applyBtn.onclick  = confirm;

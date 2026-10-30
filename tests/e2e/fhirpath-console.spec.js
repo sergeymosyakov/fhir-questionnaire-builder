@@ -37,8 +37,7 @@ async function openConsole(page) {
 async function evaluate(page, expr) {
   const inp = page.getByTestId('fhirpath-input');
   await inp.fill(expr);
-  await page.waitForTimeout(400); // debounce 250ms
-  return page.getByTestId('fhirpath-result').textContent();
+  return page.getByTestId('fhirpath-result');
 }
 
 test.describe('FHIRPath console', () => {
@@ -57,15 +56,15 @@ test.describe('FHIRPath console', () => {
     await fresh(page);
     await loadAnnual(page);
     await openConsole(page);
-    expect(await evaluate(page, '1 + 1')).toContain('2');
+    await expect(await evaluate(page, '1 + 1')).toContainText('2');
   });
 
   test('evaluates against the live QuestionnaireResponse', async ({ page }) => {
     await fresh(page);
     await loadAnnual(page);
     await openConsole(page);
-    const out = await evaluate(page, '%resource.descendants().count()');
-    expect(Number(out.trim().replace(/[^\d.-]/g, ''))).toBeGreaterThan(0);
+    const result = await evaluate(page, '%resource.descendants().count()');
+    await expect(result).toHaveText(/[1-9]\d*/);
   });
 
   test('invalid expression shows an error without crashing', async ({ page }) => {
@@ -74,7 +73,7 @@ test.describe('FHIRPath console', () => {
     await openConsole(page);
     await evaluate(page, 'foo(((');
     await expect(page.getByTestId('fhirpath-result')).toHaveClass(/fhirpath-result--error/);
-    expect(await evaluate(page, '2 * 3')).toContain('6');
+    await expect(await evaluate(page, '2 * 3')).toContainText('6');
   });
 
   test('reflects a value entered in the form live (console stays open)', async ({ page }) => {
