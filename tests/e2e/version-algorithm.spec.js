@@ -28,6 +28,7 @@ import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { readFileSync } from 'node:fs';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/version-algorithm.fhir.json');
 
@@ -35,7 +36,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q1"]')).toBeVisible({ timeout: 8_000 });
   await expect(page.getByTestId('fhir-version-select')).toHaveAttribute('data-value', 'R5');
 }
@@ -55,9 +56,6 @@ async function exportFHIR(page) {
   await openDropdownItem(page, 'export-btn', 'export-quest-item');
   await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
   await page.getByTestId('saveFormatModalApply').click();
-  const modal = page.locator('[data-testid="validateModal"]');
-  await modal.waitFor({ state: 'visible', timeout: 3_000 }).catch(() => {});
-  if (await modal.isVisible()) await modal.locator('.btn-fhir-export').click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByTestId('prompt-save').click(),

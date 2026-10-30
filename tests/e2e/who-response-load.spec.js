@@ -5,9 +5,14 @@
 // appear. Proves the form's real logic runs in-browser without a CQL engine.
 //
 // Run: npx playwright test tests/e2e/who-response-load.spec.js
+//
+// ── data-testid registry ────────────────────────────────────────────────────
+//   add-root-group-btn
+// ────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FORM = path.resolve('sampledata/who-emcare-treatment.fhir.json');
 const QR   = path.resolve('sampledata/who-emcare-treatment-response.qr.json');
@@ -19,7 +24,7 @@ async function freshStart(page) {
 }
 
 async function loadFile(page, filePath) {
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(filePath);
+  await loadFixtureFile(page, filePath);
 }
 
 // The WHO form gates everything on polymorphic `.value` (value[x]), which only

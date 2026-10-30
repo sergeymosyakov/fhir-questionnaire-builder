@@ -18,9 +18,9 @@
 
 import { test, expect } from '@playwright/test';
 
-const card   = (page) => page.locator('#containedCard');
-const count  = (page) => page.locator('#containedCardCount');
-const chips  = (page) => page.locator('#containedCardChips');
+const card   = (page) => page.getByTestId('contained-card');
+const count  = (page) => page.getByTestId('contained-card-count');
+const chips  = (page) => page.getByTestId('contained-card-chips');
 const modal  = (page) => page.getByTestId('containedResourceModal');
 
 const vsJson = (id, title = 'Test VS') =>

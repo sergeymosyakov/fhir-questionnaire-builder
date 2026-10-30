@@ -21,6 +21,7 @@ import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'node:path';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/answer-expression.fhir.json');
 const AE_URL  = FHIR.answerExpression;
@@ -29,7 +30,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q-expr"]')).toBeVisible({ timeout: 8_000 });
 }
 
@@ -61,7 +62,7 @@ test.describe('answer-expression — Answer Type modal', () => {
     await loadFixture(page);
     await page.locator('[data-node-id="q-expr"] [data-testid="action-type"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
-    const exprRadio = page.locator('#_at_src_expr');
+    const exprRadio = page.getByTestId('src-answer-expr-radio');
     await expect(exprRadio).toBeChecked();
   });
 
@@ -78,7 +79,7 @@ test.describe('answer-expression — Answer Type modal', () => {
     await loadFixture(page);
     await page.locator('[data-node-id="q-plain"] [data-testid="action-type"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
-    const optRadio = page.locator('#_at_src_opt');
+    const optRadio = page.getByTestId('src-options-radio');
     await expect(optRadio).toBeChecked();
     const exprSection = page.locator('[data-testid="answer-expr-input"]');
     await expect(exprSection).toBeHidden();
@@ -88,7 +89,7 @@ test.describe('answer-expression — Answer Type modal', () => {
     await loadFixture(page);
     await page.locator('[data-node-id="q-plain"] [data-testid="action-type"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
-    await page.locator('#_at_src_expr').click();
+    await page.getByTestId('src-answer-expr-radio').click();
     await expect(page.locator('[data-testid="answer-expr-input"]')).toBeVisible();
   });
 
@@ -96,7 +97,7 @@ test.describe('answer-expression — Answer Type modal', () => {
     await loadFixture(page);
     await page.locator('[data-node-id="q-plain"] [data-testid="action-type"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
-    await page.locator('#_at_src_expr').click();
+    await page.getByTestId('src-answer-expr-radio').click();
     await page.locator('[data-testid="answer-expr-input"]').fill("'x' | 'y'");
     await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();

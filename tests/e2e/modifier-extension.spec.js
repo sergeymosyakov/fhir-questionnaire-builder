@@ -26,6 +26,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/modifier-extension.fhir.json');
 const MODIFIER_URL =
@@ -41,7 +42,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-testid="node-type-label"]').first()).toBeVisible({ timeout: 8_000 });
 }
 
@@ -53,10 +54,8 @@ async function exportFHIR(page) {
   // The questionnaire carries a modifierExtension warning, so the validate modal
   // opens in export mode — click "Export anyway" to proceed.
   const modal = page.locator('[data-testid="validateModal"]');
-  await modal.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-  if (await modal.isVisible()) {
-    await modal.locator('.btn-fhir-export').click();
-  }
+  await expect(modal).toBeVisible();
+  await modal.locator('.btn-fhir-export').click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByTestId('prompt-save').click(),

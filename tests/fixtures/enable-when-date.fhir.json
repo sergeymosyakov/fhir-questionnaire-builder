@@ -1,0 +1,88 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "enable-when-date-test",
+  "status": "draft",
+  "title": "enableWhen answerDate Test",
+  "item": [
+    {
+      "linkId": "dob",
+      "text": "Event date",
+      "type": "date"
+    },
+    {
+      "linkId": "dep-gt",
+      "text": "After 2024-06-15",
+      "type": "display",
+      "disabledDisplay": "hidden",
+      "enableWhen": [
+        {
+          "question": "dob",
+          "operator": ">",
+          "answerDate": "2024-06-15"
+        }
+      ]
+    },
+    {
+      "linkId": "dep-eq",
+      "text": "On 2024-06-15",
+      "type": "display",
+      "disabledDisplay": "hidden",
+      "enableWhen": [
+        {
+          "question": "dob",
+          "operator": "=",
+          "answerDate": "2024-06-15"
+        }
+      ]
+    },
+    {
+      "linkId": "dep-le",
+      "text": "On or before 2024-06-15",
+      "type": "display",
+      "disabledDisplay": "hidden",
+      "enableWhen": [
+        {
+          "question": "dob",
+          "operator": "<=",
+          "answerDate": "2024-06-15"
+        }
+      ]
+    },
+    {
+      "linkId": "appt",
+      "text": "Appointment",
+      "type": "dateTime"
+    },
+    {
+      "linkId": "dep-appt",
+      "text": "At or after 2024-06-15 10:00Z",
+      "type": "display",
+      "disabledDisplay": "hidden",
+      "enableWhen": [
+        {
+          "question": "appt",
+          "operator": ">=",
+          "answerDateTime": "2024-06-15T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "linkId": "tm",
+      "text": "Wake-up time",
+      "type": "time"
+    },
+    {
+      "linkId": "dep-tm",
+      "text": "At or after 10:00",
+      "type": "display",
+      "disabledDisplay": "hidden",
+      "enableWhen": [
+        {
+          "question": "tm",
+          "operator": ">=",
+          "answerTime": "10:00:00"
+        }
+      ]
+    }
+  ]
+}

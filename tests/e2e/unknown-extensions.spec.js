@@ -26,6 +26,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/unknown-extensions.fhir.json');
 const CUSTOM_URL = 'https://vendor.example.com/fhir/StructureDefinition/custom-field';
@@ -40,7 +41,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-testid="node-type-label"]').first()).toBeVisible({ timeout: 8_000 });
 }
 
@@ -49,11 +50,6 @@ async function exportFHIR(page) {
   await page.locator('[data-testid="export-quest-item"]').click();
   await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
   await page.getByTestId('saveFormatModalApply').click();
-  // If the questionnaire has validation warnings the validate modal opens first
-  // and blocks the save prompt — click "Export anyway" so the download proceeds.
-  const modal = page.locator('[data-testid="validateModal"]');
-  await modal.waitFor({ state: 'visible', timeout: 3_000 }).catch(() => {});
-  if (await modal.isVisible()) await modal.locator('.btn-fhir-export').click();
   // Wrap only the actual download trigger (prompt-save) in the download wait.
   const [download] = await Promise.all([
     page.waitForEvent('download'),

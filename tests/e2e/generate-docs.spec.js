@@ -3,25 +3,37 @@
 // new tab, key sections render, Print and Download-as-text buttons work.
 // Also covers issue #111 (extended item/metadata field completeness).
 //
-// Tested elements:
+// ── data-testid registry ────────────────────────────────────────────────────
 //   generate-docs-item — menu item in Save ▾
 //   qdoc-root, qdoc-title, qdoc-legend, qdoc-metadata, qdoc-variables, qdoc-contained,
 //   qdoc-structure, qdoc-validation — sections
 //   qdoc-item-<linkId> — per-item report block
 //   qdoc-print-btn, qdoc-download-btn — action buttons
 //   qdoc-code — expression/JSON code blocks
+//   export-btn
+//   qdoc-item-q-hidden-audit-marker
+//   qdoc-item-item-multi
+//   qdoc-item-item-integer
+//   qdoc-item-item-choice
+//   qdoc-item-item-display
+//   qdoc-item-item-attachment
+//   qdoc-item-item-reference
+//   qdoc-item-item-quantity
+//   tree-container
+// ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { freshStart } from './helpers/builder.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { mockTerminologyExpand } from './helpers/terminology.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/example-bariatric.fhir.json');
 
 async function loadFixture(page) {
   await freshStart(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await page.waitForSelector('[data-testid="tree-container"] [data-node-id]', { timeout: 15_000 });
 }
 
@@ -171,7 +183,7 @@ test.describe('Questionnaire Documentation generator — extended field coverage
   async function loadCompletenessFixture(page) {
     await mockTerminologyExpand(page);
     await freshStart(page);
-    await page.locator('[data-testid="fhir-file-input"]').setInputFiles(COMPLETENESS_FIXTURE);
+    await loadFixtureFile(page, COMPLETENESS_FIXTURE);
     await page.waitForSelector('[data-testid="tree-container"] [data-node-id]', { timeout: 15_000 });
   }
 

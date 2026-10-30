@@ -202,7 +202,7 @@ describe('validateTree — constraint[]', () => {
     const item = makeItem({ id: 'q1', constraint: [{ key: 'chk', severity: 'warning', human: 'msg', expression: '' }] });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.includes('empty expression'))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringContaining('empty expression') });
   });
 
   it('no issues for valid constraint', () => {
@@ -287,7 +287,7 @@ describe('validateTree — required + hidden', () => {
     const item = makeItem({ id: 'q1', mandatory: true, _hidden: true });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/required and hidden/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/required and hidden/) });
   });
 
   it('no warning when required but not hidden', () => {
@@ -308,7 +308,7 @@ describe('validateTree — calculatedExpression without readOnly', () => {
     const item = makeItem({ id: 'q1', _calculatedExpr: '%age * 2', _readOnly: false });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/calculatedExpression.*not read-only/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/calculatedExpression.*not read-only/) });
   });
 
   it('no warning when calculatedExpression set and readOnly is true', () => {
@@ -330,13 +330,13 @@ describe('validateTree — answerExpression + answerOption co-presence', () => {
     const item = makeItem({ id: 'q1', _answerExpression: '%meds', _rawAnswerOptions: [{ valueCoding: { code: 'a' } }] });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/answerExpression.*answerOption/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/answerExpression.*answerOption/) });
   });
 
   it('warns when both answerExpression and options string are set', () => {
     const item = makeItem({ id: 'q1', _answerExpression: '%meds', options: 'a,b,c' });
     const issues = validateTree([item]);
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/answerExpression.*answerOption/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/answerExpression.*answerOption/) });
   });
 
   it('no warning when only answerExpression is set', () => {
@@ -351,7 +351,7 @@ describe('validateTree — candidateExpression + answerOption co-presence', () =
   it('warns when both candidateExpression and options string are set', () => {
     const item = makeItem({ id: 'q1', _candidateExpression: '%meds', options: 'a,b,c' });
     const issues = validateTree([item]);
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/candidateExpression.*answerOption/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/candidateExpression.*answerOption/) });
   });
 
   it('no warning when only candidateExpression is set', () => {
@@ -368,7 +368,7 @@ describe('validateTree — isSubject uniqueness', () => {
     const b = makeItem({ id: 'q2', itemType: 'reference', _isSubject: true });
     const issues = validateTree([a, b]);
     const subjectErrs = issues.filter(i => i.severity === 'error' && i.message.match(/isSubject/));
-    expect(subjectErrs.length).toBeGreaterThan(0);
+    expect(subjectErrs).toEqual([{ severity: 'error', nodeId: 'q2', message: expect.stringContaining('Marked on: q1, q2.') }]);
   });
 
   it('does not error when exactly one item is marked isSubject', () => {
@@ -391,7 +391,7 @@ describe('validateTree — enableWhen + enableWhenExpression conflict', () => {
     const q1 = makeItem({ id: 'q1' });
     const issues = validateTree([q1, item]);
     expect(warnIds(issues)).toContain('q2');
-    expect(issues.find(i => i.nodeId === 'q2' && i.message.match(/enableWhen.*enableWhenExpression/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q2', message: expect.stringMatching(/enableWhen.*enableWhenExpression/) });
   });
 
   it('no warning when only enableWhen[] is set', () => {
@@ -414,7 +414,7 @@ describe('validateTree — repeats + initial values count', () => {
     const item = makeItem({ id: 'q1', repeats: false, _initialValues: ['a', 'b'] });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/initial values/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/2 initial values but repeats is not set/) });
   });
 
   it('no warning when repeats is true and multiple initial values', () => {
@@ -435,7 +435,7 @@ describe('validateTree — minOccurs R4 invariant', () => {
   it('warns when minOccurs=0 and required is not set (R4 context invariant: must be required=true)', () => {
     const item = makeItem({ id: 'q1', repeats: true, _minOccurs: 0 });
     const issues = validateTree([item]);
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/minOccurs.*not marked required/) });
   });
 
   it('no warning when minOccurs > 0 and required=true', () => {
@@ -447,7 +447,7 @@ describe('validateTree — minOccurs R4 invariant', () => {
   it('warns when minOccurs > 0 and required is not set', () => {
     const item = makeItem({ id: 'q1', repeats: true, _minOccurs: 2 });
     const issues = validateTree([item], {});
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/minOccurs.*not marked required/) });
   });
 
   it('no warning when minOccurs is not set', () => {
@@ -462,19 +462,19 @@ describe('validateTree — que-11 initial + answerOption conflict', () => {
   it('warns when _initialValue is set and item has options', () => {
     const item = makeItem({ id: 'q1', itemType: 'select', _initialValue: 'opt1', options: 'opt1|opt2' });
     const issues = validateTree([item]);
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/que-11/) });
   });
 
   it('warns when _initialValue is set and item has _rawAnswerOptions', () => {
     const item = makeItem({ id: 'q1', itemType: 'select', _initialValue: 'opt1', _rawAnswerOptions: [{ valueCoding: { code: 'opt1' } }] });
     const issues = validateTree([item]);
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/que-11/) });
   });
 
   it('warns when _initialValue is set and item has _answerValueSet', () => {
     const item = makeItem({ id: 'q1', itemType: 'select', _initialValue: 'opt1', _answerValueSet: 'https://example.com/vs' });
     const issues = validateTree([item]);
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-11|initial value/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/que-11/) });
   });
 
   it('no warning when _initialValue is set on text item (no answer options)', () => {
@@ -502,7 +502,7 @@ describe('validateTree — que-3 display item with code[]', () => {
     const item = makeItem({ id: 'q1', itemType: 'display', _codes: [{ system: LOINC_URL.system, code: '1234-5' }] });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-3|code\[\]/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/que-3/) });
   });
 
   it('no warning when non-display item has _codes', () => {
@@ -540,14 +540,14 @@ describe('validateTree — que-6 display item required/repeats', () => {
     const item = makeItem({ id: 'q1', itemType: 'display', mandatory: true });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-6|required/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/cannot be required.*que-6/) });
   });
 
   it('warns when display item has repeats=true', () => {
     const item = makeItem({ id: 'q1', itemType: 'display', repeats: true });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-6|repeats/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/cannot have repeats.*que-6/) });
   });
 
   it('no que-6 warning for text item with required=true', () => {
@@ -563,7 +563,7 @@ describe('validateTree — que-7 enableWhen exists operator', () => {
     const q1 = makeItem({ id: 'q1' });
     const issues = validateTree([q1, item]);
     expect(errIds(issues)).toContain('q2');
-    expect(issues.find(i => i.nodeId === 'q2' && i.message.match(/que-7|exists.*boolean/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'error', nodeId: 'q2', message: expect.stringMatching(/"exists".*que-7/) });
   });
 
   it('no error when operator=exists with answerBoolean=true', () => {
@@ -591,7 +591,7 @@ describe('validateTree — que-9 display item readOnly', () => {
     const item = makeItem({ id: 'q1', itemType: 'display', _readOnly: true });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-9|readOnly/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/que-9/) });
   });
 
   it('no que-9 warning for text item with readOnly=true', () => {
@@ -606,13 +606,13 @@ describe('validateTree — que-10 maxLength type restriction', () => {
     const item = makeItem({ id: 'q1', itemType: 'date', _maxLength: 10 });
     const issues = validateTree([item]);
     expect(warnIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-10|maxLength/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/maxLength.*"date".*que-10/) });
   });
 
   it('warns when maxLength set on select item', () => {
     const item = makeItem({ id: 'q1', itemType: 'select', options: 'a,b', _maxLength: 50 });
     const issues = validateTree([item]);
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-10|maxLength/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/maxLength.*"select".*que-10/) });
   });
 
   it('no que-10 warning for text item with maxLength', () => {
@@ -640,12 +640,12 @@ describe('validateTree — que-10 maxLength type restriction', () => {
 describe('validateTree — que-0 Questionnaire.name format', () => {
   it('warns when name starts with lowercase', () => {
     const issues = validateTree([], {}, { name: 'myQuestionnaire' });
-    expect(issues.find(i => i.nodeId === '(root)' && i.message.match(/que-0|naming/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: '(root)', message: expect.stringMatching(/"myQuestionnaire".*que-0/) });
   });
 
   it('warns when name contains spaces', () => {
     const issues = validateTree([], {}, { name: 'My Questionnaire' });
-    expect(issues.find(i => i.nodeId === '(root)')).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'warning', nodeId: '(root)', message: expect.stringMatching(/"My Questionnaire".*que-0/) });
   });
 
   it('no warning when name matches pattern', () => {
@@ -689,7 +689,7 @@ describe('validateTree — que-5 answerValueSet type restriction', () => {
     const item = makeItem({ id: 'q1', itemType: 'url', _answerValueSet: 'https://example.com/vs' });
     const issues = validateTree([item]);
     expect(errIds(issues)).toContain('q1');
-    expect(issues.find(i => i.nodeId === 'q1' && i.message.match(/que-5/))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'error', nodeId: 'q1', message: expect.stringMatching(/que-5/) });
   });
 
   it('errors when answerValueSet set on attachment item', () => {
@@ -732,14 +732,14 @@ describe('validateTree — circular dependency detection', () => {
     const b = makeItem({ id: 'b', itemType: 'decimal', _readOnly: true, _calculatedExpr: "item.where(linkId='a').answer.valueDecimal" });
     const issues = validateTree([a, b]);
     const cycleErr = issues.find(i => i.severity === 'error' && /Circular dependency/.test(i.message));
-    expect(cycleErr).toBeTruthy();
+    expect(cycleErr).toMatchObject({ nodeId: 'a', message: expect.stringContaining('a \u2192 b \u2192 a') });
   });
 
   it('errors on an enableWhen cycle', () => {
     const a = makeItem({ id: 'a', enableWhen: [{ question: 'b', operator: 'exists', answerBoolean: true }] });
     const b = makeItem({ id: 'b', enableWhen: [{ question: 'a', operator: 'exists', answerBoolean: true }] });
     const issues = validateTree([a, b]);
-    expect(issues.find(i => /Circular dependency/.test(i.message))).toBeTruthy();
+    expect(issues).toContainEqual({ severity: 'error', nodeId: 'a', message: expect.stringMatching(/Circular dependency between items: a → b → a/) });
   });
 
   it('reports a cycle only once', () => {

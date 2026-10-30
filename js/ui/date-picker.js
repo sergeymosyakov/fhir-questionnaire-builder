@@ -102,6 +102,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
 
     calEl = document.createElement('div');
     calEl.className = 'dp-cal' + (withTime ? ' dp-cal--dt' : '');
+    calEl.dataset.testid = 'dp-cal';
     document.body.appendChild(calEl);
     _renderCal();
     _position();

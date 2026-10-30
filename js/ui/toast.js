@@ -125,6 +125,7 @@ export function showPrompt(label, defaultValue, onConfirm) {
   cancelBtn.type = 'button';
   cancelBtn.className = 'modal-btn';
   cancelBtn.textContent = 'Cancel';
+  cancelBtn.dataset.testid = 'prompt-cancel';
   const applyBtn = document.createElement('button');
   applyBtn.type = 'button';
   applyBtn.className = 'modal-btn modal-btn--apply';

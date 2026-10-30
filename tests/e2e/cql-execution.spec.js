@@ -15,12 +15,13 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { freshStart } from './helpers/builder.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/cql-execution.fhir.json');
 
 async function loadFixture(page) {
   await freshStart(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await page.waitForSelector('[data-testid="tree-container"] [data-node-id]', { timeout: 15_000 });
 }
 

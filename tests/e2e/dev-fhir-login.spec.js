@@ -2,7 +2,7 @@
 // Interim local-testing tool, issue #63 — see docs/FHIR-SERVER-AUTH-PLAN.md.
 // The network is fully mocked with page.route() — no real IdP is called.
 //
-// Tested elements:
+// ── data-testid registry ────────────────────────────────────────────────────
 //   dev-login-token-url     — token URL input
 //   dev-login-client-id     — client id input
 //   dev-login-client-secret — client secret input
@@ -10,6 +10,7 @@
 //   dev-login-test-btn      — "Test" button (one-off verify fetch, not stored)
 //   dev-login-reset-btn     — "Reset" button
 //   dev-login-status        — saved/not-configured status line
+// ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
 

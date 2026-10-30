@@ -24,12 +24,24 @@
 //   display-help-toggle       "? Help" button on help items in preview
 //   display-help-content      collapsible content span on help items in preview
 //   csel-drop                 dropdown panel of any custom select
+//   saveFormatModalApply
+//   prompt-save
+//   answerTypeModal
+//   answerTypeModalApply
+//   saveFormatModal
+//   validateModal
+//   validateModalBody
+//   export-btn
+//   export-quest-item
+//   tools-btn
+//   validate-item
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/display-category.fhir.json');
 
@@ -43,7 +55,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="dc-instructions"]')).toBeVisible({ timeout: 8_000 });
 }
 
@@ -317,19 +329,16 @@ function findItemRecursive(items, linkId) {
 }
 
 /**
- * Export FHIR JSON, handling the optional validate modal that opens when
- * there are warnings (e.g. displayCategory on display items).
+ * Export FHIR JSON, passing through the validate modal that opens for the fixture's warnings.
  */
 async function exportAndDownload(page) {
   await openDropdownItem(page, 'export-btn', 'export-quest-item');
   await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
   await page.getByTestId('saveFormatModalApply').click();
-  // Validate modal opens when questionnaire has warnings/errors
+  // The fixture's displayCategory warnings always open the validate modal
   const modal = page.locator('[data-testid="validateModal"]');
-  await modal.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-  if (await modal.isVisible()) {
-    await page.locator('[data-testid="validateModal"] .btn-fhir-export').click();
-  }
+  await expect(modal).toBeVisible();
+  await modal.locator('.btn-fhir-export').click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByTestId('prompt-save').click(),

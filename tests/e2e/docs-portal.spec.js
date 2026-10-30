@@ -14,22 +14,22 @@ test.describe('documentation portal', () => {
   test('loads and renders the first page from Markdown', async ({ page }) => {
     await page.goto('/docs.html');
     await expect(page.locator('.doc-nav-section', { hasText: 'Getting Started' })).toBeVisible();
-    await expect(page.locator('#docContent h1')).toHaveText('What is this?');
+    await expect(page.getByTestId('doc-content').locator('h1')).toHaveText('What is this?');
     // Sidebar marks the active page.
     await expect(page.locator('.doc-nav-link--active')).toHaveText('What is this?');
   });
 
   test('sidebar search filters pages by title', async ({ page }) => {
     await page.goto('/docs.html');
-    await page.fill('#docSearch', 'translate');
-    const visible = page.locator('#docSidebar li:not(.doc-hidden) .doc-nav-link');
+    await page.fill('[data-testid="doc-search"]', 'translate');
+    const visible = page.getByTestId('doc-sidebar').locator('li:not(.doc-hidden) .doc-nav-link');
     await expect(visible).toHaveCount(1);
     await expect(visible).toHaveText('Translate a questionnaire');
   });
 
   test('an unknown page id shows a not-found placeholder', async ({ page }) => {
     await page.goto('/docs.html#/no-such-page');
-    await expect(page.locator('#docContent h1')).toHaveText('Page not found');
+    await expect(page.getByTestId('doc-content').locator('h1')).toHaveText('Page not found');
     await expect(page.locator('.doc-placeholder')).toBeVisible();
   });
 

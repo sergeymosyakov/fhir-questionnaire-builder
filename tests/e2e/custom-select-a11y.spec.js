@@ -16,13 +16,14 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { freshStart } from './helpers/builder.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const CHOICE_FIXTURE = path.resolve('sampledata/annual-health-check.fhir.json');
 const REF_FIXTURE    = path.resolve('tests/fixtures/reference-profile.fhir.json');
 
 async function load(page, fixture, previewId) {
   await freshStart(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(fixture);
+  await loadFixtureFile(page, fixture);
   await expect(page.locator(`[data-preview-id="${previewId}"]`)).toBeVisible({ timeout: 8_000 });
 }
 

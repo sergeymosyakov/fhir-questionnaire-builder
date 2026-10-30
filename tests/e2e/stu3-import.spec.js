@@ -27,13 +27,6 @@ async function waitForLoad(page) {
 async function loadFixture(page, filename) {
   await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
 
-  // Confirm-before-load dialog (only when a questionnaire is already loaded)
-  const confirmModal = page.getByTestId('loadConfirmModal');
-  await confirmModal.waitFor({ state: 'visible', timeout: 2_000 }).catch(() => {});
-  if (await confirmModal.isVisible()) {
-    await page.getByTestId('load-confirm-proceed-btn').click();
-  }
-
   // Format picker modal — keep default FHIR JSON selection
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
   const [fileChooser] = await Promise.all([
@@ -75,7 +68,7 @@ test.describe('STU3 import', () => {
     // Switch to FHIR JSON view to verify it was imported into questMeta.
     await page.getByTestId('preview-mode-btn').click();
     await page.getByTestId('preview-mode-json').click();
-    await expect(page.locator('#fhirJsonView')).toContainText('PHQ-9 Depression Screening');
+    await expect(page.getByTestId('fhir-json-view')).toContainText('PHQ-9 Depression Screening');
     // Switch back to Preview for subsequent tests
     await page.getByTestId('preview-mode-btn').click();
     await page.getByTestId('preview-mode-preview').click();

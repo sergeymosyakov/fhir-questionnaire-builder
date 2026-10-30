@@ -74,7 +74,7 @@ export class ItemNode extends BaseNode {
       (this.constraint?.length > 0) ||
       (this._minValue !== undefined || this._maxValue !== undefined) ||
       (this._maxDecimalPlaces !== undefined) ||
-      (this._regex)
+      (this._regex || this._minLength)
     );
     const displayOk = res.ok && rc.calcFormOk(this) && constraintPass;
     return { hasCondition, displayOk };

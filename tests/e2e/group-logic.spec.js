@@ -109,12 +109,13 @@ test.describe('Group AND/OR logic — preview reactivity', () => {
 // ── Calculated-expression tests using annual-health-check fixture ─────────────
 
 import path from 'node:path';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 const ANNUAL = path.resolve('sampledata/annual-health-check.fhir.json');
 
 async function loadAnnual(page) {
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(ANNUAL);
+  await loadFixtureFile(page, ANNUAL);
   await expect(page.locator('[data-preview-id="bmi"]')).toBeVisible({ timeout: 10_000 });
 }
 

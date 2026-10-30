@@ -116,6 +116,7 @@ export class Modal {
   open()  {
     // Remember what had focus so it can be restored on close (a11y).
     this._prevFocus = (typeof document !== 'undefined' && document.activeElement) || null;
+    this._stackAboveOpenModals();
     this.backdrop.style.display = 'flex';
     // Move focus into the dialog and trap Tab within it.
     if (!this._trapHandler) {
@@ -125,8 +126,21 @@ export class Modal {
     try { this.box.focus({ preventScroll: true }); } catch { /* jsdom */ }
   }
 
+  // Equal-z backdrops stack by DOM order, so a modal opened from another can end up beneath it.
+  _stackAboveOpenModals() {
+    this.backdrop.style.zIndex = '';
+    const own = parseInt(getComputedStyle(this.backdrop).zIndex, 10) || 0;
+    let top = -1;
+    for (const b of _registry.keys()) {
+      if (b === this.backdrop || b.style.display === 'none') continue;
+      top = Math.max(top, parseInt(getComputedStyle(b).zIndex, 10) || 0);
+    }
+    if (top >= own) this.backdrop.style.zIndex = String(top + 1);
+  }
+
   close() {
     this.backdrop.style.display = 'none';
+    this.backdrop.style.zIndex = '';
     if (this._trapHandler) {
       this.backdrop.removeEventListener('keydown', this._trapHandler);
       this._trapHandler = null;

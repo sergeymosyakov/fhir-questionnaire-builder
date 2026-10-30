@@ -19,10 +19,15 @@
 //   patient-view-btn    toggle button in preview header
 //   preview-nav-btn     ↗ nav button on each visible preview row
 //   preview-linkid      linkId badge on each visible preview row
+//   preview-mode-btn
+//   preview-mode-patient
+//   preview-mode-preview
+//   add-root-group-btn
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/patient-view.fhir.json');
 
@@ -34,7 +39,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q1"]')).toBeVisible({ timeout: 8_000 });
 }
 

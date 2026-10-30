@@ -32,6 +32,7 @@ export function createRefSearchAutocomplete(input, options) {
 
   const dropdown = document.createElement('div');
   dropdown.className = extraClassName ? `ref-search-drop ${extraClassName}` : 'ref-search-drop';
+  dropdown.dataset.testid = 'ref-search-drop';
   dropdown.style.display = 'none';
   document.body.appendChild(dropdown);
 
@@ -57,6 +58,7 @@ export function createRefSearchAutocomplete(input, options) {
     if (!results.length) {
       const empty = document.createElement('div');
       empty.className = 'ref-search-empty';
+      empty.dataset.testid = 'ref-search-empty';
       empty.textContent = query.trim() ? 'No results' : 'Type to search\u2026';
       dropdown.appendChild(empty);
     } else {
@@ -64,6 +66,7 @@ export function createRefSearchAutocomplete(input, options) {
         const item = document.createElement('button');
         item.type = 'button';
         item.className = 'ref-search-item';
+        item.dataset.testid = 'ref-search-item';
         const nameSpan = document.createElement('span');
         nameSpan.className = 'ref-search-name';
         nameSpan.textContent = r.display;
@@ -90,6 +93,7 @@ export function createRefSearchAutocomplete(input, options) {
     searchAbort = controller;
     const loading = document.createElement('div');
     loading.className = 'ref-search-empty';
+    loading.dataset.testid = 'ref-search-loading';
     loading.textContent = 'Searching\u2026';
     dropdown.innerHTML = '';
     dropdown.appendChild(loading);
@@ -103,6 +107,7 @@ export function createRefSearchAutocomplete(input, options) {
       if (controller.signal.aborted || e.name === 'AbortError') return;
       const err = document.createElement('div');
       err.className = 'ref-search-empty ref-search-error';
+      err.dataset.testid = 'ref-search-error';
       err.textContent = e.message || 'Search failed';
       dropdown.innerHTML = '';
       dropdown.appendChild(err);

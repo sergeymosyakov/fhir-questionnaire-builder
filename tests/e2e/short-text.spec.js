@@ -19,11 +19,16 @@
 //   export-btn           main Export dropdown button
 //   export-quest-item    "Questionnaire2026" item in export dropdown (opens saveFormatModal)
 //   prompt-save          confirm button in filename prompt dialog
+//   preview-mode-btn
+//   preview-mode-patient
+//   add-root-group-btn
+//   saveFormatModalApply
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/short-text.fhir.json');
 
@@ -31,7 +36,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q-with-short"]')).toBeVisible({ timeout: 8_000 });
 }
 

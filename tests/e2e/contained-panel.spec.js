@@ -5,24 +5,18 @@
 //
 // Run: npx playwright test tests/e2e/contained-panel.spec.js
 //
-// ── element IDs ──────────────────────────────────────────────────────────────
-//   containedCard            collapsible card (shown when contained[] is non-empty)
-//   containedCardToggle      collapse/expand button
-//   containedCardChips       chip list container
-//   containedCardCount       resource count badge
-//   answerValueSetCard       collapsible card (shown when any item has answerValueSet)
-//   answerValueSetCardToggle collapse/expand button
-//   answerValueSetCardChips  chip list container
-//   answerValueSetCardCount  URL count badge
-//   fhirJsonModal            read-only JSON viewer modal backdrop
-//   fhirJsonModalTitle       modal title <span>
-//   fhirJsonModalPre         <pre> with formatted JSON
-//   fhirJsonModalClose       × close button (header)
-//   fhirJsonModalCloseBtn    "Close" button (footer)
-// ─────────────────────────────────────────────────────────────────────────────
+// ── data-testid registry ────────────────────────────────────────────────────
+//   contained-card / -toggle / -chips / -count                  Contained Resources card + parts
+//   answer-value-set-card / -toggle / -chips / -count          Answer ValueSet card + parts
+//   fhirJsonModal / Title / Pre / Close / CloseBtn             read-only JSON viewer modal
+//   clear-form-btn, clear-confirm-clear-btn                    clear-form flow
+//   add-root-group-btn                                         builder-ready marker
+// ────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { loadFixtureFile } from './helpers/load-fixture.js';
+import { mockTerminologyExpand } from './helpers/terminology.js';
 
 const FIXTURE = path.resolve('tests/fixtures/contained-valueset.fhir.json');
 
@@ -38,30 +32,21 @@ async function freshStart(page) {
   await waitForLoad(page);
 }
 
-/** Load the contained-valueset fixture via the hidden file input.
- *  The fixture has an external answerValueSet URL that always fails expansion
- *  (fake domain). We wait for and dismiss the resulting error modal so tests
- *  that cover the contained panel are not blocked by it. */
+/** Load the contained-valueset fixture; its external answerValueSet expansion is mocked so no error modal opens. */
 async function loadFixture(page) {
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await mockTerminologyExpand(page);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 8_000 });
-  // Async expansion fires after render; wait up to 5 s for the error modal.
-  const validateBackdrop = page.locator('[data-testid="validateModal"]');
-  await validateBackdrop.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-  if (await validateBackdrop.isVisible()) {
-    await page.locator('[data-testid="validateModalClose"]').click();
-    await validateBackdrop.waitFor({ state: 'hidden', timeout: 3_000 });
-  }
 }
 
-const containedCard      = (page) => page.locator('#containedCard');
-const containedChips     = (page) => page.locator('#containedCardChips');
-const containedCount     = (page) => page.locator('#containedCardCount');
-const containedToggle    = (page) => page.locator('#containedCardToggle');
+const containedCard      = (page) => page.getByTestId('contained-card');
+const containedChips     = (page) => page.getByTestId('contained-card-chips');
+const containedCount     = (page) => page.getByTestId('contained-card-count');
+const containedToggle    = (page) => page.getByTestId('contained-card-toggle');
 
-const avsCard            = (page) => page.locator('#answerValueSetCard');
-const avsChips           = (page) => page.locator('#answerValueSetCardChips');
-const avsCount           = (page) => page.locator('#answerValueSetCardCount');
+const avsCard            = (page) => page.getByTestId('answer-value-set-card');
+const avsChips           = (page) => page.getByTestId('answer-value-set-card-chips');
+const avsCount           = (page) => page.getByTestId('answer-value-set-card-count');
 
 const jsonModal          = (page) => page.locator('[data-testid="fhirJsonModal"]');
 const jsonModalTitle     = (page) => page.locator('[data-testid="fhirJsonModalTitle"]');

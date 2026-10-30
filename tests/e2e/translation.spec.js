@@ -29,6 +29,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const PHQ9 = path.resolve('sampledata/phq-9.fhir.json');
 
@@ -40,7 +41,7 @@ async function freshStart(page) {
 
 async function loadPHQ9(page) {
   await freshStart(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(PHQ9);
+  await loadFixtureFile(page, PHQ9);
   await expect(page.locator('[data-preview-id="/44250-9"]')).toBeVisible({ timeout: 10_000 });
 }
 

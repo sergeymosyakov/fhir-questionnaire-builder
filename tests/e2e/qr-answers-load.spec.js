@@ -13,6 +13,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { expectBoolValue } from './helpers/builder.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const PHQ9_FIXTURE = path.resolve('sampledata/phq-9.fhir.json');
 const PHQ9_QR      = path.resolve('sampledata/phq-9-response.qr.json');
@@ -22,7 +23,7 @@ const BARIATRIC_QR      = path.resolve('sampledata/example-bariatric-response.qr
 async function loadPHQ9(page) {
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(PHQ9_FIXTURE);
+  await loadFixtureFile(page, PHQ9_FIXTURE);
   // PHQ-9 first item has LOINC linkId /44250-9
   await expect(page.locator('[data-preview-id="/44250-9"]')).toBeVisible({ timeout: 10_000 });
 }
@@ -31,7 +32,7 @@ async function loadBariatric(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(BARIATRIC_FIXTURE);
+  await loadFixtureFile(page, BARIATRIC_FIXTURE);
   // Wait for a top-level group to confirm the fixture loaded
   await expect(page.locator('[data-preview-id="g-consent"]')).toBeVisible({ timeout: 10_000 });
 }

@@ -14,10 +14,18 @@
 //
 // Run: npx playwright test tests/e2e/fhir-hidden.spec.js
 // ─────────────────────────────────────────────────────────────────────────────
+//
+// ── data-testid registry ────────────────────────────────────────────────────
+//   preview-mode-patient
+//   preview-mode-btn
+//   preview-search-input
+//   add-root-group-btn
+// ────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const ANNUAL       = path.resolve('sampledata/annual-health-check.fhir.json');
 const ITEM_CONTROL = path.resolve('sampledata/item-control-demo.fhir.json');
@@ -26,7 +34,7 @@ async function freshLoad(page, fixture) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(fixture);
+  await loadFixtureFile(page, fixture);
 }
 
 async function loadAnnual(page) {

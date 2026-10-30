@@ -25,6 +25,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
@@ -187,7 +188,7 @@ test.describe('atable itemControl — round-trip', () => {
     writeFileSync(tmpFile, JSON.stringify(q));
     try {
       await freshStart(page);
-      await page.locator('[data-testid="fhir-file-input"]').setInputFiles(tmpFile);
+      await loadFixtureFile(page, tmpFile);
       await expect(page.locator(`[data-preview-id="${item.linkId}"] table.atable-item`)).toBeVisible({ timeout: 8_000 });
 
       await openAnswerTypeModal(page, '1.1');

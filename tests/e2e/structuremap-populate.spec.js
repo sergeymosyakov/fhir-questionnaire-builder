@@ -14,6 +14,7 @@ import path from 'node:path';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { freshStart } from './helpers/builder.js';
 import { openModal } from './helpers/metadata.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/structuremap-populate.fhir.json');
 
@@ -27,7 +28,7 @@ async function clearFhirBaseUrl(page) {
 
 async function loadFixture(page) {
   await freshStart(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.getByTestId('quest-meta-card')).toBeVisible({ timeout: 8_000 });
 }
 

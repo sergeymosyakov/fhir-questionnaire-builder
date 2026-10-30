@@ -125,16 +125,14 @@ describe('QuestionnaireLoader.load — success', () => {
   it('dispatches REINIT_FORM on load', async () => {
     await makeLoader().load({}, 'test.json');
     const calls = document.dispatchEvent.mock.calls;
-    const evt = calls.find(c => c[0].type === 'reinit-form');
-    expect(evt).toBeDefined();
+    expect(calls.map(c => c[0].type)).toContain('reinit-form');
   });
 
   it('dispatches QUESTIONNAIRE_LOADED event with fileName', async () => {
     await makeLoader().load({}, 'my-qs.json');
     const calls = document.dispatchEvent.mock.calls;
     const loadedEvt = calls.find(c => c[0].type === 'questionnaire-loaded');
-    expect(loadedEvt).toBeDefined();
-    expect(loadedEvt[0].detail.fileName).toBe('my-qs.json');
+    expect(loadedEvt[0].detail).toMatchObject({ fileName: 'my-qs.json' });
   });
 
   it('calls progress.show and progress.hide in finally', async () => {
@@ -202,8 +200,7 @@ describe('QuestionnaireLoader.load — VS expansion failures', () => {
     // so the external validator does not POST an empty body (HTTP 400).
     const showCalls = validateModal.show.mock.calls;
     const expansionCall = showCalls.find(c => c[0].includes('ValueSet'));
-    expect(expansionCall).toBeDefined();
-    expect(expansionCall[2].questJson).toBe(data);
+    expect(expansionCall[2]).toMatchObject({ questJson: data });
   });
 
   it('does not call validateModal.show for VS when no failures', async () => {
@@ -238,24 +235,21 @@ describe('QuestionnaireLoader.reset', () => {
     const loader = makeLoader();
     loader.reset();
     const calls = document.dispatchEvent.mock.calls;
-    const evt = calls.find(c => c[0].type === 'answer:clear');
-    expect(evt).toBeDefined();
+    expect(calls.map(c => c[0].type)).toContain('answer:clear');
   });
 
   it('dispatches BUILDER_RERENDER on reset', () => {
     const loader = makeLoader();
     loader.reset();
     const calls = document.dispatchEvent.mock.calls;
-    const evt = calls.find(c => c[0].type === 'builder:rerender');
-    expect(evt).toBeDefined();
+    expect(calls.map(c => c[0].type)).toContain('builder:rerender');
   });
 
   it('dispatches QUESTIONNAIRE_CLEARED event', () => {
     const loader = makeLoader();
     loader.reset();
     const calls = document.dispatchEvent.mock.calls;
-    const evt = calls.find(c => c[0].type === 'questionnaire-cleared');
-    expect(evt).toBeDefined();
+    expect(calls.map(c => c[0].type)).toContain('questionnaire-cleared');
   });
 
   it('does not throw', () => {

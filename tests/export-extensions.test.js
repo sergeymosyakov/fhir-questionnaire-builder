@@ -58,11 +58,7 @@ function build(nodes, title = 'Test Q', vars = []) {
 describe('buildFHIRObject — _renderXhtml', () => {
   it('exports _renderXhtml as _text rendering-xhtml extension', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _renderXhtml: '<b>Bold</b>' }]);
-    expect(q.item[0]._text).toBeDefined();
-    const ext = q.item[0]._text.extension;
-    const xhtmlExt = ext.find(e => e.url.includes('rendering-xhtml'));
-    expect(xhtmlExt).toBeDefined();
-    expect(xhtmlExt.valueString).toBe('<b>Bold</b>');
+    expect(q.item[0]._text).toEqual({ extension: [{ url: FHIR.renderingXhtml, valueString: '<b>Bold</b>' }] });
   });
 
   it('exports both _renderStyle and _renderXhtml in one _text.extension[]', () => {
@@ -253,13 +249,13 @@ describe('buildFHIRObject — resource meta', () => {
     _questMeta._rawMetaTag = [{ system: 'https://example.org', code: 'tag1' }];
     _questMeta._rawMetaSecurity = [{ system: 'https://example.org', code: 'sec1' }];
     const q = build([]);
-    expect(q.meta).toBeDefined();
+    expect(q.meta).toMatchObject({ versionId: 'v2' });
     expect(q.meta.versionId).toBe('v2');
     expect(q.meta.source).toBe('https://example.org');
     expect(q.meta.profile).toEqual([FHIR.sd + '/Questionnaire']);
     expect(q.meta.tag).toEqual([{ system: 'https://example.org', code: 'tag1' }]);
     expect(q.meta.security).toEqual([{ system: 'https://example.org', code: 'sec1' }]);
-    expect(q.meta.lastUpdated).toBeDefined();
+    expect(q.meta.lastUpdated).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
   });
 
   it('omits q.meta when no meta fields are set', () => {
@@ -600,11 +596,7 @@ describe('_unknownExtensions pass-through', () => {
       _unknownExtensions: [{ url: 'https://vendor.example.com/custom', valueString: 'val' }],
     };
     const q = build([node]);
-    const ext = q.item[0].extension;
-    expect(ext).toBeDefined();
-    const custom = ext.find(e => e.url === 'https://vendor.example.com/custom');
-    expect(custom).toBeDefined();
-    expect(custom.valueString).toBe('val');
+    expect(q.item[0].extension).toEqual([{ url: 'https://vendor.example.com/custom', valueString: 'val' }]);
   });
 
   it('appends unknown extensions after known ones', () => {
@@ -615,12 +607,10 @@ describe('_unknownExtensions pass-through', () => {
     };
     const q = build([node]);
     const ext = q.item[0].extension;
-    expect(ext.length).toBeGreaterThanOrEqual(2);
-    const minLen = ext.find(e => e.url === FHIR.minLength);
-    const custom = ext.find(e => e.url === 'https://vendor.example.com/custom');
-    expect(minLen).toBeDefined();
-    expect(custom).toBeDefined();
-    expect(custom.valueBoolean).toBe(true);
+    expect(ext).toEqual([
+      { url: FHIR.minLength, valueInteger: 3 },
+      { url: 'https://vendor.example.com/custom', valueBoolean: true },
+    ]);
   });
 
   it('does not add extension[] when _unknownExtensions is empty', () => {
@@ -767,8 +757,7 @@ describe('buildFHIRObject — sdc-questionnaire-collapsible', () => {
   it('exports default-closed as valueCode on a group', () => {
     const q = build([{ id: 'g1', type: 'group', title: 'G', _collapsible: 'default-closed', children: [] }]);
     const ext = (q.item[0].extension || []).find(e => e.url === COLL_URL);
-    expect(ext).toBeDefined();
-    expect(ext.valueCode).toBe('default-closed');
+    expect(ext).toEqual({ url: COLL_URL, valueCode: 'default-closed' });
   });
 
   it('exports default-open as valueCode on a group', () => {
@@ -973,8 +962,7 @@ describe('buildFHIRObject — _regex', () => {
   it('exports regex extension when _regex is set', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _regex: '^[A-Z]+$' }]);
     const ext = (q.item[0].extension || []).find(e => e.url === RX_URL);
-    expect(ext).toBeDefined();
-    expect(ext.valueString).toBe('^[A-Z]+$');
+    expect(ext).toEqual({ url: RX_URL, valueString: '^[A-Z]+$' });
   });
 
   it('omits regex extension when _regex is absent', () => {
@@ -998,8 +986,7 @@ describe('buildFHIRObject — _optionExclusives', () => {
     expect(opts).toHaveLength(2);
     const noneOpt = opts.find(o => o.valueCoding.code === 'none');
     const oeExt = (noneOpt.extension || []).find(e => e.url === OE_URL);
-    expect(oeExt).toBeDefined();
-    expect(oeExt.valueBoolean).toBe(true);
+    expect(oeExt).toEqual({ url: OE_URL, valueBoolean: true });
     // Non-exclusive option should not have the extension
     const aOpt = opts.find(o => o.valueCoding.code === 'a');
     const aOeExt = (aOpt.extension || []).find(e => e.url === OE_URL);

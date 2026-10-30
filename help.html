@@ -26,7 +26,7 @@
   <div class="page-header">
     <div class="page-header-bar">
       <h1 class="page-header-title">FHIR Field Reference</h1>
-      <input type="search" id="helpSearch" class="page-header-search page-header-search--inline" placeholder="Search by field name, extension, or keyword…" autocomplete="off">
+      <input type="search" id="helpSearch" data-testid="help-search" class="page-header-search page-header-search--inline" placeholder="Search by field name, extension, or keyword…" autocomplete="off">
       <a href="index.html" class="page-header-back" target="_parent" data-back-link>← Back to Builder</a>
     </div>
     <p class="page-header-subtitle">Find any FHIR R4 / SDC field and where to configure it in the Logic Builder UI.</p>
@@ -34,7 +34,7 @@
   </div>
 
   <div class="help-wrap">
-    <table id="helpTable">
+    <table id="helpTable" data-testid="help-table">
       <thead>
         <tr>
           <th class="col-field">FHIR Field / Extension</th>

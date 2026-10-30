@@ -30,11 +30,20 @@
 //   eb-leaf-value-select                                                  Expression Builder
 //   csel-drop [data-val]                                                  custom-select option
 // Preview control classes (sanctioned non-testid exception): .radio-label
+//   fhir-json-view
+//   opt-code-0
+//   opt-label-0
+//   opt-code-1
+//   opt-label-1
+//   vis-cond-q-trigger-0
+//   vis-cond-val-sel-0
+//   qdoc-options-1.1
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/comma-option-display.fhir.json');
 const COMMA_DISPLAY = 'E1220 - Wheelchair, adult size, heavy duty, elevating legrests';
@@ -43,16 +52,16 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-node-id="q-radio-comma"]')).toBeVisible({ timeout: 8_000 });
 }
 
 async function getExportedJSON(page) {
   await page.getByTestId('preview-mode-btn').click();
   await page.getByTestId('preview-mode-json').click();
-  await expect(page.locator('#fhirJsonView')).toBeVisible();
-  await expect(page.locator('#fhirJsonView')).toContainText('resourceType', { timeout: 8_000 });
-  return JSON.parse(await page.locator('#fhirJsonView').textContent());
+  await expect(page.getByTestId('fhir-json-view')).toBeVisible();
+  await expect(page.getByTestId('fhir-json-view')).toContainText('resourceType', { timeout: 8_000 });
+  return JSON.parse(await page.getByTestId('fhir-json-view').textContent());
 }
 
 function findItem(items, linkId) {

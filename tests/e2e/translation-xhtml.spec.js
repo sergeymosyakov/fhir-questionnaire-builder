@@ -13,6 +13,33 @@
 //       It intercepts the network request and returns a stub translation so
 //       the test is deterministic and works without internet access.
 // ─────────────────────────────────────────────────────────────────────────────
+//
+// ── data-testid registry ────────────────────────────────────────────────────
+//   loadFormatModal
+//   load-format-select
+//   loadFormatModalApply
+//   tools-btn
+//   translate-item
+//   translate-lang-select
+//   translate-btn
+//   translate-cancel-btn
+//   translate-apply-btn
+//   saveFormatModal
+//   saveFormatModalApply
+//   validateModal
+//   prompt-save
+//   add-root-group-btn
+//   csel-drop
+//   translateModal
+//   translate-table
+//   translate-input-intro
+//   lang-menu-btn
+//   lang-menu-item-es
+//   load-fhir-btn
+//   load-from-file-item
+//   export-btn
+//   export-quest-item
+// ────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
@@ -31,9 +58,6 @@ async function freshStart(page) {
 async function loadXHTMLDemo(page) {
   await freshStart(page);
   await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
-  const confirm = page.getByTestId('loadConfirmModal');
-  await confirm.waitFor({ state: 'visible', timeout: 2_000 }).catch(() => {});
-  if (await confirm.isVisible()) await page.getByTestId('load-confirm-proceed-btn').click();
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
   await page.getByTestId('load-format-select').click();
   await page.locator('[data-testid="csel-drop"] [data-val="fhir"]').click();
@@ -48,9 +72,6 @@ async function loadXHTMLDemo(page) {
 async function loadMarkdownDemo(page) {
   await freshStart(page);
   await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
-  const confirm = page.getByTestId('loadConfirmModal');
-  await confirm.waitFor({ state: 'visible', timeout: 2_000 }).catch(() => {});
-  if (await confirm.isVisible()) await page.getByTestId('load-confirm-proceed-btn').click();
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
   await page.getByTestId('load-format-select').click();
   await page.locator('[data-testid="csel-drop"] [data-val="fhir"]').click();
@@ -170,17 +191,9 @@ test.describe('XHTML translation — export round-trip', () => {
         await openDropdownItem(page, 'export-btn', 'export-quest-item');
         await expect(page.getByTestId('saveFormatModal')).toBeVisible();
         await page.getByTestId('saveFormatModalApply').click();
-        // Validate modal may appear — export anyway
-        const vm = page.getByTestId('validateModal');
-        await vm.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-        if (await vm.isVisible()) {
-          const exportBtn = vm.locator('button:has-text("Export"), button:has-text("Export anyway")');
-          await exportBtn.first().click();
-        }
         // Filename prompt
         const prompt = page.getByTestId('prompt-save');
-        await prompt.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-        if (await prompt.isVisible()) await prompt.click();
+        await prompt.click();
       })(),
     ]);
 
@@ -254,15 +267,8 @@ test.describe('Markdown translation — export round-trip', () => {
         await openDropdownItem(page, 'export-btn', 'export-quest-item');
         await expect(page.getByTestId('saveFormatModal')).toBeVisible();
         await page.getByTestId('saveFormatModalApply').click();
-        const vm = page.getByTestId('validateModal');
-        await vm.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-        if (await vm.isVisible()) {
-          const exportBtn = vm.locator('button:has-text("Export"), button:has-text("Export anyway")');
-          await exportBtn.first().click();
-        }
         const prompt = page.getByTestId('prompt-save');
-        await prompt.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-        if (await prompt.isVisible()) await prompt.click();
+        await prompt.click();
       })(),
     ]);
 

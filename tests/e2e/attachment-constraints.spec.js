@@ -21,12 +21,17 @@
 //   mime-hint            Span showing accepted MIME types below file button
 //   export-btn           Export dropdown trigger (toolbar)
 // export-quest-item    "Questionnaire…" item in export dropdown (opens saveFormatModal)
+//   saveFormatModalApply
+//   prompt-save
+//   add-root-group-btn
+//   answerTypeModal
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/attachment-constraints.fhir.json');
 
@@ -41,7 +46,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="att-maxsize"]')).toBeVisible({ timeout: 8_000 });
 }
 

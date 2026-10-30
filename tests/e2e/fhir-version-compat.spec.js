@@ -21,6 +21,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const R5_FIXTURE = path.resolve('sampledata/r5-demo.fhir.json');
 
@@ -137,7 +138,7 @@ test.describe('answerConstraint downgrade warning', () => {
   test('loading R5 file then switching to R4 shows answerConstraint warning', async ({ page }) => {
     await freshStart(page);
     // Load R5 fixture — auto-detected as R5
-    await page.locator('[data-testid="fhir-file-input"]').setInputFiles(R5_FIXTURE);
+    await loadFixtureFile(page, R5_FIXTURE);
     await expect(page.locator('[data-preview-id="preferred-drink"]')).toBeVisible({ timeout: 8_000 });
     await expect(page.getByTestId('fhir-version-select')).toHaveAttribute('data-value', 'R5');
 
@@ -151,7 +152,7 @@ test.describe('answerConstraint downgrade warning', () => {
 
   test('loading R5 file then switching to R4B shows R4B-specific downgrade warning', async ({ page }) => {
     await freshStart(page);
-    await page.locator('[data-testid="fhir-file-input"]').setInputFiles(R5_FIXTURE);
+    await loadFixtureFile(page, R5_FIXTURE);
     await expect(page.locator('[data-preview-id="preferred-drink"]')).toBeVisible({ timeout: 8_000 });
 
     await selectVersion(page, 'R4B');
@@ -167,7 +168,7 @@ test.describe('answerConstraint downgrade warning', () => {
 test.describe('no warning on auto-detected import', () => {
   test('loading R5 file auto-switches version without showing a warning', async ({ page }) => {
     await freshStart(page);
-    await page.locator('[data-testid="fhir-file-input"]').setInputFiles(R5_FIXTURE);
+    await loadFixtureFile(page, R5_FIXTURE);
     await expect(page.locator('[data-preview-id="preferred-drink"]')).toBeVisible({ timeout: 8_000 });
     // Auto-detect should NOT show a warning toast
     await expect(warnToast(page)).not.toBeVisible();

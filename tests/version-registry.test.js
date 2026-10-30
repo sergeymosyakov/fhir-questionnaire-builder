@@ -32,7 +32,6 @@ describe('versionRegistry facade', () => {
 
   it('retrieves R4 via facade', () => {
     const def = registry.get('R4');
-    expect(def).toBeDefined();
     expect(def.id).toBe('R4');
     expect(def.selectorLabel).toBe('FHIR R4');
     expect(def.metaVersion).toBe('4.0.1');
@@ -40,14 +39,12 @@ describe('versionRegistry facade', () => {
 
   it('retrieves R4B via facade', () => {
     const def = registry.get('R4B');
-    expect(def).toBeDefined();
-    expect(def.metaVersion).toBe('4.3.0');
+    expect(def).toMatchObject({ id: 'R4B', metaVersion: '4.3.0' });
   });
 
   it('retrieves R5 via facade', () => {
     const def = registry.get('R5');
-    expect(def).toBeDefined();
-    expect(def.metaVersion).toBe('5.0.0');
+    expect(def).toMatchObject({ id: 'R5', metaVersion: '5.0.0' });
   });
 
   it('getAll() returns only builder versions (isBuilderVersion === true)', () => {

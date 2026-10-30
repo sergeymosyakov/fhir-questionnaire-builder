@@ -13,12 +13,13 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { freshStart } from './helpers/builder.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('sampledata/phq-9.fhir.json');
 
 async function load(page) {
   await freshStart(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-testid="preview-panel"] [data-preview-id]').first())
     .toBeVisible({ timeout: 8_000 });
 }

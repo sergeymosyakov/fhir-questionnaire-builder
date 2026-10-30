@@ -26,6 +26,7 @@ import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'node:path';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/candidate-expression.fhir.json');
 const CE_URL  = FHIR.candidateExpression;
@@ -34,7 +35,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q-cand"]')).toBeVisible({ timeout: 8_000 });
 }
 
@@ -69,7 +70,7 @@ test.describe('candidate-expression — Answer Type modal', () => {
     await loadFixture(page);
     await page.locator('[data-node-id="q-cand"] [data-testid="action-type"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
-    await expect(page.locator('#_at_src_cand')).toBeChecked();
+    await expect(page.getByTestId('src-candidate-expr-radio')).toBeChecked();
   });
 
   test('Candidate textarea shows the imported expression', async ({ page }) => {
@@ -85,7 +86,7 @@ test.describe('candidate-expression — Answer Type modal', () => {
     await loadFixture(page);
     await page.locator('[data-node-id="q-plain"] [data-testid="action-type"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
-    await expect(page.locator('#_at_src_opt')).toBeChecked();
+    await expect(page.getByTestId('src-options-radio')).toBeChecked();
     await expect(page.locator('[data-testid="candidate-expr-input"]')).toBeHidden();
   });
 
@@ -93,7 +94,7 @@ test.describe('candidate-expression — Answer Type modal', () => {
     await loadFixture(page);
     await page.locator('[data-node-id="q-plain"] [data-testid="action-type"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
-    await page.locator('#_at_src_cand').click();
+    await page.getByTestId('src-candidate-expr-radio').click();
     await expect(page.locator('[data-testid="candidate-expr-input"]')).toBeVisible();
   });
 
@@ -101,7 +102,7 @@ test.describe('candidate-expression — Answer Type modal', () => {
     await loadFixture(page);
     await page.locator('[data-node-id="q-plain"] [data-testid="action-type"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
-    await page.locator('#_at_src_cand').click();
+    await page.getByTestId('src-candidate-expr-radio').click();
     await page.locator('[data-testid="candidate-expr-input"]').fill("'x' | 'y'");
     await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
@@ -113,13 +114,13 @@ test.describe('candidate-expression — Answer Type modal', () => {
     await loadFixture(page);
     await page.locator('[data-node-id="q-cand"] [data-testid="action-type"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
-    await page.locator('#_at_src_expr').click();
+    await page.getByTestId('src-answer-expr-radio').click();
     await page.locator('[data-testid="answer-expr-input"]').fill("'p' | 'q'");
     await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
     // Reopen — answerExpression should be set, candidateExpression cleared
     await page.locator('[data-node-id="q-cand"] [data-testid="action-type"]').click();
-    await expect(page.locator('#_at_src_expr')).toBeChecked();
+    await expect(page.getByTestId('src-answer-expr-radio')).toBeChecked();
     await expect(page.locator('[data-testid="answer-expr-input"]')).toHaveValue("'p' | 'q'");
   });
 

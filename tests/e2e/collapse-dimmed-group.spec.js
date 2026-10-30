@@ -40,11 +40,6 @@ async function loadFixture(page) {
 
   await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
 
-  // Confirm if an existing questionnaire is loaded
-  const confirm = page.getByTestId('loadConfirmModal');
-  await confirm.waitFor({ state: 'visible', timeout: 2_000 }).catch(() => {});
-  if (await confirm.isVisible()) await page.getByTestId('load-confirm-proceed-btn').click();
-
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
   await page.getByTestId('load-format-select').click();
   await page.locator('[data-testid="csel-drop"] [data-val="fhir"]').click();

@@ -5,15 +5,28 @@
 //
 // Run: npx playwright test tests/e2e/repeats-roundtrip.spec.js
 // ─────────────────────────────────────────────────────────────────────────────
+//
+// ── data-testid registry ────────────────────────────────────────────────────
+//   qrExportModalApply
+//   repeat-add-btn
+//   date-input
+//   add-root-group-btn
+//   qrExportModal
+//   qr-file-input
+//   repeat-remove-btn
+//   export-btn
+//   export-qr-item
+// ────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/all-types-repeatable.fhir.json');
 
 async function loadFixture(page) {
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="text-item"]')).toBeVisible({ timeout: 8_000 });
 }
 
