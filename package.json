@@ -36,7 +36,7 @@
     "eslint": "^10.13.0",
     "events": "^3.3.0",
     "fhir-structuremap-js": "^1.2.1",
-    "fhirpath": "^5.2.1",
+    "fhirpath": "^5.2.2",
     "globals": "^17.13.0",
     "marked": "^18.1.2",
     "serve": "^14.0.0",
