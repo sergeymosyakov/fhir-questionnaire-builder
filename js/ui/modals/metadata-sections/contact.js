@@ -39,6 +39,7 @@ class ContactSection extends Section {
             rmContact.type           = 'button';
             rmContact.className      = 'codes-remove-btn';
             rmContact.textContent    = '\u00D7';
+            rmContact.setAttribute('aria-label', 'Remove contact');
             rmContact.dataset.testid = `meta-contact-remove-${ci}`;
             rmContact.onclick = () => { pending.contacts.splice(ci, 1); render(); setLabel(); };
             nameRow.append(nameInp, rmContact);
@@ -66,6 +67,7 @@ class ContactSection extends Section {
               rmTel.type           = 'button';
               rmTel.className      = 'codes-remove-btn';
               rmTel.textContent    = '\u00D7';
+              rmTel.setAttribute('aria-label', 'Remove telecom');
               rmTel.dataset.testid = `meta-contact-${ci}-tel-remove-${ti}`;
               rmTel.onclick = () => { telecoms.splice(ti, 1); render(); setLabel(); };
               telRow.append(sysSel.el, valInp, rmTel);

@@ -65,8 +65,6 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       // atable ("Answer Table") implies a per-option control of its own —
       // radio-button/checkbox aren't spelled out separately, so infer from repeats.
       itemType = fhirItem.repeats ? 'checklist' : 'radio';
-    } else if (ctrlCode === 'autocomplete' || ctrlCode === 'drop-down') {
-      // store for round-trip; rendering adapts in ChoiceNode
     }
   }
 
@@ -75,6 +73,9 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     title:     fhirItem.text || fhirItem.linkId || 'Item',
     mandatory: !!fhirItem.required,
   });
+
+  // FHIR 'text' and 'string' both map to itemType 'text'; remember the original for export.
+  if (fhirItem.type === 'text') node._fhirText = true;
 
   // Preserve full answerOption array — the only stored answer-options field.
   if (fhirItem.answerOption) {
@@ -460,7 +461,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   const fhirTypeExt = (fhirItem.extension || []).find(
     e => e.url === FHIR.fhirType
   );
-  if (fhirTypeExt?.valueCode) node._fhirType = fhirTypeExt.valueCode;
+  if (fhirTypeExt?.valueString || fhirTypeExt?.valueCode) node._fhirType = fhirTypeExt.valueString || fhirTypeExt.valueCode;
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
   if (fhirItem.answerValueSet) {
     node._answerValueSet = fhirItem.answerValueSet;
@@ -551,7 +552,7 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     const grpFhirTypeExt = (fhirItem.extension || []).find(
       e => e.url === FHIR.fhirType
     );
-    if (grpFhirTypeExt?.valueCode) node._fhirType = grpFhirTypeExt.valueCode;
+    if (grpFhirTypeExt?.valueString || grpFhirTypeExt?.valueCode) node._fhirType = grpFhirTypeExt.valueString || grpFhirTypeExt.valueCode;
     if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
     const groupSupportLinks = (fhirItem.extension || [])
       .filter(e => e.url === FHIR.supportLink && e.valueUri)
@@ -582,6 +583,10 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
       e => e.url === FHIR.shortText
     );
     if (groupShortTextExt?.valueString) node._shortText = groupShortTextExt.valueString;
+    const groupMaxDecExt = (fhirItem.extension || []).find(
+      e => e.url === FHIR.maxDecimalPlaces
+    );
+    if (groupMaxDecExt?.valueInteger !== undefined) node._maxDecimalPlaces = groupMaxDecExt.valueInteger;
     // designNote — author-facing internal note (groups)
     const groupDesignNoteExt = (fhirItem.extension || []).find(
       e => e.url === FHIR.designNote

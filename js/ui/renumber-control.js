@@ -4,6 +4,7 @@
 import { createCustomSelect } from './custom-select.js';
 import * as progress from './progress.js';
 import { AppEvents } from '../events.js';
+import { showError } from './toast.js';
 
 export class RenumberControl {
   /**
@@ -47,7 +48,7 @@ export class RenumberControl {
       };
       document.addEventListener(AppEvents.RENUMBER_PROGRESS, onProgress);
       document.addEventListener(AppEvents.RENUMBER_DONE, cleanup);
-      try { await renumberAll(); } catch { cleanup(); }
+      try { await renumberAll(); } catch (err) { cleanup(); showError(err.message); }
     };
   }
 }

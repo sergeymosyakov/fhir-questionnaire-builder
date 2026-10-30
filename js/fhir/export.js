@@ -97,7 +97,8 @@ export function nodeToFHIRItem(node) {
   const fhirItem = {
     linkId: node.id,
     text:   node.title,
-    type:   node.type === 'group' ? 'group' : itemTypeToFHIRType(node.itemType)
+    type:   node.type === 'group' ? 'group'
+      : (node._fhirText && node.itemType === 'text') ? 'text' : itemTypeToFHIRType(node.itemType)
   };
 
   if (node._prefix) fhirItem.prefix = node._prefix;
@@ -135,6 +136,16 @@ export function nodeToFHIRItem(node) {
       if (t === 'reference') {
         const ref = (v && typeof v === 'object') ? v.reference : (typeof v === 'string' ? v : '');
         return ref ? { valueReference: { reference: ref } } : null;
+      }
+      if (t === 'quantity') {
+        if (!v || typeof v !== 'object' || v.value === undefined || v.value === '') return null;
+        const n = Number(v.value);
+        if (!isFinite(n)) return null;
+        return { valueQuantity: { value: n, ...(v.unit ? { unit: v.unit } : {}), ...(v.system ? { system: v.system } : {}), ...(v.code ? { code: v.code } : {}) } };
+      }
+      if (t === 'choice' && v && typeof v === 'object') {
+        const { system, code, display } = v;
+        return { valueCoding: { ...(system ? { system } : {}), code: String(code ?? display ?? ''), display: String(display ?? code ?? '') } };
       }
       if (t === 'choice')   return { valueCoding:   { code: String(v), display: String(v) } };
       return { valueString: String(v) };
@@ -450,7 +461,7 @@ export function nodeToFHIRItem(node) {
   // R4 invariant: type!='display' and (required=true or valueInteger=0)
   // minOccurs: only valid when item is required=true (R4 context invariant: que-minoccurs-1)
   if (node.repeats && node._minOccurs !== undefined && node.itemType !== 'display'
-      && node.required)
+      && node.mandatory === true)
     ext.push({ url: FHIR.minOccurs, valueInteger: node._minOccurs });
   if (node.repeats && node._maxOccurs !== undefined)
     ext.push({ url: FHIR.maxOccurs, valueInteger: node._maxOccurs });
@@ -601,7 +612,8 @@ const TRANSLATION_URL = FHIR.translation;
  * extensions on `_text`, `_title`, and `answerOption._valueCoding._display`.
  */
 function _exportTranslations(q, translations) {
-  if (!translations || !Object.keys(translations).length) return;
+  // Empty store still falls through so stale ui/xhtml/markdown extensions from raw passthrough are stripped
+  translations = translations || {};
   const langs = Object.keys(translations);
 
   // Questionnaire.title

@@ -4,8 +4,7 @@
 // Communicates via VARIABLES_APPLY event — receiver merges into questDoc.variables.
 //
 // Usage:
-//   const profile = new PatientProfile();
-//   profile.mount(document.getElementById('patientPresetWrap'));
+//   new PatientProfile();  // finds its own mount point and wires its own events
 import { createCustomSelect } from './custom-select.js';
 import { Modal } from './modals/modal-base.js';
 import { PatientPresetMenu } from './menus/patient-preset-menu.js';

@@ -140,7 +140,7 @@ GroupNode.prototype.buildBuilder = function () {
   setActive(noteLink, !!node._designNote);
 
   // ⚙ gear menu (Add Group / Add Item / Copy / Paste / Delete)
-  const gear = new NodeGearMenu('group-add-btn');
+  const gear = new NodeGearMenu('group-add-btn', { signal: node._ac?.signal });
   addMetaRowGearItem(gear, node);
   gear.addSep();
   node._addChildGearItems(gear);
@@ -456,7 +456,7 @@ ItemNode.prototype.buildBuilder = function () {
   header.appendChild(actions);
 
   // ⚙ gear menu (Add Sub-group / Add Sub-item / Copy / Paste / Delete)
-  const gear = new NodeGearMenu('node-gear-btn');
+  const gear = new NodeGearMenu('node-gear-btn', { signal: node._ac?.signal });
   addMetaRowGearItem(gear, node);
   gear.addSep();
   node._addChildGearItems(gear);

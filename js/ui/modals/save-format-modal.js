@@ -36,6 +36,7 @@ class SaveFormatModal extends Modal {
   constructor() {
     super({ applyLabel: 'Export', cancelLabel: 'Cancel', maxWidth: '400px' });
     this._deps   = null;
+    this._onDone = null;
     this._format = 'R4'; // resolved from LS / getFhirTarget on open()
 
     const row = document.createElement('div');
@@ -66,6 +67,7 @@ class SaveFormatModal extends Modal {
   /** @param {{ fileName, tree, values }} deps */
   open(deps) {
     this._deps   = deps;
+    this._onDone = deps?.onDone ?? null;
     // Cancel any lingering side effects from previous format (e.g. REDCap validator left enabled)
     const prev = formatRegistry.get(this._format);
     if (prev?.onCancel) prev.onCancel();
@@ -84,9 +86,17 @@ class SaveFormatModal extends Modal {
     this.close();
     const fmt = formatRegistry.get(this._format);
     if (fmt) this._exportWithFormat(fmt);
+    else this._finish();
   }
 
-  _cancel() { this.close(); }
+  _cancel() { this.close(); this._finish(); }
+
+  // Signals the opener exactly once: export done, skipped, or cancelled.
+  _finish() {
+    const done = this._onDone;
+    this._onDone = null;
+    done?.();
+  }
 
   // ── Generic export handler ─────────────────────────────────────────────────
   // Works for any registered format: FHIR JSON variants and CSV formats alike.
@@ -110,7 +120,7 @@ class SaveFormatModal extends Modal {
           fmt.onAfterExport?.();
           const content = fmt.build(baseQ);
           showPrompt('Save as:', suggested + '.' + fmt.ext, name => {
-            if (name === null) return;
+            if (name === null) { this._finish(); return; }
             const trimmed = name.replace(new RegExp(`\\.${fmt.ext}$`, 'i'), '');
             if (fmt.ext === 'json') {
               downloadJSON(content, trimmed + '.json');
@@ -126,8 +136,10 @@ class SaveFormatModal extends Modal {
               URL.revokeObjectURL(url);
             }
             document.dispatchEvent(new CustomEvent(AppEvents.FILE_NAME_CHANGED, { detail: { name: trimmed } }));
+            this._finish();
           });
         },
+        onDismiss: () => this._finish(),
       }
     );
 

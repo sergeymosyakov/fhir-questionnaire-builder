@@ -94,7 +94,7 @@ export class QuestionnaireLoader {
   /** Full import pipeline: parse → render tree → validate → expand ValueSets. */
   async load(data, fileName) {
     try {
-      importFHIR(data);
+      if (importFHIR(data) === false) return;
       // Auto-detect FHIR version: builder-target-version extension first, then
       // feature-based heuristics (see formatRegistry.detectVersion); default R4
       const _importedVersion = versionRegistry.detectVersion(data);

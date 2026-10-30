@@ -19,6 +19,11 @@ import { AppEvents } from '../events.js';
 //   tipTitle/tipBody  — rich tooltip attributes on the button
 //   tipFhir/tipSpec   — FHIR path / spec badge for tooltip
 
+function _setHtml(el, html) {
+  if (window.DOMPurify) el.innerHTML = window.DOMPurify.sanitize(html);
+  else el.textContent = html;
+}
+
 export class DropdownMenu {
   // One-time global click handler: clicking outside any dropdown closes all.
   static {
@@ -35,7 +40,7 @@ export class DropdownMenu {
     if (wrapId) { this._wrap.id = wrapId; this._wrap.dataset.mount = wrapId; }
 
     this._btn = document.createElement('button');
-    this._btn.id = btnId;
+    if (btnId) this._btn.id = btnId;
     this._btn.type = 'button';
     this._btn.className = btnClass;
     if (testid)   this._btn.dataset.testid   = testid;
@@ -43,13 +48,13 @@ export class DropdownMenu {
     if (tipBody)  this._btn.dataset.tipBody  = tipBody;
     if (tipFhir)  this._btn.dataset.tipFhir  = tipFhir;
     if (tipSpec)  this._btn.dataset.tipSpec  = tipSpec;
-    this._btn.innerHTML = label;
+    _setHtml(this._btn, label);
     this._btn.setAttribute('aria-haspopup', 'menu');
     this._btn.setAttribute('aria-expanded', 'false');
 
     this._menu = document.createElement('div');
     this._menu.className = 'load-menu';
-    this._menu.id = menuId;
+    if (menuId) this._menu.id = menuId;
     if (menuId) this._menu.dataset.testid = menuId.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
     this._menu.style.display = 'none';
 
@@ -61,6 +66,7 @@ export class DropdownMenu {
     this._closeBtn.className = 'load-menu-close';
     this._closeBtn.dataset.testid = 'load-menu-close';
     this._closeBtn.dataset.tipTitle = 'Close';
+    this._closeBtn.setAttribute('aria-label', 'Close menu');
     this._closeBtn.textContent = '\u2715';
     this._closeBtn.addEventListener('click', e => { e.stopPropagation(); this.close(); });
 
@@ -119,7 +125,7 @@ export class DropdownMenu {
     el.className = 'load-menu-item';
     if (id)     el.id = id;
     if (testid) el.dataset.testid = testid;
-    el.innerHTML = window.DOMPurify ? window.DOMPurify.sanitize(html) : html;
+    _setHtml(el, html);
     return el;
   }
 

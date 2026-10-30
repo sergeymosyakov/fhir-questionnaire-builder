@@ -1,12 +1,12 @@
 // ── Questionnaire Variables panel ─────────────────────────────────────────────
 // Collapsible card (above tree) + edit modal for sdc-questionnaire-variable.
-// configure({questVariables, mountEl}) — call once at startup.
+// Self-initializes on import; mount point found via data-mount.
 import { Modal } from './modals/modal-base.js';
 import { AppEvents, EventState } from '../events.js';
 
 const _CARD_HTML = `
 <div class="variables-card-header">
-  <button type="button" class="variables-card-toggle" data-testid="variables-card-toggle" aria-expanded="true"
+  <button type="button" class="variables-card-toggle" data-testid="variables-card-toggle" aria-expanded="true" aria-label="Collapse or expand Variables"
     data-tip-title="Collapse / expand" data-tip-body="Toggle the Variables card open or closed.">
     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor"
       stroke-width="1.8" stroke-linecap="round"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
@@ -57,9 +57,6 @@ export function init() {
   document.addEventListener(AppEvents.PATIENT_CTX_APPLIED, refresh);
   refresh();
 }
-
-// Self-initialize when the module is imported (DOM is ready at this point)
-// VariablesModal is declared below — side-effect init() must come after it
 
 class VariablesModal extends Modal {
   getName() { return 'variablesModal'; }
@@ -148,6 +145,7 @@ class VariablesModal extends Modal {
     deleteBtn.className = 'variables-delete-btn';
     deleteBtn.dataset.tipTitle = 'Remove variable';
     deleteBtn.textContent = '×';
+    deleteBtn.setAttribute('aria-label', 'Remove variable');
     deleteBtn.addEventListener('click', () => { _draft.splice(index, 1); this._renderBody(); });
     row.appendChild(deleteBtn);
     return row;
@@ -186,6 +184,6 @@ function _renderChips() {
   }
 }
 
-// Self-initialize after all class declarations are complete
+// Must stay below VariablesModal (class declarations are not hoisted)
 if (typeof document !== 'undefined') { init(); }
 

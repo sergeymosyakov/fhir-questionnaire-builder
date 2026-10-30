@@ -33,6 +33,7 @@ class SupportLinksSection extends ItemSection {
             rm.type           = 'button';
             rm.className      = 'codes-remove-btn';
             rm.textContent    = '\u00D7';
+            rm.setAttribute('aria-label', 'Remove support link');
             rm.dataset.testid = 'support-link-rm';
             rm.onclick = () => { pending.supportLinks.splice(idx, 1); render(); setLabel(); };
 

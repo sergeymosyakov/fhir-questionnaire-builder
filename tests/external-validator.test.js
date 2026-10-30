@@ -92,6 +92,13 @@ describe('ExternalValidator', () => {
     expect(sentBody.extension).toEqual([{ url: 'https://example.org/keep', valueString: 'x' }]);
   });
 
+  it('passes an AbortSignal so a hung validator request times out', async () => {
+    const v = new ExternalValidator({ name: 'HAPI FHIR', url: 'https://hapi.fhir.org/baseR4', getFhirTarget: () => 'R4' });
+    v.enabled = true;
+    await v.run({ resourceType: 'Questionnaire', item: [] });
+    expect(fetchMock.calls.at(-1).opts.signal).toBeInstanceOf(AbortSignal);
+  });
+
   it('falls back to the configured URL when it has no recognised base segment', async () => {
     const v = new ExternalValidator({ name: 'My FHIR', url: 'https://my.server/fhir', getFhirTarget: () => 'R5' });
     v.enabled = true;

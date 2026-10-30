@@ -13,8 +13,11 @@ const ORDINAL_URL = FHIR.ordinalValue;
 // Build a single QR answer object for one value, typed by the FHIR item's type.
 // Exported so calculatedExpression evaluation can write results back into the QR
 // using the exact same value-mapping rules as the initial QR build.
+// Returns null when the value has no valid QR representation (callers omit the answer).
 export function buildAnswer(fhirItem, v) {
   const t = fhirItem.type || 'string';
+  if (t === 'attachment') return null; // answers hold file metadata only, no content
+  if ((t === 'integer' || t === 'decimal') && (v === '' || v === null || v === undefined)) return null;
   if (t === 'boolean')  return { valueBoolean: v === true };
   if (t === 'date')     return { valueDate: String(v) };
   if (t === 'dateTime') return { valueDateTime: String(v) };
@@ -36,6 +39,8 @@ export function buildAnswer(fhirItem, v) {
       if (ordExt !== undefined)
         coding.extension = [{ url: ORDINAL_URL, valueDecimal: ordExt.valueDecimal }];
     }
+    // Free text typed into an open-choice that matches no defined option is a valueString
+    if (t === 'open-choice' && !opt && (fhirItem.answerOption || []).length) return { valueString: codeStr };
     return { valueCoding: coding };
   }
   if (t === 'integer')  return { valueInteger: parseInt(v, 10) || 0 };
@@ -80,6 +85,10 @@ function buildQRItem(fhirItem, values) {
       qrItem.answer = vs[0].split(',').map(makeAnswer);
     } else if (vs.length > 0) {
       qrItem.answer = vs.map(makeAnswer);
+    }
+    if (qrItem.answer) {
+      qrItem.answer = qrItem.answer.filter(Boolean);
+      if (!qrItem.answer.length) delete qrItem.answer;
     }
   }
 

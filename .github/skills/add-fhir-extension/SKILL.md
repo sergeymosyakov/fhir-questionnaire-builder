@@ -25,7 +25,7 @@ invent a URL or cardinality.
 ## 4. Preview render
 - Render/apply the feature in the relevant node class under `js/nodes/*.js`.
 - If it introduces a validation rule, follow the two-layer preview-validation
-  checklist (visual indicator in `buildControl()` + `calcFormOk()` in `js/state.js`).
+  checklist (visual indicator in `buildControl()` + `calcFormOk()` in `js/fhir/form-checks.js`).
 
 ## 5. Validation
 - If the field constrains the questionnaire, add checks in the relevant validator

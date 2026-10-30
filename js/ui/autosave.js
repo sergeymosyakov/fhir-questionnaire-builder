@@ -1,16 +1,16 @@
 // ── Autosave ──────────────────────────────────────────────────────────────────
 // Saves the current questionnaire to a per-questionnaire storage slot.
+// Key = Questionnaire.url  OR  identifier[fhir-qb.app/editor].value (auto-gen).
+//
+// API:
+//   init()               — read the enabled flag and start the interval
+//   getMostRecentDraft() → { meta, key } | null
+//   getDraftData(key)    → parsedJson | null
+//   clearDraft()         — remove current questionnaire's slot
 
 import * as storage from '../storage/storage.js';
 import { buildFHIRObject } from '../fhir/export.js';
 import { AppEvents } from '../events.js';
-// Key = Questionnaire.url  OR  identifier[fhir-qb.app/editor].value (auto-gen).
-//
-// API:
-//   init({ onSaved }) — start the interval
-//   getMostRecentDraft() → { meta, key } | null
-//   getDraftData(key)    → parsedJson | null
-//   clearDraft()         — remove current questionnaire's slot
 
 const EDITOR_SYSTEM  = 'https://fhir-qb.app/editor';
 const KEY_PREFIX     = 'autosave:';

@@ -113,6 +113,7 @@ function _searchParam(resourceType) {
 export async function searchFhir(resourceType, query, count = 10, opts = {}) {
   const base = ((opts.fhirBase ?? serverConfig.get(CONFIG_KEYS.FHIR_BASE)) || '').replace(/\/$/, '');
   if (!base || !resourceType || !query.trim()) return [];
+  if (!/^[A-Za-z]+$/.test(resourceType)) return [];
 
   const params = new URLSearchParams({ _count: String(count) });
   params.set(_searchParam(resourceType), query);

@@ -119,6 +119,8 @@ export class QuestionnairesMenu extends DropdownMenu {
                 document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_LOAD_REQUESTED, {
                   detail: { data: questionnaire, fileName: item.label },
                 }));
+              } else {
+                progress.hide();
               }
               return;
             }

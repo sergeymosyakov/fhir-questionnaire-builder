@@ -17,11 +17,11 @@ async function addRootGroup(page) {
 }
 
 const viewBtn = page => page.getByTestId('view-options-btn');
-const viewMenu = page => page.locator('#viewOptionsMenu');
-const linkIdCheckbox = page => page.locator('#viewOptionLinkId');
-const prefixCheckbox = page => page.locator('#viewOptionPrefix');
-const badgesCheckbox = page => page.locator('#viewOptionBadges');
-const hiddenCheckbox = page => page.locator('#viewOptionHidden');
+const viewMenu = page => page.getByTestId('view-options-menu');
+const linkIdCheckbox = page => page.getByTestId('view-option-linkid').locator('input');
+const prefixCheckbox = page => page.getByTestId('view-option-prefix').locator('input');
+const badgesCheckbox = page => page.getByTestId('view-option-badges').locator('input');
+const hiddenCheckbox = page => page.getByTestId('view-option-hidden').locator('input');
 
 test.describe('View Options menu visibility', () => {
   test('View Options button is hidden when tree is empty', async ({ page }) => {

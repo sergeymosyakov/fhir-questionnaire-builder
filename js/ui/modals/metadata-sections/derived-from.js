@@ -27,6 +27,7 @@ function buildUrlList(pending, key, { emptyText, placeholder, testidPrefix, addL
         rm.type            = 'button';
         rm.className       = 'codes-remove-btn';
         rm.textContent     = '\u00D7';
+        rm.setAttribute('aria-label', 'Remove URL');
         rm.dataset.testid  = `${testidPrefix}-remove-${idx}`;
         rm.onclick = () => { pending[key].splice(idx, 1); render(); setLabel(); };
         row.append(inp, rm);

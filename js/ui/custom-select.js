@@ -77,7 +77,7 @@ export function createCustomSelect({ items = [], value = '', onChange, className
   };
 
   const _onKey = e => {
-    if (e.key === 'Escape') { _close(); trigger.focus(); return; }
+    if (e.key === 'Escape') { e.stopPropagation(); _close(); trigger.focus(); return; }
     const opts = _visibleOpts();
     if (!opts.length) return;
     if (e.key === 'ArrowDown')      { e.preventDefault(); _setActive(_activeIdx + 1); }

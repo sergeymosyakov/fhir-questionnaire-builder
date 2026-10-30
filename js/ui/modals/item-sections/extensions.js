@@ -55,6 +55,7 @@ class ExtensionsSection extends ItemSection {
             rmBtn.type             = 'button';
             rmBtn.className        = 'codes-remove-btn';
             rmBtn.textContent      = '\u00D7';
+            rmBtn.setAttribute('aria-label', 'Remove extension');
             rmBtn.dataset.tipTitle = 'Remove';
             rmBtn.dataset.testid   = `item-props-ext-rm-${idx}`;
             rmBtn.onclick = () => {

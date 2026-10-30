@@ -51,8 +51,8 @@ checks that flag things which aren't strictly invalid FHIR but are usually
 authoring mistakes, e.g. an `enableWhen` condition that can never be true, or a
 choice item that would benefit from an `answerValueSet` binding it doesn't have.
 Unlike validation, the audit **never blocks import or export** — it's purely
-informational and only runs when you explicitly ask for it (**⋯ More → Validate**,
-with the **Audit** check enabled in that menu). Its findings show up alongside
+informational and only runs when you explicitly ask for it (**⚙ Settings ▾ → Validate**,
+with the **Quality audit** checkbox ticked in that menu). Its findings show up alongside
 the validation results but are visually distinct so they're never mistaken for
 errors that must be fixed before exporting.
 

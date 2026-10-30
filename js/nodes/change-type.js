@@ -54,7 +54,10 @@ export function changeNodeType(node, newType, tree, _answerStore) {
   // lifecycle and let the old one's listeners get cleaned up.
   newNode._ac = new AbortController();
   newNode._busWired = false;
-  node.destroy?.();
+  if (node.itemType !== newType) delete newNode._fhirText;
+  // Not node.destroy(): it recurses into children, which the new node still owns.
+  node._ac?.abort();
+  node._navAbort?.abort();
   if (tree) replaceInTree(tree, node.id, newNode);
 
   if (newNode.impliesRepeats()) {

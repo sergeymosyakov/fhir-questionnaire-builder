@@ -25,15 +25,24 @@ class ValidateModal extends Modal {
   constructor() {
     super({ cancelLabel: null, applyLabel: null });
     this._onExport = null;
+    this._onDismiss = null;
+  }
+
+  close() {
+    const dismiss = this._onDismiss;
+    this._onDismiss = null;
+    super.close();
+    dismiss?.();
   }
 
   /**
    * @param {string} title
    * @param {'export'|'import'|'validate'} mode
-   * @param {{ questJson?, tree?, values?, onExport?, extraIssues?, validatorFilter? }} opts
+   * @param {{ questJson?, tree?, values?, onExport?, extraIssues?, validatorFilter?, onDismiss? }} opts
    */
-  show(title, mode, { questJson = null, tree = [], values = {}, onExport = null, extraIssues = [], validatorFilter = null } = {}) {
+  show(title, mode, { questJson = null, tree = [], values = {}, onExport = null, extraIssues = [], validatorFilter = null, onDismiss = null } = {}) {
     this._onExport = onExport;
+    this._onDismiss = onDismiss;
     // Advisory validators (e.g. audit) only run in the explicit 'validate' mode —
     // composed the same way as validatorFilter, no per-validator special-casing here.
     const _modeFilter = mode === 'validate' ? null : (v => !v.advisory);
@@ -52,6 +61,7 @@ class ValidateModal extends Modal {
       )).then(results => {
         const allIssues = results.flatMap(r => r.issues);
         if (allIssues.length === 0 && extraIssues.length === 0) {
+          this._onDismiss = null;
           onExport?.();
           return;
         }
@@ -281,7 +291,7 @@ class ValidateModal extends Modal {
       exportBtn.type = 'button';
       exportBtn.className = 'btn-fhir btn-fhir-export';
       exportBtn.textContent = hasIssues ? 'Export anyway' : 'Export';
-      exportBtn.addEventListener('click', () => { this.close(); this._onExport?.(); });
+      exportBtn.addEventListener('click', () => { this._onDismiss = null; this.close(); this._onExport?.(); });
 
       this.footer.append(fixBtn, exportBtn);
     } else {

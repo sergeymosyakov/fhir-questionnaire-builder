@@ -82,7 +82,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
   const _onOutside = e => {
     if (!trigger.contains(e.target) && !calEl?.contains(e.target)) _close();
   };
-  const _onEsc = e => { if (e.key === 'Escape') { _close(); trigger.focus(); } };
+  const _onEsc = e => { if (e.key === 'Escape') { e.stopPropagation(); _close(); trigger.focus(); } };
 
   const _open = () => {
     if (calEl) { _close(); return; }
@@ -137,6 +137,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
     prevBtn.type = 'button';
     prevBtn.className = 'dp-nav-btn';
     prevBtn.textContent = '\u2039';
+    prevBtn.setAttribute('aria-label', 'Previous');
     prevBtn.addEventListener('mousedown', e => { e.preventDefault(); onPrev(); });
 
     const lbl = document.createElement('button');
@@ -150,6 +151,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
     nextBtn.type = 'button';
     nextBtn.className = 'dp-nav-btn';
     nextBtn.textContent = '\u203a';
+    nextBtn.setAttribute('aria-label', 'Next');
     nextBtn.addEventListener('mousedown', e => { e.preventDefault(); onNext(); });
 
     hdr.append(prevBtn, lbl, nextBtn);

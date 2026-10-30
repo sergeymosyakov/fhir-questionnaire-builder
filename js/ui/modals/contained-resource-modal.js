@@ -22,7 +22,7 @@ class ContainedResourceModal extends Modal {
     this._ta.className = 'contained-json-input';
     this._ta.dataset.testid = 'contained-json-input';
     this._ta.spellcheck = false;
-    this._ta.rows = 3; // visual height comes from CSS; kept off the forbidden rows=2
+    this._ta.rows = 3;
     this._ta.placeholder = '{\n  "resourceType": "ValueSet",\n  "id": "vs-example",\n  "status": "active"\n}';
 
     this._err = document.createElement('div');

@@ -124,8 +124,12 @@ export class QuestionnaireRenderer {
   // answerValueSets in the background and re-renders silently once ready —
   // mirrors the app's questionnaire-loader.js so choice controls fill in.
   async _expandValueSets() {
-    await this._terminology.expandAll(this._session.questDoc.tree, this._session.questDoc.meta);
-    this._session.bus.dispatch(AppEvents.REINIT_FORM, { silent: true });
+    const session = this._session;
+    try {
+      await this._terminology.expandAll(session.questDoc.tree, session.questDoc.meta);
+    } catch { return; } // expansion failures just leave choice controls unfilled
+    if (this._session !== session) return; // destroyed while expanding
+    session.bus.dispatch(AppEvents.REINIT_FORM, { silent: true });
   }
 
   // Opt-in preview chrome (config.search / config.validation). Builds the toolbar

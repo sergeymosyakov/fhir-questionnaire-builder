@@ -118,6 +118,7 @@ export class QuestDocument {
     this.rawFhir = null;
     this.contained.splice(0);
     this.variables.splice(0);
+    for (const k of Object.keys(this.translations)) delete this.translations[k];
     Object.assign(this.meta, {
       id: '', url: '', version: '', title: '', status: 'draft',
       publisher: '', description: '', name: '',
@@ -130,7 +131,7 @@ export class QuestDocument {
       _rawUseContext: null, _rawJurisdiction: null, _rawCode: null,
       _metaVersionId: '', _metaSource: '', _metaLastUpdated: '',
       _rawMetaProfile: [], _rawMetaTag: [], _rawMetaSecurity: [],
-      _rawQuestExtensions: [],
+      _rawQuestExtensions: [], _rawModifierExtension: [], launchContexts: [],
       preferredTermServer: '', targetStructureMap: '', sourceStructureMap: '', _signatureRequired: [], _implicitRules: '',
       fhirTarget: 'R4',
     });

@@ -36,7 +36,7 @@ export class SaveMenu extends DropdownMenu {
     document.addEventListener(AppEvents.FILE_NAME_CHANGED, e => { this._fileName = e.detail?.name; });
     // EXPORT_PROMPT_REQUESTED: open export dialog, resolve when done
     document.addEventListener(AppEvents.EXPORT_PROMPT_REQUESTED, e => {
-      this.promptExport(() => e.detail?.resolve());
+      this.promptExport(() => e.detail?.resolve?.());
     });
 
     this._bindTreeVisibility();
@@ -48,8 +48,9 @@ export class SaveMenu extends DropdownMenu {
   get cloudSaveSep() { return this._cloudSaveSep; }
 
   /** Prompt for filename then export FHIR JSON via saveFormatModal. */
-  promptExport() {
+  promptExport(onDone) {
     saveFormatModal.open({
+      onDone,
       fileName: this._fileName,
       tree:   this._questDoc?.tree,
       values: this._answerStore?.data,

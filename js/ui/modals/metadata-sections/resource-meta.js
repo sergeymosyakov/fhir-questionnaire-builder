@@ -129,6 +129,7 @@ class ResourceMetaSection extends Section {
             rm.type           = 'button';
             rm.className      = 'codes-remove-btn';
             rm.textContent    = '\u00D7';
+            rm.setAttribute('aria-label', 'Remove profile');
             rm.dataset.testid = `meta-profile-remove-${idx}`;
             rm.onclick = () => { pending.metaProfile.splice(idx, 1); renderProfile(); };
             row.append(inp, rm);

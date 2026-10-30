@@ -106,6 +106,19 @@
       ]
     },
     {
+      "linkId": "markdown-note",
+      "text": "Anything else we should know? **Bold** and _italic_ are rendered from Markdown.",
+      "type": "text",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/rendering-markdown",
+            "valueMarkdown": "Anything else we should know? **Bold** and _italic_ are rendered from Markdown."
+          }
+        ]
+      }
+    },
+    {
       "linkId": "plain-fallback",
       "text": "Any additional comments? (plain text, no XHTML)",
       "type": "text"

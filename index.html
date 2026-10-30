@@ -76,7 +76,8 @@
     <button type="button" id="patientPresetBtn" data-testid="patient-preset-btn" class="btn-fhir"
       data-tip-title="Patient Preset"
       data-tip-body="Select a patient profile to populate %age, %gender, %bmi, %pregnant, %smoker, %proc, %comorb variables. Applying a preset re-evaluates all initialExpression fields. Use Custom… to edit values manually."
-      data-tip-spec="SDC &#xB7; questionnaire-level variable">&#x1F464; Patient &#x25BE;</button>
+      data-tip-fhir="Questionnaire.extension[sdc-questionnaire-variable]"
+      data-tip-spec="SDC">&#x1F464; Patient &#x25BE;</button>
     <div class="load-menu" id="patientPresetMenu" style="display:none">
       <div class="load-menu-item" data-preset="adult-male">Adult Male (35 &middot; BMI&thinsp;24)</div>
       <div class="load-menu-item" data-preset="adult-female">Adult Female (28 &middot; BMI&thinsp;22)</div>

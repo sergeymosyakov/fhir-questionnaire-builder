@@ -32,6 +32,7 @@ export class Panel {
     this._toggle.type = 'button';
     if (idPrefix) this._toggle.id = idPrefix + 'Toggle';
     this._toggle.setAttribute('aria-expanded', 'true');
+    this._toggle.setAttribute('aria-label', `Collapse or expand ${label}`);
     this._toggle.dataset.tipTitle = 'Collapse / expand';
     this._toggle.dataset.tipBody  = `Toggle the ${label} card open or closed.`;
     this._toggle.innerHTML = _SVG;

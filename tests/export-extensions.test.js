@@ -294,8 +294,8 @@ describe('buildFHIRObject — minOccurs/maxOccurs', () => {
   const MIN_OCC = FHIR.minOccurs;
   const MAX_OCC = FHIR.maxOccurs;
 
-  it('exports minOccurs when repeats=true, required=true, and _minOccurs is set', () => {
-    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: true, required: true, _minOccurs: 2 }]);
+  it('exports minOccurs when repeats=true, mandatory=true, and _minOccurs is set', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', repeats: true, mandatory: true, _minOccurs: 2 }]);
     const ext = q.item[0].extension || [];
     expect(ext.find(e => e.url === MIN_OCC)?.valueInteger).toBe(2);
   });
@@ -313,7 +313,7 @@ describe('buildFHIRObject — minOccurs/maxOccurs', () => {
   });
 
   it('does not export minOccurs on display-type items (R4 invariant)', () => {
-    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'display', repeats: true, required: true, _minOccurs: 1 }]);
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'display', repeats: true, mandatory: true, _minOccurs: 1 }]);
     const ext = q.item[0].extension || [];
     expect(ext.find(e => e.url === MIN_OCC)).toBeUndefined();
   });

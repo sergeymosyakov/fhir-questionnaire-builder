@@ -136,6 +136,7 @@ export class ExternalValidator extends Validator {
           method:  'POST',
           headers: { 'Content-Type': 'application/fhir+json', 'Accept': 'application/fhir+json' },
           body,
+          signal: AbortSignal.timeout(30000),
         });
 
         // 413 Payload Too Large: the questionnaire exceeds the server's request

@@ -56,7 +56,7 @@ Every node in the tree is either a **group** or an **item**:
   _initialValues:      any[],            // FHIR item.initial[] all values (set only for repeating items with >1 initial)
   _initialSelected:    string,           // answerOption[].initialSelected code (round-trip; pre-fills _initialValue when no item.initial)
   _maxLength:          integer,          // FHIR item.maxLength
-  _minLength:          integer,          // SDC ext http://hl7.org/fhir/StructureDefinition/minLength
+  _minLength:          integer,          // core ext http://hl7.org/fhir/StructureDefinition/minLength
   _maxFileSizeMB:      number,           // http://hl7.org/fhir/StructureDefinition/maxSize — max file size in MB for attachment items
   _mimeTypes:          string[],         // http://hl7.org/fhir/StructureDefinition/mimeType — 0..* allowed MIME types for attachment items
   _minOccurs:          integer,          // questionnaire-minOccurs extension (when repeats: true)
@@ -230,7 +230,7 @@ Stored in `questDoc.meta` (`js/fhir/quest-document.js`). Populated on import, wr
 | `_answerConstraint` | `item.answerConstraint` (R5 native) | `optionsOnly` / `optionsOrType` / `optionsOrString`; import + export + Answer Type modal dropdown; `optionsOnly` makes open-choice preview read-only; on R4/R4B export it is downgraded to the builder-private extension `item-answerConstraint` (field is absent from R4/R4B) |
 | `_codes` | `item.code[]` | imported and exported unchanged (round-trip safe); editable via **Props** button (codes-modal — system/code/display rows, draft pattern); also supported on groups (see Group-specific) |
 | `_maxLength` | `item.maxLength` | imported → `node._maxLength`; exported back when set; character counter + `maxlength` attribute enforced in preview |
-| `_minLength` | SDC ext `http://hl7.org/fhir/StructureDefinition/minLength` (`valueInteger`) | imported → `node._minLength`; exported back when set; `minlength` HTML attribute enforced in preview; inline error `Min N chars` shown on blur when value is non-empty but shorter than limit; clears when value reaches the limit |
+| `_minLength` | core ext `http://hl7.org/fhir/StructureDefinition/minLength` (`valueInteger`) | imported → `node._minLength`; exported back when set; `minlength` HTML attribute enforced in preview; inline error `Min N chars` shown on blur when value is non-empty but shorter than limit; clears when value reaches the limit |
 | `_maxFileSizeMB` | `questionnaire-maxSize` ext `http://hl7.org/fhir/StructureDefinition/maxSize` (`valueDecimal`) | imported → `node._maxFileSizeMB`; exported back when set; attachment items only; validated on file selection — error tag shown when file exceeds limit; `calcFormOk` returns `false`; hint shown below file button; editable in Answer Type modal |
 | `_mimeTypes` | `http://hl7.org/fhir/StructureDefinition/mimeType` (`valueCode`, 0..*) | imported → `node._mimeTypes` string array; exported as one extension entry per MIME type; sets `accept` attribute on file input; hint shown below file button; editable in Answer Type modal (comma-separated) |
 | `_minValue` | `questionnaire-minValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; min HTML attribute set on input; error shown in preview when violated |
@@ -497,7 +497,7 @@ Extensions that configure how the server-side engine populates or extracts field
 | Extension | Builder support | Notes |
 |---|---|---|
 | `sdc-questionnaire-launchContext` | ✅ Full | Editing UI in **Properties → Launch Context** + import/export. Execution requires SDC server. |
-| `sdc-questionnaire-definitionExtract` | 🔧 Partial | Client-side extraction via **Save ▾ → Definition Extract**; `itemExtractionContext` and StructureMap-based extraction not evaluated |
+| `sdc-questionnaire-definitionExtract` | 🔧 Partial | Client-side extraction via **Save ▾ → Definition Extract**; `definitionExtractContext` is honored as an extract marker; `itemExtractionContext` not evaluated (StructureMap extraction is separate, see `targetStructureMap`) |
 | `sdc-questionnaire-itemContext` | 🔄 Round-trip only | Not evaluated client-side |
 | `sdc-questionnaire-sourceQueries` / `contextExpression` | 🔄 Round-trip only | Server-side batch queries |
 | `sdc-questionnaire-width` | 🔄 Round-trip only | Table column width; table layout not implemented |
@@ -546,7 +546,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `derivedFrom[]` | ✅ | Editable in Properties |
 | `meta.*` | ✅ | versionId, source, lastUpdated (always refreshed), profile[], tag[], security[] — all editable in Properties |
 | `text` (Narrative) | 🔧 | Read-only display in Properties; auto-generated on export; not user-editable |
-| `contained[]` | 🔧 | Deep-copied on export; viewable as JSON chips; not editable in the builder |
+| `contained[]` | 🔧 | Deep-copied on export; editable in the Contained panel (add/edit/remove via the contained-resource modal) |
 | `implicitRules` | ✅ | Editable in Properties → Resource Meta |
 | `modifierExtension[]` | 🔄 | Preserved in `questMeta._rawModifierExtension`; written back on export. Validator emits a warning when present — the builder does not interpret modifier semantics. |
 | Unknown root `extension[]` | 🔄 | Preserved in `_rawQuestExtensions`; written back unchanged |
@@ -563,7 +563,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `required` | ✅ | |
 | `repeats` | ✅ | |
 | `readOnly` | ✅ | |
-| `maxLength` | ✅ | |
+| `maxLength` | 🔄 | Round-trip only; enforced in preview, no builder UI |
 | `prefix` | ✅ | Editable inline |
 | `definition` (URL) | 🔧 | Preserved and editable as a URL; not resolved against StructureDefinition (requires server) |
 | `code[]` | ✅ | Editable via Props button |
@@ -602,7 +602,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `minValue` | ✅ | Numeric min; enforced in preview |
 | `maxValue` | ✅ | Numeric max; enforced in preview |
 | `maxDecimalPlaces` | ✅ | Max decimal digits |
-| `minLength` | ✅ | Min character count |
+| `minLength` | 🔄 | Min character count; round-trip only, enforced in preview, no builder UI (core `StructureDefinition/minLength` ext) |
 | `maxSize` | ✅ | Max file size in MB (attachment) |
 | `mimeType` | ✅ | Allowed MIME types (attachment) |
 | `regex` | ✅ | Regex validation pattern |
@@ -661,7 +661,8 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `sdc-questionnaire-variable` | ✅ | Editable in Variables panel |
 | `sdc-questionnaire-launchContext` | ✅ | Full editing UI in Properties → Launch Context |
 | `sdc-questionnaire-preferredTerminologyServer` | ✅ | Editable in Properties → Terminology Server |
-| `sdc-questionnaire-definitionExtract` | 🔧 | Client-side extraction via Save ▾ → Definition Extract; `itemExtractionContext` and StructureMap paths not evaluated |
+| `sdc-questionnaire-definitionExtract` | 🔧 | Client-side extraction via Save ▾ → Definition Extract; `itemExtractionContext` not evaluated; StructureMap extraction is separate (see `targetStructureMap`) |
+| `sdc-questionnaire-definitionExtractContext` | ✅ | Treated like `definitionExtract`: marks the group as an extraction context for Save ▾ → Definition Extract |
 | `sdc-questionnaire-assembleExpectation` | 🔄 | Assembly flag; round-tripped via `_rawQuestExtensions` |
 | `sdc-questionnaire-endpoint` | 🔄 | QR submission endpoint; round-tripped |
 | `sdc-questionnaire-performerType` | 🔄 | Performer type restriction; round-tripped |

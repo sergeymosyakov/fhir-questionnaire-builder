@@ -69,7 +69,7 @@ export function importQRAnswers(qrJson, values, tree) {
   let loaded = 0;
 
   for (const [linkId, arr] of Object.entries(extracted)) {
-    if (knownIds.has(linkId)) {
+    if (knownIds.has(linkId) && linkId !== '__proto__') {
       values[linkId] = arr;
       loaded++;
     } else {

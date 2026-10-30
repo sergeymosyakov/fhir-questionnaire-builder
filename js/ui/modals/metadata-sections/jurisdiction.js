@@ -41,6 +41,7 @@ class JurisdictionSection extends Section {
             rm.type           = 'button';
             rm.className      = 'codes-remove-btn';
             rm.textContent    = '\u00D7';
+            rm.setAttribute('aria-label', 'Remove jurisdiction');
             rm.dataset.testid = `meta-jurisdiction-remove-${idx}`;
             rm.onclick = () => { pending.jurisdictions.splice(idx, 1); render(); setLabel(); };
             row.appendChild(rm);

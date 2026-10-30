@@ -36,6 +36,7 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0   # all history + tags needed to compute the patch number
+          persist-credentials: false
 
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
@@ -62,11 +63,13 @@ jobs:
 
       - name: Compute version
         id: ver
+        env:
+          NUGET_ONLY: ${{ inputs.nuget_only }}
         run: |
           MAJOR=$(node -p "require('./version.json').major")
           MINOR=$(node -p "require('./version.json').minor")
           git fetch --tags --force
-          if [ "${{ inputs.nuget_only }}" = "true" ]; then
+          if [ "$NUGET_ONLY" = "true" ]; then
             TAG=$(git tag -l "widget-v${MAJOR}.${MINOR}.*" | sort -V | tail -1)
             if [ -z "$TAG" ]; then echo "No existing widget-v${MAJOR}.${MINOR}.* tag found" >&2; exit 1; fi
           else
@@ -85,12 +88,14 @@ jobs:
         if: ${{ !inputs.nuget_only }}
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.ver.outputs.tag }}
+          SEMVER: ${{ steps.ver.outputs.semver }}
+          REPO: ${{ github.repository }}
         run: |
-          TAG="${{ steps.ver.outputs.tag }}"
           # Previous widget tag = newest existing one (the new tag isn't created yet).
           PREV=$(git tag -l 'widget-v*' | sort -V | tail -1)
           # Auto-generate the "What's Changed" changelog from the commits since PREV.
-          CHANGELOG=$(gh api "repos/${{ github.repository }}/releases/generate-notes" \
+          CHANGELOG=$(gh api "repos/$REPO/releases/generate-notes" \
             -f tag_name="$TAG" ${PREV:+-f previous_tag_name="$PREV"} --jq '.body' || true)
           { cat .github/release-notes-widget.md; echo; echo "$CHANGELOG"; } > /tmp/notes.md
           gh release create "$TAG" \
@@ -99,7 +104,8 @@ jobs:
             dist/questionnaire-widget.css \
             dist/SHA256SUMS.txt \
             --latest \
-            --title "QuestionnaireRenderer widget ${{ steps.ver.outputs.semver }}" \
+            --target "$GITHUB_SHA" \
+            --title "QuestionnaireRenderer widget $SEMVER" \
             --notes-file /tmp/notes.md
 
       # Publishes via npm Trusted Publishing (OIDC) — no token/secret involved.
@@ -150,10 +156,11 @@ jobs:
         continue-on-error: true
         env:
           PKG_VERSION: ${{ steps.ver.outputs.semver }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: |
           mkdir -p nuget/wwwroot
           cp dist/questionnaire-widget.js dist/questionnaire-widget.global.js dist/questionnaire-widget.css nuget/wwwroot/
           cp LICENSE nuget/LICENSE
           cp WIDGET.md nuget/README.md
           dotnet pack nuget/FhirQuestionnaireWidget.csproj -c Release -p:PackageVersion="$PKG_VERSION" -o nuget-out
-          dotnet nuget push nuget-out/*.nupkg --source https://api.nuget.org/v3/index.json --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --skip-duplicate
+          dotnet nuget push nuget-out/*.nupkg --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY" --skip-duplicate

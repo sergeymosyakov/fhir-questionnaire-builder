@@ -243,7 +243,7 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `css/auth.css` | Auth UI styles: `.auth-signin-btn`, `.auth-user-btn`, `.auth-user-avatar`, `.auth-user-name`; `.auth-user-menu { position: fixed; left: auto }` override so dropdown escapes `overflow:auto` top-panel clipping; `.cloud-list-*` for CloudModal |
 | `css/sdc-modals.css` | Styles for `SdcPopulateModal` (`.sdc-pop-*` — patient search field/label/input, `.sdc-pop-input--error`, `.sdc-pop-drop` fixed-position autocomplete above modal) and `DefExtractModal` (`.def-extract-*` — warn/summary/list/card/type/id/fields) |
 | `css/expression-builder.css` | Styles for the `ExpressionBuilderModal` (`.eb-*` — rows, behavior, live preview, ok/err chips, type chooser `.eb-chooser*`, pipeline `.eb-pipe*` source/filter/chip rows) and the `.vis-build-btn` launcher; raises the builder modal above the Show When modal (`z-index: 10150`, below `csel-drop`); `.modal-box--maximized .eb-item { max-width: none }` lets the question dropdown actually use the extra width instead of staying capped at `.sc-trigger--sm`'s 180px |
-| `css/*.css` (other) | The remaining `css/` files are mostly one-per-feature and self-descriptive by name (`builder-nodes.css`, `builder-panels.css`, `builder-toolbar.css`, `controls.css`, `date-picker.css`, `preview-controls.css`, `preview-structure.css`, `preview-ui.css`, `status-badge.css`, `term-search.css`, `tooltip.css`, `translate-modal.css`, `variables.css`, `oauth-login-banner.css`, `page-header.css`, `dev-fhir-login.css`, `docs-portal.css`, `help.css`, `settings.css`) — not individually catalogued here |
+| `css/*.css` (other) | The remaining `css/` files are mostly one-per-feature and self-descriptive by name (`answer-options-editor.css` — shared options-editor rows, `explain-modal.css` — Explain modal tree, `builder-nodes.css`, `builder-panels.css`, `builder-toolbar.css`, `controls.css`, `date-picker.css`, `preview-controls.css`, `preview-structure.css`, `preview-ui.css`, `status-badge.css`, `term-search.css`, `tooltip.css`, `translate-modal.css`, `variables.css`, `oauth-login-banner.css`, `page-header.css`, `dev-fhir-login.css`, `docs-portal.css`, `help.css`, `settings.css`) — not individually catalogued here |
 | `js/ui/autosave.js` | Background autosave — 15 s interval; per-questionnaire slot keyed by `Questionnaire.url` or auto-generated `identifier[fhir-qb.app/editor].value`; public API: `init({buildFn,questMeta,onSaved})`, `isEnabled`, `setEnabled`, `getMostRecentDraft()→{meta,key}\|null`, `getDraftData(key)`, `clearDraft`; reads/writes through `StorageAdapter` (no direct `localStorage` calls) |
 | `js/ui/history.js` | Undo/redo — debounced 400 ms + `requestIdleCallback`; max 50 snapshots (JSON strings); `init({buildFn,importFn,onChange})`, `undo()`, `redo()`, `canUndo()`, `canRedo()`; stack resets on `questionnaire-loaded` / `questionnaire-cleared`; initial snapshot taken in `init()` so first change is undoable; no `renderFn` — `importFHIR` uses its own injected `renderTree` |
 | `js/ui/modals/library-modal.js` | **Load from Library** modal — `init(elements)`, `open(focusGroupId, onSelect, typeFilter)`; fetches and caches `sampledata/library.json`; renders collapsible group tree filtered by `typeFilter` (a single type string, or an array of types — `'questionnaire'` \| `'qr'` \| `'redcap'` \| `'sd'` \| undefined for all); clicking an item calls `onSelect(item)` and closes the modal; opened from the `Questionnaires ▾` dropdown (filter: `['questionnaire', 'sd']`) and `Answers ▾` dropdown (filter: qr) |
@@ -297,7 +297,8 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `sampledata/phq-9.stu3.fhir.json` | PHQ-9 in **FHIR STU3** format (`meta.fhirVersion: "3.0.2"`); uses `item.option[]`, `enableWhen.hasAnswer`, `initialInteger`; normalised to R4 automatically on import via `stu3-shim.js`; frozen copy also in `tests/fixtures/` |
 | `sampledata/phq-9-response.qr.json` | Sample QuestionnaireResponse for PHQ-9 (mild depression, score 7) — 10 answered items with `valueCoding` (LOINC codes) |
 | `sampledata/example-bariatric-response.qr.json` | Sample QuestionnaireResponse for example-bariatric (eligible male patient, BMI 41.5) — groups + nested items |
-| `sampledata/rendering-xhtml-demo.fhir.json` | **Rendering XHTML Demo** — demonstrates the `rendering-xhtml` extension: rich-text labels (bold/italic/color) rendered via DOMPurify-sanitized HTML in the preview panel, across group headers, item text, and nested items |
+| `sampledata/rendering-xhtml-demo.fhir.json` | **Rendering XHTML Demo** — demonstrates the `rendering-xhtml` extension: rich-text labels (bold/italic/color) rendered via DOMPurify-sanitized HTML in the preview panel, across group headers, item text, and nested items; also one `rendering-markdown` item |
+| `sampledata/input-constraints-demo.fhir.json` | **Input Constraints and Authoring Metadata Demo** — `entryFormat` (core + SDC), attachment `maxSize`/`mimeType`, `designNote`, `rendering-markdown`, `derivedFrom`, `effectivePeriod` |
 | `sampledata/item-control-demo.fhir.json` | **Item Control Demo** — `questionnaire-itemControl` codes: `check-box` (checklist, with `sdc-questionnaire-columnCount: 2` for a 2-column option layout), `autocomplete` (searchable dropdown), `text-area` (multi-line string), `spinner` (integer), `drop-down` (explicit default), `slider` (integer range slider), `lookup` (choice live-search against FHIR terminology server); also demos `questionnaire-usageMode` (display-only item), `sdc-questionnaire-itemMedia` (image on choice), `sdc-questionnaire-itemWeight` (weighted scoring on options) |
 | `sampledata/sample-rash.svg` | Demo image referenced by `item-control-demo.fhir.json`'s `sdc-questionnaire-itemMedia` extension (`valueAttachment.url`) — "Skin rash example" shown inline next to a choice option |
 | `sampledata/gtable-demo.fhir.json` | **Group Table Layout Demo** — four `questionnaire-itemControl=gtable` scenarios: (1) *medications* — repeating table (5 columns, Add/Remove row, min/maxOccurs); (2) *vitals* — single-row table; (3) *appointments* — gtable with a plain stacked group in one cell (Provider column); (4) *lab-results* — gtable with a nested gtable in one cell (Values column, recursive table-in-table) |
@@ -310,12 +311,115 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `vitest.config.js` | Vitest config — node environment, `tests/**/*.test.js` |
 | `playwright.config.js` | Playwright config — Chromium only with `--headless=new` (new headless mode, consistent with headed timing), `testDir: tests/e2e`, `retries: 2` on CI, auto-starts local `serve` (via `node node_modules/.bin/serve`); reporters: `html` (open:never) + `list` |
 | `tests/e2e/perf/large-questionnaire.spec.js` | Performance regression suite (tagged `@perf`) — loads the real WHO EmCare fixture (226 items) + a generated depth-8/250-item calc-chain form; measures `builder:render-done`/`preview:render-done` timing and asserts render under a generous ceiling (gross-regression gate). Run separately in the CI `perf` job |
-| `tests/e2e/builder.spec.js` | E2E tests (24) — load/clear form, collapse/expand group, FHIR export, group title edit, delete item/group (cascade), type changes (checkbox/display), bidirectional navigation flash (builder↔preview), node count match on import, answer state persistence, enableWhen (Show When modal), patient preset section visibility, Re-init / initialExpression population; all selectors via `data-testid`; fixtures from `tests/fixtures/` |
+| `tests/e2e/helpers/*.js` | Shared e2e helpers — `builder.js` (builder/fixture setup), `dropdown.js` (retry-safe dropdown open), `metadata.js`, `terminology.js` (`mockTerminologyExpand`) |
+| `tests/e2e/a11y.spec.js` | E2E tests — preview accessibility (control accessible names, AA-contrast prefix/optional badges) |
+| `tests/e2e/answer-expression.spec.js` | E2E tests — `answerExpression` import/render |
+| `tests/e2e/answer-option-types.spec.js` | E2E tests — `answerOption` value[x] types import/render |
+| `tests/e2e/answer-options-editor.spec.js` | E2E tests — shared answer options editor rows |
+| `tests/e2e/answer-type-labels.spec.js` | E2E tests — Answer Type modal FHIR-aware type labels |
+| `tests/e2e/appearance-modal.spec.js` | E2E tests — Appearance modal open/close/apply |
+| `tests/e2e/atable-item-control.spec.js` | E2E tests — `atable` itemControl builder toggle and render |
+| `tests/e2e/base-fhir-type.spec.js` | E2E tests — baseType / fhirType import pre-fill |
+| `tests/e2e/boolean-segmented.spec.js` | E2E tests — boolean segmented control rendering |
+| `tests/e2e/builder-core.spec.js` | E2E tests — builder CRUD, bidirectional reactivity, navigation, export |
+| `tests/e2e/builder-enable-when.spec.js` | E2E tests — standard `enableWhen` via the Show When modal |
+| `tests/e2e/builder-patient.spec.js` | E2E tests — patient presets and variable re-init |
+| `tests/e2e/builder-tree-a11y.spec.js` | E2E tests — builder tree keyboard accessibility |
+| `tests/e2e/candidate-expression.spec.js` | E2E tests — `candidateExpression` import/round-trip |
+| `tests/e2e/choice-column.spec.js` | E2E tests — `choiceColumn` multi-column dropdown |
+| `tests/e2e/choice-orientation.spec.js` | E2E tests — `choiceOrientation` import/render |
+| `tests/e2e/collapse-dimmed-group.spec.js` | E2E tests — Collapse All on a dimmed group |
+| `tests/e2e/comma-option-display.spec.js` | E2E tests — commas in option display text |
+| `tests/e2e/constraint-badge.spec.js` | E2E tests — constraint criteria badge |
+| `tests/e2e/constraint-modal.spec.js` | E2E tests — Constraint modal open/close/edit |
+| `tests/e2e/contained-add.spec.js` | E2E tests — editable Contained resources panel (add/edit/remove) |
+| `tests/e2e/copy-paste.spec.js` | E2E tests — node copy/paste via gear menu |
+| `tests/e2e/cql-execution.spec.js` | E2E tests — `cqf-library` + `text/cql-identifier` execution |
+| `tests/e2e/custom-select-a11y.spec.js` | E2E tests — custom-select ARIA roles and keyboard navigation |
+| `tests/e2e/definition-resolve.spec.js` | E2E tests — `item.definition` resolution |
+| `tests/e2e/dev-fhir-login.spec.js` | E2E tests — FHIR debug login page |
+| `tests/e2e/display-category.spec.js` | E2E tests — `displayCategory` import/render |
+| `tests/e2e/dnd.spec.js` | E2E tests — drag-and-drop node reorder |
+| `tests/e2e/docs-portal.spec.js` | E2E tests — documentation portal page |
+| `tests/e2e/enable-when-quantity.spec.js` | E2E tests — `answerQuantity` enableWhen preview |
+| `tests/e2e/entry-format.spec.js` | E2E tests — `entryFormat` import/render |
+| `tests/e2e/expression-builder-pipeline.spec.js` | E2E tests — Expression Builder pipeline mode |
+| `tests/e2e/expression-builder-two-way.spec.js` | E2E tests — Expression Builder two-way mode |
+| `tests/e2e/expression-builder.spec.js` | E2E tests — Expression Builder modal |
+| `tests/e2e/expression-gallery.spec.js` | E2E tests — Expression Gallery templates |
+| `tests/e2e/expression-modal.spec.js` | E2E tests — Expression modal (calculated/initial expression) |
+| `tests/e2e/fhir-hidden.spec.js` | E2E tests — `questionnaire-hidden` and `usageMode` extensions |
+| `tests/e2e/fhir-roundtrip.spec.js` | E2E tests — FHIR field import/export round-trip |
+| `tests/e2e/fhir-version-compat.spec.js` | E2E tests — FHIR version compatibility warnings |
+| `tests/e2e/fhir-version.spec.js` | E2E tests — FHIR version selector |
+| `tests/e2e/fhirpath-console.spec.js` | E2E tests — FHIRPath tester console |
+| `tests/e2e/flyover.spec.js` | E2E tests — flyover itemControl import/render |
+| `tests/e2e/group-layout.spec.js` | E2E tests — group header/footer layout |
+| `tests/e2e/group-logic.spec.js` | E2E tests — group AND/OR logic reactivity in preview |
+| `tests/e2e/help-button.spec.js` | E2E tests — help-button itemControl import/render |
+| `tests/e2e/help-modal.spec.js` | E2E tests — help modal (FHIR Field Reference) open/close |
+| `tests/e2e/initial-modal.spec.js` | E2E tests — Default Value modal open/close |
+| `tests/e2e/inline-answer-type.spec.js` | E2E tests — inline answer-type selector |
+| `tests/e2e/item-with-subitems.spec.js` | E2E tests — item with nested sub-items |
+| `tests/e2e/metadata-card.spec.js` | E2E tests — Questionnaire metadata card visibility |
+| `tests/e2e/metadata-codes.spec.js` | E2E tests — Questionnaire `code[]` editor |
+| `tests/e2e/metadata-core.spec.js` | E2E tests — metadata modal core fields, open/close, Advanced, effectivePeriod, round-trip |
+| `tests/e2e/metadata-identifiers.spec.js` | E2E tests — metadata modal Identifiers section |
+| `tests/e2e/metadata-launch-context.spec.js` | E2E tests — Launch Context add/save |
+| `tests/e2e/metadata-narrative-replaces.spec.js` | E2E tests — metadata modal Narrative and `replaces` |
+| `tests/e2e/metadata-resource-meta.spec.js` | E2E tests — metadata modal Resource Meta section |
+| `tests/e2e/modal-focus.spec.js` | E2E tests — modal focus management |
+| `tests/e2e/modal-responsive.spec.js` | E2E tests — modal sizing on mobile vs desktop |
+| `tests/e2e/modifier-extension.spec.js` | E2E tests — `modifierExtension` round-trip |
+| `tests/e2e/note-modal.spec.js` | E2E tests — Design Note modal open/close |
+| `tests/e2e/oauth-login-banner.spec.js` | E2E tests — OAuth re-login banner |
+| `tests/e2e/oauth-login-flow.spec.js` | E2E tests — OAuth2 code + PKCE login flow with mocked IdP |
+| `tests/e2e/oauth-settings.spec.js` | E2E tests — Settings page OAuth fields |
+| `tests/e2e/observation-extract.spec.js` | E2E tests — observation-extract dropdown in States modal |
+| `tests/e2e/panel-visibility.spec.js` | E2E tests — panel visibility toggle on narrow screens |
+| `tests/e2e/patient-calc-checkbox.spec.js` | E2E tests — Patient view calculated checkbox badge |
+| `tests/e2e/patient-view.spec.js` | E2E tests — Patient View mode |
+| `tests/e2e/preview-collapse-toggle.spec.js` | E2E tests — per-item preview collapse/expand |
+| `tests/e2e/preview-prefix-align.spec.js` | E2E tests — preview ordinal prefix alignment |
+| `tests/e2e/qr-answers-load.spec.js` | E2E tests — load QuestionnaireResponse answers from file |
+| `tests/e2e/qr-export-modal.spec.js` | E2E tests — QuestionnaireResponse export modal |
+| `tests/e2e/reference-profile.spec.js` | E2E tests — reference type validation |
+| `tests/e2e/regression.spec.js` | E2E tests — cross-cutting regression scenarios |
+| `tests/e2e/rendering-markdown.spec.js` | E2E tests — `rendering-markdown` in preview |
+| `tests/e2e/rendering-xhtml.spec.js` | E2E tests — `rendering-xhtml` in preview |
+| `tests/e2e/renumber.spec.js` | E2E tests — Renumber prefix assignment |
+| `tests/e2e/repeat-select-dedup.spec.js` | E2E tests — repeating select without duplicate codes |
+| `tests/e2e/repeating-groups.spec.js` | E2E tests — repeating group preview |
+| `tests/e2e/repeats-roundtrip.spec.js` | E2E tests — repeatable QR round-trip |
+| `tests/e2e/repeats.spec.js` | E2E tests — Repeatable toggle in builder |
+| `tests/e2e/sdc-definition-extract.spec.js` | E2E tests — SDC Definition Extract |
+| `tests/e2e/sdc-populate.spec.js` | E2E tests — SDC `$populate` button |
+| `tests/e2e/separator-logic.spec.js` | E2E tests — AND/OR separator logic |
+| `tests/e2e/settings.spec.js` | E2E tests — Settings page |
+| `tests/e2e/showwhen-modal.spec.js` | E2E tests — Show When modal open/close |
+| `tests/e2e/structuremap-extract.spec.js` | E2E tests — StructureMap Extract |
+| `tests/e2e/structuremap-populate.spec.js` | E2E tests — StructureMap Population |
+| `tests/e2e/stu3-import.spec.js` | E2E tests — STU3 import shim |
+| `tests/e2e/term-search.spec.js` | E2E tests — LOINC/SNOMED/ICD-10-CM term search |
+| `tests/e2e/terminology-server.spec.js` | E2E tests — Terminology Server modal |
+| `tests/e2e/translation-providers.spec.js` | E2E tests — translation providers |
+| `tests/e2e/translation-xhtml.spec.js` | E2E tests — XHTML/Markdown translation review table |
+| `tests/e2e/translation.spec.js` | E2E tests — questionnaire translation |
+| `tests/e2e/unit-valueset.spec.js` | E2E tests — `unitValueSet` export round-trip |
+| `tests/e2e/unknown-extensions.spec.js` | E2E tests — unknown extensions pass-through |
+| `tests/e2e/validate.spec.js` | E2E tests — Validate modal |
+| `tests/e2e/validation-aria-live.spec.js` | E2E tests — validation aria-live announcements |
+| `tests/e2e/variables-panel.spec.js` | E2E tests — Variables panel |
+| `tests/e2e/version-algorithm.spec.js` | E2E tests — `versionAlgorithm` / `copyrightLabel` in Properties |
+| `tests/e2e/view-options.spec.js` | E2E tests — View Options menu |
+| `tests/e2e/who-response-load.spec.js` | E2E tests — WHO EmCare revived via companion QuestionnaireResponse |
+| `tests/e2e/widget-populate.spec.js` | E2E tests — widget-scoped populate / StructureMap populate |
+| `tests/e2e/widget-renderer.spec.js` | E2E tests — embeddable QuestionnaireRenderer widget |
+| `tests/e2e/widget-terminology.spec.js` | E2E tests — widget-scoped terminology server |
 | `tests/e2e/contained-panel.spec.js` | E2E tests (17) — Contained Resources card + Answer ValueSet card; chip rendering, JSON viewer modal (open/close via ×/footer/Esc/backdrop), toggle collapse/expand, cards hidden on clear; fixture `tests/fixtures/contained-valueset.fhir.json` |
 | `tests/e2e/fhir-features.spec.js` | E2E tests (27) — readOnly enforcement, maxLength counter, minValue/maxValue error display and round-trip, ordinalValue badges in radio/select, ordinalValue round-trip export, minLength error enforcement and round-trip, maxDecimalPlaces error enforcement and round-trip; fixture `tests/fixtures/fhir-features.fhir.json` |
 | `tests/e2e/attachment-constraints.spec.js` | E2E tests (19) — `maxSize` and `mimeType` extensions for attachment items: Answer Type modal shows correct values on import, preview hints visible, `accept` attribute set from mimeTypes, file-too-large error tag, round-trip export round-trip for both extensions; fixture `tests/fixtures/attachment-constraints.fhir.json` |
 | `tests/e2e/slider-disabled.spec.js` | E2E tests (15) — slider rendering (range input, min/max/step attrs, label update, round-trip), disabledDisplay (hidden absent from DOM, protected dimmed, toggle on condition change, round-trip), builder UI (Answer Type modal numeric section, Show When modal disabledDisplay select, applying changes); fixture `tests/fixtures/slider-disabled.fhir.json` |
-| `tests/e2e/metadata-modal.spec.js` | E2E tests (84) — questMetaCard visibility, status badge, modal open/close, fields pre-populated, Advanced section, round-trip export, Apply/Cancel, reset on clear, effectivePeriod, Codes section (toggle + badge + add/remove/edit + round-trip), Resource Meta section (versionId/Generate, source, lastUpdated, profile[], tag[], security[], badge count), **Identifiers section** (toggle, auto-expand, badge count, imported row values, add/remove, system/value/use round-trip, Cancel discards); fixture `tests/fixtures/meta-test.fhir.json` |
 | `tests/e2e/support-link.spec.js` | E2E tests — `questionnaire-supportLink` feature: 🔗 icons in builder preview (single / multiple), "More info ↗" buttons in patient view, Props modal editing (open via `action-codes`, expand Support Links section, add/remove URL inputs, Apply updates preview), active-state on Props button; fixture `tests/fixtures/support-link.fhir.json` |
 | `tests/e2e/required-modal.spec.js` | E2E tests for Required flag within the States modal — updated from old required-modal; uses `action-states` + `#statesModal` + `states-required-sel` testids; covers open/close, 3-option select, draft pattern (Cancel/Apply), active state, re-open reflects saved value |
 | `tests/e2e/states-modal.spec.js` | E2E tests for the combined States modal — open/close (item + group), item layout (Required select + Read-only + Hidden checkboxes), group layout (no Read-only row), Read-only toggle draft pattern + setActive, Hidden toggle draft pattern + setActive + preview class, combined states active/inactive |

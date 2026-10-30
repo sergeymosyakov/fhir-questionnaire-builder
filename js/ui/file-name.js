@@ -26,6 +26,7 @@ export class FileNameDisplay {
     this._btn.dataset.tipTitle = 'Clear questionnaire';
     this._btn.dataset.tipBody = 'Removes the current questionnaire from the builder. You will be asked whether to export first.';
     this._btn.textContent = '\u00d7';
+    this._btn.setAttribute('aria-label', 'Clear questionnaire');
 
     this._wrap.append(this._nameEl, this._btn);
     mountEl.appendChild(this._wrap);

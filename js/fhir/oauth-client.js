@@ -91,7 +91,16 @@ async function _codeChallenge(verifier) {
   return _base64url(new Uint8Array(digest));
 }
 
+// https only; http allowed for localhost dev.
+function _assertSecureUrl(url, what) {
+  let u;
+  try { u = new URL(url); } catch { throw new Error(`${what} is not a valid URL.`); }
+  const localhost = u.protocol === 'http:' && (u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname === '[::1]');
+  if (u.protocol !== 'https:' && !localhost) throw new Error(`${what} must use https:// (http:// is allowed only for localhost).`);
+}
+
 async function _exchangeToken(cfg, body) {
+  _assertSecureUrl(cfg.tokenUrl, 'OAuth token URL');
   const res = await fetch(cfg.tokenUrl, {
     method:  'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -112,6 +121,9 @@ async function _exchangeToken(cfg, body) {
 export async function startLogin(serverKey) {
   const cfg = _oauthConfig(serverKey);
   if (!cfg) throw new Error(`No OAuth config for ${serverKey} — set it up in Settings first.`);
+
+  _assertSecureUrl(cfg.authorizeUrl, 'OAuth authorize URL');
+  _assertSecureUrl(cfg.tokenUrl, 'OAuth token URL');
 
   const state     = _randomString(18);
   const verifier  = _randomString(48);
