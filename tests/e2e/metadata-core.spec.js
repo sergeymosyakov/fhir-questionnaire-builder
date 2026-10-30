@@ -32,6 +32,7 @@
 //   export-quest-item    "Questionnaire…" item in export dropdown (opens saveFormatModal)
 //   clear-form-btn         clear/reset button
 //   clear-confirm-clear-btn confirm clear button
+//   clearConfirmModal    Clear-questionnaire confirm modal backdrop
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -247,7 +248,7 @@ test.describe('metadata modal — effectivePeriod', () => {
   test('effectivePeriod cleared when form is cleared', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('clear-form-btn').click();
-    await page.waitForSelector('.clear-confirm-backdrop');
+    await page.getByTestId('clearConfirmModal').waitFor();
     await page.getByTestId('clear-confirm-clear-btn').click();
     await page.getByTestId('add-root-group-btn').click();
     await expect(page.getByTestId('quest-meta-card')).toBeVisible();

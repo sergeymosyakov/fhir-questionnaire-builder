@@ -34,6 +34,7 @@ export class NodeGearMenu {
 
     this._menu = document.createElement('div');
     this._menu.className = 'node-gear-menu';
+    this._menu.dataset.testid = testid + '-menu';
     this._menu.setAttribute('role', 'menu');
     this._menu.style.display = 'none';
 

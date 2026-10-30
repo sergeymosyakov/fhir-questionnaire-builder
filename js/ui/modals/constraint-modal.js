@@ -82,6 +82,7 @@ class ConstraintModal extends Modal {
     draft.forEach((c, idx) => {
       const card = document.createElement('div');
       card.className = 'constraint-card';
+      card.dataset.testid = 'constraint-card-' + idx;
 
       const hdr = document.createElement('div');
       hdr.className = 'constraint-card-hdr';
@@ -101,6 +102,7 @@ class ConstraintModal extends Modal {
 
       const rmBtn = document.createElement('button');
       rmBtn.type = 'button'; rmBtn.className = 'vis-cond-rm'; rmBtn.textContent = '\u2715';
+      rmBtn.dataset.testid = 'constraint-rm-btn-' + idx;
       rmBtn.setAttribute('aria-label', 'Remove constraint');
       rmBtn.onclick = () => { draft.splice(idx, 1); this._renderBody(draft); };
       hdr.appendChild(rmBtn);

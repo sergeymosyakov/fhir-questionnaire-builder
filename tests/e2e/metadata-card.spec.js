@@ -14,6 +14,7 @@
 //   meta-id                (data-testid) id input inside modal body
 //   meta-url               (data-testid) url input
 //   meta-title             (data-testid) title input
+//   clearConfirmModal    Clear-questionnaire confirm modal backdrop
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -62,7 +63,7 @@ test.describe('metadata card — reset on clear', () => {
     await expect(page.getByTestId('quest-meta-status')).toHaveText('active');
 
     await page.getByTestId('clear-form-btn').click();
-    await page.waitForSelector('.clear-confirm-backdrop');
+    await page.getByTestId('clearConfirmModal').waitFor();
     await page.getByTestId('clear-confirm-clear-btn').click();
 
     await page.getByTestId('add-root-group-btn').click();

@@ -10,6 +10,7 @@
 //   sdcPopulate
 //   load-fhir-btn
 //   load-library-item
+//   sdcPopulateApply     SDC Populate modal Apply button
 // ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -120,7 +121,7 @@ test.describe('SDC $populate button', () => {
     await openDropdownItem(page, 'answers-btn', 'sdc-populate-btn');
     const input = page.getByTestId('sdc-populate-patient-ref-input');
     await input.fill('Patient/test-123');
-    await page.locator('[data-testid="sdcPopulate"] .modal-btn--apply').click();
+    await page.getByTestId('sdcPopulateApply').click();
 
     const detail = await page.evaluate(() => window.__populateDetail);
     expect(detail?.patientRef).toBe('Patient/test-123');
@@ -141,7 +142,7 @@ test.describe('SDC $populate button', () => {
     await openDropdownItem(page, 'answers-btn', 'sdc-populate-btn');
     const input = page.getByTestId('sdc-populate-patient-ref-input');
     await input.fill('98765');
-    await page.locator('[data-testid="sdcPopulate"] .modal-btn--apply').click();
+    await page.getByTestId('sdcPopulateApply').click();
 
     const detail = await page.evaluate(() => window.__populateDetail);
     expect(detail?.patientRef).toBe('Patient/98765');

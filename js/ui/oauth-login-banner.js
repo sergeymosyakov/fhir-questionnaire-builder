@@ -39,6 +39,7 @@ class OauthLoginBanner {
     const dismissBtn = document.createElement('button');
     dismissBtn.type = 'button';
     dismissBtn.className = 'oauth-login-banner-dismiss';
+    dismissBtn.dataset.testid = 'oauth-login-banner-dismiss-' + serverKey;
     dismissBtn.setAttribute('aria-label', 'Dismiss');
     dismissBtn.textContent = '\u00d7';
     dismissBtn.addEventListener('click', () => this._remove(serverKey));

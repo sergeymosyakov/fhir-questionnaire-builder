@@ -20,6 +20,7 @@
 //   qdoc-item-item-reference
 //   qdoc-item-item-quantity
 //   tree-container
+//   qdoc-contained-ussg-fhh  contained resource heading in the generated docs page
 // ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -103,7 +104,7 @@ test.describe('Questionnaire Documentation generator', () => {
     const link = docsPage.getByRole('link', { name: 'USSG Family Health History' });
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute('href', '#qdoc-contained-ussg-fhh');
-    await expect(docsPage.locator('#qdoc-contained-ussg-fhh')).toHaveText('ValueSet/ussg-fhh');
+    await expect(docsPage.getByTestId('qdoc-contained-ussg-fhh')).toHaveText('ValueSet/ussg-fhh');
     await docsPage.close();
   });
 

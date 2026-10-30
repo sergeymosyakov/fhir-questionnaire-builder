@@ -161,6 +161,7 @@ export function buildDragHandle(node) {
 export function buildDropZoneAbove(node) {
   const div = document.createElement('div');
   div.className   = 'drop-zone drop-zone-above';
+  div.dataset.testid = 'drop-zone-above';
   div.textContent = 'Drop here';
   dnd.attachDropZone(div, node, 'before');
   return div;
@@ -211,6 +212,7 @@ export function addChildGearItems(gear, node) {
 export function buildInsideDropZone(node) {
   const div = document.createElement('div');
   div.className   = 'drop-zone drop-zone-inside';
+  div.dataset.testid = 'drop-zone-inside';
   div.textContent = 'Drop here to add as last child';
   dnd.attachDropZone(div, node, 'inside-last');
   return div;

@@ -13,6 +13,13 @@
 //   type-select             custom type dropdown inside Answer Type modal
 //   answerTypeModalApply    Apply button
 //   date-input               date-picker trigger (preview)
+//   dp-cal               date picker popup
+//   dp-month-lbl         date picker header label (drill-down button)
+//   dp-grid-4col         date picker month/year grid
+//   dp-cell              date picker month/year cell
+//   dp-day               date picker day cell
+//   dp-nav-prev          date picker previous button
+//   right-panel-body     scrolling body of the right panel
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -64,28 +71,28 @@ test.describe('Date picker', () => {
     const trigger = page.locator(`[data-preview-id="${itemId}"]`).getByTestId('date-input');
     await trigger.click();
 
-    const cal = page.locator('.dp-cal');
+    const cal = page.getByTestId('dp-cal');
     await expect(cal).toBeVisible();
 
     // Day view -> click header -> months view (12 cells)
-    await cal.locator('.dp-month-lbl').click();
-    await expect(cal.locator('.dp-grid--4col .dp-cell')).toHaveCount(12);
+    await cal.getByTestId('dp-month-lbl').click();
+    await expect(cal.getByTestId('dp-grid-4col').getByTestId('dp-cell')).toHaveCount(12);
 
     // Months view -> click year header -> years view (12 cells)
-    await cal.locator('.dp-month-lbl').click();
-    const yearCells = cal.locator('.dp-grid--4col .dp-cell');
+    await cal.getByTestId('dp-month-lbl').click();
+    const yearCells = cal.getByTestId('dp-grid-4col').getByTestId('dp-cell');
     await expect(yearCells).toHaveCount(12);
     const pickedYear = (await yearCells.first().textContent()).trim();
     await yearCells.first().click();
 
     // Back in months view, header shows the picked year
-    await expect(cal.locator('.dp-month-lbl')).toHaveText(pickedYear);
-    await cal.locator('.dp-grid--4col .dp-cell').first().click(); // January
+    await expect(cal.getByTestId('dp-month-lbl')).toHaveText(pickedYear);
+    await cal.getByTestId('dp-grid-4col').getByTestId('dp-cell').first().click(); // January
 
     // Back in day view, header shows "January <year>"
-    await expect(cal.locator('.dp-month-lbl')).toHaveText(`January ${pickedYear}`);
+    await expect(cal.getByTestId('dp-month-lbl')).toHaveText(`January ${pickedYear}`);
 
-    await cal.locator('.dp-day').filter({ hasText: /^15$/ }).click();
+    await cal.getByTestId('dp-day').filter({ hasText: /^15$/ }).click();
     await expect(cal).not.toBeVisible();
     await expect(trigger).toHaveAttribute('data-value', `${pickedYear}-01-15`);
   });
@@ -98,18 +105,18 @@ test.describe('Date picker', () => {
 
     const trigger = page.locator(`[data-preview-id="${itemId}"]`).getByTestId('date-input');
     await trigger.click();
-    const cal = page.locator('.dp-cal');
-    await cal.locator('.dp-month-lbl').click(); // -> months view
+    const cal = page.getByTestId('dp-cal');
+    await cal.getByTestId('dp-month-lbl').click(); // -> months view
 
-    const monthCells = cal.locator('.dp-grid--4col .dp-cell');
+    const monthCells = cal.getByTestId('dp-grid-4col').getByTestId('dp-cell');
     await expect(monthCells).toHaveCount(12);
-    const yearLabel = (await cal.locator('.dp-month-lbl').textContent()).trim();
+    const yearLabel = (await cal.getByTestId('dp-month-lbl').textContent()).trim();
     await monthCells.nth(5).click(); // June
 
     // Back in day view, header shows "June <year>"
-    await expect(cal.locator('.dp-month-lbl')).toHaveText(`June ${yearLabel}`);
+    await expect(cal.getByTestId('dp-month-lbl')).toHaveText(`June ${yearLabel}`);
 
-    await cal.locator('.dp-day').filter({ hasText: /^10$/ }).click();
+    await cal.getByTestId('dp-day').filter({ hasText: /^10$/ }).click();
     await expect(cal).not.toBeVisible();
     await expect(trigger).toHaveAttribute('data-value', `${yearLabel}-06-10`);
   });
@@ -122,22 +129,22 @@ test.describe('Date picker', () => {
 
     const trigger = page.locator(`[data-preview-id="${itemId}"]`).getByTestId('date-input');
     await trigger.click();
-    const cal = page.locator('.dp-cal');
-    await cal.locator('.dp-month-lbl').click(); // -> months
-    await cal.locator('.dp-month-lbl').click(); // -> years
+    const cal = page.getByTestId('dp-cal');
+    await cal.getByTestId('dp-month-lbl').click(); // -> months
+    await cal.getByTestId('dp-month-lbl').click(); // -> years
 
-    const yearCells = cal.locator('.dp-grid--4col .dp-cell');
+    const yearCells = cal.getByTestId('dp-grid-4col').getByTestId('dp-cell');
     await expect(yearCells).toHaveCount(12);
     const pickedYear = (await yearCells.nth(11).textContent()).trim(); // last cell in the grid
     await yearCells.nth(11).click();
 
     // Back in months view, header shows the exact picked year
-    await expect(cal.locator('.dp-month-lbl')).toHaveText(pickedYear);
+    await expect(cal.getByTestId('dp-month-lbl')).toHaveText(pickedYear);
 
-    await cal.locator('.dp-grid--4col .dp-cell').nth(2).click(); // March
-    await expect(cal.locator('.dp-month-lbl')).toHaveText(`March ${pickedYear}`);
+    await cal.getByTestId('dp-grid-4col').getByTestId('dp-cell').nth(2).click(); // March
+    await expect(cal.getByTestId('dp-month-lbl')).toHaveText(`March ${pickedYear}`);
 
-    await cal.locator('.dp-day').filter({ hasText: /^5$/ }).click();
+    await cal.getByTestId('dp-day').filter({ hasText: /^5$/ }).click();
     await expect(cal).not.toBeVisible();
     await expect(trigger).toHaveAttribute('data-value', `${pickedYear}-03-05`);
   });
@@ -150,13 +157,13 @@ test.describe('Date picker', () => {
 
     const trigger = page.locator(`[data-preview-id="${itemId}"]`).getByTestId('date-input');
     await trigger.click();
-    const cal = page.locator('.dp-cal');
-    await cal.locator('.dp-month-lbl').click(); // -> months
-    await cal.locator('.dp-month-lbl').click(); // -> years
+    const cal = page.getByTestId('dp-cal');
+    await cal.getByTestId('dp-month-lbl').click(); // -> months
+    await cal.getByTestId('dp-month-lbl').click(); // -> years
 
-    const rangeBefore = (await cal.locator('.dp-month-lbl').textContent()).trim();
-    await cal.locator('.dp-nav-btn').first().click(); // prev 12 years
-    const rangeAfter = (await cal.locator('.dp-month-lbl').textContent()).trim();
+    const rangeBefore = (await cal.getByTestId('dp-month-lbl').textContent()).trim();
+    await cal.getByTestId('dp-nav-prev').click(); // prev 12 years
+    const rangeAfter = (await cal.getByTestId('dp-month-lbl').textContent()).trim();
     expect(rangeAfter).not.toBe(rangeBefore);
   });
 
@@ -170,12 +177,12 @@ test.describe('Date picker', () => {
     }
     await setDateType(page, lastId);
 
-    const panel = page.locator('.right-panel-body');
+    const panel = page.getByTestId('right-panel-body');
     await panel.evaluate(el => { el.scrollTop = el.scrollHeight; });
 
     const trigger = page.locator(`[data-preview-id="${lastId}"]`).getByTestId('date-input');
     await trigger.click();
-    const cal = page.locator('.dp-cal');
+    const cal = page.getByTestId('dp-cal');
     await expect(cal).toBeVisible();
 
     const triggerBefore = await trigger.boundingBox();

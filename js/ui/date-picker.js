@@ -137,6 +137,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
     const prevBtn = document.createElement('button');
     prevBtn.type = 'button';
     prevBtn.className = 'dp-nav-btn';
+    prevBtn.dataset.testid = 'dp-nav-prev';
     prevBtn.textContent = '\u2039';
     prevBtn.setAttribute('aria-label', 'Previous');
     prevBtn.addEventListener('mousedown', e => { e.preventDefault(); onPrev(); });
@@ -144,6 +145,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
     const lbl = document.createElement('button');
     lbl.type = 'button';
     lbl.className = 'dp-month-lbl';
+    lbl.dataset.testid = 'dp-month-lbl';
     lbl.textContent = labelText;
     lbl.disabled = !onLabelClick;
     if (onLabelClick) lbl.addEventListener('mousedown', e => { e.preventDefault(); onLabelClick(); });
@@ -151,6 +153,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
     const nextBtn = document.createElement('button');
     nextBtn.type = 'button';
     nextBtn.className = 'dp-nav-btn';
+    nextBtn.dataset.testid = 'dp-nav-next';
     nextBtn.textContent = '\u203a';
     nextBtn.setAttribute('aria-label', 'Next');
     nextBtn.addEventListener('mousedown', e => { e.preventDefault(); onNext(); });
@@ -170,6 +173,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
 
     const grid  = document.createElement('div');
     grid.className = 'dp-grid dp-grid--4col';
+    grid.dataset.testid = 'dp-grid-4col';
     const todayY = new Date().getFullYear();
     const selY   = withTime ? _pendY : (_parseISO(_value)?.y ?? null);
 
@@ -179,6 +183,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
         + (y === todayY ? ' dp-cell--today' : '')
         + (y === selY   ? ' dp-cell--sel'   : '');
       cell.textContent = y;
+      cell.dataset.testid = 'dp-cell';
       cell.addEventListener('mousedown', e => {
         e.preventDefault();
         _viewY   = y;
@@ -199,6 +204,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
 
     const grid  = document.createElement('div');
     grid.className = 'dp-grid dp-grid--4col';
+    grid.dataset.testid = 'dp-grid-4col';
     const today = new Date();
     const selParsed = withTime
       ? (_pendY !== null ? { y: _pendY, m: _pendM } : null)
@@ -212,6 +218,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
         + (isToday ? ' dp-cell--today' : '')
         + (isSel   ? ' dp-cell--sel'   : '');
       cell.textContent = label;
+      cell.dataset.testid = 'dp-cell';
       cell.addEventListener('mousedown', e => {
         e.preventDefault();
         _viewM   = m;
@@ -273,6 +280,7 @@ export function createDatePicker({ value = '', onChange, className = '', testid,
         + (isToday ? ' dp-day--today' : '')
         + (isSel   ? ' dp-day--sel'   : '');
       cell.textContent = d;
+      cell.dataset.testid = 'dp-day';
       const _y = y, _m = m, _d = d;
       cell.addEventListener('mousedown', e => {
         e.preventDefault();

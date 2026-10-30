@@ -22,6 +22,7 @@
 //   saveFormatModal          save-format modal backdrop
 //   saveFormatModalApply     Apply button in save-format modal
 //   prompt-save              confirm button in the save prompt
+//   validate-export-btn  Export / Export anyway button of the validate modal
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -55,7 +56,7 @@ async function exportFHIR(page) {
   // opens in export mode — click "Export anyway" to proceed.
   const modal = page.locator('[data-testid="validateModal"]');
   await expect(modal).toBeVisible();
-  await modal.locator('.btn-fhir-export').click();
+  await modal.getByTestId('validate-export-btn').click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByTestId('prompt-save').click(),

@@ -12,6 +12,8 @@
 //   meta-replaces-add-btn    Add URL button
 //   metadataModalApply       (id) Apply button
 //   metadataModalCancel      (id) Cancel button
+//   meta-narrative-div   raw narrative div <pre> in metadata modal
+//   clearConfirmModal    Clear-questionnaire confirm modal backdrop
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -41,7 +43,7 @@ test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
   test('narrative div block is visible below the status row', async ({ page }) => {
     await loadFixture(page);
     await openModal(page);
-    const pre = page.locator('.meta-modal-narrative');
+    const pre = page.getByTestId('meta-narrative-div');
     await expect(pre).toBeVisible();
     await expect(pre).toContainText('<div xmlns');
     await page.locator('[data-testid="metadataModalCancel"]').click();
@@ -80,7 +82,7 @@ test.describe('metadata modal — Narrative (Questionnaire.text)', () => {
   test('text field is auto-generated (not absent) in export after form clear', async ({ page }) => {
     await loadFixture(page);
     await page.getByTestId('clear-form-btn').click();
-    await page.waitForSelector('.clear-confirm-backdrop');
+    await page.getByTestId('clearConfirmModal').waitFor();
     await page.getByTestId('clear-confirm-clear-btn').click();
     await page.getByTestId('add-root-group-btn').click();
     await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();

@@ -6,6 +6,7 @@
 // ── data-testid registry ────────────────────────────────────────────────────
 //   oauth-login-banner-FHIR_BASE        — the banner itself
 //   oauth-login-banner-login-FHIR_BASE  — its "Log in" button
+//   oauth-login-banner-dismiss-FHIR_BASE  dismiss button of the FHIR_BASE re-login banner
 // ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -41,7 +42,7 @@ test.describe('OAuth re-login banner', () => {
     await expect(banner).toContainText(/FHIR server/i);
     await expect(banner).toContainText(/expired/i);
 
-    await page.locator('[data-testid="oauth-login-banner-FHIR_BASE"] .oauth-login-banner-dismiss').click();
+    await page.getByTestId('oauth-login-banner-dismiss-FHIR_BASE').click();
     await expect(banner).toBeHidden();
   });
 

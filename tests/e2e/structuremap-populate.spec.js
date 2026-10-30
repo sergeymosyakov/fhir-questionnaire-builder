@@ -8,6 +8,7 @@
 //   structureMapPopulate                      — modal testid
 //   structuremap-populate-patient-ref-input    — patient ref input in modal
 //   meta-source-structure-map                 — Properties modal field
+//   structureMapPopulateApply  StructureMap Populate modal Apply button
 
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
@@ -84,7 +85,7 @@ test.describe('StructureMap Population', () => {
     await openDropdownItem(page, 'answers-btn', 'structuremap-populate-btn');
     const input = page.getByTestId('structuremap-populate-patient-ref-input');
     await input.fill('Patient/test-123');
-    await page.locator('[data-testid="structureMapPopulate"] .modal-btn--apply').click();
+    await page.getByTestId('structureMapPopulateApply').click();
     const detail = await page.evaluate(() => window.__smPopulateDetail);
     expect(detail?.patientRef).toBe('Patient/test-123');
   });
@@ -100,7 +101,7 @@ test.describe('StructureMap Population', () => {
     await openDropdownItem(page, 'answers-btn', 'structuremap-populate-btn');
     const input = page.getByTestId('structuremap-populate-patient-ref-input');
     await input.fill('98765');
-    await page.locator('[data-testid="structureMapPopulate"] .modal-btn--apply').click();
+    await page.getByTestId('structureMapPopulateApply').click();
     const detail = await page.evaluate(() => window.__smPopulateDetail);
     expect(detail?.patientRef).toBe('Patient/98765');
   });

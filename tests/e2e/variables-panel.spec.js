@@ -12,6 +12,8 @@
 //   variablesModalCancel  Cancel button
 //   variablesModalApply   Apply button
 //   variables-add-btn     "+ Add Variable" button inside the modal body
+//   variables-name-input-  variable name input (suffix = row index)
+//   variables-expr-input-  variable expression textarea (suffix = row index)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -107,7 +109,7 @@ test.describe('Variables modal — open / close', () => {
     await expect(variablesModalBody(page)).toBeVisible();
     await expect(variablesAddBtn(page)).toBeVisible();
     // No variable rows on a fresh questionnaire
-    await expect(variablesModalBody(page).locator('input.variables-name-input')).toHaveCount(0);
+    await expect(variablesModalBody(page).locator('[data-testid^="variables-name-input-"]')).toHaveCount(0);
   });
 });
 
@@ -125,18 +127,18 @@ test.describe('Variables modal — draft pattern', () => {
 
     // Fresh questionnaire has no variables — baseline row count is 0.
     await variablesEditBtn(page).click();
-    const rowsBefore = await variablesModalBody(page).locator('input.variables-name-input').count();
+    const rowsBefore = await variablesModalBody(page).locator('[data-testid^="variables-name-input-"]').count();
     await variablesModalCancel(page).click();
 
     // Open again and add a new named variable, then cancel
     await variablesEditBtn(page).click();
     await variablesAddBtn(page).click();
-    await variablesModalBody(page).locator('input.variables-name-input').last().fill('tempVar');
+    await variablesModalBody(page).locator('[data-testid^="variables-name-input-"]').last().fill('tempVar');
     await variablesModalCancel(page).click();
 
     // Re-open: row count must be unchanged
     await variablesEditBtn(page).click();
-    const rowsAfter = await variablesModalBody(page).locator('input.variables-name-input').count();
+    const rowsAfter = await variablesModalBody(page).locator('[data-testid^="variables-name-input-"]').count();
     expect(rowsAfter).toBe(rowsBefore);
   });
 
@@ -146,9 +148,9 @@ test.describe('Variables modal — draft pattern', () => {
     await variablesAddBtn(page).click();
 
     // Fill the last row (the newly added one)
-    const nameInput = variablesModalBody(page).locator('input.variables-name-input').last();
+    const nameInput = variablesModalBody(page).locator('[data-testid^="variables-name-input-"]').last();
     await nameInput.fill('myVar');
-    const exprInput = variablesModalBody(page).locator('textarea.variables-expr-input').last();
+    const exprInput = variablesModalBody(page).locator('[data-testid^="variables-expr-input-"]').last();
     await exprInput.fill('%resource.id');
 
     await variablesModalApply(page).click();
@@ -164,12 +166,12 @@ test.describe('Variables modal — draft pattern', () => {
     await freshStartWithGroup(page);
     await variablesEditBtn(page).click();
 
-    const rowsBefore = await variablesModalBody(page).locator('input.variables-name-input').count();
+    const rowsBefore = await variablesModalBody(page).locator('[data-testid^="variables-name-input-"]').count();
 
     await variablesAddBtn(page).click();
-    await variablesModalBody(page).locator('input.variables-name-input').last().fill('varA');
+    await variablesModalBody(page).locator('[data-testid^="variables-name-input-"]').last().fill('varA');
     await variablesAddBtn(page).click();
-    await variablesModalBody(page).locator('input.variables-name-input').last().fill('varB');
+    await variablesModalBody(page).locator('[data-testid^="variables-name-input-"]').last().fill('varB');
 
     await variablesModalApply(page).click();
     // count badge = total named vars (pre-seeded + 2 new)
@@ -179,18 +181,18 @@ test.describe('Variables modal — draft pattern', () => {
   test('Cancel does not persist the typed variable name', async ({ page }) => {
     await freshStartWithGroup(page);
     await variablesEditBtn(page).click();
-    const rowsBefore = await variablesModalBody(page).locator('input.variables-name-input').count();
+    const rowsBefore = await variablesModalBody(page).locator('[data-testid^="variables-name-input-"]').count();
     await variablesModalCancel(page).click();
 
     // Open, add a row, type a name, then cancel
     await variablesEditBtn(page).click();
     await variablesAddBtn(page).click();
-    await variablesModalBody(page).locator('input.variables-name-input').last().fill('tempVar');
+    await variablesModalBody(page).locator('[data-testid^="variables-name-input-"]').last().fill('tempVar');
     await variablesModalCancel(page).click();
 
     // Re-open — row count must be unchanged (draft discarded)
     await variablesEditBtn(page).click();
-    const rowsAfter = await variablesModalBody(page).locator('input.variables-name-input').count();
+    const rowsAfter = await variablesModalBody(page).locator('[data-testid^="variables-name-input-"]').count();
     expect(rowsAfter).toBe(rowsBefore);
     // 'tempVar' chip must not appear
     await expect(page.locator('[data-testid="variables-card-chips"]')).not.toContainText('%tempVar');
@@ -201,7 +203,7 @@ test.describe('Variables panel — card collapse/expand', () => {
   async function addVariable(page, name) {
     await variablesEditBtn(page).click();
     await variablesAddBtn(page).click();
-    await variablesModalBody(page).locator('input.variables-name-input').first().fill(name);
+    await variablesModalBody(page).locator('[data-testid^="variables-name-input-"]').first().fill(name);
     await variablesModalApply(page).click();
   }
 

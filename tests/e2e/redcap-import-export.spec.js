@@ -24,6 +24,7 @@
 //   validateModalTitle     <span> in validate modal header
 //   validateModalBody      scrollable body
 //   validateModalClose     × close button
+//   node-wrap            wrapper around a builder node and its drop zones
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -116,7 +117,7 @@ test.describe('REDCap CSV import', () => {
     await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 10_000 });
 
     // The demo CSV has 7 forms → 7 root groups (direct children of the tree container)
-    const rootGroups = page.getByTestId('tree-container').locator(':scope > .node-wrap');
+    const rootGroups = page.getByTestId('tree-container').locator(':scope > [data-testid="node-wrap"]');
     await expect(rootGroups).toHaveCount(7, { timeout: 10_000 });
   });
 
@@ -125,7 +126,7 @@ test.describe('REDCap CSV import', () => {
     await loadFHIRJSON(page, SAMPLE_FHIR);
     await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 10_000 });
     // Should have the same 7 groups as the CSV import (direct children of the tree container)
-    const rootGroups = page.getByTestId('tree-container').locator(':scope > .node-wrap');
+    const rootGroups = page.getByTestId('tree-container').locator(':scope > [data-testid="node-wrap"]');
     await expect(rootGroups).toHaveCount(7, { timeout: 10_000 });
   });
 });

@@ -30,10 +30,12 @@ export class AttachmentNode extends ItemNode {
 
     const nameTag = document.createElement('span');
     nameTag.className = 'file-name-tag';
+    nameTag.dataset.testid = 'file-name-tag';
     nameTag.textContent = getValue(node.id) ? getValue(node.id).name : 'No file chosen';
 
     const sizeHint = document.createElement('span');
     sizeHint.className = 'file-size-hint';
+    sizeHint.dataset.testid = 'file-size-hint';
     if (node._maxFileSizeMB !== undefined) sizeHint.textContent = `Max ${node._maxFileSizeMB} MB`;
 
     const mimeHint = document.createElement('span');

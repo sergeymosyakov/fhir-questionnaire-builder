@@ -14,6 +14,13 @@
 //   validateModalTitle  <span> inside modal-header
 //   validateModalBody   scrollable body
 //   validateModalClose  × close button
+//   validate-ok           "No issues found" message
+//   validate-ok-btn       OK / Great! button of the validate modal
+//   validate-issue        issue row in the validate modal
+//   validate-issue-badge  severity badge of an issue row
+//   validate-nav-btn      "go to node" button of an issue row
+//   validate-fix-btn      "Fix first" button of the validate modal
+//   validate-export-btn   Export / Export anyway button of the validate modal
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -99,7 +106,7 @@ test.describe('Validate modal — all good', () => {
     await openValidateModal(page);
 
     await expect(validateModalTitle(page)).toHaveText('Validate — All good', { timeout: 10_000 });
-    await expect(validateModalBody(page).locator('[data-testid="validate-section-local"] .validate-ok')).toBeVisible();
+    await expect(validateModalBody(page).locator('[data-testid="validate-section-local"]').getByTestId('validate-ok')).toBeVisible();
   });
 
   test('"Great!" button closes the modal', async ({ page }) => {
@@ -108,7 +115,7 @@ test.describe('Validate modal — all good', () => {
 
     await openValidateModal(page);
 
-    const greatBtn = page.locator('[data-testid="validateModal"] .btn-fhir');
+    const greatBtn = page.getByTestId('validate-ok-btn');
     await expect(greatBtn).toBeVisible({ timeout: 10_000 });
     await greatBtn.click();
     await expect(validateModal(page)).not.toBeVisible();
@@ -136,9 +143,9 @@ test.describe('Validate modal — issues', () => {
 
     await expect(validateModalTitle(page)).toContainText('Validate');
     // At least one issue row must appear.
-    await expect(validateModalBody(page).locator('.validate-issue').first()).toBeVisible();
+    await expect(validateModalBody(page).getByTestId('validate-issue').first()).toBeVisible();
     // At least one badge must be present.
-    await expect(validateModalBody(page).locator('.validate-issue-badge').first()).toBeVisible();
+    await expect(validateModalBody(page).getByTestId('validate-issue-badge').first()).toBeVisible();
   });
 
   test('"OK" button closes modal when in standalone validate mode', async ({ page }) => {
@@ -159,7 +166,7 @@ test.describe('Validate modal — issues', () => {
 
     await openValidateModal(page);
 
-    const okBtn = page.locator('[data-testid="validateModal"] .btn-fhir');
+    const okBtn = page.getByTestId('validate-ok-btn');
     await expect(okBtn).toBeVisible({ timeout: 10_000 });
     await okBtn.click();
     await expect(validateModal(page)).not.toBeVisible();
@@ -224,7 +231,7 @@ test.describe('Validate modal — navigate to node', () => {
     await openValidateModal(page);
 
     // Click the ↗ nav button on the first issue row.
-    const navBtn = validateModalBody(page).locator('.validate-nav-btn').first();
+    const navBtn = validateModalBody(page).getByTestId('validate-nav-btn').first();
     await expect(navBtn).toBeVisible();
     await navBtn.click();
 
@@ -264,10 +271,8 @@ test.describe('Validate modal — export mode', () => {
     const fixBtn = page.locator('[data-testid="validateModal"]').getByText('Fix first');
     await expect(fixBtn).toBeVisible({ timeout: 10_000 });
 
-    const buttons = page.locator('[data-testid="validateModal"] .btn-fhir');
-    const texts = await buttons.allInnerTexts();
-    expect(texts).toContain('Fix first');
-    expect(texts).toContain('Export anyway');
+    await expect(page.getByTestId('validate-fix-btn')).toHaveText('Fix first');
+    await expect(page.getByTestId('validate-export-btn')).toHaveText('Export anyway');
   });
 
   test('"Fix first" button in export mode closes the modal without exporting', async ({ page }) => {

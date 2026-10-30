@@ -58,6 +58,7 @@ export function createOptionsEditor({ rows = [], onchange = () => {}, testidPref
     if (_rows.length === 0) {
       const empty = document.createElement('div');
       empty.className   = 'opt-editor__empty';
+      empty.dataset.testid = 'opt-editor-empty';
       empty.textContent = 'No options yet — click "+ Add option" below.';
       list.appendChild(empty);
       return;

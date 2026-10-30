@@ -4,6 +4,7 @@
 // hidden items.
 //
 // Run: npx playwright test tests/e2e/view-options.spec.js
+//   right-panel-body     scrolling body of the right panel
 
 import { test, expect } from '@playwright/test';
 
@@ -82,7 +83,7 @@ test.describe('View Options menu interaction', () => {
     await expect(viewMenu(page)).toBeVisible();
     
     // Click somewhere outside
-    await page.locator('.right-panel-body').click();
+    await page.getByTestId('right-panel-body').click();
     await expect(viewMenu(page)).toBeHidden();
   });
 });

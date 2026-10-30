@@ -17,6 +17,8 @@
 //   add-root-group-btn           add root group button
 //   fhir-file-input              hidden file input for loading FHIR JSON
 //   type-select                  item type select inside Answer Type modal
+//   notif-box-warn       warning toast box
+//   notif-body-warn      warning toast body
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -40,12 +42,12 @@ async function selectVersion(page, versionId) {
 
 /** Returns the visible warning toast backdrop (notif--warn). */
 function warnToast(page) {
-  return page.locator('.notif-backdrop .notif--warn');
+  return page.getByTestId('notif-box-warn');
 }
 
 /** Returns the body text of the visible warning toast. */
 function warnToastBody(page) {
-  return page.locator('.notif-backdrop .notif--warn .modal-body');
+  return page.getByTestId('notif-body-warn');
 }
 
 /** Dismiss the warning toast by pressing Enter. */

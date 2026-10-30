@@ -4,8 +4,11 @@
 //
 // data-testid registry: preview-placeholder-docs-link (Quick tour link in the
 //                        empty-preview placeholder)
-// Selectors used: #docSidebar, .doc-nav-link, #docContent, #docSearch,
-//                 .doc-placeholder; app opens docs via ⋯ More → Docs (docs-page-btn)
+// Opens docs via ⋯ More → Docs (docs-page-btn).
+//   doc-sidebar / doc-content / doc-search   sidebar nav, article, search input
+//   doc-nav-section      docs sidebar section heading
+//   doc-nav-link         docs sidebar page link
+//   doc-placeholder      docs page placeholder/not-found paragraph
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -13,16 +16,16 @@ import { test, expect } from '@playwright/test';
 test.describe('documentation portal', () => {
   test('loads and renders the first page from Markdown', async ({ page }) => {
     await page.goto('/docs.html');
-    await expect(page.locator('.doc-nav-section', { hasText: 'Getting Started' })).toBeVisible();
+    await expect(page.getByTestId('doc-nav-section').filter({ hasText: 'Getting Started' })).toBeVisible();
     await expect(page.getByTestId('doc-content').locator('h1')).toHaveText('What is this?');
     // Sidebar marks the active page.
-    await expect(page.locator('.doc-nav-link--active')).toHaveText('What is this?');
+    await expect(page.getByTestId('doc-nav-link').filter({ hasText: 'What is this?' })).toHaveText('What is this?');
   });
 
   test('sidebar search filters pages by title', async ({ page }) => {
     await page.goto('/docs.html');
     await page.fill('[data-testid="doc-search"]', 'translate');
-    const visible = page.getByTestId('doc-sidebar').locator('li:not(.doc-hidden) .doc-nav-link');
+    const visible = page.getByTestId('doc-sidebar').getByTestId('doc-nav-link').and(page.locator(':visible'));
     await expect(visible).toHaveCount(1);
     await expect(visible).toHaveText('Translate a questionnaire');
   });
@@ -30,7 +33,7 @@ test.describe('documentation portal', () => {
   test('an unknown page id shows a not-found placeholder', async ({ page }) => {
     await page.goto('/docs.html#/no-such-page');
     await expect(page.getByTestId('doc-content').locator('h1')).toHaveText('Page not found');
-    await expect(page.locator('.doc-placeholder')).toBeVisible();
+    await expect(page.getByTestId('doc-placeholder')).toBeVisible();
   });
 
   test('the ⋯ More menu links to the docs portal', async ({ page }) => {

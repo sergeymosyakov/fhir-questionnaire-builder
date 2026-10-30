@@ -19,6 +19,7 @@
 //   display-control-select    the Display control dropdown in the Answer Type modal
 //   answerTypeModalApply      Apply button
 //   export-btn / export-quest-item / saveFormatModalApply / prompt-save — export flow
+//   rich-tooltip         rich tooltip popup
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -66,7 +67,7 @@ test.describe('flyover — import render', () => {
     await loadFixture(page);
     const marker = page.locator('[data-preview-id="flyover-note"]').getByTestId('display-flyover');
     await marker.hover();
-    const tip = page.locator('.rich-tooltip');
+    const tip = page.getByTestId('rich-tooltip');
     await expect(tip).toBeVisible({ timeout: 5_000 });
     await expect(tip).toContainText('government-issued ID');
   });

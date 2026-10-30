@@ -12,6 +12,7 @@
 //   min-value-input         Min field in Answer Type modal numeric section
 //   max-value-input         Max field in Answer Type modal numeric section
 //   slider-step-input       Step field in Answer Type modal (visible only when slider-toggle is checked)
+//   validate-export-btn  Export / Export anyway button of the validate modal
 
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
@@ -243,7 +244,7 @@ test.describe('sliderStepValue — R4 decimal constraint', () => {
     // Validate modal opens because of the decimal-step warning — click Export anyway
     const modal = page.locator('[data-testid="validateModal"]');
     await modal.waitFor({ state: 'visible', timeout: 5_000 });
-    await page.locator('[data-testid="validateModal"] .btn-fhir-export').click();
+    await page.getByTestId('validate-export-btn').click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
       page.getByTestId('prompt-save').click(),

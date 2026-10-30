@@ -33,9 +33,11 @@ GroupNode.prototype.buildBuilder = function () {
 
   const wrapper = document.createElement('div');
   wrapper.className = 'node-wrap';
+  wrapper.dataset.testid = 'node-wrap';
 
   const div = document.createElement('div');
   div.className = 'node node-group';
+  div.dataset.testid = 'node-group';
   div.dataset.nodeId = node.id;
   node._initNavListener(div);
 
@@ -300,9 +302,11 @@ ItemNode.prototype.buildBuilder = function () {
 
   const wrapper = document.createElement('div');
   wrapper.className = 'node-wrap';
+  wrapper.dataset.testid = 'node-wrap';
 
   const div = document.createElement('div');
   div.className = 'node node-item';
+  div.dataset.testid = 'node-item';
   div.dataset.nodeId = node.id;
   node._initNavListener(div);
 

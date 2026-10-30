@@ -19,6 +19,7 @@
 //   node-paste-before-btn  "Paste before" gear-menu item (disabled until copy)
 //   node-paste-after-btn   "Paste after" gear-menu item (disabled until copy)
 //   node-title-display     read-only title span on each node
+//   node-wrap            wrapper around a builder node and its drop zones
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -98,12 +99,12 @@ test.describe('paste after', () => {
     await gearAction(page, '[data-node-id="1"]', 'group-add-btn', 'node-copy-btn');
 
     // Count nodes before paste
-    const before = await page.locator('[data-testid="tree-container"] > .node-wrap').count();
+    const before = await page.locator('[data-testid="tree-container"] > [data-testid="node-wrap"]').count();
 
     // Paste after group "1"
     await gearAction(page, '[data-node-id="1"]', 'group-add-btn', 'node-paste-after-btn');
 
-    const after = await page.locator('[data-testid="tree-container"] > .node-wrap').count();
+    const after = await page.locator('[data-testid="tree-container"] > [data-testid="node-wrap"]').count();
     expect(after).toBe(before + 1);
   });
 

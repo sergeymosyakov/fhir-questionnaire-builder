@@ -19,6 +19,7 @@
 //   node-picker-search        search input in Node Picker
 //   node-picker-confirm       "Copy to selected (N)" confirm button
 //   node-picker-cb-<id>       checkbox for node with given id
+//   vis-cond-row-        Show When condition row (suffix = index)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -238,7 +239,7 @@ test.describe('Copy to — apply behaviour', () => {
     await page.getByTestId('showWhenModalCancel').click();
 
     await openShowWhenModal(page, '1.2');
-    await expect(modalBody(page).locator('.vis-cond-card, .vis-cond-row').first()).toBeVisible();
+    await expect(modalBody(page).locator('[data-testid^="vis-cond-row-"]').first()).toBeVisible();
   });
 
   test('source node conditions are not affected by Copy to', async ({ page }) => {
@@ -254,7 +255,7 @@ test.describe('Copy to — apply behaviour', () => {
     await pickerConfirm(page).click();
 
     // Source modal still shows the condition
-    await expect(modalBody(page).locator('.vis-cond-card, .vis-cond-row').first()).toBeVisible();
+    await expect(modalBody(page).locator('[data-testid^="vis-cond-row-"]').first()).toBeVisible();
   });
 });
 

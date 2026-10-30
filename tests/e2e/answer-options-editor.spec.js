@@ -20,6 +20,7 @@
 //   opt-rm-{i}          Remove button for row i
 //   export-btn          toolbar Export dropdown
 // export-quest-item    "Questionnaire…" item in export dropdown (opens saveFormatModal)
+//   opt-editor-empty     empty-state message of the answer options editor
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -96,8 +97,8 @@ test.describe('answer options editor — pre-population', () => {
     await page.getByTestId('opt-rm-2').click();
     await page.getByTestId('opt-rm-1').click();
     await page.getByTestId('opt-rm-0').click();
-    await expect(page.locator('.opt-editor__empty')).toBeVisible();
-    await expect(page.locator('.opt-editor__empty')).toContainText('No options yet');
+    await expect(page.getByTestId('opt-editor-empty')).toBeVisible();
+    await expect(page.getByTestId('opt-editor-empty')).toContainText('No options yet');
   });
 });
 
@@ -129,7 +130,7 @@ test.describe('answer options editor — add/remove', () => {
     await page.getByTestId('opt-rm-0').click();
     await page.getByTestId('opt-add-btn').click();
     await page.getByTestId('opt-rm-0').click();
-    await expect(page.locator('.opt-editor__empty')).toBeVisible();
+    await expect(page.getByTestId('opt-editor-empty')).toBeVisible();
   });
 });
 

@@ -4,6 +4,8 @@
 // Uses widget-demo.html (raw-ESM dogfood: annual-health-check in patient mode).
 //
 // Run: npx playwright test tests/e2e/widget-renderer.spec.js
+//   explain-row          row in the Expression Explain modal
+//   rich-tooltip         rich tooltip popup
 
 import { test, expect } from '@playwright/test';
 
@@ -124,7 +126,7 @@ test.describe('QuestionnaireRenderer widget', () => {
     await badge.click();
     const modal = page.locator('[data-testid="explainModal"]');
     await expect(modal).toBeVisible();
-    await expect(modal.locator('.explain-row').first()).toBeVisible();
+    await expect(modal.getByTestId('explain-row').first()).toBeVisible();
     // Modal structure comes from modals.css — must be a real centered overlay,
     // not an unstyled block (regression guard: modals.css in the widget manifest).
     await expect(modal).toHaveCSS('position', 'fixed');
@@ -137,7 +139,7 @@ test.describe('QuestionnaireRenderer widget', () => {
     await expect(tipEl).toBeVisible({ timeout: 10_000 });
     // Trigger the document-delegated tooltip (real hover is flaky headless).
     await tipEl.dispatchEvent('mouseover');
-    const tip = page.locator('.rich-tooltip');
+    const tip = page.getByTestId('rich-tooltip');
     await expect(tip).toBeVisible();
     await expect(tip).not.toBeEmpty();
   });

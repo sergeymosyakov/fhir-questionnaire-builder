@@ -16,6 +16,12 @@
 //   showWhenModalBody    (id) modal body
 //   showWhenModalApply   (id) Apply button
 //   preview-condition-hint  visibility-condition badge in the preview row
+//   vis-add-condition-btn  "+ Add condition" button
+//   vis-cond-q-trigger-0   question picker trigger of the 1st condition row
+//   vis-cond-q-drop        question picker dropdown
+//   vis-cond-q-opt-1.1     question picker option for linkId 1.1
+//   vis-cond-val-inp-0     answer value input of the 1st condition row
+//   vis-cond-rm-0          remove button of the 1st Show When condition row
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -54,17 +60,17 @@ test.describe('enableWhen (standard)', () => {
     await expect(page.locator('[data-testid="showWhenModal"]')).toBeVisible();
 
     // Add a condition row
-    await page.locator('[data-testid="showWhenModalBody"] .vis-add-btn').click();
+    await page.getByTestId('showWhenModalBody').getByTestId('vis-add-condition-btn').click();
 
     // Open the question picker dropdown
-    await page.locator('[data-testid="showWhenModalBody"] .vis-q-sel-trigger').click();
-    await page.waitForSelector('.vis-q-sel-drop', { timeout: 3000 });
+    await page.getByTestId('vis-cond-q-trigger-0').click();
+    await page.getByTestId('vis-cond-q-drop').waitFor({ timeout: 3000 });
 
     // Select "1.1 — Trigger" from the portal dropdown
-    await page.locator('.vis-q-sel-opt[data-id="1.1"]').click();
+    await page.getByTestId('vis-cond-q-opt-1.1').click();
 
     // Operator defaults to "=" for text type; fill the answer value
-    await page.locator('[data-testid="showWhenModalBody"] .vis-cond-val-inp').fill('yes');
+    await page.getByTestId('vis-cond-val-inp-0').fill('yes');
 
     // Apply the condition
     await page.locator('[data-testid="showWhenModalApply"]').click();
@@ -108,11 +114,11 @@ test.describe('enableWhen (standard)', () => {
     // Add a condition: 1.1 = yes
     await page.locator('[data-node-id="1.2"]').getByTestId('action-vis').click();
     await expect(page.locator('[data-testid="showWhenModal"]')).toBeVisible();
-    await page.locator('[data-testid="showWhenModalBody"] .vis-add-btn').click();
-    await page.locator('[data-testid="showWhenModalBody"] .vis-q-sel-trigger').click();
-    await page.waitForSelector('.vis-q-sel-drop', { timeout: 3000 });
-    await page.locator('.vis-q-sel-opt[data-id="1.1"]').click();
-    await page.locator('[data-testid="showWhenModalBody"] .vis-cond-val-inp').fill('yes');
+    await page.getByTestId('showWhenModalBody').getByTestId('vis-add-condition-btn').click();
+    await page.getByTestId('vis-cond-q-trigger-0').click();
+    await page.getByTestId('vis-cond-q-drop').waitFor({ timeout: 3000 });
+    await page.getByTestId('vis-cond-q-opt-1.1').click();
+    await page.getByTestId('vis-cond-val-inp-0').fill('yes');
     await page.locator('[data-testid="showWhenModalApply"]').click();
     await expect(page.locator('[data-testid="showWhenModal"]')).not.toBeVisible();
 
@@ -125,7 +131,7 @@ test.describe('enableWhen (standard)', () => {
     // Reopen Show When and remove the condition
     await page.locator('[data-node-id="1.2"]').getByTestId('action-vis').click();
     await expect(page.locator('[data-testid="showWhenModal"]')).toBeVisible();
-    await page.locator('[data-testid="showWhenModalBody"] .vis-cond-rm').click();
+    await page.getByTestId('vis-cond-rm-0').click();
     await page.locator('[data-testid="showWhenModalApply"]').click();
     await expect(page.locator('[data-testid="showWhenModal"]')).not.toBeVisible();
 
@@ -148,11 +154,11 @@ test.describe('enableWhen (standard)', () => {
     await group.getByTestId('group-add-btn').click();
     await page.locator('[data-testid="add-menu-item"]').first().click();
     await page.locator('[data-node-id="1.2"]').getByTestId('action-vis').click();
-    await page.locator('[data-testid="showWhenModalBody"] .vis-add-btn').click();
-    await page.locator('[data-testid="showWhenModalBody"] .vis-q-sel-trigger').click();
-    await page.waitForSelector('.vis-q-sel-drop');
-    await page.locator('.vis-q-sel-opt[data-id="1.1"]').click();
-    await page.locator('[data-testid="showWhenModalBody"] .vis-cond-val-inp').fill('yes');
+    await page.getByTestId('showWhenModalBody').getByTestId('vis-add-condition-btn').click();
+    await page.getByTestId('vis-cond-q-trigger-0').click();
+    await page.getByTestId('vis-cond-q-drop').waitFor();
+    await page.getByTestId('vis-cond-q-opt-1.1').click();
+    await page.getByTestId('vis-cond-val-inp-0').fill('yes');
     await page.locator('[data-testid="showWhenModalApply"]').click();
 
     // No answer yet → hint tooltip should contain audit with ✗ and "(no answer)"

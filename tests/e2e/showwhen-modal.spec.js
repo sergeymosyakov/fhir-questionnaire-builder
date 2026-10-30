@@ -19,6 +19,9 @@
 //   showWhenModalClose    × close button
 //   showWhenModalCancel   Cancel button
 //   showWhenModalApply    Apply button
+//   vis-cond-rm-0         remove button of the 1st Show When condition row
+//   vis-cond-q-trigger-0  question picker trigger of the 1st condition row
+//   vis-cond-q-opt-1.1    question picker option for linkId 1.1
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -201,7 +204,7 @@ test.describe('Show When modal — draft pattern', () => {
 
     // Open again and remove condition
     await actionLink.click();
-    await showWhenModalBody(page).locator('.vis-cond-rm').first().click();
+    await showWhenModalBody(page).getByTestId('vis-cond-rm-0').click();
     await showWhenModalApply(page).click();
 
     await expect(actionLink).not.toHaveClass(/action-edit--active/);
@@ -224,11 +227,11 @@ test.describe('Show When modal — question picker tooltip', () => {
     await openShowWhenModal(page, '1.2');
     await showWhenModalBody(page).getByTestId('vis-add-condition-btn').click();
 
-    const trigger = showWhenModalBody(page).locator('.vis-q-sel-trigger').first();
+    const trigger = showWhenModalBody(page).getByTestId('vis-cond-q-trigger-0');
     await expect(trigger).toBeVisible();
     await trigger.click();
 
-    const opt = page.locator('.vis-q-sel-opt[data-id="1.1"]');
+    const opt = page.getByTestId('vis-cond-q-opt-1.1');
     await expect(opt).toBeVisible();
     await expect(opt).toContainText('First Question');
     const label = (await opt.textContent()).trim();

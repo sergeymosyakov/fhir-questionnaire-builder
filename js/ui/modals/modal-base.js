@@ -98,7 +98,9 @@ export class Modal {
       this.title.dataset.testid    = n + 'Title';
       this.maximizeBtn.dataset.testid = n + 'Maximize';
       this.closeBtn.dataset.testid = n + 'Close';
+      box.dataset.testid           = n + 'Box';
       this.body.dataset.testid     = n + 'Body';
+      this.footer.dataset.testid   = n + 'Footer';
       if (this.cancelBtn) this.cancelBtn.dataset.testid = n + 'Cancel';
       if (this.applyBtn)  this.applyBtn.dataset.testid  = n + 'Apply';
     }
