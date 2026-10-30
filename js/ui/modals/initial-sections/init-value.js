@@ -73,6 +73,7 @@ class InitValueSection extends InitialSection {
       const dp = createDatePicker({
         value:    pending.draftValue || '',
         onChange: v => setDraft(v || undefined),
+        testid:   'initial-date-input',
         className: 'sc-trigger--full',
       });
       ctrl = dp.el;

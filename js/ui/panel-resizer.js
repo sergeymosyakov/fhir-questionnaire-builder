@@ -16,6 +16,8 @@ export class PanelResizer {
   constructor({ storageKey, min = 200, max = () => window.innerWidth * 0.7 }) {
     this._resizer    = document.querySelector('[data-mount="panel-resizer"]');
     this._panel      = document.querySelector('[data-mount="left-panel"]');
+    this._resizer.dataset.testid = 'panel-resizer';
+    this._panel.dataset.testid   = 'left-panel';
     this._storageKey = storageKey;
     this._min        = min;
     this._max        = max;

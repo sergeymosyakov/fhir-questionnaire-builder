@@ -32,10 +32,10 @@ export class SettingsMenu extends DropdownMenu {
 
   _buildMenu() {
     // Initial states: tips/autosave unknown until setHandlers(); validate from prefs
-    this._tipsRow             = this._checkItem('settings-tips-check',              'Tips');
-    this._autosaveRow         = this._checkItem('settings-autosave-check',          'Autosave');
-    this._validateLocalRow    = this._checkItem('settings-validate-local-check',    'Local validation');
-    this._validateExternalRow = this._checkItem('settings-validate-external-check', 'Server validation');
+    this._tipsRow             = this._checkItem('settings-tips-check',              'Tips', 'settings-tips-check');
+    this._autosaveRow         = this._checkItem('settings-autosave-check',          'Autosave', 'settings-autosave-check');
+    this._validateLocalRow    = this._checkItem('settings-validate-local-check',    'Local validation', 'settings-validate-local-check');
+    this._validateExternalRow = this._checkItem('settings-validate-external-check', 'Server validation', 'settings-validate-external-check');
     this._validateAuditRow    = this._checkItem('settings-validate-audit-check',    'Quality audit', 'settings-validate-audit-check');
 
     // Set initial checked states

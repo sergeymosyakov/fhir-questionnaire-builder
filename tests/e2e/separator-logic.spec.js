@@ -11,6 +11,16 @@
 //
 // Separator CSS class: .logic-separator
 // ─────────────────────────────────────────────────────────────────────────────
+//
+// ── data-testid registry ────────────────────────────────────────────────────
+//   loadFormatModal
+//   load-format-select
+//   loadFormatModalApply
+//   add-root-group-btn
+//   csel-drop
+//   load-fhir-btn
+//   load-from-file-item
+// ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
 import path from 'path';
@@ -28,11 +38,6 @@ async function loadFixture(page) {
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
 
   await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
-
-  // Confirm if existing questionnaire is loaded
-  const confirm = page.getByTestId('loadConfirmModal');
-  await confirm.waitFor({ state: 'visible', timeout: 2_000 }).catch(() => {});
-  if (await confirm.isVisible()) await page.getByTestId('load-confirm-proceed-btn').click();
 
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
   await page.getByTestId('load-format-select').click();

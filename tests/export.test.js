@@ -204,8 +204,7 @@ describe('buildFHIRObject — enableWhen', () => {
     }]);
     const ext = q.item[0].extension || [];
     const ewe = ext.find(e => e.url.includes('enableWhenExpression'));
-    expect(ewe).toBeDefined();
-    expect(ewe.valueExpression.expression).toBe('%age > 18');
+    expect(ewe).toEqual({ url: FHIR.enableWhenExpression, valueExpression: { language: 'text/fhirpath', expression: '%age > 18' } });
   });
 
   it('copies enableWhen entries as independent objects', () => {
@@ -231,7 +230,7 @@ describe('buildFHIRObject — constraint', () => {
     }]);
     const ext = q.item[0].extension || [];
     const c = ext.find(e => e.url === FHIR.constraint);
-    expect(c).toBeDefined();
+    expect(c).toMatchObject({ url: FHIR.constraint });
     expect(c.extension.find(e => e.url === 'key')?.valueId).toBe('bmi-ok');
     expect(c.extension.find(e => e.url === 'expression')?.valueString).toBe('%bmi < 50');
     expect(c.extension.find(e => e.url === 'human')?.valueString).toBe('BMI must be less than 50');
@@ -287,8 +286,7 @@ describe('buildFHIRObject — answerOption', () => {
     }]);
     const ext = q.item[0].extension || [];
     const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
-    expect(ic).toBeDefined();
-    expect(ic.valueCodeableConcept.coding[0].code).toBe('check-box');
+    expect(ic).toEqual({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'check-box' }] } });
   });
 
   it('exports atable itemControl for a radio item, not radio-button', () => {
@@ -328,8 +326,7 @@ describe('buildFHIRObject — answerOption', () => {
     }]);
     const ext = q.item[0].extension || [];
     const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
-    expect(ic).toBeDefined();
-    expect(ic.valueCodeableConcept.coding[0].code).toBe('autocomplete');
+    expect(ic).toEqual({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'autocomplete' }] } });
   });
 
   it('exports _itemControl as itemControl extension (flyover on display)', () => {
@@ -338,8 +335,7 @@ describe('buildFHIRObject — answerOption', () => {
     }]);
     const ext = q.item[0].extension || [];
     const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
-    expect(ic).toBeDefined();
-    expect(ic.valueCodeableConcept.coding[0].code).toBe('flyover');
+    expect(ic).toEqual({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'flyover' }] } });
   });
 
   it('exports _itemControl as itemControl extension (header on group)', () => {
@@ -349,8 +345,7 @@ describe('buildFHIRObject — answerOption', () => {
     }]);
     const ext = q.item[0].extension || [];
     const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
-    expect(ic).toBeDefined();
-    expect(ic.valueCodeableConcept.coding[0].code).toBe('header');
+    expect(ic).toEqual({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'header' }] } });
     expect(q.item[0].type).toBe('group');
   });
 
@@ -390,8 +385,7 @@ describe('buildFHIRObject — answerOption', () => {
     }]);
     const ext = q.item[0].extension || [];
     const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
-    expect(ic).toBeDefined();
-    expect(ic.valueCodeableConcept.coding[0].code).toBe('text-area');
+    expect(ic).toEqual({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'text-area' }] } });
   });
 
   it('exports _itemControl as itemControl extension (spinner)', () => {
@@ -400,8 +394,7 @@ describe('buildFHIRObject — answerOption', () => {
     }]);
     const ext = q.item[0].extension || [];
     const ic = ext.find(e => e.url.includes('questionnaire-itemControl'));
-    expect(ic).toBeDefined();
-    expect(ic.valueCodeableConcept.coding[0].code).toBe('spinner');
+    expect(ic).toEqual({ url: FHIR.itemControl, valueCodeableConcept: { coding: [{ system: FHIR.itemControlCS, code: 'spinner' }] } });
   });
 
   it('does not export itemControl when _itemControl is absent and type is select', () => {
@@ -542,7 +535,7 @@ describe('buildFHIRObject — OR group constraint', () => {
     }]);
     const ext = q.item[0].extension || [];
     const orExt = ext.find(e => e.url === FHIR.constraint);
-    expect(orExt).toBeDefined();
+    expect(orExt).toMatchObject({ url: FHIR.constraint });
     const key = orExt.extension.find(e => e.url === 'key')?.valueId;
     expect(key).toMatch(/group-or/);
     const expr = orExt.extension.find(e => e.url === 'expression')?.valueString;
@@ -584,9 +577,7 @@ describe('buildFHIRObject — OR group constraint', () => {
 describe('buildFHIRObject — _renderStyle', () => {
   it('exports _renderStyle as _text rendering-style extension', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _renderStyle: 'color: red; font-weight: bold' }]);
-    expect(q.item[0]._text).toBeDefined();
-    expect(q.item[0]._text.extension[0].url).toContain('rendering-style');
-    expect(q.item[0]._text.extension[0].valueString).toBe('color: red; font-weight: bold');
+    expect(q.item[0]._text).toEqual({ extension: [{ url: FHIR.renderingStyle, valueString: 'color: red; font-weight: bold' }] });
   });
 
   it('omits _text when _renderStyle is empty or absent', () => {
@@ -713,9 +704,8 @@ describe('buildFHIRObject — translations export', () => {
       es: { title: 'Cuestionario', items: {}, opts: {}, ui: {} },
     };
     const q = buildFHIRObject();
-    expect(q._title?.extension).toBeDefined();
-    const ext = q._title.extension.find(e => e.extension?.some(x => x.valueCode === 'es'));
-    expect(ext).toBeTruthy();
+    const ext = q._title?.extension?.find(e => e.extension?.some(x => x.valueCode === 'es'));
+    expect(ext.extension).toContainEqual({ url: 'content', valueString: 'Cuestionario' });
     _questDoc.translations = null;
   });
 
@@ -730,7 +720,8 @@ describe('buildFHIRObject — translations export', () => {
     };
     const q = buildFHIRObject();
     const item = q.item[0];
-    expect(item._text?.extension).toBeDefined();
+    const tr = item._text?.extension?.find(e => e.extension?.some(x => x.valueCode === 'es'));
+    expect(tr.extension).toContainEqual({ url: 'content', valueString: 'Pregunta' });
     _tree.length = 0;
     _questDoc.translations = null;
   });
@@ -750,7 +741,7 @@ describe('buildFHIRObject — translations export', () => {
     const q = buildFHIRObject();
     const UI_TRANS_URL = APP_URL.uiTranslations;
     const uiExt = (q.extension || []).find(e => e.url === UI_TRANS_URL);
-    expect(uiExt).toBeDefined();
+    expect(uiExt).toMatchObject({ url: UI_TRANS_URL });
     const langSub    = uiExt.extension.find(s => s.url === 'lang');
     const stringsSub = uiExt.extension.find(s => s.url === 'strings');
     expect(langSub?.valueCode).toBe('de');
@@ -766,7 +757,7 @@ describe('buildFHIRObject — translations export', () => {
     const q = buildFHIRObject();
     const XHTML_TRANS_URL = APP_URL.xhtmlTranslations;
     const xhtmlExt = (q.extension || []).find(e => e.url === XHTML_TRANS_URL);
-    expect(xhtmlExt).toBeDefined();
+    expect(xhtmlExt).toMatchObject({ url: XHTML_TRANS_URL });
     const strings = JSON.parse(xhtmlExt.extension.find(s => s.url === 'strings').valueString);
     expect(strings.intro).toBe('<p>Text</p>');
     _questDoc.translations = null;
@@ -780,7 +771,7 @@ describe('buildFHIRObject — translations export', () => {
     const q = buildFHIRObject();
     const MD_TRANS_URL = APP_URL.markdownTranslations;
     const mdExt = (q.extension || []).find(e => e.url === MD_TRANS_URL);
-    expect(mdExt).toBeDefined();
+    expect(mdExt).toMatchObject({ url: MD_TRANS_URL });
     const strings = JSON.parse(mdExt.extension.find(s => s.url === 'strings').valueString);
     expect(strings.intro).toBe('**Wichtig**');
     _questDoc.translations = null;
@@ -809,11 +800,9 @@ describe('buildFHIRObject — translations export', () => {
     };
     const q = buildFHIRObject();
     const ao = q.item?.[0]?.answerOption?.find(a => a.valueCoding?.code === 'M');
-    expect(ao?._valueCoding?._display?.extension).toBeDefined();
-    const ext = ao._valueCoding._display.extension.find(e =>
+    const ext = ao?._valueCoding?._display?.extension?.find(e =>
       e.extension?.some(x => x.valueCode === 'de')
     );
-    expect(ext).toBeTruthy();
     expect(ext.extension.find(x => x.url === 'content')?.valueString).toBe('Männlich');
     _tree.length = 0;
     _questDoc.translations = null;

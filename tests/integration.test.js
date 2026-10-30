@@ -1,6 +1,6 @@
 // Integration tests: buildQR + evalConstraints pipeline.
 // Tests the full chain: FHIR Questionnaire → QR → constraint evaluation.
-// Uses a minimal real-like fhirpath mock that evaluates numeric comparisons.
+// Uses the real fhirpath evaluator (tests/helpers/fhirpath-node.js).
 
 import { describe, it, expect } from 'vitest';
 import { buildQR as _buildQR } from '../js/fhir/qr-builder.js';
@@ -14,51 +14,8 @@ const bq = (fhir, vals = {}) =>
 
 const { evalConstraints } = await import('../js/fhir/form-checks.js');
 
-// Minimal fhirpath mock: navigates QR structure and evaluates comparisons.
-// Supports: %resource.repeat(item).where(linkId='X').answer.valueDecimal >= N
-//           %resource.repeat(item).where(linkId='X').answer.valueInteger >= N
-function makeRealFp() {
-  return {
-    evaluate(qr, expr, env) {
-      // Resolve %resource
-      const resource = env?.resource ?? qr;
-
-      // Flatten all items recursively
-      function flatItems(items) {
-        const out = [];
-        for (const fhirItem of (items || [])) {
-          out.push(fhirItem);
-          if (fhirItem.item) out.push(...flatItems(fhirItem.item));
-        }
-        return out;
-      }
-
-      // Pattern: *.repeat(item).where(linkId='X').answer.valueDecimal >= N
-      const m = expr.match(
-        /repeat\(item\)\.where\(linkId='([^']+)'\)\.answer\.(value\w+)\s*(>=|<=|>|<|=)\s*([\d.]+)/
-      );
-      if (m) {
-        const [, linkId, valueKey, op, rawNum] = m;
-        const num = parseFloat(rawNum);
-        const all = flatItems(resource.item || []);
-        const item = all.find(i => i.linkId === linkId);
-        const val = item?.answer?.[0]?.[valueKey];
-        if (val === undefined) return [false];
-        if (op === '>=') return [val >= num];
-        if (op === '<=') return [val <= num];
-        if (op === '>')  return [val >  num];
-        if (op === '<')  return [val <  num];
-        if (op === '=')  return [val === num];
-      }
-
-      if (expr === 'true')  return [true];
-      if (expr === 'false') return [false];
-      return [];
-    }
-  };
-}
-
-const fp = makeRealFp();
+const { loadFhirpath } = await import('./helpers/fhirpath-node.js');
+const fp = loadFhirpath();
 
 // ── decimal constraint ────────────────────────────────────────────────────────
 describe('integration — decimal item constraint', () => {
@@ -71,6 +28,7 @@ describe('integration — decimal item constraint', () => {
 
   it('passes when decimal value satisfies >= constraint', () => {
     const qr = bq(fhir, { '1.1': 5, '1.2': 'x' });
+    expect(qr.item.find(i => i.linkId === '1.1').answer).toEqual([{ valueDecimal: 5 }]);
     const node = {
       constraint: [{
         key: 'min-val', severity: 'error',
@@ -93,6 +51,7 @@ describe('integration — decimal item constraint', () => {
 
   it('fails when valueInteger used for decimal-type item (wrong key)', () => {
     const qr = bq(fhir, { '1.1': 5 });
+    expect(qr.item[0].answer[0]).not.toHaveProperty('valueInteger');
     const node = {
       constraint: [{
         key: 'wrong-key', severity: 'error',
@@ -110,6 +69,7 @@ describe('integration — integer item constraint', () => {
 
   it('passes when integer value satisfies constraint', () => {
     const qr = bq(fhir, { 'q-months': 6 });
+    expect(qr.item[0].answer).toEqual([{ valueInteger: 6 }]);
     const node = {
       constraint: [{
         key: 'diet-months', severity: 'error',
@@ -158,6 +118,7 @@ describe('integration — nested item constraint', () => {
       }],
     };
     const qr = bq(fhir, { nested: 10 });
+    expect(qr.item[0].item[0].answer).toEqual([{ valueDecimal: 10 }]);
     const node = {
       constraint: [{
         key: 'c', severity: 'error',

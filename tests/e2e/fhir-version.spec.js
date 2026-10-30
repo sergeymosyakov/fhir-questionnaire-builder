@@ -21,6 +21,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const R5_FIXTURE = path.resolve('sampledata/r5-demo.fhir.json');
 
@@ -135,7 +136,7 @@ test.describe('auto-detect version on import', () => {
     expect(await getSelectedVersion(page)).toBe('R4');
 
     // Load the R5 fixture via the hidden file input
-    await page.locator('[data-testid="fhir-file-input"]').setInputFiles(R5_FIXTURE);
+    await loadFixtureFile(page, R5_FIXTURE);
 
     // Wait for the questionnaire to load (one of the items should appear)
     await expect(page.locator('[data-preview-id="preferred-drink"]')).toBeVisible({ timeout: 8_000 });
@@ -167,7 +168,7 @@ test.describe('R5 export stamps builder-target-version', () => {
     await expect(page.getByTestId('fhir-version-select')).toHaveAttribute('data-value', 'R5');
 
     // Load the R5 fixture which has choice+answerConstraint items
-    await page.locator('[data-testid="fhir-file-input"]').setInputFiles(R5_FIXTURE);
+    await loadFixtureFile(page, R5_FIXTURE);
     await expect(page.locator('[data-preview-id="preferred-drink"]')).toBeVisible({ timeout: 8_000 });
 
     // Version should still be R5 after load

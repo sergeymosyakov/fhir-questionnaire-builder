@@ -19,11 +19,18 @@
 //   csel-drop              dropdown panel of any custom select
 //   answerTypeModal        Answer Type modal backdrop
 //   answerTypeModalApply   Apply button in the Answer Type modal
+//   saveFormatModalApply
+//   prompt-save
+//   add-root-group-btn
+//   saveFormatModal
+//   export-btn
+//   export-quest-item
 
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'node:path';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/column-count.fhir.json');
 const CC_URL  = FHIR.columnCount;
@@ -32,7 +39,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q-cols"]')).toBeVisible({ timeout: 8_000 });
 }
 

@@ -67,7 +67,8 @@ export class StatusBadge {
     const constraintsAllOk  = constraintItems.every(r => evalConstraints(r.node, fp, qr, cEnv));
 
     const rangeItems = activeItems.filter(r =>
-      !isMandatory(r.node) && (r.node._minValue !== undefined || r.node._maxValue !== undefined)
+      !isMandatory(r.node) && (r.node._minValue !== undefined || r.node._maxValue !== undefined ||
+        r.node._minLength || r.node._regex)
     );
     const hasRange   = rangeItems.length > 0;
     const rangeAllOk = rangeItems.every(r => calcFormOk(r.node, store));

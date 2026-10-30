@@ -21,7 +21,7 @@ describe('importQRAnswers — input validation', () => {
   it('rejects null input', () => {
     const r = importQRAnswers(null, {}, []);
     expect(r.ok).toBe(false);
-    expect(r.error).toBeDefined();
+    expect(r.error).toBe('Not a QuestionnaireResponse (resourceType: unknown)');
   });
 
   it('rejects undefined input', () => {

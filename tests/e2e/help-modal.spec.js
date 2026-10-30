@@ -97,8 +97,8 @@ test.describe('help modal — iframe content', () => {
     await page.getByTestId('more-btn').click();
     await page.getByTestId('help-btn').click();
     const frame = page.frameLocator('[data-testid="helpModalBody"] iframe.help-iframe');
-    await frame.locator('#helpSearch').fill('linkId');
-    await expect(frame.locator('#helpTable tbody tr:not(.help-cat-sep)')).toHaveCount(1);
+    await frame.getByTestId('help-search').fill('linkId');
+    await expect(frame.getByTestId('help-table').locator('tbody tr:not(.help-cat-sep)')).toHaveCount(1);
   });
 
   test('help page table has rows for known fields', async ({ page }) => {
@@ -106,8 +106,8 @@ test.describe('help modal — iframe content', () => {
     await page.getByTestId('more-btn').click();
     await page.getByTestId('help-btn').click();
     const frame = page.frameLocator('[data-testid="helpModalBody"] iframe.help-iframe');
-    await expect(frame.locator('#helpTable tbody')).toBeVisible({ timeout: 8_000 });
-    const rows = frame.locator('#helpTable tbody tr:not(.help-cat-sep)');
+    await expect(frame.getByTestId('help-table').locator('tbody')).toBeVisible({ timeout: 8_000 });
+    const rows = frame.getByTestId('help-table').locator('tbody tr:not(.help-cat-sep)');
     const count = await rows.count();
     expect(count).toBeGreaterThanOrEqual(30);
   });

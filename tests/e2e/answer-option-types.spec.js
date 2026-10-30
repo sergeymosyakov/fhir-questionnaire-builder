@@ -16,6 +16,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('sampledata/answer-option-types-demo.fhir.json');
 
@@ -23,7 +24,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   // q-coding is the first item in the first group
   await expect(page.locator('[data-node-id="q-coding"]')).toBeVisible({ timeout: 8_000 });
 }
@@ -31,9 +32,9 @@ async function loadFixture(page) {
 async function getExportedJSON(page) {
   await page.getByTestId('preview-mode-btn').click();
   await page.getByTestId('preview-mode-json').click();
-  await expect(page.locator('#fhirJsonView')).toBeVisible();
-  await expect(page.locator('#fhirJsonView')).toContainText('resourceType', { timeout: 8_000 });
-  const raw = await page.locator('#fhirJsonView').textContent();
+  await expect(page.getByTestId('fhir-json-view')).toBeVisible();
+  await expect(page.getByTestId('fhir-json-view')).toContainText('resourceType', { timeout: 8_000 });
+  const raw = await page.getByTestId('fhir-json-view').textContent();
   return JSON.parse(raw);
 }
 

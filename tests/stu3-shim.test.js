@@ -123,7 +123,7 @@ describe('normaliseSTU3 — option[] → answerOption[]', () => {
       item: [{ linkId: 'q1', type: 'choice', option: [{ valueCoding: { code: 'b' } }] }],
     }]);
     const result = normaliseSTU3(json);
-    expect(result.item[0].item[0].answerOption).toBeDefined();
+    expect(result.item[0].item[0].answerOption).toEqual([{ valueCoding: { code: 'b' } }]);
     expect(result.item[0].item[0].option).toBeUndefined();
   });
 });

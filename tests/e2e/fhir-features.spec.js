@@ -25,6 +25,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/fhir-features.fhir.json');
 
@@ -38,7 +39,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="readonly-text"]')).toBeVisible({ timeout: 8_000 });
 }
 
@@ -266,6 +267,12 @@ test.describe('ordinalValue display', () => {
   });
 });
 
+async function commitInput(page) {
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await page.getByTestId('preview-search-input').click();
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+}
+
 // ── 5. minLength ──────────────────────────────────────────────────────────────
 
 test.describe('minLength enforcement', () => {
@@ -280,6 +287,7 @@ test.describe('minLength enforcement', () => {
     const textarea = page.locator('[data-preview-id="string-with-min"] textarea');
     await textarea.click();
     await textarea.fill('Hi');
+    // Tab: the minLength error is blur-driven, which is what this test covers
     await textarea.press('Tab');
     const err = page.locator('[data-preview-id="string-with-min"] [data-testid="minlength-err"]');
     await expect(err).toBeVisible();
@@ -325,7 +333,7 @@ test.describe('maxDecimalPlaces', () => {
     const row = page.locator('[data-preview-id="decimal-places"]');
     const input = row.locator('input[type="number"]');
     await input.fill('72.123');
-    await input.press('Tab');
+    await commitInput(page);
     const err = row.locator('[data-testid="numeric-err"]');
     await expect(err).toBeVisible();
     await expect(err).toContainText('Max 2 decimal place');
@@ -336,7 +344,7 @@ test.describe('maxDecimalPlaces', () => {
     const row = page.locator('[data-preview-id="decimal-places"]');
     const input = row.locator('input[type="number"]');
     await input.fill('72.12');
-    await input.press('Tab');
+    await commitInput(page);
     const err = row.locator('[data-testid="numeric-err"]');
     await expect(err).toBeHidden();
   });
@@ -346,7 +354,7 @@ test.describe('maxDecimalPlaces', () => {
     const row = page.locator('[data-preview-id="decimal-places"]');
     const input = row.locator('input[type="number"]');
     await input.fill('72');
-    await input.press('Tab');
+    await commitInput(page);
     const err = row.locator('[data-testid="numeric-err"]');
     await expect(err).toBeHidden();
   });

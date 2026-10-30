@@ -50,6 +50,7 @@ class PasteWarningModal extends Modal {
   _renderSection(heading, hint, rows) {
     const h = document.createElement('h4');
     h.className = 'paste-warn-heading';
+    h.dataset.testid = 'paste-warn-heading';
     h.textContent = heading;
     this.body.appendChild(h);
 
@@ -60,6 +61,7 @@ class PasteWarningModal extends Modal {
 
     const table = document.createElement('table');
     table.className = 'paste-warn-table';
+    table.dataset.testid = 'paste-warn-table';
 
     const thead = document.createElement('thead');
     thead.innerHTML = '<tr><th>linkId</th><th>Type</th><th>Expression</th></tr>';
@@ -68,6 +70,7 @@ class PasteWarningModal extends Modal {
     const tbody = document.createElement('tbody');
     for (const { linkId, type, expr } of rows) {
       const tr = document.createElement('tr');
+      tr.dataset.testid = 'paste-warn-row';
       const tdId   = document.createElement('td');
       const tdType = document.createElement('td');
       const tdExpr = document.createElement('td');

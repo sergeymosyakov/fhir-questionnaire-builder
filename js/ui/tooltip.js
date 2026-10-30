@@ -32,6 +32,7 @@ function _getEl() {
   if (!_el) {
     _el = document.createElement('div');
     _el.className = 'rich-tooltip';
+    _el.dataset.testid = 'rich-tooltip';
     _el.setAttribute('aria-hidden', 'true');
     // Close button — only visible in bottom-sheet mode (CSS controls display).
     const closeBtn = document.createElement('button');

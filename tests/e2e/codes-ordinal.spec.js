@@ -29,6 +29,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { SNOMED_URL } from '../../js/fhir/urls/snomed.js';
 import { LOINC_URL } from '../../js/fhir/urls/loinc.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/codes-ordinal.fhir.json');
 
@@ -42,7 +43,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   // Wait for first node to appear in builder
   await expect(page.locator('[data-testid="node-type-label"]').first()).toBeVisible({ timeout: 8_000 });
 }

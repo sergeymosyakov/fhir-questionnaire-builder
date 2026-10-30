@@ -136,11 +136,8 @@ describe('detectCycles', () => {
       { id: 'b', type: 'item', _calculatedExpr: "item.where(linkId='a').answer" },
     ];
     const cycles = detectCycles(buildDepGraph(nodes));
-    expect(cycles.length).toBeGreaterThan(0);
-    // first and last entry of a reported cycle are identical (closed loop)
-    const cyc = cycles[0];
-    expect(cyc[0]).toBe(cyc[cyc.length - 1]);
-    expect(new Set(cyc)).toEqual(new Set(['a', 'b']));
+    // closed loop: first and last entry are identical
+    expect(cycles).toEqual([['a', 'b', 'a']]);
   });
 
   it('detects a three-node cycle A→B→C→A', () => {
@@ -150,8 +147,7 @@ describe('detectCycles', () => {
       { id: 'c', type: 'item', _calculatedExpr: "item.where(linkId='b').answer" },
     ];
     const cycles = detectCycles(buildDepGraph(nodes));
-    expect(cycles.length).toBeGreaterThan(0);
-    expect(new Set(cycles[0])).toEqual(new Set(['a', 'b', 'c']));
+    expect(cycles).toEqual([['a', 'c', 'b', 'a']]);
   });
 });
 
@@ -187,6 +183,6 @@ describe('topoOrder', () => {
     ];
     const { order, cycles } = topoOrder(buildDepGraph(nodes));
     expect(order.sort()).toEqual(['a', 'b', 'free']);
-    expect(cycles.length).toBeGreaterThan(0);
+    expect(cycles).toEqual([['a', 'b', 'a']]);
   });
 });

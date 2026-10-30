@@ -2,9 +2,15 @@
 // Tests: button hidden/visible, modal opens with patient input,
 // populate dispatches event, error handling.
 //
-// Tested elements:
+// ── data-testid registry ────────────────────────────────────────────────────
 //   sdc-populate-btn            — populate button in preview toolbar
 //   sdc-populate-patient-ref-input — patient ref input in modal
+//   answers-btn
+//   add-root-group-btn
+//   sdcPopulate
+//   load-fhir-btn
+//   load-library-item
+// ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
 import { freshStart } from './helpers/builder.js';

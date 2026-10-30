@@ -4,9 +4,14 @@
 //
 // Fixture: tests/fixtures/boolean-segmented.fhir.json
 // Run: npx playwright test tests/e2e/boolean-segmented.spec.js
+//
+// ── data-testid registry ────────────────────────────────────────────────────
+//   add-root-group-btn
+// ────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/boolean-segmented.fhir.json');
 
@@ -14,7 +19,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('.bool-seg').first()).toBeVisible({ timeout: 8_000 });
 }
 

@@ -24,11 +24,13 @@
 //   export-btn                 main Export dropdown button
 //   export-quest-item    "Questionnaire2026" item in export dropdown (opens saveFormatModal)
 //   prompt-save                confirm button in filename prompt dialog
+//   saveFormatModalApply
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/unit-valueset.fhir.json');
 const VS_URL  = FHIR.vs + '/ucum-bodyweight';
@@ -37,7 +39,7 @@ async function freshLoad(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q-with-unit-vs"]')).toBeVisible({ timeout: 8_000 });
 }
 

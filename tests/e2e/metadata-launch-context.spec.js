@@ -21,6 +21,7 @@ import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { freshStart, openModal, exportFHIR } from './helpers/metadata.js';
 import path from 'node:path';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE_LC = path.resolve('sampledata/answer-expression-demo.fhir.json');
 
@@ -111,7 +112,7 @@ test.describe('Launch Context — round-trip import', () => {
   test('imports launchContext from answer-expression-demo sample and shows it in the modal', async ({ page }) => {
     await freshStart(page);
     // Load the sample that has a launchContext declared
-    await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE_LC);
+    await loadFixtureFile(page, FIXTURE_LC);
     await expect(page.getByTestId('quest-meta-card')).toBeVisible({ timeout: 8_000 });
     await openModal(page);
     await expandLaunchCtx(page);
@@ -122,7 +123,7 @@ test.describe('Launch Context — round-trip import', () => {
 
   test('exports launchContext back to FHIR JSON', async ({ page }) => {
     await freshStart(page);
-    await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE_LC);
+    await loadFixtureFile(page, FIXTURE_LC);
     await expect(page.getByTestId('quest-meta-card')).toBeVisible({ timeout: 8_000 });
 
     const q = await exportFHIR(page);

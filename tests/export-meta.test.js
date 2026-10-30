@@ -338,7 +338,7 @@ describe('buildFHIRObject — Questionnaire.text (Narrative)', () => {
 
   it('always emits q.text (never undefined)', () => {
     const q = buildFHIRObject();
-    expect(q.text).toBeDefined();
+    expect(q.text).toMatchObject({ status: 'generated', div: expect.stringMatching(/^<div xmlns=/) });
   });
 
   it('uses status "generated" when _rawText is null', () => {
@@ -563,8 +563,7 @@ describe('buildFHIRObject — entryFormat', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _entryFormat: 'MM/DD/YYYY' }]);
     const ext = q.item[0].extension || [];
     const ef = ext.find(e => e.url === EF_URL);
-    expect(ef).toBeDefined();
-    expect(ef.valueString).toBe('MM/DD/YYYY');
+    expect(ef).toEqual({ url: EF_URL, valueString: 'MM/DD/YYYY' });
   });
 
   it('does not emit entryFormat extension when _entryFormat is absent', () => {
@@ -589,8 +588,7 @@ describe('buildFHIRObject — choiceOrientation', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A', _choiceOrientation: 'vertical' }]);
     const ext = q.item[0].extension || [];
     const co = ext.find(e => e.url === CO_URL);
-    expect(co).toBeDefined();
-    expect(co.valueCode).toBe('vertical');
+    expect(co).toEqual({ url: CO_URL, valueCode: 'vertical' });
   });
 
   it('exports _choiceOrientation=horizontal as valueCode extension', () => {
@@ -652,7 +650,7 @@ describe('buildFHIRObject — displayCategory', () => {
     const q = build([{ id: 'g1', type: 'group', title: 'Section', _displayCategory: 'instructions', children: [] }]);
     const ext = q.item[0].extension || [];
     const dc = ext.find(e => e.url === DC_URL);
-    expect(dc).toBeDefined();
+    expect(dc.url).toBe(DC_URL);
     expect(dc.valueCodeableConcept?.coding?.[0]?.code).toBe('instructions');
   });
 

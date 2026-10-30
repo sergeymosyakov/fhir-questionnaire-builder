@@ -3,9 +3,10 @@
 // AppEvents.OAUTH_LOGIN_REQUIRED directly — real 5-minute timing is covered
 // by tests/oauth-scheduler.test.js (fake timers), not e2e.
 //
-// Tested elements:
+// ── data-testid registry ────────────────────────────────────────────────────
 //   oauth-login-banner-FHIR_BASE        — the banner itself
 //   oauth-login-banner-login-FHIR_BASE  — its "Log in" button
+// ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
 import { freshStart } from './helpers/builder.js';

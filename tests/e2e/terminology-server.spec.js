@@ -29,6 +29,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/terminology-server.fhir.json');
 
@@ -36,7 +37,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 8_000 });
 }
 
@@ -185,10 +186,10 @@ test.describe('Terminology server — export JSON', () => {
 
     await page.getByTestId('preview-mode-btn').click();
     await page.getByTestId('preview-mode-json').click();
-    await expect(page.locator('#fhirJsonView')).toBeVisible();
+    await expect(page.getByTestId('fhir-json-view')).toBeVisible();
     // Wait for async render to populate JSON content
-    await expect(page.locator('#fhirJsonView')).toContainText('resourceType', { timeout: 8_000 });
-    const json = await page.locator('#fhirJsonView').textContent();
+    await expect(page.getByTestId('fhir-json-view')).toContainText('resourceType', { timeout: 8_000 });
+    const json = await page.getByTestId('fhir-json-view').textContent();
     const q = JSON.parse(json);
     const ext = (q.item?.[0]?.item?.[0]?.extension || []).find(
       e => e.url === FHIR.preferredTerminologyServer
@@ -200,10 +201,10 @@ test.describe('Terminology server — export JSON', () => {
     await loadFixture(page);
     await page.getByTestId('preview-mode-btn').click();
     await page.getByTestId('preview-mode-json').click();
-    await expect(page.locator('#fhirJsonView')).toBeVisible();
+    await expect(page.getByTestId('fhir-json-view')).toBeVisible();
     // Wait for async render to populate JSON content
-    await expect(page.locator('#fhirJsonView')).toContainText('resourceType', { timeout: 8_000 });
-    const json = await page.locator('#fhirJsonView').textContent();
+    await expect(page.getByTestId('fhir-json-view')).toContainText('resourceType', { timeout: 8_000 });
+    const json = await page.getByTestId('fhir-json-view').textContent();
     const q = JSON.parse(json);
     const ext = (q.extension || []).find(
       e => e.url === FHIR.preferredTerminologyServer

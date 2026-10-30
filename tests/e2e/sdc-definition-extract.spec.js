@@ -9,12 +9,13 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { freshStart } from './helpers/builder.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/def-extract.fhir.json');
 
 async function loadFixture(page) {
   await freshStart(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   // Wait for at least one node to appear in the builder tree
   await page.waitForSelector('[data-testid="tree-container"] [data-node-id]', { timeout: 15_000 });
 }
@@ -102,7 +103,7 @@ test.describe('SDC Definition Extract — repeating field values', () => {
 
   async function loadRepeat(page) {
     await freshStart(page);
-    await page.locator('[data-testid="fhir-file-input"]').setInputFiles(REPEAT);
+    await loadFixtureFile(page, REPEAT);
     await page.waitForSelector('[data-testid="tree-container"] [data-node-id]', { timeout: 15_000 });
   }
 

@@ -22,6 +22,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { clickBoolOption } from './helpers/builder.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const ANNUAL  = path.resolve('sampledata/annual-health-check.fhir.json');
 const CALC    = path.resolve('sampledata/patient-scenario-calc-chain.fhir.json');
@@ -35,7 +36,7 @@ async function freshStart(page) {
 }
 
 async function loadFile(page, filePath) {
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(filePath);
+  await loadFixtureFile(page, filePath);
 }
 
 /** Commit any pending input changes by yielding two rAF ticks + focusing search box. */

@@ -2,14 +2,16 @@
 // Tests: page loads, displays values from config.json, saves to localStorage,
 // reset works, provider list is shown.
 //
-// Tested elements:
-//   settings-page-btn      — gear icon link in builder header
-//   termServerInput         — terminology server input
-//   corsProxyInput          — CORS proxy input
-//   fhirBaseInput           — FHIR base server input
-//   nlmApiInput             — NLM API base input
-//   testTermServerBtn       — test connection button
-//   saveBtn                 — save button
+// ── data-testid registry ────────────────────────────────────────────────────
+//   settings-page-btn          gear icon link in builder header
+//   term-server-input          terminology server input
+//   settings-save-btn          save button
+//   translate-key-field        translation API key field (shown for keyed providers)
+//   translate-provider-select  translation provider select
+//   providers-display          provider badge list
+//   more-btn                   builder header overflow menu
+//   add-root-group-btn         builder-ready marker
+// ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
 
@@ -18,7 +20,7 @@ const SETTINGS_URL = '/settings.html';
 // ── Helpers ───────────────────────────────────────────────────────────────────
 async function gotoSettings(page) {
   await page.goto(SETTINGS_URL);
-  await page.waitForSelector('#termServerInput', { timeout: 10_000 });
+  await page.getByTestId('term-server-input').waitFor({ timeout: 10_000 });
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -37,7 +39,7 @@ test.describe('Settings page', () => {
     await gotoSettings(page);
 
     // Terminology server should be pre-filled from config.json
-    const termVal = await page.locator('#termServerInput').inputValue();
+    const termVal = await page.getByTestId('term-server-input').inputValue();
     expect(termVal).toContain('fhir.org');
 
     // CORS proxy should be pre-filled
@@ -63,7 +65,7 @@ test.describe('Settings page', () => {
   test('shows active provider list', async ({ page }) => {
     await gotoSettings(page);
 
-    const providers = page.locator('#providersDisplay .s-provider-badge');
+    const providers = page.getByTestId('providers-display').locator('.s-provider-badge');
     // Provider list renders after serverConfig.ready() resolves (async) — wait for it.
     await expect(providers.first()).toBeVisible();
 
@@ -75,10 +77,10 @@ test.describe('Settings page', () => {
   test('saves custom value and marks field as overridden', async ({ page }) => {
     await gotoSettings(page);
 
-    const input = page.locator('#termServerInput');
+    const input = page.getByTestId('term-server-input');
 
     await input.fill('https://custom-server.example.com/r4');
-    await page.locator('#saveBtn').click();
+    await page.getByTestId('settings-save-btn').click();
 
     // Field should have custom style
     await expect(input).toHaveClass(/is-custom/);
@@ -90,32 +92,32 @@ test.describe('Settings page', () => {
   test('persists saved value after page reload', async ({ page }) => {
     await gotoSettings(page);
 
-    await page.locator('#termServerInput').fill('https://persisted.example.com/r4');
-    await page.locator('#saveBtn').click();
+    await page.getByTestId('term-server-input').fill('https://persisted.example.com/r4');
+    await page.getByTestId('settings-save-btn').click();
 
     // Reload
     await page.reload();
-    await page.waitForSelector('#termServerInput');
+    await page.getByTestId('term-server-input').waitFor();
 
-    const val = await page.locator('#termServerInput').inputValue();
+    const val = await page.getByTestId('term-server-input').inputValue();
     expect(val).toBe('https://persisted.example.com/r4');
   });
 
   test('reset restores default value', async ({ page }) => {
     await gotoSettings(page);
 
-    const defaultVal = await page.locator('#termServerInput').inputValue();
+    const defaultVal = await page.getByTestId('term-server-input').inputValue();
 
     // Save custom value
-    await page.locator('#termServerInput').fill('https://custom.example.com/r4');
-    await page.locator('#saveBtn').click();
+    await page.getByTestId('term-server-input').fill('https://custom.example.com/r4');
+    await page.getByTestId('settings-save-btn').click();
     await expect(page.locator('[data-reset="terminologyServer"]')).toBeEnabled();
 
     // Reset
     await page.locator('[data-reset="terminologyServer"]').click();
 
     // Should return to default
-    const restoredVal = await page.locator('#termServerInput').inputValue();
+    const restoredVal = await page.getByTestId('term-server-input').inputValue();
     expect(restoredVal).toBe(defaultVal);
     await expect(page.locator('[data-reset="terminologyServer"]')).toBeDisabled();
   });
@@ -127,7 +129,7 @@ test.describe('Settings page', () => {
     await expect(input).toBeVisible();
 
     await input.fill('https://my-translate-proxy.example.com/translate');
-    await page.locator('#saveBtn').click();
+    await page.getByTestId('settings-save-btn').click();
 
     await expect(input).toHaveClass(/is-custom/);
     await expect(page.locator('[data-reset="translateApiUrl"]')).toBeEnabled();
@@ -144,28 +146,28 @@ test.describe('Settings page', () => {
     const trigger = page.getByTestId('translate-provider-select');
     await expect(trigger).toBeVisible();
     // Default gtx has no key → key field hidden
-    await expect(page.locator('#translateKeyField')).toBeHidden();
+    await expect(page.getByTestId('translate-key-field')).toBeHidden();
 
     // Pick DeepL → key field appears
     await trigger.click();
     await page.locator('.csel-drop .oc-opt[data-val="deepl"]').click();
     await expect(trigger).toHaveAttribute('data-value', 'deepl');
-    await expect(page.locator('#translateKeyField')).toBeVisible();
+    await expect(page.getByTestId('translate-key-field')).toBeVisible();
 
     // Enter a key and save
     await page.locator('#translateApiKeyInput').fill('secret-key');
-    await page.locator('#saveBtn').click();
+    await page.getByTestId('settings-save-btn').click();
 
     // Reload → provider selection and key persist
     await page.reload();
-    await page.waitForSelector('#termServerInput');
+    await page.getByTestId('term-server-input').waitFor();
     await expect(page.getByTestId('translate-provider-select')).toHaveAttribute('data-value', 'deepl');
-    await expect(page.locator('#translateKeyField')).toBeVisible();
+    await expect(page.getByTestId('translate-key-field')).toBeVisible();
     expect(await page.locator('#translateApiKeyInput').inputValue()).toBe('secret-key');
   });
 
   test('settings link opens settings.html from main app via \u22ef menu', async ({ page }) => {    await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    await page.getByTestId('add-root-group-btn').waitFor();
     // settings-page-btn is inside the ⋯ More menu
     await page.getByTestId('more-btn').click();
     await expect(page.getByTestId('settings-page-btn')).toBeVisible();

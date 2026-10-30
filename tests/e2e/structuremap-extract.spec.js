@@ -12,12 +12,13 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { freshStart, openModal } from './helpers/metadata.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/structuremap-extract.fhir.json');
 
 async function loadFixture(page) {
   await freshStart(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await page.waitForSelector('[data-testid="tree-container"] [data-node-id]', { timeout: 15_000 });
 }
 

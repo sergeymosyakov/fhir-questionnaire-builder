@@ -1,0 +1,33 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "preview-validation-length-regex-test",
+  "status": "draft",
+  "title": "Length and regex validation Test",
+  "item": [
+    {
+      "linkId": "opt-min",
+      "text": "Optional note (min 5)",
+      "type": "text",
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/minLength", "valueInteger": 5 }
+      ]
+    },
+    {
+      "linkId": "opt-regex",
+      "text": "Optional digits",
+      "type": "text",
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/regex", "valueString": "^[0-9]+$" }
+      ]
+    },
+    {
+      "linkId": "req-min",
+      "text": "Required note (min 5)",
+      "type": "text",
+      "required": true,
+      "extension": [
+        { "url": "http://hl7.org/fhir/StructureDefinition/minLength", "valueInteger": 5 }
+      ]
+    }
+  ]
+}

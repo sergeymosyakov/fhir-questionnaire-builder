@@ -32,7 +32,7 @@
       <div class="s-card-desc">FHIR $expand endpoint used to resolve ValueSet bindings (choice items, answer options).</div>
       <div class="s-field">
         <label class="s-label" for="termServerInput">Server URL</label>
-        <input id="termServerInput" class="s-input" type="url" placeholder="https://tx.fhir.org/r4" autocomplete="off" spellcheck="false">
+        <input id="termServerInput" data-testid="term-server-input" class="s-input" type="url" placeholder="https://tx.fhir.org/r4" autocomplete="off" spellcheck="false">
         <button class="s-reset-btn" data-reset="terminologyServer" disabled>Reset</button>
         <span class="s-hint">Used by Answer Type modal when expanding ValueSets from a canonical URL.</span>
         <div class="s-test-row">
@@ -52,21 +52,21 @@
         <button class="s-reset-btn" data-reset="fhirBaseUrl" disabled>Reset</button>
         <span class="s-hint">Used for <code>reference</code> item type autocomplete. Leave blank to disable.</span>
         <div class="s-test-row">
-          <button class="s-test-btn" id="testFhirBaseBtn">Test connection</button>
-          <span class="s-test-result" id="testFhirBaseResult"></span>
+          <button class="s-test-btn" id="testFhirBaseBtn" data-testid="test-fhir-base-btn">Test connection</button>
+          <span class="s-test-result" id="testFhirBaseResult" data-testid="test-fhir-base-result"></span>
         </div>
       </div>
       <div class="s-field s-field--oauth">
         <div class="s-card-subtitle">OAuth login (optional)</div>
         <span class="s-hint">Only needed if this server requires login. Leave all blank to keep using it unauthenticated.</span>
         <label class="s-label" for="fhirBaseOauthAuthorizeInput">Authorize URL</label>
-        <input id="fhirBaseOauthAuthorizeInput" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/authorize" autocomplete="off" spellcheck="false">
+        <input id="fhirBaseOauthAuthorizeInput" data-testid="fhir-oauth-authorize-url" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/authorize" autocomplete="off" spellcheck="false">
         <label class="s-label" for="fhirBaseOauthTokenInput">Token URL</label>
-        <input id="fhirBaseOauthTokenInput" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/token" autocomplete="off" spellcheck="false">
+        <input id="fhirBaseOauthTokenInput" data-testid="fhir-oauth-token-url" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/token" autocomplete="off" spellcheck="false">
         <label class="s-label" for="fhirBaseOauthClientIdInput">Client ID</label>
-        <input id="fhirBaseOauthClientIdInput" class="s-input" type="text" autocomplete="off" spellcheck="false">
+        <input id="fhirBaseOauthClientIdInput" data-testid="fhir-oauth-client-id" class="s-input" type="text" autocomplete="off" spellcheck="false">
         <label class="s-label" for="fhirBaseOauthScopeInput">Scope</label>
-        <input id="fhirBaseOauthScopeInput" class="s-input" type="text" placeholder="openid fhirUser" autocomplete="off" spellcheck="false">
+        <input id="fhirBaseOauthScopeInput" data-testid="fhir-oauth-scope" class="s-input" type="text" placeholder="openid fhirUser" autocomplete="off" spellcheck="false">
       </div>
     </div>
       <div class="s-card">
@@ -86,13 +86,13 @@
           <div class="s-card-subtitle">OAuth login (optional)</div>
           <span class="s-hint">Only needed if this server requires login. Leave all blank to keep using it unauthenticated.</span>
           <label class="s-label" for="sdcServerOauthAuthorizeInput">Authorize URL</label>
-          <input id="sdcServerOauthAuthorizeInput" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/authorize" autocomplete="off" spellcheck="false">
+          <input id="sdcServerOauthAuthorizeInput" data-testid="sdc-oauth-authorize-url" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/authorize" autocomplete="off" spellcheck="false">
           <label class="s-label" for="sdcServerOauthTokenInput">Token URL</label>
-          <input id="sdcServerOauthTokenInput" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/token" autocomplete="off" spellcheck="false">
+          <input id="sdcServerOauthTokenInput" data-testid="sdc-oauth-token-url" class="s-input" type="url" placeholder="https://idp.example.com/oauth2/token" autocomplete="off" spellcheck="false">
           <label class="s-label" for="sdcServerOauthClientIdInput">Client ID</label>
-          <input id="sdcServerOauthClientIdInput" class="s-input" type="text" autocomplete="off" spellcheck="false">
+          <input id="sdcServerOauthClientIdInput" data-testid="sdc-oauth-client-id" class="s-input" type="text" autocomplete="off" spellcheck="false">
           <label class="s-label" for="sdcServerOauthScopeInput">Scope</label>
-          <input id="sdcServerOauthScopeInput" class="s-input" type="text" placeholder="openid fhirUser" autocomplete="off" spellcheck="false">
+          <input id="sdcServerOauthScopeInput" data-testid="sdc-oauth-scope" class="s-input" type="text" placeholder="openid fhirUser" autocomplete="off" spellcheck="false">
         </div>
       </div>
     <!-- ── CORS Proxy ────────────────────────────────────────────────────── -->
@@ -132,7 +132,7 @@
         <button class="s-reset-btn" data-reset="translateApiUrl" disabled>Reset</button>
         <span class="s-hint" id="translateEndpointHint">Leave blank to use the provider default.</span>
       </div>
-      <div class="s-field" id="translateKeyField">
+      <div class="s-field" id="translateKeyField" data-testid="translate-key-field">
         <label class="s-label" for="translateApiKeyInput" id="translateApiKeyLabel">API Key</label>
         <input id="translateApiKeyInput" class="s-input" type="password" autocomplete="off" spellcheck="false">
         <button class="s-reset-btn" data-reset="translateApiKey" disabled>Reset</button>
@@ -151,14 +151,14 @@
     <div class="s-card">
       <div class="s-card-title">Active Configuration Sources</div>
       <div class="s-card-desc">Settings are resolved in priority order — higher sources override lower ones.</div>
-      <div id="providersDisplay"></div>
+      <div id="providersDisplay" data-testid="providers-display"></div>
     </div>
 
   </div>
 
   <div class="s-save-bar">
-    <button class="s-save-btn" id="saveBtn">Save settings</button>
-    <span class="s-status" id="saveStatus"></span>
+    <button class="s-save-btn" id="saveBtn" data-testid="settings-save-btn">Save settings</button>
+    <span class="s-status" id="saveStatus" data-testid="settings-save-status"></span>
   </div>
 
   <script type="module" src="js/embedded-nav.js"></script>

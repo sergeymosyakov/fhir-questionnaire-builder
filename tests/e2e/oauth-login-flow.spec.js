@@ -4,8 +4,10 @@
 // are intercepted; the real oauth-callback.html + js/fhir/oauth-client.js +
 // js/fhir/oauth-scheduler.js run for real. See docs/FHIR-SERVER-AUTH-PLAN.md.
 //
-// Tested elements:
-//   testFhirBaseBtn / testFhirBaseResult — Test Connection (FHIR Base Server)
+// ── data-testid registry ────────────────────────────────────────────────────
+//   test-fhir-base-btn     Test Connection button (FHIR Base Server)
+//   test-fhir-base-result  Test Connection result text
+// ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
 
@@ -59,7 +61,7 @@ async function mockFhirMetadata(context) {
 
 async function gotoSettings(page) {
   await page.goto('/settings.html');
-  await page.waitForSelector('#testFhirBaseBtn');
+  await page.getByTestId('test-fhir-base-btn').waitFor();
 }
 
 test.describe('OAuth login flow (mocked IdP)', () => {
@@ -72,11 +74,11 @@ test.describe('OAuth login flow (mocked IdP)', () => {
     await gotoSettings(page);
 
     const popupPromise = page.waitForEvent('popup');
-    await page.click('#testFhirBaseBtn');
+    await page.click('[data-testid="test-fhir-base-btn"]');
     const popup = await popupPromise;
     await popup.waitForEvent('close', { timeout: 8000 });
 
-    await expect(page.locator('#testFhirBaseResult')).toContainText('MockFHIR', { timeout: 8000 });
+    await expect(page.getByTestId('test-fhir-base-result')).toContainText('MockFHIR', { timeout: 8000 });
     expect(await page.evaluate(() => localStorage.getItem('fhirqb.oauthToken.FHIR_BASE.accessToken')))
       .toBe('mock-access-token');
   });
@@ -90,16 +92,16 @@ test.describe('OAuth login flow (mocked IdP)', () => {
     await gotoSettings(page);
 
     const popupPromise = page.waitForEvent('popup');
-    await page.click('#testFhirBaseBtn');
+    await page.click('[data-testid="test-fhir-base-btn"]');
     const popup = await popupPromise;
     await popup.waitForEvent('close', { timeout: 8000 });
-    await expect(page.locator('#testFhirBaseResult')).toContainText('MockFHIR', { timeout: 8000 });
+    await expect(page.getByTestId('test-fhir-base-result')).toContainText('MockFHIR', { timeout: 8000 });
 
     // Clicking again must NOT open a popup — the stored access token is still valid.
     let secondPopupOpened = false;
     page.once('popup', () => { secondPopupOpened = true; });
-    await page.click('#testFhirBaseBtn');
-    await expect(page.locator('#testFhirBaseResult')).toContainText('MockFHIR', { timeout: 8000 });
+    await page.click('[data-testid="test-fhir-base-btn"]');
+    await expect(page.getByTestId('test-fhir-base-result')).toContainText('MockFHIR', { timeout: 8000 });
     expect(secondPopupOpened).toBe(false);
   });
 
@@ -109,21 +111,21 @@ test.describe('OAuth login flow (mocked IdP)', () => {
     await gotoSettings(page);
 
     const popupPromise = page.waitForEvent('popup');
-    await page.click('#testFhirBaseBtn');
+    await page.click('[data-testid="test-fhir-base-btn"]');
     const popup = await popupPromise;
     await popup.close(); // user closes it without logging in
 
-    await expect(page.locator('#testFhirBaseResult')).toContainText(/cancel/i, { timeout: 8000 });
+    await expect(page.getByTestId('test-fhir-base-result')).toContainText(/cancel/i, { timeout: 8000 });
 
     // Retry — a fresh popup must open (nothing stuck/stale from the cancelled attempt).
     await mockAuthorizeRedirect(context);
     await mockTokenExchange(context);
     await mockFhirMetadata(context);
     const popupPromise2 = page.waitForEvent('popup');
-    await page.click('#testFhirBaseBtn');
+    await page.click('[data-testid="test-fhir-base-btn"]');
     const popup2 = await popupPromise2;
     await popup2.waitForEvent('close', { timeout: 8000 });
-    await expect(page.locator('#testFhirBaseResult')).toContainText('MockFHIR', { timeout: 8000 });
+    await expect(page.getByTestId('test-fhir-base-result')).toContainText('MockFHIR', { timeout: 8000 });
   });
 
   test('a blocked popup surfaces a clear error instead of hanging', async ({ page }) => {
@@ -132,7 +134,7 @@ test.describe('OAuth login flow (mocked IdP)', () => {
     // Simulate the browser's popup blocker: window.open() returns null.
     await page.evaluate(() => { window.open = () => null; });
 
-    await page.click('#testFhirBaseBtn');
-    await expect(page.locator('#testFhirBaseResult')).toContainText(/popup/i, { timeout: 8000 });
+    await page.click('[data-testid="test-fhir-base-btn"]');
+    await expect(page.getByTestId('test-fhir-base-result')).toContainText(/popup/i, { timeout: 8000 });
   });
 });

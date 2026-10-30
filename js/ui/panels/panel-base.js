@@ -10,6 +10,9 @@ function _mk(tag, className) {
   return el;
 }
 
+// camelCase id prefix -> kebab-case testid base (containedCard -> contained-card)
+const _tid = (prefix) => prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+
 export class Panel {
   /**
    * @param {object} cfg
@@ -24,13 +27,13 @@ export class Panel {
   constructor({ mod, idPrefix, label, tipTitle, tipBody, tipFhir, tipSpec }) {
     this._card = _mk('div', 'fhir-res-card');
     this._card.style.display = 'none';
-    if (idPrefix) this._card.id = idPrefix;
+    if (idPrefix) { this._card.id = idPrefix; this._card.dataset.testid = _tid(idPrefix); }
 
     const header = _mk('div', 'fhir-res-card-header');
 
     this._toggle = _mk('button', 'fhir-res-card-toggle');
     this._toggle.type = 'button';
-    if (idPrefix) this._toggle.id = idPrefix + 'Toggle';
+    if (idPrefix) { this._toggle.id = idPrefix + 'Toggle'; this._toggle.dataset.testid = _tid(idPrefix) + '-toggle'; }
     this._toggle.setAttribute('aria-expanded', 'true');
     this._toggle.setAttribute('aria-label', `Collapse or expand ${label}`);
     this._toggle.dataset.tipTitle = 'Collapse / expand';
@@ -45,12 +48,12 @@ export class Panel {
     titleEl.textContent = label;
 
     this._count = _mk('span', `fhir-res-card-count fhir-res-card-count--${mod}`);
-    if (idPrefix) this._count.id = idPrefix + 'Count';
+    if (idPrefix) { this._count.id = idPrefix + 'Count'; this._count.dataset.testid = _tid(idPrefix) + '-count'; }
 
     header.append(this._toggle, titleEl, this._count);
 
     this._chipList = _mk('div', 'fhir-res-card-chips');
-    if (idPrefix) this._chipList.id = idPrefix + 'Chips';
+    if (idPrefix) { this._chipList.id = idPrefix + 'Chips'; this._chipList.dataset.testid = _tid(idPrefix) + '-chips'; }
 
     this._card.append(header, this._chipList);
 

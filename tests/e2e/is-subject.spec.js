@@ -20,6 +20,7 @@ import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'node:path';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/is-subject.fhir.json');
 const IS_URL  = FHIR.isSubject;
@@ -28,7 +29,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q-subject"]')).toBeVisible({ timeout: 8_000 });
 }
 

@@ -22,6 +22,7 @@ import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { freshStart, addRootGroup, waitForLoad } from './helpers/builder.js';
 import { mockTerminologyExpand } from './helpers/terminology.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/audit-issues.fhir.json');
 
@@ -33,7 +34,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q-external-vs"]')).toBeVisible({ timeout: 8_000 });
 }
 

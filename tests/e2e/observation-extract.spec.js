@@ -30,6 +30,9 @@
 //   obsExportModalApply     Apply button in the Observation export modal
 //   statesModal             States modal backdrop
 //   statesModalApply        Apply button inside States modal
+//   add-root-group-btn
+//   preview-search-input
+//   csel-drop
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -37,6 +40,7 @@ import fs   from 'node:fs';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/obs-extract-e2e.fhir.json');
 const OBS_EXT = FHIR.observationExtract;
@@ -49,7 +53,7 @@ async function freshStart(page) {
 
 async function loadFixture(page) {
   await freshStart(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="vitals"]')).toBeVisible({ timeout: 8_000 });
 }
 

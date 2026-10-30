@@ -4,10 +4,27 @@
 //
 // Fixture: tests/fixtures/repeating-group-demo.fhir.json
 // ─────────────────────────────────────────────────────────────────────────────
+//
+// ── data-testid registry ────────────────────────────────────────────────────
+//   preview-search-input
+//   add-root-group-btn
+//   action-repeatable
+//   repeatableModalCancel
+//   group-add-btn
+//   repeat-modal-toggle
+//   repeatableModalApply
+//   rg-add-btn
+//   rg-remove-btn
+//   tree-container
+//   node-title-display
+//   repeatableModal
+//   add-menu-item
+// ────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { clickBoolOption } from './helpers/builder.js';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/repeating-group-demo.fhir.json');
 
@@ -21,7 +38,7 @@ async function freshLoad(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="meds"]')).toBeVisible({ timeout: 8_000 });
   await expect(page.locator('[data-rg-group="meds"] > [data-testid="rg-add-btn"]')).toBeVisible({ timeout: 5_000 });
 }

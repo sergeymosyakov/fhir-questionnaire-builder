@@ -26,6 +26,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('sampledata/example-bariatric.fhir.json');
 
@@ -39,7 +40,7 @@ async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(FIXTURE);
+  await loadFixtureFile(page, FIXTURE);
   // Wait for a radio item from section 8 to appear in the preview
   await expect(page.locator('[data-preview-id="q-diet-type"]')).toBeVisible({ timeout: 8_000 });
 }

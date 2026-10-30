@@ -10,6 +10,10 @@
 // ad-hoc QuestionnaireRenderer via a dynamic import inside page.evaluate.
 //
 // Run: npx playwright test tests/e2e/widget-populate.spec.js
+//
+// ── data-testid registry ────────────────────────────────────────────────────
+//   pop-none
+// ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
 

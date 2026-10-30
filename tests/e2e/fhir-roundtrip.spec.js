@@ -21,9 +21,16 @@
 //
 // Run: npx playwright test tests/e2e/fhir-roundtrip.spec.js
 // ─────────────────────────────────────────────────────────────────────────────
+//
+// ── data-testid registry ────────────────────────────────────────────────────
+//   preview-mode-btn
+//   preview-mode-patient
+//   add-root-group-btn
+// ────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
+import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const REF        = path.resolve('sampledata/reference-example.fhir.json');
 const PHQ9       = path.resolve('sampledata/phq-9.fhir.json');
@@ -34,7 +41,7 @@ async function freshLoad(page, fixture, waitForId) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.locator('[data-testid="fhir-file-input"]').setInputFiles(fixture);
+  await loadFixtureFile(page, fixture);
   if (waitForId) {
     await expect(page.locator(`[data-preview-id="${waitForId}"]`)).toBeVisible({ timeout: 10_000 });
   }

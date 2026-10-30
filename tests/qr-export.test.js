@@ -190,7 +190,6 @@ describe('exportQR — id, language and meta block', () => {
   it('always writes meta.lastUpdated as an ISO date string', () => {
     exportQR('test.json');
     const { meta } = buildQR.mock.results[0].value;
-    expect(meta).toBeDefined();
     expect(typeof meta.lastUpdated).toBe('string');
     expect(new Date(meta.lastUpdated).toISOString()).toBe(meta.lastUpdated);
   });
