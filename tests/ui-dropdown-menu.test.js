@@ -20,7 +20,9 @@ describe('DropdownMenu _setHtml', () => {
   });
 
   it('with DOMPurify, passes html through sanitize and renders its output as markup', () => {
-    const sanitize = vi.fn(h => h.replace(/<script.*?<\/script>/g, ''));
+    // Fixed input→output table: the stub must not implement real sanitizing.
+    const cleaned = { 'ok <b>bold</b><script>evil()</script>': 'ok <b>bold</b>' };
+    const sanitize = vi.fn(h => cleaned[h] ?? h);
     window.DOMPurify = { sanitize };
     const m = new DropdownMenu({ label: 'Menu &#x25BE;' });
     const item = m._item('i1', 'ok <b>bold</b><script>evil()</script>');
