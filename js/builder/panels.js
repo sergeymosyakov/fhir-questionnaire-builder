@@ -58,6 +58,7 @@ function buildQuestionSelect(allItems, selectedId, onSelect, idx) {
 
     const blank = document.createElement('div');
     blank.className = 'vis-q-sel-opt' + (!selectedId ? ' vis-q-sel-opt--sel' : '');
+    blank.dataset.testid = 'vis-cond-q-opt-none';
     blank.textContent = '\u2014 question \u2014';
     blank.addEventListener('mousedown', () => {
       trigger.textContent = '\u2014 question \u2014';
@@ -76,6 +77,7 @@ function buildQuestionSelect(allItems, selectedId, onSelect, idx) {
       opt.dataset.tipTitle = it.label;
       opt.dataset.tipBody = it.id;
       opt.dataset.id = it.id;
+      opt.dataset.testid = 'vis-cond-q-opt-' + it.id;
       opt.addEventListener('mousedown', () => {
         trigger.textContent = it.label;
         trigger.dataset.tipTitle = it.label;
@@ -159,6 +161,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
   const renderCondRow = (ew, idx) => {
     const row = document.createElement('div');
     row.className = 'vis-cond-row';
+    row.dataset.testid = 'vis-cond-row-' + idx;
 
     const qWidget = buildQuestionSelect(allItems, ew.question || '', (id, it) => {
       ew.question = id;
@@ -178,6 +181,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
     const rmBtn = document.createElement('button');
     rmBtn.type = 'button';
     rmBtn.className = 'vis-cond-rm';
+    rmBtn.dataset.testid = 'vis-cond-rm-' + idx;
     rmBtn.textContent = '\u2715';
     rmBtn.onclick = () => {
       node.enableWhen.splice(idx, 1);
@@ -252,6 +256,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
           } else {
             const inp = document.createElement('input');
             inp.type = 'text'; inp.className = 'vis-cond-val-inp';
+            inp.dataset.testid = 'vis-cond-val-inp-' + idx;
             inp.value = ew.answerCoding?.code || ew.answerString || '';
             inp.oninput = () => { ew.answerCoding = { code: inp.value }; delete ew.answerString; };
             valWrap.appendChild(inp);
@@ -272,6 +277,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
           opSel.setValue(ew.operator || '=');
           const inp = document.createElement('input');
           inp.type = 'number'; inp.className = 'vis-cond-val-inp';
+          inp.dataset.testid = 'vis-cond-val-inp-' + idx;
           inp.value = ew.answerDecimal !== undefined ? ew.answerDecimal
             : ew.answerInteger !== undefined ? ew.answerInteger : '';
           inp.oninput = () => {
@@ -301,10 +307,12 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
           const numInp = document.createElement('input');
           numInp.type = 'number'; numInp.step = 'any';
           numInp.className = 'vis-cond-val-inp vis-cond-qty-num';
+          numInp.dataset.testid = 'vis-cond-qty-num-' + idx;
           numInp.value = q.value !== undefined ? q.value : '';
           const unitInp = document.createElement('input');
           unitInp.type = 'text'; unitInp.className = 'vis-cond-val-inp vis-cond-qty-unit';
           unitInp.placeholder = 'unit';
+          unitInp.dataset.testid = 'vis-cond-qty-unit-' + idx;
           unitInp.value = q.code || q.unit || (qNode && qNode.quantityUnit) || '';
           const setQ = () => {
             const n = parseFloat(numInp.value);
@@ -337,6 +345,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
           if (isTimeOnly) {
             const tinp = document.createElement('input');
             tinp.type = 'time'; tinp.className = 'vis-cond-val-inp ctrl-input--time';
+            tinp.dataset.testid = 'vis-cond-val-inp-' + idx;
             // FHIR time: HH:MM:SS — slice to HH:MM for native input
             tinp.value = (ew.answerTime || '').slice(0, 5);
             tinp.addEventListener('change', () => {
@@ -368,6 +377,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
           opSel.setValue(ew.operator || '=');
           const inp = document.createElement('input');
           inp.type = 'text'; inp.className = 'vis-cond-val-inp';
+          inp.dataset.testid = 'vis-cond-val-inp-' + idx;
           inp.value = ew.answerString || '';
           inp.oninput = () => { ew.answerString = inp.value; delete ew.answerCoding; delete ew.answerDecimal; };
           valWrap.appendChild(inp);

@@ -15,6 +15,8 @@
 //   action-vis             "Show When" action link on an item node
 //   showWhenModal          Show When modal backdrop
 //   export-btn / export-quest-item / saveFormatModalApply / prompt-save — export flow
+//   vis-cond-qty-num-0   Quantity value input (1st row)
+//   vis-cond-qty-unit-0  Quantity unit input (1st row)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -118,7 +120,7 @@ test.describe('answerQuantity — Show When editor', () => {
     await page.locator('[data-node-id="weight-alert"]').getByTestId('action-vis').click();
     await expect(page.locator('[data-testid="showWhenModal"]')).toBeVisible();
     const body = page.locator('[data-testid="showWhenModalBody"]');
-    await expect(body.locator('.vis-cond-qty-num')).toHaveValue('100');
-    await expect(body.locator('.vis-cond-qty-unit')).toHaveValue('kg');
+    await expect(body.getByTestId('vis-cond-qty-num-0')).toHaveValue('100');
+    await expect(body.getByTestId('vis-cond-qty-unit-0')).toHaveValue('kg');
   });
 });

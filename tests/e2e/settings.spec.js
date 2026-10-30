@@ -11,6 +11,11 @@
 //   providers-display          provider badge list
 //   more-btn                   builder header overflow menu
 //   add-root-group-btn         builder-ready marker
+//   cors-proxy-input         CORS proxy URL input
+//   s-validator-row          validator row on settings page
+//   s-provider-badge         provider badge on settings page
+//   translate-api-input      translate endpoint URL input
+//   translate-api-key-input  translate API key input
 // ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -43,7 +48,7 @@ test.describe('Settings page', () => {
     expect(termVal).toContain('fhir.org');
 
     // CORS proxy should be pre-filled
-    const proxyVal = await page.locator('#corsProxyInput').inputValue();
+    const proxyVal = await page.locator('[data-testid="cors-proxy-input"]').inputValue();
     expect(proxyVal.length).toBeGreaterThan(0);
 
     // Reset buttons should be disabled (no overrides)
@@ -58,14 +63,14 @@ test.describe('Settings page', () => {
     await gotoSettings(page);
 
     // At least one validator row should be visible
-    const rows = page.locator('.s-validator-row');
+    const rows = page.getByTestId('s-validator-row');
     await expect(rows.first()).toBeVisible();
   });
 
   test('shows active provider list', async ({ page }) => {
     await gotoSettings(page);
 
-    const providers = page.getByTestId('providers-display').locator('.s-provider-badge');
+    const providers = page.getByTestId('providers-display').getByTestId('s-provider-badge');
     // Provider list renders after serverConfig.ready() resolves (async) — wait for it.
     await expect(providers.first()).toBeVisible();
 
@@ -125,7 +130,7 @@ test.describe('Settings page', () => {
   test('translation API endpoint persists after reload', async ({ page }) => {
     await gotoSettings(page);
 
-    const input = page.locator('#translateApiInput');
+    const input = page.locator('[data-testid="translate-api-input"]');
     await expect(input).toBeVisible();
 
     await input.fill('https://my-translate-proxy.example.com/translate');
@@ -135,8 +140,8 @@ test.describe('Settings page', () => {
     await expect(page.locator('[data-reset="translateApiUrl"]')).toBeEnabled();
 
     await page.reload();
-    await page.waitForSelector('#translateApiInput');
-    const val = await page.locator('#translateApiInput').inputValue();
+    await page.waitForSelector('[data-testid="translate-api-input"]');
+    const val = await page.locator('[data-testid="translate-api-input"]').inputValue();
     expect(val).toBe('https://my-translate-proxy.example.com/translate');
   });
 
@@ -155,7 +160,7 @@ test.describe('Settings page', () => {
     await expect(page.getByTestId('translate-key-field')).toBeVisible();
 
     // Enter a key and save
-    await page.locator('#translateApiKeyInput').fill('secret-key');
+    await page.locator('[data-testid="translate-api-key-input"]').fill('secret-key');
     await page.getByTestId('settings-save-btn').click();
 
     // Reload → provider selection and key persist
@@ -163,7 +168,7 @@ test.describe('Settings page', () => {
     await page.getByTestId('term-server-input').waitFor();
     await expect(page.getByTestId('translate-provider-select')).toHaveAttribute('data-value', 'deepl');
     await expect(page.getByTestId('translate-key-field')).toBeVisible();
-    expect(await page.locator('#translateApiKeyInput').inputValue()).toBe('secret-key');
+    expect(await page.locator('[data-testid="translate-api-key-input"]').inputValue()).toBe('secret-key');
   });
 
   test('settings link opens settings.html from main app via \u22ef menu', async ({ page }) => {    await page.goto('/');

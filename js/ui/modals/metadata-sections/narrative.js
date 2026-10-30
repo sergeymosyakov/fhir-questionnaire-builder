@@ -33,6 +33,7 @@ class NarrativeSection extends Section {
       narrativeDivSpacer.className = 'meta-modal-lbl';
       const narrativeDivPre = document.createElement('pre');
       narrativeDivPre.className   = 'meta-modal-narrative';
+      narrativeDivPre.dataset.testid = 'meta-narrative-div';
       narrativeDivPre.textContent = questMeta._rawText.div;
       narrativeDivRow.append(narrativeDivSpacer, narrativeDivPre);
       frag.appendChild(narrativeDivRow);

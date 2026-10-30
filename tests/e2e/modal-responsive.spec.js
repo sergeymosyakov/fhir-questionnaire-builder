@@ -20,6 +20,9 @@
 //   libraryModalMaximize     same toggle, on the modal with a per-modal body max-height cap
 //
 // Run: npx playwright test tests/e2e/modal-responsive.spec.js
+//   loadFormatModalBox   Load Format modal box
+//   libraryModalBox      Library modal box
+//   libraryModalFooter   Library modal footer
 
 import { test, expect } from '@playwright/test';
 
@@ -41,7 +44,7 @@ test.describe('Modal sizing — mobile (<1024px) fills the viewport', () => {
     await waitForLoad(page);
     await openModal(page, 'load-from-file-item', 'loadFormatModal');
 
-    const box = await page.locator('[data-testid="loadFormatModal"] .modal-box').boundingBox();
+    const box = await page.locator('[data-testid="loadFormatModalBox"]').boundingBox();
     expect(box.x).toBeCloseTo(0, 0);
     expect(box.width).toBeCloseTo(480, 0);
     expect(box.y + box.height).toBeCloseTo(800, 0);
@@ -52,8 +55,8 @@ test.describe('Modal sizing — mobile (<1024px) fills the viewport', () => {
     await waitForLoad(page);
     await openModal(page, 'load-library-item', 'libraryModal');
 
-    const boxRect    = await page.locator('[data-testid="libraryModal"] .modal-box').boundingBox();
-    const footerRect = await page.locator('[data-testid="libraryModal"] .modal-footer').boundingBox();
+    const boxRect    = await page.locator('[data-testid="libraryModalBox"]').boundingBox();
+    const footerRect = await page.locator('[data-testid="libraryModalFooter"]').boundingBox();
     expect(boxRect.width).toBeCloseTo(480, 0);
     expect(footerRect.y + footerRect.height).toBeCloseTo(boxRect.y + boxRect.height, 0);
   });
@@ -75,7 +78,7 @@ test.describe('Modal sizing — desktop (\u22651024px) stays centered/capped', (
     await waitForLoad(page);
     await openModal(page, 'load-from-file-item', 'loadFormatModal');
 
-    const box = await page.locator('[data-testid="loadFormatModal"] .modal-box').boundingBox();
+    const box = await page.locator('[data-testid="loadFormatModalBox"]').boundingBox();
     expect(box.width).toBeLessThan(1280);
     expect(box.height).toBeLessThan(800);
   });
@@ -85,7 +88,7 @@ test.describe('Modal sizing — desktop (\u22651024px) stays centered/capped', (
     await waitForLoad(page);
     await openModal(page, 'load-from-file-item', 'loadFormatModal');
 
-    const boxLocator = page.locator('[data-testid="loadFormatModal"] .modal-box');
+    const boxLocator = page.locator('[data-testid="loadFormatModalBox"]');
     const original = await boxLocator.boundingBox();
     expect(original.width).toBeLessThan(1280);
 
@@ -109,8 +112,8 @@ test.describe('Modal sizing — desktop (\u22651024px) stays centered/capped', (
 
     await page.getByTestId('libraryModalMaximize').click();
 
-    const boxRect    = await page.locator('[data-testid="libraryModal"] .modal-box').boundingBox();
-    const footerRect = await page.locator('[data-testid="libraryModal"] .modal-footer').boundingBox();
+    const boxRect    = await page.locator('[data-testid="libraryModalBox"]').boundingBox();
+    const footerRect = await page.locator('[data-testid="libraryModalFooter"]').boundingBox();
     expect(boxRect.height).toBeCloseTo(800, 0);
     expect(footerRect.y + footerRect.height).toBeCloseTo(boxRect.y + boxRect.height, -1);
   });

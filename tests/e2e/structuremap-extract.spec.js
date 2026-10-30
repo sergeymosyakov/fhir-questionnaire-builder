@@ -7,6 +7,9 @@
 //   export-structuremap-extract-item — menu item in Save ▾
 //   structureMapExtract               — modal testid
 //   meta-target-structure-map         — Properties modal field
+//   def-extract-summary       extract result summary line
+//   structureMapExtractClose  StructureMap Extract modal close button
+//   def-extract-warn          extract warning hint
 
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
@@ -45,7 +48,7 @@ test.describe('SDC StructureMap Extract', () => {
     await openDropdownItem(page, 'export-btn', 'export-structuremap-extract-item');
     const modal = page.locator('[data-testid="structureMapExtract"]').first();
     await expect(modal).toBeVisible();
-    await expect(modal.locator('.def-extract-summary')).toContainText('Extracted 1 resource');
+    await expect(modal.getByTestId('def-extract-summary')).toContainText('Extracted 1 resource');
   });
 
   test('modal closes on × button', async ({ page }) => {
@@ -53,7 +56,7 @@ test.describe('SDC StructureMap Extract', () => {
     await openDropdownItem(page, 'export-btn', 'export-structuremap-extract-item');
     const modal = page.locator('[data-testid="structureMapExtract"]').first();
     await expect(modal).toBeVisible();
-    await modal.locator('.modal-close').click();
+    await modal.getByTestId('structureMapExtractClose').click();
     await expect(modal).not.toBeVisible();
   });
 
@@ -93,7 +96,7 @@ test.describe('SDC StructureMap Extract', () => {
     await openDropdownItem(page, 'export-btn', 'export-structuremap-extract-item');
     const modal = page.locator('[data-testid="structureMapExtract"]').first();
     await expect(modal).toBeVisible();
-    await expect(modal.locator('.def-extract-warn')).toContainText('targetStructureMap');
+    await expect(modal.getByTestId('def-extract-warn')).toContainText('targetStructureMap');
     await expect(page.getByTestId('structureMapExtractApply')).toBeDisabled();
   });
 });

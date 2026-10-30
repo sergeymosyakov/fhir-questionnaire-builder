@@ -333,6 +333,7 @@ function renderContained(contained) {
   for (const r of contained) {
     const heading = el('h3', { text: `${r.resourceType}/${r.id || '(no id)'}` });
     if (r.id) heading.id = 'qdoc-contained-' + r.id;
+    if (r.id) heading.dataset.testid = 'qdoc-contained-' + r.id;
     wrap.appendChild(heading);
     wrap.appendChild(jsonBlock(r));
   }

@@ -4,6 +4,9 @@
 // Tested elements:
 //   export-def-extract-item — menu item in Save ▾
 //   defExtract              — modal testid
+//   defExtractBody       Definition Extract modal body
+//   defExtractClose      Definition Extract modal close button
+//   def-extract-summary  extract result summary line
 
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
@@ -43,7 +46,7 @@ test.describe('SDC Definition Extract', () => {
     await openDropdownItem(page, 'export-btn', 'export-def-extract-item');
     const modal = page.locator('[data-testid="defExtract"]').first();
     await expect(modal).toBeVisible();
-    const bodyText = await modal.locator('.modal-body').textContent();
+    const bodyText = await modal.getByTestId('defExtractBody').textContent();
     expect(bodyText.length).toBeGreaterThan(0);
   });
 
@@ -52,7 +55,7 @@ test.describe('SDC Definition Extract', () => {
     await openDropdownItem(page, 'export-btn', 'export-def-extract-item');
     const modal = page.locator('[data-testid="defExtract"]').first();
     await expect(modal).toBeVisible();
-    await modal.locator('.modal-close').click();
+    await modal.getByTestId('defExtractClose').click();
     await expect(modal).not.toBeVisible();
   });
 
@@ -62,7 +65,7 @@ test.describe('SDC Definition Extract', () => {
     const modal = page.locator('[data-testid="defExtract"]').first();
     await expect(modal).toBeVisible();
     // The body should contain FHIR resource references (Bundle, Patient, or similar)
-    const bodyText = await modal.locator('.modal-body').textContent();
+    const bodyText = await modal.getByTestId('defExtractBody').textContent();
     // Either a bundle or a "no extractable data" message
     expect(bodyText.length).toBeGreaterThan(10);
   });
@@ -112,7 +115,7 @@ test.describe('SDC Definition Extract — repeating field values', () => {
     await openDropdownItem(page, 'export-btn', 'export-def-extract-item');
     const modal = page.locator('[data-testid="defExtract"]').first();
     await expect(modal).toBeVisible();
-    await expect(modal.locator('.def-extract-summary')).toContainText('Extracted 1 resource');
+    await expect(modal.getByTestId('def-extract-summary')).toContainText('Extracted 1 resource');
   });
 
   test('downloaded bundle promotes repeated given names to an array', async ({ page }) => {

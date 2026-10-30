@@ -8,6 +8,7 @@
 //   fhir-file-input   — questionnaire file input
 //   action-codes      — "Props" button on an item card (opener)
 //   codesModal        — Item Properties modal
+//   codesModalBox     — Codes modal box
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -25,7 +26,7 @@ async function load(page) {
 }
 
 const focusInModal = (page) => page.evaluate(() => {
-  const box = document.querySelector('[data-testid="codesModal"] .modal-box');
+  const box = document.querySelector('[data-testid="codesModalBox"]');
   return !!box && box.contains(document.activeElement);
 });
 
@@ -35,7 +36,7 @@ test.describe('modal focus management', () => {
     const opener = page.locator('[data-node-id] [data-testid="action-codes"]').first();
     await expect(opener).toBeVisible();
     await opener.click();
-    const box = page.locator('[data-testid="codesModal"] .modal-box');
+    const box = page.locator('[data-testid="codesModalBox"]');
     await expect(box).toBeVisible();
     await expect(box).toHaveAttribute('role', 'dialog');
     await expect(box).toHaveAttribute('aria-modal', 'true');
@@ -44,14 +45,14 @@ test.describe('modal focus management', () => {
   test('focus moves into the dialog on open', async ({ page }) => {
     await load(page);
     await page.locator('[data-node-id] [data-testid="action-codes"]').first().click();
-    await expect(page.locator('[data-testid="codesModal"] .modal-box')).toBeVisible();
+    await expect(page.locator('[data-testid="codesModalBox"]')).toBeVisible();
     expect(await focusInModal(page)).toBe(true);
   });
 
   test('Tab keeps focus trapped inside the dialog', async ({ page }) => {
     await load(page);
     await page.locator('[data-node-id] [data-testid="action-codes"]').first().click();
-    await expect(page.locator('[data-testid="codesModal"] .modal-box')).toBeVisible();
+    await expect(page.locator('[data-testid="codesModalBox"]')).toBeVisible();
     for (let i = 0; i < 8; i++) {
       await page.keyboard.press('Tab');
       expect(await focusInModal(page)).toBe(true);
@@ -64,7 +65,7 @@ test.describe('modal focus management', () => {
     await load(page);
     const opener = page.locator('[data-node-id] [data-testid="action-codes"]').first();
     await opener.click();
-    await expect(page.locator('[data-testid="codesModal"] .modal-box')).toBeVisible();
+    await expect(page.locator('[data-testid="codesModalBox"]')).toBeVisible();
 
     await page.keyboard.press('Escape');
     await expect(page.locator('[data-testid="codesModal"]')).toBeHidden();

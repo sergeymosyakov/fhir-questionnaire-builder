@@ -44,6 +44,7 @@
     for (const sec of manifest.sections) {
       const h = document.createElement('div');
       h.className = 'doc-nav-section';
+      h.dataset.testid = 'doc-nav-section';
       h.textContent = sec.label;
       sidebarEl.appendChild(h);
 
@@ -53,6 +54,7 @@
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.className = 'doc-nav-link';
+        a.dataset.testid = 'doc-nav-link';
         a.href = '#/' + p.id;
         a.textContent = p.title;
         a.dataset.id = p.id;
@@ -110,6 +112,7 @@
     h.textContent = page.title;
     const p = document.createElement('p');
     p.className = 'doc-placeholder';
+    p.dataset.testid = 'doc-placeholder';
     p.textContent = '📝 This page is being written.';
     contentEl.append(h, p);
     tocEl.classList.add('doc-hidden');
@@ -121,6 +124,7 @@
     h.textContent = 'Page not found';
     const p = document.createElement('p');
     p.className = 'doc-placeholder';
+    p.dataset.testid = 'doc-placeholder';
     p.textContent = id ? `No documentation page for "${id}".` : 'No page selected.';
     contentEl.append(h, p);
     tocEl.classList.add('doc-hidden');

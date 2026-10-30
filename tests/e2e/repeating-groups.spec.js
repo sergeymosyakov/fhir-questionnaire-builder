@@ -19,6 +19,7 @@
 //   node-title-display
 //   repeatableModal
 //   add-menu-item
+//   node-group           group node card in the builder tree
 // ────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -288,7 +289,7 @@ test.describe('repeating group — FHIR round-trip', () => {
 test.describe('repeating group — Repeatable action link in builder', () => {
   test('loaded repeating group has Repeatable action link highlighted (active)', async ({ page }) => {
     await freshLoad(page);
-    const repeatBtn = page.locator('[data-testid="tree-container"] .node-group').filter({
+    const repeatBtn = page.locator('[data-testid="tree-container"] [data-testid="node-group"]').filter({
       has: page.locator('[data-testid="node-title-display"]:has-text("Medications")'),
     }).first().locator('[data-testid="action-repeatable"]').first();
     await expect(repeatBtn).toBeVisible({ timeout: 5_000 });
@@ -308,7 +309,7 @@ test.describe('repeating group — Repeatable action link in builder', () => {
 
   test('clicking Repeatable action link opens the Repeatable modal', async ({ page }) => {
     await freshLoad(page);
-    const repeatBtn = page.locator('[data-testid="tree-container"] .node-group').filter({
+    const repeatBtn = page.locator('[data-testid="tree-container"] [data-testid="node-group"]').filter({
       has: page.locator('[data-testid="node-title-display"]:has-text("Medications")'),
     }).first().locator('[data-testid="action-repeatable"]').first();
     await expect(repeatBtn).toBeVisible({ timeout: 5_000 });
@@ -322,7 +323,7 @@ test.describe('repeating group — Repeatable action link in builder', () => {
     await page.goto('/');
     await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
     await page.getByTestId('add-root-group-btn').click();
-    const groupNode = page.locator('[data-testid="tree-container"] .node-group').first();
+    const groupNode = page.locator('[data-testid="tree-container"] [data-testid="node-group"]').first();
     // Add a child item so the group has children (needed for instances to render)
     await expect(groupNode.getByTestId('group-add-btn')).toBeVisible({ timeout: 5_000 });
     await groupNode.getByTestId('group-add-btn').click();
@@ -330,7 +331,7 @@ test.describe('repeating group — Repeatable action link in builder', () => {
     await expect(addItemBtn).toBeVisible({ timeout: 5_000 });
     await addItemBtn.click();
     // Now enable Repeatable on the group
-    const repeatBtn = page.locator('[data-testid="tree-container"] .node-group [data-testid="action-repeatable"]').first();
+    const repeatBtn = page.locator('[data-testid="tree-container"] [data-testid="node-group"] [data-testid="action-repeatable"]').first();
     await expect(repeatBtn).toBeVisible({ timeout: 5_000 });
     await expect(repeatBtn).not.toHaveClass(/action-edit--active/);
     await repeatBtn.click();

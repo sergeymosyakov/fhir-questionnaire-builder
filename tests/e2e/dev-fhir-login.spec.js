@@ -10,6 +10,8 @@
 //   dev-login-test-btn      — "Test" button (one-off verify fetch, not stored)
 //   dev-login-reset-btn     — "Reset" button
 //   dev-login-status        — saved/not-configured status line
+//   notif-box-info       info toast box
+//   notif-box-error      error toast box
 // ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -37,7 +39,7 @@ test.describe('FHIR debug login page', () => {
     await page.getByTestId('dev-login-token-url').fill(TOKEN_URL);
     // Client ID / Secret left empty
     await page.getByTestId('dev-login-save-btn').click();
-    await expect(page.locator('.notif-box.notif--error')).toContainText('required');
+    await expect(page.getByTestId('notif-box-error')).toContainText('required');
   });
 
   test('Save persists credentials without any network call', async ({ page }) => {
@@ -74,7 +76,7 @@ test.describe('FHIR debug login page', () => {
     await page.getByTestId('dev-login-client-secret').fill('mock-secret');
     await page.getByTestId('dev-login-test-btn').click();
 
-    await expect(page.locator('.notif-box.notif--info')).toContainText('Credentials work', { timeout: 8000 });
+    await expect(page.getByTestId('notif-box-info')).toContainText('Credentials work', { timeout: 8000 });
     // Test never saved the fields (only Save does) — nothing in session storage.
     expect(await page.evaluate(() => sessionStorage.getItem('fhirqb.debugLogin.tokenUrl'))).toBeNull();
   });

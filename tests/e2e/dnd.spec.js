@@ -8,11 +8,10 @@
 //   add-root-group-btn   "+Add Root Group" toolbar button
 //   group-add-btn        gear/add button on a group
 //   add-menu-item        "Add Item" option in the gear dropdown
-//
-// CSS classes / selectors:
-//   .node-drag-handle    ⠿ drag handle element
-//   .drop-zone-above     drop zone that accepts 'before' drops
-//   .drop-zone-inside    drop zone that accepts 'inside-last' drops (into group)
+//   node-drag-handle     ⠿ drag handle element
+//   drop-zone-above      drop zone that accepts 'before' drops
+//   drop-zone-inside     drop zone that accepts 'inside-last' drops (into group)
+//   node-wrap            wrapper around a node and its drop zones
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -80,13 +79,13 @@ test.describe('Drag & Drop — node reorder', () => {
     await freshStart(page);
     await addRootGroup(page);
     await addItemToGroup(page, '1');
-    await expect(page.locator('[data-node-id="1.1"] .node-drag-handle')).toBeVisible();
+    await expect(page.locator('[data-node-id="1.1"] [data-testid="node-drag-handle"]')).toBeVisible();
   });
 
   test('drag handle is visible on groups', async ({ page }) => {
     await freshStart(page);
     await addRootGroup(page);
-    await expect(page.locator('[data-node-id="1"] .node-drag-handle')).toBeVisible();
+    await expect(page.locator('[data-node-id="1"] [data-testid="node-drag-handle"]')).toBeVisible();
   });
 
   test('dragging item 1.2 before item 1.1 reverses order in FHIR export', async ({ page }) => {
@@ -98,11 +97,11 @@ test.describe('Drag & Drop — node reorder', () => {
     const orderBefore = await getGroupChildOrder(page, '1');
     expect(orderBefore).toEqual(['1.1', '1.2']);
 
-    // Drag 1.2's handle to the drop zone above 1.1 (first .drop-zone-above inside group 1)
+    // Drag 1.2's handle to the drop zone above 1.1 (first drop-zone-above inside group 1)
     await doDrag(
       page,
-      '[data-node-id="1.2"] .node-drag-handle',
-      { sel: "[data-node-id='1'] .drop-zone-above", index: 0 }
+      '[data-node-id="1.2"] [data-testid="node-drag-handle"]',
+      { sel: `[data-node-id='1'] [data-testid="drop-zone-above"]`, index: 0 }
     );
 
     // After drag: order should be [1.2, 1.1]
@@ -115,11 +114,11 @@ test.describe('Drag & Drop — node reorder', () => {
     await addRootGroup(page);
     await addItems(page, '1', 2);
 
-    // Drag 1.1 to the .drop-zone-inside (inside-last) of group 1
+    // Drag 1.1 to the drop-zone-inside (inside-last) of group 1
     await doDrag(
       page,
-      '[data-node-id="1.1"] .node-drag-handle',
-      { sel: "[data-node-id='1'] .drop-zone-inside" }
+      '[data-node-id="1.1"] [data-testid="node-drag-handle"]',
+      { sel: `[data-node-id='1'] [data-testid="drop-zone-inside"]` }
     );
 
     const order = await getGroupChildOrder(page, '1');
@@ -134,11 +133,11 @@ test.describe('Drag & Drop — node reorder', () => {
     await expect(page.locator('[data-node-id="2"]')).toBeVisible();
 
     // Drag group 2 to the drop zone above group 1
-    // The drop-zone-above for group 1 is inside group 1's .node-wrap (as preceding sibling)
+    // The drop-zone-above for group 1 is inside group 1's node-wrap (as preceding sibling)
     await doDrag(
       page,
-      '[data-node-id="2"] .node-drag-handle',
-      { anchor: "[data-node-id='1']", closest: '.node-wrap', within: '.drop-zone-above' }
+      '[data-node-id="2"] [data-testid="node-drag-handle"]',
+      { anchor: "[data-node-id='1']", closest: '[data-testid="node-wrap"]', within: '[data-testid="drop-zone-above"]' }
     );
 
     // After drag: exported FHIR item[0] should be '2'
@@ -164,8 +163,8 @@ test.describe('Drag & Drop — node reorder', () => {
     // Drag 1.1 into group 2 (drop-zone-inside)
     await doDrag(
       page,
-      '[data-node-id="1.1"] .node-drag-handle',
-      { sel: "[data-node-id='2'] .drop-zone-inside" }
+      '[data-node-id="1.1"] [data-testid="node-drag-handle"]',
+      { sel: `[data-node-id='2'] [data-testid="drop-zone-inside"]` }
     );
 
     const json = await page.evaluate(async () => {
@@ -188,8 +187,8 @@ test.describe('Drag & Drop — node reorder', () => {
     // Drag 1.2 to before 1.1
     await doDrag(
       page,
-      '[data-node-id="1.2"] .node-drag-handle',
-      { sel: "[data-node-id='1'] .drop-zone-above", index: 0 }
+      '[data-node-id="1.2"] [data-testid="node-drag-handle"]',
+      { sel: `[data-node-id='1'] [data-testid="drop-zone-above"]`, index: 0 }
     );
 
     const order = await getGroupChildOrder(page, '1');
@@ -206,8 +205,8 @@ test.describe('Drag & Drop — node reorder', () => {
 
     await doDrag(
       page,
-      '[data-node-id="1.2"] .node-drag-handle',
-      { sel: "[data-node-id='1'] .drop-zone-above", index: 0 }
+      '[data-node-id="1.2"] [data-testid="node-drag-handle"]',
+      { sel: `[data-node-id='1'] [data-testid="drop-zone-above"]`, index: 0 }
     );
 
     // Both preview items should still be visible after re-render

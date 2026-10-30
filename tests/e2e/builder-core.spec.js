@@ -36,6 +36,7 @@
 //   preview-nav-btn          "↗" icon on preview rows
 //   preview-required-star    "*" required indicator
 //   preview-optional-badge   "optional" badge
+//   clearConfirmModal    Clear-questionnaire confirm modal backdrop
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -72,7 +73,7 @@ test.describe('Clear form', () => {
     await expect(page.locator('[data-testid="preview-panel"] [data-preview-id]').first()).toBeVisible();
 
     await page.getByTestId('clear-form-btn').click();
-    await page.waitForSelector('.clear-confirm-backdrop');
+    await page.getByTestId('clearConfirmModal').waitFor();
     await page.getByTestId('clear-confirm-clear-btn').click();
 
     await expect(page.locator('[data-testid="tree-container"] [data-node-id]')).toHaveCount(0);

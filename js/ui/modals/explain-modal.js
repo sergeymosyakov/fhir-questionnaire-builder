@@ -58,6 +58,7 @@ class ExplainModal extends Modal {
     for (const r of data.rows) {
       const row = document.createElement('div');
       row.className = 'explain-row';
+      row.dataset.testid = 'explain-row';
       row.style.setProperty('--explain-depth', 0);
       row.appendChild(_icon(r.ok));
       const span = document.createElement('span');
@@ -87,6 +88,7 @@ function _renderNode(node, depth) {
 
   const row = document.createElement('div');
   row.className = 'explain-row';
+  row.dataset.testid = 'explain-row';
   row.style.setProperty('--explain-depth', depth);
   row.appendChild(_icon(node.result));
 

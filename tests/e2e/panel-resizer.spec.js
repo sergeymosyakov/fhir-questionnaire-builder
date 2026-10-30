@@ -7,6 +7,7 @@
 // ── data-testid registry ─────────────────────────────────────────────────────
 //   panel-resizer   draggable divider between the panels (set by PanelResizer)
 //   left-panel      builder (left) panel whose width is resized (set by PanelResizer)
+//   resize-overlay       drag overlay shown while resizing panels
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -41,7 +42,7 @@ test.describe('Panel resizer', () => {
     const before = await panelWidth(page);
     await dragDivider(page, 120);
     await expect.poll(() => panelWidth(page)).toBe(before + 120);
-    await expect(page.locator('#resize-overlay')).toHaveCount(0);
+    await expect(page.getByTestId('resize-overlay')).toHaveCount(0);
   });
 
   test('dragging the divider left narrows the left panel', async ({ page }) => {

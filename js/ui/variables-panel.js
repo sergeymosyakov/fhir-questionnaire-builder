@@ -119,6 +119,7 @@ class VariablesModal extends Modal {
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.className = 'variables-name-input';
+    nameInput.dataset.testid = 'variables-name-input-' + index;
     nameInput.placeholder = 'variableName';
     nameInput.value = _draft[index].name;
     nameInput.spellcheck = false;
@@ -134,6 +135,7 @@ class VariablesModal extends Modal {
     row.appendChild(nameWrap);
     const exprInput = document.createElement('textarea');
     exprInput.className = 'variables-expr-input';
+    exprInput.dataset.testid = 'variables-expr-input-' + index;
     exprInput.placeholder = "FHIRPath expression, e.g. item.where(linkId='weight').answer.valueDecimal";
     exprInput.value = _draft[index].expression;
     exprInput.rows = 3;

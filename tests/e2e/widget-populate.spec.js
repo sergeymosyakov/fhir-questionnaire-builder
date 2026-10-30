@@ -13,6 +13,8 @@
 //
 // ── data-testid registry ────────────────────────────────────────────────────
 //   pop-none
+//   notif-box-           toast/notification box (suffix = type)
+//   notif-backdrop       toast backdrop
 // ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -231,7 +233,7 @@ test.describe('Widget populate (config.fhirBaseUrl / config.getAuthToken)', () =
     await page.evaluate(() => window.__popWidgets['pop-none'].populate('Patient/1'));
     await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
     await expect(page.getByTestId('pop-none')).toBeVisible();
-    await expect(page.locator('.notif-box, .modal-backdrop.notif-backdrop')).toHaveCount(0);
+    await expect(page.locator('[data-testid^="notif-box-"], [data-testid="notif-backdrop"]')).toHaveCount(0);
 
     // Attach a listener — the host is told, with a widget-appropriate message
     // (never "Open Settings", which doesn't exist for an embedded widget).

@@ -19,6 +19,8 @@
 //   constraintModalClose  × close button
 //   constraintModalCancel Cancel button
 //   constraintModalApply  Apply button
+//   constraint-card-     constraint card (suffix = index)
+//   constraint-rm-btn-0  remove button of the 1st constraint card
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -144,7 +146,7 @@ test.describe('Constraint modal — draft pattern', () => {
 
     await openConstraintModal(page);
     await constraintModalBody(page).getByTestId('constraint-add-btn').click();
-    await expect(constraintModalBody(page).locator('.constraint-card')).toHaveCount(1);
+    await expect(constraintModalBody(page).locator('[data-testid^="constraint-card-"]')).toHaveCount(1);
   });
 
   test('Cancel after adding does not save the constraint', async ({ page }) => {
@@ -201,7 +203,7 @@ test.describe('Constraint modal — draft pattern', () => {
 
     // Open again and remove the card
     await actionLink.click();
-    await constraintModalBody(page).locator('.vis-cond-rm').first().click();
+    await constraintModalBody(page).getByTestId('constraint-rm-btn-0').click();
     await constraintModalApply(page).click();
 
     await expect(actionLink).not.toHaveClass(/action-edit--active/);

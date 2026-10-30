@@ -39,6 +39,7 @@ export class DefExtractModal extends Modal {
     if (warnings.length) {
       const warn = document.createElement('div');
       warn.className = 'modal-field-hint def-extract-warn';
+      warn.dataset.testid = 'def-extract-warn';
       warn.textContent = warnings.join(' ');
       this.body.appendChild(warn);
     }
@@ -53,6 +54,7 @@ export class DefExtractModal extends Modal {
     // Summary
     const summary = document.createElement('p');
     summary.className = 'def-extract-summary';
+    summary.dataset.testid = 'def-extract-summary';
     summary.textContent = `Extracted ${count} resource${count !== 1 ? 's' : ''} from current answers.`;
     this.body.appendChild(summary);
 

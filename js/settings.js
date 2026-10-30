@@ -112,6 +112,7 @@ function _renderValidators(validators) {
   for (const v of validators) {
     const row = document.createElement('div');
     row.className = 's-validator-row';
+    row.dataset.testid = 's-validator-row';
 
     const typeEl = document.createElement('span');
     typeEl.className = 's-validator-type';
@@ -144,6 +145,7 @@ function _renderProviders() {
     rank.textContent = '#' + (i + 1);
 
     const badge = document.createElement('span');
+    badge.dataset.testid = 's-provider-badge';
     badge.className = 's-provider-badge' +
       (p.label.includes('Custom') ? ' custom' : p.label.includes('Cloud') ? ' cloud' : '');
     badge.textContent = p.label;

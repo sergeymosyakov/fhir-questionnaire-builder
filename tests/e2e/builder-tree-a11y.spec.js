@@ -11,6 +11,7 @@
 //   node-title-display  — read-only node title span
 //   node-title-input    — inline title textarea
 //   node-gear-btn       — ⚙ node actions button
+//   node-gear-btn-menu   node gear dropdown menu
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -50,7 +51,7 @@ test.describe('builder tree keyboard accessibility', () => {
     await gear.click();
     await expect(gear).toHaveAttribute('aria-expanded', 'true');
 
-    const menu = node.locator('.node-gear-menu').first();
+    const menu = node.getByTestId('node-gear-btn-menu').first();
     await expect(menu).toHaveAttribute('role', 'menu');
     const item = menu.locator('[role="menuitem"]').first();
     await expect(item).toBeVisible();

@@ -18,6 +18,7 @@
 //   patient-preset-btn         "Patient ▾" toolbar dropdown trigger
 //
 // Run: npx playwright test tests/e2e/panel-visibility.spec.js
+//   top-panel-copyright  GitHub/copyright block in the top bar
 
 import { test, expect } from '@playwright/test';
 
@@ -29,8 +30,8 @@ async function waitForLoad(page) {
 
 const leftRailTab  = page => page.getByTestId('left-panel-rail-tab');
 const rightRailTab = page => page.getByTestId('right-panel-rail-tab');
-const leftPanel    = page => page.locator('.left-panel');
-const rightPanel   = page => page.locator('.right-panel');
+const leftPanel    = page => page.getByTestId('left-panel');
+const rightPanel   = page => page.getByTestId('right-panel');
 
 test.describe('Panel visibility toggle — narrow screens', () => {
   test.use({ viewport: { width: 480, height: 800 } });
@@ -136,10 +137,10 @@ test.describe('Top-panel narrow-screen cleanup', () => {
     await page.setViewportSize({ width: 480, height: 800 });
     await page.goto('/');
     await waitForLoad(page);
-    await expect(page.locator('.top-panel-copyright')).toBeHidden();
+    await expect(page.getByTestId('top-panel-copyright')).toBeHidden();
 
     await page.setViewportSize({ width: 1280, height: 800 });
-    await expect(page.locator('.top-panel-copyright')).toBeVisible();
+    await expect(page.getByTestId('top-panel-copyright')).toBeVisible();
   });
 });
 
@@ -153,7 +154,7 @@ test.describe('Top-panel — no horizontal overflow at narrow widths', () => {
 
       await expect(async () => {
         const overflow = await page.evaluate(() => {
-          const tp = document.querySelector('.top-panel');
+          const tp = document.querySelector('[data-testid="top-panel"]');
           return tp.scrollWidth - tp.clientWidth;
         });
         expect(overflow).toBeLessThanOrEqual(0);

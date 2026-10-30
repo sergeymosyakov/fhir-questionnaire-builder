@@ -88,6 +88,7 @@ export function init(onDrop, tree) {
 export function makeDragHandle(node) {
   const h = document.createElement('span');
   h.className = 'node-drag-handle';
+  h.dataset.testid = 'node-drag-handle';
   h.dataset.tipTitle = 'Drag to reorder';
   h.textContent = '⠿';
   h.draggable = true;

@@ -9,6 +9,7 @@
 //   helpModal       help modal backdrop
 //   helpModalClose  × close button
 //   helpModalCancel Close button in footer
+//   help-iframe          iframe embedding help.html
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -80,14 +81,14 @@ test.describe('help modal — iframe content', () => {
     await freshPage(page);
     await page.getByTestId('more-btn').click();
     await page.getByTestId('help-btn').click();
-    await expect(page.locator('[data-testid="helpModalBody"] iframe.help-iframe')).toBeVisible();
+    await expect(page.locator('[data-testid="helpModalBody"] [data-testid="help-iframe"]')).toBeVisible();
   });
 
   test('iframe loads the help page (title visible inside frame)', async ({ page }) => {
     await freshPage(page);
     await page.getByTestId('more-btn').click();
     await page.getByTestId('help-btn').click();
-    const frame = page.frameLocator('[data-testid="helpModalBody"] iframe.help-iframe');
+    const frame = page.frameLocator('[data-testid="helpModalBody"] [data-testid="help-iframe"]');
     await expect(frame.locator('h1')).toBeVisible({ timeout: 8_000 });
     await expect(frame.locator('h1')).toContainText('FHIR Field Reference');
   });
@@ -96,7 +97,7 @@ test.describe('help modal — iframe content', () => {
     await freshPage(page);
     await page.getByTestId('more-btn').click();
     await page.getByTestId('help-btn').click();
-    const frame = page.frameLocator('[data-testid="helpModalBody"] iframe.help-iframe');
+    const frame = page.frameLocator('[data-testid="helpModalBody"] [data-testid="help-iframe"]');
     await frame.getByTestId('help-search').fill('linkId');
     await expect(frame.getByTestId('help-table').locator('tbody tr:not(.help-cat-sep)')).toHaveCount(1);
   });
@@ -105,7 +106,7 @@ test.describe('help modal — iframe content', () => {
     await freshPage(page);
     await page.getByTestId('more-btn').click();
     await page.getByTestId('help-btn').click();
-    const frame = page.frameLocator('[data-testid="helpModalBody"] iframe.help-iframe');
+    const frame = page.frameLocator('[data-testid="helpModalBody"] [data-testid="help-iframe"]');
     await expect(frame.getByTestId('help-table').locator('tbody')).toBeVisible({ timeout: 8_000 });
     const rows = frame.getByTestId('help-table').locator('tbody tr:not(.help-cat-sep)');
     const count = await rows.count();
@@ -116,7 +117,7 @@ test.describe('help modal — iframe content', () => {
     await freshPage(page);
     await page.getByTestId('more-btn').click();
     await page.getByTestId('help-btn').click();
-    const frame = page.frameLocator('[data-testid="helpModalBody"] iframe.help-iframe');
+    const frame = page.frameLocator('[data-testid="helpModalBody"] [data-testid="help-iframe"]');
     // Wait for the embedded page to render, then confirm the back link is hidden.
     await expect(frame.locator('h1')).toBeVisible({ timeout: 8_000 });
     await expect(frame.locator('[data-back-link]')).toBeHidden();

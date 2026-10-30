@@ -25,6 +25,9 @@
 //   prompt-save
 //   add-root-group-btn
 //   answerTypeModal
+//   answerTypeModalClose  Answer Type modal close button
+//   file-name-tag         file name tag of the attachment control
+//   notif-body-error      error toast body
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
@@ -66,7 +69,7 @@ test.describe('maxSize — Answer Type modal', () => {
     const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('max-file-size-input');
     await expect(inp).toBeVisible();
     await expect(inp).toHaveValue('2');
-    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
+    await page.getByTestId('answerTypeModalClose').click();
   });
 
   test('max-file-size-input is empty for item without maxSize', async ({ page }) => {
@@ -75,7 +78,7 @@ test.describe('maxSize — Answer Type modal', () => {
     const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('max-file-size-input');
     await expect(inp).toBeVisible();
     await expect(inp).toHaveValue('');
-    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
+    await page.getByTestId('answerTypeModalClose').click();
   });
 
   test('max-file-size-input shows value for att-both (5 MB)', async ({ page }) => {
@@ -83,7 +86,7 @@ test.describe('maxSize — Answer Type modal', () => {
     await openAnswerTypeModal(page, 'att-both');
     const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('max-file-size-input');
     await expect(inp).toHaveValue('5');
-    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
+    await page.getByTestId('answerTypeModalClose').click();
   });
 });
 
@@ -96,7 +99,7 @@ test.describe('mimeType — Answer Type modal', () => {
     const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('mime-types-input');
     await expect(inp).toBeVisible();
     await expect(inp).toHaveValue('image/jpeg, application/pdf');
-    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
+    await page.getByTestId('answerTypeModalClose').click();
   });
 
   test('mime-types-input is empty for item without mimeType', async ({ page }) => {
@@ -105,7 +108,7 @@ test.describe('mimeType — Answer Type modal', () => {
     const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('mime-types-input');
     await expect(inp).toBeVisible();
     await expect(inp).toHaveValue('');
-    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
+    await page.getByTestId('answerTypeModalClose').click();
   });
 
   test('mime-types-input shows single mimeType for att-both', async ({ page }) => {
@@ -113,7 +116,7 @@ test.describe('mimeType — Answer Type modal', () => {
     await openAnswerTypeModal(page, 'att-both');
     const inp = page.locator('[data-testid="answerTypeModal"]').getByTestId('mime-types-input');
     await expect(inp).toHaveValue('image/*');
-    await page.locator('[data-testid="answerTypeModal"] .modal-close').click();
+    await page.getByTestId('answerTypeModalClose').click();
   });
 });
 
@@ -123,14 +126,14 @@ test.describe('attachment constraints — preview hints', () => {
   test('size hint is visible for att-maxsize and contains the limit', async ({ page }) => {
     await loadFixture(page);
     const row = page.locator('[data-preview-id="att-maxsize"]');
-    const hints = row.locator('.file-size-hint');
+    const hints = row.getByTestId('file-size-hint');
     await expect(hints.first()).toContainText('2');
   });
 
   test('no size hint visible for att-none', async ({ page }) => {
     await loadFixture(page);
     const row = page.locator('[data-preview-id="att-none"]');
-    await expect(row.locator('.file-size-hint')).toHaveCount(0);
+    await expect(row.getByTestId('file-size-hint')).toHaveCount(0);
   });
 
   test('mime hint is visible for att-mimetypes', async ({ page }) => {
@@ -170,7 +173,7 @@ test.describe('maxSize — file-size validation', () => {
     const fileInput = row.locator('input[type="file"]');
     const smallBuf = Buffer.alloc(512 * 1024, 'a'); // 0.5 MB < 2 MB limit
     await fileInput.setInputFiles({ name: 'small.pdf', mimeType: 'application/pdf', buffer: smallBuf });
-    const nameTag = row.locator('.file-name-tag');
+    const nameTag = row.getByTestId('file-name-tag');
     await expect(nameTag).toContainText('small.pdf');
     await expect(nameTag).not.toHaveClass(/file-name-tag--error/);
   });
@@ -182,8 +185,8 @@ test.describe('maxSize — file-size validation', () => {
     const bigBuf = Buffer.alloc(3 * 1024 * 1024, 'a'); // 3 MB > 2 MB limit
     await fileInput.setInputFiles({ name: 'big.pdf', mimeType: 'application/pdf', buffer: bigBuf });
     // Error modal is the user-visible feedback; preview re-renders nameTag to default
-    await expect(page.locator('.notif--error .modal-body')).toContainText('File too large');
-    const nameTag = row.locator('.file-name-tag');
+    await expect(page.getByTestId('notif-body-error')).toContainText('File too large');
+    const nameTag = row.getByTestId('file-name-tag');
     await expect(nameTag).toContainText('No file chosen');
     await expect(nameTag).not.toHaveClass(/file-name-tag--error/);
   });
@@ -194,7 +197,7 @@ test.describe('maxSize — file-size validation', () => {
     const fileInput = row.locator('input[type="file"]');
     const bigBuf = Buffer.alloc(10 * 1024 * 1024, 'a'); // 10 MB — no limit
     await fileInput.setInputFiles({ name: 'huge.pdf', mimeType: 'application/pdf', buffer: bigBuf });
-    const nameTag = row.locator('.file-name-tag');
+    const nameTag = row.getByTestId('file-name-tag');
     await expect(nameTag).toContainText('huge.pdf');
     await expect(nameTag).not.toHaveClass(/file-name-tag--error/);
   });

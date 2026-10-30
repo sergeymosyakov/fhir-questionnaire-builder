@@ -23,11 +23,13 @@ export function showToast(message, type = 'error') {
   // Backdrop — reuses .modal-backdrop (fixed, flex-center, dark overlay)
   const backdrop = document.createElement('div');
   backdrop.className = 'modal-backdrop notif-backdrop';
+  backdrop.dataset.testid = 'notif-backdrop';
   backdrop.style.opacity = '0'; // runtime: animation start state
 
   // Box — reuses .modal-box (surface bg, border, shadow, flex-column)
   const box = document.createElement('div');
   box.className = `modal-box notif-box notif--${type}`;
+  box.dataset.testid = `notif-box-${type}`;
   box.setAttribute('role', 'alertdialog');
   box.setAttribute('aria-modal', 'true');
 
@@ -52,6 +54,7 @@ export function showToast(message, type = 'error') {
   // Body — reuses .modal-body
   const body = document.createElement('div');
   body.className = 'modal-body';
+  body.dataset.testid = `notif-body-${type}`;
   body.textContent = message;
 
   // Footer — reuses .modal-footer + .modal-btn--apply

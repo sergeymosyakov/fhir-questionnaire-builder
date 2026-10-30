@@ -14,6 +14,9 @@
 //   load-fhir-btn        "Questionnaires ▾" dropdown trigger
 //   loadRecentItem      "Recent draft…" item (hidden when no draft)
 //   loadRecentSep       separator above recent item
+//   settings-autosave-check  Autosave checkbox row in Settings menu
+//   settings-tips-check      Tips checkbox row in Settings menu
+//   left-panel               builder (left) panel
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -96,13 +99,13 @@ test.describe('Autosave draft', () => {
 /** Open Settings menu and return the Autosave toggle row. */
 async function openSettingsAutosave(page) {
   await page.getByTestId('tools-btn').click();
-  return page.locator('.load-menu-item--checkbox').filter({ hasText: 'Autosave' });
+  return page.getByTestId('settings-autosave-check');
 }
 
 /** Open Settings menu and return the Tips toggle row. */
 async function openSettingsTips(page) {
   await page.getByTestId('tools-btn').click();
-  return page.locator('.load-menu-item--checkbox').filter({ hasText: 'Tips' });
+  return page.getByTestId('settings-tips-check');
 }
 
 /** Whether the checkbox row is currently checked. */
@@ -180,7 +183,7 @@ test.describe('Panel width persistence', () => {
     await page.goto('/');
     await waitForLoad(page);
 
-    const width = await page.locator('.left-panel').evaluate(
+    const width = await page.getByTestId('left-panel').evaluate(
       el => parseInt(window.getComputedStyle(el).width)
     );
     expect(width).toBeCloseTo(380, -1); // within ±10 px
@@ -195,7 +198,7 @@ test.describe('Panel width persistence', () => {
     await page.goto('/');
     await waitForLoad(page);
 
-    const widthAt = () => page.locator('.left-panel').evaluate(
+    const widthAt = () => page.getByTestId('left-panel').evaluate(
       el => parseInt(window.getComputedStyle(el).width)
     );
     // Width comes from a CSS media query (var(--saved-panel-width)), not a JS

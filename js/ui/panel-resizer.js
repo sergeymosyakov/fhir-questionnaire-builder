@@ -45,6 +45,7 @@ export class PanelResizer {
       const overlay = document.createElement('div');
       overlay.id = 'resize-overlay';
       overlay.className = 'resize-overlay';
+      overlay.dataset.testid = 'resize-overlay';
       document.body.appendChild(overlay);
 
       const onMove = ev => {

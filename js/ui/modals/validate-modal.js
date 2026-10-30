@@ -203,6 +203,7 @@ class ValidateModal extends Modal {
     if (issues.length === 0) {
       const ok = document.createElement('div');
       ok.className = 'validate-ok';
+      ok.dataset.testid = 'validate-ok';
       ok.innerHTML = '<span class="validate-ok-icon">✅</span> No issues found.';
       body.appendChild(ok);
       return;
@@ -226,9 +227,11 @@ class ValidateModal extends Modal {
   _renderIssueRow(issue) {
     const row = document.createElement('div');
     row.className = 'validate-issue';
+    row.dataset.testid = 'validate-issue';
 
     const badge = document.createElement('span');
     badge.className = `validate-issue-badge validate-badge-${issue.severity}`;
+    badge.dataset.testid = 'validate-issue-badge';
     badge.textContent = issue.severity;
     row.appendChild(badge);
 
@@ -246,6 +249,7 @@ class ValidateModal extends Modal {
       const navBtn = document.createElement('button');
       navBtn.type = 'button';
       navBtn.className = 'validate-nav-btn';
+      navBtn.dataset.testid = 'validate-nav-btn';
       navBtn.dataset.tipTitle = 'Go to node in builder';
       navBtn.textContent = '↗';
       navBtn.addEventListener('click', () => {
@@ -284,12 +288,14 @@ class ValidateModal extends Modal {
       const fixBtn = document.createElement('button');
       fixBtn.type = 'button';
       fixBtn.className = 'btn-fhir';
+      fixBtn.dataset.testid = 'validate-fix-btn';
       fixBtn.textContent = 'Fix first';
       fixBtn.addEventListener('click', () => this.close());
 
       const exportBtn = document.createElement('button');
       exportBtn.type = 'button';
       exportBtn.className = 'btn-fhir btn-fhir-export';
+      exportBtn.dataset.testid = 'validate-export-btn';
       exportBtn.textContent = hasIssues ? 'Export anyway' : 'Export';
       exportBtn.addEventListener('click', () => { this._onDismiss = null; this.close(); this._onExport?.(); });
 
@@ -298,6 +304,7 @@ class ValidateModal extends Modal {
       const okBtn = document.createElement('button');
       okBtn.type = 'button';
       okBtn.className = 'btn-fhir btn-fhir-export';
+      okBtn.dataset.testid = 'validate-ok-btn';
       okBtn.textContent = hasErrors ? 'OK' : 'Great!';
       okBtn.addEventListener('click', () => this.close());
       this.footer.appendChild(okBtn);

@@ -101,7 +101,7 @@
       <div class="s-card-desc">Proxy worker that forwards requests to FHIR servers when CORS headers are not set. Required for browser-based validation against external servers.</div>
       <div class="s-field">
         <label class="s-label" for="corsProxyInput">Proxy URL</label>
-        <input id="corsProxyInput" class="s-input" type="url" placeholder="https://your-proxy.workers.dev" autocomplete="off" spellcheck="false">
+        <input id="corsProxyInput" data-testid="cors-proxy-input" class="s-input" type="url" placeholder="https://your-proxy.workers.dev" autocomplete="off" spellcheck="false">
         <button class="s-reset-btn" data-reset="corsProxyUrl" disabled>Reset</button>
         <span class="s-hint">Requests are forwarded as <code>proxy?url=&lt;encoded-target&gt;</code>. Leave blank to call servers directly.</span>
       </div>
@@ -128,13 +128,13 @@
       </div>
       <div class="s-field">
         <label class="s-label" for="translateApiInput">Endpoint URL</label>
-        <input id="translateApiInput" class="s-input" type="url" placeholder="https://translate.googleapis.com/translate_a/single" autocomplete="off" spellcheck="false">
+        <input id="translateApiInput" data-testid="translate-api-input" class="s-input" type="url" placeholder="https://translate.googleapis.com/translate_a/single" autocomplete="off" spellcheck="false">
         <button class="s-reset-btn" data-reset="translateApiUrl" disabled>Reset</button>
         <span class="s-hint" id="translateEndpointHint">Leave blank to use the provider default.</span>
       </div>
       <div class="s-field" id="translateKeyField" data-testid="translate-key-field">
         <label class="s-label" for="translateApiKeyInput" id="translateApiKeyLabel">API Key</label>
-        <input id="translateApiKeyInput" class="s-input" type="password" autocomplete="off" spellcheck="false">
+        <input id="translateApiKeyInput" data-testid="translate-api-key-input" class="s-input" type="password" autocomplete="off" spellcheck="false">
         <button class="s-reset-btn" data-reset="translateApiKey" disabled>Reset</button>
         <span class="s-hint">Stored in your browser and cloud account. Never sent anywhere except the chosen provider.</span>
       </div>

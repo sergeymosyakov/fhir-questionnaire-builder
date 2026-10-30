@@ -19,6 +19,7 @@
 //   node-picker-confirm       "Copy to selected (N)" confirm button
 //   node-picker-cb-<id>       checkbox for node with given id
 //   node-picker-hdr-<id>      non-selectable header row for node with given id
+//   constraint-card-     constraint card (suffix = index)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -246,7 +247,7 @@ test.describe('Copy to — apply behaviour', () => {
     await page.getByTestId('constraintModalCancel').click();
 
     await openConstraintModal(page, '1.2');
-    await expect(modalBody(page).locator('.constraint-card')).toHaveCount(1);
+    await expect(modalBody(page).locator('[data-testid^="constraint-card-"]')).toHaveCount(1);
     await expect(modalBody(page).locator('input[placeholder*="key"]').first()).toHaveValue('rule-1');
   });
 
@@ -262,7 +263,7 @@ test.describe('Copy to — apply behaviour', () => {
     await pickerCb(page, '1.2').check();
     await pickerConfirm(page).click();
 
-    await expect(modalBody(page).locator('.constraint-card')).toHaveCount(1);
+    await expect(modalBody(page).locator('[data-testid^="constraint-card-"]')).toHaveCount(1);
   });
 });
 
