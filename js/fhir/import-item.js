@@ -505,6 +505,8 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     } else {
       const val = extractVal(fhirItem.initial[0]);
       if (val !== undefined) node._initialValue = val;
+      // Keep the full Coding (system/display) so a value-set default re-exports unchanged
+      if (fhirItem.initial[0].valueCoding) node._initialCoding = JSON.parse(JSON.stringify(fhirItem.initial[0].valueCoding));
     }
   }
   // answerOption[].initialSelected → _initialSelected (round-trip flag)
