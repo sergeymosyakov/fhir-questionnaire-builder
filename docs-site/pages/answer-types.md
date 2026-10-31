@@ -13,22 +13,31 @@ and how each maps to FHIR.
 
 Choice questions can be shown as **radio buttons**, a **drop-down**, or
 **check-boxes** (a multi-select "checklist"); the underlying FHIR type stays
-`choice` either way.
+`choice` either way. The Answer Type editor also offers three display options:
+**Autocomplete** (a searchable drop-down, so people can type to filter a long
+list), **Lookup** (live search against a server, for a drop-down that uses an
+external value set) and **Answer table** (shows the options as table columns, for
+radio and check-box questions).
 
 ## Where choice options come from
 
-A choice/open-choice question can get its options from one of three sources:
+A choice/open-choice question can get its options from one of four sources,
+selected at the top of the Answer Type editor:
 
-- **Inline options** — a fixed list you type in, in `code=display` form (e.g.
-  `M=Male, F=Female`). Each option can also carry a coding system.
+- **Options list** — a fixed list you build row by row, each row with a code and a
+  label (e.g. `M` / `Male`), plus optional score, prefix and weight. Rows can also
+  be marked as exclusive (picking it clears the other choices).
 - **A bound value set** — reference a `ValueSet` by canonical URL
   (`answerValueSet`). External value sets are expanded through the configured
   terminology server, and the editor has a **Test expansion** action so you can
   check the URL resolves. A value set contained inside the questionnaire is used
   directly.
-- **A dynamic expression** — generate the options at run time with FHIRPath
-  (`answerExpression` / `candidateExpression`), instead of a fixed list. See
+- **Expression** — generate the options at run time with FHIRPath
+  (`answerExpression`), instead of a fixed list. See
   [FHIRPath in the builder](fhirpath.md).
+- **Candidate** — like an expression, but it produces suggested answers for the
+  respondent to choose from (`candidateExpression`). It cannot be combined with an
+  expression or a fixed options list on the same question.
 
 ## Scoring options
 
