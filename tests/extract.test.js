@@ -183,3 +183,77 @@ describe('extractObservations — value mapping', () => {
     expect(obs.derivedFrom).toEqual([{ display: 'Source QuestionnaireResponse' }]);
   });
 });
+
+describe('extractObservations — repeating groups', () => {
+  const code = [{ system: 's', code: 'c' }];
+  const q = { resourceType: 'Questionnaire', item: [
+    { linkId: 'g', type: 'group', repeats: true, item: [
+      { linkId: 'v', type: 'integer', code, extension: [flag()] },
+    ] },
+  ] };
+
+  it('extracts one Observation per group instance', () => {
+    const qr = { resourceType: 'QuestionnaireResponse', item: [
+      { linkId: 'g', item: [{ linkId: 'v', answer: [{ valueInteger: 1 }] }] },
+      { linkId: 'g', item: [{ linkId: 'v', answer: [{ valueInteger: 2 }] }] },
+      { linkId: 'g', item: [{ linkId: 'v', answer: [{ valueInteger: 3 }] }] },
+    ] };
+    const values = extractObservations(qr, q).entry.map(e => e.resource.valueInteger);
+    expect(values).toEqual([1, 2, 3]);
+  });
+
+  it('handles a repeating group nested in a repeating group', () => {
+    const nested = { resourceType: 'Questionnaire', item: [
+      { linkId: 'outer', type: 'group', repeats: true, item: [
+        { linkId: 'inner', type: 'group', repeats: true, item: [
+          { linkId: 'v', type: 'integer', code, extension: [flag()] },
+        ] },
+      ] },
+    ] };
+    const leaf = n => ({ linkId: 'inner', item: [{ linkId: 'v', answer: [{ valueInteger: n }] }] });
+    const qr = { resourceType: 'QuestionnaireResponse', item: [
+      { linkId: 'outer', item: [leaf(1), leaf(2)] },
+      { linkId: 'outer', item: [leaf(3)] },
+    ] };
+    expect(extractObservations(qr, nested).entry.map(e => e.resource.valueInteger)).toEqual([1, 2, 3]);
+  });
+
+  it('skips a group with no response instances', () => {
+    const qr = { resourceType: 'QuestionnaireResponse', item: [] };
+    expect(extractObservations(qr, q).entry).toHaveLength(0);
+  });
+
+  it('keeps answers under a question that has nested items', () => {
+    const withChild = { resourceType: 'Questionnaire', item: [
+      { linkId: 'p', type: 'boolean', code, extension: [flag()], item: [
+        { linkId: 'c', type: 'integer', code, extension: [flag()] },
+      ] },
+    ] };
+    const qr = { resourceType: 'QuestionnaireResponse', item: [
+      { linkId: 'p', answer: [{ valueBoolean: true, item: [{ linkId: 'c', answer: [{ valueInteger: 7 }] }] }] },
+    ] };
+    const bundle = extractObservations(qr, withChild);
+    expect(bundle.entry.map(e => e.resource.valueBoolean ?? e.resource.valueInteger)).toEqual([true, 7]);
+  });
+
+  it('extracts a repeating group nested inside a question answer', () => {
+    const deep = { resourceType: 'Questionnaire', item: [
+      { linkId: 'p', type: 'boolean', item: [
+        { linkId: 'g', type: 'group', repeats: true, item: [{ linkId: 'v', type: 'integer', code, extension: [flag()] }] },
+      ] },
+    ] };
+    const inst = n => ({ linkId: 'g', item: [{ linkId: 'v', answer: [{ valueInteger: n }] }] });
+    const qr = { resourceType: 'QuestionnaireResponse', item: [
+      { linkId: 'p', answer: [{ valueBoolean: true, item: [inst(1), inst(2)] }] },
+    ] };
+    expect(extractObservations(qr, deep).entry.map(e => e.resource.valueInteger)).toEqual([1, 2]);
+  });
+
+  it('does not extract items the response does not nest like the questionnaire', () => {
+    const flat = { resourceType: 'QuestionnaireResponse', item: [
+      { linkId: 'v', answer: [{ valueInteger: 9 }] },
+    ] };
+    expect(extractObservations(flat, q).entry).toHaveLength(0);
+  });
+});
+

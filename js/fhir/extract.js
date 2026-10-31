@@ -22,6 +22,7 @@ import { FHIR } from './urls/fhir.js';
 //     form of the flag (which would convey component/hasMember) is treated as
 //     "extraction enabled" but its relationship semantics are not yet applied.
 //   • Each answer of a multi-answer item becomes a separate Observation.
+//   • Every instance of a repeating group is extracted separately (the response must nest items like the questionnaire).
 //   • Skipped/cleared answers and items without a code produce nothing.
 
 const OBSERVATION_EXTRACT_URL =
@@ -83,20 +84,9 @@ function answerToValue(answer, qItem) {
   return null;
 }
 
-/** Build a flat Map<linkId, qrItem> from a QuestionnaireResponse tree. */
-function indexQR(qr) {
-  const map = new Map();
-  const walk = (items) => {
-    for (const it of items || []) {
-      if (it.linkId) map.set(it.linkId, it);
-      if (it.item) walk(it.item);
-      for (const a of it.answer || []) {
-        if (a.item) walk(a.item);
-      }
-    }
-  };
-  walk(qr.item);
-  return map;
+/** The QR item lists a matched QR item's children live in (group items, plus each answer's nested items). */
+function childScopes(qrItem) {
+  return [qrItem.item, ...(qrItem.answer || []).map(a => a.item)].filter(Boolean);
 }
 
 /** A Reference to the source QuestionnaireResponse for Observation.derivedFrom. */
@@ -161,27 +151,31 @@ export function extractObservations(qr, questionnaire, options = {}) {
   const obsProfile = options.obsProfile || [];
   const observations = [];
   if (qr && questionnaire) {
-    const qrMap = indexQR(qr);
     const rootFlag = ownFlag(questionnaire);
 
-    const walk = (items, inherited) => {
+    // `scopes` = the QR item lists a questionnaire level maps onto; a repeating group
+    // yields one QR item per instance, so each instance is walked with its own scope.
+    const walk = (items, inherited, scopes) => {
       for (const qItem of items || []) {
         const own = ownFlag(qItem);
         const effective = own === undefined ? inherited : own;
-        const qrItem = qrMap.get(qItem.linkId);
+        const matches = scopes.flatMap(list => list.filter(i => i.linkId === qItem.linkId));
         const isLeafQuestion = qItem.type !== 'group' && qItem.type !== 'display';
 
-        if (effective === true && isLeafQuestion && qItem.code?.length && qrItem) {
-          for (const ans of qrItem.answer || []) {
-            const valueProp = answerToValue(ans, qItem);
-            if (valueProp) observations.push(buildObservation(qItem, valueProp, qr, obsProfile));
+        if (effective === true && isLeafQuestion && qItem.code?.length) {
+          for (const qrItem of matches) {
+            for (const ans of qrItem.answer || []) {
+              const valueProp = answerToValue(ans, qItem);
+              if (valueProp) observations.push(buildObservation(qItem, valueProp, qr, obsProfile));
+            }
           }
         }
-        walk(qItem.item, effective);
+        // each matched instance contributes its own children; no match leaves the subtree empty
+        for (const qrItem of matches) walk(qItem.item, effective, childScopes(qrItem));
       }
     };
 
-    walk(questionnaire.item, rootFlag);
+    walk(questionnaire.item, rootFlag, [qr.item || []]);
   }
 
   return {
