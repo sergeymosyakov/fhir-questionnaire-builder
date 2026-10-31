@@ -54,12 +54,29 @@ function indexQrItems(items, map = new Map()) {
   return map;
 }
 
+// One FHIRPath result element as the value its answer control stores (Coding → code,
+// Quantity → { value, unit }, Reference → { reference }); String(object) would give "[object Object]".
+function resultScalar(node, v) {
+  if (v === null || v === undefined) return '';
+  if (typeof v !== 'object') return String(v);
+  if (node.itemType === 'reference') {
+    return { reference: String(v.reference ?? ''), ...(v.display ? { display: String(v.display) } : {}) };
+  }
+  if (node.itemType === 'quantity') return { value: v.value, unit: v.unit || v.code || '' };
+  if (v.code !== undefined) return String(v.code);
+  return v.value !== undefined ? String(v.value) : '';
+}
+
 // Coerce a raw FHIRPath result into the value stored in values[] for a node.
 function coerceResult(node, result) {
   if (node.itemType === 'checkbox') {
     return result[0] === true || result[0] === 'true';
   }
-  return Array.isArray(result) ? result.join('') : (result[0] !== undefined ? String(result[0]) : '');
+  if (!Array.isArray(result)) return '';
+  if (node.itemType === 'reference' || node.itemType === 'quantity') {
+    return result.length ? resultScalar(node, result[0]) : '';
+  }
+  return result.map(v => resultScalar(node, v)).join('');
 }
 
 // Evaluate all readOnly calculatedExpression nodes and write results to values[].
@@ -134,11 +151,7 @@ export function evalInitialExprNodes(nodes, qr, fp, values, envVars = {}, cqlVal
     } else if (node._initialExpr) {
       try {
         const result = fp.evaluate(qr, node._initialExpr, env, fhirModel());
-        if (node.itemType === 'checkbox') {
-          values[node.id] = result[0] === true || result[0] === 'true';
-        } else {
-          values[node.id] = Array.isArray(result) ? result.join('') : (result[0] !== undefined ? String(result[0]) : '');
-        }
+        values[node.id] = coerceResult(node, result);
       } catch (_e) {
         // silently skip nodes whose expression fails
       }
