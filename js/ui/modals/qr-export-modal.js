@@ -29,7 +29,8 @@ function _resetQrMeta() {
   _qrMeta.metaSecurity  = [];
 }
 
-document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, _resetQrMeta);
+// undo/redo re-dispatch LOADED without detail — keep the user's QR metadata
+document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => { if (e.detail) _resetQrMeta(); });
 document.addEventListener(AppEvents.QR_LOADED, e => {
   _qrMeta.status        = e.detail.status        || 'in-progress';
   _qrMeta.subject       = e.detail.subject       || '';

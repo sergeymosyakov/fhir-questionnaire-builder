@@ -95,7 +95,16 @@ class SaveFormatModal extends Modal {
   _finish() {
     const done = this._onDone;
     this._onDone = null;
+    this._runPendingCancel();
     done?.();
+  }
+
+  // Runs the format's cleanup hook once and detaches the load/clear listeners.
+  _runPendingCancel() {
+    this._abortCancel?.abort();
+    this._abortCancel = null;
+    this._pendingCancel?.();
+    this._pendingCancel = null;
   }
 
   // ── Generic export handler ─────────────────────────────────────────────────
@@ -145,10 +154,13 @@ class SaveFormatModal extends Modal {
 
     // If the format has cleanup hooks, ensure they run even if the user
     // dismisses the validate modal without exporting.
+    this._abortCancel?.abort();
     if (fmt.onCancel) {
-      const cleanup = () => fmt.onCancel();
-      document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  cleanup, { once: true });
-      document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, cleanup, { once: true });
+      const ac = this._abortCancel = new AbortController();
+      const cleanup = () => this._runPendingCancel();
+      this._pendingCancel = () => fmt.onCancel();
+      document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  e => { if (e.detail) cleanup(); }, { signal: ac.signal });
+      document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, cleanup, { signal: ac.signal });
     }
   }
 }
