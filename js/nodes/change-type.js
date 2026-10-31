@@ -56,6 +56,7 @@ export function changeNodeType(node, newType, tree, _answerStore) {
   newNode._busWired = false;
   if (node.itemType !== newType) {
     delete newNode._fhirText;
+    delete newNode._fhirOpenChoice;
     // Imported bound kinds are tied to the old type
     for (const k of ['_minValueType', '_maxValueType', '_minValueRaw', '_maxValueRaw']) delete newNode[k];
   }

@@ -135,9 +135,10 @@ function _convertInitial(item) {
 
 // ── Recursive item normalisation ──────────────────────────────────────────────
 
-// DSTU2 used 'coding' as the item type; STU3+ uses 'choice'.
+// DSTU2 used 'coding' as the item type; STU3+ uses 'choice'. R5 reuses 'coding'
+// and expresses open-choice as coding + answerConstraint optionsOrString.
 function _convertItemType(item) {
-  if (item.type === 'coding') item.type = 'choice';
+  if (item.type === 'coding') item.type = item.answerConstraint === 'optionsOrString' ? 'open-choice' : 'choice';
 }
 
 function _normaliseItem(item) {

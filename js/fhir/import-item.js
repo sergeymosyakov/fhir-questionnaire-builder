@@ -78,6 +78,8 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // FHIR 'text' and 'string' both map to itemType 'text'; remember the original for export.
   if (fhirItem.type === 'text') node._fhirText = true;
+  // open-choice shown as radio/check-box keeps its FHIR type on export
+  if (fhirItem.type === 'open-choice' && node.itemType !== 'open-choice') node._fhirOpenChoice = true;
 
   // Preserve full answerOption array — the only stored answer-options field.
   if (fhirItem.answerOption) {
@@ -542,6 +544,9 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     const hasOrGroup = applyConstraints(node, fhirItem);
     if (hasOrGroup) node.logicWithParent = 'OR';
     if (fhirItem.repeats) node.repeats = true;
+    if (fhirItem.readOnly) node._readOnly = true;
+    const grpUsageModeExt = (fhirItem.extension || []).find(e => e.url === FHIR.usageMode);
+    if (grpUsageModeExt?.valueCode) node._usageMode = grpUsageModeExt.valueCode;
     const grpMinOccExt = (fhirItem.extension || []).find(
       e => e.url === FHIR.minOccurs
     );

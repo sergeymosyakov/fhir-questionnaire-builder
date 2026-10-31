@@ -291,7 +291,7 @@ function _importTranslations(q, tree, translations) {
 
 // Lang codes become object keys; block prototype-chain keys.
 function _isSafeLang(lang) {
-  return !!lang && lang !== '__proto__' && lang !== 'constructor' && lang !== 'prototype';
+  return !!lang && !(lang in Object.prototype);
 }
 
 function _ensureLang(translations, lang) {

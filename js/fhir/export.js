@@ -98,7 +98,9 @@ export function nodeToFHIRItem(node) {
     linkId: node.id,
     text:   node.title,
     type:   node.type === 'group' ? 'group'
-      : (node._fhirText && node.itemType === 'text') ? 'text' : itemTypeToFHIRType(node.itemType)
+      : (node._fhirText && node.itemType === 'text') ? 'text'
+      : (node._fhirOpenChoice && (node.itemType === 'radio' || node.itemType === 'checklist')) ? 'open-choice'
+      : itemTypeToFHIRType(node.itemType)
   };
 
   if (node._prefix) fhirItem.prefix = node._prefix;
@@ -634,7 +636,7 @@ function _exportTranslations(q, translations) {
     for (const fi of items || []) {
       // item.text
       const textExts = langs
-        .filter(l => translations[l].items[fi.linkId] != null)
+        .filter(l => Object.hasOwn(translations[l].items, fi.linkId) && translations[l].items[fi.linkId] != null)
         .map(l => _translationExt(l, translations[l].items[fi.linkId]));
       if (textExts.length) {
         fi._text = fi._text || {};
