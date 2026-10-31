@@ -18,12 +18,26 @@ External requests happen **only for features you configure or trigger**:
 
 - Terminology expansion, `$populate`, and external validation call the servers you
   set in [Settings](settings.md).
+- Out of the box the builder is pre-configured with a public terminology server
+  (tx.fhir.org) and the NLM Clinical Tables service. Opening a questionnaire that
+  refers to an external value set contacts the terminology server automatically,
+  even if you changed nothing in Settings. A questionnaire can also name its own
+  preferred terminology server, which is then contacted instead.
+- A public external validator (HAPI FHIR) is listed in the defaults but stays
+  **off** until you turn it on.
 - Translation calls the configured provider (Google `gtx` by default; optionally
   DeepL, LibreTranslate or OpenAI). Provider API keys are stored client-side.
-- A CORS proxy, when configured, forwards requests only to allowlisted FHIR
-  servers and stores no data.
+- Requests to other servers can go through a CORS proxy (a small relay needed
+  because browsers block direct calls to many FHIR servers). The default proxy is
+  run by the maintainer and stores no data. It only accepts request paths that
+  look like FHIR operations (such as value-set expansion or `$validate`); it does
+  not restrict which server the request is forwarded to. If you send an
+  authorization header to a protected server, the proxy passes it on without
+  storing it. You can point the builder at your own proxy in Settings.
 
-If you configure none of these, the builder makes no external FHIR calls.
+To keep requests under your control, point the terminology server and proxy at
+servers you run, and be careful with questionnaires that reference external value
+sets.
 
 ## Sending clinical data
 

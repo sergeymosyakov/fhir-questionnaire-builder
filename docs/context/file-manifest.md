@@ -313,6 +313,67 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `playwright.config.js` | Playwright config — Chromium only with `--headless=new` (new headless mode, consistent with headed timing), `testDir: tests/e2e`, `retries: 2` on CI, auto-starts local `serve` (via `node node_modules/.bin/serve`); reporters: `html` (open:never) + `list` |
 | `tests/e2e/perf/large-questionnaire.spec.js` | Performance regression suite (tagged `@perf`) — loads the real WHO EmCare fixture (226 items) + a generated depth-8/250-item calc-chain form; measures `builder:render-done`/`preview:render-done` timing and asserts render under a generous ceiling (gross-regression gate). Run separately in the CI `perf` job |
 | `tests/e2e/helpers/*.js` | Shared e2e helpers — `builder.js` (builder/fixture setup), `dropdown.js` (retry-safe dropdown open), `metadata.js`, `terminology.js` (`mockTerminologyExpand`) |
+| `tests/answer-store.test.js` | Unit tests — `AnswerStore` flat rows, `$$` addressing, repeating-group instances |
+| `tests/change-type.test.js` | Unit tests — `changeNodeType` / `nodeTypeNeedsConfig` / `nodeHasTypeConfig` (type switch keeps node data, no stale props) |
+| `tests/choice-helpers.test.js` | Unit tests — pure choice helpers for repeating-select dedup |
+| `tests/core-session.test.js` | Unit tests — `QuestionnaireSession` container |
+| `tests/cql-engine.test.js` | Unit tests — `js/fhir/cql-engine.js` |
+| `tests/definition-resolver.test.js` | Unit tests — definition resolver |
+| `tests/e2e/clear-export-first.spec.js` | E2E tests — Clear → "Export first" flow |
+| `tests/e2e/cloud-delete-confirm.spec.js` | E2E tests — cloud questionnaire delete uses the in-app confirm modal |
+| `tests/e2e/enable-when-date.spec.js` | E2E tests — `enableWhen` on date / dateTime / time answers |
+| `tests/e2e/escape-layers.spec.js` | E2E tests — Escape closes one layer at a time |
+| `tests/e2e/library-modal.spec.js` | E2E tests — sample library modal |
+| `tests/e2e/obs-export-modal.spec.js` | E2E tests — Observation export modal |
+| `tests/e2e/panel-resizer.spec.js` | E2E tests — drag divider between builder and preview |
+| `tests/e2e/paste-warning-modal.spec.js` | E2E tests — paste warning modal |
+| `tests/e2e/prefs.spec.js` | E2E tests — user preferences persistence |
+| `tests/e2e/preview-validation-length-regex.spec.js` | E2E tests — minLength / regex validation in the preview |
+| `tests/e2e/ref-search.spec.js` | E2E tests — reference search autocomplete |
+| `tests/e2e/undo-keyboard.spec.js` | E2E tests — Ctrl+Z keyboard scoping |
+| `tests/e2e/user-menu.spec.js` | E2E tests — user menu |
+| `tests/expr-builder-emit.test.js` | Unit tests — expression builder block tree → FHIRPath (`emit`) |
+| `tests/expr-builder-gallery.test.js` | Unit tests — expression gallery patterns resolve to correct FHIRPath |
+| `tests/expr-builder-parse.test.js` | Unit tests — FHIRPath → expression builder blocks (`parseExpression`, `expandAggregateOverSet`) |
+| `tests/expr-builder-pipeline.test.js` | Unit tests — expression builder `setLiteral` / pipeline emit and parse |
+| `tests/extract.test.js` | Unit tests — `js/fhir/extract.js` |
+| `tests/fhir-search.test.js` | Unit tests — `js/fhir/fhir-search.js` |
+| `tests/form-checks.test.js` | Unit tests — `js/fhir/form-checks.js` preview PASS/FAIL validation |
+| `tests/import-comma-options.test.js` | Regression tests — choice option display containing a comma is not split |
+| `tests/nodes.test.js` | Unit tests — node class shapes and `NODE_REGISTRY` |
+| `tests/oauth-callback-page.test.js` | Unit tests (jsdom) — OAuth callback page |
+| `tests/oauth-client.test.js` | Unit tests — `js/fhir/oauth-client.js` |
+| `tests/oauth-scheduler.test.js` | Unit tests — `js/fhir/oauth-scheduler.js` |
+| `tests/obs-export.test.js` | Unit tests — `js/fhir/obs-export.js` |
+| `tests/qr-answers-manager.test.js` | Unit tests — `QRAnswersManager` |
+| `tests/questionnaire-loader.test.js` | Unit tests — `QuestionnaireLoader` |
+| `tests/redcap-branching.test.js` | Unit tests — REDCap branching logic ↔ FHIR `enableWhen` |
+| `tests/redcap-compat.test.js` | Unit tests — REDCap compatibility validator |
+| `tests/redcap-convert.test.js` | Unit tests — REDCap ↔ FHIR conversion |
+| `tests/redcap-parse.test.js` | Unit tests — REDCap CSV parser and validator |
+| `tests/redcap-transpiler.test.js` | Unit tests — REDCap calculation → FHIRPath transpiler |
+| `tests/review-fixes-fhir.test.js` | Regression tests — FHIR-layer code-review fixes (eval, form-checks, export/import round-trip) |
+| `tests/sd-import.test.js` | Unit tests — `js/fhir/sd-import.js` |
+| `tests/sdc-cql-eval.test.js` | Unit tests — `js/fhir/sdc-cql-eval.js` |
+| `tests/sdc-definition-extract.test.js` | Unit tests — `js/fhir/sdc-definition-extract.js` |
+| `tests/sdc-populate.test.js` | Unit tests — `js/fhir/sdc-populate.js` |
+| `tests/sdc-structuremap-extract.test.js` | Unit tests — `js/fhir/sdc-structuremap-extract.js` |
+| `tests/sdc-structuremap-populate.test.js` | Unit tests — `js/fhir/sdc-structuremap-populate.js` |
+| `tests/security-docs-media.test.js` | Security tests — docs page media links only allow http(s) |
+| `tests/security-label-fallback.test.js` | Security tests — markdown label fallback never uses unsanitized `innerHTML` |
+| `tests/security-oauth-urls.test.js` | Security tests — OAuth URLs must be https (http only for localhost) |
+| `tests/server-config-cloud.test.js` | Unit tests (jsdom) — cloud settings provider |
+| `tests/server-config.test.js` | Unit tests — `js/fhir/server-config.js` |
+| `tests/structuremap-engine.test.js` | Unit tests — StructureMap engine wrapper wiring |
+| `tests/terminology-service.test.js` | Unit tests — `TerminologyService` |
+| `tests/translate-api.test.js` | Unit tests — translate API providers |
+| `tests/translation.test.js` | Unit tests — translation import/export round-trip |
+| `tests/ui-dropdown-menu.test.js` | Unit tests (jsdom) — `DropdownMenu` |
+| `tests/ui-escape-handling.test.js` | Unit tests (jsdom) — custom-select and date-picker Escape handling |
+| `tests/ui-questionnaires-menu.test.js` | Unit tests (jsdom) — Questionnaires menu |
+| `tests/ui-renumber.test.js` | Unit tests — `RenumberControl` |
+| `tests/ui-save-export-prompt.test.js` | Unit tests — `SaveFormatModal` onDone |
+| `tests/ui-undo-redo.test.js` | Unit tests — `UndoRedo` buttons and shortcuts |
 | `tests/e2e/a11y.spec.js` | E2E tests — preview accessibility (control accessible names, AA-contrast prefix/optional badges) |
 | `tests/e2e/answer-expression.spec.js` | E2E tests — `answerExpression` import/render |
 | `tests/e2e/answer-option-types.spec.js` | E2E tests — `answerOption` value[x] types import/render |

@@ -175,7 +175,6 @@ validation badge.
 | `getAuthToken` | `() => string \| Promise<string>` | — | Returns a Bearer token for `fhirBaseUrl` requests (your host's own auth — e.g. you're already logged into the FHIR server in your own app). The widget **never** runs its own OAuth login popup; without this, requests go out with no `Authorization` header (fine for public/CORS-open test servers). Independent per instance. |
 | `corsProxy` | `string` | — | CORS proxy for the FHIR/terminology requests. |
 | `terminology` | `object` | — | This widget's own terminology server for external `answerValueSet` expansion: `{ server, corsProxy, nlmApiBase }`. Independent per instance — two widgets on the same page can point to two different terminology servers. Falls back to the public HL7 server (`tx.fhir.org/r4`) when omitted. |
-| `readOnly` | `boolean` | `false` | Render answers without editable controls. |
 | `onProgress` | `(msg\|null) => void` | — | Called with a message while long operations run, `null` when done. |
 
 ---

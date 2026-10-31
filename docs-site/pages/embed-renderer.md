@@ -57,6 +57,9 @@ The widget has **no menus** — the host page decides what to show through
 | `fhirBaseUrl`, `corsProxy` | A FHIR server for reference search and server-side `$populate`. |
 | `viewPrefs: { showLinkId, showPrefix, showBadges, showHiddenItems }` | Fine-grained toggles for the design view. |
 | `language: 'fr'` | Show a translated language if the questionnaire carries translations. |
+| `getAuthToken` | A function returning a sign-in token for your FHIR server. The widget never opens its own login window; without this, requests go out with no authorization. |
+| `terminology: { server, corsProxy, nlmApiBase }` | This widget's own terminology server for looking up the choices of value-set questions. If omitted, the public HL7 server (tx.fhir.org) is used, so opening a form with an external value set contacts it. |
+| `onProgress` | A function called with a message while a long operation runs, and with `null` when it finishes. |
 
 ## Reading and setting answers
 
@@ -64,12 +67,20 @@ The widget has **no menus** — the host page decides what to show through
 const qr = widget.getResponse();   // current answers as a QuestionnaireResponse
 widget.setResponse(existingQR);    // load answers back in
 widget.setLanguage('es');          // switch language
-widget.setConfig({ validation: true });
+widget.setConfig({ language: 'es' }); // after creation only the language can change
+widget.populate('Patient/123');    // fill answers from a patient on your FHIR server
+widget.structureMapPopulate('Patient/123'); // same, using a StructureMap
 widget.destroy();                  // remove it and free listeners
 ```
 
+`populate()` and `structureMapPopulate()` need `fhirBaseUrl`; the other display
+options (search, validation, tooltips and so on) are fixed when the widget is
+created.
+
 Events you can subscribe to with `widget.on(name, cb)`: `ready`,
-`response-changed`, `language-changed`, `render`.
+`response-changed`, `language-changed`, `render`, `info` (a populate call
+succeeded) and `error` (a populate call failed — nothing is shown unless you
+listen).
 
 ## Why it stays isolated
 

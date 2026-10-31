@@ -26,6 +26,18 @@ its default.
   [Translate](translate.md): Google `gtx` (free, no key), DeepL, LibreTranslate
   or OpenAI. Pick a provider, set its endpoint, and (for DeepL/OpenAI) an API key.
 
+## Signing in to protected FHIR servers
+
+The **FHIR Base Server** and the **SDC Server** each have optional sign-in fields
+for servers that require a login: **Authorize URL**, **Token URL**, **Client ID**
+and **Scope**. When you fill them in, the builder signs you in through a pop-up
+window using the standard OAuth authorization-code flow with PKCE (a way to log in
+without the builder ever seeing your password), then sends the resulting access
+token with its requests to that server. If the session expires, a banner appears
+with a **Log in** button so you can sign in again. The tokens are kept in your
+browser's local storage on this device, so sign out of shared computers by
+clearing site data.
+
 ## Validators
 
 The **Validators** section manages the validation pipeline. A built-in validator
