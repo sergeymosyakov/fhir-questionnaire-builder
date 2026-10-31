@@ -28,6 +28,7 @@ The same flow applies to every feature, fix, or chore that touches code (not jus
 
 ## 5. PR — only once the feature is fully complete
 - If the branch is mid-flight (more work planned before it's shippable), don't open a PR yet — keep pushing to the branch and iterating.
+- **Independent review first** — mandatory before every PR, see `copilot-instructions.md` rule 10. Never open the PR first and review afterwards.
 - Once fully complete and validated: `gh pr create` (reference the tracking issue with `Closes #<n>` in the body when one exists), then `gh pr merge <branch> --squash --auto`. Squash auto-merge is the default — skip it only for large/needs-manual-review branches, and say so explicitly rather than silently deviating.
 
 ## 6. Close out
