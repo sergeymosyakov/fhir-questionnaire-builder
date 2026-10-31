@@ -105,6 +105,11 @@ describe('buildQR — leaf answer types', () => {
     expect(qr.item[0].answer[0].valueCoding).toEqual({ code: 'custom' });
   });
 
+  it('quantity keeps the unit system and code when the store has them', () => {
+    const qr = bq(mkFhir('q', 'quantity'), { q: { value: 150, unit: '[lb_av]', system: 'http://unitsofmeasure.org', code: '[lb_av]' } });
+    expect(qr.item[0].answer[0].valueQuantity).toEqual({ value: 150, unit: '[lb_av]', system: 'http://unitsofmeasure.org', code: '[lb_av]' });
+  });
+
   it('quantity → valueQuantity with value and unit', () => {
     const qr = bq(mkFhir('q', 'quantity'), { q: { value: 70, unit: 'kg' } });
     expect(qr.item[0].answer[0].valueQuantity).toEqual({ value: 70, unit: 'kg' });

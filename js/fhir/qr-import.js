@@ -29,7 +29,7 @@ function _flattenQR(items, out = Object.create(null), repeatGroups = new Set()) 
         if (ans.valueDateTime  !== undefined) return ans.valueDateTime;
         if (ans.valueTime      !== undefined) return ans.valueTime;
         if (ans.valueQuantity  !== undefined) return {
-          value: ans.valueQuantity.value, unit: ans.valueQuantity.unit || '',
+          value: ans.valueQuantity.value, unit: ans.valueQuantity.code || ans.valueQuantity.unit || '',
           ...(ans.valueQuantity.system ? { system: ans.valueQuantity.system } : {}),
           ...(ans.valueQuantity.code   ? { code:   ans.valueQuantity.code }   : {}),
         };

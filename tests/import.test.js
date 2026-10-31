@@ -730,6 +730,16 @@ describe('importFHIR', () => {
     });
   });
 
+  // ── initial valueQuantity import ───────────────────────────────────────────
+  describe('initial valueQuantity', () => {
+    it('keys the unit by code and keeps system/code', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'quantity', text: 'Q',
+        initial: [{ valueQuantity: { value: 150, unit: 'pound', system: 'http://unitsofmeasure.org', code: '[lb_av]' } }],
+      }]));
+      expect(_tree[0]._initialValue).toEqual({ value: '150', unit: '[lb_av]', system: 'http://unitsofmeasure.org', code: '[lb_av]' });
+    });
+  });
+
   // ── initial valueReference import ──────────────────────────────────────────
   describe('initial valueReference', () => {
     it('reads item.initial[].valueReference into node._initialValue', () => {

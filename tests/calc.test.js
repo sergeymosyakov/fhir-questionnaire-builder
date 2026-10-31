@@ -220,6 +220,7 @@ describe('evalInitialExprNodes', () => {
     ['checklist', [{ code: 'a' }, { code: 'b' }], 'a,b'],
     ['reference', [{ reference: 'Patient/1', display: 'P' }], { reference: 'Patient/1', display: 'P' }],
     ['quantity', [{ value: 5, unit: 'kg' }], { value: 5, unit: 'kg' }],
+    ['quantity', [{ value: 150, unit: 'pound', system: 'http://unitsofmeasure.org', code: '[lb_av]' }], { value: 150, unit: '[lb_av]', system: 'http://unitsofmeasure.org', code: '[lb_av]' }],
   ])('maps an object result for %s items instead of "[object Object]"', (itemType, result, expected) => {
     const fp = { evaluate: vi.fn(() => result) };
     const values = {};
