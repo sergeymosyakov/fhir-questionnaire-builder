@@ -730,6 +730,18 @@ describe('importFHIR', () => {
     });
   });
 
+  // ── checklist initial values are stored as one encoded row ────────────────
+  describe('checklist initial values', () => {
+    it('writes every initial code, comma-safe, into one row', () => {
+      importFHIR(minQ([{ linkId: 'q1', type: 'choice', repeats: true, text: 'Q',
+        extension: [{ url: 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl', valueCodeableConcept: { coding: [{ code: 'check-box' }] } }],
+        answerOption: [{ valueCoding: { code: 'a,b' } }, { valueCoding: { code: 'z' } }],
+        initial: [{ valueCoding: { code: 'a,b' } }, { valueCoding: { code: 'z' } }],
+      }]));
+      expect(_values.q1).toBe('a\u001Fb,z');
+    });
+  });
+
   // ── initial valueReference import ──────────────────────────────────────────
   describe('initial valueReference', () => {
     it('reads item.initial[].valueReference into node._initialValue', () => {

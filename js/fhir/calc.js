@@ -4,6 +4,7 @@
 import { buildDepGraph, topoOrder } from './dep-graph.js';
 import { buildAnswer } from './qr-builder.js';
 import { fhirModel } from './fhir-model.js';
+import { joinCodes } from './checklist-codec.js';
 
 // Pre-compute questionnaire-level SDC variables into an environment object.
 // Variables are evaluated in order; later ones may reference earlier ones via %name.
@@ -80,8 +81,9 @@ function coerceResult(node, result) {
   if (node.itemType === 'reference' || node.itemType === 'quantity') {
     return result.length ? resultScalar(node, result[0]) : '';
   }
-  // checklist values are comma-separated codes
-  return result.map(v => resultScalar(node, v)).join(node.itemType === 'checklist' ? ',' : '');
+  const scalars = result.map(v => resultScalar(node, v));
+  // a checklist keeps all selections in one encoded row
+  return node.itemType === 'checklist' ? joinCodes(scalars) : scalars.join('');
 }
 
 // Evaluate all readOnly calculatedExpression nodes and write results to values[].

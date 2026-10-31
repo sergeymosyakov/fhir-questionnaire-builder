@@ -1,4 +1,5 @@
 // Parse and load answers from a FHIR R4 QuestionnaireResponse into the plain values object
+import { joinCodes } from './checklist-codec.js';
 
 // Collect all builder node linkIds recursively from tree
 function _collectLinkIds(nodes, set = new Set()) {
@@ -70,15 +71,6 @@ function _collectRepeatGroupIds(nodes, set = new Set()) {
   return set;
 }
 
-// Collect checklist node linkIds from tree
-function _collectChecklistIds(nodes, set = new Set()) {
-  for (const n of nodes) {
-    if (n.itemType === 'checklist') set.add(n.id);
-    if (n.children) _collectChecklistIds(n.children, set);
-  }
-  return set;
-}
-
 /**
  * Load QR answers into the plain `values` object.
  * Only loads answers for linkIds that exist in the current questionnaire tree.
@@ -107,14 +99,23 @@ export function importQRAnswers(qrJson, values, tree) {
     }
   }
 
-  // Merge multi-answer QR entries for checklist items into a single comma-separated row
-  const checklistIds = _collectChecklistIds(tree);
-  for (const id of checklistIds) {
-    const arr = Object.hasOwn(values, id) ? values[id] : undefined;
-    if (Array.isArray(arr) && arr.length > 1) {
-      values[id] = [arr.filter(v => v !== undefined).join(',')];
+  // Merge multi-answer QR entries for checklist items into a single encoded row (also inside repeating-group instances)
+  const mergeChecklists = (nodes, scope) => {
+    for (const n of nodes) {
+      if (n.itemType === 'checklist') {
+        const arr = Object.hasOwn(scope, n.id) ? scope[n.id] : undefined;
+        if (Array.isArray(arr) && (arr.length > 1 || (arr.length === 1 && typeof arr[0] === 'string'))) {
+          scope[n.id] = [joinCodes(arr.filter(v => v !== undefined))];
+        }
+      }
+      if (!n.children?.length) continue;
+      if (n.type === 'group' && n.repeats) {
+        const rows = Object.hasOwn(scope, n.id) ? scope[n.id] : undefined;
+        if (Array.isArray(rows)) for (const row of rows) if (row && typeof row === 'object') mergeChecklists(n.children, row);
+      } else mergeChecklists(n.children, scope);
     }
-  }
+  };
+  mergeChecklists(tree, values);
 
   return { ok: true, loaded, unmatched, questionnaire: qrJson.questionnaire || '',
     meta: {

@@ -1,4 +1,5 @@
 import { FHIR } from './urls/fhir.js';
+import { splitCodes } from './checklist-codec.js';
 // ── QuestionnaireResponse builder ─────────────────────────────────────────────
 // Builds a minimal QR from the original FHIR Questionnaire JSON + current values.
 // Used as context for FHIRPath calculatedExpression evaluation.
@@ -83,6 +84,13 @@ function buildQRItems(fhirItem, values) {
   return [buildQRItem(fhirItem, values)];
 }
 
+// A checklist stores all its selections in one encoded string: check-box, or atable when repeating (otherwise atable is a radio)
+const isChecklistItem = fhirItem => (fhirItem.extension || []).some(e => {
+  if (e.url !== FHIR.itemControl) return false;
+  const code = e.valueCodeableConcept?.coding?.[0]?.code;
+  return code === 'check-box' || (code === 'atable' && !!fhirItem.repeats);
+});
+
 function buildQRItem(fhirItem, values) {
   const qrItem = { linkId: fhirItem.linkId };
   const children = fhirItem.item || [];
@@ -107,9 +115,9 @@ function buildQRItem(fhirItem, values) {
     qrItem.answer = [answerObj];
   } else {
     const vs = allVals();
-    // Checklist (check-box itemControl): value is comma-separated codes → split into individual answers
-    if ((t === 'choice' || t === 'open-choice') && fhirItem.repeats && vs.length === 1 && typeof vs[0] === 'string' && vs[0].includes(',')) {
-      qrItem.answer = vs[0].split(',').map(makeAnswer);
+    // Checklist (check-box itemControl): value is encoded comma-separated codes → split into individual answers
+    if ((t === 'choice' || t === 'open-choice') && isChecklistItem(fhirItem) && vs.length === 1 && typeof vs[0] === 'string') {
+      qrItem.answer = splitCodes(vs[0]).map(makeAnswer);
     } else if (vs.length > 0) {
       qrItem.answer = vs.map(makeAnswer);
     }

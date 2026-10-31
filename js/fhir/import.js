@@ -19,6 +19,7 @@ import {
 } from './import-helpers.js';
 import { fhirItemToNode } from './import-item.js';
 import { BUILDER_VERSION_EXTENSION_URL } from './format-registry.js';
+import { joinCodes } from './checklist-codec.js';
 
 // Re-export helpers — consumed by answer-type-modal.js and unit tests.
 export {
@@ -33,7 +34,11 @@ export {
 // Walk the tree and pre-populate answers from node._initialValue / _initialValues
 function applyInitialValues(nodes, bus) {
   for (const node of nodes) {
-    if (node.repeats && node._initialValues && node._initialValues.length > 1) {
+    if (node.itemType === 'checklist') {
+      // A checklist keeps all selections in one encoded row
+      const vals = node._initialValues?.length ? node._initialValues : node._initialValue !== undefined ? [node._initialValue] : [];
+      if (vals.length) bus.dispatch(AppEvents.ANSWER_SET, { id: node.id, value: joinCodes(vals) });
+    } else if (node.repeats && node._initialValues && node._initialValues.length > 1) {
       bus.dispatch(AppEvents.ANSWER_SET, { id: node.id, value: node._initialValues[0] });
       for (let i = 1; i < node._initialValues.length; i++) {
         bus.dispatch(AppEvents.ANSWER_SET, { id: node.id + '$$' + i, value: node._initialValues[i] });

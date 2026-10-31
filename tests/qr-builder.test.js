@@ -359,8 +359,9 @@ describe('buildQR — ordinalValue in valueCoding answers', () => {
 
 // ── buildQR — checklist (check-box itemControl) ──────────────────────────────
 describe('buildQR — checklist multi-value', () => {
-  it('splits comma-separated value into multiple answers for repeating choice', () => {
-    const fhir = { item: [{ linkId: 'q', type: 'choice', repeats: true }] };
+  it('splits comma-separated value into multiple answers for a repeating check-box choice', () => {
+    const ctl = { url: FHIR.itemControl, valueCodeableConcept: { coding: [{ code: 'check-box' }] } };
+    const fhir = { item: [{ linkId: 'q', type: 'choice', repeats: true, extension: [ctl] }] };
     const qr = bq(fhir, { q: 'a,b,c' });
     expect(qr.item[0].answer).toHaveLength(3);
     expect(qr.item[0].answer[0].valueCoding.code).toBe('a');

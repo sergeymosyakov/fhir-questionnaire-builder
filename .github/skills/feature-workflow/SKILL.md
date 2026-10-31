@@ -21,6 +21,7 @@ The same flow applies to every feature, fix, or chore that touches code (not jus
 - Do the work. Run the repo's lint + unit tests (and e2e when the feature is user-facing or explicitly requested) before considering it done — see this repo's own copilot-instructions.md pre-push checklist for the exact commands.
 - Keep tests + sample/fixture coverage in step with the feature per the repo's own rules (e.g. e2e + sampledata for user-facing FHIR features in fhir-qb).
 - If a real bug slips through review/testing, fix it directly on the same branch — don't open a second branch for a same-feature bugfix found before merge.
+- Before committing/pushing, get the independent review (`copilot-instructions.md` rule 10): after lint + tests, fix the real findings.
 
 ## 4. Commit + push — still two separate explicit permissions
 - This workflow describes the SHAPE of the flow, not a bypass of the commit/push permission rule: commit and push each still require the user's explicit "commit" / "push" / "да" — never fire them just because the feature "looks done".
@@ -28,6 +29,7 @@ The same flow applies to every feature, fix, or chore that touches code (not jus
 
 ## 5. PR — only once the feature is fully complete
 - If the branch is mid-flight (more work planned before it's shippable), don't open a PR yet — keep pushing to the branch and iterating.
+- Independent review done first (`copilot-instructions.md` rule 10) — never open the PR and review afterwards.
 - Once fully complete and validated: `gh pr create` (reference the tracking issue with `Closes #<n>` in the body when one exists), then `gh pr merge <branch> --squash --auto`. Squash auto-merge is the default — skip it only for large/needs-manual-review branches, and say so explicitly rather than silently deviating.
 
 ## 6. Close out

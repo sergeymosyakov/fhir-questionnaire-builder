@@ -3,6 +3,7 @@
 // (optional; needed only for enableWhenExpression FHIRPath evaluation)
 import { answerStore } from './answer-store.js';
 import { fhirModel } from './fhir/fhir-model.js';
+import { splitCodes } from './fhir/checklist-codec.js';
 
 // Marks every node in a subtree as visible-but-disabled.
 export function markAllDisabled(nodes, results) {
@@ -79,7 +80,9 @@ export function compareValue(val, ew) {
   else return false;
   // Coerce for consistent comparison (user values may be booleans or strings)
   const coerced = String(answer);
-  const current = val !== undefined && val !== null ? String(val) : '';
+  let current = val !== undefined && val !== null ? String(val) : '';
+  // A single checklist selection is stored with commas encoded; compare its decoded code
+  if (ew.answerCoding && typeof val === 'string' && splitCodes(val).length === 1) current = splitCodes(val)[0];
   switch (ew.operator) {
     case '=':  return current === coerced;
     case '!=': return current !== coerced;
