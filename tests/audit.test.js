@@ -43,7 +43,7 @@ describe('auditTree — broken linkId references', () => {
 describe('auditTree — answerValueSet fallback', () => {
   it('flags an external answerValueSet with no local fallback', () => {
     const issues = auditTree([makeItem({ _answerValueSet: 'https://tx.fhir.org/r4/ValueSet/x' })]);
-    expect(issues.some(i => i.nodeId === 'q1' && i.message.includes('external terminology server'))).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'q1', message: expect.stringContaining('external terminology server') }));
   });
 
   it('does not flag a local #contained answerValueSet', () => {
@@ -64,7 +64,7 @@ describe('auditTree — unreachable items (contradiction heuristic)', () => {
       ],
     });
     const issues = auditTree([src, item]);
-    expect(issues.some(i => i.nodeId === 'q1' && i.message.startsWith('Unreachable'))).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'q1', message: expect.stringMatching(/^Unreachable/) }));
   });
 
   it('flags = X and != X (same literal) as contradictory', () => {
@@ -76,7 +76,7 @@ describe('auditTree — unreachable items (contradiction heuristic)', () => {
       ],
     });
     const issues = auditTree([src, item]);
-    expect(issues.some(i => i.nodeId === 'q1')).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'q1' }));
   });
 
   it('does not flag two identical = X conditions (redundant, not contradictory)', () => {
@@ -123,7 +123,7 @@ describe('auditTree — unreachable items (contradiction heuristic)', () => {
       ],
     });
     const issues = auditTree([src, item]);
-    expect(issues.some(i => i.nodeId === 'q1')).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'q1' }));
   });
 
   it('does not flag a satisfiable numeric range (> 5 and < 10)', () => {
@@ -157,7 +157,7 @@ describe('auditTree — unreachable items (contradiction heuristic)', () => {
       ],
     });
     const issues = auditTree([src, item]);
-    expect(issues.some(i => i.nodeId === 'q1')).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'q1' }));
   });
 });
 

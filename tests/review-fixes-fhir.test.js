@@ -106,7 +106,7 @@ describe('export — minOccurs', () => {
     const { questDoc } = load({ item: [{ linkId: 'a', text: 'A', type: 'string', repeats: true,
       extension: [{ url: FHIR.minOccurs, valueInteger: 2 }] }] });
     const out = buildFHIRObject(questDoc);
-    expect((out.item[0].extension || []).some(e => e.url === FHIR.minOccurs)).toBe(false);
+    expect((out.item[0].extension || [])).not.toContainEqual(expect.objectContaining({ url: FHIR.minOccurs }));
   });
 });
 

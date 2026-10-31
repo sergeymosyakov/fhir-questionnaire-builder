@@ -56,7 +56,7 @@ describe('REDCapCompatValidator', () => {
       ]),
     ]);
     const issues = await validator._run(q, [], {});
-    expect(issues.some(i => i.nodeId === 'deep' && i.severity === 'warning')).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'deep', severity: 'warning' }));
   });
 
   it('does NOT warn on deep group with rc origin (round-trip data)', async () => {
@@ -81,7 +81,7 @@ describe('REDCapCompatValidator', () => {
       ]),
     ]);
     const issues = await validator._run(q, [], {});
-    expect(issues.some(i => i.nodeId === 'q1' && i.severity === 'error')).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'q1', severity: 'error' }));
   });
 
   it('warns on item.code', async () => {
@@ -91,7 +91,7 @@ describe('REDCapCompatValidator', () => {
       ]),
     ]);
     const issues = await validator._run(q, [], {});
-    expect(issues.some(i => i.nodeId === 'q1' && i.severity === 'warning')).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'q1', severity: 'warning' }));
   });
 
   it('warns on enableWhenExpression (FHIRPath branching)', async () => {
@@ -103,7 +103,7 @@ describe('REDCapCompatValidator', () => {
       ]),
     ]);
     const issues = await validator._run(q, [], {});
-    expect(issues.some(i => i.nodeId === 'q2' && i.message.includes('FHIRPath'))).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'q2', message: expect.stringContaining('FHIRPath') }));
   });
 
   it('warns on answerExpression extension', async () => {
@@ -118,7 +118,7 @@ describe('REDCapCompatValidator', () => {
       ]),
     ]);
     const issues = await validator._run(q, [], {});
-    expect(issues.some(i => i.severity === 'warning' && i.message.includes('answerExpression'))).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ severity: 'warning', message: expect.stringContaining('answerExpression') }));
   });
 
   it('warns on type reference', async () => {
@@ -128,7 +128,7 @@ describe('REDCapCompatValidator', () => {
       ]),
     ]);
     const issues = await validator._run(q, [], {});
-    expect(issues.some(i => i.nodeId === 'prac' && i.message.includes('reference'))).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'prac', message: expect.stringContaining('reference') }));
   });
 
   it('warns on type quantity', async () => {
@@ -138,7 +138,7 @@ describe('REDCapCompatValidator', () => {
       ]),
     ]);
     const issues = await validator._run(q, [], {});
-    expect(issues.some(i => i.nodeId === 'weight' && i.message.includes('quantity'))).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'weight', message: expect.stringContaining('quantity') }));
   });
 
   it('warns on calculatedExpression (non-rc-origin)', async () => {
@@ -153,7 +153,7 @@ describe('REDCapCompatValidator', () => {
       ]),
     ]);
     const issues = await validator._run(q, [], {});
-    expect(issues.some(i => i.nodeId === 'total' && i.severity === 'warning')).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'total', severity: 'warning' }));
   });
 
   it('returns no issues for null questJson', async () => {

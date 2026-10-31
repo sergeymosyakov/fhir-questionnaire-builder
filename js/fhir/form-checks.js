@@ -6,6 +6,7 @@
 //   import { calcFormOk, isMandatory, evalConstraints,
 //            CHECKABLE_TYPES, NONEMPTY_TYPES } from './form-checks.js';
 import { fhirModel } from './fhir-model.js';
+import { regexMatches } from './safe-regex.js';
 
 // Item types that have form-value validation logic in the preview.
 // CHECKABLE_TYPES: any validation exists (mandatory empty-check, format, or required-file).
@@ -80,7 +81,7 @@ export function calcFormOk(node, store, path) {
     const val = store.get(node.id);
     if (!val || val === '') return !isMandatory(node);
     if (!_isValidUrl(val)) return false;
-    if (node._regex) { try { if (!new RegExp(node._regex).test(val)) return false; } catch { /* invalid regex — skip */ } }
+    if (node._regex && !regexMatches(node._regex, val)) return false;
     return true;
   }
   if (node.itemType === 'attachment') {
@@ -113,7 +114,7 @@ export function calcFormOk(node, store, path) {
   }
   if (node._regex) {
     const val = store.get(node.id);
-    if (val && typeof val !== 'object') { try { if (!new RegExp(node._regex).test(String(val))) return false; } catch { /* invalid regex — skip */ } }
+    if (val && typeof val !== 'object' && !regexMatches(node._regex, val)) return false;
   }
   if (node.mandatory === false) return true;
   if (node.itemType === 'reference') {

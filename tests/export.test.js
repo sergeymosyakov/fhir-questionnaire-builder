@@ -244,13 +244,13 @@ describe('buildFHIRObject — constraint', () => {
       constraint: [{ key: 'k', expression: '', human: 'h', severity: 'error' }],
     }]);
     const ext = q.item[0].extension || [];
-    expect(ext.some(e => e.url.includes('questionnaire-constraint'))).toBe(false);
+    expect(ext).not.toContainEqual(expect.objectContaining({ url: expect.stringContaining('questionnaire-constraint') }));
   });
 
   it('omits extension for empty constraint array', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', enableWhen: [], constraint: [] }]);
     const ext = q.item[0].extension || [];
-    expect(ext.some(e => e.url.includes('questionnaire-constraint'))).toBe(false);
+    expect(ext).not.toContainEqual(expect.objectContaining({ url: expect.stringContaining('questionnaire-constraint') }));
   });
 });
 
@@ -277,7 +277,7 @@ describe('buildFHIRObject — answerOption', () => {
       id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A,b=B',
     }]);
     const ext = q.item[0].extension || [];
-    expect(ext.some(e => e.url.includes('questionnaire-itemControl'))).toBe(true);
+    expect(ext).toContainEqual(expect.objectContaining({ url: expect.stringContaining('questionnaire-itemControl') }));
   });
 
   it('exports check-box itemControl extension for checklist', () => {
@@ -402,7 +402,7 @@ describe('buildFHIRObject — answerOption', () => {
       id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A',
     }]);
     const ext = q.item[0].extension || [];
-    expect(ext.some(e => e.url.includes('questionnaire-itemControl'))).toBe(false);
+    expect(ext).not.toContainEqual(expect.objectContaining({ url: expect.stringContaining('questionnaire-itemControl') }));
   });
 });
 

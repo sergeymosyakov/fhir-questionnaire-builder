@@ -10,7 +10,7 @@ It is **not** designed for direct use by clinicians or end users without FHIR tr
 
 ## Simple vs Advanced view
 
-The builder has two view modes, switched from the **⋯** menu in the builder header:
+The builder has two view modes, switched from the **More ▾** menu in the builder header:
 
 - **Simple** — hides the advanced per-item controls (States, Show When, Answer Type, Expression, etc.), leaving only *Add group/item*, rename, and delete. Good for laying out structure quickly.
 - **Advanced** — shows every per-item control (all modal action links) on the builder tree.

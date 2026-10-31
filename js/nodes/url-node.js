@@ -2,6 +2,7 @@
 // URI input with format validation. itemType: 'url'
 // Optional FHIR-imported: _entryFormat, _maxLength, _minLength
 import { ItemNode } from './item-node.js';
+import { regexMatches } from '../fhir/safe-regex.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
 
@@ -34,13 +35,11 @@ export class UrlNode extends ItemNode {
     errMsg.textContent = 'Invalid URL';
     errMsg.style.display = 'none';
 
-    const _regexObj = (() => { if (!node._regex) return null; try { return new RegExp(node._regex); } catch { return null; } })();
-
     const validateErr = () => {
       if (node._minLength && el.value.length > 0 && el.value.length < node._minLength) {
         errMsg.textContent = 'Min\u00A0' + node._minLength + '\u00A0chars';
         errMsg.style.display = 'inline';
-      } else if (_regexObj && el.value.length > 0 && !_regexObj.test(el.value)) {
+      } else if (node._regex && el.value.length > 0 && !regexMatches(node._regex, el.value)) {
         errMsg.textContent = 'Does not match pattern';
         errMsg.style.display = 'inline';
       } else {

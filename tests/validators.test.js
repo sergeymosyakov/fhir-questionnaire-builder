@@ -50,13 +50,13 @@ describe('LocalValidator', () => {
     const v = new LocalValidator();
     const issues = await v.run({ name: 'badname' }, [], {});
     expect(Array.isArray(issues)).toBe(true);
-    expect(issues.some(i => i.severity === 'warning' && /que-0/.test(i.message))).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ severity: 'warning', message: expect.stringMatching(/que-0/) }));
   });
 
   it('returns no que-0 warning for a conforming name', async () => {
     const v = new LocalValidator();
     const issues = await v.run({ name: 'GoodName' }, [], {});
-    expect(issues.some(i => /que-0/.test(i.message))).toBe(false);
+    expect(issues).not.toContainEqual(expect.objectContaining({ message: expect.stringMatching(/que-0/) }));
   });
 
   it('surfaces a modifierExtension warning from the questJson root', async () => {
@@ -66,13 +66,13 @@ describe('LocalValidator', () => {
       modifierExtension: [{ url: 'https://example.org/mod', valueBoolean: true }],
     };
     const issues = await v.run(questJson, [], {});
-    expect(issues.some(i => i.severity === 'warning' && /modifierExtension/.test(i.message))).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ severity: 'warning', message: expect.stringMatching(/modifierExtension/) }));
   });
 
   it('emits no modifierExtension warning when the questJson root has none', async () => {
     const v = new LocalValidator();
     const issues = await v.run({ name: 'GoodName' }, [], {});
-    expect(issues.some(i => /modifierExtension/.test(i.message))).toBe(false);
+    expect(issues).not.toContainEqual(expect.objectContaining({ message: expect.stringMatching(/modifierExtension/) }));
   });
 });
 
@@ -89,7 +89,7 @@ describe('AuditValidator', () => {
     const v = new AuditValidator();
     const tree = [{ id: 'q1', type: 'item', enableWhen: [{ question: 'ghost', operator: '=', answerBoolean: true }] }];
     const issues = await v.run({}, tree, {});
-    expect(issues.some(i => i.nodeId === 'q1')).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ nodeId: 'q1' }));
   });
 
   it('reads variables from EventState (questDoc.variables) to resolve %refs', async () => {
@@ -98,7 +98,7 @@ describe('AuditValidator', () => {
 
     // Without 'age' declared as a variable, the linkId-shaped reference is unknown.
     const before = await v.run({}, tree, {});
-    expect(before.some(i => i.nodeId === 'q1')).toBe(true);
+    expect(before).toContainEqual(expect.objectContaining({ nodeId: 'q1' }));
 
     // 'age' declared as a %variable — buildDepGraph excludes known variable names.
     EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc: { variables: [{ name: 'age', expression: '30' }] } });

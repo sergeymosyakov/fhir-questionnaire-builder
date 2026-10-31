@@ -201,7 +201,7 @@ describe('importFHIR — replaces extension', () => {
   it('excludes replaces entries from _rawQuestExtensions', () => {
     importFHIR(minQ([{ url: REPLACES_URL, valueCanonical: 'https://example.org/fhir/Questionnaire/prior' }]));
     const raw = _questMeta._rawQuestExtensions || [];
-    expect(raw.some(e => e.url === REPLACES_URL)).toBe(false);
+    expect(raw).not.toContainEqual(expect.objectContaining({ url: REPLACES_URL }));
   });
 
   it('does not include entries without valueCanonical in replaces', () => {
@@ -250,7 +250,7 @@ describe('importFHIR — sdc-questionnaire-collapsible', () => {
       item: [{ linkId: 'q1', type: 'string', text: 'Q' }],
     }]));
     const unknown = _tree[0]._unknownExtensions || [];
-    expect(unknown.some(e => e.url === COLL_URL)).toBe(false);
+    expect(unknown).not.toContainEqual(expect.objectContaining({ url: COLL_URL }));
   });
 });
 
@@ -288,7 +288,7 @@ describe('importFHIR — sdc-questionnaire-openLabel', () => {
       extension: [{ url: OL_URL, valueString: 'Other' }],
     }]));
     const unknown = _tree[0]._unknownExtensions || [];
-    expect(unknown.some(e => e.url === OL_URL)).toBe(false);
+    expect(unknown).not.toContainEqual(expect.objectContaining({ url: OL_URL }));
   });
 });
 
@@ -342,7 +342,7 @@ describe('importFHIR — designNote', () => {
       extension: [{ url: DN_URL, valueMarkdown: 'Note.' }],
     }]));
     const unknown = _tree[0]._unknownExtensions || [];
-    expect(unknown.some(e => e.url === DN_URL)).toBe(false);
+    expect(unknown).not.toContainEqual(expect.objectContaining({ url: DN_URL }));
   });
 });
 
@@ -376,7 +376,7 @@ describe('importFHIR — answerExpression', () => {
       extension: [{ url: AE_URL, valueExpression: { language: 'text/fhirpath', expression: '%x' } }],
     }]));
     const unknown = _tree[0]._unknownExtensions || [];
-    expect(unknown.some(e => e.url === AE_URL)).toBe(false);
+    expect(unknown).not.toContainEqual(expect.objectContaining({ url: AE_URL }));
   });
 
   it('stores empty string when valueExpression.expression is absent', () => {
@@ -418,7 +418,7 @@ describe('importFHIR — candidateExpression', () => {
       extension: [{ url: CE_URL, valueExpression: { language: 'text/fhirpath', expression: '%x' } }],
     }]));
     const unknown = _tree[0]._unknownExtensions || [];
-    expect(unknown.some(e => e.url === CE_URL)).toBe(false);
+    expect(unknown).not.toContainEqual(expect.objectContaining({ url: CE_URL }));
   });
 });
 
@@ -448,7 +448,7 @@ describe('importFHIR — isSubject', () => {
       extension: [{ url: IS_URL, valueBoolean: true }],
     }]));
     const unknown = _tree[0]._unknownExtensions || [];
-    expect(unknown.some(e => e.url === IS_URL)).toBe(false);
+    expect(unknown).not.toContainEqual(expect.objectContaining({ url: IS_URL }));
   });
 });
 
@@ -490,7 +490,7 @@ describe('importFHIR — columnCount', () => {
       extension: [{ url: CC_URL, valueInteger: 2 }],
     }]));
     const unknown = _tree[0]._unknownExtensions || [];
-    expect(unknown.some(e => e.url === CC_URL)).toBe(false);
+    expect(unknown).not.toContainEqual(expect.objectContaining({ url: CC_URL }));
   });
 });
 
@@ -520,7 +520,7 @@ describe('_regex', () => {
       extension: [{ url: RX_URL, valueString: '.*' }],
     }]));
     const unknown = _tree[0]._unknownExtensions || [];
-    expect(unknown.some(e => e.url === RX_URL)).toBe(false);
+    expect(unknown).not.toContainEqual(expect.objectContaining({ url: RX_URL }));
   });
 });
 
@@ -571,7 +571,7 @@ describe('usageMode', () => {
 
   it('does not add usageMode URL to _unknownExtensions', () => {
     importFHIR(minQ([{ linkId: 'q1', type: 'string', text: 'Q', extension: [{ url: UM_URL, valueCode: 'display' }] }]));
-    expect((_tree[0]._unknownExtensions || []).some(e => e.url === UM_URL)).toBe(false);
+    expect((_tree[0]._unknownExtensions || [])).not.toContainEqual(expect.objectContaining({ url: UM_URL }));
   });
 });
 
@@ -827,8 +827,8 @@ describe('import versionAlgorithm / copyrightLabel', () => {
       ],
     }));
     const raw = _questMeta._rawQuestExtensions || [];
-    expect(raw.some(e => e.url === VA_EXT)).toBe(false);
-    expect(raw.some(e => e.url === CL_EXT)).toBe(false);
+    expect(raw).not.toContainEqual(expect.objectContaining({ url: VA_EXT }));
+    expect(raw).not.toContainEqual(expect.objectContaining({ url: CL_EXT }));
   });
 
   it('defaults to empty when neither field nor extension present', () => {

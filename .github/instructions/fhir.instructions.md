@@ -9,7 +9,7 @@ Rules that keep the builder's FHIR support and its documentation/sample data in 
 
 ## FHIR tooltips are mandatory
 
-Every UI label or input that controls a FHIR field or extension must have `data-tip-title`, `data-tip-body`, `data-tip-fhir`, and `data-tip-spec` set. `data-tip-fhir` must contain the exact FHIR path (e.g. `Questionnaire.item.required`, `item.extension[questionnaire-hidden].valueBoolean`). `data-tip-spec` must be `'R4'` or `'SDC'`. No FHIR-mapped control may ship without all four attributes.
+Every UI label or input that controls a FHIR field or extension must have `data-tip-title`, `data-tip-body`, `data-tip-fhir`, and `data-tip-spec` set. `data-tip-fhir` must contain the exact FHIR path (e.g. `Questionnaire.item.required`, `item.extension[questionnaire-hidden].valueBoolean`). `data-tip-spec` must start with `R4`, `SDC` or `R5`, optionally followed by ` · qualifier` parts (e.g. `'R4'`, `'SDC'`, `'R4 · optional'`, `'R4 · SDC'`). No FHIR-mapped control may ship without all four attributes.
 
 ## Keep documentation in sync with support
 

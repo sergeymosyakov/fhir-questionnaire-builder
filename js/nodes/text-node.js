@@ -2,6 +2,7 @@
 // Free-text single/multi-line input. itemType: 'text'
 // Optional FHIR-imported: _maxLength, _minLength, _entryFormat, _interacted
 import { ItemNode } from './item-node.js';
+import { regexMatches } from '../fhir/safe-regex.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
 
@@ -54,14 +55,13 @@ export class TextNode extends ItemNode {
     }
 
     let errRegex = null;
-    const _re = node._regex ? (() => { try { return new RegExp(node._regex); } catch { return null; } })() : null;
     if (node._regex) {
       errRegex = document.createElement('span');
       errRegex.className = 'ctrl-err ctrl-err--regex';
       errRegex.dataset.testid = 'regex-err';
       errRegex.textContent = 'Does not match pattern';
       const validateRegex = () => {
-        errRegex.style.display = (_re && el.value.length > 0 && !_re.test(el.value)) ? 'inline' : 'none';
+        errRegex.style.display = (el.value.length > 0 && !regexMatches(node._regex, el.value)) ? 'inline' : 'none';
       };
       if (node._interacted) { validateRegex(); } else { errRegex.style.display = 'none'; }
     }
@@ -72,7 +72,7 @@ export class TextNode extends ItemNode {
         errMinLen.style.display = (el.value.length > 0 && el.value.length < node._minLength) ? 'inline' : 'none';
       }
       if (errRegex) {
-        errRegex.style.display = (_re && el.value.length > 0 && !_re.test(el.value)) ? 'inline' : 'none';
+        errRegex.style.display = (el.value.length > 0 && !regexMatches(node._regex, el.value)) ? 'inline' : 'none';
       }
     });
 

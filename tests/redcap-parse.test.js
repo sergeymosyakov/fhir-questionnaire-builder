@@ -130,19 +130,19 @@ describe('validateCSV', () => {
   it('returns error for invalid variable name (uppercase)', () => {
     const rows = parseCSV(csv(row('Age', 'demo', 'text', 'Age')));
     const issues = validateCSV(rows);
-    expect(issues.some(i => i.severity === 'error' && i.nodeId === 'Age')).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ severity: 'error', nodeId: 'Age' }));
   });
 
   it('returns error for invalid variable name (starts with digit)', () => {
     const rows = parseCSV(csv(row('1age', 'demo', 'text', 'Age')));
     const issues = validateCSV(rows);
-    expect(issues.some(i => i.severity === 'error')).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ severity: 'error' }));
   });
 
   it('returns error for radio without choices', () => {
     const rows = parseCSV(csv(row('q1', 'f', 'radio', 'Q1', '')));
     const issues = validateCSV(rows);
-    expect(issues.some(i => i.severity === 'error' && i.nodeId === 'q1')).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ severity: 'error', nodeId: 'q1' }));
   });
 
   it('returns error for duplicate variable names', () => {
@@ -151,19 +151,19 @@ describe('validateCSV', () => {
       row('age', 'demo', 'text', 'Age again'),
     ));
     const issues = validateCSV(rows);
-    expect(issues.some(i => i.message.includes('duplicate'))).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ message: expect.stringContaining('duplicate') }));
   });
 
   it('returns warning for unknown field type', () => {
     const rows = parseCSV(csv(row('q1', 'f', 'unknown_type', 'Q1')));
     const issues = validateCSV(rows);
-    expect(issues.some(i => i.severity === 'warning' && i.message.includes('unknown field type'))).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ severity: 'warning', message: expect.stringContaining('unknown field type') }));
   });
 
   it('returns warning for calc without formula', () => {
     const rows = parseCSV(csv(row('total', 'f', 'calc', 'Total', '')));
     const issues = validateCSV(rows);
-    expect(issues.some(i => i.severity === 'warning' && i.message.includes('calc'))).toBe(true);
+    expect(issues).toContainEqual(expect.objectContaining({ severity: 'warning', message: expect.stringContaining('calc') }));
   });
 
   it('accepts checkbox and dropdown with choices', () => {

@@ -1,4 +1,4 @@
-﻿// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
+// ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
 import { formatRegistry } from './format-registry.js';import { ANSWER_SOURCE_EXPR_EXTS } from './import-helpers.js';import './formats/r4.js';
 import './formats/r4b.js';

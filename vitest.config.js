@@ -9,7 +9,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'json-summary'],
       reportsDirectory: './coverage',
-      include: ['js/fhir/**'],
+      include: ['js/fhir/**/*.js'],
       thresholds: {
         statements: 89,
         branches:   82,

@@ -18,7 +18,7 @@ export default defineConfig({
     command: 'node node_modules/.bin/serve . --listen 3000',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 15_000,
+    timeout: 60_000,
   },
 
   use: {

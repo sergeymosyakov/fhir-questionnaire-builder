@@ -19,7 +19,7 @@ The screen splits into two: the **builder tree** on the left and the **live prev
 - On any node, open the **⚙** gear menu to **Add Group**, **Add Item**, **Copy**, **Paste before/after**, or delete.
 - **Rename** an item by clicking its title and typing (Enter or click also works from the keyboard).
 
-Switch the **⋯** menu between **Simple** (structure only) and **Advanced** (all per-item controls) depending on how much you want to see.
+Switch the **More ▾** menu between **Simple** (structure only) and **Advanced** (all per-item controls) depending on how much you want to see.
 
 ## 3. Configure an item
 
