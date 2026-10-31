@@ -14,6 +14,14 @@ describe('changeNodeType', () => {
     expect(out.title).toBe('My question');
   });
 
+  it('keeps the open-choice flag between radio and checklist, drops it for other types', () => {
+    const radio = createItemNode('radio', { id: '1' });
+    radio._fhirOpenChoice = true;
+    const asChecklist = changeNodeType(radio, 'checklist');
+    expect(asChecklist._fhirOpenChoice).toBe(true);
+    expect(changeNodeType(asChecklist, 'select')._fhirOpenChoice).toBeUndefined();
+  });
+
   it('replaces the node in the tree in place', () => {
     const node = createItemNode('text', { id: '1' });
     const tree = [node];
