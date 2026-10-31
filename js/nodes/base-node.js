@@ -451,22 +451,24 @@ export class BaseNode {
     const domPurify = window.DOMPurify;
     const marked    = window.marked;
     const lang = rc?.activeLanguage;
+    // Translation stores are plain objects keyed by linkId; never read inherited members
+    const own = store => (store && Object.hasOwn(store, this.id) ? store[this.id] : undefined);
+    const tr = lang && rc?.translations?.[lang];
     // 1. Translated XHTML (per-language rich text)
-    if (lang && rc?.translations?.[lang]?.xhtml?.[this.id] != null) {
-      el.innerHTML = domPurify ? domPurify.sanitize(rc.translations[lang].xhtml[this.id]) : '';
+    if (own(tr?.xhtml) != null) {
+      el.innerHTML = domPurify ? domPurify.sanitize(tr.xhtml[this.id]) : '';
       return;
     }
     // 2. Translated Markdown (per-language)
-    if (lang && rc?.translations?.[lang]?.markdown?.[this.id] != null) {
-      const md = rc.translations[lang].markdown[this.id];
+    if (own(tr?.markdown) != null) {
+      const md = tr.markdown[this.id];
       if (domPurify && marked) el.innerHTML = domPurify.sanitize(marked.parseInline(md));
       else el.textContent = md;
       return;
     }
     // 3. Translated plain text
-    const langItems = lang && rc?.translations?.[lang]?.items;
-    if (langItems && Object.hasOwn(langItems, this.id) && langItems[this.id] != null) {
-      el.textContent = langItems[this.id];
+    if (own(tr?.items) != null) {
+      el.textContent = tr.items[this.id];
       return;
     }
     // 3. Original rendering-xhtml / rendering-markdown / plain title
