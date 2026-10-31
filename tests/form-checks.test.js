@@ -67,6 +67,11 @@ describe('calcFormOk — url', () => {
     expect(calcFormOk(node({ itemType: 'url' }), store({ q: 'not a url' }))).toBe(false);
     expect(calcFormOk(node({ itemType: 'url' }), store({ q: 'https://example.org' }))).toBe(true);
   });
+  it('valid url shorter than minLength fails', () => {
+    const n = node({ itemType: 'url', _minLength: 20 });
+    expect(calcFormOk(n, store({ q: 'http://a.b' }))).toBe(false);
+    expect(calcFormOk(n, store({ q: 'https://example.org/long' }))).toBe(true);
+  });
   it('valid url must also satisfy a regex when set', () => {
     const n = node({ itemType: 'url', _regex: '^https://' });
     expect(calcFormOk(n, store({ q: 'http://example.org' }))).toBe(false); // NOSONAR — intentionally http so it fails the ^https:// regex

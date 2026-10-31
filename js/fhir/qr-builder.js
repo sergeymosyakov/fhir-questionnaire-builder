@@ -102,12 +102,7 @@ function buildQRItem(fhirItem, values) {
       qrItem.item = children.flatMap(child => buildQRItems(child, values));
     }
   } else if (children.length > 0) {
-    const answerObj = {};
-    if (t === 'boolean') {
-      if (val !== undefined) answerObj.valueBoolean = val === true;
-    } else if (t === 'string' || t === 'text') {
-      if (val !== undefined) answerObj.valueString = String(val);
-    }
+    const answerObj = (val !== undefined && makeAnswer(val)) || {};
     answerObj.item = children.flatMap(child => buildQRItems(child, values));
     qrItem.answer = [answerObj];
   } else {

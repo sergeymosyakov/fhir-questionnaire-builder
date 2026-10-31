@@ -236,3 +236,7 @@ export function resolveContainedValueSet(contained, ref) {
   }
   return parts;
 }
+
+// answerOption[] is emitted only when options are the item's sole answer source
+export const emitsAnswerOptions = node =>
+  !!node._rawAnswerOptions && !node._answerValueSet && !node._answerExpression && !node._candidateExpression;

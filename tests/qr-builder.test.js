@@ -159,6 +159,17 @@ describe('buildQR — question with nested sub-items', () => {
     expect(ans.item[0].answer[0].valueString).toBe('detail');
   });
 
+  it.each([
+    ['integer', 7, { valueInteger: 7 }],
+    ['date', '2024-01-02', { valueDate: '2024-01-02' }],
+    ['choice', 'a', { valueCoding: { code: 'a' } }],
+  ])('%s parent with sub-items keeps its own answer', (type, value, expected) => {
+    const fhir = { item: [{ linkId: 'p', type, item: [{ linkId: 'c', type: 'string' }] }] };
+    const ans = bq(fhir, { p: value, c: 'note' }).item[0].answer[0];
+    expect(ans).toMatchObject(expected);
+    expect(ans.item[0].answer[0].valueString).toBe('note');
+  });
+
   it('string parent with sub-items includes valueString', () => {
     const fhir = {
       item: [{

@@ -2,6 +2,7 @@ import { InitialSection } from './base-section.js';
 import { INITIAL_SECTIONS } from './registry.js';
 import { rawOptsToPairs } from '../../../utils.js';
 import { AppEvents } from '../../../events.js';
+import { emitsAnswerOptions } from '../../../fhir/import-helpers.js';
 import { createCustomSelect } from '../../custom-select.js';
 import { createDatePicker } from '../../date-picker.js';
 
@@ -65,6 +66,7 @@ class InitValueSection extends InitialSection {
         ],
         value:     pending.draftValue || '',
         className: 'sc-trigger--full',
+        testid:    'initial-option-select',
         onChange:  v => setDraft(v || undefined),
       });
       ctrl = optSel.el;
@@ -128,9 +130,11 @@ class InitValueSection extends InitialSection {
     const v = pending.draftValue;
     if (v !== undefined && v !== '') {
       node._initialValue = v;
+      if (emitsAnswerOptions(node)) node._initialSelected = String(v);
       document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: node.id, value: v } }));
     } else {
       delete node._initialValue;
+      if (emitsAnswerOptions(node)) node._initialSelected = '';
       document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: node.id } }));
     }
   }

@@ -112,9 +112,9 @@ describe('buildFHIRObject — _initialValue export', () => {
     expect(q.item[0].initial).toBeUndefined();
   });
 
-  it('omits initial[] when item has _answerValueSet (que-11)', () => {
+  it('keeps initial[] when options come from _answerValueSet (que-11 only forbids answerOption)', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', _initialValue: 'opt1', _answerValueSet: 'https://example.com/vs' }]);
-    expect(q.item[0].initial).toBeUndefined();
+    expect(q.item[0].initial?.[0]?.valueCoding?.code).toBe('opt1');
   });
 
   it('exports initial[] when item is text (no answer options, que-11 does not apply)', () => {

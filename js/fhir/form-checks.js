@@ -81,6 +81,7 @@ export function calcFormOk(node, store, path) {
     const val = store.get(node.id);
     if (!val || val === '') return !isMandatory(node);
     if (!_isValidUrl(val)) return false;
+    if (node._minLength && String(val).length < node._minLength) return false;
     if (node._regex && !regexMatches(node._regex, val)) return false;
     return true;
   }
