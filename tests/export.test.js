@@ -464,6 +464,29 @@ describe('buildFHIRObject — _rawAnswerOptions round-trip', () => {
     expect(selected?.valueString).toBe('Phone');
   });
 
+  it('exports a default picked in the builder (_initialSelected) as initialSelected', () => {
+    const q = build([{
+      id: 'q1', type: 'item', title: 'Q', itemType: 'select',
+      options: 'a=Alpha, b=Beta', _initialValue: 'b', _initialSelected: 'b',
+    }]);
+    expect(q.item[0].answerOption.map(o => !!o.initialSelected)).toEqual([false, true]);
+    expect(q.item[0].initial).toBeUndefined();
+  });
+
+  it('moves the mark when the default changes and drops it when cleared', () => {
+    const raw = [{ valueCoding: { code: 'a' }, initialSelected: true }, { valueCoding: { code: 'b' } }];
+    const moved = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', _rawAnswerOptions: raw, _initialSelected: 'b' }]);
+    expect(moved.item[0].answerOption.map(o => !!o.initialSelected)).toEqual([false, true]);
+    const cleared = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', _rawAnswerOptions: raw, _initialSelected: '' }]);
+    expect(cleared.item[0].answerOption.some(o => o.initialSelected)).toBe(false);
+  });
+
+  it('keeps original initialSelected marks of an untouched import', () => {
+    const raw = [{ valueCoding: { code: 'a' }, initialSelected: true }, { valueCoding: { code: 'b' }, initialSelected: true }];
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'checklist', repeats: true, _rawAnswerOptions: raw, _initialSelected: 'a' }]);
+    expect(q.item[0].answerOption.every(o => o.initialSelected)).toBe(true);
+  });
+
   it('uses options string path when _rawAnswerOptions absent', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=Alpha',

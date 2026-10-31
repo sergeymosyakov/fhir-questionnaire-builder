@@ -3,6 +3,7 @@
 // Returns an array of { severity: 'error'|'warning', nodeId, message }.
 
 import { buildDepGraph, detectCycles } from './dep-graph.js';
+import { emitsAnswerOptions } from './import-helpers.js';
 
 // System-generated constraint key (must match ITLH_KEY_GROUP_OR in utils.js)
 const _ITLH_KEY_GROUP_OR = 'e3a8c2f1-6b4d-4e9a-87c5:group-or';
@@ -189,7 +190,7 @@ export function validateTree(tree, _values = {}, questMeta = null) {
     }
 
     // minOccurs without required=true — R4 context invariant (que-minoccurs-1): extension is only valid when required=true
-    if (node.repeats && node._minOccurs !== undefined && !node.required) {
+    if (node.repeats && node._minOccurs !== undefined && node.mandatory !== true) {
       issues.push({ severity: 'warning', nodeId: id, message: 'Min answers (questionnaire-minOccurs) is set but the item is not marked required — R4 context invariant requires required=true. The extension will be omitted from the export.' });
     }
 
@@ -200,7 +201,7 @@ export function validateTree(tree, _values = {}, questMeta = null) {
       (node._initialValue !== undefined && node._initialValue !== node._initialSelected) ||
       (node._initialValues && node._initialValues.length > 0)
     );
-    if (hasInitial && (node._rawAnswerOptions || node._answerValueSet || node._answerExpression || node._candidateExpression)) {
+    if (hasInitial && emitsAnswerOptions(node)) {
       issues.push({ severity: 'warning', nodeId: id, message: 'Initial value is set but the item has answer options — R4 invariant que-11 forbids initial[x] when answerOption[] is present. Use the answer option\'s "Initially selected" setting instead. The initial value will be omitted from the export.' });
     }
 

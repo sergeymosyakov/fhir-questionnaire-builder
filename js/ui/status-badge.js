@@ -68,7 +68,8 @@ export class StatusBadge {
 
     const rangeItems = activeItems.filter(r =>
       !isMandatory(r.node) && (r.node._minValue !== undefined || r.node._maxValue !== undefined ||
-        r.node._minLength || r.node._regex)
+        r.node._maxDecimalPlaces !== undefined || r.node._minLength || r.node._regex ||
+        r.node.itemType === 'url' || r.node.referenceResource || r.node._maxFileSizeMB !== undefined)
     );
     const hasRange   = rangeItems.length > 0;
     const rangeAllOk = rangeItems.every(r => calcFormOk(r.node, store));

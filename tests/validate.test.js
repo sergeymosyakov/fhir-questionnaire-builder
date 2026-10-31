@@ -438,8 +438,8 @@ describe('validateTree — minOccurs R4 invariant', () => {
     expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/minOccurs.*not marked required/) });
   });
 
-  it('no warning when minOccurs > 0 and required=true', () => {
-    const item = makeItem({ id: 'q1', repeats: true, required: true, _minOccurs: 2 });
+  it('no warning when minOccurs > 0 and the item is mandatory', () => {
+    const item = makeItem({ id: 'q1', repeats: true, mandatory: true, _minOccurs: 2 });
     const issues = validateTree([item]);
     expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/minOccurs/))).toHaveLength(0);
   });
@@ -471,10 +471,10 @@ describe('validateTree — que-11 initial + answerOption conflict', () => {
     expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/que-11/) });
   });
 
-  it('warns when _initialValue is set and item has _answerValueSet', () => {
+  it('no que-11 warning when options come from _answerValueSet (initial is allowed there)', () => {
     const item = makeItem({ id: 'q1', itemType: 'select', _initialValue: 'opt1', _answerValueSet: 'https://example.com/vs' });
     const issues = validateTree([item]);
-    expect(issues).toContainEqual({ severity: 'warning', nodeId: 'q1', message: expect.stringMatching(/que-11/) });
+    expect(issues.filter(i => i.nodeId === 'q1' && i.message.match(/que-11/))).toHaveLength(0);
   });
 
   it('no warning when _initialValue is set on text item (no answer options)', () => {

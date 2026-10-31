@@ -1,6 +1,6 @@
 // ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
-import { formatRegistry } from './format-registry.js';import { ANSWER_SOURCE_EXPR_EXTS, TEMPORAL_BOUND_KEY } from './import-helpers.js';import './formats/r4.js';
+import { formatRegistry } from './format-registry.js';import { ANSWER_SOURCE_EXPR_EXTS, TEMPORAL_BOUND_KEY, emitsAnswerOptions } from './import-helpers.js';import './formats/r4.js';
 import './formats/r4b.js';
 import './formats/r5.js';
 import './formats/redcap.js';
@@ -117,11 +117,8 @@ export function nodeToFHIRItem(node) {
   if (node.mandatory === true && node.itemType !== 'display') fhirItem.required = true;
 
   // item.initial[] — multi-value for repeating items; single value otherwise
-  // que-11: must be absent when answerOption[] is present (use answerOption[].initialSelected instead)
-  // Also suppressed when answerValueSet or an answer-source expression is set (same constraint applies)
-  const hasAnswerOptions = node.type === 'item' && (
-    node._rawAnswerOptions || node._answerValueSet || node._answerExpression || node._candidateExpression
-  );
+  // que-11: must be absent when answerOption[] is emitted (use answerOption[].initialSelected instead)
+  const hasAnswerOptions = node.type === 'item' && emitsAnswerOptions(node);
   // que-8: display items cannot have initial[] (R4 invariant)
   if (node.type === 'item' && node.itemType !== 'display' && !hasAnswerOptions) {
     const t = itemTypeToFHIRType(node.itemType);
@@ -258,10 +255,9 @@ export function nodeToFHIRItem(node) {
   if (node.type === 'group') {
     fhirItem.item = node.children.map(nodeToFHIRItem);
     if (node._helpText) fhirItem.item.push(_helpTextItem(node));
-  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice' || node.itemType === 'checklist') && node._rawAnswerOptions && !node._answerValueSet && !node._answerExpression && !node._candidateExpression) {
+  } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice' || node.itemType === 'checklist') && emitsAnswerOptions(node)) {
     // Round-trip: preserve the original non-valueCoding FHIR answerOption[] types
-    fhirItem.answerOption = node._rawAnswerOptions.map(opt => {
-      const key = opt.valueCoding
+    const keyOf = opt => opt.valueCoding
         ? (opt.valueCoding.code || opt.valueCoding.display || '')
         : opt.valueString  !== undefined ? opt.valueString
         : opt.valueInteger !== undefined ? String(opt.valueInteger)
@@ -269,6 +265,12 @@ export function nodeToFHIRItem(node) {
         : opt.valueTime    !== undefined ? opt.valueTime
         : opt.valueReference ? (typeof opt.valueReference === 'string' ? opt.valueReference : (opt.valueReference.reference || ''))
         : '';
+    const firstMarked = node._rawAnswerOptions.find(o => o.initialSelected);
+    // Builder edits write _initialSelected ('' = cleared); an untouched import keeps its original marks
+    const selChanged = node._initialSelected !== undefined
+      && String(node._initialSelected) !== (firstMarked ? String(keyOf(firstMarked)) : '');
+    fhirItem.answerOption = node._rawAnswerOptions.map(opt => {
+      const key = keyOf(opt);
       const optOut = { ...opt };
       const MANAGED_OPT_EXTS = new Set([
         FHIR.ordinalValue,
@@ -294,7 +296,10 @@ export function nodeToFHIRItem(node) {
         optExts.push({ url: FHIR.answerMedia, valueAttachment: node._answerMedias[key] });
       }
       if (optExts.length) optOut.extension = optExts;
-      if (node._initialSelected === key) optOut.initialSelected = true;
+      if (selChanged) {
+        delete optOut.initialSelected;
+        if (String(node._initialSelected) === String(key)) optOut.initialSelected = true;
+      }
       return optOut;
     });
   }
