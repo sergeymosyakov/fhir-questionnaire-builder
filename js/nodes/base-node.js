@@ -464,8 +464,9 @@ export class BaseNode {
       return;
     }
     // 3. Translated plain text
-    if (lang && rc?.translations?.[lang]?.items?.[this.id] != null) {
-      el.textContent = rc.translations[lang].items[this.id];
+    const langItems = lang && rc?.translations?.[lang]?.items;
+    if (langItems && Object.hasOwn(langItems, this.id) && langItems[this.id] != null) {
+      el.textContent = langItems[this.id];
       return;
     }
     // 3. Original rendering-xhtml / rendering-markdown / plain title

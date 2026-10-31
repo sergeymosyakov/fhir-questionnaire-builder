@@ -59,6 +59,16 @@ describe('import fidelity', () => {
     expect(out.item[0].type).toBe('open-choice');
   });
 
+  it('item with a prototype-named linkId exports no phantom translation', () => {
+    const ext = { url: U + 'translation', extension: [{ url: 'lang', valueCode: 'es' }, { url: 'content', valueString: 'Hola' }] };
+    const out = roundTrip([
+      { linkId: 'toString', type: 'string', text: 'T' },
+      { linkId: 'ok', type: 'string', text: 'Q', _text: { extension: [ext] } },
+    ]);
+    expect(out.item[0]._text).toBeUndefined();
+    expect(out.item[1]._text.extension.length).toBe(1);
+  });
+
   it.each(['valueOf', 'toString', 'constructor'])('translation language "%s" does not break import', lang => {
     const ext = { url: U + 'translation', extension: [{ url: 'lang', valueCode: lang }, { url: 'content', valueString: 'X' }] };
     const out = roundTrip([{ linkId: 'q', type: 'string', text: 'Q', _text: { extension: [ext] } }]);
