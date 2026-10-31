@@ -146,6 +146,7 @@ export function nodeToFHIRItem(node) {
         const { system, code, display } = v;
         return { valueCoding: { ...(system ? { system } : {}), code: String(code ?? display ?? ''), display: String(display ?? code ?? '') } };
       }
+      if (t === 'choice' && node._initialCoding?.code === String(v)) return { valueCoding: { ...node._initialCoding } };
       if (t === 'choice')   return { valueCoding:   { code: String(v), display: String(v) } };
       return { valueString: String(v) };
     };
@@ -267,7 +268,9 @@ export function nodeToFHIRItem(node) {
         : opt.valueTime    !== undefined ? opt.valueTime
         : opt.valueReference ? (typeof opt.valueReference === 'string' ? opt.valueReference : (opt.valueReference.reference || ''))
         : '';
-    const firstMarked = node._rawAnswerOptions.find(o => o.initialSelected);
+    // Same options the importer can derive _initialSelected from (coding / string / integer)
+    const firstMarked = node._rawAnswerOptions.find(o => o.initialSelected
+      && (o.valueCoding || o.valueString !== undefined || o.valueInteger !== undefined));
     // Builder edits write _initialSelected ('' = cleared); an untouched import keeps its original marks
     const selChanged = node._initialSelected !== undefined
       && String(node._initialSelected) !== (firstMarked ? String(keyOf(firstMarked)) : '');
