@@ -23,6 +23,9 @@ import { UI_STRINGS }             from '../../fhir/ui-strings.js';
 import { AppEvents, EventState }      from '../../events.js';
 import { showError }              from '../toast.js';
 
+// Translation stores are plain objects keyed by linkId; never read inherited members
+const _own = (obj, key) => (obj && Object.hasOwn(obj, key) ? obj[key] : undefined);
+
 export class TranslateModal extends Modal {
   constructor() {
     super({ cancelLabel: null, applyLabel: null, maxWidth: '780px', testid: 'translateModal' });
@@ -117,11 +120,11 @@ export class TranslateModal extends Modal {
     function walk(nodes) {
       for (const node of nodes || []) {
         if (node._renderXhtml) {
-          entries.push({ key: node.id, original: node._renderXhtml, isXhtml: true, translated: store.xhtml?.[node.id] ?? '' });
+          entries.push({ key: node.id, original: node._renderXhtml, isXhtml: true, translated: _own(store.xhtml, node.id) ?? '' });
         } else if (node._renderMarkdown) {
-          entries.push({ key: node.id, original: node._renderMarkdown, isMarkdown: true, translated: store.markdown?.[node.id] ?? '' });
+          entries.push({ key: node.id, original: node._renderMarkdown, isMarkdown: true, translated: _own(store.markdown, node.id) ?? '' });
         } else if (node.title) {
-          entries.push({ key: node.id, original: node.title, translated: store.items[node.id] ?? '' });
+          entries.push({ key: node.id, original: node.title, translated: _own(store.items, node.id) ?? '' });
         }
         const opts = _getOptionLabels(node);
         for (const { code, display } of opts) {
