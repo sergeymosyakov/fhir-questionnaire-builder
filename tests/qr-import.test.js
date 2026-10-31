@@ -1,5 +1,5 @@
 // Unit tests for importQRAnswers in js/fhir/qr-import.js.
-// qr-import.js has no external imports — no mocking needed.
+// qr-import.js only imports pure helpers — no mocking needed.
 
 import { describe, it, expect } from 'vitest';
 import { importQRAnswers } from '../js/fhir/qr-import.js';

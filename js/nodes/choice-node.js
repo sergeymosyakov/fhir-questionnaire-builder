@@ -8,6 +8,7 @@ import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
 import { terminologyService } from '../fhir/terminology-service.js';
 import { nextUid } from '../id.js';
+import { joinCodes, splitCodes } from '../fhir/checklist-codec.js';
 import {
   _nodeOpts, _evalAnswerOpts, _resolveColValue, _findRawOpt,
   _getColDisplayLabel, _buildColHeader, _buildColRow, _appendOptionExtras,
@@ -518,9 +519,9 @@ export class ChecklistNode extends ItemNode {
     const parseSelected = () => {
       const raw = getValue(node.id);
       if (!raw || raw === '') return new Set();
-      return new Set(String(raw).split(','));
+      return new Set(splitCodes(raw));
     };
-    const serializeSelected = set => [...set].join(',');
+    const serializeSelected = set => joinCodes([...set]);
 
     const exclusives = node._optionExclusives || {};
     const allCheckboxes = [];

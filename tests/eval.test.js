@@ -214,6 +214,26 @@ describe('evaluateNode — enableWhen single condition', () => {
     expect(evaluateNode(node, {}, []).visible).toBe(false);
   });
 
+  it('matches a single checklist selection whose code contains a comma', () => {
+    const node = {
+      id: 'q1', type: 'item', mandatory: false,
+      enableWhen: [{ question: 'q0', operator: '=', answerCoding: { code: 'cough,dry' } }],
+      enableBehavior: 'all', enableWhenExpression: '',
+    };
+    _values['q0'] = 'cough\u001Fdry'; // stored form of the single code "cough,dry"
+    expect(evaluateNode(node, {}, []).visible).toBe(true);
+  });
+
+  it('a raw single-select code containing a comma still matches exactly', () => {
+    const node = {
+      id: 'q1', type: 'item', mandatory: false,
+      enableWhen: [{ question: 'q0', operator: '=', answerCoding: { code: 'a,b' } }],
+      enableBehavior: 'all', enableWhenExpression: '',
+    };
+    _values['q0'] = 'a,b';
+    expect(evaluateNode(node, {}, []).visible).toBe(true);
+  });
+
   it('handles answerCoding by code', () => {
     const node = {
       id: 'q1', type: 'item', mandatory: false,

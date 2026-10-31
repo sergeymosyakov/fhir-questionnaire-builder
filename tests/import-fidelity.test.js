@@ -1,7 +1,5 @@
 // Import/export fidelity regressions: group attributes, open-choice controls, R5 open answers, prototype-named languages.
-import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
-import fs from 'node:fs';
-import path from 'node:path';
+import { describe, it, expect, vi } from 'vitest';
 
 globalThis.CustomEvent = class CustomEvent {
   constructor(type, init) { this.type = type; this.detail = init?.detail; }
@@ -19,9 +17,7 @@ vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
 const { importFHIR } = await import('../js/fhir/import.js');
 const { buildFHIRObject } = await import('../js/fhir/export.js');
-const { isSTU3 } = await import('../js/fhir/stu3-shim.js');
 const { FHIR } = await import('../js/fhir/urls/fhir.js');
-const { BUILDER_VERSION_EXTENSION_URL } = await import('../js/fhir/format-registry.js');
 const { AppEvents, EventState } = await import('../js/events.js');
 EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc });
 
