@@ -10,7 +10,7 @@
     "start": "2026-01-01",
     "end": "2026-12-31"
   },
-  "description": "Demonstrates entryFormat hints, attachment maxSize/mimeType limits, designNote, rendering-markdown, derivedFrom and effectivePeriod.",
+  "description": "Demonstrates entryFormat hints, attachment maxSize/mimeType limits, designNote, rendering-markdown, derivedFrom, effectivePeriod and date/dateTime/time min/max bounds (kept on import/export, not editable).",
   "item": [
     {
       "linkId": "phone",
@@ -54,6 +54,51 @@
         {
           "url": "http://hl7.org/fhir/StructureDefinition/mimeType",
           "valueCode": "image/png"
+        }
+      ]
+    },
+    {
+      "linkId": "birth-date-window",
+      "text": "Date of birth (1900 to 2026)",
+      "type": "date",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+          "valueDate": "1900-01-01"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+          "valueDate": "2026-12-31"
+        }
+      ]
+    },
+    {
+      "linkId": "appointment-slot",
+      "text": "Appointment date and time",
+      "type": "dateTime",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+          "valueDateTime": "2026-01-01T08:00:00Z"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+          "valueDateTime": "2026-12-31T18:00:00Z"
+        }
+      ]
+    },
+    {
+      "linkId": "arrival-time",
+      "text": "Arrival time (clinic hours)",
+      "type": "time",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+          "valueTime": "08:00:00"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+          "valueTime": "17:30:00"
         }
       ]
     },

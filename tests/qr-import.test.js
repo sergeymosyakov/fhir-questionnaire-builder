@@ -15,6 +15,38 @@ function makeQR(items, questionnaire = '') {
   return { resourceType: 'QuestionnaireResponse', questionnaire, item: items };
 }
 
+// ── Object.prototype-named linkIds ────────────────────────────────────────────
+
+describe('importQRAnswers — prototype-named linkIds', () => {
+  const ids = ['constructor', 'toString', 'hasOwnProperty'];
+
+  it.each(ids)('imports a plain item with linkId %s', (id) => {
+    const values = {};
+    const r = importQRAnswers(makeQR([{ linkId: id, answer: [{ valueString: 'x' }] }]), values, makeTree(id));
+    expect(r.loaded).toBe(1);
+    expect(values[id]).toEqual(['x']);
+  });
+
+  it.each(ids)('imports a repeating group with linkId %s as one map per instance', (id) => {
+    const tree = [{ id, type: 'group', repeats: true, children: [{ id: 'c', children: [] }] }, { id: 'c', children: [] }];
+    const values = {};
+    const qr = makeQR([
+      { linkId: id, item: [{ linkId: 'c', answer: [{ valueString: 'a' }] }] },
+      { linkId: id, item: [{ linkId: 'c', answer: [{ valueString: 'b' }] }] },
+    ]);
+    expect(() => importQRAnswers(qr, values, tree)).not.toThrow();
+    expect(values[id].map(m => m.c)).toEqual([['a'], ['b']]);
+  });
+
+  it('ignores a __proto__ linkId without polluting the store', () => {
+    const values = {};
+    const r = importQRAnswers(makeQR([{ linkId: '__proto__', answer: [{ valueString: 'x' }] }]), values, makeTree('__proto__'));
+    expect(r.loaded).toBe(0);
+    expect(Object.getPrototypeOf(values)).toBe(Object.prototype);
+    expect(({}).x).toBeUndefined();
+  });
+});
+
 // ── input validation ──────────────────────────────────────────────────────────
 
 describe('importQRAnswers — input validation', () => {

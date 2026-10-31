@@ -9,9 +9,16 @@ function _collectLinkIds(nodes, set = new Set()) {
   return set;
 }
 
-// Flatten QR item[] recursively → { [linkId]: [row0, row1, …] } (repeat rows as array)
-function _flattenQR(items, out = {}) {
+// Flatten QR item[] recursively → { [linkId]: [row0, row1, …] } (repeat rows as array).
+// A repeating group instead maps to one answer map per QR item occurrence, as the store expects.
+// Containers are null-prototype so linkIds like 'constructor' or '__proto__' are plain keys.
+function _flattenQR(items, out = Object.create(null), repeatGroups = new Set()) {
   for (const item of items || []) {
+    if (item.linkId === '__proto__') continue;
+    if (repeatGroups.has(item.linkId)) {
+      (out[item.linkId] ||= []).push(_flattenQR(item.item, Object.create(null), repeatGroups));
+      continue;
+    }
     if (item.answer && item.answer.length) {
       const extractVal = ans => {
         if (ans.valueBoolean  !== undefined) return ans.valueBoolean;
@@ -21,9 +28,23 @@ function _flattenQR(items, out = {}) {
         if (ans.valueDate      !== undefined) return ans.valueDate;
         if (ans.valueDateTime  !== undefined) return ans.valueDateTime;
         if (ans.valueTime      !== undefined) return ans.valueTime;
-        if (ans.valueQuantity  !== undefined) return { value: ans.valueQuantity.value, unit: ans.valueQuantity.unit || '' };
+        if (ans.valueQuantity  !== undefined) return {
+          value: ans.valueQuantity.value, unit: ans.valueQuantity.unit || '',
+          ...(ans.valueQuantity.system ? { system: ans.valueQuantity.system } : {}),
+          ...(ans.valueQuantity.code   ? { code:   ans.valueQuantity.code }   : {}),
+        };
         if (ans.valueUri       !== undefined) return ans.valueUri;
-        if (ans.valueReference !== undefined) return { reference: ans.valueReference.reference || '' };
+        if (ans.valueReference !== undefined) return {
+          reference: ans.valueReference.reference || '',
+          ...(ans.valueReference.display ? { display: ans.valueReference.display } : {}),
+        };
+        // The store keeps the file-chip fields plus the original Attachment so export can restore it verbatim
+        if (ans.valueAttachment !== undefined) return {
+          name: ans.valueAttachment.title || ans.valueAttachment.url || '',
+          type: ans.valueAttachment.contentType || '',
+          size: ans.valueAttachment.size,
+          attachment: JSON.parse(JSON.stringify(ans.valueAttachment)),
+        };
         if (ans.valueString    !== undefined) return ans.valueString;
         return undefined;
       };
@@ -31,13 +52,22 @@ function _flattenQR(items, out = {}) {
       if (out[item.linkId].length === 0) delete out[item.linkId];
       // Nested items inside answers (non-group questions with sub-items)
       for (const ans of item.answer) {
-        if (ans.item) _flattenQR(ans.item, out);
+        if (ans.item) _flattenQR(ans.item, out, repeatGroups);
       }
     }
     // Group children
-    if (item.item) _flattenQR(item.item, out);
+    if (item.item) _flattenQR(item.item, out, repeatGroups);
   }
   return out;
+}
+
+// Collect repeating group linkIds from tree
+function _collectRepeatGroupIds(nodes, set = new Set()) {
+  for (const n of nodes) {
+    if (n.type === 'group' && n.repeats && n.id) set.add(n.id);
+    if (n.children) _collectRepeatGroupIds(n.children, set);
+  }
+  return set;
 }
 
 // Collect checklist node linkIds from tree
@@ -64,7 +94,7 @@ export function importQRAnswers(qrJson, values, tree) {
   }
 
   const knownIds  = _collectLinkIds(tree);
-  const extracted = _flattenQR(qrJson.item || []);
+  const extracted = _flattenQR(qrJson.item || [], undefined, _collectRepeatGroupIds(tree));
   const unmatched = [];
   let loaded = 0;
 
@@ -80,7 +110,7 @@ export function importQRAnswers(qrJson, values, tree) {
   // Merge multi-answer QR entries for checklist items into a single comma-separated row
   const checklistIds = _collectChecklistIds(tree);
   for (const id of checklistIds) {
-    const arr = values[id];
+    const arr = Object.hasOwn(values, id) ? values[id] : undefined;
     if (Array.isArray(arr) && arr.length > 1) {
       values[id] = [arr.filter(v => v !== undefined).join(',')];
     }

@@ -389,14 +389,34 @@ describe('buildQR — fallback branches', () => {
     expect(qr.item[0].answer[0].valueDecimal).toBe(0);
   });
 
-  it('quantity answer falls back to 0/empty for missing value/unit', () => {
-    const qr = bq({ item: [{ linkId: 'q', type: 'quantity' }] }, { q: {} });
-    expect(qr.item[0].answer[0].valueQuantity).toEqual({ value: 0, unit: '' });
+  it.each([{}, { value: '', unit: 'kg' }, { value: null }])('cleared quantity %j emits no answer', (q) => {
+    const qr = bq({ item: [{ linkId: 'q', type: 'quantity' }] }, { q });
+    expect(qr.item[0].answer).toBeUndefined();
   });
 
-  it('reference answer falls back to empty string for missing reference', () => {
-    const qr = bq({ item: [{ linkId: 'q', type: 'reference' }] }, { q: {} });
-    expect(qr.item[0].answer[0].valueReference).toEqual({ reference: '' });
+  it('quantity zero is a real value', () => {
+    const qr = bq({ item: [{ linkId: 'q', type: 'quantity' }] }, { q: { value: 0, unit: 'kg' } });
+    expect(qr.item[0].answer[0].valueQuantity).toEqual({ value: 0, unit: 'kg' });
+  });
+
+  it.each([{}, { reference: '' }, { display: 'Dr. Who' }])('reference %j without a reference string emits no answer', (r) => {
+    const qr = bq({ item: [{ linkId: 'q', type: 'reference' }] }, { q: r });
+    expect(qr.item[0].answer).toBeUndefined();
+  });
+
+  it('choice with valueReference options or display-only match falls back to valueCoding code (known limit)', () => {
+    const fhir = { item: [{ linkId: 'q', type: 'choice', answerOption: [
+      { valueReference: { reference: 'Patient/1', display: 'P1' } },
+      { valueCoding: { code: 'a', display: 'Alpha' } },
+    ] }] };
+    expect(bq(fhir, { q: 'Patient/1' }).item[0].answer[0]).toEqual({ valueCoding: { code: 'Patient/1' } });
+    expect(bq(fhir, { q: 'Alpha' }).item[0].answer[0]).toEqual({ valueCoding: { code: 'Alpha' } });
+  });
+
+  it('linkIds named like Object.prototype members build without throwing', () => {
+    const fhir = { item: [{ linkId: 'toString', type: 'string' }, { linkId: 'constructor', type: 'group', repeats: true, item: [{ linkId: 'hasOwnProperty', type: 'string' }] }] };
+    const qr = _buildQR(fhir, {});
+    expect(qr.item).toHaveLength(2);
   });
 
   it('non-group boolean item with children embeds sub-items in answer', () => {
