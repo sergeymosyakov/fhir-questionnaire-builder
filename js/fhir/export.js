@@ -146,6 +146,8 @@ export function nodeToFHIRItem(node) {
         const { system, code, display } = v;
         return { valueCoding: { ...(system ? { system } : {}), code: String(code ?? display ?? ''), display: String(display ?? code ?? '') } };
       }
+      const keptCoding = t === 'choice' && node._initialCodings?.find(c => (c.code ?? c.display) === String(v));
+      if (keptCoding) return { valueCoding: { ...keptCoding } };
       if (t === 'choice')   return { valueCoding:   { code: String(v), display: String(v) } };
       return { valueString: String(v) };
     };
@@ -267,8 +269,13 @@ export function nodeToFHIRItem(node) {
         : opt.valueTime    !== undefined ? opt.valueTime
         : opt.valueReference ? (typeof opt.valueReference === 'string' ? opt.valueReference : (opt.valueReference.reference || ''))
         : '';
-    const firstMarked = node._rawAnswerOptions.find(o => o.initialSelected);
+    // Same options the importer can derive _initialSelected from (coding / string / integer)
+    const firstMarked = node._rawAnswerOptions.find(o => o.initialSelected
+      && (o.valueCoding || o.valueString !== undefined || o.valueInteger !== undefined));
     // Builder edits write _initialSelected ('' = cleared); an untouched import keeps its original marks
+    // A checklist default is a comma-separated list of codes
+    const selectedKeys = new Set((node.itemType === 'checklist' ? String(node._initialSelected).split(',') : [String(node._initialSelected)])
+      .map(k => k.trim()).filter(Boolean));
     const selChanged = node._initialSelected !== undefined
       && String(node._initialSelected) !== (firstMarked ? String(keyOf(firstMarked)) : '');
     fhirItem.answerOption = node._rawAnswerOptions.map(opt => {
@@ -300,7 +307,7 @@ export function nodeToFHIRItem(node) {
       if (optExts.length) optOut.extension = optExts;
       if (selChanged) {
         delete optOut.initialSelected;
-        if (String(node._initialSelected) === String(key)) optOut.initialSelected = true;
+        if (selectedKeys.has(String(key))) optOut.initialSelected = true;
       }
       return optOut;
     });

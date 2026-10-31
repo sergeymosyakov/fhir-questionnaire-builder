@@ -487,6 +487,24 @@ describe('buildFHIRObject — _rawAnswerOptions round-trip', () => {
     expect(q.item[0].answerOption.every(o => o.initialSelected)).toBe(true);
   });
 
+  it('keeps the full initial Coding (system/display) for a value-set item', () => {
+    const coding = { system: 'http://loinc.org', code: 'LA1', display: 'Yes' };
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', _answerValueSet: 'https://example.com/vs', _initialValue: 'LA1', _initialCodings: [coding] }]);
+    expect(q.item[0].initial).toEqual([{ valueCoding: coding }]);
+  });
+
+  it('checklist default lists several codes as initialSelected marks', () => {
+    const raw = [{ valueCoding: { code: 'a' } }, { valueCoding: { code: 'b' } }, { valueCoding: { code: 'c' } }];
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'checklist', repeats: true, _rawAnswerOptions: raw, _initialSelected: 'a, c' }]);
+    expect(q.item[0].answerOption.map(o => !!o.initialSelected)).toEqual([true, false, true]);
+  });
+
+  it('untouched import keeps marks when the first marked option is a date', () => {
+    const raw = [{ valueDate: '2024-01-01', initialSelected: true }, { valueInteger: 5, initialSelected: true }];
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', _rawAnswerOptions: raw, _initialSelected: '5' }]);
+    expect(q.item[0].answerOption.every(o => o.initialSelected)).toBe(true);
+  });
+
   it('uses options string path when _rawAnswerOptions absent', () => {
     const q = build([{
       id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=Alpha',

@@ -37,7 +37,7 @@ class InitValueSection extends InitialSection {
     lbl.className        = 'initial-modal-label';
     lbl.textContent      = 'Default value:';
     lbl.dataset.tipTitle = 'item.initial';
-    lbl.dataset.tipBody  = 'Pre-filled value when the form loads. Exported as item.initial[0].value[x] in the FHIR Questionnaire. User can edit unless the item is read-only.';
+    lbl.dataset.tipBody  = 'Pre-filled value when the form loads. Exported as item.initial[0].value[x], or as answerOption[].initialSelected when the item has an options list. User can edit unless the item is read-only.';
     lbl.dataset.tipFhir  = 'Questionnaire.item.initial[].value[x]';
     lbl.dataset.tipSpec  = 'R4';
     wrap.appendChild(lbl);
