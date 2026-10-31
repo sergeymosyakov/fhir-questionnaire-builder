@@ -79,7 +79,7 @@ https://fhirbuilder.com/
 
 ### Tests
 ```powershell
-npm test             # unit tests — single run (Vitest, 1899 tests)
+npm test             # unit tests — single run (Vitest, 2288 tests)
 npm run test:watch   # unit tests — watch mode
 npm run test:e2e     # e2e tests — Playwright/Chromium
 npm run test:e2e:ui  # e2e tests — Playwright UI mode
@@ -126,7 +126,7 @@ All samples live in `sampledata/` and can be loaded via the **Load** button.
 - **fhir-structuremap-js** — `lib/fhir-structuremap-js.esm.js`; executes FHIR StructureMap transforms for SDC populate/extract (author's own library)
 - **cql-execution / cql-exec-fhir** — `lib/cql-execution.esm.js`, `lib/cql-exec-fhir.esm.js`; CQL/ELM execution engine + FHIR data source, powers `initialExpression` CQL evaluation
 - **Supabase** — `lib/supabase.min.js`; auth + optional cloud sync backend
-- **Vitest** — 1899 unit tests across 57 files; CI via GitHub Actions (`npm test`)
+- **Vitest** — 2288 unit tests across 76 files; CI via GitHub Actions (`npm test`)
 - **Playwright** — e2e tests (Chromium); CI + HTML report on GitHub Pages
 
 ---

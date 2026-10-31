@@ -1,6 +1,6 @@
 # Settings
 
-The **Settings** page (⋯ More → Settings) configures the external servers and
+The **Settings** page (**More ▾ → Settings**) configures the external servers and
 services the builder can talk to. Everything here is **optional** — the builder
 works offline without any of it; these settings only enable features that need a
 server (terminology expansion, `$populate`, external validation, translation).

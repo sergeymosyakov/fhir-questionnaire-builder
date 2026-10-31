@@ -1,4 +1,4 @@
-﻿// Entry point — composition root. All modules self-wire via events + EventState.
+// Entry point — composition root. All modules self-wire via events + EventState.
 import * as storage from './storage/storage.js';
 import { SupabaseAdapter } from './storage/supabase-adapter.js';
 import { supabase } from './auth/supabase-client.js';

@@ -36,7 +36,7 @@ describe('definitionExtract — guard paths', () => {
     const { bundle, count, warnings } = definitionExtract(q, qr);
     expect(bundle).toBeNull();
     expect(count).toBe(0);
-    expect(warnings.some(w => w.includes('No extraction groups'))).toBe(true);
+    expect(warnings).toContainEqual(expect.stringContaining('No extraction groups'));
   });
 });
 

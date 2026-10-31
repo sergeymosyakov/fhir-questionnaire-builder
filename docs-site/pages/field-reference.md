@@ -6,7 +6,7 @@ builder knows about, and exactly where to configure it in the UI.
 
 ## Opening it
 
-From the app, open **⋯ More → FHIR Reference**. It also opens as a standalone
+From the app, open **More ▾ → FHIR Reference**. It also opens as a standalone
 page at `help.html`.
 
 ## What's in it

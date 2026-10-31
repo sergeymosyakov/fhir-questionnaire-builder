@@ -53,7 +53,7 @@ See [context/file-manifest.md](context/file-manifest.md) for the full per-file r
 - **Event-driven calc** — nodes/modals dispatch `CALC_RECALC_REQUESTED`; `BuilderPanel` listens and runs `evalCalcNodes` + dispatches `RESPONSE_CHANGED`
 - **Confirm dialog** — `ConfirmDialog.show(label)` in `js/ui/confirm-dialog.js` — no DI, standalone `Promise<boolean>`
 - **`ctx` object** — `{ renderTree, renderNode, tree, collapsed }` passed down to renderers and panels
-- **Vitest** — unit test suite for pure-function modules; **2165 tests** across 66 files; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules; **2288 tests** across 76 files; CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://fhirbuilder.com/
 
 ---

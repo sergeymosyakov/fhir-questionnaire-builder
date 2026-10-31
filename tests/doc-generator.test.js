@@ -721,12 +721,12 @@ describe('generateQuestionnaireDoc — validation & audit passthrough', () => {
   it('surfaces validateTree issues (e.g. enableWhen referencing an unknown linkId)', () => {
     const item = makeItem({ enableWhen: [{ question: 'ghost', operator: '=', answerBoolean: true }] });
     const doc = generateQuestionnaireDoc(baseDeps([item]));
-    expect(doc.validation.some(v => v.nodeId === 'q1')).toBe(true);
+    expect(doc.validation).toContainEqual(expect.objectContaining({ nodeId: 'q1' }));
   });
 
   it('surfaces auditTree issues (e.g. enableWhenExpression referencing an unknown linkId)', () => {
     const item = makeItem({ enableWhenExpression: "item.where(linkId='ghost').answer.exists()" });
     const doc = generateQuestionnaireDoc(baseDeps([item]));
-    expect(doc.audit.some(a => a.nodeId === 'q1')).toBe(true);
+    expect(doc.audit).toContainEqual(expect.objectContaining({ nodeId: 'q1' }));
   });
 });

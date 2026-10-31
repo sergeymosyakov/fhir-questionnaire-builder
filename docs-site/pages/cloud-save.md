@@ -45,7 +45,7 @@ your most recent work is kept as a local **Recent draft** you can restore from t
 That local draft is kept up to date by **autosave** — it writes the current
 questionnaire to your browser's local storage every 15 seconds while you work, so
 a crashed tab or an accidental close doesn't lose your edits. It's on by default;
-to turn it off, uncheck **Autosave** in **⋯ More**, next to the tooltip and
+to turn it off, uncheck **Autosave** in **⚙ Settings ▾**, next to the tooltip and
 validation toggles. The same menu row shows the time of the last save once it has
 run at least once.
 

@@ -8,7 +8,7 @@ guide. The builder imports, edits, previews and re-exports a broad set of them,
 and round-trips the ones it does not render so nothing is lost.
 
 For the exhaustive, field-by-field list of what is supported and where to set it
-in the UI, use the built-in **FHIR Field Reference** (⋯ More → FHIR Reference).
+in the UI, use the built-in **FHIR Field Reference** (**More ▾ → FHIR Reference**).
 This page explains, in plain terms, what each group of features does for you.
 
 ## Logic & expressions

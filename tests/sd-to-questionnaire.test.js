@@ -113,6 +113,6 @@ describe('generateQuestionnaireFromSD', () => {
     expect(questionnaire.item[0]).toMatchObject({ linkId: 'Patient.multipleBirthBoolean', type: 'boolean', text: 'Multiple birth (boolean)' });
     expect(questionnaire.item[1]).toMatchObject({ linkId: 'Patient.multipleBirthInteger', type: 'integer', text: 'Multiple birth (integer)' });
     expect(questionnaire.item[0].required).toBeUndefined();
-    expect(warnings.some(w => w.includes('Patient.multipleBirth[x]'))).toBe(true);
+    expect(warnings).toContainEqual(expect.stringContaining('Patient.multipleBirth[x]'));
   });
 });

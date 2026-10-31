@@ -35,7 +35,7 @@ invent a URL or cardinality.
 - Add the editing control to the correct modal section (e.g. an
   `AnswerTypeSection` in `js/ui/answer-type/sections.js`, or a states section).
 - Mandatory FHIR tooltip: set `data-tip-title`, `data-tip-body`, `data-tip-fhir`
-  (exact FHIR path), `data-tip-spec` (`'R4'` or `'SDC'`) on the control.
+  (exact FHIR path), `data-tip-spec` (`R4`, `SDC` or `R5`, optional ` · qualifier`) on the control.
 - Use `createCustomSelect` for dropdowns; never a native `<select>`.
 
 ## 7. Sample data

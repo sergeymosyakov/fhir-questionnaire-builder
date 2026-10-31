@@ -527,7 +527,7 @@ describe('buildFHIRObject — reference, quantity, expr extensions', () => {
   it('does not emit unitOption when _unitOptions is absent', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'quantity' }]);
     const ext = q.item[0].extension || [];
-    expect(ext.some(e => e.url === UNIT_OPT_URL)).toBe(false);
+    expect(ext).not.toContainEqual(expect.objectContaining({ url: UNIT_OPT_URL }));
   });
 
   it('exports SDC calculatedExpression when _calculatedExpr is set', () => {

@@ -569,7 +569,7 @@ describe('buildFHIRObject — entryFormat', () => {
   it('does not emit entryFormat extension when _entryFormat is absent', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text' }]);
     const ext = q.item[0].extension || [];
-    expect(ext.some(e => e.url === EF_URL)).toBe(false);
+    expect(ext).not.toContainEqual(expect.objectContaining({ url: EF_URL }));
   });
 
   it('exports entryFormat for non-text types such as integer', () => {
@@ -601,7 +601,7 @@ describe('buildFHIRObject — choiceOrientation', () => {
   it('does not emit choiceOrientation extension when _choiceOrientation is absent', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A' }]);
     const ext = q.item[0].extension || [];
-    expect(ext.some(e => e.url === CO_URL)).toBe(false);
+    expect(ext).not.toContainEqual(expect.objectContaining({ url: CO_URL }));
   });
 });
 
@@ -631,7 +631,7 @@ describe('buildFHIRObject — choiceColumn', () => {
   it('does not emit choiceColumn extension when _choiceColumns is absent', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A' }]);
     const ext = q.item[0].extension || [];
-    expect(ext.some(e => e.url === CC_URL)).toBe(false);
+    expect(ext).not.toContainEqual(expect.objectContaining({ url: CC_URL }));
   });
 });
 
@@ -671,7 +671,7 @@ describe('buildFHIRObject — displayCategory', () => {
   it('does not emit displayCategory extension when _displayCategory is absent', () => {
     const q = build([{ id: 'd1', type: 'item', title: 'Plain', itemType: 'display' }]);
     const ext = q.item[0].extension || [];
-    expect(ext.some(e => e.url === DC_URL)).toBe(false);
+    expect(ext).not.toContainEqual(expect.objectContaining({ url: DC_URL }));
   });
 });
 
