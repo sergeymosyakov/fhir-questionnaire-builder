@@ -233,8 +233,8 @@ Stored in `questDoc.meta` (`js/fhir/quest-document.js`). Populated on import, wr
 | `_minLength` | core ext `http://hl7.org/fhir/StructureDefinition/minLength` (`valueInteger`) | imported → `node._minLength`; exported back when set; `minlength` HTML attribute enforced in preview; inline error `Min N chars` shown on blur when value is non-empty but shorter than limit; clears when value reaches the limit |
 | `_maxFileSizeMB` | `questionnaire-maxSize` ext `http://hl7.org/fhir/StructureDefinition/maxSize` (`valueDecimal`) | imported → `node._maxFileSizeMB`; exported back when set; attachment items only; validated on file selection — error tag shown when file exceeds limit; `calcFormOk` returns `false`; hint shown below file button; editable in Answer Type modal |
 | `_mimeTypes` | `http://hl7.org/fhir/StructureDefinition/mimeType` (`valueCode`, 0..*) | imported → `node._mimeTypes` string array; exported as one extension entry per MIME type; sets `accept` attribute on file input; hint shown below file button; editable in Answer Type modal (comma-separated) |
-| `_minValue` | `questionnaire-minValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; min HTML attribute set on input; error shown in preview when violated |
-| `_maxValue` | `questionnaire-maxValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items; max HTML attribute set on input; error shown in preview when violated |
+| `_minValue` | `questionnaire-minValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items (`valueDecimal` vs `valueInteger` is remembered in `_minValueType`); date/dateTime/time bounds are kept apart in `_minValueRaw`; min HTML attribute set on input; error shown in preview when violated |
+| `_maxValue` | `questionnaire-maxValue` ext (`valueDecimal` or `valueInteger`) | imported/exported for `integer`/`decimal` items (`valueDecimal` vs `valueInteger` is remembered in `_maxValueType`); date/dateTime/time bounds are kept apart in `_maxValueRaw`; max HTML attribute set on input; error shown in preview when violated |
 | `_optionOrdinals` | `ordinalValue` ext on `answerOption[].extension` (primary) or `valueCoding.extension` (fallback) | map of option code → numeric score; shown as `(N)` badge in radio/select; editable in Answer Type modal (`code=Label=score` format); exported to `answerOption.extension` |
 | `_optionSystems` | `answerOption[].valueCoding.system` | map of option code → system URI (e.g. `http://loinc.org`); optional per-option; editable in Answer Type modal **System** column; exported as `valueCoding.system` in the simple options path; preserved from `_rawAnswerOptions.valueCoding.system` in the raw path |
 | `_optionPrefixes` | `questionnaire-optionPrefix` ext on `answerOption[].extension` | map of option code → display prefix string (e.g. `'A.'`, `'1.'`); prepended to option label in select/radio preview; editable in Answer Type modal (`code=Prefix` format, comma-separated); exported to `answerOption.extension` alongside `ordinalValue` when present |
@@ -473,7 +473,7 @@ All R4 `Questionnaire` invariants (que-0 through que-13) are enforced by the loc
 | `sliderStep` is a decimal | warning | R4 only allows `valueInteger`; step rounded on export |
 | `displayCategory` on a `display` item | warning | R4 only allows on group items; suppressed on export |
 
-All rules are tested in `tests/validate.test.js` (1064 unit tests total across all test files).
+All rules are tested in `tests/validate.test.js` (2571 unit tests total across all test files).
 
 ---
 
@@ -601,6 +601,7 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `questionnaire-maxOccurs` | ✅ | Max repeat rows; enforced in preview |
 | `minValue` | ✅ | Numeric min; enforced in preview |
 | `maxValue` | ✅ | Numeric max; enforced in preview |
+| `minValue` / `maxValue` on `date` / `dateTime` / `time` items | 🔄 Round-trip only | Kept with the exact `valueDate` / `valueDateTime` / `valueTime` type (`_minValueRaw` / `_maxValueRaw`); not enforced in preview |
 | `maxDecimalPlaces` | ✅ | Max decimal digits |
 | `minLength` | 🔄 | Min character count; round-trip only, enforced in preview, no builder UI (core `StructureDefinition/minLength` ext) |
 | `maxSize` | ✅ | Max file size in MB (attachment) |

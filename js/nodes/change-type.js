@@ -54,7 +54,11 @@ export function changeNodeType(node, newType, tree, _answerStore) {
   // lifecycle and let the old one's listeners get cleaned up.
   newNode._ac = new AbortController();
   newNode._busWired = false;
-  if (node.itemType !== newType) delete newNode._fhirText;
+  if (node.itemType !== newType) {
+    delete newNode._fhirText;
+    // Imported bound kinds are tied to the old type
+    for (const k of ['_minValueType', '_maxValueType', '_minValueRaw', '_maxValueRaw']) delete newNode[k];
+  }
   // Not node.destroy(): it recurses into children, which the new node still owns.
   node._ac?.abort();
   node._navAbort?.abort();
@@ -100,6 +104,8 @@ export function nodeHasTypeConfig(node) {
     node._regex ||
     node._minValue !== undefined ||
     node._maxValue !== undefined ||
+    node._minValueRaw ||
+    node._maxValueRaw ||
     node._sliderStep !== undefined ||
     node.quantityUnit ||
     node._unitValueSet ||

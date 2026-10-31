@@ -108,13 +108,21 @@ class NumericSection extends AnswerTypeSection {
       const maxV   = _pf(pending.draftMaxValue);
       const stepV  = _pf(pending.draftSliderStep);
       const decP   = _pi(pending.draftMaxDecimalPlaces);
-      if (minV  !== undefined)              node._minValue   = _round ? Math.round(minV)  : minV;  else delete node._minValue;
-      if (maxV  !== undefined)              node._maxValue   = _round ? Math.round(maxV)  : maxV;  else delete node._maxValue;
+      const newMin = minV !== undefined && _round ? Math.round(minV) : minV;
+      const newMax = maxV !== undefined && _round ? Math.round(maxV) : maxV;
+      // An edited bound follows the item type again instead of the imported value[x] kind
+      if (newMin !== node._minValue) delete node._minValueType;
+      if (newMax !== node._maxValue) delete node._maxValueType;
+      delete node._minValueRaw; delete node._maxValueRaw;
+      if (newMin !== undefined) node._minValue = newMin; else delete node._minValue;
+      if (newMax !== undefined) node._maxValue = newMax; else delete node._maxValue;
       if (stepV !== undefined && stepV > 0) { node._sliderStep = _round ? Math.round(stepV) : stepV; node._itemControl = 'slider'; } else { delete node._sliderStep; if (node._itemControl === 'slider') delete node._itemControl; }
       if (node.itemType === 'decimal' && decP !== undefined && decP >= 0) node._maxDecimalPlaces = decP; else delete node._maxDecimalPlaces;
     } else {
       delete node._minValue;
       delete node._maxValue;
+      delete node._minValueType;
+      delete node._maxValueType;
       delete node._sliderStep;
       delete node._maxDecimalPlaces;
     }

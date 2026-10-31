@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { changeNodeType, nodeTypeNeedsConfig, nodeHasTypeConfig } from '../js/nodes/change-type.js';
 import { createItemNode } from '../js/nodes/index.js';
+import { ANSWER_TYPE_SECTIONS } from '../js/ui/modals/answer-type/registry.js';
+await import('../js/ui/modals/answer-type/sections/numeric.js');
 
 describe('changeNodeType', () => {
   it('returns a new node of the target type, preserving id and title', () => {
@@ -126,6 +128,12 @@ describe('nodeHasTypeConfig', () => {
     expect(nodeHasTypeConfig(n)).toBe(true);
   });
 
+  it('is true when a date item only carries an imported raw bound', () => {
+    const n = createItemNode('date', { id: '1' });
+    n._maxValueRaw = { valueDate: '2030-01-01' };
+    expect(nodeHasTypeConfig(n)).toBe(true);
+  });
+
   it('is true when a quantity item has a unit', () => {
     const n = createItemNode('quantity', { id: '1' });
     n.quantityUnit = 'kg';
@@ -157,5 +165,49 @@ describe('nodeHasTypeConfig', () => {
   it('is false for null/undefined', () => {
     expect(nodeHasTypeConfig(null)).toBe(false);
     expect(nodeHasTypeConfig(undefined)).toBe(false);
+  });
+});
+
+describe('changeNodeType — imported bound metadata', () => {
+  const numeric = ANSWER_TYPE_SECTIONS.find(sec => sec.isVisible('integer'));
+
+  it('drops raw temporal bounds on date -> dateTime', () => {
+    const n = createItemNode('date', { id: '1' });
+    n._minValueRaw = { valueDate: '2020-01-01' };
+    const out = changeNodeType(n, 'dateTime');
+    expect(out._minValueRaw).toBeUndefined();
+  });
+
+  it('does not resurrect a raw bound on date -> integer -> date', () => {
+    const n = createItemNode('date', { id: '1' });
+    n._maxValueRaw = { valueDate: '2030-01-01' };
+    const back = changeNodeType(changeNodeType(n, 'integer'), 'date');
+    expect(back._maxValueRaw).toBeUndefined();
+  });
+
+  it('drops the imported numeric value[x] kind on a type change', () => {
+    const n = createItemNode('decimal', { id: '1' });
+    n._minValue = 5; n._minValueType = 'valueDecimal';
+    const out = changeNodeType(n, 'integer');
+    expect(out._minValue).toBe(5);
+    expect(out._minValueType).toBeUndefined();
+  });
+
+  it('keeps the imported kind when the Answer Type dialog is confirmed without editing the bound', () => {
+    const n = createItemNode('decimal', { id: '1' });
+    n._minValue = 5; n._minValueType = 'valueDecimal';
+    numeric.commit({ draftMinValue: '5', draftMaxValue: '', draftSliderStep: '', draftMaxDecimalPlaces: '' }, n);
+    expect(n._minValueType).toBe('valueDecimal');
+  });
+
+  it('clears the imported kind when the user edits or removes a bound', () => {
+    const n = createItemNode('integer', { id: '1' });
+    n._minValue = 5; n._minValueType = 'valueDecimal';
+    n._maxValue = 9; n._maxValueType = 'valueDecimal';
+    numeric.commit({ draftMinValue: '7', draftMaxValue: '', draftSliderStep: '', draftMaxDecimalPlaces: '' }, n);
+    expect(n._minValue).toBe(7);
+    expect(n._minValueType).toBeUndefined();
+    expect(n._maxValue).toBeUndefined();
+    expect(n._maxValueType).toBeUndefined();
   });
 });

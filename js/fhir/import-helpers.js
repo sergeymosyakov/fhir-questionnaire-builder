@@ -57,10 +57,24 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   FHIR.maxDecimalPlaces,
 ]);
 
+// Item type → the only value[x] key a min/max bound may use for it; import and export both rely on this.
+export const TEMPORAL_BOUND_KEY = { date: 'valueDate', dateTime: 'valueDateTime', time: 'valueTime' };
+
+export const isNumericBound = e => e.valueDecimal !== undefined || e.valueInteger !== undefined;
+export const isTemporalBound = (e, item) => {
+  const k = TEMPORAL_BOUND_KEY[item?.type];
+  return !!k && e[k] !== undefined;
+};
+// Keeps the exact FHIR value[x] key so date bounds re-export with their original type.
+export const pickBoundValue = (e, item) => {
+  const k = TEMPORAL_BOUND_KEY[item?.type];
+  return { [k]: e[k] };
+};
+
 // Known URLs whose importer only parses some value shapes; other shapes stay in pass-through.
 const PARSED_VALUE = {
-  [FHIR.minValue]:         e => e.valueDecimal !== undefined || e.valueInteger !== undefined,
-  [FHIR.maxValue]:         e => e.valueDecimal !== undefined || e.valueInteger !== undefined,
+  [FHIR.minValue]:         (e, item) => isNumericBound(e) || isTemporalBound(e, item),
+  [FHIR.maxValue]:         (e, item) => isNumericBound(e) || isTemporalBound(e, item),
   [FHIR.shortText]:        e => !!e.valueString,
   [FHIR.maxDecimalPlaces]: e => e.valueInteger !== undefined,
 };
@@ -78,7 +92,7 @@ export const ANSWER_SOURCE_EXPR_EXTS = [
 
 export function _collectUnknownExtensions(fhirItem) {
   const unknown = (fhirItem.extension || []).filter(
-    e => !KNOWN_ITEM_EXTENSION_URLS.has(e.url) || (PARSED_VALUE[e.url] && !PARSED_VALUE[e.url](e))
+    e => !KNOWN_ITEM_EXTENSION_URLS.has(e.url) || (PARSED_VALUE[e.url] && !PARSED_VALUE[e.url](e, fhirItem))
   );
   return unknown.length ? unknown.map(e => JSON.parse(JSON.stringify(e))) : null;
 }

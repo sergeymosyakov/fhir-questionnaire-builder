@@ -81,7 +81,7 @@
         "label": "Input Constraints & Authoring Metadata",
         "file": "input-constraints-demo.fhir.json",
         "type": "questionnaire",
-        "note": "entryFormat, attachment maxSize/mimeType, designNote, rendering-markdown, derivedFrom, effectivePeriod"
+        "note": "entryFormat, attachment maxSize/mimeType, designNote, rendering-markdown, derivedFrom, effectivePeriod, date/dateTime/time min/max"
       },
       {
         "label": "Item Control Demo",

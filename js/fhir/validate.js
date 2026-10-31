@@ -246,7 +246,7 @@ export function validateTree(tree, _values = {}, questMeta = null) {
     // questionnaire-sliderStepValue: R4 only allows valueInteger
     // decimal step values require R5/R4B; warn and note the export will round
     if (node._sliderStep !== undefined && !Number.isInteger(node._sliderStep)) {
-      issues.push({ severity: 'warning', nodeId: id, message: `Slider step value ${node._sliderStep} is a decimal — questionnaire-sliderStepValue only allows valueInteger in R4. The step will be rounded to ${Math.round(node._sliderStep)} on export. Use R5/R4B for decimal step values.` });
+      issues.push({ severity: 'warning', nodeId: id, message: `Slider step value ${node._sliderStep} is a decimal — questionnaire-sliderStepValue only allows valueInteger in R4. The step will be rounded to ${Math.max(1, Math.round(node._sliderStep))} on export. Use R5/R4B for decimal step values.` });
     }
 
     // questionnaire-displayCategory: in R4 this extension is only valid on group items

@@ -91,6 +91,8 @@ export function importFHIR(fhirJson, opts = {}) {
   questMeta.experimental      = q.experimental !== undefined ? q.experimental : null;
   questMeta.language          = q.language || '';
   questMeta._rawIdentifier   = Array.isArray(q.identifier)   ? JSON.parse(JSON.stringify(q.identifier)) : [];
+  // Non-translation extensions on the title primitive (e.g. rendering-style); translations are re-derived on export
+  questMeta._rawTitleExtensions = (q._title?.extension || []).filter(e => e.url !== FHIR.translation).map(e => JSON.parse(JSON.stringify(e)));
   questMeta._rawText         = q.text && q.text.status && q.text.div ? { status: q.text.status, div: q.text.div } : null;
   questMeta._rawContact      = Array.isArray(q.contact)      ? q.contact      : null;
   questMeta._rawUseContext   = Array.isArray(q.useContext)   ? q.useContext   : null;

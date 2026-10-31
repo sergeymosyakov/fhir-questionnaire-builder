@@ -13,6 +13,8 @@ import {
   resolveContainedValueSet,
   _collectUnknownExtensions,
   ANSWER_SOURCE_EXPR_EXTS,
+  isTemporalBound,
+  pickBoundValue,
 } from './import-helpers.js';
 
 // Build our item node from a FHIR leaf question
@@ -319,14 +321,20 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (minValExt) {
     const v = minValExt.valueDecimal ?? minValExt.valueInteger;
-    if (v !== undefined) node._minValue = v;
+    if (v !== undefined) {
+      node._minValue = v;
+      node._minValueType = minValExt.valueDecimal !== undefined ? 'valueDecimal' : 'valueInteger';
+    } else if (isTemporalBound(minValExt, fhirItem)) node._minValueRaw = pickBoundValue(minValExt, fhirItem);
   }
   const maxValExt = (fhirItem.extension || []).find(
     e => e.url === FHIR.maxValue
   );
   if (maxValExt) {
     const v = maxValExt.valueDecimal ?? maxValExt.valueInteger;
-    if (v !== undefined) node._maxValue = v;
+    if (v !== undefined) {
+      node._maxValue = v;
+      node._maxValueType = maxValExt.valueDecimal !== undefined ? 'valueDecimal' : 'valueInteger';
+    } else if (isTemporalBound(maxValExt, fhirItem)) node._maxValueRaw = pickBoundValue(maxValExt, fhirItem);
   }
 
   // minOccurs / maxOccurs cardinality extensions

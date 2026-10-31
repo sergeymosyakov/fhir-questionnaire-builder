@@ -1,6 +1,6 @@
 // ── FHIR R4 Questionnaire export ──────────────────────────────────────────────
 import { ITLH_KEY_GROUP_OR } from '../utils.js';
-import { formatRegistry } from './format-registry.js';import { ANSWER_SOURCE_EXPR_EXTS } from './import-helpers.js';import './formats/r4.js';
+import { formatRegistry } from './format-registry.js';import { ANSWER_SOURCE_EXPR_EXTS, TEMPORAL_BOUND_KEY } from './import-helpers.js';import './formats/r4.js';
 import './formats/r4b.js';
 import './formats/r5.js';
 import './formats/redcap.js';
@@ -169,7 +169,7 @@ export function nodeToFHIRItem(node) {
   }
 
   // ── SDC extensions ────────────────────────────────────────────────────────
-  const ext = [];
+  const ext = fhirItem.extension || [];
 
   // enableWhenExpression (SDC FHIRPath condition)
   if (node.enableWhenExpression) {
@@ -440,13 +440,16 @@ export function nodeToFHIRItem(node) {
   }
 
   // questionnaire-minValue / questionnaire-maxValue
-  if (node._minValue !== undefined) {
-    const isInt = Number.isInteger(node._minValue);
-    ext.push({ url: FHIR.minValue, [isInt ? 'valueInteger' : 'valueDecimal']: node._minValue });
-  }
-  if (node._maxValue !== undefined) {
-    const isInt = Number.isInteger(node._maxValue);
-    ext.push({ url: FHIR.maxValue, [isInt ? 'valueInteger' : 'valueDecimal']: node._maxValue });
+  for (const [url, val, valType, raw] of [
+    [FHIR.minValue, node._minValue, node._minValueType, node._minValueRaw],
+    [FHIR.maxValue, node._maxValue, node._maxValueType, node._maxValueRaw],
+  ]) {
+    if (val !== undefined) {
+      const key = Number.isInteger(val) && valType !== 'valueDecimal' ? 'valueInteger' : 'valueDecimal';
+      ext.push({ url, [key]: val });
+    } else if (raw && raw[TEMPORAL_BOUND_KEY[node.itemType]] !== undefined) {
+      ext.push({ url, [TEMPORAL_BOUND_KEY[node.itemType]]: raw[TEMPORAL_BOUND_KEY[node.itemType]] });
+    }
   }
   // que-5: answerValueSet only valid for choice/open-choice/decimal/integer/date/dateTime/time/string/quantity
   const _answerVsAllowed = new Set(['select','radio','checklist','open-choice','decimal','integer','number','text','date','dateTime','time','quantity']);
@@ -472,7 +475,7 @@ export function nodeToFHIRItem(node) {
   // questionnaire-sliderStepValue — R4 only allows valueInteger; decimal step rounded
   if (node._sliderStep !== undefined) {
     const isInt = Number.isInteger(node._sliderStep);
-    const stepVal = isInt ? node._sliderStep : Math.round(node._sliderStep);
+    const stepVal = isInt ? node._sliderStep : Math.max(1, Math.round(node._sliderStep));
     ext.push({ url: FHIR.sliderStepValue, valueInteger: stepVal });
   }
   // Pass-through: unknown extensions collected on import or added via Props modal
@@ -496,6 +499,7 @@ export function buildFHIRObject(questDoc = EventState.get(AppEvents.APP_CONTEXT_
   if (questMeta.url)         q.url         = questMeta.url;
   if (questMeta.version)     q.version     = questMeta.version;
   q.title = questMeta.title || (rawFhir && rawFhir.title) || 'Untitled Questionnaire';
+  if (questMeta._rawTitleExtensions?.length) q._title = { extension: JSON.parse(JSON.stringify(questMeta._rawTitleExtensions)) };
   if (questMeta.name)        q.name        = questMeta.name;
   if (questMeta.publisher)   q.publisher   = questMeta.publisher;
   if (questMeta.description) q.description = questMeta.description;

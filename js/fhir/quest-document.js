@@ -52,6 +52,7 @@ export class QuestDocument {
     _rawIdentifier:   [],
     // FHIR root fields — pass-through or limited edit
     _rawText:         null,
+    _rawTitleExtensions: [],
     _rawContact:      null,
     _rawUseContext:   null,
     _rawJurisdiction: null,
@@ -127,7 +128,7 @@ export class QuestDocument {
       effectivePeriodStart: '', effectivePeriodEnd: '',
       experimental: null, language: '', derivedFrom: [], replaces: [],
       copyrightLabel: '', _versionAlgorithmString: '', _versionAlgorithmCoding: null,
-      _rawIdentifier: [], _rawText: null, _rawContact: null,
+      _rawIdentifier: [], _rawText: null, _rawTitleExtensions: [], _rawContact: null,
       _rawUseContext: null, _rawJurisdiction: null, _rawCode: null,
       _metaVersionId: '', _metaSource: '', _metaLastUpdated: '',
       _rawMetaProfile: [], _rawMetaTag: [], _rawMetaSecurity: [],

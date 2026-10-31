@@ -187,6 +187,12 @@ describe('buildFHIRObject — _sliderStep', () => {
     expect(sliderExt?.valueInteger).toBe(1); // 0.5 rounds to 1
     expect(sliderExt?.valueDecimal).toBeUndefined();
   });
+
+  it.each([[0.1, 1], [0.4, 1], [2.6, 3]])('decimal step %s exports as %s, never a zero step', (step, expected) => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _sliderStep: step }]);
+    const sliderExt = (q.item[0].extension || []).find(e => e.url === SLIDER_URL);
+    expect(sliderExt?.valueInteger).toBe(expected);
+  });
 });
 
 // ── maxDecimalPlaces ──────────────────────────────────────────────────────────
@@ -342,6 +348,30 @@ describe('buildFHIRObject — _minValue', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _minValue: 0.5 }]);
     const ext = q.item[0].extension || [];
     expect(ext.find(e => e.url === MIN_URL)?.valueDecimal).toBe(0.5);
+  });
+});
+
+describe('buildFHIRObject — raw temporal bounds', () => {
+  const ext = (q, url) => (q.item[0].extension || []).find(e => e.url === url);
+
+  it('exports a raw bound whose value[x] kind matches the item type', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'date', _minValueRaw: { valueDate: '2020-01-01' } }]);
+    expect(ext(q, FHIR.minValue)?.valueDate).toBe('2020-01-01');
+  });
+
+  it('drops a raw bound whose kind does not match the item type', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'dateTime', _maxValueRaw: { valueDate: '2020-01-01' } }]);
+    expect(ext(q, FHIR.maxValue)).toBeUndefined();
+  });
+
+  it('exports an integer edited from an imported decimal bound per item type', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'integer', _minValue: 7 }]);
+    expect(ext(q, FHIR.minValue)).toEqual({ url: FHIR.minValue, valueInteger: 7 });
+  });
+
+  it('keeps valueDecimal for an untouched imported decimal bound', () => {
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'decimal', _minValue: 5, _minValueType: 'valueDecimal' }]);
+    expect(ext(q, FHIR.minValue)).toEqual({ url: FHIR.minValue, valueDecimal: 5 });
   });
 });
 
