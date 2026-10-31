@@ -5,6 +5,7 @@ import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
 import { createCustomSelect } from '../ui/custom-select.js';
+import { UCUM_URL } from '../fhir/urls/ucum.js';
 
 const QUANTITY_UNITS = [
   { label: '── Mass ──', disabled: true },
@@ -90,6 +91,14 @@ export class QuantityNode extends ItemNode {
       onChange: () => { update(); },
     });
 
+    // The chosen unit's coding for the exported answer: explicit/value-set units carry their own
+    // system; the built-in list is UCUM.
+    const unitCoding = u => {
+      const listed = node._unitOptions?.length ? node._unitOptions : node._unitValueSet ? (node._unitVsCache || []) : null;
+      const system = listed ? listed.find(x => x.code === u)?.system : UCUM_URL.system;
+      return system ? { system, code: u } : {};
+    };
+
     const errMsg = document.createElement('span');
     errMsg.className = 'ctrl-err';
 
@@ -102,7 +111,7 @@ export class QuantityNode extends ItemNode {
       if (hasVal && !hasUnit) { errMsg.textContent = 'unit is required'; errMsg.style.display = 'inline'; }
       else if (!hasVal && hasUnit) { errMsg.textContent = 'value is required'; errMsg.style.display = 'inline'; }
       else { errMsg.style.display = 'none'; }
-      setValue(node.id, (hasVal && hasUnit) ? { value: vNum, unit: u } : undefined);
+      setValue(node.id, (hasVal && hasUnit) ? { value: vNum, unit: u, ...unitCoding(u) } : undefined);
       _reCalc(); onChange();
     };
 

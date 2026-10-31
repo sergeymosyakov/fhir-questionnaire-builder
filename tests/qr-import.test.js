@@ -212,6 +212,13 @@ describe('importQRAnswers — time and reference types', () => {
     expect(values['q-time']).toEqual([{ value: 70, unit: 'kg' }]);
   });
 
+  it('selects a coded quantity unit by its code', () => {
+    const values = {};
+    const vq = { value: 150, unit: 'pound', system: 'http://unitsofmeasure.org', code: '[lb_av]' };
+    importQRAnswers(makeQR([{ linkId: 'q-time', answer: [{ valueQuantity: vq }] }]), values, tree);
+    expect(values['q-time']).toEqual([{ value: 150, unit: '[lb_av]', system: vq.system, code: '[lb_av]' }]);
+  });
+
   it('loads a valueUri as string', () => {
     const values = {};
     importQRAnswers(makeQR([{ linkId: 'q-ref', answer: [{ valueUri: 'https://example.org' }] }]), values, tree);
