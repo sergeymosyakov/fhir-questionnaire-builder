@@ -18,6 +18,7 @@ export class FileNameDisplay {
 
     this._nameEl = document.createElement('span');
     this._nameEl.className = 'loaded-file-name';
+    this._nameEl.dataset.testid = 'loaded-file-name';
 
     this._btn = document.createElement('button');
     this._btn.type = 'button';
@@ -36,7 +37,7 @@ export class FileNameDisplay {
       document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_CLEAR_REQUESTED))
     );
 
-    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  e => this._show(e.detail?.fileName));
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED,  e => { if (e.detail) this._show(e.detail.fileName); });
     document.addEventListener(AppEvents.QUESTIONNAIRE_NEW,     () => this._show('New Questionnaire'));
     document.addEventListener(AppEvents.QUESTIONNAIRE_CLEARED, () => this._hide());
   }

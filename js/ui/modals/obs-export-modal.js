@@ -23,7 +23,7 @@ class ObsExportModal extends Modal {
         qrId:    e.detail.id      || '',
       };
     });
-    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, () => { this._saved = null; });
+    document.addEventListener(AppEvents.QUESTIONNAIRE_LOADED, e => { if (e.detail) this._saved = null; });
     this._saved = null;
   }
 
