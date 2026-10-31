@@ -54,6 +54,8 @@ function indexQrItems(items, map = new Map()) {
   return map;
 }
 
+const CHOICE_TYPES = new Set(['select', 'radio', 'open-choice', 'checklist']);
+
 // One FHIRPath result element as the value its answer control stores (Coding → code,
 // Quantity → { value, unit }, Reference → { reference }); String(object) would give "[object Object]".
 function resultScalar(node, v) {
@@ -63,8 +65,10 @@ function resultScalar(node, v) {
     return { reference: String(v.reference ?? ''), ...(v.display ? { display: String(v.display) } : {}) };
   }
   if (node.itemType === 'quantity') return { value: v.value, unit: v.unit || v.code || '' };
-  if (v.code !== undefined) return String(v.code);
-  return v.value !== undefined ? String(v.value) : '';
+  // A Coding answers choice items by code; a Quantity answers numeric/text items by value
+  if (CHOICE_TYPES.has(node.itemType) && v.code !== undefined) return String(v.code);
+  if (v.value !== undefined) return String(v.value);
+  return v.code !== undefined ? String(v.code) : '';
 }
 
 // Coerce a raw FHIRPath result into the value stored in values[] for a node.
@@ -76,7 +80,8 @@ function coerceResult(node, result) {
   if (node.itemType === 'reference' || node.itemType === 'quantity') {
     return result.length ? resultScalar(node, result[0]) : '';
   }
-  return result.map(v => resultScalar(node, v)).join('');
+  // checklist values are comma-separated codes
+  return result.map(v => resultScalar(node, v)).join(node.itemType === 'checklist' ? ',' : '');
 }
 
 // Evaluate all readOnly calculatedExpression nodes and write results to values[].

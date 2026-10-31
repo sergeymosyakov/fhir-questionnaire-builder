@@ -216,6 +216,8 @@ describe('evalInitialExprNodes', () => {
   it.each([
     ['select', [{ system: 's', code: 'a', display: 'A' }], 'a'],
     ['text', [{ value: 7 }], '7'],
+    ['decimal', [{ value: 5, unit: 'kg', system: 'u', code: 'kg' }], '5'],
+    ['checklist', [{ code: 'a' }, { code: 'b' }], 'a,b'],
     ['reference', [{ reference: 'Patient/1', display: 'P' }], { reference: 'Patient/1', display: 'P' }],
     ['quantity', [{ value: 5, unit: 'kg' }], { value: 5, unit: 'kg' }],
   ])('maps an object result for %s items instead of "[object Object]"', (itemType, result, expected) => {
