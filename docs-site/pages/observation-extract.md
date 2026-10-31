@@ -20,6 +20,10 @@ Answers with a `questionnaire-unit` extension are written as a `valueQuantity`
 with that unit; other answer types map to the matching `value[x]` (string,
 boolean, integer, decimal, dateTime, Coding).
 
+If a coded question sits inside a repeating group, every instance of the group gets
+its own `Observation` (for example, three filled-in rows produce three
+Observations).
+
 ## Running it
 
 1. Fill in the form in the preview (or load a `QuestionnaireResponse`).
