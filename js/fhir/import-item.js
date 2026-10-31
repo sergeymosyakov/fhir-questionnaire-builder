@@ -496,7 +496,9 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
         : init.valueReference;
       if (init.valueQuantity)               return {
         value: init.valueQuantity.value !== undefined ? String(init.valueQuantity.value) : '',
-        unit:  init.valueQuantity.unit || '',
+        // the unit control is keyed by code; system/code travel with it
+        unit:  init.valueQuantity.code || init.valueQuantity.unit || '',
+        ...(init.valueQuantity.system && init.valueQuantity.code ? { system: init.valueQuantity.system, code: init.valueQuantity.code } : {}),
       };
       return undefined;
     };

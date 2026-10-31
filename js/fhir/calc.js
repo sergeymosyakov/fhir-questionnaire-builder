@@ -64,7 +64,9 @@ function resultScalar(node, v) {
   if (node.itemType === 'reference') {
     return { reference: String(v.reference ?? ''), ...(v.display ? { display: String(v.display) } : {}) };
   }
-  if (node.itemType === 'quantity') return { value: v.value, unit: v.unit || v.code || '' };
+  if (node.itemType === 'quantity') {
+    return { value: v.value, unit: v.code || v.unit || '', ...(v.system && v.code ? { system: v.system, code: v.code } : {}) };
+  }
   // A Coding answers choice items by code; a Quantity answers numeric/text items by value
   if (CHOICE_TYPES.has(node.itemType) && v.code !== undefined) return String(v.code);
   if (v.value !== undefined) return String(v.value);
