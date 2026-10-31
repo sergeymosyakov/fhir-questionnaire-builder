@@ -54,10 +54,10 @@ function indexQrItems(items, map = new Map()) {
   return map;
 }
 
-// One FHIRPath result element as the value its answer control stores (Coding → code,
-// Quantity → { value, unit }, Reference → { reference }); String(object) would give "[object Object]".
 const CHOICE_TYPES = new Set(['select', 'radio', 'open-choice', 'checklist']);
 
+// One FHIRPath result element as the value its answer control stores (Coding → code,
+// Quantity → { value, unit }, Reference → { reference }); String(object) would give "[object Object]".
 function resultScalar(node, v) {
   if (v === null || v === undefined) return '';
   if (typeof v !== 'object') return String(v);
