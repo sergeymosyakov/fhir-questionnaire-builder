@@ -498,6 +498,9 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       };
       return undefined;
     };
+    // Keep the full Codings (system/display) so value-set defaults re-export unchanged
+    const initCodings = fhirItem.initial.map(i => i.valueCoding).filter(Boolean).map(c => JSON.parse(JSON.stringify(c)));
+    if (initCodings.length) node._initialCodings = initCodings;
     if (node.repeats && fhirItem.initial.length > 1) {
       const vals = fhirItem.initial.map(extractVal).filter(v => v !== undefined);
       node._initialValues = vals;
@@ -505,8 +508,6 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     } else {
       const val = extractVal(fhirItem.initial[0]);
       if (val !== undefined) node._initialValue = val;
-      // Keep the full Coding (system/display) so a value-set default re-exports unchanged
-      if (fhirItem.initial[0].valueCoding) node._initialCoding = JSON.parse(JSON.stringify(fhirItem.initial[0].valueCoding));
     }
   }
   // answerOption[].initialSelected → _initialSelected (round-trip flag)

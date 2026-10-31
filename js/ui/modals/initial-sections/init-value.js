@@ -6,9 +6,6 @@ import { emitsAnswerOptions } from '../../../fhir/import-helpers.js';
 import { createCustomSelect } from '../../custom-select.js';
 import { createDatePicker } from '../../date-picker.js';
 
-// Types whose Default control is the option picker (a checklist uses free text, so it keeps its own marks)
-const hasOptionPicker = node => emitsAnswerOptions(node) && ['select', 'radio', 'open-choice'].includes(node.itemType);
-
 class InitValueSection extends InitialSection {
   initPending(node) {
     return { draftValue: node._initialValue };
@@ -41,7 +38,7 @@ class InitValueSection extends InitialSection {
     lbl.textContent      = 'Default value:';
     lbl.dataset.tipTitle = 'item.initial';
     lbl.dataset.tipBody  = 'Pre-filled value when the form loads. Exported as item.initial[0].value[x], or as answerOption[].initialSelected when the item has an options list. User can edit unless the item is read-only.';
-    lbl.dataset.tipFhir  = 'Questionnaire.item.initial[].value[x] | Questionnaire.item.answerOption[].initialSelected';
+    lbl.dataset.tipFhir  = 'Questionnaire.item.initial[].value[x]';
     lbl.dataset.tipSpec  = 'R4';
     wrap.appendChild(lbl);
 
@@ -133,11 +130,11 @@ class InitValueSection extends InitialSection {
     const v = pending.draftValue;
     if (v !== undefined && v !== '') {
       node._initialValue = v;
-      if (hasOptionPicker(node)) node._initialSelected = String(v);
+      if (emitsAnswerOptions(node)) node._initialSelected = String(v);
       document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: node.id, value: v } }));
     } else {
       delete node._initialValue;
-      if (hasOptionPicker(node)) node._initialSelected = '';
+      if (emitsAnswerOptions(node)) node._initialSelected = '';
       document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: node.id } }));
     }
   }
