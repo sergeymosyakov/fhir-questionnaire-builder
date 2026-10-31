@@ -102,6 +102,9 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     permissions:
       contents: read
       pages: write
@@ -132,6 +135,14 @@ jobs:
             --exclude=test-results \
             --exclude=playwright-report \
             --exclude=coverage \
+            --exclude=tests \
+            --exclude=scripts \
+            --exclude=nuget \
+            --exclude=.claude \
+            --exclude=wrangler.toml \
+            --exclude=start.ps1 \
+            --exclude=CLAUDE.md \
+            --exclude='*.config.js' \
             . _site/
           cp -r playwright-report/. _site/playwright-report/
           cp -r coverage/. _site/coverage/

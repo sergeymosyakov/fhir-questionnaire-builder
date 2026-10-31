@@ -32,7 +32,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
@@ -120,7 +120,7 @@ jobs:
           PKG_OWNER: ${{ github.repository_owner }}
           PKG_REPO: ${{ github.repository }}
         run: |
-          npm install -g npm@latest
+          npm install -g npm@11.21.0   # >= 11.5.1 needed for Trusted Publishing; pinned for reproducibility
           node -e '
             const fs = require("fs");
             const pkg = {
