@@ -213,6 +213,18 @@ describe('evalInitialExprNodes', () => {
     expect(values.q1).toBe('preloaded');
   });
 
+  it.each([
+    ['select', [{ system: 's', code: 'a', display: 'A' }], 'a'],
+    ['text', [{ value: 7 }], '7'],
+    ['reference', [{ reference: 'Patient/1', display: 'P' }], { reference: 'Patient/1', display: 'P' }],
+    ['quantity', [{ value: 5, unit: 'kg' }], { value: 5, unit: 'kg' }],
+  ])('maps an object result for %s items instead of "[object Object]"', (itemType, result, expected) => {
+    const fp = { evaluate: vi.fn(() => result) };
+    const values = {};
+    evalInitialExprNodes([{ id: 'q', type: 'item', itemType, _initialExpr: 'e' }], {}, fp, values);
+    expect(values.q).toEqual(expected);
+  });
+
   it('evaluates a checkbox initial expression (true)', () => {
     const nodes = [{ id: 'chk', type: 'item', itemType: 'checkbox', _initialExpr: 'true' }];
     const values = {};
