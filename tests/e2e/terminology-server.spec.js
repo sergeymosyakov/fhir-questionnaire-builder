@@ -30,10 +30,13 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { mockTerminologyExpand } from './helpers/terminology.js';
 
 const FIXTURE = path.resolve('tests/fixtures/terminology-server.fhir.json');
 
 async function loadFixture(page) {
+  // import fires a real expandAll() for the fixture's external value sets; keep it off the network
+  await mockTerminologyExpand(page);
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
@@ -62,6 +65,14 @@ const urlInput    = (page) => page.getByTestId('terminology-server-url-input');
 const applyBtn    = (page) => page.locator('[data-testid="terminologyModalApply"]');
 const cancelBtn   = (page) => page.locator('[data-testid="terminologyModalCancel"]');
 
+// A click right after node creation can be swallowed by a re-render; retry until the modal is really open
+async function openTerminologyModal(page, item) {
+  await expect(async () => {
+    await item.getByTestId('action-terminology').click();
+    await expect(modal(page)).toBeVisible();
+  }).toPass();
+}
+
 // ── Modal open / close ────────────────────────────────────────────────────────
 
 test.describe('Terminology modal — open / close', () => {
@@ -74,26 +85,26 @@ test.describe('Terminology modal — open / close', () => {
   test('clicking "Terminology" opens the modal', async ({ page }) => {
     await freshStart(page);
     const item = await addItem(page);
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await expect(modal(page)).toBeVisible();
   });
 
   test('modal title contains "Terminology Server"', async ({ page }) => {
     await freshStart(page);
     const item = await addItem(page);
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await expect(page.locator('[data-testid="terminologyModalTitle"]')).toContainText('Terminology Server');
   });
 
   test('Cancel closes the modal without saving', async ({ page }) => {
     await freshStart(page);
     const item = await addItem(page);
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await urlInput(page).fill('https://tx.fhir.org/r4');
     await cancelBtn(page).click();
     await expect(modal(page)).not.toBeVisible();
     // Re-open: value must still be empty
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await expect(urlInput(page)).toHaveValue('');
     await cancelBtn(page).click();
   });
@@ -101,7 +112,7 @@ test.describe('Terminology modal — open / close', () => {
   test('× button closes the modal', async ({ page }) => {
     await freshStart(page);
     const item = await addItem(page);
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await page.locator('[data-testid="terminologyModalClose"]').click();
     await expect(modal(page)).not.toBeVisible();
   });
@@ -113,7 +124,7 @@ test.describe('Terminology modal — per-item set / clear', () => {
   test('entering a URL and applying activates the action link', async ({ page }) => {
     await freshStart(page);
     const item = await addItem(page);
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await urlInput(page).fill('https://tx.fhir.org/r4');
     await applyBtn(page).click();
     await expect(modal(page)).not.toBeVisible();
@@ -125,11 +136,11 @@ test.describe('Terminology modal — per-item set / clear', () => {
     await freshStart(page);
     const item = await addItem(page);
     // Set
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await urlInput(page).fill('https://tx.fhir.org/r4');
     await applyBtn(page).click();
     // Clear
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await urlInput(page).fill('');
     await applyBtn(page).click();
     await expect(item.getByTestId('action-terminology')).not.toHaveClass(/action-edit--active/);
@@ -138,10 +149,10 @@ test.describe('Terminology modal — per-item set / clear', () => {
   test('applied value is re-shown when modal is re-opened', async ({ page }) => {
     await freshStart(page);
     const item = await addItem(page);
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await urlInput(page).fill('https://ontoserver.csiro.au/r4');
     await applyBtn(page).click();
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await expect(urlInput(page)).toHaveValue('https://ontoserver.csiro.au/r4');
     await cancelBtn(page).click();
   });
@@ -180,7 +191,7 @@ test.describe('Terminology server — export JSON', () => {
   test('per-item extension appears in exported JSON', async ({ page }) => {
     await freshStart(page);
     const item = await addItem(page);
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await urlInput(page).fill('https://tx.fhir.org/r4');
     await applyBtn(page).click();
 
@@ -219,7 +230,7 @@ test.describe('Terminology modal — Test connection button', () => {
     await freshStart(page);
     const item = await addItem(page);
     await expect(item.getByTestId('action-terminology')).toBeVisible();
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await expect(modal(page)).toBeVisible();
     await expect(page.getByTestId('terminology-test-btn')).toBeVisible();
   });
@@ -227,7 +238,7 @@ test.describe('Terminology modal — Test connection button', () => {
   test('clicking Test connection shows a status result', async ({ page }) => {
     await freshStart(page);
     const item = await addItem(page);
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await urlInput(page).fill('https://tx.fhir.org/r4');
     await page.getByTestId('terminology-test-btn').click();
     // Status element should become non-empty (either ok or error — network may be unavailable in CI)
@@ -237,10 +248,10 @@ test.describe('Terminology modal — Test connection button', () => {
   test('status resets when modal is reopened', async ({ page }) => {
     await freshStart(page);
     const item = await addItem(page);
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     await urlInput(page).fill('https://tx.fhir.org/r4');
     await cancelBtn(page).click();
-    await item.getByTestId('action-terminology').click();
+    await openTerminologyModal(page, item);
     // On reopen, status should be empty (no stale result)
     await expect(page.getByTestId('terminology-test-status')).toBeEmpty();
   });
