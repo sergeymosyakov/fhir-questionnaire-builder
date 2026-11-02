@@ -9,6 +9,12 @@
 # release (npm + GitHub Release already succeeded). Skips lint/test/e2e/tag/
 # release/npm and republishes the existing latest widget-v* version to NuGet.
 #
+# Jobs: `verify` (read-only: install, lint, tests, build, version) → `publish` (write + OIDC:
+# GitHub Release, npm, NuGet) publishes exactly the files `verify` built, so dependency
+# install scripts never run with publishing rights.
+#
+# dry_run: runs verify, NuGet pack and `npm pack --dry-run`; skips release creation and the npm/NuGet login and push.
+#
 # Trigger: manual only (Actions → "Release widget" → Run workflow).
 name: Release widget
 
@@ -19,20 +25,28 @@ on:
         description: "Republish only NuGet for the current version (skip tag/release/npm)"
         type: boolean
         default: false
+      dry_run:
+        description: "Rehearse: run everything except publishing (does not exercise npm/NuGet OIDC login)"
+        type: boolean
+        default: false
 
 permissions:
-  contents: write
-  id-token: write   # required for npm Trusted Publishing (OIDC), no NPM_TOKEN needed
+  contents: read
 
 concurrency:
   group: release-widget
   cancel-in-progress: false
 
 jobs:
-  release:
+  verify:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.ver.outputs.tag }}
+      semver: ${{ steps.ver.outputs.semver }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
@@ -43,10 +57,6 @@ jobs:
         with:
           node-version: 24
           cache: npm
-
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
-        with:
-          dotnet-version: '10.0.x'
 
       - run: npm ci
       - run: npm run lint
@@ -85,12 +95,64 @@ jobs:
         if: ${{ !inputs.nuget_only }}
         run: (cd dist && sha256sum questionnaire-widget.js questionnaire-widget.global.js questionnaire-widget.css > SHA256SUMS.txt)
 
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: widget-dist
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+      id-token: write   # required for npm / NuGet Trusted Publishing (OIDC), no tokens stored
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0   # tags needed for the release notes
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: widget-dist
+          path: dist/
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Summary
+        env:
+          TAG: ${{ needs.verify.outputs.tag }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          echo "Tag: $TAG (dry_run=$DRY_RUN)"
+          ls -l dist
+
+      # Packed before anything irreversible so a packaging error blocks the run early.
+      - name: Pack NuGet package
+        env:
+          PKG_VERSION: ${{ needs.verify.outputs.semver }}
+        run: |
+          mkdir -p nuget/wwwroot
+          cp dist/questionnaire-widget.js dist/questionnaire-widget.global.js dist/questionnaire-widget.css nuget/wwwroot/
+          cp LICENSE nuget/LICENSE
+          cp WIDGET.md nuget/README.md
+          dotnet pack nuget/FhirQuestionnaireWidget.csproj -c Release -p:PackageVersion="$PKG_VERSION" -o nuget-out
+
       - name: Create release
-        if: ${{ !inputs.nuget_only }}
+        if: ${{ !inputs.nuget_only && !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.ver.outputs.tag }}
-          SEMVER: ${{ steps.ver.outputs.semver }}
+          TAG: ${{ needs.verify.outputs.tag }}
+          SEMVER: ${{ needs.verify.outputs.semver }}
           REPO: ${{ github.repository }}
         run: |
           # Previous widget tag = newest existing one (the new tag isn't created yet).
@@ -114,11 +176,12 @@ jobs:
       # workflow file. Non-blocking: the GitHub Release above already succeeded.
       - name: Publish to npm (npmjs.com, Trusted Publishing)
         if: ${{ !inputs.nuget_only }}
-        continue-on-error: true
+        continue-on-error: ${{ !inputs.dry_run }}   # a rehearsal must fail loudly
         env:
-          PKG_VERSION: ${{ steps.ver.outputs.semver }}
+          PKG_VERSION: ${{ needs.verify.outputs.semver }}
           PKG_OWNER: ${{ github.repository_owner }}
           PKG_REPO: ${{ github.repository }}
+          DRY_RUN: ${{ inputs.dry_run }}
         run: |
           npm install -g npm@11.21.0   # >= 11.5.1 needed for Trusted Publishing; pinned for reproducibility
           node -e '
@@ -139,7 +202,8 @@ jobs:
           '
           cp LICENSE dist/LICENSE
           cp WIDGET.md dist/README.md
-          cd dist && npm publish --access public --provenance
+          cd dist
+          if [ "$DRY_RUN" = "true" ]; then npm pack --dry-run; else npm publish --access public --provenance; fi
 
       # Publishes via NuGet Trusted Publishing (OIDC) — no token/secret involved.
       # Requires the "release-widget-github-actions" trusted publisher policy
@@ -147,21 +211,15 @@ jobs:
       # the GitHub Release and npm publish above already succeeded.
       - name: NuGet Trusted Publishing login
         id: nuget-login
+        if: ${{ !inputs.dry_run }}
         continue-on-error: true
         uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
         with:
           user: sergeymosyakov
 
       - name: Publish to NuGet
-        if: steps.nuget-login.outcome == 'success'
+        if: ${{ !inputs.dry_run && steps.nuget-login.outcome == 'success' }}
         continue-on-error: true
         env:
-          PKG_VERSION: ${{ steps.ver.outputs.semver }}
           NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
-        run: |
-          mkdir -p nuget/wwwroot
-          cp dist/questionnaire-widget.js dist/questionnaire-widget.global.js dist/questionnaire-widget.css nuget/wwwroot/
-          cp LICENSE nuget/LICENSE
-          cp WIDGET.md nuget/README.md
-          dotnet pack nuget/FhirQuestionnaireWidget.csproj -c Release -p:PackageVersion="$PKG_VERSION" -o nuget-out
-          dotnet nuget push nuget-out/*.nupkg --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY" --skip-duplicate
+        run: dotnet nuget push nuget-out/*.nupkg --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY" --skip-duplicate

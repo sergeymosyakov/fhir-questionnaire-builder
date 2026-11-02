@@ -30,14 +30,19 @@ confirmation before triggering, per WORKFLOW RULE 1 in `.github/copilot-instruct
 2. Optional but recommended before spending CI minutes: sync local master and run
    a fast local sanity check — `git checkout master && git pull --ff-only && npm
    run lint && npx vitest run`.
-3. Trigger: `gh workflow run release-widget.yml --ref master`. Never pass
+3. Optional rehearsal: `gh workflow run release-widget.yml --ref master -f dry_run=true` runs
+   tests, build, tag computation, NuGet pack and `npm pack --dry-run`. It skips release
+   creation (incl. release-notes generation) and the npm/NuGet OIDC login and push, so a
+   green dry run is necessary, not sufficient.
+4. Trigger: `gh workflow run release-widget.yml --ref master`. Never pass
    `nuget_only=true` for a normal release — that input is the recovery-only path
    (see below).
-4. Find the run and watch it to completion: `gh run list --workflow=release-widget.yml
-   --limit 1` then `gh run watch <id>`. Takes ~10-15 min (lint → unit → e2e
-   (chromium only, `--grep-invert @perf`) → build widget → compute tag → GitHub
-   Release → npm publish → NuGet publish).
-5. Verify all three artifacts actually landed — **do not trust the job's green
+5. Find the run and watch it to completion: `gh run list --workflow=release-widget.yml
+   --limit 1` then `gh run watch <id>`. Takes ~10-15 min. Two jobs: `verify` (read-only:
+   lint → unit → e2e (chromium only, `--grep-invert @perf`) → build widget → compute tag →
+   artifact) then `publish` (write + OIDC: NuGet pack → GitHub Release → npm publish → NuGet
+   publish), so dependency install scripts never run with publishing rights.
+6. Verify all three artifacts actually landed — **do not trust the job's green
    checkmark alone**:
    - GitHub Release: `gh release view widget-v<X.Y.Z>` — assets present
      (`questionnaire-widget.js`, `.global.js`, `.css`, `SHA256SUMS.txt`).
@@ -47,7 +52,7 @@ confirmation before triggering, per WORKFLOW RULE 1 in `.github/copilot-instruct
      `NU5030` packaging error was masked this way). Check the step's raw log
      (`gh run view <id> --log | grep -i nuget`) for an actual success line, or
      confirm on nuget.org directly — don't just trust the checkmark.
-6. Report back: new tag, GitHub Release URL, explicit confirmation that npm *and*
+7. Report back: new tag, GitHub Release URL, explicit confirmation that npm *and*
    NuGet both actually published (not just "job green").
 
 ## Recovery: NuGet-only republish
@@ -63,3 +68,9 @@ the existing latest `widget-v*` version to NuGet only.
   the newest tag is optional polish, not required for the release itself.
 - Closing now-superseded branches/PRs after a release is a separate explicit step,
   not automatically bundled with releasing.
+
+## Known limits
+- No `npm_only` recovery: if npm publish fails after the GitHub Release exists, fix the cause and
+  publish manually; a normal re-run would mint the next patch number.
+- `nuget_only` rebuilds from current `master`, so the NuGet package can contain newer code than the
+  released npm/GitHub assets if `master` moved since.
