@@ -4,6 +4,7 @@
 import { answerStore } from './answer-store.js';
 import { fhirModel } from './fhir/fhir-model.js';
 import { splitCodes } from './fhir/checklist-codec.js';
+import { isCoded } from './fhir/open-choice-value.js';
 
 // Marks every node in a subtree as visible-but-disabled.
 export function markAllDisabled(nodes, results) {
@@ -80,6 +81,8 @@ export function compareValue(val, ew) {
   else return false;
   // Coerce for consistent comparison (user values may be booleans or strings)
   const coerced = String(answer);
+  // A picked open-choice option compares by its code
+  if (isCoded(val)) val = val.code;
   let current = val !== undefined && val !== null ? String(val) : '';
   // A single checklist selection is stored with commas encoded; compare its decoded code
   if (ew.answerCoding && typeof val === 'string' && splitCodes(val).length === 1) current = splitCodes(val)[0];

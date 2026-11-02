@@ -19,6 +19,15 @@ list), **Lookup** (live search against a server, for a drop-down that uses an
 external value set) and **Answer table** (shows the options as table columns, for
 radio and check-box questions).
 
+## Picking versus typing in an open choice
+
+An **open choice** question lets people either pick from the list or type their own
+answer. What you see is what is saved: a value picked from the list is recorded as a
+coded answer (code, label and code system) and shows a ✓ next to the field; text you type
+is recorded as plain text, even if it happens to match a list entry. When typed text
+matches a list entry, a short hint suggests picking it from the list if you want the coded
+answer. Loading a saved response restores each answer as it was recorded.
+
 ## Where choice options come from
 
 A choice/open-choice question can get its options from one of four sources,

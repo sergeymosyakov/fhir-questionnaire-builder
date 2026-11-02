@@ -373,6 +373,8 @@ For `choice`/`open-choice` items the exported `QuestionnaireResponse.item.answer
 
 This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR with `ordinalValue` on every answer without any post-processing.
 
+For `open-choice` items (R4: "a Coding drawn from a list of possible answers or a free-text entry in a string") the answer kind follows what the respondent did: an option picked from the list is exported as `valueCoding` (`system`, `code`, `display`), and text typed into the field is exported as `valueString` — even when it equals an option's label. The preview marks a picked value with ✓ and shows a soft hint when typed text matches an option. Importing a response keeps the kind (`valueCoding` → picked option, `valueString` → typed text). A default (`item.initial`) follows the same rule: `valueCoding` is a picked option, `valueString` is text.
+
 ---
 
 ## QuestionnaireResponse

@@ -530,8 +530,8 @@ describe('importFHIR', () => {
     });
     expect(_tree[0]._answerValueSet).toBe('#vs-diet');
     expect(_tree[0]._rawAnswerOptions).toEqual([
-      { valueCoding: { code: 'veg', display: 'Vegetarian' } },
-      { valueCoding: { code: 'omn', display: 'Omnivore' } },
+      { valueCoding: { system: 'https://example.org', code: 'veg', display: 'Vegetarian' } },
+      { valueCoding: { system: 'https://example.org', code: 'omn', display: 'Omnivore' } },
     ]);
   });
 

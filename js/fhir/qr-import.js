@@ -13,17 +13,22 @@ function _collectLinkIds(nodes, set = new Set()) {
 // Flatten QR item[] recursively → { [linkId]: [row0, row1, …] } (repeat rows as array).
 // A repeating group instead maps to one answer map per QR item occurrence, as the store expects.
 // Containers are null-prototype so linkIds like 'constructor' or '__proto__' are plain keys.
-function _flattenQR(items, out = Object.create(null), repeatGroups = new Set()) {
+function _flattenQR(items, out = Object.create(null), repeatGroups = new Set(), openChoiceIds = new Set()) {
   for (const item of items || []) {
     if (item.linkId === '__proto__') continue;
     if (repeatGroups.has(item.linkId)) {
-      (out[item.linkId] ||= []).push(_flattenQR(item.item, Object.create(null), repeatGroups));
+      (out[item.linkId] ||= []).push(_flattenQR(item.item, Object.create(null), repeatGroups, openChoiceIds));
       continue;
     }
     if (item.answer && item.answer.length) {
       const extractVal = ans => {
         if (ans.valueBoolean  !== undefined) return ans.valueBoolean;
-        if (ans.valueCoding   !== undefined) return ans.valueCoding.code;
+        // open-choice keeps the whole Coding (a picked option); other choice types keep the code
+        if (ans.valueCoding   !== undefined) {
+          if (!openChoiceIds.has(item.linkId)) return ans.valueCoding.code;
+          const c = ans.valueCoding;
+          return { code: c.code ?? c.display ?? '', ...(c.display ? { display: c.display } : {}), ...(c.system ? { system: c.system } : {}) };
+        }
         if (ans.valueDecimal  !== undefined) return ans.valueDecimal;
         if (ans.valueInteger  !== undefined) return ans.valueInteger;
         if (ans.valueDate      !== undefined) return ans.valueDate;
@@ -53,13 +58,22 @@ function _flattenQR(items, out = Object.create(null), repeatGroups = new Set()) 
       if (out[item.linkId].length === 0) delete out[item.linkId];
       // Nested items inside answers (non-group questions with sub-items)
       for (const ans of item.answer) {
-        if (ans.item) _flattenQR(ans.item, out, repeatGroups);
+        if (ans.item) _flattenQR(ans.item, out, repeatGroups, openChoiceIds);
       }
     }
     // Group children
-    if (item.item) _flattenQR(item.item, out, repeatGroups);
+    if (item.item) _flattenQR(item.item, out, repeatGroups, openChoiceIds);
   }
   return out;
+}
+
+// Collect open-choice node linkIds from tree
+function _collectOpenChoiceIds(nodes, set = new Set()) {
+  for (const n of nodes) {
+    if (n.itemType === 'open-choice' && n.id) set.add(n.id);
+    if (n.children) _collectOpenChoiceIds(n.children, set);
+  }
+  return set;
 }
 
 // Collect repeating group linkIds from tree
@@ -86,7 +100,7 @@ export function importQRAnswers(qrJson, values, tree) {
   }
 
   const knownIds  = _collectLinkIds(tree);
-  const extracted = _flattenQR(qrJson.item || [], undefined, _collectRepeatGroupIds(tree));
+  const extracted = _flattenQR(qrJson.item || [], undefined, _collectRepeatGroupIds(tree), _collectOpenChoiceIds(tree));
   const unmatched = [];
   let loaded = 0;
 

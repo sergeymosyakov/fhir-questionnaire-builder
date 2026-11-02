@@ -9,6 +9,7 @@ import { BaseNode, createWrap } from './base-node.js';
 import { terminologyService } from '../fhir/terminology-service.js';
 import { nextUid } from '../id.js';
 import { joinCodes, splitCodes } from '../fhir/checklist-codec.js';
+import { isCoded, openChoiceText, pickedValue, matchesOption } from '../fhir/open-choice-value.js';
 import {
   _nodeOpts, _evalAnswerOpts, _resolveColValue, _findRawOpt,
   _getColDisplayLabel, _buildColHeader, _buildColRow, _appendOptionExtras,
@@ -407,7 +408,8 @@ export class OpenChoiceNode extends ItemNode {
     el.type        = 'text';
     el.className   = 'oc-input';
     el.placeholder = node._openLabel || 'Choose or type\u2026';
-    el.value       = getValue(node.id) !== undefined ? getValue(node.id) : '';
+    let current    = getValue(node.id);
+    el.value       = openChoiceText(current);
     el.autocomplete = 'off';
 
     // optionsOnly: no free-text allowed — input is read-only, acts as display
@@ -424,8 +426,25 @@ export class OpenChoiceNode extends ItemNode {
     btn.innerHTML = '&#x25BE;';
     btn.dataset.tipTitle = 'Show options';
 
+    // Picked from the list = coded answer (marker); typed text stays a string (soft hint if it equals an option)
+    const badge = document.createElement('span');
+    badge.className = 'oc-coded-badge';
+    badge.dataset.testid = 'oc-coded-badge';
+    badge.textContent = '\u2713';
+    badge.dataset.tipTitle = 'Selected from the list';
+    badge.dataset.tipBody  = 'Recorded as a coded answer.';
+    const hint = document.createElement('div');
+    hint.className = 'oc-match-hint';
+    hint.dataset.testid = 'oc-match-hint';
+    hint.textContent = 'Matches a listed option \u2014 pick it from the list to record it as a coded answer.';
+    const refreshMarkers = () => {
+      badge.hidden = !isCoded(current);
+      hint.hidden  = !(typeof current === 'string' && matchesOption(current, parsed));
+    };
+
     box.appendChild(el);
     box.appendChild(btn);
+    box.appendChild(badge);
 
     let dropEl = null;
     let _open  = false;
@@ -440,9 +459,11 @@ export class OpenChoiceNode extends ItemNode {
       if (!box.contains(e.target) && !dropEl?.contains(e.target)) close();
     };
 
-    const _pick = display => {
-      el.value = display;
-      setValue(node.id, display);
+    const _pick = opt => {
+      current = pickedValue(opt, _findRawOpt(node, opt.code));
+      el.value = openChoiceText(current);
+      setValue(node.id, current);
+      refreshMarkers();
       _reCalc(); onChange(); BaseNode.notifyChanged(ctx.bus);
       close();
       el.focus();
@@ -463,8 +484,8 @@ export class OpenChoiceNode extends ItemNode {
         const opt = document.createElement('div');
         opt.className = 'oc-opt';
         opt.textContent = label;
-        if (label === el.value) opt.classList.add('oc-opt--sel');
-        opt.addEventListener('mousedown', e => { e.preventDefault(); _pick(label); });
+        if (isCoded(current) && current.code === code) opt.classList.add('oc-opt--sel');
+        opt.addEventListener('mousedown', e => { e.preventDefault(); _pick({ display, code, system: matches.find(m => m.code === code)?.system }); });
         dropEl.appendChild(opt);
       }
       document.body.appendChild(dropEl);
@@ -473,13 +494,30 @@ export class OpenChoiceNode extends ItemNode {
       document.addEventListener('mousedown', _onOutside, true);
     };
 
-    el.addEventListener('input', () => { if (optionsOnly) return; setValue(node.id, el.value); _reCalc(); onChange(); openDrop(el.value); });
+    el.addEventListener('input', () => {
+      if (optionsOnly) return;
+      current = el.value;
+      setValue(node.id, current);
+      refreshMarkers();
+      _reCalc(); onChange(); openDrop(el.value);
+    });
     el.addEventListener('change', () => { BaseNode.notifyChanged(ctx.bus); });
-    el.addEventListener('focus', () => { if (parsed.length) openDrop(el.value); });
+    // a picked option opens the full list (to change the pick); typed text filters it
+    el.addEventListener('focus', () => { if (parsed.length) openDrop(isCoded(current) ? '' : el.value); });
+    // the field keeps focus after a pick, so a later click must reopen the list itself
+    el.addEventListener('click', () => { if (parsed.length && !_open) openDrop(isCoded(current) ? '' : el.value); });
     el.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
-    btn.addEventListener('click', e => { e.stopPropagation(); if (_open) { close(); } else { el.focus(); openDrop(el.value); } });
+    btn.addEventListener('click', e => { e.stopPropagation(); if (_open) { close(); } else { el.focus(); openDrop(isCoded(current) ? '' : el.value); } });
 
+    // a calculated result rewrites the value from outside: resync the control state
+    node._syncOpenChoice = () => {
+      current = getValue(node.id);
+      el.value = openChoiceText(current);
+      refreshMarkers();
+    };
+    refreshMarkers();
     wrap.appendChild(box);
+    wrap.appendChild(hint);
     return wrap;
   }
 }

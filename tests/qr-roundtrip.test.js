@@ -111,6 +111,7 @@ describe('sample QuestionnaireResponse round-trip', () => {
     expect(qrs.map(f => f.rel).sort()).toEqual([
       'sampledata/example-bariatric-response.qr.json',
       'sampledata/phq-9-response.qr.json',
+      'sampledata/valueset-demo-response.qr.json',
       'sampledata/who-emcare-treatment-response.qr.json',
     ]);
   });
@@ -164,6 +165,10 @@ const SYN_Q = {
       { valueCoding: { system: 'http://example.org/cs', code: 'a', display: 'A' } },
     ] },
     { linkId: 'open-vs', text: 'open-vs', type: 'open-choice', answerValueSet: 'http://example.org/ValueSet/vs' },
+    { linkId: 'open-vs-coded', text: 'open-vs-coded', type: 'open-choice', answerValueSet: 'http://example.org/ValueSet/vs' },
+    { linkId: 'open-list-coded', text: 'open-list-coded', type: 'open-choice', answerOption: [
+      { valueCoding: { system: 'http://example.org/cs', code: 'a', display: 'A' } },
+    ] },
     { linkId: 'multi', text: 'multi', type: 'string', repeats: true },
     { linkId: 'multi-choice', text: 'multi-choice', type: 'choice', repeats: true, answerOption: [
       { valueCoding: { system: 'http://example.org/cs', code: 'a', display: 'A' } },
@@ -196,6 +201,8 @@ const SYN_ANSWERS = {
   'choice-int': [{ valueInteger: 2 }],
   open: [{ valueString: 'free text' }],
   'open-vs': [{ valueString: 'free text' }],
+  'open-vs-coded': [{ valueCoding: { system: 'http://example.org/cs', code: 'x', display: 'X' } }],
+  'open-list-coded': [{ valueCoding: { system: 'http://example.org/cs', code: 'a', display: 'A' } }],
   multi: [{ valueString: 'x' }, { valueString: 'y' }, { valueString: 'z' }],
   'multi-choice': [
     { valueCoding: { system: 'http://example.org/cs', code: 'a', display: 'A' } },
@@ -216,18 +223,11 @@ function synQR(overrides = {}) {
 describe('QuestionnaireResponse answer shapes', () => {
   const shapes = Object.keys(SYN_ANSWERS).map(id => [id]);
 
-  // A free-text answer to an open-choice backed only by a ValueSet cannot be told from a coded answer in the plain store.
-  const KNOWN_GAP = new Set(['open-vs']);
-  it.each(shapes.filter(([id]) => !KNOWN_GAP.has(id)))('%s: answer survives import then rebuild', id => {
+  it.each(shapes)('%s: answer survives import then rebuild', id => {
     const qr = synQR();
     const { rebuilt } = reload(qr, SYN_Q);
     const got = answerMap(rebuilt.item)[id];
     expect(got && got.map(normAnswer).map(canon)).toEqual(SYN_ANSWERS[id].map(normAnswer).map(canon));
-  });
-
-  it('open-vs: free text over a ValueSet-only open-choice is exported as valueCoding (known limitation, tracked separately)', () => {
-    const { rebuilt } = reload(synQR(), SYN_Q);
-    expect(answerMap(rebuilt.item)['open-vs']).toEqual([{ valueCoding: { code: 'free text' } }]);
   });
 
   it('repeating group instances keep their own answers and order', () => {
