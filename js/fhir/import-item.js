@@ -505,6 +505,9 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     // Keep the full Codings (system/display) so value-set defaults re-export unchanged
     const initCodings = fhirItem.initial.map(i => i.valueCoding).filter(Boolean).map(c => JSON.parse(JSON.stringify(c)));
     if (initCodings.length) node._initialCodings = initCodings;
+    // open-choice free-text defaults stay strings (an initial valueString is not a picked option)
+    const initTexts = fhirItem.initial.filter(i => i.valueString !== undefined).map(i => i.valueString);
+    if (initTexts.length) node._initialTexts = initTexts;
     if (node.repeats && fhirItem.initial.length > 1) {
       const vals = fhirItem.initial.map(extractVal).filter(v => v !== undefined);
       node._initialValues = vals;

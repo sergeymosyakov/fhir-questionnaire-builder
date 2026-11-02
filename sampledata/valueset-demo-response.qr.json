@@ -1,0 +1,26 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "valueset-demo-sample-response",
+  "questionnaire": "valueset-demo",
+  "status": "completed",
+  "authored": "2026-11-02T10:00:00Z",
+  "item": [
+    {
+      "linkId": "s-lifestyle",
+      "item": [
+        {
+          "linkId": "q-activity",
+          "answer": [
+            {
+              "valueCoding": {
+                "system": "https://example.org/fhir/CodeSystem/activity-level",
+                "code": "moderate",
+                "display": "Moderately active (3–5 days/week)"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

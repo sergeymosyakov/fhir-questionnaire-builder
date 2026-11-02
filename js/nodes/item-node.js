@@ -9,6 +9,7 @@ import { uiStr } from '../preview/render-ctx.js';
 import { BaseNode, applyRenderStyle } from './base-node.js';
 import { parseOptions } from '../utils.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
+import { answerText } from '../fhir/open-choice-value.js';
 
 export class ItemNode extends BaseNode {
   constructor(data = {}) {
@@ -240,7 +241,8 @@ export class ItemNode extends BaseNode {
     if (!field) return;
     this._refreshCalcBadge = () => {
       const v = rc.getValue(this.id);
-      field.value = (v !== undefined && v !== null) ? v : '';
+      field.value = answerText(v);
+      this._syncOpenChoice?.();
     };
   }
 
@@ -305,7 +307,7 @@ export class ItemNode extends BaseNode {
     const vb = document.createElement('span');
     vb.className = 'preview-readonly-value';
     vb.dataset.testid = 'preview-readonly-value';
-    vb.textContent = (val !== undefined && val !== null && val !== '') ? String(val) : '\u2014';
+    vb.textContent = answerText(val) || '\u2014';
     row.appendChild(vb);
   }
 
@@ -318,7 +320,7 @@ export class ItemNode extends BaseNode {
     if (isPatient) {
       const s = rc.getValue(this.id);
       badge.className = 'preview-calc-value';
-      badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
+      badge.textContent = answerText(s) || '\u2014';
       this._attachCalcExplain(badge, rc);
     } else if (this.itemType === 'checkbox') {
       const calcVal = rc.getValue(this.id);
@@ -337,7 +339,7 @@ export class ItemNode extends BaseNode {
     } else {
       const s = rc.getValue(this.id);
       badge.className = 'preview-calc-value';
-      badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
+      badge.textContent = answerText(s) || '\u2014';
       this._attachCalcExplain(badge, rc);
     }
     // Store updater closure — called on REFRESH_CALC_BADGES without full DOM rebuild.
@@ -353,7 +355,7 @@ export class ItemNode extends BaseNode {
       } else {
         const s = rc.getValue(this.id);
         badge.className = 'preview-calc-value' + (rc.showExplain && this._calculatedExpr ? ' preview-calc-value--explain' : '');
-        badge.textContent = (s !== undefined && s !== '') ? String(s) : '\u2014';
+        badge.textContent = answerText(s) || '\u2014';
       }
     };
     row.appendChild(badge);

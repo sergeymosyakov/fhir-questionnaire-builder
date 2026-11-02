@@ -25,9 +25,14 @@ export function buildAnswer(fhirItem, v) {
   if (t === 'date')     return { valueDate: String(v) };
   if (t === 'dateTime') return { valueDateTime: String(v) };
   if (t === 'time')     return { valueTime: String(v) };
+  // Free text typed into an open-choice is a plain string (R4: open-choice = Coding or string); a picked option is { code, display, system? }.
+  // Radio / check-box / table renderings of an open-choice cannot be typed into: their string values are option codes.
+  if (t === 'open-choice' && typeof v !== 'object' && !hasListControl(fhirItem)) return { valueString: String(v) };
   if (t === 'choice' || t === 'open-choice') {
-    const codeStr = String(v);
-    const coding  = { code: codeStr };
+    const picked  = v !== null && typeof v === 'object' ? v : null;
+    const codeStr = String(picked ? (picked.code ?? '') : v);
+    if (!codeStr) return null;
+    const coding  = { code: codeStr, ...(picked?.system ? { system: picked.system } : {}), ...(picked?.display ? { display: picked.display } : {}) };
     // Enrich from answerOption: system, display, ordinalValue extension
     const opt = (fhirItem.answerOption || []).find(o =>
       (o.valueCoding && o.valueCoding.code === codeStr) ||
@@ -50,8 +55,6 @@ export function buildAnswer(fhirItem, v) {
       if (ordExt !== undefined)
         coding.extension = [{ url: ORDINAL_URL, valueDecimal: ordExt.valueDecimal }];
     }
-    // Free text typed into an open-choice that matches no defined option is a valueString
-    if (t === 'open-choice' && !opt && (fhirItem.answerOption || []).length) return { valueString: codeStr };
     return { valueCoding: coding };
   }
   if (t === 'integer')  return { valueInteger: parseInt(v, 10) || 0 };
@@ -83,6 +86,10 @@ function buildQRItems(fhirItem, values) {
   }
   return [buildQRItem(fhirItem, values)];
 }
+
+const LIST_CONTROLS = new Set(['radio-button', 'check-box', 'atable']);
+const hasListControl = fhirItem => (fhirItem.extension || []).some(e => e.url === FHIR.itemControl
+  && LIST_CONTROLS.has(e.valueCodeableConcept?.coding?.[0]?.code));
 
 // A checklist stores all its selections in one encoded string: check-box, or atable when repeating (otherwise atable is a radio)
 const isChecklistItem = fhirItem => (fhirItem.extension || []).some(e => {

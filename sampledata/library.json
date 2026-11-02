@@ -226,6 +226,12 @@
         "label": "Bariatric — Sample Response",
         "file": "example-bariatric-response.qr.json",
         "type": "qr"
+      },
+      {
+        "label": "Value Sets — Sample Response (picked open-choice)",
+        "file": "valueset-demo-response.qr.json",
+        "type": "qr",
+        "note": "The open-choice question answered with an option from its value set (a coded answer). Typing your own text instead records a plain-text answer."
       }
     ]
   },

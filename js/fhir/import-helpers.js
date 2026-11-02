@@ -231,7 +231,7 @@ export function resolveContainedValueSet(contained, ref) {
   const parts = [];
   for (const inc of vs.compose?.include || []) {
     for (const c of inc.concept || []) {
-      if (c.code) parts.push({ valueCoding: { code: c.code, ...(c.display ? { display: c.display } : {}) } });
+      if (c.code) parts.push({ valueCoding: { ...(inc.system ? { system: inc.system } : {}), code: c.code, ...(c.display ? { display: c.display } : {}) } });
     }
   }
   return parts;

@@ -263,14 +263,16 @@ describe('buildQR — value edge cases', () => {
     expect(qrOf({ linkId: 'i', type: 'integer' }, '0').answer).toEqual([{ valueInteger: 0 }]);
   });
   const opts = [{ valueCoding: { code: 'a', display: 'A' } }];
-  it('open-choice free text is valueString; a defined option stays a coding', () => {
+  it('open-choice free text is valueString; a picked option stays a coding', () => {
     const item = { linkId: 'o', type: 'open-choice', answerOption: opts };
     expect(qrOf(item, 'something else').answer).toEqual([{ valueString: 'something else' }]);
-    expect(qrOf(item, 'a').answer[0].valueCoding.code).toBe('a');
+    expect(qrOf(item, { code: 'a' }).answer[0].valueCoding).toMatchObject({ code: 'a', display: 'A' });
   });
-  it('open-choice without answerOption keeps coding (value-set backed)', () => {
-    expect(qrOf({ linkId: 'o', type: 'open-choice', answerValueSet: 'http://vs' }, 'x').answer)
-      .toEqual([{ valueCoding: { code: 'x' } }]);
+  it('open-choice backed by a value set: picked option is a coding, typed text a string', () => {
+    const item = { linkId: 'o', type: 'open-choice', answerValueSet: 'http://vs' };
+    expect(qrOf(item, { code: 'x', display: 'X', system: 'http://s' }).answer)
+      .toEqual([{ valueCoding: { code: 'x', display: 'X', system: 'http://s' } }]);
+    expect(qrOf(item, 'x').answer).toEqual([{ valueString: 'x' }]);
   });
   it('open-choice free text round-trips through QR import', () => {
     const item = { linkId: 'o', type: 'open-choice', answerOption: opts };

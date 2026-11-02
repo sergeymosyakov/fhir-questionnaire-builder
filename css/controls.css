@@ -163,6 +163,8 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { cursor: pointe
   box-shadow: -2px 0 0 2px var(--c-primary-lt), 0 2px 0 2px var(--c-primary-lt), 0 -2px 0 2px var(--c-primary-lt);
 }
 .choice-open-readonly { cursor: default; }
+.oc-coded-badge { margin-left: 6px; color: var(--c-ok); font-weight: 600; }
+.oc-match-hint  { margin-top: 2px; color: var(--c-amber); font-size: inherit; }
 .oc-btn {
   width: 24px;
   height: 28px;

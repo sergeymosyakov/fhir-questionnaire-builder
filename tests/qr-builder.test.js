@@ -100,9 +100,11 @@ describe('buildQR — leaf answer types', () => {
     expect(qr.item[0].answer[0].valueCoding).toEqual({ code: 'opt1' });
   });
 
-  it('open-choice → valueCoding', () => {
-    const qr = bq(mkFhir('q', 'open-choice'), { q: 'custom' });
-    expect(qr.item[0].answer[0].valueCoding).toEqual({ code: 'custom' });
+  it('open-choice: a picked option is a valueCoding, typed text is a valueString', () => {
+    const fhir = mkFhir('q', 'open-choice');
+    expect(bq(fhir, { q: { code: 'a', display: 'A', system: 'http://s' } }).item[0].answer[0].valueCoding)
+      .toEqual({ code: 'a', display: 'A', system: 'http://s' });
+    expect(bq(fhir, { q: 'custom' }).item[0].answer[0]).toEqual({ valueString: 'custom' });
   });
 
   it('quantity keeps the unit system and code when the store has them', () => {
@@ -344,7 +346,7 @@ describe('buildQR — ordinalValue in valueCoding answers', () => {
       valueCoding: { code: 'la1', display: 'Not at all' },
     }];
     const fhir = { item: [{ linkId: 'q', type: 'open-choice', answerOption }] };
-    const qr = bq(fhir, { q: 'la1' });
+    const qr = bq(fhir, { q: { code: 'la1', display: 'Not at all' } });
     const vc = qr.item[0].answer[0].valueCoding;
     expect(vc.extension).toEqual([{ url: ORDINAL_URL, valueDecimal: 1 }]);
   });

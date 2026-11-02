@@ -1,0 +1,232 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "open-choice-answers",
+  "status": "draft",
+  "title": "Open-choice answers",
+  "contained": [
+    {
+      "resourceType": "ValueSet",
+      "id": "vs-diet",
+      "url": "https://example.org/fhir/ValueSet/diet-type",
+      "status": "active",
+      "compose": {
+        "include": [
+          {
+            "system": "https://example.org/diet",
+            "concept": [
+              {
+                "code": "low-carb",
+                "display": "Low Carbohydrate"
+              },
+              {
+                "code": "mediterranean",
+                "display": "Mediterranean"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "linkId": "oc-list",
+      "text": "Pain type",
+      "type": "open-choice",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://example.org/pain",
+            "code": "ache",
+            "display": "Ache"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://example.org/pain",
+            "code": "sharp",
+            "display": "Sharp"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "oc-vs",
+      "text": "Diet",
+      "type": "open-choice",
+      "answerValueSet": "#vs-diet"
+    },
+    {
+      "linkId": "oc-ext",
+      "text": "External list",
+      "type": "open-choice",
+      "answerValueSet": "https://example.org/fhir/ValueSet/ext-oc"
+    },
+    {
+      "linkId": "oc-only",
+      "text": "Options only",
+      "type": "open-choice",
+      "answerConstraint": "optionsOnly",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://example.org/pain",
+            "code": "ache",
+            "display": "Ache"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://example.org/pain",
+            "code": "sharp",
+            "display": "Sharp"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "oc-req",
+      "text": "Required choice",
+      "type": "open-choice",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://example.org/pain",
+            "code": "ache",
+            "display": "Ache"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "oc-rep",
+      "text": "Repeating choice",
+      "type": "open-choice",
+      "repeats": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://example.org/pain",
+            "code": "ache",
+            "display": "Ache"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://example.org/pain",
+            "code": "sharp",
+            "display": "Sharp"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "oc-init-coded",
+      "text": "Default coded",
+      "type": "open-choice",
+      "answerValueSet": "#vs-diet",
+      "initial": [
+        {
+          "valueCoding": {
+            "system": "https://example.org/diet",
+            "code": "mediterranean",
+            "display": "Mediterranean"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "oc-init-text",
+      "text": "Default text",
+      "type": "open-choice",
+      "answerValueSet": "#vs-diet",
+      "initial": [
+        {
+          "valueString": "my own diet"
+        }
+      ]
+    },
+    {
+      "linkId": "oc-radio",
+      "text": "Shown as radio buttons",
+      "type": "open-choice",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ],
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://example.org/pain",
+            "code": "ache",
+            "display": "Ache"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://example.org/pain",
+            "code": "sharp",
+            "display": "Sharp"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "oc-readonly",
+      "text": "Read-only default",
+      "type": "open-choice",
+      "readOnly": true,
+      "answerValueSet": "#vs-diet",
+      "initial": [
+        {
+          "valueCoding": {
+            "system": "https://example.org/diet",
+            "code": "low-carb",
+            "display": "Low Carbohydrate"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "oc-mirror",
+      "text": "Mirror of the pain type",
+      "type": "open-choice",
+      "readOnly": true,
+      "answerValueSet": "#vs-diet",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+          "valueExpression": {
+            "language": "text/fhirpath",
+            "expression": "%resource.item.where(linkId='oc-list').answer.value"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "dep",
+      "text": "Shown for ache",
+      "type": "string",
+      "enableWhen": [
+        {
+          "question": "oc-list",
+          "operator": "=",
+          "answerCoding": {
+            "system": "https://example.org/pain",
+            "code": "ache"
+          }
+        }
+      ]
+    }
+  ]
+}

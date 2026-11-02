@@ -62,6 +62,10 @@ const CHOICE_TYPES = new Set(['select', 'radio', 'open-choice', 'checklist']);
 function resultScalar(node, v) {
   if (v === null || v === undefined) return '';
   if (typeof v !== 'object') return String(v);
+  // open-choice: a Coding result is a picked option; a plain string stays free text
+  if (node.itemType === 'open-choice' && v.code !== undefined) {
+    return { code: String(v.code), ...(v.display ? { display: String(v.display) } : {}), ...(v.system ? { system: String(v.system) } : {}) };
+  }
   if (node.itemType === 'reference') {
     return { reference: String(v.reference ?? ''), ...(v.display ? { display: String(v.display) } : {}) };
   }
@@ -80,7 +84,7 @@ function coerceResult(node, result) {
     return result[0] === true || result[0] === 'true';
   }
   if (!Array.isArray(result)) return '';
-  if (node.itemType === 'reference' || node.itemType === 'quantity') {
+  if (node.itemType === 'reference' || node.itemType === 'quantity' || node.itemType === 'open-choice') {
     return result.length ? resultScalar(node, result[0]) : '';
   }
   const scalars = result.map(v => resultScalar(node, v));

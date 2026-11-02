@@ -146,7 +146,7 @@ export function nodeToFHIRItem(node) {
         const { system, code, display } = v;
         return { valueCoding: { ...(system ? { system } : {}), code: String(code ?? display ?? ''), display: String(display ?? code ?? '') } };
       }
-      const keptCoding = t === 'choice' && node._initialCodings?.find(c => (c.code ?? c.display) === String(v));
+      const keptCoding = (t === 'choice' || (t === 'open-choice' && !node._initialTexts?.includes(String(v)))) && node._initialCodings?.find(c => (c.code ?? c.display) === String(v));
       if (keptCoding) return { valueCoding: { ...keptCoding } };
       if (t === 'choice')   return { valueCoding:   { code: String(v), display: String(v) } };
       return { valueString: String(v) };
