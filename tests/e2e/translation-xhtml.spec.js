@@ -144,8 +144,7 @@ test.describe('XHTML translation — preview render', () => {
     await loadXHTMLDemo(page);
 
     // Translate to Spanish
-    await page.getByTestId('tools-btn').click();
-    await page.getByTestId('translate-item').click();
+    await openDropdownItem(page, 'tools-btn', 'translate-item');
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible();
     await page.getByTestId('translate-lang-select').click();
     await page.locator('[data-testid="csel-drop"] [data-val="es"]').click();
@@ -175,8 +174,7 @@ test.describe('XHTML translation — export round-trip', () => {
     await loadXHTMLDemo(page);
 
     // Translate to Spanish
-    await page.getByTestId('tools-btn').click();
-    await page.getByTestId('translate-item').click();
+    await openDropdownItem(page, 'tools-btn', 'translate-item');
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible();
     await page.getByTestId('translate-lang-select').click();
     await page.locator('[data-testid="csel-drop"] [data-val="es"]').click();
@@ -222,8 +220,7 @@ test.describe('Markdown translation — preview render', () => {
     await loadMarkdownDemo(page);
 
     // Translate to Spanish
-    await page.getByTestId('tools-btn').click();
-    await page.getByTestId('translate-item').click();
+    await openDropdownItem(page, 'tools-btn', 'translate-item');
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible();
     await page.getByTestId('translate-lang-select').click();
     await page.locator('[data-testid="csel-drop"] [data-val="es"]').click();
@@ -251,8 +248,7 @@ test.describe('Markdown translation — export round-trip', () => {
     await loadMarkdownDemo(page);
 
     // Translate to Spanish
-    await page.getByTestId('tools-btn').click();
-    await page.getByTestId('translate-item').click();
+    await openDropdownItem(page, 'tools-btn', 'translate-item');
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible();
     await page.getByTestId('translate-lang-select').click();
     await page.locator('[data-testid="csel-drop"] [data-val="es"]').click();

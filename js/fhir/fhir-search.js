@@ -94,7 +94,7 @@ export function displayName(resource) {
 /** Search parameter name by resource type. */
 function _searchParam(resourceType) {
   if (['Patient', 'Practitioner', 'RelatedPerson', 'Person'].includes(resourceType)) return 'name';
-  if (['Organization', 'Location', 'HealthcareService', 'Medication'].includes(resourceType)) return 'name';
+  if (['Organization', 'Location', 'HealthcareService'].includes(resourceType)) return 'name';
   if (['Encounter', 'EpisodeOfCare', 'Condition', 'Observation', 'Procedure',
        'DiagnosticReport', 'MedicationRequest', 'ServiceRequest'].includes(resourceType)) return 'patient.name';
   if (['Medication', 'Substance'].includes(resourceType)) return 'code';

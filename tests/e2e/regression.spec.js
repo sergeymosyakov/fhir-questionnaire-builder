@@ -23,6 +23,7 @@ import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { clickBoolOption } from './helpers/builder.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { mockTerminologyExpand } from './helpers/terminology.js';
 
 const ANNUAL  = path.resolve('sampledata/annual-health-check.fhir.json');
 const CALC    = path.resolve('sampledata/patient-scenario-calc-chain.fhir.json');
@@ -144,10 +145,9 @@ test.describe('H1 — QR export contains filled answers', () => {
       document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
     });
 
-    await page.evaluate(() => new Promise(r => setTimeout(r, 300)));
     await commitInput(page);
 
-    expect(await medInput.inputValue()).toBe('Test drug');
+    await expect(medInput).toHaveValue('Test drug');
   });
 });
 
@@ -197,19 +197,18 @@ test.describe('H2 — calculatedExpression: BMI updates on height/weight input',
       if (m.type() === 'error' && !m.text().includes('favicon')) errors.push(m.text());
     });
 
+    await mockTerminologyExpand(page);
     await freshStart(page);
     await loadFile(page, CALC);
     await expect(page.locator('.preview-card')).toBeVisible({ timeout: 8_000 });
-    await page.evaluate(() => new Promise(r => setTimeout(r, 500)));
+    await page.waitForLoadState('networkidle');
 
     expect(errors).toHaveLength(0);
 
     // Re-init triggers initialExpression evaluation
     await expect(page.getByTestId('variables-reinit-btn')).toBeVisible({ timeout: 5_000 });
     await page.getByTestId('variables-reinit-btn').click();
-    await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
-    const calcVals = await page.locator('.preview-readonly-value').count();
-    expect(calcVals).toBeGreaterThan(0);
+    await expect(page.locator('.preview-readonly-value').first()).toBeVisible();
   });
 });
 
@@ -448,10 +447,11 @@ test.describe('M2 — Large form (AHRQ 30+ items) renders without JS errors', ()
     page.on('pageerror',  e => errors.push(e.message));
     page.on('console',   m => { if (m.type() === 'error' && !m.text().includes('favicon')) errors.push(m.text()); });
 
+    await mockTerminologyExpand(page);
     await freshStart(page);
     await loadFile(page, AHRQ);
     await page.locator('.preview-card .lform-item').first().waitFor({ timeout: 10_000 });
-    await page.evaluate(() => new Promise(r => setTimeout(r, 500)));
+    await page.waitForLoadState('networkidle');
 
     expect(errors, 'No JS errors during AHRQ render').toHaveLength(0);
     const itemCount = await page.locator('.preview-card .lform-item').count();
@@ -462,10 +462,11 @@ test.describe('M2 — Large form (AHRQ 30+ items) renders without JS errors', ()
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
 
+    await mockTerminologyExpand(page);
     await freshStart(page);
     await loadFile(page, AHRQ);
     await page.locator('[data-testid="tree-container"] [data-node-id]').first().waitFor({ timeout: 10_000 });
-    await page.evaluate(() => new Promise(r => setTimeout(r, 500)));
+    await page.waitForLoadState('networkidle');
 
     expect(errors).toHaveLength(0);
     const nodeCount = await page.locator('[data-testid="tree-container"] [data-node-id]').count();

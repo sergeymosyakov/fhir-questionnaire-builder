@@ -85,8 +85,10 @@ test.describe('States modal — open / close', () => {
     await addGroupAndItem(page);
     const item = page.locator('[data-node-id="1.1"]');
     await expect(item.getByTestId('node-title-display')).toBeVisible();
-    await item.getByTestId('node-title-display').click();
-    await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await item.getByTestId('node-title-display').click();
+      await expect(item.getByTestId('node-title-input')).toBeVisible();
+    }).toPass();
     await item.getByTestId('node-title-input').fill('Blood pressure');
     await item.getByTestId('node-title-input').blur();
 

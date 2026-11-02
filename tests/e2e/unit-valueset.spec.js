@@ -31,12 +31,15 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { mockTerminologyExpand } from './helpers/terminology.js';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/unit-valueset.fhir.json');
 const VS_URL  = FHIR.vs + '/ucum-bodyweight';
 
 async function freshLoad(page) {
   await page.addInitScript(() => localStorage.clear());
+  await mockTerminologyExpand(page);
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
@@ -50,12 +53,10 @@ test.describe('unit-valueset — export round-trip', () => {
     await freshLoad(page);
 
     // Open export dialog
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-quest-item"]').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     await page.locator('[data-testid="saveFormatModalApply"]').click();
 
-    page.once('dialog', async dlg => { await dlg.accept('unit-vs-test'); });
     const [download] = await Promise.all([
       page.waitForEvent('download'),
       page.locator('[data-testid="prompt-save"]').click(),
@@ -73,12 +74,10 @@ test.describe('unit-valueset — export round-trip', () => {
   test('item without unitValueSet has no questionnaire-unitValueSet extension', async ({ page }) => {
     await freshLoad(page);
 
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-quest-item"]').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     await page.locator('[data-testid="saveFormatModalApply"]').click();
 
-    page.once('dialog', async dlg => { await dlg.accept('unit-vs-test'); });
     const [download2] = await Promise.all([
       page.waitForEvent('download'),
       page.locator('[data-testid="prompt-save"]').click(),
@@ -94,12 +93,10 @@ test.describe('unit-valueset — export round-trip', () => {
   test('fixed-unit item still exports questionnaire-unit (not unitValueSet)', async ({ page }) => {
     await freshLoad(page);
 
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-quest-item"]').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     await page.locator('[data-testid="saveFormatModalApply"]').click();
 
-    page.once('dialog', async dlg => { await dlg.accept('unit-vs-test'); });
     const [download3] = await Promise.all([
       page.waitForEvent('download'),
       page.locator('[data-testid="prompt-save"]').click(),
@@ -157,12 +154,10 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
     await page.locator('[data-testid="answerTypeModalApply"]').click();
 
     // Export and verify
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-quest-item"]').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     await page.locator('[data-testid="saveFormatModalApply"]').click();
 
-    page.once('dialog', async dlg => { await dlg.accept('unit-vs-edit-test'); });
     const [download] = await Promise.all([
       page.waitForEvent('download'),
       page.locator('[data-testid="prompt-save"]').click(),
@@ -185,12 +180,10 @@ test.describe('unit-valueset — Answer Type modal UI', () => {
     await inp.fill('');
     await page.locator('[data-testid="answerTypeModalApply"]').click();
 
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-quest-item"]').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     await page.locator('[data-testid="saveFormatModalApply"]').click();
 
-    page.once('dialog', async dlg => { await dlg.accept('unit-vs-clear-test'); });
     const [download] = await Promise.all([
       page.waitForEvent('download'),
       page.locator('[data-testid="prompt-save"]').click(),

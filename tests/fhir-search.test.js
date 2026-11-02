@@ -137,6 +137,15 @@ describe('searchFhir', () => {
     expect(init.headers).toEqual({ Accept: 'application/fhir+json' });
   });
 
+  it('searches Medication and Substance by code (they have no name parameter)', async () => {
+    const f = vi.fn(async () => jsonRes({})); vi.stubGlobal('fetch', f);
+    await searchFhir('Medication', 'asp');
+    await searchFhir('Substance', 'asp');
+    expect(f.mock.calls[0][0]).toContain('code=asp');
+    expect(f.mock.calls[1][0]).toContain('code=asp');
+    expect(f.mock.calls[0][0]).not.toContain('name=');
+  });
+
   it('uses patient.name for clinical resources and _id for unknown types', async () => {
     const f = vi.fn(async () => jsonRes({})); vi.stubGlobal('fetch', f);
     await searchFhir('Observation', 'x');

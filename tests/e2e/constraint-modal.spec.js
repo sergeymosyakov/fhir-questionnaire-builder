@@ -49,8 +49,10 @@ async function addTextItem(page, title = 'My Question') {
     const item = page.locator('[data-node-id="1.1"]');
     // Wait for add-menu to fully close before clicking title
     await expect(item.getByTestId('node-title-display')).toBeVisible();
-    await item.getByTestId('node-title-display').click();
-    await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await item.getByTestId('node-title-display').click();
+      await expect(item.getByTestId('node-title-input')).toBeVisible();
+    }).toPass();
     await item.getByTestId('node-title-input').fill(title);
     await item.getByTestId('node-title-input').blur();
   }

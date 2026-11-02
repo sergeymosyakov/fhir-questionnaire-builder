@@ -287,8 +287,8 @@ test.describe('minLength enforcement', () => {
     const textarea = page.locator('[data-preview-id="string-with-min"] textarea');
     await textarea.click();
     await textarea.fill('Hi');
-    // Tab: the minLength error is blur-driven, which is what this test covers
-    await textarea.press('Tab');
+    // the minLength error is blur-driven; commitInput blurs the textarea
+    await commitInput(page);
     const err = page.locator('[data-preview-id="string-with-min"] [data-testid="minlength-err"]');
     await expect(err).toBeVisible();
     await expect(err).toContainText('5');
@@ -299,10 +299,10 @@ test.describe('minLength enforcement', () => {
     const textarea = page.locator('[data-preview-id="string-with-min"] textarea');
     await textarea.click();
     await textarea.fill('Hi');
-    await textarea.press('Tab');
+    await commitInput(page);
     await textarea.click();
     await textarea.fill('Hello world');
-    await textarea.press('Tab');
+    await commitInput(page);
     const err = page.locator('[data-preview-id="string-with-min"] [data-testid="minlength-err"]');
     await expect(err).toBeHidden();
   });

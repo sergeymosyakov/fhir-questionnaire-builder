@@ -25,14 +25,14 @@
 //   libraryModalFooter   Library modal footer
 
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="left-panel-rail-tab"]', { state: 'attached', timeout: 10_000 });
 }
 
 async function openModal(page, itemTestId, modalTestId) {
-  await page.getByTestId('load-fhir-btn').click();
-  await page.getByTestId(itemTestId).click();
+  await openDropdownItem(page, 'load-fhir-btn', itemTestId);
   await expect(page.getByTestId(modalTestId)).toBeVisible();
 }
 

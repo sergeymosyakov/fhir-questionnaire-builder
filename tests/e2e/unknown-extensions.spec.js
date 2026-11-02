@@ -27,6 +27,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/unknown-extensions.fhir.json');
 const CUSTOM_URL = 'https://vendor.example.com/fhir/StructureDefinition/custom-field';
@@ -46,8 +47,7 @@ async function loadFixture(page) {
 }
 
 async function exportFHIR(page) {
-  await page.locator('[data-testid="export-btn"]').click();
-  await page.locator('[data-testid="export-quest-item"]').click();
+  await openDropdownItem(page, 'export-btn', 'export-quest-item');
   await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
   await page.getByTestId('saveFormatModalApply').click();
   // Wrap only the actual download trigger (prompt-save) in the download wait.

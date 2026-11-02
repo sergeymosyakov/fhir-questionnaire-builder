@@ -155,7 +155,7 @@ test.describe('Settings page', () => {
 
     // Pick DeepL → key field appears
     await trigger.click();
-    await page.locator('.csel-drop .oc-opt[data-val="deepl"]').click();
+    await page.locator('[data-testid="csel-drop"] [data-val="deepl"]').click();
     await expect(trigger).toHaveAttribute('data-value', 'deepl');
     await expect(page.getByTestId('translate-key-field')).toBeVisible();
 

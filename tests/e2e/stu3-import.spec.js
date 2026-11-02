@@ -109,8 +109,7 @@ test.describe('STU3 import', () => {
     await loadFixture(page, 'phq-9.stu3.fhir.json');
 
     // Trigger export and capture the downloaded JSON
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),

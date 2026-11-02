@@ -17,11 +17,13 @@ import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { readFileSync } from 'node:fs';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { mockTerminologyExpand } from './helpers/terminology.js';
 
 const FIXTURE = path.resolve('tests/fixtures/item-control.fhir.json');
 
 async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
+  await mockTerminologyExpand(page);
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);

@@ -183,7 +183,11 @@ test.describe('QuestionnaireRenderer widget', () => {
         questionnaire: q,
         config: { previewMode: 'patient', search: true, validation: true, explain: true },
       });
-      await new Promise(res => setTimeout(res, 80));
+      await new Promise(res => {
+        const start = Date.now();
+        const tick = () => (host.querySelector('.preview-card') || Date.now() - start > 3000 ? res() : requestAnimationFrame(tick));
+        tick();
+      });
       const renderedBefore = !!host.querySelector('.preview-card') && !!host.querySelector('.fhir-toolbar');
       let threw = false;
       try { w.destroy(); w.destroy(); } catch { threw = true; } // idempotent

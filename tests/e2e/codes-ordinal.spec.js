@@ -30,6 +30,7 @@ import { test, expect } from '@playwright/test';
 import { SNOMED_URL } from '../../js/fhir/urls/snomed.js';
 import { LOINC_URL } from '../../js/fhir/urls/loinc.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/codes-ordinal.fhir.json');
 
@@ -154,8 +155,7 @@ test.describe('Codes modal editing', () => {
 test.describe('Codes export round-trip', () => {
   test('item.code[] preserved in exported FHIR JSON', async ({ page }) => {
     await loadFixture(page);
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),

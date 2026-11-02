@@ -21,6 +21,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, waitForLoad } from './helpers/builder.js';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 /** freshStart + add one root group so the Settings menu button becomes visible. */
 async function freshStartWithGroup(page) {
@@ -85,8 +86,7 @@ test.describe('Autosave draft', () => {
     await page.goto('/');
     await waitForLoad(page);
 
-    await page.getByTestId('load-fhir-btn').click();
-    await page.locator('[data-testid="load-recent-item"]').click();
+    await openDropdownItem(page, 'load-fhir-btn', 'load-recent-item');
 
     await expect(
       page.locator('[data-testid="tree-container"] [data-node-id]').first()
@@ -223,8 +223,7 @@ test.describe('Panel width persistence', () => {
 test.describe('Load confirm dialog', () => {
   test('no confirm shown when tree is empty (loads immediately)', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('load-fhir-btn').click();
-    await page.locator('[data-testid="load-library-item"]').click();
+    await openDropdownItem(page, 'load-fhir-btn', 'load-library-item');
     // library modal opens — confirm dialog should NOT appear
     await expect(page.getByTestId('load-confirm-proceed-btn')).not.toBeVisible();
   });
@@ -233,8 +232,7 @@ test.describe('Load confirm dialog', () => {
     await freshStart(page);
     await addRootGroup(page);
 
-    await page.getByTestId('load-fhir-btn').click();
-    await page.locator('[data-testid="load-library-item"]').click();
+    await openDropdownItem(page, 'load-fhir-btn', 'load-library-item');
     await expect(page.getByTestId('load-confirm-proceed-btn')).toBeVisible();
   });
 
@@ -243,8 +241,7 @@ test.describe('Load confirm dialog', () => {
     await addRootGroup(page);
     const before = await page.locator('[data-testid="tree-container"] [data-node-id]').count();
 
-    await page.getByTestId('load-fhir-btn').click();
-    await page.locator('[data-testid="load-library-item"]').click();
+    await openDropdownItem(page, 'load-fhir-btn', 'load-library-item');
     await page.getByTestId('load-confirm-cancel-btn').click();
 
     await expect(page.getByTestId('load-confirm-proceed-btn')).not.toBeVisible();
@@ -256,8 +253,7 @@ test.describe('Load confirm dialog', () => {
     await addRootGroup(page);
     const before = await page.locator('[data-testid="tree-container"] [data-node-id]').count();
 
-    await page.getByTestId('load-fhir-btn').click();
-    await page.locator('[data-testid="load-library-item"]').click();
+    await openDropdownItem(page, 'load-fhir-btn', 'load-library-item');
     await page.keyboard.press('Escape');
 
     await expect(page.getByTestId('load-confirm-proceed-btn')).not.toBeVisible();
@@ -268,8 +264,7 @@ test.describe('Load confirm dialog', () => {
     await freshStart(page);
     await addRootGroup(page);
 
-    await page.getByTestId('load-fhir-btn').click();
-    await page.locator('[data-testid="load-library-item"]').click();
+    await openDropdownItem(page, 'load-fhir-btn', 'load-library-item');
     await page.getByTestId('load-confirm-proceed-btn').click();
 
     // library modal should now be open
