@@ -1,0 +1,127 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "choice-value-set-coding",
+  "status": "draft",
+  "title": "Choice answers backed by a value set",
+  "contained": [
+    {
+      "resourceType": "ValueSet",
+      "id": "vs-diet",
+      "url": "https://example.org/fhir/ValueSet/diet-type",
+      "status": "active",
+      "compose": {
+        "include": [
+          {
+            "system": "https://example.org/diet",
+            "concept": [
+              {
+                "code": "low-carb",
+                "display": "Low Carbohydrate"
+              },
+              {
+                "code": "mediterranean",
+                "display": "Mediterranean"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "linkId": "vs-select",
+      "text": "Drop-down",
+      "type": "choice",
+      "answerValueSet": "#vs-diet"
+    },
+    {
+      "linkId": "vs-radio",
+      "text": "Radio buttons",
+      "type": "choice",
+      "answerValueSet": "#vs-diet",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "vs-checklist",
+      "text": "Check-boxes",
+      "type": "choice",
+      "repeats": true,
+      "answerValueSet": "#vs-diet",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "check-box"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "vs-ext",
+      "text": "External value set",
+      "type": "choice",
+      "answerValueSet": "https://example.org/fhir/ValueSet/ext-choice"
+    },
+    {
+      "linkId": "vs-repeat",
+      "text": "Repeating drop-down",
+      "type": "choice",
+      "repeats": true,
+      "answerValueSet": "#vs-diet"
+    },
+    {
+      "linkId": "vs-default",
+      "text": "Default from a value set",
+      "type": "choice",
+      "answerValueSet": "#vs-diet",
+      "initial": [
+        {
+          "valueCoding": {
+            "system": "https://example.org/diet",
+            "code": "mediterranean",
+            "display": "Mediterranean"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "list-select",
+      "text": "Options listed on the question",
+      "type": "choice",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "https://example.org/pain",
+            "code": "ache",
+            "display": "Ache"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "https://example.org/pain",
+            "code": "sharp",
+            "display": "Sharp"
+          }
+        }
+      ]
+    }
+  ]
+}

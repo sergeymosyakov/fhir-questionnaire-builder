@@ -11,9 +11,9 @@ import { AppEvents, EventState } from '../events.js';
  * @param {{ status?, subject?, author?, id?, language?, metaVersionId?, metaSource?, metaProfile?, metaTag?, metaSecurity? }} [meta]
  */
 export function exportQR(fileName, meta) {
-  const { answerStore } = EventState.get(AppEvents.APP_CONTEXT_READY) || {};
+  const { answerStore, questDoc } = EventState.get(AppEvents.APP_CONTEXT_READY) || {};
   const fhirQ = buildFHIRObject();
-  const qr    = buildQR(fhirQ, answerStore.toValueMap());
+  const qr    = buildQR(fhirQ, answerStore.toValueMap(), answerStore.codingResolver(questDoc.tree));
   qr.status   = (meta && meta.status)  || 'in-progress';
   if (meta && meta.id)      qr.id       = meta.id;
   if (meta && meta.language) qr.language = meta.language;

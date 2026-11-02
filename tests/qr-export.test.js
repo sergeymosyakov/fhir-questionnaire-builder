@@ -28,7 +28,10 @@ import { buildQR }         from '../js/fhir/qr-builder.js';
 import { AppEvents, EventState } from '../js/events.js';
 
 // EventState seed — exportQR reads answerStore from the shared APP_CONTEXT_READY cache
-EventState._set(AppEvents.APP_CONTEXT_READY, { answerStore: { data: {}, toValueMap() { return this.data; } } });
+EventState._set(AppEvents.APP_CONTEXT_READY, {
+  answerStore: { data: {}, toValueMap() { return this.data; }, codingResolver: tree => ({ resolverFor: tree }) },
+  questDoc: { tree: [] },
+});
 
 // ── DOM stub helpers ──────────────────────────────────────────────────────────
 
@@ -75,7 +78,7 @@ describe('exportQR — FHIR building', () => {
   it('passes the Questionnaire and values to buildQR', () => {
     exportQR('test.json');
     const fhirQ = buildFHIRObject.mock.results[0].value;
-    expect(buildQR).toHaveBeenCalledWith(fhirQ, {});
+    expect(buildQR).toHaveBeenCalledWith(fhirQ, {}, { resolverFor: [] });
   });
 });
 

@@ -1,5 +1,6 @@
 // Parse and load answers from a FHIR R4 QuestionnaireResponse into the plain values object
 import { joinCodes } from './checklist-codec.js';
+import { collectResponseCodings } from './coding-resolver.js';
 
 // Collect all builder node linkIds recursively from tree
 function _collectLinkIds(nodes, set = new Set()) {
@@ -131,7 +132,7 @@ export function importQRAnswers(qrJson, values, tree) {
   };
   mergeChecklists(tree, values);
 
-  return { ok: true, loaded, unmatched, questionnaire: qrJson.questionnaire || '',
+  return { ok: true, loaded, unmatched, questionnaire: qrJson.questionnaire || '', codings: collectResponseCodings(qrJson.item),
     meta: {
       status:           qrJson.status  || 'in-progress',
       subject:          qrJson.subject?.reference || '',

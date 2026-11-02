@@ -19,6 +19,7 @@
 // touches the raw backing object directly.
 import { AppEvents } from './events.js';
 import { defaultBus } from './core/events/bus.js';
+import { makeCodingResolver } from './fhir/coding-resolver.js';
 
 // linkIds are untrusted object keys: read own props only, never assign '__proto__'.
 const own = (obj, k) => (Object.hasOwn(obj, k) ? obj[k] : undefined);
@@ -28,6 +29,9 @@ export class AnswerStore {
    *  A repeating group's linkId holds an array of INSTANCE MAPS ({ childId: [...] }),
    *  addressed by an instance path (array of { id, idx }). */
   data = {};
+
+  /** Codings (system/display) carried by a loaded response, for value sets that are not expanded: { linkId: { code: {...} } } */
+  codings = Object.create(null);
 
   /** Decode a row-address key into { base, kind: 'row'|'count', index }. */
   static _parse(key) {
@@ -135,7 +139,7 @@ export class AnswerStore {
   }
 
   /** Remove all answers. */
-  clear() { const d = this.data; Object.keys(d).forEach(k => delete d[k]); }
+  clear() { const d = this.data; Object.keys(d).forEach(k => delete d[k]); this.codings = Object.create(null); }
 
   /** Return a tree snapshot { id: [rows] } for read-only pure consumers. */
   toValueMap() {
@@ -152,8 +156,11 @@ export class AnswerStore {
     }
   }
 
-  /** Replace all answers with the given map (clear + merge). */
-  replaceAll(map) { this.clear(); this.merge(map); }
+  /** Replace all answers with the given map (clear + merge); `codings` are those of the loaded response. */
+  replaceAll(map, codings) { this.clear(); this.merge(map); if (codings) this.codings = codings; }
+
+  /** Resolver of system/display for QR export (see coding-resolver.js). */
+  codingResolver(tree) { return makeCodingResolver(tree, this.codings); }
 
   constructor(bus = defaultBus) {
     bus.on(AppEvents.ANSWER_SET,    e => this.set(e.detail.id, e.detail.value, e.detail.path));

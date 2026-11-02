@@ -36,7 +36,7 @@ export class QRAnswersManager {
     const values = this._answerStore.toValueMap();
     const result = importQRAnswers(qr, values, this._tree);
     if (!result.ok) { showError('Cannot load answers: ' + result.error); return; }
-    this._answerStore.replaceAll(values);
+    this._answerStore.replaceAll(values, result.codings);
 
     document.dispatchEvent(new CustomEvent(AppEvents.QR_LOADED, { detail: {
       status:        result.meta.status,

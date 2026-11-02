@@ -15,9 +15,9 @@ import { AppEvents, EventState } from '../events.js';
  * @returns {object} the generated Bundle (also useful for tests).
  */
 export function exportObservations(fileName, meta) {
-  const { answerStore } = EventState.get(AppEvents.APP_CONTEXT_READY) || {};
+  const { answerStore, questDoc } = EventState.get(AppEvents.APP_CONTEXT_READY) || {};
   const fhirQ = buildFHIRObject();
-  const qr    = buildQR(fhirQ, answerStore.toValueMap());
+  const qr    = buildQR(fhirQ, answerStore.toValueMap(), answerStore.codingResolver(questDoc.tree));
   qr.status   = 'completed';
   qr.authored = new Date().toISOString();
   if (meta && meta.qrId)    qr.id      = meta.qrId;

@@ -254,7 +254,7 @@ export class PreviewForm {
     if (!silent) progress.show('Building questionnaire response\u2026');
     await _yield();
     const base = { resourceType: 'Questionnaire', item: [] };
-    const qr = buildQR(base, this._answerStore.toValueMap());
+    const qr = buildQR(base, this._answerStore.toValueMap(), this._answerStore.codingResolver(this._tree));
     if (!silent) progress.show('Evaluating variables…');
     await _yield();
     const envVars = buildVarEnv(this._questVariables, qr, fhirpath);
@@ -272,7 +272,7 @@ export class PreviewForm {
     // snapshot, so an enableWhenExpression/calculatedExpression evaluated against it
     // during the upcoming render would miss values initialExpression just wrote
     // (notably a CQL-computed value driving a downstream enableWhenExpression).
-    this._preQR = buildQR(questJson, this._answerStore.toValueMap());
+    this._preQR = buildQR(questJson, this._answerStore.toValueMap(), this._answerStore.codingResolver(this._tree));
     this._preEnvVars = envVars;
     if (!silent) progress.show('Refreshing preview\u2026');
     await _yield();
@@ -317,7 +317,7 @@ export class PreviewForm {
         qr = this._preQR; envVars = this._preEnvVars;
         this._preQR = null; this._preEnvVars = null;
       } else {
-        qr = buildQR(base, this._answerStore.toValueMap());
+        qr = buildQR(base, this._answerStore.toValueMap(), this._answerStore.codingResolver(this._tree));
         envVars = buildVarEnv(this._questVariables, qr, fhirpath);
       }
       const calcMap = this._answerStore.toValueMap();
@@ -668,8 +668,8 @@ export class PreviewForm {
       const authHeader = await this._resolveAuthHeader();
       const qr = await populateFromServer(fhirBase, questJson, patientRef, { authHeader });
       const values = this._answerStore.toValueMap();
-      const { loaded } = importQRAnswers(qr, values, this._tree);
-      this._answerStore.replaceAll(values);
+      const { loaded, codings } = importQRAnswers(qr, values, this._tree);
+      this._answerStore.replaceAll(values, codings);
       this._bus.dispatch(AppEvents.REINIT_FORM);
       this._notify.info(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} from server.`);
     } catch (err) {
@@ -711,8 +711,8 @@ export class PreviewForm {
       const { qr, warnings } = structureMapPopulate(questJson, sourceResource);
       if (!qr) { this._notify.error(warnings.join(' ') || 'StructureMap produced no output.'); return; }
       const values = this._answerStore.toValueMap();
-      const { loaded } = importQRAnswers(qr, values, this._tree);
-      this._answerStore.replaceAll(values);
+      const { loaded, codings } = importQRAnswers(qr, values, this._tree);
+      this._answerStore.replaceAll(values, codings);
       this._bus.dispatch(AppEvents.REINIT_FORM);
       this._notify.info(`Pre-filled ${loaded} answer${loaded !== 1 ? 's' : ''} via StructureMap.`);
     } catch (err) {

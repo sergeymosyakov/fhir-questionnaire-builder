@@ -126,7 +126,7 @@ export class BuilderPanel {
     if (this._questDoc.rawFhir && fhirpath) {
       const base = JSON.parse(JSON.stringify(this._questDoc.rawFhir));
       const values = this._answerStore.toValueMap();
-      const qr = buildQR(base, values);
+      const qr = buildQR(base, values, this._answerStore.codingResolver(this._tree));
       // Reuse cached dep-graph order — stable while questionnaire structure is unchanged.
       if (!this._calcCache) {
         this._calcCache = buildCalcCache(this._tree, this._questDoc.variables);
