@@ -48,12 +48,12 @@ See [context/file-manifest.md](context/file-manifest.md) for the full per-file r
 - **FHIRPath** — `window.fhirpath` (global, `lib/fhirpath.min.js`, vendored at `npm run vendor:fhirpath` / `vendor:fhirpath:r4` after a version bump — no CDN, CSP blocks arbitrary script hosts); used in `enableWhenExpression`, `calculatedExpression`, `evalConstraints`, and `buildVarEnv`
 - **StructureMap execution** — [`fhir-structuremap-js`](https://github.com/sergeymosyakov/fhir-structuremap-js), a real FML/StructureMap engine, vendored at `lib/fhir-structuremap-js.esm.js` (`npm run vendor:structuremap` to rebuild after a version bump — not loaded from a CDN, CSP's `script-src` only allows `'self'`); executes `sdc-questionnaire-targetStructureMap` for **Save ▾ → StructureMap Extract** and `sdc-questionnaire-sourceStructureMap` for **Answers ▾ → Fill via StructureMap** (fetches the source resource from the FHIR Base Server, then runs the map in-browser — no server-side `$populate` support required)
 - **CQL execution** — [`cql-execution`](https://github.com/cqframework/cql-execution) + [`cql-exec-fhir`](https://github.com/cqframework/cql-exec-fhir), vendored at `lib/cql-execution.esm.js` / `lib/cql-exec-fhir.esm.js` (`npm run vendor:cql` / `vendor:cql-fhir`, lazy dynamic-imported — no CDN); resolves `initialExpression` fields with `language: text/cql-identifier` against a `#id` contained `Library`'s embedded precompiled ELM (`cqf-library` extension) — self-contained/offline only, see `docs/FHIR-MAPPING.md` "CQL execution"
-- **Playwright** — E2E test suite; 152 spec files (Chromium); CI via GitHub Actions (`npx playwright test`)
+- **Playwright** — E2E test suite (Chromium); CI via GitHub Actions (`npx playwright test`)
 - **Dependency injection** — `dnd.js` receives callbacks from `BuilderPanel`; `_shared.js` is pure-function only (no injected state)
 - **Event-driven calc** — nodes/modals dispatch `CALC_RECALC_REQUESTED`; `BuilderPanel` listens and runs `evalCalcNodes` + dispatches `RESPONSE_CHANGED`
 - **Confirm dialog** — `ConfirmDialog.show(label)` in `js/ui/confirm-dialog.js` — no DI, standalone `Promise<boolean>`
 - **`ctx` object** — `{ renderTree, renderNode, tree, collapsed }` passed down to renderers and panels
-- **Vitest** — unit test suite for pure-function modules; **2571 tests** across 78 files; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit test suite for pure-function modules; unit tests (Vitest); CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://fhirbuilder.com/
 
 ---
@@ -114,7 +114,7 @@ rawFhir           // { value: null } — original FHIR JSON after import
 // FHIR-imported nodes also carry:
 _enableWhenText  // human-readable enableWhen label (e.g. "«Q» = Yes AND «Q2» = No")
 _renderStyle     // raw CSS string from FHIR _text.extension[rendering-style]
-_renderXhtml     // raw XHTML string from FHIR _text.extension[rendering-xhtml] (round-trip only, not rendered)
+_renderXhtml     // raw XHTML string from FHIR _text.extension[rendering-xhtml] (rendered via `DOMPurify.sanitize()` in preview; editable in the Appearance modal)
 _calculatedExpr  // FHIRPath string (SDC calculatedExpression)
 _initialExpr     // FHIRPath string (SDC initialExpression) — evaluated once on import + Re-init
 _readOnly        // boolean — FHIR item.readOnly
@@ -133,7 +133,7 @@ _sliderStep      // number — questionnaire-sliderStepValue ext; when set, inte
 _disabledDisplay // 'hidden'|'protected' — when not visible: 'hidden' removes item from DOM entirely, 'protected' shows grayed row (default); editable in Show When modal
 _choiceOrientation // 'vertical'|'horizontal' — questionnaire-choiceOrientation ext; controls layout of radio button groups (vertical: stacked column, horizontal: inline row); editable in Answer Type modal for radio items
 _displayCategory   // 'instructions'|'security'|'help' — questionnaire-displayCategory ext; applies colored bg + left border + icon (instructions/security) or collapsible help toggle (help) to group items in preview; R4: only exported for group items (suppressed on display items with validator warning); editable in Answer Type modal for group items
-_shortText         // string — sdc-questionnaire-shortText ext; abbreviated label for summary views; shown as a small blue badge in builder preview row (not in patient view); round-trip safe; not editable in builder UI
+_shortText         // string — sdc-questionnaire-shortText ext; abbreviated label for summary views; shown as a small blue badge in builder preview row (not in patient view); round-trip safe; editable in the Props modal (`js/ui/modals/item-sections/short-text.js`)
 ```
 
 ---
@@ -188,7 +188,7 @@ _shortText         // string — sdc-questionnaire-shortText ext; abbreviated la
 | `time` | `time` | ✅ native `<input type="time">` | — | Stored as `HH:MM:SS`; QR → `valueTime` |
 | `url` | `url` | ✅ | ✅ `new URL()` | Invalid format → ✘ even if optional |
 | `choice` | `select` / `radio` / `checklist` | ✅ | — | `questionnaire-itemControl: radio-button` → `radio`; `check-box` → `checklist` (multi-select checkboxes); `autocomplete` → searchable dropdown; `drop-down` preserved |
-| `open-choice` | `open-choice` | ✅ text + datalist | — | Free-text allowed; datalist populated from `answerOption[]` |
+| `open-choice` | `open-choice` | ✅ text input + custom dropdown | — | Free-text allowed; the dropdown (`oc-drop`) lists `answerOption[]` / value-set options |
 | `display` | `display` | ✅ label | — | No control, no pass/fail |
 | `group` | `group` | ✅ | — | |
 | `group` (no children) | `group` | ✅ `[Info]` | — | |

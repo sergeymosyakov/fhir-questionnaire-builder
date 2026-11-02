@@ -45,7 +45,7 @@ shell, no iframe, no framework.
 ```
 
 - **Full guide & API reference:** [WIDGET.md](WIDGET.md)
-- **Use via CDN (no install):** `https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.3/dist/questionnaire-widget.js` (+ `.css`)
+- **Use via CDN (no install):** `https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.17/dist/questionnaire-widget.js` (+ `.css`)
 - **Download the bundle:** [GitHub Releases](https://github.com/sergeymosyakov/fhir-questionnaire-builder/releases)
 - **Live demo:** [fhirbuilder.com/widget-demo.html](https://fhirbuilder.com/widget-demo.html) — three isolated widgets + a custom “Export FHIR R4” button
 
@@ -79,7 +79,7 @@ https://fhirbuilder.com/
 
 ### Tests
 ```powershell
-npm test             # unit tests — single run (Vitest, 2571 tests)
+npm test             # unit tests — single run (Vitest)
 npm run test:watch   # unit tests — watch mode
 npm run test:e2e     # e2e tests — Playwright/Chromium
 npm run test:e2e:ui  # e2e tests — Playwright UI mode
@@ -94,27 +94,20 @@ Coverage report: https://fhirbuilder.com/coverage/
 
 ## Sample Questionnaires
 
-All samples live in `sampledata/` and can be loaded via the **Questionnaires ▾** menu.
+All samples live in `sampledata/` and are listed in `sampledata/library.json`. Load them from the **Questionnaires ▾ → From Library…** menu (questionnaires, other formats such as REDCap CSV and StructureDefinition, and a few sample responses under **Answers ▾ → From Library…**). A selection:
 
-| File | Items (incl. groups) | What to look for |
-|---|---|---|
-| `example-bariatric.fhir.json` | 54 | Default on startup. BMI calc, radio, attachment, open-choice, `contained[]` ValueSets, constraints. |
-| `bariatric-extended.fhir.json` | 87 | Stress-test: all item types, 32 enableWhen, diabetes/hypertension/sleep apnea sub-sections. |
-| `ussg-fht.fhir.json` | 46 | Deep nesting (depth 5). Good for tree collapse/expand. |
-| `prowl-ss.fhir.json` | 16 | Flat structure (depth 1). Likert-scale radios. |
-| `phq-9.fhir.json` | 11 | Minimal — fast baseline test. |
-| `annual-health-check.fhir.json` | 21 | Full-feature reference: prefix, LOINC codes, sliders, ordinalValue, repeats, rendering-style, BMI calc, constraint. |
-| `reference-example.fhir.json` | 7 | `reference` item type with `questionnaire-referenceResource`. |
-| `sdc-variables-demo.fhir.json` | 5 | SDC questionnaire-level variables + `calculatedExpression`. |
-| `valueset-demo.fhir.json` | 5 | Contained ValueSets, local `#vs-id` refs, external URL, rendering-style. |
-| `slider-disabled-demo.fhir.json` | ~12 | Sliders, `disabledDisplay` (hidden/protected), ordinalValue radios. |
-| `patient-scenario-*.fhir.json` | — | Load + select preset + Re-init to test `initialExpression` / `enableWhenExpression` pipelines. |
-| `redcap-clinical-demo.fhir.json` | 44 | Converted from REDCap Data Dictionary. Includes branching logic, calc expressions (BMI via FHIRPath), slider, radio, checkbox fields. |
-| `sd-demo-patient.json` | — | A FHIR **StructureDefinition** (not a Questionnaire) — pick "Generate draft from StructureDefinition" in the format picker, or load it via Library, to see BackboneElement groups, profile slicing, and multi-type (`value[x]`) explosion. |
-| `r4b-demo.fhir.json` | ~10 | FHIR R4B — `answerConstraint`, native `disabledDisplay`; auto-detected as R4B on import. |
-| `r5-demo.fhir.json` | ~10 | FHIR R5 — `answerConstraint`, native `disabledDisplay`; exported with `meta.fhirVersion: 5.0.0`. |
-
----
+| File | What to look for |
+|---|---|
+| `example-bariatric.fhir.json` | Default on startup. BMI calc, radio, attachment, open-choice, `contained[]` ValueSets, constraints. |
+| `bariatric-extended.fhir.json` | Stress-test: all item types, many `enableWhen`, nested sub-sections. |
+| `phq-9.fhir.json` | Minimal scoring questionnaire — fast baseline test. |
+| `annual-health-check.fhir.json` | Full-feature reference: prefix, LOINC codes, sliders, ordinalValue, repeats, rendering-style, BMI calc, constraint. |
+| `valueset-demo.fhir.json` | Contained ValueSets, local `#vs-id` refs, external URL, rendering-style. |
+| `sdc-variables-demo.fhir.json` | SDC questionnaire-level variables + `calculatedExpression`. |
+| `patient-scenario-*.fhir.json` | Load + select a patient preset + Re-init to test `initialExpression` / `enableWhenExpression`. |
+| `redcap-clinical-demo.fhir.json` | Converted from a REDCap Data Dictionary, including branching logic and calculations. |
+| `sd-demo-patient.json` | A FHIR **StructureDefinition** (not a Questionnaire) — pick "Generate draft" to build a Questionnaire from it. |
+| `r4b-demo.fhir.json`, `r5-demo.fhir.json` | R4B / R5 documents. |
 
 ## Tech Stack
 
@@ -126,7 +119,7 @@ All samples live in `sampledata/` and can be loaded via the **Questionnaires ▾
 - **fhir-structuremap-js** — `lib/fhir-structuremap-js.esm.js`; executes FHIR StructureMap transforms for SDC populate/extract (author's own library)
 - **cql-execution / cql-exec-fhir** — `lib/cql-execution.esm.js`, `lib/cql-exec-fhir.esm.js`; CQL/ELM execution engine + FHIR data source, powers `initialExpression` CQL evaluation
 - **Supabase** — `lib/supabase.min.js`; auth + optional cloud sync backend
-- **Vitest** — 2571 unit tests across 78 files; CI via GitHub Actions (`npm test`)
+- **Vitest** — unit tests; CI via GitHub Actions (`npm test`)
 - **Playwright** — e2e tests (Chromium); CI + HTML report on GitHub Pages
 
 ---

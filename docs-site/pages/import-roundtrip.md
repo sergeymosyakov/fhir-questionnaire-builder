@@ -22,7 +22,7 @@ prompted first.
 
 The target FHIR version — **R4**, **R4B** or **R5** — is chosen from the version
 selector in the builder toolbar. On import the version is **auto-detected** from
-the questionnaire's `meta.fhirVersion`. STU3 JSON is also accepted and adapted to
+the marker the builder writes into its own exports, or from R5-only fields; otherwise R4 is assumed (FHIR resources do not carry their version in `meta`). STU3 JSON is also accepted and adapted to
 R4 on load, so older questionnaires still open.
 
 On export, the questionnaire is written for the selected target version (for

@@ -1,5 +1,7 @@
 # Widget Extraction Plan — Core module + Renderer widget
 
+> **Status: completed (historical).** All phases shipped; the current behaviour is described in [WIDGET.md](../WIDGET.md) and `docs/context/file-manifest.md`. Note: `config.readOnly` mentioned below was never implemented, and the backlog now lives in GitHub issues (there is no ROADMAP file).
+
 > **Goal:** Split the app into three layers **without duplication**, in-place (transform, not fork):
 > - **Core** (`js/core/*`) — single pluggable module, no DOM, instantiable, no global singletons. Imported by BOTH the builder app AND the renderer widget.
 > - **Renderer** (`js/renderer/*`) — the right side as `QuestionnaireRenderer(mountEl, {questionnaire, response, config})`; in-page, multi-instance, isolated, **no menus** (all behavior via config/API).

@@ -7,7 +7,7 @@ faithfully it preserves a questionnaire through import and export.
 
 The builder authors **FHIR `Questionnaire`** resources and can target **R4**,
 **R4B** or **R5**, selected from the toolbar version selector. On import the
-version is auto-detected from `meta.fhirVersion`, and STU3 input is adapted to R4.
+version is auto-detected from the builder's own marker or R5-only fields (otherwise R4), and STU3 input is adapted to R4.
 See [Import & round-trip](import-roundtrip.md).
 
 On top of base FHIR it supports a broad set of **SDC** (Structured Data Capture)

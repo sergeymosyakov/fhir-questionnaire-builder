@@ -9,7 +9,21 @@ you designed here, in-place, with no iframe.
 You can put **several independent widgets on one page** — each keeps its own
 answers, calculations and validation state, with no cross-talk.
 
+## Install
+
+Pick whichever fits your project; the full guide with every option is in
+[WIDGET.md](https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/WIDGET.md).
+
+- **CDN (no install):** load the bundle straight from jsDelivr, pinned to a release tag.
+- **Download:** the ready-made bundle is attached to every
+  [GitHub Release](https://github.com/sergeymosyakov/fhir-questionnaire-builder/releases).
+- **npm:** `npm install @sergeymosyakov/questionnaire-widget` for bundler projects.
+- **NuGet:** the `FhirQuestionnaireWidget` package for .NET web apps.
+
 ## Quick start
+
+The snippet below uses the files from a copy of this repository; with the CDN or npm bundle
+you import the widget from there instead.
 
 ```html
 <link rel="stylesheet" href="css/widget.css">
@@ -29,9 +43,9 @@ answers, calculations and validation state, with no cross-talk.
 </script>
 ```
 
-That renders the questionnaire as a patient-facing form. See
-in the repository for a complete three-widget example, or open the
-[live demo](https://fhirbuilder.com/widget-demo.html).
+That renders the questionnaire as a patient-facing form. Open the
+[live demo](https://fhirbuilder.com/widget-demo.html) (`widget-demo.html` in the repository)
+for a complete three-widget example.
 
 ## Modes
 

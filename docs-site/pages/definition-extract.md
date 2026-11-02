@@ -25,6 +25,19 @@ The engine can build common resources — `Patient`, `Condition`, `Observation`,
 `Encounter`, `Practitioner`, `Medication`, `MedicationRequest`, `Procedure`,
 `AllergyIntolerance` and other types with straightforward element paths.
 
+This is a basic implementation, not a full SDC definition-based extractor. Known limits:
+
+- The extension is only used as a marker: its own parameters (such as `fullUrl` or the conditional
+  request options) are ignored, and the resource type is taken from each item's definition path.
+- Fields are filled from simple values; a coded answer is not converted to the shape of
+  the target element, so check coded fields (for example `Condition.code`) in the result.
+- Answers nested under another answer are not read, and repeating groups that map to the same
+  list element are merged into one entry.
+- Ids and `fullUrl` values in the bundle are generated placeholders, and the output is not
+  validated against profiles.
+
+These limits are tracked in the project issues; use an SDC server for extraction that needs full conformance.
+
 ## Running it
 
 1. Fill in the form in the preview (or load a `QuestionnaireResponse`).

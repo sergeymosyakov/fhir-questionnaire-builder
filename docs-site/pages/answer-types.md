@@ -40,7 +40,8 @@ selected at the top of the Answer Type editor:
   (`answerValueSet`). External value sets are expanded through the configured
   terminology server, and the editor has a **Test expansion** action so you can
   check the URL resolves. A value set contained inside the questionnaire is used
-  directly.
+  directly when it lists its codes (with their system) one by one; contained value sets that are
+  defined only by a code system, by other value sets or by filters are not expanded.
 - **Expression** — generate the options at run time with FHIRPath
   (`answerExpression`), instead of a fixed list. See
   [FHIRPath in the builder](fhirpath.md).
