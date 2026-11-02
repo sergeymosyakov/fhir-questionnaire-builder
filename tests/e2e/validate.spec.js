@@ -51,16 +51,20 @@ async function addValidItem(page) {
   await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
 
   // Title the group
-  await group.getByTestId('node-title-display').first().click();
-  await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
+  await expect(async () => {
+    await group.getByTestId('node-title-display').first().click();
+    await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+  }).toPass();
   await group.getByTestId('node-title-input').first().fill('My Section');
   await group.getByTestId('node-title-input').first().blur();
 
   // Title the item
   const item = page.locator('[data-node-id="1.1"]');
   await expect(item.getByTestId('node-title-display')).toBeVisible();
-  await item.getByTestId('node-title-display').click();
-  await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
+  await expect(async () => {
+    await item.getByTestId('node-title-display').click();
+    await expect(item.getByTestId('node-title-input')).toBeVisible();
+  }).toPass();
   await item.getByTestId('node-title-input').fill('My Question');
   await item.getByTestId('node-title-input').blur();
 
@@ -134,8 +138,10 @@ test.describe('Validate modal — issues', () => {
     await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
 
     // Clear the group title to produce an empty-title warning.
-    await group.getByTestId('node-title-display').first().click();
-    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await group.getByTestId('node-title-display').first().click();
+      await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+    }).toPass();
     await group.getByTestId('node-title-input').first().fill('');
     await group.getByTestId('node-title-input').first().blur();
 
@@ -159,8 +165,10 @@ test.describe('Validate modal — issues', () => {
     await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
 
     // Clear the group title to produce a warning, so footer renders the "OK" button.
-    await group.getByTestId('node-title-display').first().click();
-    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await group.getByTestId('node-title-display').first().click();
+      await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+    }).toPass();
     await group.getByTestId('node-title-input').first().fill('');
     await group.getByTestId('node-title-input').first().blur();
 
@@ -216,15 +224,19 @@ test.describe('Validate modal — navigate to node', () => {
     await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
 
     // Give group a title; clear the item title so only item has a warning.
-    await group.getByTestId('node-title-display').first().click();
-    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await group.getByTestId('node-title-display').first().click();
+      await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+    }).toPass();
     await group.getByTestId('node-title-input').first().fill('My Section');
     await group.getByTestId('node-title-input').first().blur();
 
     const item = page.locator('[data-node-id="1.1"]');
     await expect(item.getByTestId('node-title-display')).toBeVisible();
-    await item.getByTestId('node-title-display').click();
-    await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await item.getByTestId('node-title-display').click();
+      await expect(item.getByTestId('node-title-input')).toBeVisible();
+    }).toPass();
     await item.getByTestId('node-title-input').fill('');
     await item.getByTestId('node-title-input').blur();
 
@@ -252,8 +264,10 @@ test.describe('Validate modal — export mode', () => {
 
     // Clear the group title so validation has issues.
     const group = page.locator('[data-node-id="1"]');
-    await group.getByTestId('node-title-display').first().click();
-    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await group.getByTestId('node-title-display').first().click();
+      await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+    }).toPass();
     await group.getByTestId('node-title-input').first().fill('');
     await group.getByTestId('node-title-input').first().blur();
     // Wait for UI to reflect cleared title before clicking export.
@@ -281,8 +295,10 @@ test.describe('Validate modal — export mode', () => {
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     const group = page.locator('[data-node-id="1"]');
-    await group.getByTestId('node-title-display').first().click();
-    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await group.getByTestId('node-title-display').first().click();
+      await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+    }).toPass();
     await group.getByTestId('node-title-input').first().fill('');
     await group.getByTestId('node-title-input').first().blur();
 
@@ -303,8 +319,10 @@ test.describe('Validate modal — export mode', () => {
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     const group = page.locator('[data-node-id="1"]');
-    await group.getByTestId('node-title-display').first().click();
-    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await group.getByTestId('node-title-display').first().click();
+      await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+    }).toPass();
     await group.getByTestId('node-title-input').first().fill('');
     await group.getByTestId('node-title-input').first().blur();
 

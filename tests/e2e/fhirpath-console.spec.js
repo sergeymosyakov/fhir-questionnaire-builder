@@ -15,6 +15,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const ANNUAL = path.resolve('sampledata/annual-health-check.fhir.json');
 
@@ -30,8 +31,7 @@ async function loadAnnual(page) {
 }
 
 async function openConsole(page) {
-  await page.getByTestId('tools-btn').click();
-  await page.getByTestId('fhirpath-tester-item').click();
+  await openDropdownItem(page, 'tools-btn', 'fhirpath-tester-item');
   await expect(page.getByTestId('fhirpath-console')).toBeVisible();
 }
 

@@ -106,8 +106,10 @@ test.describe('Simple mode — functional integrity', () => {
 
     const item = page.locator('[data-node-id="1.1"]');
     await expect(item.getByTestId('node-title-display')).toBeVisible();
-    await item.getByTestId('node-title-display').click();
-    await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await item.getByTestId('node-title-display').click();
+      await expect(item.getByTestId('node-title-input')).toBeVisible();
+    }).toPass();
     await item.getByTestId('node-title-input').fill('Simple Test');
     await item.getByTestId('node-title-input').blur();
     await expect(item.getByTestId('node-title-display')).toContainText('Simple Test');
@@ -130,8 +132,10 @@ test.describe('Simple mode — functional integrity', () => {
     // Set a title in Advanced
     const item = page.locator(`[data-node-id="${itemId}"]`);
     await expect(item.getByTestId('node-title-display')).toBeVisible();
-    await item.getByTestId('node-title-display').click();
-    await expect(item.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await item.getByTestId('node-title-display').click();
+      await expect(item.getByTestId('node-title-input')).toBeVisible();
+    }).toPass();
     await item.getByTestId('node-title-input').fill('Preserved Title');
     await item.getByTestId('node-title-input').blur();
 

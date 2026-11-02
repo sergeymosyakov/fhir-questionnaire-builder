@@ -29,6 +29,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/short-text.fhir.json');
 
@@ -90,8 +91,7 @@ test.describe('short-text — patient view', () => {
 test.describe('short-text — export round-trip', () => {
   test('sdc-questionnaire-shortText extension preserved in exported FHIR JSON', async ({ page }) => {
     await loadFixture(page);
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-quest-item"]').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -112,8 +112,7 @@ test.describe('short-text — export round-trip', () => {
 
   test('item without shortText has no shortText extension in export', async ({ page }) => {
     await loadFixture(page);
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.locator('[data-testid="export-quest-item"]').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),

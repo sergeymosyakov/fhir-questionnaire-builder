@@ -30,6 +30,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const PHQ9 = path.resolve('sampledata/phq-9.fhir.json');
 
@@ -69,8 +70,7 @@ test.describe('translation — modal', () => {
 
   test('modal has a language select and translate button', async ({ page }) => {
     await loadPHQ9(page);
-    await page.getByTestId('tools-btn').click();
-    await page.getByTestId('translate-item').click();
+    await openDropdownItem(page, 'tools-btn', 'translate-item');
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible({ timeout: 5_000 });
     await expect(page.getByTestId('translate-lang-select')).toBeVisible();
     await expect(page.getByTestId('translate-btn')).toBeVisible();
@@ -80,8 +80,7 @@ test.describe('translation — modal', () => {
 
   test('selecting a language enables the Translate button', async ({ page }) => {
     await loadPHQ9(page);
-    await page.getByTestId('tools-btn').click();
-    await page.getByTestId('translate-item').click();
+    await openDropdownItem(page, 'tools-btn', 'translate-item');
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible({ timeout: 5_000 });
 
     // Pick French from the language select
@@ -92,8 +91,7 @@ test.describe('translation — modal', () => {
 
   test('modal closes on Escape key', async ({ page }) => {
     await loadPHQ9(page);
-    await page.getByTestId('tools-btn').click();
-    await page.getByTestId('translate-item').click();
+    await openDropdownItem(page, 'tools-btn', 'translate-item');
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible({ timeout: 5_000 });
     await page.keyboard.press('Escape');
     await expect(page.locator('[data-testid="translateModal"]')).not.toBeVisible();

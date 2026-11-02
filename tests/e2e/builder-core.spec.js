@@ -109,15 +109,19 @@ test.describe('FHIR export', () => {
     const itemId  = await addItemToGroup(page, groupId);
 
     const group = page.locator(`[data-node-id="${groupId}"]`);
-    await group.getByTestId('node-title-display').first().click();
-    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await group.getByTestId('node-title-display').first().click();
+      await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+    }).toPass();
     await group.getByTestId('node-title-input').first().fill('My Group');
     await group.getByTestId('node-title-input').first().blur();
 
     const node = page.locator(`[data-node-id="${itemId}"]`);
     await expect(node.getByTestId('node-title-display')).toBeVisible();
-    await node.getByTestId('node-title-display').click();
-    await expect(node.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await node.getByTestId('node-title-display').click();
+      await expect(node.getByTestId('node-title-input')).toBeVisible();
+    }).toPass();
     await node.getByTestId('node-title-input').fill('My Question');
     await node.getByTestId('node-title-input').blur();
 
@@ -142,8 +146,10 @@ test.describe('Builder → preview: group title edit', () => {
     const groupId = await addRootGroup(page);
 
     const group = page.locator(`[data-node-id="${groupId}"]`);
-    await group.getByTestId('node-title-display').first().click();
-    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await group.getByTestId('node-title-display').first().click();
+      await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+    }).toPass();
     await group.getByTestId('node-title-input').first().fill('My Section');
     await group.getByTestId('node-title-input').first().blur();
 
@@ -315,8 +321,10 @@ test.describe('Preview answers → state', () => {
     await previewInput.fill('hello world');
 
     const group = page.locator(`[data-node-id="${groupId}"]`);
-    await group.getByTestId('node-title-display').first().click();
-    await expect(group.getByTestId('node-title-input').first()).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await group.getByTestId('node-title-display').first().click();
+      await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+    }).toPass();
     await group.getByTestId('node-title-input').first().fill('Updated Title');
     await group.getByTestId('node-title-input').first().blur();
 
@@ -354,9 +362,11 @@ test.describe('Builder creates items → preview reacts', () => {
 
     const node = page.locator(`[data-node-id="${itemId}"]`);
     await expect(node.getByTestId('node-title-display')).toBeVisible();
-    await node.getByTestId('node-title-display').click();
     const titleInput = node.getByTestId('node-title-input');
-    await expect(titleInput).toBeVisible();
+    await expect(async () => {
+      await node.getByTestId('node-title-display').click();
+      await expect(titleInput).toBeVisible();
+    }).toPass();
     await titleInput.fill('My Test Question');
     await titleInput.blur();
 

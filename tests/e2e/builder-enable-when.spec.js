@@ -45,8 +45,10 @@ test.describe('enableWhen (standard)', () => {
     // Title the trigger so it appears by name in the question selector
     const triggerNode = page.locator('[data-node-id="1.1"]');
     await expect(triggerNode.getByTestId('node-title-display')).toBeVisible();
-    await triggerNode.getByTestId('node-title-display').click();
-    await expect(triggerNode.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await triggerNode.getByTestId('node-title-display').click();
+      await expect(triggerNode.getByTestId('node-title-input')).toBeVisible();
+    }).toPass();
     await triggerNode.getByTestId('node-title-input').fill('Trigger');
     await triggerNode.getByTestId('node-title-input').blur();
 
@@ -101,8 +103,10 @@ test.describe('enableWhen (standard)', () => {
     await expect(page.locator('[data-node-id="1.1"]').getByTestId('action-type')).toBeVisible();
     const triggerNode = page.locator('[data-node-id="1.1"]');
     await expect(triggerNode.getByTestId('node-title-display')).toBeVisible();
-    await triggerNode.getByTestId('node-title-display').click();
-    await expect(triggerNode.getByTestId('node-title-input')).toBeVisible({ timeout: 10_000 });
+    await expect(async () => {
+      await triggerNode.getByTestId('node-title-display').click();
+      await expect(triggerNode.getByTestId('node-title-input')).toBeVisible();
+    }).toPass();
     await triggerNode.getByTestId('node-title-input').fill('Trigger');
     await triggerNode.getByTestId('node-title-input').blur();
 

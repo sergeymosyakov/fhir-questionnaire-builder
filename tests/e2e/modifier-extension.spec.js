@@ -28,6 +28,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/modifier-extension.fhir.json');
 const MODIFIER_URL =
@@ -48,8 +49,7 @@ async function loadFixture(page) {
 }
 
 async function exportFHIR(page) {
-  await page.locator('[data-testid="export-btn"]').click();
-  await page.locator('[data-testid="export-quest-item"]').click();
+  await openDropdownItem(page, 'export-btn', 'export-quest-item');
   await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
   await page.getByTestId('saveFormatModalApply').click();
   // The questionnaire carries a modifierExtension warning, so the validate modal
@@ -67,8 +67,7 @@ async function exportFHIR(page) {
 }
 
 async function openValidateModal(page) {
-  await page.getByTestId('tools-btn').click();
-  await page.getByTestId('validate-item').click();
+  await openDropdownItem(page, 'tools-btn', 'validate-item');
   await expect(page.locator('[data-testid="validateModal"]')).toBeVisible();
 }
 

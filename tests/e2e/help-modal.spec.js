@@ -13,6 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 async function freshPage(page) {
   await page.addInitScript(() => localStorage.clear());
@@ -32,15 +33,13 @@ test.describe('help modal — open / close', () => {
 
   test('clicking ? button opens the help modal', async ({ page }) => {
     await freshPage(page);
-    await page.getByTestId('more-btn').click();
-    await page.getByTestId('help-btn').click();
+    await openDropdownItem(page, 'more-btn', 'help-btn');
     await expect(page.locator('[data-testid="helpModal"]')).toBeVisible();
   });
 
   test('× button closes the help modal', async ({ page }) => {
     await freshPage(page);
-    await page.getByTestId('more-btn').click();
-    await page.getByTestId('help-btn').click();
+    await openDropdownItem(page, 'more-btn', 'help-btn');
     await expect(page.locator('[data-testid="helpModal"]')).toBeVisible();
     await page.getByTestId('helpModalClose').click();
     await expect(page.locator('[data-testid="helpModal"]')).not.toBeVisible();
@@ -48,8 +47,7 @@ test.describe('help modal — open / close', () => {
 
   test('Close button closes the help modal', async ({ page }) => {
     await freshPage(page);
-    await page.getByTestId('more-btn').click();
-    await page.getByTestId('help-btn').click();
+    await openDropdownItem(page, 'more-btn', 'help-btn');
     await expect(page.locator('[data-testid="helpModal"]')).toBeVisible();
     await page.getByTestId('helpModalCancel').click();
     await expect(page.locator('[data-testid="helpModal"]')).not.toBeVisible();
@@ -57,8 +55,7 @@ test.describe('help modal — open / close', () => {
 
   test('Escape key closes the help modal', async ({ page }) => {
     await freshPage(page);
-    await page.getByTestId('more-btn').click();
-    await page.getByTestId('help-btn').click();
+    await openDropdownItem(page, 'more-btn', 'help-btn');
     await expect(page.locator('[data-testid="helpModal"]')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.locator('[data-testid="helpModal"]')).not.toBeVisible();
@@ -66,8 +63,7 @@ test.describe('help modal — open / close', () => {
 
   test('clicking backdrop closes the help modal', async ({ page }) => {
     await freshPage(page);
-    await page.getByTestId('more-btn').click();
-    await page.getByTestId('help-btn').click();
+    await openDropdownItem(page, 'more-btn', 'help-btn');
     await expect(page.locator('[data-testid="helpModal"]')).toBeVisible();
     await page.locator('[data-testid="helpModal"]').click({ position: { x: 5, y: 5 } });
     await expect(page.locator('[data-testid="helpModal"]')).not.toBeVisible();
@@ -79,15 +75,13 @@ test.describe('help modal — open / close', () => {
 test.describe('help modal — iframe content', () => {
   test('iframe with help.html is present inside the modal', async ({ page }) => {
     await freshPage(page);
-    await page.getByTestId('more-btn').click();
-    await page.getByTestId('help-btn').click();
+    await openDropdownItem(page, 'more-btn', 'help-btn');
     await expect(page.locator('[data-testid="helpModalBody"] [data-testid="help-iframe"]')).toBeVisible();
   });
 
   test('iframe loads the help page (title visible inside frame)', async ({ page }) => {
     await freshPage(page);
-    await page.getByTestId('more-btn').click();
-    await page.getByTestId('help-btn').click();
+    await openDropdownItem(page, 'more-btn', 'help-btn');
     const frame = page.frameLocator('[data-testid="helpModalBody"] [data-testid="help-iframe"]');
     await expect(frame.locator('h1')).toBeVisible({ timeout: 8_000 });
     await expect(frame.locator('h1')).toContainText('FHIR Field Reference');
@@ -95,8 +89,7 @@ test.describe('help modal — iframe content', () => {
 
   test('help page search input is functional', async ({ page }) => {
     await freshPage(page);
-    await page.getByTestId('more-btn').click();
-    await page.getByTestId('help-btn').click();
+    await openDropdownItem(page, 'more-btn', 'help-btn');
     const frame = page.frameLocator('[data-testid="helpModalBody"] [data-testid="help-iframe"]');
     await frame.getByTestId('help-search').fill('linkId');
     await expect(frame.getByTestId('help-table').locator('tbody tr:not(.help-cat-sep)')).toHaveCount(1);
@@ -104,8 +97,7 @@ test.describe('help modal — iframe content', () => {
 
   test('help page table has rows for known fields', async ({ page }) => {
     await freshPage(page);
-    await page.getByTestId('more-btn').click();
-    await page.getByTestId('help-btn').click();
+    await openDropdownItem(page, 'more-btn', 'help-btn');
     const frame = page.frameLocator('[data-testid="helpModalBody"] [data-testid="help-iframe"]');
     await expect(frame.getByTestId('help-table').locator('tbody')).toBeVisible({ timeout: 8_000 });
     const rows = frame.getByTestId('help-table').locator('tbody tr:not(.help-cat-sep)');
@@ -115,8 +107,7 @@ test.describe('help modal — iframe content', () => {
 
   test('"Back to Builder" link is hidden when embedded in the modal', async ({ page }) => {
     await freshPage(page);
-    await page.getByTestId('more-btn').click();
-    await page.getByTestId('help-btn').click();
+    await openDropdownItem(page, 'more-btn', 'help-btn');
     const frame = page.frameLocator('[data-testid="helpModalBody"] [data-testid="help-iframe"]');
     // Wait for the embedded page to render, then confirm the back link is hidden.
     await expect(frame.locator('h1')).toBeVisible({ timeout: 8_000 });

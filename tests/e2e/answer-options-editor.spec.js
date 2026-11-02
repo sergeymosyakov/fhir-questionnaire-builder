@@ -27,6 +27,7 @@ import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import path from 'node:path';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/answer-options-editor.fhir.json');
 
@@ -174,8 +175,7 @@ test.describe('answer options editor — apply/cancel', () => {
 test.describe('answer options editor — export round-trip', () => {
   test('answerOption[].valueCoding preserved in exported FHIR JSON', async ({ page }) => {
     await freshLoad(page);
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -192,8 +192,7 @@ test.describe('answer options editor — export round-trip', () => {
 
   test('ordinalValue extension round-trips correctly', async ({ page }) => {
     await freshLoad(page);
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -210,8 +209,7 @@ test.describe('answer options editor — export round-trip', () => {
 
   test('questionnaire-optionPrefix extension round-trips correctly', async ({ page }) => {
     await freshLoad(page);
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -235,8 +233,7 @@ test.describe('answer options editor — export round-trip', () => {
     await page.getByTestId('opt-score-3').fill('4');
     await applyModal(page);
 
-    await page.locator('[data-testid="export-btn"]').click();
-    await page.getByTestId('export-quest-item').click();
+    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.locator('[data-testid="saveFormatModal"]')).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
