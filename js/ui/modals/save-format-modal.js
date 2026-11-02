@@ -99,12 +99,17 @@ class SaveFormatModal extends Modal {
     done?.();
   }
 
-  // Runs the format's cleanup hook once and detaches the load/clear listeners.
-  _runPendingCancel() {
+  _dropPendingCancel() {
     this._abortCancel?.abort();
     this._abortCancel = null;
-    this._pendingCancel?.();
     this._pendingCancel = null;
+  }
+
+  // Runs the format's cleanup hook once and detaches the load/clear listeners.
+  _runPendingCancel() {
+    const cancel = this._pendingCancel;
+    this._dropPendingCancel();
+    cancel?.();
   }
 
   // ── Generic export handler ─────────────────────────────────────────────────
@@ -145,6 +150,7 @@ class SaveFormatModal extends Modal {
               URL.revokeObjectURL(url);
             }
             document.dispatchEvent(new CustomEvent(AppEvents.FILE_NAME_CHANGED, { detail: { name: trimmed } }));
+            this._dropPendingCancel(); // exported: onCancel is for dismissal only
             this._finish();
           });
         },
