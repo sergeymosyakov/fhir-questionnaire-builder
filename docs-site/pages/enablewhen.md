@@ -50,7 +50,7 @@ answers satisfies it (per the FHIR R4 rule).
 ## When not visible
 
 The **When not visible** selector controls what happens to an item whose
-condition is not met. It maps to the SDC `disabledDisplay` extension:
+condition is not met. It maps to the `disabledDisplay` field (native in FHIR R5; on R4/R4B the builder stores it in its own extension):
 
 - **Show grayed (protected)** — the item stays on screen, greyed out and
   read-only.

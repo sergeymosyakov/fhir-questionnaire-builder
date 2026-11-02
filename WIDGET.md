@@ -37,9 +37,9 @@ Load the widget straight from [jsDelivr](https://www.jsdelivr.com/), pinned to a
 release tag — nothing to download, no npm, no token:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.3/dist/questionnaire-widget.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.17/dist/questionnaire-widget.css">
 <script type="module">
-  import { QuestionnaireRenderer } from 'https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.3/dist/questionnaire-widget.js';
+  import { QuestionnaireRenderer } from 'https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.17/dist/questionnaire-widget.js';
   // …
 </script>
 ```
@@ -47,10 +47,10 @@ release tag — nothing to download, no npm, no token:
 Or the classic global build (`window.FhirQuestionnaireWidget`):
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.3/dist/questionnaire-widget.global.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-v1.0.17/dist/questionnaire-widget.global.js"></script>
 ```
 
-> Pin to a specific `@widget-v1.0.x` tag for stability; jsDelivr caches immutably.
+> Pin to a specific release tag (the latest is `widget-v1.0.17`; see the [Releases](https://github.com/sergeymosyakov/fhir-questionnaire-builder/releases) page) for stability; jsDelivr caches immutably.
 
 ### Download the release bundle
 
@@ -76,7 +76,7 @@ Verify the download with the `SHA256SUMS.txt` published alongside the assets.
 
 ### npm (optional, for bundler projects)
 
-If a maintainer has published to npm, bundler users (React / Vite / webpack) can:
+Published to npm with each widget release (the GitHub Release is the primary channel), so bundler users (React / Vite / webpack) can:
 
 ```bash
 npm install @sergeymosyakov/questionnaire-widget

@@ -375,6 +375,10 @@ This allows scoring questionnaires (e.g. PHQ-9) to produce a fully scored QR wit
 
 For `open-choice` items (R4: "a Coding drawn from a list of possible answers or a free-text entry in a string") the answer kind follows what the respondent did: an option picked from the list is exported as `valueCoding` (`system`, `code`, `display`), and text typed into the field is exported as `valueString` — even when it equals an option's label. The preview marks a picked value with ✓ and shows a soft hint when typed text matches an option. Importing a response keeps the kind (`valueCoding` → picked option, `valueString` → typed text). A default (`item.initial`) follows the same rule: `valueCoding` is a picked option, `valueString` is text.
 
+Other answer encodings: a **checklist** (multi-select) is exported as one `answer` per selected code; a comma inside an option code is stored internally as U+001F so it is never split (`js/fhir/checklist-codec.js`). A **quantity** answer is exported as `valueQuantity {value, unit, system, code}` where `system` is UCUM for the built-in unit list (or the unit option's own system) and `code` is only written together with `system` (invariant qty-3). A non-coding `answerOption` keeps its own `value[x]` type. A cleared quantity or reference is omitted. A repeating group is exported as one QR item per instance, and a question with child items nests them under `answer.item`.
+
+Observation extraction (**Save ▾ → Observations**, client-side) emits one `Observation` per answer of every flagged, coded question, and one per **instance** of a repeating group; see the [SDC Observation-based extraction](https://hl7.org/fhir/uv/sdc/extraction.html) rules. Code-level flags, `observation-extract-category` and component/hasMember relationships are not supported.
+
 ---
 
 ## QuestionnaireResponse
@@ -398,18 +402,34 @@ For `open-choice` items (R4: "a Coding drawn from a list of possible answers or 
 
 ---
 
+## Known deviations from the specification
+
+A review against the published FHIR R4/R5 and SDC 4.0 packages (November 2026) found the following differences between this builder and the specification. They are tracked as issues; until they are fixed, treat the affected output as not fully interoperable.
+
+| Area | Deviation | Tracking |
+|---|---|---|
+| Extension addresses | `hidden`, `entryFormat` and `variable` are **core** extensions (`http://hl7.org/fhir/StructureDefinition/...`) but are exported with SDC addresses (older SDC addresses are still read); the answer-option media extension is written as `sdc-questionnaire-answerMedia` (the real one is `sdc-questionnaire-itemAnswerMedia`); `columnCount` is written as `valueInteger` (spec: `positiveInt`); answer/candidate expression language and the Observation-extract relationship code are not preserved | #232 |
+| Retired / unknown extensions | In the specification packages the SDC extension `sdc-questionnaire-preferredTerminologyServer` (use the generic `http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer`) and the core extensions `questionnaire-constraint` (use `targetConstraint`), `regex`, `questionnaire-supportLink`, `questionnaire-referenceFilter` and `ordinalValue` (use `itemWeight`) are **retired**; `sdc-questionnaire-definitionExtractContext`, `sdc-questionnaire-itemContext` and the `sdc-observation` profile used by Observation export do not exist under those names (the retired SDC extraction context was replaced by `definitionExtract`; the population one is `itemPopulationContext`) | #232 |
+| Questionnaire rules | Empty group exported as an empty `item` list; missing `text` replaced by the linkId; numeric `enableWhen` equality compares as text; `answerCoding` conditions drop the code system; validator does not check operator/answer presence; `maxLength` lost for open-choice shown as radio/check-box; `initial.valueAttachment` dropped; only the first `initialSelected` is kept | #233 |
+| Responses & extraction | Invalid integer/decimal answer exported as 0; empty `questionnaire` / `unit` strings; `$populate` does not send `local`; definition-extract output shapes (single coded fields as lists, invented ids, ignored extension parameters, no nested answers, repeated groups merged); StructureMap bundle wrapped in a bundle; per-code Observation flags and category not supported; client engine binds neither `%questionnaire` nor launch-context variables | #234 |
+| Versions & terminology | R5 export carrying the builder's version marker loses `open-choice` on re-import; `$expand` request uses `_count` (spec: `count`), ignores nested `contains`, abstract entries and paging; contained ValueSets only expand `include.concept`; terminology server not chosen per target version | #235 |
+
+### SDC extensions not supported (round-trip pass-through only where noted)
+
+`observationLinkPeriod`, `definitionExtractValue`, `templateExtract`, `templateExtractBundle`, `templateExtractContext`, `templateExtractValue`, `extractAllocateId`, `observationExtractEntry`, `observation-extract-category`, `unitOpen`, `unitSupplementalSystem`, `minQuantity`, `maxQuantity`, `optionalDisplay`, `answerOptionsToggleExpression`, `entryMode`, `keyboard`, `behave`, `render`, `modular`, `assembleContext`, `assembledFrom`, `assembleDefinitionRoot`, `adapt`, `search`, `targetConstraint`, and the SDC population/extraction profiles. Unknown extensions are preserved on import and export unchanged. `definitionExtract` is read only as a marker (its `definition` and request parameters are ignored); `launchContext` is edited and exported but **not bound as variables by the client-side engine** (use an SDC server for population/extraction that depends on it).
+
 ## FHIR Version Support
 
 | Version | Status |
 |---|---|
 | R4 | ✅ Fully supported |
-| R4B | ✅ Fully supported — schema overlaps R4; R5-only fields are downgraded to builder-private extensions on export |
+| R4B | ✅ Supported — the Questionnaire schema is the same as R4 (R4B adds no new Questionnaire fields); R5-only fields are downgraded to builder-private extensions on export |
 | R5 | ✅ Fully supported — `disabledDisplay` and `answerConstraint` are R5 native fields; `choice`/`open-choice` exported as `coding`. The R5-only root metadata fields `versionAlgorithm[x]` and `copyrightLabel` are editable in Properties → Advanced and downgraded to their official `artifact-*` extensions on R4/R4B export. |
 | STU3 | ✅ Import shim — automatically normalised to R4 on load via `js/fhir/stu3-shim.js`; see table below |
 
 ### STU3 → R4 Normalisation (`js/fhir/stu3-shim.js`)
 
-Applied automatically in `importFHIR()` before the R4 parser runs. Detection: `meta.fhirVersion` starts with `3.`/`1.`, or presence of STU3-only fields anywhere in the item tree.
+Applied automatically in `importFHIR()` before the R4 parser runs. Detection: a `fhirVersion` or `meta.fhirVersion` value starting with `3.`/`1.` (neither is a standard element of a FHIR resource; both are honoured as a convenience for files that add them), or the presence of STU3-only fields anywhere in the item tree. Files that carry the builder's `builder-target-version` extension are never treated as STU3.
 
 | STU3 field | R4 equivalent | Notes |
 |---|---|---|
@@ -441,16 +461,16 @@ The builder runs `validateTree()` (`js/fhir/validate.js`) automatically on impor
 
 ### FHIR R4 formal invariants
 
-All R4 `Questionnaire` invariants (que-0 through que-13) are enforced by the local validator and/or suppressed silently on export:
+R4 `Questionnaire` invariants are handled by the local validator and/or suppressed on export, as shown below (✅ / ⚠️ = checked; ❌ = not checked; "—" = nothing to do). que-1 (empty group) and que-4 are **not** checked by the validator; the gaps are tracked in #233:
 
 | Invariant | Rule | Validator | Export |
 |---|---|---|---|
 | que-0 | `Questionnaire.name` must match `[A-Z][A-Za-z0-9_]{0,254}` | ⚠️ warning | — |
-| que-1 | Group items must have nested items | ⚠️ warning | — |
+| que-1 | Group items must have nested items; display items cannot have nested items | ⚠️ warning only for help text on a display item; an **empty group is not reported and is exported with an empty `item` list** (#233) | — |
 | que-2 | All `linkId` values must be unique | ✅ error | Checked in `js/fhir/validators/local.js`; duplicate linkId surfaces as an error in the Validate modal |
 | que-3 | `display` items cannot have `item.code[]` | ⚠️ warning | ✅ suppressed |
-| que-4 | `answerOption[]` and `answerValueSet` are mutually exclusive | ❌ error | ✅ `answerOption[]` path skips when VS set |
-| que-5 | `answerValueSet` only valid on choice/open-choice/decimal/integer/date/dateTime/time/string/quantity | ❌ error | ✅ suppressed on disallowed types |
+| que-4 | `answerOption[]` and `answerValueSet` are mutually exclusive | ❌ not checked (cannot occur on export) | ✅ `answerOption[]` path skips when VS set |
+| que-5 | `answerValueSet` only valid on choice/open-choice/decimal/integer/date/dateTime/time/string/quantity | ✅ error | ✅ suppressed on disallowed types (the builder's `text` type is allowed through although FHIR que-5 does not list it; #233) |
 | que-6 | `display` items cannot have `required` or `repeats` | ⚠️ warning | ✅ suppressed |
 | que-7 | `enableWhen.operator = 'exists'` must use `answerBoolean` | ✅ error | Evaluated in `js/eval.js`; validator warns in `js/fhir/validate.js` when `answerBoolean` is missing |
 | que-8 | `display`/`group` items cannot have `initial[]` | ⚠️ (via que-11) | ✅ suppressed |
@@ -475,7 +495,7 @@ All R4 `Questionnaire` invariants (que-0 through que-13) are enforced by the loc
 | `sliderStep` is a decimal | warning | R4 only allows `valueInteger`; step rounded on export |
 | `displayCategory` on a `display` item | warning | R4 only allows on group items; suppressed on export |
 
-All rules are tested in `tests/validate.test.js` (2571 unit tests total across all test files).
+All rules are tested in `tests/validate.test.js` (see the unit-test suite).
 
 ---
 

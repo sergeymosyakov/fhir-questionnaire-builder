@@ -17,11 +17,12 @@ answers with normal FHIRPath, for example:
 
 Alongside `%resource`, expressions can use:
 
-- **`%questionnaire`** — the `Questionnaire` itself (used, for example, in
-  constraint expressions).
 - **`%varName`** — any questionnaire-level variable you have defined (see below).
-- **Launch-context variables** — `%patient`, `%user`, `%encounter`, etc. when
-  declared as launch contexts.
+
+The builder's own engine does **not** provide `%questionnaire` or launch-context variables
+such as `%patient`, `%user` or `%encounter`. You can still declare launch contexts so that an
+SDC server can use them, and the patient presets in the top bar set the `%age`, `%gender` and similar
+variables for testing.
 
 ## Questionnaire variables
 
@@ -52,7 +53,7 @@ The same engine powers several features, each backed by a different FHIR field:
 | Initial value | `initialExpression` (SDC) | Seed an answer when the form loads |
 | Visibility | `enableWhenExpression` (SDC) | Show/hide an item — see [enableWhen & visibility](enablewhen.md) |
 | Dynamic options | `answerExpression` (SDC) | Produce choice options at render time |
-| Validation | `questionnaire-constraint` expression | Must return `true` to pass — uses `%resource` and `%questionnaire` |
+| Validation | `questionnaire-constraint` expression | Must return `true` to pass — uses `%resource` (`%questionnaire` is not available in the builder's own engine) |
 
 ## Build expressions visually
 

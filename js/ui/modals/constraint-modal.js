@@ -151,7 +151,7 @@ class ConstraintModal extends Modal {
       const exprWrap = document.createElement('div');
       exprWrap.className = 'constraint-expr-wrap';
       exprWrap.append(exprInp, explainBtn);
-      card.appendChild(_lbl('Expression:', exprWrap, { title: 'Constraint FHIRPath expression', body: 'Must evaluate to true to pass validation. Use %resource and %questionnaire to access answers.', fhir: 'questionnaire-constraint.extension[expression].valueString', spec: 'R4' }));
+      card.appendChild(_lbl('Expression:', exprWrap, { title: 'Constraint FHIRPath expression', body: 'Must evaluate to true to pass validation. Use %resource to access answers.', fhir: 'questionnaire-constraint.extension[expression].valueString', spec: 'R4' }));
 
       container.appendChild(card);
     });

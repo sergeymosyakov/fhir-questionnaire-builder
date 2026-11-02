@@ -33,7 +33,7 @@ invent a URL or cardinality.
 
 ## 6. Builder UI
 - Add the editing control to the correct modal section (e.g. an
-  `AnswerTypeSection` in `js/ui/answer-type/sections.js`, or a states section).
+  `AnswerTypeSection` in `js/ui/modals/answer-type/sections/`, or a states section in `js/ui/modals/states-sections/`).
 - Mandatory FHIR tooltip: set `data-tip-title`, `data-tip-body`, `data-tip-fhir`
   (exact FHIR path), `data-tip-spec` (`R4`, `SDC` or `R5`, optional ` · qualifier`) on the control.
 - Use `createCustomSelect` for dropdowns; never a native `<select>`.

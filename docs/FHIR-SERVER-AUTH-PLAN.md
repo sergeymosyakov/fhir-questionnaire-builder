@@ -1,6 +1,6 @@
 # FHIR Server Auth Plan — builder app login/token lifecycle
 
-> **Status: implemented for `FHIR_BASE` + `SDC_SERVER`** (issue #63) — see
+> **Status: implemented for `FHIR_BASE` + `SDC_SERVER` (living design document; re-check the terminology/validator gaps against the code before relying on it)** (issue #63) — see
 > "Production flow" below for what's done and the known scope cuts
 > (`TERMINOLOGY_SERVER`/`VALIDATORS` not yet wired). An **interim debug
 > tool** (`dev-fhir-login.html`, `client_credentials`, one shared token)
