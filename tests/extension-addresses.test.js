@@ -104,6 +104,14 @@ describe('review follow-ups', () => {
     expect(q.item[0].extension).toEqual([{ url: FHIR.preferredTerminologyServer, valueUrl: 'https://tx.example.org' }]);
   });
 
+  it('applyPatch ignores prototype-polluting keys', () => {
+    const node = { applyPatch: BaseNode.prototype.applyPatch };
+    node.applyPatch(JSON.parse('{"__proto__":{"evil":1},"constructor":"x","title":"T"}'));
+    expect(node.title).toBe('T');
+    expect(node.evil).toBeUndefined();
+    expect(node.constructor).toBe(Object);
+  });
+
   it('observationExtract code is only written while extraction is on', async () => {
     const { STATES_SECTIONS } = await import('../js/ui/modals/states-sections/registry.js');
     await import('../js/ui/modals/states-sections/observation-extract.js');

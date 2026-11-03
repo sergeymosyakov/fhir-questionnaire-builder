@@ -46,6 +46,7 @@ vi.mock('../js/state.js', () => ({
 
 vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
+const { buildLinkIdMap } = await import('../js/fhir/import-helpers.js');
 const { fhirTypeToItemType, fhirOptsToStr, hasNonCodingOpts, humanEnableWhen, applyVisibility, importFHIR } = await import('../js/fhir/import.js');
 const { AppEvents, EventState } = await import('../js/events.js');
 EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc: _questDoc });
@@ -181,6 +182,15 @@ describe('hasNonCodingOpts', () => {
 });
 
 // ── humanEnableWhen ─────────────────────────────────────────────────────────────────
+describe('humanEnableWhen — inherited keys', () => {
+  it('falls back to the raw question id when it names an Object member', () => {
+    const map = buildLinkIdMap([{ linkId: 'a', text: 'A' }]);
+    const txt = humanEnableWhen([{ question: 'constructor', operator: 'exists', answerBoolean: true }], 'all', map);
+    expect(txt).toContain('constructor');
+    expect(txt).not.toContain('function');
+  });
+});
+
 describe('humanEnableWhen', () => {
   it('returns empty for null/undefined/empty', () => {
     expect(humanEnableWhen(null)).toBe('');
@@ -1855,6 +1865,24 @@ describe('importFHIR — _importTranslations', () => {
     });
     // Should not throw and de.ui should be empty (or de not created at all)
     expect(_questDoc.translations?.de?.ui ?? {}).toEqual({});
+  });
+
+  it('copies only own string entries from translation strings (no prototype keys)', () => {
+    importFHIR({
+      resourceType: 'Questionnaire', title: 'T', item: [],
+      extension: [{
+        url: UI_TRANS_URL,
+        extension: [
+          { url: 'lang',    valueCode:   'de' },
+          { url: 'strings', valueString: '{"__proto__":{"polluted":"x"},"next":"Weiter","n":5}' },
+        ],
+      }],
+    });
+    const ui = _questDoc.translations.de.ui;
+    expect(ui.next).toBe('Weiter');
+    expect(ui.n).toBeUndefined();
+    expect(Object.getPrototypeOf(ui)).toBe(Object.prototype);
+    expect(ui.polluted).toBeUndefined();
   });
 
   it('skips title translation with missing lang or content', () => {

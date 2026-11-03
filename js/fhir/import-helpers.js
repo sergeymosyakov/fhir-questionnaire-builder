@@ -154,7 +154,7 @@ export function hasCommaInCodingOpts(opts) {
 }
 
 // Build linkId → question text map for human-friendly display
-export function buildLinkIdMap(items, map = {}) {
+export function buildLinkIdMap(items, map = Object.create(null)) {
   for (const item of items || []) {
     map[item.linkId] = item.text || item.linkId || '';
     buildLinkIdMap(item.item, map);

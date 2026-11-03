@@ -31,7 +31,7 @@ export const DOC_LEGEND = [
   { icon: '\uD83D\uDCDD', label: 'Design note', desc: 'Author-facing note not shown to respondents (designNote extension) — shown in a highlighted box' },
 ];
 
-function buildLinkIdMap(nodes, map = {}) {
+function buildLinkIdMap(nodes, map = Object.create(null)) {
   for (const n of nodes) {
     map[n.id] = n.title || n.id;
     if (n.children?.length) buildLinkIdMap(n.children, map);
