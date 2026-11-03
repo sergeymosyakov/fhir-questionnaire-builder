@@ -7,7 +7,7 @@ import { uiStr } from '../preview/render-ctx.js';
 import { AppEvents } from '../events.js';
 import { defaultBus } from '../core/events/bus.js';
 import { compareValue } from '../eval.js';
-import { isDescendant } from '../utils.js';
+import { isDescendant, isUnsafeKey } from '../utils.js';
 import { parseRenderStyle } from '../fhir/render-style.js';
 // Structured enableWhen breakdown: each condition with expected/actual + pass.
 // Shared by the tooltip audit string and the click-to-explain modal.
@@ -120,6 +120,7 @@ export class BaseNode {
    */
   applyPatch(patch) {
     for (const [key, val] of Object.entries(patch)) {
+      if (isUnsafeKey(key)) continue;
       if (val === null) delete this[key];
       else this[key] = val;
     }

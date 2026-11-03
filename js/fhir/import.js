@@ -3,7 +3,7 @@ import { showError } from '../ui/toast.js';
 import { AppEvents, EventState } from '../events.js';
 import { defaultBus } from '../core/events/bus.js';
 import { normaliseSTU3, normaliseCodingTypes } from './stu3-shim.js';
-import { destroyTree } from '../utils.js';
+import { destroyTree, isUnsafeKey } from '../utils.js';
 import { resetSeq } from '../id.js';
 import { FHIR } from './urls/fhir.js';
 import { APP_URL } from './urls/app.js';
@@ -266,7 +266,7 @@ function _importTranslations(q, tree, translations) {
     try {
       const parsed = JSON.parse(strings);
       _ensureLang(translations, lang);
-      Object.assign(translations[lang].ui, parsed);
+      _mergeStrings(translations[lang].ui, parsed);
     } catch { /* ignore malformed */ }
   }
 
@@ -280,7 +280,7 @@ function _importTranslations(q, tree, translations) {
       const parsed = JSON.parse(strings);
       _ensureLang(translations, lang);
       if (!translations[lang].xhtml) translations[lang].xhtml = {};
-      Object.assign(translations[lang].xhtml, parsed);
+      _mergeStrings(translations[lang].xhtml, parsed);
     } catch { /* ignore malformed */ }
   }
 
@@ -293,7 +293,7 @@ function _importTranslations(q, tree, translations) {
     try {
       const parsed = JSON.parse(strings);
       _ensureLang(translations, lang);
-      Object.assign(translations[lang].markdown, parsed);
+      _mergeStrings(translations[lang].markdown, parsed);
     } catch { /* ignore malformed */ }
   }
 }
@@ -301,6 +301,14 @@ function _importTranslations(q, tree, translations) {
 // Lang codes become object keys; block prototype-chain keys.
 function _isSafeLang(lang) {
   return !!lang && !(lang in Object.prototype);
+}
+
+// Copy only own, string-valued, non-prototype entries of imported JSON.
+function _mergeStrings(target, parsed) {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return;
+  for (const [k, v] of Object.entries(parsed)) {
+    if (!isUnsafeKey(k) && typeof v === 'string') target[k] = v;
+  }
 }
 
 function _ensureLang(translations, lang) {
