@@ -5,7 +5,7 @@
   "status": "draft",
   "extension": [
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer",
+      "url": "http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer",
       "valueUrl": "https://tx.fhir.org/r4"
     }
   ],
@@ -17,7 +17,7 @@
       "answerValueSet": "http://hl7.org/fhir/ValueSet/yesnodontknow",
       "extension": [
         {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer",
+          "url": "http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer",
           "valueUrl": "https://r4.ontoserver.csiro.au/fhir"
         }
       ]

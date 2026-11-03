@@ -1,0 +1,109 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "legacy-extension-addresses",
+  "status": "draft",
+  "title": "Extensions under older addresses",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "valueExpression": {
+        "name": "limit",
+        "language": "text/fhirpath",
+        "expression": "100"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer",
+      "valueUrl": "https://tx.example.org/r4"
+    }
+  ],
+  "item": [
+    {
+      "linkId": "secret",
+      "text": "Hidden under the older address",
+      "type": "string",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden",
+          "valueBoolean": true
+        }
+      ]
+    },
+    {
+      "linkId": "dob",
+      "text": "Date of birth",
+      "type": "string",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat",
+          "valueString": "dd/mm/yyyy"
+        }
+      ]
+    },
+    {
+      "linkId": "diet",
+      "text": "Diet",
+      "type": "choice",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount",
+          "valueInteger": 2
+        }
+      ],
+      "answerOption": [
+        {
+          "valueCoding": {
+            "code": "veg",
+            "display": "Vegetarian"
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia",
+              "valueAttachment": {
+                "contentType": "image/png",
+                "url": "https://example.org/veg.png"
+              }
+            }
+          ]
+        },
+        {
+          "valueCoding": {
+            "code": "omni",
+            "display": "Omnivore"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "pick",
+      "text": "Pick from the server",
+      "type": "choice",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression",
+          "valueExpression": {
+            "language": "application/x-fhir-query",
+            "expression": "Condition?patient={{%patient.id}}"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "weight",
+      "text": "Weight",
+      "type": "decimal",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "29463-7"
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+          "valueCode": "member"
+        }
+      ]
+    }
+  ]
+}

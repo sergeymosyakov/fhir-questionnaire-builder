@@ -115,7 +115,7 @@ test.describe('sdc-questionnaire-hidden', () => {
 
     const flag = findItem(q.item, 'bmi-high-flag');
     expect(flag).toBeTruthy();
-    const HIDDEN_URL = FHIR.hiddenSdc;
+    const HIDDEN_URL = FHIR.hidden;
     const hiddenExt = (flag.extension ?? []).find(e => e.url === HIDDEN_URL);
     expect(hiddenExt?.valueBoolean).toBe(true);
   });

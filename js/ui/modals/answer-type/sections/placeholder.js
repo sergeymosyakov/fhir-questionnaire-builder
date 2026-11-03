@@ -13,9 +13,9 @@ class PlaceholderSection extends AnswerTypeSection {
     placeholderLbl.className        = 'at-modal-sub-lbl at-modal-sub-lbl--tip';
     placeholderLbl.textContent      = 'Placeholder hint (entryFormat):';
     placeholderLbl.dataset.tipTitle = 'Entry Format';
-    placeholderLbl.dataset.tipBody  = 'Text shown inside the input field before the user types. Guides the expected format (e.g. MM/DD/YYYY, (999) 999-9999). Exported as the sdc-questionnaire-entryFormat SDC extension.';
-    placeholderLbl.dataset.tipFhir  = 'item.extension[sdc-questionnaire-entryFormat].valueString';
-    placeholderLbl.dataset.tipSpec  = 'SDC';
+    placeholderLbl.dataset.tipBody  = 'Text shown inside the input field before the user types. Guides the expected format (e.g. MM/DD/YYYY, (999) 999-9999). Exported as the core entryFormat extension.';
+    placeholderLbl.dataset.tipFhir  = 'item.extension[entryFormat].valueString';
+    placeholderLbl.dataset.tipSpec  = 'R4';
 
     const placeholderInp = document.createElement('input');
     placeholderInp.type           = 'text';

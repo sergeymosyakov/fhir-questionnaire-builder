@@ -16,12 +16,12 @@ class TerminologyServerSection extends Section {
       'https://tx.fhir.org/r4',
       'meta-preferred-term-server',
       {
-        title: 'sdc-questionnaire-preferredTerminologyServer',
+        title: 'preferredTerminologyServer',
         body:  'Questionnaire-level default FHIR terminology server URL for ValueSet expansion. ' +
                'Applied to all items that do not have their own per-item server override. ' +
                `Extension URL: ${PREF_TERM_URL}`,
-        fhir:  'Questionnaire.extension[sdc-questionnaire-preferredTerminologyServer].valueUrl',
-        spec:  'SDC',
+        fhir:  'Questionnaire.extension[preferredTerminologyServer].valueUrl',
+        spec:  'R4',
       }
     ));
     return frag;

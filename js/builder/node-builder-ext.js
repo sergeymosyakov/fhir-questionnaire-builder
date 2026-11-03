@@ -80,7 +80,7 @@ GroupNode.prototype.buildBuilder = function () {
   const statesLink = node._makeActionLink('States', 'states', {
     title: 'Item / group states',
     body:  'Required \u2014 must be answered to pass validation.\nHidden \u2014 excluded from patient view; participates in logic.\nCollapsible \u2014 group starts collapsed or expanded in patient view.',
-    fhir:  'item.required / sdc-questionnaire-hidden / sdc-questionnaire-collapsible',
+    fhir:  'item.required / questionnaire-hidden / sdc-questionnaire-collapsible',
     spec:  'R4 \u00B7 SDC',
   }, actions);
   statesLink.onclick = () => MODAL_REGISTRY.get('states').open(node, statesLink, setActive);
@@ -352,7 +352,7 @@ ItemNode.prototype.buildBuilder = function () {
   const statesLink = node._makeActionLink('States', 'states', {
     title: 'Item / group states',
     body:  'Required \u2014 must be answered to pass validation.\nRead-only \u2014 value set programmatically, not editable (items only).\nHidden \u2014 excluded from patient view; participates in logic.',
-    fhir:  'item.required / item.readOnly / sdc-questionnaire-hidden',
+    fhir:  'item.required / item.readOnly / questionnaire-hidden',
     spec:  'R4 \u00B7 SDC',
   }, actions);
   statesLink.dataset.testid   = 'action-states';
@@ -428,8 +428,8 @@ ItemNode.prototype.buildBuilder = function () {
   const termLink = node._makeActionLink('Terminology', 'terminology', {
     title: 'Preferred Terminology Server',
     body:  'Per-item override for the FHIR terminology server used to expand ValueSets. Falls back to the Questionnaire-level default.',
-    fhir:  'item.extension[sdc-questionnaire-preferredTerminologyServer].valueUrl',
-    spec:  'SDC',
+    fhir:  'item.extension[preferredTerminologyServer].valueUrl',
+    spec:  'R4',
   }, actions);
   termLink.onclick = () => MODAL_REGISTRY.get('terminology').open(node, termLink, setActive);
   setActive(termLink, !!node._preferredTermServer);

@@ -93,7 +93,7 @@
         },
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount",
-          "valueInteger": 2
+          "valuePositiveInt": 2
         }
       ]
     },

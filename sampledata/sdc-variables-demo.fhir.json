@@ -11,7 +11,7 @@
   "date": "2026-05-13",
   "extension": [
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "weightKg",
         "language": "text/fhirpath",
@@ -19,7 +19,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "heightM",
         "language": "text/fhirpath",
@@ -27,7 +27,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "bmiCalc",
         "language": "text/fhirpath",

@@ -27,7 +27,7 @@ These make a form *react* to what the user enters (all powered by
 - **Dynamic option lists** — build the choices for a question at run time from a
   formula instead of a fixed list (`answerExpression` / `candidateExpression`).
 - **Questionnaire variables** — named formulas defined once and reused across the
-  form as `%name` (`sdc-questionnaire-variable`).
+  form as `%name` (the core `variable` extension; the older `sdc-questionnaire-variable` address is still read and saved back at the core address; variables declared on individual items, at either address, are kept unchanged but cannot be edited in the builder).
 - **Launch contexts** — resources the form expects when it opens, such as the
   patient or current user, referenced as `%patient`, `%user`, …
   (`sdc-questionnaire-launchContext`).
@@ -91,7 +91,7 @@ How an item looks and how the user interacts with it:
   styling; the builder sanitizes this markup before showing it
   (`rendering-xhtml` / `rendering-markdown` / `rendering-style`).
 - **Media** — attach an image or other media to a question or to individual
-  answer options (`sdc-questionnaire-itemMedia` / `sdc-questionnaire-answerMedia`).
+  answer options (`sdc-questionnaire-itemMedia` / `sdc-questionnaire-itemAnswerMedia`).
 - **Option prefixes & help links** — show a short prefix before each option, and
   add "more info" links next to an item (`questionnaire-optionPrefix` /
   `questionnaire-supportLink`).
@@ -112,7 +112,7 @@ How choice options are sourced and scored:
 
 - **Hidden items** — keep an item off-screen for the patient while it still takes
   part in calculations and logic, e.g. a computed score you don't want shown
-  (`sdc-questionnaire-hidden`).
+  (the core `questionnaire-hidden` extension; the older `sdc-questionnaire-hidden` address is still read).
 - **Usage mode** — control whether an item is for data entry, display-only, or
   only shown when it has a value (`questionnaire-usageMode`).
 - **Disabled display** — when a visibility condition fails, choose whether the

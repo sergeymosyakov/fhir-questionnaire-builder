@@ -153,13 +153,13 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   }
   if (Object.keys(weights).length) node._optionWeights = weights;
 
-  // sdc-questionnaire-answerMedia — media attached to individual answer options
+  // sdc-questionnaire-itemAnswerMedia (older files: sdc-questionnaire-answerMedia) — media attached to individual answer options
   const answerMedias = {};
   for (const opt of fhirItem.answerOption || []) {
     if (opt.valueCoding) {
       const code = opt.valueCoding.code || opt.valueCoding.display || '';
       const amExt = (opt.extension || []).find(
-        e => e.url === FHIR.answerMedia
+        e => e.url === FHIR.answerMedia || e.url === FHIR.answerMediaLegacy
       );
       if (amExt?.valueAttachment && code) answerMedias[code] = amExt.valueAttachment;
     }
@@ -239,9 +239,13 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // SDC answer-source expressions — dynamic answer options computed via FHIRPath
   // (answerExpression / candidateExpression). Both map ext → prop identically.
-  for (const { url, prop } of ANSWER_SOURCE_EXPR_EXTS) {
+  for (const { url, prop, langProp } of ANSWER_SOURCE_EXPR_EXTS) {
     const exprExt = (fhirItem.extension || []).find(e => e.url === url);
-    if (exprExt?.valueExpression) node[prop] = exprExt.valueExpression.expression || '';
+    if (exprExt?.valueExpression) {
+      node[prop] = exprExt.valueExpression.expression || '';
+      // keep a non-FHIRPath language (e.g. application/x-fhir-query) so export does not relabel it
+      if (exprExt.valueExpression.language && exprExt.valueExpression.language !== 'text/fhirpath') node[langProp] = exprExt.valueExpression.language;
+    }
   }
 
   // maxLength
@@ -267,10 +271,10 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (regexExt?.valueString) node._regex = regexExt.valueString;
 
-  // sdc-questionnaire-entryFormat (SDC) or entryFormat (R4 element-definition ext)
+  // entryFormat (core extension; older files: sdc-questionnaire-entryFormat)
   const entryFmtExt = (fhirItem.extension || []).find(
-    e => e.url === FHIR.entryFormatSdc ||
-         e.url === FHIR.entryFormat
+    e => e.url === FHIR.entryFormat ||
+         e.url === FHIR.entryFormatSdc
   );
   if (entryFmtExt?.valueString) node._entryFormat = entryFmtExt.valueString;
 
@@ -280,12 +284,13 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   );
   if (choiceOrientExt?.valueCode) node._choiceOrientation = choiceOrientExt.valueCode;
 
-  // sdc-questionnaire-columnCount — lay out a choice question's options across N columns
+  // sdc-questionnaire-columnCount (positiveInt; older files wrote valueInteger) — lay out a choice question's options across N columns
   const columnCountExt = (fhirItem.extension || []).find(
     e => e.url === FHIR.columnCount
   );
-  if (Number.isInteger(columnCountExt?.valueInteger) && columnCountExt.valueInteger > 1) {
-    node._columnCount = columnCountExt.valueInteger;
+  const columnCount = columnCountExt?.valuePositiveInt ?? columnCountExt?.valueInteger;
+  if (Number.isInteger(columnCount) && columnCount > 1) {
+    node._columnCount = columnCount;
   }
 
   // sdc-questionnaire-choiceColumn (0..* — multi-column display for choice/open-choice/reference)
@@ -382,10 +387,10 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     .map(e => e.valueUri);
   if (supportLinks.length) node._supportLinks = supportLinks;
 
-  // sdc-questionnaire-hidden (SDC) or questionnaire-hidden (R4 standard) — alias fallback
+  // questionnaire-hidden (core; older files: sdc-questionnaire-hidden)
   const hiddenExt = (fhirItem.extension || []).find(
-    e => e.url === FHIR.hiddenSdc ||
-         e.url === FHIR.hidden
+    e => e.url === FHIR.hidden ||
+         e.url === FHIR.hiddenSdc
   );
   if (hiddenExt?.valueBoolean === true) node._hidden = true;
 
@@ -399,7 +404,10 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   const obsExtractExt = (fhirItem.extension || []).find(
     e => e.url === FHIR.observationExtract
   );
-  if (obsExtractExt) node._observationExtract = obsExtractExt.valueBoolean === false ? false : true;
+  if (obsExtractExt) {
+    node._observationExtract = obsExtractExt.valueBoolean === false ? false : true;
+    if (obsExtractExt.valueCode) node._observationExtractCode = obsExtractExt.valueCode;
+  }
 
   // sdc-questionnaire-openLabel (open-choice items only)
   if (node.itemType === 'open-choice') {
@@ -411,7 +419,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   // sdc-questionnaire-preferredTerminologyServer — per-item terminology server override
   const prefTermExt = (fhirItem.extension || []).find(
-    e => e.url === FHIR.preferredTerminologyServer
+    e => e.url === FHIR.preferredTerminologyServer || e.url === FHIR.preferredTerminologyServerSdc
   );
   if (prefTermExt?.valueUrl) node._preferredTermServer = prefTermExt.valueUrl;
 
@@ -588,7 +596,10 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     const groupObsExtractExt = (fhirItem.extension || []).find(
       e => e.url === FHIR.observationExtract
     );
-    if (groupObsExtractExt) node._observationExtract = groupObsExtractExt.valueBoolean === false ? false : true;
+    if (groupObsExtractExt) {
+      node._observationExtract = groupObsExtractExt.valueBoolean === false ? false : true;
+      if (groupObsExtractExt.valueCode) node._observationExtractCode = groupObsExtractExt.valueCode;
+    }
     // sdc-questionnaire-collapsible
     const collapsibleExt = (fhirItem.extension || []).find(
       e => e.url === FHIR.collapsible
@@ -596,7 +607,7 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
     if (collapsibleExt?.valueCode) node._collapsible = collapsibleExt.valueCode;
     // sdc-questionnaire-preferredTerminologyServer — per-item terminology server override (groups)
     const groupPrefTermExt = (fhirItem.extension || []).find(
-      e => e.url === FHIR.preferredTerminologyServer
+      e => e.url === FHIR.preferredTerminologyServer || e.url === FHIR.preferredTerminologyServerSdc
     );
     if (groupPrefTermExt?.valueUrl) node._preferredTermServer = groupPrefTermExt.valueUrl;
     // sdc-questionnaire-shortText (groups)

@@ -15,7 +15,6 @@ import { buildQR } from '../js/fhir/qr-builder.js';
 import { extractObservations } from '../js/fhir/extract.js';
 import { downloadJSON } from '../js/fhir/download.js';
 import { AppEvents, EventState } from '../js/events.js';
-import { FHIR } from '../js/fhir/urls/fhir.js';
 
 const FIXED_NOW = new Date('2025-03-04T05:06:07.000Z');
 const Q = { resourceType: 'Questionnaire', status: 'active' };
@@ -44,16 +43,9 @@ describe('exportObservations', () => {
     expect(extractObservations.mock.calls[0][1]).toBe(Q);
   });
 
-  it('adds the SDC observation profile by default', () => {
+  it('does not stamp a profile on the Observations (the specification defines no sdc-observation profile)', () => {
     exportObservations('o.json');
-    expect(extractObservations.mock.calls[0][2]).toEqual({ obsProfile: [FHIR.sdcObservation] });
-  });
-
-  it('omits the profile when addProfile is false but keeps it for other falsy-ish values', () => {
-    exportObservations('o.json', { addProfile: false });
-    expect(extractObservations.mock.calls[0][2]).toEqual({ obsProfile: [] });
-    exportObservations('o.json', { addProfile: undefined });
-    expect(extractObservations.mock.calls[1][2]).toEqual({ obsProfile: [FHIR.sdcObservation] });
+    expect(extractObservations.mock.calls[0][2]).toBeUndefined();
   });
 
   it('applies qrId, subject and author from meta as id / references', () => {

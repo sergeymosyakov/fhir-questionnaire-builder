@@ -224,11 +224,12 @@ test.describe('item-control-demo: itemMedia + itemWeight round-trip', () => {
 // ── annual-health-check: hidden, calculatedExpression, readOnly, initial[] ───
 
 test.describe('annual-health-check: hidden + calc + readOnly + initial round-trip', () => {
-  test('sdc-questionnaire-hidden preserved in export', async ({ page }) => {
+  test('questionnaire-hidden preserved in export (core address)', async ({ page }) => {
     await freshLoad(page, ANNUAL, 'height');
     const q = await exportFHIR(page);
     const item = findItem(q.item, 'bmi-high-flag');
-    const ext = extOf(item, 'sdc-questionnaire-hidden');
+    const ext = extOf(item, 'StructureDefinition/questionnaire-hidden');
+    expect(ext?.url).toBe('http://hl7.org/fhir/StructureDefinition/questionnaire-hidden');
     expect(ext?.valueBoolean).toBe(true);
   });
 

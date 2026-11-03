@@ -27,11 +27,11 @@ variables for testing.
 ## Questionnaire variables
 
 The **Variables** card above the builder tree defines reusable, questionnaire-level
-FHIRPath variables (the SDC `sdc-questionnaire-variable` extension). Each variable
+FHIRPath variables (the core `variable` extension). Each variable
 has a **name** and an **expression** and is referenced elsewhere as `%name`.
 
 Variables are evaluated **in order**, and a later variable may reference an earlier
-one. They are imported and exported as `sdc-questionnaire-variable` extensions. The
+one. They are imported and exported as `variable` extensions (files that use the older `sdc-questionnaire-variable` address are still read). The
 card's **↺ Re-init** button re-evaluates all variables and item `initialExpression`
 fields.
 

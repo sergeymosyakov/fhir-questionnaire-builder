@@ -1,5 +1,5 @@
 // ── Questionnaire Variables panel ─────────────────────────────────────────────
-// Collapsible card (above tree) + edit modal for sdc-questionnaire-variable.
+// Collapsible card (above tree) + edit modal for the questionnaire-level variable extension.
 // Self-initializes on import; mount point found via data-mount.
 import { Modal } from './modals/modal-base.js';
 import { AppEvents, EventState } from '../events.js';
@@ -13,9 +13,9 @@ const _CARD_HTML = `
   </button>
   <span class="variables-card-title"
     data-tip-title="Questionnaire Variables"
-    data-tip-body="SDC questionnaire-level FHIRPath variables. Defined once at the root and referenced as %varName inside any calculatedExpression. Imported and exported as sdc-questionnaire-variable extensions."
-    data-tip-fhir="Questionnaire.extension[sdc-questionnaire-variable]"
-    data-tip-spec="SDC · optional">Variables</span>
+    data-tip-body="SDC questionnaire-level FHIRPath variables. Defined once at the root and referenced as %varName inside any calculatedExpression. Imported and exported as core variable extensions."
+    data-tip-fhir="Questionnaire.extension[variable]"
+    data-tip-spec="R4 · optional">Variables</span>
   <span class="variables-card-count" data-testid="variables-card-count"></span>
   <button data-testid="variables-reinit-btn" type="button" class="variables-reinit-btn"
     data-tip-title="Re-init" data-tip-body="Re-evaluate all questionnaire-level variables and item initialExpression fields.">&#x21BA; Re-init</button>
@@ -179,8 +179,8 @@ function _renderChips() {
     chip.className = 'variables-chip';
     chip.dataset.tipTitle = '%' + v.name;
     chip.dataset.tipBody  = v.expression || '(no expression)';
-    chip.dataset.tipFhir  = 'Questionnaire.extension[sdc-questionnaire-variable]';
-    chip.dataset.tipSpec  = 'SDC';
+    chip.dataset.tipFhir  = 'Questionnaire.extension[variable]';
+    chip.dataset.tipSpec  = 'R4';
     chip.textContent = '%' + v.name;
     _el.chipList.appendChild(chip);
   }

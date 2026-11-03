@@ -7,14 +7,11 @@ import { extractObservations } from './extract.js';
 import { downloadJSON } from './download.js';
 
 import { AppEvents, EventState } from '../events.js';
-import { FHIR } from './urls/fhir.js';
-
-const SDC_OBS_PROFILE = FHIR.sdcObservation;
 
 /**
  * Build and download a transaction Bundle of extracted Observations.
  * @param {string} fileName - download file name (e.g. 'phq-9-observations.json').
- * @param {{ subject?, author?, qrId?, addProfile? }} [meta]
+ * @param {{ subject?, author?, qrId? }} [meta]
  * @returns {object} the generated Bundle (also useful for tests).
  */
 export function exportObservations(fileName, meta) {
@@ -27,9 +24,7 @@ export function exportObservations(fileName, meta) {
   if (meta && meta.subject) qr.subject = { reference: meta.subject };
   if (meta && meta.author)  qr.author  = { reference: meta.author };
 
-  const addProfile = meta?.addProfile !== false;
-  const obsProfile = addProfile ? [SDC_OBS_PROFILE] : [];
-  const bundle = extractObservations(qr, fhirQ, { obsProfile });
+  const bundle = extractObservations(qr, fhirQ);
   downloadJSON(bundle, fileName || 'observations.json');
   return bundle;
 }

@@ -5,9 +5,6 @@
 import { Modal } from './modal-base.js';
 import { exportObservations } from '../../fhir/obs-export.js';
 import { AppEvents } from '../../events.js';
-import { FHIR } from '../../fhir/urls/fhir.js';
-
-const SDC_OBS_PROFILE = FHIR.sdcObservation;
 
 class ObsExportModal extends Modal {
   getName() { return 'obsExportModal'; }
@@ -34,7 +31,6 @@ class ObsExportModal extends Modal {
       subject:    saved.subject || '',
       author:     saved.author  || '',
       qrId:       saved.qrId   || '',
-      addProfile: true,
     };
     this._renderBody();
     super.open();
@@ -47,7 +43,6 @@ class ObsExportModal extends Modal {
       subject:    s.subject    || undefined,
       author:     s.author     || undefined,
       qrId:       s.qrId       || undefined,
-      addProfile: s.addProfile,
     });
     this.close();
   }
@@ -88,38 +83,6 @@ class ObsExportModal extends Modal {
       'Logical id for the QuestionnaireResponse. Used to build Observation.derivedFrom reference: "QuestionnaireResponse/<id>". Leave blank for a display-only reference.',
       'R4');
     this.body.appendChild(_row('QR resource ID:', qrIdInp));
-
-    // ── SDC Observation profile ───────────────────────────────────────────────
-    const profRow = document.createElement('div');
-    profRow.className = 'meta-modal-row';
-
-    // empty spacer to align with input column
-    const profSpacer = document.createElement('span');
-    profSpacer.className = 'meta-modal-lbl';
-    profSpacer.setAttribute('aria-hidden', 'true');
-
-    const profInner = document.createElement('div');
-    profInner.className = 'obs-export-prof-row';
-
-    const profChk = document.createElement('input');
-    profChk.type           = 'checkbox';
-    profChk.id             = 'obsExportProfile';
-    profChk.dataset.testid = 'obs-export-profile-chk';
-    profChk.checked        = s.addProfile;
-    profChk.addEventListener('change', () => { s.addProfile = profChk.checked; });
-
-    const profLbl = document.createElement('label');
-    profLbl.htmlFor          = 'obsExportProfile';
-    profLbl.className        = 'obs-export-prof-lbl';
-    profLbl.textContent      = 'Add SDC profile';
-    profLbl.dataset.tipTitle = 'meta.profile — sdc-observation';
-    profLbl.dataset.tipBody  = `Adds meta.profile = ["${SDC_OBS_PROFILE}"] to each generated Observation. Recommended by the SDC IG to declare conformance.`;
-    profLbl.dataset.tipFhir  = 'Observation.meta.profile';
-    profLbl.dataset.tipSpec  = 'SDC';
-
-    profInner.append(profChk, profLbl);
-    profRow.append(profSpacer, profInner);
-    this.body.appendChild(profRow);
   }
 }
 

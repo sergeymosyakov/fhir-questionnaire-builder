@@ -757,3 +757,15 @@ describe('validateTree — circular dependency detection', () => {
     expect(issues.filter(i => /Circular dependency/.test(i.message))).toHaveLength(0);
   });
 });
+
+// ── non-FHIRPath answer/candidate expressions are not parsed as FHIRPath ──────────────
+describe('validateTree — expression language', () => {
+  it('does not report FHIRPath errors for a FHIR query answerExpression', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', _answerExpression: 'INVALID query', _answerExpressionLanguage: 'application/x-fhir-query' });
+    expect(validateTree([item]).filter(i => i.message.includes('expression error'))).toHaveLength(0);
+  });
+  it('still reports an invalid FHIRPath answerExpression', () => {
+    const item = makeItem({ id: 'q1', itemType: 'select', _answerExpression: 'INVALID expression' });
+    expect(validateTree([item]).some(i => i.message.startsWith('Answer expression error'))).toBe(true);
+  });
+});

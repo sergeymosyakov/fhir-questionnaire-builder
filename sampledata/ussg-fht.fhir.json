@@ -78,7 +78,7 @@
       "valueCode": "fhir"
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "weightKg",
         "language": "text/fhirpath",
@@ -86,7 +86,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "heightM",
         "language": "text/fhirpath",
