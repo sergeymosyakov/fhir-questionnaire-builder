@@ -131,13 +131,16 @@ describe('terminologyService.expandValueSet', () => {
     expect(result[0].display).toBe('X');
   });
 
-  it('uses empty string for missing code', async () => {
+  it('skips entries without a code and abstract entries, and flattens nested ones', async () => {
     mockFetch.mockResolvedValueOnce(makeOk({
       resourceType: 'ValueSet',
-      expansion: { contains: [{ display: 'No code', system: 'https://s.com' }] },
+      expansion: { contains: [
+        { display: 'No code', system: 'https://s.com' },
+        { code: 'grp', abstract: true, system: 'https://s.com', contains: [{ code: 'child', display: 'Child', system: 'https://s.com' }] },
+      ] },
     }));
     const result = await terminologyService.expandValueSet('https://vs', DEFAULT_TERMINOLOGY_SERVER);
-    expect(result[0].code).toBe('');
+    expect(result.map(r => r.code)).toEqual(['child']);
   });
 
   it('throws on non-ok HTTP response', async () => {
@@ -195,7 +198,7 @@ describe('terminologyService.expandWithFilter', () => {
   it('respects custom count parameter', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
     await terminologyService.expandWithFilter('https://vs', DEFAULT_TERMINOLOGY_SERVER, '', 25);
-    expect(mockFetch.mock.calls[0][0]).toContain('_count=25');
+    expect(mockFetch.mock.calls[0][0]).toContain('count=25');
   });
 
   it('throws on non-ok response', async () => {
@@ -347,6 +350,24 @@ describe('terminologyService.expandAll', () => {
     expect(failures).toEqual([]);
     expect(node._vsCache).toHaveLength(2);
     expect(node._vsCache[0].code).toBe('A');
+  });
+
+  it('asks for the defined count parameter', async () => {
+    mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
+    await terminologyService.expandAll([{ id: 'q1', _answerValueSet: 'https://vs', children: [] }], {});
+    const url = mockFetch.mock.calls[0][0];
+    expect(url).toContain('&count=');
+    expect(url).not.toContain('_count');
+  });
+
+  it('keeps the loaded options and reports a truncated set', async () => {
+    mockFetch.mockResolvedValueOnce(makeOk({ resourceType: 'ValueSet', expansion: { total: 900, contains: [{ code: 'A', display: 'A', system: 's' }] } }));
+    const node = { id: 'q1', _answerValueSet: 'https://vs', children: [] };
+    const failures = await terminologyService.expandAll([node], {});
+    expect(node._vsCache).toHaveLength(1);
+    expect(failures).toHaveLength(1);
+    expect(failures[0].error).toMatch(/900 entries but only the first 1/);
+    expect(node._vsExpansionIssue).toMatch(/900 entries/);
   });
 
   it('records failure and caches empty array on HTTP error', async () => {

@@ -13,6 +13,7 @@
 //   svc.expandAll(treeNodes, questMeta)   → Promise<failure[]>
 
 import { serverConfig, CONFIG_KEYS } from './server-config.js';
+import { flattenExpansion } from './expansion.js';
 
 // Default terminology server — falls back to HL7 public server.
 const FALLBACK_TERMINOLOGY_SERVER = 'https://tx.fhir.org/r4';
@@ -135,20 +136,21 @@ export class TerminologyService {
    * @returns {Promise<Array<{code: string, display: string, system: string}>>}
    */
   async expandValueSet(vsUrl, serverUrl) {
+    return (await this.expandValueSetDetailed(vsUrl, serverUrl)).options;
+  }
+
+  /** Like expandValueSet, but also reports the server's total so callers can tell when the set was cut off. */
+  async expandValueSetDetailed(vsUrl, serverUrl) {
     await this._cfg.ready?.();
     const base   = (serverUrl || this._termServer()).replace(/\/$/, '');
-    const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?url=${encodeURIComponent(vsUrl)}&_count=${EXPAND_COUNT}`);
+    const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?url=${encodeURIComponent(vsUrl)}&count=${EXPAND_COUNT}`);
     const res = await _fetchWithRetry(reqUrl, {
       headers: { Accept: 'application/fhir+json' },
     }, FETCH_TIMEOUT);
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
     const body = await res.json();
     if (body.resourceType !== 'ValueSet') throw new Error('Response is not a FHIR ValueSet');
-    return (body.expansion?.contains || []).map(c => ({
-      code:    c.code    ?? '',
-      display: c.display || c.code || '',
-      system:  c.system  || '',
-    }));
+    return flattenExpansion(body.expansion);
   }
 
   /**
@@ -163,7 +165,7 @@ export class TerminologyService {
   async expandWithFilter(vsUrl, serverUrl, filter = '', count = 50) {
     await this._cfg.ready?.();
     const base   = (serverUrl || this._termServer()).replace(/\/$/, '');
-    const params = new URLSearchParams({ url: vsUrl, _count: String(count) });
+    const params = new URLSearchParams({ url: vsUrl, count: String(count) });
     if (filter && filter.trim()) params.set('filter', filter.trim());
     const reqUrl = this._proxyUrl(`${base}/ValueSet/$expand?${params}`);
     const res = await _fetchWithRetry(reqUrl, {
@@ -172,11 +174,7 @@ export class TerminologyService {
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
     const body = await res.json();
     if (body.resourceType !== 'ValueSet') throw new Error('Response is not a FHIR ValueSet');
-    return (body.expansion?.contains || []).map(c => ({
-      code:    c.code    ?? '',
-      display: c.display || c.code || '',
-      system:  c.system  || '',
-    }));
+    return flattenExpansion(body.expansion).options;
   }
 
   /**
@@ -236,20 +234,30 @@ export class TerminologyService {
     for (const node of nodes) {
       const server = this.getServer(node, questMeta);
       try {
-        node._vsCache = await this.expandValueSet(node._answerValueSet, server);
+        const { options, total, truncated } = await this.expandValueSetDetailed(node._answerValueSet, server);
+        node._vsCache = options;
+        delete node._vsExpansionIssue;
+        if (truncated) {
+          const error = `The value set has ${total} entries but only the first ${options.length} were loaded.`;
+          node._vsExpansionIssue = error;
+          failures.push({ node, vsUrl: node._answerValueSet, server, error });
+        }
       } catch (err) {
         node._vsCache = [];
         const isCors = err instanceof TypeError && err.message.includes('fetch');
         const msg = isCors
           ? `Network error (possible CORS restriction — the server may not allow browser requests): ${err.message}`
           : err.message;
+        node._vsExpansionIssue = `The value set could not be expanded: ${msg}`;
         failures.push({ node, vsUrl: node._answerValueSet, server, error: msg });
       }
     }
     for (const node of unitNodes) {
       const server = this.getServer(node, questMeta);
       try {
-        node._unitVsCache = await this.expandValueSet(node._unitValueSet, server);
+        const { options, total, truncated } = await this.expandValueSetDetailed(node._unitValueSet, server);
+        node._unitVsCache = options;
+        if (truncated) failures.push({ node, vsUrl: node._unitValueSet, server, error: `The value set has ${total} entries but only the first ${options.length} were loaded.` });
       } catch (err) {
         node._unitVsCache = [];
         const isCors = err instanceof TypeError && err.message.includes('fetch');

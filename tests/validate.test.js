@@ -815,3 +815,18 @@ describe('validateTree — que-11 and initialSelected defaults', () => {
     expect(issues.some(i => /que-11/.test(i.message))).toBe(true);
   });
 });
+
+describe('validateTree — unsupported contained value set parts', () => {
+  it('warns when a contained value set has parts that cannot be expanded locally', () => {
+    const item = makeItem({ id: 'v', itemType: 'select', options: 'a=A', _answerValueSet: '#vs', _containedVsUnsupported: ['filters the concepts of http://x'] });
+    const m = validateTree([item]).filter(i => i.nodeId === 'v').map(i => i.message).join(' ');
+    expect(m).toMatch(/cannot expand itself/);
+  });
+});
+
+describe('validateTree — value set expansion issue', () => {
+  it('shows what the terminology server reported for the item', () => {
+    const item = makeItem({ id: 'e', itemType: 'select', _answerValueSet: 'http://vs', _vsExpansionIssue: 'The value set has 900 entries but only the first 500 were loaded.' });
+    expect(validateTree([item]).some(i => i.nodeId === 'e' && /900 entries/.test(i.message))).toBe(true);
+  });
+});

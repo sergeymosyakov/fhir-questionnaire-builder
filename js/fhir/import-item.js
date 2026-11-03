@@ -11,7 +11,7 @@ import {
   fhirTypeToItemType,
   applyVisibility,
   applyConstraints,
-  resolveContainedValueSet,
+  analyseContainedValueSet,
   _collectUnknownExtensions,
   ANSWER_SOURCE_EXPR_EXTS,
   isTemporalBound,
@@ -484,8 +484,9 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
   if (fhirItem.code && fhirItem.code.length) node._codes = fhirItem.code;
   if (fhirItem.answerValueSet) {
     node._answerValueSet = fhirItem.answerValueSet;
-    const resolved = resolveContainedValueSet(contained, fhirItem.answerValueSet);
-    if (resolved.length) node._rawAnswerOptions = resolved;
+    const { options, unsupported } = analyseContainedValueSet(contained, fhirItem.answerValueSet);
+    if (options.length) node._rawAnswerOptions = options;
+    if (unsupported.length) node._containedVsUnsupported = [...new Set(unsupported)];
   }
 
   // item.initial[] → _initialValue / _initialValues (multi-row for repeating items)

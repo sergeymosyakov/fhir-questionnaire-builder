@@ -164,7 +164,7 @@
         "label": "FHIR R4B Demo",
         "file": "r4b-demo.fhir.json",
         "type": "questionnaire",
-        "note": "Demonstrates FHIR R4B: answerConstraint on choice items (introduced in R4B). Loading auto-switches the builder to R4B mode."
+        "note": "A questionnaire exported for FHIR R4B (same fields as R4; R5-only features such as answerConstraint travel as builder-private extensions). Loading auto-switches the builder to R4B mode."
       },
       {
         "label": "FHIR R5 Demo",

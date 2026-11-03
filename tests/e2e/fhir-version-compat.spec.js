@@ -148,11 +148,11 @@ test.describe('answerConstraint downgrade warning', () => {
     await selectVersion(page, 'R4');
     await expect(warnToast(page)).toBeVisible({ timeout: 3_000 });
     await expect(warnToastBody(page)).toContainText('answerConstraint');
-    await expect(warnToastBody(page)).toContainText('backport extension');
+    await expect(warnToastBody(page)).toContainText('builder-private extension');
     await dismissWarn(page);
   });
 
-  test('loading R5 file then switching to R4B shows R4B-specific downgrade warning', async ({ page }) => {
+  test('loading R5 file then switching to R4B shows the downgrade warning naming R4B', async ({ page }) => {
     await freshStart(page);
     await loadFixtureFile(page, R5_FIXTURE);
     await expect(page.locator('[data-preview-id="preferred-drink"]')).toBeVisible({ timeout: 8_000 });
@@ -160,7 +160,7 @@ test.describe('answerConstraint downgrade warning', () => {
     await selectVersion(page, 'R4B');
     await expect(warnToast(page)).toBeVisible({ timeout: 3_000 });
     await expect(warnToastBody(page)).toContainText('answerConstraint');
-    await expect(warnToastBody(page)).toContainText('R4B native field');
+    await expect(warnToastBody(page)).toContainText('R4B has no such field');
     await dismissWarn(page);
   });
 });

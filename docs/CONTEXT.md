@@ -216,7 +216,7 @@ _shortText         // string — sdc-questionnaire-shortText ext; abbreviated la
 - `questionnaire-maxValue` ext (`valueDecimal`/`valueInteger`) → `node._maxValue` (enforced in preview — error badge + blocks PASS)
 - `ordinalValue` extension on `answerOption[].extension` (primary, per FHIR R4 spec) or `answerOption[].valueCoding.extension` (fallback for older files) → `node._optionOrdinals` (map of code → score; shown as `(N)` badge in radio/select)
 - `questionnaire-sliderStepValue` ext (`valueDecimal`/`valueInteger`) → `node._sliderStep` (renders integer/decimal as range slider in preview; editable in Answer Type modal)
-- `item.disabledDisplay` (R4B native field) → `node._disabledDisplay`; R4 backport extension `extension-Questionnaire.item.disabledDisplay` also read
+- `item.disabledDisplay` (R5 native field) → `node._disabledDisplay`; the builder-private `item-disabledDisplay` extension (written on R4/R4B export) and the older `extension-Questionnaire.item.disabledDisplay` are also read
 - `linkIdMap` built before parsing → used for human-readable condition text in `_enableWhenText`
 
 ## FHIR Export (`exportFHIR`)

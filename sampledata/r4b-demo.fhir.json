@@ -9,38 +9,88 @@
   ],
   "url": "https://example.org/fhir/Questionnaire/r4b-demo",
   "version": "1.0",
-  "title": "FHIR R4B Feature Demo",
+  "title": "FHIR R4B Demo",
   "status": "draft",
   "date": "2025-01-01",
-  "description": "Demonstrates FHIR R4B features: answerConstraint on choice items (introduced in R4B). Loading this questionnaire automatically switches the builder to R4B mode.",
+  "description": "A questionnaire exported for FHIR R4B. R4B has the same Questionnaire fields as R4, so R5-only features such as answerConstraint travel as builder-private extensions; loading this file switches the builder to R4B mode.",
   "item": [
     {
       "linkId": "intro",
       "type": "display",
-      "text": "This questionnaire uses FHIR R4B features. The builder auto-detected the target version R4B."
+      "text": "This questionnaire was exported for R4B. The builder detected the target version and switched to R4B."
     },
     {
       "linkId": "preferred-transport",
       "type": "choice",
-      "text": "Preferred mode of transport (R4B answerConstraint: optionsOrString)",
-      "answerConstraint": "optionsOrString",
+      "text": "Preferred mode of transport (answerConstraint: optionsOrString)",
       "answerOption": [
-        { "valueCoding": { "code": "car",    "display": "Car"    } },
-        { "valueCoding": { "code": "bus",    "display": "Bus"    } },
-        { "valueCoding": { "code": "bike",   "display": "Bike"   } },
-        { "valueCoding": { "code": "walk",   "display": "Walk"   } }
+        {
+          "valueCoding": {
+            "code": "car",
+            "display": "Car"
+          }
+        },
+        {
+          "valueCoding": {
+            "code": "bus",
+            "display": "Bus"
+          }
+        },
+        {
+          "valueCoding": {
+            "code": "bike",
+            "display": "Bike"
+          }
+        },
+        {
+          "valueCoding": {
+            "code": "walk",
+            "display": "Walk"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-answerConstraint",
+          "valueCode": "optionsOrString"
+        }
       ]
     },
     {
       "linkId": "diet",
       "type": "choice",
-      "text": "Dietary preference (R4B answerConstraint: optionsOnly)",
-      "answerConstraint": "optionsOnly",
+      "text": "Dietary preference (answerConstraint: optionsOnly)",
       "answerOption": [
-        { "valueCoding": { "code": "omnivore",   "display": "Omnivore"   } },
-        { "valueCoding": { "code": "vegetarian", "display": "Vegetarian" } },
-        { "valueCoding": { "code": "vegan",      "display": "Vegan"      } },
-        { "valueCoding": { "code": "other",      "display": "Other"      } }
+        {
+          "valueCoding": {
+            "code": "omnivore",
+            "display": "Omnivore"
+          }
+        },
+        {
+          "valueCoding": {
+            "code": "vegetarian",
+            "display": "Vegetarian"
+          }
+        },
+        {
+          "valueCoding": {
+            "code": "vegan",
+            "display": "Vegan"
+          }
+        },
+        {
+          "valueCoding": {
+            "code": "other",
+            "display": "Other"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-answerConstraint",
+          "valueCode": "optionsOnly"
+        }
       ]
     },
     {
@@ -65,7 +115,12 @@
       "linkId": "notes",
       "type": "text",
       "text": "Additional notes",
-      "disabledDisplay": "protected"
+      "extension": [
+        {
+          "url": "https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-disabledDisplay",
+          "valueCode": "protected"
+        }
+      ]
     }
   ]
 }

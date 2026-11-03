@@ -381,6 +381,8 @@ Observation extraction (**Save ▾ → Observations**, client-side) emits one `O
 
 For `choice`/`open-choice` items whose options come from a **value set** (contained `#id` or external `answerValueSet`) there is no `answerOption`, so `system` and `display` are resolved when the QR is built (`js/fhir/coding-resolver.js`): first from the item's options (a contained ValueSet's `compose.include.system` + concepts, or the expansion cache of an external set), then from the codings of a previously loaded response (kept for sets that cannot be expanded). If neither knows the code, only the `code` is exported.
 
+External value sets are expanded with `ValueSet/$expand` (`url`, `count`, and `filter` for live lookup); nested `contains` are flattened, abstract entries and entries without a code are skipped, and a result smaller than the server's `total` is reported as truncated (`js/fhir/expansion.js`). A contained ValueSet is read from its `expansion`, or from `compose` — listed concepts, nested contained value sets and `exclude`d concepts; includes by whole code system, by filter or by external value set cannot be expanded locally and are reported as a validation warning.
+
 ---
 
 ## QuestionnaireResponse
@@ -412,7 +414,7 @@ A review against the published FHIR R4/R5 and SDC 4.0 packages (November 2026) f
 |---|---|---|
 | Retired / unknown extensions | In the specification packages the SDC extension `sdc-questionnaire-preferredTerminologyServer` (use the generic `http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer`) and the core extensions `questionnaire-constraint` (use `targetConstraint`), `regex`, `questionnaire-supportLink`, `questionnaire-referenceFilter` and `ordinalValue` (use `itemWeight`) are **retired**; `sdc-questionnaire-definitionExtractContext`, `sdc-questionnaire-itemContext` and the `sdc-observation` profile used by Observation export do not exist under those names (the retired SDC extraction context was replaced by `definitionExtract`; the population one is `itemPopulationContext`) | #232 |
 | Responses & extraction | Invalid integer/decimal answer exported as 0; empty `questionnaire` / `unit` strings; `$populate` does not send `local`; definition-extract output shapes (single coded fields as lists, invented ids, ignored extension parameters, no nested answers, repeated groups merged); StructureMap bundle wrapped in a bundle; per-code Observation flags and category not supported; client engine binds neither `%questionnaire` nor launch-context variables | #234 |
-| Versions & terminology | R5 export carrying the builder's version marker loses `open-choice` on re-import; `$expand` request uses `_count` (spec: `count`), ignores nested `contains`, abstract entries and paging; contained ValueSets only expand `include.concept`; terminology server not chosen per target version | #235 |
+| Versions & terminology | The terminology server is not chosen according to the FHIR version of the target; contained ValueSets are expanded from an existing `expansion`, listed concepts, nested contained value sets and `exclude`d concepts — includes by whole code system, by filter or by external value set are reported (validation warning), not expanded; an external `$expand` loads at most 500 entries (`count`) with no paging, and a larger set is reported as truncated | #235 |
 
 ### SDC extensions not supported (round-trip pass-through only where noted)
 
@@ -423,8 +425,8 @@ A review against the published FHIR R4/R5 and SDC 4.0 packages (November 2026) f
 | Version | Status |
 |---|---|
 | R4 | ✅ Fully supported |
-| R4B | ✅ Supported — the Questionnaire schema is the same as R4 (R4B adds no new Questionnaire fields); R5-only fields are downgraded to builder-private extensions on export |
-| R5 | ✅ Fully supported — `disabledDisplay` and `answerConstraint` are R5 native fields; `choice`/`open-choice` exported as `coding`. The R5-only root metadata fields `versionAlgorithm[x]` and `copyrightLabel` are editable in Properties → Advanced and downgraded to their official `artifact-*` extensions on R4/R4B export. |
+| R4B | ✅ Supported — the Questionnaire schema is the same as R4 (R4B adds no new Questionnaire fields, so `answerConstraint` and `disabledDisplay` are **not** R4B fields); R5-only fields are downgraded to builder-private extensions on export |
+| R5 | ✅ Fully supported — `disabledDisplay` and `answerConstraint` are R5 native fields; `choice`/`open-choice` exported as `coding`; on import `coding` becomes `choice`, or `open-choice` when `answerConstraint` is `optionsOrString`, whether or not the builder's version marker is present. The R5-only root metadata fields `versionAlgorithm[x]` and `copyrightLabel` are editable in Properties → Advanced and downgraded to their official `artifact-*` extensions on R4/R4B export. |
 | STU3 | ✅ Import shim — automatically normalised to R4 on load via `js/fhir/stu3-shim.js`; see table below |
 
 ### STU3 → R4 Normalisation (`js/fhir/stu3-shim.js`)

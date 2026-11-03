@@ -18,6 +18,7 @@ vi.mock('../js/ui/toast.js', () => ({ showError: vi.fn(), showWarn: vi.fn(), sho
 vi.mock('../js/builder/index.js', () => ({ renderTree: vi.fn() }));
 
 const { importFHIR } = await import('../js/fhir/import.js');
+const { ITEM_ANSWER_CONSTRAINT_EXTENSION_URL, ITEM_DISABLED_DISPLAY_EXTENSION_URL } = await import('../js/fhir/format-registry.js');
 const { buildFHIRObject } = await import('../js/fhir/export.js');
 const { isSTU3 } = await import('../js/fhir/stu3-shim.js');
 const { FHIR } = await import('../js/fhir/urls/fhir.js');
@@ -117,7 +118,8 @@ function expectedExtList(list, item) {
   // On a quantity the default unit merges into an equal unitOption (which keeps its display).
   const raw = (list || []).filter(e => !(item.type === 'quantity' && e.url === FHIR.unit &&
     list.some(o => o.url === FHIR.unitOption && sameUnit(o, e))));
-  let exts = raw.map(e => expectedExt(e, item));
+  // The internal export keeps the R5-only fields native; the versioned save moves them back into these extensions.
+  let exts = raw.filter(e => e.url !== ITEM_ANSWER_CONSTRAINT_EXTENSION_URL && e.url !== ITEM_DISABLED_DISPLAY_EXTENSION_URL).map(e => expectedExt(e, item));
   // Dropped on purpose: displayCategory on display items and minOccurs on non-required / non-repeating items (R4 invariants).
   if (item.type === 'display') exts = exts.filter(e => e.url !== FHIR.displayCategory);
   if (!(item.required && item.repeats)) exts = exts.filter(e => e.url !== FHIR.minOccurs);
@@ -150,8 +152,7 @@ function projectItem(item, orig, isOutput) {
     _text: item._text && canon(item._text),
     extension: isOutput ? canon(item.extension || []) : expectedExtList(item.extension, orig),
   };
-  // Missing text is replaced by the linkId as the visible title.
-  if (!isOutput || orig.text !== undefined) p.text = item.text;
+  p.text = item.text;
   // que-11 / que-8: initial[] is suppressed when an answer source exists or on display items.
   if (!hasAnswerSource(orig) && orig.type !== 'display') p.initial = item.initial;
   return p;
