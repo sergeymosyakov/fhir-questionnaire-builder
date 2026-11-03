@@ -93,7 +93,7 @@ test.describe('modifierExtension validator warning', () => {
     await loadFixture(page);
     await openValidateModal(page);
     const body = page.locator('[data-testid="validateModalBody"]');
-    await expect(body.getByText(/modifierExtension/).first()).toBeVisible({ timeout: 10_000 });
+    await expect(body).toContainText(/modifierExtension/, { timeout: 10_000 });
     await expect(body).toContainText(MODIFIER_URL);
   });
 
