@@ -8,7 +8,7 @@ import { evaluateNode } from './eval.js';
 import { buildQR } from './fhir/qr-builder.js';
 import { evalCalcNodes, buildVarEnv, evalInitialExprNodes, buildCalcCache } from './fhir/calc.js';
 import { buildFHIRObject } from './fhir/export.js';
-import { calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES } from './fhir/form-checks.js';
+import { calcFormOk, isMandatory, evalConstraints, hasEnforceableRule, CHECKABLE_TYPES } from './fhir/form-checks.js';
 import { importQRAnswers } from './fhir/qr-import.js';
 import { populateFromServer } from './fhir/sdc-populate.js';
 import { structureMapPopulate } from './fhir/sdc-structuremap-populate.js';
@@ -88,6 +88,7 @@ export class PreviewForm {
     _rc.isMandatory      = isMandatory;
     _rc.evalConstraints  = evalConstraints;
     _rc.CHECKABLE_TYPES  = CHECKABLE_TYPES;
+    _rc.hasEnforceableRule = hasEnforceableRule;
 
     // ── Data wiring deferred until APP_CONTEXT_READY ─────────────────────────
     const _initData = ({ questDoc, answerStore }) => {
