@@ -9,7 +9,13 @@
 .preview-linkid, .preview-hidden-badge, .preview-short-text-badge,
 .preview-meta-badge, .preview-prefix { margin-right: 4px; }
 /* sdc-questionnaire-itemMedia: breathing room from the preceding label/badges. */
-.preview-item-media { margin-left: 8px; }
+.preview-item-media { margin-left: 8px; max-width: 100%; }
+img.preview-item-media   { max-height: 200px; }
+video.preview-item-media { max-height: 240px; }
+/* Per-answer-option media (sdc-questionnaire-itemAnswerMedia): small thumbnails beside the option label. */
+.preview-answer-media { max-width: 120px; max-height: 80px; margin-left: 6px; vertical-align: middle; }
+video.preview-answer-media { max-width: 200px; max-height: 120px; }
+audio.preview-answer-media { max-width: none; }
 /* Controls are full-width blocks, capped at 1024px so they don't stretch too wide. */
 .item-body .ctrl-wrap {
   display: flex;

@@ -1,0 +1,18 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "item-media-unsafe",
+  "title": "Item media safety",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "ok", "text": "Safe image", "type": "string",
+      "extension": [{ "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia",
+        "valueAttachment": { "url": "https://example.org/a.png", "contentType": "image/png" } }]
+    },
+    {
+      "linkId": "bad", "text": "Unsafe image", "type": "string",
+      "extension": [{ "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia",
+        "valueAttachment": { "url": "file:///etc/passwd", "contentType": "image/png" } }]
+    }
+  ]
+}
