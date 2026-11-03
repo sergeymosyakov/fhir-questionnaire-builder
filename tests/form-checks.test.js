@@ -286,6 +286,8 @@ describe('hasEnforceableRule', () => {
   });
   it('ignores a file-size limit on a non-attachment item', () => {
     expect(hasEnforceableRule(node({ _maxFileSizeMB: 1 }))).toBe(false);
+  });
+});
 
 describe('decimalPlaces', () => {
   it.each([[1, 0], [1.5, 1], [0.125, 3], ['2.50', 2], [1e-7, 7], [1.5e-7, 8], [1e21, 0]])('%s → %s', (v, n) => {
