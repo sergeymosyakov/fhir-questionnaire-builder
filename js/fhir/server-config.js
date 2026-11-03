@@ -21,9 +21,11 @@ export const CONFIG_KEYS = {
   VALIDATORS:         'validators',       // JSON array string
   TRANSLATE_API:      'translateApiUrl',  // translation endpoint (provider-specific)
   TRANSLATE_PROVIDER: 'translateProvider',// active machine-translation provider id
-  TRANSLATE_API_KEY:  'translateApiKey',  // API key for key-based providers (DeepL/OpenAI)
+  // API key for key-based providers (DeepL/OpenAI): kept in localStorage so it works
+  // offline, and synced to the user's Supabase settings when signed in.
+  TRANSLATE_API_KEY:  'translateApiKey',
   // Production OAuth2 Authorization Code + PKCE config (issue #63). Only the
-  // non-secret config (URLs/client id/scope) lives here — the resulting
+  // endpoint config (URLs/client id/scope) lives here — the resulting
   // access/refresh tokens are NOT stored via serverConfig (would sync to
   // Supabase cloud); see js/fhir/oauth-client.js for token storage.
   FHIR_BASE_OAUTH_AUTHORIZE_URL:  'fhirBaseOauthAuthorizeUrl',
