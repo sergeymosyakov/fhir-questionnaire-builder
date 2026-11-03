@@ -26,11 +26,13 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { mockTerminologyExpand } from './helpers/terminology.js';
 
 const ANNUAL       = path.resolve('sampledata/annual-health-check.fhir.json');
 const ITEM_CONTROL = path.resolve('sampledata/item-control-demo.fhir.json');
 
 async function freshLoad(page, fixture) {
+  await mockTerminologyExpand(page);
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });

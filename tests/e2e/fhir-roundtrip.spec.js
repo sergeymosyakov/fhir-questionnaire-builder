@@ -31,6 +31,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { mockTerminologyExpand } from './helpers/terminology.js';
 
 const REF        = path.resolve('sampledata/reference-example.fhir.json');
 const PHQ9       = path.resolve('sampledata/phq-9.fhir.json');
@@ -38,6 +39,7 @@ const ITEM_CTRL  = path.resolve('sampledata/item-control-demo.fhir.json');
 const ANNUAL     = path.resolve('sampledata/annual-health-check.fhir.json');
 
 async function freshLoad(page, fixture, waitForId) {
+  await mockTerminologyExpand(page);
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });

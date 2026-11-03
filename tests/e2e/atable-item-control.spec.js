@@ -26,12 +26,14 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { mockTerminologyExpand } from './helpers/terminology.js';
 
 async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
+  await mockTerminologyExpand(page);
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await waitForLoad(page);
