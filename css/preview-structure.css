@@ -15,7 +15,7 @@ video.preview-item-media { max-height: 240px; }
 /* Per-answer-option media (sdc-questionnaire-itemAnswerMedia): small thumbnails beside the option label. */
 .preview-answer-media { max-width: 120px; max-height: 80px; margin-left: 6px; vertical-align: middle; }
 video.preview-answer-media { max-width: 200px; max-height: 120px; }
-audio.preview-answer-media { max-width: none; }
+audio.preview-answer-media { max-width: none; max-height: none; margin-left: 0; }
 /* Controls are full-width blocks, capped at 1024px so they don't stretch too wide. */
 .item-body .ctrl-wrap {
   display: flex;

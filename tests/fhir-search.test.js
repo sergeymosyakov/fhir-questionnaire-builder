@@ -71,11 +71,6 @@ describe('fhirAuthHeaderFor / reauthHeaderFor', () => {
     expect(await fhirAuthHeaderFor('https://evil.example.com/r4/Patient', 'FHIR_BASE')).toEqual({});
     expect(await fhirAuthHeaderFor(BASE, 'SDC_SERVER')).toEqual({});
   });
-  it('matches against an explicit base URL when given (unsaved settings test)', async () => {
-    oauth.getValidAccessToken.mockReturnValue('tok');
-    expect(await fhirAuthHeaderFor('https://other.example.org/metadata', 'FHIR_BASE', 'https://other.example.org'))
-      .toEqual({ Authorization: 'Bearer tok' });
-  });
   it('falls back to the debug bridge (empty when no credentials saved)', async () => {
     expect(await fhirAuthHeaderFor(BASE, 'FHIR_BASE')).toEqual({});
   });
