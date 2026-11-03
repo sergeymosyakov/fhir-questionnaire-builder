@@ -123,10 +123,8 @@ export class ReferenceNode extends ItemNode {
         positionDrop: (input, dropdown) => {
           const r = input.getBoundingClientRect();
           const dropW = 240;
-          dropdown.style.position = 'fixed';
           dropdown.style.top  = (r.bottom + 4) + 'px';
           dropdown.style.width = dropW + 'px';
-          dropdown.style.maxHeight = '220px';
           // flip left if would overflow viewport
           const left = r.right - dropW;
           dropdown.style.left = Math.max(4, left) + 'px';

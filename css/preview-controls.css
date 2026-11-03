@@ -245,6 +245,8 @@ div.lform-item--hidden {
   max-height: 220px;
   overflow-y: auto;
 }
+/* Appended to <body> and positioned from the input's bounding rect. */
+.ref-search-drop--floating { position: fixed; }
 .ref-search-item {
   display: flex;
   align-items: center;

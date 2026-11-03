@@ -31,14 +31,13 @@ export function createRefSearchAutocomplete(input, options) {
   } = options;
 
   const dropdown = document.createElement('div');
-  dropdown.className = extraClassName ? `ref-search-drop ${extraClassName}` : 'ref-search-drop';
+  dropdown.className = extraClassName ? `ref-search-drop ref-search-drop--floating ${extraClassName}` : 'ref-search-drop ref-search-drop--floating';
   dropdown.dataset.testid = 'ref-search-drop';
   dropdown.style.display = 'none';
   document.body.appendChild(dropdown);
 
   const defaultPositionDrop = () => {
     const r = input.getBoundingClientRect();
-    dropdown.style.position = 'fixed';
     dropdown.style.top   = (r.bottom + 3) + 'px';
     dropdown.style.left  = r.left + 'px';
     dropdown.style.width = r.width + 'px';
