@@ -3,7 +3,7 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  calcFormOk, isMandatory, evalConstraints, CHECKABLE_TYPES, NONEMPTY_TYPES, refTypeMismatch,
+  calcFormOk, isMandatory, evalConstraints, hasEnforceableRule, CHECKABLE_TYPES, NONEMPTY_TYPES, refTypeMismatch,
 } from '../js/fhir/form-checks.js';
 
 // Store stub: get(id) reads from a plain map.
@@ -262,5 +262,29 @@ describe('calcFormOk — path-scoped store', () => {
     const mockStore = { get: () => '' };
     const n = node({ itemType: 'url', mandatory: false });
     expect(calcFormOk(n, mockStore, [])).toBe(true);
+  });
+});
+
+// ── hasEnforceableRule ─────────────────────────────────────────────────────────
+describe('hasEnforceableRule', () => {
+  it('is false for an optional unconstrained item', () => {
+    expect(hasEnforceableRule(node())).toBe(false);
+  });
+  it('is true for a mandatory checkable item', () => {
+    expect(hasEnforceableRule(node({ mandatory: true }))).toBe(true);
+  });
+  it.each([
+    ['regex', { _regex: '^a$' }],
+    ['minLength', { _minLength: 2 }],
+    ['maxDecimalPlaces', { itemType: 'decimal', _maxDecimalPlaces: 1 }],
+    ['minValue', { itemType: 'integer', _minValue: 0 }],
+    ['maxFileSizeMB', { itemType: 'attachment', _maxFileSizeMB: 1 }],
+    ['reference type', { itemType: 'reference', referenceResource: 'Patient' }],
+    ['constraint', { constraint: [{ expression: 'true', severity: 'error' }] }],
+  ])('is true for an optional item with %s', (_n, over) => {
+    expect(hasEnforceableRule(node(over))).toBe(true);
+  });
+  it('ignores a file-size limit on a non-attachment item', () => {
+    expect(hasEnforceableRule(node({ _maxFileSizeMB: 1 }))).toBe(false);
   });
 });

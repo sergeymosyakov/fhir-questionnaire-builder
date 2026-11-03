@@ -128,4 +128,14 @@ test.describe('AND/OR separator logic', () => {
     await expect(g5Row.locator('.preview-logic-badge')).toHaveCount(0);
     await expect(g5Nested.locator('.logic-separator')).toHaveCount(0);
   });
+
+  // ── g6: optional items whose only rule is a regex — still enforceable ────
+
+  test('g6: ALL items badge and separator shown when the only rule is a regex', async ({ page }) => {
+    const g6Row = page.locator('[data-preview-id="g6"]');
+    const g6Nested = page.locator('[data-preview-id="g6"] + .preview-nested');
+    await expect(page.locator('[data-preview-id="f1"]')).toBeVisible();
+    await expect(g6Row.locator('.preview-logic-badge')).toBeVisible();
+    await expect(g6Nested.locator('.logic-separator')).toHaveCount(1);
+  });
 });

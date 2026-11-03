@@ -31,6 +31,7 @@ export function createRenderCtx() {
     // State helpers — injected to avoid circular imports in node classes:
     isMandatory:    null, // function(node) → bool
     calcFormOk:     null, // function(node) → bool
+    hasEnforceableRule: null, // function(node) → bool
     evalConstraints: null, // function(node, fp, qr, env) → bool
     getValue:       null, // function(id) → any
     getAll:         null, // function(id) → any[]  (all answers incl. repeat rows)

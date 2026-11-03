@@ -47,17 +47,11 @@ export function createWrap() {
   return wrap;
 }
 
-// A descendant item is "relevant" to a container's aggregate pass/fail icon when
-// it carries something enforceable: a mandatory checkable answer, a read-only
-// calculated checkbox, a constraint, or a numeric min/max bound. When a group
-// (or composite item) has no relevant descendant, its AND/OR combination is a
-// no-op — so the "ALL/ANY items" badge and the child AND/OR separators are
-// meaningless and should be suppressed.
+// A descendant item is "relevant" to a container's aggregate pass/fail icon only
+// when it carries an enforceable rule; otherwise the "ALL/ANY items" badge and the
+// child AND/OR separators are meaningless and suppressed.
 export function isRelevantItem(node, rc) {
-  return (rc.isMandatory(node) && rc.CHECKABLE_TYPES.has(node.itemType)) ||
-    (node._calculatedExpr && node._readOnly && node.itemType === 'checkbox') ||
-    (node.constraint?.length > 0) ||
-    (node._minValue !== undefined || node._maxValue !== undefined);
+  return rc.hasEnforceableRule(node);
 }
 
 // Safe allowlist for node._renderStyle lives in the shared js/fhir/render-style.js parser.

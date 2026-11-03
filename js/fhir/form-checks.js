@@ -52,6 +52,19 @@ export function refTypeMismatch(value, allowedType) {
   return !!t && t !== allowedType;
 }
 
+// True when the node carries any rule that can make calcFormOk fail — the single
+// source for "does this item count toward a group's aggregate pass/fail".
+export function hasEnforceableRule(node) {
+  return (isMandatory(node) && CHECKABLE_TYPES.has(node.itemType)) ||
+    !!(node._calculatedExpr && node._readOnly && node.itemType === 'checkbox') ||
+    node.constraint?.length > 0 ||
+    node._minValue !== undefined || node._maxValue !== undefined ||
+    node._maxDecimalPlaces !== undefined ||
+    !!node._minLength || !!node._regex ||
+    (node.itemType === 'attachment' && node._maxFileSizeMB !== undefined) ||
+    (node.itemType === 'reference' && !!node.referenceResource);
+}
+
 /**
  * Check whether a node's current answer satisfies all validation rules.
  * @param {object} node  — tree node
