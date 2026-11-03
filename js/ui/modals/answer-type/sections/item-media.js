@@ -41,7 +41,6 @@ class ItemMediaSection extends AnswerTypeSection {
     ctInp.value          = pending.draftItemMediaCt;
     ctInp.placeholder    = 'image/png';
     ctInp.disabled       = !pending.draftItemMediaUrl.trim();
-    ctInp.title          = '';
     ctInp.oninput = () => { pending.draftItemMediaCt = ctInp.value; };
 
     const updateCtState = () => {

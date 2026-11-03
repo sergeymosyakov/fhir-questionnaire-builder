@@ -20,6 +20,7 @@
 //   node-picker-cb-<id>       checkbox for node with given id
 //   node-picker-hdr-<id>      non-selectable header row for node with given id
 //   constraint-card-     constraint card (suffix = index)
+//   constraint-add-btn   "+ Add constraint" button in the constraint modal
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -99,7 +100,7 @@ async function openConstraintModal(page, nodeId = '1.1') {
 }
 
 async function addConstraint(page, key = 'rule-1', msg = 'Must pass') {
-  await modalBody(page).getByText('+ Add constraint').click();
+  await modalBody(page).getByTestId('constraint-add-btn').click();
   const keyInp = modalBody(page).locator('input[placeholder*="key"]').first();
   await keyInp.fill(key);
   const msgInp = modalBody(page).locator('input[placeholder*="message"]').first();
