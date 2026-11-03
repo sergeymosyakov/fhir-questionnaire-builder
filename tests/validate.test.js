@@ -769,3 +769,49 @@ describe('validateTree — expression language', () => {
     expect(validateTree([item]).some(i => i.message.startsWith('Answer expression error'))).toBe(true);
   });
 });
+
+// ── enableWhen operator/answer, empty text, empty group ───────────────────────
+describe('validateTree — Questionnaire rules', () => {
+  const src = makeItem({ id: 'src' });
+  const msgs = (issues, id) => issues.filter(i => i.nodeId === id).map(i => i.message).join(' | ');
+
+  it('reports a condition without an operator', () => {
+    const t = makeItem({ id: 't', enableWhen: [{ question: 'src', answerString: 'x' }] });
+    expect(msgs(validateTree([src, t]), 't')).toMatch(/no operator/);
+  });
+  it('reports an unknown operator', () => {
+    const t = makeItem({ id: 't', enableWhen: [{ question: 'src', operator: '~', answerString: 'x' }] });
+    expect(msgs(validateTree([src, t]), 't')).toMatch(/unknown operator "~"/);
+  });
+  it('reports a comparison without an answer', () => {
+    const t = makeItem({ id: 't', enableWhen: [{ question: 'src', operator: '=' }] });
+    expect(msgs(validateTree([src, t]), 't')).toMatch(/no answer to compare/);
+  });
+  it('accepts a complete condition', () => {
+    const t = makeItem({ id: 't', enableWhen: [{ question: 'src', operator: '>=', answerDecimal: 1.5 }] });
+    expect(errIds(validateTree([src, t]))).not.toContain('t');
+  });
+  it('item without text: warns without claiming FHIR requires text', () => {
+    const m = msgs(validateTree([makeItem({ id: 'n', title: '' })]), 'n');
+    expect(m).toMatch(/no text/);
+    expect(m).not.toMatch(/requires text/);
+  });
+  it('a group without a title is not warned about text', () => {
+    expect(msgs(validateTree([makeGroup({ id: 'g', title: '', children: [makeItem({ id: 'c' })] })]), 'g')).toBe('');
+  });
+  it('warns about an empty group', () => {
+    expect(msgs(validateTree([makeGroup({ id: 'g' })]), 'g')).toMatch(/no items/);
+  });
+});
+
+describe('validateTree — que-11 and initialSelected defaults', () => {
+  const sel = extra => makeItem({ id: 'c', itemType: 'checklist', options: 'a=A,b=B,c=C', repeats: true, ...extra });
+  it('no que-11 warning when the defaults come only from initialSelected marks', () => {
+    const issues = validateTree([sel({ _initialSelected: 'a,c', _initialValue: 'a', _initialValues: ['a', 'c'] })]);
+    expect(issues.some(i => /que-11/.test(i.message))).toBe(false);
+  });
+  it('still warns when item.initial values are not the marked options', () => {
+    const issues = validateTree([sel({ _initialSelected: 'a', _initialValue: 'a', _initialValues: ['a', 'b'] })]);
+    expect(issues.some(i => /que-11/.test(i.message))).toBe(true);
+  });
+});

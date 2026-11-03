@@ -1,0 +1,42 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "title": "Questionnaire rules",
+  "item": [
+    {
+      "linkId": "smoker",
+      "type": "choice",
+      "text": "Smoker?",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "http://example.org/yn",
+            "code": "yes",
+            "display": "Yes"
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "http://example.org/yn",
+            "code": "no",
+            "display": "No"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "advice",
+      "type": "display",
+      "text": "Quit smoking advice",
+      "enableWhen": [
+        {
+          "question": "smoker",
+          "operator": "=",
+          "answerCoding": {
+            "code": "no"
+          }
+        }
+      ]
+    }
+  ]
+}

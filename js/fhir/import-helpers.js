@@ -186,13 +186,16 @@ export function humanEnableWhen(enableWhen, enableBehavior, linkIdMap) {
   return parts.join(joiner);
 }
 
+// Operator names older converters wrote; FHIR R4 defines only the symbols
+const LEGACY_OPERATORS = { equal: '=', 'not-equal': '!=', 'greater-than': '>', 'less-than': '<', 'greater-or-equal': '>=', 'less-or-equal': '<=' };
+
 // Apply enableWhen, enableBehavior, enableWhenExpression to a node from a FHIR item
 export function applyVisibility(node, fhirItem, linkIdMap) {
   // Standard enableWhen[] → stored structurally
   if (fhirItem.enableWhen && fhirItem.enableWhen.length) {
-    node.enableWhen     = fhirItem.enableWhen.map(ew => ({ ...ew }));
+    node.enableWhen     = fhirItem.enableWhen.map(ew => ({ ...ew, ...(LEGACY_OPERATORS[ew.operator] ? { operator: LEGACY_OPERATORS[ew.operator] } : {}) }));
     node.enableBehavior = fhirItem.enableBehavior === 'any' ? 'any' : 'all';
-    node._enableWhenText = humanEnableWhen(fhirItem.enableWhen, fhirItem.enableBehavior, linkIdMap);
+    node._enableWhenText = humanEnableWhen(node.enableWhen, fhirItem.enableBehavior, linkIdMap);
   }
   // SDC enableWhenExpression → FHIRPath condition
   const eweExt = (fhirItem.extension || []).find(

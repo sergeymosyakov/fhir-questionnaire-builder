@@ -7,11 +7,11 @@
 export function getAllItems(nodes, result = [], prefix = '') {
   for (const n of nodes) {
     if (n.type === 'item') {
-      result.push({ id: n.id, label: (prefix ? prefix + ' \u203a ' : '') + n.title, itemType: n.itemType, _rawAnswerOptions: n._rawAnswerOptions });
+      result.push({ id: n.id, label: (prefix ? prefix + ' \u203a ' : '') + (n.title || n.id), itemType: n.itemType, _rawAnswerOptions: n._rawAnswerOptions });
     }
     // Non-group items can also carry nested item.item[] (FHIR R4) — always recurse.
     if (n.children?.length) {
-      getAllItems(n.children, result, (prefix ? prefix + ' › ' : '') + n.title);
+      getAllItems(n.children, result, (prefix ? prefix + ' › ' : '') + (n.title || n.id));
     }
   }
   return result;

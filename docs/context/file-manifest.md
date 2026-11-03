@@ -319,6 +319,8 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `tests/e2e/helpers/*.js` | Shared e2e helpers — `builder.js` (builder/fixture setup), `dropdown.js` (retry-safe dropdown open), `metadata.js`, `terminology.js` (`mockTerminologyExpand`) |
 | `tests/e2e/extension-addresses.spec.js` | E2E tests — a file using older extension addresses (hidden, entryFormat, variable, terminology server, answer media, columnCount) loads into the UI and exports with the standard addresses/types; expression language and observationExtract code kept |
 | `tests/extension-addresses.test.js` | Unit tests — core extension addresses written, older ones read, expression language and relationship code preserved |
+| `tests/e2e/questionnaire-rules.spec.js` | E2E tests — an empty group and an item without text export without `item`/`text` (and are reported); a Show When condition on a coded answer keeps the option's code system |
+| `tests/questionnaire-rules.test.js` | Unit tests — export/import round trip for empty groups, missing text, open-choice `maxLength`, attachment defaults and several preselected options |
 | `tests/legacy-fixtures/*.fhir.json` | Inputs that deliberately use older addresses (kept out of `tests/fixtures/`, which the round-trip test requires to be lossless) |
 | `tests/e2e/open-choice-answers.spec.js` | E2E tests — open-choice answers: picked option = `valueCoding`, typed text = `valueString` (list / value sets / options-only / defaults / import round trip) |
 | `tests/open-choice-value.test.js` | Unit tests — open-choice value model (helpers, QR import, enableWhen, expression results, initial answers) |

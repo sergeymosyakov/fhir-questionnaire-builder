@@ -4,7 +4,10 @@
 
 import { buildDepGraph, detectCycles } from './dep-graph.js';
 import { emitsAnswerOptions } from './import-helpers.js';
+import { splitCodes } from './checklist-codec.js';
 
+const ENABLE_WHEN_OPERATORS = new Set(['exists', '=', '!=', '>', '<', '>=', '<=']);
+const ENABLE_WHEN_ANSWER_KEYS = ['answerBoolean', 'answerDecimal', 'answerInteger', 'answerDate', 'answerDateTime', 'answerTime', 'answerString', 'answerCoding', 'answerQuantity', 'answerReference'];
 // System-generated constraint key (must match ITLH_KEY_GROUP_OR in utils.js)
 const _ITLH_KEY_GROUP_OR = 'e3a8c2f1-6b4d-4e9a-87c5:group-or';
 
@@ -137,6 +140,11 @@ export function validateTree(tree, _values = {}, questMeta = null) {
         } else if (!allIds.includes(ew.question)) {
           issues.push({ severity: 'error', nodeId: id, message: `Show When references unknown linkId "${ew.question}" — the target question does not exist.` });
         }
+        if (!ENABLE_WHEN_OPERATORS.has(ew.operator)) {
+          issues.push({ severity: 'error', nodeId: id, message: `Show When condition has ${ew.operator ? `unknown operator "${ew.operator}"` : 'no operator'} — FHIR R4 requires enableWhen.operator (exists, =, !=, >, <, >=, <=).` });
+        } else if (ew.operator !== 'exists' && !ENABLE_WHEN_ANSWER_KEYS.some(k => ew[k] !== undefined)) {
+          issues.push({ severity: 'error', nodeId: id, message: 'Show When condition has no answer to compare with — FHIR R4 requires enableWhen.answer[x].' });
+        }
       }
     }
 
@@ -198,9 +206,10 @@ export function validateTree(tree, _values = {}, questMeta = null) {
     // que-11: initial[x] must be absent when answerOption[] is present
     // Exception: _initialValue derived solely from answerOption[].initialSelected is NOT a violation —
     // it IS the correct R4 pattern. Only warn when _initialValue comes from item.initial[].
+    const fromMarks = node._initialSelected !== undefined ? splitCodes(String(node._initialSelected)) : [];
     const hasInitial = node.type === 'item' && (
-      (node._initialValue !== undefined && node._initialValue !== node._initialSelected) ||
-      (node._initialValues && node._initialValues.length > 0)
+      (node._initialValue !== undefined && !fromMarks.includes(String(node._initialValue))) ||
+      (node._initialValues?.length > 0 && !node._initialValues.every(v => fromMarks.includes(String(v))))
     );
     if (hasInitial && emitsAnswerOptions(node)) {
       issues.push({ severity: 'warning', nodeId: id, message: 'Initial value is set but the item has answer options — R4 invariant que-11 forbids initial[x] when answerOption[] is present. Use the answer option\'s "Initially selected" setting instead. The initial value will be omitted from the export.' });
@@ -264,8 +273,12 @@ export function validateTree(tree, _values = {}, questMeta = null) {
     }
 
     // ── Warnings ──────────────────────────────────────────────────────────────
-    if (!node.title || !node.title.trim()) {
-      issues.push({ severity: 'warning', nodeId: id || '(empty)', message: 'Empty item text (title) — FHIR R4 requires text on every item.' });
+    if (node.type !== 'group' && (!node.title || !node.title.trim())) {
+      const shown = node.itemType === 'display' ? 'a display item shows nothing without text' : 'respondents will see no label for it';
+      issues.push({ severity: 'warning', nodeId: id || '(empty)', message: `Item has no text — ${shown}. The text is left out of the export.` });
+    }
+    if (node.type === 'group' && !node.children?.length && !node._helpText) {
+      issues.push({ severity: 'warning', nodeId: id || '(empty)', message: 'Group has no items — nothing is shown for it. It is exported without an item list.' });
     }
 
     if (node.type === 'item' &&

@@ -519,3 +519,17 @@ describe('evaluateNode — enableWhen answerQuantity', () => {
     expect(evaluateNode(node, {}, []).visible).toBe(false);
   });
 });
+
+describe('compareValue — numeric equality', () => {
+  it.each([
+    ['1.0', { operator: '=',  answerDecimal: 1 },  true],
+    [1,     { operator: '=',  answerDecimal: 1.0 }, true],
+    ['1.50', { operator: '=', answerDecimal: 1.5 }, true],
+    ['2',   { operator: '!=', answerInteger: 2 },  false],
+    ['2.0', { operator: '!=', answerInteger: 3 },  true],
+    ['',    { operator: '=',  answerInteger: 0 },  false],
+    ['',    { operator: '!=', answerInteger: 0 },  true],
+  ])('value %j against %j is %s', (val, ew, expected) => {
+    expect(compareValue(val, ew)).toBe(expected);
+  });
+});

@@ -36,6 +36,11 @@ When you load a questionnaire, the builder checks its structure and reports any
 problems it finds — malformed items, invalid references between items, and
 similar issues — so you know what you're working with before you start editing.
 
+Among the things it reports: a **Show When** condition with no operator or no value
+to compare with, a question or display item with **no text** (FHIR does not require
+text, so this is a warning and the item is exported without it), and a **group with
+no items** (exported without an item list, because FHIR does not allow an empty one).
+
 ## External FHIR validators (optional)
 
 For authoritative validation against the FHIR specification and profiles, you can

@@ -1,13 +1,13 @@
 // ── REDCap Branching Logic ↔ FHIR enableWhen ─────────────────────────────────
 //
 // REDCap branching logic syntax (subset we handle):
-//   [variable] = '1'           →  equal (string/code)
-//   [variable] <> '1'          →  not-equal
-//   [variable] != '1'          →  not-equal (alternative syntax)
-//   [variable] > 2             →  greater-than (numeric)
-//   [variable] >= 2            →  greater-or-equal
-//   [variable] < 2             →  less-than
-//   [variable] <= 2            →  less-or-equal
+//   [variable] = '1'           →  =  (string/code)
+//   [variable] <> '1'          →  !=
+//   [variable] != '1'          →  !=  (alternative syntax)
+//   [variable] > 2             →  >   (numeric)
+//   [variable] >= 2            →  >=
+//   [variable] < 2             →  <
+//   [variable] <= 2            →  <=
 //   expr AND expr              →  all (enableBehavior='all')
 //   expr OR  expr              →  any (enableBehavior='any')
 //   (expr)                     →  grouping — only one nesting level
@@ -19,14 +19,16 @@
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const OP_MAP = {
-  '=':  'equal',  '!=': 'not-equal', '<>': 'not-equal',
+  '=':  '=',      '!=': '!=',        '<>': '!=',
   '>':  '>',      '>=': '>=',
   '<':  '<',      '<=': '<=',
 };
 
 // Reverse: FHIR operator → REDCap operator
 const FHIR_OP_TO_REDCAP = {
-  'equal':     '=',
+  '=':  '=',
+  '!=': '<>',
+  'equal': '=',
   'not-equal': '<>',
   'exists':    null,   // can't represent cleanly
   '>':  '>',  '>=': '>=', '<': '<', '<=': '<=',
@@ -161,7 +163,7 @@ export function enableWhenToBranching(enableWhen, enableBehavior) {
 
   const parts = enableWhen.map(ew => {
     const question = `[${ew.question}]`;
-    const fhirOp = ew.operator || 'equal';
+    const fhirOp = ew.operator || '=';
     const redcapOp = FHIR_OP_TO_REDCAP[fhirOp] ?? '=';
 
     let val;

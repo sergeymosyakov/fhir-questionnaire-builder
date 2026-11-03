@@ -250,7 +250,10 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
               value:    ew.answerCoding?.code || '',
               className: 'sc-trigger--sm vis-cond-val-inp',
               testid:   'vis-cond-val-sel-' + idx,
-              onChange: (v, item) => { ew.answerCoding = { code: v, display: item.label }; },
+              onChange: (v, item) => {
+                const system = rawOpts.find(o => o.valueCoding?.code === v)?.valueCoding?.system;
+                ew.answerCoding = { ...(system ? { system } : {}), code: v, display: item.label };
+              },
             });
             valWrap.appendChild(valCsel.el);
           } else {

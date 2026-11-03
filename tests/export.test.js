@@ -483,7 +483,7 @@ describe('buildFHIRObject — _rawAnswerOptions round-trip', () => {
 
   it('keeps original initialSelected marks of an untouched import', () => {
     const raw = [{ valueCoding: { code: 'a' }, initialSelected: true }, { valueCoding: { code: 'b' }, initialSelected: true }];
-    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'checklist', repeats: true, _rawAnswerOptions: raw, _initialSelected: 'a' }]);
+    const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'checklist', repeats: true, _rawAnswerOptions: raw, _initialSelected: 'a,b' }]);
     expect(q.item[0].answerOption.every(o => o.initialSelected)).toBe(true);
   });
 

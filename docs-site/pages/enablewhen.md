@@ -29,12 +29,14 @@ The operators offered depend on the type of the question you pick:
 | Question type | Operators offered |
 |---|---|
 | Boolean (checkbox) | *is Yes (checked)*, *is No (unchecked)*, *has answer*, *has no answer* |
-| Choice (radio, drop-down, checklist, open-choice) | `=`, `≠`, *has answer*, *has no answer* — value picked from the question's options |
-| Integer / decimal / number | `=`, `≠`, `>`, `<`, `>=`, `<=` with a numeric value |
+| Choice (radio, drop-down, checklist, open-choice) | `=`, `≠`, *has answer*, *has no answer* — value picked from the question's options; the picked option's code system is saved with the condition |
+| Integer / decimal / number | `=`, `≠`, `>`, `<`, `>=`, `<=` with a numeric value; numbers are compared as numbers, so an answer of `1.0` equals a condition of `1` |
 | Quantity | numeric comparison plus a unit |
 | Date / dateTime / time | comparison operators with a date/time picker |
 
 *has answer* / *has no answer* map to the FHIR `exists` operator.
+
+A condition that has no operator, an unknown operator, or no value to compare with is reported as an error when you validate or export, because FHIR requires all of them.
 
 ## ALL vs ANY
 
