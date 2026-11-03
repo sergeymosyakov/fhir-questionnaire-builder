@@ -99,7 +99,6 @@ const CHOICE_FALLBACKS = { Coding: ['Coding', 'CodeableConcept'], Date: ['Date',
 // The suffix of the value[x] name → the datatype used to shape the value
 const CHOICE_CONVERT = { String: 'string', Integer: 'integer', Decimal: 'decimal', Boolean: 'boolean', Date: 'date', DateTime: 'dateTime', Time: 'time', Uri: 'uri' };
 
-
 // Model lookup for `Type.path`: element type, cardinality and allowed value[x] types.
 // The model keys backbone elements by their own path and datatype elements by the datatype (HumanName.given).
 function meta(ctx, path) {

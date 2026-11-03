@@ -11,10 +11,10 @@ export const ITLH_NS = 'e3a8c2f1-6b4d-4e9a-87c5';
 // System constraint keys
 export const ITLH_KEY_GROUP_OR = ITLH_NS + ':group-or';
 
-// Escape a string for use in an HTML attribute value.
 // Keys that must never be written onto an object from untrusted JSON.
 export const isUnsafeKey = k => k === '__proto__' || k === 'constructor' || k === 'prototype';
 
+// Escape a string for use in an HTML attribute value.
 export const escAttr = s => (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 // Remove the node with the given id from a tree (mutates in place).
