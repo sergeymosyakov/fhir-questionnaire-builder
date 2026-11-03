@@ -4,6 +4,7 @@
 import { ItemNode } from './item-node.js';
 import { NODE_REGISTRY } from './registry.js';
 import { BaseNode, createWrap } from './base-node.js';
+import { decimalPlaces } from '../fhir/form-checks.js';
 
 export class NumberNode extends ItemNode {
   constructor(data = {}) {
@@ -65,8 +66,7 @@ export class NumberNode extends ItemNode {
       } else if (node._maxValue !== undefined && num > node._maxValue) {
         errMsg.textContent = 'Max: ' + node._maxValue; errMsg.style.display = 'inline';
       } else if (node._maxDecimalPlaces !== undefined) {
-        const parts = String(v).split('.');
-        if (parts.length > 1 && parts[1].length > node._maxDecimalPlaces) {
+        if (decimalPlaces(v) > node._maxDecimalPlaces) {
           errMsg.textContent = 'Max ' + node._maxDecimalPlaces + ' decimal place' + (node._maxDecimalPlaces !== 1 ? 's' : '');
           errMsg.style.display = 'inline';
         } else {

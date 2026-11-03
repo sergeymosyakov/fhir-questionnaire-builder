@@ -1,9 +1,9 @@
 // Unit tests for js/fhir/form-checks.js — pure preview PASS/FAIL validation.
 // No DOM, no state: store is a plain { get } stub.
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
-  calcFormOk, isMandatory, evalConstraints, hasEnforceableRule, CHECKABLE_TYPES, NONEMPTY_TYPES, refTypeMismatch,
+  calcFormOk, isMandatory, evalConstraints, hasEnforceableRule, decimalPlaces, CHECKABLE_TYPES, NONEMPTY_TYPES, refTypeMismatch,
 } from '../js/fhir/form-checks.js';
 
 // Store stub: get(id) reads from a plain map.
@@ -286,5 +286,24 @@ describe('hasEnforceableRule', () => {
   });
   it('ignores a file-size limit on a non-attachment item', () => {
     expect(hasEnforceableRule(node({ _maxFileSizeMB: 1 }))).toBe(false);
+
+describe('decimalPlaces', () => {
+  it.each([[1, 0], [1.5, 1], [0.125, 3], ['2.50', 2], [1e-7, 7], [1.5e-7, 8], [1e21, 0]])('%s → %s', (v, n) => {
+    expect(decimalPlaces(v)).toBe(n);
+  });
+  it('rejects exponent-form values over the limit in calcFormOk', () => {
+    const n = node({ itemType: 'decimal', _maxDecimalPlaces: 2 });
+    expect(calcFormOk(n, store({ q: 1e-7 }))).toBe(false);
+  });
+});
+
+describe('evalConstraints — evaluation errors', () => {
+  it('fails the item and logs a warning', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const n = node({ constraint: [{ key: 'c1', expression: 'bad(', severity: 'error' }] });
+    const fp = { evaluate: () => { throw new Error('boom'); } };
+    expect(evalConstraints(n, fp, {}, {})).toBe(false);
+    expect(warn).toHaveBeenCalledOnce();
+    warn.mockRestore();
   });
 });
