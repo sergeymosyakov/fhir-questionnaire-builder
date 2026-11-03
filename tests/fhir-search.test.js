@@ -66,11 +66,17 @@ describe('fhirAuthHeaderFor / reauthHeaderFor', () => {
     expect(await fhirAuthHeaderFor(BASE, 'FHIR_BASE')).toEqual({ Authorization: 'Bearer tok' });
     expect(oauth.getValidAccessToken).toHaveBeenCalledWith('FHIR_BASE');
   });
+  it('never sends the OAuth token to a URL outside the configured server origin', async () => {
+    oauth.getValidAccessToken.mockReturnValue('tok');
+    expect(await fhirAuthHeaderFor('https://evil.example.com/r4/Patient', 'FHIR_BASE')).toEqual({});
+    expect(await fhirAuthHeaderFor(BASE, 'SDC_SERVER')).toEqual({});
+  });
   it('falls back to the debug bridge (empty when no credentials saved)', async () => {
     expect(await fhirAuthHeaderFor(BASE, 'FHIR_BASE')).toEqual({});
   });
   it('reauth refreshes the token and returns the new header', async () => {
     oauth.getValidAccessToken.mockReturnValue('fresh');
+    cfg.sdcServerUrl = BASE;
     expect(await reauthHeaderFor(BASE, 'SDC_SERVER')).toEqual({ Authorization: 'Bearer fresh' });
     expect(oauth.refreshAccessToken).toHaveBeenCalledWith('SDC_SERVER');
     expect(oauth.clearStoredToken).not.toHaveBeenCalled();

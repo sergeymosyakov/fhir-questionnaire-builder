@@ -28,11 +28,16 @@ export function proxiedUrl(url, corsProxy) {
   return `${proxy}?url=${encodeURIComponent(url)}`;
 }
 
+function sameOrigin(a, b) {
+  try { return new URL(a).origin === new URL(b).origin; } catch { return false; }
+}
+
 /**
  * Auth header for a FHIR request — real per-server OAuth token (issue #63)
  * if logged in, else the interim debug bridge (fetches a fresh token per
  * call — see getFhirAuthHeader); empty for known public demo servers
  * (neither is meant for them).
+ * The OAuth token is only attached to URLs on the origin of that server's base URL.
  * @param {string} url
  * @param {'FHIR_BASE'|'SDC_SERVER'} [serverKey]
  * @returns {Promise<{Authorization?: string}>}
@@ -41,7 +46,7 @@ export async function fhirAuthHeaderFor(url, serverKey) {
   try {
     if (CORS_ENABLED_HOSTS.includes(new URL(url).hostname)) return {};
   } catch { /* invalid URL, fall through */ }
-  const oauthToken = serverKey && getValidAccessToken(serverKey);
+  const oauthToken = serverKey && sameOrigin(url, serverKey && serverConfig.get(CONFIG_KEYS[serverKey])) && getValidAccessToken(serverKey);
   if (oauthToken) return { Authorization: `Bearer ${oauthToken}` };
   return getFhirAuthHeader();
 }

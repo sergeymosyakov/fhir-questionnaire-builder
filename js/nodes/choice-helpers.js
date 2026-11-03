@@ -3,6 +3,7 @@
 // ChoiceNode / RadioNode / OpenChoiceNode (js/nodes/choice-node.js).
 import { rawOptsToPairs } from '../utils.js';
 import { fhirModel } from '../fhir/fhir-model.js';
+import { createMedia } from './media-element.js';
 
 // Evaluate the answer-source expression (SDC answerExpression or
 // candidateExpression) against the current FHIRPath context.
@@ -190,13 +191,7 @@ export function _appendOptionExtras(lbl, node, code) {
   }
   if (node._answerMedias && node._answerMedias[code]) {
     const att = node._answerMedias[code];
-    const ct = att.contentType || '';
-    const el = ct.startsWith('audio/')
-      ? Object.assign(document.createElement('audio'), { src: att.url, controls: true })
-      : ct.startsWith('video/')
-        ? Object.assign(document.createElement('video'), { src: att.url, controls: true, style: 'max-width:200px;max-height:120px' })
-        : Object.assign(document.createElement('img'), { src: att.url, alt: att.title || '', style: 'max-width:120px;max-height:80px;vertical-align:middle;margin-left:6px' });
-    el.className = 'preview-answer-media';
-    lbl.appendChild(el);
+    const el = createMedia(att, 'preview-answer-media');
+    if (el) lbl.appendChild(el);
   }
 }

@@ -8,6 +8,7 @@ import { uiStr } from '../preview/render-ctx.js';
 //   _initialValue, _initialValues, _initialSelected, _helpText
 import { BaseNode, applyRenderStyle } from './base-node.js';
 import { parseOptions } from '../utils.js';
+import { createMedia } from './media-element.js';
 import * as explainModal from '../ui/modals/explain-modal.js';
 import { answerText } from '../fhir/open-choice-value.js';
 
@@ -205,13 +206,8 @@ export class ItemNode extends BaseNode {
   _buildItemMedia(row) {
     if (!this._itemMedia?.url) return;
     const att = this._itemMedia;
-    const ct = att.contentType || '';
-    const el = ct.startsWith('audio/')
-      ? Object.assign(document.createElement('audio'), { src: att.url, controls: true })
-      : ct.startsWith('video/')
-        ? Object.assign(document.createElement('video'), { src: att.url, controls: true, style: 'max-width:100%;max-height:240px' })
-        : Object.assign(document.createElement('img'), { src: att.url, alt: att.title || '', style: 'max-width:100%;max-height:200px' });
-    el.className = 'preview-item-media';
+    const el = createMedia(att, 'preview-item-media');
+    if (!el) return;
     el.dataset.testid = 'preview-item-media';
     row.appendChild(el);
   }

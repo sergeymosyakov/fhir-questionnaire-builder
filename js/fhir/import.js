@@ -55,6 +55,14 @@ function applyInitialValues(nodes, bus) {
 }
 
 // Main import entry point
+const MAX_ITEM_DEPTH = 100;
+
+// Stops descending past the limit, so a hostile file can't overflow the stack here either.
+function exceedsItemDepth(items, limit) {
+  if (!Array.isArray(items)) return false;
+  return limit === 0 || items.some(i => exceedsItemDepth(i?.item, limit - 1));
+}
+
 export function importFHIR(fhirJson, opts = {}) {
   const questDoc = opts.questDoc || EventState.get(AppEvents.APP_CONTEXT_READY)?.questDoc;
   const bus = opts.bus || defaultBus;
@@ -65,6 +73,10 @@ export function importFHIR(fhirJson, opts = {}) {
   }
   if (!q || q.resourceType !== 'Questionnaire') {
     showError('Not a FHIR Questionnaire resource (resourceType must be "Questionnaire").');
+    return false;
+  }
+  if (exceedsItemDepth(q.item, MAX_ITEM_DEPTH)) {
+    showError(`Questionnaire items are nested deeper than ${MAX_ITEM_DEPTH} levels.`);
     return false;
   }
   q = normaliseSTU3(q); // no-op for R4; converts STU3 fields to R4 equivalents
