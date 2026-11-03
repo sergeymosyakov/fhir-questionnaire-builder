@@ -202,14 +202,15 @@ export class QuestionnaireRenderer {
   /** Current answers as a FHIR QuestionnaireResponse. */
   getResponse() {
     const base = this._session.questDoc.rawFhir || { resourceType: 'Questionnaire', item: [] };
-    return buildQR(base, this._session.answerStore.toValueMap());
+    const { answerStore, questDoc } = this._session;
+    return buildQR(base, answerStore.toValueMap(), answerStore.codingResolver(questDoc.tree));
   }
 
   /** Load answers from a QuestionnaireResponse and re-render. */
   setResponse(qr) {
     const values = this._session.answerStore.toValueMap();
-    importQRAnswers(qr, values, this._session.questDoc.tree);
-    this._session.answerStore.replaceAll(values);
+    const { codings } = importQRAnswers(qr, values, this._session.questDoc.tree);
+    this._session.answerStore.replaceAll(values, codings);
     this._session.bus.dispatch(AppEvents.QR_LOADED, {});
     this._session.bus.dispatch(AppEvents.RESPONSE_CHANGED);
   }

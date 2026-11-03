@@ -379,6 +379,8 @@ Other answer encodings: a **checklist** (multi-select) is exported as one `answe
 
 Observation extraction (**Save ▾ → Observations**, client-side) emits one `Observation` per answer of every flagged, coded question, and one per **instance** of a repeating group; see the [SDC Observation-based extraction](https://hl7.org/fhir/uv/sdc/extraction.html) rules. Code-level flags, `observation-extract-category` and component/hasMember relationships are not supported.
 
+For `choice`/`open-choice` items whose options come from a **value set** (contained `#id` or external `answerValueSet`) there is no `answerOption`, so `system` and `display` are resolved when the QR is built (`js/fhir/coding-resolver.js`): first from the item's options (a contained ValueSet's `compose.include.system` + concepts, or the expansion cache of an external set), then from the codings of a previously loaded response (kept for sets that cannot be expanded). If neither knows the code, only the `code` is exported.
+
 ---
 
 ## QuestionnaireResponse

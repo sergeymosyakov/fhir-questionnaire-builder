@@ -29,14 +29,17 @@ beforeEach(() => {
   buildQR.mockReset().mockReturnValue(qr);
   extractObservations.mockReset().mockReturnValue(BUNDLE);
   downloadJSON.mockReset();
-  EventState._set(AppEvents.APP_CONTEXT_READY, { answerStore: { toValueMap: () => ({ q1: 'a' }) } });
+  EventState._set(AppEvents.APP_CONTEXT_READY, {
+    answerStore: { toValueMap: () => ({ q1: 'a' }), codingResolver: tree => ({ resolverFor: tree }) },
+    questDoc: { tree: [] },
+  });
 });
 afterEach(() => { vi.useRealTimers(); });
 
 describe('exportObservations', () => {
   it('builds the QR from the questionnaire and current answers, marking it completed with an authored timestamp', () => {
     exportObservations('o.json');
-    expect(buildQR).toHaveBeenCalledWith(Q, { q1: 'a' });
+    expect(buildQR).toHaveBeenCalledWith(Q, { q1: 'a' }, { resolverFor: [] });
     expect(extractObservations.mock.calls[0][0]).toMatchObject({
       resourceType: 'QuestionnaireResponse', status: 'completed', authored: '2025-03-04T05:06:07.000Z',
     });

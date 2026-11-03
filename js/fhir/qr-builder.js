@@ -15,7 +15,7 @@ const ORDINAL_URL = FHIR.ordinalValue;
 // Exported so calculatedExpression evaluation can write results back into the QR
 // using the exact same value-mapping rules as the initial QR build.
 // Returns null when the value has no valid QR representation (callers omit the answer).
-export function buildAnswer(fhirItem, v) {
+export function buildAnswer(fhirItem, v, resolve) {
   const t = fhirItem.type || 'string';
   // The store holds file-chip metadata only; a loaded QR keeps its original Attachment for verbatim re-export
   if (t === 'attachment') return v?.attachment ? { valueAttachment: JSON.parse(JSON.stringify(v.attachment)) } : null;
@@ -55,6 +55,12 @@ export function buildAnswer(fhirItem, v) {
       if (ordExt !== undefined)
         coding.extension = [{ url: ORDINAL_URL, valueDecimal: ordExt.valueDecimal }];
     }
+    // Value-set-backed items have no answerOption: take system/display from the resolved value set (or a loaded response)
+    if (!opt && resolve) {
+      const r = resolve(fhirItem.linkId, codeStr);
+      if (r?.system && !coding.system) coding.system = r.system;
+      if (r?.display && !coding.display) coding.display = r.display;
+    }
     return { valueCoding: coding };
   }
   if (t === 'integer')  return { valueInteger: parseInt(v, 10) || 0 };
@@ -78,13 +84,13 @@ export function buildAnswer(fhirItem, v) {
 }
 
 // A repeating group emits one QR item per stored instance map; everything else emits exactly one item.
-function buildQRItems(fhirItem, values) {
+function buildQRItems(fhirItem, values, resolve) {
   const inst = Object.hasOwn(values, fhirItem.linkId) ? values[fhirItem.linkId] : undefined;
   if (fhirItem.type === 'group' && fhirItem.repeats && Array.isArray(inst) && inst.length
       && inst.every(i => i && typeof i === 'object' && !Array.isArray(i))) {
-    return inst.map(map => buildQRItem(fhirItem, map));
+    return inst.map(map => buildQRItem(fhirItem, map, resolve));
   }
-  return [buildQRItem(fhirItem, values)];
+  return [buildQRItem(fhirItem, values, resolve)];
 }
 
 const LIST_CONTROLS = new Set(['radio-button', 'check-box', 'atable']);
@@ -98,7 +104,7 @@ const isChecklistItem = fhirItem => (fhirItem.extension || []).some(e => {
   return code === 'check-box' || (code === 'atable' && !!fhirItem.repeats);
 });
 
-function buildQRItem(fhirItem, values) {
+function buildQRItem(fhirItem, values, resolve) {
   const qrItem = { linkId: fhirItem.linkId };
   const children = fhirItem.item || [];
   const t = fhirItem.type || 'string';
@@ -110,15 +116,15 @@ function buildQRItem(fhirItem, values) {
     return (rows || []).filter(v => v !== undefined);
   }
 
-  const makeAnswer = (v) => buildAnswer(fhirItem, v);
+  const makeAnswer = (v) => buildAnswer(fhirItem, v, resolve);
 
   if (t === 'group') {
     if (children.length > 0) {
-      qrItem.item = children.flatMap(child => buildQRItems(child, values));
+      qrItem.item = children.flatMap(child => buildQRItems(child, values, resolve));
     }
   } else if (children.length > 0) {
     const answerObj = (val !== undefined && makeAnswer(val)) || {};
-    answerObj.item = children.flatMap(child => buildQRItems(child, values));
+    answerObj.item = children.flatMap(child => buildQRItems(child, values, resolve));
     qrItem.answer = [answerObj];
   } else {
     const vs = allVals();
@@ -137,11 +143,11 @@ function buildQRItem(fhirItem, values) {
   return qrItem;
 }
 
-export function buildQR(fhirJson, values) {
+export function buildQR(fhirJson, values, resolve) {
   return {
     resourceType: 'QuestionnaireResponse',
     questionnaire: fhirJson.url || fhirJson.id || '',
     status: 'in-progress',
-    item: (fhirJson.item || []).flatMap(item => buildQRItems(item, values))
+    item: (fhirJson.item || []).flatMap(item => buildQRItems(item, values, resolve))
   };
 }
