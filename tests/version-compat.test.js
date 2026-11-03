@@ -31,17 +31,19 @@ describe('R5 downgrade checker (answerConstraint)', () => {
     expect(msgs).toEqual([]);
   });
 
-  it('warns about an R4 backport extension when downgrading R5 → R4', async () => {
+  it('warns about a builder-private extension when downgrading R5 → R4', async () => {
     const msgs = await versionCompatRegistry.runAll('R5', 'R4', [ac('q1')]);
     expect(msgs).toHaveLength(1);
     expect(msgs[0]).toContain('1 item use answerConstraint');
     expect(msgs[0]).toContain('q1');
-    expect(msgs[0]).toContain('R4 backport extension');
+    expect(msgs[0]).toContain('R4 has no such field');
+    expect(msgs[0]).toContain('builder-private extension');
   });
 
-  it('warns about an R4B native field when downgrading R5 → R4B', async () => {
+  it('does not claim R4B has the field when downgrading R5 → R4B', async () => {
     const msgs = await versionCompatRegistry.runAll('R5', 'R4B', [ac('q1')]);
-    expect(msgs[0]).toContain('R4B native field');
+    expect(msgs[0]).toContain('R4B has no such field');
+    expect(msgs[0]).not.toContain('native field');
   });
 
   it('counts affected items recursively and pluralises', async () => {

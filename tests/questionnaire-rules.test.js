@@ -109,3 +109,42 @@ describe('Default value editor', () => {
     expect(node._initialValue).toBeUndefined();
   });
 });
+
+describe('R5 documents', () => {
+  const R5_MARKER = { url: 'https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/builder-target-version', valueCode: '5.0.0' };
+  const r5 = items => {
+    importFHIR({ resourceType: 'Questionnaire', status: 'draft', title: 't', extension: [R5_MARKER], item: items });
+    return buildFHIRObject();
+  };
+  it('open-choice questions survive re-import, with or without the version marker', () => {
+    const items = [{ linkId: 'q', type: 'coding', text: 'Q', answerConstraint: 'optionsOrString', answerOption: opts(['a', 'b']) }];
+    expect(r5(items).item[0].type).toBe('open-choice');
+    importFHIR({ resourceType: 'Questionnaire', status: 'draft', title: 't', item: items });
+    expect(buildFHIRObject().item[0].type).toBe('open-choice');
+  });
+  it('a plain coding question stays a choice question', () => {
+    expect(r5([{ linkId: 'q', type: 'coding', text: 'Q', answerOption: opts(['a']) }]).item[0].type).toBe('choice');
+  });
+});
+
+describe('Answer Type editor', () => {
+  it('changing the answer source drops the contained / expansion warnings of the old one', async () => {
+    const { ANSWER_TYPE_SECTIONS } = await import('../js/ui/modals/answer-type/registry.js');
+    await import('../js/ui/modals/answer-type/sections/choice.js');
+    const section = ANSWER_TYPE_SECTIONS.find(x => x.constructor.name === 'ChoiceSection');
+    const node = () => ({ itemType: 'select', _answerValueSet: '#vs', _containedVsUnsupported: ['filters the concepts of x'], _vsExpansionIssue: 'cut off' });
+    const manual = node();
+    section.commit({ draftSrc: 'options', draftOptionRows: [{ code: 'a', label: 'A', score: '', prefix: '', weight: '', system: '' }] }, manual, questDoc, null);
+    expect(manual._containedVsUnsupported).toBeUndefined();
+    expect(manual._vsExpansionIssue).toBeUndefined();
+    const expr = node();
+    section.commit({ draftSrc: 'expression', draftAnswerExpr: 'x', draftCandidateExpr: '' }, expr, questDoc, null);
+    expect(expr._containedVsUnsupported).toBeUndefined();
+    const other = node();
+    questDoc.contained = [{ resourceType: 'ValueSet', id: 'ok', compose: { include: [{ system: 'http://s', concept: [{ code: 'a' }] }] } }];
+    section.commit({ draftSrc: 'valueset', draftAVS: '#ok' }, other, questDoc, null);
+    questDoc.contained = [];
+    expect(other._containedVsUnsupported).toBeUndefined();
+    expect(other._vsExpansionIssue).toBeUndefined();
+  });
+});

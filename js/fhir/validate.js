@@ -114,6 +114,13 @@ export function validateTree(tree, _values = {}, questMeta = null) {
       issues.push({ severity: 'error', nodeId: id, message: `Multiple items marked as subject (sdc-questionnaire-isSubject) — a QuestionnaireResponse can have only one subject. Marked on: ${subjectNodes.map(n => n.id).join(', ')}.` });
     }
 
+    if (node._answerValueSet && node._vsExpansionIssue) {
+      issues.push({ severity: 'warning', nodeId: id, message: `${node._answerValueSet}: ${node._vsExpansionIssue}` });
+    }
+    if (node._answerValueSet && node._containedVsUnsupported?.length) {
+      issues.push({ severity: 'warning', nodeId: id, message: `The contained value set ${node._answerValueSet} ${node._containedVsUnsupported.join(' and ')}, which the builder cannot expand itself — only the other listed concepts are offered as options.` });
+    }
+
     // que-5: answerValueSet only valid for choice/open-choice/decimal/integer/date/dateTime/time/string/quantity
     if (node._answerValueSet && node.type === 'item' && !_ANSWER_VS_ALLOWED_TYPES.has(node.itemType)) {
       issues.push({ severity: 'error', nodeId: id, message: `answerValueSet is not valid for item type "${node.itemType}" — R4 invariant que-5 only allows it on choice, open-choice, decimal, integer, date, dateTime, time, string, and quantity items. It will be omitted from the export.` });

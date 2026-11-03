@@ -2,7 +2,7 @@
 import { showError } from '../ui/toast.js';
 import { AppEvents, EventState } from '../events.js';
 import { defaultBus } from '../core/events/bus.js';
-import { normaliseSTU3 } from './stu3-shim.js';
+import { normaliseSTU3, normaliseCodingTypes } from './stu3-shim.js';
 import { destroyTree } from '../utils.js';
 import { resetSeq } from '../id.js';
 import { FHIR } from './urls/fhir.js';
@@ -16,6 +16,7 @@ import {
   humanEnableWhen,
   applyVisibility,
   resolveContainedValueSet,
+  analyseContainedValueSet,
 } from './import-helpers.js';
 import { fhirItemToNode } from './import-item.js';
 import { BUILDER_VERSION_EXTENSION_URL } from './format-registry.js';
@@ -30,6 +31,7 @@ export {
   humanEnableWhen,
   applyVisibility,
   resolveContainedValueSet,
+  analyseContainedValueSet,
 };
 
 // Walk the tree and pre-populate answers from node._initialValue / _initialValues
@@ -66,6 +68,7 @@ export function importFHIR(fhirJson, opts = {}) {
     return false;
   }
   q = normaliseSTU3(q); // no-op for R4; converts STU3 fields to R4 equivalents
+  q = normaliseCodingTypes(q);
   destroyTree(tree);
   bus.dispatch(AppEvents.ANSWERS_CLEAR);
   questDoc.rawFhir = q;

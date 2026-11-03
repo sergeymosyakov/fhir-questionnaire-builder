@@ -5,6 +5,7 @@ import { ITLH_KEY_GROUP_OR } from '../utils.js';import {
   ITEM_DISABLED_DISPLAY_EXTENSION_URL,
 } from './format-registry.js';
 import { FHIR } from './urls/fhir.js';
+import { flattenExpansion } from './expansion.js';
 // ── Known extension URLs — any item.extension[] entry NOT in this set is
 // collected into node._unknownExtensions for pass-through round-tripping.
 export const KNOWN_ITEM_EXTENSION_URLS = new Set([
@@ -226,19 +227,60 @@ export function applyConstraints(node, fhirItem) {
   return hasOrGroup;
 }
 
-// Extract a _rawAnswerOptions-shaped array from a contained[] ValueSet referenced by '#id'
-export function resolveContainedValueSet(contained, ref) {
-  if (!ref || !ref.startsWith('#')) return [];
+// Options of a contained[] ValueSet referenced by '#id', plus the parts that cannot be expanded locally.
+// Handles an existing expansion, listed concepts, nested contained value sets and excluded concepts;
+// includes by whole system or by filter, and external value sets, are reported as unsupported.
+export function analyseContainedValueSet(contained, ref, path = []) {
+  const out = { options: [], unsupported: [] };
+  if (!ref || !ref.startsWith('#')) return out;
   const id = ref.slice(1);
   const vs = (contained || []).find(r => r.resourceType === 'ValueSet' && r.id === id);
-  if (!vs) return [];
-  const parts = [];
-  for (const inc of vs.compose?.include || []) {
-    for (const c of inc.concept || []) {
-      if (c.code) parts.push({ valueCoding: { ...(inc.system ? { system: inc.system } : {}), code: c.code, ...(c.display ? { display: c.display } : {}) } });
-    }
+  if (path.includes(id)) { out.unsupported.push(`includes itself (${ref})`); return out; }
+  if (!vs) { out.unsupported.push(`refers to ${ref}, which is not contained`); return out; }
+  const coding = (system, c) => ({ valueCoding: { ...(system ? { system } : {}), code: c.code, ...(c.display ? { display: c.display } : {}) } });
+  const flat = flattenExpansion(vs.expansion, { raw: true });
+  if (flat.options.length) {
+    out.options = flat.options.map(o => coding(o.system, o));
+    if (flat.truncated) out.unsupported.push(`has an expansion cut off at ${flat.options.length} of ${flat.total} entries`);
+    return out;
   }
-  return parts;
+  const exclude = vs.compose?.exclude || [];
+  // An exclude that also names value sets or filters is an intersection, so its listed concepts are not removed outright
+  const excluded = new Set(exclude.filter(ex => !ex.valueSet?.length && !ex.filter?.length).flatMap(ex => (ex.concept || []).map(c => `${ex.system || ''}|${c.code}`)));
+  for (const ex of exclude) {
+    if (ex.valueSet?.length || ex.filter?.length || (ex.system && !ex.concept?.length)) out.unsupported.push('excludes concepts by system, filter or value set');
+  }
+  const seen = new Set();
+  const add = o => {
+    const key = `${o.valueCoding.system || ''}|${o.valueCoding.code}`;
+    if (excluded.has(key) || seen.has(key)) return;
+    seen.add(key);
+    out.options.push(o);
+  };
+  for (const inc of vs.compose?.include || []) {
+    let handled = false;
+    if (inc.valueSet?.length && inc.system) out.unsupported.push(`combines ${inc.system} with other value sets`);
+    if (inc.valueSet?.length > 1) out.unsupported.push('intersects several value sets');
+    for (const c of inc.concept || []) {
+      handled = true;
+      if (c.code) add(coding(inc.system, c));
+    }
+    for (const ref2 of inc.valueSet || []) {
+      handled = true;
+      if (!ref2.startsWith('#')) { out.unsupported.push(`includes the external value set ${ref2}`); continue; }
+      const nested = analyseContainedValueSet(contained, ref2, [...path, id]);
+      nested.options.forEach(add);
+      out.unsupported.push(...nested.unsupported);
+    }
+    if (inc.filter?.length) out.unsupported.push(`filters the concepts of ${inc.system || 'a code system'}`);
+    else if (!handled && inc.system) out.unsupported.push(`includes every concept of ${inc.system}`);
+  }
+  return out;
+}
+
+// Extract a _rawAnswerOptions-shaped array from a contained[] ValueSet referenced by '#id'
+export function resolveContainedValueSet(contained, ref) {
+  return analyseContainedValueSet(contained, ref).options;
 }
 
 // answerOption[] is emitted only when options are the item's sole answer source

@@ -1,6 +1,6 @@
 import { AnswerTypeSection } from '../base-section.js';
 import { ANSWER_TYPE_SECTIONS } from '../registry.js';
-import { resolveContainedValueSet } from '../../../../fhir/import.js';
+import { analyseContainedValueSet } from '../../../../fhir/import.js';
 import { createCustomSelect } from '../../../custom-select.js';
 import { CHOICE_TYPES } from '../data.js';
 import { createOptionsEditor } from '../../../answer-options-editor.js';
@@ -418,15 +418,21 @@ class ChoiceSection extends AnswerTypeSection {
           delete node._answerExpressionLanguage;
         }
         delete node._answerValueSet;
+        delete node._containedVsUnsupported;
+        delete node._vsExpansionIssue;
         delete node._optionOrdinals;
         delete node._optionPrefixes;
         delete node._optionExclusives;
         delete node._optionWeights;
         delete node._answerMedias;
       } else if (pending.draftAVS) {
+        const prevAVS = node._answerValueSet;
         node._answerValueSet = pending.draftAVS;
-        const resolved = resolveContainedValueSet(questDoc?.contained ?? [], pending.draftAVS);
+        const { options: resolved, unsupported } = analyseContainedValueSet(questDoc?.contained ?? [], pending.draftAVS);
         node._rawAnswerOptions = resolved.length ? resolved : undefined;
+        if (unsupported.length) node._containedVsUnsupported = [...new Set(unsupported)];
+        else delete node._containedVsUnsupported;
+        if (pending.draftAVS !== prevAVS) delete node._vsExpansionIssue;
         delete node._optionOrdinals;
         delete node._optionPrefixes;
         delete node._optionExclusives;
@@ -434,6 +440,8 @@ class ChoiceSection extends AnswerTypeSection {
         delete node._answerMedias;
       } else {
         delete node._answerValueSet;
+        delete node._containedVsUnsupported;
+        delete node._vsExpansionIssue;
         delete node._answerExpression;
         delete node._candidateExpression;
         delete node._answerExpressionLanguage;
@@ -519,6 +527,8 @@ class ChoiceSection extends AnswerTypeSection {
       }
     } else {
       delete node._answerValueSet;
+      delete node._containedVsUnsupported;
+      delete node._vsExpansionIssue;
       delete node._answerExpression;
       delete node._answerExpressionLanguage;
       delete node._optionOrdinals;

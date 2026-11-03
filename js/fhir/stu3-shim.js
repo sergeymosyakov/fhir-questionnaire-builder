@@ -166,3 +166,19 @@ export function normaliseSTU3(fhirJson) {
   for (const item of q.item || []) _normaliseItem(item);
   return q;
 }
+
+const _hasCoding = items => (items || []).some(i => i.type === 'coding' || _hasCoding(i.item));
+function _convertCodingTypes(items) {
+  for (const item of items || []) {
+    _convertItemType(item);
+    _convertCodingTypes(item.item);
+  }
+}
+
+// R5 `coding` items (with or without the builder's version marker) become choice / open-choice
+export function normaliseCodingTypes(fhirJson) {
+  if (!_hasCoding(fhirJson?.item)) return fhirJson;
+  const q = JSON.parse(JSON.stringify(fhirJson));
+  _convertCodingTypes(q.item);
+  return q;
+}
