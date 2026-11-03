@@ -118,7 +118,7 @@ test.describe('SDC Definition Extract — repeating field values', () => {
     await expect(modal.getByTestId('def-extract-summary')).toContainText('Extracted 1 resource');
   });
 
-  test('downloaded bundle promotes repeated given names to an array', async ({ page }) => {
+  test('downloaded bundle lists repeated given names under a single name element', async ({ page }) => {
     await loadRepeat(page);
     await openDropdownItem(page, 'export-btn', 'export-def-extract-item');
     const modal = page.locator('[data-testid="defExtract"]').first();
@@ -134,7 +134,35 @@ test.describe('SDC Definition Extract — repeating field values', () => {
 
     const patient = bundle.entry[0].resource;
     expect(patient.resourceType).toBe('Patient');
-    expect(patient.name.family).toBe('Doe');
-    expect(patient.name.given).toEqual(['John', 'James']);
+    expect(patient.name).toEqual([{ family: 'Doe', given: ['John', 'James'] }]);
+    expect(patient).not.toHaveProperty('id');
+  });
+});
+
+// ── Element shapes and the extension's own parameters ────────────────────────
+test.describe('SDC Definition Extract — spec-conformant output', () => {
+  const SHAPES = path.resolve('tests/fixtures/def-extract-shapes.fhir.json');
+
+  test('coded answers take the shape of their element and the extension parameters are used', async ({ page }) => {
+    await freshStart(page);
+    await loadFixtureFile(page, SHAPES);
+    await page.waitForSelector('[data-testid="tree-container"] [data-node-id]', { timeout: 15_000 });
+    await openDropdownItem(page, 'export-btn', 'export-def-extract-item');
+    await expect(page.locator('[data-testid="defExtract"]').first()).toBeVisible();
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('defExtractApply').click(),
+    ]);
+    const { readFileSync } = await import('node:fs');
+    const bundle = JSON.parse(readFileSync(await download.path(), 'utf8'));
+
+    const patient = bundle.entry.find(e => e.resource.resourceType === 'Patient');
+    const condition = bundle.entry.find(e => e.resource.resourceType === 'Condition');
+    expect(patient.fullUrl).toBe('urn:uuid:11111111-1111-1111-1111-111111111111');
+    expect(patient.resource.gender).toBe('female');
+    expect(patient.resource).not.toHaveProperty('id');
+    expect(patient.resource).not.toHaveProperty('meta');
+    expect(condition.resource.code).toEqual({ coding: [{ system: 'http://snomed.info/sct', code: '73211009', display: 'Diabetes mellitus' }] });
   });
 });

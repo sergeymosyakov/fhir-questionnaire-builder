@@ -72,6 +72,11 @@ export function structureMapExtract(questJson, qr, { engine = createStructureMap
     return { bundle: null, count: 0, warnings: ['StructureMap produced no output.'] };
   }
 
+  // A map that already builds its own Bundle is returned as is
+  if (resources.length === 1 && resources[0].resourceType === 'Bundle') {
+    return { bundle: resources[0], count: resources[0].entry?.length ?? 0, warnings: [] };
+  }
+
   const bundle = {
     resourceType: 'Bundle',
     type: 'transaction',

@@ -15,6 +15,15 @@ Two things make an item extractable:
    every coded question beneath it, and an explicit "off" on one child overrides
    that inherited "on" for just that item.
 
+A question with several codes can also switch individual codes on or off: a code marked
+"on" produces an Observation carrying just that code (even if the question itself is not
+marked), and a code marked "off" is left out of the question's Observation.
+
+The category of the extracted Observations (for example *vital signs*) comes from the
+`observation-extract-category` setting on the questionnaire or an item; the nearest one
+above an item wins. The builder does not edit this setting, but keeps it when a file is
+imported and exported.
+
 Every coded item with an answer produces one `Observation` (`status: final`).
 Answers with a `questionnaire-unit` extension are written as a `valueQuantity`
 with that unit; other answer types map to the matching `value[x]` (string,

@@ -33,6 +33,7 @@ export async function populateFromServer(fhirBase, questJson, patientRef, opts =
     parameter: [
       { name: 'questionnaire',   resource: questJson },
       { name: 'subject', valueReference: { reference: patientRef } },
+      { name: 'local',   valueBoolean: true },
     ],
   });
 

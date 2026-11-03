@@ -17,7 +17,21 @@ Two pieces drive it:
    `.../StructureDefinition/{Type}#{path}`. The answer to that item is written to
    that field on the new resource.
 
-Nested paths such as `name.family` are supported and set as deep properties.
+Nested paths such as `name.family` are supported. The builder knows each element's type and
+whether it repeats, so a coded answer becomes the right kind of value (a codeable concept,
+a coding or a plain code), a single-valued element stays single and a repeating one
+(like a name's given names) becomes a list. If several answers are given for a
+single-valued element, the first is used and you get a warning. A repeating group whose
+item has a definition (for example a patient's contacts) produces one element per row the
+user filled in, and answers entered under another answer are included.
+
+No resource id is made up: the extracted resources carry only what the form provided. Each
+Bundle entry gets a fresh `urn:uuid` address unless the extension says otherwise. The
+extension's own settings are honored — the profile to extract (added to the resource's
+`meta.profile` unless it is the plain resource type), the entry address (`fullUrl`) and the
+conditional-request settings (`ifNoneMatch`, `ifMatch`, `ifNoneExist`, `ifModifiedSince`), each
+given as a FHIRPath expression evaluated against the group's answers. Allocating ids
+across resources (`extractAllocateId`) and fixed values (`definitionExtractValue`) are not supported.
 
 ## Supported resource types
 

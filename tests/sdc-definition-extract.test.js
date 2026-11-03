@@ -2,9 +2,16 @@
 // definitionExtract() is a pure FHIR transformation — no DOM, no state.
 
 import { describe, it, expect } from 'vitest';
-import { definitionExtract } from '../js/fhir/sdc-definition-extract.js';
+import { createRequire } from 'node:module';
+import fhirpath from 'fhirpath';
+import { definitionExtract as extract } from '../js/fhir/sdc-definition-extract.js';
 import { FHIR } from '../js/fhir/urls/fhir.js';
 import { LOINC_URL } from '../js/fhir/urls/loinc.js';
+
+const require = createRequire(import.meta.url);
+const model = require('fhirpath/fhir-context/r4');
+const evaluate = (expression, context, qr) => fhirpath.evaluate(context, { base: 'QuestionnaireResponse.item', expression }, { resource: qr, context }, model);
+const definitionExtract = (q, qr, opts = {}) => extract(q, qr, { model, evaluate, ...opts });
 
 const EXTRACT_URL     = FHIR.definitionExtract;
 const EXTRACT_CTX_URL = FHIR.definitionExtractContext;
@@ -71,17 +78,18 @@ describe('definitionExtract — Patient resource', () => {
     expect(bundle.entry).toHaveLength(1);
   });
 
-  it('resource has expected resourceType and id', () => {
+  it('resource has the expected type and no invented id or profile', () => {
     const { bundle } = definitionExtract(q, qr);
     const r = bundle.entry[0].resource;
     expect(r.resourceType).toBe('Patient');
-    expect(r.id).toMatch(/^extracted-patient-1$/i);
+    expect(r.id).toBeUndefined();
+    expect(r.meta).toBeUndefined();
   });
 
   it('sets nested name.family correctly', () => {
     const { bundle } = definitionExtract(q, qr);
     const r = bundle.entry[0].resource;
-    expect(r.name.family).toBe('Doe');
+    expect(r.name).toEqual([{ family: 'Doe' }]);
   });
 
   it('sets birthDate correctly', () => {
@@ -187,12 +195,12 @@ describe('definitionExtract — answerToValue covers all value types', () => {
     expect(bundle.entry[0].resource.effective).toBe('2024-01-01T00:00:00Z');
   });
 
-  it('handles valueCoding (array field)', () => {
+  it('handles valueCoding (repeating CodeableConcept element)', () => {
     const coding = { system: LOINC_URL.system, code: '8310-5' };
-    const q  = makeQ([{ linkId:'g', type:'group', definition:`${SD_BASE}Obs#Obs`, extension:[{url:EXTRACT_URL}], item:[{linkId:'c',type:'choice',definition:`${SD_BASE}Obs#Obs.category`}] }]);
+    const q  = makeQ([{ linkId:'g', type:'group', definition:`${SD_BASE}Observation#Observation`, extension:[{url:EXTRACT_URL}], item:[{linkId:'c',type:'choice',definition:`${SD_BASE}Observation#Observation.category`}] }]);
     const qr = makeQR([{ linkId:'g', item:[{linkId:'c',answer:[{valueCoding:coding}]}] }]);
     const { bundle } = definitionExtract(q, qr);
-    expect(bundle.entry[0].resource.category[0]).toEqual(coding);
+    expect(bundle.entry[0].resource.category).toEqual([{ coding: [coding] }]);
   });
 
   it('handles valueQuantity', () => {
@@ -211,15 +219,12 @@ describe('definitionExtract — answerToValue covers all value types', () => {
     expect(bundle.entry[0].resource.subject).toEqual(ref);
   });
 
-  it('creates resource but sets no fields when answer value type is unrecognized', () => {
-    const q  = makeQ([{ linkId:'g', type:'group', definition:`${SD_BASE}Obs#Obs`, extension:[{url:EXTRACT_URL}], item:[{linkId:'x',type:'string',definition:`${SD_BASE}Obs#Obs.valueString`}] }]);
+  it('creates no resource when the only answer has no usable value', () => {
+    const q  = makeQ([{ linkId:'g', type:'group', definition:`${SD_BASE}Observation#Observation`, extension:[{url:EXTRACT_URL}], item:[{linkId:'x',type:'string',definition:`${SD_BASE}Observation#Observation.status`}] }]);
     const qr = makeQR([{ linkId:'g', item:[{linkId:'x',answer:[{}]}] }]);
-    // answer has no value → answerToValue returns null → setPath not called
-    // but resource IS created (field was found with answer.length > 0)
     const { bundle, count } = definitionExtract(q, qr);
-    expect(count).toBe(1);
-    expect(bundle.entry[0].resource.resourceType).toBe('Obs');
-    expect(bundle.entry[0].resource.valueString).toBeUndefined();
+    expect(count).toBe(0);
+    expect(bundle).toBeNull();
   });
 });
 
@@ -282,23 +287,23 @@ describe('definitionExtract — setPath array fields', () => {
       item: [{ linkId: 'id-field', answer: [{ valueString: 'MRN-001' }] }],
     }]);
     const { bundle } = definitionExtract(q, qr);
-    expect(bundle.entry[0].resource.identifier).toEqual(['MRN-001']);
+    expect(bundle.entry[0].resource.identifier).toEqual([{ value: 'MRN-001' }]);
   });
 
-  it('appends to existing array field on second answer', () => {
+  it('keeps both answers of a repeating element', () => {
     const q  = makeQ([{
       linkId: 'g',
       type: 'group',
       definition: `${SD_BASE}Patient#Patient`,
       extension: [{ url: EXTRACT_URL }],
-      item: [{ linkId: 'code-f', type: 'string', definition: `${SD_BASE}Patient#Patient.code` }],
+      item: [{ linkId: 'code-f', type: 'string', definition: `${SD_BASE}Patient#Patient.name.given` }],
     }]);
     const qr = makeQR([{
       linkId: 'g',
       item: [{ linkId: 'code-f', answer: [{ valueString: 'A' }, { valueString: 'B' }] }],
     }]);
     const { bundle } = definitionExtract(q, qr);
-    expect(bundle.entry[0].resource.code).toEqual(['A', 'B']);
+    expect(bundle.entry[0].resource.name[0].given).toEqual(['A', 'B']);
   });
 });
 
@@ -399,14 +404,14 @@ describe('definitionExtract — nested structures', () => {
       }],
     }]);
     const { bundle } = definitionExtract(q, qr);
-    expect(bundle.entry[0].resource.name.given).toBe('Alice');
+    expect(bundle.entry[0].resource.name[0].given).toEqual(['Alice']);
   });
 });
 
 // ── Repeating field values → arrays ──────────────────────────────────────────
 
 describe('definitionExtract — repeating field values', () => {
-  it('promotes a repeated non-array leaf (name.given) to an array', () => {
+  it('keeps every answer of a repeating element (name.given) in a list', () => {
     const q  = makeQ([{
       linkId: 'g', type: 'group', definition: `${SD_BASE}Patient#Patient`,
       extension: [{ url: EXTRACT_URL }],
@@ -417,10 +422,10 @@ describe('definitionExtract — repeating field values', () => {
       item: [{ linkId: 'given', answer: [{ valueString: 'John' }, { valueString: 'James' }] }],
     }]);
     const { bundle } = definitionExtract(q, qr);
-    expect(bundle.entry[0].resource.name.given).toEqual(['John', 'James']);
+    expect(bundle.entry[0].resource.name[0].given).toEqual(['John', 'James']);
   });
 
-  it('keeps a single value scalar', () => {
+  it('a single answer of a repeating element is still a list', () => {
     const q  = makeQ([{
       linkId: 'g', type: 'group', definition: `${SD_BASE}Patient#Patient`,
       extension: [{ url: EXTRACT_URL }],
@@ -431,7 +436,7 @@ describe('definitionExtract — repeating field values', () => {
       item: [{ linkId: 'given', answer: [{ valueString: 'Solo' }] }],
     }]);
     const { bundle } = definitionExtract(q, qr);
-    expect(bundle.entry[0].resource.name.given).toBe('Solo');
+    expect(bundle.entry[0].resource.name[0].given).toEqual(['Solo']);
   });
 });
 
@@ -452,17 +457,17 @@ describe('definitionExtract — repeating groups', () => {
     ]);
     const { bundle, count } = definitionExtract(q, qr);
     expect(count).toBe(2);
-    expect(bundle.entry.map(e => e.resource.name.family)).toEqual(['Doe', 'Roe']);
+    expect(bundle.entry.map(e => e.resource.name[0].family)).toEqual(['Doe', 'Roe']);
   });
 
-  it('gives each extracted resource a unique id', () => {
+  it('gives each entry its own fullUrl and invents no resource id', () => {
     const qr = makeQR([
       { linkId: 'contact-g', item: [{ linkId: 'family', answer: [{ valueString: 'Doe' }] }] },
       { linkId: 'contact-g', item: [{ linkId: 'family', answer: [{ valueString: 'Roe' }] }] },
     ]);
     const { bundle } = definitionExtract(q, qr);
-    const ids = bundle.entry.map(e => e.resource.id);
-    expect(new Set(ids).size).toBe(2);
+    expect(new Set(bundle.entry.map(e => e.fullUrl)).size).toBe(2);
+    expect(bundle.entry.every(e => e.resource.id === undefined)).toBe(true);
   });
 
   it('scopes each instance to its own answers (no cross-contamination)', () => {
@@ -471,8 +476,8 @@ describe('definitionExtract — repeating groups', () => {
       { linkId: 'contact-g', item: [{ linkId: 'family', answer: [{ valueString: 'Second' }] }] },
     ]);
     const { bundle } = definitionExtract(q, qr);
-    expect(bundle.entry[0].resource.name.family).toBe('First');
-    expect(bundle.entry[1].resource.name.family).toBe('Second');
+    expect(bundle.entry[0].resource.name[0].family).toBe('First');
+    expect(bundle.entry[1].resource.name[0].family).toBe('Second');
   });
 });
 
@@ -511,5 +516,110 @@ describe('definitionExtract — parseDefinition edge cases', () => {
     // parseDefinition returns null for group def (no #), so infers from children
     const { count } = definitionExtract(q, qr);
     expect(count).toBe(1);
+  });
+});
+
+// ── Element shapes, nested answers, repeating elements, extension parameters ──
+describe('definitionExtract — spec-conformant output', () => {
+  const group = (type, items, extra = {}) => ({ linkId: 'g', type: 'group', definition: `${SD_BASE}${type}#${type}`, extension: [{ url: EXTRACT_URL }], item: items, ...extra });
+  const field = (linkId, type, path, extra = {}) => ({ linkId, type, definition: `${SD_BASE}${type === undefined ? '' : ''}${path.split('.')[0]}#${path}`, ...extra });
+  const run = (q, items, opts) => definitionExtract(makeQ(q), makeQR(items), opts);
+  const coding = { system: 'http://snomed.info/sct', code: '73211009', display: 'Diabetes mellitus' };
+
+  it('a single coded field becomes one CodeableConcept, not a list', () => {
+    const { bundle } = run([group('Condition', [field('c', 'choice', 'Condition.code')])], [{ linkId: 'g', item: [{ linkId: 'c', answer: [{ valueCoding: coding }] }] }]);
+    expect(bundle.entry[0].resource.code).toEqual({ coding: [coding] });
+  });
+
+  it('a gender coding becomes the code string', () => {
+    const { bundle } = run([group('Patient', [field('s', 'choice', 'Patient.gender')])], [{ linkId: 'g', item: [{ linkId: 's', answer: [{ valueCoding: { system: 'http://hl7.org/fhir/administrative-gender', code: 'female', display: 'Female' } }] }] }]);
+    expect(bundle.entry[0].resource.gender).toBe('female');
+  });
+
+  it('value[x] takes the type of the answer', () => {
+    const items = [field('q', 'quantity', 'Observation.value[x]')];
+    const qty = { value: 70, unit: 'kg' };
+    expect(run([group('Observation', items)], [{ linkId: 'g', item: [{ linkId: 'q', answer: [{ valueQuantity: qty }] }] }]).bundle.entry[0].resource.valueQuantity).toEqual(qty);
+    expect(run([group('Observation', items)], [{ linkId: 'g', item: [{ linkId: 'q', answer: [{ valueCoding: coding }] }] }]).bundle.entry[0].resource.valueCodeableConcept).toEqual({ coding: [coding] });
+  });
+
+  it('a number is not accepted for a text element and a bad integer is skipped', () => {
+    const { bundle } = run([group('Patient', [field('a', 'string', 'Patient.birthDate'), field('b', 'string', 'Patient.multipleBirthInteger')])],
+      [{ linkId: 'g', item: [{ linkId: 'a', answer: [{ valueString: '1990-01-01' }] }, { linkId: 'b', answer: [{ valueString: 'x' }] }] }]);
+    expect(bundle.entry[0].resource.birthDate).toBe('1990-01-01');
+    expect(bundle.entry[0].resource).not.toHaveProperty('multipleBirthInteger');
+  });
+
+  it('warns when several answers go to a single-valued element and uses the first', () => {
+    const { bundle, warnings } = run([group('Patient', [field('b', 'string', 'Patient.birthDate')])],
+      [{ linkId: 'g', item: [{ linkId: 'b', answer: [{ valueString: '1990-01-01' }, { valueString: '1991-01-01' }] }] }]);
+    expect(bundle.entry[0].resource.birthDate).toBe('1990-01-01');
+    expect(warnings.join(' ')).toMatch(/single value/);
+  });
+
+  it('answers nested under an answer are extracted', () => {
+    const q = [group('Patient', [{ ...field('top', 'string', 'Patient.name.family'), item: [field('sub', 'string', 'Patient.name.given')] }])];
+    const { bundle } = run(q, [{ linkId: 'g', item: [{ linkId: 'top', answer: [{ valueString: 'Doe', item: [{ linkId: 'sub', answer: [{ valueString: 'Jane' }] }] }] }] }]);
+    expect(bundle.entry[0].resource.name[0]).toMatchObject({ family: 'Doe', given: ['Jane'] });
+  });
+
+  it('a repeating group with a definition gives one element per instance', () => {
+    const contactGroup = { linkId: 'contact', type: 'group', repeats: true, definition: `${SD_BASE}Patient#Patient.contact`, item: [field('cf', 'string', 'Patient.contact.name.family')] };
+    const { bundle } = run([group('Patient', [contactGroup])], [{ linkId: 'g', item: [
+      { linkId: 'contact', item: [{ linkId: 'cf', answer: [{ valueString: 'Doe' }] }] },
+      { linkId: 'contact', item: [{ linkId: 'cf', answer: [{ valueString: 'Roe' }] }] },
+    ] }]);
+    expect(bundle.entry[0].resource.contact.map(c => c.name.family)).toEqual(['Doe', 'Roe']);
+  });
+
+  it('uses the extension parameters for the entry and the profile', () => {
+    const profile = 'http://example.org/StructureDefinition/my-patient';
+    const ext = { url: EXTRACT_URL, extension: [
+      { url: 'definition', valueCanonical: profile },
+      { url: 'fullUrl', valueString: "'urn:uuid:11111111-1111-1111-1111-111111111111'" },
+      { url: 'ifNoneExist', valueString: "'identifier=urn:x|' + item.where(linkId='mrn').answer.value" },
+    ] };
+    const items = [group('Patient', [field('mrn', 'string', 'Patient.name.family')], { extension: [ext] })];
+    const { bundle } = run(items, [{ linkId: 'g', item: [{ linkId: 'mrn', answer: [{ valueString: 'M1' }] }] }]);
+    const entry = bundle.entry[0];
+    expect(entry.fullUrl).toBe('urn:uuid:11111111-1111-1111-1111-111111111111');
+    expect(entry.request).toEqual({ method: 'POST', url: 'Patient', ifNoneExist: 'identifier=urn:x|M1' });
+    expect(entry.resource.meta).toEqual({ profile: [profile] });
+  });
+
+  it('a nested extract group keeps its own resource type', () => {
+    const nested = { linkId: 'cond', type: 'group', extension: [{ url: EXTRACT_URL, extension: [{ url: 'definition', valueCanonical: `${SD_BASE}Condition` }] }],
+      item: [field('c', 'choice', 'Condition.code')] };
+    const { bundle } = run([group('Encounter', [field('s', 'string', 'Encounter.status'), nested])],
+      [{ linkId: 'g', item: [{ linkId: 's', answer: [{ valueString: 'finished' }] }, { linkId: 'cond', item: [{ linkId: 'c', answer: [{ valueCoding: coding }] }] }] }]);
+    expect(bundle.entry.map(e => e.resource.resourceType)).toEqual(['Encounter', 'Condition']);
+    expect(bundle.entry[1].resource.code).toEqual({ coding: [coding] });
+  });
+
+  it('a date answer fits dateTime choices and a decimal fits a Quantity value', () => {
+    const { bundle } = run([group('Observation', [field('d', 'date', 'Observation.effective[x]'), field('n', 'decimal', 'Observation.value[x]')])],
+      [{ linkId: 'g', item: [{ linkId: 'd', answer: [{ valueDate: '2024-05-01' }] }, { linkId: 'n', answer: [{ valueDecimal: 7.5 }] }] }]);
+    expect(bundle.entry[0].resource).toMatchObject({ effectiveDateTime: '2024-05-01', valueQuantity: { value: 7.5 } });
+  });
+
+  it('a path that names an inherited property writes nothing onto it', () => {
+    run([group('Patient', [field('x', 'string', 'Patient.toString.x')])], [{ linkId: 'g', item: [{ linkId: 'x', answer: [{ valueString: 'v' }] }] }]);
+    expect(Object.prototype.toString.x).toBeUndefined();
+    expect(({}).toString.x).toBeUndefined();
+  });
+
+  it('warns when the instances of a group go into one single-valued element', () => {
+    const maritalGroup = { linkId: 'bd', type: 'group', repeats: true, definition: `${SD_BASE}Patient#Patient.maritalStatus`, item: [field('t', 'string', 'Patient.maritalStatus.text')] };
+    const { warnings } = run([group('Patient', [maritalGroup])], [{ linkId: 'g', item: [
+      { linkId: 'bd', item: [{ linkId: 't', answer: [{ valueString: 'single' }] }] },
+      { linkId: 'bd', item: [{ linkId: 't', answer: [{ valueString: 'married' }] }] },
+    ] }]);
+    expect(warnings.join(' ')).toMatch(/several group instances/);
+  });
+
+  it('a base resource canonical adds no profile', () => {
+    const ext = { url: EXTRACT_URL, extension: [{ url: 'definition', valueCanonical: `${SD_BASE}Patient` }] };
+    const { bundle } = run([group('Patient', [field('f', 'string', 'Patient.name.family')], { extension: [ext] })], [{ linkId: 'g', item: [{ linkId: 'f', answer: [{ valueString: 'X' }] }] }]);
+    expect(bundle.entry[0].resource.meta).toBeUndefined();
   });
 });

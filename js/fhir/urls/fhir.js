@@ -87,6 +87,7 @@ export const FHIR = {
   hiddenSdc:            SDC + '/sdc-questionnaire-hidden',
   openLabel:            SDC + '/sdc-questionnaire-openLabel',
   observationExtract:   SDC + '/sdc-questionnaire-observationExtract',
+  observationExtractCategory: SDC + '/sdc-questionnaire-observation-extract-category',
   shortText:            SDC + '/sdc-questionnaire-shortText',
   itemContext:          SDC + '/sdc-questionnaire-itemContext',
   itemExtractionContext: SDC + '/sdc-questionnaire-itemExtractionContext',

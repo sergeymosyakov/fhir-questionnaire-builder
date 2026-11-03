@@ -257,3 +257,44 @@ describe('extractObservations — repeating groups', () => {
   });
 });
 
+
+describe('extractObservations — per-code flags and category', () => {
+  const A = { system: 's', code: 'a' };
+  const B = { system: 's', code: 'b' };
+  const qrOf = () => ({ resourceType: 'QuestionnaireResponse', item: [{ linkId: 'q', answer: [{ valueInteger: 5 }] }] });
+  const codesOf = bundle => bundle.entry.map(e => e.resource.code.coding.map(c => c.code));
+
+  it('a code switched off is left out of an item that is extracted', () => {
+    const q = { resourceType: 'Questionnaire', item: [{ linkId: 'q', type: 'integer', extension: [flag()], code: [A, { ...B, extension: [flag(false)] }] }] };
+    expect(codesOf(extractObservations(qrOf(), q))).toEqual([['a']]);
+  });
+
+  it('a flagged code is extracted alone, even when the item itself is not flagged', () => {
+    const q = { resourceType: 'Questionnaire', item: [{ linkId: 'q', type: 'integer', code: [A, { ...B, extension: [flag()] }] }] };
+    expect(codesOf(extractObservations(qrOf(), q))).toEqual([['b']]);
+  });
+
+  it('every flagged code gives its own Observation', () => {
+    const q = { resourceType: 'Questionnaire', item: [{ linkId: 'q', type: 'integer', code: [{ ...A, extension: [flag()] }, { ...B, extension: [flag()] }] }] };
+    expect(codesOf(extractObservations(qrOf(), q))).toEqual([['a'], ['b']]);
+  });
+
+  const vital = { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/observation-category', code: 'vital-signs' }] };
+  const social = { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/observation-category', code: 'social-history' }] };
+  const cat = cc => ({ url: FHIR.observationExtractCategory, valueCodeableConcept: cc });
+
+  it('the questionnaire-level category is used on extracted Observations', () => {
+    const q = { resourceType: 'Questionnaire', extension: [flag(), cat(vital)], item: [{ linkId: 'q', type: 'integer', code: [A] }] };
+    expect(extractObservations(qrOf(), q).entry[0].resource.category).toEqual([vital]);
+  });
+
+  it('a category on an item overrides the one above it', () => {
+    const q = { resourceType: 'Questionnaire', extension: [flag(), cat(vital)], item: [{ linkId: 'q', type: 'integer', code: [A], extension: [cat(social)] }] };
+    expect(extractObservations(qrOf(), q).entry[0].resource.category).toEqual([social]);
+  });
+
+  it('no category extension leaves Observation.category out', () => {
+    const q = { resourceType: 'Questionnaire', item: [{ linkId: 'q', type: 'integer', code: [A], extension: [flag()] }] };
+    expect(extractObservations(qrOf(), q).entry[0].resource).not.toHaveProperty('category');
+  });
+});

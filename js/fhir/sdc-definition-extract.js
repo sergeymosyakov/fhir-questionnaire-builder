@@ -1,21 +1,20 @@
 import { FHIR } from './urls/fhir.js';
+import { fhirModel } from './fhir-model.js';
 // ── SDC Definition-based extraction ──────────────────────────────────────────
 // Pure transformation: Questionnaire + QuestionnaireResponse → Bundle of FHIR
 // resources constructed from item.definition mappings.
 //
 // SDC spec: https://hl7.org/fhir/uv/sdc/extraction.html#definition-based-extraction
 //
-// Scope (MVP):
-// • Scans for group items annotated with sdc-questionnaire-definitionExtract.
-// • Each annotated group defines one resource instance of the type encoded in
-//   item.definition (or child item definitions).
-// • Child items with item.definition = '...StructureDefinition/{Type}#{path}'
-//   map their QR answers to element paths in the target resource.
-// • Supports: Patient, Condition, Observation, Encounter, Practitioner,
-//   Medication, MedicationRequest, Procedure, AllergyIntolerance and any other
-//   type with simple (non-nested) element paths.
-// • Nested paths like 'name.family' are set as deep properties.
-// • A transaction Bundle is returned; each resource gets a temporary id.
+// • Each group annotated with sdc-questionnaire-definitionExtract defines one resource per
+//   response instance of the type encoded in item.definition (or child item definitions).
+// • Items with item.definition = '...StructureDefinition/{Type}#{path}' map their answers to that element.
+//   The element's type and cardinality come from the R4 model, so a coded answer becomes a CodeableConcept /
+//   Coding / code as the element requires, and single-valued elements are not turned into lists.
+// • A group with a definition is one element (one per response instance); answers nested under answers are used.
+// • The extension's own parameters (definition, fullUrl, ifNoneMatch, ifMatch, ifNoneExist, ifModifiedSince)
+//   become the Bundle entry; no resource id or profile is invented.
+// Not supported: extractAllocateId, definitionExtractValue.
 
 const DEFINITION_EXTRACT_URL =
   FHIR.definitionExtract;
@@ -55,132 +54,240 @@ function parseDefinition(definition) {
  * Convert a QR answer object to a raw FHIR value.
  */
 function answerToValue(answer) {
-  if (answer.valueString    !== undefined) return answer.valueString;
-  if (answer.valueInteger   !== undefined) return answer.valueInteger;
-  if (answer.valueDecimal   !== undefined) return answer.valueDecimal;
-  if (answer.valueBoolean   !== undefined) return answer.valueBoolean;
-  if (answer.valueDate      !== undefined) return answer.valueDate;
-  if (answer.valueDateTime  !== undefined) return answer.valueDateTime;
-  if (answer.valueCoding    !== undefined) return answer.valueCoding;
-  if (answer.valueQuantity  !== undefined) return answer.valueQuantity;
-  if (answer.valueReference !== undefined) return answer.valueReference;
+  for (const k of ['valueString', 'valueInteger', 'valueDecimal', 'valueBoolean', 'valueDate', 'valueDateTime', 'valueTime',
+    'valueUri', 'valueCoding', 'valueQuantity', 'valueReference', 'valueAttachment']) {
+    if (answer[k] !== undefined) return answer[k];
+  }
   return null;
 }
 
-/**
- * Set a value at a dot-notation path in an object.
- * 'name.family' → obj.name.family = value
- * 'name[0].family' → obj.name = [{ family: value }]
- */
-function setPath(obj, path, value) {
-  if (!path) return;
-  const parts = path.split('.');
-  // Guard against prototype pollution from attacker-controlled item.definition paths.
-  const isUnsafeKey = (k) => k === '__proto__' || k === 'constructor' || k === 'prototype';
+const STRING_TYPES = new Set(['string', 'markdown', 'id', 'uri', 'url', 'canonical', 'oid', 'uuid', 'base64Binary']);
+const QUANTITY_TYPES = new Set(['Quantity', 'SimpleQuantity', 'Age', 'Count', 'Duration', 'Distance', 'Money']);
+
+/** Shape an answer for an element of the given FHIR type; null when it cannot be represented. */
+function convertAnswer(answer, type) {
+  const raw = answerToValue(answer);
+  if (raw == null) return null;
+  const coding = answer.valueCoding;
+  if (type === 'CodeableConcept') return coding ? { coding: [coding] } : typeof raw === 'string' ? { text: raw } : null;
+  if (type === 'Coding') return coding ?? null;
+  if (type === 'code') return coding ? coding.code ?? null : String(raw);
+  if (STRING_TYPES.has(type)) return coding ? coding.display ?? coding.code ?? null : typeof raw === 'object' ? null : String(raw);
+  if (type === 'boolean') return typeof raw === 'boolean' ? raw : null;
+  if (type === 'integer' || type === 'positiveInt' || type === 'unsignedInt') {
+    const n = typeof raw === 'object' ? NaN : Number(raw);
+    return Number.isInteger(n) ? n : null;
+  }
+  if (type === 'decimal') { const n = typeof raw === 'object' ? NaN : Number(raw); return Number.isFinite(n) ? n : null; }
+  if (QUANTITY_TYPES.has(type)) {
+    if (answer.valueQuantity) return answer.valueQuantity;
+    const n = typeof raw === 'object' ? NaN : Number(raw);
+    return Number.isFinite(n) ? { value: n } : null;
+  }
+  if (type === 'Reference') return answer.valueReference ?? (typeof raw === 'string' ? { reference: raw } : null);
+  if (type === 'Identifier') return typeof raw === 'string' ? { value: raw } : null;
+  if (type === 'date' || type === 'dateTime' || type === 'instant' || type === 'time') return typeof raw === 'string' ? raw : null;
+  if (type === 'Attachment') return answer.valueAttachment ?? null;
+  return raw;
+}
+
+const CHOICE_SUFFIX = { valueString: 'String', valueInteger: 'Integer', valueDecimal: 'Decimal', valueBoolean: 'Boolean', valueDate: 'Date',
+  valueDateTime: 'DateTime', valueTime: 'Time', valueUri: 'Uri', valueCoding: 'Coding', valueQuantity: 'Quantity', valueReference: 'Reference', valueAttachment: 'Attachment' };
+
+const CHOICE_FALLBACKS = { Coding: ['Coding', 'CodeableConcept'], Date: ['Date', 'DateTime'], Decimal: ['Decimal', 'Quantity'], Integer: ['Integer', 'Quantity'] };
+// The suffix of the value[x] name → the datatype used to shape the value
+const CHOICE_CONVERT = { String: 'string', Integer: 'integer', Decimal: 'decimal', Boolean: 'boolean', Date: 'date', DateTime: 'dateTime', Time: 'time', Uri: 'uri' };
+
+const isUnsafeKey = k => k === '__proto__' || k === 'constructor' || k === 'prototype';
+
+// Model lookup for `Type.path`: element type, cardinality and allowed value[x] types.
+// The model keys backbone elements by their own path and datatype elements by the datatype (HumanName.given).
+function meta(ctx, path) {
+  const m = ctx.model;
+  if (!m) return {};
+  const segs = path.split('.');
+  let owner = ctx.resourceType;
+  for (let i = 0; i < segs.length; i++) {
+    const key = `${owner}.${segs[i]}`;
+    const type = m.path2Type?.[key];
+    if (i === segs.length - 1) return { type, repeating: m.path2Repeating?.[key] === true, choice: m.choiceTypePaths?.[key] };
+    if (type === undefined) return {};
+    owner = type === 'BackboneElement' || type === 'Element' ? key : type;
+  }
+  return {};
+}
+const repeatsAt = (ctx, path) => meta(ctx, path).repeating === true;
+
+/** Walk to the object that holds the last segment, creating parents; arrays on the way use their first element. */
+function walkTo(ctx, obj, parentParts, baseParts) {
   let cur = obj;
-  for (let i = 0; i < parts.length - 1; i++) {
-    const key = parts[i];
-    if (isUnsafeKey(key)) return;
-    if (!(key in cur)) cur[key] = {};
-    // If existing value is array, use first element
-    if (Array.isArray(cur[key])) {
-      if (cur[key].length === 0) cur[key].push({});
-      cur = cur[key][0];
-    } else {
-      cur = cur[key];
-    }
+  for (let i = 0; i < parentParts.length; i++) {
+    const key = parentParts[i];
+    if (isUnsafeKey(key)) return null;
+    if (!Object.hasOwn(cur, key)) cur[key] = repeatsAt(ctx, [...baseParts, ...parentParts.slice(0, i + 1)].join('.')) ? [{}] : {};
+    cur = Array.isArray(cur[key]) ? (cur[key][0] ??= {}) : cur[key];
   }
-  const lastKey = parts[parts.length - 1];
-  if (isUnsafeKey(lastKey)) return;
-  // If path ends in array-like field (name, identifier, address, telecom), wrap in array
-  const ARRAY_FIELDS = new Set(['name','identifier','address','telecom','code','coding',
-    'category','reasonCode','note','performer','contained','extension','modifierExtension']);
-  if (ARRAY_FIELDS.has(lastKey) && !Array.isArray(cur[lastKey])) {
-    // If value is already an object, wrap; if existing has value, push
-    cur[lastKey] = [value];
-  } else if (Array.isArray(cur[lastKey])) {
-    cur[lastKey].push(value);
-  } else if (cur[lastKey] !== undefined) {
-    // Repeating field value on a non-array leaf → promote the scalar to an array.
-    cur[lastKey] = [cur[lastKey], value];
+  return cur;
+}
+
+/** Resolve a definition path to { obj, key, parentParts, absPath } relative to the current element scope. */
+function locate(ctx, path) {
+  const base = ctx.base;
+  const inScope = base && path.startsWith(base + '.');
+  const rel = inScope ? path.slice(base.length + 1) : path;
+  const obj = inScope ? ctx.target : ctx.resource;
+  const relParts = rel.split('.');
+  const baseParts = inScope ? base.split('.') : [];
+  const target = walkTo(ctx, obj, relParts.slice(0, -1), baseParts);
+  return target ? { target, key: relParts[relParts.length - 1], absPath: path } : null;
+}
+
+function putValue(ctx, loc, values, absPath) {
+  if (!values.length) return;
+  const { target, key } = loc;
+  if (isUnsafeKey(key)) return;
+  if (repeatsAt(ctx, absPath)) {
+    const had = Object.hasOwn(target, key);
+    target[key] = [...(had ? (Array.isArray(target[key]) ? target[key] : [target[key]]) : []), ...values];
+  } else if (ctx.model || !Object.hasOwn(target, key)) {
+    if (values.length > 1) ctx.warnings.push(`${ctx.resourceType}.${absPath} takes a single value; only the first of ${values.length} answers was used.`);
+    target[key] = values[0];
   } else {
-    cur[lastKey] = value;
+    // No model available: a repeated value promotes the scalar to a list
+    target[key] = [...(Array.isArray(target[key]) ? target[key] : [target[key]]), ...values];
   }
 }
 
-/**
- * Recursively collect every QR item matching a linkId across the whole tree.
- * Repeating groups appear as multiple items with the same linkId.
- * @returns {object[]} matching QR items (each a group instance)
- */
-function findGroupInstances(qrItems, linkId, out = []) {
-  for (const it of (qrItems || [])) {
+function setField(ctx, path, answers) {
+  const loc = locate(ctx, path);
+  if (!loc) return;
+  const noX = path.replace(/\[x\]$/, '');
+  const { type, choice } = meta(ctx, noX);
+  if (choice) {
+    const lastKey = loc.key.replace(/\[x\]$/, '');
+    for (const a of answers) {
+      const kind = Object.keys(CHOICE_SUFFIX).find(k => a[k] !== undefined);
+      const wanted = kind && CHOICE_SUFFIX[kind];
+      // A date is a valid dateTime, a decimal a valid Quantity value, a coding a valid CodeableConcept
+      const typeName = wanted && (CHOICE_FALLBACKS[wanted] || [wanted]).find(t => choice.includes(t));
+      if (!typeName) {
+        if (kind) ctx.warnings.push(`${ctx.resourceType}.${noX} does not allow a ${wanted} value; the answer was skipped.`);
+        continue;
+      }
+      const value = convertAnswer(a, CHOICE_CONVERT[typeName] || typeName);
+      if (value != null) loc.target[lastKey + typeName] = value;
+    }
+    return;
+  }
+  const values = answers.map(a => (type ? convertAnswer(a, type) : answerToValue(a))).filter(v => v != null);
+  putValue(ctx, { ...loc, key: loc.key.replace(/\[x\]$/, '') }, values, noX);
+}
+
+/** Attach a finished group element (one response instance) at its definition path. */
+function attachElement(ctx, path, elem) {
+  if (!Object.keys(elem).length) return;
+  const loc = locate(ctx, path);
+  if (!loc || isUnsafeKey(loc.key)) return;
+  const has = Object.hasOwn(loc.target, loc.key);
+  if (repeatsAt(ctx, path)) (has ? loc.target[loc.key] : (loc.target[loc.key] = [])).push(elem);
+  else {
+    if (has) ctx.warnings.push(`${ctx.resourceType}.${path} takes a single element; the answers of several group instances were merged.`);
+    loc.target[loc.key] = { ...(has ? loc.target[loc.key] : {}), ...elem };
+  }
+}
+
+const qrChildren = qrItem => [...(qrItem.item || []), ...(qrItem.answer || []).flatMap(a => a.item || [])];
+
+/** Every response item with this linkId in the scope, at any depth; stops descending at a match. */
+function findQrItems(scope, linkId, out = []) {
+  for (const it of scope || []) {
     if (it.linkId === linkId) out.push(it);
-    if (it.item) findGroupInstances(it.item, linkId, out);
+    else findQrItems(qrChildren(it), linkId, out);
   }
   return out;
 }
 
-/**
- * Build a QR item lookup: linkId → answer[].
- */
-function buildQRIndex(qrItems, out = {}) {
-  for (const item of (qrItems || [])) {
-    out[item.linkId] = item.answer || [];
-    buildQRIndex(item.item, out);
+function processItems(ctx, qItems, scope) {
+  for (const qItem of qItems || []) {
+    if (hasExtractExtension(qItem)) continue;
+    const parsed = qItem.definition ? parseDefinition(qItem.definition) : null;
+    const path = parsed && parsed.resourceType === ctx.resourceType && parsed.path ? parsed.path : null;
+    const matches = findQrItems(scope, qItem.linkId);
+    if (qItem.type === 'group') {
+      if (path) {
+        for (const inst of matches) {
+          const elem = {};
+          processItems({ ...ctx, base: path, target: elem }, qItem.item, qrChildren(inst));
+          attachElement(ctx, path, elem);
+        }
+      } else {
+        processItems(ctx, qItem.item, matches.length ? matches.flatMap(qrChildren) : scope);
+      }
+      continue;
+    }
+    if (path) {
+      const answers = matches.flatMap(i => i.answer || []);
+      if (answers.length) setField(ctx, path, answers);
+    }
+    if (qItem.item?.length) processItems(ctx, qItem.item, matches.flatMap(qrChildren));
   }
-  return out;
 }
 
-/**
- * Walk Questionnaire items and collect extraction groups.
- * A group with definitionExtract = extraction context. Repeating groups yield
- * one entry per QR instance (so a repeating group extracts multiple resources).
- * Returns array of { resourceType, fields: [{linkId, path, answers[]}] }
- */
-function collectGroups(qItems, qr, parentResourceType = null) {
-  const groups = [];
+/** Parameters of the definitionExtract extension: { profile, fullUrl, ifNoneMatch, ... } (expressions stay unevaluated). */
+function extractParams(qItem) {
+  const ext = (qItem.extension || []).find(e => e.url === DEFINITION_EXTRACT_URL);
+  const sub = name => (ext?.extension || []).find(e => e.url === name);
+  return {
+    profile:         sub('definition')?.valueCanonical,
+    fullUrl:         sub('fullUrl')?.valueString,
+    ifNoneMatch:     sub('ifNoneMatch')?.valueString,
+    ifModifiedSince: sub('ifModifiedSince')?.valueString,
+    ifMatch:         sub('ifMatch')?.valueString,
+    ifNoneExist:     sub('ifNoneExist')?.valueString,
+  };
+}
 
+const BASE_SD = `${FHIR.sd}/`;
+const profileOf = (canonical, resourceType) => (canonical && canonical !== `${BASE_SD}${resourceType}` ? canonical : undefined);
+
+/**
+ * Walk Questionnaire items and collect one built resource per extraction-group instance
+ * (repeating groups yield one per response instance; extraction groups nested in an instance extract too).
+ */
+function collectResources(qItems, scope, ctx, parentResourceType = null, out = []) {
   for (const qItem of (qItems || [])) {
-    const isGroup = qItem.type === 'group';
-    const isExtractGroup = isGroup && hasExtractExtension(qItem);
-
-    // Determine resource type for this scope
     let localType = parentResourceType;
     if (qItem.definition) {
       const parsed = parseDefinition(qItem.definition);
       if (parsed?.resourceType) localType = parsed.resourceType;
     }
-
-    if (isExtractGroup) {
-      // This group defines a new resource instance (one per QR occurrence)
-      const resourceType = localType || _inferResourceType(qItem);
-      if (!resourceType) {
-        // recurse into children with parent context
-        groups.push(...collectGroups(qItem.item, qr, localType));
-        continue;
+    if (!(qItem.type === 'group' && hasExtractExtension(qItem))) {
+      collectResources(qItem.item, scope, ctx, localType, out);
+      continue;
+    }
+    const params = extractParams(qItem);
+    const profileType = params.profile ? params.profile.split('/').pop().split('|')[0] : null;
+    // The group's own definition wins over the type inherited from the enclosing group
+    const ownType = qItem.definition ? parseDefinition(qItem.definition)?.resourceType : null;
+    const resourceType = ownType || profileType || _inferResourceType(qItem) || parentResourceType;
+    if (!resourceType) { collectResources(qItem.item, scope, ctx, localType, out); continue; }
+    // Falls back to the whole response when the group linkId is absent (flat / implicit responses)
+    const instances = findQrItems(scope, qItem.linkId);
+    const scopes = instances.length ? instances : [{ linkId: qItem.linkId, item: scope }];
+    for (const inst of scopes) {
+      const resource = { resourceType };
+      const profile = profileOf(params.profile, resourceType);
+      const rctx = { ...ctx, resourceType, resource, target: resource, base: '' };
+      processItems(rctx, qItem.item, qrChildren(inst));
+      if (Object.keys(resource).length > 1) {
+        resource.meta = { ...(profile ? { profile: [profile] } : {}) };
+        if (!Object.keys(resource.meta).length) delete resource.meta;
+        out.push({ resource, params, context: inst });
       }
-
-      // Each QR occurrence of this group (repeats) → its own resource, scoped
-      // to that instance's answers. Falls back to the whole QR when the group
-      // linkId is not present (flat / implicit responses).
-      const instances = findGroupInstances(qr.item, qItem.linkId);
-      const scopes = instances.length ? instances.map(i => i.item) : [qr.item];
-      for (const scopeItems of scopes) {
-        const qrIndex = buildQRIndex(scopeItems);
-        const fields = [];
-        _collectFields(qItem.item, qrIndex, resourceType, fields);
-        if (fields.length > 0) {
-          groups.push({ resourceType, fields, linkId: qItem.linkId });
-        }
-      }
-    } else {
-      // Not an extract group — recurse
-      groups.push(...collectGroups(qItem.item, qr, localType));
+      collectResources(qItem.item, qrChildren(inst), ctx, resourceType, out);
     }
   }
-
-  return groups;
+  return out;
 }
 
 /**
@@ -196,49 +303,27 @@ function _inferResourceType(groupItem) {
   return null;
 }
 
-/**
- * Recursively collect {path, answers} from items within an extraction group.
- */
-function _collectFields(qItems, qrIndex, resourceType, out) {
-  for (const qItem of (qItems || [])) {
-    if (qItem.definition) {
-      const parsed = parseDefinition(qItem.definition);
-      if (parsed && parsed.resourceType === resourceType && parsed.path) {
-        const answers = qrIndex[qItem.linkId] || [];
-        if (answers.length > 0) {
-          out.push({ linkId: qItem.linkId, path: parsed.path, answers });
-        }
-      }
-    }
-    // Recurse into sub-groups (non-extract)
-    if (qItem.item && !hasExtractExtension(qItem)) {
-      _collectFields(qItem.item, qrIndex, resourceType, out);
-    }
-  }
-}
+const defaultEvaluate = (expression, context, qr) =>
+  (typeof window !== 'undefined' && window.fhirpath ? window.fhirpath.evaluate(context, { base: 'QuestionnaireResponse.item', expression }, { resource: qr, context }, fhirModel()) : null);
 
-/**
- * Build a FHIR resource from a group definition.
- */
-function buildResource(group, index) {
-  const resource = {
-    resourceType: group.resourceType,
-    id: `extracted-${group.resourceType.toLowerCase()}-${index + 1}`,
-    meta: {
-      profile: [`${FHIR.sd}/${group.resourceType}`],
-    },
+function entryFor({ resource, params, context }, qr, evaluate, warnings) {
+  const run = (name, expression) => {
+    if (!expression) return undefined;
+    try {
+      const v = evaluate(expression, context, qr)?.[0];
+      return v == null ? undefined : String(v);
+    } catch (e) {
+      warnings.push(`${name} expression "${expression}" could not be evaluated: ${e.message}`);
+      return undefined;
+    }
   };
-
-  for (const field of group.fields) {
-    for (const answer of field.answers) {
-      const value = answerToValue(answer);
-      if (value != null) {
-        setPath(resource, field.path, value);
-      }
-    }
+  const request = { method: 'POST', url: resource.resourceType };
+  for (const name of ['ifNoneMatch', 'ifModifiedSince', 'ifMatch', 'ifNoneExist']) {
+    const v = run(name, params[name]);
+    if (v !== undefined) request[name] = v;
   }
-
-  return resource;
+  const fullUrl = run('fullUrl', params.fullUrl) ?? `urn:uuid:${globalThis.crypto.randomUUID()}`;
+  return { fullUrl, resource, request };
 }
 
 /**
@@ -246,18 +331,20 @@ function buildResource(group, index) {
  *
  * @param {object} questJson - FHIR Questionnaire resource
  * @param {object} qr        - FHIR QuestionnaireResponse resource
+ * @param {{ model?: object, evaluate?: Function }} [opts] — model: FHIR R4 model (defaults to the loaded one);
+ *   evaluate(expression, contextItem, qr) → array, for the extension's fullUrl / if* expressions
  * @returns {{ bundle: object, count: number, warnings: string[] }}
  */
-export function definitionExtract(questJson, qr) {
+export function definitionExtract(questJson, qr, { model = fhirModel(), evaluate = defaultEvaluate } = {}) {
   const warnings = [];
 
   if (!qr || qr.resourceType !== 'QuestionnaireResponse') {
     return { bundle: null, count: 0, warnings: ['No QuestionnaireResponse provided.'] };
   }
 
-  const groups = collectGroups(questJson.item, qr);
+  const found = collectResources(questJson.item, qr.item || [], { model, warnings });
 
-  if (groups.length === 0) {
+  if (found.length === 0) {
     warnings.push(
       'No extraction groups found. Add the sdc-questionnaire-definitionExtract ' +
       'extension to a group item and set item.definition on child items.'
@@ -265,16 +352,11 @@ export function definitionExtract(questJson, qr) {
     return { bundle: null, count: 0, warnings };
   }
 
-  const resources = groups.map((g, i) => buildResource(g, i));
   const bundle = {
     resourceType: 'Bundle',
     type: 'transaction',
-    entry: resources.map(r => ({
-      fullUrl: `urn:uuid:${r.id}`,
-      resource: r,
-      request: { method: 'POST', url: r.resourceType },
-    })),
+    entry: found.map(f => entryFor(f, qr, evaluate, warnings)),
   };
 
-  return { bundle, count: resources.length, warnings };
+  return { bundle, count: found.length, warnings };
 }
