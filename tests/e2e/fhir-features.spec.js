@@ -359,6 +359,14 @@ test.describe('maxDecimalPlaces', () => {
     await expect(err).toBeHidden();
   });
 
+  test('shows error for exponent notation with too many decimal places', async ({ page }) => {
+    await loadFixture(page);
+    const row = page.locator('[data-preview-id="decimal-places"]');
+    await row.locator('input[type="number"]').fill('1e-7');
+    await commitInput(page);
+    await expect(row.locator('[data-testid="numeric-err"]')).toContainText('Max 2 decimal place');
+  });
+
   test('maxDecimalPlaces round-trips through export', async ({ page }) => {
     await loadFixture(page);
     await openDropdownItem(page, 'export-btn', 'export-quest-item');

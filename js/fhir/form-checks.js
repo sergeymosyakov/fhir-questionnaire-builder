@@ -28,9 +28,19 @@ export function evalConstraints(node, fp, qr, varEnv) {
     try {
       const result = fp.evaluate(qr, c.expression, env, fhirModel());
       if (!result || result.length === 0 || result[0] === false) return false;
-    } catch { return false; }
+    } catch (e) {
+      console.warn(`Constraint "${c.key ?? c.expression}" failed to evaluate:`, e.message);
+      return false;
+    }
   }
   return true;
+}
+
+// Number of decimal places of a numeric value, exponent notation included (1e-7 → 7).
+export function decimalPlaces(val) {
+  const m = /^-?\d*\.?(\d*)(?:e([+-]?\d+))?$/i.exec(String(val));
+  if (!m) return 0;
+  return Math.max(0, m[1].length - (m[2] ? Number(m[2]) : 0));
 }
 
 function _isValidUrl(s) {
@@ -114,8 +124,7 @@ export function calcFormOk(node, store, path) {
       if (node._minValue !== undefined && num < Number(node._minValue)) return false;
       if (node._maxValue !== undefined && num > Number(node._maxValue)) return false;
       if (node._maxDecimalPlaces !== undefined) {
-        const parts = String(val).split('.');
-        if (parts.length > 1 && parts[1].length > node._maxDecimalPlaces) return false;
+        if (decimalPlaces(val) > node._maxDecimalPlaces) return false;
       }
     }
     if (isMandatory(node)) return val !== undefined && val !== '' && val !== null;
