@@ -21,7 +21,7 @@
   },
   "extension": [
     { "url": "http://hl7.org/fhir/StructureDefinition/replaces", "valueCanonical": "http://example.org/Questionnaire/old" },
-    { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer", "valueUrl": "https://tx.example.org/fhir" },
+    { "url": "http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer", "valueUrl": "https://tx.example.org/fhir" },
     { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-targetStructureMap", "valueCanonical": "http://example.org/StructureMap/target" },
     { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-sourceStructureMap", "valueCanonical": "http://example.org/StructureMap/source" },
     {
@@ -46,7 +46,7 @@
       "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient.birthDate",
       "extension": [
         { "url": "http://hl7.org/fhir/StructureDefinition/regex", "valueString": "^[A-Z]{2}\\d{4}$" },
-        { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer", "valueUrl": "https://tx.example.org/fhir" },
+        { "url": "http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer", "valueUrl": "https://tx.example.org/fhir" },
         { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-baseType", "valueCode": "Patient" },
         { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-fhirType", "valueCode": "date" },
         { "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode", "valueCode": "capture-display" },

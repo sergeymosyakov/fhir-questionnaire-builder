@@ -405,11 +405,17 @@ class ChoiceSection extends AnswerTypeSection {
     if (CHOICE_TYPES.has(node.itemType)) {
       if (pending.draftSrc === 'expression' || pending.draftSrc === 'candidate') {
         if (pending.draftSrc === 'expression') {
-          node._answerExpression = pending.draftAnswerExpr.trim();
+          const expr = pending.draftAnswerExpr.trim();
+          if (expr !== node._answerExpression) delete node._answerExpressionLanguage;
+          node._answerExpression = expr;
           delete node._candidateExpression;
+          delete node._candidateExpressionLanguage;
         } else {
-          node._candidateExpression = pending.draftCandidateExpr.trim();
+          const expr = pending.draftCandidateExpr.trim();
+          if (expr !== node._candidateExpression) delete node._candidateExpressionLanguage;
+          node._candidateExpression = expr;
           delete node._answerExpression;
+          delete node._answerExpressionLanguage;
         }
         delete node._answerValueSet;
         delete node._optionOrdinals;
@@ -430,6 +436,8 @@ class ChoiceSection extends AnswerTypeSection {
         delete node._answerValueSet;
         delete node._answerExpression;
         delete node._candidateExpression;
+        delete node._answerExpressionLanguage;
+        delete node._candidateExpressionLanguage;
 
         // Derive a code from the label when the Code field is left blank (and
         // vice versa) so a label-only option is kept instead of silently dropped.
@@ -512,6 +520,7 @@ class ChoiceSection extends AnswerTypeSection {
     } else {
       delete node._answerValueSet;
       delete node._answerExpression;
+      delete node._answerExpressionLanguage;
       delete node._optionOrdinals;
       delete node._optionPrefixes;
       delete node._optionExclusives;

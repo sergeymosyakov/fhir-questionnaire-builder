@@ -30,8 +30,8 @@ Observations).
 2. Open **Save ▾ → 🧪 Observations · FHIR JSON Bundle**.
 3. A small dialog lets you optionally set the `subject` and `author`
    references and the `QuestionnaireResponse` id that each Observation should
-   point back to, and whether to tag each Observation with the SDC Observation
-   profile (on by default).
+   point back to. (The Observations are plain FHIR `Observation` resources; the
+   specification defines no standard SDC profile to stamp on them.)
 4. Confirm to download a transaction `Bundle` of the extracted Observations.
 
 Everything runs in the browser — no server is required.

@@ -11,7 +11,7 @@
   ],
   "extension": [
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "age",
         "language": "text/fhirpath",
@@ -19,7 +19,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "gender",
         "language": "text/fhirpath",
@@ -27,7 +27,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "hba1c",
         "language": "text/fhirpath",
@@ -35,7 +35,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "glucoseFasting",
         "language": "text/fhirpath",
@@ -43,7 +43,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "diabetesType",
         "language": "text/fhirpath",
@@ -51,7 +51,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "onInsulin",
         "language": "text/fhirpath",
@@ -59,7 +59,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "hba1cRisk",
         "language": "text/fhirpath",
@@ -67,7 +67,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "hba1cRiskScore",
         "language": "text/fhirpath",

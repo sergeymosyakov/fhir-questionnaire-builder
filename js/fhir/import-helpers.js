@@ -42,6 +42,7 @@ export const KNOWN_ITEM_EXTENSION_URLS = new Set([
   FHIR.answerExpression,
   FHIR.candidateExpression,
   FHIR.preferredTerminologyServer,
+  FHIR.preferredTerminologyServerSdc,
   FHIR.choiceColumn,
   FHIR.unitOption,
   FHIR.regex,
@@ -86,8 +87,8 @@ const PARSED_VALUE = {
 // source and share the same import (ext → prop), export (prop → ext), render and
 // validation handling. Shared by import-item.js and export.js.
 export const ANSWER_SOURCE_EXPR_EXTS = [
-  { url: FHIR.answerExpression,    prop: '_answerExpression' },
-  { url: FHIR.candidateExpression, prop: '_candidateExpression' },
+  { url: FHIR.answerExpression,    prop: '_answerExpression',    langProp: '_answerExpressionLanguage' },
+  { url: FHIR.candidateExpression, prop: '_candidateExpression', langProp: '_candidateExpressionLanguage' },
 ];
 
 export function _collectUnknownExtensions(fhirItem) {

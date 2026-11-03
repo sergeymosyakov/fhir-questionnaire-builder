@@ -331,9 +331,9 @@ export class BaseNode {
       const b = document.createElement('span');
       b.className = 'preview-hidden-badge';
       b.textContent = 'HIDDEN';
-      b.dataset.tipTitle = 'sdc-questionnaire-hidden';
+      b.dataset.tipTitle = 'questionnaire-hidden';
       b.dataset.tipBody  = 'This item is permanently hidden from patients. It still participates in calculatedExpression logic. Controls are disabled in preview.';
-      b.dataset.tipFhir  = 'sdc-questionnaire-hidden';
+      b.dataset.tipFhir  = 'questionnaire-hidden';
       b.dataset.tipSpec  = 'SDC';
       row.appendChild(b);
     }

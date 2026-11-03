@@ -148,7 +148,7 @@ export function importFHIR(fhirJson, opts = {}) {
     .filter(e => e.url === REPLACES_URL && e.valueCanonical)
     .map(e => e.valueCanonical);
   for (const ext of q.extension || []) {
-    if (ext.url === SDC_VAR_URL && ext.valueExpression) {
+    if ((ext.url === SDC_VAR_URL || ext.url === FHIR.variableSdc) && ext.valueExpression) {
       questVariables.push({
         name:       ext.valueExpression.name       || '',
         expression: ext.valueExpression.expression || ''
@@ -156,7 +156,7 @@ export function importFHIR(fhirJson, opts = {}) {
     }
   }
   const PREF_TERM_URL = FHIR.preferredTerminologyServer;
-  const prefTermQuestExt = (q.extension || []).find(e => e.url === PREF_TERM_URL);
+  const prefTermQuestExt = (q.extension || []).find(e => e.url === PREF_TERM_URL || e.url === FHIR.preferredTerminologyServerSdc);
   questMeta.preferredTermServer = prefTermQuestExt?.valueUrl || '';
   const TARGET_SM_URL = FHIR.targetStructureMap;
   const targetSmExt = (q.extension || []).find(e => e.url === TARGET_SM_URL);
@@ -172,7 +172,7 @@ export function importFHIR(fhirJson, opts = {}) {
         return { system: c.system || '', code: c.code || '', display: c.display || '' };
       })
     : [];
-  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL && e.url !== TARGET_SM_URL && e.url !== SOURCE_SM_URL && e.url !== SIG_REQ_URL && e.url !== BUILDER_VERSION_EXTENSION_URL && e.url !== LAUNCH_CTX_URL && e.url !== ARTIFACT_VERSION_ALGO_URL && e.url !== ARTIFACT_COPYRIGHT_LABEL_URL);
+  const nonVarExts = (q.extension || []).filter(e => e.url !== SDC_VAR_URL && e.url !== FHIR.variableSdc && e.url !== REPLACES_URL && e.url !== PREF_TERM_URL && e.url !== FHIR.preferredTerminologyServerSdc && e.url !== TARGET_SM_URL && e.url !== SOURCE_SM_URL && e.url !== SIG_REQ_URL && e.url !== BUILDER_VERSION_EXTENSION_URL && e.url !== LAUNCH_CTX_URL && e.url !== ARTIFACT_VERSION_ALGO_URL && e.url !== ARTIFACT_COPYRIGHT_LABEL_URL);
   questMeta._rawQuestExtensions = nonVarExts.length ? JSON.parse(JSON.stringify(nonVarExts)) : [];
 
   // sdc-questionnaire-launchContext (0..*)

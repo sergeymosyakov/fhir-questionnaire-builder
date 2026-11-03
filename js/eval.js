@@ -131,9 +131,9 @@ function isNodeVisible(node, ctx, path) {
 // evaluateNode handles external conditions (enableWhen / enableWhenExpression).
 // Form-value checks (calcFormOk) are applied separately in the preview renderer
 // so that typing in a control does NOT trigger a full DOM rebuild on each input event.
-// _insideHidden: true when a parent node carries sdc-questionnaire-hidden=true
+// _insideHidden: true when a parent node carries questionnaire-hidden=true
 export function evaluateNode(node, ctx, results, _insideHidden = false, path = []) {
-  // sdc-questionnaire-hidden: node (and all its descendants) are marked hidden.
+  // questionnaire-hidden: node (and all its descendants) are marked hidden.
   // calculatedExpression still runs; they are excluded from PASS/FAIL validation.
   if (node._hidden || _insideHidden) {
     const isRoot = !!node._hidden && !_insideHidden;

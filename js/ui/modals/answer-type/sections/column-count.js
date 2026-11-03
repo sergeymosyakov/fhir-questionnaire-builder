@@ -15,7 +15,7 @@ class ColumnCountSection extends AnswerTypeSection {
     lbl.textContent      = 'Option columns:';
     lbl.dataset.tipTitle = 'Column Count';
     lbl.dataset.tipBody  = 'Recommends laying out this question\u2019s answer options across the given number of columns (vertical-first fill; direction follows choice-orientation). Per SDC it is a rendering recommendation \u2014 this preview applies it to inline option layouts (radio / check-box). Exported as the sdc-questionnaire-columnCount extension for any choice item. Default is a single column.';
-    lbl.dataset.tipFhir  = 'item.extension[sdc-questionnaire-columnCount].valueInteger';
+    lbl.dataset.tipFhir  = 'item.extension[sdc-questionnaire-columnCount].valuePositiveInt';
     lbl.dataset.tipSpec  = 'SDC';
 
     const sel = createCustomSelect({

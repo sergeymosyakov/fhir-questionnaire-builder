@@ -14,14 +14,12 @@
 //   obs-export-subject             Observation.subject input
 //   obs-export-author              Observation.performer input
 //   obs-export-qr-id               QuestionnaireResponse id input
-//   obs-export-profile-chk         "Add SDC profile" checkbox
 //   preview-search-input           preview search box (clicked to commit a preview input)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import fs from 'node:fs';
 import { test, expect } from '@playwright/test';
-import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { freshStart } from './helpers/builder.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
@@ -59,16 +57,16 @@ const weightObs = bundle =>
   bundle.entry.map(e => e.resource).find(r => r.code?.coding?.some(c => c.code === WEIGHT_LOINC));
 
 test.describe('Observation export modal', () => {
-  test('opens with a suggested file name, empty metadata and the SDC profile on', async ({ page }) => {
+  test('opens with a suggested file name and empty metadata, with no profile option', async ({ page }) => {
     await openModalWithWeight(page);
     await expect(page.getByTestId('obs-export-filename')).toHaveValue(/-observations\.json$/);
     await expect(page.getByTestId('obs-export-subject')).toHaveValue('');
     await expect(page.getByTestId('obs-export-author')).toHaveValue('');
     await expect(page.getByTestId('obs-export-qr-id')).toHaveValue('');
-    await expect(page.getByTestId('obs-export-profile-chk')).toBeChecked();
+    await expect(page.getByTestId('obs-export-profile-chk')).toHaveCount(0);
   });
 
-  test('subject, author, QR id and profile flow into the downloaded Observations', async ({ page }) => {
+  test('subject, author and QR id flow into the downloaded Observations', async ({ page }) => {
     await openModalWithWeight(page);
     await page.getByTestId('obs-export-filename').fill('my-obs');
     await page.getByTestId('obs-export-subject').fill('Patient/123');
@@ -87,18 +85,9 @@ test.describe('Observation export modal', () => {
     expect(obs.subject).toEqual({ reference: 'Patient/123' });
     expect(obs.performer).toEqual([{ reference: 'Practitioner/456' }]);
     expect(JSON.stringify(obs.derivedFrom)).toContain('QuestionnaireResponse/qr-001');
-    expect(obs.meta.profile).toEqual([FHIR.sdcObservation]);
-    await expect(page.getByTestId('obsExportModal')).toBeHidden();
-  });
-
-  test('unchecking "Add SDC profile" omits meta.profile', async ({ page }) => {
-    await openModalWithWeight(page);
-    await page.getByTestId('obs-export-profile-chk').uncheck();
-
-    const { bundle } = await applyAndRead(page);
-    const obs = weightObs(bundle);
-    expect(obs).toBeDefined();
+    // the specification defines no sdc-observation profile, so none is stamped
     expect(obs.meta?.profile).toBeUndefined();
+    await expect(page.getByTestId('obsExportModal')).toBeHidden();
   });
 
   test('Cancel closes the modal without downloading', async ({ page }) => {

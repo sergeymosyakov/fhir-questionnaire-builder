@@ -21,14 +21,14 @@ class HiddenSection extends StatesSection {
     lbl.htmlFor          = 'statesHidden';
     lbl.className        = 'states-modal-chk-label';
     lbl.textContent      = 'Hidden';
-    lbl.dataset.tipTitle = 'sdc-questionnaire-hidden';
+    lbl.dataset.tipTitle = 'questionnaire-hidden';
     lbl.dataset.tipBody  = 'Excluded from the patient-facing view. The item still participates in calculatedExpression and enableWhen logic.';
-    lbl.dataset.tipFhir  = 'item.extension[sdc-questionnaire-hidden].valueBoolean';
-    lbl.dataset.tipSpec  = 'SDC';
+    lbl.dataset.tipFhir  = 'item.extension[questionnaire-hidden].valueBoolean';
+    lbl.dataset.tipSpec  = 'R4';
 
     const hint = document.createElement('span');
     hint.className   = 'states-modal-chk-hint';
-    hint.textContent = 'Excluded from patient view (sdc-questionnaire-hidden). Still participates in calculatedExpression logic.';
+    hint.textContent = 'Excluded from patient view (questionnaire-hidden). Still participates in calculatedExpression logic.';
 
     row.appendChild(chk);
     row.appendChild(lbl);

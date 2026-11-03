@@ -20,15 +20,15 @@ import { FHIR } from './urls/fhir.js';
 const DEFINITION_EXTRACT_URL =
   FHIR.definitionExtract;
 
-const DEFINITION_EXTRACT_CONTEXT_URL =
-  FHIR.definitionExtractContext;
+// Older names accepted as the same marker: a name the builder used to write, and the retired SDC item extraction context
+const EXTRACT_MARKER_ALIASES = [FHIR.definitionExtractContext, FHIR.itemExtractionContext];
 
 /**
  * Check if a questionnaire item has the definitionExtract extension.
  */
 function hasExtractExtension(qItem) {
   return (qItem.extension || []).some(e =>
-    e.url === DEFINITION_EXTRACT_URL || e.url === DEFINITION_EXTRACT_CONTEXT_URL
+    e.url === DEFINITION_EXTRACT_URL || EXTRACT_MARKER_ALIASES.includes(e.url)
   );
 }
 

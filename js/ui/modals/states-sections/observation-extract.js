@@ -55,8 +55,9 @@ class ObservationExtractSection extends StatesSection {
 
   buildPatch(pending, _node) {
     if (pending.draftObsExtract === 'true')  return { _observationExtract: true };
-    if (pending.draftObsExtract === 'false') return { _observationExtract: false };
-    return { _observationExtract: null };
+    const cleared = { _observationExtractCode: null };
+    if (pending.draftObsExtract === 'false') return { _observationExtract: false, ...cleared };
+    return { _observationExtract: null, ...cleared };
   }
 }
 

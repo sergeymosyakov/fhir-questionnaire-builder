@@ -21,6 +21,9 @@ const UNSUPPORTED_EXTS = new Set([
   FHIR.itemContext,
   FHIR.constraint,
   FHIR.variable,
+  FHIR.variableSdc,
+  FHIR.itemPopulationContext,
+  FHIR.itemExtractionContext,
 ]);
 
 /** Recursively walk FHIR item array. cb(item, depth) called for each item. */

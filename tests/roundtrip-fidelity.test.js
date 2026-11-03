@@ -66,9 +66,12 @@ const pickSystemCode = c => ({ system: c.system, code: c.code });
 function expectedExt(e, item) {
   const out = clone(e);
   switch (e.url) {
-    // The builder always writes the SDC-namespaced hidden / entryFormat URLs.
-    case FHIR.hidden: out.url = FHIR.hiddenSdc; break;
-    case FHIR.entryFormat: out.url = FHIR.entryFormatSdc; break;
+    // Older files used SDC-namespaced hidden / entryFormat / variable / preferredTerminologyServer URLs; the builder writes the core ones.
+    case FHIR.hiddenSdc: out.url = FHIR.hidden; break;
+    case FHIR.entryFormatSdc: out.url = FHIR.entryFormat; break;
+    case FHIR.variableSdc: out.url = FHIR.variable; break;
+    case FHIR.preferredTerminologyServerSdc: out.url = FHIR.preferredTerminologyServer; break;
+    case FHIR.columnCount: if (out.valueInteger !== undefined) { out.valuePositiveInt = out.valueInteger; delete out.valueInteger; } break;
     // designNote is markdown in the spec; the builder writes valueMarkdown.
     case FHIR.designNote:
       if (out.valueString !== undefined) { out.valueMarkdown = out.valueString; delete out.valueString; }
@@ -374,12 +377,14 @@ describe('exporter normalises these extensions to a fixed form', () => {
   };
   const find = (list, url) => list.filter(e => e.url === url);
 
-  it('hidden and entryFormat use the SDC-namespaced URLs', () => {
-    const out = exts('string', [{ url: FHIR.hidden, valueBoolean: true }, { url: FHIR.entryFormat, valueString: 'yyyy' }]);
-    expect(find(out, FHIR.hiddenSdc)).toEqual([{ url: FHIR.hiddenSdc, valueBoolean: true }]);
-    expect(find(out, FHIR.entryFormatSdc)).toEqual([{ url: FHIR.entryFormatSdc, valueString: 'yyyy' }]);
-    expect(find(out, FHIR.hidden)).toEqual([]);
-    expect(find(out, FHIR.entryFormat)).toEqual([]);
+  it('hidden and entryFormat are written with the core URLs, legacy SDC URLs are rewritten', () => {
+    for (const [hidden, entry] of [[FHIR.hidden, FHIR.entryFormat], [FHIR.hiddenSdc, FHIR.entryFormatSdc]]) {
+      const out = exts('string', [{ url: hidden, valueBoolean: true }, { url: entry, valueString: 'yyyy' }]);
+      expect(find(out, FHIR.hidden)).toEqual([{ url: FHIR.hidden, valueBoolean: true }]);
+      expect(find(out, FHIR.entryFormat)).toEqual([{ url: FHIR.entryFormat, valueString: 'yyyy' }]);
+      expect(find(out, FHIR.hiddenSdc)).toEqual([]);
+      expect(find(out, FHIR.entryFormatSdc)).toEqual([]);
+    }
   });
 
   it('designNote string becomes valueMarkdown', () => {

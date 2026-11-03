@@ -8,7 +8,7 @@
   "description": "Demonstrates the initialExpression → calculatedExpression → enableWhenExpression chain. Select a Patient preset, click ↺ Re-init, then observe: (1) Step 1 fields populate from patient context; (2) Step 2 risk scores recompute; (3) the matching Risk Level section appears.",
   "extension": [
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "age",
         "language": "text/fhirpath",
@@ -16,7 +16,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "gender",
         "language": "text/fhirpath",
@@ -24,7 +24,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "bmi",
         "language": "text/fhirpath",
@@ -32,7 +32,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "smoker",
         "language": "text/fhirpath",
@@ -40,7 +40,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "pregnant",
         "language": "text/fhirpath",
@@ -48,7 +48,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "ageRiskPts",
         "language": "text/fhirpath",
@@ -56,7 +56,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "bmiRiskPts",
         "language": "text/fhirpath",
@@ -64,7 +64,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "smokerPts",
         "language": "text/fhirpath",
@@ -72,7 +72,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "pregnancyPts",
         "language": "text/fhirpath",
@@ -80,7 +80,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "totalRisk",
         "language": "text/fhirpath",

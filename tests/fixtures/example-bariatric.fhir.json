@@ -9,7 +9,7 @@
   "date": "2024-01-01",
   "extension": [
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": {
         "name": "bmi",
         "language": "text/fhirpath",

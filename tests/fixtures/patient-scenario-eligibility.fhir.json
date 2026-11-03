@@ -6,27 +6,27 @@
   "description": "Automated eligibility assessment driven by patient context. Select a Patient preset and click ↺ Re-init in the Variables panel to populate all auto-filled fields.",
   "extension": [
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": { "name": "age",      "language": "text/fhirpath", "expression": "30" }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": { "name": "gender",   "language": "text/fhirpath", "expression": "'male'" }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": { "name": "bmi",      "language": "text/fhirpath", "expression": "42" }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": { "name": "pregnant", "language": "text/fhirpath", "expression": "false" }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": { "name": "smoker",   "language": "text/fhirpath", "expression": "false" }
     },
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable",
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
       "valueExpression": { "name": "comorb",   "language": "text/fhirpath", "expression": "''" }
     }
   ],

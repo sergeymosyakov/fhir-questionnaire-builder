@@ -1,5 +1,5 @@
 // ── Preferred Terminology Server modal ────────────────────────────────────────
-// Per-item configuration for sdc-questionnaire-preferredTerminologyServer.
+// Per-item configuration for the preferredTerminologyServer extension.
 // Stores a URL hint for the terminology server to use when expanding ValueSets
 // for this specific item. Falls back to the Questionnaire-level setting.
 import { MODAL_REGISTRY } from './modal-registry.js';
@@ -82,11 +82,11 @@ class TerminologyModal extends Modal {
     const lbl = document.createElement('label');
     lbl.className = 'meta-modal-lbl';
     lbl.textContent = 'Server URL:';
-    lbl.dataset.tipTitle = 'sdc-questionnaire-preferredTerminologyServer';
+    lbl.dataset.tipTitle = 'preferredTerminologyServer';
     lbl.dataset.tipBody  = 'URL of the preferred FHIR terminology server for ValueSet expansion on this item. ' +
       'Takes precedence over Questionnaire.extension[preferredTerminologyServer].';
-    lbl.dataset.tipFhir  = 'item.extension[sdc-questionnaire-preferredTerminologyServer].valueUrl';
-    lbl.dataset.tipSpec  = 'SDC';
+    lbl.dataset.tipFhir  = 'item.extension[preferredTerminologyServer].valueUrl';
+    lbl.dataset.tipSpec  = 'R4';
 
     const inp = document.createElement('input');
     inp.type      = 'url';

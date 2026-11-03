@@ -27,7 +27,7 @@ Every node in the tree is either a **group** or an **item**:
   _fhirType:           string,          // questionnaire-fhirType extension valueCode
   _codes:              object[],        // item.code[] coding entries
   _supportLinks:       string[],        // questionnaire-supportLink URIs (0..*)
-  _hidden:             true|undefined   // sdc-questionnaire-hidden: never shown to patients; participates in calculatedExpression
+  _hidden:             true|undefined   // questionnaire-hidden: never shown to patients; participates in calculatedExpression
 }
 
 // Item
@@ -65,7 +65,7 @@ Every node in the tree is either a **group** or an **item**:
   _answerExpression:   string,           // SDC sdc-questionnaire-answerExpression — FHIRPath expression evaluated at render time; result replaces answerOption[] in preview
   _candidateExpression: string,          // SDC sdc-questionnaire-candidateExpression — FHIRPath expression for candidate/suggested answers; evaluated at render time; mutually exclusive with _answerExpression / answerOption[]
   _isSubject:          boolean,          // SDC sdc-questionnaire-isSubject — marks the item whose answer identifies the QuestionnaireResponse subject; only one item per questionnaire may set it
-  _columnCount:        number,           // SDC sdc-questionnaire-columnCount — positiveInt; per spec valid on any choice item with options; editable/round-tripped for all choice types; preview lays out options across N columns (vertical-first) for inline lists (radio/checklist) only
+  _columnCount:        number,           // SDC sdc-questionnaire-columnCount — positiveInt (older files wrote `valueInteger`, still read); per spec valid on any choice item with options; editable/round-tripped for all choice types; preview lays out options across N columns (vertical-first) for inline lists (radio/checklist) only
   _minValue:           number,           // questionnaire-minValue extension value (decimal or integer)
   _maxValue:           number,           // questionnaire-maxValue extension value (decimal or integer)
   _optionOrdinals:     object,           // map of option code → ordinalValue (from ordinalValue extension on answerOption.extension or valueCoding.extension fallback)
@@ -73,11 +73,11 @@ Every node in the tree is either a **group** or an **item**:
   _sliderStep:         number,           // questionnaire-sliderStepValue ext; when set, integer/decimal renders as <input type="range"> slider
   _disabledDisplay:    string,           // 'hidden'|'protected' — behaviour when enableWhen condition is not met; 'protected' is default (not persisted)
   _supportLinks:       string[],         // questionnaire-supportLink URIs (0..*); 🔗 icons in builder preview; "More info ↗" buttons in patient view
-  _hidden:             true|undefined,   // sdc-questionnaire-hidden: never shown to patients; participates in calculatedExpression; controls disabled in preview
+  _hidden:             true|undefined,   // questionnaire-hidden: never shown to patients; participates in calculatedExpression; controls disabled in preview
   _usageMode:          string,           // questionnaire-usageMode: 'capture'|'display'|'display-non-empty'|'capture-display'|'capture-display-non-empty' — controls item visibility per mode
   _itemMedia:          object,           // sdc-questionnaire-itemMedia valueAttachment: { url, contentType, title? } — media inline before the control
   _optionWeights:      object,           // map of option code → weight (from itemWeight extension on answerOption)
-  _answerMedias:       object,           // map of option code → Attachment (from sdc-questionnaire-answerMedia extension on answerOption)
+  _answerMedias:       object,           // map of option code → Attachment (from sdc-questionnaire-itemAnswerMedia extension on answerOption)
   _definition:         string,          // item.definition URL (also on groups)
   _baseType:           string,          // questionnaire-baseType extension valueCode (also on groups)
   _fhirType:           string,          // questionnaire-fhirType extension valueCode (also on groups)
@@ -212,7 +212,7 @@ Stored in `questDoc.meta` (`js/fhir/quest-document.js`). Populated on import, wr
 | `_fhirType` | `questionnaire-fhirType` ext (`valueCode`) | specific FHIR type for complex elements (e.g. `HumanName`, `ContactPoint`); round-trip safe; editable via **Props** button — FHIR Type field |
 | `_codes` | `item.code[]` | coding entries (system / code / display); round-trip safe; editable via **Props** button |
 | `_supportLinks` | `questionnaire-supportLink` ext (0..*) | help / documentation URIs; rendered as 🔗 icons in builder preview and "More info ↗" buttons in patient view; editable via **Props** button |
-| `_hidden` | `sdc-questionnaire-hidden` ext (`valueBoolean: true`) | item/group permanently hidden from patients; still participates in `calculatedExpression`; rendered with purple dashed border + **HIDDEN badge** in builder preview when **hidden** toggle is on; excluded from PASS/FAIL validation; controls disabled in preview; toggled via **Hidden** action button in builder; **on import also reads** `http://hl7.org/fhir/StructureDefinition/questionnaire-hidden` (R4 standard alias) | Yes |
+| `_hidden` | `questionnaire-hidden` ext (core extension; the older `sdc-questionnaire-hidden` address is still read) (`valueBoolean: true`) | item/group permanently hidden from patients; still participates in `calculatedExpression`; rendered with purple dashed border + **HIDDEN badge** in builder preview when **hidden** toggle is on; excluded from PASS/FAIL validation; controls disabled in preview; toggled via **Hidden** action button in builder; **on import also reads** `http://hl7.org/fhir/StructureDefinition/questionnaire-hidden` (R4 standard alias) | Yes |
 
 ### Item-specific
 
@@ -297,7 +297,7 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression` | SDC | `_answerExpression` (dynamic answer options for choice/radio/open-choice) | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression` | SDC | `_candidateExpression` (dynamic candidate/suggested answers for choice/radio/open-choice) | Yes (SDC) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject` | SDC | `_isSubject` (item whose answer is the QR subject) | Yes (SDC) |
-| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable` | SDC | `questVariables[]` on root | Yes (SDC) |
+| `http://hl7.org/fhir/StructureDefinition/variable` | R4 (core) | `questVariables[]` on root; the older `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-variable` address is still read and rewritten to the core one on export | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression` | SDC | `enableWhenExpression` | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-constraint` | standard | `constraint[]` | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-unit` | standard | `quantityUnit` (quantity default unit) | Yes |
@@ -317,12 +317,12 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/maxDecimalPlaces` | standard | `_maxDecimalPlaces` (max decimal digits for `decimal` items; enforced in preview; editable in Answer Type modal) | Yes |
 | `https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-disabledDisplay` | builder-private | `_disabledDisplay` (hidden/protected; also read from native `item.disabledDisplay` R5 field) | Yes (R4/R4B downgrade of the R5-only field) |
 | `https://sergeymosyakov.github.io/fhir-questionnaire-builder/StructureDefinition/item-answerConstraint` | builder-private | `_answerConstraint` (optionsOnly/optionsOrType/optionsOrString; also read from native `item.answerConstraint` R5 field) | Yes (R4/R4B downgrade of the R5-only field) |
-| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` | SDC | `_entryFormat` (placeholder hint text shown on text/url/number/quantity controls; editable in Answer Type modal); **on import also reads** `http://hl7.org/fhir/StructureDefinition/entryFormat` (R4 element-definition alias); SDC URL takes precedence when both are present | Yes |
+| `http://hl7.org/fhir/StructureDefinition/entryFormat` | R4 (core) | `_entryFormat` (placeholder hint text shown on text/url/number/quantity controls; editable in Answer Type modal); the older `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` address is still read and rewritten on export | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation` | standard | `_choiceOrientation` (`vertical` / `horizontal`; controls layout of radio button groups; editable in Answer Type modal for `radio` items) | Yes |
-| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount` | SDC | `_columnCount` (`positiveInt`; per spec valid on any choice item with a set of options; editable in Answer Type modal "Option columns" for all choice types `select`/`radio`/`open-choice`/`checklist` and round-tripped; preview applies the visual N-column layout, vertical-first, to inline option lists (`radio`/`checklist`) only) | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-columnCount` | SDC | `_columnCount` (`positiveInt`, written as `valuePositiveInt`; older files with `valueInteger` are still read; per spec valid on any choice item with a set of options; editable in Answer Type modal "Option columns" for all choice types `select`/`radio`/`open-choice`/`checklist` and round-tripped; preview applies the visual N-column layout, vertical-first, to inline option lists (`radio`/`checklist`) only) | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory` | standard | `_displayCategory` (`instructions` / `security` / `help`; applies visual category styling to `display` items in preview; editable in Answer Type modal); exported with `system: 'http://hl7.org/fhir/questionnaire-display-category'` in coding; **R4 note:** only exported for `group` items (R4 context invariant); suppressed on `display` items with local validator warning | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-supportLink` | standard | `_supportLinks` (0..* help/documentation URIs per item or group; 🔗 icons in builder; "More info ↗" in patient view; editable via **Props** button) | Yes |
-| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden` | SDC | `_hidden` (item/group hidden from patients; purple dashed border + HIDDEN badge in builder preview; excluded from PASS/FAIL; controls disabled; **Hidden** toggle button in builder actions); **on import also reads** `http://hl7.org/fhir/StructureDefinition/questionnaire-hidden` (R4 standard alias); SDC URL takes precedence when both are present | Yes (SDC) |
+| `http://hl7.org/fhir/StructureDefinition/questionnaire-hidden` | R4 (core) | `_hidden` (item/group hidden from patients; purple dashed border + HIDDEN badge in builder preview; excluded from PASS/FAIL; controls disabled; **Hidden** toggle button in builder actions); the older `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden` address is still read and rewritten on export | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract` | SDC | `_observationExtract` (item/group flagged for Observation-based extraction; **States** → **Extract as Observation** checkbox; exported/imported as `valueBoolean`; an explicit `false` on a descendant suppresses an inherited `true`). **Save → Observations** runs the extraction in `js/fhir/extract.js`, producing a `transaction` Bundle of `Observation` resources from the current answers. Each coded leaf answer → one Observation (`status: final`, `code` from `item.code`, `value[x]` from the answer, `Quantity` when `questionnaire-unit` is present, `subject`/`encounter`/`effectiveDateTime`/`issued`/`performer`/`derivedFrom` from the QR). **Deliberate scope:** when a group carries only a boolean flag the SDC spec leaves the parent↔child relationship (component vs hasMember) undefined — the builder treats such a group as a container and emits each coded leaf as an independent Observation (no value-less parent, no `component[]`/`hasMember`). Root-level flag and `false`-suppression are honoured by the extraction engine but the builder UI models the flag per item/group only | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/designNote` | Core | `_designNote` — author-facing note; editable via "Note" action on each item/group card; exported as `valueMarkdown`; never rendered in preview | Yes (Core) |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-collapsible` | SDC | `_collapsible` (`'default-closed'` / `'default-open'`; groups only; controls initial collapsed state in patient-facing preview; `default-closed` groups start collapsed on load; user can still expand/collapse; editable via **States** → **Collapsible** select in builder) | Yes (SDC) |
@@ -331,14 +331,14 @@ The builder stores standard FHIR `enableWhen[]` objects directly on the node. Th
 | `http://hl7.org/fhir/StructureDefinition/minLength` | standard | `_minLength` (minimum character count for `text`/`url` items; `minlength` HTML attribute enforced in preview; inline error `Min N chars` on blur when value is non-empty but shorter than limit; clears when limit is reached) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/maxSize` | standard | `_maxFileSizeMB` (maximum file size in MB for `attachment` items; validated on file selection; error tag shown when exceeded; `calcFormOk` returns `false`; hint shown below file button; editable in Answer Type modal) | Yes |
 | `http://hl7.org/fhir/StructureDefinition/mimeType` | standard | `_mimeTypes` (0..* allowed MIME types for `attachment` items; sets `accept` attribute on file input; hint shown below file button; editable in Answer Type modal as comma-separated list) | Yes |
-| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer` | SDC | `_preferredTermServer` — per-item preferred FHIR terminology server URL; editable via **Terminology** action on each item/group card; exported as `valueUrl`; Questionnaire-level default editable in Properties modal | Yes (SDC) |
+| `http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer` | R4 (core) | `_preferredTermServer` — per-item (and Questionnaire-level) preferred FHIR terminology server URL; editable via **Terminology** action on each item/group card and in Properties; exported as `valueUrl`; the retired SDC address `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-preferredTerminologyServer` is still read | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn` | SDC | `_choiceColumns` — 0..* complex extension defining multi-column display for choice/open-choice dropdowns; each column has `path` (FHIRPath), `label` (header text), optional `width` (Quantity), and `forDisplay` (boolean — which column shows in trigger after selection); editable in **Answer Type** modal "Choice columns" section; rendered as columned dropdown in preview | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/regex` | standard | `_regex` — regular expression pattern for `text`/`url` items; imported as `valueString`; validated on blur in preview (inline error "Does not match pattern"); editable in **Answer Type** modal "Regex validation pattern" field | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-optionExclusive` | standard | `_optionExclusives` — on `answerOption.extension`; marks an option as exclusive (e.g. "None of the above"); selecting an exclusive option in a checklist deselects all other options; selecting a non-exclusive option deselects all exclusive ones; editable in **Answer Type** modal options editor "Excl" checkbox column | Yes |
 | `http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode` | standard | `_usageMode` — `valueCode`: `capture` / `display` / `display-non-empty` / `capture-display` / `capture-display-non-empty`; controls item visibility in patient vs preview mode; `display` / `display-non-empty` items hidden in patient view; editable in **States** modal dropdown | Yes |
 | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemMedia` | SDC | `_itemMedia` — `valueAttachment` with `url`, `contentType`, optional `title`; renders image/audio/video inline before the control in preview; editable in **Answer Type** modal "Item media URL" section | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/itemWeight` | R4 | `_optionWeights` — on `answerOption.extension` (or `valueCoding.extension` fallback); per-option `valueDecimal` scoring weight; shown as `[w:N]` badge in preview; editable in **Answer Type** modal options editor "Weight" column | Yes |
-| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerMedia` | SDC | `_answerMedias` — on `answerOption.extension`; `valueAttachment` with `url`/`contentType`; renders media inline next to option label in preview; preserved on round-trip (no inline editor) | Yes (SDC) |
+| `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemAnswerMedia` | SDC | `_answerMedias` — on `answerOption.extension`; `valueAttachment` with `url`/`contentType`; renders media inline next to option label in preview; the older name `sdc-questionnaire-answerMedia` is still read; preserved on round-trip (no inline editor) | Yes (SDC) |
 | `http://hl7.org/fhir/StructureDefinition/translation` | standard | `questDoc.translations[lang].items[linkId]` / `.title` / `.opts[key]` — per-language plain text translations on `_text.extension`, `_title.extension`, and `answerOption._valueCoding._display.extension`; written/read by the Translate modal; active language selected via the language switcher in the header | Yes |
 | `http://fhir-qb.app/StructureDefinition/ui-translations` | app-custom | `questDoc.translations[lang].ui` — JSON-serialised map of UI string keys → translated labels (AND/OR separators, "+ Add another", "More info ↗", etc.); stored as `valueString: JSON.stringify(ui)` on the root Questionnaire; round-trip safe | No (app-specific) |
 | `http://fhir-qb.app/StructureDefinition/xhtml-translations` | app-custom | `questDoc.translations[lang].xhtml` — JSON-serialised map of `linkId → translated XHTML string`; for items that use `rendering-xhtml`; Google Translate preserves HTML tags; rendered via `innerHTML + DOMPurify`; stored as `valueString: JSON.stringify(xhtml)` on the root Questionnaire; round-trip safe | No (app-specific) |
@@ -430,8 +430,8 @@ Some capabilities exist as both a **standard R4 extension** and a separate **SDC
 
 | Capability | URLs read on import | Precedence |
 |---|---|---|
-| Hidden item | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden` (SDC, primary) and `http://hl7.org/fhir/StructureDefinition/questionnaire-hidden` (R4 standard, alias) | SDC URL wins if both present |
-| Entry format hint | `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` (SDC, primary) and `http://hl7.org/fhir/StructureDefinition/entryFormat` (R4 element-definition ext, alias) | SDC URL wins if both present |
+| Hidden item | `http://hl7.org/fhir/StructureDefinition/questionnaire-hidden` (core, written) and `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-hidden` (older address, read only) | Both are read; the core address is written |
+| Entry format hint | `http://hl7.org/fhir/StructureDefinition/entryFormat` (core, written) and `http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat` (older address, read only) | Both are read; the core address is written |
 
 ---
 
@@ -499,7 +499,7 @@ Extensions that configure how the server-side engine populates or extracts field
 | Extension | Builder support | Notes |
 |---|---|---|
 | `sdc-questionnaire-launchContext` | ✅ Full | Editing UI in **Properties → Launch Context** + import/export. Execution requires SDC server. |
-| `sdc-questionnaire-definitionExtract` | 🔧 Partial | Client-side extraction via **Save ▾ → Definition Extract**; `definitionExtractContext` is honored as an extract marker; `itemExtractionContext` not evaluated (StructureMap extraction is separate, see `targetStructureMap`) |
+| `sdc-questionnaire-definitionExtract` | 🔧 Partial | Client-side extraction via **Save ▾ → Definition Extract**; an item carrying `definitionExtractContext` (a name that does not exist in SDC 4.0) or the retired `itemExtractionContext` is accepted as the same marker (only its presence is used, never its value); StructureMap extraction is separate, see `targetStructureMap` |
 | `sdc-questionnaire-itemContext` | 🔄 Round-trip only | Not evaluated client-side |
 | `sdc-questionnaire-sourceQueries` / `contextExpression` | 🔄 Round-trip only | Server-side batch queries |
 | `sdc-questionnaire-width` | 🔄 Round-trip only | Table column width; table layout not implemented |
@@ -616,8 +616,8 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 | `questionnaire-signatureRequired` | ✅ | 0..* signature type codings |
 | `questionnaire-constraint` | ✅ | FHIRPath validation rules; enforced in preview |
 | `questionnaire-usageMode` | ✅ | capture / display / display-non-empty / … |
-| `questionnaire-hidden` | ✅ | R4 alias for `sdc-questionnaire-hidden`; both read on import |
-| `entryFormat` | ✅ | R4 alias for `sdc-questionnaire-entryFormat`; both read on import |
+| `questionnaire-hidden` | ✅ | Core extension; the older `sdc-questionnaire-hidden` address is also read on import |
+| `entryFormat` | ✅ | Core extension; the older `sdc-questionnaire-entryFormat` address is also read on import |
 | `designNote` | ✅ | Author-internal note (not shown to patients) |
 | `questionnaire-baseType` | ✅ | Base FHIR type (editable via Props) |
 | `questionnaire-fhirType` | ✅ | Specific FHIR type (editable via Props) |
@@ -632,27 +632,27 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 
 | Extension | Status | Notes |
 |---|---|---|
-| `sdc-questionnaire-variable` | ✅ | Questionnaire-level and item-level; editable in Variables panel |
+| `variable` (core) | ✅ | Questionnaire-level (older `sdc-questionnaire-variable` also read and rewritten to the core address); editable in Variables panel. Item-level variables (either address) are passed through unchanged, not editable and not migrated |
 | `sdc-questionnaire-calculatedExpression` | ✅ | FHIRPath; evaluated in topological order |
 | `sdc-questionnaire-initialExpression` | ✅ | FHIRPath, or `language: text/cql-identifier` resolved via the questionnaire's `cqf-library` (see "CQL execution" below); evaluated on load and Re-init |
 | `sdc-questionnaire-enableWhenExpression` | ✅ | FHIRPath visibility condition |
 | `sdc-questionnaire-answerExpression` | ✅ | Dynamic answer options |
 | `sdc-questionnaire-candidateExpression` | ✅ | Candidate/suggested answers |
-| `sdc-questionnaire-hidden` | ✅ | Permanently hidden from patients |
-| `sdc-questionnaire-entryFormat` | ✅ | Placeholder hint text |
+| `questionnaire-hidden` (core) | ✅ | Permanently hidden from patients |
+| `entryFormat` (core) | ✅ | Placeholder hint text |
 | `sdc-questionnaire-collapsible` | ✅ | default-closed / default-open groups |
 | `sdc-questionnaire-openLabel` | ✅ | Custom open-choice placeholder label |
 | `sdc-questionnaire-isSubject` | ✅ | Marks QR subject item |
-| `sdc-questionnaire-columnCount` | ✅ | Multi-column choice layout |
+| `sdc-questionnaire-columnCount` | ✅ | Multi-column choice layout (`valuePositiveInt`) |
 | `sdc-questionnaire-choiceColumn` | ✅ | Multi-column dropdown definition |
 | `sdc-questionnaire-itemMedia` | ✅ | Image/audio/video inline before the control |
-| `sdc-questionnaire-answerMedia` | ✅ | Media attached to individual answer options (round-trip; rendered in preview) |
+| `sdc-questionnaire-itemAnswerMedia` | ✅ | Media attached to individual answer options (round-trip; rendered in preview); the older name `sdc-questionnaire-answerMedia` is also read |
 | `sdc-questionnaire-shortText` | ✅ | Abbreviated label for summary views |
-| `sdc-questionnaire-preferredTerminologyServer` | ✅ | Per-item terminology server override |
+| `preferredTerminologyServer` (core) | ✅ | Per-item terminology server override (the retired SDC address is also read) |
 | `sdc-questionnaire-observationExtract` | ✅ | Observation-based extraction flag; extraction runs client-side |
 | `sdc-questionnaire-itemContext` | 🔄 | FHIRPath context for server-side population; round-tripped |
 | `sdc-questionnaire-itemPopulationContext` | 🔄 | Server-side population context expression; round-tripped |
-| `sdc-questionnaire-itemExtractionContext` | 🔄 | Extraction context; round-tripped |
+| `sdc-questionnaire-itemExtractionContext` | 🔄 | Retired in SDC; round-tripped, and accepted as a Definition Extract marker (presence only) |
 | `sdc-questionnaire-subQuestionnaire` | 🔄 | Inline sub-questionnaire reference; round-tripped; not resolved (requires server assembly) |
 
 ---
@@ -661,10 +661,10 @@ A complete status listing of every FHIR R4 Questionnaire field, extension, and S
 
 | Extension | Status | Notes |
 |---|---|---|
-| `sdc-questionnaire-variable` | ✅ | Editable in Variables panel |
+| `variable` (core) | ✅ | Editable in Variables panel (Questionnaire level) |
 | `sdc-questionnaire-launchContext` | ✅ | Full editing UI in Properties → Launch Context |
-| `sdc-questionnaire-preferredTerminologyServer` | ✅ | Editable in Properties → Terminology Server |
-| `sdc-questionnaire-definitionExtract` | 🔧 | Client-side extraction via Save ▾ → Definition Extract; `itemExtractionContext` not evaluated; StructureMap extraction is separate (see `targetStructureMap`) |
+| `preferredTerminologyServer` (core) | ✅ | Editable in Properties → Terminology Server |
+| `sdc-questionnaire-definitionExtract` | 🔧 | Client-side extraction via Save ▾ → Definition Extract; the retired `itemExtractionContext` is accepted as a marker only; StructureMap extraction is separate (see `targetStructureMap`) |
 | `sdc-questionnaire-definitionExtractContext` | ✅ | Treated like `definitionExtract`: marks the group as an extraction context for Save ▾ → Definition Extract |
 | `sdc-questionnaire-assembleExpectation` | 🔄 | Assembly flag; round-tripped via `_rawQuestExtensions` |
 | `sdc-questionnaire-endpoint` | 🔄 | QR submission endpoint; round-tripped |

@@ -120,10 +120,11 @@ export function validateTree(tree, _values = {}, questMeta = null) {
     const fhirPathErr = _checkFhirPath(node._calculatedExpr);
     if (fhirPathErr) issues.push({ severity: 'error', nodeId: id, message: `Calculated expression error: ${fhirPathErr}` });
 
-    const fhirPathAeErr = _checkFhirPath(node._answerExpression);
+    // only FHIRPath expressions can be checked here; a FHIR query (application/x-fhir-query) is kept as written
+    const fhirPathAeErr = node._answerExpressionLanguage ? null : _checkFhirPath(node._answerExpression);
     if (fhirPathAeErr) issues.push({ severity: 'error', nodeId: id, message: `Answer expression error: ${fhirPathAeErr}` });
 
-    const fhirPathCeErr = _checkFhirPath(node._candidateExpression);
+    const fhirPathCeErr = node._candidateExpressionLanguage ? null : _checkFhirPath(node._candidateExpression);
     if (fhirPathCeErr) issues.push({ severity: 'error', nodeId: id, message: `Candidate expression error: ${fhirPathCeErr}` });
 
     const fhirPathEwErr = _checkFhirPath(node.enableWhenExpression);

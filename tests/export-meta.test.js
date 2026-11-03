@@ -557,9 +557,9 @@ describe('buildFHIRObject — multi-initial for repeating items', () => {
 
 // ── sdc-questionnaire-entryFormat ────────────────────────────────────────────
 describe('buildFHIRObject — entryFormat', () => {
-  const EF_URL = FHIR.entryFormatSdc;
+  const EF_URL = FHIR.entryFormat;
 
-  it('exports _entryFormat as sdc-questionnaire-entryFormat extension', () => {
+  it('exports _entryFormat as the core entryFormat extension', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _entryFormat: 'MM/DD/YYYY' }]);
     const ext = q.item[0].extension || [];
     const ef = ext.find(e => e.url === EF_URL);

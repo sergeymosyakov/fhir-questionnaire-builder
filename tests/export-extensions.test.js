@@ -115,9 +115,9 @@ describe('buildFHIRObject — _supportLinks', () => {
 
 // ── sdc-questionnaire-hidden ───────────────────────────────────────────────────
 describe('buildFHIRObject — _hidden', () => {
-  const HIDDEN_URL = FHIR.hiddenSdc;
+  const HIDDEN_URL = FHIR.hidden;
 
-  it('exports sdc-questionnaire-hidden = true when _hidden is set', () => {
+  it('exports questionnaire-hidden = true when _hidden is set', () => {
     const q = build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'text', _hidden: true }]);
     const ext = q.item[0].extension || [];
     const hiddenExts = ext.filter(e => e.url === HIDDEN_URL);
@@ -131,7 +131,7 @@ describe('buildFHIRObject — _hidden', () => {
     expect(ext.filter(e => e.url === HIDDEN_URL)).toHaveLength(0);
   });
 
-  it('exports sdc-questionnaire-hidden on a group', () => {
+  it('exports questionnaire-hidden on a group', () => {
     const q = build([{ id: 'g1', type: 'group', title: 'G', _hidden: true, children: [
       { id: 'g1.q1', type: 'item', title: 'Child', itemType: 'text' }
     ]}]);
@@ -960,10 +960,10 @@ describe('buildFHIRObject — columnCount', () => {
   const CC_URL = FHIR.columnCount;
   const _build = nodes => { _tree.splice(0, _tree.length, ...nodes.map(_withRawOpts)); _questDoc.rawFhir = { title: 'T' }; return buildFHIRObject(); };
 
-  it('exports _columnCount as valueInteger extension', () => {
+  it('exports _columnCount as a positiveInt extension', () => {
     const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'radio', options: 'a=A,b=B', _columnCount: 3 }]);
     const ext = (q.item[0].extension || []).find(e => e.url === CC_URL);
-    expect(ext?.valueInteger).toBe(3);
+    expect(ext).toEqual({ url: CC_URL, valuePositiveInt: 3 });
   });
 
   it('does not export columnCount when absent', () => {
@@ -981,7 +981,7 @@ describe('buildFHIRObject — columnCount', () => {
   it('exports _columnCount on a drop-down (select) choice (spec-valid, any choice type)', () => {
     const q = _build([{ id: 'q1', type: 'item', title: 'Q', itemType: 'select', options: 'a=A,b=B', _columnCount: 3 }]);
     const ext = (q.item[0].extension || []).find(e => e.url === CC_URL);
-    expect(ext?.valueInteger).toBe(3);
+    expect(ext?.valuePositiveInt).toBe(3);
   });
 });
 

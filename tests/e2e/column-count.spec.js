@@ -146,7 +146,7 @@ test.describe('columnCount — export round-trip', () => {
     const q = JSON.parse(await readDownload(download));
     const cols  = q.item.find(i => i.linkId === 'q-cols');
     const plain = q.item.find(i => i.linkId === 'q-plain');
-    expect((cols.extension || []).find(e => e.url === CC_URL)?.valueInteger).toBe(2);
+    expect((cols.extension || []).find(e => e.url === CC_URL)?.valuePositiveInt).toBe(2);
     expect((plain.extension || []).find(e => e.url === CC_URL)).toBeUndefined();
   });
 
@@ -162,6 +162,6 @@ test.describe('columnCount — export round-trip', () => {
     ]);
     const q = JSON.parse(await readDownload(download));
     const sel = q.item.find(i => i.linkId === 'q-select');
-    expect((sel.extension || []).find(e => e.url === CC_URL)?.valueInteger).toBe(3);
+    expect((sel.extension || []).find(e => e.url === CC_URL)?.valuePositiveInt).toBe(3);
   });
 });

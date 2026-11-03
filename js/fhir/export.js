@@ -237,9 +237,9 @@ export function nodeToFHIRItem(node) {
   if (node._initialExpr)
     ext.push({ url: FHIR.initialExpression, valueExpression: { language: node._initialExprLanguage || 'text/fhirpath', expression: node._initialExpr } });
   // answer-source expressions (SDC) — dynamic answer options (answerExpression / candidateExpression)
-  for (const { url, prop } of ANSWER_SOURCE_EXPR_EXTS) {
+  for (const { url, prop, langProp } of ANSWER_SOURCE_EXPR_EXTS) {
     if (node[prop])
-      ext.push({ url, valueExpression: { language: 'text/fhirpath', expression: node[prop] } });
+      ext.push({ url, valueExpression: { language: node[langProp] || 'text/fhirpath', expression: node[prop] } });
   }
   // questionnaire-itemControl
   if (node.itemType === 'radio')
@@ -287,6 +287,7 @@ export function nodeToFHIRItem(node) {
         FHIR.optionExclusive,
         FHIR.itemWeight,
         FHIR.answerMedia,
+        FHIR.answerMediaLegacy,
       ]);
       const optExts = (opt.extension || []).filter(e => !MANAGED_OPT_EXTS.has(e.url));
       if (node._optionOrdinals?.[key] !== undefined) {
@@ -351,9 +352,9 @@ export function nodeToFHIRItem(node) {
     }
   }
 
-  // sdc-questionnaire-entryFormat
+  // entryFormat (core extension)
   if (node._entryFormat) {
-    ext.push({ url: FHIR.entryFormatSdc, valueString: node._entryFormat });
+    ext.push({ url: FHIR.entryFormat, valueString: node._entryFormat });
   }
 
   // questionnaire-choiceOrientation
@@ -361,9 +362,9 @@ export function nodeToFHIRItem(node) {
     ext.push({ url: FHIR.choiceOrientation, valueCode: node._choiceOrientation });
   }
 
-  // sdc-questionnaire-columnCount (multi-column layout of a choice question's options)
+  // sdc-questionnaire-columnCount (multi-column layout of a choice question's options; positiveInt)
   if (Number.isInteger(node._columnCount) && node._columnCount > 1) {
-    ext.push({ url: FHIR.columnCount, valueInteger: node._columnCount });
+    ext.push({ url: FHIR.columnCount, valuePositiveInt: node._columnCount });
   }
 
   // sdc-questionnaire-choiceColumn (0..* multi-column choice display)
@@ -385,9 +386,9 @@ export function nodeToFHIRItem(node) {
     }
   }
 
-  // sdc-questionnaire-hidden
+  // questionnaire-hidden (core extension)
   if (node._hidden) {
-    ext.push({ url: FHIR.hiddenSdc, valueBoolean: true });
+    ext.push({ url: FHIR.hidden, valueBoolean: true });
   }
 
   // sdc-questionnaire-isSubject (item whose answer identifies the QR subject)
@@ -397,7 +398,10 @@ export function nodeToFHIRItem(node) {
 
   // sdc-questionnaire-observationExtract — mark item/group for Observation-based extraction
   if (node._observationExtract != null && node.itemType !== 'display') {
-    ext.push({ url: FHIR.observationExtract, valueBoolean: node._observationExtract !== false });
+    // a relationship code (component/member/derived/independent) is kept as written; otherwise the boolean flag
+    ext.push(node._observationExtract === true && node._observationExtractCode
+      ? { url: FHIR.observationExtract, valueCode: node._observationExtractCode }
+      : { url: FHIR.observationExtract, valueBoolean: node._observationExtract !== false });
   }
 
   // sdc-questionnaire-collapsible (groups only)

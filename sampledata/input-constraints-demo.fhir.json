@@ -29,7 +29,7 @@
       "type": "date",
       "extension": [
         {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryFormat",
+          "url": "http://hl7.org/fhir/StructureDefinition/entryFormat",
           "valueString": "yyyy-mm-dd"
         },
         {
