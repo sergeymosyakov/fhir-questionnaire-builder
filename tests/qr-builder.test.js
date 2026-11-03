@@ -393,19 +393,21 @@ describe('buildQR — checklist multi-value', () => {
 
 // ── buildQR — || fallback branches ────────────────────────────────────────────
 describe('buildQR — fallback branches', () => {
-  it('questionnaire field falls back to empty string when url and id absent', () => {
-    const qr = bq({ item: [] }, {});
-    expect(qr.questionnaire).toBe('');
+  it('questionnaire field is omitted when url and id are absent', () => {
+    expect(bq({ item: [] }, {})).not.toHaveProperty('questionnaire');
   });
 
-  it('integer answer falls back to 0 for non-numeric value', () => {
-    const qr = bq({ item: [{ linkId: 'q', type: 'integer' }] }, { q: 'not-a-number' });
-    expect(qr.item[0].answer[0].valueInteger).toBe(0);
+  it.each([['integer', 'not-a-number'], ['integer', ''], ['decimal', 'abc'], ['decimal', '']])('a %s answer of %j is omitted, not exported as 0', (type, v) => {
+    expect(bq({ item: [{ linkId: 'q', type }] }, { q: v }).item[0].answer).toBeUndefined();
   });
 
-  it('decimal answer falls back to 0 for non-numeric value', () => {
-    const qr = bq({ item: [{ linkId: 'q', type: 'decimal' }] }, { q: 'abc' });
-    expect(qr.item[0].answer[0].valueDecimal).toBe(0);
+  it('a real zero is still exported', () => {
+    expect(bq({ item: [{ linkId: 'q', type: 'integer' }] }, { q: '0' }).item[0].answer[0].valueInteger).toBe(0);
+    expect(bq({ item: [{ linkId: 'q', type: 'decimal' }] }, { q: 0 }).item[0].answer[0].valueDecimal).toBe(0);
+  });
+
+  it('a quantity without a unit text has no empty unit', () => {
+    expect(bq({ item: [{ linkId: 'q', type: 'quantity' }] }, { q: { value: '5', unit: '' } }).item[0].answer[0].valueQuantity).toEqual({ value: 5 });
   });
 
   it.each([{}, { value: '', unit: 'kg' }, { value: null }])('cleared quantity %j emits no answer', (q) => {

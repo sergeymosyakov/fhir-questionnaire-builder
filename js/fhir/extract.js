@@ -14,6 +14,9 @@ import { FHIR } from './urls/fhir.js';
 //     flag on item.code does not propagate further.
 //   • Only leaf question items that have an `item.code` AND an answer value are
 //     extracted; each produces one Observation (status = 'final').
+//   • A flag on an individual item.code applies to that code: `false` leaves it out, `true` extracts an
+//     Observation with that code alone (even when the item itself is not flagged).
+//   • sdc-questionnaire-observation-extract-category sets Observation.category; the nearest level wins.
 //   • A group carrying only a boolean flag is treated as a container: the spec
 //     states the parent↔child relationship (component vs hasMember) is "undefined"
 //     when the flag value is only a boolean. To stay safe we do NOT invent a
@@ -27,7 +30,14 @@ import { FHIR } from './urls/fhir.js';
 
 const OBSERVATION_EXTRACT_URL =
   FHIR.observationExtract;
+const CATEGORY_URL = FHIR.observationExtractCategory;
 const UNIT_URL = FHIR.unit;
+
+/** Observation.category declared directly on a node (undefined when absent). */
+function ownCategory(node) {
+  const cats = (node.extension || []).filter(e => e.url === CATEGORY_URL && e.valueCodeableConcept).map(e => e.valueCodeableConcept);
+  return cats.length ? cats : undefined;
+}
 
 /**
  * Resolve the effective observationExtract flag declared directly on a node.
@@ -95,13 +105,13 @@ function qrReference(qr) {
   return { display: 'Source QuestionnaireResponse' };
 }
 
-function buildObservation(qItem, valueProp, qr, obsProfile) {
+function buildObservation(codes, valueProp, qr, obsProfile, category) {
   const obs = {
     resourceType: 'Observation',
     ...(obsProfile?.length ? { meta: { profile: obsProfile } } : {}),
     status: 'final',
     code: {
-      coding: (qItem.code || []).map(c => {
+      coding: codes.map(c => {
         const coding = {};
         if (c.system)  coding.system  = c.system;
         if (c.code)    coding.code    = c.code;
@@ -110,6 +120,7 @@ function buildObservation(qItem, valueProp, qr, obsProfile) {
       }),
     },
   };
+  if (category) obs.category = category;
   if (qr.basedOn) obs.basedOn = qr.basedOn;
   if (qr.partOf)  obs.partOf  = qr.partOf;
   if (qr.subject)   obs.subject   = qr.subject;
@@ -155,27 +166,33 @@ export function extractObservations(qr, questionnaire, options = {}) {
 
     // `scopes` = the QR item lists a questionnaire level maps onto; a repeating group
     // yields one QR item per instance, so each instance is walked with its own scope.
-    const walk = (items, inherited, scopes) => {
+    const walk = (items, inherited, scopes, inheritedCategory) => {
       for (const qItem of items || []) {
         const own = ownFlag(qItem);
         const effective = own === undefined ? inherited : own;
+        const category = ownCategory(qItem) ?? inheritedCategory;
         const matches = scopes.flatMap(list => list.filter(i => i.linkId === qItem.linkId));
         const isLeafQuestion = qItem.type !== 'group' && qItem.type !== 'display';
 
-        if (effective === true && isLeafQuestion && qItem.code?.length) {
+        // Each entry is the code list of one Observation: every flagged code alone, else all codes not switched off
+        const codes = qItem.code || [];
+        const flaggedOn = codes.filter(c => ownFlag(c) === true);
+        const codeSets = flaggedOn.length ? flaggedOn.map(c => [c])
+          : effective === true ? [codes.filter(c => ownFlag(c) !== false)].filter(set => set.length) : [];
+        if (isLeafQuestion && codeSets.length) {
           for (const qrItem of matches) {
             for (const ans of qrItem.answer || []) {
               const valueProp = answerToValue(ans, qItem);
-              if (valueProp) observations.push(buildObservation(qItem, valueProp, qr, obsProfile));
+              if (valueProp) for (const set of codeSets) observations.push(buildObservation(set, valueProp, qr, obsProfile, category));
             }
           }
         }
         // each matched instance contributes its own children; no match leaves the subtree empty
-        for (const qrItem of matches) walk(qItem.item, effective, childScopes(qrItem));
+        for (const qrItem of matches) walk(qItem.item, effective, childScopes(qrItem), category);
       }
     };
 
-    walk(questionnaire.item, rootFlag, [qr.item || []]);
+    walk(questionnaire.item, rootFlag, [qr.item || []], ownCategory(questionnaire));
   }
 
   return {

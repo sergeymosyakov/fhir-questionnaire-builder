@@ -30,7 +30,8 @@ These make a form *react* to what the user enters (all powered by
   form as `%name` (the core `variable` extension; the older `sdc-questionnaire-variable` address is still read and saved back at the core address; variables declared on individual items, at either address, are kept unchanged but cannot be edited in the builder).
 - **Launch contexts** — resources the form expects when it opens, such as the
   patient or current user, referenced as `%patient`, `%user`, …
-  (`sdc-questionnaire-launchContext`).
+  (`sdc-questionnaire-launchContext`). A server that fills in or evaluates the form can use them;
+  the builder's own preview does not provide these variables (see [FHIRPath in the builder](fhirpath.md)).
 - **Constraints** — custom validation rules that must hold true, with your own
   error message (`questionnaire-constraint`).
 

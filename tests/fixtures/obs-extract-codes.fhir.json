@@ -1,0 +1,20 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "title": "Observation extraction codes and category",
+  "extension": [
+    { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract", "valueBoolean": true },
+    { "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observation-extract-category",
+      "valueCodeableConcept": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs" }] } }
+  ],
+  "item": [
+    {
+      "linkId": "weight", "type": "decimal", "text": "Weight",
+      "code": [
+        { "system": "http://loinc.org", "code": "29463-7", "display": "Body weight" },
+        { "system": "http://snomed.info/sct", "code": "27113001", "display": "Body weight (observable entity)",
+          "extension": [{ "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract", "valueBoolean": false }] }
+      ]
+    }
+  ]
+}

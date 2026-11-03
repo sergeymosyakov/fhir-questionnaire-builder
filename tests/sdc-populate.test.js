@@ -49,6 +49,7 @@ describe('populateFromServer request', () => {
       parameter: [
         { name: 'questionnaire', resource: Q },
         { name: 'subject', valueReference: { reference: 'Patient/1' } },
+        { name: 'local', valueBoolean: true },
       ],
     });
     expect(search.fhirAuthHeaderFor).toHaveBeenCalledWith('https://fhir.example/r4/Questionnaire/$populate', 'FHIR_BASE');

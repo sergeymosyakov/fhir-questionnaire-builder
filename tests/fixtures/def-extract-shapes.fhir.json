@@ -1,0 +1,39 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "title": "Definition extract shapes",
+  "item": [
+    {
+      "linkId": "patient-g", "type": "group", "text": "Patient",
+      "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient",
+      "extension": [{ "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtract", "extension": [
+        { "url": "definition", "valueCanonical": "http://hl7.org/fhir/StructureDefinition/Patient" },
+        { "url": "fullUrl", "valueString": "'urn:uuid:11111111-1111-1111-1111-111111111111'" }
+      ] }],
+      "item": [
+        { "linkId": "family", "type": "string", "text": "Family name", "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient.name.family", "initial": [{ "valueString": "Doe" }] },
+        {
+          "linkId": "gender", "type": "choice", "text": "Gender", "definition": "http://hl7.org/fhir/StructureDefinition/Patient#Patient.gender",
+          "answerOption": [
+            { "valueCoding": { "system": "http://hl7.org/fhir/administrative-gender", "code": "female", "display": "Female" }, "initialSelected": true },
+            { "valueCoding": { "system": "http://hl7.org/fhir/administrative-gender", "code": "male", "display": "Male" } }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "condition-g", "type": "group", "text": "Condition",
+      "definition": "http://hl7.org/fhir/StructureDefinition/Condition#Condition",
+      "extension": [{ "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtract", "valueBoolean": true }],
+      "item": [
+        {
+          "linkId": "diagnosis", "type": "choice", "text": "Diagnosis", "definition": "http://hl7.org/fhir/StructureDefinition/Condition#Condition.code",
+          "answerOption": [
+            { "valueCoding": { "system": "http://snomed.info/sct", "code": "73211009", "display": "Diabetes mellitus" }, "initialSelected": true },
+            { "valueCoding": { "system": "http://snomed.info/sct", "code": "38341003", "display": "Hypertension" } }
+          ]
+        }
+      ]
+    }
+  ]
+}

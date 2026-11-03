@@ -127,6 +127,28 @@ test.describe('SDC $populate button', () => {
     expect(detail?.patientRef).toBe('Patient/test-123');
   });
 
+  test('the $populate request asks the server to use its own patient data (local = true)', async ({ page }) => {
+    let body = null;
+    await page.route(url => decodeURIComponent(url.href).includes('/Questionnaire/$populate'), async route => {
+      body = route.request().postDataJSON();
+      await route.fulfill({ status: 200, contentType: 'application/fhir+json', body: JSON.stringify({
+        resourceType: 'Parameters', parameter: [{ name: 'response', resource: { resourceType: 'QuestionnaireResponse', status: 'in-progress', item: [] } }],
+      }) });
+    });
+    await setFhirBaseUrl(page, 'https://hapi.fhir.org/baseR4');
+    await page.goto('/');
+    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    await loadBariatric(page);
+
+    await openDropdownItem(page, 'answers-btn', 'sdc-populate-btn');
+    await page.getByTestId('sdc-populate-patient-ref-input').fill('Patient/test-123');
+    await page.getByTestId('sdcPopulateApply').click();
+
+    await expect.poll(() => body).not.toBeNull();
+    expect(body.parameter).toContainEqual({ name: 'local', valueBoolean: true });
+    expect(body.parameter).toContainEqual({ name: 'subject', valueReference: { reference: 'Patient/test-123' } });
+  });
+
   test('bare ID auto-prefixes with Patient/', async ({ page }) => {
     await setFhirBaseUrl(page, 'https://hapi.fhir.org/baseR4');
     await page.goto('/');

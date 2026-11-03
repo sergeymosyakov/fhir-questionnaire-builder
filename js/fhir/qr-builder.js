@@ -63,14 +63,15 @@ export function buildAnswer(fhirItem, v, resolve) {
     }
     return { valueCoding: coding };
   }
-  if (t === 'integer')  return { valueInteger: parseInt(v, 10) || 0 };
-  if (t === 'decimal')   return { valueDecimal: parseFloat(v) || 0 };
+  // A value that is not a number is no answer; 0 is only exported when it was entered
+  if (t === 'integer')  { const n = parseInt(v, 10); return Number.isNaN(n) ? null : { valueInteger: n }; }
+  if (t === 'decimal')  { const n = parseFloat(v);   return Number.isNaN(n) ? null : { valueDecimal: n }; }
   if (t === 'quantity') {
     // A cleared quantity keeps its unit but has no value; 0 is a real value
     const qv = parseFloat(v?.value);
     if (isNaN(qv)) return null;
     return { valueQuantity: {
-      value: qv, unit: v?.unit || '',
+      value: qv, ...(v?.unit ? { unit: v.unit } : {}),
       ...(v?.system ? { system: v.system } : {}), ...(v?.code ? { code: v.code } : {}),
     } };
   }
@@ -146,7 +147,7 @@ function buildQRItem(fhirItem, values, resolve) {
 export function buildQR(fhirJson, values, resolve) {
   return {
     resourceType: 'QuestionnaireResponse',
-    questionnaire: fhirJson.url || fhirJson.id || '',
+    ...(fhirJson.url || fhirJson.id ? { questionnaire: fhirJson.url || fhirJson.id } : {}),
     status: 'in-progress',
     item: (fhirJson.item || []).flatMap(item => buildQRItems(item, values, resolve))
   };

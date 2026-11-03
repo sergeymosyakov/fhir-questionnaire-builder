@@ -201,3 +201,29 @@ test.describe('observation-extract — Bundle download', () => {
     expect(noCodeObs).toBeUndefined();
   });
 });
+
+// ── 6. Per-code flags and category ───────────────────────────────────────────
+// Fixture: tests/fixtures/obs-extract-codes.fhir.json — questionnaire-level flag + category,
+// one item with two codes of which the second is switched off.
+
+test.describe('observation-extract — code flags and category', () => {
+  test('a code switched off is left out and the category is set', async ({ page }) => {
+    await freshStart(page);
+    await loadFixtureFile(page, path.resolve('tests/fixtures/obs-extract-codes.fhir.json'));
+    await expect(page.locator('[data-preview-id="weight"]')).toBeVisible({ timeout: 8_000 });
+    await page.locator('[data-preview-id="weight"] input[type="number"]').fill('72');
+    await page.getByTestId('preview-search-input').click();
+
+    await openDropdownItem(page, 'export-btn', 'export-obs-item');
+    await expect(page.locator('[data-testid="obsExportModal"]')).toBeVisible();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('[data-testid="obsExportModalApply"]').click(),
+    ]);
+    const bundle = JSON.parse(fs.readFileSync(await download.path(), 'utf8'));
+    expect(bundle.entry).toHaveLength(1);
+    const obs = bundle.entry[0].resource;
+    expect(obs.code.coding.map(c => c.code)).toEqual(['29463-7']);
+    expect(obs.category).toEqual([{ coding: [{ system: 'http://terminology.hl7.org/CodeSystem/observation-category', code: 'vital-signs' }] }]);
+  });
+});

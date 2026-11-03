@@ -85,3 +85,20 @@ describe('structureMapExtract — happy path', () => {
     expect(bundle.entry[0].request).toEqual({ method: 'POST', url: 'Patient' });
   });
 });
+
+describe('structureMapExtract — a map that builds its own Bundle', () => {
+  it('returns that Bundle as is instead of wrapping it', () => {
+    const sm = parseFMLToJSON(`
+      map "http://example.org/StructureMap/QRToBundle" = QRToBundle
+      group main(source qr : QuestionnaireResponse, target bundle : Bundle) {
+        qr -> bundle.resourceType = 'Bundle', bundle.type = 'transaction';
+      }
+    `);
+    sm.id = 'qr-to-bundle';
+    const q = { resourceType: 'Questionnaire', contained: [sm], extension: [{ url: FHIR.targetStructureMap, valueCanonical: '#qr-to-bundle' }] };
+    const { bundle, warnings } = structureMapExtract(q, qr, { engine: realEngine });
+    expect(warnings).toEqual([]);
+    expect(bundle.resourceType).toBe('Bundle');
+    expect(bundle.entry?.[0]?.resource?.resourceType).not.toBe('Bundle');
+  });
+});
