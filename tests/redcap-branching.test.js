@@ -13,7 +13,7 @@ describe('branchingToEnableWhen', () => {
     expect(result).not.toBeNull();
     expect(result.enableWhen).toHaveLength(1);
     expect(result.enableWhen[0].question).toBe('gender');
-    expect(result.enableWhen[0].operator).toBe('equal');
+    expect(result.enableWhen[0].operator).toBe('=');
     expect(result.enableWhen[0].answerCoding).toEqual({ code: '1' });
     expect(result.enableBehavior).toBe('all');
   });
@@ -26,12 +26,12 @@ describe('branchingToEnableWhen', () => {
 
   it('parses <> (not-equal)', () => {
     const result = branchingToEnableWhen("[status] <> '0'");
-    expect(result.enableWhen[0].operator).toBe('not-equal');
+    expect(result.enableWhen[0].operator).toBe('!=');
   });
 
   it('parses != (not-equal alternative)', () => {
     const result = branchingToEnableWhen("[status] != '0'");
-    expect(result.enableWhen[0].operator).toBe('not-equal');
+    expect(result.enableWhen[0].operator).toBe('!=');
   });
 
   it('parses AND joining two clauses → enableBehavior=all', () => {
@@ -72,7 +72,7 @@ describe('enableWhenToBranching', () => {
 
   it('converts single equal condition', () => {
     const result = enableWhenToBranching([
-      { question: 'gender', operator: 'equal', answerCoding: { code: '1' } },
+      { question: 'gender', operator: '=', answerCoding: { code: '1' } },
     ], 'all');
     expect(result).toBe("[gender] = '1'");
   });
@@ -87,15 +87,15 @@ describe('enableWhenToBranching', () => {
   it('wraps multiple conditions with AND', () => {
     const result = enableWhenToBranching([
       { question: 'age', operator: '>=', answerDecimal: 18 },
-      { question: 'consent', operator: 'equal', answerCoding: { code: '1' } },
+      { question: 'consent', operator: '=', answerCoding: { code: '1' } },
     ], 'all');
     expect(result).toBe("([age] >= 18) AND ([consent] = '1')");
   });
 
   it('wraps multiple conditions with OR', () => {
     const result = enableWhenToBranching([
-      { question: 'a', operator: 'equal', answerCoding: { code: '1' } },
-      { question: 'b', operator: 'equal', answerCoding: { code: '2' } },
+      { question: 'a', operator: '=', answerCoding: { code: '1' } },
+      { question: 'b', operator: '=', answerCoding: { code: '2' } },
     ], 'any');
     expect(result).toBe("([a] = '1') OR ([b] = '2')");
   });
@@ -108,5 +108,12 @@ describe('enableWhenToBranching', () => {
     const ew2 = branchingToEnableWhen(back);
     expect(ew2.enableWhen[0].question).toBe(ew.enableWhen[0].question);
     expect(ew2.enableWhen[1].question).toBe(ew.enableWhen[1].question);
+  });
+});
+
+describe('FHIR operators ↔ REDCap', () => {
+  it('exports != as not-equal and = as equal', () => {
+    expect(enableWhenToBranching([{ question: 'a', operator: '!=', answerCoding: { code: '1' } }], 'all')).toBe("[a] <> '1'");
+    expect(enableWhenToBranching([{ question: 'a', operator: '=', answerCoding: { code: '1' } }], 'all')).toBe("[a] = '1'");
   });
 });

@@ -79,6 +79,12 @@ export function compareValue(val, ew) {
   else if (ew.answerDecimal  !== undefined) answer = ew.answerDecimal;
   else if (ew.answerCoding)                 answer = ew.answerCoding.code || ew.answerCoding.display || '';
   else return false;
+  // Numeric conditions compare numbers, so 1.0 equals 1
+  if (typeof answer === 'number' && (ew.operator === '=' || ew.operator === '!=')) {
+    const cur = val === undefined || val === null || val === '' ? NaN : Number(val);
+    if (Number.isNaN(cur)) return ew.operator === '!=';
+    return compareNumbers(cur, answer, ew.operator);
+  }
   // Coerce for consistent comparison (user values may be booleans or strings)
   const coerced = String(answer);
   // A picked open-choice option compares by its code

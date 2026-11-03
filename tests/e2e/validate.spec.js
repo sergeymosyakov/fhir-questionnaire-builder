@@ -137,13 +137,14 @@ test.describe('Validate modal — issues', () => {
     await page.locator('[data-testid="add-menu-item"]').first().click();
     await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
 
-    // Clear the group title to produce an empty-title warning.
+    // Clear the item title to produce an empty-text warning (groups may be untitled).
+    const item = page.locator('[data-node-id="1.1"]');
     await expect(async () => {
-      await group.getByTestId('node-title-display').first().click();
-      await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+      await item.getByTestId('node-title-display').first().click();
+      await expect(item.getByTestId('node-title-input').first()).toBeVisible();
     }).toPass();
-    await group.getByTestId('node-title-input').first().fill('');
-    await group.getByTestId('node-title-input').first().blur();
+    await item.getByTestId('node-title-input').first().fill('');
+    await item.getByTestId('node-title-input').first().blur();
 
     await openValidateModal(page);
 
@@ -164,13 +165,14 @@ test.describe('Validate modal — issues', () => {
     await page.locator('[data-testid="add-menu-item"]').first().click();
     await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
 
-    // Clear the group title to produce a warning, so footer renders the "OK" button.
+    // Clear the item title to produce an warning, so footer renders the "OK" button.
+    const item = page.locator('[data-node-id="1.1"]');
     await expect(async () => {
-      await group.getByTestId('node-title-display').first().click();
-      await expect(group.getByTestId('node-title-input').first()).toBeVisible();
+      await item.getByTestId('node-title-display').first().click();
+      await expect(item.getByTestId('node-title-input').first()).toBeVisible();
     }).toPass();
-    await group.getByTestId('node-title-input').first().fill('');
-    await group.getByTestId('node-title-input').first().blur();
+    await item.getByTestId('node-title-input').first().fill('');
+    await item.getByTestId('node-title-input').first().blur();
 
     await openValidateModal(page);
 

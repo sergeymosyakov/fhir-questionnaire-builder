@@ -6,6 +6,7 @@ import {
   ITEM_DISABLED_DISPLAY_EXTENSION_URL,
 } from './format-registry.js';
 import { FHIR } from './urls/fhir.js';
+import { joinCodes } from './checklist-codec.js';
 import {
   fhirTypeToItemType,
   applyVisibility,
@@ -72,7 +73,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
 
   const node = createItemNode(itemType, {
     id:        fhirItem.linkId,
-    title:     fhirItem.text || fhirItem.linkId || 'Item',
+    title:     fhirItem.text || '',
     mandatory: !!fhirItem.required,
   });
 
@@ -498,6 +499,7 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
       if (init.valueTime     !== undefined) return init.valueTime;
       if (init.valueString   !== undefined) return init.valueString;
       if (init.valueUri      !== undefined) return init.valueUri;
+      if (init.valueAttachment)             return init.valueAttachment;
       if (init.valueCoding)                 return init.valueCoding.code || init.valueCoding.display || '';
       if (init.valueReference)              return typeof init.valueReference === 'string'
         ? { reference: init.valueReference }
@@ -526,18 +528,24 @@ function fhirQuestionToItem(fhirItem, linkIdMap, contained) {
     }
   }
   // answerOption[].initialSelected → _initialSelected (round-trip flag)
+  const selectedCodes = [];
   for (const opt of fhirItem.answerOption || []) {
-    if (opt.initialSelected) {
-      let code;
-      if (opt.valueCoding)              code = opt.valueCoding.code || opt.valueCoding.display || '';
-      else if (opt.valueString  !== undefined) code = opt.valueString;
-      else if (opt.valueInteger !== undefined) code = String(opt.valueInteger);
-      if (code !== undefined) {
-        node._initialSelected = code;
-        // Pre-fill initial value from initialSelected when item.initial[] is absent
-        if (node._initialValue === undefined) node._initialValue = code;
-        break;
-      }
+    if (!opt.initialSelected) continue;
+    let code;
+    if (opt.valueCoding)              code = opt.valueCoding.code || opt.valueCoding.display || '';
+    else if (opt.valueString  !== undefined) code = opt.valueString;
+    else if (opt.valueInteger !== undefined) code = String(opt.valueInteger);
+    if (code !== undefined) selectedCodes.push(code);
+  }
+  if (selectedCodes.length) {
+    const multi = selectedCodes.length > 1;
+    // A checklist keeps every preselected code in one value; a repeating item keeps one value per code
+    const checklist = node.itemType === 'checklist';
+    node._initialSelected = checklist ? joinCodes(selectedCodes) : selectedCodes[0];
+    // Pre-fill initial value from initialSelected when item.initial[] is absent
+    if (node._initialValue === undefined) {
+      node._initialValue = selectedCodes[0];
+      if (multi && (checklist || node.repeats)) node._initialValues = selectedCodes;
     }
   }
   // Preserve any unrecognised extensions for round-trip pass-through
@@ -553,7 +561,7 @@ export function fhirItemToNode(fhirItem, linkIdMap, contained) {
   if (t === 'group') {
     const node = createGroupNode({
       id:        fhirItem.linkId,
-      title:     fhirItem.text || fhirItem.linkId || 'Group',
+      title:     fhirItem.text || '',
       mandatory: !!fhirItem.required,
     });
     applyVisibility(node, fhirItem, linkIdMap);

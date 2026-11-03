@@ -247,8 +247,8 @@ Stored in `questDoc.meta` (`js/fhir/quest-document.js`). Populated on import, wr
 | `_candidateExpression` | SDC `sdc-questionnaire-candidateExpression` extension (`valueExpression.expression`) | FHIRPath evaluated at render time for candidate/suggested answers; same client-side evaluation as `_answerExpression`; mutually exclusive with `_answerExpression` and `answerOption[]` (each clears the others); `answerOption[]` suppressed on export when set; editable in Answer Type modal (Candidate source radio) |
 | `_isSubject` | SDC `sdc-questionnaire-isSubject` extension (`valueBoolean`) | marks the item whose answer identifies the `QuestionnaireResponse.subject`; editable in States modal (Is subject checkbox, non-display items only); shown as a `SUBJECT` badge in the builder preview (not in patient view); export emits `valueBoolean: true`; validation errors when set on more than one item |
 | `_initialValue` | `item.initial[0]` value | imported from `initial[0]`; exported as `initial: [entry]`; pre-fills `values[]` on import |
-| `_initialValues` | `item.initial[]` all values | set only for repeating items with >1 initial value; exported as `initial: [entry, …]`; `_initialValue` holds `initial[0]` for backwards compat |
-| `_initialSelected` | `answerOption[].initialSelected` | code of the initially-selected option; preserved round-trip; if no `item.initial[]` exists, also used to pre-fill `_initialValue` |
+| `_initialValues` | `item.initial[]` all values | set only for repeating items with >1 initial value (or >1 `initialSelected` option, including a checklist); exported as `initial: [entry, …]`; `_initialValue` holds `initial[0]` for backwards compat |
+| `_initialSelected` | `answerOption[].initialSelected` | code of the initially-selected option (several preselected codes are comma-joined; a repeating item or checklist also gets one `_initialValues` entry per code); preserved round-trip; if no `item.initial[]` exists, also used to pre-fill `_initialValue` |
 | `_definition` | `item.definition` | URL pointing to a StructureDefinition element; stored as `node._definition`; editable via **Props** button (codes-modal); **Resolve from profile** auto-fills `text`/`type`/constraints from an uploaded StructureDefinition; round-trip safe; also supported on groups (see Group-specific) |
 | `_baseType` | `questionnaire-baseType` ext (`valueCode`) | base FHIR type for items derived from an ElementDefinition; editable via **Props** button — Base Type field; round-trip safe; also supported on groups |
 | `_fhirType` | `questionnaire-fhirType` ext (`valueCode`) | specific FHIR type for complex structures; editable via **Props** button — FHIR Type field; round-trip safe; also supported on groups |
@@ -410,9 +410,7 @@ A review against the published FHIR R4/R5 and SDC 4.0 packages (November 2026) f
 
 | Area | Deviation | Tracking |
 |---|---|---|
-| Extension addresses | `hidden`, `entryFormat` and `variable` are **core** extensions (`http://hl7.org/fhir/StructureDefinition/...`) but are exported with SDC addresses (older SDC addresses are still read); the answer-option media extension is written as `sdc-questionnaire-answerMedia` (the real one is `sdc-questionnaire-itemAnswerMedia`); `columnCount` is written as `valueInteger` (spec: `positiveInt`); answer/candidate expression language and the Observation-extract relationship code are not preserved | #232 |
 | Retired / unknown extensions | In the specification packages the SDC extension `sdc-questionnaire-preferredTerminologyServer` (use the generic `http://hl7.org/fhir/StructureDefinition/preferredTerminologyServer`) and the core extensions `questionnaire-constraint` (use `targetConstraint`), `regex`, `questionnaire-supportLink`, `questionnaire-referenceFilter` and `ordinalValue` (use `itemWeight`) are **retired**; `sdc-questionnaire-definitionExtractContext`, `sdc-questionnaire-itemContext` and the `sdc-observation` profile used by Observation export do not exist under those names (the retired SDC extraction context was replaced by `definitionExtract`; the population one is `itemPopulationContext`) | #232 |
-| Questionnaire rules | Empty group exported as an empty `item` list; missing `text` replaced by the linkId; numeric `enableWhen` equality compares as text; `answerCoding` conditions drop the code system; validator does not check operator/answer presence; `maxLength` lost for open-choice shown as radio/check-box; `initial.valueAttachment` dropped; only the first `initialSelected` is kept | #233 |
 | Responses & extraction | Invalid integer/decimal answer exported as 0; empty `questionnaire` / `unit` strings; `$populate` does not send `local`; definition-extract output shapes (single coded fields as lists, invented ids, ignored extension parameters, no nested answers, repeated groups merged); StructureMap bundle wrapped in a bundle; per-code Observation flags and category not supported; client engine binds neither `%questionnaire` nor launch-context variables | #234 |
 | Versions & terminology | R5 export carrying the builder's version marker loses `open-choice` on re-import; `$expand` request uses `_count` (spec: `count`), ignores nested `contains`, abstract entries and paging; contained ValueSets only expand `include.concept`; terminology server not chosen per target version | #235 |
 
@@ -463,22 +461,24 @@ The builder runs `validateTree()` (`js/fhir/validate.js`) automatically on impor
 
 ### FHIR R4 formal invariants
 
-R4 `Questionnaire` invariants are handled by the local validator and/or suppressed on export, as shown below (✅ / ⚠️ = checked; ❌ = not checked; "—" = nothing to do). que-1 (empty group) and que-4 are **not** checked by the validator; the gaps are tracked in #233:
+R4 `Questionnaire` invariants are handled by the local validator and/or suppressed on export, as shown below (✅ / ⚠️ = checked; ❌ = not checked; "—" = nothing to do). Not every invariant is enforced: que-4 is **not** checked by the validator (it cannot arise on export), and the rows below say exactly what is checked and what is suppressed:
 
 | Invariant | Rule | Validator | Export |
 |---|---|---|---|
 | que-0 | `Questionnaire.name` must match `[A-Z][A-Za-z0-9_]{0,254}` | ⚠️ warning | — |
-| que-1 | Group items must have nested items; display items cannot have nested items | ⚠️ warning only for help text on a display item; an **empty group is not reported and is exported with an empty `item` list** (#233) | — |
+| que-1 | Group items must have nested items; display items cannot have nested items | ⚠️ warning for an empty group and for help text on a display item | ✅ an empty group is exported without an `item` list (never an empty array); help text on a display item is omitted |
 | que-2 | All `linkId` values must be unique | ✅ error | Checked in `js/fhir/validators/local.js`; duplicate linkId surfaces as an error in the Validate modal |
 | que-3 | `display` items cannot have `item.code[]` | ⚠️ warning | ✅ suppressed |
 | que-4 | `answerOption[]` and `answerValueSet` are mutually exclusive | ❌ not checked (cannot occur on export) | ✅ `answerOption[]` path skips when VS set |
-| que-5 | `answerValueSet` only valid on choice/open-choice/decimal/integer/date/dateTime/time/string/quantity | ✅ error | ✅ suppressed on disallowed types (the builder's `text` type is allowed through although FHIR que-5 does not list it; #233) |
+| que-5 | `answerValueSet` only valid on choice/open-choice/decimal/integer/date/dateTime/time/string/quantity | ✅ error | ✅ suppressed on disallowed types (the builder's `text` type is allowed through although FHIR que-5 does not list it) |
 | que-6 | `display` items cannot have `required` or `repeats` | ⚠️ warning | ✅ suppressed |
 | que-7 | `enableWhen.operator = 'exists'` must use `answerBoolean` | ✅ error | Evaluated in `js/eval.js`; validator warns in `js/fhir/validate.js` when `answerBoolean` is missing |
 | que-8 | `display`/`group` items cannot have `initial[]` | ⚠️ (via que-11) | ✅ suppressed |
 | que-9 | `display` items cannot have `readOnly` | ⚠️ warning | ✅ suppressed |
 | que-10 | `maxLength` only valid for boolean/decimal/integer/string/text/url/open-choice | ⚠️ warning | ✅ suppressed on disallowed types |
 | que-11 | `initial[]` must be absent when `answerOption[]` present | ⚠️ warning | ✅ suppressed |
+| — | Item text | ⚠️ warning when an item (not a group) has no text; FHIR does not require text, so the message does not claim it does | ✅ missing text stays missing — the `linkId` is never used as text |
+| — | `enableWhen` condition | ✅ error for a missing `question`, an unknown or missing `operator`, or a comparison without an `answer[x]` | — |
 | que-12 | `enableBehavior` required when `enableWhen.count() > 1` | ✅ auto-handled | ✅ auto-written |
 | que-13 | `repeats: false` → at most 1 initial value | ⚠️ warning | — |
 

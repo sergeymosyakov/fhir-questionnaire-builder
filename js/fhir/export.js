@@ -8,6 +8,7 @@ import './formats/redcap.js';
 import { AppEvents, EventState } from '../events.js';
 import { downloadJSON } from './download.js';
 import { FHIR } from './urls/fhir.js';
+import { joinCodes, splitCodes } from './checklist-codec.js';
 import { APP_URL } from './urls/app.js';
 import { UCUM_URL } from './urls/ucum.js';
 import { W3C_URL } from './urls/w3c.js';
@@ -96,7 +97,7 @@ function buildConstraintExtensions(constraint) {
 export function nodeToFHIRItem(node) {
   const fhirItem = {
     linkId: node.id,
-    text:   node.title,
+    ...(node.title?.trim() ? { text: node.title } : {}),
     type:   node.type === 'group' ? 'group'
       : (node._fhirText && node.itemType === 'text') ? 'text'
       : (node._fhirOpenChoice && (node.itemType === 'radio' || node.itemType === 'checklist')) ? 'open-choice'
@@ -132,6 +133,7 @@ export function nodeToFHIRItem(node) {
       if (t === 'dateTime') return { valueDateTime: String(v) };
       if (t === 'time')     return { valueTime:     String(v) };
       if (t === 'url')      return { valueUri:      String(v) };
+      if (t === 'attachment') return v && typeof v === 'object' ? { valueAttachment: v } : null;
       if (t === 'reference') {
         const ref = (v && typeof v === 'object') ? v.reference : (typeof v === 'string' ? v : '');
         return ref ? { valueReference: { reference: ref } } : null;
@@ -257,8 +259,9 @@ export function nodeToFHIRItem(node) {
   if (_textExts.length) fhirItem._text = { extension: _textExts };
 
   if (node.type === 'group') {
-    fhirItem.item = node.children.map(nodeToFHIRItem);
-    if (node._helpText) fhirItem.item.push(_helpTextItem(node));
+    const children = node.children.map(nodeToFHIRItem);
+    if (node._helpText) children.push(_helpTextItem(node));
+    if (children.length) fhirItem.item = children;
   } else if ((node.itemType === 'select' || node.itemType === 'radio' || node.itemType === 'open-choice' || node.itemType === 'checklist') && emitsAnswerOptions(node)) {
     // Round-trip: preserve the original non-valueCoding FHIR answerOption[] types
     const keyOf = opt => opt.valueCoding
@@ -270,14 +273,16 @@ export function nodeToFHIRItem(node) {
         : opt.valueReference ? (typeof opt.valueReference === 'string' ? opt.valueReference : (opt.valueReference.reference || ''))
         : '';
     // Same options the importer can derive _initialSelected from (coding / string / integer)
-    const firstMarked = node._rawAnswerOptions.find(o => o.initialSelected
+    const markedOpts = node._rawAnswerOptions.filter(o => o.initialSelected
       && (o.valueCoding || o.valueString !== undefined || o.valueInteger !== undefined));
+    const firstMarked = markedOpts[0];
+    const markedKey = node.itemType === 'checklist' ? joinCodes(markedOpts.map(keyOf)) : firstMarked ? String(keyOf(firstMarked)) : '';
     // Builder edits write _initialSelected ('' = cleared); an untouched import keeps its original marks
     // A checklist default is a comma-separated list of codes
-    const selectedKeys = new Set((node.itemType === 'checklist' ? String(node._initialSelected).split(',') : [String(node._initialSelected)])
+    const selectedKeys = new Set((node.itemType === 'checklist' ? splitCodes(String(node._initialSelected)) : [String(node._initialSelected)])
       .map(k => k.trim()).filter(Boolean));
     const selChanged = node._initialSelected !== undefined
-      && String(node._initialSelected) !== (firstMarked ? String(keyOf(firstMarked)) : '');
+      && String(node._initialSelected) !== markedKey;
     fhirItem.answerOption = node._rawAnswerOptions.map(opt => {
       const key = keyOf(opt);
       const optOut = { ...opt };
@@ -316,7 +321,8 @@ export function nodeToFHIRItem(node) {
 
   // maxLength — que-10: only valid for boolean/decimal/integer/string/text/url/open-choice
   const _maxLengthAllowed = new Set(['checkbox', 'decimal', 'integer', 'number', 'text', 'url', 'open-choice']);
-  if (node._maxLength !== undefined && node._maxLength !== null && _maxLengthAllowed.has(node.itemType)) fhirItem.maxLength = node._maxLength;
+  const _openChoiceList = node._fhirOpenChoice && (node.itemType === 'radio' || node.itemType === 'checklist');
+  if (node._maxLength !== undefined && node._maxLength !== null && (_maxLengthAllowed.has(node.itemType) || _openChoiceList)) fhirItem.maxLength = node._maxLength;
 
   // Non-group item with nested sub-items (FHIR R4 allows this).
   // que-1 invariant: display items cannot have their own nested items, so

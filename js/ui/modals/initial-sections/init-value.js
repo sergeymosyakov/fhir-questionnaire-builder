@@ -131,10 +131,12 @@ class InitValueSection extends InitialSection {
     const v = pending.draftValue;
     if (v !== undefined && v !== '') {
       node._initialValue = v;
+      delete node._initialValues;
       if (emitsAnswerOptions(node)) node._initialSelected = String(v);
       document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_SET, { detail: { id: node.id, value: initialAnswerValue(node, v) } }));
     } else {
       delete node._initialValue;
+      delete node._initialValues;
       if (emitsAnswerOptions(node)) node._initialSelected = '';
       document.dispatchEvent(new CustomEvent(AppEvents.ANSWER_DELETE, { detail: { id: node.id } }));
     }
