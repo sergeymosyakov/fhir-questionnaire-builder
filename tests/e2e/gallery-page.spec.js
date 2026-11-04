@@ -6,6 +6,8 @@
 //   gp-open-builder       "Open the Builder" link in the page header
 //   gp-card-<id>          one section per gallery pattern
 //   add-root-group-btn    builder ready marker (after following the link)
+//   top-gallery-link      static link to this page in the Builder's top panel
+//   docs-gallery-link     link to this page in the docs header
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -14,13 +16,14 @@ test.describe('gallery.html (SEO page)', () => {
   test('is a complete page: title, description, canonical, h1, pattern cards with sources', async ({ page }) => {
     await page.goto('/gallery.html');
     await expect(page).toHaveTitle(/FHIRPath Calculation Gallery/);
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /FHIRPath calculatedExpression/);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /FHIRPath/);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://fhirbuilder.com/gallery.html');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     const bmi = page.getByTestId('gp-card-bmi');
     await expect(bmi).toBeVisible();
     await expect(bmi).toContainText('Source:');
     await expect(page.getByTestId('gp-card-egfr-ckd-epi-2021')).toContainText('Answer code for Female');
+    await expect(page.getByTestId('gp-card-egfr-ckd-epi-2021')).not.toContainText('`');
   });
 
   test('structured data parses and lists the calculations with anchors that exist on the page', async ({ page }) => {
@@ -45,5 +48,12 @@ test.describe('gallery.html (SEO page)', () => {
     expect(await sitemap.text()).toContain('https://fhirbuilder.com/gallery.html');
     const home = await request.get('/index.html');
     expect(await home.text()).toContain('href="gallery.html"');
+  });
+
+  test('the Builder top panel and the docs header link to the gallery page', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('top-gallery-link')).toHaveAttribute('href', 'gallery.html');
+    await page.goto('/docs.html');
+    await expect(page.getByTestId('docs-gallery-link')).toHaveAttribute('href', 'gallery.html');
   });
 });

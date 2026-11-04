@@ -4,17 +4,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FHIRPath Calculation Gallery for FHIR Questionnaires — FHIR Questionnaire Builder</title>
-  <meta name="description" content="Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale, due dates and many more. Pick the questionnaire items and get a working FHIRPath calculatedExpression.">
+  <title>FHIRPath Calculation Gallery | FHIR Questionnaire Builder</title>
+  <meta name="description" content="Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale and many more — as working FHIRPath.">
   <meta name="keywords" content="FHIR Questionnaire, FHIRPath, calculatedExpression, SDC, clinical calculator, BMI, eGFR, Glasgow Coma Scale, FHIR form builder">
   <meta property="og:type"        content="website">
   <meta property="og:title"       content="FHIRPath Calculation Gallery for FHIR Questionnaires">
-  <meta property="og:description" content="Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale, due dates and many more. Pick the questionnaire items and get a working FHIRPath calculatedExpression.">
+  <meta property="og:description" content="Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale and many more — as working FHIRPath.">
   <meta property="og:url"         content="https://fhirbuilder.com/gallery.html">
   <meta property="og:image"       content="https://fhirbuilder.com/docs/social-preview.png">
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="FHIRPath Calculation Gallery for FHIR Questionnaires">
-  <meta name="twitter:description" content="Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale, due dates and many more. Pick the questionnaire items and get a working FHIRPath calculatedExpression.">
+  <meta name="twitter:description" content="Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale and many more — as working FHIRPath.">
   <meta name="twitter:image"       content="https://fhirbuilder.com/docs/social-preview.png">
   <link rel="canonical" href="https://fhirbuilder.com/gallery.html">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -29,8 +29,11 @@
       "@id": "https://fhirbuilder.com/gallery.html#page",
       "url": "https://fhirbuilder.com/gallery.html",
       "name": "FHIRPath Calculation Gallery for FHIR Questionnaires",
-      "description": "Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale, due dates and many more. Pick the questionnaire items and get a working FHIRPath calculatedExpression.",
+      "description": "Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale and many more — as working FHIRPath.",
       "inLanguage": "en",
+      "breadcrumb": {
+        "@id": "https://fhirbuilder.com/gallery.html#breadcrumb"
+      },
       "isPartOf": {
         "@type": "WebApplication",
         "name": "FHIR Questionnaire Builder",
@@ -259,6 +262,7 @@
     },
     {
       "@type": "BreadcrumbList",
+      "@id": "https://fhirbuilder.com/gallery.html#breadcrumb",
       "itemListElement": [
         {
           "@type": "ListItem",
@@ -479,14 +483,14 @@
       <h3>eGFR (CKD-EPI 2021)</h3>
       <p>Estimated GFR in mL/min/1.73 m² from creatinine, age and sex — set the answer code that means female if your sex item does not use “female”.</p>
       <p class="gp-label">Inputs</p>
-      <ul><li>Serum creatinine item (Already in mg/dL / Convert from µmol/L)</li><li>Age in years item</li><li>Sex item (single choice)</li><li>Answer code for Female (default `female`)</li></ul>
+      <ul><li>Serum creatinine item (Already in mg/dL / Convert from µmol/L)</li><li>Age in years item</li><li>Sex item (single choice)</li><li>Answer code for Female (default <code>female</code>)</li></ul>
       <p class="gp-source">Source: Inker et al. 2021, N Engl J Med 385:1737 (race-free CKD-EPI)</p>
     </section>
     <section class="gp-card" id="cockcroft-gault" data-testid="gp-card-cockcroft-gault">
       <h3>Creatinine clearance (Cockcroft–Gault)</h3>
       <p>(140 − age) × weight ÷ (72 × creatinine), × 0.85 if female, in mL/min — set the answer code that means female if your sex item does not use “female”.</p>
       <p class="gp-label">Inputs</p>
-      <ul><li>Age in years item</li><li>Weight item (Already in kg / Convert from lb)</li><li>Serum creatinine item (Already in mg/dL / Convert from µmol/L)</li><li>Sex item (single choice)</li><li>Answer code for Female (default `female`)</li></ul>
+      <ul><li>Age in years item</li><li>Weight item (Already in kg / Convert from lb)</li><li>Serum creatinine item (Already in mg/dL / Convert from µmol/L)</li><li>Sex item (single choice)</li><li>Answer code for Female (default <code>female</code>)</li></ul>
       <p class="gp-source">Source: Cockcroft &amp; Gault 1976, Nephron 16:31</p>
     </section>
     <section class="gp-card" id="due-date-naegele" data-testid="gp-card-due-date-naegele">
@@ -564,7 +568,7 @@
       <h3>Ideal body weight (Devine)</h3>
       <p>Male 50 kg / female 45.5 kg + 2.3 kg per inch over 5 feet — set the answer code that means female if your sex item does not use “female”.</p>
       <p class="gp-label">Inputs</p>
-      <ul><li>Height item (Already in inches / Convert from cm)</li><li>Sex item (single choice)</li><li>Answer code for Female (default `female`)</li></ul>
+      <ul><li>Height item (Already in inches / Convert from cm)</li><li>Sex item (single choice)</li><li>Answer code for Female (default <code>female</code>)</li></ul>
       <p class="gp-source">Source: Devine 1974, Drug Intell Clin Pharm 8:650</p>
     </section>
     <section class="gp-card" id="waist-hip-ratio" data-testid="gp-card-waist-hip-ratio">

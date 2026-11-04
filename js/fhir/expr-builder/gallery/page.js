@@ -3,14 +3,16 @@ import { describeInputs } from './catalog.js';
 
 const SITE = 'https://fhirbuilder.com';
 const TITLE = 'FHIRPath Calculation Gallery for FHIR Questionnaires';
-const DESCRIPTION = 'Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale, due dates and many more. Pick the questionnaire items and get a working FHIRPath calculatedExpression.';
+const PAGE_TITLE = 'FHIRPath Calculation Gallery | FHIR Questionnaire Builder';
+const DESCRIPTION = 'Ready-made, source-referenced clinical calculations for FHIR Questionnaires — BMI, eGFR, Glasgow Coma Scale and many more — as working FHIRPath.';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 // `<` escaped so the JSON can never close its own <script> element.
 const json = (o) => JSON.stringify(o, null, 2).replace(/</g, '\\u003c');
 
 function card(p) {
-  const inputs = describeInputs(p).map((i) => `<li>${esc(i)}</li>`).join('');
+  // `x` in an input description (a constant's default) is shown as code
+  const inputs = describeInputs(p).map((i) => `<li>${esc(i).replace(/`([^`]*)`/g, '<code>$1</code>')}</li>`).join('');
   const bands = p.categories ? `\n      <p class="gp-bands"><strong>Result:</strong> ${p.categories.map((c) => esc(c.label)).join(' &middot; ')}</p>` : '';
   return `    <section class="gp-card" id="${esc(p.id)}" data-testid="gp-card-${esc(p.id)}">
       <h3>${esc(p.name)}</h3>
@@ -28,6 +30,7 @@ export function renderGalleryPage(patterns) {
     '@graph': [
       {
         '@type': 'WebPage', '@id': `${url}#page`, url, name: TITLE, description: DESCRIPTION, inLanguage: 'en',
+        breadcrumb: { '@id': `${url}#breadcrumb` },
         isPartOf: { '@type': 'WebApplication', name: 'FHIR Questionnaire Builder', url: `${SITE}/` },
         mainEntity: { '@id': `${url}#list` },
       },
@@ -36,7 +39,7 @@ export function renderGalleryPage(patterns) {
         itemListElement: patterns.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name, url: `${url}#${p.id}` })),
       },
       {
-        '@type': 'BreadcrumbList',
+        '@type': 'BreadcrumbList', '@id': `${url}#breadcrumb`,
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'FHIR Questionnaire Builder', item: `${SITE}/` },
           { '@type': 'ListItem', position: 2, name: 'Calculation gallery', item: url },
@@ -50,7 +53,7 @@ export function renderGalleryPage(patterns) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${esc(TITLE)} — FHIR Questionnaire Builder</title>
+  <title>${esc(PAGE_TITLE)}</title>
   <meta name="description" content="${esc(DESCRIPTION)}">
   <meta name="keywords" content="FHIR Questionnaire, FHIRPath, calculatedExpression, SDC, clinical calculator, BMI, eGFR, Glasgow Coma Scale, FHIR form builder">
   <meta property="og:type"        content="website">
