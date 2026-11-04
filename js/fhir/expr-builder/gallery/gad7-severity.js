@@ -5,6 +5,7 @@ export const gad7Severity = {
   id: 'gad7-severity',
   name: 'GAD-7 total + severity',
   description: 'Sums the 7 GAD-7 items (each scored 0\u20133) and maps the total to its anxiety severity band.',
+  source: 'Spitzer et al. 2006, Arch Intern Med 166:1092',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     { key: 'q1', label: 'Q1 \u2014 feeling nervous, anxious, on edge', transforms: [] },

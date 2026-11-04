@@ -3,6 +3,7 @@ export const ageFromBirthdate = {
   id: 'age-from-birthdate',
   name: 'Age from birthdate (whole years)',
   description: 'Whole years since a birthdate item — correctly handles a birthday not yet reached this year.',
+  source: 'Calendar-year difference with birthday adjustment',
   itemTypes: ['date', 'dateTime'],
   slots: [
     { key: 'birthdate', label: 'Birthdate item', transforms: [] },

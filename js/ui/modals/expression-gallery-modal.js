@@ -28,6 +28,7 @@ class ExpressionGalleryModal extends Modal {
     this._allItems = flattenItems(tree || []);
     this._pattern = null;
     this._selections = {};
+    this._constants = {};
     this._listSearch = '';
     this.setTitle('Choose from gallery');
     this._render();
@@ -84,7 +85,7 @@ class ExpressionGalleryModal extends Modal {
       desc.className = 'eg-row-desc';
       desc.textContent = pattern.description;
       row.append(name, desc);
-      row.addEventListener('click', () => { this._pattern = pattern; this._selections = {}; this._render(); });
+      row.addEventListener('click', () => { this._pattern = pattern; this._selections = {}; this._constants = {}; this._render(); });
       this._listEl.appendChild(row);
     }
   }
@@ -102,6 +103,15 @@ class ExpressionGalleryModal extends Modal {
     desc.className = 'eg-note';
     desc.textContent = this._pattern.description;
     this.body.appendChild(desc);
+    if (this._pattern.source) {
+      const src = document.createElement('div');
+      src.className = 'eg-note eg-source';
+      src.dataset.testid = 'eg-source';
+      src.textContent = 'Source: ' + this._pattern.source;
+      this.body.appendChild(src);
+    }
+
+    if (this._pattern.constants?.length) this.body.appendChild(this._renderConstants());
 
     const slotsWrap = document.createElement('div');
     slotsWrap.className = 'eg-slots';
@@ -119,6 +129,30 @@ class ExpressionGalleryModal extends Modal {
     this._preview.dataset.testid = 'eg-preview';
     this.body.appendChild(this._preview);
     this._refreshPreview();
+  }
+
+  // Pattern-level constants (e.g. which answer code means "female"): a labelled
+  // input per constant, prefilled with its default; blank falls back to the default.
+  _renderConstants() {
+    const wrap = document.createElement('div');
+    wrap.className = 'eg-slots eg-consts';
+    for (const c of this._pattern.constants) {
+      const row = document.createElement('div');
+      row.className = 'eg-slot-row';
+      const lbl = document.createElement('span');
+      lbl.className = 'eg-slot-label';
+      lbl.textContent = c.label;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'eg-const-input';
+      input.dataset.testid = 'eg-const-' + c.key;
+      input.value = this._constants[c.key] ?? c.default;
+      input.placeholder = c.default;
+      input.addEventListener('input', () => { this._constants[c.key] = input.value; this._refreshPreview(); });
+      row.append(lbl, input);
+      wrap.appendChild(row);
+    }
+    return wrap;
   }
 
   _renderSlot(slot, eligible) {
@@ -280,12 +314,12 @@ class ExpressionGalleryModal extends Modal {
 
   _refreshPreview() {
     if (!this._preview) return;
-    const expr = resolveGalleryPattern(this._pattern, this._selections);
+    const expr = resolveGalleryPattern(this._pattern, this._selections, this._constants);
     this._preview.textContent = expr || 'Pick an item for every slot\u2026';
   }
 
   _apply() {
-    const expr = this._pattern && resolveGalleryPattern(this._pattern, this._selections);
+    const expr = this._pattern && resolveGalleryPattern(this._pattern, this._selections, this._constants);
     if (!expr) return; // incomplete — stay open, preview already says what's missing
     if (typeof this._onInsert === 'function') this._onInsert(expr);
     this._reset();
@@ -298,6 +332,7 @@ class ExpressionGalleryModal extends Modal {
     this._onInsert = null;
     this._pattern = null;
     this._selections = {};
+    this._constants = {};
     this.body.innerHTML = '';
   }
 }

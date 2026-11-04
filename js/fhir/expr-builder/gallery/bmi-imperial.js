@@ -6,6 +6,7 @@ export const bmiImperial = {
   id: 'bmi-imperial',
   name: 'BMI (imperial: lb, inches)',
   description: 'weight(lb) \u00d7 703 \u00f7 height(in)\u00b2 — the standard US imperial BMI formula.',
+  source: 'Imperial BMI formula (weight lb × 703 ÷ height in²)',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     {

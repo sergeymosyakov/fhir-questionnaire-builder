@@ -5,6 +5,7 @@ export const apgarScore = {
   id: 'apgar-score',
   name: 'Apgar score',
   description: 'Sums the 5 Apgar criteria (each scored 0–2) and maps the total (0–10) to its band.',
+  source: 'Apgar 1953; AAP/ACOG score bands',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     { key: 'appearance', label: 'Appearance — skin colour (0–2)', transforms: [] },

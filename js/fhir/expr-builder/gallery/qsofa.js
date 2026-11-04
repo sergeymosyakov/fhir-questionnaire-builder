@@ -6,6 +6,7 @@ export const qsofa = {
   id: 'qsofa',
   name: 'qSOFA sepsis screen',
   description: 'Counts the 3 qSOFA criteria that are present; 2 or more means high risk of poor outcome.',
+  source: 'Singer et al. 2016 (Sepsis-3), JAMA 315:801',
   itemTypes: ['boolean', 'checkbox'],
   slots: [
     { key: 'resp', label: 'Respiratory rate ≥22/min', transforms: [] },

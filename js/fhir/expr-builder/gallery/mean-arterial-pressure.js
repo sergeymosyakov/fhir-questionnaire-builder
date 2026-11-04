@@ -4,6 +4,7 @@ export const meanArterialPressure = {
   id: 'mean-arterial-pressure',
   name: 'Mean arterial pressure',
   description: '(systolic + 2 × diastolic) ÷ 3 in mmHg, rounded to 1 decimal.',
+  source: 'Standard estimate: (systolic + 2 × diastolic) ÷ 3',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     { key: 'sbp', label: 'Systolic BP item', transforms: [] },

@@ -4,6 +4,7 @@ export const bsaMosteller = {
   id: 'bsa-mosteller',
   name: 'Body surface area (Mosteller)',
   description: '√(height cm × weight kg ÷ 3600), in m² — pick the height and weight items, with optional unit conversion.',
+  source: 'Mosteller 1987, N Engl J Med 317:1098',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     {

@@ -99,28 +99,29 @@ from scratch. Pick a pattern, fill in which item answers each slot (with an
 optional unit conversion where relevant), and the resolved FHIRPath is dropped
 into the field as ordinary editable text — the gallery is a starting point, not a
 locked-in choice. Some patterns add rows ("+ Add item") for a variable number of
-inputs, or resolve to a named category instead of a raw number. Patterns
-currently in the gallery:
+inputs, or resolve to a named category instead of a raw number. Each pattern also
+shows where its formula comes from.
 
-| Pattern | Produces |
-|---|---|
-| BMI (metric), BMI (imperial), BMI Category (WHO) | Body-mass index, or its underweight/normal/overweight/obese category |
-| Age from birthdate | Whole years since a birthdate item |
-| Unit conversion | A single value converted between common clinical units (lb↔kg, cm↔m, °F↔°C) |
-| GAD-7 total + severity | Sum of 7 items mapped to its anxiety severity band |
-| PHQ-9 total + severity | Sum of 9 items mapped to its depression severity band |
-| CHA₂DS₂-VASc | Weighted stroke-risk score from yes/no criteria |
-| Charlson Comorbidity Index | Weighted comorbidity score (pick which conditions apply) plus an age-based bonus |
-| Sum of items | Add together as many numeric items as you need |
-| Count of Yes answers | How many of the yes/no items you pick are answered Yes |
-| Percent change | How much a value changed compared with a baseline, in percent (e.g. weight since the first visit) |
-| PHQ-2 screen | Sum of 2 items; a total of 3 or more is a positive depression screen |
-| Glasgow Coma Scale | Eye, verbal and motor responses added up (3–15) and mapped to mild / moderate / severe |
-| Apgar score | Sum of 5 newborn criteria (0–10) mapped to low / moderately abnormal / reassuring |
-| qSOFA sepsis screen | Counts 3 bedside criteria; 2 or more means high risk |
-| Body surface area (Mosteller) | Body surface area in m² from height and weight, with unit conversion |
-| Mean arterial pressure | Average blood pressure from the systolic and diastolic readings |
-| Serum anion gap | Sodium minus (chloride + bicarbonate) from three lab values |
+What is in the gallery, by area:
+
+- **Body measurements:** BMI (metric and imperial) and its WHO category, body surface area (Mosteller), ideal body weight (Devine), waist-to-hip ratio.
+- **Dates and age:** age from a birthdate, age at another date, age in months, days between two dates, expected delivery date and gestational age from the last menstrual period, a date plus an interval (for follow-up dates).
+- **Kidney function:** eGFR (CKD-EPI 2021) and creatinine clearance (Cockcroft–Gault).
+- **Laboratory and cardiology:** corrected calcium, LDL cholesterol (Friedewald), HOMA-IR, FIB-4, anion gap, mean arterial pressure, QTc (Bazett and Fridericia).
+- **Scores and screens:** PHQ-9, PHQ-2, GAD-7, Glasgow Coma Scale, Apgar, qSOFA, CHA₂DS₂-VASc, Charlson Comorbidity Index.
+- **General helpers:** unit conversion, sum of items, count of Yes answers, percent change.
+
+The full list, with every pattern's inputs, result bands and source, is in the
+[gallery catalog](https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/docs/EXPRESSION-GALLERY.md).
+
+For patterns that depend on sex (eGFR, Cockcroft–Gault, ideal body weight), the
+**sex** item must be a single-choice question. The pattern compares the item's
+answer *code* with the text in **Answer code for Female**, which starts as `female`.
+If your answers use another code (for example `F` or `2`), type it there before
+inserting. Matching is exact, including upper and lower case. A pattern gives no
+result until all of its inputs are answered (yes/no checklist patterns such as qSOFA
+count an unanswered box as No), and date patterns need full dates. The gallery offers reference
+calculations to save authoring effort; they are not medical advice.
 
 ## Understanding a result (Expression Explain)
 

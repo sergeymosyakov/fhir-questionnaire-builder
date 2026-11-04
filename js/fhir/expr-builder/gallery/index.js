@@ -2,6 +2,7 @@
 // pattern per file in this folder into EXPR_GALLERY, plus the pure resolver.
 // No DOM; consumed by ExpressionGalleryModal. Adding a pattern = new file here
 // + one line below, never edit an existing pattern's file.
+import { q } from '../emit.js';
 import { bmi } from './bmi.js';
 import { bmiImperial } from './bmi-imperial.js';
 import { bmiCategory } from './bmi-category.js';
@@ -21,12 +22,30 @@ import { qsofa } from './qsofa.js';
 import { bsaMosteller } from './bsa-mosteller.js';
 import { meanArterialPressure } from './mean-arterial-pressure.js';
 import { anionGap } from './anion-gap.js';
+import { egfrCkdEpi2021 } from './egfr-ckd-epi-2021.js';
+import { cockcroftGault } from './cockcroft-gault.js';
+import { dueDateNaegele } from './due-date-naegele.js';
+import { datePlusInterval } from './date-plus-interval.js';
+import { ageAtDate } from './age-at-date.js';
+import { ageInMonths } from './age-in-months.js';
+import { correctedCalcium } from './corrected-calcium.js';
+import { ldlFriedewald } from './ldl-friedewald.js';
+import { homaIr } from './homa-ir.js';
+import { fib4 } from './fib4.js';
+import { qtcBazett } from './qtc-bazett.js';
+import { qtcFridericia } from './qtc-fridericia.js';
+import { idealBodyWeight } from './ideal-body-weight.js';
+import { waistHipRatio } from './waist-hip-ratio.js';
+import { daysBetweenDates } from './days-between-dates.js';
+import { gestationalAgeWeeks } from './gestational-age-weeks.js';
 
 export const EXPR_GALLERY = [
   bmi, bmiImperial, bmiCategory, ageFromBirthdate, unitConvert,
   gad7Severity, phq9Severity, cha2ds2Vasc, sumOfItems, charlsonComorbidityIndex,
   countYesAnswers, percentChange, phq2Screen, glasgowComaScale, apgarScore, qsofa,
-  bsaMosteller, meanArterialPressure, anionGap,
+  bsaMosteller, meanArterialPressure, anionGap, egfrCkdEpi2021, cockcroftGault,
+  dueDateNaegele, datePlusInterval, ageAtDate, ageInMonths, correctedCalcium, ldlFriedewald, homaIr, fib4, qtcBazett, qtcFridericia, idealBodyWeight, waistHipRatio,
+  daysBetweenDates, gestationalAgeWeeks,
 ];
 
 // Applies a slot's transform (if any) and wraps the result in parens, unless
@@ -63,17 +82,30 @@ function applyCategories(numExpr, categories) {
   return `iif(${numExpr}.exists(), ${out}, {})`;
 }
 
+// pattern.constants: [{ key, label, default }] — the template references each as
+// %const.key%, replaced by a FHIRPath string literal of the author's override
+// (blank/absent falls back to the default).
+function constantLiterals(constants, overrides) {
+  return (constants || []).map((c) => [
+    `%const.${c.key}%`,
+    q(String(overrides?.[c.key] ?? '').trim() || c.default),
+  ]);
+}
+
 // selections: { [slotKey]: fixed-slot object, or an array for a repeatable slot }
+// constants: { [constKey]: string } overrides for pattern.constants (optional).
 // Returns null if any slot is unfilled (or a repeatable slot is under its min).
-export function resolveGalleryPattern(pattern, selections) {
-  let result = pattern.template;
+// One substitution pass, so inserted text (item refs, constant values) is never rescanned.
+export function resolveGalleryPattern(pattern, selections, constants) {
+  const values = new Map(constantLiterals(pattern.constants, constants));
   for (const slot of pattern.slots) {
     const value = slot.repeatable
       ? resolveRepeatableSlot(slot, selections[slot.key])
       : resolveFixedSlot(slot, selections[slot.key]);
     if (value == null) return null;
-    result = result.split(`%${slot.key}%`).join(value);
+    values.set(`%${slot.key}%`, value);
   }
+  let result = pattern.template.replace(/%(?:const\.)?\w+%/g, (m) => values.get(m) ?? m);
   if (pattern.categories) result = applyCategories(result, pattern.categories);
   return result;
 }

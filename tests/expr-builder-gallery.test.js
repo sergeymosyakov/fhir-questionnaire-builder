@@ -324,3 +324,231 @@ describe('resolveGalleryPattern — second-batch patterns evaluate correctly', (
     expect(run('anion-gap', { na: 140, cl: 104, hco3: 24 })).toBe(12);
   });
 });
+
+// ── eGFR (CKD-EPI 2021) and Cockcroft-Gault — checked against an independent JS reference ──
+describe('resolveGalleryPattern — renal function patterns', () => {
+  const kidneyQr = ({ scr, age, weight, sex }) => ({
+    resourceType: 'QuestionnaireResponse',
+    item: [
+      scr != null && { linkId: 'scr', answer: [{ valueDecimal: scr }] },
+      age != null && { linkId: 'age', answer: [{ valueInteger: age }] },
+      weight != null && { linkId: 'wt', answer: [{ valueDecimal: weight }] },
+      sex != null && { linkId: 'sex', answer: [{ valueCoding: { code: sex } }] },
+    ].filter(Boolean),
+  });
+  const R = (id, acc) => `%resource.item.where(linkId='${id}').answer.${acc}`;
+  const evalPattern = (id, values, picks, constants) => {
+    const qr = kidneyQr(values);
+    const sel = {
+      scr: { ref: R('scr', 'valueDecimal'), transformId: picks.scr },
+      age: { ref: R('age', 'valueInteger') },
+      weight: { ref: R('wt', 'valueDecimal'), transformId: picks.weight },
+      sex: { ref: R('sex', 'valueCoding.code') },
+    };
+    const expr = resolveGalleryPattern(pattern(id), sel, constants);
+    return fhirpath.evaluate(qr, expr, { resource: qr }, fhirpath_r4_model)[0];
+  };
+  const refEgfr = (scr, age, female) => {
+    const k = female ? 0.7 : 0.9, a = female ? -0.241 : -0.302, r = scr / k;
+    return Math.round(142 * Math.min(r, 1) ** a * Math.max(r, 1) ** -1.2 * 0.9938 ** age * (female ? 1.012 : 1));
+  };
+  const refCg = (age, kg, scr, female) => Math.round(((140 - age) * kg) / (72 * scr) * (female ? 0.85 : 1));
+
+  it.each([
+    [0.9, 60, 'female', true], [1.0, 50, 'male', false], [0.5, 30, 'female', true],
+    [1.8, 75, 'male', false], [0.6, 40, 'male', false], [2.4, 82, 'female', true],
+  ])('egfr-ckd-epi-2021 Scr %s age %s %s matches the reference formula', (scr, age, sex, female) => {
+    expect(evalPattern('egfr-ckd-epi-2021', { scr, age, sex }, { scr: 'mgdl' })).toBe(refEgfr(scr, age, female));
+  });
+
+  it('egfr: \u00b5mol/L conversion and a overridden female code give the same answer', () => {
+    const want = refEgfr(1, 55, true);
+    expect(evalPattern('egfr-ckd-epi-2021', { scr: 88.4, age: 55, sex: 'F' }, { scr: 'umol' }, { female: 'F' })).toBe(want);
+    expect(evalPattern('egfr-ckd-epi-2021', { scr: 1, age: 55, sex: 'custom1' }, { scr: 'mgdl' }, { female: ' custom1 ' })).toBe(want);
+  });
+
+  it('egfr: without an override only the default code female counts as female', () => {
+    expect(evalPattern('egfr-ckd-epi-2021', { scr: 1, age: 55, sex: 'F' }, { scr: 'mgdl' })).toBe(refEgfr(1, 55, false));
+  });
+
+  it('egfr gives no result for a zero creatinine instead of Infinity', () => {
+    expect(evalPattern('egfr-ckd-epi-2021', { scr: 0, age: 55, sex: 'male' }, { scr: 'mgdl' })).toBeUndefined();
+  });
+
+  it.each([{ scr: null }, { age: null }, { sex: null }])('egfr gives no result while an input is unanswered %j', (miss) => {
+    const v = { scr: 1, age: 55, sex: 'male', ...miss };
+    expect(evalPattern('egfr-ckd-epi-2021', v, { scr: 'mgdl' })).toBeUndefined();
+  });
+
+  it.each([[60, 70, 1.0, 'male', false], [72, 55, 0.8, 'female', true], [45, 90, 1.5, 'female', true]])(
+    'cockcroft-gault age %s %s kg Scr %s %s matches the reference formula', (age, weight, scr, sex, female) => {
+      expect(evalPattern('cockcroft-gault', { scr, age, weight, sex }, { scr: 'mgdl', weight: 'kg' }))
+        .toBe(refCg(age, weight, scr, female));
+    });
+
+  it('cockcroft-gault: lb and \u00b5mol/L conversions, female override; unanswered sex gives no result', () => {
+    expect(evalPattern('cockcroft-gault', { scr: 88.4, age: 60, weight: 154.324, sex: 'M' }, { scr: 'umol', weight: 'lb' }))
+      .toBe(refCg(60, 70, 1, false));
+    expect(evalPattern('cockcroft-gault', { scr: 1, age: 60, weight: 70, sex: 'F' }, { scr: 'mgdl', weight: 'kg' }, { female: 'F' }))
+      .toBe(refCg(60, 70, 1, true));
+    expect(evalPattern('cockcroft-gault', { scr: 1, age: 60, weight: 70 }, { scr: 'mgdl', weight: 'kg' })).toBeUndefined();
+  });
+});
+
+describe('resolveGalleryPattern — constants', () => {
+  const p = { slots: [], template: '%const.a% = %const.a%', constants: [{ key: 'a', label: 'A', default: 'x' }] };
+  it('uses the default when no override or a blank override is given', () => {
+    expect(resolveGalleryPattern(p, {})).toBe("'x' = 'x'");
+    expect(resolveGalleryPattern(p, {}, { a: '   ' })).toBe("'x' = 'x'");
+  });
+  it('substitutes an override as a string literal, escaping quotes and backslashes', () => {
+    expect(resolveGalleryPattern(p, {}, { a: "o'k\\d" })).toBe("'o\\'k\\\\d' = 'o\\'k\\\\d'");
+  });
+  it('never rescans a constant value for placeholders', () => {
+    const q2 = { slots: [{ key: 's', label: 'S', transforms: [] }], template: '%s% %const.a%', constants: [{ key: 'a', label: 'A', default: 'x' }] };
+    expect(resolveGalleryPattern(q2, { s: { ref: '%R' } }, { a: '%s% %const.a%' })).toBe("(%R) '%s% %const.a%'");
+  });
+  it('patterns without constants are unaffected', () => {
+    expect(resolveGalleryPattern(pattern('unit-convert'), { value: { ref: '%A', transformId: 'lb-kg' } }, { a: 'z' })).toBe(
+      resolveGalleryPattern(pattern('unit-convert'), { value: { ref: '%A', transformId: 'lb-kg' } }));
+  });
+});
+
+// ── Date and lab/clinical formula patterns — checked against independent JS references ──
+describe('resolveGalleryPattern — date and lab patterns', () => {
+  const ACC = { d: 'valueDate', n: 'valueDecimal', c: 'valueCoding.code' };
+  // spec: { slotKey: [kind 'd'|'n'|'c', value, transformId?] }; absent key = unanswered item
+  const calc = (id, spec, constants) => {
+    const qr = { resourceType: 'QuestionnaireResponse', item: [] };
+    const sel = {};
+    for (const slot of pattern(id).slots) {
+      const [kind, value, transformId] = spec[slot.key] || ['n'];
+      if (value != null) {
+        const ans = kind === 'd' ? { valueDate: value } : kind === 'c' ? { valueCoding: { code: value } } : { valueDecimal: value };
+        qr.item.push({ linkId: slot.key, answer: [ans] });
+      }
+      sel[slot.key] = { ref: `%resource.item.where(linkId='${slot.key}').answer.${ACC[kind]}`, transformId };
+    }
+    const expr = resolveGalleryPattern(pattern(id), sel, constants);
+    return fhirpath.evaluate(qr, expr, { resource: qr }, fhirpath_r4_model)[0];
+  };
+  const days = (iso, n) => new Date(Date.parse(iso) + n * 86400000).toISOString().slice(0, 10);
+  const refYears = (b, at) => {
+    const [by, bm, bd] = b.split('-').map(Number), [ay, am, ad] = at.split('-').map(Number);
+    return ay - by - (am * 100 + ad < bm * 100 + bd ? 1 : 0);
+  };
+  const refMonths = (b, at) => {
+    const [by, bm, bd] = b.split('-').map(Number), [ay, am, ad] = at.split('-').map(Number);
+    return (ay - by) * 12 + (am - bm) - (ad < bd ? 1 : 0);
+  };
+
+  it.each(['2026-01-01', '2025-12-31', '2024-02-29', '2026-06-15'])('due-date-naegele %s = LMP + 280 days', (lmp) => {
+    expect(calc('due-date-naegele', { lmp: ['d', lmp] })).toBe(days(lmp, 280));
+  });
+
+  it.each([
+    ['1w', '2026-01-31', '2026-02-07'], ['2w', '2026-01-31', '2026-02-14'], ['4w', '2026-01-31', '2026-02-28'],
+    ['1m', '2026-01-31', '2026-02-28'], ['3m', '2026-01-15', '2026-04-15'], ['6m', '2026-08-31', '2027-02-28'],
+    ['1y', '2026-03-01', '2027-03-01'],
+  ])('date-plus-interval %s on %s = %s', (tid, from, want) => {
+    expect(calc('date-plus-interval', { date: ['d', from, tid] })).toBe(want);
+  });
+
+  it.each([
+    ['1990-12-25', '2026-06-01'], ['1990-06-01', '2026-06-01'], ['1990-06-02', '2026-06-01'], ['2020-02-29', '2024-02-28'], ['2020-02-29', '2024-02-29'],
+  ])('age-at-date %s at %s', (b, at) => {
+    expect(calc('age-at-date', { birth: ['d', b], at: ['d', at] })).toBe(refYears(b, at));
+  });
+
+  it.each([
+    ['2025-03-15', '2026-03-14'], ['2025-03-15', '2026-03-15'], ['2025-12-20', '2026-01-10'], ['2026-01-31', '2026-02-28'], ['2020-05-05', '2020-05-05'],
+  ])('age-in-months %s at %s', (b, at) => {
+    expect(calc('age-in-months', { birth: ['d', b], at: ['d', at] })).toBe(refMonths(b, at));
+  });
+
+  it('days-between-dates matches real calendar days across leap years and century boundaries', () => {
+    const starts = ['1900-02-27', '1999-12-30', '2000-02-27', '2023-12-30', '2024-02-27', '2099-12-30', '2100-02-27', '2026-11-04'];
+    let checked = 0;
+    for (const start of starts) {
+      for (let off = -3; off <= 800; off += 37) {
+        const end = days(start, off);
+        expect(calc('days-between-dates', { start: ['d', start], end: ['d', end] }), `${start} -> ${end}`).toBe(off);
+        checked++;
+      }
+    }
+    expect(checked).toBeGreaterThan(150);
+  }, 30000);
+
+  it('days-between-dates: exact edge cases and negative spans', () => {
+    const d = (start, end) => calc('days-between-dates', { start: ['d', start], end: ['d', end] });
+    expect(d('2024-02-28', '2024-03-01')).toBe(2);
+    expect(d('2023-02-28', '2023-03-01')).toBe(1);
+    expect(d('2000-01-01', '2000-12-31')).toBe(365);
+    expect(d('2026-01-01', '2025-12-31')).toBe(-1);
+    expect(d('2026-05-05', '2026-05-05')).toBe(0);
+  });
+
+  it.each([['2026-01-01', '2026-01-07', 0], ['2026-01-01', '2026-01-08', 1], ['2025-12-01', '2026-03-01', 12], ['2024-02-01', '2024-11-07', 40]])(
+    'gestational-age-weeks LMP %s at %s = %s completed weeks', (lmp, at, weeks) => {
+      expect(calc('gestational-age-weeks', { lmp: ['d', lmp], at: ['d', at] })).toBe(weeks);
+    });
+
+  it('gestational-age-weeks gives no result when the visit is before the LMP; cockcroft-gault none for age over 140', () => {
+    expect(calc('gestational-age-weeks', { lmp: ['d', '2026-03-01'], at: ['d', '2026-02-20'] })).toBeUndefined();
+    expect(calc('cockcroft-gault', { age: ['n', 150], weight: ['n', 70, 'kg'], scr: ['n', 1, 'mgdl'], sex: ['c', 'male'] })).toBeUndefined();
+  });
+
+  it('date patterns give no result while a date is unanswered', () => {
+    expect(calc('age-at-date', { birth: ['d', '1990-01-01'], at: ['d', null] })).toBeUndefined();
+    expect(calc('due-date-naegele', { lmp: ['d', null] })).toBeUndefined();
+    expect(calc('days-between-dates', { start: ['d', '2026-01-01'], end: ['d', null] })).toBeUndefined();
+  });
+
+  it('corrected-calcium: Ca + 0.8 x (4 - albumin), with unit conversions', () => {
+    expect(calc('corrected-calcium', { ca: ['n', 8, 'mgdl'], alb: ['n', 2.5, 'gdl'] })).toBe(9.2);
+    expect(calc('corrected-calcium', { ca: ['n', 2, 'mmol'], alb: ['n', 25, 'gl'] })).toBe(9.2);
+    expect(calc('corrected-calcium', { ca: ['n', 9.5, 'mgdl'], alb: ['n', 4, 'gdl'] })).toBe(9.5);
+  });
+
+  it('ldl-friedewald: TC - HDL - TG/5; no result at TG >= 400; mmol/L conversion', () => {
+    expect(calc('ldl-friedewald', { tc: ['n', 200, 'mgdl'], hdl: ['n', 50, 'mgdl'], tg: ['n', 150, 'mgdl'] })).toBe(120);
+    expect(calc('ldl-friedewald', { tc: ['n', 200, 'mgdl'], hdl: ['n', 50, 'mgdl'], tg: ['n', 400, 'mgdl'] })).toBeUndefined();
+    expect(calc('ldl-friedewald', { tc: ['n', 200, 'mgdl'], hdl: ['n', 50, 'mgdl'], tg: ['n', 399, 'mgdl'] })).toBe(Math.round(200 - 50 - 399 / 5));
+    const mm = calc('ldl-friedewald', { tc: ['n', 5.17, 'mmol'], hdl: ['n', 1.29, 'mmol'], tg: ['n', 1.69, 'mmol'] });
+    expect(mm).toBe(Math.round(5.17 * 38.67 - 1.29 * 38.67 - (1.69 * 88.57) / 5));
+  });
+
+  it('homa-ir: glucose x insulin / 405, mmol/L converts at 18', () => {
+    expect(calc('homa-ir', { glucose: ['n', 90, 'mgdl'], insulin: ['n', 10] })).toBe(2.22);
+    expect(calc('homa-ir', { glucose: ['n', 5, 'mmol'], insulin: ['n', 10] })).toBe(2.22);
+  });
+
+  it.each([
+    [{ age: 30, ast: 20, alt: 36, plt: 250 }, 'Low risk (< 1.3)'],
+    [{ age: 50, ast: 40, alt: 25, plt: 200 }, 'Indeterminate (1.3\u20132.67)'],
+    [{ age: 60, ast: 100, alt: 25, plt: 100 }, 'High risk (> 2.67)'],
+  ])('fib4 %j -> %s', (v, want) => {
+    const spec = Object.fromEntries(Object.entries(v).map(([k, x]) => [k, ['n', x]]));
+    expect(calc('fib4', spec)).toBe(want);
+  });
+
+  it.each([[400, 75], [380, 60], [450, 110]])('qtc-bazett and qtc-fridericia for QT %s ms, HR %s', (qt, hr) => {
+    const rr = 60 / hr;
+    expect(calc('qtc-bazett', { qt: ['n', qt], hr: ['n', hr] })).toBe(Math.round(qt / Math.sqrt(rr)));
+    expect(calc('qtc-fridericia', { qt: ['n', qt], hr: ['n', hr] })).toBe(Math.round(qt / Math.cbrt(rr)));
+  });
+
+  it('ideal-body-weight: Devine by sex, cm conversion, overridable female code; no sex = no result', () => {
+    expect(calc('ideal-body-weight', { height: ['n', 70, 'in'], sex: ['c', 'male'] })).toBe(73);
+    expect(calc('ideal-body-weight', { height: ['n', 170.18, 'cm'], sex: ['c', 'female'] })).toBe(61.6);
+    expect(calc('ideal-body-weight', { height: ['n', 67, 'in'], sex: ['c', 'F'] }, { female: 'F' })).toBe(61.6);
+    expect(calc('ideal-body-weight', { height: ['n', 67, 'in'], sex: ['c', 'F'] })).toBe(50 + 2.3 * 7);
+    expect(calc('ideal-body-weight', { height: ['n', 67, 'in'], sex: ['c', null] })).toBeUndefined();
+  });
+
+  it('waist-hip-ratio rounds to 2 decimals', () => {
+    expect(calc('waist-hip-ratio', { waist: ['n', 80], hip: ['n', 100] })).toBe(0.8);
+    expect(calc('waist-hip-ratio', { waist: ['n', 91], hip: ['n', 107] })).toBe(0.85);
+  });
+});
+

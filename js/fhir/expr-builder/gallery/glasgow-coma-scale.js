@@ -5,6 +5,7 @@ export const glasgowComaScale = {
   id: 'glasgow-coma-scale',
   name: 'Glasgow Coma Scale',
   description: 'Adds the eye (1–4), verbal (1–5) and motor (1–6) responses and maps the total (3–15) to its severity band.',
+  source: 'Teasdale & Jennett 1974, Lancet 2:81',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     { key: 'eye', label: 'Eye response (1–4)', transforms: [] },

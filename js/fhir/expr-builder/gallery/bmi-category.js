@@ -3,6 +3,7 @@ export const bmiCategory = {
   id: 'bmi-category',
   name: 'BMI Category (WHO)',
   description: 'BMI mapped to its WHO weight category \u2014 pick the weight and height items, with optional unit conversion.',
+  source: 'WHO adult BMI classification',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     {

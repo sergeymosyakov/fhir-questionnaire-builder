@@ -4,6 +4,7 @@ export const anionGap = {
   id: 'anion-gap',
   name: 'Serum anion gap',
   description: 'Na − (Cl + HCO₃), all in mEq/L — pick the three lab items.',
+  source: 'Standard potassium-free form: Na − (Cl + HCO₃)',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     { key: 'na', label: 'Sodium item', transforms: [] },
