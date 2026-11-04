@@ -3,7 +3,7 @@ export const waistHipRatio = {
   id: 'waist-hip-ratio',
   name: 'Waist-to-hip ratio',
   description: 'Waist circumference ÷ hip circumference (same unit), rounded to 2 decimals.',
-  source: 'Standard ratio (WHO waist-hip ratio guidance)',
+  source: 'WHO Expert Consultation 2008, Waist circumference and waist–hip ratio (Geneva)',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     { key: 'waist', label: 'Waist circumference item', transforms: [] },

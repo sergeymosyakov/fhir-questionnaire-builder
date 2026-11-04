@@ -7,7 +7,8 @@ Pick a pattern, say which questionnaire item supplies each input, and the result
 
 - Where an input offers several units, you choose the unit your item uses and the pattern converts it.
 - Where a pattern lists an **answer code** input, it is prefilled with a default; change it if your answers use another code.
-- A pattern gives **no result** until every input is answered, rather than guessing a value.
+- Numeric and date patterns give **no result** until every input is answered, rather than guessing a value; yes/no checklist patterns count an unanswered box as No.
+- Date patterns need full dates (year-month-day).
 - These are reference calculations to save authoring effort, not medical advice. Check each formula against its source for your use case.
 
 To add a pattern, see [the gallery README](../js/fhir/expr-builder/gallery/README.md).
@@ -35,7 +36,7 @@ To add a pattern, see [the gallery README](../js/fhir/expr-builder/gallery/READM
 | **Serum anion gap** | Na − (Cl + HCO₃), all in mEq/L — pick the three lab items. | Sodium item<br>Chloride item<br>Bicarbonate item | Standard potassium-free form: Na − (Cl + HCO₃) |
 | **eGFR (CKD-EPI 2021)** | Estimated GFR in mL/min/1.73 m² from creatinine, age and sex — set the answer code that means female if your sex item does not use “female”. | Serum creatinine item (Already in mg/dL / Convert from µmol/L)<br>Age in years item<br>Sex item (single choice)<br>Answer code for Female (default `female`) | Inker et al. 2021, N Engl J Med 385:1737 (race-free CKD-EPI) |
 | **Creatinine clearance (Cockcroft–Gault)** | (140 − age) × weight ÷ (72 × creatinine), × 0.85 if female, in mL/min — set the answer code that means female if your sex item does not use “female”. | Age in years item<br>Weight item (Already in kg / Convert from lb)<br>Serum creatinine item (Already in mg/dL / Convert from µmol/L)<br>Sex item (single choice)<br>Answer code for Female (default `female`) | Cockcroft & Gault 1976, Nephron 16:31 |
-| **Expected delivery date (from LMP)** | Last menstrual period + 280 days (Naegele’s rule, regular 28-day cycle). | Last menstrual period item | Naegele's rule (LMP + 280 days, regular 28-day cycle) |
+| **Expected delivery date (LMP + 280 days)** | Last menstrual period + 280 days (40 weeks), assuming a regular 28-day cycle. | Last menstrual period item | Naegele's rule, 280-day form (regular 28-day cycle) |
 | **Date plus interval** | A date item plus a fixed interval — e.g. a follow-up or next-due date. | Start date item (+ 1 week / + 2 weeks / + 4 weeks / + 1 month / + 3 months / + 6 months / + 1 year) | FHIRPath calendar arithmetic |
 | **Age at a date (whole years)** | Whole years between a birthdate and another date item — e.g. age at the visit or at diagnosis. | Birthdate item<br>Date to measure age at | Calendar-year difference with birthday adjustment |
 | **Age in months at a date** | Whole months between a birthdate and another date item — for infant and paediatric questionnaires. | Birthdate item<br>Date to measure age at | Calendar-month difference with day-of-month adjustment |
@@ -46,6 +47,6 @@ To add a pattern, see [the gallery README](../js/fhir/expr-builder/gallery/READM
 | **QTc (Bazett)** | QT interval corrected for heart rate: QT ÷ √RR, in ms — over-corrects at fast heart rates. | QT interval item (ms)<br>Heart rate item (bpm) | Bazett 1920 |
 | **QTc (Fridericia)** | QT interval corrected for heart rate: QT ÷ RR¹ᐟ³, in ms — steadier than Bazett at fast or slow rates. | QT interval item (ms)<br>Heart rate item (bpm) | Fridericia 1920 |
 | **Ideal body weight (Devine)** | Male 50 kg / female 45.5 kg + 2.3 kg per inch over 5 feet — set the answer code that means female if your sex item does not use “female”. | Height item (Already in inches / Convert from cm)<br>Sex item (single choice)<br>Answer code for Female (default `female`) | Devine 1974, Drug Intell Clin Pharm 8:650 |
-| **Waist-to-hip ratio** | Waist circumference ÷ hip circumference (same unit), rounded to 2 decimals. | Waist circumference item<br>Hip circumference item | Standard ratio (WHO waist-hip ratio guidance) |
+| **Waist-to-hip ratio** | Waist circumference ÷ hip circumference (same unit), rounded to 2 decimals. | Waist circumference item<br>Hip circumference item | WHO Expert Consultation 2008, Waist circumference and waist–hip ratio (Geneva) |
 | **Days between two dates** | Whole days from a start date item to an end date item — e.g. length of stay. Negative if the end is before the start. | Start date item<br>End date item | Calendar day count (Gregorian calendar, leap years included) |
-| **Gestational age (completed weeks)** | Completed weeks from the last menstrual period to a visit date item. | Last menstrual period item<br>Visit date item | Standard LMP dating (completed weeks since the first day of the last period) |
+| **Gestational age (completed weeks)** | Completed weeks from the last menstrual period to a visit date item; no result if the visit is before the LMP. | Last menstrual period item<br>Visit date item | Standard LMP dating (completed weeks since the first day of the last period) |

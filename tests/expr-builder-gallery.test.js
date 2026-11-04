@@ -493,6 +493,11 @@ describe('resolveGalleryPattern — date and lab patterns', () => {
       expect(calc('gestational-age-weeks', { lmp: ['d', lmp], at: ['d', at] })).toBe(weeks);
     });
 
+  it('gestational-age-weeks gives no result when the visit is before the LMP; cockcroft-gault none for age over 140', () => {
+    expect(calc('gestational-age-weeks', { lmp: ['d', '2026-03-01'], at: ['d', '2026-02-20'] })).toBeUndefined();
+    expect(calc('cockcroft-gault', { age: ['n', 150], weight: ['n', 70, 'kg'], scr: ['n', 1, 'mgdl'], sex: ['c', 'male'] })).toBeUndefined();
+  });
+
   it('date patterns give no result while a date is unanswered', () => {
     expect(calc('age-at-date', { birth: ['d', '1990-01-01'], at: ['d', null] })).toBeUndefined();
     expect(calc('due-date-naegele', { lmp: ['d', null] })).toBeUndefined();

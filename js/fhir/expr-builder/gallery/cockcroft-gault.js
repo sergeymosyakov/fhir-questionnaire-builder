@@ -29,5 +29,5 @@ export const cockcroftGault = {
     },
     { key: 'sex', label: 'Sex item (single choice)', itemTypes: ['select', 'radio'], transforms: [] },
   ],
-  template: 'iif(%sex%.exists(), ((((140 - %age%) * %weight%) / (72 * %scr%)) * iif(%sex% = %const.female%, 0.85, 1)).round(0), {})',
+  template: 'iif(%sex%.exists(), ((((140 - %age%) * %weight%) / (72 * %scr%)) * iif(%sex% = %const.female%, 0.85, 1)).round(0), {}).where($this >= 0)',
 };

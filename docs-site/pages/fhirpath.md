@@ -119,7 +119,8 @@ For patterns that depend on sex (eGFR, Cockcroft–Gault, ideal body weight), th
 answer *code* with the text in **Answer code for Female**, which starts as `female`.
 If your answers use another code (for example `F` or `2`), type it there before
 inserting. Matching is exact, including upper and lower case. A pattern gives no
-result until all of its inputs are answered. The gallery offers reference
+result until all of its inputs are answered (yes/no checklist patterns such as qSOFA
+count an unanswered box as No), and date patterns need full dates. The gallery offers reference
 calculations to save authoring effort; they are not medical advice.
 
 ## Understanding a result (Expression Explain)
