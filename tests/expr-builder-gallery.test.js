@@ -48,9 +48,10 @@ describe('resolveGalleryPattern', () => {
       height: { ref: '%H', transformId: 'm' },
     });
     expect(expr).toBe(
+      "iif(((%W) / ((%H) * (%H))).exists(), " +
       "iif(((%W) / ((%H) * (%H))) < 18.5, 'Underweight', " +
       "iif(((%W) / ((%H) * (%H))) < 25, 'Normal weight', " +
-      "iif(((%W) / ((%H) * (%H))) < 30, 'Overweight', 'Obese')))"
+      "iif(((%W) / ((%H) * (%H))) < 30, 'Overweight', 'Obese'))), {})"
     );
   });
 
@@ -238,5 +239,88 @@ describe('resolveGalleryPattern — charlson-comorbidity-index', () => {
     expect(resolveGalleryPattern(pattern('charlson-comorbidity-index'), {
       conditions: [{ ref: '%X', transformId: 'mi' }],
     })).toBeNull();
+  });
+});
+
+// ── Patterns added in the second batch — each evaluated against a real QR ─────
+describe('resolveGalleryPattern — second-batch patterns evaluate correctly', () => {
+  const answers = (map) => ({
+    resourceType: 'QuestionnaireResponse',
+    item: Object.entries(map).map(([linkId, v]) => ({
+      linkId,
+      answer: [typeof v === 'boolean' ? { valueBoolean: v } : { valueDecimal: v }],
+    })),
+  });
+  const run = (id, values, picks = {}) => {
+    const qr = answers(values);
+    const sel = {};
+    for (const slot of pattern(id).slots) {
+      const mk = (linkId) => ({
+        ref: `%resource.item.where(linkId='${linkId}').answer.${typeof values[linkId] === 'boolean' ? 'valueBoolean' : 'valueDecimal'}`,
+        transformId: picks[slot.key],
+      });
+      sel[slot.key] = slot.repeatable ? Object.keys(values).map(mk) : mk(slot.key);
+    }
+    const expr = resolveGalleryPattern(pattern(id), sel);
+    return fhirpath.evaluate(qr, expr, { resource: qr }, fhirpath_r4_model)[0];
+  };
+
+  it('count-yes-answers counts only Yes rows (No is 0)', () => {
+    expect(run('count-yes-answers', { a: true, b: false, c: true, d: true }, { items: 'yes' })).toBe(3);
+  });
+
+  it('percent-change: 80 → 76 is -5.0%; a zero baseline yields no answer', () => {
+    expect(run('percent-change', { baseline: 80, current: 76 })).toBe(-5);
+    expect(run('percent-change', { baseline: 0, current: 5 })).toBeUndefined();
+  });
+
+  it.each([[{ q1: 1, q2: 1 }, 'Negative screen'], [{ q1: 2, q2: 1 }, 'Positive screen']])(
+    'phq2-screen %j → %s', (v, want) => { expect(run('phq2-screen', v)).toBe(want); });
+
+  it.each([
+    [{ eye: 1, verbal: 1, motor: 1 }, 'Severe (GCS 3–8)'],
+    [{ eye: 2, verbal: 3, motor: 4 }, 'Moderate (GCS 9–12)'],
+    [{ eye: 4, verbal: 5, motor: 6 }, 'Mild (GCS 13–15)'],
+    [{ eye: 3, verbal: 3, motor: 3 }, 'Moderate (GCS 9–12)'],
+  ])('glasgow-coma-scale %j → %s', (v, want) => { expect(run('glasgow-coma-scale', v)).toBe(want); });
+
+  it.each([
+    [{ appearance: 0, pulse: 1, grimace: 1, activity: 1, respiration: 0 }, 'Low (0–3)'],
+    [{ appearance: 1, pulse: 1, grimace: 1, activity: 1, respiration: 1 }, 'Moderately abnormal (4–6)'],
+    [{ appearance: 2, pulse: 2, grimace: 1, activity: 2, respiration: 2 }, 'Reassuring (7–10)'],
+  ])('apgar-score %j → %s', (v, want) => { expect(run('apgar-score', v)).toBe(want); });
+
+  it('qsofa: 1 criterion is lower risk, 2 is high risk', () => {
+    expect(run('qsofa', { resp: true, mentation: false, sbp: false })).toBe('Lower risk');
+    expect(run('qsofa', { resp: true, mentation: true, sbp: false })).toBe('High risk');
+  });
+
+  it('bsa-mosteller: 175 cm, 70 kg ≈ 1.84 m²; inch/lb conversions give the same body', () => {
+    expect(run('bsa-mosteller', { height: 175, weight: 70 })).toBe(1.84);
+    expect(run('bsa-mosteller', { height: 68.9, weight: 154.3 }, { height: 'in', weight: 'lb' })).toBe(1.84);
+  });
+
+  it('mean-arterial-pressure: 120/80 → 93.3', () => {
+    expect(run('mean-arterial-pressure', { sbp: 120, dbp: 80 })).toBe(93.3);
+  });
+
+  it('a category pattern gives no result while any input is unanswered', () => {
+    const qr = answers({ q1: 2 });
+    const ref = (id) => `%resource.item.where(linkId='${id}').answer.valueDecimal`;
+    const expr = resolveGalleryPattern(pattern('phq2-screen'), { q1: { ref: ref('q1') }, q2: { ref: ref('q2') } });
+    expect(fhirpath.evaluate(qr, expr, { resource: qr }, fhirpath_r4_model)).toEqual([]);
+  });
+
+  it('missing booleans count as 0 in qsofa and count-yes-answers', () => {
+    const ref = (id) => `%resource.item.where(linkId='${id}').answer.valueBoolean`;
+    const qr = answers({ resp: true });
+    const sel = { resp: { ref: ref('resp') }, mentation: { ref: ref('mentation') }, sbp: { ref: ref('sbp') } };
+    expect(fhirpath.evaluate(qr, resolveGalleryPattern(pattern('qsofa'), sel), { resource: qr }, fhirpath_r4_model)[0]).toBe('Lower risk');
+    const cy = resolveGalleryPattern(pattern('count-yes-answers'), { items: [{ ref: ref('resp'), transformId: 'yes' }, { ref: ref('gone'), transformId: 'yes' }] });
+    expect(fhirpath.evaluate(qr, cy, { resource: qr }, fhirpath_r4_model)[0]).toBe(1);
+  });
+
+  it('anion-gap: Na 140, Cl 104, HCO3 24 → 12', () => {
+    expect(run('anion-gap', { na: 140, cl: 104, hco3: 24 })).toBe(12);
   });
 });
