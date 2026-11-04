@@ -386,7 +386,19 @@ test.describe('Expression Gallery', () => {
     { id: 'bsa-mosteller', slots: [['height', 'decimal'], ['weight', 'decimal']], result: 'decimal', fragment: '.sqrt()' },
     { id: 'mean-arterial-pressure', slots: [['sbp', 'decimal'], ['dbp', 'decimal']], result: 'decimal', fragment: '/ 3' },
     { id: 'anion-gap', slots: [['na', 'decimal'], ['cl', 'decimal'], ['hco3', 'decimal']], result: 'decimal', fragment: ' - (' },
-    { id: 'cockcroft-gault', slots: [['age', 'integer'], ['weight', 'decimal'], ['scr', 'decimal'], ['sex', 'radio']], result: 'decimal', fragment: '0.85' },
+    { id: 'cockcroft-gault', slots: [['age', 'integer'], ['weight', 'decimal'], ['scr', 'decimal'], ['sex', 'radio']], result: 'decimal', fragment: '0.85', consts: true },
+    { id: 'due-date-naegele', slots: [['lmp', 'date']], result: 'date', fragment: '280 days' },
+    { id: 'date-plus-interval', slots: [['date', 'date']], result: 'date', fragment: '+ 1 week' },
+    { id: 'age-at-date', slots: [['birth', 'date'], ['at', 'date']], result: 'integer', fragment: 'substring(0,4)' },
+    { id: 'age-in-months', slots: [['birth', 'date'], ['at', 'date']], result: 'integer', fragment: '* 12' },
+    { id: 'corrected-calcium', slots: [['ca', 'decimal'], ['alb', 'decimal']], result: 'decimal', fragment: '0.8 *' },
+    { id: 'ldl-friedewald', slots: [['tc', 'decimal'], ['hdl', 'decimal'], ['tg', 'decimal']], result: 'decimal', fragment: '/ 5' },
+    { id: 'homa-ir', slots: [['glucose', 'decimal'], ['insulin', 'decimal']], result: 'decimal', fragment: '/ 405' },
+    { id: 'fib4', slots: [['age', 'integer'], ['ast', 'decimal'], ['alt', 'decimal'], ['plt', 'decimal']], result: 'text', fragment: 'High risk' },
+    { id: 'qtc-bazett', slots: [['qt', 'decimal'], ['hr', 'decimal']], result: 'decimal', fragment: '.sqrt()' },
+    { id: 'qtc-fridericia', slots: [['qt', 'decimal'], ['hr', 'decimal']], result: 'decimal', fragment: '.power(1 / 3)' },
+    { id: 'ideal-body-weight', slots: [['height', 'decimal'], ['sex', 'radio']], result: 'decimal', fragment: '45.5', consts: true },
+    { id: 'waist-hip-ratio', slots: [['waist', 'decimal'], ['hip', 'decimal']], result: 'decimal', fragment: '.round(2)' },
   ];
 
   for (const p of PATTERNS) {
@@ -409,7 +421,7 @@ test.describe('Expression Gallery', () => {
         await pick(page, page, `eg-slot-item-${key}`, `1.${i + 1}`);
       }
       // the constants block only exists for patterns that declare constants
-      await expect(page.getByTestId('eg-const-female')).toHaveCount(p.id === 'cockcroft-gault' ? 1 : 0);
+      await expect(page.getByTestId('eg-const-female')).toHaveCount(p.consts ? 1 : 0);
       await expect(page.getByTestId('eg-preview')).toContainText(p.fragment);
       await page.getByTestId('expressionGalleryModalApply').click();
       await page.getByTestId('expressionBuilderModalApply').click();

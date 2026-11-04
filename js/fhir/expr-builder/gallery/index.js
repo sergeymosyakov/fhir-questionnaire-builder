@@ -24,12 +24,25 @@ import { meanArterialPressure } from './mean-arterial-pressure.js';
 import { anionGap } from './anion-gap.js';
 import { egfrCkdEpi2021 } from './egfr-ckd-epi-2021.js';
 import { cockcroftGault } from './cockcroft-gault.js';
+import { dueDateNaegele } from './due-date-naegele.js';
+import { datePlusInterval } from './date-plus-interval.js';
+import { ageAtDate } from './age-at-date.js';
+import { ageInMonths } from './age-in-months.js';
+import { correctedCalcium } from './corrected-calcium.js';
+import { ldlFriedewald } from './ldl-friedewald.js';
+import { homaIr } from './homa-ir.js';
+import { fib4 } from './fib4.js';
+import { qtcBazett } from './qtc-bazett.js';
+import { qtcFridericia } from './qtc-fridericia.js';
+import { idealBodyWeight } from './ideal-body-weight.js';
+import { waistHipRatio } from './waist-hip-ratio.js';
 
 export const EXPR_GALLERY = [
   bmi, bmiImperial, bmiCategory, ageFromBirthdate, unitConvert,
   gad7Severity, phq9Severity, cha2ds2Vasc, sumOfItems, charlsonComorbidityIndex,
   countYesAnswers, percentChange, phq2Screen, glasgowComaScale, apgarScore, qsofa,
   bsaMosteller, meanArterialPressure, anionGap, egfrCkdEpi2021, cockcroftGault,
+  dueDateNaegele, datePlusInterval, ageAtDate, ageInMonths, correctedCalcium, ldlFriedewald, homaIr, fib4, qtcBazett, qtcFridericia, idealBodyWeight, waistHipRatio,
 ];
 
 // Applies a slot's transform (if any) and wraps the result in parens, unless
