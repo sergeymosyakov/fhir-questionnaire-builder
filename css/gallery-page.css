@@ -13,7 +13,6 @@ body { margin: 0; color: #1f2933; background: #fff; font: 15px/1.6 -apple-system
 .gp-card ul { margin: 4px 0 8px; padding-left: 20px; }
 .gp-label { font-weight: 600; margin-bottom: 0; }
 .gp-source { color: #6b7280; font-size: 13px; font-style: italic; }
-.gp-footer { margin-top: 32px; color: #6b7280; }
 @media (min-width: 768px) {
   .gp-main { padding: 24px; }
   .gp-toc ul { columns: 2; }

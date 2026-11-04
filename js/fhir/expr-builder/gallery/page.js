@@ -97,7 +97,6 @@ ${patterns.map((p) => `        <li><a href="#${esc(p.id)}">${esc(p.name)}</a></l
       </ul>
     </nav>
 ${patterns.map(card).join('\n')}
-    <p class="gp-footer"><a href="index.html">Open the Builder</a> · <a href="docs.html">Documentation</a> · <a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/docs/EXPRESSION-GALLERY.md">Catalog on GitHub</a></p>
   </main>
 </body>
 </html>
