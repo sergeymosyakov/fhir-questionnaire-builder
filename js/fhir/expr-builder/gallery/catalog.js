@@ -1,5 +1,6 @@
 // Markdown catalog of EXPR_GALLERY (docs/EXPRESSION-GALLERY.md) — generated, never hand-edited.
-const cell = (s) => String(s).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+// Backslashes first, so the ones added for `|` are not escaped again.
+const cell = (s) => String(s).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\n/g, ' ');
 
 function inputsOf(pattern) {
   const slots = pattern.slots.map((slot) => {

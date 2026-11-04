@@ -9,6 +9,11 @@ describe('docs/EXPRESSION-GALLERY.md', () => {
     expect(file).toBe(renderGalleryCatalog(EXPR_GALLERY));
   });
 
+  it('escapes backslashes and pipes in table cells', () => {
+    const p = { id: 'x', name: 'a\\b | c', description: 'd', source: 's', slots: [] };
+    expect(renderGalleryCatalog([p])).toContain('| **a\\\\b \\| c** |');
+  });
+
   it('every pattern names its source', () => {
     expect(EXPR_GALLERY.filter((p) => !p.source).map((p) => p.id)).toEqual([]);
   });
