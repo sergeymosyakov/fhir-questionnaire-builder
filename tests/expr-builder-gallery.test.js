@@ -324,3 +324,92 @@ describe('resolveGalleryPattern — second-batch patterns evaluate correctly', (
     expect(run('anion-gap', { na: 140, cl: 104, hco3: 24 })).toBe(12);
   });
 });
+
+// ── eGFR (CKD-EPI 2021) and Cockcroft-Gault — checked against an independent JS reference ──
+describe('resolveGalleryPattern — renal function patterns', () => {
+  const kidneyQr = ({ scr, age, weight, sex }) => ({
+    resourceType: 'QuestionnaireResponse',
+    item: [
+      scr != null && { linkId: 'scr', answer: [{ valueDecimal: scr }] },
+      age != null && { linkId: 'age', answer: [{ valueInteger: age }] },
+      weight != null && { linkId: 'wt', answer: [{ valueDecimal: weight }] },
+      sex != null && { linkId: 'sex', answer: [{ valueCoding: { code: sex } }] },
+    ].filter(Boolean),
+  });
+  const R = (id, acc) => `%resource.item.where(linkId='${id}').answer.${acc}`;
+  const evalPattern = (id, values, picks, constants) => {
+    const qr = kidneyQr(values);
+    const sel = {
+      scr: { ref: R('scr', 'valueDecimal'), transformId: picks.scr },
+      age: { ref: R('age', 'valueInteger') },
+      weight: { ref: R('wt', 'valueDecimal'), transformId: picks.weight },
+      sex: { ref: R('sex', 'valueCoding.code') },
+    };
+    const expr = resolveGalleryPattern(pattern(id), sel, constants);
+    return fhirpath.evaluate(qr, expr, { resource: qr }, fhirpath_r4_model)[0];
+  };
+  const refEgfr = (scr, age, female) => {
+    const k = female ? 0.7 : 0.9, a = female ? -0.241 : -0.302, r = scr / k;
+    return Math.round(142 * Math.min(r, 1) ** a * Math.max(r, 1) ** -1.2 * 0.9938 ** age * (female ? 1.012 : 1));
+  };
+  const refCg = (age, kg, scr, female) => Math.round(((140 - age) * kg) / (72 * scr) * (female ? 0.85 : 1));
+
+  it.each([
+    [0.9, 60, 'female', true], [1.0, 50, 'male', false], [0.5, 30, 'female', true],
+    [1.8, 75, 'male', false], [0.6, 40, 'male', false], [2.4, 82, 'female', true],
+  ])('egfr-ckd-epi-2021 Scr %s age %s %s matches the reference formula', (scr, age, sex, female) => {
+    expect(evalPattern('egfr-ckd-epi-2021', { scr, age, sex }, { scr: 'mgdl' })).toBe(refEgfr(scr, age, female));
+  });
+
+  it('egfr: \u00b5mol/L conversion and a overridden female code give the same answer', () => {
+    const want = refEgfr(1, 55, true);
+    expect(evalPattern('egfr-ckd-epi-2021', { scr: 88.4, age: 55, sex: 'F' }, { scr: 'umol' }, { female: 'F' })).toBe(want);
+    expect(evalPattern('egfr-ckd-epi-2021', { scr: 1, age: 55, sex: 'custom1' }, { scr: 'mgdl' }, { female: ' custom1 ' })).toBe(want);
+  });
+
+  it('egfr: without an override only the default code female counts as female', () => {
+    expect(evalPattern('egfr-ckd-epi-2021', { scr: 1, age: 55, sex: 'F' }, { scr: 'mgdl' })).toBe(refEgfr(1, 55, false));
+  });
+
+  it('egfr gives no result for a zero creatinine instead of Infinity', () => {
+    expect(evalPattern('egfr-ckd-epi-2021', { scr: 0, age: 55, sex: 'male' }, { scr: 'mgdl' })).toBeUndefined();
+  });
+
+  it.each([{ scr: null }, { age: null }, { sex: null }])('egfr gives no result while an input is unanswered %j', (miss) => {
+    const v = { scr: 1, age: 55, sex: 'male', ...miss };
+    expect(evalPattern('egfr-ckd-epi-2021', v, { scr: 'mgdl' })).toBeUndefined();
+  });
+
+  it.each([[60, 70, 1.0, 'male', false], [72, 55, 0.8, 'female', true], [45, 90, 1.5, 'female', true]])(
+    'cockcroft-gault age %s %s kg Scr %s %s matches the reference formula', (age, weight, scr, sex, female) => {
+      expect(evalPattern('cockcroft-gault', { scr, age, weight, sex }, { scr: 'mgdl', weight: 'kg' }))
+        .toBe(refCg(age, weight, scr, female));
+    });
+
+  it('cockcroft-gault: lb and \u00b5mol/L conversions, female override; unanswered sex gives no result', () => {
+    expect(evalPattern('cockcroft-gault', { scr: 88.4, age: 60, weight: 154.324, sex: 'M' }, { scr: 'umol', weight: 'lb' }))
+      .toBe(refCg(60, 70, 1, false));
+    expect(evalPattern('cockcroft-gault', { scr: 1, age: 60, weight: 70, sex: 'F' }, { scr: 'mgdl', weight: 'kg' }, { female: 'F' }))
+      .toBe(refCg(60, 70, 1, true));
+    expect(evalPattern('cockcroft-gault', { scr: 1, age: 60, weight: 70 }, { scr: 'mgdl', weight: 'kg' })).toBeUndefined();
+  });
+});
+
+describe('resolveGalleryPattern — constants', () => {
+  const p = { slots: [], template: '%const.a% = %const.a%', constants: [{ key: 'a', label: 'A', default: 'x' }] };
+  it('uses the default when no override or a blank override is given', () => {
+    expect(resolveGalleryPattern(p, {})).toBe("'x' = 'x'");
+    expect(resolveGalleryPattern(p, {}, { a: '   ' })).toBe("'x' = 'x'");
+  });
+  it('substitutes an override as a string literal, escaping quotes and backslashes', () => {
+    expect(resolveGalleryPattern(p, {}, { a: "o'k\\d" })).toBe("'o\\'k\\\\d' = 'o\\'k\\\\d'");
+  });
+  it('never rescans a constant value for placeholders', () => {
+    const q2 = { slots: [{ key: 's', label: 'S', transforms: [] }], template: '%s% %const.a%', constants: [{ key: 'a', label: 'A', default: 'x' }] };
+    expect(resolveGalleryPattern(q2, { s: { ref: '%R' } }, { a: '%s% %const.a%' })).toBe("(%R) '%s% %const.a%'");
+  });
+  it('patterns without constants are unaffected', () => {
+    expect(resolveGalleryPattern(pattern('unit-convert'), { value: { ref: '%A', transformId: 'lb-kg' } }, { a: 'z' })).toBe(
+      resolveGalleryPattern(pattern('unit-convert'), { value: { ref: '%A', transformId: 'lb-kg' } }));
+  });
+});

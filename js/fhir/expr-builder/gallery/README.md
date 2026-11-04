@@ -45,6 +45,22 @@ export const myPattern = {
   directly (`node -e "require('fhirpath')..."`) before committing it — don't
   guess syntax, see `age-from-birthdate.js` for why.
 
+## Constants (values the author can override)
+
+Declare `constants` on the pattern for a value the formula compares against that
+differs between questionnaires — e.g. which answer code means "female":
+
+```js
+constants: [{ key: 'female', label: 'Answer code for Female', default: 'female' }],
+template: 'iif(%sex% = %const.female%, 0.85, 1)',
+```
+
+The gallery shows one labelled input per constant above the slots, prefilled with
+`default`; a blank input falls back to the default. `%const.key%` is replaced by a
+FHIRPath string literal (quotes/backslashes escaped). Patterns without `constants`
+show nothing extra. Matching is exact — add `.lower()` in the template if you want
+it case-insensitive. See `egfr-ckd-epi-2021.js`.
+
 ## Repeatable slots (sum of N items)
 
 Set `repeatable: true` on a slot to let the author add/remove as many rows as

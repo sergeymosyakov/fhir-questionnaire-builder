@@ -121,6 +121,14 @@ currently in the gallery:
 | Body surface area (Mosteller) | Body surface area in m² from height and weight, with unit conversion |
 | Mean arterial pressure | Average blood pressure from the systolic and diastolic readings |
 | Serum anion gap | Sodium minus (chloride + bicarbonate) from three lab values |
+| eGFR (CKD-EPI 2021) | Kidney function (mL/min/1.73 m²) from creatinine, age and sex; creatinine can be converted from µmol/L |
+| Creatinine clearance (Cockcroft–Gault) | Kidney clearance (mL/min) from age, weight, creatinine and sex |
+
+For the two kidney patterns, the **sex** item must be a single-choice question. The
+pattern compares the item's answer *code* with the text in **Answer code for
+Female**, which starts as `female`. If your answers use another code (for example
+`F` or `2`), type it there before inserting. Matching is exact, including upper and
+lower case. Until creatinine, age and sex are all answered, there is no result.
 
 ## Understanding a result (Expression Explain)
 
