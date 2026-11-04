@@ -10,6 +10,7 @@ export const egfrCkdEpi2021 = {
   id: 'egfr-ckd-epi-2021',
   name: 'eGFR (CKD-EPI 2021)',
   description: 'Estimated GFR in mL/min/1.73 m\u00b2 from creatinine, age and sex \u2014 set the answer code that means female if your sex item does not use \u201cfemale\u201d.',
+  source: 'Inker et al. 2021, N Engl J Med 385:1737 (race-free CKD-EPI)',
   itemTypes: ['integer', 'decimal', 'quantity'],
   constants: [{ key: 'female', label: 'Answer code for Female', default: 'female' }],
   slots: [

@@ -3,6 +3,7 @@ export const bmi = {
   id: 'bmi',
   name: 'BMI (Body Mass Index)',
   description: 'weight ÷ height² — pick the weight and height items, with optional unit conversion.',
+  source: 'Quetelet index (weight kg ÷ height m²)',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     {

@@ -6,6 +6,7 @@ export const fib4 = {
   id: 'fib4',
   name: 'FIB-4 liver fibrosis index',
   description: 'Age × AST ÷ (platelets × √ALT), mapped to low / indeterminate / high risk of advanced fibrosis (cut-offs 1.3 and 2.67).',
+  source: 'Shah et al. 2009, Clin Gastroenterol Hepatol 7:1104 (cut-offs 1.3 / 2.67)',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     { key: 'age', label: 'Age in years item', transforms: [] },

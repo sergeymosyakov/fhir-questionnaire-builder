@@ -4,6 +4,7 @@ export const qtcBazett = {
   id: 'qtc-bazett',
   name: 'QTc (Bazett)',
   description: 'QT interval corrected for heart rate: QT ÷ √RR, in ms — over-corrects at fast heart rates.',
+  source: 'Bazett 1920',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     { key: 'qt', label: 'QT interval item (ms)', transforms: [] },

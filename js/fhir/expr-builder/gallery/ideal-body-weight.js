@@ -5,6 +5,7 @@ export const idealBodyWeight = {
   id: 'ideal-body-weight',
   name: 'Ideal body weight (Devine)',
   description: 'Male 50 kg / female 45.5 kg + 2.3 kg per inch over 5 feet — set the answer code that means female if your sex item does not use “female”.',
+  source: 'Devine 1974, Drug Intell Clin Pharm 8:650',
   itemTypes: ['integer', 'decimal', 'quantity'],
   constants: [{ key: 'female', label: 'Answer code for Female', default: 'female' }],
   slots: [

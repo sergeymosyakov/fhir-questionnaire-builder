@@ -5,6 +5,7 @@ export const ageInMonths = {
   id: 'age-in-months',
   name: 'Age in months at a date',
   description: 'Whole months between a birthdate and another date item — for infant and paediatric questionnaires.',
+  source: 'Calendar-month difference with day-of-month adjustment',
   itemTypes: ['date', 'dateTime'],
   slots: [
     { key: 'birth', label: 'Birthdate item', transforms: [] },

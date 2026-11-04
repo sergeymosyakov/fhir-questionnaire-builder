@@ -6,6 +6,7 @@ export const cockcroftGault = {
   id: 'cockcroft-gault',
   name: 'Creatinine clearance (Cockcroft\u2013Gault)',
   description: '(140 \u2212 age) \u00d7 weight \u00f7 (72 \u00d7 creatinine), \u00d7 0.85 if female, in mL/min \u2014 set the answer code that means female if your sex item does not use \u201cfemale\u201d.',
+  source: 'Cockcroft & Gault 1976, Nephron 16:31',
   itemTypes: ['integer', 'decimal', 'quantity'],
   constants: [{ key: 'female', label: 'Answer code for Female', default: 'female' }],
   slots: [

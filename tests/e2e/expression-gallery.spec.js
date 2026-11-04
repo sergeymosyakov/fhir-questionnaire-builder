@@ -11,6 +11,7 @@
 //   expressionBuilderModal / eb-choose-gallery                          builder entry
 //   expressionGalleryModal / eg-search / eg-row-<id> / eg-slot-item-<key> /
 //     eg-slot-transform-<key> / eg-preview / expressionGalleryModalApply gallery modal
+//   eg-source                                                            pattern source note
 //   eg-const-<key>                                                       pattern constant input
 //   eg-slot-add-<key> / eg-slot-row-<key>-<i> / eg-slot-remove-<key>-<i>       repeatable slot
 //   csel-drop [data-val]                                                custom-select option
@@ -359,6 +360,7 @@ test.describe('Expression Gallery', () => {
     await expect(page.locator('[data-testid="csel-drop"] [data-val="1.1"]')).toHaveCount(0);
     await page.locator('[data-testid="csel-drop"] [data-val="1.3"]').click();
 
+    await expect(page.getByTestId('eg-source')).toContainText('Inker');
     // constant is prefilled with its default and drives the formula
     await expect(page.getByTestId('eg-const-female')).toHaveValue('female');
     await expect(page.getByTestId('eg-preview')).toContainText("= 'female'");

@@ -5,6 +5,7 @@ export const ageAtDate = {
   id: 'age-at-date',
   name: 'Age at a date (whole years)',
   description: 'Whole years between a birthdate and another date item — e.g. age at the visit or at diagnosis.',
+  source: 'Calendar-year difference with birthday adjustment',
   itemTypes: ['date', 'dateTime'],
   slots: [
     { key: 'birth', label: 'Birthdate item', transforms: [] },

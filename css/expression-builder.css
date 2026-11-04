@@ -262,6 +262,7 @@
   border-radius: var(--r-sm);
   font-size: 13px;
 }
+.eg-source { font-size: 12px; font-style: italic; }
 .eg-const-input { min-width: 200px; flex: 1 1 auto; }
 .eg-preview {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;

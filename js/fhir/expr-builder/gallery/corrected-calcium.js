@@ -4,6 +4,7 @@ export const correctedCalcium = {
   id: 'corrected-calcium',
   name: 'Corrected calcium (albumin)',
   description: 'Total calcium adjusted for low albumin, in mg/dL: Ca + 0.8 × (4.0 − albumin).',
+  source: 'Payne et al. 1973, BMJ 4:643',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     {

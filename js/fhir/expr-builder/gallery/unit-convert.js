@@ -3,6 +3,7 @@ export const unitConvert = {
   id: 'unit-convert',
   name: 'Unit conversion',
   description: 'Convert a single numeric item between common clinical units.',
+  source: 'Standard unit conversion factors',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     {

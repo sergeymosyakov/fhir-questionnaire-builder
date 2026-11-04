@@ -8,6 +8,7 @@ export const cha2ds2Vasc = {
   id: 'cha2ds2-vasc',
   name: 'CHA\u2082DS\u2082-VASc stroke risk score',
   description: 'Stroke risk score for atrial fibrillation \u2014 pick the yes/no item for each criterion (max 9 points).',
+  source: 'Lip et al. 2010, Chest 137:263',
   itemTypes: ['boolean', 'checkbox'],
   slots: [
     { key: 'chf', label: 'Congestive heart failure / LV dysfunction (+1)', transforms: [] },

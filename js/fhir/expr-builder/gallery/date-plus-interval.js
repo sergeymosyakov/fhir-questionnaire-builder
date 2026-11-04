@@ -6,6 +6,7 @@ export const datePlusInterval = {
   id: 'date-plus-interval',
   name: 'Date plus interval',
   description: 'A date item plus a fixed interval — e.g. a follow-up or next-due date.',
+  source: 'FHIRPath calendar arithmetic',
   itemTypes: ['date', 'dateTime'],
   slots: [
     {

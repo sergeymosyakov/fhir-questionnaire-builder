@@ -4,6 +4,7 @@ export const qtcFridericia = {
   id: 'qtc-fridericia',
   name: 'QTc (Fridericia)',
   description: 'QT interval corrected for heart rate: QT ÷ RR¹ᐟ³, in ms — steadier than Bazett at fast or slow rates.',
+  source: 'Fridericia 1920',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     { key: 'qt', label: 'QT interval item (ms)', transforms: [] },

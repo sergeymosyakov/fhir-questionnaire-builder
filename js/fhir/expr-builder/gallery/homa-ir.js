@@ -5,6 +5,7 @@ export const homaIr = {
   id: 'homa-ir',
   name: 'HOMA-IR (insulin resistance)',
   description: 'Fasting glucose × fasting insulin ÷ 405 (glucose in mg/dL, insulin in µU/mL), rounded to 2 decimals.',
+  source: 'Matthews et al. 1985, Diabetologia 28:412',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     {

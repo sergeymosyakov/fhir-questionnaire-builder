@@ -11,6 +11,8 @@ still-editable FHIRPath string.
 1. Create a new file in this folder, one pattern per file (e.g. `bsa.js`).
 2. Export a single pattern object (see shape below).
 3. Import it in `index.js` and add it to the `EXPR_GALLERY` array.
+4. Give it a `source` (publication or standard formula it comes from) and run `npm run docs:gallery` to refresh
+   `docs/EXPRESSION-GALLERY.md` — a test fails if the catalog is stale or a pattern has no `source`.
 
 Never edit an existing pattern's file to add a different pattern — new pattern
 = new file, so the library grows without touching unrelated code.

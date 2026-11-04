@@ -37,6 +37,7 @@ export const charlsonComorbidityIndex = {
   id: 'charlson-comorbidity-index',
   name: 'Charlson Comorbidity Index',
   description: 'Add one row per comorbidity the patient has \u2014 each contributes its fixed weight (1\u20136), plus an automatic age-based bonus.',
+  source: 'Charlson et al. 1987, J Chronic Dis 40:373 (with the Charlson/Deyo age adjustment)',
   itemTypes: ['boolean', 'checkbox'],
   slots: [
     {

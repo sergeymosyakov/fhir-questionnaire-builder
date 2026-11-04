@@ -7,6 +7,7 @@ export const sumOfItems = {
   id: 'sum-of-items',
   name: 'Sum of items',
   description: 'Add as many numeric items as you need \u2014 their values (with optional unit conversion) are added together.',
+  source: 'Plain sum of the picked items',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     {

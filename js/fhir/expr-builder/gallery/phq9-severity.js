@@ -6,6 +6,7 @@ export const phq9Severity = {
   id: 'phq9-severity',
   name: 'PHQ-9 total + severity',
   description: 'Sums the 9 PHQ-9 items (each scored 0\u20133) and maps the total to its depression severity band.',
+  source: 'Kroenke, Spitzer & Williams 2001, J Gen Intern Med 16:606',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     { key: 'q1', label: 'Q1 \u2014 little interest or pleasure', transforms: [] },

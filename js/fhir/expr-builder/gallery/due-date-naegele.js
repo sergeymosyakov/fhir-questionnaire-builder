@@ -4,6 +4,7 @@ export const dueDateNaegele = {
   id: 'due-date-naegele',
   name: 'Expected delivery date (from LMP)',
   description: 'Last menstrual period + 280 days (Naegele’s rule, regular 28-day cycle).',
+  source: 'Naegele\'s rule (LMP + 280 days, regular 28-day cycle)',
   itemTypes: ['date', 'dateTime'],
   slots: [{ key: 'lmp', label: 'Last menstrual period item', transforms: [] }],
   template: '(%lmp% + 280 days)',

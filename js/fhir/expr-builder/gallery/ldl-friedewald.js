@@ -10,6 +10,7 @@ export const ldlFriedewald = {
   id: 'ldl-friedewald',
   name: 'LDL cholesterol (Friedewald)',
   description: 'Total − HDL − triglycerides ÷ 5, in mg/dL; no result when triglycerides are 400 mg/dL or more.',
+  source: 'Friedewald et al. 1972, Clin Chem 18:499',
   itemTypes: ['integer', 'decimal', 'quantity'],
   slots: [
     { key: 'tc', label: 'Total cholesterol item', transforms: CHOL },

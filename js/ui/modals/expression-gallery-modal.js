@@ -103,6 +103,13 @@ class ExpressionGalleryModal extends Modal {
     desc.className = 'eg-note';
     desc.textContent = this._pattern.description;
     this.body.appendChild(desc);
+    if (this._pattern.source) {
+      const src = document.createElement('div');
+      src.className = 'eg-note eg-source';
+      src.dataset.testid = 'eg-source';
+      src.textContent = 'Source: ' + this._pattern.source;
+      this.body.appendChild(src);
+    }
 
     if (this._pattern.constants?.length) this.body.appendChild(this._renderConstants());
 

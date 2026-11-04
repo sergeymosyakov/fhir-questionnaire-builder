@@ -5,6 +5,7 @@ export const countYesAnswers = {
   id: 'count-yes-answers',
   name: 'Count of Yes answers',
   description: 'How many of the picked yes/no items are answered Yes — add one row per item.',
+  source: 'Plain count of the picked items answered Yes',
   itemTypes: ['boolean', 'checkbox'],
   slots: [
     {
