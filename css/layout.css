@@ -241,6 +241,7 @@
 }
 .top-panel-copyright a:hover { color: #fff; text-decoration: underline; }
 .top-panel-github-link {
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 4px;
