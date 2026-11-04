@@ -259,6 +259,8 @@
   text-decoration: none;
   white-space: nowrap;
 }
+/* tooltip.css sets cursor: help on [data-tip-title]; links should show a pointer (a.x outranks [attr]). */
+a.top-panel-github-link, a.left-panel-gallery-link { cursor: pointer; }
 .left-panel-gallery-link:hover { text-decoration: underline; }
 
 .top-panel-auth {

@@ -6,7 +6,8 @@
 //   gp-open-builder       "Open the Builder" link in the page header
 //   gp-card-<id>          one section per gallery pattern
 //   add-root-group-btn    builder ready marker (after following the link)
-//   top-gallery-link      static link to this page in the Builder's top panel
+//   top-gallery-link      static link to this page next to the left panel title
+//   github-link           GitHub link in the Builder's top panel
 //   docs-gallery-link     link to this page in the docs header
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -53,6 +54,9 @@ test.describe('gallery.html (SEO page)', () => {
   test('the Builder top panel and the docs header link to the gallery page', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('top-gallery-link')).toHaveAttribute('href', 'gallery.html');
+    // tooltip.css gives [data-tip-title] a help cursor; these links must show a pointer
+    await expect(page.getByTestId('top-gallery-link')).toHaveCSS('cursor', 'pointer');
+    await expect(page.getByTestId('github-link')).toHaveCSS('cursor', 'pointer');
     await page.goto('/docs.html');
     await expect(page.getByTestId('docs-gallery-link')).toHaveAttribute('href', 'gallery.html');
   });
