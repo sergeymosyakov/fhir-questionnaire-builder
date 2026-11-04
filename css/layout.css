@@ -253,6 +253,8 @@
 .left-panel-gallery-link {
   font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--c-accent, #2563eb);
   text-decoration: none;
   white-space: nowrap;
