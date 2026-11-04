@@ -12,10 +12,21 @@ import { phq9Severity } from './phq9-severity.js';
 import { cha2ds2Vasc } from './cha2ds2-vasc.js';
 import { sumOfItems } from './sum-of-items.js';
 import { charlsonComorbidityIndex } from './charlson-comorbidity-index.js';
+import { countYesAnswers } from './count-yes-answers.js';
+import { percentChange } from './percent-change.js';
+import { phq2Screen } from './phq2-screen.js';
+import { glasgowComaScale } from './glasgow-coma-scale.js';
+import { apgarScore } from './apgar-score.js';
+import { qsofa } from './qsofa.js';
+import { bsaMosteller } from './bsa-mosteller.js';
+import { meanArterialPressure } from './mean-arterial-pressure.js';
+import { anionGap } from './anion-gap.js';
 
 export const EXPR_GALLERY = [
   bmi, bmiImperial, bmiCategory, ageFromBirthdate, unitConvert,
   gad7Severity, phq9Severity, cha2ds2Vasc, sumOfItems, charlsonComorbidityIndex,
+  countYesAnswers, percentChange, phq2Screen, glasgowComaScale, apgarScore, qsofa,
+  bsaMosteller, meanArterialPressure, anionGap,
 ];
 
 // Applies a slot's transform (if any) and wraps the result in parens, unless
@@ -42,13 +53,14 @@ function resolveRepeatableSlot(slot, rows) {
 }
 
 // pattern.categories: [{ lessThan, label }, ..., { label }] — last entry is the
-// catch-all (no lessThan). Builds a nested iif() chain, evaluated on numExpr.
+// catch-all (no lessThan). Builds a nested iif() chain, evaluated on numExpr;
+// an unanswered input gives no result instead of falling into the catch-all band.
 function applyCategories(numExpr, categories) {
   let out = `'${categories[categories.length - 1].label}'`;
   for (let i = categories.length - 2; i >= 0; i--) {
     out = `iif(${numExpr} < ${categories[i].lessThan}, '${categories[i].label}', ${out})`;
   }
-  return out;
+  return `iif(${numExpr}.exists(), ${out}, {})`;
 }
 
 // selections: { [slotKey]: fixed-slot object, or an array for a repeatable slot }

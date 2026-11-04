@@ -112,6 +112,15 @@ currently in the gallery:
 | CHA₂DS₂-VASc | Weighted stroke-risk score from yes/no criteria |
 | Charlson Comorbidity Index | Weighted comorbidity score (pick which conditions apply) plus an age-based bonus |
 | Sum of items | Add together as many numeric items as you need |
+| Count of Yes answers | How many of the yes/no items you pick are answered Yes |
+| Percent change | How much a value changed compared with a baseline, in percent (e.g. weight since the first visit) |
+| PHQ-2 screen | Sum of 2 items; a total of 3 or more is a positive depression screen |
+| Glasgow Coma Scale | Eye, verbal and motor responses added up (3–15) and mapped to mild / moderate / severe |
+| Apgar score | Sum of 5 newborn criteria (0–10) mapped to low / moderately abnormal / reassuring |
+| qSOFA sepsis screen | Counts 3 bedside criteria; 2 or more means high risk |
+| Body surface area (Mosteller) | Body surface area in m² from height and weight, with unit conversion |
+| Mean arterial pressure | Average blood pressure from the systolic and diastolic readings |
+| Serum anion gap | Sodium minus (chloride + bicarbonate) from three lab values |
 
 ## Understanding a result (Expression Explain)
 

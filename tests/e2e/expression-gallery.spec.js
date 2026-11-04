@@ -282,4 +282,56 @@ test.describe('Expression Gallery', () => {
     await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.2'");
     await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.3'");
   });
+
+  test('glasgow-coma-scale pattern resolves to a severity-band iif() chain', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await addItem(page, '1', '1.1', 'Eye');
+    await setItemType(page, '1.1', 'integer');
+    await addItem(page, '1', '1.2', 'Verbal');
+    await setItemType(page, '1.2', 'integer');
+    await addItem(page, '1', '1.3', 'Motor');
+    await setItemType(page, '1.3', 'integer');
+    await addItem(page, '1', '1.4', 'GCS band');
+    await setItemType(page, '1.4', 'text');
+
+    await openValueBuilder(page, '1.4');
+    await page.getByTestId('eb-choose-gallery').click();
+    await page.getByTestId('eg-row-glasgow-coma-scale').click();
+    await pick(page, page, 'eg-slot-item-eye', '1.1');
+    await pick(page, page, 'eg-slot-item-verbal', '1.2');
+    await pick(page, page, 'eg-slot-item-motor', '1.3');
+
+    await expect(page.getByTestId('eg-preview')).toContainText('Severe (GCS 3');
+    await expect(page.getByTestId('eg-preview')).toContainText('Mild (GCS 13');
+    await page.getByTestId('expressionGalleryModalApply').click();
+    await expect(page.getByTestId('eb-raw-input')).toHaveValue(/iif\(/);
+    await page.getByTestId('expressionBuilderModalApply').click();
+    await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/Moderate \(GCS 9/);
+  });
+
+  test('count-yes-answers turns each yes/no row into 1/0 via its default transform', async ({ page }) => {
+    await freshStart(page);
+    await page.getByTestId('add-root-group-btn').click();
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await addItem(page, '1', '1.1', 'Smoker');
+    await setItemType(page, '1.1', 'checkbox');
+    await addItem(page, '1', '1.2', 'Drinker');
+    await setItemType(page, '1.2', 'checkbox');
+    await addItem(page, '1', '1.3', 'Yes count');
+    await setItemType(page, '1.3', 'integer');
+
+    await openValueBuilder(page, '1.3');
+    await page.getByTestId('eb-choose-gallery').click();
+    await page.getByTestId('eg-row-count-yes-answers').click();
+    await pick(page, page, 'eg-slot-item-items-0', '1.1');
+    await pick(page, page, 'eg-slot-item-items-1', '1.2');
+
+    await expect(page.getByTestId('eg-preview')).toContainText('iif(');
+    await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.2'");
+    await page.getByTestId('expressionGalleryModalApply').click();
+    await page.getByTestId('expressionBuilderModalApply').click();
+    await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/iif\(.*, 1, 0\)\) \+ \(iif\(.*, 1, 0\)\)\)/);
+  });
 });
