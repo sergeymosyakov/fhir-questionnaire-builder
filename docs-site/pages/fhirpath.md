@@ -105,7 +105,7 @@ shows where its formula comes from.
 What is in the gallery, by area:
 
 - **Body measurements:** BMI (metric and imperial) and its WHO category, body surface area (Mosteller), ideal body weight (Devine), waist-to-hip ratio.
-- **Dates and age:** age from a birthdate, age at another date, age in months, expected delivery date from the last menstrual period, a date plus an interval (for follow-up dates).
+- **Dates and age:** age from a birthdate, age at another date, age in months, days between two dates, expected delivery date and gestational age from the last menstrual period, a date plus an interval (for follow-up dates).
 - **Kidney function:** eGFR (CKD-EPI 2021) and creatinine clearance (Cockcroft–Gault).
 - **Laboratory and cardiology:** corrected calcium, LDL cholesterol (Friedewald), HOMA-IR, FIB-4, anion gap, mean arterial pressure, QTc (Bazett and Fridericia).
 - **Scores and screens:** PHQ-9, PHQ-2, GAD-7, Glasgow Coma Scale, Apgar, qSOFA, CHA₂DS₂-VASc, Charlson Comorbidity Index.

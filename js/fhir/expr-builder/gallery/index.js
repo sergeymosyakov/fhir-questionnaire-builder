@@ -36,6 +36,8 @@ import { qtcBazett } from './qtc-bazett.js';
 import { qtcFridericia } from './qtc-fridericia.js';
 import { idealBodyWeight } from './ideal-body-weight.js';
 import { waistHipRatio } from './waist-hip-ratio.js';
+import { daysBetweenDates } from './days-between-dates.js';
+import { gestationalAgeWeeks } from './gestational-age-weeks.js';
 
 export const EXPR_GALLERY = [
   bmi, bmiImperial, bmiCategory, ageFromBirthdate, unitConvert,
@@ -43,6 +45,7 @@ export const EXPR_GALLERY = [
   countYesAnswers, percentChange, phq2Screen, glasgowComaScale, apgarScore, qsofa,
   bsaMosteller, meanArterialPressure, anionGap, egfrCkdEpi2021, cockcroftGault,
   dueDateNaegele, datePlusInterval, ageAtDate, ageInMonths, correctedCalcium, ldlFriedewald, homaIr, fib4, qtcBazett, qtcFridericia, idealBodyWeight, waistHipRatio,
+  daysBetweenDates, gestationalAgeWeeks,
 ];
 
 // Applies a slot's transform (if any) and wraps the result in parens, unless

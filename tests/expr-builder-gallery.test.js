@@ -466,9 +466,37 @@ describe('resolveGalleryPattern — date and lab patterns', () => {
     expect(calc('age-in-months', { birth: ['d', b], at: ['d', at] })).toBe(refMonths(b, at));
   });
 
+  it('days-between-dates matches real calendar days across leap years and century boundaries', () => {
+    const starts = ['1900-02-27', '1999-12-30', '2000-02-27', '2023-12-30', '2024-02-27', '2099-12-30', '2100-02-27', '2026-11-04'];
+    let checked = 0;
+    for (const start of starts) {
+      for (let off = -3; off <= 800; off += 37) {
+        const end = days(start, off);
+        expect(calc('days-between-dates', { start: ['d', start], end: ['d', end] }), `${start} -> ${end}`).toBe(off);
+        checked++;
+      }
+    }
+    expect(checked).toBeGreaterThan(150);
+  }, 30000);
+
+  it('days-between-dates: exact edge cases and negative spans', () => {
+    const d = (start, end) => calc('days-between-dates', { start: ['d', start], end: ['d', end] });
+    expect(d('2024-02-28', '2024-03-01')).toBe(2);
+    expect(d('2023-02-28', '2023-03-01')).toBe(1);
+    expect(d('2000-01-01', '2000-12-31')).toBe(365);
+    expect(d('2026-01-01', '2025-12-31')).toBe(-1);
+    expect(d('2026-05-05', '2026-05-05')).toBe(0);
+  });
+
+  it.each([['2026-01-01', '2026-01-07', 0], ['2026-01-01', '2026-01-08', 1], ['2025-12-01', '2026-03-01', 12], ['2024-02-01', '2024-11-07', 40]])(
+    'gestational-age-weeks LMP %s at %s = %s completed weeks', (lmp, at, weeks) => {
+      expect(calc('gestational-age-weeks', { lmp: ['d', lmp], at: ['d', at] })).toBe(weeks);
+    });
+
   it('date patterns give no result while a date is unanswered', () => {
     expect(calc('age-at-date', { birth: ['d', '1990-01-01'], at: ['d', null] })).toBeUndefined();
     expect(calc('due-date-naegele', { lmp: ['d', null] })).toBeUndefined();
+    expect(calc('days-between-dates', { start: ['d', '2026-01-01'], end: ['d', null] })).toBeUndefined();
   });
 
   it('corrected-calcium: Ca + 0.8 x (4 - albumin), with unit conversions', () => {

@@ -400,6 +400,8 @@ test.describe('Expression Gallery', () => {
     { id: 'qtc-bazett', slots: [['qt', 'decimal'], ['hr', 'decimal']], result: 'decimal', fragment: '.sqrt()' },
     { id: 'qtc-fridericia', slots: [['qt', 'decimal'], ['hr', 'decimal']], result: 'decimal', fragment: '.power(1 / 3)' },
     { id: 'ideal-body-weight', slots: [['height', 'decimal'], ['sex', 'radio']], result: 'decimal', fragment: '45.5', consts: true },
+    { id: 'days-between-dates', slots: [['start', 'date'], ['end', 'date']], result: 'integer', fragment: '365 *' },
+    { id: 'gestational-age-weeks', slots: [['lmp', 'date'], ['at', 'date']], result: 'integer', fragment: 'div 7' },
     { id: 'waist-hip-ratio', slots: [['waist', 'decimal'], ['hip', 'decimal']], result: 'decimal', fragment: '.round(2)' },
   ];
 
