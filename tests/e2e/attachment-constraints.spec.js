@@ -42,7 +42,7 @@ const MAX_SIZE_URL = FHIR.maxSize;
 const MIME_URL     = FHIR.mimeType;
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadFixture(page) {

@@ -7,13 +7,14 @@
 //   right-panel-body     scrolling body of the right panel
 
 import { test, expect } from '@playwright/test';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function addRootGroup(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await page.waitForSelector('[data-node-id]', { timeout: 5_000 });
 }
 

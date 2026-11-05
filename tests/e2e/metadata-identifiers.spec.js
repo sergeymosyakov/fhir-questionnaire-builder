@@ -16,6 +16,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, loadFixture, openModal, exportFHIR } from './helpers/metadata.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 test.describe('metadata modal — Identifiers section', () => {
 
@@ -35,7 +36,7 @@ test.describe('metadata modal — Identifiers section', () => {
 
   test('section is collapsed by default on a fresh questionnaire', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await openModal(page);
     await expect(page.getByTestId('meta-identifier-add-btn')).not.toBeVisible();
     await page.locator('[data-testid="metadataModalCancel"]').click();
@@ -43,7 +44,7 @@ test.describe('metadata modal — Identifiers section', () => {
 
   test('clicking toggle expands the section', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await openModal(page);
     await page.getByTestId('meta-identifiers-toggle').click();
     await expect(page.getByTestId('meta-identifier-add-btn')).toBeVisible();
@@ -141,7 +142,7 @@ test.describe('metadata modal — Identifiers section', () => {
 
   test('new questionnaire without identifiers has no identifier[] in export', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     // Add a child item so the group is not empty (avoids que-1 warning on export
     // which would open validateModal instead of triggering the download directly)
     await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();

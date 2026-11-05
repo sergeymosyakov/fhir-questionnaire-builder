@@ -1,0 +1,30 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "title": "Group with an internal calculation",
+  "item": [
+    {
+      "linkId": "g",
+      "type": "group",
+      "text": "Scored group",
+      "item": [
+        { "linkId": "a", "type": "integer", "text": "Input" },
+        {
+          "linkId": "total",
+          "type": "integer",
+          "text": "Double of input",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='a').answer.value * 2"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

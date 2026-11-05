@@ -6,7 +6,7 @@
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
 // Toolbar
-//   add-root-group-btn   "+Add Root Group" button
+//   add-root-group-btn   Add menu → "Root group" item
 //   load-fhir-btn        "⬆ Load ▾" dropdown trigger
 //   load-library-item    "Library" item in load dropdown
 //   clear-form-btn       "×" button that opens the clear-confirm dialog

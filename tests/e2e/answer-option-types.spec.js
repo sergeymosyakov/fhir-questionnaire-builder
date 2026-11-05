@@ -23,7 +23,7 @@ const FIXTURE = path.resolve('sampledata/answer-option-types-demo.fhir.json');
 async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   // q-coding is the first item in the first group
   await expect(page.locator('[data-node-id="q-coding"]')).toBeVisible({ timeout: 8_000 });

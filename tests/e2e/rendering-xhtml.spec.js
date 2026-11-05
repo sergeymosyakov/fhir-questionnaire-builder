@@ -18,13 +18,14 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/rendering-xhtml.fhir.json');
 
 async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q-bold"]')).toBeVisible({ timeout: 8_000 });
 }
@@ -68,10 +69,10 @@ test.describe('rendering-xhtml round-trip via Appearance modal', () => {
   test('xhtml entered in modal is preserved and rendered after apply', async ({ page }) => {
     await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 
     // Build a minimal item
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
     await page.locator('[data-testid="add-menu-item"]').first().click();
@@ -99,8 +100,8 @@ test.describe('rendering-xhtml round-trip via Appearance modal', () => {
 async function buildItemAndOpenAppearance(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-  await page.getByTestId('add-root-group-btn').click();
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
+  await clickAddRootGroup(page);
   await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
   await page.locator('[data-testid="add-menu-item"]').first().click();
   await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();

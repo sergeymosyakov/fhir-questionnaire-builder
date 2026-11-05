@@ -20,7 +20,7 @@ const QR   = path.resolve('sampledata/who-emcare-treatment-response.qr.json');
 async function freshStart(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 15_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 15_000 });
 }
 
 async function loadFile(page, filePath) {

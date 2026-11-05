@@ -3,7 +3,7 @@
 // updates the logic badge and separator in the preview panel.
 //
 // data-testid registry:
-//   add-root-group-btn     "+Add Root Group" toolbar button
+//   add-root-group-btn     Add menu → "Root group" item
 //   group-add-btn          "+" add-child button on a group node
 //   add-menu-item          "Item" option in the add-child dropdown
 //   node-type-label        type label on each builder node
@@ -114,7 +114,7 @@ const ANNUAL = path.resolve('sampledata/annual-health-check.fhir.json');
 
 async function loadAnnual(page) {
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, ANNUAL);
   await expect(page.locator('[data-preview-id="bmi"]')).toBeVisible({ timeout: 10_000 });
 }

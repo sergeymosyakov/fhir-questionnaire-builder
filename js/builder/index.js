@@ -4,6 +4,8 @@
 import { BuilderPanel } from './builder-panel.js';
 import { MetadataCard } from '../ui/metadata-card.js';
 import { CopyPaste }    from '../ui/copy-paste.js';
+import { TemplateInsert } from '../ui/template-insert.js';
+import '../ui/menus/add-menu.js';
 import './node-builder-ext.js';   // augments node prototypes with buildBuilder (builder-only)
 import '../fhir/version-compat/open-choice.js';
 import '../fhir/version-compat/r5-downgrade.js';
@@ -16,6 +18,7 @@ import '../fhir/formats/redcap.js';
 const panel = new BuilderPanel();
 new MetadataCard();
 new CopyPaste();
+new TemplateInsert();
 
 // ── Re-exports for backward compatibility ─────────────────────────────────────
 export function mount() { panel.mount(); }

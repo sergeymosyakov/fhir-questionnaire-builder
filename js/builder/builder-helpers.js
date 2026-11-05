@@ -205,7 +205,8 @@ export function addChildGearItems(gear, node) {
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_NAVIGATE_TO, { detail: { nodeId: n.id } }));
   });
-
+  gear.addItem('Insert template\u2026', 'add-menu-template', () =>
+    document.dispatchEvent(new CustomEvent(AppEvents.NODE_INSERT_TEMPLATE_REQUESTED, { detail: { id: node.id } })));
 }
 
 /** Returns a drop-zone-inside element wired for DnD into the last child position. */

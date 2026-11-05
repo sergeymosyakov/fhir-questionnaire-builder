@@ -35,7 +35,7 @@ const CUSTOM_URL = 'https://vendor.example.com/fhir/StructureDefinition/custom-f
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadFixture(page) {

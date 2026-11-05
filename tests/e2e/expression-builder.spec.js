@@ -5,7 +5,7 @@
 // Run: npx playwright test tests/e2e/expression-builder.spec.js
 //
 // ── data-testid used in this suite ───────────────────────────────────────────
-//   add-root-group-btn        "+Add Root Group"
+//   add-root-group-btn        Add menu → "Root group" item
 //   group-add-btn             "+" button on a group
 //   add-menu-item             "Item" option in add-child menu
 //   node-title-display/input  inline title editor
@@ -20,10 +20,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 async function freshStart(page) {
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function addItem(page, groupId, nodeId, title) {
@@ -42,7 +43,7 @@ async function addItem(page, groupId, nodeId, title) {
 }
 
 async function twoItems(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
   await addItem(page, '1', '1.1', 'First');
   await addItem(page, '1', '1.2', 'Second');
@@ -183,7 +184,7 @@ test.describe('Expression Builder', () => {
 test.describe('Expression Builder — value / calculatedExpression', () => {
   test('builds an arithmetic value and inserts it into the calc field', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'Score');
 
@@ -211,7 +212,7 @@ test.describe('Expression Builder — value / calculatedExpression', () => {
 
   test('builds a count aggregate over another question', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'First');
     await addItem(page, '1', '1.2', 'Second');

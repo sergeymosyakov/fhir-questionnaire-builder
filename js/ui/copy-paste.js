@@ -1,9 +1,10 @@
 // ── Copy / Paste nodes ────────────────────────────────────────────────────────
-// Serialises a node subtree to FHIR JSON (via export.js), re-maps linkIds to
-// avoid collisions, then deserialises back (via import-item.js) and inserts the
-// result after the source node in the tree.
+// Serialises a node subtree to FHIR JSON (via export.js), re-maps linkIds and
+// their references (linkid-remap.js), then deserialises back (via import-item.js)
+// and inserts the result next to the source node in the tree.
 import { nodeToFHIRItem } from '../fhir/export.js';
 import { fhirItemToNode } from '../fhir/import-item.js';
+import { remapSubtree, linkIdRefsIn, collectNodeIds } from '../fhir/linkid-remap.js';
 import { MODAL_REGISTRY } from './modals/modal-registry.js';
 import { AppEvents, EventState } from '../events.js';
 
@@ -61,7 +62,7 @@ export class CopyPaste {
     let fhirItem;
     try { fhirItem = JSON.parse(this._clip); } catch { return; }
 
-    const { remapped, idMap } = this._remapLinkIds(fhirItem);
+    const { remapped, idMap } = remapSubtree(fhirItem, collectNodeIds(this._questDoc.tree), 'copy');
     const node = fhirItemToNode(remapped, new Map(), this._questDoc.contained || []);
     if (position === 'before') this._insertBefore(node, anchorId);
     else                       this._insertAfter(node, anchorId);
@@ -132,52 +133,6 @@ export class CopyPaste {
     return false;
   }
 
-  _allLinkIds(nodes, out = []) {
-    for (const n of nodes) {
-      out.push(n.id);
-      if (n.children?.length) this._allLinkIds(n.children, out);
-    }
-    return out;
-  }
-
-  // ── Private: linkId re-mapping ─────────────────────────────────────────────
-
-  _remapLinkIds(fhirItem) {
-    const idMap      = new Map(); // oldId → newId
-    const usedInBatch = new Set();
-    this._collectIds(fhirItem, idMap, usedInBatch);
-    const remapped = this._rewriteIds(JSON.parse(JSON.stringify(fhirItem)), idMap);
-    return { remapped, idMap };
-  }
-
-  _collectIds(item, idMap, usedInBatch) {
-    const newId = this._uniqueId(item.linkId + '-copy', usedInBatch);
-    idMap.set(item.linkId, newId);
-    usedInBatch.add(newId);
-    if (item.item) for (const c of item.item) this._collectIds(c, idMap, usedInBatch);
-  }
-
-  _uniqueId(base, usedInBatch) {
-    const existing = new Set(this._allLinkIds(this._questDoc.tree));
-    if (usedInBatch) for (const id of usedInBatch) existing.add(id);
-    let candidate = base;
-    let n = 2;
-    while (existing.has(candidate)) { candidate = base + '-' + n++; }
-    return candidate;
-  }
-
-  _rewriteIds(item, idMap) {
-    item.linkId = idMap.get(item.linkId) ?? item.linkId;
-    // enableWhen: only rewrite question refs that point inside the copied subtree
-    if (item.enableWhen) {
-      for (const ew of item.enableWhen) {
-        if (idMap.has(ew.question)) ew.question = idMap.get(ew.question);
-      }
-    }
-    if (item.item) for (const c of item.item) this._rewriteIds(c, idMap);
-    return item;
-  }
-
   // ── Private: expression analysis ──────────────────────────────────────────
 
   /** Return rows for expressions in the pasted subtree that reference external linkIds. */
@@ -215,12 +170,7 @@ export class CopyPaste {
   }
 
   _hasExternalLinkIdRef(expr, idMap) {
-    const re = /linkId\s*=\s*['"]([^'"]+)['"]/g;
-    let m;
-    while ((m = re.exec(expr)) !== null) {
-      if (!idMap.has(m[1])) return true; // references an id NOT in the copied subtree
-    }
-    return false;
+    return linkIdRefsIn(expr).some(id => !idMap.has(id));
   }
 
   /** Scan entire tree for expressions that query tree structure (.descendants, .count, etc.). */

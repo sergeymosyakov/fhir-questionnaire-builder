@@ -21,7 +21,7 @@ const SDC = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/';
 async function freshLoad(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="dob"]')).toBeVisible({ timeout: 10_000 });
 }

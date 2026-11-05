@@ -5,7 +5,7 @@
 // Run: npx playwright test tests/e2e/atable-item-control.spec.js
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
-//   add-root-group-btn   "+Add Root Group" toolbar button
+//   add-root-group-btn   Add menu → "Root group" item
 //   group-add-btn        "+" button on a group node
 //   add-menu-item         "Item" option in add-child menu
 //   action-type           "Answer Type" action link on an item node
@@ -27,9 +27,10 @@ import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { mockTerminologyExpand } from './helpers/terminology.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -40,7 +41,7 @@ async function freshStart(page) {
 }
 
 async function addItem(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
   await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
   await page.locator('[data-testid="add-menu-item"]').first().click();

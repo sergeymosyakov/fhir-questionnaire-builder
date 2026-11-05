@@ -10,7 +10,7 @@ import { openDropdownItem } from './dropdown.js';
 export const FIXTURE = path.resolve('tests/fixtures/meta-test.fhir.json');
 
 export async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 export async function freshStart(page) {

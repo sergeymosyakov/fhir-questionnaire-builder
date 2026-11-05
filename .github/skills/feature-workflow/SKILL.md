@@ -20,6 +20,8 @@ The same flow applies to every feature, fix, or chore that touches code (not jus
 ## 3. Implement + validate
 - Do the work. Run the repo's lint + unit tests (and e2e when the feature is user-facing or explicitly requested) before considering it done — see this repo's own copilot-instructions.md pre-push checklist for the exact commands.
 - Keep tests + sample/fixture coverage in step with the feature per the repo's own rules (e.g. e2e + sampledata for user-facing FHIR features in fhir-qb).
+- **Multi-phase features** keep their locked decisions and phase list in `docs/<NAME>-PLAN.md` while the work is in flight (delete it in the PR's final commit once the durable facts live in `docs/CONTEXT.md`, the file manifest and ux-features); update it as phases ship. When the plan sets a final gate, run the **full** Vitest + Playwright suites (observable, `tee` to a log) and the independent review before the PR — e2e is otherwise on-demand.
+- Generalize while implementing: extract shared code instead of copying, and give every user-facing change its own e2e.
 - If a real bug slips through review/testing, fix it directly on the same branch — don't open a second branch for a same-feature bugfix found before merge.
 - Before committing/pushing, get the independent review (`copilot-instructions.md` rule 10): after lint + tests, fix the real findings.
 

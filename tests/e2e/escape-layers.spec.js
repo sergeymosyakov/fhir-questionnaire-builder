@@ -5,7 +5,7 @@
 // Run: npx playwright test tests/e2e/escape-layers.spec.js
 //
 // ── data-testid registry ─────────────────────────────────────────────────────
-//   add-root-group-btn   "+Add Root Group"
+//   add-root-group-btn   Add menu → "Root group" item
 //   group-add-btn / add-menu-item   "+" on a group / "Item" option
 //   action-type          "Answer Type" action link
 //   answerTypeModal      Answer Type modal backdrop

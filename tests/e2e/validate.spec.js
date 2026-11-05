@@ -25,11 +25,12 @@
 
 import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -42,7 +43,7 @@ async function freshStart(page) {
  * Returns { groupId, itemId }.
  */
 async function addValidItem(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
   const group = page.locator('[data-node-id="1"]');
@@ -96,7 +97,7 @@ test.describe('Tools menu visibility', () => {
 
   test('appears after adding a node', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await expect(toolsMenuBtn(page)).toBeVisible();
   });
@@ -129,7 +130,7 @@ test.describe('Validate modal — all good', () => {
 test.describe('Validate modal — issues', () => {
   test('shows warning badge when nodes have empty titles', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     const group = page.locator('[data-node-id="1"]');
@@ -157,7 +158,7 @@ test.describe('Validate modal — issues', () => {
 
   test('"OK" button closes modal when in standalone validate mode', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     const group = page.locator('[data-node-id="1"]');
@@ -216,7 +217,7 @@ test.describe('Validate modal — close gestures', () => {
 test.describe('Validate modal — navigate to node', () => {
   test('↗ button closes modal and flashes the builder node', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     // Add item without a title to trigger a warning with a navigate button.
@@ -261,7 +262,7 @@ test.describe('Validate modal — navigate to node', () => {
 test.describe('Validate modal — export mode', () => {
   test('export with issues shows "Fix first" and "Export anyway" buttons', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     // Clear the group title so validation has issues.
@@ -293,7 +294,7 @@ test.describe('Validate modal — export mode', () => {
 
   test('"Fix first" button in export mode closes the modal without exporting', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     const group = page.locator('[data-node-id="1"]');
@@ -317,7 +318,7 @@ test.describe('Validate modal — export mode', () => {
 
   test('"Export anyway" triggers file download despite issues', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     const group = page.locator('[data-node-id="1"]');

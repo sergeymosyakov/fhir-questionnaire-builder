@@ -1,0 +1,58 @@
+[
+  {
+    "id": "phq-9",
+    "name": "PHQ-9 Depression Screening",
+    "description": "Nine-question depression screener with an automatic total score and severity band (minimal to severe).",
+    "scoring": "Each answer scores 0–3. The total (0–27) maps to minimal (0–4), mild (5–9), moderate (10–14), moderately severe (15–19) or severe (20–27) depression.",
+    "keywords": [
+      "depression",
+      "mood",
+      "phq",
+      "screening",
+      "score",
+      "mental health"
+    ],
+    "source": "Kroenke, Spitzer & Williams 2001, J Gen Intern Med 16:606 (PHQ-9). Codes: LOINC; form text as published at phqscreeners.com.",
+    "sourceUrl": "https://www.phqscreeners.com/",
+    "license": "Developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute.",
+    "licenseUrl": "https://www.phqscreeners.com/",
+    "file": "phq-9.template.json"
+  },
+  {
+    "id": "gad-7",
+    "name": "GAD-7 Anxiety Screening",
+    "description": "Seven-question generalized anxiety screener with an automatic total score and severity band (minimal to severe).",
+    "scoring": "Each answer scores 0–3. The total (0–21) maps to minimal (0–4), mild (5–9), moderate (10–14) or severe (15–21) anxiety.",
+    "keywords": [
+      "anxiety",
+      "gad",
+      "screening",
+      "score",
+      "mental health"
+    ],
+    "source": "Spitzer et al. 2006, Arch Intern Med 166:1092 (GAD-7). Codes: LOINC; form text as published at phqscreeners.com.",
+    "sourceUrl": "https://www.phqscreeners.com/",
+    "license": "Developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute.",
+    "licenseUrl": "https://www.phqscreeners.com/",
+    "file": "gad-7.template.json"
+  },
+  {
+    "id": "audit-c",
+    "name": "AUDIT-C Alcohol Use Screening",
+    "description": "Three-question alcohol consumption screen with an automatic total score (0–12) and the usual positive-screen thresholds.",
+    "scoring": "Each answer scores 0–4. The total (0–12) is a positive screen at 4 or more for men and 3 or more for women.",
+    "keywords": [
+      "alcohol",
+      "audit",
+      "drinking",
+      "screening",
+      "score",
+      "substance use"
+    ],
+    "source": "Bush et al. 1998, Arch Intern Med 158:1789 (AUDIT-C, from the WHO AUDIT). Codes and answer lists: LOINC, as in the HL7 US Core AUDIT-C questionnaire.",
+    "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/9738608/",
+    "license": "No restrictions on use (per the ONC USCDI/ISP listing; submitted by NIAAA).",
+    "licenseUrl": "https://isp.healthit.gov/uscdi-data/audit-c",
+    "file": "audit-c.template.json"
+  }
+]

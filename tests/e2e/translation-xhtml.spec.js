@@ -52,7 +52,7 @@ const MD_DEMO    = path.resolve('tests/fixtures/rendering-markdown.fhir.json');
 async function freshStart(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadXHTMLDemo(page) {

@@ -31,7 +31,7 @@ const BASE_TYPE_URL = FHIR.baseType;
 const FHIR_TYPE_URL = FHIR.fhirType;
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadFixture(page) {

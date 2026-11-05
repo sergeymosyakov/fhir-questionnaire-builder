@@ -4,7 +4,7 @@
 // Run: npx playwright test tests/e2e/note-copy-to.spec.js
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
-//   add-root-group-btn        "+Add Root Group"
+//   add-root-group-btn        Add menu → "Root group" item
 //   group-add-btn             "+" button on a group
 //   add-menu-item             "Item" option in add-child menu
 //   node-title-display        read-only title span
@@ -22,11 +22,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -35,7 +36,7 @@ async function freshStart(page) {
 }
 
 async function addGroup(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 }
 
@@ -76,7 +77,7 @@ async function addSecondItem(page, groupNodeId, title) {
 }
 
 async function addSecondGroup(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="2"]')).toBeVisible();
 }
 

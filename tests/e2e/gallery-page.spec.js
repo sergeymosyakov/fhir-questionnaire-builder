@@ -8,7 +8,7 @@
 //   add-root-group-btn    builder ready marker (after following the link)
 //   top-gallery-link      static link to this page next to the left panel title
 //   github-link           GitHub link in the Builder's top panel
-//   docs-gallery-link     link to this page in the docs header
+//   doc-content           docs article (its Calculation gallery page links here)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -41,7 +41,7 @@ test.describe('gallery.html (SEO page)', () => {
     await page.goto('/gallery.html#glasgow-coma-scale');
     await expect(page.getByTestId('gp-card-glasgow-coma-scale')).toBeInViewport();
     await page.getByTestId('gp-open-builder').click();
-    await expect(page.getByTestId('add-root-group-btn')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('add-menu-btn')).toBeVisible({ timeout: 10_000 });
   });
 
   test('is listed in sitemap.xml and the home page points to it', async ({ request }) => {
@@ -51,13 +51,15 @@ test.describe('gallery.html (SEO page)', () => {
     expect(await home.text()).toContain('href="gallery.html"');
   });
 
-  test('the Builder top panel and the docs header link to the gallery page', async ({ page }) => {
+  test('the Builder top panel and the docs Calculation gallery page link to the gallery page', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('top-gallery-link')).toHaveAttribute('href', 'gallery.html');
     // tooltip.css gives [data-tip-title] a help cursor; these links must show a pointer
     await expect(page.getByTestId('top-gallery-link')).toHaveCSS('cursor', 'pointer');
     await expect(page.getByTestId('github-link')).toHaveCSS('cursor', 'pointer');
-    await page.goto('/docs.html');
-    await expect(page.getByTestId('docs-gallery-link')).toHaveAttribute('href', 'gallery.html');
+    await page.goto('/docs.html#/calculation-gallery');
+    await expect(page.getByTestId('doc-content').locator('h1')).toHaveText('Calculation gallery');
+    await expect(page.getByTestId('doc-content').locator('a[href="https://fhirbuilder.com/gallery.html"]')).toBeVisible();
+    await expect(page.getByTestId('doc-nav-link').filter({ hasText: 'Calculation gallery' })).toBeVisible();
   });
 });

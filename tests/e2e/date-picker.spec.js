@@ -5,7 +5,7 @@
 // Run: npx playwright test tests/e2e/date-picker.spec.js
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
-//   add-root-group-btn   "+Add Root Group"
+//   add-root-group-btn   Add menu → "Root group" item
 //   group-add-btn         "+" button on a group
 //   add-menu-item         "Item" option in add-child menu
 //   action-type            "Answer Type" action link
@@ -23,9 +23,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -64,7 +65,7 @@ function verticalGap(a, b) {
 test.describe('Date picker', () => {
   test('drill-down: day view -> months -> years -> pick year -> pick month -> pick day', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     const itemId = await addItem(page, '1', 1);
     await setDateType(page, itemId);
 
@@ -99,7 +100,7 @@ test.describe('Date picker', () => {
 
   test('can select a specific month from the months grid', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     const itemId = await addItem(page, '1', 1);
     await setDateType(page, itemId);
 
@@ -123,7 +124,7 @@ test.describe('Date picker', () => {
 
   test('can select a specific year from the years grid', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     const itemId = await addItem(page, '1', 1);
     await setDateType(page, itemId);
 
@@ -151,7 +152,7 @@ test.describe('Date picker', () => {
 
   test('years view pages by 12 years with the prev/next buttons', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     const itemId = await addItem(page, '1', 1);
     await setDateType(page, itemId);
 
@@ -170,7 +171,7 @@ test.describe('Date picker', () => {
   test('popup stays anchored to its field when the panel scrolls', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 500 });
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     let lastId = '1';
     for (let i = 1; i <= 8; i++) {
       lastId = await addItem(page, '1', i);

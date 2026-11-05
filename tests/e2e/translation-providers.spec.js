@@ -35,7 +35,7 @@ async function startWithConfig(page, cfg) {
     }
   }, cfg);
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadPHQ9(page) {

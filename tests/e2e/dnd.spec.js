@@ -5,7 +5,7 @@
 // Run: npx playwright test tests/e2e/dnd.spec.js
 //
 // data-testid registry:
-//   add-root-group-btn   "+Add Root Group" toolbar button
+//   add-root-group-btn   Add menu → "Root group" item
 //   group-add-btn        gear/add button on a group
 //   add-menu-item        "Add Item" option in the gear dropdown
 //   node-drag-handle     ⠿ drag handle element
@@ -15,7 +15,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
-import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
+import { freshStart, addRootGroup, addItemToGroup, clickAddRootGroup } from './helpers/builder.js';
 
 /** Add N items to a group and wait for them to appear. */
 async function addItems(page, groupId, count) {
@@ -129,7 +129,7 @@ test.describe('Drag & Drop — node reorder', () => {
     await freshStart(page);
     // Add two root groups
     await addRootGroup(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="2"]')).toBeVisible();
 
     // Drag group 2 to the drop zone above group 1
@@ -154,7 +154,7 @@ test.describe('Drag & Drop — node reorder', () => {
     await freshStart(page);
     // Two root groups
     await addRootGroup(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="2"]')).toBeVisible();
 
     // Add item to group 1

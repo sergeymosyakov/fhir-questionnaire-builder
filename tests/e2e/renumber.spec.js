@@ -3,7 +3,7 @@
 // immediately reflects the new prefixes without any extra action.
 //
 // data-testid registry:
-//   add-root-group-btn     "+Add Root Group" toolbar button
+//   add-root-group-btn     Add menu → "Root group" item
 //   renumber-btn           "↺ Renumber" button in the builder toolbar
 //   renumber-format        custom-select for prefix format (numbers/roman/letters)
 //   node-title-display     read-only title span on a builder node

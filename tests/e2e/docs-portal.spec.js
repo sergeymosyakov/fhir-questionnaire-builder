@@ -38,7 +38,7 @@ test.describe('documentation portal', () => {
 
   test('the ⋯ More menu links to the docs portal', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    await page.waitForSelector('[data-testid="add-menu-btn"]');
     await page.getByTestId('more-btn').click();
     const docsItem = page.getByTestId('docs-page-btn');
     await expect(docsItem).toBeVisible();

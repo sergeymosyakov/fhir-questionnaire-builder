@@ -20,7 +20,7 @@ const payload = questionnaire => ({ name: 'inline.fhir.json', mimeType: 'applica
 async function load(page, questionnaire, readyId) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, payload(questionnaire));
   await expect(page.locator(`[data-preview-id="${readyId}"]`)).toBeVisible({ timeout: 10_000 });
 }
@@ -44,7 +44,7 @@ test.describe('Value sets', () => {
     }));
     await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
     await loadFixtureFile(page, payload({ item: [{ linkId: 'big', type: 'choice', text: 'Big', answerValueSet: 'http://example.org/ValueSet/big' }] }));
     await expect(page.getByTestId('validateModal')).toContainText('900 entries but only the first 1', { timeout: 10_000 });
   });

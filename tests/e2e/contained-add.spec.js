@@ -17,6 +17,7 @@
 //   contained-empty              empty-state text
 
 import { test, expect } from '@playwright/test';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const card   = (page) => page.getByTestId('contained-card');
 const count  = (page) => page.getByTestId('contained-card-count');
@@ -29,11 +30,11 @@ const vsJson = (id, title = 'Test VS') =>
 async function freshStart(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 15_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 15_000 });
 }
 
 async function newQuestionnaire(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 }
 

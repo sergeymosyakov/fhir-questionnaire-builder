@@ -22,13 +22,14 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const R5_FIXTURE = path.resolve('sampledata/r5-demo.fhir.json');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -79,7 +80,7 @@ test.describe('R5 version gate: open-choice hidden', () => {
   test('open-choice appears in type dropdown when version is R4', async ({ page }) => {
     await freshStart(page);
     // Add a group + item so we have something to open Answer Type for
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     const group = page.locator('[data-node-id="1"]');
     await expect(group).toBeVisible();
     await group.getByTestId('group-add-btn').click();
@@ -104,7 +105,7 @@ test.describe('R5 version gate: open-choice hidden', () => {
     await expect(page.getByTestId('fhir-version-select')).toHaveAttribute('data-value', 'R5');
 
     // Add group + item
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     const group = page.locator('[data-node-id="1"]');
     await expect(group).toBeVisible();
     await group.getByTestId('group-add-btn').click();
@@ -154,7 +155,7 @@ test.describe('R5 export stamps builder-target-version', () => {
     await selectVersion(page, 'R5');
 
     // Add a root group so we have something to export
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     // Intercept the download by evaluating buildFHIRObjectVersioned via JS

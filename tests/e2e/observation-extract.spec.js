@@ -41,6 +41,7 @@ import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/obs-extract-e2e.fhir.json');
 const OBS_EXT = FHIR.observationExtract;
@@ -48,7 +49,7 @@ const OBS_EXT = FHIR.observationExtract;
 async function freshStart(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadFixture(page) {
@@ -80,8 +81,8 @@ test.describe('observation-extract — toggle and apply', () => {
   test('selecting "Yes" and applying activates the States action link', async ({ page }) => {
     await freshStart(page);
     await expect(async () => {
-      if (!(await page.getByTestId('add-root-group-btn').isVisible())) return;
-      await page.getByTestId('add-root-group-btn').click();
+      if (!(await page.getByTestId('add-menu-btn').isVisible())) return;
+      await clickAddRootGroup(page);
     }).toPass();
     await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 6_000 });
     const nodeId = await page.locator('[data-node-id]').first().getAttribute('data-node-id');

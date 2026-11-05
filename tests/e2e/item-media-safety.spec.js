@@ -19,7 +19,7 @@ const FIXTURE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../f
 test('itemMedia with a file: URL is not rendered, http(s) one is', async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="ok"]')).toBeVisible({ timeout: 10_000 });
   await expect(page.locator('[data-preview-id="ok"] [data-testid="preview-item-media"]')).toHaveCount(1);
@@ -30,7 +30,7 @@ test('itemMedia with a file: URL is not rendered, http(s) one is', async ({ page
 test('importing items nested deeper than 100 levels is refused with an error', async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   let item = { linkId: 'leaf', type: 'string', text: 'x' };
   for (let i = 0; i < 150; i++) item = { linkId: `g${i}`, type: 'group', item: [item] };
   const buffer = Buffer.from(JSON.stringify({ resourceType: 'Questionnaire', status: 'draft', item: [item] }));

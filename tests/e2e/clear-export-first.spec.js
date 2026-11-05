@@ -17,12 +17,12 @@
 //   saveFormatModal / saveFormatModalApply   export format dialog / its Export button
 //   prompt-save / prompt-cancel   "Save as:" prompt buttons
 //   tree-container           wraps all builder nodes
-//   add-root-group-btn       "+Add Root Group"
+//   add-root-group-btn       Add menu → "Root group" item
 // ─────────────────────────────────────────────────────────────────────────────
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
-import { freshStart } from './helpers/builder.js';
+import { freshStart, clickAddRootGroup } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/short-text.fhir.json');
 
@@ -44,7 +44,7 @@ async function chooseExportFirst(page) {
 async function expectClearedAndUsable(page) {
   await expect(nodes(page)).toHaveCount(0);
   await expect(page.locator('[data-preview-id="q-no-short"]')).toHaveCount(0);
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 }
 

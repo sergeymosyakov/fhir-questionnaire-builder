@@ -19,6 +19,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, loadFixture, openModal } from './helpers/metadata.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 // ── Card visibility ───────────────────────────────────────────────────────────
 
@@ -30,7 +31,7 @@ test.describe('metadata card — visibility', () => {
 
   test('card appears after adding a root group', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.getByTestId('quest-meta-card')).toBeVisible();
   });
 
@@ -50,7 +51,7 @@ test.describe('metadata card — status badge', () => {
 
   test('shows "draft" after adding a new group (default status)', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.getByTestId('quest-meta-status')).toHaveText('draft');
   });
 });
@@ -66,7 +67,7 @@ test.describe('metadata card — reset on clear', () => {
     await page.getByTestId('clearConfirmModal').waitFor();
     await page.getByTestId('clear-confirm-clear-btn').click();
 
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.getByTestId('quest-meta-card')).toBeVisible();
     await expect(page.getByTestId('quest-meta-status')).toHaveText('draft');
 

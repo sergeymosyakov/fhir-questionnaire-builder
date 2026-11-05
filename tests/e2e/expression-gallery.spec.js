@@ -18,10 +18,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 async function freshStart(page) {
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function addItem(page, groupId, nodeId, title) {
@@ -66,7 +67,7 @@ async function openValueBuilder(page, nodeId) {
 test.describe('Expression Gallery', () => {
   test('BMI pattern with unit conversion resolves into the calculatedExpression field', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'Weight');
     await setItemType(page, '1.1', 'decimal');
@@ -102,7 +103,7 @@ test.describe('Expression Gallery', () => {
 
   test('bmi-imperial pattern resolves without unit conversion (already lb/in)', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'Weight');
     await setItemType(page, '1.1', 'decimal');
@@ -129,7 +130,7 @@ test.describe('Expression Gallery', () => {
 
   test('bmi-category pattern resolves to a threshold-category iif() chain', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'Weight');
     await setItemType(page, '1.1', 'decimal');
@@ -160,7 +161,7 @@ test.describe('Expression Gallery', () => {
 
   test('gallery Cancel returns to the builder chooser without inserting anything', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'Score');
     await setItemType(page, '1.1', 'decimal');
@@ -176,7 +177,7 @@ test.describe('Expression Gallery', () => {
 
   test('search filters the pattern list by name/description', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'Score');
     await setItemType(page, '1.1', 'decimal');
@@ -198,7 +199,7 @@ test.describe('Expression Gallery', () => {
 
   test('sum-of-items repeatable slot supports adding and removing rows', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'Score A');
     await setItemType(page, '1.1', 'decimal');
@@ -250,7 +251,7 @@ test.describe('Expression Gallery', () => {
 
   test('charlson-comorbidity-index hides an already-picked condition from other rows', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'Has MI');
     await setItemType(page, '1.1', 'checkbox');
@@ -287,7 +288,7 @@ test.describe('Expression Gallery', () => {
 
   test('glasgow-coma-scale pattern resolves to a severity-band iif() chain', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'Eye');
     await setItemType(page, '1.1', 'integer');
@@ -315,7 +316,7 @@ test.describe('Expression Gallery', () => {
 
   test('count-yes-answers turns each yes/no row into 1/0 via its default transform', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'Smoker');
     await setItemType(page, '1.1', 'checkbox');
@@ -339,7 +340,7 @@ test.describe('Expression Gallery', () => {
 
   test('egfr-ckd-epi-2021: sex offers only choice items; the female code constant is overridable', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await addItem(page, '1', '1.1', 'Creatinine');
     await setItemType(page, '1.1', 'decimal');
@@ -408,7 +409,7 @@ test.describe('Expression Gallery', () => {
   for (const p of PATTERNS) {
     test(`${p.id} pattern resolves into the field`, async ({ page }) => {
       await freshStart(page);
-      await page.getByTestId('add-root-group-btn').click();
+      await clickAddRootGroup(page);
       await expect(page.locator('[data-node-id="1"]')).toBeVisible();
       for (const [i, [key, type]] of p.slots.entries()) {
         await addItem(page, '1', `1.${i + 1}`, key);

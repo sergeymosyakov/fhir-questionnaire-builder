@@ -42,7 +42,7 @@ async function freshLoad(page, fixture, waitForId) {
   await mockTerminologyExpand(page);
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, fixture);
   if (waitForId) {
     await expect(page.locator(`[data-preview-id="${waitForId}"]`)).toBeVisible({ timeout: 10_000 });

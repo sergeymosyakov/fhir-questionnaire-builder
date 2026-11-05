@@ -12,7 +12,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
-import { expectBoolValue } from './helpers/builder.js';
+import { expectBoolValue, clickAddRootGroup } from './helpers/builder.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const PHQ9_FIXTURE = path.resolve('sampledata/phq-9.fhir.json');
@@ -22,7 +22,7 @@ const BARIATRIC_QR      = path.resolve('sampledata/example-bariatric-response.qr
 
 async function loadPHQ9(page) {
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, PHQ9_FIXTURE);
   // PHQ-9 first item has LOINC linkId /44250-9
   await expect(page.locator('[data-preview-id="/44250-9"]')).toBeVisible({ timeout: 10_000 });
@@ -31,7 +31,7 @@ async function loadPHQ9(page) {
 async function loadBariatric(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, BARIATRIC_FIXTURE);
   // Wait for a top-level group to confirm the fixture loaded
   await expect(page.locator('[data-preview-id="g-consent"]')).toBeVisible({ timeout: 10_000 });
@@ -54,9 +54,9 @@ test.describe('QR Answers — load from file via Answers menu', () => {
 
   test('"From file…" menu item exists in the Answers dropdown', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
     // Add a group so answers-btn becomes visible (hidden until questionnaire loaded/new)
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await page.getByTestId('answers-btn').click();
     await expect(page.locator('[data-testid="load-answers-from-file"]')).toBeVisible({ timeout: 5000 });
@@ -64,8 +64,8 @@ test.describe('QR Answers — load from file via Answers menu', () => {
 
   test('"From Library…" menu item exists in the Answers dropdown', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-    await page.getByTestId('add-root-group-btn').click();
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await page.getByTestId('answers-btn').click();
     await expect(page.locator('[data-testid="load-answers-library-item"]')).toBeVisible({ timeout: 5000 });

@@ -137,6 +137,11 @@ export const AppEvents = Object.freeze({
   NODE_COPY_REQUESTED:         'node:copy-requested',
   NODE_PASTE_AFTER_REQUESTED:  'node:paste-after-requested',
   NODE_PASTE_BEFORE_REQUESTED: 'node:paste-before-requested',
+  // Dispatched by the Add menu "Root group" item; BuilderPanel listens.
+  ROOT_GROUP_ADD_REQUESTED:    'node:root-group-add-requested',
+  // Dispatched by the "Insert template…" gear item / Add menu; TemplateInsert listens.
+  // detail: { id: string|null } — node to insert into, null = questionnaire root
+  NODE_INSERT_TEMPLATE_REQUESTED: 'node:insert-template-requested',
   // Dispatched by CopyPaste after clipboard changes (copy or clear).
   // detail: { hasClip: boolean }
   CLIPBOARD_CHANGED:           'node:clipboard-changed',

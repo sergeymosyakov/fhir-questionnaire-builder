@@ -25,6 +25,8 @@
       "label": "How-to Guides",
       "pages": [
         { "id": "build-from-scratch", "title": "Build a questionnaire from scratch", "file": "build-from-scratch.md" },
+        { "id": "calculation-gallery", "title": "Calculation gallery", "file": "calculation-gallery.md" },
+        { "id": "templates", "title": "Templates", "file": "templates.md" },
         { "id": "import-roundtrip", "title": "Import & round-trip", "file": "import-roundtrip.md" },
         { "id": "answer-types", "title": "Answer types & options", "file": "answer-types.md" },
         { "id": "validation", "title": "Validation", "file": "validation.md" },

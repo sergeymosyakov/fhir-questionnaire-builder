@@ -172,7 +172,7 @@ test.describe('Settings page', () => {
   });
 
   test('settings link opens settings.html from main app via \u22ef menu', async ({ page }) => {    await page.goto('/');
-    await page.getByTestId('add-root-group-btn').waitFor();
+    await page.getByTestId('add-menu-btn').waitFor();
     // settings-page-btn is inside the ⋯ More menu
     await page.getByTestId('more-btn').click();
     await expect(page.getByTestId('settings-page-btn')).toBeVisible();

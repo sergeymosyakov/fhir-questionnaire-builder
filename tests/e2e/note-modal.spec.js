@@ -4,7 +4,7 @@
 // Run: npx playwright test tests/e2e/note-modal.spec.js
 //
 // ── data-testid used in this suite ───────────────────────────────────────────
-//   add-root-group-btn   "+Add Root Group"
+//   add-root-group-btn   Add menu → "Root group" item
 //   group-add-btn        "+" button on a group
 //   add-menu-item        "Item" option in add-child menu
 //   action-note          "Note" action link on a node card
@@ -22,12 +22,13 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const DN_URL    = FHIR.designNote;
 const _FIXTURE  = path.resolve('tests/fixtures/meta-test.fhir.json');
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -38,7 +39,7 @@ async function freshStart(page) {
 
 /** Add a root group + one text item; returns node IDs. */
 async function addItem(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
   await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
   await page.locator('[data-testid="add-menu-item"]').first().click();
@@ -99,7 +100,7 @@ test.describe('note modal — open / close', () => {
 
   test('Note link is also present on group cards', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await expect(page.locator('[data-node-id="1"]').getByTestId('action-note')).toBeVisible();
   });

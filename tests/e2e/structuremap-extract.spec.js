@@ -16,6 +16,7 @@ import path from 'node:path';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { freshStart, openModal } from './helpers/metadata.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/structuremap-extract.fhir.json');
 
@@ -91,7 +92,7 @@ test.describe('SDC StructureMap Extract', () => {
 
   test('a blank questionnaire (no targetStructureMap) shows a warning instead of a bundle', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await openDropdownItem(page, 'export-btn', 'export-structuremap-extract-item');
     const modal = page.locator('[data-testid="structureMapExtract"]').first();

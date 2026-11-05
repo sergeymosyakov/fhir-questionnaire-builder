@@ -6,7 +6,7 @@
 // Run: npx playwright test tests/e2e/builder-enable-when.spec.js
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
-//   add-root-group-btn   "+Add Root Group" button
+//   add-root-group-btn   Add menu → "Root group" item
 //   add-menu-item        "Item" option in the add-child menu
 //   group-add-btn        "+" button on a group
 //   node-title-display   read-only title span
@@ -25,14 +25,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
-import { freshStart, clickBoolOption } from './helpers/builder.js';
+import { freshStart, clickBoolOption, clickAddRootGroup } from './helpers/builder.js';
 
 test.describe('enableWhen (standard)', () => {
   test('set condition on item → preview shows dimmed; fill trigger answer → item becomes visible', async ({ page }) => {
     await freshStart(page);
 
     // Add group "1" with two text items: trigger "1.1" and dependent "1.2"
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     const group = page.locator('[data-node-id="1"]');
@@ -93,7 +93,7 @@ test.describe('enableWhen (standard)', () => {
   test('removing the condition clears the stale preview visibility badge', async ({ page }) => {
     await freshStart(page);
 
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     const group = page.locator('[data-node-id="1"]');
 
@@ -146,7 +146,7 @@ test.describe('enableWhen (standard)', () => {
   test('condition audit tooltip shows actual value and pass/fail for each enableWhen rule', async ({ page }) => {
     await freshStart(page);
 
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     const group = page.locator('[data-node-id="1"]');
 
     // Trigger item 1.1
@@ -191,7 +191,7 @@ const ANNUAL = path.resolve('sampledata/annual-health-check.fhir.json');
 async function loadAnnual(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, ANNUAL);
   await expect(page.locator('[data-preview-id="smoker"]')).toBeVisible({ timeout: 8_000 });
 }
