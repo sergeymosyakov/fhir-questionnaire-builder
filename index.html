@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; img-src 'self' data: blob: https://avatars.githubusercontent.com;">
 <title>FHIR Questionnaire Builder — Visual Logic &amp; FHIRPath Editor for FHIR R4/R5</title>
-<meta name="description" content="FHIR Questionnaire Builder — a visual drag-and-drop editor for FHIR R4 Questionnaires with conditional logic (enableWhen / enableWhenExpression), SDC variables, patient presets, FHIRPath evaluation, and FHIR JSON import/export.">
+<meta name="description" content="FHIR Questionnaire Builder — a visual drag-and-drop editor for FHIR R4 Questionnaires with conditional logic (enableWhen / enableWhenExpression), SDC variables, patient presets, FHIRPath evaluation, a gallery of ready-made clinical calculations, and FHIR JSON import/export.">
 <!-- Open Graph -->
 <meta property="og:type"        content="website">
 <meta property="og:title"       content="FHIR Questionnaire Builder — Visual Logic &amp; FHIRPath Editor">
-<meta property="og:description" content="FHIR Questionnaire Builder — a visual drag-and-drop editor for FHIR R4 Questionnaires with conditional logic, SDC variables, patient presets, FHIRPath evaluation, and FHIR JSON import/export.">
+<meta property="og:description" content="FHIR Questionnaire Builder — a visual drag-and-drop editor for FHIR R4 Questionnaires with conditional logic, SDC variables, patient presets, FHIRPath evaluation, ready-made clinical calculations, and FHIR JSON import/export.">
 <meta property="og:url"         content="https://fhirbuilder.com/">
 <meta property="og:image"       content="https://fhirbuilder.com/docs/social-preview.png">
 <!-- Twitter Card -->
@@ -25,7 +25,14 @@
   "name": "FHIR Questionnaire Builder",
   "alternateName": "FHIR Questionnaire Logic Builder",
   "url": "https://fhirbuilder.com/",
-  "description": "Visual drag-and-drop builder for FHIR R4 Questionnaires with conditional logic, FHIRPath expressions, SDC variables, and FHIR JSON import/export. No backend required.",
+  "description": "Visual drag-and-drop builder for FHIR R4 Questionnaires with conditional logic, FHIRPath expressions, SDC variables, a gallery of ready-made clinical calculations, and FHIR JSON import/export. No backend required.",
+  "featureList": [
+    "Drag-and-drop Questionnaire item tree",
+    "Conditional logic with enableWhen and FHIRPath",
+    "Gallery of ready-made, source-referenced clinical calculations (BMI, eGFR, Glasgow Coma Scale, due dates and many more) inserted as editable FHIRPath",
+    "SDC variables, calculated expressions and constraints",
+    "FHIR JSON import and export"
+  ],
   "applicationCategory": "HealthApplication",
   "operatingSystem": "Any (browser-based)",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -89,7 +96,7 @@
     </div>
   </div>
   <div class="top-panel-copyright" data-testid="top-panel-copyright">
-    <a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" target="_blank" rel="noopener" class="top-panel-github-link" data-tip-title="View source on GitHub"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" class="top-panel-github-icon"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
+    <a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" target="_blank" rel="noopener" class="top-panel-github-link" data-testid="github-link" data-tip-title="View source on GitHub"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" class="top-panel-github-icon"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> GitHub</a>
     <span data-mount="copyright-notice"></span>
   </div>
   <div id="authWrap" class="top-panel-auth" data-mount="auth-panel"><!-- AuthPanel builds and mounts its DOM here --></div>
@@ -110,7 +117,9 @@
     <div class="left-panel-content">
     <div class="left-panel-header">
       <div class="left-panel-title-row">
-        <span class="section-title">Logic Builder<span id="tooltipsOffBadge" class="tips-off-badge" style="display:none">tooltips off</span></span>
+        <span class="section-title">Logic Builder<span id="tooltipsOffBadge" class="tips-off-badge" style="display:none">tooltips off</span>
+          <a href="gallery.html" target="_blank" class="left-panel-gallery-link" data-testid="top-gallery-link" data-tip-title="Calculation gallery" data-tip-body="Browse the ready-made clinical calculations you can insert into a questionnaire.">&#x1F4D0; Calculations</a>
+        </span>
         <span id="fhirVersionSelectMount" class="fhir-version-select-mount" data-mount="fhir-version-select"
           data-tip-title="FHIR Target Version"
           data-tip-body="Select the FHIR version this questionnaire targets. Affects which item types and fields are available in the builder, and is recorded in a builder-target-version extension on export (FHIR's Meta type has no fhirVersion field)."
@@ -200,6 +209,7 @@
       <li>Conditional logic — <code>enableWhen</code> and <code>enableWhenExpression</code> (FHIRPath)</li>
       <li>SDC variables — <code>sdc-questionnaire-variable</code> at questionnaire level</li>
       <li>Calculated expressions — <code>calculatedExpression</code> with live FHIRPath evaluation</li>
+      <li>Calculation gallery — ready-made, source-referenced clinical calculations (BMI, eGFR, Glasgow Coma Scale, due dates and many more), inserted as editable FHIRPath — <a href="gallery.html">browse the gallery</a></li>
       <li>Patient presets — seed <code>%age</code>, <code>%gender</code>, <code>%bmi</code> and more</li>
       <li>Answer types — text, integer, decimal, date, boolean, radio, select, open-choice, reference, quantity</li>
       <li>FHIR JSON import and export — round-trip safe for all supported extensions</li>

@@ -111,7 +111,8 @@ What is in the gallery, by area:
 - **Scores and screens:** PHQ-9, PHQ-2, GAD-7, Glasgow Coma Scale, Apgar, qSOFA, CHA₂DS₂-VASc, Charlson Comorbidity Index.
 - **General helpers:** unit conversion, sum of items, count of Yes answers, percent change.
 
-The full list, with every pattern's inputs, result bands and source, is in the
+Every pattern's inputs, result bands and source are on the
+[calculation gallery page](https://fhirbuilder.com/gallery.html) and in the
 [gallery catalog](https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/docs/EXPRESSION-GALLERY.md).
 
 For patterns that depend on sex (eGFR, Cockcroft–Gault, ideal body weight), the

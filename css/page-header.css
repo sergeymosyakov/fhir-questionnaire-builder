@@ -46,6 +46,17 @@
 }
 .page-header-back:hover { text-decoration: underline; }
 
+/* Secondary link in the bar, placed before the back link (after the inline search, if any). */
+.page-header-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.page-header-link:hover { text-decoration: underline; }
+.page-header-link + .page-header-back { margin-left: 0; }
+
 .page-header-subtitle {
   margin: 0;
   font-size: 13px;

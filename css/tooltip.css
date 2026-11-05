@@ -4,7 +4,9 @@
 .preview-linkid[data-tip-title],
 .calc-badge--explain[data-tip-title],
 .preview-condition-hint--explain[data-tip-title],
-.preview-nav-btn[data-tip-title] { cursor: pointer; }
+.preview-nav-btn[data-tip-title],
+.top-panel-github-link[data-tip-title],
+.left-panel-gallery-link[data-tip-title] { cursor: pointer; }
 @media (min-width: 1024px) {
   [data-tip-title], [data-tip-body] { cursor: unset; }
 }

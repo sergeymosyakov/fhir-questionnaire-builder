@@ -58,7 +58,7 @@ shell, no iframe, no framework.
 | [WIDGET.md](WIDGET.md) | **Embeddable renderer widget** — install, config, API, events, examples |
 | [docs/CONTEXT.md](docs/CONTEXT.md) | Architecture, file map, node model, UX features, build rules |
 | [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) | FHIR R4 field mapping, supported extensions, known gaps |
-| [docs/EXPRESSION-GALLERY.md](docs/EXPRESSION-GALLERY.md) | Catalog of the ready-made FHIRPath calculation patterns (BMI, eGFR, GCS, due date, ...) with inputs and sources |
+| [docs/EXPRESSION-GALLERY.md](docs/EXPRESSION-GALLERY.md) | Catalog of the ready-made FHIRPath calculation patterns (BMI, eGFR, GCS, due date, ...) with inputs and sources; also published as [gallery.html](https://fhirbuilder.com/gallery.html) |
 | [Issues labeled `roadmap`](https://github.com/sergeymosyakov/fhir-questionnaire-builder/issues?q=is%3Aissue+is%3Aopen+label%3Aroadmap) | Feature backlog |
 | [docs/COMPETITORS.md](docs/COMPETITORS.md) | Honest, no-spin comparison vs LHC-Forms, Smart Forms, Aidbox, Medplum, Firely |
 
