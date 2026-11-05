@@ -5,6 +5,7 @@
 // data-testid registry:
 //   add-menu-btn / add-template-btn        Add menu trigger / "From template…"
 //   tpl-row-<id>, tpl-detail, templatesModalApply   templates modal
+//   rg-add-btn                           "+ Add another entry" on a repeating group
 // Preview radio rows (.radio-label) are the sanctioned non-testid exception.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -31,7 +32,7 @@ test.beforeEach(async ({ page }) => {
 
 test('library lists the shipped scales with source and license', async ({ page }) => {
   await openDropdownItem(page, 'add-menu-btn', 'add-template-btn');
-  for (const id of ['phq-9', 'gad-7', 'audit-c']) await expect(page.getByTestId('tpl-row-' + id)).toBeVisible();
+  for (const id of ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c', 'demographics', 'allergies', 'medications', 'pain']) await expect(page.getByTestId('tpl-row-' + id)).toBeVisible();
   await page.getByTestId('tpl-row-phq-9').click();
   await expect(page.getByTestId('tpl-detail')).toContainText('Kroenke, Spitzer & Williams 2001');
   await expect(page.getByTestId('tpl-detail')).toContainText('No permission required to reproduce');
@@ -82,4 +83,64 @@ test('a second PHQ-9 gets fresh ids and scores from its own answers', async ({ p
   await expect(page.locator('[data-preview-id="phq9-total"]')).toContainText('0');
   await expect(page.locator(`[data-preview-id="phq9-total${suffix}"]`)).toContainText('27');
   await expect(page.locator(`[data-preview-id="phq9-severity${suffix}"]`)).toContainText('Severe depression');
+});
+
+test('PHQ-2 flags a positive screen at 3 or more', async ({ page }) => {
+  await insert(page, 'phq-2');
+  await pick(page, 'phq2-q1', 1);
+  await pick(page, 'phq2-q2', 1);
+  await expect(page.locator('[data-preview-id="phq2-total"]')).toContainText('2');
+  await expect(page.locator('[data-preview-id="phq2-result"]')).toContainText('Negative screen');
+  await pick(page, 'phq2-q2', 2);
+  await expect(page.locator('[data-preview-id="phq2-total"]')).toContainText('3');
+  await expect(page.locator('[data-preview-id="phq2-result"]')).toContainText('Positive screen');
+});
+
+test('GAD-2 flags a positive screen at 3 or more', async ({ page }) => {
+  await insert(page, 'gad-2');
+  await pick(page, 'gad2-q1', 3);
+  await expect(page.locator('[data-preview-id="gad2-total"]')).toBeVisible();
+  await expect(page.locator('[data-preview-id="gad2-result"]')).not.toContainText('screen');
+  await pick(page, 'gad2-q2', 0);
+  await expect(page.locator('[data-preview-id="gad2-total"]')).toContainText('3');
+  await expect(page.locator('[data-preview-id="gad2-result"]')).toContainText('Positive screen');
+});
+
+test('intake fragments insert as groups with their fields', async ({ page }) => {
+  await insert(page, 'demographics');
+  for (const id of ['demo-first-name', 'demo-birth-date', 'demo-sex', 'demo-email']) {
+    await expect(page.locator(`[data-preview-id="${id}"]`)).toBeVisible();
+  }
+  await insert(page, 'pain');
+  await expect(page.locator('[data-preview-id="pain-severity"]')).toBeVisible();
+});
+
+test('Allergies and Medications rows can be added', async ({ page }) => {
+  await insert(page, 'allergies');
+  await expect(page.locator('[data-preview-id="allergy-substance"]')).toHaveCount(1);
+  await page.getByTestId('rg-add-btn').click();
+  await expect(page.locator('[data-preview-id="allergy-substance"]')).toHaveCount(2);
+  await insert(page, 'medications');
+  await expect(page.locator('[data-preview-id="meds-name"]')).toHaveCount(1);
+  await page.getByTestId('rg-add-btn').last().click();
+  await expect(page.locator('[data-preview-id="meds-name"]')).toHaveCount(2);
+});
+
+test('ticking "No known allergies" disables the allergy rows', async ({ page }) => {
+  await insert(page, 'allergies');
+  await expect(page.locator('[data-preview-id="allergy-substance"]')).toBeVisible();
+  await page.locator('[data-preview-id="allergy-none"] .bool-seg__btn').nth(0).click();
+  await expect(page.locator('.preview-card').getByText('«allergy-none» ≠ Yes')).toBeVisible();
+  await expect(page.locator('input[data-preview-id="allergy-substance"], textarea[data-preview-id="allergy-substance"]')).toHaveCount(0);
+  await page.locator('[data-preview-id="allergy-none"] .bool-seg__btn').nth(1).click();
+  await expect(page.locator('[data-preview-id="allergy-substance"]')).toBeVisible();
+});
+
+test('ticking "Not taking any medications" disables the medication rows', async ({ page }) => {
+  await insert(page, 'medications');
+  await expect(page.locator('[data-preview-id="meds-name"]')).toBeVisible();
+  await page.locator('[data-preview-id="meds-none"] .bool-seg__btn').nth(0).click();
+  await expect(page.locator('.preview-card').getByText('«meds-none» ≠ Yes')).toBeVisible();
+  await page.locator('[data-preview-id="meds-none"] .bool-seg__btn').nth(1).click();
+  await expect(page.locator('[data-preview-id="meds-name"]')).toBeVisible();
 });

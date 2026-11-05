@@ -2,14 +2,17 @@
 
 A template is a ready-made group of questions — with the scale's original wording,
 standard LOINC codes, scores and a working total — that you insert into your
-questionnaire in one click. Use it when you need a well-known screening scale and
-don't want to type it in and wire up the scoring yourself.
+questionnaire in one click. Use it when you need a well-known screening scale — or a standard intake section such as
+demographics or allergies — and don't want to type it in and wire up the scoring yourself.
 
 ## What is available
 
+- **PHQ-2** — the two-question depression screen; a total (0–6) and a positive/negative result that points to the PHQ-9.
+- **GAD-2** — the two-question anxiety screen; a total (0–6) and a positive/negative result that points to the GAD-7.
 - **PHQ-9** — depression screening; a total score (0–27) and its severity band (minimal to severe).
 - **GAD-7** — anxiety screening; a total score (0–21) and its severity band.
 - **AUDIT-C** — alcohol use screening; a total score (0–12) with the usual positive-screen thresholds noted.
+- **Intake fragments** — plain data-collection groups with no scoring: **Patient Demographics**, **Allergies** and **Current Medications** (both with a repeatable list, so a patient can add as many rows as needed), and **Pain Assessment** (0–10 severity, location, onset, description).
 
 The list of templates, with each scale's questions, scoring, source and license, is
 on the public [templates page](https://fhirbuilder.com/templates.html).
@@ -28,8 +31,8 @@ move it, or edit any question like one you wrote yourself.
 
 ## What gets inserted
 
-- Every question carries its LOINC code, and every answer its LOINC answer code and score.
-- The **total** (and, for PHQ-9 and GAD-7, the **severity**) are read-only calculated
+- In the scales, every question carries its LOINC code, and every answer its LOINC answer code and score. The intake fragments carry LOINC codes only where a standard one exists (for example date of birth and pain severity).
+- The **total** (and, for PHQ-9 and GAD-7, the **severity**; for PHQ-2 and GAD-2, the **screening result**) are read-only calculated
   fields. They stay empty until every scored question is answered, instead of
   showing a misleading partial score.
 - If an id in the template would clash with an id already in your questionnaire, the

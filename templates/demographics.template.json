@@ -1,0 +1,99 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "demo",
+      "text": "Patient Demographics",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "demo-first-name",
+          "text": "First name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "linkId": "demo-last-name",
+          "text": "Last name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "linkId": "demo-birth-date",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "21112-8"
+            }
+          ],
+          "text": "Date of birth",
+          "type": "date",
+          "required": true
+        },
+        {
+          "linkId": "demo-sex",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "76689-9"
+            }
+          ],
+          "text": "Sex assigned at birth",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA3-6",
+                "display": "Female"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA2-8",
+                "display": "Male"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA4489-6",
+                "display": "Unknown"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "demo-phone",
+          "text": "Phone number",
+          "type": "string"
+        },
+        {
+          "linkId": "demo-email",
+          "text": "Email address",
+          "type": "string"
+        },
+        {
+          "linkId": "demo-address",
+          "text": "Home address",
+          "type": "text"
+        }
+      ]
+    }
+  ]
+}

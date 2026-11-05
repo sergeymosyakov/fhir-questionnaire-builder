@@ -1,0 +1,73 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "allergy",
+      "text": "Allergies",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "allergy-none",
+          "text": "No known allergies",
+          "type": "boolean"
+        },
+        {
+          "linkId": "allergy-entry",
+          "text": "Allergy",
+          "type": "group",
+          "repeats": true,
+          "item": [
+            {
+              "linkId": "allergy-substance",
+              "text": "Allergen (medication, food or other)",
+              "type": "string",
+              "required": true
+            },
+            {
+              "linkId": "allergy-reaction",
+              "text": "Reaction",
+              "type": "string"
+            },
+            {
+              "linkId": "allergy-severity",
+              "text": "Severity",
+              "type": "choice",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "answerOption": [
+                {
+                  "valueString": "Mild"
+                },
+                {
+                  "valueString": "Moderate"
+                },
+                {
+                  "valueString": "Severe"
+                }
+              ]
+            }
+          ],
+          "enableWhen": [
+            {
+              "question": "allergy-none",
+              "operator": "!=",
+              "answerBoolean": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -213,7 +213,7 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `js/ui/modals/templates-modal.js` | `TemplatesModal extends Modal` — searchable template list, source/license detail card, Insert/Cancel; registered as `templates` |
 | `js/fhir/templates.js` | Template library access — `loadTemplateLibrary()` (`templates/library.json`), `templateGroupFrom()` (a template file must hold exactly one root group), `loadTemplateGroup(entry)` |
 | `templates/library.json` | Template catalog (id, name, description, keywords, source, license, file) — one Questionnaire file per template next to it |
-| `templates/*.template.json` | Shipped templates (PHQ-9, GAD-7, AUDIT-C): one Questionnaire with a single wrapper group each — LOINC-coded questions/answers with `ordinalValue` scores, calculated total (+ severity) via FHIRPath over the ordinals |
+| `templates/*.template.json` | Shipped templates (PHQ-9/2, GAD-7/2, AUDIT-C scales; demographics, allergies, medications, pain fragments): one Questionnaire with a single wrapper group each — LOINC-coded questions/answers with `ordinalValue` scores, calculated total (+ severity) via FHIRPath over the ordinals |
 | `css/templates.css` | Templates modal styles (`.tpl-*`; list/row look reuses `.eg-*`) |
 | `js/ui/modals/paste-warning-modal.js` | Read-only warning modal shown after paste when pasted items' expressions reference linkIds outside the copied subtree, or existing expressions elsewhere use structural FHIRPath queries that may now behave differently; single "Got it" dismiss button |
 | `js/ui/header-actions.js` | Mounts all 7 header menu instances into `#headerActions` span (Questionnaires, Answers, Save, PreviewMode, ViewOptions, Settings, **LanguageMenu**); exports `questionnairesMenu`, `answersMenu`, `saveMenu`, `previewModeMenu`, `viewOptionsMenu`, `settingsMenu`, `languageMenu`, `prefs` |
@@ -434,7 +434,7 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `tests/e2e/helpers/templates.js` | `serveTemplates(page)` — serves `tests/fixtures/templates/*` as `/templates/*` |
 | `tests/e2e/template-insert.spec.js` | E2E — templates modal (search, detail, cancel, load error) and insertion from group/item gear menus incl. id collision (fixtures in `tests/fixtures/templates/`) |
 | `tests/templates-library.test.js` | Unit tests — catalog completeness, per-template structure/LOINC coding, and scoring (totals, band boundaries, no score until all answered) evaluated with fhirpath |
-| `tests/e2e/templates-library.spec.js` | E2E — shipped templates listed with source/license; PHQ-9, GAD-7, AUDIT-C insert and calculate (no mocking) |
+| `tests/e2e/templates-library.spec.js` | E2E — shipped templates listed with source/license; PHQ-9/2, GAD-7/2, AUDIT-C insert and calculate; intake fragments insert (no mocking) |
 | `tests/templates-page.test.js` | Unit tests — `templates.html` freshness, escaping, question list |
 | `tests/e2e/templates-page.spec.js` | E2E — `templates.html` metadata/cards/JSON links/sitemap and the docs Templates page |
 | `tests/templates.test.js` | Unit tests — `templateGroupFrom` validation |

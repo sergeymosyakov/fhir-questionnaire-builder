@@ -1,0 +1,206 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "gad2",
+      "text": "GAD-2 Anxiety Screening",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "gad2-intro",
+          "text": "Over the last 2 weeks, how often have you been bothered by the following problems?",
+          "type": "display"
+        },
+        {
+          "linkId": "gad2-q1",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "69725-0"
+            }
+          ],
+          "text": "Feeling nervous, anxious or on edge",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6568-5",
+                "display": "Not at all"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6569-3",
+                "display": "Several days"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 2
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6570-1",
+                "display": "More than half the days"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 3
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6571-9",
+                "display": "Nearly every day"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gad2-q2",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "68509-9"
+            }
+          ],
+          "text": "Not being able to stop or control worrying",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6568-5",
+                "display": "Not at all"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6569-3",
+                "display": "Several days"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 2
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6570-1",
+                "display": "More than half the days"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 3
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6571-9",
+                "display": "Nearly every day"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gad2-total",
+          "text": "GAD-2 total score",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.repeat(item).where(linkId in ('gad2-q1' | 'gad2-q2')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.count() = 2, %resource.repeat(item).where(linkId in ('gad2-q1' | 'gad2-q2')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.sum(), {})"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gad2-result",
+          "text": "Screening result",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.repeat(item).where(linkId='gad2-total').answer.valueDecimal.exists(), iif(%resource.repeat(item).where(linkId='gad2-total').answer.valueDecimal < 3, 'Negative screen', 'Positive screen — follow up with the GAD-7'), {})"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

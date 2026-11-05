@@ -1,0 +1,212 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "phq2",
+      "text": "PHQ-2 Depression Screening",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "phq2-intro",
+          "text": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
+          "type": "display"
+        },
+        {
+          "linkId": "phq2-q1",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "44250-9"
+            }
+          ],
+          "text": "Little interest or pleasure in doing things",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6568-5",
+                "display": "Not at all"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6569-3",
+                "display": "Several days"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 2
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6570-1",
+                "display": "More than half the days"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 3
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6571-9",
+                "display": "Nearly every day"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "phq2-q2",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "44255-8"
+            }
+          ],
+          "text": "Feeling down, depressed, or hopeless",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6568-5",
+                "display": "Not at all"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6569-3",
+                "display": "Several days"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 2
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6570-1",
+                "display": "More than half the days"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 3
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6571-9",
+                "display": "Nearly every day"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "phq2-total",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "55758-7"
+            }
+          ],
+          "text": "PHQ-2 total score",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.repeat(item).where(linkId in ('phq2-q1' | 'phq2-q2')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.count() = 2, %resource.repeat(item).where(linkId in ('phq2-q1' | 'phq2-q2')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.sum(), {})"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "phq2-result",
+          "text": "Screening result",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.repeat(item).where(linkId='phq2-total').answer.valueDecimal.exists(), iif(%resource.repeat(item).where(linkId='phq2-total').answer.valueDecimal < 3, 'Negative screen', 'Positive screen — follow up with the PHQ-9'), {})"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

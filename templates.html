@@ -65,6 +65,42 @@
           "position": 3,
           "name": "AUDIT-C Alcohol Use Screening",
           "url": "https://fhirbuilder.com/templates.html#audit-c"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "PHQ-2 Depression Screening",
+          "url": "https://fhirbuilder.com/templates.html#phq-2"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "GAD-2 Anxiety Screening",
+          "url": "https://fhirbuilder.com/templates.html#gad-2"
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "name": "Patient Demographics",
+          "url": "https://fhirbuilder.com/templates.html#demographics"
+        },
+        {
+          "@type": "ListItem",
+          "position": 7,
+          "name": "Allergies",
+          "url": "https://fhirbuilder.com/templates.html#allergies"
+        },
+        {
+          "@type": "ListItem",
+          "position": 8,
+          "name": "Current Medications",
+          "url": "https://fhirbuilder.com/templates.html#medications"
+        },
+        {
+          "@type": "ListItem",
+          "position": 9,
+          "name": "Pain Assessment",
+          "url": "https://fhirbuilder.com/templates.html#pain"
         }
       ]
     },
@@ -114,6 +150,12 @@
         <li><a href="#phq-9">PHQ-9 Depression Screening</a></li>
         <li><a href="#gad-7">GAD-7 Anxiety Screening</a></li>
         <li><a href="#audit-c">AUDIT-C Alcohol Use Screening</a></li>
+        <li><a href="#phq-2">PHQ-2 Depression Screening</a></li>
+        <li><a href="#gad-2">GAD-2 Anxiety Screening</a></li>
+        <li><a href="#demographics">Patient Demographics</a></li>
+        <li><a href="#allergies">Allergies</a></li>
+        <li><a href="#medications">Current Medications</a></li>
+        <li><a href="#pain">Pain Assessment</a></li>
       </ul>
     </nav>
     <section class="gp-card" id="phq-9" data-testid="tp-card-phq-9">
@@ -145,6 +187,66 @@
       <p class="gp-source">Source: Bush et al. 1998, Arch Intern Med 158:1789 (AUDIT-C, from the WHO AUDIT). Codes and answer lists: LOINC, as in the HL7 US Core AUDIT-C questionnaire. (<a href="https://pubmed.ncbi.nlm.nih.gov/9738608/" rel="noopener">link</a>)</p>
       <p class="gp-source">License: No restrictions on use (per the ONC USCDI/ISP listing; submitted by NIAAA). (<a href="https://isp.healthit.gov/uscdi-data/audit-c" rel="noopener">link</a>)</p>
       <p class="gp-source"><a href="templates/audit-c.template.json" data-testid="tp-json-audit-c">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="phq-2" data-testid="tp-card-phq-2">
+      <h3>PHQ-2 Depression Screening</h3>
+      <p>Two-question depression screener with an automatic total and positive-screen flag; the short entry to the PHQ-9.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Each answer scores 0–3. The total (0–6) is a positive screen at 3 or more.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Little interest or pleasure in doing things</li><li>Feeling down, depressed, or hopeless</li></ol>
+      <p class="gp-source">Source: Kroenke, Spitzer &amp; Williams 2003, Med Care 41:1284 (PHQ-2). Codes: LOINC; form text as published at phqscreeners.com. (<a href="https://pubmed.ncbi.nlm.nih.gov/14583691/" rel="noopener">link</a>)</p>
+      <p class="gp-source">License: Developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute. (<a href="https://www.phqscreeners.com/" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/phq-2.template.json" data-testid="tp-json-phq-2">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="gad-2" data-testid="tp-card-gad-2">
+      <h3>GAD-2 Anxiety Screening</h3>
+      <p>Two-question anxiety screener with an automatic total and positive-screen flag; the short entry to the GAD-7.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Each answer scores 0–3. The total (0–6) is a positive screen at 3 or more.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Feeling nervous, anxious or on edge</li><li>Not being able to stop or control worrying</li></ol>
+      <p class="gp-source">Source: Kroenke et al. 2007, Ann Intern Med 146:317 (GAD-2). Codes: LOINC; form text as published at phqscreeners.com. (<a href="https://pubmed.ncbi.nlm.nih.gov/17339617/" rel="noopener">link</a>)</p>
+      <p class="gp-source">License: Developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute. (<a href="https://www.phqscreeners.com/" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/gad-2.template.json" data-testid="tp-json-gad-2">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="demographics" data-testid="tp-card-demographics">
+      <h3>Patient Demographics</h3>
+      <p>Name, date of birth, sex assigned at birth and contact details for a patient intake form.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> No scoring — a data-collection fragment.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>First name</li><li>Last name</li><li>Date of birth</li><li>Sex assigned at birth</li><li>Phone number</li><li>Email address</li><li>Home address</li></ol>
+      <p class="gp-source">Source: Original wording written for this builder.</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/demographics.template.json" data-testid="tp-json-demographics">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="allergies" data-testid="tp-card-allergies">
+      <h3>Allergies</h3>
+      <p>&#39;No known allergies&#39; plus a repeatable list of allergens with reaction and severity.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> No scoring — a data-collection fragment.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>No known allergies</li><li>Allergy</li></ol>
+      <p class="gp-source">Source: Original wording written for this builder.</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/allergies.template.json" data-testid="tp-json-allergies">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="medications" data-testid="tp-card-medications">
+      <h3>Current Medications</h3>
+      <p>&#39;Not taking any medications&#39; plus a repeatable list with dose, frequency and reason.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> No scoring — a data-collection fragment.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Not taking any medications</li><li>Medication</li></ol>
+      <p class="gp-source">Source: Original wording written for this builder.</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/medications.template.json" data-testid="tp-json-medications">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="pain" data-testid="tp-card-pain">
+      <h3>Pain Assessment</h3>
+      <p>Pain severity on a 0–10 scale, location, onset and a free-text description.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> No scoring — severity is recorded as a 0–10 number.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Pain severity right now (0 = no pain, 10 = worst pain imaginable)</li><li>Where is the pain?</li><li>When did the pain start?</li><li>Describe the pain (for example sharp, dull or burning)</li></ol>
+      <p class="gp-source">Source: Original wording written for this builder.</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/pain.template.json" data-testid="tp-json-pain">Download the FHIR Questionnaire JSON</a></p>
     </section>
     <p class="gp-source">This material contains content from LOINC (<a href="https://loinc.org" rel="noopener">loinc.org</a>). LOINC is copyright © Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the <a href="https://loinc.org/license/" rel="noopener">LOINC license</a>.</p>
   </main>
