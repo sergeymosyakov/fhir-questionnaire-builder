@@ -44,7 +44,7 @@ test.describe('gallery.html (SEO page)', () => {
     await expect(page.getByTestId('add-root-group-btn')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('is listed in sitemap.xml and the home page points to it', async ({ page, request }) => {
+  test('is listed in sitemap.xml and the home page points to it', async ({ request }) => {
     const sitemap = await request.get('/sitemap.xml');
     expect(await sitemap.text()).toContain('https://fhirbuilder.com/gallery.html');
     const home = await request.get('/index.html');
