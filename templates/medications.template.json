@@ -1,0 +1,54 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "meds",
+      "text": "Current Medications",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "meds-none",
+          "text": "Not taking any medications",
+          "type": "boolean"
+        },
+        {
+          "linkId": "meds-entry",
+          "text": "Medication",
+          "type": "group",
+          "repeats": true,
+          "item": [
+            {
+              "linkId": "meds-name",
+              "text": "Medication name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "linkId": "meds-dose",
+              "text": "Dose",
+              "type": "string"
+            },
+            {
+              "linkId": "meds-frequency",
+              "text": "How often",
+              "type": "string"
+            },
+            {
+              "linkId": "meds-reason",
+              "text": "Reason for taking",
+              "type": "string"
+            }
+          ],
+          "enableWhen": [
+            {
+              "question": "meds-none",
+              "operator": "!=",
+              "answerBoolean": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

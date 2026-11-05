@@ -4,7 +4,7 @@ import path from 'path';
 import fhirpath from 'fhirpath';
 import fhirpath_r4_model from 'fhirpath/fhir-context/r4/index.js';
 import { templateGroupFrom } from '../js/fhir/templates.js';
-import { remapSubtree, collectLinkIds } from '../js/fhir/linkid-remap.js';
+import { remapSubtree, collectLinkIds, linkIdRefsIn } from '../js/fhir/linkid-remap.js';
 
 const DIR = path.resolve('templates');
 const ORD = 'http://hl7.org/fhir/StructureDefinition/ordinalValue';
@@ -14,6 +14,7 @@ const load = id => {
   const entry = library.find(e => e.id === id);
   return templateGroupFrom(JSON.parse(fs.readFileSync(path.join(DIR, entry.file), 'utf8')));
 };
+const SCORED = ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c'];
 const walk = (items, fn) => items.forEach(i => { fn(i); walk(i.item ?? [], fn); });
 
 describe('template library catalog', () => {
@@ -38,15 +39,19 @@ describe.each(library.map(e => e.id))('template %s', id => {
     expect(group.text).toBeTruthy();
   });
 
-  it('codes items with LOINC and gives every choice item scored, coded options', () => {
+  it('codes items with LOINC and gives every choice item at least two options', () => {
     walk(group.item, i => {
       if (i.code) for (const c of i.code) expect(c).toMatchObject({ system: 'http://loinc.org', code: expect.stringMatching(/^\d+-\d$/) });
-      if (i.type === 'choice') {
-        expect(i.answerOption.length, i.linkId).toBeGreaterThanOrEqual(2);
-        for (const o of i.answerOption) {
-          expect(o.valueCoding.code, i.linkId).toMatch(/^LA\d+-\d$/);
-          expect(o.extension.find(e => e.url === ORD)?.valueDecimal, i.linkId).toBeTypeOf('number');
-        }
+      if (i.type === 'choice') expect(i.answerOption.length, i.linkId).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  it.runIf(SCORED.includes(id))('gives every choice item of a scored scale LOINC-coded, scored options', () => {
+    walk(group.item, i => {
+      if (i.type !== 'choice') return;
+      for (const o of i.answerOption) {
+        expect(o.valueCoding.code, i.linkId).toMatch(/^LA\d+-\d$/);
+        expect(o.extension.find(e => e.url === ORD)?.valueDecimal, i.linkId).toBeTypeOf('number');
       }
     });
   });
@@ -75,6 +80,10 @@ describe('template scoring', () => {
   const cases = [
     { id: 'phq-9', total: 'phq9-total', sev: 'phq9-severity', n: 9,
       bands: [[0, 'Minimal depression'], [4, 'Minimal depression'], [5, 'Mild depression'], [9, 'Mild depression'], [10, 'Moderate depression'], [14, 'Moderate depression'], [15, 'Moderately severe depression'], [19, 'Moderately severe depression'], [20, 'Severe depression'], [27, 'Severe depression']] },
+    { id: 'phq-2', total: 'phq2-total', sev: 'phq2-result', n: 2,
+      bands: [[0, 'Negative screen'], [2, 'Negative screen'], [3, 'Positive screen — follow up with the PHQ-9'], [6, 'Positive screen — follow up with the PHQ-9']] },
+    { id: 'gad-2', total: 'gad2-total', sev: 'gad2-result', n: 2,
+      bands: [[0, 'Negative screen'], [2, 'Negative screen'], [3, 'Positive screen — follow up with the GAD-7'], [6, 'Positive screen — follow up with the GAD-7']] },
     { id: 'gad-7', total: 'gad7-total', sev: 'gad7-severity', n: 7,
       bands: [[0, 'Minimal anxiety'], [4, 'Minimal anxiety'], [5, 'Mild anxiety'], [9, 'Mild anxiety'], [10, 'Moderate anxiety'], [14, 'Moderate anxiety'], [15, 'Severe anxiety'], [21, 'Severe anxiety']] },
     { id: 'audit-c', total: 'auditc-total', n: 3 },
@@ -114,7 +123,7 @@ describe('template scoring', () => {
 });
 
 describe('inserting a template into a questionnaire that already has its ids', () => {
-  it.each(library.map(e => e.id))('%s: renamed copy calculates from its own answers, no old id left in expressions', id => {
+  it.each(SCORED)('%s: renamed copy calculates from its own answers, no old id left in expressions', id => {
     const group = load(id);
     const old = collectLinkIds(group);
     const { remapped } = remapSubtree(group, old, 'suffix');
@@ -122,13 +131,24 @@ describe('inserting a template into a questionnaire that already has its ids', (
     walk(remapped.item, i => {
       const ext = i.extension?.find(x => x.url === CALC);
       if (!ext) return;
-      const refs = [...ext.valueExpression.expression.matchAll(/'([^']+)'/g)].map(m => m[1]);
+      const refs = linkIdRefsIn(ext.valueExpression.expression);
       for (const r of refs.filter(r => old.includes(r))) expect.fail(`${i.linkId} still references original id ${r}`);
-      expect(refs.every(r => renamed.has(r) || !r.includes('-'))).toBe(true);
+      expect(refs.every(r => renamed.has(r))).toBe(true);
     });
     const scored = [];
     walk(remapped.item, i => { if (i.type === 'choice' && i.required) scored.push(i.linkId); });
     const totalId = [...renamed].find(l => /-total-/.test(l));
     expect(evalIn(qrFor(remapped, scored, () => 1), exprOf(remapped, totalId))).toEqual([scored.length]);
+  });
+});
+
+describe('enableWhen in intake fragments survives a rename', () => {
+  it.each([['allergies', 'allergy-none', 'allergy-entry'], ['medications', 'meds-none', 'meds-entry']])('%s', (id, noneId, entryId) => {
+    const group = load(id);
+    const { remapped, idMap } = remapSubtree(group, collectLinkIds(group), 'suffix');
+    let entry;
+    walk(remapped.item, i => { if (i.linkId === idMap.get(entryId)) entry = i; });
+    expect(idMap.get(noneId)).not.toBe(noneId);
+    expect(entry.enableWhen[0].question).toBe(idMap.get(noneId));
   });
 });

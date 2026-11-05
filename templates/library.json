@@ -54,5 +54,108 @@
     "license": "No restrictions on use (per the ONC USCDI/ISP listing; submitted by NIAAA).",
     "licenseUrl": "https://isp.healthit.gov/uscdi-data/audit-c",
     "file": "audit-c.template.json"
+  },
+  {
+    "id": "phq-2",
+    "name": "PHQ-2 Depression Screening",
+    "description": "Two-question depression screener with an automatic total and positive-screen flag; the short entry to the PHQ-9.",
+    "scoring": "Each answer scores 0–3. The total (0–6) is a positive screen at 3 or more.",
+    "keywords": [
+      "depression",
+      "phq",
+      "screening",
+      "score",
+      "mental health"
+    ],
+    "source": "Kroenke, Spitzer & Williams 2003, Med Care 41:1284 (PHQ-2). Codes: LOINC; form text as published at phqscreeners.com.",
+    "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/14583691/",
+    "license": "Developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute.",
+    "licenseUrl": "https://www.phqscreeners.com/",
+    "file": "phq-2.template.json"
+  },
+  {
+    "id": "gad-2",
+    "name": "GAD-2 Anxiety Screening",
+    "description": "Two-question anxiety screener with an automatic total and positive-screen flag; the short entry to the GAD-7.",
+    "scoring": "Each answer scores 0–3. The total (0–6) is a positive screen at 3 or more.",
+    "keywords": [
+      "anxiety",
+      "gad",
+      "screening",
+      "score",
+      "mental health"
+    ],
+    "source": "Kroenke et al. 2007, Ann Intern Med 146:317 (GAD-2). Codes: LOINC; form text as published at phqscreeners.com.",
+    "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/17339617/",
+    "license": "Developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute.",
+    "licenseUrl": "https://www.phqscreeners.com/",
+    "file": "gad-2.template.json"
+  },
+  {
+    "id": "demographics",
+    "name": "Patient Demographics",
+    "description": "Name, date of birth, sex assigned at birth and contact details for a patient intake form.",
+    "scoring": "No scoring — a data-collection fragment.",
+    "keywords": [
+      "intake",
+      "patient",
+      "demographics",
+      "registration",
+      "contact"
+    ],
+    "file": "demographics.template.json",
+    "source": "Original wording written for this builder.",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission).",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE"
+  },
+  {
+    "id": "allergies",
+    "name": "Allergies",
+    "description": "'No known allergies' plus a repeatable list of allergens with reaction and severity.",
+    "scoring": "No scoring — a data-collection fragment.",
+    "keywords": [
+      "allergy",
+      "allergies",
+      "intake",
+      "history",
+      "medication"
+    ],
+    "file": "allergies.template.json",
+    "source": "Original wording written for this builder.",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission).",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE"
+  },
+  {
+    "id": "medications",
+    "name": "Current Medications",
+    "description": "'Not taking any medications' plus a repeatable list with dose, frequency and reason.",
+    "scoring": "No scoring — a data-collection fragment.",
+    "keywords": [
+      "medication",
+      "medicines",
+      "drugs",
+      "intake",
+      "history"
+    ],
+    "file": "medications.template.json",
+    "source": "Original wording written for this builder.",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission).",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE"
+  },
+  {
+    "id": "pain",
+    "name": "Pain Assessment",
+    "description": "Pain severity on a 0–10 scale, location, onset and a free-text description.",
+    "scoring": "No scoring — severity is recorded as a 0–10 number.",
+    "keywords": [
+      "pain",
+      "severity",
+      "assessment",
+      "symptom"
+    ],
+    "file": "pain.template.json",
+    "source": "Original wording written for this builder.",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission).",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE"
   }
 ]

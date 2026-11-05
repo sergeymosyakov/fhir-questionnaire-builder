@@ -1,0 +1,49 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "pain",
+      "text": "Pain Assessment",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "pain-severity",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "72514-3"
+            }
+          ],
+          "text": "Pain severity right now (0 = no pain, 10 = worst pain imaginable)",
+          "type": "integer",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/minValue",
+              "valueInteger": 0
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/maxValue",
+              "valueInteger": 10
+            }
+          ]
+        },
+        {
+          "linkId": "pain-location",
+          "text": "Where is the pain?",
+          "type": "string"
+        },
+        {
+          "linkId": "pain-onset",
+          "text": "When did the pain start?",
+          "type": "string"
+        },
+        {
+          "linkId": "pain-description",
+          "text": "Describe the pain (for example sharp, dull or burning)",
+          "type": "text"
+        }
+      ]
+    }
+  ]
+}
