@@ -1,0 +1,236 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "body",
+      "text": "Body Measurements",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "body-height",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "8302-2"
+            }
+          ],
+          "text": "Height (cm)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "cm",
+                "display": "cm"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "body-weight",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7"
+            }
+          ],
+          "text": "Weight (kg)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "kg",
+                "display": "kg"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "body-sex",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "76689-9"
+            }
+          ],
+          "text": "Sex assigned at birth (used by the ideal body weight formula)",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA3-6",
+                "display": "Female"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA2-8",
+                "display": "Male"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "body-waist",
+          "text": "Waist circumference (cm)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "cm",
+                "display": "cm"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "body-hip",
+          "text": "Hip circumference (cm)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "cm",
+                "display": "cm"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "body-bmi",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5"
+            }
+          ],
+          "text": "Body mass index (kg/m²)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "kg/m2",
+                "display": "kg/m²"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "((%resource.item.where(linkId='body').item.where(linkId='body-weight').answer.valueDecimal) / ((%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal / 100) * (%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal / 100))).round(1)"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "body-bmi-category",
+          "text": "BMI category (WHO)",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(((%resource.item.where(linkId='body').item.where(linkId='body-weight').answer.valueDecimal) / ((%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal / 100) * (%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal / 100))).exists(), iif(((%resource.item.where(linkId='body').item.where(linkId='body-weight').answer.valueDecimal) / ((%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal / 100) * (%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal / 100))) < 18.5, 'Underweight', iif(((%resource.item.where(linkId='body').item.where(linkId='body-weight').answer.valueDecimal) / ((%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal / 100) * (%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal / 100))) < 25, 'Normal weight', iif(((%resource.item.where(linkId='body').item.where(linkId='body-weight').answer.valueDecimal) / ((%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal / 100) * (%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal / 100))) < 30, 'Overweight', 'Obese'))), {})"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "body-bsa",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "8277-6"
+            }
+          ],
+          "text": "Body surface area (m², Mosteller)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "m2",
+                "display": "m²"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "(((%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal) * (%resource.item.where(linkId='body').item.where(linkId='body-weight').answer.valueDecimal)) / 3600).sqrt().round(2)"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "body-ibw",
+          "text": "Ideal body weight (kg, Devine)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "kg",
+                "display": "kg"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif((%resource.item.where(linkId='body').item.where(linkId='body-sex').answer.valueCoding.code).exists(), (iif((%resource.item.where(linkId='body').item.where(linkId='body-sex').answer.valueCoding.code) = 'LA3-6', 45.5, 50) + (2.3 * ((%resource.item.where(linkId='body').item.where(linkId='body-height').answer.valueDecimal / 2.54) - 60))).round(1), {})"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "body-whr",
+          "text": "Waist-to-hip ratio",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "((%resource.item.where(linkId='body').item.where(linkId='body-waist').answer.valueDecimal) / (%resource.item.where(linkId='body').item.where(linkId='body-hip').answer.valueDecimal)).round(2)"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

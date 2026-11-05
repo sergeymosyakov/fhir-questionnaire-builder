@@ -1,0 +1,158 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "kidney",
+      "text": "Kidney Function",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "kidney-age",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "30525-0"
+            }
+          ],
+          "text": "Age (years)",
+          "type": "integer",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "a",
+                "display": "years"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "kidney-sex",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "76689-9"
+            }
+          ],
+          "text": "Sex assigned at birth (used by both formulas)",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA3-6",
+                "display": "Female"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA2-8",
+                "display": "Male"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "kidney-weight",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7"
+            }
+          ],
+          "text": "Weight (kg)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "kg",
+                "display": "kg"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "kidney-creatinine",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "2160-0"
+            }
+          ],
+          "text": "Serum creatinine (mg/dL)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL",
+                "display": "mg/dL"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "kidney-egfr",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "98979-8"
+            }
+          ],
+          "text": "eGFR (mL/min/1.73 m², CKD-EPI 2021)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif((%resource.item.where(linkId='kidney').item.where(linkId='kidney-creatinine').answer.valueDecimal) > 0 and (%resource.item.where(linkId='kidney').item.where(linkId='kidney-age').answer.valueInteger).exists() and (%resource.item.where(linkId='kidney').item.where(linkId='kidney-sex').answer.valueCoding.code).exists(), (142 * iif(((%resource.item.where(linkId='kidney').item.where(linkId='kidney-creatinine').answer.valueDecimal) / iif(((%resource.item.where(linkId='kidney').item.where(linkId='kidney-sex').answer.valueCoding.code) = 'LA3-6'), 0.7, 0.9)) < 1, ((%resource.item.where(linkId='kidney').item.where(linkId='kidney-creatinine').answer.valueDecimal) / iif(((%resource.item.where(linkId='kidney').item.where(linkId='kidney-sex').answer.valueCoding.code) = 'LA3-6'), 0.7, 0.9)), 1).power(iif(((%resource.item.where(linkId='kidney').item.where(linkId='kidney-sex').answer.valueCoding.code) = 'LA3-6'), -0.241, -0.302)) * iif(((%resource.item.where(linkId='kidney').item.where(linkId='kidney-creatinine').answer.valueDecimal) / iif(((%resource.item.where(linkId='kidney').item.where(linkId='kidney-sex').answer.valueCoding.code) = 'LA3-6'), 0.7, 0.9)) > 1, ((%resource.item.where(linkId='kidney').item.where(linkId='kidney-creatinine').answer.valueDecimal) / iif(((%resource.item.where(linkId='kidney').item.where(linkId='kidney-sex').answer.valueCoding.code) = 'LA3-6'), 0.7, 0.9)), 1).power(-1.2) * 0.9938.power((%resource.item.where(linkId='kidney').item.where(linkId='kidney-age').answer.valueInteger)) * iif(((%resource.item.where(linkId='kidney').item.where(linkId='kidney-sex').answer.valueCoding.code) = 'LA3-6'), 1.012, 1)).round(0), {})"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "kidney-crcl",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "35591-7"
+            }
+          ],
+          "text": "Creatinine clearance (mL/min, Cockcroft–Gault)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif((%resource.item.where(linkId='kidney').item.where(linkId='kidney-sex').answer.valueCoding.code).exists(), ((((140 - (%resource.item.where(linkId='kidney').item.where(linkId='kidney-age').answer.valueInteger)) * (%resource.item.where(linkId='kidney').item.where(linkId='kidney-weight').answer.valueDecimal)) / (72 * (%resource.item.where(linkId='kidney').item.where(linkId='kidney-creatinine').answer.valueDecimal))) * iif((%resource.item.where(linkId='kidney').item.where(linkId='kidney-sex').answer.valueCoding.code) = 'LA3-6', 0.85, 1)).round(0), {}).where($this >= 0)"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

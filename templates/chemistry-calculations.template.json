@@ -1,0 +1,211 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "chem",
+      "text": "Chemistry Calculations",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "chem-na",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "2951-2"
+            }
+          ],
+          "text": "Sodium (mmol/L)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mmol/L",
+                "display": "mmol/L"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "chem-cl",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "2075-0"
+            }
+          ],
+          "text": "Chloride (mmol/L)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mmol/L",
+                "display": "mmol/L"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "chem-hco3",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "1963-8"
+            }
+          ],
+          "text": "Bicarbonate (mmol/L)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mmol/L",
+                "display": "mmol/L"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "chem-ca",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "17861-6"
+            }
+          ],
+          "text": "Total calcium (mg/dL)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL",
+                "display": "mg/dL"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "chem-alb",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "1751-7"
+            }
+          ],
+          "text": "Albumin (g/dL)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "g/dL",
+                "display": "g/dL"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "chem-glucose",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "1558-6"
+            }
+          ],
+          "text": "Fasting glucose (mg/dL)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL",
+                "display": "mg/dL"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "chem-insulin",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "20448-7"
+            }
+          ],
+          "text": "Fasting insulin (µU/mL)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "u[IU]/mL",
+                "display": "µU/mL"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "chem-anion-gap",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "33037-3"
+            }
+          ],
+          "text": "Anion gap (mmol/L)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "((%resource.item.where(linkId='chem').item.where(linkId='chem-na').answer.valueDecimal) - ((%resource.item.where(linkId='chem').item.where(linkId='chem-cl').answer.valueDecimal) + (%resource.item.where(linkId='chem').item.where(linkId='chem-hco3').answer.valueDecimal)))"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "chem-corrected-ca",
+          "text": "Albumin-corrected calcium (mg/dL)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "((%resource.item.where(linkId='chem').item.where(linkId='chem-ca').answer.valueDecimal) + (0.8 * (4 - (%resource.item.where(linkId='chem').item.where(linkId='chem-alb').answer.valueDecimal)))).round(1)"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "chem-homa-ir",
+          "text": "HOMA-IR",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "(((%resource.item.where(linkId='chem').item.where(linkId='chem-glucose').answer.valueDecimal) * (%resource.item.where(linkId='chem').item.where(linkId='chem-insulin').answer.valueDecimal)) / 405).round(2)"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "lipid",
+      "text": "Lipid Panel",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "lipid-tc",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "2093-3"
+            }
+          ],
+          "text": "Total cholesterol (mg/dL)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL",
+                "display": "mg/dL"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "lipid-hdl",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "2085-9"
+            }
+          ],
+          "text": "HDL cholesterol (mg/dL)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL",
+                "display": "mg/dL"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "lipid-tg",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "2571-8"
+            }
+          ],
+          "text": "Triglycerides (mg/dL)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mg/dL",
+                "display": "mg/dL"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "lipid-ldl",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "13457-7"
+            }
+          ],
+          "text": "LDL cholesterol, calculated (mg/dL; blank when triglycerides are 400 or more)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif((%resource.item.where(linkId='lipid').item.where(linkId='lipid-tg').answer.valueDecimal) < 400, ((%resource.item.where(linkId='lipid').item.where(linkId='lipid-tc').answer.valueDecimal) - (%resource.item.where(linkId='lipid').item.where(linkId='lipid-hdl').answer.valueDecimal) - ((%resource.item.where(linkId='lipid').item.where(linkId='lipid-tg').answer.valueDecimal) / 5)).round(0), {})"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

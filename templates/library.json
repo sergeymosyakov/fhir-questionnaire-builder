@@ -157,5 +157,139 @@
     "source": "Original wording written for this builder.",
     "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission).",
     "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE"
+  },
+  {
+    "id": "body-measurements",
+    "name": "Body Measurements",
+    "description": "Height, weight, sex and waist/hip with BMI (and its WHO category), body surface area, ideal body weight and waist-to-hip ratio.",
+    "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
+    "keywords": [
+      "bmi",
+      "body mass index",
+      "height",
+      "weight",
+      "body surface area",
+      "waist",
+      "hip",
+      "anthropometrics"
+    ],
+    "source": "Quetelet index (weight kg ÷ height m²); WHO adult BMI classification; Mosteller 1987, N Engl J Med 317:1098; Devine 1974, Drug Intell Clin Pharm 8:650; WHO Expert Consultation 2008, Waist circumference and waist–hip ratio (Geneva). Codes: LOINC.",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "body-measurements.template.json"
+  },
+  {
+    "id": "kidney-function",
+    "name": "Kidney Function",
+    "description": "Creatinine, age, sex and weight with eGFR (CKD-EPI 2021) and creatinine clearance (Cockcroft–Gault).",
+    "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
+    "keywords": [
+      "kidney",
+      "renal",
+      "egfr",
+      "creatinine",
+      "clearance",
+      "ckd",
+      "nephrology"
+    ],
+    "source": "Inker et al. 2021, N Engl J Med 385:1737 (race-free CKD-EPI); Cockcroft & Gault 1976, Nephron 16:31. Codes: LOINC.",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "kidney-function.template.json"
+  },
+  {
+    "id": "cardiac-measurements",
+    "name": "Cardiac Measurements",
+    "description": "Blood pressure, QT interval and heart rate with mean arterial pressure and corrected QT (Bazett and Fridericia).",
+    "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
+    "keywords": [
+      "blood pressure",
+      "map",
+      "qtc",
+      "qt",
+      "ecg",
+      "heart rate",
+      "cardiology"
+    ],
+    "source": "Standard estimate: (systolic + 2 × diastolic) ÷ 3; Bazett 1920; Fridericia 1920. Codes: LOINC.",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "cardiac-measurements.template.json"
+  },
+  {
+    "id": "lipid-panel",
+    "name": "Lipid Panel",
+    "description": "Total cholesterol, HDL and triglycerides with calculated LDL cholesterol (Friedewald).",
+    "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
+    "keywords": [
+      "lipid",
+      "cholesterol",
+      "ldl",
+      "hdl",
+      "triglycerides",
+      "cardiology"
+    ],
+    "source": "Friedewald et al. 1972, Clin Chem 18:499. Codes: LOINC.",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "lipid-panel.template.json"
+  },
+  {
+    "id": "chemistry-calculations",
+    "name": "Chemistry Calculations",
+    "description": "Electrolytes, calcium, albumin, glucose and insulin with anion gap, albumin-corrected calcium and HOMA-IR.",
+    "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
+    "keywords": [
+      "anion gap",
+      "calcium",
+      "albumin",
+      "homa",
+      "insulin resistance",
+      "electrolytes",
+      "laboratory"
+    ],
+    "source": "Standard potassium-free form: Na − (Cl + HCO₃); Payne et al. 1973, BMJ 4:643; Matthews et al. 1985, Diabetologia 28:412. Codes: LOINC.",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "chemistry-calculations.template.json"
+  },
+  {
+    "id": "fib4",
+    "name": "FIB-4 Liver Fibrosis Index",
+    "description": "Age, AST, ALT and platelets with the FIB-4 index and its fibrosis-risk category.",
+    "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
+    "keywords": [
+      "fib-4",
+      "fib4",
+      "liver",
+      "fibrosis",
+      "hepatology",
+      "ast",
+      "alt",
+      "platelets"
+    ],
+    "source": "Shah et al. 2009, Clin Gastroenterol Hepatol 7:1104 (cut-offs 1.3 / 2.67). Codes: LOINC.",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "fib4.template.json"
+  },
+  {
+    "id": "pregnancy-dating",
+    "name": "Pregnancy Dating",
+    "description": "Last menstrual period and visit date with the expected delivery date (Naegele) and gestational age in weeks.",
+    "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
+    "keywords": [
+      "pregnancy",
+      "gestational age",
+      "due date",
+      "edd",
+      "lmp",
+      "obstetrics",
+      "prenatal"
+    ],
+    "source": "Naegele's rule, 280-day form (regular 28-day cycle); Standard LMP dating (completed weeks since the first day of the last period). Codes: LOINC.",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "pregnancy-dating.template.json"
   }
 ]
