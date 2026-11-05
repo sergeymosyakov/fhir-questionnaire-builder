@@ -207,6 +207,7 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `js/ui/menus/add-menu.js` | `AddMenu extends DropdownMenu` — tree-toolbar **+ Add** menu (Root group / From template…); self-mounts at `[data-mount="add-menu"]` |
 | `js/fhir/static-page.js` | `renderStaticPage()` — shared shell (head/SEO meta/JSON-LD/page header) for generated crawlable pages (`gallery.html`, `templates.html`) |
 | `js/fhir/templates-page.js` | `renderTemplatesPage(entries, groups)` — generates `templates.html` (cards: description, scoring, questions, source, license, JSON download; LOINC notice) |
+| `scripts/calculator-templates.mjs` / `scripts/gen-calculator-templates.mjs` | Definitions of the calculator templates (body measurements, kidney, cardiac, lipid, chemistry, FIB-4, pregnancy dating) — formulas resolved from the Expression Gallery; the generator writes `templates/*.template.json` and upserts `templates/library.json` (run via `npm run docs:templates`) |
 | `scripts/gen-templates-page.mjs` | `npm run docs:templates` — regenerates `templates.html` from `templates/` |
 | `templates.html` | Generated, crawlable template catalog page (do not edit by hand; freshness-tested) |
 | `js/ui/template-insert.js` | `TemplateInsert` singleton — on `NODE_INSERT_TEMPLATE_REQUESTED` opens the templates modal, loads the chosen template group, remaps its linkIds (`suffix` strategy) and appends it to the target node's children (or root) |
@@ -435,6 +436,8 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `tests/e2e/template-insert.spec.js` | E2E — templates modal (search, detail, cancel, load error) and insertion from group/item gear menus incl. id collision (fixtures in `tests/fixtures/templates/`) |
 | `tests/templates-library.test.js` | Unit tests — catalog completeness, per-template structure/LOINC coding, and scoring (totals, band boundaries, no score until all answered) evaluated with fhirpath |
 | `tests/e2e/templates-library.spec.js` | E2E — shipped templates listed with source/license; PHQ-9/2, GAD-7/2, AUDIT-C insert and calculate; intake fragments insert (no mocking) |
+| `tests/calculator-templates.test.js` | Unit tests — calculator templates are up to date with the gallery, every result evaluates to the hand-computed value, stays empty without inputs and survives an id rename |
+| `tests/e2e/templates-calculators.spec.js` | E2E — calculator templates insert and calculate in the preview; a second insert calculates independently |
 | `tests/templates-page.test.js` | Unit tests — `templates.html` freshness, escaping, question list |
 | `tests/e2e/templates-page.spec.js` | E2E — `templates.html` metadata/cards/JSON links/sitemap and the docs Templates page |
 | `tests/templates.test.js` | Unit tests — `templateGroupFrom` validation |

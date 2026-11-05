@@ -5,16 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FHIR Questionnaire Templates | FHIR Questionnaire Builder</title>
-  <meta name="description" content="Free, source-referenced clinical screening scales as ready-to-use FHIR Questionnaires — PHQ-9, GAD-7, AUDIT-C and more — with LOINC codes and automatic scoring.">
+  <meta name="description" content="Free, source-referenced FHIR Questionnaires — clinical screening scales (PHQ-9, GAD-7, AUDIT-C and more), calculators such as eGFR and BMI, and intake sections — with LOINC codes and automatic calculation.">
   <meta name="keywords" content="FHIR Questionnaire, PHQ-9 FHIR, GAD-7 FHIR, AUDIT-C FHIR, LOINC, SDC, screening questionnaire, FHIR form builder, calculatedExpression">
   <meta property="og:type"        content="website">
-  <meta property="og:title"       content="Ready-made FHIR Questionnaire Templates (PHQ-9, GAD-7, AUDIT-C)">
-  <meta property="og:description" content="Free, source-referenced clinical screening scales as ready-to-use FHIR Questionnaires — PHQ-9, GAD-7, AUDIT-C and more — with LOINC codes and automatic scoring.">
+  <meta property="og:title"       content="Ready-made FHIR Questionnaire Templates: Screening Scales, Calculators and Intake">
+  <meta property="og:description" content="Free, source-referenced FHIR Questionnaires — clinical screening scales (PHQ-9, GAD-7, AUDIT-C and more), calculators such as eGFR and BMI, and intake sections — with LOINC codes and automatic calculation.">
   <meta property="og:url"         content="https://fhirbuilder.com/templates.html">
   <meta property="og:image"       content="https://fhirbuilder.com/docs/social-preview.png">
   <meta name="twitter:card"        content="summary_large_image">
-  <meta name="twitter:title"       content="Ready-made FHIR Questionnaire Templates (PHQ-9, GAD-7, AUDIT-C)">
-  <meta name="twitter:description" content="Free, source-referenced clinical screening scales as ready-to-use FHIR Questionnaires — PHQ-9, GAD-7, AUDIT-C and more — with LOINC codes and automatic scoring.">
+  <meta name="twitter:title"       content="Ready-made FHIR Questionnaire Templates: Screening Scales, Calculators and Intake">
+  <meta name="twitter:description" content="Free, source-referenced FHIR Questionnaires — clinical screening scales (PHQ-9, GAD-7, AUDIT-C and more), calculators such as eGFR and BMI, and intake sections — with LOINC codes and automatic calculation.">
   <meta name="twitter:image"       content="https://fhirbuilder.com/docs/social-preview.png">
   <link rel="canonical" href="https://fhirbuilder.com/templates.html">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -28,8 +28,8 @@
       "@type": "WebPage",
       "@id": "https://fhirbuilder.com/templates.html#page",
       "url": "https://fhirbuilder.com/templates.html",
-      "name": "Ready-made FHIR Questionnaire Templates (PHQ-9, GAD-7, AUDIT-C)",
-      "description": "Free, source-referenced clinical screening scales as ready-to-use FHIR Questionnaires — PHQ-9, GAD-7, AUDIT-C and more — with LOINC codes and automatic scoring.",
+      "name": "Ready-made FHIR Questionnaire Templates: Screening Scales, Calculators and Intake",
+      "description": "Free, source-referenced FHIR Questionnaires — clinical screening scales (PHQ-9, GAD-7, AUDIT-C and more), calculators such as eGFR and BMI, and intake sections — with LOINC codes and automatic calculation.",
       "inLanguage": "en",
       "breadcrumb": {
         "@id": "https://fhirbuilder.com/templates.html#breadcrumb"
@@ -101,6 +101,48 @@
           "position": 9,
           "name": "Pain Assessment",
           "url": "https://fhirbuilder.com/templates.html#pain"
+        },
+        {
+          "@type": "ListItem",
+          "position": 10,
+          "name": "Body Measurements",
+          "url": "https://fhirbuilder.com/templates.html#body-measurements"
+        },
+        {
+          "@type": "ListItem",
+          "position": 11,
+          "name": "Kidney Function",
+          "url": "https://fhirbuilder.com/templates.html#kidney-function"
+        },
+        {
+          "@type": "ListItem",
+          "position": 12,
+          "name": "Cardiac Measurements",
+          "url": "https://fhirbuilder.com/templates.html#cardiac-measurements"
+        },
+        {
+          "@type": "ListItem",
+          "position": 13,
+          "name": "Lipid Panel",
+          "url": "https://fhirbuilder.com/templates.html#lipid-panel"
+        },
+        {
+          "@type": "ListItem",
+          "position": 14,
+          "name": "Chemistry Calculations",
+          "url": "https://fhirbuilder.com/templates.html#chemistry-calculations"
+        },
+        {
+          "@type": "ListItem",
+          "position": 15,
+          "name": "FIB-4 Liver Fibrosis Index",
+          "url": "https://fhirbuilder.com/templates.html#fib4"
+        },
+        {
+          "@type": "ListItem",
+          "position": 16,
+          "name": "Pregnancy Dating",
+          "url": "https://fhirbuilder.com/templates.html#pregnancy-dating"
         }
       ]
     },
@@ -135,7 +177,7 @@
     <p class="page-header-subtitle">Ready-made clinical scales you can insert into a questionnaire.</p>
   </header>
   <main class="gp-main">
-    <h1>Ready-made FHIR Questionnaire Templates (PHQ-9, GAD-7, AUDIT-C)</h1>
+    <h1>Ready-made FHIR Questionnaire Templates: Screening Scales, Calculators and Intake</h1>
     <p class="gp-lead">Standard screening scales are widely used, but turning one into a correct FHIR Questionnaire — the exact wording, LOINC-coded questions and answers, the scores and a working total — takes care. The <a href="index.html">FHIR Questionnaire Builder</a> ships ready-made templates you can insert in one click and keep editing.</p>
     <h2>How it works</h2>
     <ol>
@@ -156,6 +198,13 @@
         <li><a href="#allergies">Allergies</a></li>
         <li><a href="#medications">Current Medications</a></li>
         <li><a href="#pain">Pain Assessment</a></li>
+        <li><a href="#body-measurements">Body Measurements</a></li>
+        <li><a href="#kidney-function">Kidney Function</a></li>
+        <li><a href="#cardiac-measurements">Cardiac Measurements</a></li>
+        <li><a href="#lipid-panel">Lipid Panel</a></li>
+        <li><a href="#chemistry-calculations">Chemistry Calculations</a></li>
+        <li><a href="#fib4">FIB-4 Liver Fibrosis Index</a></li>
+        <li><a href="#pregnancy-dating">Pregnancy Dating</a></li>
       </ul>
     </nav>
     <section class="gp-card" id="phq-9" data-testid="tp-card-phq-9">
@@ -247,6 +296,76 @@
       <p class="gp-source">Source: Original wording written for this builder.</p>
       <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
       <p class="gp-source"><a href="templates/pain.template.json" data-testid="tp-json-pain">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="body-measurements" data-testid="tp-card-body-measurements">
+      <h3>Body Measurements</h3>
+      <p>Height, weight, sex and waist/hip with BMI (and its WHO category), body surface area, ideal body weight and waist-to-hip ratio.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Calculated values only; each result stays empty until all of its inputs are answered.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Height (cm)</li><li>Weight (kg)</li><li>Sex assigned at birth (used by the ideal body weight formula)</li><li>Waist circumference (cm)</li><li>Hip circumference (cm)</li></ol>
+      <p class="gp-source">Source: Quetelet index (weight kg ÷ height m²); WHO adult BMI classification; Mosteller 1987, N Engl J Med 317:1098; Devine 1974, Drug Intell Clin Pharm 8:650; WHO Expert Consultation 2008, Waist circumference and waist–hip ratio (Geneva). Codes: LOINC.</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/body-measurements.template.json" data-testid="tp-json-body-measurements">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="kidney-function" data-testid="tp-card-kidney-function">
+      <h3>Kidney Function</h3>
+      <p>Creatinine, age, sex and weight with eGFR (CKD-EPI 2021) and creatinine clearance (Cockcroft–Gault).</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Calculated values only; each result stays empty until all of its inputs are answered.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Age (years)</li><li>Sex assigned at birth (used by both formulas)</li><li>Weight (kg)</li><li>Serum creatinine (mg/dL)</li></ol>
+      <p class="gp-source">Source: Inker et al. 2021, N Engl J Med 385:1737 (race-free CKD-EPI); Cockcroft &amp; Gault 1976, Nephron 16:31. Codes: LOINC.</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/kidney-function.template.json" data-testid="tp-json-kidney-function">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="cardiac-measurements" data-testid="tp-card-cardiac-measurements">
+      <h3>Cardiac Measurements</h3>
+      <p>Blood pressure, QT interval and heart rate with mean arterial pressure and corrected QT (Bazett and Fridericia).</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Calculated values only; each result stays empty until all of its inputs are answered.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Systolic blood pressure (mmHg)</li><li>Diastolic blood pressure (mmHg)</li><li>QT interval (ms)</li><li>Heart rate (beats per minute)</li></ol>
+      <p class="gp-source">Source: Standard estimate: (systolic + 2 × diastolic) ÷ 3; Bazett 1920; Fridericia 1920. Codes: LOINC.</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/cardiac-measurements.template.json" data-testid="tp-json-cardiac-measurements">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="lipid-panel" data-testid="tp-card-lipid-panel">
+      <h3>Lipid Panel</h3>
+      <p>Total cholesterol, HDL and triglycerides with calculated LDL cholesterol (Friedewald).</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Calculated values only; each result stays empty until all of its inputs are answered.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Total cholesterol (mg/dL)</li><li>HDL cholesterol (mg/dL)</li><li>Triglycerides (mg/dL)</li></ol>
+      <p class="gp-source">Source: Friedewald et al. 1972, Clin Chem 18:499. Codes: LOINC.</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/lipid-panel.template.json" data-testid="tp-json-lipid-panel">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="chemistry-calculations" data-testid="tp-card-chemistry-calculations">
+      <h3>Chemistry Calculations</h3>
+      <p>Electrolytes, calcium, albumin, glucose and insulin with anion gap, albumin-corrected calcium and HOMA-IR.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Calculated values only; each result stays empty until all of its inputs are answered.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Sodium (mmol/L)</li><li>Chloride (mmol/L)</li><li>Bicarbonate (mmol/L)</li><li>Total calcium (mg/dL)</li><li>Albumin (g/dL)</li><li>Fasting glucose (mg/dL)</li><li>Fasting insulin (µU/mL)</li></ol>
+      <p class="gp-source">Source: Standard potassium-free form: Na − (Cl + HCO₃); Payne et al. 1973, BMJ 4:643; Matthews et al. 1985, Diabetologia 28:412. Codes: LOINC.</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/chemistry-calculations.template.json" data-testid="tp-json-chemistry-calculations">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="fib4" data-testid="tp-card-fib4">
+      <h3>FIB-4 Liver Fibrosis Index</h3>
+      <p>Age, AST, ALT and platelets with the FIB-4 index and its fibrosis-risk category.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Calculated values only; each result stays empty until all of its inputs are answered.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Age (years)</li><li>AST (U/L)</li><li>ALT (U/L)</li><li>Platelets (×10⁹/L)</li></ol>
+      <p class="gp-source">Source: Shah et al. 2009, Clin Gastroenterol Hepatol 7:1104 (cut-offs 1.3 / 2.67). Codes: LOINC.</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/fib4.template.json" data-testid="tp-json-fib4">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="pregnancy-dating" data-testid="tp-card-pregnancy-dating">
+      <h3>Pregnancy Dating</h3>
+      <p>Last menstrual period and visit date with the expected delivery date (Naegele) and gestational age in weeks.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Calculated values only; each result stays empty until all of its inputs are answered.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>First day of last menstrual period</li><li>Visit date</li></ol>
+      <p class="gp-source">Source: Naegele&#39;s rule, 280-day form (regular 28-day cycle); Standard LMP dating (completed weeks since the first day of the last period). Codes: LOINC.</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/pregnancy-dating.template.json" data-testid="tp-json-pregnancy-dating">Download the FHIR Questionnaire JSON</a></p>
     </section>
     <p class="gp-source">This material contains content from LOINC (<a href="https://loinc.org" rel="noopener">loinc.org</a>). LOINC is copyright © Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the <a href="https://loinc.org/license/" rel="noopener">LOINC license</a>.</p>
   </main>

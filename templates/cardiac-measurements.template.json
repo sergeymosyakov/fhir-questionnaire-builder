@@ -1,0 +1,148 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "cardiac",
+      "text": "Cardiac Measurements",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "cardiac-sbp",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "8480-6"
+            }
+          ],
+          "text": "Systolic blood pressure (mmHg)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mm[Hg]",
+                "display": "mmHg"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "cardiac-dbp",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "8462-4"
+            }
+          ],
+          "text": "Diastolic blood pressure (mmHg)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mm[Hg]",
+                "display": "mmHg"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "cardiac-qt",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "8634-8"
+            }
+          ],
+          "text": "QT interval (ms)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "ms",
+                "display": "ms"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "cardiac-hr",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "8867-4"
+            }
+          ],
+          "text": "Heart rate (beats per minute)",
+          "type": "decimal",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "/min",
+                "display": "/min"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "cardiac-map",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "8478-0"
+            }
+          ],
+          "text": "Mean arterial pressure (mmHg)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "(((%resource.item.where(linkId='cardiac').item.where(linkId='cardiac-sbp').answer.valueDecimal) + (2 * (%resource.item.where(linkId='cardiac').item.where(linkId='cardiac-dbp').answer.valueDecimal))) / 3).round(1)"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "cardiac-qtc-bazett",
+          "text": "QTc, Bazett (ms)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "((%resource.item.where(linkId='cardiac').item.where(linkId='cardiac-qt').answer.valueDecimal) / (60 / (%resource.item.where(linkId='cardiac').item.where(linkId='cardiac-hr').answer.valueDecimal)).sqrt()).round(0)"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "cardiac-qtc-fridericia",
+          "text": "QTc, Fridericia (ms)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "((%resource.item.where(linkId='cardiac').item.where(linkId='cardiac-qt').answer.valueDecimal) / (60 / (%resource.item.where(linkId='cardiac').item.where(linkId='cardiac-hr').answer.valueDecimal)).power(1 / 3)).round(0)"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

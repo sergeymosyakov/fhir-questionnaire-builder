@@ -1,0 +1,71 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "preg",
+      "text": "Pregnancy Dating",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "preg-lmp",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "8665-2"
+            }
+          ],
+          "text": "First day of last menstrual period",
+          "type": "date"
+        },
+        {
+          "linkId": "preg-visit",
+          "text": "Visit date",
+          "type": "date"
+        },
+        {
+          "linkId": "preg-edd",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "11778-8"
+            }
+          ],
+          "text": "Expected delivery date",
+          "type": "date",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "((%resource.item.where(linkId='preg').item.where(linkId='preg-lmp').answer.valueDate) + 280 days)"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "preg-ga",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "11884-4"
+            }
+          ],
+          "text": "Gestational age (completed weeks)",
+          "type": "integer",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "(((365 * (((%resource.item.where(linkId='preg').item.where(linkId='preg-visit').answer.valueDate).toString().substring(0,4).toInteger()) - iif(((%resource.item.where(linkId='preg').item.where(linkId='preg-visit').answer.valueDate).toString().substring(5,2).toInteger()) <= 2, 1, 0)) + ((((%resource.item.where(linkId='preg').item.where(linkId='preg-visit').answer.valueDate).toString().substring(0,4).toInteger()) - iif(((%resource.item.where(linkId='preg').item.where(linkId='preg-visit').answer.valueDate).toString().substring(5,2).toInteger()) <= 2, 1, 0)) div 4) - ((((%resource.item.where(linkId='preg').item.where(linkId='preg-visit').answer.valueDate).toString().substring(0,4).toInteger()) - iif(((%resource.item.where(linkId='preg').item.where(linkId='preg-visit').answer.valueDate).toString().substring(5,2).toInteger()) <= 2, 1, 0)) div 100) + ((((%resource.item.where(linkId='preg').item.where(linkId='preg-visit').answer.valueDate).toString().substring(0,4).toInteger()) - iif(((%resource.item.where(linkId='preg').item.where(linkId='preg-visit').answer.valueDate).toString().substring(5,2).toInteger()) <= 2, 1, 0)) div 400) + ((153 * ((((%resource.item.where(linkId='preg').item.where(linkId='preg-visit').answer.valueDate).toString().substring(5,2).toInteger()) + 9) mod 12) + 2) div 5) + ((%resource.item.where(linkId='preg').item.where(linkId='preg-visit').answer.valueDate).toString().substring(8,2).toInteger())) - (365 * (((%resource.item.where(linkId='preg').item.where(linkId='preg-lmp').answer.valueDate).toString().substring(0,4).toInteger()) - iif(((%resource.item.where(linkId='preg').item.where(linkId='preg-lmp').answer.valueDate).toString().substring(5,2).toInteger()) <= 2, 1, 0)) + ((((%resource.item.where(linkId='preg').item.where(linkId='preg-lmp').answer.valueDate).toString().substring(0,4).toInteger()) - iif(((%resource.item.where(linkId='preg').item.where(linkId='preg-lmp').answer.valueDate).toString().substring(5,2).toInteger()) <= 2, 1, 0)) div 4) - ((((%resource.item.where(linkId='preg').item.where(linkId='preg-lmp').answer.valueDate).toString().substring(0,4).toInteger()) - iif(((%resource.item.where(linkId='preg').item.where(linkId='preg-lmp').answer.valueDate).toString().substring(5,2).toInteger()) <= 2, 1, 0)) div 100) + ((((%resource.item.where(linkId='preg').item.where(linkId='preg-lmp').answer.valueDate).toString().substring(0,4).toInteger()) - iif(((%resource.item.where(linkId='preg').item.where(linkId='preg-lmp').answer.valueDate).toString().substring(5,2).toInteger()) <= 2, 1, 0)) div 400) + ((153 * ((((%resource.item.where(linkId='preg').item.where(linkId='preg-lmp').answer.valueDate).toString().substring(5,2).toInteger()) + 9) mod 12) + 2) div 5) + ((%resource.item.where(linkId='preg').item.where(linkId='preg-lmp').answer.valueDate).toString().substring(8,2).toInteger()))) div 7).where($this >= 0)"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -12,6 +12,14 @@ demographics or allergies — and don't want to type it in and wire up the scori
 - **PHQ-9** — depression screening; a total score (0–27) and its severity band (minimal to severe).
 - **GAD-7** — anxiety screening; a total score (0–21) and its severity band.
 - **AUDIT-C** — alcohol use screening; a total score (0–12) with the usual positive-screen thresholds noted.
+- **Calculators** — a few related measurements with their formulas already wired in; each result stays empty until all of its inputs are answered:
+  - **Body Measurements** — height, weight, sex, waist and hip give BMI and its WHO category, body surface area, ideal body weight and waist-to-hip ratio.
+  - **Kidney Function** — creatinine, age, sex and weight give eGFR (CKD-EPI 2021) and creatinine clearance (Cockcroft–Gault).
+  - **Cardiac Measurements** — blood pressure, QT interval and heart rate give mean arterial pressure and corrected QT (Bazett and Fridericia).
+  - **Lipid Panel** — total cholesterol, HDL and triglycerides give calculated LDL (Friedewald).
+  - **Chemistry Calculations** — electrolytes, calcium, albumin, glucose and insulin give the anion gap, albumin-corrected calcium and HOMA-IR.
+  - **FIB-4 Liver Fibrosis Index** — age, AST, ALT and platelets give the FIB-4 index and its category.
+  - **Pregnancy Dating** — last menstrual period and visit date give the expected delivery date and gestational age in weeks.
 - **Intake fragments** — plain data-collection groups with no scoring: **Patient Demographics**, **Allergies** and **Current Medications** (both with a repeatable list, so a patient can add as many rows as needed), and **Pain Assessment** (0–10 severity, location, onset, description).
 
 The list of templates, with each scale's questions, scoring, source and license, is
@@ -26,12 +34,14 @@ on the public [templates page](https://fhirbuilder.com/templates.html).
 In the window that opens, search by name or topic, select a template to see its
 **source** and **license**, then press **Insert**.
 
+The calculators use the same formulas as the [calculation gallery](calculation-gallery.md); the questions come with the template, so there is nothing to pick. Enter each value in the unit shown in its question.
+
 The template arrives as one group titled with the scale's name. You can rename it,
 move it, or edit any question like one you wrote yourself.
 
 ## What gets inserted
 
-- In the scales, every question carries its LOINC code, and every answer its LOINC answer code and score. The intake fragments carry LOINC codes only where a standard one exists (for example date of birth and pain severity).
+- In the scales, every question carries its LOINC code, and every answer its LOINC answer code and score. The calculators and intake fragments carry LOINC codes only where a standard one exists (for example height, creatinine, date of birth and pain severity).
 - The **total** (and, for PHQ-9 and GAD-7, the **severity**; for PHQ-2 and GAD-2, the **screening result**) are read-only calculated
   fields. They stay empty until every scored question is answered, instead of
   showing a misleading partial score.

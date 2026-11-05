@@ -1,9 +1,9 @@
 // Static, crawlable HTML page for the template library (templates.html) — generated, never hand-edited.
 import { renderStaticPage, esc, SITE } from './static-page.js';
 
-const TITLE = 'Ready-made FHIR Questionnaire Templates (PHQ-9, GAD-7, AUDIT-C)';
+const TITLE = 'Ready-made FHIR Questionnaire Templates: Screening Scales, Calculators and Intake';
 const PAGE_TITLE = 'FHIR Questionnaire Templates | FHIR Questionnaire Builder';
-const DESCRIPTION = 'Free, source-referenced clinical screening scales as ready-to-use FHIR Questionnaires — PHQ-9, GAD-7, AUDIT-C and more — with LOINC codes and automatic scoring.';
+const DESCRIPTION = 'Free, source-referenced FHIR Questionnaires — clinical screening scales (PHQ-9, GAD-7, AUDIT-C and more), calculators such as eGFR and BMI, and intake sections — with LOINC codes and automatic calculation.';
 
 // Question texts a respondent answers (no read-only results, no display notes).
 const questionsOf = (group) => (group.item ?? []).filter((i) => i.type !== 'display' && !i.readOnly).map((i) => i.text);
