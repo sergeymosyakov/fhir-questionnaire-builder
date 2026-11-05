@@ -28,7 +28,7 @@ const IS_URL  = FHIR.isSubject;
 async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q-subject"]')).toBeVisible({ timeout: 8_000 });
 }

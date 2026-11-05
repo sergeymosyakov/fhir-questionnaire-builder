@@ -49,8 +49,6 @@ export class BuilderPanel {
   // ── Public API ──────────────────────────────────────────────────────────────
   mount() {
     this._container = document.querySelector('[data-mount="tree-container"]');
-    const addRootGroupBtn  = document.querySelector('[data-mount="add-root-group-btn"]');
-    addRootGroupBtn.onclick = () => this.addRootGroup();
     this._renumberControl = new RenumberControl({ renumberAll: () => this.renumberAll() });
   }
 
@@ -170,6 +168,7 @@ export class BuilderPanel {
         document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
       }
     });
+    document.addEventListener(AppEvents.ROOT_GROUP_ADD_REQUESTED, () => this.addRootGroup());
     document.addEventListener(AppEvents.CALC_RECALC_REQUESTED,
       () => this._doCalcRecalc());
     document.addEventListener(AppEvents.BUILDER_RERENDER,

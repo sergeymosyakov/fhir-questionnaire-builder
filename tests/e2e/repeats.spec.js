@@ -5,7 +5,7 @@
 // Run: npx playwright test tests/e2e/repeats.spec.js
 //
 // ── data-testid used in this suite ───────────────────────────────────────────
-//   add-root-group-btn      "+Add Root Group"
+//   add-root-group-btn      Add menu → "Root group" item
 //   group-add-btn           "+" button on a group
 //   add-menu-item           "Item" in add-child menu
 //   action-repeatable       "Repeatable" action link on an item
@@ -14,11 +14,12 @@
 
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -28,7 +29,7 @@ async function freshStart(page) {
 }
 
 async function addTextItem(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
   await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
   await page.locator('[data-testid="add-menu-item"]').first().click();

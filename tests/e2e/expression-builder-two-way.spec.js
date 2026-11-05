@@ -21,10 +21,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 async function freshStart(page) {
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function addItem(page, groupId, nodeId, title) {
@@ -43,7 +44,7 @@ async function addItem(page, groupId, nodeId, title) {
 
 // A root group with n items: 1.1 is the edited node, 1.2… are referenceable.
 async function makeItems(page, n) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
   for (let i = 1; i <= n; i++) await addItem(page, '1', `1.${i}`, `Item ${i}`);
 }

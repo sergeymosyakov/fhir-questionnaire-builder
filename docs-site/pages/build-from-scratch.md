@@ -6,8 +6,8 @@ or use the hosted version).
 
 ## 1. Start an empty questionnaire
 
-If a sample is loaded, clear it, then click **+ Add Root Group** in the left
-panel. Every questionnaire starts with at least one top-level group — this is the
+If a sample is loaded, clear it, then open **+ Add** in the left panel and
+choose **Root group** (or **From template…** to start from a ready-made set of questions). Every questionnaire starts with at least one top-level group — this is the
 first section of your form.
 
 ## 2. Build the structure
@@ -77,4 +77,4 @@ download the `Questionnaire`. The same menu can also export a filled-in
 
 ---
 
-Next: [Import & round-trip FHIR / REDCap](import-roundtrip.md).
+Next: [Calculation gallery](calculation-gallery.md).

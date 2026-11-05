@@ -19,13 +19,14 @@ import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'node:path';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/slider-disabled.fhir.json');
 
 async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="pain-score"]')).toBeVisible({ timeout: 8_000 });
 }
@@ -217,9 +218,9 @@ test.describe('sliderStepValue — R4 decimal constraint', () => {
   async function buildDecimalSlider(page) {
     await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
     // Add a root group then a decimal item
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
     await page.locator('[data-testid="add-menu-item"]').first().click();

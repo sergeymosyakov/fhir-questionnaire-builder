@@ -10,7 +10,7 @@
 // Run: npx playwright test tests/e2e/states-modal.spec.js
 //
 // ── data-testid registry ─────────────────────────────────────────────────────
-//   add-root-group-btn     "+Add Root Group"
+//   add-root-group-btn     Add menu → "Root group" item
 //   group-add-btn          "+" button on a group
 //   add-menu-item          "Item" option in add-child menu
 //   node-title-display     read-only title span
@@ -28,9 +28,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -40,7 +41,7 @@ async function freshStart(page) {
 
 /** Add root group + text item. Returns [groupId, itemId]. */
 async function addGroupAndItem(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
   const group = page.locator('[data-node-id="1"]');
   await group.getByTestId('group-add-btn').click();
@@ -152,7 +153,7 @@ test.describe('States modal — item layout', () => {
 test.describe('States modal — group layout', () => {
   test('shows Required select and Hidden checkbox for groups (no Read-only)', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     const groupLink = page.locator('[data-node-id="1"]').getByTestId('action-states');

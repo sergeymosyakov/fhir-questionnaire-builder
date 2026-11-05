@@ -57,7 +57,7 @@ test.describe('SDC $populate button', () => {
     await page.addInitScript(() => localStorage.clear());
     await setFhirBaseUrl(page, 'https://hapi.fhir.org/baseR4');
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    await page.waitForSelector('[data-testid="add-menu-btn"]');
     // No questionnaire — Answers menu itself should be hidden (tree empty)
     await expect(page.getByTestId('answers-btn')).toBeHidden();
   });
@@ -65,7 +65,7 @@ test.describe('SDC $populate button', () => {
   test('populate item visible in Answers menu when fhirBaseUrl set and questionnaire loaded', async ({ page }) => {
     await setFhirBaseUrl(page, 'https://hapi.fhir.org/baseR4');
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    await page.waitForSelector('[data-testid="add-menu-btn"]');
     await loadBariatric(page);
     await page.getByTestId('answers-btn').click();
     await expect(page.getByTestId('sdc-populate-btn')).toBeVisible();
@@ -75,7 +75,7 @@ test.describe('SDC $populate button', () => {
   test('clicking populate button opens modal with patient ref input', async ({ page }) => {
     await setFhirBaseUrl(page, 'https://hapi.fhir.org/baseR4');
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    await page.waitForSelector('[data-testid="add-menu-btn"]');
     await loadBariatric(page);
 
     await openDropdownItem(page, 'answers-btn', 'sdc-populate-btn');
@@ -89,7 +89,7 @@ test.describe('SDC $populate button', () => {
   test('modal cancel closes without dispatching event', async ({ page }) => {
     await setFhirBaseUrl(page, 'https://hapi.fhir.org/baseR4');
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    await page.waitForSelector('[data-testid="add-menu-btn"]');
     await loadBariatric(page);
 
     await page.evaluate(() => {
@@ -109,7 +109,7 @@ test.describe('SDC $populate button', () => {
   test('Apply dispatches SDC_POPULATE_REQUESTED with patientRef', async ({ page }) => {
     await setFhirBaseUrl(page, 'https://hapi.fhir.org/baseR4');
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    await page.waitForSelector('[data-testid="add-menu-btn"]');
     await loadBariatric(page);
 
     await page.evaluate(() => {
@@ -137,7 +137,7 @@ test.describe('SDC $populate button', () => {
     });
     await setFhirBaseUrl(page, 'https://hapi.fhir.org/baseR4');
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    await page.waitForSelector('[data-testid="add-menu-btn"]');
     await loadBariatric(page);
 
     await openDropdownItem(page, 'answers-btn', 'sdc-populate-btn');
@@ -152,7 +152,7 @@ test.describe('SDC $populate button', () => {
   test('bare ID auto-prefixes with Patient/', async ({ page }) => {
     await setFhirBaseUrl(page, 'https://hapi.fhir.org/baseR4');
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]');
+    await page.waitForSelector('[data-testid="add-menu-btn"]');
     await loadBariatric(page);
 
     await page.evaluate(() => {

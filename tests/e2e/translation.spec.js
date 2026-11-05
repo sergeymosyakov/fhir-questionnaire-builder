@@ -31,13 +31,14 @@ import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const PHQ9 = path.resolve('sampledata/phq-9.fhir.json');
 
 async function freshStart(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadPHQ9(page) {
@@ -148,7 +149,7 @@ test.describe('translation — language switcher', () => {
 
   test('non-translated questionnaire does not show language switcher', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
     // No translations → lang-menu-btn hidden
     await expect(page.getByTestId('lang-menu-btn')).not.toBeVisible();

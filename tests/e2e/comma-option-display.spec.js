@@ -44,6 +44,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/comma-option-display.fhir.json');
 const COMMA_DISPLAY = 'E1220 - Wheelchair, adult size, heavy duty, elevating legrests';
@@ -51,7 +52,7 @@ const COMMA_DISPLAY = 'E1220 - Wheelchair, adult size, heavy duty, elevating leg
 async function loadFixture(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-node-id="q-radio-comma"]')).toBeVisible({ timeout: 8_000 });
 }
@@ -103,8 +104,8 @@ test.describe('comma typed into an option label via the Answer Type modal', () =
   test('Apply keeps it as one option, not split at the comma', async ({ page }) => {
     await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-    await page.getByTestId('add-root-group-btn').click();
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
@@ -179,8 +180,8 @@ test.describe('comma-containing option reaches the Show When condition value pic
   test('value picker lists it as one option, not split at the comma', async ({ page }) => {
     await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-    await page.getByTestId('add-root-group-btn').click();
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     await addTitledItem(page, '1', '1.1', 'Target choice');
@@ -206,8 +207,8 @@ test.describe('comma-containing option reaches the Generate Docs report', () => 
   test('report lists it as one option, not split at the comma', async ({ page }) => {
     await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-    await page.getByTestId('add-root-group-btn').click();
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     await addTitledItem(page, '1', '1.1', 'Target choice');
@@ -230,8 +231,8 @@ test.describe('comma-containing option reaches the Expression Builder tree leaf 
   test('value picker lists it as one option, not split at the comma', async ({ page }) => {
     await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-    await page.getByTestId('add-root-group-btn').click();
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     await addTitledItem(page, '1', '1.1', 'Condition host');

@@ -5,7 +5,7 @@
 // Run: npx playwright test tests/e2e/undo-keyboard.spec.js
 //
 // ── data-testid registry ─────────────────────────────────────────────────────
-//   add-root-group-btn   "+Add Root Group"
+//   add-root-group-btn   Add menu → "Root group" item
 //   group-add-btn / add-menu-item   "+" on a group / "Item" option
 //   undo-btn             undo item in the More menu (enabled once history has a step)
 //   tree-container       wraps all builder nodes

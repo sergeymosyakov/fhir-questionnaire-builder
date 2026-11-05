@@ -19,7 +19,7 @@ const FIXTURE = path.join(process.cwd(), 'tests/fixtures/answer-options-editor.f
 async function freshLoad(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="q-opts"]')).toBeVisible({ timeout: 8_000 });
 }

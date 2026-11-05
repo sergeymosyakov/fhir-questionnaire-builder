@@ -59,6 +59,8 @@ shell, no iframe, no framework.
 | [docs/CONTEXT.md](docs/CONTEXT.md) | Architecture, file map, node model, UX features, build rules |
 | [docs/FHIR-MAPPING.md](docs/FHIR-MAPPING.md) | FHIR R4 field mapping, supported extensions, known gaps |
 | [docs/EXPRESSION-GALLERY.md](docs/EXPRESSION-GALLERY.md) | Catalog of the ready-made FHIRPath calculation patterns (BMI, eGFR, GCS, due date, ...) with inputs and sources; also published as [gallery.html](https://fhirbuilder.com/gallery.html) |
+
+| [templates/](templates/) | Ready-made questionnaire templates (PHQ-9, GAD-7, AUDIT-C, ...) with LOINC codes and automatic scoring — one FHIR Questionnaire per template; catalog in `templates/library.json`, also published as [templates.html](https://fhirbuilder.com/templates.html) |
 | [Issues labeled `roadmap`](https://github.com/sergeymosyakov/fhir-questionnaire-builder/issues?q=is%3Aissue+is%3Aopen+label%3Aroadmap) | Feature backlog |
 | [docs/COMPETITORS.md](docs/COMPETITORS.md) | Honest, no-spin comparison vs LHC-Forms, Smart Forms, Aidbox, Medplum, Firely |
 
@@ -136,6 +138,8 @@ The builder's code search feature retrieves SNOMED CT concepts via the public FH
 ICD-10-CM codes are retrieved via the NLM Clinical Tables API (https://clinicaltables.nlm.nih.gov/). ICD-10-CM is maintained by the U.S. Centers for Disease Control and Prevention (CDC) and is in the public domain.
 
 The NLM Clinical Tables Search Service is provided free of charge by the U.S. National Library of Medicine. Neither NLM, LHNCBC, NIH, nor any contributor's name may be used to endorse products derived from this service without prior written permission.
+
+The ready-made questionnaire templates in `templates/` (PHQ-9, GAD-7, AUDIT-C) use the published scale wording and LOINC codes and answer lists (see the LOINC notice above). PHQ-9 and GAD-7: developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc.; no permission required to reproduce, translate, display or distribute ([phqscreeners.com](https://www.phqscreeners.com/)). AUDIT-C: derived from the WHO AUDIT (Bush et al., Arch Intern Med 1998;158:1789); the ONC USCDI/ISP listing for AUDIT-C (submitted by NIAAA) states no restrictions on use ([isp.healthit.gov](https://isp.healthit.gov/uscdi-data/audit-c)). Each template's source and license are also shown in the template picker.
 
 Sample files sourced from HL7 Implementation Guides are published under Creative Commons Attribution 4.0 (CC BY 4.0). Source URLs are preserved in each file's `url` field.
 

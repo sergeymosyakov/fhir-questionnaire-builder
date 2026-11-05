@@ -18,6 +18,7 @@ import './json-viewer.js';
 import './help-modal.js';
 import './cloud-modal.js';
 import './paste-warning-modal.js';
+import './templates-modal.js';
 import './def-extract-modal.js';
 import './structuremap-extract-modal.js';
 import './clear-confirm-modal.js';

@@ -41,7 +41,7 @@ async function openPopulateModal(page) {
     localStorage.setItem('fhirqb.server.fhirBaseUrl', base);
   }, FHIR_BASE);
   await page.goto('/');
-  await expect(page.getByTestId('add-root-group-btn')).toBeVisible();
+  await expect(page.getByTestId('add-menu-btn')).toBeVisible();
   await page.getByTestId('fhir-file-input').setInputFiles(FIXTURE);
   await expect(page.locator('[data-preview-id="vitals"]')).toBeVisible();
   await openDropdownItem(page, 'answers-btn', 'sdc-populate-btn');

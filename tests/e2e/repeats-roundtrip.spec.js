@@ -80,7 +80,7 @@ test('QR repeat round-trip: fill 3 rows per field, export, reload, import, verif
   // ── Setup ──
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 
   // ── 1. Load fixture ──
   await loadFixture(page);
@@ -110,7 +110,7 @@ test('QR repeat round-trip: fill 3 rows per field, export, reload, import, verif
   // ── 4. Reload page to clear state ──
   await page.addInitScript(() => localStorage.clear());
   await page.reload();
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 
   // ── 5. Re-load fixture ──
   await loadFixture(page);
@@ -155,7 +155,7 @@ test('QR repeat round-trip: fill 3 rows per field, export, reload, import, verif
 async function loadRepeatable(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixture(page);
 }
 

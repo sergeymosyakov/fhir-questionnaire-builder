@@ -32,7 +32,7 @@ import { loadFixtureFile } from './helpers/load-fixture.js';
 const FIXTURE = path.resolve('tests/fixtures/patient-view.fhir.json');
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadFixture(page) {

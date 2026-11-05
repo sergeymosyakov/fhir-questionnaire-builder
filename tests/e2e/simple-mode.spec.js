@@ -68,7 +68,7 @@ test.describe('Simple / Advanced view mode', () => {
     await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-states')).toBeHidden();
 
     await page.reload();
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
     await expect(page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-states')).toBeHidden();
   });
 });

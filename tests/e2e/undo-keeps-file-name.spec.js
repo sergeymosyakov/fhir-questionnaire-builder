@@ -10,6 +10,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/answer-options-editor.fhir.json');
 const HISTORY_TIMEOUT = 3_000;
@@ -17,11 +18,11 @@ const HISTORY_TIMEOUT = 3_000;
 test('file name survives undo after an edit', async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   await expect(page.getByTestId('loaded-file-name')).toContainText('answer-options-editor');
 
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.getByTestId('undo-btn')).toBeEnabled({ timeout: HISTORY_TIMEOUT });
   await page.keyboard.press('Control+z');
   await expect(page.locator('[data-node-id="2"]')).toHaveCount(0);

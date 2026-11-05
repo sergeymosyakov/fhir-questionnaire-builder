@@ -1,0 +1,9 @@
+/* ── Templates modal ─────────────────────────────────────────────────────────── */
+.tpl-body { display: flex; flex-direction: column; gap: 10px; }
+.tpl-row--selected { border-color: var(--c-accent, #2563eb); background: var(--c-hover); }
+.tpl-detail { font-size: 12px; border-top: 1px solid var(--c-border); padding-top: 8px; }
+.tpl-detail p { margin: 2px 0; }
+
+@media (min-width: 768px) {
+  .tpl-body { min-width: 480px; }
+}

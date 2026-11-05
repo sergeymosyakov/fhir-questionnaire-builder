@@ -21,7 +21,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
-import { clickBoolOption } from './helpers/builder.js';
+import { clickBoolOption, clickAddRootGroup } from './helpers/builder.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { mockTerminologyExpand } from './helpers/terminology.js';
 
@@ -33,7 +33,7 @@ const AHRQ    = path.resolve('sampledata/ahrq-medication-safety.fhir.json');
 async function freshStart(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadFile(page, filePath) {
@@ -639,7 +639,7 @@ test.describe('M4 — Exported questionnaire always has required FHIR metadata',
 
   test('manually built questionnaire exports with at least one item', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
     const json = await page.evaluate(async () => {

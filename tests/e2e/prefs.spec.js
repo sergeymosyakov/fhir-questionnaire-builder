@@ -35,7 +35,7 @@ async function openSettings(page) {
 
 async function reloadAndOpenSettings(page) {
   await page.reload();
-  await expect(page.getByTestId('add-root-group-btn')).toBeVisible();
+  await expect(page.getByTestId('add-menu-btn')).toBeVisible();
   await addRootGroup(page);
   await openSettings(page);
 }
@@ -79,7 +79,7 @@ test.describe('Preferences persistence', () => {
 
   test('turning Tips off hides tooltips and stays off after reload', async ({ page }) => {
     // Baseline: with tips on, hovering a tipped control shows the tooltip.
-    await page.getByTestId('add-root-group-btn').hover();
+    await page.getByTestId('add-menu-btn').hover();
     await expect(page.getByTestId('rich-tooltip')).toBeVisible();
 
     await openSettings(page);
@@ -89,7 +89,7 @@ test.describe('Preferences persistence', () => {
 
     await reloadAndOpenSettings(page);
     await expect(checkbox(page, 'settings-tips-check')).not.toBeChecked();
-    await page.getByTestId('add-root-group-btn').hover();
+    await page.getByTestId('add-menu-btn').hover();
     await expect(page.getByTestId('rich-tooltip')).toBeHidden();
   });
 });

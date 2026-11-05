@@ -24,6 +24,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const R5_FIXTURE = path.resolve('sampledata/r5-demo.fhir.json');
 
@@ -32,7 +33,7 @@ const R5_FIXTURE = path.resolve('sampledata/r5-demo.fhir.json');
 async function freshStart(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function selectVersion(page, versionId) {
@@ -58,7 +59,7 @@ async function dismissWarn(page) {
 
 /** Add a root group + one item. Returns the nodeId of the item. */
 async function addGroupAndItem(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   const group = page.locator('[data-node-id="1"]');
   await expect(group).toBeVisible();
   await group.getByTestId('group-add-btn').click();

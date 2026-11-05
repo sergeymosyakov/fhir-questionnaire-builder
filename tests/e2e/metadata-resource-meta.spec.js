@@ -31,6 +31,7 @@
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { freshStart, loadFixture, openModal, exportFHIR } from './helpers/metadata.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 // ── Toggle ────────────────────────────────────────────────────────────────────
 
@@ -52,7 +53,7 @@ test.describe('metadata modal — Resource Meta section', () => {
 
   test('section is collapsed by default on a fresh questionnaire', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await openModal(page);
     await expect(page.getByTestId('meta-version-id')).not.toBeVisible();
     await page.locator('[data-testid="metadataModalCancel"]').click();
@@ -60,7 +61,7 @@ test.describe('metadata modal — Resource Meta section', () => {
 
   test('clicking toggle expands and collapses the section', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await openModal(page);
     await page.getByTestId('meta-resource-meta-toggle').click();
     await expect(page.getByTestId('meta-version-id')).toBeVisible();
@@ -164,7 +165,7 @@ test.describe('metadata modal — Resource Meta section', () => {
 
   test('clean questionnaire has no user-set meta fields in export', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
     await page.locator('[data-testid="add-menu-item"]').first().click();
     await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();

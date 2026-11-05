@@ -17,11 +17,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -33,7 +34,7 @@ async function freshStart(page) {
 /** Add a root group so the variables card becomes visible. */
 async function freshStartWithGroup(page) {
   await freshStart(page);
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
   await expect(page.getByTestId('variables-card')).toBeVisible();
 }

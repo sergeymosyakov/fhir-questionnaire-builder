@@ -24,7 +24,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
-import { clickBoolOption } from './helpers/builder.js';
+import { clickBoolOption, clickAddRootGroup } from './helpers/builder.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/repeating-group-demo.fhir.json');
@@ -38,7 +38,7 @@ async function commitInput(page) {
 async function freshLoad(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-preview-id="meds"]')).toBeVisible({ timeout: 8_000 });
   await expect(page.locator('[data-rg-group="meds"] > [data-testid="rg-add-btn"]')).toBeVisible({ timeout: 5_000 });
@@ -299,8 +299,8 @@ test.describe('repeating group — Repeatable action link in builder', () => {
   test('new plain group has Repeatable action link NOT active by default', async ({ page }) => {
     await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-    await page.getByTestId('add-root-group-btn').click();
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-testid="tree-container"] [data-node-id]').first()
       .getByTestId('action-repeatable')).toBeVisible({ timeout: 5_000 });
     await expect(page.locator('[data-testid="tree-container"] [data-node-id]').first()
@@ -321,8 +321,8 @@ test.describe('repeating group — Repeatable action link in builder', () => {
   test('toggling Repeatable on in modal activates the action link and shows preview instances', async ({ page }) => {
     await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
-    await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
-    await page.getByTestId('add-root-group-btn').click();
+    await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
+    await clickAddRootGroup(page);
     const groupNode = page.locator('[data-testid="tree-container"] [data-testid="node-group"]').first();
     // Add a child item so the group has children (needed for instances to render)
     await expect(groupNode.getByTestId('group-add-btn')).toBeVisible({ timeout: 5_000 });

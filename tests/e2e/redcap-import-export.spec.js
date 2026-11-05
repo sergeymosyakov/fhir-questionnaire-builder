@@ -31,6 +31,7 @@ import { test, expect } from '@playwright/test';
 import { openDropdownItem } from './helpers/dropdown.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SAMPLE_CSV  = path.resolve(__dirname, '../../sampledata/redcap-clinical-demo.csv');
@@ -39,7 +40,7 @@ const SAMPLE_FHIR = path.resolve(__dirname, '../../sampledata/redcap-clinical-de
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -136,7 +137,7 @@ test.describe('REDCap CSV import', () => {
 test.describe('REDCap CSV export', () => {
   test('save format modal opens on "Questionnaire…" click', async ({ page }) => {
     await freshStart(page);    // export-btn is hidden until a questionnaire is loaded/started
-    await page.getByTestId('add-root-group-btn').click();    await openDropdownItem(page, 'export-btn', 'export-quest-item');
+    await clickAddRootGroup(page);    await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.getByTestId('saveFormatModal')).toBeVisible();
     await expect(page.getByTestId('save-format-select')).toBeVisible();
     await page.getByTestId('saveFormatModalCancel').click();

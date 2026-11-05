@@ -37,6 +37,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loadFixture, freshStart, openModal, exportFHIR } from './helpers/metadata.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 // ── Modal open / close ────────────────────────────────────────────────────────
 
@@ -194,7 +195,7 @@ test.describe('metadata modal — Advanced section', () => {
 
   test('empty subjectType is omitted from export', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
     await page.locator('[data-testid="add-menu-item"]').first().click();
     await expect(page.locator('[data-node-id="1.1"]')).toBeVisible();
@@ -250,7 +251,7 @@ test.describe('metadata modal — effectivePeriod', () => {
     await page.getByTestId('clear-form-btn').click();
     await page.getByTestId('clearConfirmModal').waitFor();
     await page.getByTestId('clear-confirm-clear-btn').click();
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.getByTestId('quest-meta-card')).toBeVisible();
     await openModal(page);
     await page.getByTestId('meta-advanced-toggle').click();

@@ -17,7 +17,7 @@ const FIXTURE = path.join(process.cwd(), 'tests/fixtures/checklist-comma-code.fh
 test('selecting a comma-containing code exports one answer with the full code', async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   const item = page.locator('[data-preview-id="symptoms"]');
   await expect(item).toBeVisible({ timeout: 8_000 });

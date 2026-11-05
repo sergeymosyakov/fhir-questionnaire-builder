@@ -18,7 +18,7 @@ const FIXTURE = path.join(process.cwd(), 'tests/fixtures/enable-when-quantity.fh
 test('exported quantity answer has the UCUM system and code of the unit', async ({ page }) => {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   const weight = page.locator('[data-preview-id="weight"]');
   await expect(weight).toBeVisible({ timeout: 8_000 });

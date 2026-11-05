@@ -1,0 +1,30 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "item": [
+    {
+      "linkId": "ts",
+      "type": "group",
+      "text": "Test scale",
+      "item": [
+        { "linkId": "ts-q1", "type": "integer", "text": "First" },
+        { "linkId": "ts-q2", "type": "integer", "text": "Second" },
+        {
+          "linkId": "ts-total",
+          "type": "integer",
+          "text": "Total",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='ts-q1').answer.value + %resource.repeat(item).where(linkId='ts-q2').answer.value"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

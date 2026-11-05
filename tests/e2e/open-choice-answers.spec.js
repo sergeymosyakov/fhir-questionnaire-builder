@@ -45,7 +45,7 @@ async function freshLoad(page, fixture = FIXTURE, readyId = 'oc-list') {
   await mockExternalExpansion(page);
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, fixture);
   await expect(page.locator(`[data-preview-id="${readyId}"]`)).toBeVisible({ timeout: 10_000 });
 }

@@ -4,6 +4,7 @@
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { expect } from '@playwright/test';
+import { openDropdownItem } from './dropdown.js';
 
 export const FIXTURES = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)), '../../fixtures'
@@ -11,7 +12,7 @@ export const FIXTURES = path.resolve(
 
 /** Wait until the app has fully initialized (toolbar button is rendered). */
 export async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 /** Click a boolean segmented control option. Accepts page or a scoped locator. */
@@ -34,11 +35,16 @@ export async function freshStart(page) {
   await waitForLoad(page);
 }
 
+/** Add a root group via the toolbar Add menu (retry-safe: the menu toggles). */
+export async function clickAddRootGroup(page) {
+  await openDropdownItem(page, 'add-menu-btn', 'add-root-group-btn');
+}
+
 /**
  * Add one root group and return its linkId (always "1" on a fresh tree).
  */
 export async function addRootGroup(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
   return '1';
 }

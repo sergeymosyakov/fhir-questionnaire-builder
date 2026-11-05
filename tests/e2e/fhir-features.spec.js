@@ -32,7 +32,7 @@ const FIXTURE = path.resolve('tests/fixtures/fhir-features.fhir.json');
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadFixture(page) {

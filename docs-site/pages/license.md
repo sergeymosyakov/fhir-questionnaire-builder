@@ -23,6 +23,22 @@ including:
 
 Each retains its own license; see the files under `lib/` in the repository.
 
+## Ready-made templates
+
+The scales offered under **+ Add → From template…** keep their original wording and
+carry the credits their authors ask for. The picker shows each template's source and
+license before you insert it.
+
+- **PHQ-9 and GAD-7** — developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt
+  Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission is
+  required to reproduce, translate, display or distribute them
+  ([phqscreeners.com](https://www.phqscreeners.com/)).
+- **AUDIT-C** — a short form of the WHO AUDIT (Bush et al., *Arch Intern Med* 1998;158:1789).
+  The ONC USCDI/ISP listing for AUDIT-C (submitted by NIAAA) states no restrictions on use
+  ([isp.healthit.gov](https://isp.healthit.gov/uscdi-data/audit-c)).
+- **Codes** — question and answer codes come from LOINC, copyright Regenstrief Institute,
+  Inc., available at no cost under the [LOINC license](https://loinc.org/license/).
+
 ## Attribution in exports
 
 Questionnaires you export are your own FHIR data. The builder does not inject

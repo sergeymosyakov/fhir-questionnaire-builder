@@ -94,35 +94,10 @@ back into blocks where possible; anything it can't represent stays editable as t
 ## Expression Gallery
 
 On a value field, the type chooser's **📐 Choose from gallery** option opens a
-searchable library of named, ready-made calculation patterns instead of building
-from scratch. Pick a pattern, fill in which item answers each slot (with an
-optional unit conversion where relevant), and the resolved FHIRPath is dropped
-into the field as ordinary editable text — the gallery is a starting point, not a
-locked-in choice. Some patterns add rows ("+ Add item") for a variable number of
-inputs, or resolve to a named category instead of a raw number. Each pattern also
-shows where its formula comes from.
-
-What is in the gallery, by area:
-
-- **Body measurements:** BMI (metric and imperial) and its WHO category, body surface area (Mosteller), ideal body weight (Devine), waist-to-hip ratio.
-- **Dates and age:** age from a birthdate, age at another date, age in months, days between two dates, expected delivery date and gestational age from the last menstrual period, a date plus an interval (for follow-up dates).
-- **Kidney function:** eGFR (CKD-EPI 2021) and creatinine clearance (Cockcroft–Gault).
-- **Laboratory and cardiology:** corrected calcium, LDL cholesterol (Friedewald), HOMA-IR, FIB-4, anion gap, mean arterial pressure, QTc (Bazett and Fridericia).
-- **Scores and screens:** PHQ-9, PHQ-2, GAD-7, Glasgow Coma Scale, Apgar, qSOFA, CHA₂DS₂-VASc, Charlson Comorbidity Index.
-- **General helpers:** unit conversion, sum of items, count of Yes answers, percent change.
-
-Every pattern's inputs, result bands and source are on the
-[calculation gallery page](https://fhirbuilder.com/gallery.html) and in the
-[gallery catalog](https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/docs/EXPRESSION-GALLERY.md).
-
-For patterns that depend on sex (eGFR, Cockcroft–Gault, ideal body weight), the
-**sex** item must be a single-choice question. The pattern compares the item's
-answer *code* with the text in **Answer code for Female**, which starts as `female`.
-If your answers use another code (for example `F` or `2`), type it there before
-inserting. Matching is exact, including upper and lower case. A pattern gives no
-result until all of its inputs are answered (yes/no checklist patterns such as qSOFA
-count an unanswered box as No), and date patterns need full dates. The gallery offers reference
-calculations to save authoring effort; they are not medical advice.
+searchable library of ready-made calculations (BMI, eGFR, PHQ-9, due date and
+many more) instead of building from scratch. The result is ordinary, editable
+FHIRPath. See [Calculation gallery](calculation-gallery.md) for how it works and
+what it offers.
 
 ## Understanding a result (Expression Explain)
 

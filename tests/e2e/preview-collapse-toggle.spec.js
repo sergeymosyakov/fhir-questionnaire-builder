@@ -9,7 +9,7 @@
 // Run: npx playwright test tests/e2e/preview-collapse-toggle.spec.js
 //
 // data-testid / selector registry:
-//   add-root-group-btn      "+ Add Root Group" button
+//   add-root-group-btn      Add menu → "Root group" item
 //   group-add-btn           "+" add-child button on a group
 //   add-menu-item           "Item" option in the add-child menu
 //   [data-preview-id="…"]   a rendered preview row

@@ -6,7 +6,7 @@
 // Run: npx playwright test tests/e2e/item-with-subitems.spec.js
 //
 // ── data-testid used in this suite ───────────────────────────────────────────
-//   add-root-group-btn     "+Add Root Group" button
+//   add-root-group-btn     Add menu → "Root group" item
 //   group-add-btn          gear button on a group
 //   node-gear-btn          gear button on an item
 //   add-menu-item          "Add Item" option in the add-child menu
@@ -18,7 +18,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { freshStart, waitForLoad } from './helpers/builder.js';
+import { freshStart, waitForLoad, clickAddRootGroup } from './helpers/builder.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
 const FIXTURES = path.resolve(
@@ -69,7 +69,7 @@ test.describe('Item with sub-items — add children via gear menu', () => {
   test('Add Item in gear menu adds a sub-item to an item node', async ({ page }) => {
     await freshStart(page);
     // Create root group, add an item inside it
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     const group = page.locator('[data-node-id="1"]');
     await expect(group).toBeVisible();
     await group.getByTestId('group-add-btn').click();
@@ -90,7 +90,7 @@ test.describe('Item with sub-items — add children via gear menu', () => {
 
   test('Add Group in gear menu adds a sub-group to an item node', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     const group = page.locator('[data-node-id="1"]');
     await expect(group).toBeVisible();
     await group.getByTestId('group-add-btn').click();

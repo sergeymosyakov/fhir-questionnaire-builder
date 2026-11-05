@@ -13,7 +13,7 @@
 // Run: npx playwright test tests/e2e/terminology-server.spec.js
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
-//   add-root-group-btn            "+Add Root Group"
+//   add-root-group-btn            Add menu → "Root group" item
 //   group-add-btn                 "+" button on a group
 //   add-menu-item                 "Item" option in add-child menu
 //   action-terminology            "Terminology" action link on an item row
@@ -31,6 +31,7 @@ import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { mockTerminologyExpand } from './helpers/terminology.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/terminology-server.fhir.json');
 
@@ -39,7 +40,7 @@ async function loadFixture(page) {
   await mockTerminologyExpand(page);
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, FIXTURE);
   await expect(page.locator('[data-node-id]').first()).toBeVisible({ timeout: 8_000 });
 }
@@ -47,11 +48,11 @@ async function loadFixture(page) {
 async function freshStart(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function addItem(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
   await page.locator('[data-node-id="1"]').getByTestId('group-add-btn').click();
   await page.locator('[data-testid="add-menu-item"]').first().click();
@@ -261,7 +262,7 @@ test.describe('Terminology modal — Test connection button', () => {
 test.describe('Properties modal — section order', () => {
   test('Terminology Server field appears before any collapsible section', async ({ page }) => {
     await freshStart(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await page.getByTestId('properties-btn').click();
     await expect(page.locator('[data-testid="metadataModal"]')).toBeVisible();
 

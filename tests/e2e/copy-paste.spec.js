@@ -23,7 +23,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
-import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
+import { freshStart, addRootGroup, addItemToGroup, clickAddRootGroup } from './helpers/builder.js';
 
 const DISABLED_RE = /node-gear-menu-item--disabled/;
 
@@ -92,7 +92,7 @@ test.describe('paste after', () => {
   test('inserts a new group after the source', async ({ page }) => {
     await setup(page);
     // Add a second root group so we can verify ordering
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="2"]')).toBeVisible();
 
     // Copy group "1"
@@ -128,7 +128,7 @@ test.describe('paste after', () => {
 test.describe('paste before', () => {
   test('inserts a new node before the target', async ({ page }) => {
     await setup(page);
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     await expect(page.locator('[data-node-id="2"]')).toBeVisible();
 
     // Copy group "2", paste before group "1"

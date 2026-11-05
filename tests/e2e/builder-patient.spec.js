@@ -5,7 +5,7 @@
 // Run: npx playwright test tests/e2e/builder-patient.spec.js
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
-//   add-root-group-btn     "+Add Root Group" button
+//   add-root-group-btn     Add menu → "Root group" item
 //   patient-preset-btn     "👤 Patient ▾" preset dropdown button
 //   variables-reinit-btn   "↺ Re-init" button in the Variables panel
 // ─────────────────────────────────────────────────────────────────────────────

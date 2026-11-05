@@ -6,7 +6,7 @@
 // Run: npx playwright test tests/e2e/cloud-delete-confirm.spec.js
 //
 // ── data-testid registry ─────────────────────────────────────────────────────
-//   add-root-group-btn      "+Add Root Group" (app-ready marker)
+//   add-root-group-btn      Add menu → "Root group" item (app-ready marker)
 //   load-fhir-btn / load-cloud-item   Questionnaires menu toggle / "From Cloud…" item
 //   cloudModal / cloudModalBody  Cloud questionnaires modal backdrop / body
 //   cloud-item-<id>         cloud list row

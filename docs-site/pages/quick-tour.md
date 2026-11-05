@@ -9,14 +9,14 @@ Open the builder. Use the **Questionnaires ▾** menu in the toolbar:
 - **📚 From Library…** — pick one of the built-in samples (e.g. *PHQ-9 Depression Screening* or *Annual Health Check*).
 - **📂 From file…** — upload your own FHIR R4 (or STU3) `Questionnaire` JSON.
 
-Or start empty with **+ Add Root Group** in the left panel.
+Or start empty with **+ Add** in the left panel: **Root group** for a blank section, or **From template…** for a ready-made set of questions.
 
 The screen splits into two: the **builder tree** on the left and the **live preview** on the right.
 
 ## 2. Edit the structure
 
-- **Add a group** at the top level with **+ Add Root Group**.
-- On any node, open the **⚙** gear menu to **Add Group**, **Add Item**, **Copy**, **Paste before/after**, or delete.
+- **Add a group** at the top level with **+ Add → Root group**, or insert a ready-made template with **+ Add → From template…**.
+- On any node, open the **⚙** gear menu to **Add Group**, **Add Item**, **Insert template…**, **Copy**, **Paste before/after**, or delete.
 - **Rename** an item by clicking its title and typing (Enter or click also works from the keyboard).
 
 Switch the **More ▾** menu between **Simple** (structure only) and **Advanced** (all per-item controls) depending on how much you want to see.

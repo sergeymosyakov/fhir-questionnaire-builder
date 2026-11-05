@@ -4,7 +4,7 @@
 // Run: npx playwright test tests/e2e/constraint-modal.spec.js
 //
 // ── data-testid used in this suite ───────────────────────────────────────────
-//   add-root-group-btn    "+Add Root Group"
+//   add-root-group-btn    Add menu → "Root group" item
 //   group-add-btn         "+" button on a group
 //   add-menu-item         "Item" option in add-child menu
 //   node-title-display    read-only title span
@@ -24,11 +24,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -37,7 +38,7 @@ async function freshStart(page) {
 }
 
 async function addTextItem(page, title = 'My Question') {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
 
   const group = page.locator('[data-node-id="1"]');

@@ -6,7 +6,7 @@
 // Run: npx playwright test tests/e2e/term-search.spec.js
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
-//   add-root-group-btn          "+Add Root Group"
+//   add-root-group-btn          Add menu → "Root group" item
 //   group-add-btn               "+" button on a group
 //   add-menu-item               "Item" option in add-child menu
 //   action-codes                "Props" action link on an item node
@@ -28,6 +28,7 @@
 import { test, expect } from '@playwright/test';
 import { SNOMED_URL } from '../../js/fhir/urls/snomed.js';
 import { LOINC_URL } from '../../js/fhir/urls/loinc.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 // ── Mock API response shape ───────────────────────────────────────────────────
 // NLM Clinical Tables API returns: [total, codes[], extraHash, displays[]]
@@ -60,7 +61,7 @@ const MOCK_SNOMED_FHIR_RESPONSE = {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function freshStart(page) {
@@ -80,7 +81,7 @@ async function freshStartWithTouAccepted(page) {
 }
 
 async function addItemAndOpenCodesModal(page) {
-  await page.getByTestId('add-root-group-btn').click();
+  await clickAddRootGroup(page);
   await expect(page.locator('[data-node-id="1"]')).toBeVisible();
   const group = page.locator('[data-node-id="1"]');
   await group.getByTestId('group-add-btn').click();

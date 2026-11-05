@@ -22,7 +22,7 @@ const ANNUAL = path.resolve('sampledata/annual-health-check.fhir.json');
 async function fresh(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadAnnual(page) {

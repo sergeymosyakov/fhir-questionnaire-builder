@@ -67,7 +67,7 @@ test.describe('Panel resizer', () => {
     await expect.poll(() => page.evaluate(k => localStorage.getItem(k), STORAGE_KEY)).toBe(String(target));
 
     await page.reload();
-    await expect(page.getByTestId('add-root-group-btn')).toBeVisible();
+    await expect(page.getByTestId('add-menu-btn')).toBeVisible();
     await expect.poll(() => panelWidth(page)).toBe(target);
   });
 });

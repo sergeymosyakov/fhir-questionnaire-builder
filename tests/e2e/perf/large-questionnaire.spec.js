@@ -25,7 +25,7 @@ const RENDER_CEILING_MS = process.env.CI ? 20_000 : 8_000;
 async function freshStart(page) {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 15_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 15_000 });
 }
 
 // Install page-side timing + error capture before the load is triggered.

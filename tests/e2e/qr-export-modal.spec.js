@@ -4,7 +4,7 @@
 // Run: npx playwright test tests/e2e/qr-export-modal.spec.js
 //
 // ── data-testid used in this suite ───────────────────────────────────────────
-//   add-root-group-btn         "+Add Root Group" toolbar button
+//   add-root-group-btn         Add menu → "Root group" item
 //   export-btn                 "Export ▾" toolbar button
 //   export-qr-item             "QuestionnaireResponse" dropdown item
 //   qr-export-filename         file name input inside the modal
@@ -30,7 +30,7 @@ import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { openDropdownItem } from './helpers/dropdown.js';
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadSampleAndOpenExportModal(page) {

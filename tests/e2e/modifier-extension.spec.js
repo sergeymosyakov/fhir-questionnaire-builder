@@ -29,6 +29,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { clickAddRootGroup } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/modifier-extension.fhir.json');
 const MODIFIER_URL =
@@ -37,7 +38,7 @@ const MODIFIER_URL =
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function waitForLoad(page) {
-  await page.waitForSelector('[data-testid="add-root-group-btn"]', { timeout: 10_000 });
+  await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
 async function loadFixture(page) {
@@ -103,7 +104,7 @@ test.describe('modifierExtension validator warning', () => {
     await waitForLoad(page);
 
     // Build a minimal valid questionnaire with no modifierExtension.
-    await page.getByTestId('add-root-group-btn').click();
+    await clickAddRootGroup(page);
     const group = page.locator('[data-node-id="1"]');
     await expect(group).toBeVisible();
     await group.getByTestId('group-add-btn').click();
