@@ -23,6 +23,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 const R5_FIXTURE = path.resolve('sampledata/r5-demo.fhir.json');
 
@@ -39,10 +40,7 @@ async function freshStart(page) {
 }
 
 /** Select a FHIR version using the custom-select widget. */
-async function selectVersion(page, versionId) {
-  await page.getByTestId('fhir-version-select').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${versionId}"]`).click();
-}
+const selectVersion = (page, versionId) => pickCustomSelect(page, 'fhir-version-select', versionId);
 
 /** Get the current value from the version selector trigger. */
 async function getSelectedVersion(page) {

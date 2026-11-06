@@ -27,7 +27,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { readFileSync } from 'node:fs';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/version-algorithm.fhir.json');
@@ -47,10 +47,7 @@ async function openAdvanced(page) {
   await page.getByTestId('meta-advanced-toggle').click();
 }
 
-async function selectVersion(page, versionId) {
-  await page.getByTestId('fhir-version-select').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${versionId}"]`).click();
-}
+const selectVersion = (page, versionId) => pickCustomSelect(page, 'fhir-version-select', versionId);
 
 async function exportFHIR(page) {
   await openDropdownItem(page, 'export-btn', 'export-quest-item');
