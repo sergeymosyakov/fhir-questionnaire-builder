@@ -146,6 +146,12 @@ jobs:
             . _site/
           cp -r playwright-report/. _site/playwright-report/
           cp -r coverage/. _site/coverage/
+      # Test reports are for developers, not search results: mark every report page noindex and fail the deploy if one is missed.
+      - name: Mark reports noindex
+        run: |
+          find _site/coverage _site/playwright-report -name '*.html' -exec sed -i 's#<head>#<head><meta name="robots" content="noindex, nofollow">#I' {} +
+          missing=$(grep -rL 'name="robots" content="noindex' --include='*.html' _site/coverage _site/playwright-report || true)
+          if [ -n "$missing" ]; then echo "Report pages without noindex:"; echo "$missing"; exit 1; fi
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site/
