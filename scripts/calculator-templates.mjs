@@ -168,7 +168,7 @@ export function buildTemplate(def) {
 export function libraryEntry(def) {
   const sources = [...new Set(def.outputs.map(o => EXPR_GALLERY.find(p => p.id === o.pattern).source))];
   return {
-    id: def.id, name: def.name, description: def.description,
+    id: def.id, name: def.name, description: def.description, category: 'calculators',
     scoring: 'Calculated values only; each result stays empty until all of its inputs are answered.',
     keywords: def.keywords,
     source: `${sources.join('; ')}. Codes: LOINC.`,

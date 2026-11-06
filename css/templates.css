@@ -1,5 +1,11 @@
 /* ── Templates modal ─────────────────────────────────────────────────────────── */
 .tpl-body { display: flex; flex-direction: column; gap: 10px; }
+.tpl-cats { display: flex; flex-wrap: wrap; gap: 6px; }
+.tpl-cat { font: inherit; font-size: 12px; padding: 3px 10px; border: 1px solid var(--c-border); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+.tpl-cat:hover { background: var(--c-hover); }
+.tpl-cat:focus-visible { outline: 2px solid var(--c-accent, #2563eb); outline-offset: 1px; }
+.tpl-cat--active { border-color: var(--c-accent, #2563eb); background: var(--c-hover); font-weight: 600; }
+.tpl-group-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; opacity: .7; margin: 6px 2px 0; }
 .tpl-row--selected { border-color: var(--c-accent, #2563eb); background: var(--c-hover); }
 .tpl-detail { font-size: 12px; border-top: 1px solid var(--c-border); padding-top: 8px; }
 .tpl-detail p { margin: 2px 0; }

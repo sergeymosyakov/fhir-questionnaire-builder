@@ -1,23 +1,21 @@
 // Static, crawlable HTML page for the template library (templates.html) — generated, never hand-edited.
 import { renderStaticPage, esc, SITE } from './static-page.js';
+import { groupByCategory } from './templates.js';
+import { questionsOf, linkHtml, LOINC_NOTICE } from './template-view.js';
 
 const TITLE = 'Ready-made FHIR Questionnaire Templates: Screening Scales, Calculators and Intake';
 const PAGE_TITLE = 'FHIR Questionnaire Templates | FHIR Questionnaire Builder';
-const DESCRIPTION = 'Free, source-referenced FHIR Questionnaires — clinical screening scales (PHQ-9, GAD-7, AUDIT-C and more), calculators such as eGFR and BMI, and intake sections — with LOINC codes and automatic calculation.';
-
-// Question texts a respondent answers (no read-only results, no display notes).
-const questionsOf = (group) => (group.item ?? []).filter((i) => i.type !== 'display' && !i.readOnly).map((i) => i.text);
+const DESCRIPTION = 'Source-referenced FHIR Questionnaires — clinical screening scales (PHQ-9, GAD-7, AUDIT-C and more), calculators such as eGFR and BMI, and intake sections — with LOINC codes and automatic calculation.';
 
 function card(entry, group) {
-  const link = (text, href) => (href ? `${esc(text)} (<a href="${esc(href)}" rel="noopener">link</a>)` : esc(text));
   return `    <section class="gp-card" id="${esc(entry.id)}" data-testid="tp-card-${esc(entry.id)}">
-      <h3>${esc(entry.name)}</h3>
+      <h3><a href="templates/${esc(entry.id)}.html" data-testid="tp-detail-${esc(entry.id)}">${esc(entry.name)}</a></h3>
       <p>${esc(entry.description)}</p>
       <p class="gp-bands"><strong>Scoring:</strong> ${esc(entry.scoring)}</p>
       <p class="gp-label">Questions</p>
-      <ol>${questionsOf(group).map((q) => `<li>${esc(q)}</li>`).join('')}</ol>
-      <p class="gp-source">Source: ${link(entry.source, entry.sourceUrl)}</p>
-      <p class="gp-source">License: ${link(entry.license, entry.licenseUrl)}</p>
+      <ol>${questionsOf(group).map((q) => `<li>${esc(q.text)}</li>`).join('')}</ol>
+      <p class="gp-source">Source: ${linkHtml(entry.source, entry.sourceUrl)}</p>
+      <p class="gp-source">License: ${linkHtml(entry.license, entry.licenseUrl)}</p>
       <p class="gp-source"><a href="templates/${esc(entry.file)}" data-testid="tp-json-${esc(entry.id)}">Download the FHIR Questionnaire JSON</a></p>
     </section>`;
 }
@@ -32,7 +30,7 @@ export function renderTemplatesPage(entries, groups) {
     description: DESCRIPTION,
     keywords: 'FHIR Questionnaire, PHQ-9 FHIR, GAD-7 FHIR, AUDIT-C FHIR, LOINC, SDC, screening questionnaire, FHIR form builder, calculatedExpression',
     headerTitle: 'Questionnaire templates',
-    subtitle: 'Ready-made clinical scales you can insert into a questionnaire.',
+    subtitle: 'Ready-made questionnaire templates you can insert into your own questionnaire.',
     openBuilderTestid: 'tp-open-builder',
     jsonLd: (url) => [
       {
@@ -43,7 +41,7 @@ export function renderTemplatesPage(entries, groups) {
       },
       {
         '@type': 'ItemList', '@id': `${url}#list`, name: 'Questionnaire templates',
-        itemListElement: entries.map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: e.name, url: `${url}#${e.id}` })),
+        itemListElement: entries.map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: e.name, url: `${SITE}/templates/${e.id}.html` })),
       },
       {
         '@type': 'BreadcrumbList', '@id': `${url}#breadcrumb`,
@@ -62,13 +60,13 @@ export function renderTemplatesPage(entries, groups) {
       <li>It arrives as one titled group with its calculations already wired. If an id would clash with your questionnaire, the builder renames it for you, calculations included.</li>
     </ol>
     <p>Templates keep the published wording of each scale and credit their authors. They are provided to save authoring effort, not as medical advice — confirm a scale and its cut-offs for your use case.</p>
-    <h2>Templates</h2>
-    <nav class="gp-toc" aria-label="Templates">
+${groupByCategory(entries).map(({ category, entries: list }) => `    <h2 id="cat-${esc(category.id)}">${esc(category.label)}</h2>
+    <nav class="gp-toc" aria-label="${esc(category.label)}">
       <ul>
-${entries.map((e) => `        <li><a href="#${esc(e.id)}">${esc(e.name)}</a></li>`).join('\n')}
+${list.map((e) => `        <li><a href="#${esc(e.id)}">${esc(e.name)}</a></li>`).join('\n')}
       </ul>
     </nav>
-${entries.map((e) => card(e, groups.get(e.id))).join('\n')}
-    <p class="gp-source">This material contains content from LOINC (<a href="https://loinc.org" rel="noopener">loinc.org</a>). LOINC is copyright © Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the <a href="https://loinc.org/license/" rel="noopener">LOINC license</a>.</p>`,
+${list.map((e) => card(e, groups.get(e.id))).join('\n')}`).join('\n')}
+    <p class="gp-source">${LOINC_NOTICE}</p>`,
   });
 }

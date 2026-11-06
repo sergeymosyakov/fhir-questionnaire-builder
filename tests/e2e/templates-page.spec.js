@@ -4,6 +4,7 @@
 //   tp-open-builder       "Back to Builder" link in the page header
 //   tp-card-<id>          one section per template
 //   tp-json-<id>          "Download the FHIR Questionnaire JSON" link of a template
+//   tp-detail-<id>        card title link to the template's own page
 //   doc-content / doc-nav-link   docs article / sidebar link (Templates docs page)
 //   add-menu-btn          builder ready marker (after following the header link)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -34,13 +35,21 @@ test.describe('templates.html (SEO page)', () => {
     expect((await res.json()).resourceType).toBe('Questionnaire');
   });
 
-  test('structured data lists the templates with anchors that exist on the page', async ({ page }) => {
+  test('structured data lists the templates with links to their own pages', async ({ page, request }) => {
     await page.goto('/templates.html');
     const graph = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())['@graph'];
     const list = graph.find((n) => n['@type'] === 'ItemList');
     expect(list.itemListElement.length).toBeGreaterThan(0);
-    const anchor = list.itemListElement[0].url.split('#')[1];
-    await expect(page.locator(`#${anchor}`)).toHaveCount(1);
+    const url = list.itemListElement[0].url;
+    expect(url).toMatch(/^https:\/\/fhirbuilder\.com\/templates\/[\w-]+\.html$/);
+    expect((await request.get(new URL(url).pathname)).ok()).toBe(true);
+  });
+
+  test('templates are grouped under category headings and each card links to its page', async ({ page }) => {
+    await page.goto('/templates.html');
+    for (const id of ['cat-scales', 'cat-calculators', 'cat-intake']) await expect(page.locator(`#${id}`)).toHaveCount(1);
+    await page.getByTestId('tp-detail-phq-9').click();
+    await expect(page).toHaveURL(/\/templates\/phq-9(\.html)?$/);
   });
 
   test('the header link opens the Builder', async ({ page }) => {

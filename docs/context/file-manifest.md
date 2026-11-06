@@ -205,15 +205,16 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `js/ui/confirm-dialog.js` | `ConfirmDialog` — static `show(label) → Promise<boolean>`; standalone "Delete node?" modal; no DI, no `_svc`; imported directly by `group-node.js` and `item-node.js` |
 | `js/ui/copy-paste.js` | `CopyPaste` singleton — serializes a node subtree to FHIR JSON (`export.js`), re-maps linkIds and their expression references (`linkid-remap.js`), deserializes back (`import-item.js`) and inserts after the source node; flags a `STRUCTURAL_RE` match (`.descendants()`/`.item.where(type=…)`/`.count()`) so callers can warn about structural-query expressions elsewhere in the tree |
 | `js/ui/menus/add-menu.js` | `AddMenu extends DropdownMenu` — tree-toolbar **+ Add** menu (Root group / From template…); self-mounts at `[data-mount="add-menu"]` |
-| `js/fhir/static-page.js` | `renderStaticPage()` — shared shell (head/SEO meta/JSON-LD/page header) for generated crawlable pages (`gallery.html`, `templates.html`) |
+| `js/fhir/static-page.js` | `renderStaticPage()` — shared shell (head/SEO meta/JSON-LD/page header) for generated crawlable pages (`gallery.html`, `templates.html`, `templates/<id>.html`); nested pages pass `root`, `headerHref` and `crumb` (header breadcrumb) |
 | `js/fhir/templates-page.js` | `renderTemplatesPage(entries, groups)` — generates `templates.html` (cards: description, scoring, questions, source, license, JSON download; LOINC notice) |
 | `scripts/calculator-templates.mjs` / `scripts/gen-calculator-templates.mjs` | Definitions of the calculator templates (body measurements, kidney, cardiac, lipid, chemistry, FIB-4, pregnancy dating) — formulas resolved from the Expression Gallery; the generator writes `templates/*.template.json` and upserts `templates/library.json` (run via `npm run docs:templates`) |
-| `scripts/gen-templates-page.mjs` | `npm run docs:templates` — regenerates `templates.html` from `templates/` |
-| `templates.html` | Generated, crawlable template catalog page (do not edit by hand; freshness-tested) |
+| `js/fhir/template-page.js` / `js/fhir/template-view.js` | `renderTemplatePage()` — one crawlable page per template (`templates/<id>.html`: questions with answer options, calculated results, source, license, related templates); shared pure helpers (`questionsOf`, `resultsOf`, `linkHtml`) |
+| `scripts/gen-templates-page.mjs` | `npm run docs:templates` — regenerates `templates.html` and `templates/<id>.html` from `templates/` and appends missing sitemap entries |
+| `templates.html` / `templates/<id>.html` | Generated, crawlable template catalog (grouped by category) and one page per template (do not edit by hand; freshness-tested) |
 | `js/ui/template-insert.js` | `TemplateInsert` singleton — on `NODE_INSERT_TEMPLATE_REQUESTED` opens the templates modal, loads the chosen template group, remaps its linkIds (`suffix` strategy) and appends it to the target node's children (or root) |
 | `js/ui/modals/templates-modal.js` | `TemplatesModal extends Modal` — searchable template list, source/license detail card, Insert/Cancel; registered as `templates` |
 | `js/fhir/templates.js` | Template library access — `loadTemplateLibrary()` (`templates/library.json`), `templateGroupFrom()` (a template file must hold exactly one root group), `loadTemplateGroup(entry)` |
-| `templates/library.json` | Template catalog (id, name, description, keywords, source, license, file) — one Questionnaire file per template next to it |
+| `templates/library.json` | Template catalog (id, name, description, category, keywords, source, license, file) — one Questionnaire file per template next to it |
 | `templates/*.template.json` | Shipped templates (PHQ-9/2, GAD-7/2, AUDIT-C scales; demographics, allergies, medications, pain fragments): one Questionnaire with a single wrapper group each — LOINC-coded questions/answers with `ordinalValue` scores, calculated total (+ severity) via FHIRPath over the ordinals |
 | `css/templates.css` | Templates modal styles (`.tpl-*`; list/row look reuses `.eg-*`) |
 | `js/ui/modals/paste-warning-modal.js` | Read-only warning modal shown after paste when pasted items' expressions reference linkIds outside the copied subtree, or existing expressions elsewhere use structural FHIRPath queries that may now behave differently; single "Got it" dismiss button |
@@ -438,7 +439,8 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `tests/e2e/templates-library.spec.js` | E2E — shipped templates listed with source/license; PHQ-9/2, GAD-7/2, AUDIT-C insert and calculate; intake fragments insert (no mocking) |
 | `tests/calculator-templates.test.js` | Unit tests — calculator templates are up to date with the gallery, every result evaluates to the hand-computed value, stays empty without inputs and survives an id rename |
 | `tests/e2e/templates-calculators.spec.js` | E2E — calculator templates insert and calculate in the preview; a second insert calculates independently |
-| `tests/templates-page.test.js` | Unit tests — `templates.html` freshness, escaping, question list |
+| `tests/templates-page.test.js` | Unit tests — `templates.html` and per-template page freshness, sitemap entries, escaping, question/result lists, category grouping |
+| `tests/e2e/templates-detail-page.spec.js` | E2E — per-template pages (content, JSON link, breadcrumb, related links, header link, sitemap) |
 | `tests/e2e/templates-page.spec.js` | E2E — `templates.html` metadata/cards/JSON links/sitemap and the docs Templates page |
 | `tests/templates.test.js` | Unit tests — `templateGroupFrom` validation |
 | `tests/e2e/copy-paste-remap.spec.js` | E2E — pasted group's calculation uses its own copied inputs (`copy-group-calc` fixture) |

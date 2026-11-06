@@ -3,6 +3,7 @@
     "id": "test-scale",
     "name": "Test scale",
     "description": "Two numeric questions and their sum.",
+    "category": "scales",
     "keywords": ["sum", "score"],
     "source": "Test authors 2026",
     "sourceUrl": "https://example.org/test-scale",
@@ -13,6 +14,7 @@
     "id": "other-form",
     "name": "Other form",
     "description": "Something unrelated.",
+    "category": "intake",
     "source": "Nobody",
     "license": "CC0",
     "file": "other-form.template.json"
