@@ -1,6 +1,6 @@
 // Builds the calculator templates (templates/*.template.json + their library.json entries); formulas come from the Expression Gallery.
 import { itemRef } from '../js/fhir/expr-builder/model.js';
-import { emit } from '../js/fhir/expr-builder/emit.js';
+import { emit, q } from '../js/fhir/expr-builder/emit.js';
 import { valueAccessor } from '../js/fhir/expr-builder/value-paths.js';
 import { EXPR_GALLERY, resolveGalleryPattern } from '../js/fhir/expr-builder/gallery/index.js';
 
@@ -8,12 +8,46 @@ const CALC = 'http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-c
 const UNIT = 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit';
 const ITEM_CONTROL = 'http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl';
 const SEX = { code: '76689-9', answers: [['LA3-6', 'Female'], ['LA2-8', 'Male']], female: 'LA3-6' };
+// Local code system for answer options that have no LOINC answer code.
+const LOCAL_SYSTEM = 'https://fhirbuilder.com/CodeSystem/templates';
 const LICENSE = 'Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.';
 const LICENSE_URL = 'https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE';
 
 // out.round wraps a pattern that has no rounding of its own.
 // q: [key, text, builder type, {code, unit: [ucum, display]}]; out: slots map slot -> [question key, transform id].
+const YES_NO_SCORING = 'Each criterion that is present scores 1 point. An unanswered criterion counts as No; the result appears once at least one criterion is answered.';
 const num = (key, text, type, code, unit) => [key, text, type, { code, unit }];
+const bool = (key, text) => [key, text, 'boolean', {}];
+
+// Charlson: yes/no questions (labels and weights from the gallery pattern); conditions that come in tiers are one question each so two tiers can't be added together.
+const TIERS = [
+  { key: 'liver', text: 'Liver disease', options: [['none', 'None'], ['mild', 'Mild', 'liverMild'], ['severe', 'Moderate or severe', 'liverSevere']] },
+  { key: 'diabetes', text: 'Diabetes', options: [['none', 'None'], ['uncomplicated', 'Without end-organ damage', 'diabetesControlled'], ['end-organ', 'With end-organ damage', 'diabetesUncontrolled']] },
+  { key: 'tumor', text: 'Solid tumor', options: [['none', 'None'], ['localized', 'Localized', 'malignancyLocal'], ['metastatic', 'Metastatic', 'malignancyMets']] },
+];
+function charlsonDef() {
+  const pattern = EXPR_GALLERY.find(p => p.id === 'charlson-comorbidity-index');
+  const tiered = new Set(TIERS.flatMap(t => t.options.map(o => o[2]).filter(Boolean)));
+  const plain = pattern.slots.find(sl => sl.key === 'conditions').transforms.filter(c => !tiered.has(c.id));
+  const tierRows = TIERS.flatMap(t => t.options.filter(o => o[2]).map(([code, , id]) => [t.key, id, r => `(${r} = ${q(code)})`]));
+  return {
+    id: 'charlson-comorbidity-index', group: 'cci', category: 'scales', name: 'Charlson Comorbidity Index',
+    description: 'Comorbidities and age with the age-adjusted Charlson Comorbidity Index.',
+    keywords: ['charlson', 'comorbidity', 'cci', 'prognosis', 'risk adjustment'],
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/3558716/',
+    scoring: 'Comorbidities score 1, 2, 3 or 6 points by weight; the age adds 1 point per decade from 50, up to 4 points from age 80. The index appears once the age is entered; an unanswered comorbidity counts as No.',
+    questions: [
+      ...plain.map(c => bool(c.id, c.label.replace(/ \(\+\d+\)$/, ''))),
+      ...TIERS.map(t => [t.key, t.text, 'radio', { options: t.options.map(([code, display]) => [code, display]) }]),
+      num('age', 'Age (years)', 'integer', null, ['a', 'years']),
+    ],
+    outputs: [{
+      key: 'index', text: 'Charlson Comorbidity Index (age-adjusted)', type: 'integer', pattern: pattern.id, requires: ['age'],
+      slots: { conditions: { rows: [...plain.map(c => [c.id, c.id]), ...tierRows] }, age: ['age', 'age-bonus'] },
+    }],
+  };
+}
+
 export const DEFS = [
   {
     id: 'body-measurements', group: 'body', name: 'Body Measurements',
@@ -125,15 +159,59 @@ export const DEFS = [
       { key: 'ga', text: 'Gestational age (completed weeks)', type: 'integer', code: '11884-4', pattern: 'gestational-age-weeks', slots: { lmp: ['lmp'], at: ['visit'] } },
     ],
   },
+  {
+    id: 'qsofa', group: 'qsofa', category: 'scales', name: 'qSOFA Sepsis Screen',
+    description: 'Three bedside yes/no criteria with the qSOFA score and its risk result; two or more criteria mean a high risk of poor outcome.',
+    keywords: ['qsofa', 'sepsis', 'sofa', 'screening', 'emergency', 'critical care'],
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/26903338/',
+    scoring: YES_NO_SCORING,
+    questions: [
+      bool('resp', 'Respiratory rate 22 breaths per minute or higher'),
+      bool('mentation', 'Altered mentation (Glasgow Coma Scale below 15)'),
+      bool('sbp', 'Systolic blood pressure 100 mmHg or lower'),
+    ],
+    outputs: [
+      { key: 'score', text: 'qSOFA score (0–3)', type: 'integer', pattern: 'qsofa', noCategories: true, anyOf: ['resp', 'mentation', 'sbp'], slots: { resp: ['resp'], mentation: ['mentation'], sbp: ['sbp'] } },
+      { key: 'risk', text: 'qSOFA result', type: 'string', pattern: 'qsofa', anyOf: ['resp', 'mentation', 'sbp'], slots: { resp: ['resp'], mentation: ['mentation'], sbp: ['sbp'] } },
+    ],
+  },
+  {
+    id: 'cha2ds2-vasc', group: 'cha', category: 'scales', name: 'CHA₂DS₂-VASc Stroke Risk Score',
+    description: 'Six yes/no criteria and the age with the CHA₂DS₂-VASc score (0–9) for stroke risk in atrial fibrillation; a higher score means a higher risk.',
+    keywords: ['cha2ds2-vasc', 'stroke', 'atrial fibrillation', 'afib', 'anticoagulation', 'cardiology'],
+    sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/19762550/',
+    scoring: 'Points: heart failure 1, hypertension 1, age 75 or older 2, diabetes 1, previous stroke or TIA 2, vascular disease 1, age 65 to 74 1, female sex 1 (0–9). The score appears once the age is entered; an unanswered criterion counts as No.',
+    questions: [
+      bool('chf', 'Congestive heart failure or left ventricular dysfunction'),
+      bool('htn', 'Hypertension'),
+      num('age', 'Age (years)', 'integer', '30525-0', ['a', 'years']),
+      bool('diabetes', 'Diabetes mellitus'),
+      bool('stroke', 'Previous stroke, transient ischemic attack or thromboembolism'),
+      bool('vascular', 'Vascular disease (previous myocardial infarction, peripheral artery disease or aortic plaque)'),
+      bool('female', 'Female sex'),
+    ],
+    outputs: [
+      { key: 'score', text: 'CHA₂DS₂-VASc score (0–9)', type: 'integer', pattern: 'cha2ds2-vasc', requires: ['age'],
+        slots: { chf: ['chf'], htn: ['htn'], age75: ['age', null, r => `(${r} >= 75)`], diabetes: ['diabetes'], strokeTia: ['stroke'], vascular: ['vascular'], age65to74: ['age', null, r => `(${r} >= 65 and ${r} < 75)`], female: ['female'] } },
+    ],
+  },
+  charlsonDef(),
 ];
 
-const BUILDER_TYPE = { radio: 'radio', decimal: 'decimal', integer: 'integer', date: 'date' };
+const BUILDER_TYPE = { radio: 'radio', decimal: 'decimal', integer: 'integer', date: 'date', boolean: 'boolean' };
 const loinc = code => [{ system: 'http://loinc.org', code }];
 const unitExt = ([code, display]) => ({ url: UNIT, valueCoding: { system: 'http://unitsofmeasure.org', code, display } });
 const calcExt = expression => ({ url: CALC, valueExpression: { language: 'text/fhirpath', expression } });
 
 function questionItem(def, [key, text, type, opts]) {
   const item = { linkId: `${def.group}-${key}`, ...(opts.code ? { code: loinc(opts.code) } : {}), text };
+  if (opts.options) {
+    return {
+      ...item, type: 'choice',
+      extension: [{ url: ITEM_CONTROL, valueCodeableConcept: { coding: [{ system: 'http://hl7.org/fhir/questionnaire-item-control', code: 'radio-button' }] } }],
+      answerOption: opts.options.map(([code, display]) => ({ valueCoding: { system: LOCAL_SYSTEM, code, display } })),
+    };
+  }
   if (opts.sex) {
     return {
       ...item, type: 'choice',
@@ -149,9 +227,16 @@ function outputItem(def, out) {
   const refOf = key => emit(itemRef([def.group, `${def.group}-${key}`], valueAccessor(BUILDER_TYPE[typeOf(key)]), []));
   const base = EXPR_GALLERY.find(p => p.id === out.pattern);
   const pattern = out.noCategories ? { ...base, categories: undefined } : base;
-  const selections = Object.fromEntries(Object.entries(out.slots).map(([slot, [key, transformId]]) => [slot, { ref: refOf(key), transformId }]));
+  const pick = ([key, transformId, wrap]) => ({ ref: wrap ? wrap(refOf(key)) : refOf(key), transformId: transformId ?? undefined });
+  const selections = Object.fromEntries(Object.entries(out.slots).map(([slot, spec]) => [slot, spec.rows ? spec.rows.map(pick) : pick(spec)]));
   const resolved = resolveGalleryPattern(pattern, selections, { female: SEX.female });
-  const expression = out.round ? `(${resolved}).round(${out.round})` : resolved;
+  const rounded = out.round ? `(${resolved}).round(${out.round})` : resolved;
+  // Unanswered yes/no items count as No: wait for the required inputs, or for at least one yes/no answer.
+  const conditions = [
+    ...(out.anyOf ? [`(${out.anyOf.map(refOf).join(' | ')}).exists()`] : []),
+    ...(out.requires ?? []).map(key => `${refOf(key)}.exists()`),
+  ];
+  const expression = conditions.length ? `iif(${conditions.join(' and ')}, ${rounded}, {})` : rounded;
   return {
     linkId: `${def.group}-${out.key}`, ...(out.code ? { code: loinc(out.code) } : {}), text: out.text, type: out.type, readOnly: true,
     extension: [...(out.unit ? [unitExt(out.unit)] : []), calcExt(expression)],
@@ -167,11 +252,13 @@ export function buildTemplate(def) {
 
 export function libraryEntry(def) {
   const sources = [...new Set(def.outputs.map(o => EXPR_GALLERY.find(p => p.id === o.pattern).source))];
+  const coded = def.questions.some(q => q[3].code) || def.outputs.some(o => o.code);
   return {
-    id: def.id, name: def.name, description: def.description, category: 'calculators',
-    scoring: 'Calculated values only; each result stays empty until all of its inputs are answered.',
+    id: def.id, name: def.name, description: def.description, category: def.category ?? 'calculators',
+    scoring: def.scoring ?? 'Calculated values only; each result stays empty until all of its inputs are answered.',
     keywords: def.keywords,
-    source: `${sources.join('; ')}. Codes: LOINC.`,
+    source: `${sources.join('; ')}.${coded ? ' Codes: LOINC.' : ''}`,
+    ...(def.sourceUrl ? { sourceUrl: def.sourceUrl } : {}),
     license: LICENSE, licenseUrl: LICENSE_URL, file: `${def.id}.template.json`,
   };
 }

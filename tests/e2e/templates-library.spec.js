@@ -34,7 +34,7 @@ test.beforeEach(async ({ page }) => {
 
 test('library lists the shipped scales with source and license', async ({ page }) => {
   await openDropdownItem(page, 'add-menu-btn', 'add-template-btn');
-  for (const id of ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c', 'demographics', 'allergies', 'medications', 'pain']) await expect(page.getByTestId('tpl-row-' + id)).toBeVisible();
+  for (const id of ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c', 'demographics', 'allergies', 'medications', 'pain', 'glasgow-coma-scale', 'apgar-score', 'qsofa', 'cha2ds2-vasc', 'charlson-comorbidity-index']) await expect(page.getByTestId('tpl-row-' + id)).toBeVisible();
   await page.getByTestId('tpl-row-phq-9').click();
   await expect(page.getByTestId('tpl-detail')).toContainText('Kroenke, Spitzer & Williams 2001');
   await expect(page.getByTestId('tpl-detail')).toContainText('No permission required to reproduce');
@@ -174,4 +174,28 @@ test('a selection hidden by a filter is cleared, and chips keep keyboard focus',
   await expect(page.getByTestId('tpl-cat-calculators')).toBeFocused();
   await expect(page.getByTestId('tpl-detail')).toBeHidden();
   await expect(page.getByTestId('templatesModalApply')).toBeDisabled();
+});
+
+test('Glasgow Coma Scale totals the three responses and names the severity', async ({ page }) => {
+  await insert(page, 'glasgow-coma-scale');
+  await pick(page, 'gcs-eye', 3);
+  await pick(page, 'gcs-verbal', 4);
+  await pick(page, 'gcs-motor', 5);
+  await expect(page.locator('[data-preview-id="gcs-total"]')).toContainText('15');
+  await expect(page.locator('[data-preview-id="gcs-severity"]')).toContainText('Mild (GCS 13–15)');
+  await pick(page, 'gcs-motor', 0);
+  await expect(page.locator('[data-preview-id="gcs-total"]')).toContainText('10');
+  await expect(page.locator('[data-preview-id="gcs-severity"]')).toContainText('Moderate (GCS 9–12)');
+});
+
+test('Apgar scores the 1-minute and 5-minute sets independently', async ({ page }) => {
+  await insert(page, 'apgar-score');
+  for (const k of ['color', 'heart-rate', 'tone', 'reflex', 'respiration']) {
+    await pick(page, `apgar1-${k}`, 2);
+    await pick(page, `apgar5-${k}`, 0);
+  }
+  await expect(page.locator('[data-preview-id="apgar1-total"]')).toContainText('10');
+  await expect(page.locator('[data-preview-id="apgar1-band"]')).toContainText('Reassuring (7–10)');
+  await expect(page.locator('[data-preview-id="apgar5-total"]')).toContainText('0');
+  await expect(page.locator('[data-preview-id="apgar5-band"]')).toContainText('Low (0–3)');
 });

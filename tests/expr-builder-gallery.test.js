@@ -235,6 +235,26 @@ describe('resolveGalleryPattern — charlson-comorbidity-index', () => {
     expect(result).toBe(11);
   });
 
+  it('marks the tiers of one condition with a shared group (liver, diabetes, malignancy)', () => {
+    const transforms = pattern('charlson-comorbidity-index').slots.find((sl) => sl.key === 'conditions').transforms;
+    const groups = {};
+    for (const t of transforms.filter((x) => x.group)) (groups[t.group] ||= []).push(t.id);
+    expect(groups).toEqual({
+      liver: ['liverMild', 'liverSevere'],
+      diabetes: ['diabetesControlled', 'diabetesUncontrolled'],
+      malignancy: ['malignancyLocal', 'malignancyMets'],
+    });
+  });
+
+  it('gives no result while the age is unanswered (no +4 from an empty comparison)', () => {
+    const qr = { resourceType: 'QuestionnaireResponse', item: [{ linkId: 'mi', answer: [{ valueBoolean: true }] }] };
+    const expr = resolveGalleryPattern(pattern('charlson-comorbidity-index'), {
+      conditions: [{ ref: "%resource.item.where(linkId='mi').answer.valueBoolean", transformId: 'mi' }],
+      age: { ref: "%resource.item.where(linkId='age').answer.valueInteger", transformId: 'age-bonus' },
+    });
+    expect(fhirpath.evaluate(qr, expr, { resource: qr }, fhirpath_r4_model)).toEqual([]);
+  });
+
   it('resolves with just the required condition row and no age picked yet returns null', () => {
     expect(resolveGalleryPattern(pattern('charlson-comorbidity-index'), {
       conditions: [{ ref: '%X', transformId: 'mi' }],

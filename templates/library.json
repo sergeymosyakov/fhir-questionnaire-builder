@@ -307,5 +307,107 @@
     "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
     "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
     "file": "pregnancy-dating.template.json"
+  },
+  {
+    "id": "qsofa",
+    "name": "qSOFA Sepsis Screen",
+    "description": "Three bedside yes/no criteria with the qSOFA score and its risk result; two or more criteria mean a high risk of poor outcome.",
+    "category": "scales",
+    "scoring": "Each criterion that is present scores 1 point. An unanswered criterion counts as No; the result appears once at least one criterion is answered.",
+    "keywords": [
+      "qsofa",
+      "sepsis",
+      "sofa",
+      "screening",
+      "emergency",
+      "critical care"
+    ],
+    "source": "Singer et al. 2016 (Sepsis-3), JAMA 315:801.",
+    "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/26903338/",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "qsofa.template.json"
+  },
+  {
+    "id": "cha2ds2-vasc",
+    "name": "CHA₂DS₂-VASc Stroke Risk Score",
+    "description": "Six yes/no criteria and the age with the CHA₂DS₂-VASc score (0–9) for stroke risk in atrial fibrillation; a higher score means a higher risk.",
+    "category": "scales",
+    "scoring": "Points: heart failure 1, hypertension 1, age 75 or older 2, diabetes 1, previous stroke or TIA 2, vascular disease 1, age 65 to 74 1, female sex 1 (0–9). The score appears once the age is entered; an unanswered criterion counts as No.",
+    "keywords": [
+      "cha2ds2-vasc",
+      "stroke",
+      "atrial fibrillation",
+      "afib",
+      "anticoagulation",
+      "cardiology"
+    ],
+    "source": "Lip et al. 2010, Chest 137:263. Codes: LOINC.",
+    "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/19762550/",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "cha2ds2-vasc.template.json"
+  },
+  {
+    "id": "charlson-comorbidity-index",
+    "name": "Charlson Comorbidity Index",
+    "description": "Comorbidities and age with the age-adjusted Charlson Comorbidity Index.",
+    "category": "scales",
+    "scoring": "Comorbidities score 1, 2, 3 or 6 points by weight; the age adds 1 point per decade from 50, up to 4 points from age 80. The index appears once the age is entered; an unanswered comorbidity counts as No.",
+    "keywords": [
+      "charlson",
+      "comorbidity",
+      "cci",
+      "prognosis",
+      "risk adjustment"
+    ],
+    "source": "Charlson et al. 1987, J Chronic Dis 40:373; age adjustment per Charlson et al. 1994, J Clin Epidemiol 47:1245.",
+    "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/3558716/",
+    "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "charlson-comorbidity-index.template.json"
+  },
+  {
+    "id": "glasgow-coma-scale",
+    "name": "Glasgow Coma Scale",
+    "description": "Eye, verbal and motor responses with the total score (3–15) and its severity band.",
+    "category": "scales",
+    "scoring": "Eye 1–4, verbal 1–5 and motor 1–6 add up to a total of 3–15: 13–15 mild, 9–12 moderate, 3–8 severe.",
+    "keywords": [
+      "glasgow",
+      "gcs",
+      "coma",
+      "consciousness",
+      "neurology",
+      "trauma",
+      "emergency",
+      "score"
+    ],
+    "source": "Teasdale & Jennett 1974, Lancet 2:81 (Glasgow Coma Scale). Codes and answer lists: LOINC.",
+    "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/4136544/",
+    "license": "Original question wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). The scale itself is a published clinical method; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "glasgow-coma-scale.template.json"
+  },
+  {
+    "id": "apgar-score",
+    "name": "Apgar Score",
+    "description": "The five Apgar criteria at 1 and 5 minutes after birth, each with its total (0–10) and result band.",
+    "category": "scales",
+    "scoring": "Each criterion scores 0–2. The total (0–10) at each time point is reassuring at 7–10, moderately abnormal at 4–6 and low at 0–3.",
+    "keywords": [
+      "apgar",
+      "newborn",
+      "neonatal",
+      "birth",
+      "obstetrics",
+      "pediatrics",
+      "score"
+    ],
+    "source": "Apgar 1953, Curr Res Anesth Analg 32:260 (Apgar score); score bands per AAP/ACOG. Codes and answer lists: LOINC.",
+    "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/13083014/",
+    "license": "Original question wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). The scale itself is a published clinical method; see the source.",
+    "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
+    "file": "apgar-score.template.json"
   }
 ]

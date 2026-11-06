@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { templateGroupFrom, groupByCategory, TEMPLATE_CATEGORIES } from '../js/fhir/templates.js';
 import { renderTemplatesPage } from '../js/fhir/templates-page.js';
 import { renderTemplatePage } from '../js/fhir/template-page.js';
-import { questionsOf, resultsOf } from '../js/fhir/template-view.js';
+import { questionsOf, resultsOf, usesLoinc } from '../js/fhir/template-view.js';
 
 const path = (name) => new URL(`../${name}`, import.meta.url);
 const read = (name) => JSON.parse(readFileSync(path(`templates/${name}`), 'utf8'));
@@ -87,6 +87,13 @@ describe('template detail pages', () => {
     const html = onDisk('templates.html');
     expect(html).not.toContain('page-header-crumbs');
     expect(html).toContain('<a class="page-header-title" href="templates.html">Questionnaire templates</a>');
+  });
+
+  it('shows the LOINC notice only for templates that use LOINC codes', () => {
+    expect(onDisk('templates/phq-9.html')).toContain('This material contains content from LOINC');
+    expect(onDisk('templates/qsofa.html')).not.toContain('content from LOINC');
+    expect(usesLoinc({ item: [{ type: 'group', item: [{ answerOption: [{ valueCoding: { system: 'http://loinc.org' } }] }] }] })).toBe(true);
+    expect(usesLoinc({ item: [{ type: 'string', text: 'q' }] })).toBe(false);
   });
 
   it('omits the results and related sections when there are none', () => {

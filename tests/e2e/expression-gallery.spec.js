@@ -286,6 +286,40 @@ test.describe('Expression Gallery', () => {
     await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.3'");
   });
 
+  test('charlson-comorbidity-index lets only one tier of a condition be picked', async ({ page }) => {
+    await freshStart(page);
+    await clickAddRootGroup(page);
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await addItem(page, '1', '1.1', 'Mild liver');
+    await setItemType(page, '1.1', 'checkbox');
+    await addItem(page, '1', '1.2', 'Score');
+    await setItemType(page, '1.2', 'decimal');
+
+    await openValueBuilder(page, '1.2');
+    await page.getByTestId('eb-choose-gallery').click();
+    await page.getByTestId('eg-row-charlson-comorbidity-index').click();
+    await pick(page, page, 'eg-slot-item-conditions-0', '1.1');
+    await pick(page, page, 'eg-slot-transform-conditions-0', 'liverMild');
+
+    await page.getByTestId('eg-slot-add-conditions').click();
+    await page.getByTestId('eg-slot-transform-conditions-1').click();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="liverMild"]')).toBeHidden();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="liverSevere"]')).toBeHidden();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="mi"]')).toBeVisible();
+    await page.locator('[data-testid="csel-drop"] [data-val="mi"]').click();
+
+    // Switching the first row to the other tier keeps the group taken; removing the row frees it again.
+    await page.getByTestId('eg-slot-transform-conditions-0').click();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="liverMild"]')).toBeVisible();
+    await page.locator('[data-testid="csel-drop"] [data-val="liverSevere"]').click();
+    await page.getByTestId('eg-slot-transform-conditions-1').click();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="liverMild"]')).toBeHidden();
+    await page.keyboard.press('Escape');
+    await page.getByTestId('eg-slot-remove-conditions-0').click();
+    await page.getByTestId('eg-slot-transform-conditions-0').click();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="liverMild"]')).toBeVisible();
+  });
+
   test('glasgow-coma-scale pattern resolves to a severity-band iif() chain', async ({ page }) => {
     await freshStart(page);
     await clickAddRootGroup(page);

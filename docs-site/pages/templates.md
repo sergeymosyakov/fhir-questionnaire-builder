@@ -12,6 +12,9 @@ demographics or allergies — and don't want to type it in and wire up the scori
 - **PHQ-9** — depression screening; a total score (0–27) and its severity band (minimal to severe).
 - **GAD-7** — anxiety screening; a total score (0–21) and its severity band.
 - **AUDIT-C** — alcohol use screening; a total score (0–12) with the usual positive-screen thresholds noted.
+- **Glasgow Coma Scale** — eye, verbal and motor responses; a total (3–15) and its severity band.
+- **Apgar Score** — the five criteria at 1 and 5 minutes after birth; a total (0–10) and result band for each.
+- **qSOFA Sepsis Screen**, **CHA₂DS₂-VASc Stroke Risk Score** and **Charlson Comorbidity Index** — yes/no criteria added up into a score (the Charlson index also uses the age). An unanswered criterion counts as No. qSOFA shows its result once you answer at least one criterion; CHA₂DS₂-VASc and Charlson need the age first.
 - **Calculators** — a few related measurements with their formulas already wired in; each result stays empty until all of its inputs are answered:
   - **Body Measurements** — height, weight, sex, waist and hip give BMI and its WHO category, body surface area, ideal body weight and waist-to-hip ratio.
   - **Kidney Function** — creatinine, age, sex and weight give eGFR (CKD-EPI 2021) and creatinine clearance (Cockcroft–Gault).

@@ -1,0 +1,759 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "apgar",
+      "text": "Apgar Score",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "apgar1",
+          "text": "1 minute after birth",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "apgar1-color",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "32406-1"
+                }
+              ],
+              "text": "Color (appearance)",
+              "type": "choice",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "answerOption": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 0
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6722-8",
+                    "display": "The baby's whole body is completely bluish-gray or pale"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 1
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6723-6",
+                    "display": "Good color in body with bluish hands or feet"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 2
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6724-4",
+                    "display": "Good color all over"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar1-heart-rate",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "32407-9"
+                }
+              ],
+              "text": "Heart rate (pulse)",
+              "type": "choice",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "answerOption": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 0
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6716-0",
+                    "display": "No heart rate"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 1
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6717-8",
+                    "display": "Fewer than 100 beats per minute"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 2
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6718-6",
+                    "display": "At least 100 beats per minute"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar1-tone",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "32408-7"
+                }
+              ],
+              "text": "Muscle tone (activity)",
+              "type": "choice",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "answerOption": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 0
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6713-7",
+                    "display": "Limp; no movement"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 1
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6714-5",
+                    "display": "Some flexion of arms and legs"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 2
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6715-2",
+                    "display": "Active motion"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar1-reflex",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "32409-5"
+                }
+              ],
+              "text": "Reflex irritability (grimace)",
+              "type": "choice",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "answerOption": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 0
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6719-4",
+                    "display": "No response to airways being suctioned"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 1
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6720-2",
+                    "display": "Grimace during suctioning"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 2
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6721-0",
+                    "display": "Grimace and pulling away, cough, or sneeze during suctioning"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar1-respiration",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "32410-3"
+                }
+              ],
+              "text": "Respiratory effort",
+              "type": "choice",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "answerOption": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 0
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6725-1",
+                    "display": "Not breathing"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 1
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6726-9",
+                    "display": "Weak cry; may sound like whimpering, slow or irregular breathing"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 2
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6727-7",
+                    "display": "Good, strong cry; normal rate and effort of breathing"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar1-total",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "9272-6"
+                }
+              ],
+              "text": "Apgar score (0–10)",
+              "type": "decimal",
+              "readOnly": true,
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "iif(%resource.repeat(item).where(linkId in ('apgar1-color' | 'apgar1-heart-rate' | 'apgar1-tone' | 'apgar1-reflex' | 'apgar1-respiration')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.count() = 5, %resource.repeat(item).where(linkId in ('apgar1-color' | 'apgar1-heart-rate' | 'apgar1-tone' | 'apgar1-reflex' | 'apgar1-respiration')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.sum(), {})"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar1-band",
+              "text": "Result",
+              "type": "string",
+              "readOnly": true,
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "iif(%resource.repeat(item).where(linkId='apgar1-total').answer.valueDecimal.exists(), iif(%resource.repeat(item).where(linkId='apgar1-total').answer.valueDecimal < 4, 'Low (0–3)', iif(%resource.repeat(item).where(linkId='apgar1-total').answer.valueDecimal < 7, 'Moderately abnormal (4–6)', 'Reassuring (7–10)')), {})"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "linkId": "apgar5",
+          "text": "5 minutes after birth",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "apgar5-color",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "32411-1"
+                }
+              ],
+              "text": "Color (appearance)",
+              "type": "choice",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "answerOption": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 0
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6722-8",
+                    "display": "The baby's whole body is completely bluish-gray or pale"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 1
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6723-6",
+                    "display": "Good color in body with bluish hands or feet"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 2
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6724-4",
+                    "display": "Good color all over"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar5-heart-rate",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "32412-9"
+                }
+              ],
+              "text": "Heart rate (pulse)",
+              "type": "choice",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "answerOption": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 0
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6716-0",
+                    "display": "No heart rate"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 1
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6717-8",
+                    "display": "Fewer than 100 beats per minute"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 2
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6718-6",
+                    "display": "At least 100 beats per minute"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar5-tone",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "32413-7"
+                }
+              ],
+              "text": "Muscle tone (activity)",
+              "type": "choice",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "answerOption": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 0
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6713-7",
+                    "display": "Limp; no movement"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 1
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6714-5",
+                    "display": "Some flexion of arms and legs"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 2
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6715-2",
+                    "display": "Active motion"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar5-reflex",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "32414-5"
+                }
+              ],
+              "text": "Reflex irritability (grimace)",
+              "type": "choice",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "answerOption": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 0
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6719-4",
+                    "display": "No response to airways being suctioned"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 1
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6720-2",
+                    "display": "Grimace during suctioning"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 2
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6721-0",
+                    "display": "Grimace and pulling away, cough, or sneeze during suctioning"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar5-respiration",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "32415-2"
+                }
+              ],
+              "text": "Respiratory effort",
+              "type": "choice",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "required": true,
+              "answerOption": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 0
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6725-1",
+                    "display": "Not breathing"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 1
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6726-9",
+                    "display": "Weak cry; may sound like whimpering, slow or irregular breathing"
+                  }
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                      "valueDecimal": 2
+                    }
+                  ],
+                  "valueCoding": {
+                    "system": "http://loinc.org",
+                    "code": "LA6727-7",
+                    "display": "Good, strong cry; normal rate and effort of breathing"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar5-total",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "9274-2"
+                }
+              ],
+              "text": "Apgar score (0–10)",
+              "type": "decimal",
+              "readOnly": true,
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "iif(%resource.repeat(item).where(linkId in ('apgar5-color' | 'apgar5-heart-rate' | 'apgar5-tone' | 'apgar5-reflex' | 'apgar5-respiration')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.count() = 5, %resource.repeat(item).where(linkId in ('apgar5-color' | 'apgar5-heart-rate' | 'apgar5-tone' | 'apgar5-reflex' | 'apgar5-respiration')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.sum(), {})"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "apgar5-band",
+              "text": "Result",
+              "type": "string",
+              "readOnly": true,
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "iif(%resource.repeat(item).where(linkId='apgar5-total').answer.valueDecimal.exists(), iif(%resource.repeat(item).where(linkId='apgar5-total').answer.valueDecimal < 4, 'Low (0–3)', iif(%resource.repeat(item).where(linkId='apgar5-total').answer.valueDecimal < 7, 'Moderately abnormal (4–6)', 'Reassuring (7–10)')), {})"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

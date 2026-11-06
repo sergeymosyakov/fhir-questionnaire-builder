@@ -36,7 +36,7 @@ license before you insert it.
 - **AUDIT-C** — a short form of the WHO AUDIT (Bush et al., *Arch Intern Med* 1998;158:1789).
   The ONC USCDI/ISP listing for AUDIT-C (submitted by NIAAA) states no restrictions on use
   ([isp.healthit.gov](https://isp.healthit.gov/uscdi-data/audit-c)).
-- **Intake fragments and calculators** (demographics, allergies, medications, pain; body measurements, kidney function, cardiac measurements, lipid panel, chemistry calculations, FIB-4, pregnancy dating) — original wording written for this builder, covered by the project license above (non-commercial use with attribution; commercial use needs written permission). Calculator formulas are published methods; each template lists its sources.
+- **Clinical scales with original wording** (Glasgow Coma Scale, Apgar Score, qSOFA, CHA₂DS₂-VASc, Charlson Comorbidity Index; the scales are published clinical methods, each template lists its sources), **intake fragments and calculators** (demographics, allergies, medications, pain; body measurements, kidney function, cardiac measurements, lipid panel, chemistry calculations, FIB-4, pregnancy dating) — original wording written for this builder, covered by the project license above (non-commercial use with attribution; commercial use needs written permission). Calculator formulas are published methods; each template lists its sources.
 - **Codes** — question and answer codes come from LOINC, copyright Regenstrief Institute,
   Inc., available at no cost under the [LOINC license](https://loinc.org/license/).
 
