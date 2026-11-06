@@ -5,6 +5,8 @@
 // data-testid registry:
 //   add-menu-btn / add-template-btn        Add menu trigger / "From template…"
 //   tpl-row-<id>, tpl-detail, templatesModalApply   templates modal
+//   tpl-cat-<id> / tpl-group-<id>        category filter chips / group headings in the list
+//   tpl-search / tpl-empty               search box / empty state
 //   rg-add-btn                           "+ Add another entry" on a repeating group
 // Preview radio rows (.radio-label) are the sanctioned non-testid exception.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -143,4 +145,33 @@ test('ticking "Not taking any medications" disables the medication rows', async 
   await expect(page.locator('.preview-card').getByText('«meds-none» ≠ Yes')).toBeVisible();
   await page.locator('[data-preview-id="meds-none"] .bool-seg__btn').nth(1).click();
   await expect(page.locator('[data-preview-id="meds-name"]')).toBeVisible();
+});
+
+test('the modal groups templates by category and filters by chip and search', async ({ page }) => {
+  await openDropdownItem(page, 'add-menu-btn', 'add-template-btn');
+  for (const id of ['scales', 'calculators', 'intake']) await expect(page.getByTestId('tpl-group-' + id)).toBeVisible();
+  await page.getByTestId('tpl-cat-calculators').click();
+  await expect(page.getByTestId('tpl-row-kidney-function')).toBeVisible();
+  await expect(page.getByTestId('tpl-row-phq-9')).toHaveCount(0);
+  await expect(page.getByTestId('tpl-cat-calculators')).toHaveAttribute('aria-pressed', 'true');
+  await page.getByTestId('tpl-cat-intake').click();
+  await page.getByTestId('tpl-search').fill('pain');
+  await expect(page.getByTestId('tpl-row-pain')).toBeVisible();
+  await expect(page.getByTestId('tpl-row-allergies')).toHaveCount(0);
+  await page.getByTestId('tpl-cat-scales').click();
+  await expect(page.getByTestId('tpl-empty')).toBeVisible();
+  await page.getByTestId('tpl-cat-all').click();
+  await expect(page.getByTestId('tpl-row-pain')).toBeVisible();
+});
+
+test('a selection hidden by a filter is cleared, and chips keep keyboard focus', async ({ page }) => {
+  await openDropdownItem(page, 'add-menu-btn', 'add-template-btn');
+  await page.getByTestId('tpl-row-phq-9').click();
+  await expect(page.getByTestId('tpl-detail')).toBeVisible();
+  await expect(page.getByTestId('templatesModalApply')).toBeEnabled();
+  await page.getByTestId('tpl-cat-calculators').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('tpl-cat-calculators')).toBeFocused();
+  await expect(page.getByTestId('tpl-detail')).toBeHidden();
+  await expect(page.getByTestId('templatesModalApply')).toBeDisabled();
 });

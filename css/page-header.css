@@ -79,6 +79,19 @@
   margin-left: 0;
 }
 
+/* Breadcrumb variant of the title: parent page link › current page. */
+.page-header-crumbs {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+.page-header-crumbs .page-header-title { color: #2563eb; font-weight: 600; }
+.page-header-crumbs .page-header-title:hover { text-decoration: underline; }
+.page-header-sep { color: #9ca3af; font-size: 18px; }
+.page-header-current { font-size: 18px; font-weight: 700; line-height: 1.2; color: #111827; }
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (min-width: 1024px) {
   /* Mobile lets the bar wrap (e.g. action buttons dropping below a long title

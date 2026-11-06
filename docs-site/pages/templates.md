@@ -23,7 +23,9 @@ demographics or allergies — and don't want to type it in and wire up the scori
 - **Intake fragments** — plain data-collection groups with no scoring: **Patient Demographics**, **Allergies** and **Current Medications** (both with a repeatable list, so a patient can add as many rows as needed), and **Pain Assessment** (0–10 severity, location, onset, description).
 
 The list of templates, with each scale's questions, scoring, source and license, is
-on the public [templates page](https://fhirbuilder.com/templates.html).
+on the public [templates page](https://fhirbuilder.com/templates.html), and every
+template also has its own page there (questions with their answer options, calculated
+results, source and license, plus a download link for the FHIR Questionnaire JSON).
 
 ## Insert a template
 
@@ -31,7 +33,7 @@ on the public [templates page](https://fhirbuilder.com/templates.html).
 - **Inside a group or an item:** open its **⚙** menu and choose **Insert template…**.
   The template is added at the end of that group's or item's children.
 
-In the window that opens, search by name or topic, select a template to see its
+In the window that opens, narrow the list with the category buttons (screening scales, calculators, intake sections) and the search box (by name or topic), select a template to see its
 **source** and **license**, then press **Insert**.
 
 The calculators use the same formulas as the [calculation gallery](calculation-gallery.md); the questions come with the template, so there is nothing to pick. Enter each value in the unit shown in its question.

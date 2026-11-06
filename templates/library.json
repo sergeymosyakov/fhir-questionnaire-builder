@@ -3,6 +3,7 @@
     "id": "phq-9",
     "name": "PHQ-9 Depression Screening",
     "description": "Nine-question depression screener with an automatic total score and severity band (minimal to severe).",
+    "category": "scales",
     "scoring": "Each answer scores 0–3. The total (0–27) maps to minimal (0–4), mild (5–9), moderate (10–14), moderately severe (15–19) or severe (20–27) depression.",
     "keywords": [
       "depression",
@@ -22,6 +23,7 @@
     "id": "gad-7",
     "name": "GAD-7 Anxiety Screening",
     "description": "Seven-question generalized anxiety screener with an automatic total score and severity band (minimal to severe).",
+    "category": "scales",
     "scoring": "Each answer scores 0–3. The total (0–21) maps to minimal (0–4), mild (5–9), moderate (10–14) or severe (15–21) anxiety.",
     "keywords": [
       "anxiety",
@@ -40,6 +42,7 @@
     "id": "audit-c",
     "name": "AUDIT-C Alcohol Use Screening",
     "description": "Three-question alcohol consumption screen with an automatic total score (0–12) and the usual positive-screen thresholds.",
+    "category": "scales",
     "scoring": "Each answer scores 0–4. The total (0–12) is a positive screen at 4 or more for men and 3 or more for women.",
     "keywords": [
       "alcohol",
@@ -59,6 +62,7 @@
     "id": "phq-2",
     "name": "PHQ-2 Depression Screening",
     "description": "Two-question depression screener with an automatic total and positive-screen flag; the short entry to the PHQ-9.",
+    "category": "scales",
     "scoring": "Each answer scores 0–3. The total (0–6) is a positive screen at 3 or more.",
     "keywords": [
       "depression",
@@ -77,6 +81,7 @@
     "id": "gad-2",
     "name": "GAD-2 Anxiety Screening",
     "description": "Two-question anxiety screener with an automatic total and positive-screen flag; the short entry to the GAD-7.",
+    "category": "scales",
     "scoring": "Each answer scores 0–3. The total (0–6) is a positive screen at 3 or more.",
     "keywords": [
       "anxiety",
@@ -95,6 +100,7 @@
     "id": "demographics",
     "name": "Patient Demographics",
     "description": "Name, date of birth, sex assigned at birth and contact details for a patient intake form.",
+    "category": "intake",
     "scoring": "No scoring — a data-collection fragment.",
     "keywords": [
       "intake",
@@ -112,6 +118,7 @@
     "id": "allergies",
     "name": "Allergies",
     "description": "'No known allergies' plus a repeatable list of allergens with reaction and severity.",
+    "category": "intake",
     "scoring": "No scoring — a data-collection fragment.",
     "keywords": [
       "allergy",
@@ -129,6 +136,7 @@
     "id": "medications",
     "name": "Current Medications",
     "description": "'Not taking any medications' plus a repeatable list with dose, frequency and reason.",
+    "category": "intake",
     "scoring": "No scoring — a data-collection fragment.",
     "keywords": [
       "medication",
@@ -146,6 +154,7 @@
     "id": "pain",
     "name": "Pain Assessment",
     "description": "Pain severity on a 0–10 scale, location, onset and a free-text description.",
+    "category": "intake",
     "scoring": "No scoring — severity is recorded as a 0–10 number.",
     "keywords": [
       "pain",
@@ -162,6 +171,7 @@
     "id": "body-measurements",
     "name": "Body Measurements",
     "description": "Height, weight, sex and waist/hip with BMI (and its WHO category), body surface area, ideal body weight and waist-to-hip ratio.",
+    "category": "calculators",
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "bmi",
@@ -182,6 +192,7 @@
     "id": "kidney-function",
     "name": "Kidney Function",
     "description": "Creatinine, age, sex and weight with eGFR (CKD-EPI 2021) and creatinine clearance (Cockcroft–Gault).",
+    "category": "calculators",
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "kidney",
@@ -201,6 +212,7 @@
     "id": "cardiac-measurements",
     "name": "Cardiac Measurements",
     "description": "Blood pressure, QT interval and heart rate with mean arterial pressure and corrected QT (Bazett and Fridericia).",
+    "category": "calculators",
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "blood pressure",
@@ -220,6 +232,7 @@
     "id": "lipid-panel",
     "name": "Lipid Panel",
     "description": "Total cholesterol, HDL and triglycerides with calculated LDL cholesterol (Friedewald).",
+    "category": "calculators",
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "lipid",
@@ -238,6 +251,7 @@
     "id": "chemistry-calculations",
     "name": "Chemistry Calculations",
     "description": "Electrolytes, calcium, albumin, glucose and insulin with anion gap, albumin-corrected calcium and HOMA-IR.",
+    "category": "calculators",
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "anion gap",
@@ -257,6 +271,7 @@
     "id": "fib4",
     "name": "FIB-4 Liver Fibrosis Index",
     "description": "Age, AST, ALT and platelets with the FIB-4 index and its fibrosis-risk category.",
+    "category": "calculators",
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "fib-4",
@@ -277,6 +292,7 @@
     "id": "pregnancy-dating",
     "name": "Pregnancy Dating",
     "description": "Last menstrual period and visit date with the expected delivery date (Naegele) and gestational age in weeks.",
+    "category": "calculators",
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "pregnancy",
