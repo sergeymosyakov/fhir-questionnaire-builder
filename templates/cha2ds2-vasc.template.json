@@ -1,0 +1,79 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "cha",
+      "text": "CHA₂DS₂-VASc Stroke Risk Score",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "cha-chf",
+          "text": "Congestive heart failure or left ventricular dysfunction",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cha-htn",
+          "text": "Hypertension",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cha-age",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "30525-0"
+            }
+          ],
+          "text": "Age (years)",
+          "type": "integer",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "a",
+                "display": "years"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "cha-diabetes",
+          "text": "Diabetes mellitus",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cha-stroke",
+          "text": "Previous stroke, transient ischemic attack or thromboembolism",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cha-vascular",
+          "text": "Vascular disease (previous myocardial infarction, peripheral artery disease or aortic plaque)",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cha-female",
+          "text": "Female sex",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cha-score",
+          "text": "CHA₂DS₂-VASc score (0–9)",
+          "type": "integer",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.item.where(linkId='cha').item.where(linkId='cha-age').answer.valueInteger.exists(), (iif((%resource.item.where(linkId='cha').item.where(linkId='cha-chf').answer.valueBoolean), 1, 0) + iif((%resource.item.where(linkId='cha').item.where(linkId='cha-htn').answer.valueBoolean), 1, 0) + iif((%resource.item.where(linkId='cha').item.where(linkId='cha-age').answer.valueInteger >= 75), 2, 0) + iif((%resource.item.where(linkId='cha').item.where(linkId='cha-diabetes').answer.valueBoolean), 1, 0) + iif((%resource.item.where(linkId='cha').item.where(linkId='cha-stroke').answer.valueBoolean), 2, 0) + iif((%resource.item.where(linkId='cha').item.where(linkId='cha-vascular').answer.valueBoolean), 1, 0) + iif((%resource.item.where(linkId='cha').item.where(linkId='cha-age').answer.valueInteger >= 65 and %resource.item.where(linkId='cha').item.where(linkId='cha-age').answer.valueInteger < 75), 1, 0) + iif((%resource.item.where(linkId='cha').item.where(linkId='cha-female').answer.valueBoolean), 1, 0)), {})"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

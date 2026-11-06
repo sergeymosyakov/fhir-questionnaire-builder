@@ -1,11 +1,11 @@
 // Static, crawlable page for ONE template (templates/<id>.html) — generated, never hand-edited.
 import { renderStaticPage, esc, SITE } from './static-page.js';
-import { questionsOf, resultsOf, linkHtml, LOINC_NOTICE } from './template-view.js';
+import { questionsOf, resultsOf, linkHtml, usesLoinc, LOINC_NOTICE } from './template-view.js';
 
 /** @param {object} entry catalog entry  @param {object} group its wrapper group  @param {object[]} related other entries of the same category */
 export function renderTemplatePage(entry, group, related) {
   const title = `${entry.name} — FHIR Questionnaire Template`;
-  const description = `${entry.description} FHIR Questionnaire with LOINC codes, source and license — insert it in one click.`;
+  const description = `${entry.description} FHIR Questionnaire with ${usesLoinc(group) ? 'LOINC codes, ' : ''}source and license — insert it in one click.`;
   const questions = questionsOf(group);
   const results = resultsOf(group);
   return renderStaticPage({
@@ -16,7 +16,7 @@ export function renderTemplatePage(entry, group, related) {
     title,
     pageTitle: `${entry.name} FHIR Questionnaire Template | FHIR Questionnaire Builder`,
     description,
-    keywords: ['FHIR Questionnaire', entry.name, ...(entry.keywords ?? []), 'LOINC', 'SDC'].join(', '),
+    keywords: ['FHIR Questionnaire', entry.name, ...(entry.keywords ?? []), ...(usesLoinc(group) ? ['LOINC'] : []), 'SDC'].join(', '),
     headerTitle: 'Questionnaire templates',
     crumb: entry.name,
     titleTestid: 'tpd-all',
@@ -62,6 +62,6 @@ ${related.length ? `    <h2>More templates</h2>
     <ul>
 ${related.map((e) => `      <li><a href="${esc(e.id)}.html" data-testid="tpd-related-${esc(e.id)}">${esc(e.name)}</a></li>`).join('\n')}
     </ul>
-` : ''}    <p class="gp-source">${LOINC_NOTICE}</p>`,
+` : ''}${usesLoinc(group) ? `    <p class="gp-source">${LOINC_NOTICE}</p>` : ''}`,
   });
 }

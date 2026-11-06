@@ -143,6 +143,36 @@
           "position": 16,
           "name": "Pregnancy Dating",
           "url": "https://fhirbuilder.com/templates/pregnancy-dating.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 17,
+          "name": "qSOFA Sepsis Screen",
+          "url": "https://fhirbuilder.com/templates/qsofa.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 18,
+          "name": "CHA₂DS₂-VASc Stroke Risk Score",
+          "url": "https://fhirbuilder.com/templates/cha2ds2-vasc.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 19,
+          "name": "Charlson Comorbidity Index",
+          "url": "https://fhirbuilder.com/templates/charlson-comorbidity-index.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 20,
+          "name": "Glasgow Coma Scale",
+          "url": "https://fhirbuilder.com/templates/glasgow-coma-scale.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 21,
+          "name": "Apgar Score",
+          "url": "https://fhirbuilder.com/templates/apgar-score.html"
         }
       ]
     },
@@ -194,6 +224,11 @@
         <li><a href="#audit-c">AUDIT-C Alcohol Use Screening</a></li>
         <li><a href="#phq-2">PHQ-2 Depression Screening</a></li>
         <li><a href="#gad-2">GAD-2 Anxiety Screening</a></li>
+        <li><a href="#qsofa">qSOFA Sepsis Screen</a></li>
+        <li><a href="#cha2ds2-vasc">CHA₂DS₂-VASc Stroke Risk Score</a></li>
+        <li><a href="#charlson-comorbidity-index">Charlson Comorbidity Index</a></li>
+        <li><a href="#glasgow-coma-scale">Glasgow Coma Scale</a></li>
+        <li><a href="#apgar-score">Apgar Score</a></li>
       </ul>
     </nav>
     <section class="gp-card" id="phq-9" data-testid="tp-card-phq-9">
@@ -245,6 +280,56 @@
       <p class="gp-source">Source: Kroenke et al. 2007, Ann Intern Med 146:317 (GAD-2). Codes: LOINC; form text as published at phqscreeners.com. (<a href="https://pubmed.ncbi.nlm.nih.gov/17339617/" rel="noopener">link</a>)</p>
       <p class="gp-source">License: Developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute. (<a href="https://www.phqscreeners.com/" rel="noopener">link</a>)</p>
       <p class="gp-source"><a href="templates/gad-2.template.json" data-testid="tp-json-gad-2">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="qsofa" data-testid="tp-card-qsofa">
+      <h3><a href="templates/qsofa.html" data-testid="tp-detail-qsofa">qSOFA Sepsis Screen</a></h3>
+      <p>Three bedside yes/no criteria with the qSOFA score and its risk result; two or more criteria mean a high risk of poor outcome.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Each criterion that is present scores 1 point. An unanswered criterion counts as No; the result appears once at least one criterion is answered.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Respiratory rate 22 breaths per minute or higher</li><li>Altered mentation (Glasgow Coma Scale below 15)</li><li>Systolic blood pressure 100 mmHg or lower</li></ol>
+      <p class="gp-source">Source: Singer et al. 2016 (Sepsis-3), JAMA 315:801. (<a href="https://pubmed.ncbi.nlm.nih.gov/26903338/" rel="noopener">link</a>)</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/qsofa.template.json" data-testid="tp-json-qsofa">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="cha2ds2-vasc" data-testid="tp-card-cha2ds2-vasc">
+      <h3><a href="templates/cha2ds2-vasc.html" data-testid="tp-detail-cha2ds2-vasc">CHA₂DS₂-VASc Stroke Risk Score</a></h3>
+      <p>Six yes/no criteria and the age with the CHA₂DS₂-VASc score (0–9) for stroke risk in atrial fibrillation; a higher score means a higher risk.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Points: heart failure 1, hypertension 1, age 75 or older 2, diabetes 1, previous stroke or TIA 2, vascular disease 1, age 65 to 74 1, female sex 1 (0–9). The score appears once the age is entered; an unanswered criterion counts as No.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Congestive heart failure or left ventricular dysfunction</li><li>Hypertension</li><li>Age (years)</li><li>Diabetes mellitus</li><li>Previous stroke, transient ischemic attack or thromboembolism</li><li>Vascular disease (previous myocardial infarction, peripheral artery disease or aortic plaque)</li><li>Female sex</li></ol>
+      <p class="gp-source">Source: Lip et al. 2010, Chest 137:263. Codes: LOINC. (<a href="https://pubmed.ncbi.nlm.nih.gov/19762550/" rel="noopener">link</a>)</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/cha2ds2-vasc.template.json" data-testid="tp-json-cha2ds2-vasc">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="charlson-comorbidity-index" data-testid="tp-card-charlson-comorbidity-index">
+      <h3><a href="templates/charlson-comorbidity-index.html" data-testid="tp-detail-charlson-comorbidity-index">Charlson Comorbidity Index</a></h3>
+      <p>Comorbidities and age with the age-adjusted Charlson Comorbidity Index.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Comorbidities score 1, 2, 3 or 6 points by weight; the age adds 1 point per decade from 50, up to 4 points from age 80. The index appears once the age is entered; an unanswered comorbidity counts as No.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Myocardial infarction</li><li>Congestive heart failure</li><li>Peripheral vascular disease</li><li>Cerebrovascular disease</li><li>Dementia</li><li>Chronic pulmonary disease</li><li>Rheumatologic disease</li><li>Peptic ulcer disease</li><li>Hemiplegia or paraplegia</li><li>Renal disease</li><li>Leukemia</li><li>Lymphoma</li><li>AIDS</li><li>Liver disease</li><li>Diabetes</li><li>Solid tumor</li><li>Age (years)</li></ol>
+      <p class="gp-source">Source: Charlson et al. 1987, J Chronic Dis 40:373; age adjustment per Charlson et al. 1994, J Clin Epidemiol 47:1245. (<a href="https://pubmed.ncbi.nlm.nih.gov/3558716/" rel="noopener">link</a>)</p>
+      <p class="gp-source">License: Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/charlson-comorbidity-index.template.json" data-testid="tp-json-charlson-comorbidity-index">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="glasgow-coma-scale" data-testid="tp-card-glasgow-coma-scale">
+      <h3><a href="templates/glasgow-coma-scale.html" data-testid="tp-detail-glasgow-coma-scale">Glasgow Coma Scale</a></h3>
+      <p>Eye, verbal and motor responses with the total score (3–15) and its severity band.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Eye 1–4, verbal 1–5 and motor 1–6 add up to a total of 3–15: 13–15 mild, 9–12 moderate, 3–8 severe.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Eye opening response</li><li>Verbal response</li><li>Motor response</li></ol>
+      <p class="gp-source">Source: Teasdale &amp; Jennett 1974, Lancet 2:81 (Glasgow Coma Scale). Codes and answer lists: LOINC. (<a href="https://pubmed.ncbi.nlm.nih.gov/4136544/" rel="noopener">link</a>)</p>
+      <p class="gp-source">License: Original question wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). The scale itself is a published clinical method; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/glasgow-coma-scale.template.json" data-testid="tp-json-glasgow-coma-scale">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="apgar-score" data-testid="tp-card-apgar-score">
+      <h3><a href="templates/apgar-score.html" data-testid="tp-detail-apgar-score">Apgar Score</a></h3>
+      <p>The five Apgar criteria at 1 and 5 minutes after birth, each with its total (0–10) and result band.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Each criterion scores 0–2. The total (0–10) at each time point is reassuring at 7–10, moderately abnormal at 4–6 and low at 0–3.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Color (appearance)</li><li>Heart rate (pulse)</li><li>Muscle tone (activity)</li><li>Reflex irritability (grimace)</li><li>Respiratory effort</li><li>Color (appearance)</li><li>Heart rate (pulse)</li><li>Muscle tone (activity)</li><li>Reflex irritability (grimace)</li><li>Respiratory effort</li></ol>
+      <p class="gp-source">Source: Apgar 1953, Curr Res Anesth Analg 32:260 (Apgar score); score bands per AAP/ACOG. Codes and answer lists: LOINC. (<a href="https://pubmed.ncbi.nlm.nih.gov/13083014/" rel="noopener">link</a>)</p>
+      <p class="gp-source">License: Original question wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). The scale itself is a published clinical method; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="templates/apgar-score.template.json" data-testid="tp-json-apgar-score">Download the FHIR Questionnaire JSON</a></p>
     </section>
     <h2 id="cat-calculators">Calculators</h2>
     <nav class="gp-toc" aria-label="Calculators">

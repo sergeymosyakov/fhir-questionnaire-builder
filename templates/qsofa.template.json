@@ -1,0 +1,58 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "qsofa",
+      "text": "qSOFA Sepsis Screen",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "qsofa-resp",
+          "text": "Respiratory rate 22 breaths per minute or higher",
+          "type": "boolean"
+        },
+        {
+          "linkId": "qsofa-mentation",
+          "text": "Altered mentation (Glasgow Coma Scale below 15)",
+          "type": "boolean"
+        },
+        {
+          "linkId": "qsofa-sbp",
+          "text": "Systolic blood pressure 100 mmHg or lower",
+          "type": "boolean"
+        },
+        {
+          "linkId": "qsofa-score",
+          "text": "qSOFA score (0–3)",
+          "type": "integer",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif((%resource.item.where(linkId='qsofa').item.where(linkId='qsofa-resp').answer.valueBoolean | %resource.item.where(linkId='qsofa').item.where(linkId='qsofa-mentation').answer.valueBoolean | %resource.item.where(linkId='qsofa').item.where(linkId='qsofa-sbp').answer.valueBoolean).exists(), (iif((%resource.item.where(linkId='qsofa').item.where(linkId='qsofa-resp').answer.valueBoolean), 1, 0) + iif((%resource.item.where(linkId='qsofa').item.where(linkId='qsofa-mentation').answer.valueBoolean), 1, 0) + iif((%resource.item.where(linkId='qsofa').item.where(linkId='qsofa-sbp').answer.valueBoolean), 1, 0)), {})"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "qsofa-risk",
+          "text": "qSOFA result",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif((%resource.item.where(linkId='qsofa').item.where(linkId='qsofa-resp').answer.valueBoolean | %resource.item.where(linkId='qsofa').item.where(linkId='qsofa-mentation').answer.valueBoolean | %resource.item.where(linkId='qsofa').item.where(linkId='qsofa-sbp').answer.valueBoolean).exists(), iif((iif((%resource.item.where(linkId='qsofa').item.where(linkId='qsofa-resp').answer.valueBoolean), 1, 0) + iif((%resource.item.where(linkId='qsofa').item.where(linkId='qsofa-mentation').answer.valueBoolean), 1, 0) + iif((%resource.item.where(linkId='qsofa').item.where(linkId='qsofa-sbp').answer.valueBoolean), 1, 0)).exists(), iif((iif((%resource.item.where(linkId='qsofa').item.where(linkId='qsofa-resp').answer.valueBoolean), 1, 0) + iif((%resource.item.where(linkId='qsofa').item.where(linkId='qsofa-mentation').answer.valueBoolean), 1, 0) + iif((%resource.item.where(linkId='qsofa').item.where(linkId='qsofa-sbp').answer.valueBoolean), 1, 0)) < 2, 'Lower risk', 'High risk'), {}), {})"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

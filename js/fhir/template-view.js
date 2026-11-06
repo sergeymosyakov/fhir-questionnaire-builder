@@ -17,6 +17,12 @@ export function resultsOf(group) {
   return (group.item ?? []).flatMap((i) => (i.type === 'group' ? resultsOf(i) : i.readOnly ? [i.text] : []));
 }
 
+/** True when the template carries LOINC codes (item codes or answer codes). */
+export function usesLoinc(group) {
+  const loinc = (c) => c?.system === 'http://loinc.org';
+  return (group.item ?? []).some((i) => i.code?.some(loinc) || i.answerOption?.some((o) => loinc(o.valueCoding)) || (i.type === 'group' && usesLoinc(i)));
+}
+
 /** `text (link)` as escaped HTML; the link only when there is an href. */
 export const linkHtml = (text, href) => (href ? `${esc(text)} (<a href="${esc(href)}" rel="noopener">link</a>)` : esc(text));
 

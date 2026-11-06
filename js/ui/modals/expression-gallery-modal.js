@@ -270,11 +270,15 @@ class ExpressionGalleryModal extends Modal {
     if (slot.transforms?.length) {
       // uniqueTransforms (e.g. a weighted condition list): each option can only
       // be picked in one row at a time, so hide it from every other row once chosen.
+      // Options sharing a `group` (tiers of one condition) exclude each other too.
       const usedElsewhere = slot.uniqueTransforms
         ? new Set(rows.filter((_, i) => i !== index).map((r) => r.transformId).filter(Boolean))
         : null;
+      const usedGroups = usedElsewhere
+        ? new Set(slot.transforms.filter((t) => usedElsewhere.has(t.id) && t.group).map((t) => t.group))
+        : null;
       const availableTransforms = usedElsewhere
-        ? slot.transforms.filter((t) => !usedElsewhere.has(t.id))
+        ? slot.transforms.filter((t) => !usedElsewhere.has(t.id) && !(t.group && usedGroups.has(t.group)))
         : slot.transforms;
       const currentTransformId = sel.transformId || availableTransforms[0]?.id;
       const transformSel = createCustomSelect({

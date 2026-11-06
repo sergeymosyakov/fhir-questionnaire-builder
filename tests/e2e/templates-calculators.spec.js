@@ -32,6 +32,9 @@ async function type(page, previewId, value) {
   await commitInput(page);
 }
 
+// Yes (0) / No (1) button of a yes/no question in the preview.
+const answerYesNo = (page, id, yes = true) => page.locator(`[data-preview-id="${id}"] .bool-seg__btn`).nth(yes ? 0 : 1).click();
+
 const result = (page, id) => page.locator(`[data-preview-id="${id}"]`);
 
 test.beforeEach(async ({ page }) => {
@@ -41,7 +44,7 @@ test.beforeEach(async ({ page }) => {
 
 test('library lists the calculator templates', async ({ page }) => {
   await openDropdownItem(page, 'add-menu-btn', 'add-template-btn');
-  for (const id of ['body-measurements', 'kidney-function', 'cardiac-measurements', 'lipid-panel', 'chemistry-calculations', 'fib4', 'pregnancy-dating']) {
+  for (const id of ['body-measurements', 'kidney-function', 'cardiac-measurements', 'lipid-panel', 'chemistry-calculations', 'fib4', 'pregnancy-dating', 'qsofa', 'cha2ds2-vasc', 'charlson-comorbidity-index']) {
     await expect(page.getByTestId('tpl-row-' + id)).toBeVisible();
   }
 });
@@ -134,4 +137,37 @@ test('a second Body Measurements calculates from its own inputs', async ({ page 
   await type(page, `body-weight${suffix}`, 100);
   await expect(result(page, 'body-bmi')).toContainText('22.9');
   await expect(result(page, `body-bmi${suffix}`)).toContainText('25');
+});
+
+test('qSOFA stays empty until a criterion is answered, then counts the Yes answers', async ({ page }) => {
+  await insert(page, 'qsofa');
+  await expect(result(page, 'qsofa-risk')).not.toContainText(/Lower risk|High risk/);
+  await answerYesNo(page, 'qsofa-resp');
+  await expect(result(page, 'qsofa-score')).toContainText('1');
+  await expect(result(page, 'qsofa-risk')).toContainText('Lower risk');
+  await answerYesNo(page, 'qsofa-sbp');
+  await expect(result(page, 'qsofa-score')).toContainText('2');
+  await expect(result(page, 'qsofa-risk')).toContainText('High risk');
+});
+
+test('CHA₂DS₂-VASc waits for the age, then weights age 75 and previous stroke at 2 points', async ({ page }) => {
+  await insert(page, 'cha2ds2-vasc');
+  await answerYesNo(page, 'cha-stroke');
+  await expect(result(page, 'cha-score')).toContainText('—'); // empty result
+  await type(page, 'cha-age', 80);
+  await expect(result(page, 'cha-score')).toContainText('4');
+  await answerYesNo(page, 'cha-female');
+  await expect(result(page, 'cha-score')).toContainText('5');
+});
+
+test('Charlson Comorbidity Index adds the age bonus and waits for the age', async ({ page }) => {
+  await insert(page, 'charlson-comorbidity-index');
+  await answerYesNo(page, 'cci-mi');
+  await expect(result(page, 'cci-index')).not.toContainText(/\d/);
+  await type(page, 'cci-age', 65);
+  await expect(result(page, 'cci-index')).toContainText('3');
+  await page.locator('[data-preview-id="cci-tumor"] .radio-label').nth(2).click(); // Metastatic
+  await expect(result(page, 'cci-index')).toContainText('9');
+  await page.locator('[data-preview-id="cci-tumor"] .radio-label').nth(1).click(); // Localized replaces it
+  await expect(result(page, 'cci-index')).toContainText('5');
 });

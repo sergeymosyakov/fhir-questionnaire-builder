@@ -1,0 +1,231 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "cci",
+      "text": "Charlson Comorbidity Index",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "cci-mi",
+          "text": "Myocardial infarction",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-chf",
+          "text": "Congestive heart failure",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-pvd",
+          "text": "Peripheral vascular disease",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-cvd",
+          "text": "Cerebrovascular disease",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-dementia",
+          "text": "Dementia",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-copd",
+          "text": "Chronic pulmonary disease",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-rheum",
+          "text": "Rheumatologic disease",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-ulcer",
+          "text": "Peptic ulcer disease",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-hemiplegia",
+          "text": "Hemiplegia or paraplegia",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-renal",
+          "text": "Renal disease",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-leukemia",
+          "text": "Leukemia",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-lymphoma",
+          "text": "Lymphoma",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-aids",
+          "text": "AIDS",
+          "type": "boolean"
+        },
+        {
+          "linkId": "cci-liver",
+          "text": "Liver disease",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "https://fhirbuilder.com/CodeSystem/templates",
+                "code": "none",
+                "display": "None"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "https://fhirbuilder.com/CodeSystem/templates",
+                "code": "mild",
+                "display": "Mild"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "https://fhirbuilder.com/CodeSystem/templates",
+                "code": "severe",
+                "display": "Moderate or severe"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "cci-diabetes",
+          "text": "Diabetes",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "https://fhirbuilder.com/CodeSystem/templates",
+                "code": "none",
+                "display": "None"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "https://fhirbuilder.com/CodeSystem/templates",
+                "code": "uncomplicated",
+                "display": "Without end-organ damage"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "https://fhirbuilder.com/CodeSystem/templates",
+                "code": "end-organ",
+                "display": "With end-organ damage"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "cci-tumor",
+          "text": "Solid tumor",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "https://fhirbuilder.com/CodeSystem/templates",
+                "code": "none",
+                "display": "None"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "https://fhirbuilder.com/CodeSystem/templates",
+                "code": "localized",
+                "display": "Localized"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "https://fhirbuilder.com/CodeSystem/templates",
+                "code": "metastatic",
+                "display": "Metastatic"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "cci-age",
+          "text": "Age (years)",
+          "type": "integer",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "a",
+                "display": "years"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "cci-index",
+          "text": "Charlson Comorbidity Index (age-adjusted)",
+          "type": "integer",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.item.where(linkId='cci').item.where(linkId='cci-age').answer.valueInteger.exists(), (((iif(%resource.item.where(linkId='cci').item.where(linkId='cci-mi').answer.valueBoolean, 1, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-chf').answer.valueBoolean, 1, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-pvd').answer.valueBoolean, 1, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-cvd').answer.valueBoolean, 1, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-dementia').answer.valueBoolean, 1, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-copd').answer.valueBoolean, 1, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-rheum').answer.valueBoolean, 1, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-ulcer').answer.valueBoolean, 1, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-hemiplegia').answer.valueBoolean, 2, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-renal').answer.valueBoolean, 2, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-leukemia').answer.valueBoolean, 2, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-lymphoma').answer.valueBoolean, 2, 0)) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-aids').answer.valueBoolean, 6, 0)) + (iif((%resource.item.where(linkId='cci').item.where(linkId='cci-liver').answer.valueCoding.code = 'mild'), 1, 0)) + (iif((%resource.item.where(linkId='cci').item.where(linkId='cci-liver').answer.valueCoding.code = 'severe'), 3, 0)) + (iif((%resource.item.where(linkId='cci').item.where(linkId='cci-diabetes').answer.valueCoding.code = 'uncomplicated'), 1, 0)) + (iif((%resource.item.where(linkId='cci').item.where(linkId='cci-diabetes').answer.valueCoding.code = 'end-organ'), 2, 0)) + (iif((%resource.item.where(linkId='cci').item.where(linkId='cci-tumor').answer.valueCoding.code = 'localized'), 2, 0)) + (iif((%resource.item.where(linkId='cci').item.where(linkId='cci-tumor').answer.valueCoding.code = 'metastatic'), 6, 0))) + (iif(%resource.item.where(linkId='cci').item.where(linkId='cci-age').answer.valueInteger.exists(), iif(%resource.item.where(linkId='cci').item.where(linkId='cci-age').answer.valueInteger < 50, 0, iif(%resource.item.where(linkId='cci').item.where(linkId='cci-age').answer.valueInteger < 60, 1, iif(%resource.item.where(linkId='cci').item.where(linkId='cci-age').answer.valueInteger < 70, 2, iif(%resource.item.where(linkId='cci').item.where(linkId='cci-age').answer.valueInteger < 80, 3, 4)))), {}))), {})"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

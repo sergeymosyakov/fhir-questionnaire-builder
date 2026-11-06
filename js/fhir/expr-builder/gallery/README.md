@@ -106,6 +106,10 @@ transforms: [
 uniqueTransforms: true,
 ```
 
+Transforms that are tiers of one condition (mild vs severe liver disease) can
+share a `group: 'liver'`: once one is picked in a row, the others of that group
+are hidden from every other row too, so the tiers can't be added together.
+
 See `charlson-comorbidity-index.js`.
 
 ## Threshold-category output

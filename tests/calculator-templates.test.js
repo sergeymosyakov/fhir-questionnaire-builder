@@ -38,13 +38,25 @@ const CASES = {
     answers: { age: 50, ast: 40, alt: 40, plt: 200 },
     expect: { index: [1.58], category: ['Indeterminate (1.3–2.67)'] },
   },
+  qsofa: {
+    answers: { resp: true, mentation: false, sbp: true },
+    expect: { score: [2], risk: ['High risk'] },
+  },
+  'cha2ds2-vasc': {
+    answers: { chf: true, htn: true, age: 80, diabetes: false, stroke: true, vascular: false, female: true },
+    expect: { score: [7] },
+  },
+  'charlson-comorbidity-index': {
+    answers: { mi: true, chf: true, renal: true, liver: 'severe', age: 65 },
+    expect: { index: [9] },
+  },
   'pregnancy-dating': {
     answers: { lmp: '2026-01-01', visit: '2026-03-12' },
     expect: { edd: ['2026-10-08'], ga: [10] },
   },
 };
 
-const VALUE_KEY = { decimal: 'valueDecimal', integer: 'valueInteger', date: 'valueDate' };
+const VALUE_KEY = { decimal: 'valueDecimal', integer: 'valueInteger', date: 'valueDate', boolean: 'valueBoolean' };
 const answerFor = (def, key, v) => {
   const type = def.questions.find(q => q[0] === key)[2];
   return type === 'radio' ? { valueCoding: { code: v } } : { [VALUE_KEY[type]]: v };
@@ -138,6 +150,36 @@ describe('calculator templates: more branches', () => {
   ])('FIB-4 %j', (answers, index, category) => {
     expect(run('fib4', answers)).toEqual({ index: [index], category: [category] });
   });
+  it.each([
+    [{ resp: false }, '0', 'Lower risk'],
+    [{ resp: true, mentation: true }, '2', 'High risk'],
+  ])('qSOFA %j (unanswered criteria count as No)', (answers, score, risk) => {
+    expect(run('qsofa', answers)).toEqual({ score: [score], risk: [risk] });
+  });
+  it.each([[60, '0'], [64, '0'], [65, '1'], [74, '1'], [75, '2'], [90, '2']])('CHA₂DS₂-VASc age %i alone scores %s (the two age bands cannot add up)', (age, score) => {
+    expect(run('cha2ds2-vasc', { age })).toEqual({ score: [score] });
+  });
+  it('CHA₂DS₂-VASc adds 2 points for previous stroke and 1 for each other criterion', () => {
+    expect(run('cha2ds2-vasc', { age: 50, stroke: true })).toEqual({ score: ['2'] });
+    expect(run('cha2ds2-vasc', { age: 70, chf: true, htn: true, diabetes: true, vascular: true, female: true })).toEqual({ score: ['6'] });
+  });
+  it('CHA₂DS₂-VASc waits for the age', () => {
+    expect(run('cha2ds2-vasc', { chf: true })).toEqual({ score: [] });
+  });
+  it.each([[45, '1'], [49, '1'], [50, '2'], [59, '2'], [60, '3'], [69, '3'], [70, '4'], [79, '4'], [80, '5'], [95, '5']])('Charlson age %i with one point of comorbidity gives %s', (age, index) => {
+    expect(run('charlson-comorbidity-index', { mi: true, age })).toEqual({ index: [index] });
+  });
+  it.each([
+    [{ liver: 'mild' }, '1'], [{ liver: 'severe' }, '3'], [{ liver: 'none' }, '0'],
+    [{ diabetes: 'uncomplicated' }, '1'], [{ diabetes: 'end-organ' }, '2'],
+    [{ tumor: 'localized' }, '2'], [{ tumor: 'metastatic' }, '6'],
+  ])('Charlson tiered answer %j scores %s under 50 (a tier is one choice, not two additive boxes)', (answers, index) => {
+    expect(run('charlson-comorbidity-index', { ...answers, age: 40 })).toEqual({ index: [index] });
+  });
+  it('Charlson needs the age, and weights AIDS and leukemia', () => {
+    expect(run('charlson-comorbidity-index', { mi: true })).toEqual({ index: [] });
+    expect(run('charlson-comorbidity-index', { tumor: 'metastatic', aids: true, leukemia: true, age: 40 })).toEqual({ index: ['14'] });
+  });
   it('results stay empty while an input is missing', () => {
     expect(run('kidney-function', { age: 50, weight: 72, creatinine: 1 })).toEqual({ egfr: [], crcl: [] });
     expect(run('lipid-panel', { tc: 200 })).toEqual({ ldl: [] });
@@ -149,8 +191,9 @@ describe('calculator templates: units match the transforms used', () => {
   const UCUM = { kg: 'kg', cm: 'cm', mgdl: 'mg/dL', gdl: 'g/dL' };
   it.each(DEFS)('$id', def => {
     for (const out of def.outputs) {
-      for (const [, [key, transformId]] of Object.entries(out.slots)) {
-        if (!transformId) continue;
+      for (const [, spec] of Object.entries(out.slots)) {
+        const [key, transformId] = Array.isArray(spec) ? spec : [];
+        if (!UCUM[transformId]) continue;
         const question = def.questions.find(q => q[0] === key);
         expect(question[3].unit[0], `${out.key} <- ${key}`).toBe(UCUM[transformId]);
       }

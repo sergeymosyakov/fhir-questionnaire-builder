@@ -1,0 +1,330 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "gcs",
+      "text": "Glasgow Coma Scale",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "gcs-intro",
+          "text": "Record the best response the patient gives in each category.",
+          "type": "display"
+        },
+        {
+          "linkId": "gcs-eye",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "9267-6"
+            }
+          ],
+          "text": "Eye opening response",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6553-7",
+                "display": "No eye opening"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 2
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6554-5",
+                "display": "Eye opening to pain"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 3
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6555-2",
+                "display": "Eye opening to verbal command"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 4
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6556-0",
+                "display": "Eyes open spontaneously"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gcs-verbal",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "9270-0"
+            }
+          ],
+          "text": "Verbal response",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6557-8",
+                "display": "No verbal response (>2 yrs); no vocal response (<=2 yrs)"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 2
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6558-6",
+                "display": "Incomprehensible sounds"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 3
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6559-4",
+                "display": "Inappropriate words"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 4
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6560-2",
+                "display": "Confused"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 5
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6561-0",
+                "display": "Oriented"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gcs-motor",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "9268-4"
+            }
+          ],
+          "text": "Motor response",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6562-8",
+                "display": "No motor response"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 2
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6563-6",
+                "display": "Extension to pain"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 3
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6564-4",
+                "display": "Flexion to pain"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 4
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6565-1",
+                "display": "Withdrawal from pain"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 5
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6566-9",
+                "display": "Localizing pain"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 6
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA6567-7",
+                "display": "Obeys commands"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gcs-total",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "9269-2"
+            }
+          ],
+          "text": "Glasgow Coma Scale total score (3–15)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.repeat(item).where(linkId in ('gcs-eye' | 'gcs-verbal' | 'gcs-motor')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.count() = 3, %resource.repeat(item).where(linkId in ('gcs-eye' | 'gcs-verbal' | 'gcs-motor')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.sum(), {})"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gcs-severity",
+          "text": "Severity",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.repeat(item).where(linkId='gcs-total').answer.valueDecimal.exists(), iif(%resource.repeat(item).where(linkId='gcs-total').answer.valueDecimal < 9, 'Severe (GCS 3–8)', iif(%resource.repeat(item).where(linkId='gcs-total').answer.valueDecimal < 13, 'Moderate (GCS 9–12)', 'Mild (GCS 13–15)')), {})"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

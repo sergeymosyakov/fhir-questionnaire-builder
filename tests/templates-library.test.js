@@ -14,7 +14,7 @@ const load = id => {
   const entry = library.find(e => e.id === id);
   return templateGroupFrom(JSON.parse(fs.readFileSync(path.join(DIR, entry.file), 'utf8')));
 };
-const SCORED = ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c'];
+const SCORED = ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c', 'glasgow-coma-scale', 'apgar-score'];
 const walk = (items, fn) => items.forEach(i => { fn(i); walk(i.item ?? [], fn); });
 
 describe('template library catalog', () => {
@@ -87,23 +87,28 @@ describe('template scoring', () => {
     { id: 'gad-7', total: 'gad7-total', sev: 'gad7-severity', n: 7,
       bands: [[0, 'Minimal anxiety'], [4, 'Minimal anxiety'], [5, 'Mild anxiety'], [9, 'Mild anxiety'], [10, 'Moderate anxiety'], [14, 'Moderate anxiety'], [15, 'Severe anxiety'], [21, 'Severe anxiety']] },
     { id: 'audit-c', total: 'auditc-total', n: 3 },
+    { id: 'glasgow-coma-scale', total: 'gcs-total', sev: 'gcs-severity', n: 3,
+      bands: [[3, 'Severe (GCS 3–8)'], [8, 'Severe (GCS 3–8)'], [9, 'Moderate (GCS 9–12)'], [12, 'Moderate (GCS 9–12)'], [13, 'Mild (GCS 13–15)'], [15, 'Mild (GCS 13–15)']] },
+    ...['apgar1', 'apgar5'].map(p => ({
+      id: 'apgar-score', prefix: p + '-', total: p + '-total', sev: p + '-band', n: 5,
+      bands: [[0, 'Low (0–3)'], [3, 'Low (0–3)'], [4, 'Moderately abnormal (4–6)'], [6, 'Moderately abnormal (4–6)'], [7, 'Reassuring (7–10)'], [10, 'Reassuring (7–10)']],
+    })),
   ];
 
-  describe.each(cases)('$id', ({ id, total, sev, n, bands }) => {
+  describe.each(cases)('$total', ({ id, prefix = '', total, sev, n, bands }) => {
     const group = load(id);
     const scored = [];
-    walk(group.item, i => { if (i.type === 'choice' && i.required) scored.push(i.linkId); });
+    walk(group.item, i => { if (i.type === 'choice' && i.required && i.linkId.startsWith(prefix)) scored.push(i.linkId); });
 
     it('has the expected number of scored questions', () => expect(scored).toHaveLength(n));
 
     it('sums the option scores: lowest, highest and a mix', () => {
-      const maxOf = i => Math.max(...i.answerOption.map(o => o.extension.find(e => e.url === ORD).valueDecimal));
+      const ordAt = (i, idx) => i.answerOption[Math.min(idx, i.answerOption.length - 1)].extension.find(e => e.url === ORD).valueDecimal;
       const items = {}; walk(group.item, i => { items[i.linkId] = i; });
-      expect(evalIn(qrFor(group, scored, () => 0), exprOf(group, total))).toEqual([0]);
-      expect(evalIn(qrFor(group, scored, i => maxOf(i)), exprOf(group, total)))
-        .toEqual([scored.reduce((s, l) => s + maxOf(items[l]), 0)]);
-      expect(evalIn(qrFor(group, scored, i => scored.indexOf(i.linkId) % 3), exprOf(group, total)))
-        .toEqual([scored.reduce((s, l, k) => s + Math.min(k % 3, items[l].answerOption.length - 1), 0)]);
+      const sumAt = pickIdx => scored.reduce((sum, l, k) => sum + ordAt(items[l], pickIdx(k, items[l])), 0);
+      expect(evalIn(qrFor(group, scored, () => 0), exprOf(group, total))).toEqual([sumAt(() => 0)]);
+      expect(evalIn(qrFor(group, scored, i => i.answerOption.length - 1), exprOf(group, total))).toEqual([sumAt((k, i) => i.answerOption.length - 1)]);
+      expect(evalIn(qrFor(group, scored, i => scored.indexOf(i.linkId) % 3), exprOf(group, total))).toEqual([sumAt(k => k % 3)]);
     });
 
     it('gives no score until every scored question is answered', () => {
@@ -122,11 +127,29 @@ describe('template scoring', () => {
   });
 });
 
+describe('published option scores', () => {
+  const scores = (group, linkId) => {
+    let out;
+    walk(group.item, i => { if (i.linkId === linkId) out = i.answerOption.map(o => o.extension.find(e => e.url === ORD).valueDecimal); });
+    return out;
+  };
+  it('Glasgow Coma Scale: eye 1–4, verbal 1–5, motor 1–6', () => {
+    const g = load('glasgow-coma-scale');
+    expect(scores(g, 'gcs-eye')).toEqual([1, 2, 3, 4]);
+    expect(scores(g, 'gcs-verbal')).toEqual([1, 2, 3, 4, 5]);
+    expect(scores(g, 'gcs-motor')).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+  it.each(['apgar1', 'apgar5'])('Apgar %s: every criterion scores 0, 1 or 2', p => {
+    const g = load('apgar-score');
+    for (const k of ['color', 'heart-rate', 'tone', 'reflex', 'respiration']) expect(scores(g, `${p}-${k}`)).toEqual([0, 1, 2]);
+  });
+});
+
 describe('inserting a template into a questionnaire that already has its ids', () => {
   it.each(SCORED)('%s: renamed copy calculates from its own answers, no old id left in expressions', id => {
     const group = load(id);
     const old = collectLinkIds(group);
-    const { remapped } = remapSubtree(group, old, 'suffix');
+    const { remapped, idMap } = remapSubtree(group, old, 'suffix');
     const renamed = new Set(collectLinkIds(remapped));
     walk(remapped.item, i => {
       const ext = i.extension?.find(x => x.url === CALC);
@@ -135,10 +158,15 @@ describe('inserting a template into a questionnaire that already has its ids', (
       for (const r of refs.filter(r => old.includes(r))) expect.fail(`${i.linkId} still references original id ${r}`);
       expect(refs.every(r => renamed.has(r))).toBe(true);
     });
-    const scored = [];
-    walk(remapped.item, i => { if (i.type === 'choice' && i.required) scored.push(i.linkId); });
-    const totalId = [...renamed].find(l => /-total-/.test(l));
-    expect(evalIn(qrFor(remapped, scored, () => 1), exprOf(remapped, totalId))).toEqual([scored.length]);
+    const answerable = g => { const ids = []; walk(g.item, i => { if (i.type === 'choice' && i.required) ids.push(i.linkId); }); return ids; };
+    const totals = [];
+    walk(group.item, i => { if (/-total$/.test(i.linkId)) totals.push(i.linkId); });
+    expect(totals.length).toBeGreaterThan(0);
+    for (const t of totals) {
+      const expected = evalIn(qrFor(group, answerable(group), () => 1), exprOf(group, t));
+      expect(expected).toHaveLength(1);
+      expect(evalIn(qrFor(remapped, answerable(remapped), () => 1), exprOf(remapped, idMap.get(t)))).toEqual(expected);
+    }
   });
 });
 
