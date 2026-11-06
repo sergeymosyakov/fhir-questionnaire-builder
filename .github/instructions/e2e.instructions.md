@@ -46,6 +46,8 @@ await expect(async () => {
 await page.getByTestId('export-quest-item').click();
 ```
 
+**Custom-select open** — `createCustomSelect` triggers flip like `DropdownMenu` toggles, so a lost click can leave the option hidden. Use `pickCustomSelect(page, triggerTestId, value)` from `helpers/dropdown.js` instead of `click(trigger)` + `click(csel-drop option)`.
+
 **State transitions (ok→fail)** — assert `.not.toBeVisible()` on the previous state before checking the new one.
 
 **Modal title empty** — assert `toBeVisible()` on the backdrop before `toContainText()` on the title span.

@@ -25,6 +25,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 const R5_FIXTURE = path.resolve('sampledata/r5-demo.fhir.json');
 
@@ -36,10 +37,7 @@ async function freshStart(page) {
   await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
 }
 
-async function selectVersion(page, versionId) {
-  await page.getByTestId('fhir-version-select').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${versionId}"]`).click();
-}
+const selectVersion = (page, versionId) => pickCustomSelect(page, 'fhir-version-select', versionId);
 
 /** Returns the visible warning toast backdrop (notif--warn). */
 function warnToast(page) {
@@ -76,8 +74,7 @@ async function setTypeOpenChoice(page, nodeId) {
     await typeLink.click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
   }).toPass();
-  await page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="open-choice"]').click();
+  await pickCustomSelect(page, 'type-select', 'open-choice');
   await page.getByTestId('answerTypeModalApply').click();
   await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible({ timeout: 3_000 });
 }
