@@ -30,6 +30,7 @@ export function renderGalleryPage(patterns) {
     headerTitle: 'Calculation gallery',
     subtitle: 'Ready-made clinical calculations you can insert into a questionnaire.',
     openBuilderTestid: 'gp-open-builder',
+    siteFooter: true,
     jsonLd: (url) => [
       {
         '@type': 'WebPage', '@id': `${url}#page`, url, name: TITLE, description: DESCRIPTION, inLanguage: 'en',

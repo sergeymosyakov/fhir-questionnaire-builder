@@ -1,5 +1,7 @@
 # License & attribution
 
+How the FHIR Questionnaire Builder is licensed, and the credits and notices for the third-party content it uses (terminologies, scales, libraries and sample data).
+
 ## License
 
 © 2026 [Sergey Mosyakov](https://github.com/sergeymosyakov) /

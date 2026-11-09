@@ -79,6 +79,12 @@
   margin-left: 0;
 }
 
+/* Site links at the foot of the generated public pages. */
+.page-footer { border-top: 1px solid #e5e7eb; padding: 16px; font-size: 13px; }
+.page-footer nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; max-width: 1100px; margin: 0 auto; }
+.page-footer a { color: #2563eb; text-decoration: none; }
+.page-footer a:hover { text-decoration: underline; }
+
 /* Breadcrumb variant of the title: parent page link › current page. */
 .page-header-crumbs {
   display: flex;

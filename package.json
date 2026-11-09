@@ -11,6 +11,7 @@
     "test:e2e:ui": "playwright test --ui",
     "lint": "eslint js/ tests/",
     "docs:gallery": "node scripts/gen-expression-gallery-catalog.mjs",
+    "docs:guide": "node scripts/gen-docs-pages.mjs",
     "docs:templates": "node scripts/gen-calculator-templates.mjs && node scripts/gen-templates-page.mjs",
     "vendor:fhirpath": "esbuild node_modules/fhirpath/src/fhirpath.js --bundle --minify --format=iife --global-name=fhirpath --outfile=lib/fhirpath.min.js",
     "vendor:fhirpath:r4": "esbuild node_modules/fhirpath/fhir-context/r4/index.js --bundle --minify --format=iife --global-name=fhirpath_r4_model --outfile=lib/fhirpath.r4.min.js",

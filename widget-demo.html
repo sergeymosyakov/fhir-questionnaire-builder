@@ -3,23 +3,53 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Embed the FHIR Questionnaire Renderer — live demo</title>
-  <meta name="description" content="Live demo of the embeddable FHIR R4 QuestionnaireRenderer widget — three isolated in-page forms with search, validation, explain and a custom Export FHIR R4 button.">
+  <title>Embed a FHIR Questionnaire in Any Web Page — QuestionnaireRenderer Widget</title>
+  <meta name="description" content="Embeddable FHIR R4 QuestionnaireRenderer widget: drop a Questionnaire into any web page and get a live, fillable form with SDC logic and validation. Install from a CDN, npm or NuGet; live demo with three isolated forms.">
+  <meta name="keywords" content="FHIR Questionnaire widget, embed FHIR questionnaire, QuestionnaireRenderer, FHIR form renderer JavaScript, SDC, enableWhen, QuestionnaireResponse">
   <link rel="canonical" href="https://fhirbuilder.com/widget-demo.html">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
   <meta property="og:type"        content="website">
-  <meta property="og:title"       content="Embed the FHIR Questionnaire Renderer — live demo">
+  <meta property="og:title"       content="Embed a FHIR Questionnaire in Any Web Page — QuestionnaireRenderer Widget">
   <meta property="og:description" content="Embeddable FHIR R4 QuestionnaireRenderer widget — in-page, multi-instance, isolated forms driven entirely by config and a small API.">
   <meta property="og:url"         content="https://fhirbuilder.com/widget-demo.html">
   <meta property="og:image"       content="https://fhirbuilder.com/docs/social-preview.png">
 
   <meta name="twitter:card"        content="summary_large_image">
-  <meta name="twitter:title"       content="Embed the FHIR Questionnaire Renderer — live demo">
+  <meta name="twitter:title"       content="Embed a FHIR Questionnaire in Any Web Page — QuestionnaireRenderer Widget">
   <meta name="twitter:description" content="Embeddable FHIR R4 QuestionnaireRenderer widget — in-page, multi-instance, isolated forms.">
   <meta name="twitter:image"       content="https://fhirbuilder.com/docs/social-preview.png">
 
+  <link rel="stylesheet" href="css/page-header.css">
+  <link rel="stylesheet" href="css/gallery-page.css">
   <link rel="stylesheet" href="css/widget.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage", "@id": "https://fhirbuilder.com/widget-demo.html#page", "url": "https://fhirbuilder.com/widget-demo.html",
+        "name": "Embed a FHIR Questionnaire in Any Web Page — QuestionnaireRenderer Widget", "inLanguage": "en",
+        "isPartOf": { "@type": "WebApplication", "name": "FHIR Questionnaire Builder", "url": "https://fhirbuilder.com/" },
+        "breadcrumb": { "@id": "https://fhirbuilder.com/widget-demo.html#breadcrumb" },
+        "mainEntity": { "@id": "https://fhirbuilder.com/widget-demo.html#widget" }
+      },
+      {
+        "@type": "SoftwareSourceCode", "@id": "https://fhirbuilder.com/widget-demo.html#widget", "name": "QuestionnaireRenderer",
+        "description": "Embeddable vanilla ES module that renders a FHIR R4 Questionnaire as a live form and returns a QuestionnaireResponse.",
+        "programmingLanguage": "JavaScript", "runtimePlatform": "Web browser",
+        "codeRepository": "https://github.com/sergeymosyakov/fhir-questionnaire-builder"
+      },
+      {
+        "@type": "BreadcrumbList", "@id": "https://fhirbuilder.com/widget-demo.html#breadcrumb",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "FHIR Questionnaire Builder", "item": "https://fhirbuilder.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Embeddable renderer widget", "item": "https://fhirbuilder.com/widget-demo.html" }
+        ]
+      }
+    ]
+  }
+  </script>
   <script src="lib/marked.min.js"></script>
   <script src="lib/dompurify.min.js"></script>
   <script src="lib/fhirpath.min.js"></script>
@@ -28,9 +58,6 @@
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; }
     body { font-family: system-ui, -apple-system, sans-serif; color: #222; background: #f6f7f9; }
-    header { padding: 16px 20px; background: #fff; border-bottom: 1px solid #e3e6ea; }
-    header h1 { font-size: 18px; margin: 0; }
-    header p  { margin: 4px 0 0; color: #666; font-size: 13px; }
     .grid { display: flex; flex-direction: column; gap: 16px; padding: 16px 20px 32px; max-width: 800px; margin: 0 auto; }
     .col { background: #fff; border: 1px solid #e3e6ea; border-radius: 8px; overflow: hidden; }
     .col > h2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; margin: 0; padding: 8px 12px; background: #f0f2f5; border-bottom: 1px solid #e3e6ea; text-transform: uppercase; letter-spacing: .04em; color: #444; flex-wrap: wrap; }
@@ -40,10 +67,26 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>Embedded FHIR Questionnaire Renderer</h1>
-    <p>One page, three independent <code>QuestionnaireRenderer</code> widgets — each with its own isolated session.</p>
+  <header class="page-header">
+    <div class="page-header-bar">
+      <a class="page-header-title" href="widget-demo.html">Embeddable renderer widget</a>
+      <a class="page-header-back" href="index.html" data-testid="widget-open-builder">← Back to Builder</a>
+    </div>
+    <p class="page-header-subtitle">Drop a FHIR Questionnaire into any web page — no builder shell, no iframe, no framework.</p>
   </header>
+
+  <main>
+  <div class="gp-main">
+    <h1>Embed a FHIR Questionnaire in any web page</h1>
+    <p class="gp-lead">The <strong>QuestionnaireRenderer</strong> widget is the runtime of the <a href="index.html">FHIR Questionnaire Builder</a>, packaged as a self-contained, embeddable component. Give it a FHIR R4 <code>Questionnaire</code> and it renders a live, fillable form that runs the SDC logic — <code>enableWhen</code>, <code>calculatedExpression</code>, constraints and validation — and hands back a valid <code>QuestionnaireResponse</code>.</p>
+    <ul>
+      <li><strong>In-page and multi-instance</strong> — put several forms on one page; each keeps its own answers, calculations and validation state.</li>
+      <li><strong>Vanilla ES module</strong> — no React, Vue or Angular required; it works with any stack.</li>
+      <li><strong>Host-driven</strong> — the widget has no menus of its own: you switch features on through a <code>config</code> object and drive it through a small public API and events.</li>
+    </ul>
+    <h2>Live demo</h2>
+    <p>The same Annual Health Check questionnaire in three independent widgets, one per preview mode, each with search, live validation and explain turned on through <code>config</code>. The <strong>Export FHIR R4</strong> buttons are ordinary host-page buttons that call the widget’s <code>getResponse()</code>.</p>
+  </div>
 
   <div class="grid">
     <section class="col">
@@ -59,6 +102,42 @@
       <div class="mount" data-mode="json"></div>
     </section>
   </div>
+
+  <div class="gp-main">
+    <h2>Install</h2>
+    <p>Pin to a release tag so the files never change underneath you; the tags are listed on the <a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/releases" rel="noopener">GitHub Releases</a> page.</p>
+    <h3>CDN (no install, no account)</h3>
+    <pre><code>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-vX.Y.Z/dist/questionnaire-widget.css"&gt;
+&lt;script type="module"&gt;
+  import { QuestionnaireRenderer } from 'https://cdn.jsdelivr.net/gh/sergeymosyakov/fhir-questionnaire-builder@widget-vX.Y.Z/dist/questionnaire-widget.js';
+&lt;/script&gt;</code></pre>
+    <h3>npm</h3>
+    <pre><code>npm install @sergeymosyakov/questionnaire-widget</code></pre>
+    <h3>NuGet (Blazor, Razor Pages, MVC)</h3>
+    <pre><code>dotnet add package FhirQuestionnaireWidget</code></pre>
+    <h2>Quick start</h2>
+    <pre><code>&lt;link rel="stylesheet" href="questionnaire-widget.css"&gt;
+&lt;div id="form"&gt;&lt;/div&gt;
+
+&lt;script type="module"&gt;
+  import { QuestionnaireRenderer } from './questionnaire-widget.js';
+
+  const questionnaire = await (await fetch('my-questionnaire.json')).json();
+  const widget = new QuestionnaireRenderer(document.getElementById('form'), {
+    questionnaire,
+    config: { previewMode: 'patient', validation: true },
+  });
+  widget.on('response-changed', qr =&gt; console.log('answers now:', qr));
+&lt;/script&gt;</code></pre>
+    <p>That renders the questionnaire as a patient-facing form with a live PASS/FAIL validation badge. The full reference — every <code>config</code> option, the public API, events, styling and browser support — is in <a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/WIDGET.md" rel="noopener">WIDGET.md</a>, and the <a href="guide/embed-renderer.html">Embed the renderer</a> guide walks through it step by step.</p>
+    <p>Need a questionnaire to embed? Build one in the <a href="index.html">Builder</a> or start from a <a href="templates.html">ready-made template</a>.</p>
+  </div>
+  </main>
+<!-- gen:site-footer -->
+  <footer class="page-footer" data-testid="page-footer">
+    <nav aria-label="Site"><a href="index.html">Builder</a><a href="templates.html">Templates</a><a href="gallery.html">Calculation gallery</a><a href="docs.html">Documentation</a><a href="help.html">FHIR field reference</a><a href="widget-demo.html">Embeddable widget</a><a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder" rel="noopener">GitHub</a></nav>
+  </footer>
+<!-- /gen:site-footer -->
 
   <script type="module">
     import { QuestionnaireRenderer } from './js/renderer/index.js';

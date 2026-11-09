@@ -17,7 +17,7 @@
         { "id": "enablewhen", "title": "enableWhen & visibility", "file": "enablewhen.md" },
         { "id": "fhirpath", "title": "FHIRPath in the builder", "file": "fhirpath.md" },
         { "id": "extensions-sdc", "title": "Extensions & SDC", "file": "extensions-sdc.md" },
-        { "id": "extraction", "title": "Extraction (observation, definition & StructureMap)", "file": "extraction.md" },
+        { "id": "extraction", "title": "Extraction (observation, definition & StructureMap)", "seoTitle": "Extraction to FHIR resources", "file": "extraction.md" },
         { "id": "preview-modes", "title": "Preview, Patient View & FHIR JSON", "file": "preview-modes.md" }
       ]
     },

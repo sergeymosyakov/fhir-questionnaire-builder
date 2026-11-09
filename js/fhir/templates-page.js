@@ -32,6 +32,7 @@ export function renderTemplatesPage(entries, groups) {
     headerTitle: 'Questionnaire templates',
     subtitle: 'Ready-made questionnaire templates you can insert into your own questionnaire.',
     openBuilderTestid: 'tp-open-builder',
+    siteFooter: true,
     jsonLd: (url) => [
       {
         '@type': 'WebPage', '@id': `${url}#page`, url, name: TITLE, description: DESCRIPTION, inLanguage: 'en',

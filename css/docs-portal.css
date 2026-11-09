@@ -25,6 +25,11 @@ html, body {
   line-height: 1.6;
 }
 
+/* ── Previous / next links under a static guide page ───────────────────────── */
+.doc-pager { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; margin: 32px 0 0; padding-top: 14px; border-top: 1px solid var(--doc-border); }
+.doc-pager-link { font-weight: 600; }
+.doc-pager-link--next { margin-left: auto; text-align: right; }
+
 /* ── Header: see css/page-header.css (shared across settings/help/docs) ─────── */
 
 /* ── Layout ───────────────────────────────────────────────────────────────── */
@@ -140,8 +145,12 @@ html, body {
 
 .page-header-title span { display: none; }
 
+/* Static guide pages: on a phone the article comes first and the page list follows it. */
+.doc-layout--guide .doc-sidebar { order: 2; border-top: 1px solid var(--doc-border); border-bottom: none; }
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (min-width: 768px) {
+  .doc-layout--guide .doc-sidebar { order: 0; border-top: none; }
   .doc-layout { grid-template-columns: 240px minmax(0, 1fr); }
   .doc-sidebar {
     position: sticky;

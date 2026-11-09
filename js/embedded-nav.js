@@ -7,5 +7,5 @@
 // server's clean-URL redirects drop query strings but preserve the hash.
 // Loaded as a module, this runs after the document is parsed.
 if (location.hash === '#embedded' || new URLSearchParams(location.search).has('embedded')) {
-  for (const el of document.querySelectorAll('[data-back-link]')) el.hidden = true;
+  for (const el of document.querySelectorAll('[data-back-link], .page-footer')) el.hidden = true;
 }
