@@ -65,6 +65,18 @@ describe('renderDocMarkdown', () => {
     expect(summary).toBe('First paragraph with code.');
   });
 
+  it('takes heading and summary text from the tokens: entities decoded once, code and emphasis flattened', () => {
+    const { toc, summary } = renderDocMarkdown('# T\n\nTom &amp; **Jerry** use `<x>` and a < b.\n\n## Tom &amp; **Jerry** `<x>`', ids);
+    expect(toc).toEqual([{ depth: 2, id: 'tom-jerry-x', text: 'Tom & Jerry <x>' }]);
+    expect(summary).toBe('Tom & Jerry use <x> and a < b.');
+  });
+
+  it('keeps code literal, drops inline HTML and image text, and decodes entities only in plain text', () => {
+    const { toc, summary } = renderDocMarkdown('# T\n\nA `&amp;amp;` B <b>x</b> ![alt](i.png) C &amp; D.\n\n## `&lt;` &amp; <i>e</i>', ids);
+    expect(summary).toBe('A &amp;amp; B x C & D.');
+    expect(toc[0].text).toBe('&lt; & e');
+  });
+
   it('refuses what would produce a broken page: duplicate heading ids, unknown or script links', () => {
     expect(() => renderDocMarkdown('## Same\n\ntext\n\n## Same', ids)).toThrow('duplicate id');
     expect(() => renderDocMarkdown('## !!!', ids)).toThrow('empty or duplicate id');

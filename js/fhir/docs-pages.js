@@ -3,7 +3,18 @@ import { Marked } from 'marked';
 import { renderStaticPage, esc, SITE } from './static-page.js';
 
 const slug = (t) => t.toLowerCase().replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
-const plain = (html) => html.replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+const ENTITIES = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
+const decode = (s) => s.replace(/&(?:amp|lt|gt|quot|#39);/g, (m) => ENTITIES[m]);
+// Visible text of inline Markdown tokens (what textContent gives in the docs viewer), taken from the tokens, never by stripping tags:
+// code is literal, inline HTML and images add no text, entities in plain text are decoded once.
+function plain(tokens) {
+  return tokens.map((t) => {
+    if (t.type === 'codespan') return t.text;
+    if (t.type === 'html' || t.type === 'image') return '';
+    if (t.tokens) return plain(t.tokens);
+    return decode(t.text ?? t.raw ?? '');
+  }).join('');
+}
 
 /** @returns {{html: string, toc: {depth: number, id: string, text: string}[], summary: string}} */
 export function renderDocMarkdown(md, fileToId) {
@@ -16,7 +27,7 @@ export function renderDocMarkdown(md, fileToId) {
       heading({ tokens, depth }) {
         const inner = this.parser.parseInline(tokens);
         if (depth < 2 || depth > 3) return `<h${depth}>${inner}</h${depth}>\n`;
-        const text = plain(inner);
+        const text = plain(tokens);
         const id = slug(text);
         // The docs viewer slugs headings the same way, so a clash would break anchors there too.
         if (!id || seen.has(id)) throw new Error(`docs: heading "${text}" gives an empty or duplicate id "${id}"`);
@@ -37,8 +48,8 @@ export function renderDocMarkdown(md, fileToId) {
     },
   });
   const html = marked.parse(md);
-  const firstPara = /<p>([\s\S]*?)<\/p>/.exec(html)?.[1] ?? '';
-  const text = plain(firstPara).replace(/\s+/g, ' ').trim();
+  const firstPara = marked.lexer(md).find((t) => t.type === 'paragraph');
+  const text = plain(firstPara?.tokens ?? []).replace(/\s+/g, ' ').trim();
   return { html, toc, summary: text.length > 200 ? `${text.slice(0, 197).replace(/\s+\S*$/, '')}…` : text };
 }
 
