@@ -8,12 +8,14 @@
 //   tpl-cat-<id> / tpl-group-<id>        category filter chips / group headings in the list
 //   tpl-search / tpl-empty               search box / empty state
 //   rg-add-btn                           "+ Add another entry" on a repeating group
+//   properties-btn / meta-advanced-toggle / meta-copyright / metadataModalApply   Properties modal copyright field
 // Preview radio rows (.radio-label) are the sanctioned non-testid exception.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
 import { freshStart } from './helpers/builder.js';
 import { openDropdownItem } from './helpers/dropdown.js';
+import { exportFHIR } from './helpers/metadata.js';
 
 async function insert(page, id) {
   await openDropdownItem(page, 'add-menu-btn', 'add-template-btn');
@@ -226,6 +228,30 @@ test('GDS-15 scores the depressive answers and suggests depression above 5', asy
   await pick(page, 'gds15-q2', 0); // Yes on a Yes-keyed question
   await expect(page.locator('[data-preview-id="gds15-total"]')).toContainText('6');
   await expect(page.locator('[data-preview-id="gds15-result"]')).toContainText('Suggests depression');
+
+async function openCopyright(page) {
+  await page.getByTestId('properties-btn').click();
+  await page.getByTestId('meta-advanced-toggle').click();
+  return page.getByTestId('meta-copyright');
+}
+
+test('inserting a third-party template adds its licence to the copyright, after the author\'s own text and only once', async ({ page }) => {
+  await insert(page, 'glasgow-coma-scale'); // Properties needs a questionnaire to exist
+  let field = await openCopyright(page);
+  await field.fill('(c) Acme Clinic');
+  await page.getByTestId('metadataModalApply').click();
+  await insert(page, 'phq-9');
+  await insert(page, 'phq-9');
+  field = await openCopyright(page);
+  await expect(field).toHaveValue(/^\(c\) Acme Clinic\n\nPHQ-9 Depression Screening — .*phqscreeners\.com\/\)$/s);
+  await page.getByTestId('metadataModalApply').click();
+  const q = await exportFHIR(page);
+  expect(q.copyright.match(/phqscreeners\.com/g)).toHaveLength(1);
+});
+
+test('a template written for this builder leaves the copyright empty', async ({ page }) => {
+  await insert(page, 'glasgow-coma-scale');
+  await expect(await openCopyright(page)).toHaveValue('');
 });
 
 test('ASQ asks the acuity question only after a Yes and names the screen result', async ({ page }) => {
