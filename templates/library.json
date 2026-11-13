@@ -13,6 +13,13 @@
       "score",
       "mental health"
     ],
+    "galleryPatterns": [
+      "phq9-severity"
+    ],
+    "related": [
+      "phq-2",
+      "gad-7"
+    ],
     "source": "Kroenke, Spitzer & Williams 2001, J Gen Intern Med 16:606 (PHQ-9). Codes: LOINC; form text as published at phqscreeners.com.",
     "sourceUrl": "https://www.phqscreeners.com/",
     "license": "Developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute.",
@@ -31,6 +38,13 @@
       "screening",
       "score",
       "mental health"
+    ],
+    "galleryPatterns": [
+      "gad7-severity"
+    ],
+    "related": [
+      "gad-2",
+      "phq-9"
     ],
     "source": "Spitzer et al. 2006, Arch Intern Med 166:1092 (GAD-7). Codes: LOINC; form text as published at phqscreeners.com.",
     "sourceUrl": "https://www.phqscreeners.com/",
@@ -71,6 +85,12 @@
       "score",
       "mental health"
     ],
+    "galleryPatterns": [
+      "phq2-screen"
+    ],
+    "related": [
+      "phq-9"
+    ],
     "source": "Kroenke, Spitzer & Williams 2003, Med Care 41:1284 (PHQ-2). Codes: LOINC; form text as published at phqscreeners.com.",
     "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/14583691/",
     "license": "Developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and colleagues, with an educational grant from Pfizer Inc. No permission required to reproduce, translate, display or distribute.",
@@ -89,6 +109,9 @@
       "screening",
       "score",
       "mental health"
+    ],
+    "related": [
+      "gad-7"
     ],
     "source": "Kroenke et al. 2007, Ann Intern Med 146:317 (GAD-2). Codes: LOINC; form text as published at phqscreeners.com.",
     "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/17339617/",
@@ -172,6 +195,16 @@
     "name": "Body Measurements",
     "description": "Height, weight, sex and waist/hip with BMI (and its WHO category), body surface area, ideal body weight and waist-to-hip ratio.",
     "category": "calculators",
+    "galleryPatterns": [
+      "bmi",
+      "bmi-category",
+      "bsa-mosteller",
+      "ideal-body-weight",
+      "waist-hip-ratio"
+    ],
+    "related": [
+      "kidney-function"
+    ],
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "bmi",
@@ -193,6 +226,13 @@
     "name": "Kidney Function",
     "description": "Creatinine, age, sex and weight with eGFR (CKD-EPI 2021) and creatinine clearance (Cockcroft–Gault).",
     "category": "calculators",
+    "galleryPatterns": [
+      "egfr-ckd-epi-2021",
+      "cockcroft-gault"
+    ],
+    "related": [
+      "body-measurements"
+    ],
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "kidney",
@@ -213,6 +253,14 @@
     "name": "Cardiac Measurements",
     "description": "Blood pressure, QT interval and heart rate with mean arterial pressure and corrected QT (Bazett and Fridericia).",
     "category": "calculators",
+    "galleryPatterns": [
+      "mean-arterial-pressure",
+      "qtc-bazett",
+      "qtc-fridericia"
+    ],
+    "related": [
+      "lipid-panel"
+    ],
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "blood pressure",
@@ -233,6 +281,12 @@
     "name": "Lipid Panel",
     "description": "Total cholesterol, HDL and triglycerides with calculated LDL cholesterol (Friedewald).",
     "category": "calculators",
+    "galleryPatterns": [
+      "ldl-friedewald"
+    ],
+    "related": [
+      "cardiac-measurements"
+    ],
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "lipid",
@@ -252,6 +306,11 @@
     "name": "Chemistry Calculations",
     "description": "Electrolytes, calcium, albumin, glucose and insulin with anion gap, albumin-corrected calcium and HOMA-IR.",
     "category": "calculators",
+    "galleryPatterns": [
+      "anion-gap",
+      "corrected-calcium",
+      "homa-ir"
+    ],
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "anion gap",
@@ -272,6 +331,9 @@
     "name": "FIB-4 Liver Fibrosis Index",
     "description": "Age, AST, ALT and platelets with the FIB-4 index and its fibrosis-risk category.",
     "category": "calculators",
+    "galleryPatterns": [
+      "fib4"
+    ],
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "fib-4",
@@ -293,6 +355,10 @@
     "name": "Pregnancy Dating",
     "description": "Last menstrual period and visit date with the expected delivery date (Naegele) and gestational age in weeks.",
     "category": "calculators",
+    "galleryPatterns": [
+      "due-date-naegele",
+      "gestational-age-weeks"
+    ],
     "scoring": "Calculated values only; each result stays empty until all of its inputs are answered.",
     "keywords": [
       "pregnancy",
@@ -313,6 +379,12 @@
     "name": "qSOFA Sepsis Screen",
     "description": "Three bedside yes/no criteria with the qSOFA score and its risk result; two or more criteria mean a high risk of poor outcome.",
     "category": "scales",
+    "galleryPatterns": [
+      "qsofa"
+    ],
+    "related": [
+      "glasgow-coma-scale"
+    ],
     "scoring": "Each criterion that is present scores 1 point. An unanswered criterion counts as No; the result appears once at least one criterion is answered.",
     "keywords": [
       "qsofa",
@@ -333,6 +405,9 @@
     "name": "CHA₂DS₂-VASc Stroke Risk Score",
     "description": "Six yes/no criteria and the age with the CHA₂DS₂-VASc score (0–9) for stroke risk in atrial fibrillation; a higher score means a higher risk.",
     "category": "scales",
+    "galleryPatterns": [
+      "cha2ds2-vasc"
+    ],
     "scoring": "Points: heart failure 1, hypertension 1, age 75 or older 2, diabetes 1, previous stroke or TIA 2, vascular disease 1, age 65 to 74 1, female sex 1 (0–9). The score appears once the age is entered; an unanswered criterion counts as No.",
     "keywords": [
       "cha2ds2-vasc",
@@ -353,6 +428,9 @@
     "name": "Charlson Comorbidity Index",
     "description": "Comorbidities and age with the age-adjusted Charlson Comorbidity Index.",
     "category": "scales",
+    "galleryPatterns": [
+      "charlson-comorbidity-index"
+    ],
     "scoring": "Comorbidities score 1, 2, 3 or 6 points by weight; the age adds 1 point per decade from 50, up to 4 points from age 80. The index appears once the age is entered; an unanswered comorbidity counts as No.",
     "keywords": [
       "charlson",
@@ -383,6 +461,12 @@
       "emergency",
       "score"
     ],
+    "galleryPatterns": [
+      "glasgow-coma-scale"
+    ],
+    "related": [
+      "qsofa"
+    ],
     "source": "Teasdale & Jennett 1974, Lancet 2:81 (Glasgow Coma Scale). Codes and answer lists: LOINC.",
     "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/4136544/",
     "license": "Original question wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). The scale itself is a published clinical method; see the source.",
@@ -403,6 +487,9 @@
       "obstetrics",
       "pediatrics",
       "score"
+    ],
+    "galleryPatterns": [
+      "apgar-score"
     ],
     "source": "Apgar 1953, Curr Res Anesth Analg 32:260 (Apgar score); score bands per AAP/ACOG. Codes and answer lists: LOINC.",
     "sourceUrl": "https://pubmed.ncbi.nlm.nih.gov/13083014/",

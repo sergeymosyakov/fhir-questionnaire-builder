@@ -39,7 +39,7 @@ results, source and license, plus a download link for the FHIR Questionnaire JSO
 In the window that opens, narrow the list with the category buttons (screening scales, calculators, intake sections) and the search box (by name or topic), select a template to see its
 **source** and **license**, then press **Insert**.
 
-The calculators use the same formulas as the [calculation gallery](calculation-gallery.md); the questions come with the template, so there is nothing to pick. Enter each value in the unit shown in its question.
+The calculators use the same formulas as the [calculation gallery](calculation-gallery.md), and the public page of each template links to the matching gallery calculations (and back); the questions come with the template, so there is nothing to pick. Enter each value in the unit shown in its question.
 
 The template arrives as one group titled with the scale's name. You can rename it,
 move it, or edit any question like one you wrote yourself.

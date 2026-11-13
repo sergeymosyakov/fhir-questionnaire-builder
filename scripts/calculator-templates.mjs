@@ -53,6 +53,7 @@ export const DEFS = [
     id: 'body-measurements', group: 'body', name: 'Body Measurements',
     description: 'Height, weight, sex and waist/hip with BMI (and its WHO category), body surface area, ideal body weight and waist-to-hip ratio.',
     keywords: ['bmi', 'body mass index', 'height', 'weight', 'body surface area', 'waist', 'hip', 'anthropometrics'],
+    related: ["kidney-function"],
     questions: [
       num('height', 'Height (cm)', 'decimal', '8302-2', ['cm', 'cm']),
       num('weight', 'Weight (kg)', 'decimal', '29463-7', ['kg', 'kg']),
@@ -72,6 +73,7 @@ export const DEFS = [
     id: 'kidney-function', group: 'kidney', name: 'Kidney Function',
     description: 'Creatinine, age, sex and weight with eGFR (CKD-EPI 2021) and creatinine clearance (Cockcroft–Gault).',
     keywords: ['kidney', 'renal', 'egfr', 'creatinine', 'clearance', 'ckd', 'nephrology'],
+    related: ["body-measurements"],
     questions: [
       num('age', 'Age (years)', 'integer', '30525-0', ['a', 'years']),
       ['sex', 'Sex assigned at birth (used by both formulas)', 'radio', { code: SEX.code, sex: true }],
@@ -87,6 +89,7 @@ export const DEFS = [
     id: 'cardiac-measurements', group: 'cardiac', name: 'Cardiac Measurements',
     description: 'Blood pressure, QT interval and heart rate with mean arterial pressure and corrected QT (Bazett and Fridericia).',
     keywords: ['blood pressure', 'map', 'qtc', 'qt', 'ecg', 'heart rate', 'cardiology'],
+    related: ["lipid-panel"],
     questions: [
       num('sbp', 'Systolic blood pressure (mmHg)', 'decimal', '8480-6', ['mm[Hg]', 'mmHg']),
       num('dbp', 'Diastolic blood pressure (mmHg)', 'decimal', '8462-4', ['mm[Hg]', 'mmHg']),
@@ -103,6 +106,7 @@ export const DEFS = [
     id: 'lipid-panel', group: 'lipid', name: 'Lipid Panel',
     description: 'Total cholesterol, HDL and triglycerides with calculated LDL cholesterol (Friedewald).',
     keywords: ['lipid', 'cholesterol', 'ldl', 'hdl', 'triglycerides', 'cardiology'],
+    related: ["cardiac-measurements"],
     questions: [
       num('tc', 'Total cholesterol (mg/dL)', 'decimal', '2093-3', ['mg/dL', 'mg/dL']),
       num('hdl', 'HDL cholesterol (mg/dL)', 'decimal', '2085-9', ['mg/dL', 'mg/dL']),
@@ -163,6 +167,7 @@ export const DEFS = [
     id: 'qsofa', group: 'qsofa', category: 'scales', name: 'qSOFA Sepsis Screen',
     description: 'Three bedside yes/no criteria with the qSOFA score and its risk result; two or more criteria mean a high risk of poor outcome.',
     keywords: ['qsofa', 'sepsis', 'sofa', 'screening', 'emergency', 'critical care'],
+    related: ['glasgow-coma-scale'],
     sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/26903338/',
     scoring: YES_NO_SCORING,
     questions: [
@@ -255,6 +260,8 @@ export function libraryEntry(def) {
   const coded = def.questions.some(q => q[3].code) || def.outputs.some(o => o.code);
   return {
     id: def.id, name: def.name, description: def.description, category: def.category ?? 'calculators',
+    galleryPatterns: [...new Set(def.outputs.map(o => o.pattern))],
+    ...(def.related ? { related: def.related } : {}),
     scoring: def.scoring ?? 'Calculated values only; each result stays empty until all of its inputs are answered.',
     keywords: def.keywords,
     source: `${sources.join('; ')}.${coded ? ' Codes: LOINC.' : ''}`,

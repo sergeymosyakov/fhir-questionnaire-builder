@@ -23,6 +23,36 @@ export function usesLoinc(group) {
   return (group.item ?? []).some((i) => i.code?.some(loinc) || i.answerOption?.some((o) => loinc(o.valueCoding)) || (i.type === 'group' && usesLoinc(i)));
 }
 
+/**
+ * Links shown on a template's page: explicitly related templates, other templates of its category,
+ * and the gallery patterns behind it. Throws on a reference to an unknown template or pattern.
+ * @param {object} entry @param {object[]} entries all catalog entries @param {{id: string, name: string}[]} patterns gallery patterns
+ */
+export function templateLinks(entry, entries, patterns) {
+  const byId = new Map(entries.map((e) => [e.id, e]));
+  const patternById = new Map(patterns.map((p) => [p.id, p]));
+  const pick = (ids, map, what) => ids.map((id) => {
+    if (!map.has(id)) throw new Error(`template ${entry.id}: unknown ${what} "${id}"`);
+    return map.get(id);
+  });
+  const related = pick(entry.related ?? [], byId, 'related template');
+  const relatedIds = new Set(related.map((e) => e.id));
+  return {
+    related,
+    more: entries.filter((o) => o.id !== entry.id && o.category === entry.category && !relatedIds.has(o.id)),
+    patterns: pick(entry.galleryPatterns ?? [], patternById, 'gallery pattern').map((p) => ({ id: p.id, name: p.name })),
+  };
+}
+
+/** Map of gallery pattern id → [{id, name}] of the templates that list it. */
+export function templatesByPatternOf(entries) {
+  const map = new Map();
+  for (const e of entries) {
+    for (const id of e.galleryPatterns ?? []) map.set(id, [...(map.get(id) ?? []), { id: e.id, name: e.name }]);
+  }
+  return map;
+}
+
 /** `text (link)` as escaped HTML; the link only when there is an href. */
 export const linkHtml = (text, href) => (href ? `${esc(text)} (<a href="${esc(href)}" rel="noopener">link</a>)` : esc(text));
 

@@ -2,8 +2,12 @@
 import { renderStaticPage, esc, SITE } from './static-page.js';
 import { questionsOf, resultsOf, linkHtml, usesLoinc, LOINC_NOTICE } from './template-view.js';
 
-/** @param {object} entry catalog entry  @param {object} group its wrapper group  @param {object[]} related other entries of the same category */
-export function renderTemplatePage(entry, group, related) {
+/**
+ * @param {object} entry catalog entry
+ * @param {object} group its wrapper group
+ * @param {{related: object[], more: object[], patterns: object[]}} links related templates, other templates of the category, gallery patterns behind this template
+ */
+export function renderTemplatePage(entry, group, { related = [], more = [], patterns = [] } = {}) {
   const title = `${entry.name} — FHIR Questionnaire Template`;
   const description = `${entry.description} FHIR Questionnaire with ${usesLoinc(group) ? 'LOINC codes, ' : ''}source and license — insert it in one click.`;
   const questions = questionsOf(group);
@@ -58,9 +62,18 @@ ${results.map((r) => `      <li>${esc(r)}</li>`).join('\n')}
       <li>Download the <a href="${esc(entry.file)}" data-testid="tpd-json">FHIR Questionnaire JSON</a>, or</li>
       <li>open the <a href="../index.html">Builder</a>, choose <strong>+ Add → From template…</strong>, search for “${esc(entry.name)}” and insert it. It arrives as one titled group with its calculations wired, and you can keep editing it.</li>
     </ol>
-${related.length ? `    <h2>More templates</h2>
+${patterns.length ? `    <h2>In the calculation gallery</h2>
+    <p>The same calculations are available as reusable patterns in the <a href="../gallery.html">calculation gallery</a>:</p>
+    <ul>
+${patterns.map((p) => `      <li><a href="../gallery.html#${esc(p.id)}" data-testid="tpd-formula-${esc(p.id)}">${esc(p.name)}</a></li>`).join('\n')}
+    </ul>
+` : ''}${related.length ? `    <h2>Related templates</h2>
     <ul>
 ${related.map((e) => `      <li><a href="${esc(e.id)}.html" data-testid="tpd-related-${esc(e.id)}">${esc(e.name)}</a></li>`).join('\n')}
+    </ul>
+` : ''}${more.length ? `    <h2>More templates</h2>
+    <ul>
+${more.map((e) => `      <li><a href="${esc(e.id)}.html" data-testid="tpd-more-${esc(e.id)}">${esc(e.name)}</a></li>`).join('\n')}
     </ul>
 ` : ''}${usesLoinc(group) ? `    <p class="gp-source">${LOINC_NOTICE}</p>` : ''}`,
   });

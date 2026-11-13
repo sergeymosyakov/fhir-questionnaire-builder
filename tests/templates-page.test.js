@@ -3,14 +3,15 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { templateGroupFrom, groupByCategory, TEMPLATE_CATEGORIES } from '../js/fhir/templates.js';
 import { renderTemplatesPage } from '../js/fhir/templates-page.js';
 import { renderTemplatePage } from '../js/fhir/template-page.js';
-import { questionsOf, resultsOf, usesLoinc } from '../js/fhir/template-view.js';
+import { questionsOf, resultsOf, usesLoinc, templateLinks, templatesByPatternOf } from '../js/fhir/template-view.js';
+import { EXPR_GALLERY } from '../js/fhir/expr-builder/gallery/index.js';
 
 const path = (name) => new URL(`../${name}`, import.meta.url);
 const read = (name) => JSON.parse(readFileSync(path(`templates/${name}`), 'utf8'));
 const onDisk = (name) => readFileSync(path(name), 'utf8').replace(/\r\n/g, '\n');
 const entries = read('library.json');
 const groups = new Map(entries.map((e) => [e.id, templateGroupFrom(read(e.file))]));
-const relatedOf = (e) => entries.filter((o) => o.id !== e.id && o.category === e.category);
+const linksOf = (e) => templateLinks(e, entries, EXPR_GALLERY);
 
 describe('templates.html', () => {
   it('is up to date with templates/ (run `npm run docs:templates`)', () => {
@@ -50,7 +51,7 @@ describe('templates.html', () => {
 
 describe('template detail pages', () => {
   it.each(entries.map((e) => [e.id, e]))('templates/%s.html is up to date (run `npm run docs:templates`)', (id, e) => {
-    expect(onDisk(`templates/${id}.html`)).toBe(renderTemplatePage(e, groups.get(id), relatedOf(e)));
+    expect(onDisk(`templates/${id}.html`)).toBe(renderTemplatePage(e, groups.get(id), linksOf(e)));
   });
 
   it('every template page is in sitemap.xml', () => {
@@ -71,10 +72,11 @@ describe('template detail pages', () => {
       { type: 'choice', text: 'ask <1>', answerOption: [{ valueCoding: { display: 'Yes' } }, { valueString: 'No' }] },
       { type: 'decimal', text: 'total', readOnly: true },
     ] };
-    const html = renderTemplatePage(entry, group, [{ id: 'b', name: 'B' }]);
+    const html = renderTemplatePage(entry, group, { more: [{ id: 'b', name: 'B' }] });
     expect(html).toContain('<li>ask &lt;1&gt;<ul><li>Yes</li><li>No</li></ul></li>');
     expect(html).toContain('<li>total</li>');
     expect(html).toContain('href="b.html"');
+    expect(html).toContain('data-testid="tpd-more-b"');
     expect(html).toContain('href="a.template.json"');
     expect(html).toContain('&lt;n&gt;');
     expect(html).not.toContain('<n>');
@@ -97,9 +99,49 @@ describe('template detail pages', () => {
   });
 
   it('omits the results and related sections when there are none', () => {
-    const html = renderTemplatePage({ id: 'a', name: 'n', description: 'd', scoring: 's', source: 's', license: 'l', file: 'f' }, { item: [{ type: 'string', text: 'q' }] }, []);
+    const html = renderTemplatePage({ id: 'a', name: 'n', description: 'd', scoring: 's', source: 's', license: 'l', file: 'f' }, { item: [{ type: 'string', text: 'q' }] });
     expect(html).not.toContain('Calculated results');
     expect(html).not.toContain('More templates');
+  });
+});
+
+describe('links between templates and the calculation gallery', () => {
+  it('every related template and gallery pattern of the catalog exists, and relations are mutual', () => {
+    const byId = new Map(entries.map((e) => [e.id, e]));
+    const patternIds = new Set(EXPR_GALLERY.map((p) => p.id));
+    for (const e of entries) {
+      for (const id of e.galleryPatterns ?? []) expect(patternIds.has(id), `${e.id} → pattern ${id}`).toBe(true);
+      for (const id of e.related ?? []) {
+        expect(byId.has(id), `${e.id} → template ${id}`).toBe(true);
+        expect(byId.get(id).related ?? [], `${id} should list ${e.id} back`).toContain(e.id);
+      }
+    }
+  });
+
+  it('every calculator template names the gallery patterns its formulas come from', () => {
+    const calculators = entries.filter((e) => e.category === 'calculators');
+    expect(calculators.length).toBeGreaterThan(0);
+    for (const e of calculators) expect(e.galleryPatterns?.length, e.id).toBeGreaterThan(0);
+  });
+
+  it('every gallery pattern used by a template links from its gallery card', () => {
+    const html = onDisk('gallery.html');
+    for (const [patternId, templates] of templatesByPatternOf(entries)) {
+      for (const t of templates) expect(html).toContain(`data-testid="gp-template-${patternId}-${t.id}"`);
+    }
+  });
+
+  it('templateLinks keeps related templates out of the "more" list and rejects unknown references', () => {
+    const list = [
+      { id: 'a', name: 'A', category: 'c', related: ['b'], galleryPatterns: ['p1'] },
+      { id: 'b', name: 'B', category: 'c' }, { id: 'c', name: 'C', category: 'c' }, { id: 'd', name: 'D', category: 'other' },
+    ];
+    const links = templateLinks(list[0], list, [{ id: 'p1', name: 'P1', extra: 1 }]);
+    expect(links.related.map((e) => e.id)).toEqual(['b']);
+    expect(links.more.map((e) => e.id)).toEqual(['c']);
+    expect(links.patterns).toEqual([{ id: 'p1', name: 'P1' }]);
+    expect(() => templateLinks({ ...list[0], related: ['zzz'] }, list, [])).toThrow('unknown related template "zzz"');
+    expect(() => templateLinks({ ...list[0], galleryPatterns: ['zzz'] }, list, [])).toThrow('unknown gallery pattern "zzz"');
   });
 });
 
