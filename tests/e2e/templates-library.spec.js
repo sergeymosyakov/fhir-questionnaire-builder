@@ -228,6 +228,7 @@ test('GDS-15 scores the depressive answers and suggests depression above 5', asy
   await pick(page, 'gds15-q2', 0); // Yes on a Yes-keyed question
   await expect(page.locator('[data-preview-id="gds15-total"]')).toContainText('6');
   await expect(page.locator('[data-preview-id="gds15-result"]')).toContainText('Suggests depression');
+});
 
 async function openCopyright(page) {
   await page.getByTestId('properties-btn').click();
