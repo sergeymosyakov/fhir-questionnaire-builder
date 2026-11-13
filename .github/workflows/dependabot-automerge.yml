@@ -1,0 +1,40 @@
+# Auto-merges routine Dependabot updates (patch/minor of tooling and GitHub Actions) once the required checks pass.
+name: Dependabot auto-merge
+
+on: pull_request
+
+permissions: {}
+
+jobs:
+  automerge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - id: meta
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enable auto-merge for routine updates
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          UPDATE_TYPE: ${{ steps.meta.outputs.update-type }}
+          ECOSYSTEM: ${{ steps.meta.outputs.package-ecosystem }}
+          NAMES: ${{ steps.meta.outputs.dependency-names }}
+          # Libraries that ship in the product are deliberately absent: they wait for a person.
+          TOOLING: "eslint @eslint/js globals vitest @vitest/coverage-v8 @playwright/test jsdom serve"
+        run: |
+          case "$UPDATE_TYPE" in
+            version-update:semver-minor|version-update:semver-patch) ;;
+            *) echo "Not a patch/minor update ($UPDATE_TYPE): left for a person"; exit 0 ;;
+          esac
+          if [ "$ECOSYSTEM" != "github_actions" ]; then
+            [ -n "$NAMES" ] || { echo "No dependency names: left for a person"; exit 0; }
+            for name in ${NAMES//,/ }; do
+              case " $TOOLING " in *" $name "*) ;; *) echo "$name is not tooling: left for a person"; exit 0 ;; esac
+            done
+          fi
+          gh pr merge --auto --squash "$PR_URL"
