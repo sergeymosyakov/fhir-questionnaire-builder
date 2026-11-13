@@ -1,0 +1,4 @@
+name: fhir-qb CodeQL config
+# lib/ holds vendored, minified builds of third-party packages (npm run vendor:*); findings there belong to the upstream packages.
+paths-ignore:
+  - lib
