@@ -215,7 +215,8 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `js/fhir/template-page.js` / `js/fhir/template-view.js` | `renderTemplatePage()` — one crawlable page per template (`templates/<id>.html`: questions with answer options, calculated results, source, license, links to its gallery patterns, related templates and the rest of its category); shared pure helpers (`questionsOf`, `resultsOf`, `linkHtml`) |
 | `scripts/gen-templates-page.mjs` | `npm run docs:templates` — regenerates `templates.html` and `templates/<id>.html` from `templates/` and appends missing sitemap entries |
 | `templates.html` / `templates/<id>.html` | Generated, crawlable template catalog (grouped by category) and one page per template (do not edit by hand; freshness-tested) |
-| `js/ui/template-insert.js` | `TemplateInsert` singleton — on `NODE_INSERT_TEMPLATE_REQUESTED` opens the templates modal, loads the chosen template group, remaps its linkIds (`suffix` strategy) and appends it to the target node's children (or root) |
+| `js/ui/template-insert.js` | `TemplateInsert` singleton — on `NODE_INSERT_TEMPLATE_REQUESTED` opens the templates modal, loads the chosen template group, remaps its linkIds (`suffix` strategy) and appends it to the target node's children (or root); at start-up it also applies the `/?template=<id>` deep link (inserts that template at root, drops the parameter from the address, shows an error for an unknown/malformed id or a failing library) |
+| `js/fhir/template-link.js` | Pure helpers for the deep link: `parseTemplateLink()` (catalog-style ids only) and `withoutTemplateParam()` |
 | `js/ui/modals/templates-modal.js` | `TemplatesModal extends Modal` — searchable template list, source/license detail card, Insert/Cancel; registered as `templates` |
 | `js/fhir/templates.js` | Template library access — `loadTemplateLibrary()` (`templates/library.json`), `templateGroupFrom()` (a template file must hold exactly one root group), `loadTemplateGroup(entry)` |
 | `templates/library.json` | Template catalog (id, name, description, category, keywords, `galleryPatterns` (gallery calculations behind the template — linked from its page and from the gallery cards), `related` (mutual links between templates), source, license, file) — one Questionnaire file per template next to it |
@@ -445,6 +446,8 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `tests/e2e/templates-calculators.spec.js` | E2E — calculator templates insert and calculate in the preview; a second insert calculates independently |
 | `tests/docs-pages.test.js` | Unit tests — guide pages, docs.html sidebar and help.html rows are up to date; Markdown rendering (links, raw HTML, ids), sitemap helper, site footer |
 | `tests/e2e/seo-pages.spec.js` | E2E — guide pages, crawler view without JavaScript (docs.html, help.html, widget-demo.html, home page links), widget-demo metadata, site footer on hub pages |
+| `tests/template-link.test.js` | Unit tests — deep-link id parsing (accepted and rejected ids) and parameter removal |
+| `tests/e2e/template-deep-link.spec.js` | E2E — `/?template=<id>` inserts the template once, keeps other parameters, rejects unknown/malformed ids and a failing library, and the "Open in Builder" links on template pages and catalog cards |
 | `tests/templates-page.test.js` | Unit tests — `templates.html` and per-template page freshness, sitemap entries, escaping, question/result lists, category grouping |
 | `tests/e2e/templates-detail-page.spec.js` | E2E — per-template pages (content, JSON link, breadcrumb, related links, header link, sitemap) |
 | `tests/e2e/templates-page.spec.js` | E2E — `templates.html` metadata/cards/JSON links/sitemap and the docs Templates page |

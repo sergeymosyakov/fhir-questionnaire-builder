@@ -43,6 +43,7 @@ export function renderTemplatePage(entry, group, { related = [], more = [], patt
     ],
     bodyHtml: `    <h1 data-testid="tpd-title">${esc(title)}</h1>
     <p class="gp-lead">${esc(entry.description)}</p>
+    <p><a class="gp-button" href="../?template=${esc(entry.id)}" data-testid="tpd-open-in-builder">Open in Builder</a></p>
     <h2>Scoring</h2>
     <p>${esc(entry.scoring)}</p>
     <h2>Questions</h2>
@@ -60,7 +61,7 @@ ${results.map((r) => `      <li>${esc(r)}</li>`).join('\n')}
     <h2>Use it</h2>
     <ol>
       <li>Download the <a href="${esc(entry.file)}" data-testid="tpd-json">FHIR Questionnaire JSON</a>, or</li>
-      <li>open the <a href="../index.html">Builder</a>, choose <strong>+ Add → From template…</strong>, search for “${esc(entry.name)}” and insert it. It arrives as one titled group with its calculations wired, and you can keep editing it.</li>
+      <li><a href="../?template=${esc(entry.id)}">open it in the Builder</a> right away (or open the <a href="../index.html">Builder</a>, choose <strong>+ Add → From template…</strong> and search for “${esc(entry.name)}”). It arrives as one titled group with its calculations wired, and you can keep editing it.</li>
     </ol>
 ${patterns.length ? `    <h2>In the calculation gallery</h2>
     <p>The same calculations are available as reusable patterns in the <a href="../gallery.html">calculation gallery</a>:</p>

@@ -16,7 +16,7 @@ function card(entry, group) {
       <ol>${questionsOf(group).map((q) => `<li>${esc(q.text)}</li>`).join('')}</ol>
       <p class="gp-source">Source: ${linkHtml(entry.source, entry.sourceUrl)}</p>
       <p class="gp-source">License: ${linkHtml(entry.license, entry.licenseUrl)}</p>
-      <p class="gp-source"><a href="templates/${esc(entry.file)}" data-testid="tp-json-${esc(entry.id)}">Download the FHIR Questionnaire JSON</a></p>
+      <p class="gp-source"><a href="./?template=${esc(entry.id)}" data-testid="tp-open-${esc(entry.id)}">Open in Builder</a> · <a href="templates/${esc(entry.file)}" data-testid="tp-json-${esc(entry.id)}">Download the FHIR Questionnaire JSON</a></p>
     </section>`;
 }
 

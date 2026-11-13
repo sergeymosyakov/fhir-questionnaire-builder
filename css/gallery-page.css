@@ -6,6 +6,8 @@ body { margin: 0; color: #1f2933; background: #fff; font: 15px/1.6 -apple-system
 .gp-main h2 { margin-top: 28px; font-size: 19px; }
 .gp-main a { color: #2563eb; }
 .gp-main code { background: #f3f4f6; padding: 1px 5px; border-radius: 4px; }
+.gp-main a.gp-button { display: inline-block; padding: 8px 16px; border-radius: 6px; background: #2563eb; color: #fff; font-weight: 600; text-decoration: none; }
+.gp-main a.gp-button:hover { background: #1d4ed8; }
 .gp-main pre { background: #f3f4f6; border-radius: 6px; padding: 12px 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; font-size: 13px; line-height: 1.5; }
 .gp-main pre code { background: none; padding: 0; }
 .gp-toc ul { columns: 1; padding-left: 18px; }
