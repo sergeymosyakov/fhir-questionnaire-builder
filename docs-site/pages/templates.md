@@ -32,6 +32,7 @@ results, source and license, plus a download link for the FHIR Questionnaire JSO
 
 ## Insert a template
 
+- **From a link:** every template has an **Open in Builder** link, on the [template catalog](https://fhirbuilder.com/templates.html) and on the template's own page (for example `https://fhirbuilder.com/templates/phq-9.html`). The link has the form `https://fhirbuilder.com/?template=phq-9`: it opens the Builder with that template already inserted as the first group. Share the template's page rather than the Builder link — its preview shows the template's name and description.
 - **At the top level:** in the left panel choose **+ Add → From template…**.
 - **Inside a group or an item:** open its **⚙** menu and choose **Insert template…**.
   The template is added at the end of that group's or item's children.
