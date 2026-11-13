@@ -605,7 +605,8 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `.github/workflows/release-widget.yml` | Manual widget release: `verify` job (read-only: lint, unit, e2e, widget build, tag computation, artifact) → `publish` job (write + OIDC Trusted Publishing: GitHub Release, npm, NuGet). Inputs `dry_run` (rehearsal, nothing published) and `nuget_only` (NuGet recovery); runs only from `master` |
 | `.github/codeql/codeql-config.yml` | CodeQL config: `paths-ignore: lib` (vendored third-party builds) |
 | `.github/workflows/codeql.yml` | CodeQL code scanning (`init` + `analyze` must be the same version); reads `.github/codeql/codeql-config.yml`, which excludes the vendored third-party builds in `lib/` |
-| `.github/dependabot.yml` | Weekly npm + github-actions dependency updates |
+| `.github/dependabot.yml` | Weekly npm + github-actions dependency updates, new releases wait 7 days |
+| `.github/workflows/dependabot-automerge.yml` | Enables squash auto-merge for Dependabot patch/minor updates of listed tooling packages and GitHub Actions (majors and shipped libraries stay manual); merges only after the required checks pass |
 | `js/ui/modals/expr-aware-modal.js` | `ExprAwareModal extends Modal` — intermediate base for modals showing live FHIRPath expression icons (`[data-expr-icon]`); collects icon elements on `open()`, re-evaluates them on every `REFRESH_EXPR_ICONS` event; `static _fpCtx` cached from `FHIRPATH_CTX_UPDATED` |
 | `js/ui/modals/confirm-modal.js` | Generic 2-button confirm dialog (`confirmModal`) — `open(config) → Promise<'ok'\|'cancel'>` |
 | `js/ui/modals/clear-confirm-modal.js` | Clear-questionnaire confirm dialog (`clearConfirmModal`, `.clear-confirm-backdrop`) — 3-button: Export first \| Clear anyway \| Cancel; `open() → Promise<'export'\|'clear'\|'cancel'>` |
