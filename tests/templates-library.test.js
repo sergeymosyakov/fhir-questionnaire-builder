@@ -167,6 +167,41 @@ describe('PC-PTSD-5', () => {
   });
 });
 
+describe('ASQ', () => {
+  const group = load('asq');
+  const result = exprOf(group, 'asq-result');
+  const Y = 'LA33-6', N = 'LA32-8';
+  const qr = (codes, acuity) => ({
+    resourceType: 'QuestionnaireResponse', status: 'in-progress',
+    item: [...codes.map((code, k) => ({ linkId: `asq-q${k + 1}`, answer: [{ valueCoding: { system: 'http://loinc.org', code } }] })),
+      ...(acuity ? [{ linkId: 'asq-q5', answer: [{ valueCoding: { system: 'http://loinc.org', code: acuity } }] }] : [])],
+  });
+  const said = (codes, acuity) => evalIn(qr(codes, acuity), result)[0];
+
+  it('is a negative screen when all four screening questions are No', () => {
+    expect(said([N, N, N, N])).toMatch(/^Negative screen/);
+  });
+  it.each([[Y, N, N, N], [N, Y, N, N], [N, N, Y, N], [N, N, N, Y]])('a Yes on any one question (%s,%s,%s,%s) needs the acuity answer', (...codes) => {
+    expect(said(codes)).toMatch(/^Positive screen — ask the acuity question/);
+    expect(said(codes, N)).toMatch(/^Non-acute positive screen/);
+    expect(said(codes, Y)).toMatch(/^Acute positive screen/);
+  });
+  it('is negative again when every answer goes back to No, even if the acuity question was answered', () => {
+    expect(said([N, N, N, N], Y)).toMatch(/^Negative screen/);
+  });
+  it('gives no result until all four screening questions are answered', () => {
+    expect(said([N, N, N])).toBeUndefined();
+    expect(evalIn(qr([]), result)).toEqual([]);
+  });
+  it('asks the acuity question only after a Yes, and the attempt timing only after a Yes to the attempt question', () => {
+    const byId = {}; walk(group.item, i => { byId[i.linkId] = i; });
+    expect(byId['asq-q5'].enableBehavior).toBe('any');
+    expect(byId['asq-q5'].enableWhen.map(w => w.question)).toEqual(['asq-q1', 'asq-q2', 'asq-q3', 'asq-q4']);
+    expect(byId['asq-q4-when'].enableWhen).toMatchObject([{ question: 'asq-q4', operator: '=', answerCoding: { code: Y } }]);
+    expect(byId['asq-q5'].required).toBeFalsy();
+  });
+});
+
 describe('published option scores', () => {
   const scores = (group, linkId) => {
     let out;
@@ -220,7 +255,7 @@ describe('inserting a template into a questionnaire that already has its ids', (
 });
 
 describe('enableWhen in intake fragments survives a rename', () => {
-  it.each([['allergies', 'allergy-none', 'allergy-entry'], ['medications', 'meds-none', 'meds-entry']])('%s', (id, noneId, entryId) => {
+  it.each([['allergies', 'allergy-none', 'allergy-entry'], ['medications', 'meds-none', 'meds-entry'], ['asq', 'asq-q4', 'asq-q4-when']])('%s', (id, noneId, entryId) => {
     const group = load(id);
     const { remapped, idMap } = remapSubtree(group, collectLinkIds(group), 'suffix');
     let entry;
