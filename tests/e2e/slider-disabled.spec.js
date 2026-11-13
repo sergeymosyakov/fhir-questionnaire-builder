@@ -16,7 +16,7 @@
 
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import path from 'node:path';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { clickAddRootGroup } from './helpers/builder.js';
@@ -165,8 +165,7 @@ test.describe('builder UI', () => {
     // Switch general-notes to integer and enable slider via checkbox
     await page.locator('[data-node-id="general-notes"]').getByTestId('action-type').click();
     // Select integer type
-    await page.getByTestId('type-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="integer"]').click();
+    await pickCustomSelect(page, 'type-select', 'integer');
     // Check "Render as slider" — step field appears with default value 1
     await page.getByTestId('slider-toggle').check();
     await expect(page.getByTestId('slider-step-input')).toBeVisible();
@@ -228,8 +227,7 @@ test.describe('sliderStepValue — R4 decimal constraint', () => {
     // Open Answer Type modal, switch to decimal, enable slider with step 0.5
     await page.locator('[data-node-id="1.1"]').getByTestId('action-type').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
-    await page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="decimal"]').click();
+    await pickCustomSelect(page, page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select'), 'decimal');
     await page.getByTestId('slider-toggle').check();
     await expect(page.getByTestId('slider-step-input')).toBeVisible();
     await page.getByTestId('slider-step-input').fill('0.5');

@@ -23,6 +23,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 const PHQ9 = path.resolve('sampledata/phq-9.fhir.json');
 
@@ -49,8 +50,7 @@ async function runTranslate(page) {
   await expect(page.getByTestId('translate-item')).toBeVisible();
   await page.getByTestId('translate-item').click();
   await expect(page.locator('[data-testid="translateModal"]')).toBeVisible({ timeout: 5_000 });
-  await page.getByTestId('translate-lang-select').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="fr"]').click();
+  await pickCustomSelect(page, 'translate-lang-select', 'fr');
   await page.getByTestId('translate-btn').click();
   await expect(page.locator('[data-testid="translate-table"]')).toBeVisible({ timeout: 15_000 });
 }

@@ -12,6 +12,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 async function addTwoItems(page) {
   await addRootGroup(page);
@@ -67,13 +68,7 @@ test.describe('Renumber — prefix assignment', () => {
     await addTwoItems(page);
 
     // Select roman format
-    await expect(async () => {
-      if (!(await page.locator('[data-testid="csel-drop"]').isVisible())) {
-        await page.getByTestId('renumber-format').click();
-      }
-      await expect(page.locator('[data-testid="csel-drop"]')).toBeVisible();
-    }).toPass();
-    await page.locator('[data-testid="csel-drop"] [data-val="roman"]').click();
+    await pickCustomSelect(page, 'renumber-format', 'roman');
 
     await page.getByTestId('renumber-btn').click();
     await expect(page.getByTestId('renumber-btn')).toBeEnabled({ timeout: 8000 });
@@ -86,13 +81,7 @@ test.describe('Renumber — prefix assignment', () => {
     await freshStart(page);
     await addTwoItems(page);
 
-    await expect(async () => {
-      if (!(await page.locator('[data-testid="csel-drop"]').isVisible())) {
-        await page.getByTestId('renumber-format').click();
-      }
-      await expect(page.locator('[data-testid="csel-drop"]')).toBeVisible();
-    }).toPass();
-    await page.locator('[data-testid="csel-drop"] [data-val="letters"]').click();
+    await pickCustomSelect(page, 'renumber-format', 'letters');
 
     await page.getByTestId('renumber-btn').click();
     await expect(page.getByTestId('renumber-btn')).toBeEnabled({ timeout: 8000 });

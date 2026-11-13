@@ -24,7 +24,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/group-layout.fhir.json');
@@ -102,8 +102,7 @@ test.describe('group header/footer — Appearance modal', () => {
     await link.click();
     await expect(page.locator('[data-testid="appearanceModal"]')).toBeVisible();
 
-    await page.getByTestId('group-layout-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="header"]').click();
+    await pickCustomSelect(page, 'group-layout-select', 'header');
     await page.getByTestId('appearanceModalApply').click();
     await expect(page.locator('[data-testid="appearanceModal"]')).not.toBeVisible();
 

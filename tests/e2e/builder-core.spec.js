@@ -41,7 +41,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup, waitForLoad } from './helpers/builder.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 
 // ── App boot ──────────────────────────────────────────────────────────────────
 
@@ -213,8 +213,7 @@ test.describe('Builder → preview: item type changes', () => {
     await node.getByTestId('action-type').click();
     const modal = page.locator('[data-testid="answerTypeModal"]');
     await expect(modal).toBeVisible();
-    await modal.getByTestId('type-select').click();
-    await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
+    await pickCustomSelect(page, modal.getByTestId('type-select'), typeValue);
     await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(modal).not.toBeVisible();
   }
@@ -384,8 +383,7 @@ test.describe('Builder creates items → preview reacts', () => {
     await node.getByTestId('action-type').click();
     const atModal = page.locator('[data-testid="answerTypeModal"]');
     await expect(atModal).toBeVisible();
-    await atModal.getByTestId('type-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="decimal"]').click();
+    await pickCustomSelect(page, atModal.getByTestId('type-select'), 'decimal');
     await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(atModal).not.toBeVisible();
 
@@ -410,8 +408,7 @@ test.describe('Builder creates items → preview reacts', () => {
     await node.getByTestId('action-states').click();
     const reqModal = page.locator('[data-testid="statesModal"]');
     await expect(reqModal).toBeVisible();
-    await reqModal.locator('[data-testid="states-required-sel"]').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="true"]').click();
+    await pickCustomSelect(page, reqModal.locator('[data-testid="states-required-sel"]'), 'true');
     await page.locator('[data-testid="statesModalApply"]').click();
 
     await expect(previewRow.getByTestId('preview-required-star')).toBeVisible();
@@ -421,8 +418,7 @@ test.describe('Builder creates items → preview reacts', () => {
     await expect(node.getByTestId('action-states')).toBeVisible();
     await node.getByTestId('action-states').click();
     await expect(reqModal).toBeVisible();
-    await reqModal.locator('[data-testid="states-required-sel"]').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="false"]').click();
+    await pickCustomSelect(page, reqModal.locator('[data-testid="states-required-sel"]'), 'false');
     await page.locator('[data-testid="statesModalApply"]').click();
 
     await expect(previewRow.getByTestId('preview-optional-badge')).toBeVisible();

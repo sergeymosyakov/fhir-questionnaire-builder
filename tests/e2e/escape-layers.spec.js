@@ -20,6 +20,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 async function openAnswerTypeModal(page, itemId) {
   const link = page.locator(`[data-node-id="${itemId}"]`).getByTestId('action-type');
@@ -52,8 +53,7 @@ test.describe('Escape layering', () => {
     await addRootGroup(page);
     const itemId = await addItemToGroup(page, '1');
     await openAnswerTypeModal(page, itemId);
-    await page.getByTestId('type-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="date"]').click();
+    await pickCustomSelect(page, 'type-select', 'date');
     await page.getByTestId('answerTypeModalApply').click();
     await expect(page.getByTestId('answerTypeModal')).not.toBeVisible();
 

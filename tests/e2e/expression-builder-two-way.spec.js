@@ -22,6 +22,7 @@
 
 import { test, expect } from '@playwright/test';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 async function freshStart(page) {
   await page.goto('/');
@@ -52,17 +53,13 @@ async function makeItems(page, n) {
 async function setItemType(page, nodeId, typeValue) {
   await page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type').click();
   await expect(page.getByTestId('answerTypeModal')).toBeVisible();
-  await page.getByTestId('type-select').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
+  await pickCustomSelect(page, 'type-select', typeValue);
   await page.getByTestId('answerTypeModalApply').click();
   await expect(page.getByTestId('answerTypeModal')).toBeHidden();
 }
 
 async function pick(scope, page, testid, value) {
-  await scope.getByTestId(testid).click();
-  const opt = page.locator('[data-testid="csel-drop"]').locator(`[data-val="${value}"]`);
-  await expect(opt).toBeVisible();
-  await opt.click();
+  await pickCustomSelect(page, scope.getByTestId(testid), value);
 }
 
 async function openCondition(page, nodeId = '1.1') {
@@ -443,8 +440,7 @@ test.describe('Two-way — values (grouping & rounding)', () => {
     await pick(page.getByTestId('eb-operand').nth(1), page, 'eb-operand-kind', 'num');
     await page.getByTestId('eb-operand-num').fill('10000');
     await page.getByTestId('eb-add-operand').click();
-    await page.getByTestId('eb-chain').getByTestId('eb-arith-op').nth(1).click();
-    await page.locator('[data-testid="csel-drop"] [data-val="/"]').click();
+    await pickCustomSelect(page, page.getByTestId('eb-chain').getByTestId('eb-arith-op').nth(1), '/');
     await pick(page.getByTestId('eb-operand').nth(2), page, 'eb-operand-kind', 'group');
     const group = page.getByTestId('eb-group');
     await expect(group).toBeVisible();

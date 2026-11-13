@@ -22,6 +22,7 @@ import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { freshStart, openModal, exportFHIR } from './helpers/metadata.js';
 import path from 'node:path';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 const FIXTURE_LC = path.resolve('sampledata/answer-expression-demo.fhir.json');
 
@@ -57,8 +58,7 @@ test.describe('Launch Context — add / save', () => {
     await expect(page.getByTestId('meta-lc-row-0')).toBeVisible();
 
     // Select 'patient' preset from the name custom-select
-    await page.getByTestId('meta-lc-name-sel-0').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="patient"]').click();
+    await pickCustomSelect(page, 'meta-lc-name-sel-0', 'patient');
 
     // Type should be auto-filled
     await expect(page.getByTestId('meta-lc-type-0')).toHaveValue('Patient');

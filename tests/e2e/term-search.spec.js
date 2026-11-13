@@ -29,6 +29,7 @@ import { test, expect } from '@playwright/test';
 import { SNOMED_URL } from '../../js/fhir/urls/snomed.js';
 import { LOINC_URL } from '../../js/fhir/urls/loinc.js';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 // ── Mock API response shape ───────────────────────────────────────────────────
 // NLM Clinical Tables API returns: [total, codes[], extraHash, displays[]]
@@ -215,8 +216,7 @@ test.describe('Search UI', () => {
   });
 
   test('switching system to ICD-10-CM fetches condition results', async ({ page }) => {
-    await systemSelect(page).click();
-    await page.locator('[data-testid="csel-drop"] [data-val="icd10"]').click();
+    await pickCustomSelect(page, systemSelect(page), 'icd10');
     await expect(systemSelect(page)).toHaveAttribute('data-value', 'icd10');
     await searchInput(page).fill('diab');
     await expect(resultRows(page).first()).toBeVisible({ timeout: 5_000 });
@@ -226,8 +226,7 @@ test.describe('Search UI', () => {
 
   test('switching system to SNOMED CT fetches FHIR $expand results', async ({ page }) => {
     await mockSnomed(page);
-    await systemSelect(page).click();
-    await page.locator('[data-testid="csel-drop"] [data-val="snomed"]').click();
+    await pickCustomSelect(page, systemSelect(page), 'snomed');
     await expect(systemSelect(page)).toHaveAttribute('data-value', 'snomed');
     await searchInput(page).fill('diab');
     await expect(resultRows(page).first()).toBeVisible({ timeout: 8_000 });

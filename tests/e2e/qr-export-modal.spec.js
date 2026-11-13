@@ -27,7 +27,7 @@
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 
 async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
@@ -82,8 +82,7 @@ test('filename is pre-filled with questionnaire name', async ({ page }) => {
 
 test('user can change status to completed', async ({ page }) => {
   await loadSampleAndOpenExportModal(page);
-  await page.getByTestId('qr-export-status').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="completed"]').click();
+  await pickCustomSelect(page, 'qr-export-status', 'completed');
   await expect(page.getByTestId('qr-export-status')).toHaveAttribute('data-value', 'completed');
 });
 
@@ -125,8 +124,7 @@ test('Export button triggers JSON download', async ({ page }) => {
 
 test('downloaded JSON has the user-specified status', async ({ page }) => {
   await loadSampleAndOpenExportModal(page);
-  await page.getByTestId('qr-export-status').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="completed"]').click();
+  await pickCustomSelect(page, 'qr-export-status', 'completed');
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByTestId('qrExportModalApply').click(),

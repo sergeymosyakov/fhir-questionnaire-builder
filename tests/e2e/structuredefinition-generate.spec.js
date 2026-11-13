@@ -17,7 +17,7 @@
 
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import { freshStart } from './helpers/builder.js';
 
 const FIXTURE = path.resolve('tests/fixtures/sd-demo-patient.json');
@@ -26,8 +26,7 @@ async function loadStructureDefinition(page, filePath) {
   await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
 
-  await page.getByTestId('load-format-select').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="sd"]').click();
+  await pickCustomSelect(page, 'load-format-select', 'sd');
 
   const [fileChooser] = await Promise.all([
     page.waitForEvent('filechooser'),

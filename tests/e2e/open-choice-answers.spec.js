@@ -16,7 +16,7 @@ import path from 'node:path';
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/open-choice-answers.fhir.json');
 const BARIATRIC = path.resolve('sampledata/example-bariatric.fhir.json');
@@ -256,8 +256,7 @@ test.describe('open-choice — default set in the builder', () => {
     await freshLoad(page);
     await page.locator('[data-node-id="oc-list"]').getByTestId('action-default').click();
     await expect(page.getByTestId('initialModal')).toBeVisible();
-    await page.getByTestId('initial-option-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="sharp"]').click();
+    await pickCustomSelect(page, 'initial-option-select', 'sharp');
     await page.getByTestId('initialModalApply').click();
     await expect(page.getByTestId('initialModal')).not.toBeVisible();
 

@@ -19,6 +19,7 @@
 // ────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 const SETTINGS_URL = '/settings.html';
 
@@ -154,8 +155,7 @@ test.describe('Settings page', () => {
     await expect(page.getByTestId('translate-key-field')).toBeHidden();
 
     // Pick DeepL → key field appears
-    await trigger.click();
-    await page.locator('[data-testid="csel-drop"] [data-val="deepl"]').click();
+    await pickCustomSelect(page, trigger, 'deepl');
     await expect(trigger).toHaveAttribute('data-value', 'deepl');
     await expect(page.getByTestId('translate-key-field')).toBeVisible();
 

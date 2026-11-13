@@ -28,7 +28,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { clickAddRootGroup } from './helpers/builder.js';
@@ -56,8 +56,7 @@ async function loadREDCapCSV(page, filePath) {
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
 
   // Select REDCap CSV format
-  await page.getByTestId('load-format-select').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="redcap"]').click();
+  await pickCustomSelect(page, 'load-format-select', 'redcap');
 
   // Click "Choose file…" and supply the CSV file
   const [fileChooser] = await Promise.all([
@@ -74,8 +73,7 @@ async function loadFHIRJSON(page, filePath) {
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
 
   // Ensure FHIR JSON is selected (it's the default)
-  await page.getByTestId('load-format-select').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="fhir"]').click();
+  await pickCustomSelect(page, 'load-format-select', 'fhir');
 
   const [fileChooser] = await Promise.all([
     page.waitForEvent('filechooser'),
@@ -155,8 +153,7 @@ test.describe('REDCap CSV export', () => {
       (async () => {
         await openDropdownItem(page, 'export-btn', 'export-quest-item');
         await expect(page.getByTestId('saveFormatModal')).toBeVisible();
-        await page.getByTestId('save-format-select').click();
-        await page.locator('[data-testid="csel-drop"] [data-val="redcap"]').click();
+        await pickCustomSelect(page, 'save-format-select', 'redcap');
         await page.getByTestId('saveFormatModalApply').click();
         // No compat issues → validate modal skipped; filename prompt appears
         await expect(page.getByTestId('prompt-save')).toBeVisible({ timeout: 8_000 });
@@ -176,8 +173,7 @@ test.describe('REDCap CSV export', () => {
 
     await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.getByTestId('saveFormatModal')).toBeVisible();
-    await page.getByTestId('save-format-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="redcap"]').click();
+    await pickCustomSelect(page, 'save-format-select', 'redcap');
     await page.getByTestId('saveFormatModalApply').click();
     await expect(validateModal(page)).toBeVisible({ timeout: 10_000 });
     await expect(validateModalTitle(page)).toContainText('REDCap Export');
@@ -198,8 +194,7 @@ test.describe('REDCap CSV export', () => {
     // Step 1: export as REDCap → compat modal appears
     await openDropdownItem(page, 'export-btn', 'export-quest-item');
     await expect(page.getByTestId('saveFormatModal')).toBeVisible();
-    await page.getByTestId('save-format-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="redcap"]').click();
+    await pickCustomSelect(page, 'save-format-select', 'redcap');
     await page.getByTestId('saveFormatModalApply').click();
     await expect(validateModal(page)).toBeVisible({ timeout: 10_000 });
     await expect(validateModalBody(page)).toContainText('REDCap equivalent');
@@ -211,8 +206,7 @@ test.describe('REDCap CSV export', () => {
     await expect(page.getByTestId('saveFormatModal')).toBeVisible();
     // saveFormatModal now defaults to R4 (REDCap was previous selection; onCancel resets it)
     // Select R4 explicitly to be safe
-    await page.getByTestId('save-format-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="R4"]').click();
+    await pickCustomSelect(page, 'save-format-select', 'R4');
     await page.getByTestId('saveFormatModalApply').click();
 
     // Either the modal is skipped (no issues → prompt) or shows without REDCap text

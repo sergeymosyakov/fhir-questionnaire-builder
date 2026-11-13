@@ -27,7 +27,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/unknown-extensions.fhir.json');
 const CUSTOM_URL = 'https://vendor.example.com/fhir/StructureDefinition/custom-field';
@@ -136,10 +136,8 @@ test.describe('Add unknown extension via Props modal', () => {
     await page.locator('[data-testid="item-props-ext-toggle"]').click();
     await page.locator('[data-testid="item-props-ext-add"]').click();
     await page.locator('[data-testid="item-props-ext-url-0"]').fill('https://new.example.com/ext');
-    await page.locator('[data-testid="item-props-ext-type-0"]').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="valueBoolean"]').click();
-    await page.locator('[data-testid="item-props-ext-val-0"]').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="true"]').click();
+    await pickCustomSelect(page, 'item-props-ext-type-0', 'valueBoolean');
+    await pickCustomSelect(page, 'item-props-ext-val-0', 'true');
     await page.locator('[data-testid="codesModalApply"]').click();
     const q = await exportFHIR(page);
     const ext = (q.item[1].extension || []);

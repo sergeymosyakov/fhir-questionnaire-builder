@@ -42,7 +42,7 @@
 
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { clickAddRootGroup } from './helpers/builder.js';
 
@@ -115,8 +115,7 @@ test.describe('comma typed into an option label via the Answer Type modal', () =
 
     await item.getByTestId('action-type').click();
     await expect(page.getByTestId('answerTypeModal')).toBeVisible();
-    await page.getByTestId('type-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="checklist"]').click();
+    await pickCustomSelect(page, 'type-select', 'checklist');
 
     await page.getByTestId('opt-add-btn').click();
     await page.getByTestId('opt-code-0').fill('woundcare');
@@ -162,8 +161,7 @@ async function addTitledItem(page, groupId, nodeId, title) {
 async function setChecklistWithCommaOption(page, nodeId) {
   await page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type').click();
   await expect(page.getByTestId('answerTypeModal')).toBeVisible();
-  await page.getByTestId('type-select').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="checklist"]').click();
+  await pickCustomSelect(page, 'type-select', 'checklist');
 
   await page.getByTestId('opt-add-btn').click();
   await page.getByTestId('opt-code-0').fill('woundcare');
@@ -245,8 +243,7 @@ test.describe('comma-containing option reaches the Expression Builder tree leaf 
     await expect(page.getByTestId('expressionBuilderModal')).toBeVisible();
 
     const leaf = page.getByTestId('eb-leaf').first();
-    await leaf.getByTestId('eb-leaf-item').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="1.2"]').click();
+    await pickCustomSelect(page, leaf.getByTestId('eb-leaf-item'), '1.2');
 
     await leaf.getByTestId('eb-leaf-value-select').click();
     const opts = page.locator('[data-testid="csel-drop"] [data-val]');

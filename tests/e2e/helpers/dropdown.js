@@ -21,12 +21,12 @@ export async function openDropdownItem(page, toggleTestId, itemTestId) {
   await page.getByTestId(itemTestId).click();
 }
 
-// createCustomSelect triggers flip too: open retry-safely (click only while the option is hidden), then pick it in the same retry block.
-export async function pickCustomSelect(page, triggerTestId, value) {
+// `trigger` is a data-testid string or a Locator (e.g. modal-scoped). createCustomSelect triggers flip too: open retry-safely (click only while the option is hidden), then pick it in the same retry block.
+export async function pickCustomSelect(page, trigger, value) {
   const option = page.locator(`[data-testid="csel-drop"] [data-val="${value}"]`);
   await expect(async () => {
     if (!(await option.isVisible())) {
-      await page.getByTestId(triggerTestId).click();
+      await (typeof trigger === 'string' ? page.getByTestId(trigger) : trigger).click();
     }
     await option.click({ timeout: 2_000 });
   }).toPass();

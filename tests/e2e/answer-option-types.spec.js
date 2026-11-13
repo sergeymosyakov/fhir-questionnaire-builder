@@ -17,6 +17,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('sampledata/answer-option-types-demo.fhir.json');
 
@@ -224,8 +225,7 @@ test.describe('answerOption types — edit type and save', () => {
     await expect(page.locator('[data-testid="answerTypeModal"]')).toBeVisible();
 
     // Change type of first row from String to Coding
-    await page.getByTestId('opt-type-0').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="coding"]').click();
+    await pickCustomSelect(page, 'opt-type-0', 'coding');
     await expect(page.getByTestId('opt-type-0')).toHaveAttribute('data-value', 'coding');
 
     await page.getByTestId('answerTypeModalApply').click();

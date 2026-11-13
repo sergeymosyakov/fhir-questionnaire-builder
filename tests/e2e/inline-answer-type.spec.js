@@ -18,7 +18,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 
 async function seed(page) {
   await page.addInitScript(() => localStorage.clear());
@@ -29,8 +29,7 @@ async function seed(page) {
 
 async function setInlineType(page, nodeId, type) {
   const node = page.locator(`[data-node-id="${nodeId}"]`).first();
-  await node.getByTestId('inline-answer-type').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${type}"]`).click();
+  await pickCustomSelect(page, node.getByTestId('inline-answer-type'), type);
 }
 
 const cfgOf = (page, id) => page.locator(`[data-node-id="${id}"]`).first().getByTestId('action-type');

@@ -21,6 +21,7 @@
 
 import { test, expect } from '@playwright/test';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 async function freshStart(page) {
   await page.goto('/');
@@ -61,10 +62,7 @@ async function openBuilder(page, nodeId = '1.1') {
 }
 
 async function pickOption(page, triggerTestId, value) {
-  await page.getByTestId(triggerTestId).click();
-  const opt = page.locator('[data-testid="csel-drop"]').locator(`[data-val="${value}"]`);
-  await expect(opt).toBeVisible();
-  await opt.click();
+  await pickCustomSelect(page, triggerTestId, value);
 }
 
 test.describe('Expression Builder', () => {

@@ -24,6 +24,7 @@
 
 import { test, expect } from '@playwright/test';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
@@ -49,8 +50,7 @@ async function setDateType(page, nodeId) {
     await link.click();
     await expect(page.getByTestId('answerTypeModal')).toBeVisible();
   }).toPass();
-  await page.getByTestId('type-select').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="date"]').click();
+  await pickCustomSelect(page, 'type-select', 'date');
   await page.getByTestId('answerTypeModalApply').click();
   await expect(page.getByTestId('answerTypeModal')).not.toBeVisible();
 }

@@ -44,7 +44,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { APP_URL } from '../../js/fhir/urls/app.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 
 const XHTML_DEMO = path.resolve('sampledata/rendering-xhtml-demo.fhir.json');
 const MD_DEMO    = path.resolve('tests/fixtures/rendering-markdown.fhir.json');
@@ -59,8 +59,7 @@ async function loadXHTMLDemo(page) {
   await freshStart(page);
   await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
-  await page.getByTestId('load-format-select').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="fhir"]').click();
+  await pickCustomSelect(page, 'load-format-select', 'fhir');
   const [fc] = await Promise.all([
     page.waitForEvent('filechooser'),
     page.getByTestId('loadFormatModalApply').click(),
@@ -73,8 +72,7 @@ async function loadMarkdownDemo(page) {
   await freshStart(page);
   await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
-  await page.getByTestId('load-format-select').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="fhir"]').click();
+  await pickCustomSelect(page, 'load-format-select', 'fhir');
   const [fc] = await Promise.all([
     page.waitForEvent('filechooser'),
     page.getByTestId('loadFormatModalApply').click(),
@@ -117,8 +115,7 @@ test.describe('XHTML translation — review table', () => {
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible();
 
     // Select language and translate
-    await page.getByTestId('translate-lang-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="es"]').click();
+    await pickCustomSelect(page, 'translate-lang-select', 'es');
     await page.getByTestId('translate-btn').click();
 
     // Wait for review table
@@ -146,8 +143,7 @@ test.describe('XHTML translation — preview render', () => {
     // Translate to Spanish
     await openDropdownItem(page, 'tools-btn', 'translate-item');
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible();
-    await page.getByTestId('translate-lang-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="es"]').click();
+    await pickCustomSelect(page, 'translate-lang-select', 'es');
     await page.getByTestId('translate-btn').click();
     await expect(page.locator('[data-testid="translate-table"]')).toBeVisible({ timeout: 15_000 });
     await page.getByTestId('translate-apply-btn').click();
@@ -176,8 +172,7 @@ test.describe('XHTML translation — export round-trip', () => {
     // Translate to Spanish
     await openDropdownItem(page, 'tools-btn', 'translate-item');
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible();
-    await page.getByTestId('translate-lang-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="es"]').click();
+    await pickCustomSelect(page, 'translate-lang-select', 'es');
     await page.getByTestId('translate-btn').click();
     await expect(page.locator('[data-testid="translate-table"]')).toBeVisible({ timeout: 15_000 });
     await page.getByTestId('translate-apply-btn').click();
@@ -222,8 +217,7 @@ test.describe('Markdown translation — preview render', () => {
     // Translate to Spanish
     await openDropdownItem(page, 'tools-btn', 'translate-item');
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible();
-    await page.getByTestId('translate-lang-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="es"]').click();
+    await pickCustomSelect(page, 'translate-lang-select', 'es');
     await page.getByTestId('translate-btn').click();
     await expect(page.locator('[data-testid="translate-table"]')).toBeVisible({ timeout: 15_000 });
     await page.getByTestId('translate-apply-btn').click();
@@ -250,8 +244,7 @@ test.describe('Markdown translation — export round-trip', () => {
     // Translate to Spanish
     await openDropdownItem(page, 'tools-btn', 'translate-item');
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible();
-    await page.getByTestId('translate-lang-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="es"]').click();
+    await pickCustomSelect(page, 'translate-lang-select', 'es');
     await page.getByTestId('translate-btn').click();
     await expect(page.locator('[data-testid="translate-table"]')).toBeVisible({ timeout: 15_000 });
     await page.getByTestId('translate-apply-btn').click();

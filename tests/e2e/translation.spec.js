@@ -30,7 +30,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import { clickAddRootGroup } from './helpers/builder.js';
 
 const PHQ9 = path.resolve('sampledata/phq-9.fhir.json');
@@ -85,8 +85,7 @@ test.describe('translation — modal', () => {
     await expect(page.locator('[data-testid="translateModal"]')).toBeVisible({ timeout: 5_000 });
 
     // Pick French from the language select
-    await page.getByTestId('translate-lang-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="fr"]').click();
+    await pickCustomSelect(page, 'translate-lang-select', 'fr');
     await expect(page.getByTestId('translate-btn')).not.toBeDisabled();
   });
 
