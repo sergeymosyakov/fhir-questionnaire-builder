@@ -14,7 +14,7 @@ const load = id => {
   const entry = library.find(e => e.id === id);
   return templateGroupFrom(JSON.parse(fs.readFileSync(path.join(DIR, entry.file), 'utf8')));
 };
-const SCORED = ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c', 'glasgow-coma-scale', 'apgar-score'];
+const SCORED = ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c', 'glasgow-coma-scale', 'apgar-score', 'gds-15', 'pc-ptsd-5'];
 const walk = (items, fn) => items.forEach(i => { fn(i); walk(i.item ?? [], fn); });
 
 describe('template library catalog', () => {
@@ -89,6 +89,8 @@ describe('template scoring', () => {
     { id: 'audit-c', total: 'auditc-total', n: 3 },
     { id: 'glasgow-coma-scale', total: 'gcs-total', sev: 'gcs-severity', n: 3,
       bands: [[3, 'Severe (GCS 3–8)'], [8, 'Severe (GCS 3–8)'], [9, 'Moderate (GCS 9–12)'], [12, 'Moderate (GCS 9–12)'], [13, 'Mild (GCS 13–15)'], [15, 'Mild (GCS 13–15)']] },
+    { id: 'gds-15', total: 'gds15-total', sev: 'gds15-result', n: 15,
+      bands: [[0, 'Within normal range (0–5)'], [5, 'Within normal range (0–5)'], [6, 'Suggests depression (6–15) — follow up with a clinical assessment'], [15, 'Suggests depression (6–15) — follow up with a clinical assessment']] },
     ...['apgar1', 'apgar5'].map(p => ({
       id: 'apgar-score', prefix: p + '-', total: p + '-total', sev: p + '-band', n: 5,
       bands: [[0, 'Low (0–3)'], [3, 'Low (0–3)'], [4, 'Moderately abnormal (4–6)'], [6, 'Moderately abnormal (4–6)'], [7, 'Reassuring (7–10)'], [10, 'Reassuring (7–10)']],
@@ -127,6 +129,44 @@ describe('template scoring', () => {
   });
 });
 
+describe('PC-PTSD-5', () => {
+  const group = load('pc-ptsd-5');
+  const total = exprOf(group, 'pcptsd5-total');
+  const followUps = [1, 2, 3, 4, 5].map(n => `pcptsd5-q${n}`);
+  const qr = (exposure, yesCount, answered = 5) => ({
+    resourceType: 'QuestionnaireResponse', status: 'in-progress',
+    item: [
+      ...(exposure ? [{ linkId: 'pcptsd5-exposure', answer: [{ valueCoding: { system: 'http://loinc.org', code: exposure } }] }] : []),
+      ...followUps.slice(0, answered).map((linkId, k) => ({ linkId, answer: [{ valueCoding: { system: 'http://loinc.org', code: 'x', extension: [{ url: ORD, valueDecimal: k < yesCount ? 1 : 0 }] } }] })),
+    ],
+  });
+
+  it('scores 0 without asking the follow-ups when no traumatic event is reported', () => {
+    expect(evalIn(qr('LA32-8', 0, 0), total)).toEqual([0]);
+  });
+  it('ignores stale follow-up answers when the event is then answered No', () => {
+    expect(evalIn(qr('LA32-8', 5), total)).toEqual([0]);
+  });
+  it('counts the Yes answers once an event is reported', () => {
+    expect(evalIn(qr('LA33-6', 0), total)).toEqual([0]);
+    expect(evalIn(qr('LA33-6', 3), total)).toEqual([3]);
+    expect(evalIn(qr('LA33-6', 5), total)).toEqual([5]);
+  });
+  it('gives no score while a follow-up is unanswered or the event question is blank', () => {
+    expect(evalIn(qr('LA33-6', 2, 4), total)).toEqual([]);
+    expect(evalIn(qr(null, 0, 0), total)).toEqual([]);
+  });
+  it.each([[0, 'Negative screen'], [3, 'Negative screen'], [4, 'Positive screen — further assessment recommended'], [5, 'Positive screen — further assessment recommended']])('score %i is "%s"', (score, label) => {
+    expect(evalIn(withTotal({ resourceType: 'QuestionnaireResponse', item: [] }, 'pcptsd5-total', score), exprOf(group, 'pcptsd5-result'))).toEqual([label]);
+  });
+  it('asks the follow-ups only after an event is reported', () => {
+    const asked = [];
+    walk(group.item, i => { if (i.enableWhen) asked.push(i.linkId); });
+    expect(asked).toEqual(['pcptsd5-leadin', ...followUps]);
+    walk(group.item, i => { if (i.enableWhen) expect(i.enableWhen[0]).toMatchObject({ question: 'pcptsd5-exposure', operator: '=', answerCoding: { code: 'LA33-6' } }); });
+  });
+});
+
 describe('published option scores', () => {
   const scores = (group, linkId) => {
     let out;
@@ -138,6 +178,15 @@ describe('published option scores', () => {
     expect(scores(g, 'gcs-eye')).toEqual([1, 2, 3, 4]);
     expect(scores(g, 'gcs-verbal')).toEqual([1, 2, 3, 4, 5]);
     expect(scores(g, 'gcs-motor')).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+  it('GDS-15: No scores on questions 1, 5, 7, 11 and 13, Yes on all the others', () => {
+    const g = load('gds-15');
+    const noKeyed = [1, 5, 7, 11, 13];
+    for (let n = 1; n <= 15; n++) {
+      const yes = noKeyed.includes(n) ? 0 : 1;
+      let item; walk(g.item, i => { if (i.linkId === `gds15-q${n}`) item = i; });
+      expect(item.answerOption.map(o => [o.valueCoding.display, o.extension.find(e => e.url === ORD).valueDecimal]), `q${n}`).toEqual([['Yes', yes], ['No', 1 - yes]]);
+    }
   });
   it.each(['apgar1', 'apgar5'])('Apgar %s: every criterion scores 0, 1 or 2', p => {
     const g = load('apgar-score');

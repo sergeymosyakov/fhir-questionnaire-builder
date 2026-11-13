@@ -12,6 +12,8 @@ demographics or allergies — and don't want to type it in and wire up the scori
 - **PHQ-9** — depression screening; a total score (0–27) and its severity band (minimal to severe).
 - **GAD-7** — anxiety screening; a total score (0–21) and its severity band.
 - **AUDIT-C** — alcohol use screening; a total score (0–12) with the usual positive-screen thresholds noted.
+- **PC-PTSD-5** — the short post-traumatic stress screen. The follow-up questions appear only after you answer Yes to having experienced a traumatic event; the score (0–5) is a positive screen at 4 or more.
+- **GDS-15** — yes/no questions screening older adults for depression; a total (0–15) that suggests depression above 5.
 - **Glasgow Coma Scale** — eye, verbal and motor responses; a total (3–15) and its severity band.
 - **Apgar Score** — the five criteria at 1 and 5 minutes after birth; a total (0–10) and result band for each.
 - **qSOFA Sepsis Screen**, **CHA₂DS₂-VASc Stroke Risk Score** and **Charlson Comorbidity Index** — yes/no criteria added up into a score (the Charlson index also uses the age). An unanswered criterion counts as No. qSOFA shows its result once you answer at least one criterion; CHA₂DS₂-VASc and Charlson need the age first.
