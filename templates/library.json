@@ -538,5 +538,26 @@
     "license": "The original scale is in the public domain; neither the GDS nor its electronic form is protected by copyright (per the scale author, J. A. Yesavage).",
     "licenseUrl": "https://web.stanford.edu/~yesavage/Testing.htm",
     "file": "gds-15.template.json"
+  },
+  {
+    "id": "asq",
+    "name": "ASQ Suicide Risk Screening",
+    "description": "NIMH screen for suicide risk in medical settings: screening questions, the acuity question asked after a positive answer, and the published result and next steps.",
+    "category": "scales",
+    "scoring": "A Yes to any of the screening questions is a positive screen. The acuity question then separates an acute positive screen from a non-acute one; all No is a negative screen.",
+    "keywords": [
+      "suicide",
+      "asq",
+      "suicide risk",
+      "screening",
+      "mental health",
+      "emergency",
+      "safety"
+    ],
+    "source": "Horowitz et al. 2012, Arch Pediatr Adolesc Med 166:1170 (ASQ); NIMH Ask Suicide-Screening Questions (ASQ) Toolkit. Codes: LOINC.",
+    "sourceUrl": "https://www.nimh.nih.gov/ASQ",
+    "license": "Public domain tool, free of charge (per the NIMH ASQ Toolkit information sheet; developed at the NIMH Intramural Research Program).",
+    "licenseUrl": "https://www.nimh.nih.gov/ASQ",
+    "file": "asq.template.json"
   }
 ]

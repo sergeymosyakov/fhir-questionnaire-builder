@@ -34,7 +34,7 @@ test.beforeEach(async ({ page }) => {
 
 test('library lists the shipped scales with source and license', async ({ page }) => {
   await openDropdownItem(page, 'add-menu-btn', 'add-template-btn');
-  for (const id of ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c', 'demographics', 'allergies', 'medications', 'pain', 'glasgow-coma-scale', 'apgar-score', 'qsofa', 'cha2ds2-vasc', 'charlson-comorbidity-index', 'pc-ptsd-5', 'gds-15']) await expect(page.getByTestId('tpl-row-' + id)).toBeVisible();
+  for (const id of ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c', 'demographics', 'allergies', 'medications', 'pain', 'glasgow-coma-scale', 'apgar-score', 'qsofa', 'cha2ds2-vasc', 'charlson-comorbidity-index', 'pc-ptsd-5', 'gds-15', 'asq']) await expect(page.getByTestId('tpl-row-' + id)).toBeVisible();
   await page.getByTestId('tpl-row-phq-9').click();
   await expect(page.getByTestId('tpl-detail')).toContainText('Kroenke, Spitzer & Williams 2001');
   await expect(page.getByTestId('tpl-detail')).toContainText('No permission required to reproduce');
@@ -226,4 +226,19 @@ test('GDS-15 scores the depressive answers and suggests depression above 5', asy
   await pick(page, 'gds15-q2', 0); // Yes on a Yes-keyed question
   await expect(page.locator('[data-preview-id="gds15-total"]')).toContainText('6');
   await expect(page.locator('[data-preview-id="gds15-result"]')).toContainText('Suggests depression');
+});
+
+test('ASQ asks the acuity question only after a Yes and names the screen result', async ({ page }) => {
+  await insert(page, 'asq');
+  await expect(page.locator('[data-preview-id="asq-q5"]')).toBeHidden();
+  await expect(page.locator('[data-preview-id="asq-q4-when"]')).toBeHidden();
+  for (let i = 1; i <= 4; i++) await pick(page, `asq-q${i}`, 1); // all No
+  await expect(page.locator('[data-preview-id="asq-result"]')).toContainText('Negative screen');
+  await pick(page, 'asq-q4', 0); // lifetime attempt: Yes
+  await expect(page.locator('[data-preview-id="asq-q5"]')).toBeVisible();
+  await expect(page.locator('[data-preview-id="asq-q4-when"]')).toBeVisible();
+  await pick(page, 'asq-q5', 1); // No thoughts right now
+  await expect(page.locator('[data-preview-id="asq-result"]')).toContainText('Non-acute positive screen');
+  await pick(page, 'asq-q5', 0);
+  await expect(page.locator('[data-preview-id="asq-result"]')).toContainText('Acute positive screen');
 });

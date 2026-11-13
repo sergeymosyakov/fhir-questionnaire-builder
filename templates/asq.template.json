@@ -1,0 +1,379 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "asq",
+      "text": "ASQ Suicide Risk Screening",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "asq-intro",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "115565-4"
+            }
+          ],
+          "type": "display",
+          "text": "Ask the patient:"
+        },
+        {
+          "linkId": "asq-q1",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "115566-2"
+            }
+          ],
+          "text": "In the past few weeks, have you wished you were dead?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "asq-q2",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "115567-0"
+            }
+          ],
+          "text": "In the past few weeks, have you felt that you or your family would be better off if you were dead?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "asq-q3",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "115568-8"
+            }
+          ],
+          "text": "In the past week, have you been having thoughts about killing yourself?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "asq-q4",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "115569-6"
+            }
+          ],
+          "text": "Have you ever tried to kill yourself?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "asq-q4-when",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "115570-4"
+            }
+          ],
+          "text": "If yes, when was the most recent attempt?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "enableWhen": [
+            {
+              "question": "asq-q4",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA37190-8",
+                "display": "Within last 12 months"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA37191-6",
+                "display": "Over 1 year ago"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "asq-acuity-intro",
+          "type": "display",
+          "text": "If the patient answers Yes to any of Questions 1 through 4, ask the following acuity question:",
+          "enableWhen": [
+            {
+              "question": "asq-q1",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            },
+            {
+              "question": "asq-q2",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            },
+            {
+              "question": "asq-q3",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            },
+            {
+              "question": "asq-q4",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            }
+          ],
+          "enableBehavior": "any"
+        },
+        {
+          "linkId": "asq-q5",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "115571-2"
+            }
+          ],
+          "text": "Are you having thoughts of killing yourself right now?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": false,
+          "enableWhen": [
+            {
+              "question": "asq-q1",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            },
+            {
+              "question": "asq-q2",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            },
+            {
+              "question": "asq-q3",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            },
+            {
+              "question": "asq-q4",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            }
+          ],
+          "enableBehavior": "any",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "asq-result",
+          "text": "Screening result and next steps",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.repeat(item).where(linkId='asq-q1').answer.valueCoding.code.exists() and %resource.repeat(item).where(linkId='asq-q2').answer.valueCoding.code.exists() and %resource.repeat(item).where(linkId='asq-q3').answer.valueCoding.code.exists() and %resource.repeat(item).where(linkId='asq-q4').answer.valueCoding.code.exists(), iif(%resource.repeat(item).where(linkId='asq-q1').answer.valueCoding.code = 'LA33-6' or %resource.repeat(item).where(linkId='asq-q2').answer.valueCoding.code = 'LA33-6' or %resource.repeat(item).where(linkId='asq-q3').answer.valueCoding.code = 'LA33-6' or %resource.repeat(item).where(linkId='asq-q4').answer.valueCoding.code = 'LA33-6', iif(%resource.repeat(item).where(linkId='asq-q5').answer.valueCoding.code.exists(), iif(%resource.repeat(item).where(linkId='asq-q5').answer.valueCoding.code = 'LA33-6', 'Acute positive screen (imminent risk identified) — the patient requires a STAT/urgent safety/full mental health evaluation and cannot leave until evaluated for safety. Keep the patient in sight, remove dangerous objects from the room if possible, and alert the clinician responsible for the patient’s care.', 'Non-acute positive screen (potential risk identified) — the patient needs a brief suicide safety assessment to determine if a full mental health evaluation is needed (and when). Alert the clinician responsible for the patient’s care. A non-acute positive status does not require 1-to-1 observation while the patient is awaiting further assessment (unless there are other safety concerns). If an adult patient, or the parent/guardian of a youth patient, refuses the brief suicide safety assessment, document the refusal; the patient can be permitted to leave unless there are other safety concerns, and a follow-up call is recommended.'), 'Positive screen — ask the acuity question (Question 5) to complete the screen.'), 'Negative screen — no intervention is necessary at this time. Clinical judgment can always override a negative screen.'), {})"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "asq-note",
+          "type": "display",
+          "text": "A Yes to any of Questions 1 through 4 is a positive screen. When the positive screen is solely due to Yes on Question 4 (a lifetime attempt), a brief suicide safety assessment may not be necessary if, for adults, the most recent attempt was more than 1 year ago; for youth and young adults (for example under age 25), the most recent attempt was more than 1 year ago and a brief suicide safety assessment has been documented since that attempt. If the patient refuses to answer: for youth, refusal is a non-acute positive screen; for adults, refusal is not a positive screen, so document it and intervene only if there are other safety concerns."
+        },
+        {
+          "linkId": "asq-resources",
+          "type": "display",
+          "text": "Provide resources to all patients: 988 Suicide and Crisis Lifeline (call or text 988, 988lifeline.org); Crisis Text Line (text HOME or HOLA to 741741, www.crisistextline.org)."
+        }
+      ]
+    }
+  ]
+}
