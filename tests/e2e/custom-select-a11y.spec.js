@@ -10,6 +10,7 @@
 //   fhir-file-input   — questionnaire file input
 //   preview-panel     — preview wrapper
 //   csel-drop         — createCustomSelect open dropdown portal
+//   fhir-version-select — version select in the toolbar (no search box: focus stays on the trigger)
 // Preview control classes (sanctioned non-testid exception): .sc-trigger, .oc-opt
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -95,6 +96,19 @@ test.describe('custom-select keyboard navigation', () => {
     const trigger = await refTrigger(page);
     await expect(trigger).toHaveAttribute('role', 'combobox');
     await expect(trigger).toHaveAttribute('aria-haspopup', 'listbox');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('Enter on a select without a search box picks the option and keeps the list closed', async ({ page }) => {
+    await freshStart(page);
+    const trigger = page.getByTestId('fhir-version-select');
+    await trigger.focus();
+    await page.keyboard.press('ArrowDown'); // open, focus stays on the trigger
+    await expect(page.getByTestId('csel-drop')).toBeVisible();
+    await page.keyboard.press('ArrowDown'); // R4 → R4B
+    await page.keyboard.press('Enter');
+    await expect(trigger).toHaveAttribute('data-value', 'R4B');
+    await expect(page.getByTestId('csel-drop')).toBeHidden();
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
