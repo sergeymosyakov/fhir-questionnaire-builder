@@ -66,7 +66,7 @@ test.describe('templates.html (SEO page)', () => {
   test('the docs Templates page links to it and is in the sidebar', async ({ page }) => {
     await page.goto('/docs.html#/templates');
     await expect(page.getByTestId('doc-content').locator('h1')).toHaveText('Templates');
-    await expect(page.getByTestId('doc-content').locator('a[href="https://fhirbuilder.com/templates.html"]')).toBeVisible();
+    await expect(page.getByTestId('doc-content').locator('a[href="https://fhirbuilder.com/templates.html"]').first()).toBeVisible();
     await expect(page.getByTestId('doc-nav-link').filter({ hasText: /^Templates$/ })).toBeVisible();
   });
 });
