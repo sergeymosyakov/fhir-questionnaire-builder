@@ -23,7 +23,8 @@ describe('template library catalog', () => {
     for (const e of library) {
       for (const k of ['id', 'name', 'description', 'scoring', 'source', 'license', 'file']) expect(e[k], `${e.id}.${k}`).toBeTruthy();
       expect(Array.isArray(e.keywords) && e.keywords.length > 0, `${e.id}.keywords`).toBe(true);
-      for (const k of ['sourceUrl', 'licenseUrl']) if (e[k]) expect(e[k]).toMatch(/^https:\/\//);
+      expect(e.licenseUrl, `${e.id}.licenseUrl`).toMatch(/^https:\/\//);
+      if (e.sourceUrl) expect(e.sourceUrl).toMatch(/^https:\/\//);
       expect(fs.existsSync(path.join(DIR, e.file)), e.file).toBe(true);
     }
   });

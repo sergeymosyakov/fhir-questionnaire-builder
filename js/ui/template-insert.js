@@ -5,6 +5,7 @@ import { findNode } from '../builder/dnd.js';
 import { fhirItemToNode } from '../fhir/import-item.js';
 import { loadTemplateGroup, loadTemplateLibrary } from '../fhir/templates.js';
 import { parseTemplateLink, withoutTemplateParam } from '../fhir/template-link.js';
+import { copyrightNoticeFor, withCopyrightNotice } from '../fhir/template-notice.js';
 import { remapSubtree, collectNodeIds } from '../fhir/linkid-remap.js';
 import { showError } from './toast.js';
 
@@ -51,6 +52,7 @@ export class TemplateInsert {
     const wasEmpty = !parent && questDoc.tree.length === 0;
     (parent ? parent.children : questDoc.tree).push(node);
     if (parent) parent.constructor._collapseMap?.set(parent.id, false);
+    questDoc.meta.copyright = withCopyrightNotice(questDoc.meta.copyright, copyrightNoticeFor(entry));
 
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM));
     if (wasEmpty) document.dispatchEvent(new CustomEvent(AppEvents.QUESTIONNAIRE_NEW));

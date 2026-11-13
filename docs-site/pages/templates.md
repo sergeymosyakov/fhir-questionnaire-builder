@@ -63,7 +63,12 @@ move it, or edit any question like one you wrote yourself.
 
 Templates keep the published wording of each scale and credit their authors; the
 picker shows the source and license of each one before you insert it, and the
-[license page](license.md) lists the credits. Templates save authoring effort and
+[license page](license.md) lists the credits. When you insert a template that comes from a
+third-party source, its license is also added to the questionnaire's **Copyright** field
+(Properties → Advanced), after any text you already wrote there, so the credit travels with the
+exported questionnaire. Templates written for this builder add nothing.
+
+Templates save authoring effort and
 are not medical advice — confirm a scale and its cut-offs for your use case.
 
 ---
