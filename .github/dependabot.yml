@@ -6,6 +6,12 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    groups:
+      vitest:
+        # the coverage plugin needs the exact same vitest version
+        patterns:
+          - "vitest"
+          - "@vitest/*"
     labels:
       - dependencies
   - package-ecosystem: github-actions
