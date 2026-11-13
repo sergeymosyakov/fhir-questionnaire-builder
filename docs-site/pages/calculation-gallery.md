@@ -48,7 +48,8 @@ effort; they are not medical advice, so check each formula against its source fo
 your use case.
 
 Ready-made *questions* with their calculations already wired in are a separate
-feature: see [Templates](templates.md).
+feature: see [Templates](templates.md). On the public gallery page, a calculation that a
+template is built on links to that template.
 
 ---
 

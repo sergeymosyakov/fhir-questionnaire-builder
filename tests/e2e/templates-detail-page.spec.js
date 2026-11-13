@@ -3,6 +3,9 @@
 // ── data-testid registry ──────────────────────────────────────────────────────
 //   tpd-title / tpd-questions / tpd-results   h1 / question list / calculated results
 //   tpd-source / tpd-license / tpd-json       source and license lines / JSON download link
+//   tpd-formula-<patternId>                   link to the gallery pattern behind a template
+//   tpd-more-<id>                             other templates of the same category
+//   gp-template-<patternId>-<id>              gallery card link to a template built on the pattern (gallery.html)
 //   tpd-related-<id> / tpd-all                links to other templates / header breadcrumb link to the list
 //   page-header-current                       current template name in the header breadcrumb
 //   tpd-open-builder                          "Back to Builder" link in the header
@@ -47,6 +50,23 @@ test.describe('templates/<id>.html (SEO pages)', () => {
     await page.getByTestId('tpd-all').click();
     await expect(page).toHaveURL(/\/templates(\.html)?$/);
     await expect(page.getByTestId('tp-card-phq-9')).toBeVisible();
+  });
+
+  test('related templates are listed apart from the rest of the category', async ({ page }) => {
+    await page.goto('/templates/phq-9.html');
+    await expect(page.getByTestId('tpd-related-phq-2')).toBeVisible();
+    await expect(page.getByTestId('tpd-more-phq-2')).toHaveCount(0);
+    await expect(page.getByTestId('tpd-more-audit-c')).toBeVisible();
+  });
+
+  test('a calculator template and the calculation gallery link to each other', async ({ page }) => {
+    await page.goto('/templates/kidney-function.html');
+    await page.getByTestId('tpd-formula-egfr-ckd-epi-2021').click();
+    await expect(page).toHaveURL(/gallery(\.html)?#egfr-ckd-epi-2021$/);
+    await expect(page.getByTestId('gp-card-egfr-ckd-epi-2021')).toBeInViewport();
+    await page.getByTestId('gp-template-egfr-ckd-epi-2021-kidney-function').click();
+    await expect(page).toHaveURL(/templates\/kidney-function(\.html)?$/);
+    await expect(page.getByTestId('tpd-title')).toContainText('Kidney Function');
   });
 
   test('the header link opens the Builder', async ({ page }) => {
