@@ -29,6 +29,7 @@
 
 import { test, expect } from '@playwright/test';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 async function waitForLoad(page) {
   await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
@@ -51,8 +52,7 @@ async function addGroupAndItem(page) {
 }
 
 async function selectCustomOpt(page, triggerLoc, value) {
-  await triggerLoc.click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${value}"]`).click();
+  await pickCustomSelect(page, triggerLoc, value);
 }
 
 const modal       = (page) => page.locator('[data-testid="statesModal"]');

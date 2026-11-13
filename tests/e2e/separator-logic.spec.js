@@ -25,7 +25,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -40,8 +40,7 @@ async function loadFixture(page) {
   await openDropdownItem(page, 'load-fhir-btn', 'load-from-file-item');
 
   await expect(page.getByTestId('loadFormatModal')).toBeVisible();
-  await page.getByTestId('load-format-select').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="fhir"]').click();
+  await pickCustomSelect(page, 'load-format-select', 'fhir');
 
   const [fileChooser] = await Promise.all([
     page.waitForEvent('filechooser'),

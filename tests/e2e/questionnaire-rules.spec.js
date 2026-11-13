@@ -16,7 +16,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/questionnaire-rules.fhir.json');
@@ -65,8 +65,7 @@ test.describe('Questionnaire rules', () => {
     await load(page);
     await page.locator('[data-node-id="advice"]').getByTestId('action-vis').click();
     await expect(page.getByTestId('showWhenModal')).toBeVisible();
-    await page.getByTestId('showWhenModalBody').getByTestId('vis-cond-val-sel-0').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="yes"]').click();
+    await pickCustomSelect(page, page.getByTestId('showWhenModalBody').getByTestId('vis-cond-val-sel-0'), 'yes');
     await page.getByTestId('showWhenModalApply').click();
     const q = await exportQuestionnaire(page);
     const ew = q.item.find(i => i.linkId === 'advice').enableWhen[0];

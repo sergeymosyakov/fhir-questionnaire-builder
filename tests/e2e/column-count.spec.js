@@ -28,7 +28,7 @@
 
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import path from 'node:path';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 
@@ -109,8 +109,7 @@ test.describe('columnCount — Answer Type modal', () => {
   test('setting columnCount applies the columns layout in preview', async ({ page }) => {
     await loadFixture(page);
     await openAnswerTypeModal(page, 'q-plain');
-    await page.locator('[data-testid="answerTypeModal"]').getByTestId('column-count-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="3"]').click();
+    await pickCustomSelect(page, page.locator('[data-testid="answerTypeModal"]').getByTestId('column-count-select'), '3');
     await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
     const wrap = page.locator('[data-preview-id="q-plain"] .ctrl-wrap');
@@ -121,8 +120,7 @@ test.describe('columnCount — Answer Type modal', () => {
   test('clearing columnCount removes the columns layout', async ({ page }) => {
     await loadFixture(page);
     await openAnswerTypeModal(page, 'q-cols');
-    await page.locator('[data-testid="answerTypeModal"]').getByTestId('column-count-select').click();
-    await page.locator('[data-testid="csel-drop"] [data-val=""]').click();
+    await pickCustomSelect(page, page.locator('[data-testid="answerTypeModal"]').getByTestId('column-count-select'), '');
     await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
     const wrap = page.locator('[data-preview-id="q-cols"] .ctrl-wrap');

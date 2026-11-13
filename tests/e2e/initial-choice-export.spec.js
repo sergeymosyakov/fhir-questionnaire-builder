@@ -12,7 +12,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { loadFixtureFile } from './helpers/load-fixture.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 
 const FIXTURE = path.join(process.cwd(), 'tests/fixtures/answer-options-editor.fhir.json');
 
@@ -39,8 +39,7 @@ async function exportQuestionnaire(page) {
 async function setDefault(page, code) {
   await page.locator('[data-node-id="q-opts"]').getByTestId('action-default').click();
   await expect(page.getByTestId('initialModal')).toBeVisible();
-  await page.getByTestId('initial-option-select').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${code}"]`).click();
+  await pickCustomSelect(page, 'initial-option-select', code);
   await page.getByTestId('initialModalApply').click();
   await expect(page.getByTestId('initialModal')).not.toBeVisible();
 }

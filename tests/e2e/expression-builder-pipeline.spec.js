@@ -8,6 +8,7 @@
 
 import { test, expect } from '@playwright/test';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 async function freshStart(page) {
   await page.goto('/');
@@ -37,17 +38,13 @@ async function makeItems(page, n) {
 async function setItemType(page, nodeId, typeValue) {
   await page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type').click();
   await expect(page.getByTestId('answerTypeModal')).toBeVisible();
-  await page.getByTestId('type-select').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
+  await pickCustomSelect(page, 'type-select', typeValue);
   await page.getByTestId('answerTypeModalApply').click();
   await expect(page.getByTestId('answerTypeModal')).toBeHidden();
 }
 
 async function pick(page, testid, value) {
-  await page.getByTestId(testid).click();
-  const opt = page.locator('[data-testid="csel-drop"]').locator(`[data-val="${value}"]`);
-  await expect(opt).toBeVisible();
-  await opt.click();
+  await pickCustomSelect(page, testid, value);
 }
 
 async function openCalcModal(page, nodeId = '1.1') {
@@ -78,10 +75,7 @@ async function openPipeline(page, nodeId = '1.1') {
 }
 
 async function pickScoped(scope, page, testid, value) {
-  await scope.getByTestId(testid).click();
-  const opt = page.locator('[data-testid="csel-drop"]').locator(`[data-val="${value}"]`);
-  await expect(opt).toBeVisible();
-  await opt.click();
+  await pickCustomSelect(page, scope.getByTestId(testid), value);
 }
 
 async function openExprCalcRaw(page, expr, nodeId = '1.1') {

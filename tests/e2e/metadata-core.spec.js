@@ -38,6 +38,7 @@
 import { test, expect } from '@playwright/test';
 import { loadFixture, freshStart, openModal, exportFHIR } from './helpers/metadata.js';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 // ── Modal open / close ────────────────────────────────────────────────────────
 
@@ -186,8 +187,7 @@ test.describe('metadata modal — Advanced section', () => {
     await openModal(page);
     // Remove Practitioner chip, add RelatedPerson via dropdown
     await page.getByTestId('subject-type-remove-1').click();
-    await page.getByTestId('subject-type-sel').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="RelatedPerson"]').click();
+    await pickCustomSelect(page, 'subject-type-sel', 'RelatedPerson');
     await page.locator('[data-testid="metadataModalApply"]').click();
     const q = await exportFHIR(page);
     expect(q.subjectType).toEqual(['Patient', 'RelatedPerson']);

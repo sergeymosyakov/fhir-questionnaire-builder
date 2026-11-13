@@ -39,7 +39,7 @@ import path from 'node:path';
 import fs   from 'node:fs';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { clickAddRootGroup } from './helpers/builder.js';
 
@@ -91,8 +91,7 @@ test.describe('observation-extract — toggle and apply', () => {
     const trigger = page.locator('[data-testid="states-obs-extract-sel"]');
     await expect(trigger).toHaveAttribute('data-value', '');
     // Select "Yes"
-    await trigger.click();
-    await page.locator('[data-testid="csel-drop"] [data-val="true"]').click();
+    await pickCustomSelect(page, trigger, 'true');
     await expect(trigger).toHaveAttribute('data-value', 'true');
     await page.locator('[data-testid="statesModalApply"]').click();
     await expect(page.locator('[data-testid="statesModal"]')).toBeHidden();

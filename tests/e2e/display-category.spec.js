@@ -41,7 +41,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { FHIR } from '../../js/fhir/urls/fhir.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { clickAddRootGroup } from './helpers/builder.js';
 
@@ -84,13 +84,11 @@ async function openAnswerTypeModal(page, itemId) {
 }
 
 async function changeType(page, typeValue) {
-  await page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
+  await pickCustomSelect(page, page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select'), typeValue);
 }
 
 async function changeDisplayCategory(page, catValue) {
-  await page.locator('[data-testid="answerTypeModal"]').getByTestId('display-category-select').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${catValue}"]`).click();
+  await pickCustomSelect(page, page.locator('[data-testid="answerTypeModal"]').getByTestId('display-category-select'), catValue);
 }
 
 async function applyModal(page) {

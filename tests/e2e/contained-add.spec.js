@@ -18,6 +18,7 @@
 
 import { test, expect } from '@playwright/test';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 const card   = (page) => page.getByTestId('contained-card');
 const count  = (page) => page.getByTestId('contained-card-count');
@@ -54,8 +55,7 @@ async function addItem(page, groupId, nodeId) {
 async function setItemType(page, nodeId, typeValue) {
   await page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type').click();
   await expect(page.getByTestId('answerTypeModal')).toBeVisible();
-  await page.getByTestId('type-select').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
+  await pickCustomSelect(page, 'type-select', typeValue);
   await page.getByTestId('answerTypeModalApply').click();
   await expect(page.getByTestId('answerTypeModal')).toBeHidden();
 }

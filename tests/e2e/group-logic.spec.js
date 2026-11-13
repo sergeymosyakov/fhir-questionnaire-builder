@@ -34,8 +34,7 @@ async function makeRequired(page, nodeId) {
   await expect(link).toBeVisible();
   await link.click();
   await expect(page.getByTestId('statesModal')).toBeVisible();
-  await page.getByTestId('states-required-sel').click();
-  await page.locator('[data-testid="csel-drop"] [data-val="true"]').click();
+  await pickCustomSelect(page, 'states-required-sel', 'true');
   await page.getByTestId('statesModalApply').click();
   await expect(page.getByTestId('statesModal')).toBeHidden();
 }
@@ -61,8 +60,7 @@ test.describe('Group AND/OR logic — preview reactivity', () => {
 
     // Open the OR dropdown in the builder logic row
     const logicTrigger = page.locator('[data-node-id="1"]').getByTestId('group-logic-select');
-    await logicTrigger.click();
-    await page.locator('[data-testid="csel-drop"] [data-val="OR"]').click();
+    await pickCustomSelect(page, logicTrigger, 'OR');
 
     // Badge should update without any other action
     const badge = page.locator('.preview-logic-badge').first();
@@ -78,8 +76,7 @@ test.describe('Group AND/OR logic — preview reactivity', () => {
     await makeRequired(page, '1.1');
 
     const logicTrigger = page.locator('[data-node-id="1"]').getByTestId('group-logic-select');
-    await logicTrigger.click();
-    await page.locator('[data-testid="csel-drop"] [data-val="OR"]').click();
+    await pickCustomSelect(page, logicTrigger, 'OR');
 
     const separator = page.locator('.logic-separator').first();
     await expect(separator).toHaveText('OR');
@@ -95,13 +92,11 @@ test.describe('Group AND/OR logic — preview reactivity', () => {
     const logicTrigger = page.locator('[data-node-id="1"]').getByTestId('group-logic-select');
 
     // Switch to OR
-    await logicTrigger.click();
-    await page.locator('[data-testid="csel-drop"] [data-val="OR"]').click();
+    await pickCustomSelect(page, logicTrigger, 'OR');
     await expect(page.locator('.preview-logic-badge').first()).toHaveText(/ANY item/);
 
     // Switch back to AND
-    await logicTrigger.click();
-    await page.locator('[data-testid="csel-drop"] [data-val="AND"]').click();
+    await pickCustomSelect(page, logicTrigger, 'AND');
     await expect(page.locator('.preview-logic-badge').first()).toHaveText(/ALL items/);
   });
 });
@@ -110,6 +105,7 @@ test.describe('Group AND/OR logic — preview reactivity', () => {
 
 import path from 'node:path';
 import { loadFixtureFile } from './helpers/load-fixture.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 const ANNUAL = path.resolve('sampledata/annual-health-check.fhir.json');
 
 async function loadAnnual(page) {
@@ -218,8 +214,7 @@ test.describe('calculatedExpression — annual-health-check fixture', () => {
     await makeRequired(page, '1.1');
 
     const logicTrigger = group.getByTestId('group-logic-select');
-    await logicTrigger.click();
-    await page.locator('[data-testid="csel-drop"] [data-val="OR"]').click();
+    await pickCustomSelect(page, logicTrigger, 'OR');
     await expect(page.locator('.preview-logic-badge').first()).toHaveText(/ANY item/);
 
     // Commit input (focuses search box) — acts as neutral navigation without opening dropdowns
@@ -242,8 +237,7 @@ test.describe('calculatedExpression — annual-health-check fixture', () => {
     await makeRequired(page, '1.1');
 
     const logicTrigger = group.getByTestId('group-logic-select');
-    await logicTrigger.click();
-    await page.locator('[data-testid="csel-drop"] [data-val="OR"]').click();
+    await pickCustomSelect(page, logicTrigger, 'OR');
 
     // The logic separator text between items should be "OR"
     const separator = page.locator('.logic-separator').first();

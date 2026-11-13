@@ -15,6 +15,7 @@
 
 import { test, expect } from '@playwright/test';
 import { freshStart, addRootGroup, addItemToGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 async function openTypeModal(page, itemId) {
   const node = page.locator(`[data-node-id="${itemId}"]`);
@@ -72,8 +73,7 @@ test.describe('Answer Type modal — FHIR-aware type labels', () => {
 
     const node = page.locator(`[data-node-id="${itemId}"]`);
     const inlineSel = node.getByTestId('inline-answer-type');
-    await inlineSel.click();
-    await page.locator('[data-testid="csel-drop"] [data-val="checklist"]').click();
+    await pickCustomSelect(page, inlineSel, 'checklist');
     await expect(inlineSel.locator('.sc-trigger-text')).toHaveText('Choice (checkboxes)');
   });
 });

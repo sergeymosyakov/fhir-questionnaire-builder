@@ -22,6 +22,7 @@
 
 import { test, expect } from '@playwright/test';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
@@ -220,8 +221,7 @@ test.describe('Default Value modal — not applicable types', () => {
     await node.getByTestId('action-type').click();
     const modal = page.locator('[data-testid="answerTypeModal"]');
     await expect(modal).toBeVisible();
-    await modal.getByTestId('type-select').click();
-    await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
+    await pickCustomSelect(page, modal.getByTestId('type-select'), typeValue);
     await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(modal).not.toBeVisible();
   }

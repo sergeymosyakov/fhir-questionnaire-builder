@@ -104,8 +104,7 @@ test.describe('versionAlgorithm — custom expression editing', () => {
   test('switching to Custom expression round-trips as versionAlgorithmString', async ({ page }) => {
     await loadFixture(page);
     await openAdvanced(page);
-    await page.getByTestId('meta-version-algorithm').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="__custom__"]').click();
+    await pickCustomSelect(page, 'meta-version-algorithm', '__custom__');
     const expr = page.getByTestId('meta-version-algorithm-expr');
     await expect(expr).toBeVisible();
     await expr.fill('%version1 > %version2');

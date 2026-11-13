@@ -23,11 +23,11 @@
 
 import { test, expect } from '@playwright/test';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 /** Pick an option from an open custom-select portal. */
 async function selectCustomOpt(page, triggerLoc, value) {
-  await triggerLoc.click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${value}"]`).click();
+  await pickCustomSelect(page, triggerLoc, value);
 }
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────

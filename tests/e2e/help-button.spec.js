@@ -36,7 +36,7 @@
 import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const FIXTURE = path.resolve('tests/fixtures/help-button.fhir.json');
@@ -127,8 +127,7 @@ test.describe('help-button — builder toggle', () => {
 
     const select = page.locator('[data-testid="answerTypeModal"]').getByTestId('display-control-select');
     await expect(select).toBeVisible();
-    await select.click();
-    await page.locator('[data-testid="csel-drop"] [data-val="help"]').click();
+    await pickCustomSelect(page, select, 'help');
     await page.locator('[data-testid="answerTypeModalApply"]').click();
     await expect(page.locator('[data-testid="answerTypeModal"]')).not.toBeVisible();
 

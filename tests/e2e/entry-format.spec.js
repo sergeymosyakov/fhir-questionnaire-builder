@@ -22,6 +22,7 @@ import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import { loadFixtureFile } from './helpers/load-fixture.js';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 const FIXTURE = path.resolve('tests/fixtures/entry-format.fhir.json');
 
@@ -65,8 +66,7 @@ async function openAnswerTypeModal(page, itemId) {
 }
 
 async function changeType(page, typeValue) {
-  await page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
+  await pickCustomSelect(page, page.locator('[data-testid="answerTypeModal"]').getByTestId('type-select'), typeValue);
 }
 
 async function applyModal(page) {

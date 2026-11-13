@@ -19,6 +19,7 @@
 
 import { test, expect } from '@playwright/test';
 import { clickAddRootGroup } from './helpers/builder.js';
+import { pickCustomSelect } from './helpers/dropdown.js';
 
 async function freshStart(page) {
   await page.goto('/');
@@ -42,17 +43,13 @@ async function addItem(page, groupId, nodeId, title) {
 async function setItemType(page, nodeId, typeValue) {
   await page.locator(`[data-node-id="${nodeId}"]`).getByTestId('action-type').click();
   await expect(page.getByTestId('answerTypeModal')).toBeVisible();
-  await page.getByTestId('type-select').click();
-  await page.locator(`[data-testid="csel-drop"] [data-val="${typeValue}"]`).click();
+  await pickCustomSelect(page, 'type-select', typeValue);
   await page.getByTestId('answerTypeModalApply').click();
   await expect(page.getByTestId('answerTypeModal')).toBeHidden();
 }
 
 async function pick(scope, page, testid, value) {
-  await scope.getByTestId(testid).click();
-  const opt = page.locator('[data-testid="csel-drop"]').locator(`[data-val="${value}"]`);
-  await expect(opt).toBeVisible();
-  await opt.click();
+  await pickCustomSelect(page, scope.getByTestId(testid), value);
 }
 
 async function openValueBuilder(page, nodeId) {
@@ -278,8 +275,7 @@ test.describe('Expression Gallery', () => {
     await pick(page, page, 'eg-slot-item-conditions-1', '1.2');
 
     await pick(page, page, 'eg-slot-item-age', '1.3');
-    await page.getByTestId('eg-slot-transform-age').click();
-    await page.locator('[data-testid="csel-drop"] [data-val="age-bonus"]').click();
+    await pickCustomSelect(page, 'eg-slot-transform-age', 'age-bonus');
 
     await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.1'");
     await expect(page.getByTestId('eg-preview')).toContainText("linkId='1.2'");
