@@ -201,6 +201,8 @@ export function createCustomSelect({ items = [], value = '', onChange, className
 
   trigger.addEventListener('click', _open);
   trigger.addEventListener('keydown', e => {
+    // A key the open dropdown already handled (Enter picks and closes it) must not reopen it here.
+    if (e.defaultPrevented) return;
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
       if (!dropEl) _open();
