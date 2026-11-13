@@ -34,7 +34,7 @@ test.beforeEach(async ({ page }) => {
 
 test('library lists the shipped scales with source and license', async ({ page }) => {
   await openDropdownItem(page, 'add-menu-btn', 'add-template-btn');
-  for (const id of ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c', 'demographics', 'allergies', 'medications', 'pain', 'glasgow-coma-scale', 'apgar-score', 'qsofa', 'cha2ds2-vasc', 'charlson-comorbidity-index']) await expect(page.getByTestId('tpl-row-' + id)).toBeVisible();
+  for (const id of ['phq-9', 'phq-2', 'gad-7', 'gad-2', 'audit-c', 'demographics', 'allergies', 'medications', 'pain', 'glasgow-coma-scale', 'apgar-score', 'qsofa', 'cha2ds2-vasc', 'charlson-comorbidity-index', 'pc-ptsd-5', 'gds-15']) await expect(page.getByTestId('tpl-row-' + id)).toBeVisible();
   await page.getByTestId('tpl-row-phq-9').click();
   await expect(page.getByTestId('tpl-detail')).toContainText('Kroenke, Spitzer & Williams 2001');
   await expect(page.getByTestId('tpl-detail')).toContainText('No permission required to reproduce');
@@ -198,4 +198,32 @@ test('Apgar scores the 1-minute and 5-minute sets independently', async ({ page 
   await expect(page.locator('[data-preview-id="apgar1-band"]')).toContainText('Reassuring (7–10)');
   await expect(page.locator('[data-preview-id="apgar5-total"]')).toContainText('0');
   await expect(page.locator('[data-preview-id="apgar5-band"]')).toContainText('Low (0–3)');
+});
+
+test('PC-PTSD-5 asks the follow-ups only after an event and flags a positive screen at 4 or more', async ({ page }) => {
+  await insert(page, 'pc-ptsd-5');
+  await expect(page.locator('[data-preview-id="pcptsd5-q1"]')).toBeHidden();
+  await pick(page, 'pcptsd5-exposure', 1); // No
+  await expect(page.locator('[data-preview-id="pcptsd5-total"]')).toContainText('0');
+  await expect(page.locator('[data-preview-id="pcptsd5-result"]')).toContainText('Negative screen');
+  await pick(page, 'pcptsd5-exposure', 0); // Yes
+  await expect(page.locator('[data-preview-id="pcptsd5-q1"]')).toBeVisible();
+  for (let i = 1; i <= 3; i++) await pick(page, `pcptsd5-q${i}`, 0);
+  await pick(page, 'pcptsd5-q4', 1);
+  await pick(page, 'pcptsd5-q5', 1);
+  await expect(page.locator('[data-preview-id="pcptsd5-total"]')).toContainText('3');
+  await expect(page.locator('[data-preview-id="pcptsd5-result"]')).toContainText('Negative screen');
+  await pick(page, 'pcptsd5-q4', 0);
+  await expect(page.locator('[data-preview-id="pcptsd5-total"]')).toContainText('4');
+  await expect(page.locator('[data-preview-id="pcptsd5-result"]')).toContainText('Positive screen');
+});
+
+test('GDS-15 scores the depressive answers and suggests depression above 5', async ({ page }) => {
+  await insert(page, 'gds-15');
+  for (let i = 1; i <= 15; i++) await pick(page, `gds15-q${i}`, 1); // all No: only questions 1, 5, 7, 11, 13 score
+  await expect(page.locator('[data-preview-id="gds15-total"]')).toContainText('5');
+  await expect(page.locator('[data-preview-id="gds15-result"]')).toContainText('Within normal range');
+  await pick(page, 'gds15-q2', 0); // Yes on a Yes-keyed question
+  await expect(page.locator('[data-preview-id="gds15-total"]')).toContainText('6');
+  await expect(page.locator('[data-preview-id="gds15-result"]')).toContainText('Suggests depression');
 });

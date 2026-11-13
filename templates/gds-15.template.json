@@ -1,0 +1,854 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "gds15",
+      "text": "GDS-15 Geriatric Depression Scale",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "gds15-intro",
+          "type": "display",
+          "text": "Choose the best answer for how you have felt over the past week:"
+        },
+        {
+          "linkId": "gds15-q1",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48512-8"
+            }
+          ],
+          "text": "Are you basically satisfied with your life?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q2",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48513-6"
+            }
+          ],
+          "text": "Have you dropped many of your activities and interests?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q3",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48514-4"
+            }
+          ],
+          "text": "Do you feel that your life is empty?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q4",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48515-1"
+            }
+          ],
+          "text": "Do you often get bored?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q5",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48518-5"
+            }
+          ],
+          "text": "Are you in good spirits most of the time?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q6",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48519-3"
+            }
+          ],
+          "text": "Are you afraid that something bad is going to happen to you?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q7",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48520-1"
+            }
+          ],
+          "text": "Do you feel happy most of the time?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q8",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48521-9"
+            }
+          ],
+          "text": "Do you often feel helpless?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q9",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48523-5"
+            }
+          ],
+          "text": "Do you prefer to stay at home, rather than going out and doing new things?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q10",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48525-0"
+            }
+          ],
+          "text": "Do you feel you have more problems with memory than most?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q11",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48526-8"
+            }
+          ],
+          "text": "Do you think it is wonderful to be alive now?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q12",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48528-4"
+            }
+          ],
+          "text": "Do you feel pretty worthless the way you are now?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q13",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48532-6"
+            }
+          ],
+          "text": "Do you feel full of energy?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q14",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48533-4"
+            }
+          ],
+          "text": "Do you feel that your situation is hopeless?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-q15",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48534-2"
+            }
+          ],
+          "text": "Do you think that most people are better off than you are?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-total",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "48545-8"
+            }
+          ],
+          "text": "GDS-15 total score (0–15)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.repeat(item).where(linkId in ('gds15-q1' | 'gds15-q2' | 'gds15-q3' | 'gds15-q4' | 'gds15-q5' | 'gds15-q6' | 'gds15-q7' | 'gds15-q8' | 'gds15-q9' | 'gds15-q10' | 'gds15-q11' | 'gds15-q12' | 'gds15-q13' | 'gds15-q14' | 'gds15-q15')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.count() = 15, %resource.repeat(item).where(linkId in ('gds15-q1' | 'gds15-q2' | 'gds15-q3' | 'gds15-q4' | 'gds15-q5' | 'gds15-q6' | 'gds15-q7' | 'gds15-q8' | 'gds15-q9' | 'gds15-q10' | 'gds15-q11' | 'gds15-q12' | 'gds15-q13' | 'gds15-q14' | 'gds15-q15')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.sum(), {})"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-result",
+          "text": "Screening result",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.repeat(item).where(linkId='gds15-total').answer.valueDecimal.exists(), iif(%resource.repeat(item).where(linkId='gds15-total').answer.valueDecimal <= 5, 'Within normal range (0–5)', 'Suggests depression (6–15) — follow up with a clinical assessment'), {})"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "gds15-note",
+          "type": "display",
+          "text": "Each depressive answer scores 1 point: No on questions 1, 5, 7, 11 and 13, and Yes on all the others. A score above 5 suggests depression and should be followed up with a careful clinical interview."
+        }
+      ]
+    }
+  ]
+}

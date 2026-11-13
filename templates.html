@@ -173,6 +173,18 @@
           "position": 21,
           "name": "Apgar Score",
           "url": "https://fhirbuilder.com/templates/apgar-score.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 22,
+          "name": "PC-PTSD-5 PTSD Screen",
+          "url": "https://fhirbuilder.com/templates/pc-ptsd-5.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 23,
+          "name": "GDS-15 Geriatric Depression Scale",
+          "url": "https://fhirbuilder.com/templates/gds-15.html"
         }
       ]
     },
@@ -229,6 +241,8 @@
         <li><a href="#charlson-comorbidity-index">Charlson Comorbidity Index</a></li>
         <li><a href="#glasgow-coma-scale">Glasgow Coma Scale</a></li>
         <li><a href="#apgar-score">Apgar Score</a></li>
+        <li><a href="#pc-ptsd-5">PC-PTSD-5 PTSD Screen</a></li>
+        <li><a href="#gds-15">GDS-15 Geriatric Depression Scale</a></li>
       </ul>
     </nav>
     <section class="gp-card" id="phq-9" data-testid="tp-card-phq-9">
@@ -330,6 +344,26 @@
       <p class="gp-source">Source: Apgar 1953, Curr Res Anesth Analg 32:260 (Apgar score); score bands per AAP/ACOG. Codes and answer lists: LOINC. (<a href="https://pubmed.ncbi.nlm.nih.gov/13083014/" rel="noopener">link</a>)</p>
       <p class="gp-source">License: Original question wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). The scale itself is a published clinical method; see the source. (<a href="https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE" rel="noopener">link</a>)</p>
       <p class="gp-source"><a href="./?template=apgar-score" data-testid="tp-open-apgar-score">Open in Builder</a> · <a href="templates/apgar-score.template.json" data-testid="tp-json-apgar-score">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="pc-ptsd-5" data-testid="tp-card-pc-ptsd-5">
+      <h3><a href="templates/pc-ptsd-5.html" data-testid="tp-detail-pc-ptsd-5">PC-PTSD-5 PTSD Screen</a></h3>
+      <p>Short primary care screen for probable PTSD after a traumatic event, with an automatic score and positive-screen flag.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Each Yes to the follow-up questions scores 1; they are asked only after a reported traumatic event, and no event scores 0. The score (0–5) is a positive screen at 4 or more.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Have you ever experienced this kind of event?</li><li>Had nightmares about the event(s) or thought about the event(s) when you did not want to?</li><li>Tried hard not to think about the event(s) or went out of your way to avoid situations that reminded you of the event(s)?</li><li>Been constantly on guard, watchful, or easily startled?</li><li>Felt numb or detached from people, activities, or your surroundings?</li><li>Felt guilty or unable to stop blaming yourself or others for the event(s) or any problems the event(s) may have caused?</li></ol>
+      <p class="gp-source">Source: Prins et al. 2015, Primary Care PTSD Screen for DSM-5 (PC-PTSD-5), VA National Center for PTSD. Codes: LOINC. (<a href="https://www.ptsd.va.gov/professional/assessment/screens/pc-ptsd.asp" rel="noopener">link</a>)</p>
+      <p class="gp-source">License: Developed by staff at VA&#39;s National Center for PTSD; in the public domain and not copyrighted. Intended for use by qualified health professionals and researchers. (<a href="https://www.ptsd.va.gov/professional/assessment/screens/pc-ptsd.asp" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="./?template=pc-ptsd-5" data-testid="tp-open-pc-ptsd-5">Open in Builder</a> · <a href="templates/pc-ptsd-5.template.json" data-testid="tp-json-pc-ptsd-5">Download the FHIR Questionnaire JSON</a></p>
+    </section>
+    <section class="gp-card" id="gds-15" data-testid="tp-card-gds-15">
+      <h3><a href="templates/gds-15.html" data-testid="tp-detail-gds-15">GDS-15 Geriatric Depression Scale</a></h3>
+      <p>Yes/no questions screening older adults for depression, with an automatic total score and interpretation.</p>
+      <p class="gp-bands"><strong>Scoring:</strong> Each depressive answer scores 1 point (No on questions 1, 5, 7, 11 and 13; Yes on the rest). The total (0–15) suggests depression above 5.</p>
+      <p class="gp-label">Questions</p>
+      <ol><li>Are you basically satisfied with your life?</li><li>Have you dropped many of your activities and interests?</li><li>Do you feel that your life is empty?</li><li>Do you often get bored?</li><li>Are you in good spirits most of the time?</li><li>Are you afraid that something bad is going to happen to you?</li><li>Do you feel happy most of the time?</li><li>Do you often feel helpless?</li><li>Do you prefer to stay at home, rather than going out and doing new things?</li><li>Do you feel you have more problems with memory than most?</li><li>Do you think it is wonderful to be alive now?</li><li>Do you feel pretty worthless the way you are now?</li><li>Do you feel full of energy?</li><li>Do you feel that your situation is hopeless?</li><li>Do you think that most people are better off than you are?</li></ol>
+      <p class="gp-source">Source: Sheikh &amp; Yesavage 1986, Clin Gerontol 5:165 (GDS short form, from Yesavage et al. 1983, J Psychiatr Res 17:37). Codes: LOINC. (<a href="https://web.stanford.edu/~yesavage/GDS.html" rel="noopener">link</a>)</p>
+      <p class="gp-source">License: The original scale is in the public domain; neither the GDS nor its electronic form is protected by copyright (per the scale author, J. A. Yesavage). (<a href="https://web.stanford.edu/~yesavage/Testing.htm" rel="noopener">link</a>)</p>
+      <p class="gp-source"><a href="./?template=gds-15" data-testid="tp-open-gds-15">Open in Builder</a> · <a href="templates/gds-15.template.json" data-testid="tp-json-gds-15">Download the FHIR Questionnaire JSON</a></p>
     </section>
     <h2 id="cat-calculators">Calculators</h2>
     <nav class="gp-toc" aria-label="Calculators">

@@ -1,0 +1,442 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "active",
+  "item": [
+    {
+      "linkId": "pcptsd5",
+      "text": "PC-PTSD-5 PTSD Screen",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "pcptsd5-intro",
+          "type": "display",
+          "text": "Sometimes things happen to people that are unusually or especially frightening, horrible, or traumatic. For example: a serious accident or fire; a physical or sexual assault or abuse; an earthquake or flood; a war; seeing someone be killed or seriously injured; having a loved one die through homicide or suicide."
+        },
+        {
+          "linkId": "pcptsd5-exposure",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "102011-4"
+            }
+          ],
+          "text": "Have you ever experienced this kind of event?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "pcptsd5-leadin",
+          "type": "display",
+          "text": "In the past month, have you...",
+          "enableWhen": [
+            {
+              "question": "pcptsd5-exposure",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "pcptsd5-q1",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "102012-2"
+            }
+          ],
+          "text": "Had nightmares about the event(s) or thought about the event(s) when you did not want to?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "enableWhen": [
+            {
+              "question": "pcptsd5-exposure",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "pcptsd5-q2",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "102013-0"
+            }
+          ],
+          "text": "Tried hard not to think about the event(s) or went out of your way to avoid situations that reminded you of the event(s)?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "enableWhen": [
+            {
+              "question": "pcptsd5-exposure",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "pcptsd5-q3",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "102014-8"
+            }
+          ],
+          "text": "Been constantly on guard, watchful, or easily startled?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "enableWhen": [
+            {
+              "question": "pcptsd5-exposure",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "pcptsd5-q4",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "102015-5"
+            }
+          ],
+          "text": "Felt numb or detached from people, activities, or your surroundings?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "enableWhen": [
+            {
+              "question": "pcptsd5-exposure",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "pcptsd5-q5",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "102016-3"
+            }
+          ],
+          "text": "Felt guilty or unable to stop blaming yourself or others for the event(s) or any problems the event(s) may have caused?",
+          "type": "choice",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "radio-button"
+                  }
+                ]
+              }
+            }
+          ],
+          "required": true,
+          "enableWhen": [
+            {
+              "question": "pcptsd5-exposure",
+              "operator": "=",
+              "answerCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6"
+              }
+            }
+          ],
+          "answerOption": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 1
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA33-6",
+                "display": "Yes"
+              }
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                  "valueDecimal": 0
+                }
+              ],
+              "valueCoding": {
+                "system": "http://loinc.org",
+                "code": "LA32-8",
+                "display": "No"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "pcptsd5-total",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "102017-1"
+            }
+          ],
+          "text": "PC-PTSD-5 score (0–5)",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.repeat(item).where(linkId='pcptsd5-exposure').answer.valueCoding.code = 'LA32-8', 0, iif(%resource.repeat(item).where(linkId in ('pcptsd5-q1' | 'pcptsd5-q2' | 'pcptsd5-q3' | 'pcptsd5-q4' | 'pcptsd5-q5')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.count() = 5, %resource.repeat(item).where(linkId in ('pcptsd5-q1' | 'pcptsd5-q2' | 'pcptsd5-q3' | 'pcptsd5-q4' | 'pcptsd5-q5')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal.sum(), {}))"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "pcptsd5-result",
+          "text": "Screening result",
+          "type": "string",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "iif(%resource.repeat(item).where(linkId='pcptsd5-total').answer.valueDecimal.exists(), iif(%resource.repeat(item).where(linkId='pcptsd5-total').answer.valueDecimal < 4, 'Negative screen', 'Positive screen — further assessment recommended'), {})"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "pcptsd5-note",
+          "type": "display",
+          "text": "A score of 4 or more is a positive screen. A cut-point of 4 balanced false negatives and false positives overall, but produced many false negatives for women; a lower cut-point may be considered where evaluation resources allow. A positive screen needs further assessment, for example with the CAPS-5 or PCL-5."
+        }
+      ]
+    }
+  ]
+}

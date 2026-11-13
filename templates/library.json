@@ -496,5 +496,47 @@
     "license": "Original question wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). The scale itself is a published clinical method; see the source.",
     "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
     "file": "apgar-score.template.json"
+  },
+  {
+    "id": "pc-ptsd-5",
+    "name": "PC-PTSD-5 PTSD Screen",
+    "description": "Short primary care screen for probable PTSD after a traumatic event, with an automatic score and positive-screen flag.",
+    "category": "scales",
+    "scoring": "Each Yes to the follow-up questions scores 1; they are asked only after a reported traumatic event, and no event scores 0. The score (0–5) is a positive screen at 4 or more.",
+    "keywords": [
+      "ptsd",
+      "trauma",
+      "posttraumatic stress",
+      "screening",
+      "score",
+      "mental health",
+      "veterans"
+    ],
+    "source": "Prins et al. 2015, Primary Care PTSD Screen for DSM-5 (PC-PTSD-5), VA National Center for PTSD. Codes: LOINC.",
+    "sourceUrl": "https://www.ptsd.va.gov/professional/assessment/screens/pc-ptsd.asp",
+    "license": "Developed by staff at VA's National Center for PTSD; in the public domain and not copyrighted. Intended for use by qualified health professionals and researchers.",
+    "licenseUrl": "https://www.ptsd.va.gov/professional/assessment/screens/pc-ptsd.asp",
+    "file": "pc-ptsd-5.template.json"
+  },
+  {
+    "id": "gds-15",
+    "name": "GDS-15 Geriatric Depression Scale",
+    "description": "Yes/no questions screening older adults for depression, with an automatic total score and interpretation.",
+    "category": "scales",
+    "scoring": "Each depressive answer scores 1 point (No on questions 1, 5, 7, 11 and 13; Yes on the rest). The total (0–15) suggests depression above 5.",
+    "keywords": [
+      "depression",
+      "geriatric",
+      "older adults",
+      "gds",
+      "screening",
+      "score",
+      "mental health"
+    ],
+    "source": "Sheikh & Yesavage 1986, Clin Gerontol 5:165 (GDS short form, from Yesavage et al. 1983, J Psychiatr Res 17:37). Codes: LOINC.",
+    "sourceUrl": "https://web.stanford.edu/~yesavage/GDS.html",
+    "license": "The original scale is in the public domain; neither the GDS nor its electronic form is protected by copyright (per the scale author, J. A. Yesavage).",
+    "licenseUrl": "https://web.stanford.edu/~yesavage/Testing.htm",
+    "file": "gds-15.template.json"
   }
 ]
