@@ -1,5 +1,5 @@
 // A chain of operands joined by + − × ÷ — the editor behind a value, and behind each branch of a
-// conditional. Question / variable / number / aggregate / group are built in; other kinds come from
+// conditional. Question / variable / number / aggregate are built in; other kinds (group, conditional, …) come from
 // the operand registry (js/ui/modals/expr-blocks/operands/).
 import { createCustomSelect } from '../../custom-select.js';
 import { itemRef, variable, literal, arith, aggregate, BlockKind } from '../../../fhir/expr-builder/model.js';
@@ -42,7 +42,7 @@ export class ChainEditor {
   setBlock(block) {
     const operands = [];
     const ops = [];
-    if (!block || !this._walkArith(block, operands, ops, true)) return false;
+    if (!block || !this._walkArith(block, operands, ops)) return false;
     this._operands = operands;
     this._ops = ops;
     this.render();
@@ -52,6 +52,16 @@ export class ChainEditor {
   // The chain as a block; null while any operand is incomplete.
   getBlock() {
     return this._reduceChain(this._operands.map((o) => this._operandBlock(o)), this._ops);
+  }
+
+  // The chain's only operand, or null when it has several.
+  single() { return this._operands.length === 1 ? this._operands[0] : null; }
+
+  // Makes `operand` the chain's only operand.
+  replaceWith(operand) {
+    this._operands = [operand];
+    this._ops = [];
+    this.render();
   }
 
   // An operand that is only valid as a chain's single value ("No value") gives way to a blank one.
@@ -66,12 +76,14 @@ export class ChainEditor {
 
   render() {
     this.el.innerHTML = '';
-    const ctx = { operands: this._operands, ops: this._ops, rerender: () => this.render(), topLevel: true };
+    const ctx = { operands: this._operands, ops: this._ops, rerender: () => this.render() };
     this._operands.forEach((operand, i) => {
       if (i > 0) this.el.appendChild(this._renderOperator(i - 1, this._ops));
       this.el.appendChild(this._renderOperand(operand, ctx));
     });
-    if (this._inlineAdd) {
+    // A solitary operand ("No value") is replaced rather than added to, so no add button next to it.
+    const solo = this._operands.length === 1 && this._operands[0] instanceof OperandKind && this._operands[0].constructor.solo;
+    if (this._inlineAdd && !solo) {
       const add = document.createElement('button');
       add.type = 'button';
       add.className = 'eb-add';
@@ -107,7 +119,7 @@ export class ChainEditor {
   }
 
   _plainOperand(kind) {
-    return { kind, item: null, varName: '', value: '', ...(kind === 'group' ? { groupOperands: [this._blankOperand()], groupOps: [] } : {}) };
+    return { kind, item: null, varName: '', value: '' };
   }
 
   _renderOperator(opIdx, ops) {
@@ -127,13 +139,12 @@ export class ChainEditor {
     el.className = 'eb-operand';
     el.dataset.testid = 'eb-operand';
 
-    const kctx = { ...this._kindCtx(), alone: ctx.operands.length === 1 && ctx.topLevel };
+    const kctx = { ...this._kindCtx(), alone: ctx.operands.length === 1 };
     const kinds = [
       { value: 'item', label: 'Question' },
       { value: 'var', label: 'Variable' },
       { value: 'num', label: 'Number' },
       { value: 'agg', label: 'Aggregate' },
-      ...(ctx.topLevel ? [{ value: 'group', label: 'Group ( … )' }] : []),
     ].filter((k) => (k.value !== 'item' || this._items.length) && (k.value !== 'var' || this._variables.length) && (k.value !== 'agg' || this._allItems.length));
     const offered = operandKinds().filter((Kind) => Kind.available(kctx) || Kind.id === operand.kind);
     kinds.push(...offered.map((Kind) => ({ value: Kind.id, label: Kind.label })));
@@ -179,47 +190,12 @@ export class ChainEditor {
     return el;
   }
 
-  _renderGroupOperand(operand, valWrap) {
-    if (!operand.groupOperands || !operand.groupOperands.length) operand.groupOperands = [this._blankOperand()];
-    operand.groupOps = operand.groupOps || [];
-    const box = document.createElement('span');
-    box.className = 'eb-val-group';
-    box.dataset.testid = 'eb-group';
-    const open = document.createElement('span');
-    open.className = 'eb-val-group-paren';
-    open.textContent = '(';
-    const chain = document.createElement('span');
-    chain.className = 'eb-val-group-chain';
-    const close = document.createElement('span');
-    close.className = 'eb-val-group-paren';
-    close.textContent = ')';
-    const addBtn = document.createElement('button');
-    addBtn.type = 'button';
-    addBtn.className = 'eb-add eb-add--sm';
-    addBtn.textContent = '+';
-    addBtn.dataset.testid = 'eb-group-add';
-    addBtn.setAttribute('aria-label', 'Add an operand to the group');
-    const groupCtx = { operands: operand.groupOperands, ops: operand.groupOps, rerender: () => rerenderGroup(), topLevel: false };
-    const rerenderGroup = () => {
-      chain.innerHTML = '';
-      operand.groupOperands.forEach((inner, i) => {
-        if (i > 0) chain.appendChild(this._renderOperator(i - 1, operand.groupOps));
-        chain.appendChild(this._renderOperand(inner, groupCtx));
-      });
-    };
-    addBtn.addEventListener('click', () => { operand.groupOps.push('+'); operand.groupOperands.push(this._blankOperand()); rerenderGroup(); this._onChange(); });
-    rerenderGroup();
-    box.append(open, chain, close, addBtn);
-    valWrap.appendChild(box);
-  }
-
   _renderOperandVal(operand, valWrap) {
     valWrap.innerHTML = '';
     const custom = operand instanceof OperandKind;
     valWrap.parentElement?.classList.toggle('eb-operand--block', custom && operand.constructor.block);
     if (custom) { operand.render(valWrap); return; }
     if (operand.kind === 'agg') { this._renderAggOperand(operand, valWrap); return; }
-    if (operand.kind === 'group') { this._renderGroupOperand(operand, valWrap); return; }
     if (operand.kind === 'item') {
       const sel = createQuestionSelect({
         items: this._items,
@@ -274,22 +250,22 @@ export class ChainEditor {
     valWrap.append(fnSel.el, itemSel.el);
   }
 
-  _walkArith(block, operands, ops, allowGroup) {
+  _walkArith(block, operands, ops) {
     if (block.kind === BlockKind.ARITH) {
-      if (!this._walkArith(block.left, operands, ops, allowGroup)) return false;
+      if (!this._walkArith(block.left, operands, ops)) return false;
       ops.push(block.op);
-      const right = this._blockToOperand(block.right, allowGroup);
+      const right = this._blockToOperand(block.right);
       if (!right) return false;
       operands.push(right);
       return true;
     }
-    const o = this._blockToOperand(block, allowGroup);
+    const o = this._blockToOperand(block);
     if (!o) return false;
     operands.push(o);
     return true;
   }
 
-  _blockToOperand(block, allowGroup) {
+  _blockToOperand(block) {
     if (block.kind === BlockKind.ITEM_REF) {
       const item = this._itemBySegments(block.segments);
       return item ? { kind: 'item', item, varName: '', value: '' } : null;
@@ -302,13 +278,6 @@ export class ChainEditor {
       const item = this._itemBySegments(block.source.segments);
       return item ? { kind: 'agg', item: null, varName: '', value: '', aggFn: block.fn, aggItem: item } : null;
     }
-    // One level of parenthesized grouping only — leaves must be simple operands.
-    if (allowGroup && block.kind === BlockKind.ARITH) {
-      const operands = [];
-      const ops = [];
-      const ok = this._walkArith(block, operands, ops, false);
-      return ok ? { kind: 'group', item: null, varName: '', value: '', groupOperands: operands, groupOps: ops } : null;
-    }
     const kctx = this._kindCtx();
     for (const Kind of operandKinds()) {
       const operand = Kind.available(kctx) ? Kind.fromBlock(block, kctx) : null;
@@ -319,10 +288,6 @@ export class ChainEditor {
 
   _operandBlock(operand) {
     if (operand instanceof OperandKind) return operand.toBlock();
-    if (operand.kind === 'group') {
-      const blocks = (operand.groupOperands || []).map((o) => this._operandBlock(o));
-      return this._reduceChain(blocks, operand.groupOps || []);
-    }
     if (operand.kind === 'agg') {
       if (!operand.aggItem) return null;
       const fn = operand.aggFn || 'count';

@@ -5,7 +5,7 @@ import { Registry } from '../../../../registry.js';
 const registry = new Registry({ name: 'operand kind', key: 'id' });
 
 // The chain editor's own kinds; a library kind must not reuse one of these ids.
-export const BUILT_IN_OPERANDS = ['item', 'var', 'num', 'agg', 'group'];
+export const BUILT_IN_OPERANDS = ['item', 'var', 'num', 'agg'];
 
 export function registerOperand(kindClass) {
   if (BUILT_IN_OPERANDS.includes(kindClass?.id)) throw new Error(`operand kind "${kindClass.id}" is a built-in`);

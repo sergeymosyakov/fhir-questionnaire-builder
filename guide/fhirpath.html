@@ -216,14 +216,21 @@ values instead of typing paths and accessors:</p>
 stays visible — unrecognised parts are editable as text only at the leaf.</li>
 <li><strong>Values</strong> (<code>calculatedExpression</code>, <code>initialExpression</code>) — an arithmetic chain of
 questions, variables and numbers joined by × ÷ + −, plus <strong>aggregates</strong> (count,
-sum, average, min, max) over a repeating question&#39;s answers, and <strong>conditional
-values</strong>: choose <strong>If … then … otherwise</strong>, set a condition, and give the value when
-it holds and the value otherwise. A conditional can sit inside another one or inside
-a sum, which is how scores such as qSOFA are built (a sum of &quot;1 if the criterion is
-present, otherwise 0&quot;). The condition can also be &quot;at least one of several questions
-has an answer&quot;. For the otherwise (or the then) you can choose <strong>No value</strong>, which
-leaves the result empty until something is answered. Rounding at the bottom, <strong>Round
-the result</strong>, applies to the entire expression, not to one branch.</li>
+sum, average, min, max) over a repeating question&#39;s answers. <strong>Group ( … )</strong> puts a
+part of the calculation in brackets and brackets can sit inside brackets, as deep as
+the formula needs. <strong>Round / abs / … of ( … )</strong> rounds (or takes the absolute value,
+rounds up or down, truncates) a part of the calculation where it is used.
+<strong>Conditional values</strong>: choose <strong>If … then … otherwise</strong>, set a condition, and give
+the value when it holds and the value otherwise. A branch can be a number, a
+calculation, a piece of <strong>Text</strong> (for example the name of a score band), or <strong>No
+value</strong>, which leaves the result empty until something is answered. A conditional can
+sit inside another one or inside a sum, which is how scores such as qSOFA are built (a
+sum of &quot;1 if the criterion is present, otherwise 0&quot;). Bands are a flat list: <strong>+
+Otherwise if</strong> adds one more step, in the order they are checked. A condition can be
+a question, &quot;at least one of several questions has an answer&quot;, or a calculation
+(&quot;<em>Weight ÷ (Height × Height)</em> &lt; 18.5&quot;, &quot;… can be calculated&quot;); a calculation is shown
+as a short formula and <strong>edit</strong> opens its blocks. Rounding at the bottom, <strong>Round the
+result</strong>, applies to the entire expression, not to one branch.</li>
 <li><strong>Answers → value</strong> (<code>calculatedExpression</code>) — a <strong>collection pipeline</strong> over a
 question&#39;s answers: pick a source question, filter the answers — keep or drop
 values against a set (<code>intersect</code> / <code>exclude</code>), take unique values, or keep where

@@ -4,6 +4,7 @@ export class OperandKind {
   static id = '';             // operand.kind
   static label = '';          // entry in the kind picker
   static block = false;       // true: the operand needs a row of its own
+  static solo = false;        // true: it only makes sense as a chain's single value (no "add operand" beside it)
   static available() { return true; }          // ctx = { branch, alone, items, allItems, variables, fp }
   static fromBlock() { return null; }          // (block, ctx) → instance | null (not this kind's shape)
 

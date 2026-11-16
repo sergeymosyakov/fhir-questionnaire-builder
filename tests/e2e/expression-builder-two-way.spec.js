@@ -500,13 +500,14 @@ test.describe('Two-way — values (grouping & rounding)', () => {
     await expect(page.getByTestId('expr-calc-ta')).toHaveValue('5');
   });
 
-  test('an expression beyond the supported grouping depth still falls back to raw (no crash)', async ({ page }) => {
+  test('groups nest as deeply as the expression needs and write back the same expression', async ({ page }) => {
     await freshStart(page);
     await makeItems(page, 1);
-    // Two levels of nested grouping — deliberately beyond the one-level-deep scope.
-    const tooDeep = '((%a + %b) * (%c - (%d / %e))).round(1)';
-    await openCalcRaw(page, tooDeep);
-    await expect(page.getByTestId('eb-raw-input')).toBeVisible();
-    await expect(page.getByTestId('eb-raw-input')).toHaveValue(tooDeep);
+    const deep = '((%a + %b) * (%c - (%d / %e))).round(1)'; // three levels of brackets
+    await openCalcRaw(page, deep);
+    await expect(page.getByTestId('eb-raw-note')).toHaveCount(0);
+    await expect(page.getByTestId('eb-group').first()).toBeVisible();
+    await expect(page.locator('[data-testid="eb-group"] [data-testid="eb-group"]')).toHaveCount(1); // a group inside a group
+    await expect(page.getByTestId('eb-preview-str')).toHaveText(deep);
   });
 });

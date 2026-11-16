@@ -12,7 +12,7 @@ const blank = () => ({ item: null, value: '' });
 
 export class AnyAnsweredLeaf extends LeafKind {
   static id = 'any-answered';
-  static switchLabel = 'several questions';
+  static switchLabel = 'any of several questions';
 
   // The question already chosen in the row being replaced becomes the first pick.
   static create(items, from) {

@@ -40,6 +40,7 @@ class ExpressionBuilderModal extends Modal {
     this._allItems = answerable;
     this._items = this._isValue ? answerable.filter((it) => NUMERIC_TYPES.has(it.itemType)) : answerable;
     this._resetEditors();
+    this.body.dataset.testid = 'eb-body';
 
     this._seedFrom(initialExpr);
     this.setTitle(this._isValue ? 'Build value' : 'Build condition');

@@ -3,14 +3,11 @@
 // and the rounding; the shell reads getExpr() and shows a live preview via onChange.
 // Extracted from the modal so each result type is its own strategy (condition =
 // expr-tree, value = here, pipeline = expr-pipeline).
-import { createCustomSelect } from '../../custom-select.js';
-import { mathFn, MATH_WRAP_FNS, BlockKind } from '../../../fhir/expr-builder/model.js';
+import { mathFn, BlockKind } from '../../../fhir/expr-builder/model.js';
 import { emit } from '../../../fhir/expr-builder/emit.js';
 import { parseExpression } from '../../../fhir/expr-builder/parse.js';
 import { ChainEditor } from './chain-editor.js';
-
-const MATH_WRAP_LABELS = { round: 'round', abs: 'absolute value', ceiling: 'round up (ceiling)', floor: 'round down (floor)', truncate: 'truncate' };
-const MATH_WRAP_ITEMS = MATH_WRAP_FNS.map((v) => ({ value: v, label: MATH_WRAP_LABELS[v] }));
+import { createMathFnSelect, createDecimalsInput, decimalsArg } from '../expr-blocks/math-controls.js';
 
 // { items: numeric-answerable, allItems: every answerable, variables, fp,
 //   initialExpr, onChange, onEditAsText } → { el, getExpr }.
@@ -89,25 +86,15 @@ class ValueEditor {
     lbl.className = 'eb-wrap-label';
     lbl.textContent = 'Round the result';
     this._wrapRow.appendChild(lbl);
-    const fnSel = createCustomSelect({
-      items: [{ value: '', label: 'No rounding' }, ...MATH_WRAP_ITEMS],
+    const fnSel = createMathFnSelect({
       value: this._wrapFn,
-      className: 'sc-trigger--sm',
+      none: 'No rounding',
       testid: 'eb-wrap-fn',
       onChange: (v) => { this._wrapFn = v; this._renderWrapRow(); this._onChange(); },
     });
     this._wrapRow.appendChild(fnSel.el);
     if (this._wrapFn === 'round') {
-      const inp = document.createElement('input');
-      inp.type = 'number';
-      inp.step = '1';
-      inp.min = '0';
-      inp.className = 'eb-val-inp eb-wrap-arg';
-      inp.placeholder = 'decimals';
-      inp.dataset.testid = 'eb-wrap-arg';
-      inp.value = this._wrapArg;
-      inp.addEventListener('input', () => { this._wrapArg = inp.value; this._onChange(); });
-      this._wrapRow.appendChild(inp);
+      this._wrapRow.appendChild(createDecimalsInput({ value: this._wrapArg, testid: 'eb-wrap-arg', onInput: (v) => { this._wrapArg = v; this._onChange(); } }));
     }
   }
 
@@ -115,13 +102,6 @@ class ValueEditor {
     const root = this._chain.getBlock();
     if (!root) return null;
     if (!this._wrapFn) return root;
-    const arg = this._wrapFn === 'round' ? this._roundArgNum() : null;
-    return mathFn(this._wrapFn, arg, root);
-  }
-
-  _roundArgNum() {
-    if (this._wrapArg === '' || this._wrapArg == null) return null;
-    const n = Number(this._wrapArg);
-    return isNaN(n) ? null : n;
+    return mathFn(this._wrapFn, this._wrapFn === 'round' ? decimalsArg(this._wrapArg) : null, root);
   }
 }
