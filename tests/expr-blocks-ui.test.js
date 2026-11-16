@@ -5,6 +5,7 @@ import { operandKinds, operandKind, registerOperand, OperandKind } from '../js/u
 import { parseExpression } from '../js/fhir/expr-builder/parse.js';
 import { emit } from '../js/fhir/expr-builder/emit.js';
 import { createQuestionSelect } from '../js/ui/modals/expr-blocks/question-select.js';
+import { createQuestionList, availableFor } from '../js/ui/modals/expr-blocks/question-list.js';
 import { ChainEditor } from '../js/ui/modals/expr-value/chain-editor.js';
 import { createValueEditor } from '../js/ui/modals/expr-value/value-editor.js';
 import { createLeafEditor } from '../js/ui/modals/expr-tree/leaf-editor.js';
@@ -214,5 +215,39 @@ describe('a half-built condition survives the tree being redrawn', () => {
     tree.el.querySelector('[data-testid="eb-add-condition"]').click(); // redraws the whole tree
     expect(tree.el.querySelectorAll('[data-testid="eb-leaf-chain"]').length).toBe(1); // still there, not blank
     expect(tree.el.querySelectorAll('[data-testid="eb-leaf"]').length).toBe(2);
+  });
+});
+
+describe('question list', () => {
+  const entries = () => [{ item: items[0] }, { item: items[1] }, { item: null }];
+  const list = (e, opts = {}) => createQuestionList({ entries: e, items, blank: () => ({ item: null }), onPick: (en, it) => { en.item = it; }, notify: () => {}, testids: { item: 'i', add: 'a', remove: 'r' }, ...opts });
+
+  it('offers a question to one entry only: the others cannot pick it again', () => {
+    const e = entries();
+    expect(availableFor(e, e[2], items).map((it) => it.id)).not.toContain('a');
+    expect(availableFor(e, e[2], items).map((it) => it.id)).not.toContain('b');
+    expect(availableFor(e, e[0], items).map((it) => it.id)).toContain('a'); // its own choice stays
+    expect(availableFor(e, e[2], items).map((it) => it.id)).toContain('c');
+  });
+
+  it('is a labelled group, and its remove buttons say which question they remove', () => {
+    const box = list(entries(), { labels: { group: 'Questions of the scale' } });
+    expect(box.getAttribute('role')).toBe('group');
+    expect(box.getAttribute('aria-label')).toBe('Questions of the scale');
+    expect([...box.querySelectorAll('[data-testid="r"]')].map((b) => b.getAttribute('aria-label'))).toEqual(['Remove question 1', 'Remove question 2', 'Remove question 3']);
+  });
+
+  it('adds and removes entries in place, never going below the minimum', () => {
+    const e = [{ item: items[0] }, { item: items[1] }];
+    const box = list(e, { min: 2 });
+    expect(box.querySelectorAll('[data-testid="r"]').length).toBe(0); // at the minimum: nothing to remove
+    document.body.appendChild(box);
+    box.querySelector('[data-testid="a"]').click();
+    expect(e.length).toBe(3);
+    expect(box.querySelectorAll('[data-testid="r"]').length).toBe(3);
+    box.querySelector('[data-testid="r"]').click();
+    expect(e.length).toBe(2);
+    expect(document.activeElement).toBe(box.querySelector('[data-testid="a"]')); // focus goes to "+", not lost
+    box.remove();
   });
 });

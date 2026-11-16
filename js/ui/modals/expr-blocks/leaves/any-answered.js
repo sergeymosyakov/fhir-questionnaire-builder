@@ -2,7 +2,7 @@
 import { registerLeafKind } from './registry.js';
 import { LeafKind } from './leaf-kind.js';
 import { createCustomSelect } from '../../../custom-select.js';
-import { createQuestionSelect } from '../question-select.js';
+import { createQuestionList } from '../question-list.js';
 import { union, UNION } from '../../../../fhir/expr-builder/blocks/index.js';
 import { itemRef, exists, BlockKind } from '../../../../fhir/expr-builder/model.js';
 import { findItemBySegments } from '../../../../fhir/expr-builder/flatten-items.js';
@@ -40,7 +40,7 @@ export class AnyAnsweredLeaf extends LeafKind {
     return exists(union(this.picks.map((p) => itemRef(p.item.segments, p.value, p.item.answerAt))), this.negate);
   }
 
-  render(host, { notify, rerender }) {
+  render(host, { notify }) {
     const mode = createCustomSelect({
       items: [{ value: 'any', label: 'At least one of' }, { value: 'none', label: 'None of' }],
       value: this.negate ? 'none' : 'any',
@@ -49,40 +49,19 @@ export class AnyAnsweredLeaf extends LeafKind {
       onChange: (v) => { this.negate = v === 'none'; notify(); },
     });
     host.appendChild(mode.el);
-    this.picks.forEach((pick, i) => {
-      const sel = createQuestionSelect({
-        items: this.items,
-        value: pick.item?.id,
-        testid: 'eb-any-item',
-        onChange: (id) => {
-          pick.item = this.items.find((it) => it.id === id) || null;
-          pick.value = pick.item ? valueAccessor(pick.item.itemType) : '';
-          notify();
-        },
-      });
-      host.appendChild(sel.el);
-      if (this.picks.length > 2) {
-        const rm = document.createElement('button');
-        rm.type = 'button';
-        rm.className = 'eb-rm';
-        rm.textContent = '✕';
-        rm.dataset.testid = 'eb-any-remove';
-        rm.setAttribute('aria-label', 'Remove question');
-        rm.addEventListener('click', () => { this.picks.splice(i, 1); rerender(); notify(); });
-        host.appendChild(rm);
-      }
-    });
-    const add = document.createElement('button');
-    add.type = 'button';
-    add.className = 'eb-add eb-add--sm';
-    add.textContent = '+';
-    add.dataset.testid = 'eb-any-add';
-    add.setAttribute('aria-label', 'Add a question');
-    add.addEventListener('click', () => { this.picks.push(blank()); rerender(); notify(); });
+    host.appendChild(createQuestionList({
+      entries: this.picks,
+      items: this.items,
+      blank,
+      min: 2,
+      notify,
+      testids: { item: 'eb-any-item', add: 'eb-any-add', remove: 'eb-any-remove' },
+      onPick: (pick, item) => { pick.item = item; pick.value = item ? valueAccessor(item.itemType) : ''; },
+    }));
     const tail = document.createElement('span');
     tail.className = 'eb-leaf-tail';
     tail.textContent = 'has an answer';
-    host.append(add, tail);
+    host.appendChild(tail);
   }
 }
 

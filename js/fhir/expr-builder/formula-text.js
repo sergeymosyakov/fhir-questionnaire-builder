@@ -2,6 +2,8 @@
 // Pure, no DOM. A block it does not know is shown as its FHIRPath, so nothing is ever hidden or invented.
 import { BlockKind } from './model.js';
 import { emit } from './emit.js';
+import { blockDef } from './blocks/registry.js';
+import './blocks/index.js';
 
 const SYMBOL = { '+': '+', '-': '−', '*': '×', '/': '÷' };
 const FN_WORDS = { round: 'round', abs: 'absolute value', ceiling: 'round up', floor: 'round down', truncate: 'truncate' };
@@ -17,8 +19,8 @@ export function formulaText(block, labelOf = (id) => id) {
       case BlockKind.LITERAL: return b.dataType === 'string' ? `"${b.value}"` : String(b.value);
       case BlockKind.ARITH: return `${operand(b.left)} ${SYMBOL[b.op] ?? b.op} ${operand(b.right)}`;
       case BlockKind.MATH_FN: return b.fn === 'round' && b.arg != null ? `round(${text(b.target)}, ${b.arg})` : `${FN_WORDS[b.fn] ?? b.fn}(${text(b.target)})`;
-      case BlockKind.AGGREGATE: return `${b.fn} of ${b.source?.kind === BlockKind.ITEM_REF ? labelOf(b.source.segments.at(-1)) : emit(b.source)}`;
-      default: return emit(b);
+      case BlockKind.AGGREGATE: return `${b.fn} of ${b.source?.kind === BlockKind.ITEM_REF ? labelOf(b.source.segments.at(-1)) : text(b.source)}`;
+      default: return blockDef(b.kind)?.formula?.(b, labelOf) ?? emit(b);
     }
   };
   return text(block);

@@ -50,7 +50,11 @@ function unwrap(node) {
 const kids = (n) => n.children || [];
 
 // What a registered block's parse hooks may use (they never import this module).
-const PARSE_CTX = { toBlock: (node) => astToBlocks(node), kids, identText: (node) => identText(node) };
+const PARSE_CTX = {
+  toBlock: (node) => astToBlocks(node), kids, identText: (node) => identText(node),
+  unwrap: (node) => unwrap(node), isResourceTerm: (node) => isResourceTerm(node), identOfTerm: (node) => identOfTerm(node),
+  collectStrings: (node) => collectSetStrings(node), stringLitOf: (node) => stringLitOf(node), isBareName: (node, name) => isBareName(node, name),
+};
 
 function mapLogic(n) {
   const op = n.text; // 'and' | 'or'
@@ -78,7 +82,8 @@ function mapBinary(n, make) {
 function mapPathOrTerm(n) {
   const { head, steps } = flatten(n);
   if (steps.length === 0) return mapTerm(head);
-  return interpretPipeline(head, steps) || interpretPath(head, steps) || interpretMathWrap(head, steps) || interpretExistsOfBlock(head, steps);
+  return interpretPipeline(head, steps) || interpretPath(head, steps) || interpretMathWrap(head, steps) || interpretExistsOfBlock(head, steps)
+    || parseWithRegistry('parsePath', { head, steps }, PARSE_CTX);
 }
 
 // Flattens left-nested InvocationExpression into { head: term, steps: [...] }.
@@ -254,7 +259,7 @@ function interpretPipeline(head, rawSteps) {
   if (!isResourceTerm(head)) return null;
 
   const s0 = steps[0];
-  if (!(s0 && s0.kind === 'func' && s0.name === 'repeat' && s0.args.length === 1 && identText(s0.args[0]) === 'item')) return null;
+  if (!(s0 && s0.kind === 'func' && s0.name === 'repeat' && s0.args.length === 1 && isBareName(s0.args[0], 'item'))) return null;
   const linkId = whereLinkId(steps[1]);
   if (linkId == null) return null;
 
@@ -291,17 +296,27 @@ function interpretPipeline(head, rawSteps) {
   return pipeline({ linkId, accessor }, filters, reduce);
 }
 
-// All StringLiteral leaves of a set argument, in order: ('a'|'b'|'c') → [a,b,c].
+// The strings of a set argument, in order: ('a'|'b'|'c') → [a,b,c]. Only a string literal or a `|` union of string
+// literals (in any brackets) is a set of strings; anything else — a function call, an iif, a path, a comparison — is not
+// read at all (null), so its meaning is never dropped.
 function collectSetStrings(arg) {
   const out = [];
-  collectStringLeaves(arg, out);
-  return out.length ? out : null;
+  return collectStringLeaves(unwrap(arg), out) && out.length ? out : null;
 }
 
 function collectStringLeaves(node, out) {
-  if (!node) return;
-  if (node.type === 'StringLiteral') { out.push(stripQuotes(node.text)); return; }
-  for (const c of kids(node)) collectStringLeaves(c, out);
+  if (!node) return false;
+  if (node.type === 'TermExpression' || node.type === 'ParenthesizedTerm' || node.type === 'LiteralTerm') return kids(node).length === 1 && collectStringLeaves(kids(node)[0], out);
+  if (node.type === 'StringLiteral') { out.push(stripQuotes(node.text)); return true; }
+  if (node.type === 'UnionExpression') return kids(node).length === 2 && collectStringLeaves(kids(node)[0], out) && collectStringLeaves(kids(node)[1], out);
+  return false;
+}
+
+// `item` and nothing else: a bare name, not a path or a call that merely starts with it.
+function isBareName(node, name) {
+  const t = unwrapTerm(unwrap(node));
+  return !!t && t.type === 'InvocationTerm' && kids(t).length === 1 && kids(t)[0].type === 'MemberInvocation'
+    && kids(kids(t)[0]).length === 1 && kids(kids(t)[0])[0].type === 'Identifier' && kids(kids(t)[0])[0].text === name;
 }
 
 // A `where($this <op> literal)` value predicate → { op:'compare', cmp, value, dataType }.

@@ -19,7 +19,7 @@ export function emit(block) {
     case BlockKind.PIPELINE: return emitPipeline(block);
     case BlockKind.MATH_FN: return emitMathFn(block);
     case BlockKind.RAW: return block.text || '';
-    default: return blockDef(block.kind)?.emit(block, { emit, wrap }) ?? '';
+    default: return blockDef(block.kind)?.emit(block, { emit, wrap, q }) ?? '';
   }
 }
 
