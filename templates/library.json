@@ -503,6 +503,10 @@
     "description": "Short primary care screen for probable PTSD after a traumatic event, with an automatic score and positive-screen flag.",
     "category": "scales",
     "scoring": "Each Yes to the follow-up questions scores 1; they are asked only after a reported traumatic event, and no event scores 0. The score (0–5) is a positive screen at 4 or more.",
+    "about": [
+      "A short screen for probable post-traumatic stress disorder (PTSD), designed for primary care settings. It first asks whether the person has ever experienced a frightening, horrible or traumatic event. If not, the screen is complete with a score of 0; if so, it asks how the event has affected them in the past month.",
+      "A score of 4 or more is treated as a positive screen. A positive screen is not a diagnosis: it calls for further assessment, for example with the CAPS-5 or the PCL-5. The screen was developed by the VA National Center for PTSD and is intended for use by qualified health professionals and researchers."
+    ],
     "keywords": [
       "ptsd",
       "trauma",
@@ -523,7 +527,11 @@
     "name": "GDS-15 Geriatric Depression Scale",
     "description": "Yes/no questions screening older adults for depression, with an automatic total score and interpretation.",
     "category": "scales",
-    "scoring": "Each depressive answer scores 1 point (No on questions 1, 5, 7, 11 and 13; Yes on the rest). The total (0–15) suggests depression above 5.",
+    "scoring": "Each depressive answer scores 1 point (No on questions 1, 5, 7, 11 and 13; Yes on the rest). A total above 5 should be followed up with a careful clinical interview.",
+    "about": [
+      "The Geriatric Depression Scale short form screens older adults for depression. The person answers Yes or No to questions about how they have felt over the past week.",
+      "A score above 5 should be followed up with a careful clinical interview. It is a screening aid, not a diagnosis."
+    ],
     "keywords": [
       "depression",
       "geriatric",
@@ -545,6 +553,10 @@
     "description": "NIMH screen for suicide risk in medical settings: screening questions, the acuity question asked after a positive answer, and the published result and next steps.",
     "category": "scales",
     "scoring": "A Yes to any of the screening questions is a positive screen. The acuity question then separates an acute positive screen from a non-acute one; all No is a negative screen.",
+    "about": [
+      "The Ask Suicide-Screening Questions is a rapid screening tool for suicide risk, developed at the National Institute of Mental Health for youth and adults in emergency departments, inpatient units and primary care. It takes less than two minutes.",
+      "The result separates an acute positive screen, which needs urgent evaluation, from a non-acute positive screen, which needs a brief suicide safety assessment, and from a negative screen, which needs no intervention at that time. Clinical judgment can always override a negative screen."
+    ],
     "keywords": [
       "suicide",
       "asq",

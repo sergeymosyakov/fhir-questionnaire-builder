@@ -98,6 +98,17 @@ describe('template detail pages', () => {
     expect(usesLoinc({ item: [{ type: 'string', text: 'q' }] })).toBe(false);
   });
 
+  it('shows an About section from the entry text, escaped, and omits it when there is none', () => {
+    const base = { id: 'a', name: 'n', description: 'd', scoring: 's', source: 's', license: 'l', file: 'f' };
+    const group = { item: [{ type: 'string', text: 'q' }] };
+    const html = renderTemplatePage({ ...base, about: ['First <b>.', 'Second & last.'] }, group);
+    expect(html).toContain('<h2>About this scale</h2>');
+    expect(html).toContain('<p data-testid="tpd-about">First &lt;b&gt;.</p>');
+    expect(html).toContain('<p data-testid="tpd-about">Second &amp; last.</p>');
+    expect(html.indexOf('About this scale')).toBeLessThan(html.indexOf('<h2>Scoring</h2>'));
+    expect(renderTemplatePage(base, group)).not.toContain('About this scale');
+  });
+
   it('omits the results and related sections when there are none', () => {
     const html = renderTemplatePage({ id: 'a', name: 'n', description: 'd', scoring: 's', source: 's', license: 'l', file: 'f' }, { item: [{ type: 'string', text: 'q' }] });
     expect(html).not.toContain('Calculated results');
