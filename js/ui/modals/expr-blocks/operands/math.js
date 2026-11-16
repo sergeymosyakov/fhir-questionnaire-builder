@@ -17,6 +17,7 @@ const paren = (text) => {
 export class MathOperand extends OperandKind {
   static id = 'math';
   static label = 'Round / square root / … of ( … )';
+  static block = true;
 
   static fromBlock(block, ctx) {
     if (block.kind !== BlockKind.MATH_FN) return null;

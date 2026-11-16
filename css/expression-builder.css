@@ -328,7 +328,8 @@
 }
 .eb-operand--block > .eb-operand-kind { grid-area: kind; justify-self: start; }
 .eb-operand--block > .eb-rm { grid-area: rm; }
-.eb-operand--block > .eb-operand-val { grid-area: val; display: block; min-width: 0; }
+/* The body under a kind picker is indented the same at every level. */
+.eb-operand--block > .eb-operand-val { grid-area: val; display: block; min-width: 0; margin-left: 12px; }
 .eb-if {
   display: flex;
   flex-direction: column;
@@ -346,12 +347,6 @@
 .eb-if .eb-leaf-text { min-width: 0; width: 100%; }
 .eb-if .eb-leaf-row, .eb-if .eb-leaf { min-width: 0; }
 .eb-novalue { font-size: 13px; font-style: italic; color: #6b7280; }
-/* Labels sit beside the content only at the first level; nested conditionals stack them to save width. */
-@media (min-width: 768px) {
-  .eb-if:not(.eb-if .eb-if) > .eb-if-row { flex-direction: row; align-items: flex-start; gap: 10px; }
-  .eb-if:not(.eb-if .eb-if) > .eb-if-row > .eb-if-head { flex: none; width: 112px; align-items: flex-start; padding-top: 4px; }
-  .eb-if:not(.eb-if .eb-if) > .eb-if-row > .eb-tree, .eb-if:not(.eb-if .eb-if) > .eb-if-row > .eb-chain { flex: 1 1 auto; }
-}
 .eb-leaf-custom { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; min-width: 0; }
 .eb-leaf-tail { font-size: 13px; color: #6b7280; }
 .eb-math { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 2px 6px; border: 1px dashed var(--c-border, #d1d5db); border-radius: 6px; background: #f8fafc; min-width: 0; }

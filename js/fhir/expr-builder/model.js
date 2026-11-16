@@ -18,7 +18,7 @@ export const BlockKind = {
 };
 
 export const COMPARE_OPS = ['=', '!=', '>', '<', '>=', '<='];
-export const ARITH_OPS = ['+', '-', '*', '/'];
+export const ARITH_OPS = ['+', '-', '*', '/', 'div', 'mod'];
 export const LOGIC_OPS = ['and', 'or'];
 export const AGG_FNS = ['count', 'sum', 'avg', 'min', 'max'];
 // Trailing wrapper applied to a numeric result: round takes an optional precision arg.

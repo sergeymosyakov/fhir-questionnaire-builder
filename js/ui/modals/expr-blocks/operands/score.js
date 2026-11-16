@@ -13,6 +13,7 @@ const FN_LABEL = { sum: 'sum', count: 'count', avg: 'average', min: 'minimum', m
 export class ScoreOperand extends OperandKind {
   static id = 'scores';
   static label = 'Sum / count of answer scores';
+  static block = true;
   static available(ctx) { return codedItems(ctx.allItems).length > 0; }
 
   static fromBlock(block, ctx) {

@@ -5,7 +5,7 @@ import { parseExpression } from '../js/fhir/expr-builder/parse.js';
 import { emit } from '../js/fhir/expr-builder/emit.js';
 import { describeBlock } from '../js/fhir/expr-builder/describe.js';
 import { itemRef, literal, compare, arith, exists, raw, BlockKind } from '../js/fhir/expr-builder/model.js';
-import { iif, union, empty, answerScores, IIF, UNION, EMPTY, ANSWER_SCORES, ORDINAL_VALUE_URL, power, negate, keepIf, duration, POWER, NEGATE, registerBlock, registeredBlocks } from '../js/fhir/expr-builder/blocks/index.js';
+import { iif, union, empty, answerScores, IIF, UNION, EMPTY, ANSWER_SCORES, ORDINAL_VALUE_URL, power, negate, keepIf, duration, today, textFn, POWER, NEGATE, registerBlock, registeredBlocks } from '../js/fhir/expr-builder/blocks/index.js';
 import { aggregate } from '../js/fhir/expr-builder/model.js';
 import { collectExpressions, responsesFor, evaluate as evaluateText } from './helpers/expressions.js';
 import { EXPR_GALLERY, resolveGalleryPattern } from '../js/fhir/expr-builder/gallery/index.js';
@@ -46,7 +46,7 @@ describe('conditional value (iif)', () => {
   });
 
   it('keeps an unreadable branch as text instead of failing the whole expression', () => {
-    expect(parse('iif(%a, today(), 0)').kind).toBe(BlockKind.RAW);
+    expect(parse('iif(%a, now(), 0)').kind).toBe(BlockKind.RAW);
   });
 
   it('rejects a call with the wrong number of arguments', () => {
@@ -417,5 +417,39 @@ describe('calendar durations (280 days, 1 week)', () => {
 
   it('is described in words', () => {
     expect(describeBlock(parse('%d + 280 days'))).toBe('the variable %d plus 280 days');
+  });
+});
+
+describe('today(), text conversions and div / mod', () => {
+  const year = "@2024-03-09.toString().substring(0, 4).toInteger()";
+
+  it('reads today() and the text functions with their numbers and writes them back', () => {
+    for (const text of ['today()', 'today().toString().substring(0, 4).toInteger()', '%d.toString().substring(5)', '%d.toString()']) {
+      expect(emit(parse(text)), text).toBe(text);
+    }
+    expect(parse('today()')).toEqual(today());
+    expect(parse('%d.toString().substring(5, 2)')).toEqual(textFn('substring', textFn('toString', { kind: BlockKind.VARIABLE, name: 'd' }), [5, 2]));
+  });
+
+  it('gives the same value after writing back', () => {
+    for (const text of [year, '@2024-03-09.toString().substring(5, 2).toInteger() mod 2', '(@2024-03-09.toString().substring(8, 2).toInteger() + 9) div 4']) {
+      expect(fhirpath.evaluate({}, emit(parse(text)))).toEqual(fhirpath.evaluate({}, text));
+    }
+  });
+
+  it('keeps div and mod as arithmetic and reads them in words', () => {
+    expect(parse('%a div 4')).toMatchObject({ kind: BlockKind.ARITH, op: 'div' });
+    expect(parse('%a mod 4')).toMatchObject({ kind: BlockKind.ARITH, op: 'mod' });
+    expect(describeBlock(parse('%a mod 4'))).toBe('the variable %a modulo 4');
+  });
+
+  it('leaves other arguments and functions as text', () => {
+    for (const text of ['%d.substring(%a)', '%d.substring(-1)', '%d.substring(1.5)', '%d.toInteger(1)', '%d.substring()', '%d.toDecimal()', 'today(1)', 'now()', '01.toString()', '(1.50).toString()', "'abc'.substring(1.0)", "'abc'.substring(2, 01)"]) {
+      expect(parse(text).kind, text).toBe(BlockKind.RAW);
+    }
+  });
+
+  it('is described in words', () => {
+    expect(describeBlock(parse('today().toString().substring(0, 4).toInteger()'))).toBe("the whole number of part of the text of the text of today's date (from character 0, 4 characters)");
   });
 });

@@ -1,7 +1,7 @@
 # Expression-builder block library
 
 Block kinds that live outside the core model (`../model.js`): a conditional value, a combination of values, "no
-value", a power, a negation, a calendar duration. Each block is one file that registers a definition; `parse.js`, `emit.js` and `describe.js` ask the
+value", a power, a negation, a calendar duration, today's date, text conversions. Each block is one file that registers a definition; `parse.js`, `emit.js` and `describe.js` ask the
 registry (`registry.js`) about any kind they don't know, so they never change when a block is added.
 
 ## Adding a block
