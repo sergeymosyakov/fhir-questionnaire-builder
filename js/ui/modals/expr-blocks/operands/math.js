@@ -1,4 +1,4 @@
-// Operand "Round / abs / … of ( … )": a rounding-style function applied to a chain of values. It lets a value be
+// Operand "Round / square root / … of ( … )": a rounding-style function (or the square root) applied to a chain of values. It lets a value be
 // rounded where it is used — typically as the result of a conditional branch — not only as the whole result.
 import { registerOperand } from './registry.js';
 import { OperandKind } from './operand-kind.js';
@@ -16,7 +16,7 @@ const paren = (text) => {
 
 export class MathOperand extends OperandKind {
   static id = 'math';
-  static label = 'Round / abs / … of ( … )';
+  static label = 'Round / square root / … of ( … )';
 
   static fromBlock(block, ctx) {
     if (block.kind !== BlockKind.MATH_FN) return null;
@@ -44,6 +44,7 @@ export class MathOperand extends OperandKind {
     const fnSel = createMathFnSelect({
       value: this.fn,
       testid: 'eb-math-fn',
+      withSqrt: true,
       onChange: (v) => { this.fn = v; host.innerHTML = ''; this.render(host); this.ctx.onChange(); },
     });
     box.append(fnSel.el, paren('('), this.chain.el, paren(')'));

@@ -1,15 +1,17 @@
 // The controls for a rounding-style function (round, abs, …), shared by the result's rounding row and the
-// "Round / abs / … of ( … )" operand so both read and behave the same.
+// "Round / square root / … of ( … )" operand so both read and behave the same.
 import { createCustomSelect } from '../../custom-select.js';
-import { MATH_WRAP_FNS } from '../../../fhir/expr-builder/model.js';
+import { MATH_WRAP_FNS, MATH_FNS } from '../../../fhir/expr-builder/model.js';
 
-const LABELS = { round: 'round', abs: 'absolute value', ceiling: 'round up (ceiling)', floor: 'round down (floor)', truncate: 'truncate' };
-export const MATH_FN_ITEMS = MATH_WRAP_FNS.map((v) => ({ value: v, label: LABELS[v] }));
+const LABELS = { sqrt: 'square root', round: 'round', abs: 'absolute value', ceiling: 'round up (ceiling)', floor: 'round down (floor)', truncate: 'truncate' };
+const itemsOf = (fns) => fns.map((v) => ({ value: v, label: LABELS[v] }));
+export const MATH_FN_ITEMS = itemsOf(MATH_WRAP_FNS);
 
-/** @param {{ value: string, onChange(fn), testid, none?: string, ariaLabel? }} opts — `none` adds a leading "no function" entry */
-export function createMathFnSelect({ value, onChange, testid, none, ariaLabel = 'Function' }) {
+/** @param {{ value: string, onChange(fn), testid, none?: string, ariaLabel?, withSqrt?: boolean }} opts — `none` adds a leading "no function" entry; `withSqrt` offers the square root too */
+export function createMathFnSelect({ value, onChange, testid, none, ariaLabel = 'Function', withSqrt = false }) {
+  const fns = itemsOf(withSqrt ? MATH_FNS : MATH_WRAP_FNS);
   return createCustomSelect({
-    items: none ? [{ value: '', label: none }, ...MATH_FN_ITEMS] : MATH_FN_ITEMS,
+    items: none ? [{ value: '', label: none }, ...fns] : fns,
     value,
     className: 'sc-trigger--sm',
     testid,

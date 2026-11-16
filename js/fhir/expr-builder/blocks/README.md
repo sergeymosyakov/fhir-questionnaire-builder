@@ -1,7 +1,7 @@
 # Expression-builder block library
 
 Block kinds that live outside the core model (`../model.js`): a conditional value, a combination of values, "no
-value". Each block is one file that registers a definition; `parse.js`, `emit.js` and `describe.js` ask the
+value", a power, a negation. Each block is one file that registers a definition; `parse.js`, `emit.js` and `describe.js` ask the
 registry (`registry.js`) about any kind they don't know, so they never change when a block is added.
 
 ## Adding a block
@@ -23,6 +23,7 @@ registerBlock({
   describeExists?(block, negate, ctx),   // wording for "<block> has / has no an answer"
   parseNode?(node, { toBlock, kids, identText }),  // a CST node (e.g. an operator) → block | null
   parseTerm?(term, { toBlock, kids, identText }),  // a CST term (literal, function call) → block | null
+  parsePath?({ head, steps, receiver }, ctx),      // a member/function chain → block | null; receiver() = the chain minus its last step
 });
 ```
 

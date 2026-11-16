@@ -1,7 +1,7 @@
 // Maps a fhirpath.js parse CST into the block model (two-way editing). Pure over
 // the CST: the browser calls fhirpath.parse(str), this maps the result. Anything
 // not modeled collapses to a `raw` block so round-trips stay lossless.
-import { itemRef, variable, literal, compare, logic, arith, exists, aggregate, raw, setLiteral, pipeline, mathFn, MATH_WRAP_FNS, BlockKind } from './model.js';
+import { itemRef, variable, literal, compare, logic, arith, exists, aggregate, raw, setLiteral, pipeline, mathFn, MATH_FNS, BlockKind } from './model.js';
 import { emit } from './emit.js';
 import { parseWithRegistry } from './blocks/registry.js';
 import './blocks/index.js';
@@ -82,8 +82,9 @@ function mapBinary(n, make) {
 function mapPathOrTerm(n) {
   const { head, steps } = flatten(n);
   if (steps.length === 0) return mapTerm(head);
-  return interpretPipeline(head, steps) || interpretPath(head, steps) || interpretMathWrap(head, steps) || interpretExistsOfBlock(head, steps)
-    || parseWithRegistry('parsePath', { head, steps }, PARSE_CTX);
+  const receiverNode = kids(n)[0]; // the chain without its last step
+  return interpretPipeline(head, steps) || interpretPath(head, steps) || interpretMathWrap(receiverNode, steps) || interpretExistsOfBlock(head, steps)
+    || parseWithRegistry('parsePath', { head, steps, receiver: () => astToBlocks(receiverNode) }, PARSE_CTX);
 }
 
 // Flattens left-nested InvocationExpression into { head: term, steps: [...] }.
@@ -208,12 +209,12 @@ function interpretPath(head, rawSteps) {
 }
 
 const AGG_FNS = new Set(['count', 'sum', 'avg', 'min', 'max']);
-const MATH_WRAP_FN_SET = new Set(MATH_WRAP_FNS);
+const MATH_FN_SET = new Set(MATH_FNS);
 
 // Reads a trailing round([n])/abs()/ceiling()/floor()/truncate() step. Returns
 // { fn, arg } or null (not a recognized math-wrap step).
 function mathWrapOf(step) {
-  if (!step || step.kind !== 'func' || !MATH_WRAP_FN_SET.has(step.name)) return null;
+  if (!step || step.kind !== 'func' || !MATH_FN_SET.has(step.name)) return null;
   if (step.name !== 'round') return step.args.length === 0 ? { fn: step.name, arg: null } : null;
   if (step.args.length === 0) return { fn: 'round', arg: null };
   if (step.args.length !== 1) return null;
@@ -238,11 +239,10 @@ function interpretExistsOfBlock(head, steps) {
 
 // A trailing `.round(n)` / `.abs()` / … applied to a result that isn't itself a
 // resource-path (e.g. `(a * b / c).round(1)`) — head is re-parsed as its own block.
-function interpretMathWrap(head, steps) {
-  if (steps.length !== 1) return null;
-  const mw = mathWrapOf(steps[0]);
-  if (!mw) return null;
-  const target = astToBlocks(head);
+function interpretMathWrap(receiverNode, steps) {
+  const mw = mathWrapOf(steps[steps.length - 1]);
+  if (!mw || steps.some((s) => s.kind === 'bad')) return null;
+  const target = astToBlocks(receiverNode);
   return target ? mathFn(mw.fn, mw.arg, target) : null;
 }
 
