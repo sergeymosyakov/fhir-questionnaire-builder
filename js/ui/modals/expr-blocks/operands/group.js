@@ -16,6 +16,7 @@ const paren = (text) => {
 export class GroupOperand extends OperandKind {
   static id = 'group';
   static label = 'Group ( … )';
+  static block = true;
 
   static fromBlock(block, ctx) {
     if (block.kind !== BlockKind.ARITH) return null;

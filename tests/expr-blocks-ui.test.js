@@ -357,3 +357,40 @@ describe('duration in the value editor', () => {
     expect(ve.getExpr()).toBe('');
   });
 });
+
+describe('today and text functions in the value editor', () => {
+  const when = { id: 'bd', label: 'Birth date', itemType: 'date', segments: ['g', 'bd'], answerAt: [] };
+  const bd = "%resource.item.where(linkId='g').item.where(linkId='bd').answer.valueDate";
+  const make = (expr) => createValueEditor({ items: [...items, when], allItems: [...items, when], variables: [], fp, initialExpr: expr });
+
+  it('opens the year of a date and its difference from today, and writes the same text back', () => {
+    for (const expr of [
+      `today().toString().substring(0, 4).toInteger() - ${bd}.toString().substring(0, 4).toInteger()`,
+      `(${bd}.toString().substring(5, 2).toInteger() + 9) mod 12`,
+      `${bd}.toString().substring(5)`,
+      `(${bd}.toString().substring(0, 4).toInteger() div 4)`,
+    ]) {
+      const ve = make(expr);
+      expect(ve.seeded, expr).toBe(true);
+      expect(ve.getExpr(), expr).toBe(expr.replace(/^\((.*)\)$/, '$1'));
+    }
+  });
+
+  it('shows today as an operand', () => {
+    const ve = make(`today().toString().substring(0, 4).toInteger() - ${bd}.toString().substring(0, 4).toInteger()`);
+    expect(ve.el.querySelector('[data-testid="eb-today"]')).not.toBeNull();
+  });
+
+  it('offers div and mod between operands', () => {
+    const ve = make(`${bd}.toString().substring(0, 4).toInteger() mod 4`);
+    expect(ve.el.querySelector('[data-testid="eb-arith-op"]').dataset.value).toBe('mod');
+  });
+
+  it('is incomplete until the part of text has a start', () => {
+    const ve = make(`${bd}.toString().substring(0, 4)`);
+    const from = ve.el.querySelector('[data-testid="eb-textfn-from"]');
+    from.value = '';
+    from.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(ve.getExpr()).toBe('');
+  });
+});

@@ -9,6 +9,8 @@ import './math.js';
 import './power.js';
 import './negate.js';
 import './duration.js';
+import './today.js';
+import './text-fn.js';
 import './text.js';
 
 export { operandKinds, operandKind, registerOperand } from './registry.js';

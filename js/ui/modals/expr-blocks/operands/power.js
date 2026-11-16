@@ -16,6 +16,7 @@ const text = (str, className) => {
 export class PowerOperand extends OperandKind {
   static id = 'power';
   static label = '( … ) to the power of ( … )';
+  static block = true;
 
   static fromBlock(block, ctx) {
     if (block.kind !== POWER) return null;

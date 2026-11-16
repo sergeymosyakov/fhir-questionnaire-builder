@@ -15,6 +15,7 @@
 //   eb-math / eb-math-fn / eb-power / eb-power-base-chain / eb-power-exp-chain / eb-operand-num   square root and power blocks
 //   eb-keep-row / eb-keep-op / eb-keep-value                                           "keep the result only if" row
 //   eb-duration / eb-duration-value / eb-duration-unit / eb-preview-str / expr-calc-ta   date plus a duration
+//   eb-textfn / eb-textfn-fn / eb-textfn-from / eb-textfn-length / eb-textfn-chain / eb-today / eb-arith-op date parts as text and numbers
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -282,4 +283,23 @@ test('Due date: the date plus 280 days opens as a date and a duration, and both 
   await expect(modal(page).getByTestId('eb-preview-str')).toContainText('+ 40 weeks');
   await page.getByTestId('expressionBuilderModalApply').click();
   await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/ \+ 40 weeks\)?$/);
+});
+
+test('Gestational age: date parts, div and mod open as blocks, and applying unchanged keeps the expression text', async ({ page }) => {
+  await insert(page, 'pregnancy-dating');
+  const node = page.locator('[data-node-id]').filter({ has: page.getByTestId('node-title-display').filter({ hasText: 'Gestational age' }) }).last();
+  await node.getByTestId('action-expr').click();
+  await expect(page.getByTestId('expressionModal')).toBeVisible();
+  const before = await page.getByTestId('expr-calc-ta').inputValue();
+  expect(before).toContain('.toString().substring(0,4).toInteger()');
+  await page.getByTestId('expr-calc-ta-build-btn').click();
+  await expect(modal(page)).toBeVisible();
+  await expect(modal(page).getByTestId('eb-raw-note')).toHaveCount(0);
+  await expect(modal(page).getByTestId('eb-textfn').first()).toBeVisible();
+  await expect(modal(page).getByTestId('eb-textfn-from').first()).toHaveValue('0');
+  await expect(modal(page).getByTestId('eb-textfn-length').first()).toHaveValue('4');
+
+  await modal(page).getByTestId('expressionBuilderModalApply').click();
+  const after = await page.getByTestId('expr-calc-ta').inputValue();
+  expect(after.replace(/[\s()]/g, '')).toBe(before.replace(/[\s()]/g, '')); // only brackets and spacing may differ
 });

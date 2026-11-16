@@ -15,6 +15,7 @@ const scoresOf = (b, fn) => (b?.kind === BlockKind.AGGREGATE && b.fn === fn && !
 export class ScaleTotalOperand extends OperandKind {
   static id = 'scale-total';
   static label = 'Scale total (when all answered)';
+  static block = true;
   static available(ctx) { return codedItems(ctx.allItems).length > 0; }
 
   // iif(<scores>.count() = N, <scores>.sum(), {}) over the same questions, N being how many there are.

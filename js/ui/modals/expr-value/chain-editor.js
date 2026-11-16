@@ -2,13 +2,13 @@
 // conditional. Question / variable / number / aggregate are built in; other kinds (group, conditional, …) come from
 // the operand registry (js/ui/modals/expr-blocks/operands/).
 import { createCustomSelect } from '../../custom-select.js';
-import { itemRef, variable, literal, arith, aggregate, BlockKind } from '../../../fhir/expr-builder/model.js';
+import { itemRef, variable, literal, arith, aggregate, ARITH_OPS, BlockKind } from '../../../fhir/expr-builder/model.js';
 import { valueAccessor } from '../../../fhir/expr-builder/value-paths.js';
 import { findItemBySegments } from '../../../fhir/expr-builder/flatten-items.js';
 import { createQuestionSelect } from '../expr-blocks/question-select.js';
 import { operandKinds, operandKind, OperandKind } from '../expr-blocks/operands/index.js';
 
-const ARITH_LABEL = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+const ARITH_LABEL = { '+': '+', '-': '−', '*': '×', '/': '÷', div: 'div (whole part)', mod: 'mod (remainder)' };
 const AGG_FN_ITEMS = [
   { value: 'count', label: 'count of' },
   { value: 'sum', label: 'sum of' },
@@ -124,7 +124,7 @@ export class ChainEditor {
 
   _renderOperator(opIdx, ops) {
     const sel = createCustomSelect({
-      items: ['+', '-', '*', '/'].map((o) => ({ value: o, label: ARITH_LABEL[o] })),
+      items: ARITH_OPS.map((o) => ({ value: o, label: ARITH_LABEL[o] })),
       value: ops[opIdx] || '+',
       className: 'sc-trigger--sm eb-arith-op',
       testid: 'eb-arith-op',

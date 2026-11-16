@@ -8,6 +8,8 @@ import './power.js';
 import './negate.js';
 import './keep-if.js';
 import './duration.js';
+import './today.js';
+import './text-fn.js';
 
 export { iif, IIF } from './iif.js';
 export { union, UNION } from './union.js';
@@ -16,5 +18,7 @@ export { answerScores, ANSWER_SCORES, ORDINAL_VALUE_URL } from './answer-scores.
 export { power, POWER } from './power.js';
 export { negate, NEGATE } from './negate.js';
 export { duration, DURATION, DURATION_UNITS, unitBase } from './duration.js';
+export { today, TODAY } from './today.js';
+export { textFn, TEXT_FN, TEXT_FNS } from './text-fn.js';
 export { keepIf, KEEP_IF, KEEP_IF_WORDS } from './keep-if.js';
 export { blockDef, isRegisteredKind, registeredBlocks, registerBlock } from './registry.js';

@@ -328,7 +328,8 @@
 }
 .eb-operand--block > .eb-operand-kind { grid-area: kind; justify-self: start; }
 .eb-operand--block > .eb-rm { grid-area: rm; }
-.eb-operand--block > .eb-operand-val { grid-area: val; display: block; min-width: 0; }
+/* The body under a kind picker is indented the same at every level. */
+.eb-operand--block > .eb-operand-val { grid-area: val; display: block; min-width: 0; margin-left: 12px; }
 .eb-if {
   display: flex;
   flex-direction: column;

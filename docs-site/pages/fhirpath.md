@@ -80,7 +80,12 @@ values instead of typing paths and accessors:
   number, for example to give no result when a calculation comes out negative. A date
   question can be used in a calculation too: **Duration (days, weeks, …)** is an amount
   of calendar time that is added to or taken from a date, such as the last menstrual
-  period plus 280 days for an expected delivery date. For
+  period plus 280 days for an expected delivery date. **Today's date** gives the day the
+  calculation runs on. **Text / part of text / whole number of ( … )** turns a value into
+  text, takes some of its characters and reads them as a whole number; chained, they take
+  the year, month or day out of a date, which is how the age and date-difference formulas
+  of the gallery are built. Operators **div** (whole-number division) and **mod**
+  (remainder) join × ÷ + −. For
   questionnaires scored by their answers (each answer option carries a score), **Scale
   total (when all answered)** adds up the scores of the chosen questions and gives no
   result until every one of them is answered, the form every shipped scale such as PHQ-9

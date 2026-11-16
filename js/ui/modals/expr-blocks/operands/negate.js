@@ -16,6 +16,7 @@ const text = (str, className) => {
 export class NegateOperand extends OperandKind {
   static id = 'negate';
   static label = 'Minus ( … )';
+  static block = true;
 
   static fromBlock(block, ctx) {
     // fhirpath.js refuses `-<answer>` (an error, not a number), so that text is left as it was.
