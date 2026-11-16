@@ -44,7 +44,9 @@ export function renderTemplatePage(entry, group, { related = [], more = [], patt
     bodyHtml: `    <h1 data-testid="tpd-title">${esc(title)}</h1>
     <p class="gp-lead">${esc(entry.description)}</p>
     <p><a class="gp-button" href="../?template=${esc(entry.id)}" data-testid="tpd-open-in-builder">Open in Builder</a></p>
-    <h2>Scoring</h2>
+${entry.about?.length ? `    <h2>About this scale</h2>
+${entry.about.map((t) => `    <p data-testid="tpd-about">${esc(t)}</p>`).join('\n')}
+` : ''}    <h2>Scoring</h2>
     <p>${esc(entry.scoring)}</p>
     <h2>Questions</h2>
     <ol data-testid="tpd-questions">

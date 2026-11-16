@@ -2,6 +2,7 @@
 //
 // ── data-testid registry ──────────────────────────────────────────────────────
 //   tpd-title / tpd-questions / tpd-results   h1 / question list / calculated results
+//   tpd-about                                 "About this scale" paragraphs (only on templates that have the text)
 //   tpd-source / tpd-license / tpd-json       source and license lines / JSON download link
 //   tpd-formula-<patternId>                   link to the gallery pattern behind a template
 //   tpd-more-<id>                             other templates of the same category
@@ -31,6 +32,14 @@ test.describe('templates/<id>.html (SEO pages)', () => {
     const res = await request.get(new URL(href, page.url()).pathname);
     expect(res.ok()).toBe(true);
     expect((await res.json()).resourceType).toBe('Questionnaire');
+  });
+
+  test('a scale page explains what the scale is for; a page without that text has no such section', async ({ page }) => {
+    await page.goto('/templates/gds-15.html');
+    await expect(page.getByTestId('tpd-about').first()).toBeVisible();
+    await expect(page.getByTestId('tpd-about').first()).toContainText('older adults');
+    await page.goto('/templates/audit-c.html');
+    await expect(page.getByTestId('tpd-about')).toHaveCount(0);
   });
 
   test('structured data has a breadcrumb ending at the template', async ({ page }) => {

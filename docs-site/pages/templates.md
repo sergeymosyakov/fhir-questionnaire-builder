@@ -13,7 +13,7 @@ demographics or allergies — and don't want to type it in and wire up the scori
 - **GAD-7** — anxiety screening; a total score (0–21) and its severity band.
 - **AUDIT-C** — alcohol use screening; a total score (0–12) with the usual positive-screen thresholds noted.
 - **PC-PTSD-5** — the short post-traumatic stress screen. The follow-up questions appear only after you answer Yes to having experienced a traumatic event; the score (0–5) is a positive screen at 4 or more.
-- **GDS-15** — yes/no questions screening older adults for depression; a total (0–15) that suggests depression above 5.
+- **GDS-15** — yes/no questions screening older adults for depression; a total (0–15); a total above 5 should be followed up with a careful clinical interview.
 - **ASQ** — the NIMH suicide-risk screen for medical settings. The question about thoughts right now (and the timing of a past attempt) appears only after a relevant Yes answer; the result is a negative, non-acute positive or acute positive screen, with the published next steps and crisis-line resources.
 - **Glasgow Coma Scale** — eye, verbal and motor responses; a total (3–15) and its severity band.
 - **Apgar Score** — the five criteria at 1 and 5 minutes after birth; a total (0–10) and result band for each.
@@ -30,8 +30,10 @@ demographics or allergies — and don't want to type it in and wire up the scori
 
 The list of templates, with each scale's questions, scoring, source and license, is
 on the public [templates page](https://fhirbuilder.com/templates.html), and every
-template also has its own page there (questions with their answer options, calculated
-results, source and license, plus a download link for the FHIR Questionnaire JSON).
+template also has its own page there (for some of the scales, a short explanation of
+what the scale is for and how to read its result; then the questions with their answer
+options, calculated results, source and license, plus a download link for the FHIR
+Questionnaire JSON).
 
 ## Insert a template
 

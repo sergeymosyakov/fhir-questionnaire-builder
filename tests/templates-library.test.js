@@ -25,6 +25,7 @@ describe('template library catalog', () => {
       expect(Array.isArray(e.keywords) && e.keywords.length > 0, `${e.id}.keywords`).toBe(true);
       expect(e.licenseUrl, `${e.id}.licenseUrl`).toMatch(/^https:\/\//);
       if (e.sourceUrl) expect(e.sourceUrl).toMatch(/^https:\/\//);
+      if (e.about) expect(Array.isArray(e.about) && e.about.every(t => typeof t === 'string' && t.trim() && !t.includes('<')), `${e.id}.about`).toBe(true);
       expect(fs.existsSync(path.join(DIR, e.file)), e.file).toBe(true);
     }
   });
