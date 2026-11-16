@@ -31,6 +31,14 @@ describe('template library catalog', () => {
   });
 });
 
+describe('About text of the scales', () => {
+  it('every scale has one', () => {
+    const scales = library.filter(e => e.category === 'scales');
+    expect(scales.length).toBeGreaterThan(0);
+    for (const e of scales) expect(e.about?.length, `${e.id}.about`).toBeGreaterThan(0);
+  });
+});
+
 describe.each(library.map(e => e.id))('template %s', id => {
   const group = load(id);
 

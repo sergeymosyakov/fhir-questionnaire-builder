@@ -30,7 +30,7 @@ demographics or allergies — and don't want to type it in and wire up the scori
 
 The list of templates, with each scale's questions, scoring, source and license, is
 on the public [templates page](https://fhirbuilder.com/templates.html), and every
-template also has its own page there (for some of the scales, a short explanation of
+template also has its own page there (for the screening scales, a short explanation of
 what the scale is for and how to read its result; then the questions with their answer
 options, calculated results, source and license, plus a download link for the FHIR
 Questionnaire JSON).
