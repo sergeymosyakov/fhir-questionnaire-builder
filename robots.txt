@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /coverage/
+Disallow: /playwright-report/
 
 Sitemap: https://fhirbuilder.com/sitemap.xml
