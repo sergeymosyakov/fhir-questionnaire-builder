@@ -33,6 +33,10 @@ function charlsonDef() {
   return {
     id: 'charlson-comorbidity-index', group: 'cci', category: 'scales', name: 'Charlson Comorbidity Index',
     description: 'Comorbidities and age with the age-adjusted Charlson Comorbidity Index.',
+    about: [
+      'Classifies comorbid conditions that may change a patient\'s risk of death, for use in longitudinal studies. It weights each condition by its seriousness and combines them into one index; the age-adjusted version also takes age into account.',
+      'A higher index means a higher estimated risk of death from comorbid disease. Its authors described it as a simple method for studies and said further work in larger populations was needed, and the weights were later re-estimated for more recent administrative data. It estimates risk across patients and does not replace clinical judgment about one person.',
+    ],
     keywords: ['charlson', 'comorbidity', 'cci', 'prognosis', 'risk adjustment'],
     sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/3558716/',
     scoring: 'Comorbidities score 1, 2, 3 or 6 points by weight; the age adds 1 point per decade from 50, up to 4 points from age 80. The index appears once the age is entered; an unanswered comorbidity counts as No.',
@@ -166,6 +170,10 @@ export const DEFS = [
   {
     id: 'qsofa', group: 'qsofa', category: 'scales', name: 'qSOFA Sepsis Screen',
     description: 'Three bedside yes/no criteria with the qSOFA score and its risk result; two or more criteria mean a high risk of poor outcome.',
+    about: [
+      'A bedside screen for adults with suspected infection, meant for out-of-hospital, emergency department and general ward settings. It looks at breathing rate, altered mentation and systolic blood pressure, and it needs no blood tests.',
+      'A higher score marks a patient who is more likely to have the poor outcomes typical of sepsis, and the Sepsis-3 task force suggests using it to prompt a closer look for organ dysfunction. It is not a stand-alone definition of sepsis, and a lower score should not delay investigation or treatment. The 2021 Surviving Sepsis Campaign guideline advises against using it as a single screening tool.',
+    ],
     keywords: ['qsofa', 'sepsis', 'sofa', 'screening', 'emergency', 'critical care'],
     related: ['glasgow-coma-scale'],
     sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/26903338/',
@@ -183,6 +191,10 @@ export const DEFS = [
   {
     id: 'cha2ds2-vasc', group: 'cha', category: 'scales', name: 'CHA₂DS₂-VASc Stroke Risk Score',
     description: 'Six yes/no criteria and the age with the CHA₂DS₂-VASc score (0–9) for stroke risk in atrial fibrillation; a higher score means a higher risk.',
+    about: [
+      'Estimates stroke and thromboembolism risk in people with atrial fibrillation. It was developed as a risk-factor-based refinement of earlier stroke-risk schemes, and current guidelines name it as a validated clinical risk score for this assessment.',
+      'A higher score means a higher stroke risk, but the same score can carry very different absolute risk in different populations, and it has performed less well in some groups, such as people with kidney disease. It informs a clinician\'s judgment and does not replace it.',
+    ],
     keywords: ['cha2ds2-vasc', 'stroke', 'atrial fibrillation', 'afib', 'anticoagulation', 'cardiology'],
     sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/19762550/',
     scoring: 'Points: heart failure 1, hypertension 1, age 75 or older 2, diabetes 1, previous stroke or TIA 2, vascular disease 1, age 65 to 74 1, female sex 1 (0–9). The score appears once the age is entered; an unanswered criterion counts as No.',
@@ -263,6 +275,7 @@ export function libraryEntry(def) {
     galleryPatterns: [...new Set(def.outputs.map(o => o.pattern))],
     ...(def.related ? { related: def.related } : {}),
     scoring: def.scoring ?? 'Calculated values only; each result stays empty until all of its inputs are answered.',
+    ...(def.about ? { about: def.about } : {}),
     keywords: def.keywords,
     source: `${sources.join('; ')}.${coded ? ' Codes: LOINC.' : ''}`,
     ...(def.sourceUrl ? { sourceUrl: def.sourceUrl } : {}),

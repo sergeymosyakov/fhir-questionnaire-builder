@@ -38,7 +38,8 @@ test.describe('templates/<id>.html (SEO pages)', () => {
     await page.goto('/templates/gds-15.html');
     await expect(page.getByTestId('tpd-about').first()).toBeVisible();
     await expect(page.getByTestId('tpd-about').first()).toContainText('older adults');
-    await page.goto('/templates/audit-c.html');
+    await page.goto('/templates/demographics.html');
+    await expect(page.getByTestId('tpd-title')).toBeVisible();
     await expect(page.getByTestId('tpd-about')).toHaveCount(0);
   });
 
