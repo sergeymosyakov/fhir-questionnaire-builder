@@ -18,3 +18,12 @@ export function flattenItems(nodes, ctx = { chain: [], at: [], parentType: 'grou
   }
   return out;
 }
+
+// The question a reference points at. A single-segment reference also matches by id alone; a longer path that
+// no longer matches (e.g. an edited prefix) is never silently re-bound.
+export function findItemBySegments(items, segments) {
+  const segs = segments || [];
+  const exact = items.find((it) => it.segments.join('/') === segs.join('/'));
+  if (exact) return exact;
+  return segs.length === 1 ? (items.find((it) => it.id === segs[0]) || null) : null;
+}

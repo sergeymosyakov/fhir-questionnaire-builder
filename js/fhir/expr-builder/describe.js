@@ -3,6 +3,8 @@
 // a human-readable sentence. Returns null for a `raw` block (or any block that
 // contains one) — callers show the FHIRPath code with no fabricated guess.
 import { BlockKind } from './model.js';
+import { blockDef, isRegisteredKind } from './blocks/registry.js';
+import './blocks/index.js';
 
 // Exported so doc-generator.js can phrase standard enableWhen[] comparisons
 // with the exact same words, keeping both condition mechanisms consistent.
@@ -37,6 +39,11 @@ function describePipeline(b, linkIdMap) {
   return desc;
 }
 
+const describeCtx = (linkIdMap) => ({ describe: (b) => describeBlock(b, linkIdMap), title: (id) => title(id, linkIdMap) });
+
+// A library block used as an operand is bracketed: "(if …) plus (if …)".
+const operand = (b, linkIdMap) => { const t = describeBlock(b, linkIdMap); return t != null && isRegisteredKind(b?.kind) ? `(${t})` : t; };
+
 export function describeBlock(block, linkIdMap = {}) {
   if (!block || typeof block !== 'object') return null;
   switch (block.kind) {
@@ -48,18 +55,22 @@ export function describeBlock(block, linkIdMap = {}) {
     case BlockKind.SET_LITERAL: return 'one of: ' + block.members.map(m => `"${m}"`).join(', ');
     case BlockKind.PIPELINE: return describePipeline(block, linkIdMap);
     case BlockKind.COMPARE: {
-      const l = describeBlock(block.left, linkIdMap), r = describeBlock(block.right, linkIdMap);
+      const l = operand(block.left, linkIdMap), r = operand(block.right, linkIdMap);
       return (l == null || r == null) ? null : `${l} ${COMPARE_WORDS[block.op] || block.op} ${r}`;
     }
     case BlockKind.ARITH: {
-      const l = describeBlock(block.left, linkIdMap), r = describeBlock(block.right, linkIdMap);
+      const l = operand(block.left, linkIdMap), r = operand(block.right, linkIdMap);
       return (l == null || r == null) ? null : `${l} ${ARITH_WORDS[block.op] || block.op} ${r}`;
     }
     case BlockKind.LOGIC: {
-      const parts = block.operands.map(o => describeBlock(o, linkIdMap));
+      const parts = block.operands.map(o => operand(o, linkIdMap));
       return parts.some(p => p == null) ? null : parts.join(block.op === 'or' ? ' OR ' : ' AND ');
     }
     case BlockKind.EXISTS: {
+      const custom = blockDef(block.target?.kind)?.describeExists;
+      if (custom) return custom(block.target, block.negate, describeCtx(linkIdMap));
+      // "has an answer" only reads right for a question; for any other expression the code is shown instead.
+      if (block.target?.kind !== BlockKind.ITEM_REF) return null;
       const t = describeBlock(block.target, linkIdMap);
       return t == null ? null : t + (block.negate ? ' has no answer' : ' has an answer');
     }
@@ -76,6 +87,6 @@ export function describeBlock(block, linkIdMap = {}) {
       if (block.fn === 'round') return `${t} rounded${block.arg != null ? ' to ' + block.arg + ' decimal place' + (block.arg === 1 ? '' : 's') : ''}`;
       return `${MATH_WORDS[block.fn] || block.fn} ${t}`;
     }
-    default: return null;
+    default: return blockDef(block.kind)?.describe(block, describeCtx(linkIdMap)) ?? null;
   }
 }

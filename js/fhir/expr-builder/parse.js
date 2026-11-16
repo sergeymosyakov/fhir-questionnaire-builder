@@ -3,6 +3,8 @@
 // not modeled collapses to a `raw` block so round-trips stay lossless.
 import { itemRef, variable, literal, compare, logic, arith, exists, aggregate, raw, setLiteral, pipeline, mathFn, MATH_WRAP_FNS, BlockKind } from './model.js';
 import { emit } from './emit.js';
+import { parseWithRegistry } from './blocks/registry.js';
+import './blocks/index.js';
 
 // Public entry: parse a string via an injected fhirpath instance.
 export function parseExpression(str, fp) {
@@ -34,7 +36,7 @@ export function astToBlocks(node) {
     case 'TermExpression':
       return mapPathOrTerm(n);
     default:
-      return null;
+      return parseWithRegistry('parseNode', n, PARSE_CTX);
   }
 }
 
@@ -46,6 +48,9 @@ function unwrap(node) {
 }
 
 const kids = (n) => n.children || [];
+
+// What a registered block's parse hooks may use (they never import this module).
+const PARSE_CTX = { toBlock: (node) => astToBlocks(node), kids, identText: (node) => identText(node) };
 
 function mapLogic(n) {
   const op = n.text; // 'and' | 'or'
@@ -73,7 +78,7 @@ function mapBinary(n, make) {
 function mapPathOrTerm(n) {
   const { head, steps } = flatten(n);
   if (steps.length === 0) return mapTerm(head);
-  return interpretPipeline(head, steps) || interpretPath(head, steps) || interpretMathWrap(head, steps);
+  return interpretPipeline(head, steps) || interpretPath(head, steps) || interpretMathWrap(head, steps) || interpretExistsOfBlock(head, steps);
 }
 
 // Flattens left-nested InvocationExpression into { head: term, steps: [...] }.
@@ -117,11 +122,11 @@ function mapTerm(term) {
     case 'ExternalConstantTerm':
       return variable(identText(t));
     case 'LiteralTerm':
-      return mapLiteral(t);
+      return mapLiteral(t) || parseWithRegistry('parseTerm', t, PARSE_CTX);
     case 'ParenthesizedTerm':
       return astToBlocks(kids(t)[0]);
     default:
-      return null;
+      return parseWithRegistry('parseTerm', t, PARSE_CTX);
   }
 }
 
@@ -214,6 +219,14 @@ function numericLiteralArg(node) {
   if (!t || t.type !== 'LiteralTerm') return null;
   const lit = mapLiteral(t);
   return lit && lit.dataType === 'number' ? lit.value : null;
+}
+
+// `(a | b).exists()`, `(a + b).exists()`, `iif(…).empty()` — presence of any modelled value.
+function interpretExistsOfBlock(head, steps) {
+  const s = steps.length === 1 ? steps[0] : null;
+  if (!s || s.kind !== 'func' || s.args.length || (s.name !== 'exists' && s.name !== 'empty')) return null;
+  const target = astToBlocks(head);
+  return target ? exists(target, s.name === 'empty') : null;
 }
 
 // A trailing `.round(n)` / `.abs()` / … applied to a result that isn't itself a

@@ -1,0 +1,22 @@
+// Registry of expression-builder block kinds that live outside the core model. A block
+// file registers one definition; parse/emit/describe ask the registry about kinds they don't know.
+//
+// def = {
+//   kind,                                    // block.kind string
+//   emit(block, ctx),                        // → FHIRPath text; ctx = { emit, wrap }
+//   describe(block, ctx),                    // → plain words or null; ctx = { describe, title }
+//   describeExists?(block, negate, ctx),     // wording for "<block> has / has no an answer"
+//   parseNode?(node, ctx),                   // CST node → block | null; ctx = { toBlock, kids, identText }
+//   parseTerm?(term, ctx),                   // CST term (literal/function call) → block | null
+// }
+import { Registry } from '../../../registry.js';
+
+const registry = new Registry({ name: 'block', key: 'kind' });
+
+export const registerBlock = (def) => registry.register(def);
+export const blockDef = (kind) => registry.get(kind);
+export const isRegisteredKind = (kind) => registry.has(kind);
+export const registeredBlocks = () => registry.all();
+
+// First definition whose hook yields a block wins.
+export const parseWithRegistry = (hook, node, ctx) => registry.first((def) => def[hook]?.(node, ctx));

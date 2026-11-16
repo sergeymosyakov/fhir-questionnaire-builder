@@ -68,7 +68,14 @@ values instead of typing paths and accessors:
   stays visible — unrecognised parts are editable as text only at the leaf.
 - **Values** (`calculatedExpression`, `initialExpression`) — an arithmetic chain of
   questions, variables and numbers joined by × ÷ + −, plus **aggregates** (count,
-  sum, average, min, max) over a repeating question's answers.
+  sum, average, min, max) over a repeating question's answers, and **conditional
+  values**: choose **If … then … otherwise**, set a condition, and give the value when
+  it holds and the value otherwise. A conditional can sit inside another one or inside
+  a sum, which is how scores such as qSOFA are built (a sum of "1 if the criterion is
+  present, otherwise 0"). The condition can also be "at least one of several questions
+  has an answer". For the otherwise (or the then) you can choose **No value**, which
+  leaves the result empty until something is answered. Rounding at the bottom, **Round
+  the result**, applies to the entire expression, not to one branch.
 - **Answers → value** (`calculatedExpression`) — a **collection pipeline** over a
   question's answers: pick a source question, filter the answers — keep or drop
   values against a set (`intersect` / `exclude`), take unique values, or keep where
