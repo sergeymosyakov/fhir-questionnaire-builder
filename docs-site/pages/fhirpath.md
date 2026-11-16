@@ -68,14 +68,21 @@ values instead of typing paths and accessors:
   stays visible — unrecognised parts are editable as text only at the leaf.
 - **Values** (`calculatedExpression`, `initialExpression`) — an arithmetic chain of
   questions, variables and numbers joined by × ÷ + −, plus **aggregates** (count,
-  sum, average, min, max) over a repeating question's answers, and **conditional
-  values**: choose **If … then … otherwise**, set a condition, and give the value when
-  it holds and the value otherwise. A conditional can sit inside another one or inside
-  a sum, which is how scores such as qSOFA are built (a sum of "1 if the criterion is
-  present, otherwise 0"). The condition can also be "at least one of several questions
-  has an answer". For the otherwise (or the then) you can choose **No value**, which
-  leaves the result empty until something is answered. Rounding at the bottom, **Round
-  the result**, applies to the entire expression, not to one branch.
+  sum, average, min, max) over a repeating question's answers. **Group ( … )** puts a
+  part of the calculation in brackets and brackets can sit inside brackets, as deep as
+  the formula needs. **Round / abs / … of ( … )** rounds (or takes the absolute value,
+  rounds up or down, truncates) a part of the calculation where it is used.
+  **Conditional values**: choose **If … then … otherwise**, set a condition, and give
+  the value when it holds and the value otherwise. A branch can be a number, a
+  calculation, a piece of **Text** (for example the name of a score band), or **No
+  value**, which leaves the result empty until something is answered. A conditional can
+  sit inside another one or inside a sum, which is how scores such as qSOFA are built (a
+  sum of "1 if the criterion is present, otherwise 0"). Bands are a flat list: **+
+  Otherwise if** adds one more step, in the order they are checked. A condition can be
+  a question, "at least one of several questions has an answer", or a calculation
+  ("*Weight ÷ (Height × Height)* < 18.5", "… can be calculated"); a calculation is shown
+  as a short formula and **edit** opens its blocks. Rounding at the bottom, **Round the
+  result**, applies to the entire expression, not to one branch.
 - **Answers → value** (`calculatedExpression`) — a **collection pipeline** over a
   question's answers: pick a source question, filter the answers — keep or drop
   values against a set (`intersect` / `exclude`), take unique values, or keep where

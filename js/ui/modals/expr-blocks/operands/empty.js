@@ -7,6 +7,7 @@ import { empty, EMPTY } from '../../../../fhir/expr-builder/blocks/index.js';
 export class EmptyOperand extends OperandKind {
   static id = EMPTY;
   static label = 'No value';
+  static solo = true;
   static available(ctx) { return !!ctx.branch && ctx.alone !== false; }
   static fromBlock(block, ctx) { return block.kind === EMPTY ? new EmptyOperand(ctx) : null; }
 

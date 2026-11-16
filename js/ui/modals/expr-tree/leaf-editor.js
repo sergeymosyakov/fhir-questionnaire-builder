@@ -17,17 +17,26 @@ const OP_LABEL = { '=': '=', '!=': '\u2260', '>': '>', '<': '<', '>=': '\u2265',
 const EXISTS_OPS = [{ value: 'answered', label: 'has answer' }, { value: 'empty', label: 'has no answer' }];
 
 // A recognised leaf → row state, else null (leaf stays as text).
-function blockToRow(block, items) {
+// A literal the question's own control could hold; anything else is left as text rather than rewritten (e.g. a
+// number box compared with a word would become NaN).
+function literalFits(itemType, literalBlock) {
+  if (itemType === 'integer' || itemType === 'decimal') return literalBlock.dataType === 'number' && Number.isFinite(literalBlock.value);
+  if (itemType === 'checkbox') return literalBlock.dataType === 'boolean';
+  return literalBlock.dataType === 'string';
+}
+
+function blockToRow(block, items, ctx) {
   if (!block) return null;
   if (block.kind === BlockKind.EXISTS && block.target?.kind === BlockKind.ITEM_REF) {
     const item = findItemBySegments(items, block.target.segments);
-    return item ? { item, mode: 'exists', op: '=', value: '', existsValue: block.negate ? 'empty' : 'answered' } : null;
+    // `accessor` keeps the exact part of the answer the expression looks at, so applying never rewrites it.
+    return item ? { item, mode: 'exists', op: '=', value: '', existsValue: block.negate ? 'empty' : 'answered', accessor: block.target.value } : null;
   }
   if (block.kind === BlockKind.COMPARE && block.left?.kind === BlockKind.ITEM_REF && block.right?.kind === BlockKind.LITERAL) {
     const item = findItemBySegments(items, block.left.segments);
-    return item ? { item, mode: 'compare', op: block.op, value: String(block.right.value), existsValue: 'answered' } : null;
+    return item && literalFits(item.itemType, block.right) ? { item, mode: 'compare', op: block.op, value: String(block.right.value), existsValue: 'answered', accessor: block.left.value } : null;
   }
-  return leafFromBlock(block, items);
+  return leafFromBlock(block, items, ctx);
 }
 
 function compareOpsFor(t) {
@@ -49,20 +58,22 @@ function rowToBlock(row) {
   if (!row.item) return null;
   const seg = row.item.segments;
   const at = row.item.answerAt;
-  if (row.mode === 'exists') return exists(itemRef(seg, '', at), row.existsValue === 'empty');
-  const accessor = valueAccessor(row.item.itemType);
-  if (!accessor) return null;
+  if (row.mode === 'exists') return exists(itemRef(seg, row.accessor ?? '', at), row.existsValue === 'empty');
+  const accessor = row.accessor ?? valueAccessor(row.item.itemType); // '' is kept: the expression compared the answer itself
+  if (row.accessor === undefined && !accessor) return null;
   return compare(row.op, itemRef(seg, accessor, at), valueLiteral(row, row.item.itemType));
 }
 
-export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyChange }) {
+// initialRow: a half-built row to carry over when the tree is redrawn (an incomplete leaf has no text to re-read).
+export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyChange, createChain, initialRow }) {
+  const kindCtx = { createChain };
   const el = document.createElement('div');
   el.className = 'eb-leaf';
   el.dataset.testid = 'eb-leaf';
 
   const initialText = expr || '';
   let text = expr || '';
-  let row = blockToRow(fp ? parseExpression(text, fp) : null, items);
+  let row = initialRow ?? blockToRow(fp ? parseExpression(text, fp) : null, items, kindCtx);
   // An empty leaf starts in friendly mode so it can be built from scratch.
   if (!row && !text.trim() && items.length) row = { item: null, mode: 'compare', op: '=', value: '', existsValue: 'answered' };
   let mode = row ? 'row' : 'text';
@@ -94,12 +105,13 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
     const applyBtn = mkLink('Apply', 'eb-leaf-apply', () => { if (onApply) onApply(); });
     // Return an unchanged recognised expression to friendly controls.
     const visualBtn = mkLink('Edit visually', 'eb-leaf-to-row', () => {
-      const asRow = blockToRow(fp ? parseExpression(text, fp) : null, items);
+      const asRow = blockToRow(fp ? parseExpression(text, fp) : null, items, kindCtx);
       if (asRow) { row = asRow; mode = 'row'; render(); notify(); }
     });
     const update = () => {
       const dirty = isDirty();
-      const asRow = items.length && blockToRow(fp ? parseExpression(text, fp) : null, items);
+      // Only an unchanged leaf can go back to the friendly row, so a leaf being typed is not re-parsed on every key.
+      const asRow = !dirty && items.length && blockToRow(fp ? parseExpression(text, fp) : null, items, kindCtx);
       applyBtn.style.display = dirty ? '' : 'none';
       visualBtn.style.display = (!dirty && asRow) ? '' : 'none';
       if (onDirtyChange) onDirtyChange();
@@ -127,7 +139,7 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
       value: row.item?.id,
       testid: 'eb-leaf-item',
       decorate: (it) => ({ title: it.label, tipBody: 'linkId: ' + it.id }),
-      onChange: (id) => { row.item = items.find((it) => it.id === id) || null; setItemTip(); row.mode = 'compare'; row.op = '='; row.value = ''; render(); notify(); },
+      onChange: (id) => { row.item = items.find((it) => it.id === id) || null; row.accessor = undefined; setItemTip(); row.mode = 'compare'; row.op = '='; row.value = ''; render(); notify(); },
     });
     // Titles often share a long prefix and get truncated — full title + linkId on hover.
     const idChip = document.createElement('span');
@@ -139,7 +151,7 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
     setItemTip();
     const opWrap = document.createElement('span');
     const valWrap = document.createElement('span');
-    const switches = leafKinds().filter((Kind) => Kind.switchLabel).map((Kind) => mkLink(Kind.switchLabel, 'eb-leaf-kind-' + Kind.id, () => { row = Kind.create(items, row); render(); notify(); }));
+    const switches = leafKinds().filter((Kind) => Kind.switchLabel && Kind.available(kindCtx)).map((Kind) => mkLink(Kind.switchLabel, 'eb-leaf-kind-' + Kind.id, () => { row = Kind.create(items, row, kindCtx); render(); notify(); }));
     el.append(itemSel.el, idChip, opWrap, valWrap, ...switches, toTextLink());
     renderOpVal(opWrap, valWrap);
   }
@@ -160,7 +172,9 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
       testid: 'eb-leaf-op',
       onChange: (v) => {
         const [kind, rest] = v.split('|');
+        const before = row.mode;
         if (kind === 'ex') { row.mode = 'exists'; row.existsValue = rest; } else { row.mode = 'compare'; row.op = rest; }
+        if (row.mode !== before) row.accessor = undefined; // the other mode reads a different part of the answer
         renderOpVal(opWrap, valWrap); notify();
       },
     });
@@ -211,5 +225,5 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
   }
 
   render();
-  return { el, getExpr: currentExpr, isDirty };
+  return { el, getExpr: currentExpr, isDirty, getRow: () => (mode === 'row' ? row : null) };
 }

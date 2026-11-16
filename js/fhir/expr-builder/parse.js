@@ -145,11 +145,13 @@ function mapLiteral(literalTerm) {
   return null;
 }
 
+// A FHIRPath string literal's escapes: \\ \' \" \/ \` \n \r \t \f and \uXXXX.
+const SIMPLE_ESCAPES = { n: '\n', r: '\r', t: '\t', f: '\f' };
+const unescapeString = (body) => body.replace(/\\(u[0-9a-fA-F]{4}|[\s\S])/g, (_, c) => (c.length === 5 ? String.fromCharCode(parseInt(c.slice(1), 16)) : (SIMPLE_ESCAPES[c] ?? c)));
+
 function stripQuotes(s) {
   const str = s || '';
-  if (str.length >= 2 && str[0] === "'" && str[str.length - 1] === "'") {
-    return str.slice(1, -1).replace(/\\'/g, "'");
-  }
+  if (str.length >= 2 && str[0] === "'" && str[str.length - 1] === "'") return unescapeString(str.slice(1, -1));
   return str;
 }
 

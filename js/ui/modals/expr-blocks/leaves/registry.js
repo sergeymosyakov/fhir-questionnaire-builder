@@ -9,4 +9,4 @@ export const leafKinds = () => registry.all();
 export const leafKind = (id) => registry.get(id);
 
 // The first kind that recognises the block → an instance, else null.
-export const leafFromBlock = (block, items) => registry.first((Kind) => Kind.fromBlock(block, items));
+export const leafFromBlock = (block, items, ctx) => registry.first((Kind) => (Kind.available(ctx) ? Kind.fromBlock(block, items, ctx) : null));

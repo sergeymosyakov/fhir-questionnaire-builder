@@ -2,6 +2,8 @@
 // its own file, register it, and import it below — the leaf editor picks it up through the registry.
 import './any-answered.js';
 import './is-yes.js';
+import './value-compare.js';
+import './value-exists.js';
 
 export { leafKinds, leafKind, leafFromBlock, registerLeafKind } from './registry.js';
 export { LeafKind } from './leaf-kind.js';

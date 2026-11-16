@@ -11,10 +11,13 @@
 //   eb-operand-kind / eb-operand-num / eb-add-operand / eb-remove-operand     value operands
 //   eb-if / eb-if-cond / eb-if-then / eb-if-else / eb-if-branch / eb-if-add-else / eb-if-remove-else / eb-no-value   conditional block
 //   eb-branch-add                                                            "+ Add operand" inside a branch
+//   eb-if-elseif-cond / eb-if-elseif-then / eb-if-add-elseif / eb-if-remove-elseif   "otherwise if" rows
+//   eb-leaf-kind-value-compare / eb-leaf-kind-value-exists / eb-calc-text / eb-calc-edit / eb-calc-done / eb-calc-op / eb-calc-value / eb-calc-mode   calculated-value conditions
 //   eb-add-condition / eb-group-type / eb-leaf-item / eb-leaf-kind-any-answered / eb-leaf-kind-back
 //   eb-any-mode / eb-any-item / eb-any-add / eb-any-remove                   several-questions condition
 //   eb-wrap-fn / eb-wrap-arg                                                  rounding of the whole result
-//   expressionBuilderModalCancel                                              builder modal cancel
+//   eb-math / eb-math-fn / eb-math-arg / eb-operand-text / eb-group / eb-group-add / eb-arith-op   round-of, text and group operands
+//   expressionBuilderModalCancel / eb-body                                    builder modal cancel / its body
 //   eb-edit-as-text / eb-raw-note / eb-switch-visual                          text ↔ blocks
 //   add-menu-btn / add-template-btn / tpl-row-<id> / templatesModalApply     templates (qSOFA)
 // Preview answers ([data-preview-id], .bool-seg__btn) are the sanctioned non-testid exception.
@@ -295,15 +298,17 @@ test.describe('Expression Builder — conditional value', () => {
     await expect(preview(page)).toContainText(', 5, {})');
   });
 
-  test('"No value" gives way when another operand is added next to it', async ({ page }) => {
+  test('no "+ Add operand" is offered next to "No value"; choosing another kind brings it back', async ({ page }) => {
     await freshStart(page);
     await makeForm(page);
     await openBuilderForNumber(page);
     await pickCustomSelect(page, 'eb-operand-kind', 'iif');
     const otherwise = modal(page).getByTestId('eb-if').getByTestId('eb-if-else');
     await expect(otherwise.getByTestId('eb-no-value')).toBeVisible();
+    await expect(otherwise.getByTestId('eb-branch-add')).toHaveCount(0);
+    await pickCustomSelect(page, otherwise.getByTestId('eb-operand-kind'), 'num');
+    await expect(otherwise.getByTestId('eb-branch-add')).toBeVisible();
     await otherwise.getByTestId('eb-branch-add').click();
-    await expect(otherwise.getByTestId('eb-no-value')).toHaveCount(0);
     await expect(otherwise.getByTestId('eb-operand')).toHaveCount(2);
   });
 
@@ -319,6 +324,142 @@ test.describe('Expression Builder — conditional value', () => {
     await expect(box.getByTestId('eb-if-else')).toHaveCount(0);
     await expect(box.getByTestId('eb-if-add-else')).toBeVisible();
     await expect(preview(page)).toHaveText(/, 5\)$/);
+  });
+
+  test('a value can be rounded inside a branch with "Round / abs / … of ( … )"', async ({ page }) => {
+    await freshStart(page);
+    await makeForm(page);
+    await openBuilderForNumber(page);
+    await pickCustomSelect(page, 'eb-operand-kind', 'iif');
+    const box = modal(page).getByTestId('eb-if');
+    await pickCustomSelect(page, box.getByTestId('eb-if-cond').getByTestId('eb-leaf-item'), '1.2');
+    const then = box.getByTestId('eb-if-then');
+    await pickCustomSelect(page, then.getByTestId('eb-operand-kind'), 'math');
+    const math = then.getByTestId('eb-math');
+    await math.getByTestId('eb-operand-num').fill('5');
+    await math.getByTestId('eb-branch-add').click();
+    await math.getByTestId('eb-operand-num').nth(1).fill('2');
+    await math.getByTestId('eb-math-arg').fill('1');
+    await expect(preview(page)).toHaveText(/, \(5 \+ 2\)\.round\(1\), \{\}\)$/);
+
+    await pickCustomSelect(page, math.getByTestId('eb-math-fn'), 'abs');
+    await expect(math.getByTestId('eb-math-arg')).toHaveCount(0); // only round takes decimals
+    await expect(preview(page)).toHaveText(/, \(5 \+ 2\)\.abs\(\), \{\}\)$/);
+
+    await apply(page);
+    await reopenBuilder(page);
+    await expect(modal(page).getByTestId('eb-math')).toBeVisible();
+    await expect(modal(page).getByTestId('eb-math-fn')).toHaveAttribute('data-value', 'abs');
+  });
+
+  test('a branch can give a piece of text, and it is kept when reopened', async ({ page }) => {
+    await freshStart(page);
+    await makeForm(page);
+    await openBuilderForNumber(page);
+    await pickCustomSelect(page, 'eb-operand-kind', 'iif');
+    const box = modal(page).getByTestId('eb-if');
+    await pickCustomSelect(page, box.getByTestId('eb-if-cond').getByTestId('eb-leaf-item'), '1.2');
+    await pickCustomSelect(page, box.getByTestId('eb-if-then').getByTestId('eb-operand-kind'), 'text');
+    await box.getByTestId('eb-if-then').getByTestId('eb-operand-text').fill('High risk');
+    await pickCustomSelect(page, box.getByTestId('eb-if-else').getByTestId('eb-operand-kind'), 'text');
+    await box.getByTestId('eb-if-else').getByTestId('eb-operand-text').fill("It's low");
+    await expect(preview(page)).toHaveText(/, 'High risk', 'It\\'s low'\)$/); // the quote is escaped
+
+    await apply(page);
+    await reopenBuilder(page);
+    await expect(modal(page).getByTestId('eb-if-then').getByTestId('eb-operand-text')).toHaveValue('High risk');
+    await expect(modal(page).getByTestId('eb-if-else').getByTestId('eb-operand-text')).toHaveValue("It's low");
+  });
+
+  test('"Text" is offered only inside a branch', async ({ page }) => {
+    await freshStart(page);
+    await makeForm(page);
+    await openBuilderForNumber(page);
+    await expect(async () => {
+      await page.getByTestId('eb-operand-kind').first().click();
+      await expect(page.locator('[data-testid="csel-drop"] [data-val="iif"]')).toBeVisible();
+    }).toPass();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="text"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="group"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="math"]')).toHaveCount(1);
+  });
+
+  test('groups nest inside groups: 1 + (2 × (3 + 4))', async ({ page }) => {
+    await freshStart(page);
+    await makeForm(page);
+    await openBuilderForNumber(page);
+    await modal(page).getByTestId('eb-operand-num').first().fill('1');
+    await modal(page).getByTestId('eb-add-operand').click();
+    await pickCustomSelect(page, modal(page).getByTestId('eb-operand-kind').nth(1), 'group');
+    const outer = modal(page).getByTestId('eb-group').first();
+    await outer.getByTestId('eb-operand-num').first().fill('2');
+    await outer.getByTestId('eb-group-add').click();
+    await pickCustomSelect(page, outer.getByTestId('eb-operand-kind').nth(1), 'group');
+    await pickCustomSelect(page, outer.getByTestId('eb-arith-op').first(), '*');
+    const inner = outer.getByTestId('eb-group');
+    await inner.getByTestId('eb-operand-num').first().fill('3');
+    await inner.getByTestId('eb-group-add').click();
+    await inner.getByTestId('eb-operand-num').nth(1).fill('4');
+    await expect(preview(page)).toHaveText('1 + (2 * (3 + 4))');
+    await expect(page.getByTestId('eb-preview-chip')).toHaveText('= [15]');
+  });
+
+  test('"otherwise if" steps read as a flat list and can be added and removed', async ({ page }) => {
+    await freshStart(page);
+    await makeForm(page);
+    await openBuilderForNumber(page);
+    await pickCustomSelect(page, 'eb-operand-kind', 'iif');
+    const box = modal(page).getByTestId('eb-if');
+    await pickCustomSelect(page, box.getByTestId('eb-if-cond').getByTestId('eb-leaf-item'), '1.2');
+    await pickCustomSelect(page, box.getByTestId('eb-if-then').getByTestId('eb-operand-kind'), 'text');
+    await box.getByTestId('eb-if-then').getByTestId('eb-operand-text').fill('A');
+    await pickCustomSelect(page, box.getByTestId('eb-if-else').getByTestId('eb-operand-kind'), 'text');
+    await box.getByTestId('eb-if-else').getByTestId('eb-operand-text').fill('C');
+
+    await box.getByTestId('eb-if-add-elseif').click();
+    await pickCustomSelect(page, box.getByTestId('eb-if-elseif-cond').getByTestId('eb-leaf-item'), '1.3');
+    await pickCustomSelect(page, box.getByTestId('eb-if-elseif-then').getByTestId('eb-operand-kind'), 'text');
+    await box.getByTestId('eb-if-elseif-then').getByTestId('eb-operand-text').fill('B');
+    await expect(modal(page).getByTestId('eb-if')).toHaveCount(1); // one box, not a ladder of nested boxes
+    await expect(preview(page)).toHaveText(/^iif\(.*valueBoolean = true, 'A', iif\(.*valueBoolean = true, 'B', 'C'\)\)$/);
+
+    await apply(page);
+    await reopenBuilder(page);
+    await expect(modal(page).getByTestId('eb-if-elseif-cond')).toHaveCount(1); // read back as a flat step
+    await modal(page).getByTestId('eb-if-remove-elseif').click();
+    await expect(modal(page).getByTestId('eb-if-elseif-cond')).toHaveCount(0);
+    await expect(preview(page)).toHaveText(/, 'A', 'C'\)$/);
+  });
+
+  test('a condition can be built on a calculated value, shown as a short formula with "edit"', async ({ page }) => {
+    await freshStart(page);
+    await makeForm(page);
+    await openBuilderForNumber(page);
+    await pickCustomSelect(page, 'eb-operand-kind', 'iif');
+    const cond = modal(page).getByTestId('eb-if').getByTestId('eb-if-cond');
+    await cond.getByTestId('eb-leaf-kind-value-compare').click();
+    await cond.getByTestId('eb-leaf-chain').getByTestId('eb-operand-num').fill('3');
+    await cond.getByTestId('eb-branch-add').click();
+    await cond.getByTestId('eb-leaf-chain').getByTestId('eb-operand-num').nth(1).fill('4');
+    await cond.getByTestId('eb-calc-value').fill('5');
+    await modal(page).getByTestId('eb-if').getByTestId('eb-if-then').getByTestId('eb-operand-num').fill('1');
+    await expect(preview(page)).toHaveText('iif((3 + 4) = 5, 1, {})'); // the row's operator carries over
+    await pickCustomSelect(page, cond.getByTestId('eb-calc-op'), '<');
+    await expect(preview(page)).toHaveText('iif((3 + 4) < 5, 1, {})');
+
+    await cond.getByTestId('eb-calc-done').click(); // collapses to the formula
+    await expect(cond.getByTestId('eb-calc-text')).toHaveText('3 + 4');
+    await cond.getByTestId('eb-calc-edit').click();
+    await expect(cond.getByTestId('eb-leaf-chain')).toBeVisible();
+
+    // editing inside the calculation must reach the expression (it once stayed stale until another edit)
+    await cond.getByTestId('eb-leaf-chain').getByTestId('eb-operand-num').first().fill('9');
+    await expect(preview(page)).toHaveText('iif((9 + 4) < 5, 1, {})');
+    await pickCustomSelect(page, cond.getByTestId('eb-leaf-chain').getByTestId('eb-arith-op'), '*');
+    await expect(preview(page)).toHaveText('iif((9 * 4) < 5, 1, {})');
+    await cond.getByTestId('eb-calc-done').click();
+    await expect(cond.getByTestId('eb-calc-text')).toHaveText('9 \u00d7 4');
+    await expect(preview(page)).toHaveText('iif((9 * 4) < 5, 1, {})');
   });
 
   test('Cancel keeps the expression the field already had', async ({ page }) => {
@@ -407,7 +548,7 @@ test.describe('Expression Builder — the qSOFA template', () => {
     await openQsofaBuilder(page);
     await page.setViewportSize({ width: 390, height: 800 });
     await expect(modal(page).getByTestId('eb-if').first()).toBeVisible();
-    const overflow = await modal(page).locator('.eb-body').evaluate((el) => el.scrollWidth - el.clientWidth);
+    const overflow = await modal(page).getByTestId('eb-body').evaluate((el) => el.scrollWidth - el.clientWidth);
     expect(overflow).toBeLessThanOrEqual(1);
   });
 });

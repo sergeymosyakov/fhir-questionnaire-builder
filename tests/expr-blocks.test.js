@@ -133,6 +133,33 @@ describe('plain-words descriptions stay truthful', () => {
   });
 });
 
+describe('string literals and numbers survive a round trip', () => {
+  const text = (expr) => emit(parse(expr));
+
+  it('keeps escapes: tab, quote, backslash and unicode read and write back with the same meaning', () => {
+    for (const lit of [String.raw`'tab\there'`, String.raw`'it\'s'`, String.raw`'a\\b'`, String.raw`'x\u0041y'`, String.raw`'line\nbreak'`]) {
+      const expr = `iif(${ref('a')}, ${lit}, 'y')`;
+      const rewritten = text(expr);
+      const qr = { resourceType: 'QuestionnaireResponse', item: [{ linkId: 'a', answer: [{ valueBoolean: true }] }] };
+      expect(evaluate(qr, rewritten), lit).toEqual(evaluate(qr, expr));
+    }
+  });
+
+  it('writes every number so that it reads back as exactly the same number', async () => {
+    const { numberText } = await import('../js/fhir/expr-builder/emit.js');
+    for (const n of [1e-7, 1.5e-7, -1e-7, 5e-21, 1e-25, 1.2345678901234567e-7, 5e-324, 1e21, 1.2e25, 2 ** 53 + 2, Number.MAX_VALUE, 0.1 + 0.2, 18.5, -0.00000025]) {
+      expect(numberText(n), String(n)).not.toMatch(/e/i);
+      expect(Number(numberText(n)), String(n)).toBe(n);
+    }
+  });
+
+  it('writes a very small or very large number in full, never with an exponent', () => {
+    expect(text('%a < 0.0000001')).toBe('%a < 0.0000001');
+    expect(text('%a * 100000000000000000000000')).toBe('%a * 100000000000000000000000');
+    expect(text('%a < 18.5')).toBe('%a < 18.5');
+  });
+});
+
 describe('no value ({})', () => {
   it('reads {} and writes it back, alone and as a branch', () => {
     expect(parse('{}')).toEqual(empty());

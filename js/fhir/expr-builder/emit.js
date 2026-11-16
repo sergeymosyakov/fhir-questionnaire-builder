@@ -23,10 +23,11 @@ export function emit(block) {
   }
 }
 
-// FHIRPath single-quoted string literal. Escape backslash first, then the quote
-// (order matters — otherwise the backslashes we add get double-escaped).
+// FHIRPath single-quoted string literal: backslash, quote and the control characters are escaped, in one pass so
+// nothing is escaped twice. Reads back to the same text with parse.js's unescape.
+const ESCAPED = { '\\': '\\\\', "'": "\\'", '\n': '\\n', '\r': '\\r', '\t': '\\t', '\f': '\\f' };
 export function q(s) {
-  return `'${String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+  return `'${String(s).replace(/[\\'\n\r\t\f]/g, (c) => ESCAPED[c])}'`;
 }
 
 function emitSet(b) {
@@ -68,9 +69,26 @@ function emitItemRef(b) {
   return `%resource${path}${b.value ? `.answer.${b.value}` : '.answer'}`;
 }
 
+// FHIRPath has no exponent notation: 1e-7 and 1e+23 must be written out in full. The digits come straight from the
+// shortest round-trip form, so Number(numberText(n)) === n for every finite n (no rounding to a fixed number of places).
+export function numberText(n) {
+  const text = String(n);
+  if (!/e/i.test(text)) return text;
+  const [mantissa, exponent] = text.toLowerCase().split('e');
+  const negative = mantissa.startsWith('-');
+  const unsigned = mantissa.replace('-', '');
+  const digits = unsigned.replace('.', '');
+  const point = (unsigned.includes('.') ? unsigned.indexOf('.') : unsigned.length) + Number(exponent);
+  let out;
+  if (point <= 0) out = '0.' + '0'.repeat(-point) + digits;
+  else if (point >= digits.length) out = digits + '0'.repeat(point - digits.length);
+  else out = digits.slice(0, point) + '.' + digits.slice(point);
+  return (negative ? '-' : '') + out;
+}
+
 function emitLiteral(b) {
   if (b.dataType === 'string') return q(b.value);
-  return String(b.value);
+  return typeof b.value === 'number' ? numberText(b.value) : String(b.value);
 }
 
 // Parenthesize compound operands so intent survives FHIRPath precedence.

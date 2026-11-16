@@ -26,7 +26,8 @@ function expandTree(node, fp) {
   return node;
 }
 
-export function createExprTreeEditor({ initialExpr, items, fp, onChange } = {}) {
+// createChain (optional) lets leaves nest a value chain ("<calculation> < 18.5"); the host that owns the chain editor supplies it.
+export function createExprTreeEditor({ initialExpr, items, fp, onChange, createChain } = {}) {
   const el = document.createElement('div');
   el.className = 'eb-tree';
   el.dataset.testid = 'eb-tree';
@@ -143,12 +144,15 @@ export function createExprTreeEditor({ initialExpr, items, fp, onChange } = {}) 
       expr: node.expr,
       items,
       fp,
-      onChange: () => { node.expr = editor.getExpr(); onLeafChange(); },
+      createChain,
+      initialRow: node.expr.trim() ? null : node._row,
+      onChange: () => { node.expr = editor.getExpr(); node._row = editor.getRow(); onLeafChange(); },
       onApply: () => reparseLeaf(node, parentChildren),
       onDirtyChange: updateApplyAll,
     });
     leafEditors.push(editor);
     node.expr = editor.getExpr();
+    node._row = editor.getRow();
     node._chip = mkChip();
     box.append(editor.el, node._chip);
     if (parentChildren && parentChildren.length > 1) box.appendChild(mkRemove(node, parentChildren));
