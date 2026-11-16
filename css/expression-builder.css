@@ -358,3 +358,4 @@
 .eb-decimals { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: #6b7280; }
 .eb-calc { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%; }
 .eb-calc-text { font-size: 13px; color: #1f2937; overflow-wrap: anywhere; }
+.eb-qlist { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; max-width: 100%; }

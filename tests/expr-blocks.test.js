@@ -5,7 +5,9 @@ import { parseExpression } from '../js/fhir/expr-builder/parse.js';
 import { emit } from '../js/fhir/expr-builder/emit.js';
 import { describeBlock } from '../js/fhir/expr-builder/describe.js';
 import { itemRef, literal, compare, arith, exists, raw, BlockKind } from '../js/fhir/expr-builder/model.js';
-import { iif, union, empty, IIF, UNION, EMPTY, registerBlock, registeredBlocks } from '../js/fhir/expr-builder/blocks/index.js';
+import { iif, union, empty, answerScores, IIF, UNION, EMPTY, ANSWER_SCORES, ORDINAL_VALUE_URL, registerBlock, registeredBlocks } from '../js/fhir/expr-builder/blocks/index.js';
+import { aggregate } from '../js/fhir/expr-builder/model.js';
+import { collectExpressions, responsesFor, evaluate as evaluateText } from './helpers/expressions.js';
 import { EXPR_GALLERY, resolveGalleryPattern } from '../js/fhir/expr-builder/gallery/index.js';
 import { loadFhirpath } from './helpers/fhirpath-node.js';
 
@@ -157,6 +159,98 @@ describe('string literals and numbers survive a round trip', () => {
     expect(text('%a < 0.0000001')).toBe('%a < 0.0000001');
     expect(text('%a * 100000000000000000000000')).toBe('%a * 100000000000000000000000');
     expect(text('%a < 18.5')).toBe('%a < 18.5');
+  });
+});
+
+describe('the scores of the chosen answers of several questions', () => {
+  const scores = (fn = '') => `%resource.repeat(item).where(linkId in ('q1' | 'q2' | 'q3')).answer.valueCoding.extension('${ORDINAL_VALUE_URL}').valueDecimal${fn}`;
+
+  it('is a registered block, read from and written back to the exact text', () => {
+    expect(registeredBlocks().map((d) => d.kind)).toContain(ANSWER_SCORES);
+    for (const text of [scores(), scores('.sum()'), scores('.count()'), scores('.avg()')]) {
+      expect(emit(parse(text)), text).toBe(text);
+    }
+    expect(parse(scores())).toEqual(answerScores(['q1', 'q2', 'q3']));
+    expect(parse(scores('.sum()'))).toEqual(aggregate('sum', answerScores(['q1', 'q2', 'q3'])));
+  });
+
+  it('keeps another ordinal-score URL and the order of the questions', () => {
+    const text = "%resource.repeat(item).where(linkId in ('z' | 'a')).answer.valueCoding.extension('http://example.org/score').valueDecimal.sum()";
+    expect(parse(text)).toEqual(aggregate('sum', answerScores(['z', 'a'], 'http://example.org/score')));
+    expect(emit(parse(text))).toBe(text);
+  });
+
+  it('reads a scale total: if every answer is given, the sum, otherwise nothing', () => {
+    const total = `iif(${scores('.count()')} = 3, ${scores('.sum()')}, {})`;
+    const b = parse(total);
+    expect(b.kind).toBe(IIF);
+    expect(b.condition.left).toEqual(aggregate('count', answerScores(['q1', 'q2', 'q3'])));
+    expect(b.then).toEqual(aggregate('sum', answerScores(['q1', 'q2', 'q3'])));
+    expect(emit(b)).toBe(total);
+  });
+
+  it('leaves a look-alike as text: no extension step, one question only, another member, an extra step', () => {
+    for (const text of [
+      "%resource.repeat(item).where(linkId in ('q1' | 'q2')).answer.valueCoding.code",
+      `%resource.repeat(item).where(linkId = 'q1').answer.valueCoding.extension('${ORDINAL_VALUE_URL}').valueDecimal`,
+      `%resource.repeat(item).where(linkId in ('q1' | 'q2')).answer.valueCoding.extension('${ORDINAL_VALUE_URL}').valueInteger`,
+      `%resource.repeat(item).where(linkId in ('q1' | 'q2')).answer.valueCoding.extension('${ORDINAL_VALUE_URL}').valueDecimal.distinct().sum()`,
+      `%resource.item.where(linkId in ('q1' | 'q2')).answer.valueCoding.extension('${ORDINAL_VALUE_URL}').valueDecimal`,
+    ]) expect(parse(text).kind, text).toBe(BlockKind.RAW);
+  });
+
+  it('does not read a set that is more than strings, nor a repeat over anything but item', () => {
+    const tail = `.answer.valueCoding.extension('${ORDINAL_VALUE_URL}').valueDecimal.sum()`;
+    for (const text of [
+      `%resource.repeat(item).where(linkId in ('a' | 'b'.upper()))${tail}`,
+      `%resource.repeat(item).where(linkId in ('a' | iif(%x, 'b', 'c')))${tail}`,
+      `%resource.repeat(item).where(linkId in ('a' | %resource.item.where(linkId='z').answer.valueString))${tail}`,
+      `%resource.repeat(item).where(linkId in ('a') = false)${tail}`,
+      `%resource.repeat(item.item).where(linkId in ('a' | 'b'))${tail}`,
+    ]) {
+      expect(parse(text).kind, text).toBe(BlockKind.RAW);
+      expect(emit(parse(text)), text).toBe(text); // text stays exactly as it was
+    }
+  });
+
+  it('reads brackets and unions of strings in any shape, and keeps the meaning', () => {
+    const text = `%resource.repeat(item).where(linkId in (('a' | 'b') | 'c'))${`.answer.valueCoding.extension('${ORDINAL_VALUE_URL}').valueDecimal`}.sum()`;
+    expect(parse(text)).toEqual(aggregate('sum', answerScores(['a', 'b', 'c'])));
+  });
+
+  it('applies the same strictness to a pipeline over a question\'s answers', () => {
+    for (const text of [
+      "%resource.repeat(item).where(linkId='x').answer.valueCoding.code.intersect(('a' | 'b'.upper())).join(',')",
+      "%resource.repeat(item.item).where(linkId='x').answer.valueCoding.code.distinct().count()",
+    ]) {
+      expect(parse(text).kind, text).toBe(BlockKind.RAW);
+    }
+    expect(parse("%resource.repeat(item).where(linkId='x').answer.valueCoding.code.intersect(('a' | 'b')).join(',')").kind).toBe(BlockKind.PIPELINE);
+  });
+
+  it('is described in plain words', () => {
+    expect(describeBlock(parse(scores('.sum()')), { q1: 'Interest', q2: 'Mood', q3: 'Sleep' })).toBe('the sum of the scores of the answers to «Interest», «Mood» and «Sleep»');
+  });
+});
+
+describe('every shipped calculation gives the same results written back from its blocks', () => {
+  const all = collectExpressions();
+  // Many generated responses per expression, some through slow date functions: more than the default 5 s on a busy machine.
+  it.each(all.map((e) => [e.id, e]))('%s', (_id, e) => {
+    const block = parse(e.text);
+    const written = emit(block);
+    for (const qr of responsesFor(e.text, block)) expect(evaluateText(qr, written)).toBe(evaluateText(qr, e.text));
+  }, 60_000);
+});
+
+describe('the generated responses really exercise a scale total', () => {
+  it('give a number once every answer is there and nothing otherwise', () => {
+    const e = collectExpressions().find((x) => x.id.startsWith('template:phq-9') && /\.sum\(\)/.test(x.text));
+    expect(e).toBeTruthy();
+    const results = responsesFor(e.text, parse(e.text)).map((qr) => evaluateText(qr, e.text));
+    expect(results.some((r) => /^\[\d+(\.\d+)?\]$/.test(r))).toBe(true); // a total
+    expect(results.some((r) => r === '[]')).toBe(true); // an answer missing → no total
+    expect(new Set(results).size).toBeGreaterThan(2); // and the totals differ between scenarios
   });
 });
 

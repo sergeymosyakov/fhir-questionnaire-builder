@@ -17,6 +17,7 @@
 //   eb-any-mode / eb-any-item / eb-any-add / eb-any-remove                   several-questions condition
 //   eb-wrap-fn / eb-wrap-arg                                                  rounding of the whole result
 //   eb-math / eb-math-fn / eb-math-arg / eb-operand-text / eb-group / eb-group-add / eb-arith-op   round-of, text and group operands
+//   eb-scale-item / eb-scale-add / eb-scale-remove / eb-scale-total-note / eb-scores-fn / eb-scores-item / eb-scores-add   scale total and score-sum operands
 //   expressionBuilderModalCancel / eb-body                                    builder modal cancel / its body
 //   eb-edit-as-text / eb-raw-note / eb-switch-visual                          text ↔ blocks
 //   add-menu-btn / add-template-btn / tpl-row-<id> / templatesModalApply     templates (qSOFA)
@@ -382,6 +383,9 @@ test.describe('Expression Builder — conditional value', () => {
     await expect(page.locator('[data-testid="csel-drop"] [data-val="text"]')).toHaveCount(0);
     await expect(page.locator('[data-testid="csel-drop"] [data-val="group"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="csel-drop"] [data-val="math"]')).toHaveCount(1);
+    // no question with coded answers in this form, so no score operands either
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="scale-total"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="scores"]')).toHaveCount(0);
   });
 
   test('groups nest inside groups: 1 + (2 × (3 + 4))', async ({ page }) => {
@@ -460,6 +464,63 @@ test.describe('Expression Builder — conditional value', () => {
     await cond.getByTestId('eb-calc-done').click();
     await expect(cond.getByTestId('eb-calc-text')).toHaveText('9 \u00d7 4');
     await expect(preview(page)).toHaveText('iif((9 * 4) < 5, 1, {})');
+  });
+
+  // A number field (1.1) and two questions with coded answers (1.2, 1.3) to take scores from.
+  async function makeScoredForm(page) {
+    await freshStart(page);
+    await clickAddRootGroup(page);
+    await expect(page.locator('[data-node-id="1"]')).toBeVisible();
+    await addItem(page, '1', '1.1', 'Total');
+    await addItem(page, '1', '1.2', 'Mood');
+    await addItem(page, '1', '1.3', 'Sleep');
+    await setItemType(page, '1.1', 'integer');
+    await setItemType(page, '1.2', 'radio');
+    await setItemType(page, '1.3', 'radio');
+  }
+
+  test('a scale total is built from the questions: the sum, once every one is answered', async ({ page }) => {
+    await makeScoredForm(page);
+    await openBuilderForNumber(page);
+    await pickCustomSelect(page, 'eb-operand-kind', 'scale-total');
+    await expect(modal(page).getByTestId('eb-scale-total-note')).toBeVisible();
+    await expect(preview(page)).toHaveText('\u2014'); // nothing chosen yet
+    await pickCustomSelect(page, modal(page).getByTestId('eb-scale-item').nth(0), '1.2');
+    await expect(async () => { // a question already taken is not offered again
+      await modal(page).getByTestId('eb-scale-item').nth(1).click();
+      await expect(page.locator('[data-testid="csel-drop"] [data-val="1.3"]')).toBeVisible();
+    }).toPass();
+    await expect(page.locator('[data-testid="csel-drop"] [data-val="1.2"]')).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await pickCustomSelect(page, modal(page).getByTestId('eb-scale-item').nth(1), '1.3');
+    const scores = "%resource.repeat(item).where(linkId in ('1.2' | '1.3')).answer.valueCoding.extension('http://hl7.org/fhir/StructureDefinition/ordinalValue').valueDecimal";
+    await expect(preview(page)).toHaveText(`iif(${scores}.count() = 2, ${scores}.sum(), {})`);
+
+    await modal(page).getByTestId('eb-scale-add').click();
+    await expect(modal(page).getByTestId('eb-scale-item')).toHaveCount(3);
+    await expect(preview(page)).toHaveText('\u2014'); // the new question is still empty
+    await modal(page).getByTestId('eb-scale-remove').last().click();
+    await expect(preview(page)).toHaveText(`iif(${scores}.count() = 2, ${scores}.sum(), {})`);
+
+    await apply(page);
+    await reopenBuilder(page);
+    await expect(modal(page).getByTestId('eb-scale-total-note')).toBeVisible(); // read back as the same block
+    await expect(modal(page).getByTestId('eb-scale-item')).toHaveCount(2);
+  });
+
+  test('the sum, count or average of the scores can be taken without waiting for every answer', async ({ page }) => {
+    await makeScoredForm(page);
+    await openBuilderForNumber(page);
+    await pickCustomSelect(page, 'eb-operand-kind', 'scores');
+    await pickCustomSelect(page, modal(page).getByTestId('eb-scores-item').nth(0), '1.2');
+    await modal(page).getByTestId('eb-scores-add').click();
+    await pickCustomSelect(page, modal(page).getByTestId('eb-scores-item').nth(1), '1.3');
+    await pickCustomSelect(page, modal(page).getByTestId('eb-scores-fn'), 'avg');
+    await expect(preview(page)).toHaveText(/^%resource\.repeat\(item\)\.where\(linkId in \('1\.2' \| '1\.3'\)\)\.answer\.valueCoding\.extension\('[^']+'\)\.valueDecimal\.avg\(\)$/);
+    await apply(page);
+    await reopenBuilder(page);
+    await expect(modal(page).getByTestId('eb-scores-fn')).toHaveAttribute('data-value', 'avg');
+    await expect(modal(page).getByTestId('eb-scores-item')).toHaveCount(2);
   });
 
   test('Cancel keeps the expression the field already had', async ({ page }) => {

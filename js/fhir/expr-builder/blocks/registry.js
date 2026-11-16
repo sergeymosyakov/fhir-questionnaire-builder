@@ -8,6 +8,8 @@
 //   describeExists?(block, negate, ctx),     // wording for "<block> has / has no an answer"
 //   parseNode?(node, ctx),                   // CST node → block | null; ctx = { toBlock, kids, identText }
 //   parseTerm?(term, ctx),                   // CST term (literal/function call) → block | null
+//   parsePath?({ head, steps }, ctx),        // a member/function chain (head + its steps) → block | null
+//   formula?(block, labelOf),                // the block inside a short formula (formula-text.js)
 // }
 import { Registry } from '../../../registry.js';
 

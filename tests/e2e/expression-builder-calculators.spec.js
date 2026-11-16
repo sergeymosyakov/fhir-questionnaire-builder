@@ -11,6 +11,7 @@
 // Preview inputs ([data-preview-id]) and the builder's node containers ([data-node-id], which carry no testid) are the
 // sanctioned non-testid exceptions.
 //   eb-body / eb-if / eb-calc-text / eb-calc-value / eb-calc-mode / eb-operand-text   modal body and the blocks asserted on
+//   eb-scale-item / eb-scale-remove / eb-scale-add / eb-scale-total-note              scale total operand
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -30,6 +31,9 @@ async function type(page, previewId, value) {
   await page.getByTestId('preview-search-input').click();
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
+
+// Option `index` (0-based) of a choice question in the preview.
+const pickOption = (page, id, index) => page.locator(`[data-preview-id="${id}"] .radio-label`).nth(index).click();
 
 const result = (page, id) => page.locator(`[data-preview-id="${id}"]`);
 const modal = (page) => page.getByTestId('expressionBuilderModal');
@@ -136,4 +140,47 @@ test('LDL: the condition and the rounding open as blocks; applying unchanged kee
   await type(page, 'lipid-tg', 400);
   await expect(result(page, 'lipid-ldl')).not.toContainText('120');
   await expect(result(page, 'lipid-ldl')).not.toContainText('130'); // blank at 400 or more
+});
+
+test('a scale total opens as one "Scale total" block, and applying it unchanged keeps the total', async ({ page }) => {
+  await insert(page, 'phq-9');
+  await openBuilder(page, 'PHQ-9 total score');
+  await expect(modal(page).getByTestId('eb-raw-note')).toHaveCount(0);
+  await expect(modal(page).getByTestId('eb-scale-total-note')).toBeVisible();
+  await expect(modal(page).getByTestId('eb-scale-item')).toHaveCount(9);
+  await expect(modal(page).getByTestId('eb-if')).toHaveCount(0); // one block, not a conditional made of two scores
+  await applyAndSave(page);
+
+  for (let i = 1; i <= 8; i++) await pickOption(page, `phq9-q${i}`, 1); // 1 point each
+  await expect(result(page, 'phq9-total')).not.toContainText(/\b8\b/); // still waiting for the ninth
+  await pickOption(page, 'phq9-q9', 2);
+  await expect(result(page, 'phq9-total')).toContainText('10');
+});
+
+test('editing the questions of a scale total changes when the total appears', async ({ page }) => {
+  await insert(page, 'gad-2');
+  await openBuilder(page, 'GAD-2 total score');
+  await expect(modal(page).getByTestId('eb-scale-item')).toHaveCount(2);
+  await modal(page).getByTestId('eb-scale-remove').last().click(); // only the first question counts now
+  await expect(modal(page).getByTestId('eb-scale-item')).toHaveCount(1);
+  await applyAndSave(page);
+
+  await pickOption(page, 'gad2-q1', 3); // 3 points; the second question is not needed any more
+  await expect(result(page, 'gad2-total')).toContainText('3');
+});
+
+test('PC-PTSD-5: the follow-up total opens as a scale total inside a condition', async ({ page }) => {
+  await insert(page, 'pc-ptsd-5');
+  await openBuilder(page, 'PC-PTSD-5 score');
+  await expect(modal(page).getByTestId('eb-raw-note')).toHaveCount(0);
+  await expect(modal(page).getByTestId('eb-scale-total-note')).toBeVisible();
+  await applyAndSave(page);
+
+  await pickOption(page, 'pcptsd5-exposure', 1); // No traumatic event: the score is 0
+  await expect(result(page, 'pcptsd5-total')).toContainText('0');
+  await pickOption(page, 'pcptsd5-exposure', 0); // Yes
+  for (let i = 1; i <= 4; i++) await pickOption(page, `pcptsd5-q${i}`, 0); // a Yes (1 point) each
+  await pickOption(page, 'pcptsd5-q5', 1);
+  await expect(result(page, 'pcptsd5-total')).toContainText('4');
+  await expect(result(page, 'pcptsd5-result')).toContainText('Positive screen');
 });

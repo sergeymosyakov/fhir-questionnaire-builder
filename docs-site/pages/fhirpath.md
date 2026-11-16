@@ -71,7 +71,12 @@ values instead of typing paths and accessors:
   sum, average, min, max) over a repeating question's answers. **Group ( … )** puts a
   part of the calculation in brackets and brackets can sit inside brackets, as deep as
   the formula needs. **Round / abs / … of ( … )** rounds (or takes the absolute value,
-  rounds up or down, truncates) a part of the calculation where it is used.
+  rounds up or down, truncates) a part of the calculation where it is used. For
+  questionnaires scored by their answers (each answer option carries a score), **Scale
+  total (when all answered)** adds up the scores of the chosen questions and gives no
+  result until every one of them is answered, the form every shipped scale such as PHQ-9
+  uses; **Sum / count of answer scores** takes the sum, count, average, minimum or maximum
+  of the scores of the chosen questions without waiting for all of them.
   **Conditional values**: choose **If … then … otherwise**, set a condition, and give
   the value when it holds and the value otherwise. A branch can be a number, a
   calculation, a piece of **Text** (for example the name of a score band), or **No
