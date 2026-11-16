@@ -1,0 +1,23 @@
+# Expression-builder editors for library blocks
+
+The visual editors for the blocks in `js/fhir/expr-builder/blocks/`, plus condition shapes of their own. Two
+libraries, one file per kind; importing a file registers it (`js/registry.js` keeps the registered kinds).
+
+- `operands/` — kinds of operand in the value editor's chain: subclasses of `OperandKind` (`operand-kind.js`).
+  `if.js` (If … then … otherwise), `empty.js` (No value). The class statics describe the kind (`id`, `label`,
+  `block`, `available(ctx)`, `fromBlock(block, ctx)`); each operand in a chain is an instance holding its own state
+  and implementing `render(host)` and `toBlock()`. `ctx.createChain()` makes a nested operand chain (a branch).
+- `leaves/` — kinds of condition leaf in the condition tree: subclasses of `LeafKind` (`leaf-kind.js`).
+  `any-answered.js`, `is-yes.js`. Statics: `id`, `switchLabel`, `create(items, from)`, `fromBlock(block, items)`;
+  instances implement `render(host, { notify, rerender })` and `toBlock()`. Set `switchLabel` and `create` to let
+  the author start a leaf of that kind, and `backLabel` + `firstItem()` to offer the way back.
+- `question-select.js` — the question picker every editor shares.
+
+## Adding a kind
+
+1. Subclass `OperandKind` or `LeafKind` in a new file in `operands/` or `leaves/`, register it
+   (`registerOperand` / `registerLeafKind`) and import the file in that folder's `index.js`.
+2. A `fromBlock` must only claim blocks it can write back exactly (an unknown question is not claimed), so an
+   expression is never silently changed when it is opened and applied.
+3. Give every control a `data-testid`, register it in the registry comment of the e2e spec, and cover the kind in
+   `tests/e2e/expression-builder-conditional.spec.js` (or a spec of its own) including keyboard use.

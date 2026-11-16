@@ -8,32 +8,26 @@ import { itemRef, literal, compare, exists, BlockKind } from '../../../fhir/expr
 import { emit } from '../../../fhir/expr-builder/emit.js';
 import { parseExpression } from '../../../fhir/expr-builder/parse.js';
 import { valueAccessor } from '../../../fhir/expr-builder/value-paths.js';
+import { findItemBySegments } from '../../../fhir/expr-builder/flatten-items.js';
+import { createQuestionSelect } from '../expr-blocks/question-select.js';
+import { leafKinds, leafFromBlock, LeafKind } from '../expr-blocks/leaves/index.js';
 
 const NUM_OPS = ['=', '!=', '>', '<', '>=', '<='];
 const OP_LABEL = { '=': '=', '!=': '\u2260', '>': '>', '<': '<', '>=': '\u2265', '<=': '\u2264' };
 const EXISTS_OPS = [{ value: 'answered', label: 'has answer' }, { value: 'empty', label: 'has no answer' }];
 
-const itemBySegments = (items, segments) => {
-  const segs = segments || [];
-  const exact = items.find((it) => it.segments.join('/') === segs.join('/'));
-  if (exact) return exact;
-  // Loose match by leaf id only for a single-segment reference — a full path
-  // that no longer matches (e.g. an edited prefix) must NOT silently re-bind.
-  return segs.length === 1 ? (items.find((it) => it.id === segs[0]) || null) : null;
-};
-
 // A recognised leaf → row state, else null (leaf stays as text).
 function blockToRow(block, items) {
   if (!block) return null;
   if (block.kind === BlockKind.EXISTS && block.target?.kind === BlockKind.ITEM_REF) {
-    const item = itemBySegments(items, block.target.segments);
+    const item = findItemBySegments(items, block.target.segments);
     return item ? { item, mode: 'exists', op: '=', value: '', existsValue: block.negate ? 'empty' : 'answered' } : null;
   }
   if (block.kind === BlockKind.COMPARE && block.left?.kind === BlockKind.ITEM_REF && block.right?.kind === BlockKind.LITERAL) {
-    const item = itemBySegments(items, block.left.segments);
+    const item = findItemBySegments(items, block.left.segments);
     return item ? { item, mode: 'compare', op: block.op, value: String(block.right.value), existsValue: 'answered' } : null;
   }
-  return null;
+  return leafFromBlock(block, items);
 }
 
 function compareOpsFor(t) {
@@ -51,6 +45,7 @@ function valueLiteral(row, t) {
 }
 
 function rowToBlock(row) {
+  if (row instanceof LeafKind) return row.toBlock();
   if (!row.item) return null;
   const seg = row.item.segments;
   const at = row.item.answerAt;
@@ -114,13 +109,24 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
     update();
   }
 
+  const toTextLink = () => mkLink('as text', 'eb-leaf-to-text', () => { text = currentExpr(); baseline = text; mode = 'text'; render(); notify(); });
+
+  // A row of a library kind (several questions, …) draws itself.
+  function renderCustomRow() {
+    const host = document.createElement('span');
+    host.className = 'eb-leaf-custom';
+    row.render(host, { notify, rerender: render });
+    const back = row.backLabel ? mkLink(row.backLabel, 'eb-leaf-kind-back', () => { row = { item: row.firstItem(), mode: 'compare', op: '=', value: '', existsValue: 'answered' }; render(); notify(); }) : null;
+    el.append(host, ...(back ? [back] : []), toTextLink());
+  }
+
   function renderRow() {
-    const itemSel = createCustomSelect({
-      items: [{ value: '', label: '\u2014 question \u2014' }, ...items.map((it) => ({ value: it.id, label: it.label, title: it.label, tipBody: 'linkId: ' + it.id }))],
-      value: row.item?.id || '',
-      className: 'sc-trigger--sm eb-item',
+    if (row instanceof LeafKind) { renderCustomRow(); return; }
+    const itemSel = createQuestionSelect({
+      items,
+      value: row.item?.id,
       testid: 'eb-leaf-item',
-      searchable: true,
+      decorate: (it) => ({ title: it.label, tipBody: 'linkId: ' + it.id }),
       onChange: (id) => { row.item = items.find((it) => it.id === id) || null; setItemTip(); row.mode = 'compare'; row.op = '='; row.value = ''; render(); notify(); },
     });
     // Titles often share a long prefix and get truncated — full title + linkId on hover.
@@ -133,7 +139,8 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
     setItemTip();
     const opWrap = document.createElement('span');
     const valWrap = document.createElement('span');
-    el.append(itemSel.el, idChip, opWrap, valWrap, mkLink('as text', 'eb-leaf-to-text', () => { text = currentExpr(); baseline = text; mode = 'text'; render(); notify(); }));
+    const switches = leafKinds().filter((Kind) => Kind.switchLabel).map((Kind) => mkLink(Kind.switchLabel, 'eb-leaf-kind-' + Kind.id, () => { row = Kind.create(items, row); render(); notify(); }));
+    el.append(itemSel.el, idChip, opWrap, valWrap, ...switches, toTextLink());
     renderOpVal(opWrap, valWrap);
   }
 

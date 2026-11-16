@@ -3,6 +3,7 @@
 //   comparison) → reduce (join to text / count / exists / first / last).
 // Owns its own state; the shell reads getExpr() and shows a live preview.
 import { createCustomSelect } from '../../custom-select.js';
+import { createQuestionSelect } from '../expr-blocks/question-select.js';
 import { setLiteral, pipeline } from '../../../fhir/expr-builder/model.js';
 import { emit } from '../../../fhir/expr-builder/emit.js';
 import { valueAccessor } from '../../../fhir/expr-builder/value-paths.js';
@@ -117,12 +118,10 @@ class PipelineEditor {
     const lbl = document.createElement('span');
     lbl.className = 'eb-pipe-lbl';
     lbl.textContent = 'Answers of';
-    const sel = createCustomSelect({
-      items: [{ value: '', label: '\u2014 question \u2014' }, ...this._items.map((it) => ({ value: it.id, label: it.label }))],
+    const sel = createQuestionSelect({
+      items: this._items,
       value: this._source.linkId,
-      className: 'sc-trigger--sm eb-item',
       testid: 'eb-pipe-source',
-      searchable: true,
       onChange: (id) => {
         const it = this._items.find((x) => x.id === id) || null;
         this._source = { linkId: it?.id || '', accessor: it ? accessorFor(it) : '' };

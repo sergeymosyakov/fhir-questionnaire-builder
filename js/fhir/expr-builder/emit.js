@@ -1,5 +1,7 @@
 // Serializes a block tree to a FHIRPath string. Pure, no DOM.
 import { BlockKind } from './model.js';
+import { blockDef } from './blocks/registry.js';
+import './blocks/index.js';
 
 export function emit(block) {
   if (!block || typeof block !== 'object') return '';
@@ -10,14 +12,14 @@ export function emit(block) {
     case BlockKind.COMPARE: return `${wrap(block.left)} ${block.op} ${wrap(block.right)}`;
     case BlockKind.ARITH: return `${wrap(block.left)} ${block.op} ${wrap(block.right)}`;
     case BlockKind.LOGIC: return block.operands.map(wrapLogic).join(` ${block.op} `);
-    case BlockKind.EXISTS: return `${emit(block.target)}.${block.negate ? 'empty' : 'exists'}()`;
+    case BlockKind.EXISTS: return `${wrap(block.target)}.${block.negate ? 'empty' : 'exists'}()`;
     case BlockKind.AGGREGATE: return emitAggregate(block);
     case BlockKind.DESCENDANTS: return '%resource.descendants()';
     case BlockKind.SET_LITERAL: return emitSet(block);
     case BlockKind.PIPELINE: return emitPipeline(block);
     case BlockKind.MATH_FN: return emitMathFn(block);
     case BlockKind.RAW: return block.text || '';
-    default: return '';
+    default: return blockDef(block.kind)?.emit(block, { emit, wrap }) ?? '';
   }
 }
 
