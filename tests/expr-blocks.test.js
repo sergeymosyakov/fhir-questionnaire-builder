@@ -5,7 +5,7 @@ import { parseExpression } from '../js/fhir/expr-builder/parse.js';
 import { emit } from '../js/fhir/expr-builder/emit.js';
 import { describeBlock } from '../js/fhir/expr-builder/describe.js';
 import { itemRef, literal, compare, arith, exists, raw, BlockKind } from '../js/fhir/expr-builder/model.js';
-import { iif, union, empty, answerScores, IIF, UNION, EMPTY, ANSWER_SCORES, ORDINAL_VALUE_URL, power, negate, keepIf, POWER, NEGATE, registerBlock, registeredBlocks } from '../js/fhir/expr-builder/blocks/index.js';
+import { iif, union, empty, answerScores, IIF, UNION, EMPTY, ANSWER_SCORES, ORDINAL_VALUE_URL, power, negate, keepIf, duration, POWER, NEGATE, registerBlock, registeredBlocks } from '../js/fhir/expr-builder/blocks/index.js';
 import { aggregate } from '../js/fhir/expr-builder/model.js';
 import { collectExpressions, responsesFor, evaluate as evaluateText } from './helpers/expressions.js';
 import { EXPR_GALLERY, resolveGalleryPattern } from '../js/fhir/expr-builder/gallery/index.js';
@@ -393,5 +393,29 @@ describe('keep the result only if (where($this …))', () => {
 
   it('is described in words', () => {
     expect(describeBlock(parse('(%a).where($this >= 0)'))).toBe('the variable %a, kept only if it is at least 0');
+  });
+});
+
+describe('calendar durations (280 days, 1 week)', () => {
+  it('reads a duration as its own block and writes it back as written', () => {
+    for (const text of ['%d + 280 days', '%d + 1 week', '%d - 2 months', '%d + 1.5 years']) {
+      const b = parse(text);
+      expect(b.kind, text).toBe(BlockKind.ARITH);
+      expect(b.right.kind, text).toBe('duration');
+      expect(emit(b), text).toBe(text);
+    }
+    expect(parse('1 week')).toEqual(duration(1, 'week'));
+  });
+
+  it('adds to a date question and gives the same date', () => {
+    for (const text of ['@2024-01-01 + 280 days', '@2024-01-01 + 1 week', '@2024-03-31 - 2 months']) expect(fhirpath.evaluate({}, emit(parse(text)))).toEqual(fhirpath.evaluate({}, text));
+  });
+
+  it('leaves other quantities as text', () => {
+    for (const text of ["%d + 5 'mg'", "%d + 1 'wk'", '%d + 3 milliseconds', '%d + 1.50 days', '%d + 01 days']) expect(parse(text).kind, text).toBe(BlockKind.RAW);
+  });
+
+  it('is described in words', () => {
+    expect(describeBlock(parse('%d + 280 days'))).toBe('the variable %d plus 280 days');
   });
 });

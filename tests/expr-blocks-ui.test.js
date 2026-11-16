@@ -332,3 +332,28 @@ describe('keep the result only if, in the value editor', () => {
     expect(make(`${dec('w')} / 2`).el.querySelector('[data-testid="eb-keep-op"]').dataset.value).toBe('');
   });
 });
+
+describe('duration in the value editor', () => {
+  const when = { id: 'lmp', label: 'Last period', itemType: 'date', segments: ['g', 'lmp'], answerAt: [] };
+  const lmp = "%resource.item.where(linkId='g').item.where(linkId='lmp').answer.valueDate";
+  const make = (expr) => createValueEditor({ items: [...items, when], allItems: [...items, when], variables: [], fp, initialExpr: expr });
+
+  it('opens a date plus a duration and writes the same text back', () => {
+    for (const expr of [`(${lmp} + 280 days)`, `${lmp} + 1 week`, `${lmp} - 2 months`]) {
+      const ve = make(expr);
+      expect(ve.seeded, expr).toBe(true);
+      expect(ve.getExpr(), expr).toBe(expr.replace(/^\((.*)\)$/, '$1'));
+    }
+  });
+
+  it('keeps singular and plural in step with the amount, and is incomplete without one', () => {
+    const ve = make(`${lmp} + 280 days`);
+    const inp = ve.el.querySelector('[data-testid="eb-duration-value"]');
+    inp.value = '1';
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(ve.getExpr()).toBe(`${lmp} + 1 day`);
+    inp.value = '';
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(ve.getExpr()).toBe('');
+  });
+});

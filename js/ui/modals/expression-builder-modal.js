@@ -9,7 +9,7 @@ import { _rc } from '../../preview/render-ctx.js';
 import { evalFhirpath } from '../../preview/eval-fhirpath.js';
 import { BlockKind } from '../../fhir/expr-builder/model.js';
 import { parseExpression } from '../../fhir/expr-builder/parse.js';
-import { flattenItems, NUMERIC_TYPES } from '../../fhir/expr-builder/flatten-items.js';
+import { flattenItems, NUMERIC_TYPES, DATE_TYPES } from '../../fhir/expr-builder/flatten-items.js';
 import { parseExprTree } from '../../fhir/explain.js';
 import { createExprTreeEditor } from './expr-tree/tree-editor.js';
 import { createValueEditor } from './expr-value/value-editor.js';
@@ -38,7 +38,7 @@ class ExpressionBuilderModal extends Modal {
     this._tree = tree || [];
     const answerable = flattenItems(this._tree).filter((it) => it.id !== excludeId);
     this._allItems = answerable;
-    this._items = this._isValue ? answerable.filter((it) => NUMERIC_TYPES.has(it.itemType)) : answerable;
+    this._items = this._isValue ? answerable.filter((it) => NUMERIC_TYPES.has(it.itemType) || DATE_TYPES.has(it.itemType)) : answerable;
     this._resetEditors();
     this.body.dataset.testid = 'eb-body';
 

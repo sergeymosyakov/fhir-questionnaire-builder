@@ -77,7 +77,10 @@ values instead of typing paths and accessors:
   turns a part into its opposite sign; together with the square root they open the body
   surface area, QTc and kidney-function formulas as blocks. **Keep the result only if it
   is …** (under the result) drops the result unless it passes a simple test against a
-  number, for example to give no result when a calculation comes out negative. For
+  number, for example to give no result when a calculation comes out negative. A date
+  question can be used in a calculation too: **Duration (days, weeks, …)** is an amount
+  of calendar time that is added to or taken from a date, such as the last menstrual
+  period plus 280 days for an expected delivery date. For
   questionnaires scored by their answers (each answer option carries a score), **Scale
   total (when all answered)** adds up the scores of the chosen questions and gives no
   result until every one of them is answered, the form every shipped scale such as PHQ-9

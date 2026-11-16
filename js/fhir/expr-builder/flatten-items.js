@@ -3,6 +3,7 @@
 import { hasAnswer } from './value-paths.js';
 
 export const NUMERIC_TYPES = new Set(['integer', 'decimal', 'quantity']);
+export const DATE_TYPES = new Set(['date', 'dateTime']);
 
 // Flattens the tree to answerable items, tracking the ancestor linkId chain and
 // which segments are nested under a parent item's answer, so references emit an

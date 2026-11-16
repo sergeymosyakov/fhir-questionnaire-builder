@@ -41,8 +41,8 @@ function describePipeline(b, linkIdMap) {
 
 const describeCtx = (linkIdMap) => ({ describe: (b) => describeBlock(b, linkIdMap), title: (id) => title(id, linkIdMap) });
 
-// A library block used as an operand is bracketed: "(if …) plus (if …)".
-const operand = (b, linkIdMap) => { const t = describeBlock(b, linkIdMap); return t != null && isRegisteredKind(b?.kind) ? `(${t})` : t; };
+// A library block used as an operand is bracketed (unless it is a single value, `atomic`): "(if …) plus (if …)".
+const operand = (b, linkIdMap) => { const t = describeBlock(b, linkIdMap); return t != null && isRegisteredKind(b?.kind) && !blockDef(b.kind).atomic ? `(${t})` : t; };
 
 export function describeBlock(block, linkIdMap = {}) {
   if (!block || typeof block !== 'object') return null;
