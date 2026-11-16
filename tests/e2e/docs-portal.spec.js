@@ -4,6 +4,7 @@
 //
 // data-testid registry: preview-placeholder-docs-link (Quick tour link in the
 //                        empty-preview placeholder)
+//   preview-placeholder-link-<docs|help|templates|gallery|widget>   the other site links beside it
 // Opens docs via ⋯ More → Docs (docs-page-btn).
 //   doc-sidebar / doc-content / doc-search   sidebar nav, article, search input
 //   doc-nav-section      docs sidebar section heading
@@ -50,5 +51,22 @@ test.describe('documentation portal', () => {
     const link = page.getByTestId('preview-placeholder-docs-link');
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute('href', 'docs.html#/quick-tour');
+  });
+
+  test('the empty-preview placeholder also links to the docs, field reference, templates, gallery and widget demo', async ({ page }) => {
+    await page.goto('/');
+    const links = { docs: 'docs.html', help: 'help.html', templates: 'templates.html', gallery: 'gallery.html', widget: 'widget-demo.html' };
+    for (const [id, href] of Object.entries(links)) {
+      const link = page.getByTestId(`preview-placeholder-link-${id}`);
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute('href', href);
+    }
+  });
+
+  test('a placeholder link opens its page', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('preview-placeholder-link-templates').click();
+    await expect(page).toHaveURL(/\/templates(\.html)?$/);
+    await expect(page.getByTestId('tp-card-phq-9')).toBeVisible();
   });
 });

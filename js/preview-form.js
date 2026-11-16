@@ -11,6 +11,7 @@ import { buildFHIRObject } from './fhir/export.js';
 import { calcFormOk, isMandatory, evalConstraints, hasEnforceableRule, CHECKABLE_TYPES } from './fhir/form-checks.js';
 import { importQRAnswers } from './fhir/qr-import.js';
 import { populateFromServer } from './fhir/sdc-populate.js';
+import { exploreLinksHtml } from './ui/explore-links.js';
 import { structureMapPopulate } from './fhir/sdc-structuremap-populate.js';
 import { resolveCqlInitialValues } from './fhir/sdc-cql-eval.js';
 import { getResourceByReference } from './fhir/fhir-search.js';
@@ -427,7 +428,8 @@ export class PreviewForm {
             '<strong>From Library\u2026</strong> \u2014 pick one of the built-in samples,<br>' +
             '<strong>From Cloud\u2026</strong> \u2014 access your saved questionnaires (sign in required).<br>' +
             'Or start from scratch: click <strong>+ Add</strong> in the left panel and choose <strong>Root group</strong> or <strong>From template…</strong>.<br><br>' +
-            'New here? Read the <a href="docs.html#/quick-tour" data-testid="preview-placeholder-docs-link">Quick tour</a> \u2014 five minutes, end to end.' +
+            'New here? Read the <a href="docs.html#/quick-tour" data-testid="preview-placeholder-docs-link">Quick tour</a> \u2014 five minutes, end to end.<br>' +
+            'Explore: ' + exploreLinksHtml() + '.' +
           '</div>';
         lform.appendChild(placeholder);
       }
