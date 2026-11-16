@@ -3,13 +3,13 @@
 //
 // def = {
 //   kind,                                    // block.kind string
-//   emit(block, ctx),                        // → FHIRPath text; ctx = { emit, wrap }
+//   emit(block, ctx),                        // → FHIRPath text; ctx = { emit, wrap, wrapTarget, q }
 //   describe(block, ctx),                    // → plain words or null; ctx = { describe, title }
 //   describeExists?(block, negate, ctx),     // wording for "<block> has / has no an answer"
 //   parseNode?(node, ctx),                   // CST node → block | null; ctx = { toBlock, kids, identText }
 //   parseTerm?(term, ctx),                   // CST term (literal/function call) → block | null
-//   parsePath?({ head, steps }, ctx),        // a member/function chain (head + its steps) → block | null
-//   formula?(block, labelOf),                // the block inside a short formula (formula-text.js)
+//   parsePath?({ head, steps, receiver }, ctx), // a member/function chain → block | null; receiver() = the chain without its last step, as a block
+//   formula?(block, labelOf, text),          // the block inside a short formula (formula-text.js); text(b) formats a sub-block
 // }
 import { Registry } from '../../../registry.js';
 

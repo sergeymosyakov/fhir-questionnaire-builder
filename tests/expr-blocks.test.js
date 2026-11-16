@@ -5,7 +5,7 @@ import { parseExpression } from '../js/fhir/expr-builder/parse.js';
 import { emit } from '../js/fhir/expr-builder/emit.js';
 import { describeBlock } from '../js/fhir/expr-builder/describe.js';
 import { itemRef, literal, compare, arith, exists, raw, BlockKind } from '../js/fhir/expr-builder/model.js';
-import { iif, union, empty, answerScores, IIF, UNION, EMPTY, ANSWER_SCORES, ORDINAL_VALUE_URL, registerBlock, registeredBlocks } from '../js/fhir/expr-builder/blocks/index.js';
+import { iif, union, empty, answerScores, IIF, UNION, EMPTY, ANSWER_SCORES, ORDINAL_VALUE_URL, power, negate, POWER, NEGATE, registerBlock, registeredBlocks } from '../js/fhir/expr-builder/blocks/index.js';
 import { aggregate } from '../js/fhir/expr-builder/model.js';
 import { collectExpressions, responsesFor, evaluate as evaluateText } from './helpers/expressions.js';
 import { EXPR_GALLERY, resolveGalleryPattern } from '../js/fhir/expr-builder/gallery/index.js';
@@ -322,5 +322,53 @@ describe('gallery calculations', () => {
     for (const qr of [qrWith(1, ids), qrWith(70, ids), qrWith(1, ids.slice(0, 1)), qrWith(1, [])]) {
       expect(evaluate(qr, rewritten)).toEqual(evaluate(qr, expr));
     }
+  });
+});
+
+describe('square root, power and minus', () => {
+  const env = { a: 4, b: 9, age: 30 };
+  const value = (text) => fhirpath.evaluate({}, text, env);
+
+  it('reads a square root as a function block and writes it back', () => {
+    const b = parse('(%a * %b / 3600).sqrt().round(2)');
+    expect(b).toMatchObject({ kind: BlockKind.MATH_FN, fn: 'round', target: { kind: BlockKind.MATH_FN, fn: 'sqrt' } });
+    expect(value(emit(b))).toEqual(value('(%a * %b / 3600).sqrt().round(2)'));
+  });
+
+  it('reads a power with its exponent, also a literal base and a negative exponent', () => {
+    for (const text of ['%a.power(-1.2)', '0.9938.power(%age)', '(60 / %a).power(1 / 3)', '(%a / (60 / %b).power(1 / 3)).round(0)']) {
+      const b = parse(text);
+      expect(b.kind === POWER || b.kind === BlockKind.MATH_FN).toBe(true);
+      expect(value(emit(b))).toEqual(value(text));
+    }
+    expect(parse('%a.power(2)')).toEqual(power({ kind: BlockKind.VARIABLE, name: 'a' }, literal('number', 2)));
+  });
+
+  it('reads a bare negative number as a number and any other minus as a negation', () => {
+    expect(parse('-1.5')).toEqual(literal('number', -1.5));
+    expect(parse('-%a')).toEqual(negate({ kind: BlockKind.VARIABLE, name: 'a' }));
+    expect(parse('%a * -0.5')).toMatchObject({ kind: BlockKind.ARITH, right: literal('number', -0.5) });
+  });
+
+  it('keeps the meaning where a minus meets a function call (-2.abs() is minus of 2.abs())', () => {
+    for (const text of ['-2.power(2)', '(-2).power(3)', '(-%a).abs()', '-(%a + 1)', '-(-2)', '%a - -2', '-%a.abs()']) {
+      const b = parse(text);
+      expect(b.kind).not.toBe(BlockKind.RAW);
+      expect(value(emit(b))).toEqual(value(text));
+    }
+    expect(emit(power(literal('number', -2), literal('number', 3)))).toBe('(-2).power(3)');
+    expect(emit(negate(negate(literal('number', 2))))).toBe('-(-2)');
+  });
+
+  it('leaves the shapes it does not model as text', () => {
+    expect(parse('%a.power(1, 2)').kind).toBe(BlockKind.RAW);
+    expect(parse('+%a').kind).toBe(BlockKind.RAW);
+  });
+
+  it('is described in words', () => {
+    expect(describeBlock(parse('%a.sqrt()'))).toBe('the square root of the variable %a');
+    expect(describeBlock(parse('(%a + 1).power(2)'))).toBe('(the variable %a plus 1) to the power of 2');
+    expect(describeBlock(parse('-%a'))).toBe('minus the variable %a');
+    expect(NEGATE).toBe('negate');
   });
 });

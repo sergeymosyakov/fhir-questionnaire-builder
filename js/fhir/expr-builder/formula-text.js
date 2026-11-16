@@ -6,7 +6,7 @@ import { blockDef } from './blocks/registry.js';
 import './blocks/index.js';
 
 const SYMBOL = { '+': '+', '-': '−', '*': '×', '/': '÷' };
-const FN_WORDS = { round: 'round', abs: 'absolute value', ceiling: 'round up', floor: 'round down', truncate: 'truncate' };
+const FN_WORDS = { sqrt: 'square root', round: 'round', abs: 'absolute value', ceiling: 'round up', floor: 'round down', truncate: 'truncate' };
 
 /** @param {object} block @param {(linkId: string) => string} labelOf the question's title for a linkId */
 export function formulaText(block, labelOf = (id) => id) {
@@ -20,7 +20,7 @@ export function formulaText(block, labelOf = (id) => id) {
       case BlockKind.ARITH: return `${operand(b.left)} ${SYMBOL[b.op] ?? b.op} ${operand(b.right)}`;
       case BlockKind.MATH_FN: return b.fn === 'round' && b.arg != null ? `round(${text(b.target)}, ${b.arg})` : `${FN_WORDS[b.fn] ?? b.fn}(${text(b.target)})`;
       case BlockKind.AGGREGATE: return `${b.fn} of ${b.source?.kind === BlockKind.ITEM_REF ? labelOf(b.source.segments.at(-1)) : text(b.source)}`;
-      default: return blockDef(b.kind)?.formula?.(b, labelOf) ?? emit(b);
+      default: return blockDef(b.kind)?.formula?.(b, labelOf, text) ?? emit(b);
     }
   };
   return text(block);

@@ -23,6 +23,8 @@ export const LOGIC_OPS = ['and', 'or'];
 export const AGG_FNS = ['count', 'sum', 'avg', 'min', 'max'];
 // Trailing wrapper applied to a numeric result: round takes an optional precision arg.
 export const MATH_WRAP_FNS = ['round', 'abs', 'ceiling', 'floor', 'truncate'];
+// Every one-value function a result can pass through: the rounding ones plus the square root.
+export const MATH_FNS = [...MATH_WRAP_FNS, 'sqrt'];
 // Collection pipeline: filters keep/drop members, reducers collapse to a scalar.
 export const PIPE_FILTERS = ['intersect', 'exclude', 'distinct'];
 export const PIPE_REDUCERS = ['join', 'count', 'exists', 'first', 'last'];

@@ -2,6 +2,7 @@
 import { BlockKind } from './model.js';
 import { blockDef } from './blocks/registry.js';
 import './blocks/index.js';
+import { NEGATE } from './blocks/negate.js';
 
 export function emit(block) {
   if (!block || typeof block !== 'object') return '';
@@ -12,14 +13,14 @@ export function emit(block) {
     case BlockKind.COMPARE: return `${wrap(block.left)} ${block.op} ${wrap(block.right)}`;
     case BlockKind.ARITH: return `${wrap(block.left)} ${block.op} ${wrap(block.right)}`;
     case BlockKind.LOGIC: return block.operands.map(wrapLogic).join(` ${block.op} `);
-    case BlockKind.EXISTS: return `${wrap(block.target)}.${block.negate ? 'empty' : 'exists'}()`;
+    case BlockKind.EXISTS: return `${wrapTarget(block.target)}.${block.negate ? 'empty' : 'exists'}()`;
     case BlockKind.AGGREGATE: return emitAggregate(block);
     case BlockKind.DESCENDANTS: return '%resource.descendants()';
     case BlockKind.SET_LITERAL: return emitSet(block);
     case BlockKind.PIPELINE: return emitPipeline(block);
     case BlockKind.MATH_FN: return emitMathFn(block);
     case BlockKind.RAW: return block.text || '';
-    default: return blockDef(block.kind)?.emit(block, { emit, wrap, q }) ?? '';
+    default: return blockDef(block.kind)?.emit(block, { emit, wrap, wrapTarget, q }) ?? '';
   }
 }
 
@@ -60,7 +61,7 @@ function emitAggregate(b) {
 
 function emitMathFn(b) {
   const args = b.fn === 'round' && b.arg != null ? String(b.arg) : '';
-  return `${wrap(b.target)}.${b.fn}(${args})`;
+  return `${wrapTarget(b.target)}.${b.fn}(${args})`;
 }
 
 function emitItemRef(b) {
@@ -97,6 +98,13 @@ function wrap(b) {
     return `(${emit(b)})`;
   }
   return emit(b);
+}
+
+// What a `.function()` is applied to: also bracketed when it is a negation or a negative number, since `-2.abs()`
+// negates the result of `2.abs()`.
+function wrapTarget(b) {
+  if (b && (b.kind === NEGATE || (b.kind === BlockKind.LITERAL && b.dataType === 'number' && b.value < 0))) return `(${emit(b)})`;
+  return wrap(b);
 }
 
 function wrapLogic(b) {

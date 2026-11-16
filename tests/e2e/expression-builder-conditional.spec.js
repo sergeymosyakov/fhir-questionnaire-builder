@@ -327,7 +327,7 @@ test.describe('Expression Builder — conditional value', () => {
     await expect(preview(page)).toHaveText(/, 5\)$/);
   });
 
-  test('a value can be rounded inside a branch with "Round / abs / … of ( … )"', async ({ page }) => {
+  test('a value can be rounded inside a branch with "Round / square root / … of ( … )"', async ({ page }) => {
     await freshStart(page);
     await makeForm(page);
     await openBuilderForNumber(page);

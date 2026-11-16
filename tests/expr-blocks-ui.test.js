@@ -10,6 +10,7 @@ import { ChainEditor } from '../js/ui/modals/expr-value/chain-editor.js';
 import { createValueEditor } from '../js/ui/modals/expr-value/value-editor.js';
 import { createLeafEditor } from '../js/ui/modals/expr-tree/leaf-editor.js';
 import { createExprTreeEditor } from '../js/ui/modals/expr-tree/tree-editor.js';
+import { NegateOperand } from '../js/ui/modals/expr-blocks/operands/negate.js';
 import { TextOperand } from '../js/ui/modals/expr-blocks/operands/text.js';
 import { literal } from '../js/fhir/expr-builder/model.js';
 import { loadFhirpath } from './helpers/fhirpath-node.js';
@@ -249,5 +250,54 @@ describe('question list', () => {
     expect(e.length).toBe(2);
     expect(document.activeElement).toBe(box.querySelector('[data-testid="a"]')); // focus goes to "+", not lost
     box.remove();
+  });
+});
+
+describe('square root, power and minus in the value editor', () => {
+  const dec = (id) => `%resource.item.where(linkId='g').item.where(linkId='${id}').answer.valueDecimal`;
+  const writes = (expr) => {
+    const ve = createValueEditor({ items, allItems: items, variables: [], fp, initialExpr: expr });
+    return { seeded: ve.seeded, out: ve.getExpr(), ve };
+  };
+
+  it('opens each as blocks and writes the same text back', () => {
+    for (const expr of [
+      `((${dec('w')} * ${dec('h')}) / 3600).sqrt().round(2)`,
+      `(${dec('w')} / (60 / ${dec('h')}).power(1 / 3)).round(0)`,
+      `0.9938.power(${dec('w')})`,
+      `${dec('w')}.power(-1.2)`,
+      `-(${dec('w')} + 1)`,
+      `${dec('w')} * -0.5`,
+    ]) {
+      const { seeded, out } = writes(expr);
+      expect(seeded, expr).toBe(true);
+      expect(out, expr).toBe(expr);
+    }
+  });
+
+  it('shows the power as a block with its two chains, and an edit of the exponent is written', () => {
+    const { ve } = writes(`${dec('w')}.power(1 / 3)`);
+    expect(ve.el.querySelector('[data-testid="eb-power"]')).not.toBeNull();
+    const nums = ve.el.querySelectorAll('[data-testid="eb-power-exp-chain"] [data-testid="eb-operand-num"]');
+    nums[1].value = '2';
+    nums[1].dispatchEvent(new Event('input', { bubbles: true }));
+    expect(ve.getExpr()).toBe(`${dec('w')}.power(1 / 2)`);
+  });
+
+  it('leaves -<answer> as text (fhirpath.js cannot evaluate it) and builds Minus of an answer as 0 - answer', () => {
+    expect(writes(`-${dec('w')}`).seeded).toBe(false);
+    const ve = createValueEditor({ items, allItems: items, variables: [], fp, initialExpr: `-(${dec('w')} + 1)` });
+    expect(ve.seeded).toBe(true);
+    const chain = ve.el.querySelector('[data-testid="eb-negate-chain"]');
+    expect(chain).not.toBeNull();
+    const answer = parseExpression(dec('w'), fp);
+    const built = new NegateOperand({}, { getBlock: () => answer }).toBlock();
+    expect(emit(built)).toBe(`0 - ${dec('w')}`);
+  });
+
+  it('keeps a top-level square root as an operand, not under "Round the result"', () => {
+    const { ve } = writes(`${dec('w')}.sqrt()`);
+    expect(ve.el.querySelector('[data-testid="eb-wrap-fn"]').dataset.value).toBe('');
+    expect(ve.el.querySelector('[data-testid="eb-math-fn"]').dataset.value).toBe('sqrt');
   });
 });

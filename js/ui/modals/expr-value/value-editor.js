@@ -3,7 +3,7 @@
 // and the rounding; the shell reads getExpr() and shows a live preview via onChange.
 // Extracted from the modal so each result type is its own strategy (condition =
 // expr-tree, value = here, pipeline = expr-pipeline).
-import { mathFn, BlockKind } from '../../../fhir/expr-builder/model.js';
+import { mathFn, MATH_WRAP_FNS, BlockKind } from '../../../fhir/expr-builder/model.js';
 import { emit } from '../../../fhir/expr-builder/emit.js';
 import { parseExpression } from '../../../fhir/expr-builder/parse.js';
 import { ChainEditor } from './chain-editor.js';
@@ -30,7 +30,7 @@ class ValueEditor {
     const t = (text || '').trim();
     const block = t && this._fp ? parseExpression(t, this._fp) : null;
     let target = block;
-    if (block && block.kind === BlockKind.MATH_FN) {
+    if (block && block.kind === BlockKind.MATH_FN && MATH_WRAP_FNS.includes(block.fn)) {
       this._wrapFn = block.fn;
       this._wrapArg = block.arg != null ? String(block.arg) : '';
       target = block.target;

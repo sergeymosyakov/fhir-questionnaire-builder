@@ -12,6 +12,7 @@
 // sanctioned non-testid exceptions.
 //   eb-body / eb-if / eb-calc-text / eb-calc-value / eb-calc-mode / eb-operand-text   modal body and the blocks asserted on
 //   eb-scale-item / eb-scale-remove / eb-scale-add / eb-scale-total-note              scale total operand
+//   eb-math / eb-math-fn / eb-power / eb-power-base-chain / eb-power-exp-chain / eb-operand-num   square root and power blocks
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -183,4 +184,59 @@ test('PC-PTSD-5: the follow-up total opens as a scale total inside a condition',
   await pickOption(page, 'pcptsd5-q5', 1);
   await expect(result(page, 'pcptsd5-total')).toContainText('4');
   await expect(result(page, 'pcptsd5-result')).toContainText('Positive screen');
+});
+
+test('BSA: the square root opens as a block, and applying unchanged keeps the result', async ({ page }) => {
+  await insert(page, 'body-measurements');
+  await openBuilder(page, 'Body surface area');
+  await expect(modal(page).getByTestId('eb-raw-note')).toHaveCount(0);
+  await expect(modal(page).getByTestId('eb-math-fn').first()).toHaveAttribute('data-value', 'sqrt');
+  await applyAndSave(page);
+
+  await type(page, 'body-height', 180);
+  await type(page, 'body-weight', 80);
+  await expect(result(page, 'body-bsa')).toContainText('2'); // sqrt(180 x 80 / 3600) = 2
+});
+
+test('QTc Fridericia: the cube root opens as a power block, and its exponent can be edited', async ({ page }) => {
+  await insert(page, 'cardiac-measurements');
+  await openBuilder(page, 'QTc, Fridericia');
+  await expect(modal(page).getByTestId('eb-raw-note')).toHaveCount(0);
+  const power = modal(page).getByTestId('eb-power');
+  await expect(power).toBeVisible();
+  await expect(power.getByTestId('eb-power-exp-chain').getByTestId('eb-operand-num').last()).toHaveValue('3');
+  await applyAndSave(page);
+
+  await type(page, 'cardiac-qt', 400);
+  await type(page, 'cardiac-hr', 75);
+  await expect(result(page, 'cardiac-qtc-fridericia')).toContainText('431'); // 400 / (60/75)^(1/3)
+
+  await openBuilder(page, 'QTc, Fridericia');
+  await modal(page).getByTestId('eb-power-exp-chain').getByTestId('eb-operand-num').last().fill('2'); // power 1/2 is Bazett
+  await applyAndSave(page);
+  await expect(result(page, 'cardiac-qtc-fridericia')).toContainText('447');
+});
+
+test('eGFR: the powers with negative exponents open as blocks; applying unchanged keeps the result', async ({ page }) => {
+  await insert(page, 'kidney-function');
+  await type(page, 'kidney-age', 50);
+  await pickOption(page, 'kidney-sex', 0);
+  await type(page, 'kidney-creatinine', 1.1);
+  const before = (await result(page, 'kidney-egfr').innerText()).trim();
+  expect(before).toMatch(/\d/);
+
+  await openBuilder(page, 'eGFR');
+  await expect(modal(page).getByTestId('eb-raw-note')).toHaveCount(0);
+  await expect(modal(page).getByTestId('eb-power').first()).toBeVisible();
+  await applyAndSave(page);
+  expect((await result(page, 'kidney-egfr').innerText()).trim()).toBe(before);
+});
+
+test('the square root block fits a phone-width screen without sideways scrolling', async ({ page }) => {
+  await insert(page, 'cardiac-measurements');
+  await openBuilder(page, 'QTc, Fridericia');
+  await page.setViewportSize({ width: 390, height: 800 });
+  await expect(modal(page).getByTestId('eb-power')).toBeVisible();
+  const body = modal(page).getByTestId('eb-body');
+  expect(await body.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
 });

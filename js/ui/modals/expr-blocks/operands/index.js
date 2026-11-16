@@ -6,6 +6,8 @@ import './score.js';
 import './if.js';
 import './empty.js';
 import './math.js';
+import './power.js';
+import './negate.js';
 import './text.js';
 
 export { operandKinds, operandKind, registerOperand } from './registry.js';

@@ -11,7 +11,7 @@ import './blocks/index.js';
 export const COMPARE_WORDS = { '=': 'equals', '!=': 'does not equal', '>': 'is greater than', '<': 'is less than', '>=': 'is at least', '<=': 'is at most' };
 const ARITH_WORDS = { '+': 'plus', '-': 'minus', '*': 'multiplied by', '/': 'divided by' };
 const AGG_WORDS = { count: 'the count of', sum: 'the sum of', avg: 'the average of', min: 'the minimum of', max: 'the maximum of' };
-const MATH_WORDS = { abs: 'the absolute value of', ceiling: 'rounded up', floor: 'rounded down', truncate: 'truncated to a whole number' };
+const MATH_WORDS = { sqrt: 'the square root of', abs: 'the absolute value of', ceiling: 'rounded up', floor: 'rounded down', truncate: 'truncated to a whole number' };
 
 function title(linkId, linkIdMap) {
   return '\u00AB' + ((linkIdMap && linkIdMap[linkId]) || linkId) + '\u00BB';
