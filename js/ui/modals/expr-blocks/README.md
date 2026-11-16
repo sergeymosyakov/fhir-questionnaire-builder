@@ -5,7 +5,7 @@ libraries, one file per kind; importing a file registers it (`js/registry.js` ke
 
 - `operands/` — kinds of operand in the value editor's chain: subclasses of `OperandKind` (`operand-kind.js`).
   `group.js` (Group, nests to any depth), `if.js` (If … then … otherwise, with a flat "Otherwise if" list),
-  `empty.js` (No value), `math.js` (Round / square root / … of), `power.js` (… to the power of …), `negate.js` (Minus), `text.js` (Text), `score.js` (sum/count of answer scores), `scale-total.js` (the `iif(count = N, sum, {})` scale total; imported before `if.js` so it claims that exact shape first). The class statics describe the kind (`id`,
+  `empty.js` (No value), `math.js` (Round / square root / … of), `power.js` (… to the power of …), `negate.js` (Minus), `duration.js` (Duration: an amount and a calendar unit), `text.js` (Text), `score.js` (sum/count of answer scores), `scale-total.js` (the `iif(count = N, sum, {})` scale total; imported before `if.js` so it claims that exact shape first). The class statics describe the kind (`id`,
   `label`, `block`, `solo`, `available(ctx)`, `fromBlock(block, ctx)`); each operand in a chain is an instance holding its own state
   and implementing `render(host)` and `toBlock()`. `ctx.createChain()` makes a nested operand chain (a branch).
 - `leaves/` — kinds of condition leaf in the condition tree: subclasses of `LeafKind` (`leaf-kind.js`).

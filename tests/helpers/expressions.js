@@ -11,7 +11,7 @@ import { loadFhirpath } from './fhirpath-node.js';
 
 export const fp = loadFhirpath();
 const attempt = (fn) => { try { return fn(); } catch { return null; } };
-const TYPE_OF = { valueBoolean: 'checkbox', valueInteger: 'integer', valueDecimal: 'decimal', valueCoding: 'radio', valueString: 'string' };
+const TYPE_OF = { valueBoolean: 'checkbox', valueInteger: 'integer', valueDecimal: 'decimal', valueCoding: 'radio', valueString: 'string', valueDate: 'date', valueDateTime: 'dateTime' };
 
 // Every calculated/initial expression: the gallery patterns (filled with generic decimal questions) and the templates.
 export function collectExpressions() {
@@ -90,6 +90,7 @@ export function responsesFor(text, block) {
     if (a === 'valueBoolean') return { valueBoolean: (i + Math.round(scale * 10)) % 2 === 0 };
     if (a === 'valueInteger') return { valueInteger: Math.round(override ?? PRIMES[i % PRIMES.length] * scale) };
     if (a === 'valueCoding') return { valueCoding: { system: 'http://loinc.org', code: literals[(i + Math.round(scale * 10)) % Math.max(literals.length, 1)] ?? 'x' } };
+    if (a === 'valueDate') return { valueDate: new Date(Date.UTC(2000, 0, 1) + Math.round((PRIMES[i % PRIMES.length] * scale * 200 + i * 37) * 86400000)).toISOString().slice(0, 10) };
     if (a === 'valueString') return { valueString: 'abc'.slice(0, 1 + (i % 3)) };
     return { valueDecimal: override ?? PRIMES[i % PRIMES.length] * scale };
   };

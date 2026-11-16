@@ -14,11 +14,12 @@
 //   eb-scale-item / eb-scale-remove / eb-scale-add / eb-scale-total-note              scale total operand
 //   eb-math / eb-math-fn / eb-power / eb-power-base-chain / eb-power-exp-chain / eb-operand-num   square root and power blocks
 //   eb-keep-row / eb-keep-op / eb-keep-value                                           "keep the result only if" row
+//   eb-duration / eb-duration-value / eb-duration-unit / eb-preview-str / expr-calc-ta   date plus a duration
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
 import { freshStart } from './helpers/builder.js';
-import { openDropdownItem } from './helpers/dropdown.js';
+import { openDropdownItem, pickCustomSelect } from './helpers/dropdown.js';
 
 async function insert(page, id) {
   await openDropdownItem(page, 'add-menu-btn', 'add-template-btn');
@@ -263,4 +264,22 @@ test('Cockcroft–Gault: "keep the result only if" opens as a row, and its numbe
   await modal(page).getByTestId('eb-keep-value').fill('1000'); // nothing below 1000 is kept now
   await applyAndSave(page);
   await expect(result(page, 'kidney-crcl')).toContainText('—');
+});
+
+test('Due date: the date plus 280 days opens as a date and a duration, and both can be edited', async ({ page }) => {
+  await insert(page, 'pregnancy-dating');
+  await openBuilder(page, 'Expected delivery date');
+  await expect(modal(page).getByTestId('eb-raw-note')).toHaveCount(0);
+  const duration = modal(page).getByTestId('eb-duration');
+  await expect(duration.getByTestId('eb-duration-value')).toHaveValue('280');
+  await expect(duration.getByTestId('eb-duration-unit')).toHaveAttribute('data-value', 'day');
+  await expect(modal(page).getByTestId('eb-preview-str')).toContainText("+ 280 days");
+
+  await duration.getByTestId('eb-duration-value').fill('1');
+  await expect(modal(page).getByTestId('eb-preview-str')).toContainText('+ 1 day');
+  await duration.getByTestId('eb-duration-value').fill('40');
+  await pickCustomSelect(page, duration.getByTestId('eb-duration-unit'), 'week');
+  await expect(modal(page).getByTestId('eb-preview-str')).toContainText('+ 40 weeks');
+  await page.getByTestId('expressionBuilderModalApply').click();
+  await expect(page.getByTestId('expr-calc-ta')).toHaveValue(/ \+ 40 weeks\)?$/);
 });

@@ -24,6 +24,8 @@ const EDITABLE = [
   'gallery:anion-gap',
   'gallery:egfr-ckd-epi-2021',
   'gallery:cockcroft-gault',
+  'gallery:due-date-naegele',
+  'gallery:date-plus-interval',
   'gallery:corrected-calcium',
   'gallery:ldl-friedewald',
   'gallery:homa-ir',
@@ -70,6 +72,7 @@ const EDITABLE = [
   'template:phq-2#2',
   'template:phq-9#1',
   'template:phq-9#2',
+  'template:pregnancy-dating#1',
   'template:qsofa#1',
   'template:qsofa#2',
 ];

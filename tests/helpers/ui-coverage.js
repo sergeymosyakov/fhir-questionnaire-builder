@@ -12,7 +12,7 @@ const attempt = (fn) => { try { return fn(); } catch { return null; } };
 export function measureValueEditor() {
   const exprs = collectExpressions();
   const all = collectItems(exprs);
-  const numeric = all.filter((i) => ['integer', 'decimal'].includes(i.itemType));
+  const numeric = all.filter((i) => ['integer', 'decimal', 'date', 'dateTime'].includes(i.itemType));
   const editable = [];
   const textOnly = [];
   const changed = [];

@@ -3,6 +3,7 @@
 //
 // def = {
 //   kind,                                    // block.kind string
+//   atomic?,                                 // true: a single value, never bracketed when described as an operand
 //   emit(block, ctx),                        // → FHIRPath text; ctx = { emit, wrap, wrapTarget, q }
 //   describe(block, ctx),                    // → plain words or null; ctx = { describe, title }
 //   describeExists?(block, negate, ctx),     // wording for "<block> has / has no an answer"

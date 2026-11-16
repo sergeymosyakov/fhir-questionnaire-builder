@@ -8,6 +8,7 @@ import './empty.js';
 import './math.js';
 import './power.js';
 import './negate.js';
+import './duration.js';
 import './text.js';
 
 export { operandKinds, operandKind, registerOperand } from './registry.js';
