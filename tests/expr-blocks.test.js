@@ -147,7 +147,7 @@ describe('string literals and numbers survive a round trip', () => {
 
   it('writes every number so that it reads back as exactly the same number', async () => {
     const { numberText } = await import('../js/fhir/expr-builder/emit.js');
-    for (const n of [1e-7, 1.5e-7, -1e-7, 5e-21, 1e-25, 1.2345678901234567e-7, 5e-324, 1e21, 1.2e25, 2 ** 53 + 2, Number.MAX_VALUE, 0.1 + 0.2, 18.5, -0.00000025]) {
+    for (const n of [1e-7, 1.5e-7, -1e-7, 5e-21, 1e-25, 1.2345678901234568e-7, 5e-324, 1e21, 1.2e25, 2 ** 53 + 2, Number.MAX_VALUE, 0.1 + 0.2, 18.5, -0.00000025]) {
       expect(numberText(n), String(n)).not.toMatch(/e/i);
       expect(Number(numberText(n)), String(n)).toBe(n);
     }
