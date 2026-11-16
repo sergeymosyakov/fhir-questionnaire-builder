@@ -75,7 +75,9 @@ values instead of typing paths and accessors:
   calculation where it is used. **( … ) to the power of ( … )** raises one part to the
   power given by another, for example a cube root as the power 1 ÷ 3, and **Minus ( … )**
   turns a part into its opposite sign; together with the square root they open the body
-  surface area, QTc and kidney-function formulas as blocks. For
+  surface area, QTc and kidney-function formulas as blocks. **Keep the result only if it
+  is …** (under the result) drops the result unless it passes a simple test against a
+  number, for example to give no result when a calculation comes out negative. For
   questionnaires scored by their answers (each answer option carries a score), **Scale
   total (when all answered)** adds up the scores of the chosen questions and gives no
   result until every one of them is answered, the form every shipped scale such as PHQ-9

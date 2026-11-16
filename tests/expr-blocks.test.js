@@ -5,7 +5,7 @@ import { parseExpression } from '../js/fhir/expr-builder/parse.js';
 import { emit } from '../js/fhir/expr-builder/emit.js';
 import { describeBlock } from '../js/fhir/expr-builder/describe.js';
 import { itemRef, literal, compare, arith, exists, raw, BlockKind } from '../js/fhir/expr-builder/model.js';
-import { iif, union, empty, answerScores, IIF, UNION, EMPTY, ANSWER_SCORES, ORDINAL_VALUE_URL, power, negate, POWER, NEGATE, registerBlock, registeredBlocks } from '../js/fhir/expr-builder/blocks/index.js';
+import { iif, union, empty, answerScores, IIF, UNION, EMPTY, ANSWER_SCORES, ORDINAL_VALUE_URL, power, negate, keepIf, POWER, NEGATE, registerBlock, registeredBlocks } from '../js/fhir/expr-builder/blocks/index.js';
 import { aggregate } from '../js/fhir/expr-builder/model.js';
 import { collectExpressions, responsesFor, evaluate as evaluateText } from './helpers/expressions.js';
 import { EXPR_GALLERY, resolveGalleryPattern } from '../js/fhir/expr-builder/gallery/index.js';
@@ -370,5 +370,28 @@ describe('square root, power and minus', () => {
     expect(describeBlock(parse('(%a + 1).power(2)'))).toBe('(the variable %a plus 1) to the power of 2');
     expect(describeBlock(parse('-%a'))).toBe('minus the variable %a');
     expect(NEGATE).toBe('negate');
+  });
+});
+
+describe('keep the result only if (where($this …))', () => {
+  const value = (text) => fhirpath.evaluate({}, text, { a: -4, b: 9 });
+
+  it('reads a test on the result, also on a conditional, and writes it back with the same meaning', () => {
+    for (const text of ['(%a).where($this >= 0)', 'iif(%b > 1, %b * 2, {}).where($this > -1.5)', '(%b / 3).where($this != 3)', '(%a).where($this < 0).round(1)']) {
+      const b = parse(text);
+      expect(b.kind, text).not.toBe(BlockKind.RAW);
+      expect(value(emit(b)), text).toEqual(value(text));
+    }
+    expect(parse('(%a).where($this >= 0)')).toEqual(keepIf({ kind: BlockKind.VARIABLE, name: 'a' }, '>=', 0));
+  });
+
+  it('leaves any other filter as text', () => {
+    for (const text of ['(%a).where($this >= %b)', '(%a).where(true)', '(%a).where($this >= 0 and $this < 5)', '(%a).where(1 >= $this)', '(%a).where(-$this >= 0)', '(%a).where(-($this) > 3)']) {
+      expect(parse(text).kind, text).toBe(BlockKind.RAW);
+    }
+  });
+
+  it('is described in words', () => {
+    expect(describeBlock(parse('(%a).where($this >= 0)'))).toBe('the variable %a, kept only if it is at least 0');
   });
 });
