@@ -13,6 +13,7 @@
 //   eb-body / eb-if / eb-calc-text / eb-calc-value / eb-calc-mode / eb-operand-text   modal body and the blocks asserted on
 //   eb-scale-item / eb-scale-remove / eb-scale-add / eb-scale-total-note              scale total operand
 //   eb-math / eb-math-fn / eb-power / eb-power-base-chain / eb-power-exp-chain / eb-operand-num   square root and power blocks
+//   eb-keep-row / eb-keep-op / eb-keep-value                                           "keep the result only if" row
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { test, expect } from '@playwright/test';
@@ -239,4 +240,27 @@ test('the square root block fits a phone-width screen without sideways scrolling
   await expect(modal(page).getByTestId('eb-power')).toBeVisible();
   const body = modal(page).getByTestId('eb-body');
   expect(await body.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+});
+
+test('Cockcroft–Gault: "keep the result only if" opens as a row, and its number can be edited', async ({ page }) => {
+  await insert(page, 'kidney-function');
+  await openBuilder(page, 'Creatinine clearance');
+  await expect(modal(page).getByTestId('eb-raw-note')).toHaveCount(0);
+  await expect(modal(page).getByTestId('eb-keep-op')).toHaveAttribute('data-value', '>=');
+  await expect(modal(page).getByTestId('eb-keep-value')).toHaveValue('0');
+  await applyAndSave(page);
+
+  await type(page, 'kidney-age', 150); // (140 - 150) is negative, so the result is dropped
+  await type(page, 'kidney-weight', 70);
+  await type(page, 'kidney-creatinine', 1);
+  await pickOption(page, 'kidney-sex', 0);
+  await expect(result(page, 'kidney-crcl')).toContainText('—'); // blank, not a negative number
+
+  await type(page, 'kidney-age', 40);
+  await expect(result(page, 'kidney-crcl')).toContainText(/\d{2,3}/);
+
+  await openBuilder(page, 'Creatinine clearance');
+  await modal(page).getByTestId('eb-keep-value').fill('1000'); // nothing below 1000 is kept now
+  await applyAndSave(page);
+  await expect(result(page, 'kidney-crcl')).toContainText('—');
 });

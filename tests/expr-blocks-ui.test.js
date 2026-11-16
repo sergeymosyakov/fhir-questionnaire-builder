@@ -301,3 +301,34 @@ describe('square root, power and minus in the value editor', () => {
     expect(ve.el.querySelector('[data-testid="eb-math-fn"]').dataset.value).toBe('sqrt');
   });
 });
+
+describe('keep the result only if, in the value editor', () => {
+  const dec = (id) => `%resource.item.where(linkId='g').item.where(linkId='${id}').answer.valueDecimal`;
+  const make = (expr) => createValueEditor({ items, allItems: items, variables: [], fp, initialExpr: expr });
+
+  it('opens a test on the result as its own row and writes the same text back', () => {
+    for (const expr of [`(${dec('w')} / ${dec('h')}).where($this >= 0)`, `(${dec('w')} * 2).round(1).where($this > 10)`]) {
+      const ve = make(expr);
+      expect(ve.seeded, expr).toBe(true);
+      expect(ve.getExpr(), expr).toBe(expr);
+    }
+    const ve = make(`(${dec('w')} / 2).where($this >= 0)`);
+    expect(ve.el.querySelector('[data-testid="eb-keep-op"]').dataset.value).toBe('>=');
+    expect(ve.el.querySelector('[data-testid="eb-keep-value"]').value).toBe('0');
+  });
+
+  it('writes the edited number, and nothing while the number is missing', () => {
+    const ve = make(`(${dec('w')} / 2).where($this >= 0)`);
+    const inp = ve.el.querySelector('[data-testid="eb-keep-value"]');
+    inp.value = '5';
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(ve.getExpr()).toBe(`(${dec('w')} / 2).where($this >= 5)`);
+    inp.value = '';
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(ve.getExpr()).toBe('');
+  });
+
+  it('has no test by default', () => {
+    expect(make(`${dec('w')} / 2`).el.querySelector('[data-testid="eb-keep-op"]').dataset.value).toBe('');
+  });
+});
