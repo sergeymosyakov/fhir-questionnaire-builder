@@ -67,9 +67,9 @@ values instead of typing paths and accessors:
   "has answer"), with a live ✓/✗ on every node. Any expression, however nested,
   stays visible — unrecognised parts are editable as text only at the leaf.
 - **Values** (`calculatedExpression`, `initialExpression`) — an arithmetic chain of
-  questions, variables and numbers joined by × ÷ + −, plus **aggregates** (count,
+  questions, variables and numbers joined by × ÷ + − (multiplication and division are done before addition and subtraction, as in maths), plus **aggregates** (count,
   sum, average, min, max) over a repeating question's answers. **Group ( … )** puts a
-  part of the calculation in brackets and brackets can sit inside brackets, as deep as
+  part of the calculation in brackets to change that order and brackets can sit inside brackets, as deep as
   the formula needs. **Round / square root / … of ( … )** rounds (or takes the absolute
   value, rounds up or down, truncates, or takes the square root of) a part of the
   calculation where it is used. **( … ) to the power of ( … )** raises one part to the

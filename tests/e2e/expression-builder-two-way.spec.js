@@ -503,7 +503,7 @@ test.describe('Two-way — values (grouping & rounding)', () => {
   test('groups nest as deeply as the expression needs and write back the same expression', async ({ page }) => {
     await freshStart(page);
     await makeItems(page, 1);
-    const deep = '((%a + %b) * (%c - (%d / %e))).round(1)'; // three levels of brackets
+    const deep = '((%a + %b) * (%c - (%d - %e))).round(1)'; // three levels of brackets
     await openCalcRaw(page, deep);
     await expect(page.getByTestId('eb-raw-note')).toHaveCount(0);
     await expect(page.getByTestId('eb-group').first()).toBeVisible();
