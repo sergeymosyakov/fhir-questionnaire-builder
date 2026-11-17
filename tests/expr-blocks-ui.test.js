@@ -394,3 +394,37 @@ describe('today and text functions in the value editor', () => {
     expect(ve.getExpr()).toBe('');
   });
 });
+
+describe('arithmetic chain precedence', () => {
+  const load = (text) => {
+    const chain = new ChainEditor({ items, allItems: items, variables: [], fp, onChange: () => {} });
+    expect(chain.setBlock(parseExpression(text, fp))).toBe(true);
+    return chain;
+  };
+  const shape = (chain) => `${chain._operands.length} operands, ops ${chain._ops.join(' ')}`;
+
+  it('keeps × ÷ div mod tighter than + − in one flat chain', () => {
+    expect(shape(load('1 + 2 * 3'))).toBe('3 operands, ops + *');
+    expect(shape(load('1 + 6 div 4 + 7 mod 4'))).toBe('5 operands, ops + div + mod');
+    expect(emit(load('1 + 2 * 3').getBlock())).toBe('1 + (2 * 3)');
+  });
+
+  it('reads a flat chain back with the same precedence', () => {
+    const chain = load('1 + 2 * 3');
+    chain._ops[0] = '*';
+    chain._ops[1] = '+';
+    expect(emit(chain.getBlock())).toBe('(1 * 2) + 3');
+  });
+
+  it('turns a part that precedence would split into a Group, so the result is unchanged', () => {
+    expect(shape(load('(1 + 2) * 3'))).toBe('2 operands, ops *');
+    expect(shape(load('1 - (2 - 3)'))).toBe('2 operands, ops -');
+    expect(shape(load('1 / (2 * 3)'))).toBe('2 operands, ops /');
+    expect(emit(load('(1 + 2) * 3').getBlock())).toBe('(1 + 2) * 3');
+  });
+
+  it('keeps a left-nested part of the same or higher rank flat', () => {
+    expect(shape(load('(1 + 2) - 3'))).toBe('3 operands, ops + -');
+    expect(shape(load('(1 * 2) + 3'))).toBe('3 operands, ops * +');
+  });
+});

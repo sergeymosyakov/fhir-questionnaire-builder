@@ -174,28 +174,46 @@ test('Cockcroft–Gault: "keep the result only if" — (140 − age) x weight / 
   await expect(result(page, '1.3').locator('input')).toHaveValue(/^97\.22/); // 100 x 70 / 72
 });
 
-test('div and mod: a div 7 + (a mod 7) — brackets keep the remainder together', async ({ page }) => {
+test('div and mod: a div 7 + a mod 7 reads with normal precedence, no Group needed', async ({ page }) => {
   await makeForm(page, [{ title: 'A', type: 'integer' }, { title: 'Out', type: 'integer' }]);
   await openBuilder(page, '1.2');
   const top = topChain(page);
   await pickQuestion(page, operandOf(top, 0), '1.1');
-  await modal(page).getByTestId('eb-add-operand').click();
-  await pickCustomSelect(page, operatorOf(top, 0), 'div');
-  await pickKind(page, operandOf(top, 1), 'num');
-  await setNumber(operandOf(top, 1), 7);
-  await modal(page).getByTestId('eb-add-operand').click();
-  await pickCustomSelect(page, operatorOf(top, 1), '+');
-  await pickKind(page, operandOf(top, 2), 'group');
-  const rest = operandOf(top, 2).getByTestId('eb-group-chain');
-  await pickQuestion(page, operandOf(rest, 0), '1.1');
-  await operandOf(top, 2).getByTestId('eb-group-add').click();
-  await pickCustomSelect(page, operatorOf(rest, 0), 'mod');
-  await pickKind(page, operandOf(rest, 1), 'num');
-  await setNumber(operandOf(rest, 1), 7);
+  for (const [i, op, kind] of [[0, 'div', 'num'], [1, '+', 'item'], [2, 'mod', 'num']]) {
+    await modal(page).getByTestId('eb-add-operand').click();
+    await pickCustomSelect(page, operatorOf(top, i), op);
+    await pickKind(page, operandOf(top, i + 1), kind);
+    if (kind === 'num') await setNumber(operandOf(top, i + 1), 7);
+    else await pickQuestion(page, operandOf(top, i + 1), '1.1');
+  }
   await applyAndSave(page);
 
   await answer(page, '1.1', 100);
   await expect(result(page, '1.2').locator('input')).toHaveValue('16'); // 14 + 2
+});
+
+test('a Group changes the order: (a div 7 + a) mod 7', async ({ page }) => {
+  await makeForm(page, [{ title: 'A', type: 'integer' }, { title: 'Out', type: 'integer' }]);
+  await openBuilder(page, '1.2');
+  const top = topChain(page);
+  await pickKind(page, operandOf(top, 0), 'group');
+  const inner = operandOf(top, 0).getByTestId('eb-group-chain');
+  await pickQuestion(page, operandOf(inner, 0), '1.1');
+  for (const [i, op, kind] of [[0, 'div', 'num'], [1, '+', 'item']]) {
+    await operandOf(top, 0).getByTestId('eb-group-add').click();
+    await pickCustomSelect(page, operatorOf(inner, i), op);
+    await pickKind(page, operandOf(inner, i + 1), kind);
+    if (kind === 'num') await setNumber(operandOf(inner, i + 1), 7);
+    else await pickQuestion(page, operandOf(inner, i + 1), '1.1');
+  }
+  await modal(page).getByTestId('eb-add-operand').click();
+  await pickCustomSelect(page, operatorOf(top, 0), 'mod');
+  await pickKind(page, operandOf(top, 1), 'num');
+  await setNumber(operandOf(top, 1), 7);
+  await applyAndSave(page);
+
+  await answer(page, '1.1', 100);
+  await expect(result(page, '1.2').locator('input')).toHaveValue('2'); // (14 + 100) mod 7 = 2
 });
 
 test('Due date: a date question plus a duration — LMP + 280 days', async ({ page }) => {

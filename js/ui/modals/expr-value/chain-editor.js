@@ -1,4 +1,4 @@
-// A chain of operands joined by + − × ÷ — the editor behind a value, and behind each branch of a
+// A chain of operands joined by + − × ÷ (normal precedence; a Group ( … ) changes the order) — the editor behind a value, and behind each branch of a
 // conditional. Question / variable / number / aggregate are built in; other kinds (group, conditional, …) come from
 // the operand registry (js/ui/modals/expr-blocks/operands/).
 import { createCustomSelect } from '../../custom-select.js';
@@ -10,6 +10,8 @@ import { createRemoveButton } from '../expr-blocks/remove-button.js';
 import { operandKinds, operandKind, OperandKind } from '../expr-blocks/operands/index.js';
 
 const ARITH_LABEL = { '+': '+', '-': '−', '*': '×', '/': '÷', div: 'div (whole part)', mod: 'mod (remainder)' };
+// Binding strength: × ÷ div mod bind tighter than + −.
+const RANK = { '+': 1, '-': 1, '*': 2, '/': 2, div: 2, mod: 2 };
 const AGG_FN_ITEMS = [
   { value: 'count', label: 'count of' },
   { value: 'sum', label: 'sum of' },
@@ -250,15 +252,21 @@ export class ChainEditor {
     valWrap.append(fnSel.el, itemSel.el);
   }
 
+  // Flattens a tree into the chain, read with normal precedence (× ÷ div mod before + −, equal ranks left to
+  // right): a sub-calculation stays flat only where that reading rebuilds the same tree, otherwise it becomes a Group.
   _walkArith(block, operands, ops) {
     if (block.kind === BlockKind.ARITH) {
-      if (!this._walkArith(block.left, operands, ops)) return false;
+      const rank = RANK[block.op];
+      const flatLeft = block.left.kind === BlockKind.ARITH && RANK[block.left.op] >= rank;
+      const flatRight = block.right.kind === BlockKind.ARITH && RANK[block.right.op] > rank;
+      if (!(flatLeft ? this._walkArith(block.left, operands, ops) : this._pushOperand(block.left, operands))) return false;
       ops.push(block.op);
-      const right = this._blockToOperand(block.right);
-      if (!right) return false;
-      operands.push(right);
-      return true;
+      return flatRight ? this._walkArith(block.right, operands, ops) : this._pushOperand(block.right, operands);
     }
+    return this._pushOperand(block, operands);
+  }
+
+  _pushOperand(block, operands) {
     const o = this._blockToOperand(block);
     if (!o) return false;
     operands.push(o);
@@ -305,8 +313,13 @@ export class ChainEditor {
 
   _reduceChain(blocks, ops) {
     if (!blocks.length || blocks.some((b) => !b)) return null;
-    let acc = blocks[0];
-    for (let i = 1; i < blocks.length; i++) acc = arith(ops[i - 1] || '+', acc, blocks[i]);
-    return acc;
+    const terms = [blocks[0]];
+    const sums = [];
+    for (let i = 1; i < blocks.length; i++) {
+      const op = ops[i - 1] || '+';
+      if (RANK[op] === 2) terms[terms.length - 1] = arith(op, terms[terms.length - 1], blocks[i]);
+      else { sums.push(op); terms.push(blocks[i]); }
+    }
+    return terms.reduce((acc, t, i) => arith(sums[i - 1], acc, t));
   }
 }
