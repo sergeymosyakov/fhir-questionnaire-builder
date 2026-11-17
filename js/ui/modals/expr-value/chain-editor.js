@@ -6,6 +6,7 @@ import { itemRef, variable, literal, arith, aggregate, ARITH_OPS, BlockKind } fr
 import { valueAccessor } from '../../../fhir/expr-builder/value-paths.js';
 import { findItemBySegments } from '../../../fhir/expr-builder/flatten-items.js';
 import { createQuestionSelect } from '../expr-blocks/question-select.js';
+import { createRemoveButton } from '../expr-blocks/remove-button.js';
 import { operandKinds, operandKind, OperandKind } from '../expr-blocks/operands/index.js';
 
 const ARITH_LABEL = { '+': '+', '-': '−', '*': '×', '/': '÷', div: 'div (whole part)', mod: 'mod (remainder)' };
@@ -168,24 +169,23 @@ export class ChainEditor {
       },
     });
 
-    const rm = document.createElement('button');
-    rm.type = 'button';
-    rm.className = 'eb-rm';
-    rm.textContent = '✕';
-    rm.dataset.testid = 'eb-remove-operand';
-    rm.setAttribute('aria-label', 'Remove operand');
-    rm.style.display = ctx.operands.length > 1 ? '' : 'none';
-    rm.addEventListener('click', () => {
-      const idx = ctx.operands.indexOf(operand);
-      if (idx < 0) return;
-      ctx.operands.splice(idx, 1);
-      ctx.ops.splice(idx > 0 ? idx - 1 : 0, 1);
-      ctx.rerender();
-      this._onChange();
+    const rm = createRemoveButton({
+      testid: 'eb-remove-operand',
+      label: 'Remove operand',
+      tip: 'Remove this value from the calculation.',
+      onClick: () => {
+        const idx = ctx.operands.indexOf(operand);
+        if (idx < 0) return;
+        ctx.operands.splice(idx, 1);
+        ctx.ops.splice(idx > 0 ? idx - 1 : 0, 1);
+        ctx.rerender();
+        this._onChange();
+      },
     });
+    rm.style.display = ctx.operands.length > 1 ? '' : 'none';
 
     kindSel.el.classList.add('eb-operand-kind');
-    el.append(kindSel.el, valWrap, rm);
+    el.append(rm, kindSel.el, valWrap); // the remove button leads, so it reads as belonging to this operand
     this._renderOperandVal(operand, valWrap);
     return el;
   }

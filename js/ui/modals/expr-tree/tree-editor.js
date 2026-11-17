@@ -7,6 +7,7 @@ import { expandAggregateOverSet } from '../../../fhir/expr-builder/parse.js';
 import { _rc } from '../../../preview/render-ctx.js';
 import { createCustomSelect } from '../../custom-select.js';
 import { createLeafEditor } from './leaf-editor.js';
+import { createRemoveButton } from '../expr-blocks/remove-button.js';
 
 // Editor keeps a group at the root so the top-level AND/OR is always editable.
 function normalizeRoot(node) {
@@ -108,7 +109,7 @@ export function createExprTreeEditor({ initialExpr, items, fp, onChange, createC
     head.append(behavior.el, node._chip,
       mkLink('+ condition', 'eb-add-condition', () => { node.children.push({ type: 'LEAF', expr: '' }); rebuild(); }),
       mkLink('+ group', 'eb-add-group', () => { node.children.push({ type: 'OR', children: [{ type: 'LEAF', expr: '' }] }); rebuild(); }));
-    if (parentChildren) head.appendChild(mkRemove(node, parentChildren));
+    if (parentChildren) head.prepend(mkRemove(node, parentChildren));
     box.appendChild(head);
 
     const kids = document.createElement('div');
@@ -128,7 +129,7 @@ export function createExprTreeEditor({ initialExpr, items, fp, onChange, createC
     lbl.textContent = 'NOT';
     node._chip = mkChip();
     head.append(lbl, node._chip);
-    if (parentChildren) head.appendChild(mkRemove(node, parentChildren));
+    if (parentChildren) head.prepend(mkRemove(node, parentChildren));
     box.appendChild(head);
     const kids = document.createElement('div');
     kids.className = 'eb-children';
@@ -155,7 +156,7 @@ export function createExprTreeEditor({ initialExpr, items, fp, onChange, createC
     node._row = editor.getRow();
     node._chip = mkChip();
     box.append(editor.el, node._chip);
-    if (parentChildren && parentChildren.length > 1) box.appendChild(mkRemove(node, parentChildren));
+    if (parentChildren && parentChildren.length > 1) box.prepend(mkRemove(node, parentChildren));
     return box;
   }
 
@@ -170,18 +171,16 @@ export function createExprTreeEditor({ initialExpr, items, fp, onChange, createC
   }
 
   function mkRemove(node, parentChildren) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'eb-rm';
-    b.dataset.testid = 'eb-remove-node';
-    b.textContent = '\u2715';
-    b.setAttribute('aria-label', 'Remove node');
-    b.addEventListener('click', () => {
-      const i = parentChildren.indexOf(node);
-      if (i >= 0) parentChildren.splice(i, 1);
-      rebuild();
+    return createRemoveButton({
+      testid: 'eb-remove-node',
+      label: 'Remove node',
+      tip: 'Remove this condition.',
+      onClick: () => {
+        const i = parentChildren.indexOf(node);
+        if (i >= 0) parentChildren.splice(i, 1);
+        rebuild();
+      },
     });
-    return b;
   }
 
   function mkLink(label, testid, onClick) {

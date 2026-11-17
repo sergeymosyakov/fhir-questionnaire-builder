@@ -7,6 +7,7 @@ import { iif, IIF, empty } from '../../../../fhir/expr-builder/blocks/index.js';
 import { emit } from '../../../../fhir/expr-builder/emit.js';
 import { parseExpression } from '../../../../fhir/expr-builder/parse.js';
 import { raw } from '../../../../fhir/expr-builder/model.js';
+import { createRemoveButton } from '../remove-button.js';
 
 const newBranch = (ctx) => ctx.createChain({ branch: true, inlineAdd: true, chainTestid: 'eb-if-branch' });
 const noValueBranch = (ctx) => { const chain = newBranch(ctx); chain.setBlock(empty()); return chain; };
@@ -23,21 +24,12 @@ function branchRow(label, testid, content, ...extra) {
   lbl.textContent = label;
   const head = document.createElement('span');
   head.className = 'eb-if-head';
-  head.append(lbl, ...extra);
+  head.append(...extra, lbl); // the remove button (if any) leads the label
   row.append(head, content);
   return row;
 }
 
-function removeButton(label, testid, onClick) {
-  const rm = document.createElement('button');
-  rm.type = 'button';
-  rm.className = 'eb-rm';
-  rm.textContent = '\u2715';
-  rm.dataset.testid = testid;
-  rm.setAttribute('aria-label', label);
-  rm.addEventListener('click', onClick);
-  return rm;
-}
+const removeButton = (label, testid, onClick) => createRemoveButton({ testid, label, tip: label, onClick });
 
 function actionLink(label, testid, onClick) {
   const link = document.createElement('button');

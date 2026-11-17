@@ -11,6 +11,7 @@ import { valueAccessor } from '../../../fhir/expr-builder/value-paths.js';
 import { findItemBySegments } from '../../../fhir/expr-builder/flatten-items.js';
 import { createQuestionSelect } from '../expr-blocks/question-select.js';
 import { leafKinds, leafFromBlock, LeafKind } from '../expr-blocks/leaves/index.js';
+import { pencilIcon } from './mode-icons.js';
 
 const NUM_OPS = ['=', '!=', '>', '<', '>=', '<='];
 const OP_LABEL = { '=': '=', '!=': '\u2260', '>': '>', '<': '<', '>=': '\u2265', '<=': '\u2264' };
@@ -103,25 +104,36 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
     inp.placeholder = 'FHIRPath condition';
     // Apply appears once the text changed; it commits/re-parses this leaf.
     const applyBtn = mkLink('Apply', 'eb-leaf-apply', () => { if (onApply) onApply(); });
-    // Return an unchanged recognised expression to friendly controls.
-    const visualBtn = mkLink('Edit visually', 'eb-leaf-to-row', () => {
+    // The pencil is lit while the text is shown; it returns an unchanged recognised expression to the controls.
+    const visualBtn = mkIconBtn(pencilIcon(), 'eb-leaf-to-row', 'Edit as text', 'Show this condition as controls again.', () => {
+      if (visualBtn.getAttribute('aria-disabled') === 'true') return;
       const asRow = blockToRow(fp ? parseExpression(text, fp) : null, items, kindCtx);
       if (asRow) { row = asRow; mode = 'row'; render(); notify(); }
     });
+    visualBtn.classList.add('eb-rm--on');
+    visualBtn.setAttribute('aria-pressed', 'true');
     const update = () => {
       const dirty = isDirty();
       // Only an unchanged leaf can go back to the friendly row, so a leaf being typed is not re-parsed on every key.
       const asRow = !dirty && items.length && blockToRow(fp ? parseExpression(text, fp) : null, items, kindCtx);
       applyBtn.style.display = dirty ? '' : 'none';
-      visualBtn.style.display = (!dirty && asRow) ? '' : 'none';
+      // aria-disabled (not disabled) keeps it focusable and hoverable, so its tooltip can explain why it does nothing
+      const blocked = !(!dirty && asRow);
+      visualBtn.setAttribute('aria-disabled', String(blocked));
+      visualBtn.dataset.tipBody = blocked ? 'This text cannot be shown as controls (apply or undo your changes, or it uses something the controls do not cover).' : 'Show this condition as controls again.';
       if (onDirtyChange) onDirtyChange();
     };
     inp.addEventListener('input', () => { text = inp.value; notify(); update(); });
-    el.append(inp, applyBtn, visualBtn);
+    el.append(visualBtn, inp, applyBtn);
     update();
   }
 
-  const toTextLink = () => mkLink('as text', 'eb-leaf-to-text', () => { text = currentExpr(); baseline = text; mode = 'text'; render(); notify(); });
+  // Icons that lead the row (like the remove button), not links at its end.
+  const toTextLink = () => {
+    const b = mkIconBtn(pencilIcon(), 'eb-leaf-to-text', 'Edit as text', 'Show this condition as FHIRPath text and edit it there.', () => { text = currentExpr(); baseline = text; mode = 'text'; render(); notify(); });
+    b.setAttribute('aria-pressed', 'false');
+    return b;
+  };
 
   // A row of a library kind (several questions, …) draws itself.
   function renderCustomRow() {
@@ -129,7 +141,7 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
     host.className = 'eb-leaf-custom';
     row.render(host, { notify, rerender: render });
     const back = row.backLabel ? mkLink(row.backLabel, 'eb-leaf-kind-back', () => { row = { item: row.firstItem(), mode: 'compare', op: '=', value: '', existsValue: 'answered' }; render(); notify(); }) : null;
-    el.append(host, ...(back ? [back] : []), toTextLink());
+    el.append(toTextLink(), host, ...(back ? [back] : []));
   }
 
   function renderRow() {
@@ -152,7 +164,7 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
     const opWrap = document.createElement('span');
     const valWrap = document.createElement('span');
     const switches = leafKinds().filter((Kind) => Kind.switchLabel && Kind.available(kindCtx)).map((Kind) => mkLink(Kind.switchLabel, 'eb-leaf-kind-' + Kind.id, () => { row = Kind.create(items, row, kindCtx); render(); notify(); }));
-    el.append(itemSel.el, idChip, opWrap, valWrap, ...switches, toTextLink());
+    el.append(toTextLink(), itemSel.el, idChip, opWrap, valWrap, ...switches);
     renderOpVal(opWrap, valWrap);
   }
 
@@ -212,6 +224,19 @@ export function createLeafEditor({ expr, items, fp, onChange, onApply, onDirtyCh
     inp.value = row.value || '';
     inp.addEventListener('input', () => { row.value = inp.value; notify(); });
     return inp;
+  }
+
+  function mkIconBtn(icon, testid, title, body, onClick) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'eb-rm';
+    b.dataset.testid = testid;
+    b.dataset.tipTitle = title;
+    b.dataset.tipBody = body;
+    b.setAttribute('aria-label', title);
+    b.appendChild(icon);
+    b.addEventListener('click', onClick);
+    return b;
   }
 
   function mkLink(label, testid, onClick) {
