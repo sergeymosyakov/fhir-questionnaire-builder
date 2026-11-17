@@ -7,6 +7,7 @@ import { createQuestionSelect } from '../expr-blocks/question-select.js';
 import { setLiteral, pipeline } from '../../../fhir/expr-builder/model.js';
 import { emit } from '../../../fhir/expr-builder/emit.js';
 import { valueAccessor } from '../../../fhir/expr-builder/value-paths.js';
+import { createRemoveButton } from '../expr-blocks/remove-button.js';
 
 const FILTER_OPS = [
   { value: 'intersect', label: 'keep only values in set' },
@@ -156,18 +157,17 @@ class PipelineEditor {
     if (f.op === 'compare') row.appendChild(this._buildCompareEditor(f));
     else if (f.op !== 'distinct') row.appendChild(this._buildSetEditor(f));
 
-    const rm = document.createElement('button');
-    rm.type = 'button';
-    rm.className = 'eb-rm';
-    rm.textContent = '\u2715';
-    rm.dataset.testid = 'eb-pipe-remove-filter';
-    rm.addEventListener('click', () => {
-      const idx = this._filters.indexOf(f);
-      if (idx >= 0) this._filters.splice(idx, 1);
-      this._renderFilters();
-      this._onChange();
-    });
-    row.appendChild(rm);
+    row.prepend(createRemoveButton({
+      testid: 'eb-pipe-remove-filter',
+      label: 'Remove filter',
+      tip: 'Remove this filter step.',
+      onClick: () => {
+        const idx = this._filters.indexOf(f);
+        if (idx >= 0) this._filters.splice(idx, 1);
+        this._renderFilters();
+        this._onChange();
+      },
+    }));
     return row;
   }
 

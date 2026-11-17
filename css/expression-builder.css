@@ -28,15 +28,26 @@
   font-size: 13px;
 }
 .eb-rm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: var(--ctrl-h, 30px); /* as tall as the controls beside it, so it centres on their first line */
   border: none;
   background: none;
   color: #9ca3af;
   cursor: pointer;
   font-size: 14px;
   line-height: 1;
-  padding: 4px;
+  padding: 0;
 }
 .eb-rm:hover { color: #ef4444; }
+/* the pencil that switches a condition between controls and text: grey, lit while the text is shown */
+.eb-rm[aria-pressed] { border-radius: 6px; }
+.eb-rm[aria-pressed]:hover { color: var(--c-accent, #2563eb); }
+.eb-rm--on { color: var(--c-accent, #2563eb); background: #e0ecff; }
+.eb-rm[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
 
 .eb-actions { display: flex; gap: 12px; align-items: center; }
 .eb-add, .eb-text-toggle {
@@ -115,7 +126,13 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   padding: 2px 8px;
   border-radius: 999px;
+  display: inline-block;
+  box-sizing: border-box;
+  min-width: 72px; /* the same room for true, false and error, so a row does not shift when the result flips */
+  text-align: center;
 }
+/* in a leaf row the first line is a control-height line: centre the chip on it */
+.eb-leaf-row > .eb-chip { margin-top: calc((var(--ctrl-h, 30px) - 18px) / 2); margin-left: 10px; }
 .eb-chip--ok  { background: #dcfce7; color: #166534; }
 .eb-chip--err { background: #fee2e2; color: #991b1b; }
 .eb-chip--off { background: #f1f5f9; color: #64748b; }
@@ -151,7 +168,7 @@
   border-left: 2px solid var(--c-border, #e5e7eb);
   margin-left: 4px;
 }
-.eb-leaf-row { flex-direction: row; align-items: center; gap: 8px; flex-wrap: wrap; }
+.eb-leaf-row { flex-direction: row; align-items: flex-start; gap: 2px; flex-wrap: wrap; }
 .eb-leaf { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; }
 .eb-leaf-text {
   min-width: 260px;
@@ -319,12 +336,12 @@
 /* A block operand gets a row of its own: kind picker + remove on top, the block under them. */
 .eb-operand--block {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "kind rm" "val val";
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "rm kind" "val val";
   align-items: center;
   flex: 1 1 100%;
   min-width: 0;
-  gap: 6px;
+  gap: 6px 2px;
 }
 .eb-operand--block > .eb-operand-kind { grid-area: kind; justify-self: start; }
 .eb-operand--block > .eb-rm { grid-area: rm; }
@@ -342,7 +359,7 @@
 }
 .eb-if-row { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .eb-if-label { font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .03em; }
-.eb-if-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.eb-if-head { display: flex; align-items: center; gap: 6px; }
 .eb-if-row > .eb-tree, .eb-if-row > .eb-chain { min-width: 0; }
 .eb-if .eb-leaf-text { min-width: 0; width: 100%; }
 .eb-if .eb-leaf-row, .eb-if .eb-leaf { min-width: 0; }

@@ -1,6 +1,7 @@
 // A growing list of question pickers with remove (✕) and add (+) controls, shared by the editors that work on a
 // set of questions ("any of several questions has an answer", "the scores of these questions").
 import { createQuestionSelect } from './question-select.js';
+import { createRemoveButton } from './remove-button.js';
 
 /** The questions this entry may pick: every question not already picked by another entry (a question twice is meaningless). */
 export const availableFor = (entries, entry, items) => items.filter((it) => it.id === entry.item?.id || !entries.some((e) => e !== entry && e.item?.id === it.id));
@@ -29,17 +30,15 @@ export function createQuestionList({ entries, items, blank, onPick, notify, min 
         onChange: (id) => { onPick(entry, items.find((it) => it.id === id) || null); draw({ select: i }); notify(); },
       });
       selects.push(select.el);
-      box.appendChild(select.el);
       if (entries.length > min) {
-        const rm = document.createElement('button');
-        rm.type = 'button';
-        rm.className = 'eb-rm';
-        rm.textContent = '\u2715';
-        rm.dataset.testid = testids.remove;
-        rm.setAttribute('aria-label', `${text.remove} ${i + 1}`);
-        rm.addEventListener('click', () => { entries.splice(i, 1); draw('add'); notify(); });
-        box.appendChild(rm);
+        box.appendChild(createRemoveButton({
+          testid: testids.remove,
+          label: `${text.remove} ${i + 1}`,
+          tip: 'Remove this question from the list.',
+          onClick: () => { entries.splice(i, 1); draw('add'); notify(); },
+        }));
       }
+      box.appendChild(select.el);
     });
     const add = document.createElement('button');
     add.type = 'button';
@@ -47,6 +46,8 @@ export function createQuestionList({ entries, items, blank, onPick, notify, min 
     add.textContent = '+';
     add.dataset.testid = testids.add;
     add.setAttribute('aria-label', text.add);
+    add.dataset.tipTitle = 'Add question';
+    add.dataset.tipBody = text.add;
     add.addEventListener('click', () => { entries.push(blank()); draw({ select: entries.length - 1 }); notify(); });
     box.appendChild(add);
     if (focus === 'add') add.focus();

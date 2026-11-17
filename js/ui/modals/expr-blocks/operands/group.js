@@ -41,6 +41,8 @@ export class GroupOperand extends OperandKind {
     add.textContent = '+';
     add.dataset.testid = 'eb-group-add';
     add.setAttribute('aria-label', 'Add an operand to the group');
+    add.dataset.tipTitle = 'Add operand';
+    add.dataset.tipBody = 'Add another value to this group.';
     add.addEventListener('click', () => this.chain.addOperand());
     box.append(paren('('), this.chain.el, paren(')'), add);
     host.appendChild(box);
