@@ -15,8 +15,8 @@ demographics or allergies — and don't want to type it in and wire up the scori
 - **PC-PTSD-5** — the short post-traumatic stress screen. The follow-up questions appear only after you answer Yes to having experienced a traumatic event; the score (0–5) is a positive screen at 4 or more.
 - **GDS-15** — yes/no questions screening older adults for depression; a total (0–15); a total above 5 should be followed up with a careful clinical interview.
 - **ASQ** — the NIMH suicide-risk screen for medical settings. The question about thoughts right now (and the timing of a past attempt) appears only after a relevant Yes answer; the result is a negative, non-acute positive or acute positive screen, with the published next steps and crisis-line resources.
-- **Glasgow Coma Scale** — eye, verbal and motor responses; a total (3–15) and its severity band.
-- **Apgar Score** — the five criteria at 1 and 5 minutes after birth; a total (0–10) and result band for each.
+- **Glasgow Coma Scale** — eye, verbal and motor responses; a total (3–15) and a severity band (a common convention for brain injury, not part of the published scale).
+- **Apgar Score** — the five criteria at 1 and 5 minutes after birth; a total (0–10) for each, and a result band for the 5-minute score.
 - **qSOFA Sepsis Screen**, **CHA₂DS₂-VASc Stroke Risk Score** and **Charlson Comorbidity Index** — yes/no criteria added up into a score (the Charlson index also uses the age). An unanswered criterion counts as No. qSOFA shows its result once you answer at least one criterion; CHA₂DS₂-VASc and Charlson need the age first.
 - **Calculators** — a few related measurements with their formulas already wired in; each result stays empty until all of its inputs are answered:
   - **Body Measurements** — height, weight, sex, waist and hip give BMI and its WHO category, body surface area, ideal body weight and waist-to-hip ratio.

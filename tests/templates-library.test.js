@@ -102,7 +102,7 @@ describe('template scoring', () => {
     { id: 'gds-15', total: 'gds15-total', sev: 'gds15-result', n: 15,
       bands: [[0, 'Within normal range (0–5)'], [5, 'Within normal range (0–5)'], [6, 'Suggests depression (6–15) — follow up with a clinical assessment'], [15, 'Suggests depression (6–15) — follow up with a clinical assessment']] },
     ...['apgar1', 'apgar5'].map(p => ({
-      id: 'apgar-score', prefix: p + '-', total: p + '-total', sev: p + '-band', n: 5,
+      id: 'apgar-score', prefix: p + '-', total: p + '-total', sev: p === 'apgar5' ? 'apgar5-band' : undefined, n: 5, // bands are defined for the 5-minute score only
       bands: [[0, 'Low (0–3)'], [3, 'Low (0–3)'], [4, 'Moderately abnormal (4–6)'], [6, 'Moderately abnormal (4–6)'], [7, 'Reassuring (7–10)'], [10, 'Reassuring (7–10)']],
     })),
   ];

@@ -190,14 +190,14 @@ test('Glasgow Coma Scale totals the three responses and names the severity', asy
   await expect(page.locator('[data-preview-id="gcs-severity"]')).toContainText('Moderate (GCS 9–12)');
 });
 
-test('Apgar scores the 1-minute and 5-minute sets independently', async ({ page }) => {
+test('Apgar scores the 1-minute and 5-minute sets independently; only the 5-minute score has a result band', async ({ page }) => {
   await insert(page, 'apgar-score');
   for (const k of ['color', 'heart-rate', 'tone', 'reflex', 'respiration']) {
     await pick(page, `apgar1-${k}`, 2);
     await pick(page, `apgar5-${k}`, 0);
   }
   await expect(page.locator('[data-preview-id="apgar1-total"]')).toContainText('10');
-  await expect(page.locator('[data-preview-id="apgar1-band"]')).toContainText('Reassuring (7–10)');
+  await expect(page.locator('[data-preview-id="apgar1-band"]')).toHaveCount(0);
   await expect(page.locator('[data-preview-id="apgar5-total"]')).toContainText('0');
   await expect(page.locator('[data-preview-id="apgar5-band"]')).toContainText('Low (0–3)');
 });
