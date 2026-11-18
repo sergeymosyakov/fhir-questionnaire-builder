@@ -135,7 +135,7 @@ export const DEFS = [
     ],
     outputs: [
       { key: 'anion-gap', text: 'Anion gap (mmol/L)', type: 'decimal', code: '33037-3', pattern: 'anion-gap', slots: { na: ['na'], cl: ['cl'], hco3: ['hco3'] } },
-      { key: 'corrected-ca', text: 'Albumin-corrected calcium (mg/dL)', type: 'decimal', pattern: 'corrected-calcium', slots: { ca: ['ca', 'mgdl'], alb: ['alb', 'gdl'] } },
+      { key: 'corrected-ca', text: 'Albumin-corrected calcium (mg/dL; modified Payne, 0.8 per g/dL of albumin below 4.0)', type: 'decimal', pattern: 'corrected-calcium', slots: { ca: ['ca', 'mgdl'], alb: ['alb', 'gdl'] } },
       { key: 'homa-ir', text: 'HOMA-IR', type: 'decimal', pattern: 'homa-ir', slots: { glucose: ['glucose', 'mgdl'], insulin: ['insulin'] } },
     ],
   },

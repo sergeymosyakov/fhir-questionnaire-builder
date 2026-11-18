@@ -341,7 +341,7 @@
       "electrolytes",
       "laboratory"
     ],
-    "source": "Standard potassium-free form: Na − (Cl + HCO₃); Payne et al. 1973, BMJ 4:643; Matthews et al. 1985, Diabetologia 28:412. Codes: LOINC.",
+    "source": "Standard potassium-free form: Na − (Cl + HCO₃); Ca + 0.8 × (4.0 − albumin), a modified Payne form (Payne et al. 1973, BMJ 4:643, uses 1.0, and 0.75 to 1.0 is the published range per Besarab & Caro 1978, J Clin Pathol 31:1369, citing Kleeman et al.); Matthews et al. 1985, Diabetologia 28:412. Codes: LOINC.",
     "license": "Original wording written for this builder; covered by the project license (non-commercial use with attribution; commercial use needs written permission). Formulas are published methods; see the source.",
     "licenseUrl": "https://github.com/sergeymosyakov/fhir-questionnaire-builder/blob/master/LICENSE",
     "file": "chemistry-calculations.template.json"
