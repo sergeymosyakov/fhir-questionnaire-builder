@@ -2,7 +2,7 @@
 // Evaluates all readOnly calc nodes in the tree and writes results to values[].
 
 import { buildDepGraph, topoOrder } from './dep-graph.js';
-import { buildAnswer } from './qr-builder.js';
+import { buildAnswer, buildQR } from './qr-builder.js';
 import { fhirModel } from './fhir-model.js';
 import { joinCodes } from './checklist-codec.js';
 
@@ -53,6 +53,80 @@ function indexQrItems(items, map = new Map()) {
     }
   }
   return map;
+}
+
+// Repeating groups above each node, outermost first: id → [groupId, …] (only nodes that sit inside one).
+function repeatAncestors(nodes, above = [], map = new Map()) {
+  for (const n of nodes) {
+    if (above.length) map.set(n.id, above);
+    if (n.children?.length) repeatAncestors(n.children, n.type === 'group' && n.repeats ? [...above, n.id] : above, map);
+  }
+  return map;
+}
+
+// Every combination of entries of the nested repeating groups: [{ path: [{ id, idx }], scope }], scope = that entry's answer map.
+function entriesOf(values, groupIds) {
+  let found = [{ path: [], scope: values }];
+  for (const g of groupIds) {
+    found = found.flatMap(({ path, scope }) => {
+      const arr = Object.hasOwn(scope, g) ? scope[g] : undefined;
+      if (!Array.isArray(arr)) return [];
+      return arr.flatMap((inst, idx) => (inst && typeof inst === 'object' && !Array.isArray(inst) ? [{ path: [...path, { id: g, idx }], scope: inst }] : []));
+    });
+  }
+  return found;
+}
+
+// The answer tree with every repeating group on `path` reduced to the one entry, so expressions see only that entry.
+function scopeValues(values, path) {
+  const root = Object.fromEntries(Object.entries(values).map(([k, v]) => [k, Array.isArray(v) ? v : [v]])); // a calc outside the group stored a bare value
+  let cur = root;
+  for (const { id, idx } of path) {
+    const entry = { ...cur[id][idx] };
+    cur[id] = [entry];
+    cur = entry;
+  }
+  return root;
+}
+
+function findQrItem(items, id) {
+  for (const it of items || []) {
+    if (it.linkId === id) return it;
+    const sub = findQrItem(it.item ?? it.answer?.[0]?.item, id);
+    if (sub) return sub;
+  }
+  return null;
+}
+
+function findQrItems(items, id) {
+  const out = [];
+  for (const it of items || []) {
+    if (it.linkId === id) out.push(it);
+    else out.push(...findQrItems(it.item ?? it.answer?.[0]?.item, id));
+  }
+  return out;
+}
+
+// The QR item for `id` inside the entry at `path` of the full response.
+function qrItemAt(qr, path, id) {
+  let items = qr.item;
+  for (const { id: g, idx } of path) {
+    const entry = findQrItems(items, g)[idx];
+    if (!entry) return null;
+    items = entry.item;
+  }
+  return findQrItem(items, id);
+}
+
+// Writes a computed value into a QR item, keeping the nested child answers of a parent item.
+function writeAnswer(qrItem, fhirItem, value) {
+  const answer = buildAnswer(fhirItem, value);
+  const prevItem = qrItem.answer?.[0]?.item;
+  if (!answer) delete qrItem.answer;
+  else {
+    if (prevItem) answer.item = prevItem;
+    qrItem.answer = [answer];
+  }
 }
 
 const CHOICE_TYPES = new Set(['select', 'radio', 'open-choice', 'checklist']);
@@ -107,13 +181,15 @@ export function buildCalcCache(nodes, variables = []) {
   return {
     nodeMap: indexNodes(nodes),
     order:   topoOrder(buildDepGraph(nodes, variables)).order,
+    repeatAnc: repeatAncestors(nodes),
   };
 }
 
-export function evalCalcNodes(nodes, qr, fp, values, envVars = {}, base = null, cachedCtx = null) {
+export function evalCalcNodes(nodes, qr, fp, values, envVars = {}, base = null, cachedCtx = null, resolve = undefined) {
   const env = { resource: qr, ...envVars };
   const nodeMap = cachedCtx?.nodeMap || indexNodes(nodes);
   const order   = cachedCtx?.order   || topoOrder(buildDepGraph(nodes, [])).order;
+  const repeatAnc = cachedCtx?.repeatAnc || repeatAncestors(nodes);
 
   // Maps used to write computed values back into the live QR (only when base known).
   const fhirMap = base ? indexFhirItems(base.item) : null;
@@ -124,6 +200,25 @@ export function evalCalcNodes(nodes, qr, fp, values, envVars = {}, base = null, 
     // Evaluated regardless of readOnly — a non-readOnly calc field can be
     // overwritten by the user (validate.js already warns about this).
     if (!node || !node._calculatedExpr) continue;
+    // Inside a repeating group the value is computed per entry, from that entry's answers.
+    const entries = base && repeatAnc.has(id) ? entriesOf(values, repeatAnc.get(id)) : [];
+    if (entries.length) {
+      const fhirItem = fhirMap.get(id);
+      for (const { path, scope } of entries) {
+        try {
+          const own = buildQR(base, scopeValues(values, path), resolve); // rebuilt each time so it holds every value written so far
+          const value = coerceResult(node, fp.evaluate(own, node._calculatedExpr, { ...env, resource: own }, fhirModel()));
+          scope[id] = [value];
+          if (fhirItem) {
+            const mainItem = qrItemAt(qr, path, id);
+            if (mainItem) writeAnswer(mainItem, fhirItem, value);
+          }
+        } catch (_e) {
+          // silently skip entries whose expression fails
+        }
+      }
+      continue;
+    }
     try {
       const result = fp.evaluate(qr, node._calculatedExpr, env, fhirModel());
       const value = coerceResult(node, result);

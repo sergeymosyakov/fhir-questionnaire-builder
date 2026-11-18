@@ -235,11 +235,26 @@ export class ItemNode extends BaseNode {
   _wireCalcControlRefresh(el, rc) {
     const field = el?.querySelector?.('input, select, textarea');
     if (!field && !this._syncCalcValue) return;
-    this._refreshCalcBadge = () => {
-      const v = rc.getValue(this.id);
+    const { _syncCalcValue: syncCalc, _syncOpenChoice: syncOpen } = this; // of the control just built; the next entry replaces them on the node
+    this._addCalcRefresher(el, rc, (v) => {
       if (field) field.value = answerText(v);
-      this._syncCalcValue?.();
-      this._syncOpenChoice?.();
+      syncCalc?.();
+      syncOpen?.();
+    });
+  }
+
+  // Each rendered copy of a calculated item (one per repeating-group entry) refreshes from its own entry's value.
+  _addCalcRefresher(el, rc, update) {
+    const path = (rc.instancePath || []).slice();
+    const read = () => {
+      const keep = rc.instancePath;
+      rc.instancePath = path;
+      try { return rc.getValue(this.id); } finally { rc.instancePath = keep; }
+    };
+    (this._calcRefreshers ||= []).push({ el, run: () => update(read()) });
+    this._refreshCalcBadge = () => {
+      this._calcRefreshers = this._calcRefreshers.filter(r => r.el.isConnected);
+      this._calcRefreshers.forEach(r => r.run());
     };
   }
 
@@ -341,22 +356,17 @@ export class ItemNode extends BaseNode {
       badge.textContent = answerText(s) || '\u2014';
       this._attachCalcExplain(badge, rc);
     }
-    // Store updater closure — called on REFRESH_CALC_BADGES without full DOM rebuild.
-    // Must mirror the initial build's patient/design split: in patient view the
-    // calc value always renders as a plain preview-calc-value (never the design
-    // ✓/✗ calc-badge), otherwise a recompute would flip a patient-view field into
-    // the design-preview badge style.
-    this._refreshCalcBadge = () => {
+    // Called on REFRESH_CALC_BADGES without a full DOM rebuild. Must mirror the initial build's patient/design split:
+    // in patient view the value is always a plain preview-calc-value (never the design ✓/✗ calc-badge).
+    this._addCalcRefresher(badge, rc, (v) => {
       if (this.itemType === 'checkbox' && rc.previewMode !== 'patient') {
-        const v = rc.getValue(this.id);
         badge.className = 'calc-badge ' + (v ? 'calc-true' : 'calc-false') + (rc.showExplain ? ' calc-badge--explain' : '');
         badge.textContent = v ? '\u2713 true' : '\u2717 false';
       } else {
-        const s = rc.getValue(this.id);
         badge.className = 'preview-calc-value' + (rc.showExplain && this._calculatedExpr ? ' preview-calc-value--explain' : '');
-        badge.textContent = answerText(s) || '\u2014';
+        badge.textContent = answerText(v) || '\u2014';
       }
-    };
+    });
     row.appendChild(badge);
   }
 
