@@ -327,7 +327,7 @@ export class PreviewForm {
       if (!this._calcCache) {
         this._calcCache = buildCalcCache(this._tree, this._questVariables);
       }
-      evalCalcNodes(this._tree, qr, fhirpath, calcMap, envVars, base, this._calcCache);
+      evalCalcNodes(this._tree, qr, fhirpath, calcMap, envVars, base, this._calcCache, this._answerStore.codingResolver(this._tree));
       this._answerStore.merge(calcMap);
       const env = { resource: qr, ...envVars };
       this._lastCtx.fp = fhirpath; this._lastCtx.qr = qr; this._lastCtx.env = env;

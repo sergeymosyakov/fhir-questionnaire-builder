@@ -1,0 +1,179 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "calc-in-repeating-group",
+  "title": "Calculations in repeating groups",
+  "status": "active",
+  "description": "Calculated values inside repeating groups: each entry is computed from its own answers.",
+  "item": [
+    {
+      "linkId": "order",
+      "text": "Order",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "rate",
+          "text": "Rate",
+          "type": "decimal"
+        },
+        {
+          "linkId": "rate2",
+          "text": "Rate doubled",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='rate').answer.value * 2"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "lines",
+          "text": "Line",
+          "type": "group",
+          "repeats": true,
+          "item": [
+            {
+              "linkId": "qty",
+              "text": "Quantity",
+              "type": "integer"
+            },
+            {
+              "linkId": "price",
+              "text": "Price",
+              "type": "decimal"
+            },
+            {
+              "linkId": "total",
+              "text": "Line total",
+              "type": "decimal",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "%resource.repeat(item).where(linkId='qty').answer.value * %resource.repeat(item).where(linkId='price').answer.value * %resource.repeat(item).where(linkId='rate').answer.value"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "kind",
+              "text": "Kind",
+              "type": "string",
+              "readOnly": true,
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "iif(%resource.repeat(item).where(linkId='qty').answer.value > 5, 'bulk', 'single')"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "viaRate2",
+              "text": "Quantity x doubled rate",
+              "type": "decimal",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "%resource.repeat(item).where(linkId='qty').answer.value * %resource.repeat(item).where(linkId='rate2').answer.value"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "tags",
+              "text": "Tag",
+              "type": "group",
+              "repeats": true,
+              "item": [
+                {
+                  "linkId": "w",
+                  "text": "Weight",
+                  "type": "integer"
+                },
+                {
+                  "linkId": "w2",
+                  "text": "Weight x quantity",
+                  "type": "integer",
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                      "valueExpression": {
+                        "language": "text/fhirpath",
+                        "expression": "%resource.repeat(item).where(linkId='w').answer.value * %resource.repeat(item).where(linkId='qty').answer.value"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "linkId": "grand",
+          "text": "Grand total",
+          "type": "decimal",
+          "readOnly": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "%resource.repeat(item).where(linkId='total').answer.value.sum()"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "rows",
+          "text": "Row",
+          "type": "group",
+          "repeats": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-item-control",
+                    "code": "gtable"
+                  }
+                ]
+              }
+            }
+          ],
+          "item": [
+            {
+              "linkId": "a",
+              "text": "A",
+              "type": "integer"
+            },
+            {
+              "linkId": "b",
+              "text": "A x 10",
+              "type": "integer",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "%resource.repeat(item).where(linkId='a').answer.value * 10"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

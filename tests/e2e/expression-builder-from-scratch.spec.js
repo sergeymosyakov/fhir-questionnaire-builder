@@ -25,7 +25,7 @@ import { freshStart } from './helpers/builder.js';
 import { pickCustomSelect, openDropdownItem } from './helpers/dropdown.js';
 import {
   modal, makeForm, openBuilder, addField, applyAndSave, answer,
-  topChain, operandOf, operatorOf, pickKind, pickQuestion, setNumber, answerDate, addDays, makeReadOnly,
+  topChain, operandOf, operatorOf, pickKind, pickQuestion, setNumber, answerDate, addDays, makeReadOnly, makeRepeatable,
 } from './helpers/expr-builder.js';
 
 const result = (page, id) => page.locator(`[data-preview-id="${id}"]`);
@@ -270,12 +270,6 @@ test('A calculated text shows its result without being marked read-only', async 
   await answer(page, '1.1', 2);
   await expect(result(page, '1.2').locator('textarea')).toHaveValue('Low');
 });
-
-const makeRepeatable = async (page, id) => {
-  await page.locator(`[data-node-id="${id}"]`).getByTestId('action-repeatable').click();
-  await page.getByTestId('repeat-modal-toggle').check();
-  await page.getByTestId('repeatableModalApply').click();
-};
 
 test('A calculated number in a repeating question shows its result', async ({ page }) => {
   await makeForm(page, [{ title: 'A', type: 'integer' }, { title: 'Out', type: 'decimal' }]);

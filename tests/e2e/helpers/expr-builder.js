@@ -112,3 +112,11 @@ export async function addField(page, groupId, title, type) {
   await setType(page, nodeId, type);
   return nodeId;
 }
+
+// Marks a group or question repeatable (Repeatable action → toggle → Apply).
+export async function makeRepeatable(page, id) {
+  await page.locator(`[data-node-id="${id}"]`).getByTestId('action-repeatable').first().click();
+  await page.getByTestId('repeat-modal-toggle').check();
+  await page.getByTestId('repeatableModalApply').click();
+  await expect(page.getByTestId('repeatableModal')).toBeHidden();
+}
