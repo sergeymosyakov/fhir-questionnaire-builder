@@ -10,7 +10,7 @@ Open **Settings ▾ → Translate questionnaire…**:
 
 1. **Pick a target language** from the list.
 2. Click **Translate**. Every translatable string — item text, the questionnaire
-   title, and the built-in UI strings shown in the patient view — is
+   title, the labels of answer choices, and the built-in UI strings shown in the patient view — is
    machine-translated in one pass.
 3. **Review and edit** the results in a side-by-side table (original vs.
    translation). The translations are editable, so you can correct anything the
@@ -28,12 +28,15 @@ LibreTranslate or OpenAI, and set the endpoint and API key each one needs.
 
 Once translations exist, use the **language selector** to switch the preview
 between the available languages, so you can see the form as a speaker of each
-language would.
+language would. Question text and the labels of answer choices (dropdowns, radio
+buttons, checklists, open-choice lists, tables) switch together; a choice with no
+translation keeps its original label. Only the label changes — the stored answer
+and any calculation still use the choice's code.
 
 ## How it's stored
 
 Translations are written as FHIR translation extensions (on each item's `_text`,
-and the questionnaire `_title`). Because they live in the questionnaire itself,
+each answer choice's display, and the questionnaire `_title`). Because they live in the questionnaire itself,
 exporting produces a single multi-language `Questionnaire`, and importing one
 restores every language.
 

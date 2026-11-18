@@ -27,6 +27,17 @@ export function _evalAnswerOpts(node, fpCtx) {
   return _evalExpr(node, expr, fpCtx);
 }
 
+// Swap each option's display for its translation in the active language (key: linkId__code); codes stay untouched.
+export function translateOpts(node, opts, rc) {
+  const store = rc?.activeLanguage && rc.translations?.[rc.activeLanguage]?.opts;
+  if (!store) return opts;
+  return opts.map((o) => {
+    const key = `${baseRowId(node.id)}__${o.code}`;
+    const t = Object.hasOwn(store, key) ? store[key] : '';
+    return t ? { ...o, display: t } : o;
+  });
+}
+
 // Repeating single-select dedup (shared by vanilla + React render layers).
 // getValue is injected (rc.getValue / answerStore.get) — no state import here.
 

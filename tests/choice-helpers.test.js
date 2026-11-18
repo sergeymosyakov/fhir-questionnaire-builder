@@ -1,6 +1,6 @@
 // Pure helpers for repeating-select dedup (IH-5563).
 import { describe, it, expect } from 'vitest';
-import { siblingSelectedCodes, filterSiblingSelected, baseRowId } from '../js/nodes/choice-helpers.js';
+import { siblingSelectedCodes, filterSiblingSelected, baseRowId, translateOpts } from '../js/nodes/choice-helpers.js';
 
 describe('baseRowId', () => {
   it('strips the $$n row-address suffix', () => {
@@ -43,5 +43,25 @@ describe('filterSiblingSelected', () => {
 
   it('returns the same array when the sibling set is empty', () => {
     expect(filterSiblingSelected(opts, '', new Set())).toBe(opts);
+  });
+});
+
+describe('translateOpts', () => {
+  const node = { id: 'q1' };
+  const opts = [{ code: 'a', display: 'Apple' }, { code: 'b', display: 'Banana' }];
+  const rc = { activeLanguage: 'es', translations: { es: { opts: { q1__a: 'Manzana', q1__b: '' } } } };
+
+  it('swaps display for the translation and keeps the code', () => {
+    expect(translateOpts(node, opts, rc)).toEqual([{ code: 'a', display: 'Manzana' }, { code: 'b', display: 'Banana' }]);
+  });
+  it('is a no-op without an active language or store', () => {
+    expect(translateOpts(node, opts, { ...rc, activeLanguage: '' })).toBe(opts);
+    expect(translateOpts(node, opts, { activeLanguage: 'fr', translations: rc.translations })).toBe(opts);
+    expect(translateOpts(node, opts, null)).toBe(opts);
+  });
+  it('uses the base linkId for repeating rows and ignores inherited keys', () => {
+    expect(translateOpts({ id: 'q1$$2' }, opts, rc)[0].display).toBe('Manzana');
+    const inherited = { activeLanguage: 'es', translations: { es: { opts: Object.create({ q1__a: 'X' }) } } };
+    expect(translateOpts(node, opts, inherited)[0].display).toBe('Apple');
   });
 });
