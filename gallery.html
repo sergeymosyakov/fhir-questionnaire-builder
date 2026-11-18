@@ -540,10 +540,10 @@
     </section>
     <section class="gp-card" id="corrected-calcium" data-testid="gp-card-corrected-calcium">
       <h3>Corrected calcium (albumin)</h3>
-      <p>Total calcium adjusted for low albumin, in mg/dL: Ca + 0.8 × (4.0 − albumin).</p>
+      <p>Total calcium adjusted for low albumin, in mg/dL: Ca + 0.8 × (4.0 − albumin). The 0.8 is a modified Payne coefficient, within the published 0.75 to 1.0 range; Payne&#39;s 1973 original uses 1.0.</p>
       <p class="gp-label">Inputs</p>
       <ul><li>Total calcium item (Already in mg/dL / Convert from mmol/L)</li><li>Albumin item (Already in g/dL / Convert from g/L)</li></ul>
-      <p class="gp-source">Source: Payne et al. 1973, BMJ 4:643</p>
+      <p class="gp-source">Source: Ca + 0.8 × (4.0 − albumin), a modified Payne form (Payne et al. 1973, BMJ 4:643, uses 1.0, and 0.75 to 1.0 is the published range per Besarab &amp; Caro 1978, J Clin Pathol 31:1369, citing Kleeman et al.)</p>
       <p class="gp-source">Ready-made template: <a href="templates/chemistry-calculations.html" data-testid="gp-template-corrected-calcium-chemistry-calculations">Chemistry Calculations</a></p>
     </section>
     <section class="gp-card" id="ldl-friedewald" data-testid="gp-card-ldl-friedewald">

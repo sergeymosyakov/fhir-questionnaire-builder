@@ -177,7 +177,7 @@
         },
         {
           "linkId": "chem-corrected-ca",
-          "text": "Albumin-corrected calcium (mg/dL)",
+          "text": "Albumin-corrected calcium (mg/dL; modified Payne, 0.8 per g/dL of albumin below 4.0)",
           "type": "decimal",
           "readOnly": true,
           "extension": [
