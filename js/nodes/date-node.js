@@ -22,6 +22,7 @@ export class DateNode extends ItemNode {
       className: 'ctrl-input--date',
       testid:   'date-input',
     });
+    node._syncCalcValue = () => dp.setValue(getValue(node.id) || '');
     wrap.appendChild(dp.el);
     return wrap;
   }
@@ -44,6 +45,7 @@ export class DateTimeNode extends ItemNode {
       className: 'ctrl-input--date',
       testid:   'datetime-input',
     });
+    node._syncCalcValue = () => dp.setValue(getValue(node.id) || '');
     wrap.appendChild(dp.el);
     return wrap;
   }

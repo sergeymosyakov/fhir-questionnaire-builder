@@ -15,6 +15,8 @@
 //   eb-keep-op / eb-keep-value / eb-duration-value / eb-textfn-fn / eb-textfn-chain / eb-textfn-from / eb-textfn-length   keep-if, durations, date parts
 //   action-states / statesModal(+Apply) / states-readonly-chk                  read-only flag on a calculated date
 //   date-input / dp-cal / dp-day                                                the date picker (answers)
+//   action-repeatable / repeat-modal-toggle / repeatableModalApply            repeating questions
+//   (calculated date/text without read-only: date-input data-value, textarea value)
 // Preview answers ([data-preview-id], calculated date [data-calc-id]) and the builder's node containers ([data-node-id]) are the sanctioned non-testid exceptions.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -231,6 +233,80 @@ test('Due date: a date question plus a duration — LMP + 280 days', async ({ pa
 
   const lmp = await answerDate(page, '1.1');
   await expect(page.locator('[data-calc-id="1.2"]')).toHaveText(addDays(lmp, 280));
+});
+
+test('A calculated date shows its result without being marked read-only', async ({ page }) => {
+  await makeForm(page, [{ title: 'LMP', type: 'date' }, { title: 'EDD', type: 'date' }]);
+  await openBuilder(page, '1.2');
+  const top = topChain(page);
+  await pickQuestion(page, operandOf(top, 0), '1.1');
+  await modal(page).getByTestId('eb-add-operand').click();
+  await pickCustomSelect(page, operatorOf(top, 0), '+');
+  await pickKind(page, operandOf(top, 1), 'duration');
+  await operandOf(top, 1).getByTestId('eb-duration-value').fill('280');
+  await applyAndSave(page);
+
+  const lmp = await answerDate(page, '1.1');
+  await expect(result(page, '1.2').getByTestId('date-input')).toHaveAttribute('data-value', addDays(lmp, 280));
+});
+
+test('A calculated text shows its result without being marked read-only', async ({ page }) => {
+  await makeForm(page, [{ title: 'Score', type: 'integer' }, { title: 'Level', type: 'text' }]);
+  await openBuilder(page, '1.2');
+  await pickKind(page, operandOf(topChain(page), 0), 'iif');
+  const box = modal(page).getByTestId('eb-if').first();
+  const cond = box.getByTestId('eb-if-cond');
+  await pickCustomSelect(page, cond.getByTestId('eb-leaf-item'), '1.1');
+  await pickCustomSelect(page, cond.getByTestId('eb-leaf-op'), 'cmp|>');
+  await cond.getByTestId('eb-leaf-value-input').fill('5');
+  for (const [row, value] of [['eb-if-then', 'High'], ['eb-if-else', 'Low']]) {
+    await pickKind(page, box.getByTestId(row), 'text');
+    await box.getByTestId(row).getByTestId('eb-operand-text').fill(value);
+  }
+  await applyAndSave(page);
+
+  await answer(page, '1.1', 9);
+  await expect(result(page, '1.2').locator('textarea')).toHaveValue('High');
+  await answer(page, '1.1', 2);
+  await expect(result(page, '1.2').locator('textarea')).toHaveValue('Low');
+});
+
+const makeRepeatable = async (page, id) => {
+  await page.locator(`[data-node-id="${id}"]`).getByTestId('action-repeatable').click();
+  await page.getByTestId('repeat-modal-toggle').check();
+  await page.getByTestId('repeatableModalApply').click();
+};
+
+test('A calculated number in a repeating question shows its result', async ({ page }) => {
+  await makeForm(page, [{ title: 'A', type: 'integer' }, { title: 'Out', type: 'decimal' }]);
+  await makeRepeatable(page, '1.2');
+  await openBuilder(page, '1.2');
+  const top = topChain(page);
+  await pickQuestion(page, operandOf(top, 0), '1.1');
+  await modal(page).getByTestId('eb-add-operand').click();
+  await pickCustomSelect(page, operatorOf(top, 0), '*');
+  await pickKind(page, operandOf(top, 1), 'num');
+  await setNumber(operandOf(top, 1), 2);
+  await applyAndSave(page);
+
+  await answer(page, '1.1', 5);
+  await expect(result(page, '1.2').locator('.repeat-row input').first()).toHaveValue('10');
+});
+
+test('A calculated date in a repeating question shows its result', async ({ page }) => {
+  await makeForm(page, [{ title: 'LMP', type: 'date' }, { title: 'EDD', type: 'date' }]);
+  await makeRepeatable(page, '1.2');
+  await openBuilder(page, '1.2');
+  const top = topChain(page);
+  await pickQuestion(page, operandOf(top, 0), '1.1');
+  await modal(page).getByTestId('eb-add-operand').click();
+  await pickCustomSelect(page, operatorOf(top, 0), '+');
+  await pickKind(page, operandOf(top, 1), 'duration');
+  await operandOf(top, 1).getByTestId('eb-duration-value').fill('280');
+  await applyAndSave(page);
+
+  const lmp = await answerDate(page, '1.1');
+  await expect(result(page, '1.2').getByTestId('date-input').first()).toHaveAttribute('data-value', addDays(lmp, 280));
 });
 
 test('Today: today\'s date plus a duration', async ({ page }) => {
