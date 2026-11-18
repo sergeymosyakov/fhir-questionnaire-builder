@@ -362,21 +362,6 @@
                   }
                 }
               ]
-            },
-            {
-              "linkId": "apgar1-band",
-              "text": "Result",
-              "type": "string",
-              "readOnly": true,
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression",
-                  "valueExpression": {
-                    "language": "text/fhirpath",
-                    "expression": "iif(%resource.repeat(item).where(linkId='apgar1-total').answer.valueDecimal.exists(), iif(%resource.repeat(item).where(linkId='apgar1-total').answer.valueDecimal < 4, 'Low (0–3)', iif(%resource.repeat(item).where(linkId='apgar1-total').answer.valueDecimal < 7, 'Moderately abnormal (4–6)', 'Reassuring (7–10)')), {})"
-                  }
-                }
-              ]
             }
           ]
         },
@@ -738,7 +723,7 @@
             },
             {
               "linkId": "apgar5-band",
-              "text": "Result",
+              "text": "Result (term and late-preterm infants)",
               "type": "string",
               "readOnly": true,
               "extension": [

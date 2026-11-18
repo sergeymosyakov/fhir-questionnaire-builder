@@ -42,7 +42,6 @@ const EDITABLE = [
   'template:apgar-score#1',
   'template:apgar-score#2',
   'template:apgar-score#3',
-  'template:apgar-score#4',
   'template:asq#1',
   'template:audit-c#1',
   'template:body-measurements#1',
