@@ -11,7 +11,7 @@ import { nextUid } from '../id.js';
 import { joinCodes, splitCodes } from '../fhir/checklist-codec.js';
 import { isCoded, openChoiceText, pickedValue, matchesOption } from '../fhir/open-choice-value.js';
 import {
-  _nodeOpts, _evalAnswerOpts, _resolveColValue, _findRawOpt,
+  _nodeOpts, _evalAnswerOpts, translateOpts, _resolveColValue, _findRawOpt,
   _getColDisplayLabel, _buildColHeader, _buildColRow, _appendOptionExtras,
   _buildAtableControl, siblingSelectedCodes, filterSiblingSelected, baseRowId,
 } from './choice-helpers.js';
@@ -48,7 +48,7 @@ export class ChoiceNode extends ItemNode {
     const wrap = createWrap();
 
     let selected = getValue(node.id) || '';
-    let opts     = _evalAnswerOpts(node, ctx._fpCtx);
+    let opts     = translateOpts(node, _evalAnswerOpts(node, ctx._fpCtx), ctx);
     // Repeating select: hide codes already chosen in sibling rows (keep own).
     if (node.repeats) {
       opts = filterSiblingSelected(opts, selected, siblingSelectedCodes(baseRowId(node.id), node.id, getValue));
@@ -331,7 +331,7 @@ export class RadioNode extends ItemNode {
     const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
 
-    const opts = _evalAnswerOpts(node, ctx._fpCtx);
+    const opts = translateOpts(node, _evalAnswerOpts(node, ctx._fpCtx), ctx);
     if (!opts.length) {
       const msg = document.createElement('span');
       msg.className = 'radio-no-opts';
@@ -399,7 +399,7 @@ export class OpenChoiceNode extends ItemNode {
     const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
 
-    const parsed = _evalAnswerOpts(node, ctx._fpCtx);
+    const parsed = translateOpts(node, _evalAnswerOpts(node, ctx._fpCtx), ctx);
 
     const box = document.createElement('div');
     box.className = 'oc-wrap';
@@ -409,7 +409,8 @@ export class OpenChoiceNode extends ItemNode {
     el.className   = 'oc-input';
     el.placeholder = node._openLabel || 'Choose or type\u2026';
     let current    = getValue(node.id);
-    el.value       = openChoiceText(current);
+    // A picked answer shows the label of the active language (the stored display may predate a language switch)
+    el.value       = (isCoded(current) && parsed.find(o => o.code === current.code)?.display) || openChoiceText(current);
     el.autocomplete = 'off';
 
     // optionsOnly: no free-text allowed — input is read-only, acts as display
@@ -538,7 +539,7 @@ export class ChecklistNode extends ItemNode {
     const { getValue, setValue, onChange, _reCalc } = ctx;
     const wrap = createWrap();
 
-    const opts = _evalAnswerOpts(node, ctx._fpCtx);
+    const opts = translateOpts(node, _evalAnswerOpts(node, ctx._fpCtx), ctx);
     if (!opts.length) {
       const msg = document.createElement('span');
       msg.className = 'radio-no-opts';

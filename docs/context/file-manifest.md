@@ -551,6 +551,7 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `tests/e2e/translation-providers.spec.js` | E2E tests — translation providers |
 | `tests/e2e/translation-xhtml.spec.js` | E2E tests — XHTML/Markdown translation review table |
 | `tests/e2e/translation.spec.js` | E2E tests — questionnaire translation |
+| `tests/e2e/option-translations.spec.js` | E2E — answer option labels follow the preview language (select/radio/checklist/open-choice/atable) |
 | `tests/e2e/unit-valueset.spec.js` | E2E tests — `unitValueSet` export round-trip |
 | `tests/e2e/unknown-extensions.spec.js` | E2E tests — unknown extensions pass-through |
 | `tests/e2e/validate.spec.js` | E2E tests — Validate modal |

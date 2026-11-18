@@ -1,0 +1,368 @@
+{
+  "resourceType": "Questionnaire",
+  "status": "draft",
+  "title": "Option translations",
+  "item": [
+    {
+      "linkId": "sel",
+      "text": "Select",
+      "type": "choice",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "urn:t",
+            "code": "y",
+            "display": "Yes"
+          },
+          "_valueCoding": {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                  "extension": [
+                    {
+                      "url": "lang",
+                      "valueCode": "es"
+                    },
+                    {
+                      "url": "content",
+                      "valueString": "S\u00ed"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "urn:t",
+            "code": "n",
+            "display": "No"
+          },
+          "_valueCoding": {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                  "extension": [
+                    {
+                      "url": "lang",
+                      "valueCode": "es"
+                    },
+                    {
+                      "url": "content",
+                      "valueString": "No hay"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "drop-down"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "rad",
+      "text": "Radio",
+      "type": "choice",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "urn:t",
+            "code": "y",
+            "display": "Yes"
+          },
+          "_valueCoding": {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                  "extension": [
+                    {
+                      "url": "lang",
+                      "valueCode": "es"
+                    },
+                    {
+                      "url": "content",
+                      "valueString": "S\u00ed"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "urn:t",
+            "code": "n",
+            "display": "No"
+          },
+          "_valueCoding": {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                  "extension": [
+                    {
+                      "url": "lang",
+                      "valueCode": "es"
+                    },
+                    {
+                      "url": "content",
+                      "valueString": "No hay"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "chk",
+      "text": "Checklist",
+      "type": "choice",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "urn:t",
+            "code": "y",
+            "display": "Yes"
+          },
+          "_valueCoding": {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                  "extension": [
+                    {
+                      "url": "lang",
+                      "valueCode": "es"
+                    },
+                    {
+                      "url": "content",
+                      "valueString": "S\u00ed"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "urn:t",
+            "code": "n",
+            "display": "No"
+          },
+          "_valueCoding": {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                  "extension": [
+                    {
+                      "url": "lang",
+                      "valueCode": "es"
+                    },
+                    {
+                      "url": "content",
+                      "valueString": "No hay"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "check-box"
+              }
+            ]
+          }
+        }
+      ],
+      "repeats": true
+    },
+    {
+      "linkId": "oc",
+      "text": "Open choice",
+      "type": "open-choice",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "urn:t",
+            "code": "y",
+            "display": "Yes"
+          },
+          "_valueCoding": {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                  "extension": [
+                    {
+                      "url": "lang",
+                      "valueCode": "es"
+                    },
+                    {
+                      "url": "content",
+                      "valueString": "S\u00ed"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "urn:t",
+            "code": "n",
+            "display": "No"
+          },
+          "_valueCoding": {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                  "extension": [
+                    {
+                      "url": "lang",
+                      "valueCode": "es"
+                    },
+                    {
+                      "url": "content",
+                      "valueString": "No hay"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "drop-down"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "atb",
+      "text": "Atable",
+      "type": "choice",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "system": "urn:t",
+            "code": "y",
+            "display": "Yes"
+          },
+          "_valueCoding": {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                  "extension": [
+                    {
+                      "url": "lang",
+                      "valueCode": "es"
+                    },
+                    {
+                      "url": "content",
+                      "valueString": "S\u00ed"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "valueCoding": {
+            "system": "urn:t",
+            "code": "n",
+            "display": "No"
+          },
+          "_valueCoding": {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                  "extension": [
+                    {
+                      "url": "lang",
+                      "valueCode": "es"
+                    },
+                    {
+                      "url": "content",
+                      "valueString": "No hay"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "atable"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

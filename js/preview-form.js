@@ -371,6 +371,8 @@ export class PreviewForm {
       fhirBase: this._fhirBase(),
       corsProxy: this._session.config?.corsProxy ?? serverConfig.get(CONFIG_KEYS.CORS_PROXY),
       _fpCtx: this._lastCtx,
+      activeLanguage: _rc.activeLanguage,
+      translations: _rc.translations,
     };
     const el = node.buildControl(ctx);
     this._applyA11yLabels(el, node);
