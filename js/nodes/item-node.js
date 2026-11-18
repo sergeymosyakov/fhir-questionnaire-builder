@@ -234,10 +234,11 @@ export class ItemNode extends BaseNode {
   // (otherwise typing elsewhere recomputes the value but never touches the DOM).
   _wireCalcControlRefresh(el, rc) {
     const field = el?.querySelector?.('input, select, textarea');
-    if (!field) return;
+    if (!field && !this._syncCalcValue) return;
     this._refreshCalcBadge = () => {
       const v = rc.getValue(this.id);
-      field.value = answerText(v);
+      if (field) field.value = answerText(v);
+      this._syncCalcValue?.();
       this._syncOpenChoice?.();
     };
   }
@@ -257,7 +258,9 @@ export class ItemNode extends BaseNode {
       const rowEl    = document.createElement('div');
       rowEl.className = 'repeat-row';
 
-      rowEl.appendChild(rc.buildControl(fakeNode, i === 0 ? iconEl : null, onAfterChange));
+      const control = rc.buildControl(fakeNode, i === 0 ? iconEl : null, onAfterChange);
+      rowEl.appendChild(control);
+      if (i === 0 && this._calculatedExpr) this._wireCalcControlRefresh(control, rc); // only the first row holds the calculated value
 
       if (n > 0) {
         const rm = document.createElement('button');
