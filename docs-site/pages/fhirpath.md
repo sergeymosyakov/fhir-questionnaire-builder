@@ -100,7 +100,12 @@ values instead of typing paths and accessors:
   Otherwise if** adds one more step, in the order they are checked. A condition can be
   a question, "at least one of several questions has an answer", or a calculation
   ("*Weight ÷ (Height × Height)* < 18.5", "… can be calculated"); a calculation is shown
-  as a short formula and **edit** opens its blocks. Rounding at the bottom, **Round the
+  as a short formula and **edit** opens its blocks. A condition can also look through
+  the answers of a question anywhere in the form with **repeat over answers**: pick the
+  question, optionally filter its answers, and choose what to ask about them (any
+  answer exists, how many, the first, …), then optionally compare the result with a
+  value (the conditions of the ASQ template are built this way). The same
+  **Repeat over answers** is available as a value in a calculation. Rounding at the bottom, **Round the
   result**, applies to the entire expression, not to one branch.
 - **Answers → value** (`calculatedExpression`) — a **collection pipeline** over a
   question's answers: pick a source question, filter the answers — keep or drop
