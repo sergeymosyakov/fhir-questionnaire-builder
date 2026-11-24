@@ -86,7 +86,13 @@ test('a repeat condition can be built from the condition kinds', async ({ page }
   await expect(page.getByTestId('eb-pipe-source')).toBeVisible();
   await expect(page.getByTestId('eb-pipe-reduce')).toHaveAttribute('data-value', 'exists'); // a condition asks yes/no
   await expect(page.getByTestId('eb-preview-str')).toContainText('.exists()');
-  await pickCustomSelect(page, 'eb-pipe-reduce', 'count');
+  await pickCustomSelect(page, 'eb-repeat-op', '=');
+  await expect(page.getByTestId('eb-repeat-value')).toHaveAttribute('data-value', 'true'); // a yes/no is compared with true / false
+  await expect(page.getByTestId('eb-preview-str')).toContainText('.exists() = true');
+  await pickCustomSelect(page, 'eb-repeat-value', 'false');
+  await expect(page.getByTestId('eb-preview-str')).toContainText('.exists() = false');
+  await pickCustomSelect(page, 'eb-pipe-reduce', 'count'); // a count is compared with a number
+  await expect(page.getByTestId('eb-repeat-value')).not.toHaveAttribute('data-value'); // no true/false list any more: a number box
   await pickCustomSelect(page, 'eb-repeat-op', '>');
   await page.getByTestId('eb-repeat-value').fill('1');
   await expect(page.getByTestId('eb-preview-str')).toContainText('.count() > 1');

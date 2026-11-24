@@ -10,6 +10,13 @@ import { valueAccessor } from '../../../../fhir/expr-builder/value-paths.js';
 const OP_LABEL = { '=': '=', '!=': '≠', '>': '>', '<': '<', '>=': '≥', '<=': '≤' };
 const NO_COMPARE = '';
 const OPS = Object.keys(OP_LABEL);
+const isNumber = (v) => /^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(String(v).trim()) && Number.isFinite(Number(v)); // decimal notation only: not '', ' ', 0x10, Infinity, 1e999
+// A typed value kept when it still fits the new type, else true (yes/no) or empty.
+const fitValue = (value, type) => {
+  if (type === 'boolean') return value === 'true' || value === 'false' ? value : 'true';
+  if (type === 'number') return isNumber(value) ? value : '';
+  return value === 'true' || value === 'false' ? '' : value;
+};
 const knows = (items, pipe) => items.some((it) => it.id === pipe.source.linkId);
 
 export class RepeatLeaf extends LeafKind {
@@ -45,7 +52,7 @@ export class RepeatLeaf extends LeafKind {
     if (!this.cmp) return pipe.reduce?.fn === 'exists' ? pipe : null; // without a comparison only a yes/no is a condition
     const { op, value } = this.cmp;
     const dataType = this._type();
-    if (value === '' || (dataType === 'number' && isNaN(Number(value))) || (dataType === 'boolean' && value !== 'true' && value !== 'false')) return null;
+    if (value === '' || (dataType === 'number' && !isNumber(value)) || (dataType === 'boolean' && value !== 'true' && value !== 'false')) return null;
     return compare(op, pipe, literal(dataType, dataType === 'number' ? Number(value) : value));
   }
 
@@ -67,7 +74,49 @@ export class RepeatLeaf extends LeafKind {
     return this.cmp.dataType && this.cmp.basis === derived ? this.cmp.dataType : derived;
   }
 
-  _syncValueType() { if (this._valueInput && this.cmp) this._valueInput.type = this._type() === 'number' ? 'number' : 'text'; }
+  _newComparison(op) {
+    const cmp = { op, value: '', dataType: null };
+    this.cmp = cmp; // _type() reads it
+    cmp.value = fitValue('', this._type());
+    return cmp;
+  }
+
+  // The value box follows the compared type; the typed value is carried over only when it still fits.
+  _syncValueType() {
+    if (!this._valueHost || !this.cmp) return;
+    const type = this._type();
+    if (type !== this._shownType) { this.cmp.value = fitValue(this.cmp.value, type); this._drawValue(); }
+  }
+
+  _drawValue() {
+    this._valueHost.innerHTML = '';
+    this._valueInput = null;
+    if (!this.cmp) return;
+    const type = this._type();
+    this._shownType = type;
+    if (type === 'boolean') {
+      this.cmp.value = fitValue(this.cmp.value, type); // the model must say what the select shows
+      const pick = createCustomSelect({
+        items: [{ value: 'true', label: 'true' }, { value: 'false', label: 'false' }],
+        value: this.cmp.value,
+        className: 'sc-trigger--sm',
+        testid: 'eb-repeat-value',
+        ariaLabel: 'Compare with',
+        onChange: (v) => { this.cmp.value = v; this._notify?.(); },
+      });
+      this._valueHost.append(pick.el);
+      return;
+    }
+    const val = document.createElement('input');
+    this._valueInput = val;
+    val.type = type === 'number' ? 'number' : 'text';
+    val.className = 'eb-val-inp';
+    val.dataset.testid = 'eb-repeat-value';
+    val.setAttribute('aria-label', 'Compare with');
+    val.value = this.cmp.value;
+    val.addEventListener('input', () => { this.cmp.value = val.value; this._notify?.(); });
+    this._valueHost.append(val);
+  }
 
   render(host, { notify, rerender }) {
     this._notify = notify;
@@ -78,20 +127,11 @@ export class RepeatLeaf extends LeafKind {
       className: 'sc-trigger--sm',
       testid: 'eb-repeat-op',
       ariaLabel: 'Compare the result',
-      onChange: (v) => { this.cmp = v === NO_COMPARE ? null : (this.cmp ? { ...this.cmp, op: v } : { op: v, value: '', dataType: null }); rerender(); notify(); },
+      onChange: (v) => { this.cmp = v === NO_COMPARE ? null : (this.cmp ? { ...this.cmp, op: v } : this._newComparison(v)); rerender(); notify(); },
     });
-    host.append(this.editor.el, op.el);
-    this._valueInput = null;
-    if (!this.cmp) return;
-    const val = document.createElement('input');
-    this._valueInput = val;
-    this._syncValueType();
-    val.className = 'eb-val-inp';
-    val.dataset.testid = 'eb-repeat-value';
-    val.setAttribute('aria-label', 'Compare with');
-    val.value = this.cmp.value;
-    val.addEventListener('input', () => { this.cmp.value = val.value; notify(); });
-    host.append(val);
+    this._valueHost = document.createElement('span');
+    host.append(this.editor.el, op.el, this._valueHost);
+    this._drawValue();
   }
 }
 

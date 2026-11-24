@@ -104,9 +104,11 @@ values instead of typing paths and accessors:
   the answers of a question anywhere in the form with **repeat over answers**: pick the
   question, optionally filter its answers, and choose what to ask about them (any
   answer exists, how many, the first, …), then optionally compare the result with a
-  value (the conditions of the ASQ template are built this way). The same
-  **Repeat over answers** is available as a value in a calculation. Rounding at the bottom, **Round the
-  result**, applies to the entire expression, not to one branch.
+  value (the conditions of the ASQ template are built this way). The **Repeat over
+  answers** operand is also available as a value in a calculation. When the question you
+  ask about is "any exists (yes/no)", the comparison is made against **true** or
+  **false**, chosen from a list; a count is compared with a number. Rounding at the
+  bottom, **Round the result**, applies to the entire expression, not to one branch.
 - **Answers → value** (`calculatedExpression`) — a **collection pipeline** over a
   question's answers: pick a source question, filter the answers — keep or drop
   values against a set (`intersect` / `exclude`), take unique values, or keep where
