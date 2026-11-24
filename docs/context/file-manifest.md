@@ -490,7 +490,8 @@ Split out of `docs/CONTEXT.md` (see that file for the rest of the architecture d
 | `tests/e2e/enable-when-quantity.spec.js` | E2E tests — `answerQuantity` enableWhen preview |
 | `tests/e2e/entry-format.spec.js` | E2E tests — `entryFormat` import/render |
 | `tests/e2e/expression-builder-pipeline.spec.js` | E2E tests — Expression Builder pipeline mode |
-| `tests/e2e/expression-builder-repeat.spec.js` | E2E — repeat(item) conditions of the ASQ template open as controls and round-trip; Repeat over answers as a condition and as a value operand |
+| `tests/e2e/expression-builder-repeat.spec.js` | E2E — repeat(item) conditions of the ASQ template open as controls and round-trip; Repeat over answers as a condition (incl. true/false for a yes/no) and as a value operand |
+| `tests/e2e/expression-builder-repeat-templates.spec.js` | E2E — every template expression written with repeat(item) opens in the builder as controls, none as text, and applies unchanged (one test per template, read from `templates/`) |
 | `tests/e2e/expression-builder-two-way.spec.js` | E2E tests — Expression Builder two-way mode |
 | `tests/e2e/expression-builder.spec.js` | E2E tests — Expression Builder modal |
 | `tests/e2e/expression-gallery.spec.js` | E2E tests — Expression Gallery templates |

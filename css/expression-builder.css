@@ -170,6 +170,9 @@
 }
 .eb-leaf-row { flex-direction: row; align-items: flex-start; gap: 2px; flex-wrap: wrap; }
 .eb-leaf { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; }
+/* a leaf holding a pipeline spans several rows: its pencil and links sit on the first row, not in the middle */
+.eb-leaf:has(.eb-pipe) { align-items: flex-start; }
+.eb-leaf:has(.eb-pipe) > .eb-leaf-link { margin-top: calc((var(--ctrl-h, 30px) - 18px) / 2); }
 .eb-leaf-text {
   min-width: 260px;
   flex: 1;
@@ -305,6 +308,7 @@
 /* pipeline (codes → text) */
 .eb-pipe { display: flex; flex-direction: column; gap: 8px; }
 .eb-pipe-filters { display: flex; flex-direction: column; gap: 6px; }
+.eb-pipe > .eb-add { align-self: flex-start; } /* as wide as its text, at the left */
 .eb-pipe-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .eb-pipe-lbl { font-size: 12px; color: #6b7280; }
 .eb-pipe-set { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }

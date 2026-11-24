@@ -252,9 +252,11 @@ as a short formula and <strong>edit</strong> opens its blocks. A condition can a
 the answers of a question anywhere in the form with <strong>repeat over answers</strong>: pick the
 question, optionally filter its answers, and choose what to ask about them (any
 answer exists, how many, the first, …), then optionally compare the result with a
-value (the conditions of the ASQ template are built this way). The same
-<strong>Repeat over answers</strong> is available as a value in a calculation. Rounding at the bottom, <strong>Round the
-result</strong>, applies to the entire expression, not to one branch.</li>
+value (the conditions of the ASQ template are built this way). The <strong>Repeat over
+answers</strong> operand is also available as a value in a calculation. When the question you
+ask about is &quot;any exists (yes/no)&quot;, the comparison is made against <strong>true</strong> or
+<strong>false</strong>, chosen from a list; a count is compared with a number. Rounding at the
+bottom, <strong>Round the result</strong>, applies to the entire expression, not to one branch.</li>
 <li><strong>Answers → value</strong> (<code>calculatedExpression</code>) — a <strong>collection pipeline</strong> over a
 question&#39;s answers: pick a source question, filter the answers — keep or drop
 values against a set (<code>intersect</code> / <code>exclude</code>), take unique values, or keep where
