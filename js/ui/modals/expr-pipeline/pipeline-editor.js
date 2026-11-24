@@ -32,14 +32,16 @@ const REDUCE_OPS = [
   { value: '', label: 'leave as list' },
 ];
 
-// { items: answerable, initialBlock, onChange } → { el, getExpr }.
+// { items: answerable, initialBlock, onChange, defaultReduce, note } → { el, getExpr, getBlock }.
 export function createPipelineEditor(opts) {
   return new PipelineEditor(opts).mount();
 }
 
 class PipelineEditor {
-  constructor({ items = [], initialBlock = null, onChange } = {}) {
+  constructor({ items = [], initialBlock = null, onChange, defaultReduce = 'join', note = true } = {}) {
+    this._note = note;
     this._items = items;
+    this._defaultReduce = defaultReduce;
     this._onChange = onChange || (() => {});
     this._seed(initialBlock);
   }
@@ -55,13 +57,19 @@ class PipelineEditor {
       if (f.op === 'compare') return { op: 'compare', cmp: f.cmp, value: String(f.value), dataType: f.dataType };
       return { op: f.op, members: [...(f.set?.members || [])] };
     });
-    this._reduce = block?.reduce
-      ? { fn: block.reduce.fn, sep: block.reduce.sep ?? ', ' }
-      : { fn: 'join', sep: ', ' };
+    // A block without a reduce stays a list; only a brand-new pipeline starts as "join".
+    const reduce = block ? block.reduce || { fn: '' } : { fn: this._defaultReduce };
+    this._reduce = { fn: reduce.fn, sep: reduce.sep ?? ', ' };
   }
 
   getExpr() {
-    if (!this._source.linkId) return '';
+    const block = this.getBlock();
+    return block ? emit(block) : '';
+  }
+
+  // The pipeline block, or null while no question is chosen.
+  getBlock() {
+    if (!this._source.linkId) return null;
     const numeric = this._numericSource();
     const filters = this._filters
       .filter((f) => {
@@ -77,17 +85,19 @@ class PipelineEditor {
     const reduce = this._reduce.fn === 'join'
       ? { fn: 'join', sep: this._reduce.sep }
       : (this._reduce.fn ? { fn: this._reduce.fn } : null);
-    return emit(pipeline({ linkId: this._source.linkId, accessor: this._source.accessor }, filters, reduce));
+    return pipeline({ linkId: this._source.linkId, accessor: this._source.accessor }, filters, reduce);
   }
 
   mount() {
     this.el = document.createElement('div');
     this.el.className = 'eb-pipe';
 
-    const note = document.createElement('div');
-    note.className = 'eb-note';
-    note.textContent = 'Take the answers of one question, filter them, then reduce to a single value.';
-    this.el.appendChild(note);
+    if (this._note) {
+      const note = document.createElement('div');
+      note.className = 'eb-note';
+      note.textContent = 'Take the answers of one question, filter them, then reduce to a single value.';
+      this.el.appendChild(note);
+    }
 
     this.el.appendChild(this._buildSourceRow());
 
@@ -171,9 +181,7 @@ class PipelineEditor {
     return row;
   }
 
-  _numericSource() {
-    return /valueInteger|valueDecimal|valueQuantity/.test(this._source.accessor || ''); // NOSONAR — fixed value-accessor alternation, not user input
-  }
+  _numericSource() { return isNumericAccessor(this._source.accessor); }
 
   _orderedSource() {
     return /valueInteger|valueDecimal|valueQuantity|valueDate|valueDateTime|valueInstant|valueTime/.test(this._source.accessor || ''); // NOSONAR — fixed value-accessor alternation, not user input
@@ -294,6 +302,11 @@ class PipelineEditor {
     inp.addEventListener('input', () => { this._reduce.sep = inp.value; this._onChange(); });
     this._reduceExtra.append(sepLbl, inp);
   }
+}
+
+// An answer accessor that holds a number.
+export function isNumericAccessor(accessor) {
+  return /valueInteger|valueDecimal|valueQuantity/.test(accessor || ''); // NOSONAR — fixed value-accessor alternation, not user input
 }
 
 // The op-select value for a filter row: compare filters encode the comparator.

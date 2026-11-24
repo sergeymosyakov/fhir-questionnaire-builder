@@ -12,6 +12,7 @@ import './duration.js';
 import './today.js';
 import './text-fn.js';
 import './text.js';
+import './repeat.js';
 
 export { operandKinds, operandKind, registerOperand } from './registry.js';
 export { OperandKind } from './operand-kind.js';

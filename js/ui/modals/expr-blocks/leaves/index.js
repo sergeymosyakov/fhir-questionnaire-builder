@@ -2,6 +2,7 @@
 // its own file, register it, and import it below — the leaf editor picks it up through the registry.
 import './any-answered.js';
 import './is-yes.js';
+import './repeat.js'; // before value-compare.js: it would otherwise claim a number compared with a repeat
 import './value-compare.js';
 import './value-exists.js';
 
