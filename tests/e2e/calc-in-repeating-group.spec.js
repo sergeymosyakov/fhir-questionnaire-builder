@@ -21,10 +21,13 @@ import {
 const entry = (page, i) => page.locator('[data-rg-group="1"] > .rg-inst').nth(i);
 const field = (page, i, id) => entry(page, i).locator(`[data-preview-id="${id}"]`);
 
+// A commit re-renders the form shortly after (debounced); typing into the next field before that render lands
+// loses the typed value, so wait for the render to finish before returning.
 async function commit(page) {
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  const rendered = page.evaluate(() => new Promise((r) => document.addEventListener('preview:render-done', r, { once: true })));
   await page.getByTestId('preview-search-input').click();
-  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await rendered;
 }
 const enter = async (page, i, id, value) => {
   await field(page, i, id).locator('input').fill(String(value));
