@@ -49,6 +49,33 @@ up, the builder can send the questionnaire (or response) to a validator and show
 the returned issues. This is optional — the live checks above work entirely in the
 browser with no server.
 
+## Check my form (calculated results)
+
+Scores and calculators can hide mistakes that no single answer reveals — for example a
+severity band that can never be reached because a threshold was mistyped. Open
+**⚙ Settings ▾ → ✅ Check my form…** and the builder tries many answer combinations
+(everything at the lowest and highest answer, one question at a time, questions left
+unanswered, and so on) on every calculation in the form. It then lists:
+
+- **Some results can never appear** — the text results (such as "Moderate depression") that
+  the calculation is written to give but that no combination of answers produces. Fix the
+  thresholds or conditions of that calculation.
+- **Never produces a result** — no combination of answers gives the calculation a value.
+- **Not checked** — the calculation reads a question that cannot be tried automatically,
+  such as a number with no minimum and maximum, or a date. Setting a minimum and maximum
+  on number questions lets them be checked.
+
+Each row has a ↗ button that jumps to the calculation in the builder. **Open full report** opens a separate page with the questionnaire that was checked (JSON, collapsed), a summary per calculation, and one table of every answer combination that was tried: a row per combination, the answers given, and a column with the result of each calculated field. Use **Print / Save as PDF** there to keep it. The check runs
+entirely in your browser and changes nothing in the questionnaire.
+
+Treat the list as a pointer to review, not a verdict:
+
+- It only looks at questions outside repeating groups.
+- It ignores Show When rules, so an answer to a hidden question is still tried.
+- It reads the results a calculation is written to give from its `iif(...)` branches, so a
+  result produced another way is not checked.
+- On a very large form not every combination is tried, and the list says so.
+
 ## Quality audit (advisory, separate from validation)
 
 Alongside validation there's a separate **Quality audit** — a set of advisory

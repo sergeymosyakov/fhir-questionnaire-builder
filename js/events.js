@@ -88,6 +88,7 @@ export const AppEvents = Object.freeze({
   LANGUAGE_CHANGED:    'language-changed',
   TRANSLATE_REQUESTED: 'translate-requested',
   FHIRPATH_TESTER_REQUESTED: 'fhirpath-tester-requested',
+  CHECK_FORM_REQUESTED: 'check-form-requested',
 
   // ── Builder utilities ──────────────────────────────────────────────────────
   // Dispatched by nodes/modals when they change FHIR data that requires

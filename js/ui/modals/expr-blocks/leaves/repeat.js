@@ -130,7 +130,16 @@ export class RepeatLeaf extends LeafKind {
       onChange: (v) => { this.cmp = v === NO_COMPARE ? null : (this.cmp ? { ...this.cmp, op: v } : this._newComparison(v)); rerender(); notify(); },
     });
     this._valueHost = document.createElement('span');
-    host.append(this.editor.el, op.el, this._valueHost);
+    const lbl = document.createElement('span');
+    lbl.className = 'eb-pipe-lbl';
+    lbl.textContent = 'Compare result';
+    const cmp = document.createElement('div');
+    cmp.className = 'eb-pipe-row';
+    cmp.append(lbl, op.el, this._valueHost);
+    const col = document.createElement('div');
+    col.className = 'eb-repeat';
+    col.append(this.editor.el, cmp); // one column: the pipeline, then its comparison on its own line
+    host.append(col);
     this._drawValue();
   }
 }
