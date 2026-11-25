@@ -24,12 +24,12 @@ import { loadFixtureFile } from './helpers/load-fixture.js';
 
 const TEMPLATE = path.resolve('templates/phq-9.template.json');
 
-async function load(page, file) {
+async function load(page, file, ready = 'phq9-severity') {
   await page.addInitScript(() => localStorage.clear());
   await page.goto('/');
   await page.waitForSelector('[data-testid="add-menu-btn"]', { timeout: 10_000 });
   await loadFixtureFile(page, file);
-  await expect(page.locator('[data-preview-id="phq9-severity"]')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator(`[data-preview-id="${ready}"]`)).toBeVisible({ timeout: 10_000 });
 }
 
 async function openCheck(page) {
@@ -188,4 +188,11 @@ test('the report of the healthy PHQ-9 template is built from the right numbers',
   const csv = fs.readFileSync(await download.path(), 'utf8');
   expect(csv).toContain('"0","Minimal depression"');
   expect(csv).toContain('"27","Severe depression"');
+});
+
+test('a calculation on a date (expected delivery date) is checked, not skipped', async ({ page }) => {
+  await load(page, path.resolve('templates/pregnancy-dating.template.json'), 'preg-edd');
+  await openCheck(page);
+  await expect(page.getByTestId('check-form-summary')).toContainText('behave as expected', { timeout: 30_000 });
+  await expect(page.getByTestId('check-form-row').filter({ hasText: 'Not checked' })).toHaveCount(0);
 });

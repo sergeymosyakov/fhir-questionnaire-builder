@@ -157,6 +157,40 @@ describe('checkForm', () => {
     expect([i.lo, i.hi]).toEqual([1, 3]);
   });
 
+  it('tries dates around today, so a calculation on a date is checked', async () => {
+    const d = { id: 'd', type: 'item', itemType: 'date', title: 'Visit', children: [] };
+    const expr = `iif(${ref('d', 'valueDate')} > today(), 'Future', iif(${ref('d', 'valueDate')} < today() - 1 year, 'Old', 'Recent'))`;
+    const { calcs } = await run([d, calc('c', expr)]);
+    expect(calcs[0]).toMatchObject({ status: 'ok', sampled: [expect.stringContaining('Visit (')] });
+  });
+
+  it('reports a date band that needs a date far from today as possibly missed', async () => {
+    const d = { id: 'd', type: 'item', itemType: 'date', children: [] };
+    const { calcs } = await run([d, calc('c', `iif(${ref('d', 'valueDate')} < @1900-01-01, 'Ancient', 'Modern')`)]);
+    expect(calcs[0]).toMatchObject({ status: 'unreachable', missed: ['Ancient'] });
+  });
+
+  it('tries a dateTime like a date, inside a date limit', async () => {
+    const today = new Date();
+    const iso = (y) => `${today.getFullYear() + y}-01-01`;
+    const [i] = collectInputs([{ id: 'dt', type: 'item', itemType: 'dateTime', _minValueRaw: iso(-2), _maxValueRaw: iso(2), children: [] }]);
+    expect(i.sampled).toBe(false);
+    expect(i.values.length).toBeGreaterThan(1);
+    expect(i.values.every((v) => v.endsWith('T12:00:00') && v.slice(0, 10) >= iso(-2) && v.slice(0, 10) <= iso(2))).toBe(true);
+  });
+
+  it('tries ages in calendar years, up to 100 years back', () => {
+    const [i] = collectInputs([{ id: 'b', type: 'item', itemType: 'date', children: [] }]);
+    const years = i.values.map((v) => new Date().getFullYear() - Number(v.slice(0, 4)));
+    expect(years).toEqual(expect.arrayContaining([100, 50, 25, 1, 0, -1, -25, -50]));
+  });
+
+  it('combines two dates in one calculation', async () => {
+    const date = (id) => ({ id, type: 'item', itemType: 'date', children: [] });
+    const diff = `iif(${ref('b', 'valueDate')} < ${ref('a', 'valueDate')} - 10 years, 'Long', 'Short')`;
+    expect((await run([date('a'), date('b'), calc('c', diff)])).calcs[0].status).toBe('ok');
+  });
+
   it('leaves a bounded number untouched', async () => {
     const n = { id: 'n', type: 'item', itemType: 'integer', _minValue: 0, _maxValue: 10, children: [] };
     expect((await run([n, calc('c', `iif(${ref('n', 'valueInteger')} > 5, 'High', 'Low')`)])).calcs[0].sampled).toEqual([]);
