@@ -17,6 +17,7 @@ export function loadFhirpath() {
   // runInThisContext (not new Function) so a bare top-level `var` from an esbuild
   // --global-name IIFE hoists onto globalThis, same as a real browser <script> tag.
   runInThisContext(src, { filename: 'lib/fhirpath.min.js' });
+  runInThisContext(readFileSync(join(here, '..', '..', 'lib', 'fhirpath.r4.min.js'), 'utf8'), { filename: 'lib/fhirpath.r4.min.js' }); // the model types dates as the app does
   cached = g.fhirpath || g.window.fhirpath;
   return cached;
 }

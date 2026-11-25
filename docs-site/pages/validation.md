@@ -63,7 +63,9 @@ unanswered, and so on) on every calculation in the form. It then lists:
 - **Never shown** — a question whose Show When rule none of the tried answers satisfies, so nobody could answer it. Check the rule.
 - **Never produces a result** — no combination of answers gives the calculation a value.
 - **Not checked** — the calculation reads a question that cannot be tried automatically,
-  such as a date or a multiple-choice list.
+  such as a multiple-choice list.
+
+A date question is tried with dates around today: a day, week, month, year, 25 and 50 years before and after it, and 100 years back (a date and time question gets the same days at noon). A date limit set on the question is respected. The check cannot know whether the question is a birth date or a last-period date, so these are spread both ways; a result that needs a date far from today can be missed, and the row says so. Because the dates move with today, the answers in the report change from day to day.
 
 A number question with no minimum or maximum is tried with numbers from 1 to 100 (a fixed spread plus a few hundred repeatable random sets, so the same form always gives the same report; if only one limit is set, the range starts or ends there). If a result needs other numbers, the row says which range was tried: set the minimum and maximum on that question to check it properly. A Show When rule that reads such a number is not judged.
 

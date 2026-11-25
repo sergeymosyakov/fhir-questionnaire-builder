@@ -3,10 +3,12 @@ import { rawOptsToPairs } from '../../utils.js';
 
 const CHOICE = new Set(['select', 'radio', 'open-choice']);
 const NUMBER = new Set(['integer', 'decimal']);
+const DATE = new Set(['date', 'dateTime']);
+const SHIFTS = [{ y: -100 }, { y: -50 }, { y: -25 }, { y: -1 }, { m: -1 }, { d: -7 }, { d: -1 }, {}, { d: 1 }, { d: 7 }, { m: 1 }, { y: 1 }, { y: 25 }, { y: 50 }]; // an age, a past event, a due date: calendar steps from today
 const MIN_SCENARIOS = 300;
 const MAX_SCENARIOS = 1500;
 const RANDOM_SETS = 300; // formulas of several unbounded numbers need matching pairs
-const PER_INPUT = 7; // ladder (2), values and unanswered (up to 5) each question needs
+const PER_INPUT = 11; // ladder (2), values and unanswered (up to 9) each question needs
 
 // Every question the generator can answer, in form order. Questions inside a repeating group and calculated ones are not inputs.
 export function collectInputs(nodes, inGroup = false, out = []) {
@@ -28,6 +30,19 @@ function inputOf(n) {
     return codes.length ? { id: n.id, kind: 'choice', values: codes, lo: codes[0], hi: codes[codes.length - 1] } : null;
   }
   if (n.itemType === 'checkbox') return { id: n.id, kind: 'boolean', values: [false, true], lo: false, hi: true };
+  if (DATE.has(n.itemType)) { // relative to today: nobody knows if it is a birth date or the last period
+    const day = ({ y = 0, m = 0, d = 0 }) => {
+      const t = new Date();
+      t.setFullYear(t.getFullYear() + y, t.getMonth() + m, t.getDate() + d);
+      return [t.getFullYear(), t.getMonth() + 1, t.getDate()].map((x, i) => String(x).padStart(i ? 2 : 4, '0')).join('-'); // local, as the app's today()
+    };
+    const dayOf = (v) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v) ? v.slice(0, 10) : null);
+    const [min, max] = [dayOf(n._minValueRaw), dayOf(n._maxValueRaw)];
+    let days = SHIFTS.map(day).filter((v) => (!min || v >= min) && (!max || v <= max));
+    if (!days.length) days = [min ?? max];
+    const values = days.map((v) => (n.itemType === 'date' ? v : `${v}T12:00:00`));
+    return { id: n.id, kind: 'date', values, lo: values[0], hi: values[values.length - 1], sampled: !(min && max) };
+  }
   if (NUMBER.has(n.itemType)) { // without limits: positive numbers 1-100, a spread rather than a guess at a realistic range
     const given = (v) => Number.isFinite(v);
     const whole = n.itemType === 'integer';

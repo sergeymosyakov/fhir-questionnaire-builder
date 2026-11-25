@@ -77,7 +77,7 @@ function bandsOf(calc, byId, answerTexts) {
   return [...new Map(bands.map((b) => [b.text, b])).values()];
 }
 
-const KIND = { date: 'a date', dateTime: 'a date', checklist: 'a multiple-choice list' };
+const KIND = { checklist: 'a multiple-choice list' };
 const describeInput = (d) => `${d.title || d.id} (${KIND[d.itemType] ?? 'a question that cannot be tried automatically'})`;
 
 /**
@@ -101,8 +101,9 @@ export async function checkForm({ tree, base, fp, variables = [], onProgress }) 
   }));
   const inputIds = new Set(inputs.map((i) => i.id));
   const calcs = [...byId.values()].filter((n) => n._calculatedExpr);
+  const numberIds = new Set(inputs.filter((i) => i.sampled && i.kind === 'number').map((i) => i.id));
   const sampledIds = new Set(inputs.filter((i) => i.sampled).map((i) => i.id));
-  const scenarios = buildScenarios(inputs, undefined, calcs.some((c) => dependencies(c, byId).some((d) => sampledIds.has(d.id))));
+  const scenarios = buildScenarios(inputs, undefined, calcs.some((c) => { const read = dependencies(c, byId).filter((d) => sampledIds.has(d.id)); return read.some((d) => numberIds.has(d.id)) || read.length > 1; }));
   const cache = buildCalcCache(tree, variables);
   const passes = topoOrder(buildDepGraph(tree, variables)).cycles.length || variables.length ? 2 : 1; // calculations run in dependency order; a cycle or a variable (not in the graph) needs a second look
 
