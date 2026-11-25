@@ -351,6 +351,12 @@ if (typeof document !== 'undefined') {
     });
   });
 
+  // Self-wire: loaders ask for a report to be shown
+  document.addEventListener(AppEvents.VALIDATION_REPORT_REQUESTED, e => {
+    const { title, mode, ...options } = e.detail;
+    _modal.show(title, mode, options);
+  });
+
   // Self-wire: settings-menu Validate button dispatches VALIDATE_REQUESTED
   document.addEventListener(AppEvents.VALIDATE_REQUESTED, () => {
     import('../../fhir/export.js').then(({ buildFHIRObjectVersioned }) => {

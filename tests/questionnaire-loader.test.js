@@ -10,11 +10,11 @@ globalThis.CustomEvent = class CustomEvent {
 globalThis.document = { dispatchEvent: vi.fn(), addEventListener: vi.fn() };
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
-vi.mock('../js/ui/toast.js', () => ({ showError: vi.fn() }));
+vi.mock('../js/core/ui-requests.js', () => ({
+  notifyError: vi.fn(), requestValidationReport: vi.fn(), hideProgress: vi.fn(), confirmLoadReplace: vi.fn(() => Promise.resolve('proceed')),
+}));
 vi.mock('../js/fhir/import.js', () => ({ importFHIR: vi.fn() }));
 vi.mock('../js/fhir/validate.js', () => ({ validateTree: vi.fn(() => []) }));
-vi.mock('../js/ui/modals/validate-modal.js', () => ({ show: vi.fn() }));
-vi.mock('../js/ui/progress.js', () => ({ show: vi.fn(), update: vi.fn(), hide: vi.fn() }));
 vi.mock('../js/builder/index.js', () => ({
   renderTreeAsync: vi.fn(() => Promise.resolve()),
   renderTree: vi.fn(),
@@ -26,9 +26,6 @@ vi.mock('../js/nodes/group-node.js', () => ({
 vi.mock('../js/fhir/terminology-service.js', () => ({
   terminologyService: { expandAll: vi.fn(() => Promise.resolve([])) },
 }));
-vi.mock('../js/ui/modals/load-confirm-modal.js', () => ({
-  loadConfirmModal: { open: vi.fn(() => Promise.resolve('proceed')) },
-}));
 vi.mock('../js/utils.js', () => ({
   destroyTree: vi.fn(),
 }));
@@ -37,14 +34,15 @@ vi.mock('../js/state.js', () => ({
 }));
 
 const { QuestionnaireLoader }    = await import('../js/fhir/questionnaire-loader.js');
-const { showError }              = await import('../js/ui/toast.js');
+const ui                         = await import('../js/core/ui-requests.js');
+const showError                  = ui.notifyError;
 const { importFHIR }             = await import('../js/fhir/import.js');
 const { validateTree }           = await import('../js/fhir/validate.js');
-const validateModal              = await import('../js/ui/modals/validate-modal.js');
-const progress                   = await import('../js/ui/progress.js');
+const validateModal              = { show: ui.requestValidationReport };
+const progress                   = { hide: ui.hideProgress, show: vi.fn() };
 const { GroupNode }              = await import('../js/nodes/group-node.js');
 const { terminologyService }     = await import('../js/fhir/terminology-service.js');
-const { loadConfirmModal }       = await import('../js/ui/modals/load-confirm-modal.js');
+const loadConfirmModal           = { open: ui.confirmLoadReplace };
 const { EventState, AppEvents }  = await import('../js/events.js');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

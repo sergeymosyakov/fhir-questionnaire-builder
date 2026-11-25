@@ -1,17 +1,14 @@
 // ── Questionnaire Loader ──────────────────────────────────────────────────────
 // Orchestrates FHIR Questionnaire import: parse → render → validate → VS expand.
 // Also owns the reset flow (clearing tree + metadata to empty state).
-import { showError } from '../ui/toast.js';
+import { notifyError, requestValidationReport, hideProgress, confirmLoadReplace } from '../core/ui-requests.js';
 import { importFHIR } from './import.js';
 import { validateTree } from './validate.js';
-import * as validateModal from '../ui/modals/validate-modal.js';
-import * as progress from '../ui/progress.js';
 import { GroupNode } from '../nodes/group-node.js';
 import { terminologyService } from './terminology-service.js';
 import { AppEvents, EventState } from '../events.js';
 import { versionRegistry } from './version-registry.js';
 // Format registrations are handled by js/fhir/formats/*.js, imported via export.js
-import { loadConfirmModal } from '../ui/modals/load-confirm-modal.js';
 
 export class QuestionnaireLoader {
   constructor() {
@@ -86,7 +83,7 @@ export class QuestionnaireLoader {
   /** Returns 'proceed' | 'cancel'. Shows confirm dialog when tree is non-empty. */
   confirmBeforeLoad() {
     if (this._tree.length === 0) return Promise.resolve('proceed');
-    return loadConfirmModal.open();
+    return confirmLoadReplace();
   }
 
   /** Full import pipeline: parse → render tree → validate → expand ValueSets. */
@@ -111,13 +108,13 @@ export class QuestionnaireLoader {
       // Show import report only when local validator finds errors and validate is enabled.
       // Warnings are non-blocking — users can review them via Tools → Validate.
       if (this._validateEnabled && validateTree(this._tree, this._answerStore.toValueMap(), { name: data?.name }).some(i => i.severity === 'error')) {
-        validateModal.show('Import — Validation Report', 'import', { questJson: data, tree: this._tree, values: this._answerStore.toValueMap() });
+        requestValidationReport('Import — Validation Report', 'import', { questJson: data, tree: this._tree, values: this._answerStore.toValueMap() });
       }
       this._expandValueSets(++this._importSeq, data);
     } catch (err) {
-      showError('Import error: ' + err.message);
+      notifyError('Import error: ' + err.message);
     } finally {
-      progress.hide();
+      hideProgress();
     }
   }
 
@@ -125,10 +122,10 @@ export class QuestionnaireLoader {
 
   async _expandValueSets(seq, questJson) {
     let failures;
-    try { failures = await terminologyService.expandAll(this._tree, this._questDoc.meta); } catch (e) { if (this._importSeq === seq) showError('ValueSet expansion failed: ' + e.message); return; }
+    try { failures = await terminologyService.expandAll(this._tree, this._questDoc.meta); } catch (e) { if (this._importSeq === seq) notifyError('ValueSet expansion failed: ' + e.message); return; }
     if (this._importSeq !== seq) return;
     if (failures.length) {
-      validateModal.show('ValueSet Expansion Errors', 'import', { questJson, tree: this._tree, values: this._answerStore.toValueMap() });
+      requestValidationReport('ValueSet Expansion Errors', 'import', { questJson, tree: this._tree, values: this._answerStore.toValueMap() });
     }
     document.dispatchEvent(new CustomEvent(AppEvents.REINIT_FORM, { detail: { silent: true } }));
   }

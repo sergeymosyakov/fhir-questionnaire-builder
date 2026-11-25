@@ -128,6 +128,15 @@ export const AppEvents = Object.freeze({
   AUTOSAVE_SAVED:       'autosave-saved',
   // Dispatched by settings-menu Validate button; validate-modal.js listens and shows the report.
   VALIDATE_REQUESTED:   'validate-requested',
+  // Asks the UI to show a validation report. detail: { title, mode, ...options of validate-modal show() }
+  VALIDATION_REPORT_REQUESTED: 'validation-report-requested',
+  // Asks the UI to tell the user something. detail: { message, type: 'error' | 'warn' | 'info' }
+  NOTIFY_REQUESTED:     'notify-requested',
+  // Progress overlay: PROGRESS_SHOW detail: { label }; PROGRESS_HIDE needs none.
+  PROGRESS_SHOW:        'progress-show',
+  PROGRESS_HIDE:        'progress-hide',
+  // Before a load replaces the open questionnaire. detail: { resolve, handled } — the listener sets handled and calls resolve('proceed' | 'cancel').
+  LOAD_REPLACE_CONFIRM_REQUESTED: 'load-replace-confirm-requested',
 
   // ── Node actions ──────────────────────────────────────────────────────────
   // Dispatched by node delete buttons; BuilderPanel listens and handles

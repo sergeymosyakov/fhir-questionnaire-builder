@@ -2,6 +2,7 @@
 // 2-button confirm: Load anyway | Cancel
 // open() returns Promise<'proceed'|'cancel'>
 import { ChoiceModal } from './choice-modal.js';
+import { AppEvents } from '../../events.js';
 
 class LoadConfirmModal extends ChoiceModal {
   getName() { return 'loadConfirmModal'; }
@@ -21,3 +22,11 @@ class LoadConfirmModal extends ChoiceModal {
 }
 
 export const loadConfirmModal = new LoadConfirmModal();
+
+// Self-wire: the questionnaire loader asks before replacing the open questionnaire
+if (typeof document !== 'undefined') {
+  document.addEventListener(AppEvents.LOAD_REPLACE_CONFIRM_REQUESTED, async e => {
+    e.detail.handled = true;
+    try { e.detail.resolve(await loadConfirmModal.open()); } catch { e.detail.resolve('cancel'); }
+  });
+}

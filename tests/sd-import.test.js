@@ -3,13 +3,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../js/fhir/sd-to-questionnaire.js', () => ({ generateQuestionnaireFromSD: vi.fn() }));
-vi.mock('../js/ui/toast.js', () => ({ showError: vi.fn() }));
-vi.mock('../js/ui/modals/validate-modal.js', () => ({ show: vi.fn() }));
+vi.mock('../js/core/ui-requests.js', () => ({ notifyError: vi.fn(), requestValidationReport: vi.fn() }));
 
 import { applyStructureDefinition } from '../js/fhir/sd-import.js';
 import { generateQuestionnaireFromSD } from '../js/fhir/sd-to-questionnaire.js';
-import { showError } from '../js/ui/toast.js';
-import * as validateModal from '../js/ui/modals/validate-modal.js';
+import { notifyError as showError, requestValidationReport } from '../js/core/ui-requests.js';
+const validateModal = { show: requestValidationReport };
 
 beforeEach(() => {
   generateQuestionnaireFromSD.mockReset();

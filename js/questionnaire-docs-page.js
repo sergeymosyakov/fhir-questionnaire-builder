@@ -5,7 +5,7 @@
 import { renderDocAsText } from './fhir/doc-render-text.js';
 import { downloadText } from './fhir/download.js';
 import { buildItemTree } from './fhir/doc-generator.js';
-import { COPYRIGHT_HTML } from './ui/copyright-notice.js';
+import { COPYRIGHT_HTML } from './core/copyright.js';
 
 const STORAGE_KEY = 'fhirqb.generatedDocs';
 

@@ -9,13 +9,12 @@ globalThis.CustomEvent = class CustomEvent {
 globalThis.document = { dispatchEvent: vi.fn(), addEventListener: vi.fn() };
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
-vi.mock('../js/ui/toast.js', () => ({ showError: vi.fn() }));
-vi.mock('../js/ui/modals/validate-modal.js', () => ({ show: vi.fn() }));
+vi.mock('../js/core/ui-requests.js', () => ({ notifyError: vi.fn(), requestValidationReport: vi.fn() }));
 vi.mock('../js/fhir/qr-import.js', () => ({ importQRAnswers: vi.fn() }));
 
 const { QRAnswersManager }       = await import('../js/fhir/qr-answers-manager.js');
-const { showError }              = await import('../js/ui/toast.js');
-const validateModal              = await import('../js/ui/modals/validate-modal.js');
+const { notifyError: showError, requestValidationReport } = await import('../js/core/ui-requests.js');
+const validateModal = { show: requestValidationReport };
 const { importQRAnswers }        = await import('../js/fhir/qr-import.js');
 const { EventState, AppEvents }  = await import('../js/events.js');
 

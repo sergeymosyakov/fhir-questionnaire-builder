@@ -7,7 +7,7 @@ import { validateTree } from './validate.js';
 import { auditTree } from './audit.js';
 import { rawOptsToPairs } from '../utils.js';
 import { LANGUAGES_MAP } from './languages.js';
-import { COPYRIGHT_HTML } from '../ui/copyright-notice.js';
+import { COPYRIGHT_HTML } from '../core/copyright.js';
 import { parseExprTree } from './explain.js';
 import { parseExpression, expandAggregateOverSet } from './expr-builder/parse.js';
 import { describeBlock, COMPARE_WORDS } from './expr-builder/describe.js';

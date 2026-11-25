@@ -8,7 +8,7 @@ beforeAll(() => {
 });
 
 const { generateQuestionnaireDoc, DOC_LEGEND, buildItemTree } = await import('../js/fhir/doc-generator.js');
-const { COPYRIGHT_HTML } = await import('../js/ui/copyright-notice.js');
+const { COPYRIGHT_HTML } = await import('../js/core/copyright.js');
 const { parseOptions } = await import('../js/utils.js');
 const { loadFhirpath } = await import('./helpers/fhirpath-node.js');
 const fp = loadFhirpath();
