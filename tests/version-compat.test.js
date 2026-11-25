@@ -11,7 +11,7 @@ beforeAll(async () => {
   await import('../js/fhir/version-compat/open-choice.js');
 });
 
-const ac = (linkId, children) => ({ linkId, _answerConstraint: 'optionsOnly', children });
+const ac = (id, children) => ({ id, _answerConstraint: 'optionsOnly', children });
 const oc = (children) => ({ itemType: 'open-choice', children });
 
 describe('R5 downgrade checker (answerConstraint)', () => {
@@ -27,7 +27,7 @@ describe('R5 downgrade checker (answerConstraint)', () => {
   });
 
   it('returns no warning when no item uses answerConstraint', async () => {
-    const msgs = await versionCompatRegistry.runAll('R5', 'R4', [{ linkId: 'q1' }]);
+    const msgs = await versionCompatRegistry.runAll('R5', 'R4', [{ id: 'q1' }]);
     expect(msgs).toEqual([]);
   });
 
@@ -47,7 +47,7 @@ describe('R5 downgrade checker (answerConstraint)', () => {
   });
 
   it('counts affected items recursively and pluralises', async () => {
-    const tree = [ac('q1', [ac('q2'), { linkId: 'q3' }])];
+    const tree = [ac('q1', [ac('q2'), { id: 'q3' }])];
     const msgs = await versionCompatRegistry.runAll('R5', 'R4', tree);
     expect(msgs[0]).toContain('2 items use answerConstraint');
     expect(msgs[0]).toContain('q1');

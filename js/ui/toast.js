@@ -155,7 +155,7 @@ export function showPrompt(label, defaultValue, onConfirm) {
   const cancel  = () => { close(); onConfirm(null); };
 
   const onKey = e => {
-    if (e.key === 'Enter')  { e.preventDefault(); confirm(); }
+    if (e.key === 'Enter' && e.target !== cancelBtn) { e.preventDefault(); confirm(); } // Enter on Cancel presses Cancel
     if (e.key === 'Escape') { e.stopPropagation(); cancel(); }
   };
   document.addEventListener('keydown', onKey, true);

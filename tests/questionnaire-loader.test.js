@@ -222,6 +222,26 @@ describe('QuestionnaireLoader.load — VS expansion failures', () => {
   });
 });
 
+describe('QuestionnaireLoader — expansion that outlives its form', () => {
+  it('ignores an expansion that finishes after the form was cleared', async () => {
+    let finish;
+    terminologyService.expandAll.mockReturnValueOnce(new Promise((r) => { finish = r; }));
+    const loader = makeLoader();
+    await loader.load({}, 'a.json');
+    loader.reset();
+    finish([{ node: { id: 'q1' }, vsUrl: 'https://vs', server: 's', error: 'timeout' }]);
+    await Promise.resolve(); await Promise.resolve();
+    expect(validateModal.show.mock.calls.find((c) => c[0]?.includes('ValueSet'))).toBeUndefined();
+  });
+
+  it('shows an error instead of an unhandled rejection when the expansion throws', async () => {
+    terminologyService.expandAll.mockRejectedValueOnce(new Error('boom'));
+    await makeLoader().load({}, 'a.json');
+    await Promise.resolve(); await Promise.resolve();
+    expect(showError).toHaveBeenCalledWith(expect.stringContaining('boom'));
+  });
+});
+
 // ── reset() ───────────────────────────────────────────────────────────────────
 describe('QuestionnaireLoader.reset', () => {
   it('calls questDoc.reset()', () => {

@@ -25,7 +25,7 @@ export class NumberNode extends ItemNode {
       sl.dataset.testid = 'slider-input';
       sl.min  = node._minValue !== undefined ? String(node._minValue) : '0';
       sl.max  = node._maxValue !== undefined ? String(node._maxValue) : '100';
-      sl.step = String(node._sliderStep);
+      sl.step = String(node._sliderStep || 1);
       const initVal = getValue(node.id);
       sl.value = initVal !== undefined && initVal !== '' ? String(initVal) : sl.min;
 

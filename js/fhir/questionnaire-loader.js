@@ -53,6 +53,7 @@ export class QuestionnaireLoader {
    * Equivalent to the old _doReset() — but encapsulated in the loader.
    */
   reset() {
+    this._importSeq++; // a ValueSet expansion still in flight belongs to the form that was cleared
     this._questDoc.reset();
     document.dispatchEvent(new CustomEvent(AppEvents.ANSWERS_CLEAR));
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_RERENDER));
@@ -126,7 +127,8 @@ export class QuestionnaireLoader {
   // ── Private ────────────────────────────────────────────────────────────────
 
   async _expandValueSets(seq, questJson) {
-    const failures = await terminologyService.expandAll(this._tree, this._questDoc.meta);
+    let failures;
+    try { failures = await terminologyService.expandAll(this._tree, this._questDoc.meta); } catch (e) { if (this._importSeq === seq) showError('ValueSet expansion failed: ' + e.message); return; }
     if (this._importSeq !== seq) return;
     if (failures.length) {
       validateModal.show('ValueSet Expansion Errors', 'import', { questJson, tree: this._tree, values: this._answerStore.toValueMap() });

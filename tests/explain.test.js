@@ -287,3 +287,14 @@ describe('evaluateExprTree — nested', () => {
     expect(n.result).toBe(false);
   });
 });
+
+describe('parseExprTree — not(...) that does not span the whole expression', () => {
+  it('splits "not(a) and not(b)" into an AND of two NOTs', () => {
+    const t = parseExprTree('not(a = 1) and not(b = 2)');
+    expect(t.type).toBe('AND');
+    expect(t.children.map((c) => c.type)).toEqual(['NOT', 'NOT']);
+  });
+  it('still reads a single not(...)', () => {
+    expect(parseExprTree('not(a = 1)')).toMatchObject({ type: 'NOT', child: { type: 'LEAF' } });
+  });
+});

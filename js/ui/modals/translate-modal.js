@@ -130,7 +130,7 @@ export class TranslateModal extends Modal {
         for (const { code, display } of opts) {
           if (display) {
             const key = node.id + '__' + code;
-            entries.push({ key, original: display, translated: store.opts[key] ?? '' });
+            entries.push({ key, original: display, isOpt: true, translated: store.opts[key] ?? '' });
           }
         }
         walk(node.children || []);
@@ -174,7 +174,7 @@ export class TranslateModal extends Modal {
         // answerOption labels from the node model
         const opts = _getOptionLabels(node);
         for (const { code, display } of opts) {
-          if (display) entries.push({ key: node.id + '__' + code, original: display });
+          if (display) entries.push({ key: node.id + '__' + code, original: display, isOpt: true });
         }
         walk(node.children || []);
       }
@@ -340,7 +340,7 @@ export class TranslateModal extends Modal {
         store.title = val;
       } else if (row.key.startsWith('__ui__')) {
         store.ui[row.key.slice(6)] = val;   // strip '__ui__' prefix
-      } else if (row.key.includes('__')) {
+      } else if (row.isOpt) {
         store.opts[row.key] = val;
       } else if (row.isXhtml) {
         store.xhtml[row.key] = val;  // translated XHTML

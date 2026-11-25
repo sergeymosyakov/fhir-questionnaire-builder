@@ -42,7 +42,8 @@ export function compareValue(val, ew) {
   // on the value, and (for =/≠) also match the unit code when the condition sets one.
   if (ew.answerQuantity !== undefined) {
     const q = ew.answerQuantity || {};
-    const curNum  = Number(val && typeof val === 'object' ? val.value : val);
+    const curRaw  = val && typeof val === 'object' ? val.value : val;
+    const curNum  = curRaw === '' || curRaw === null || curRaw === undefined ? NaN : Number(curRaw); // unanswered is not 0
     const ansNum  = Number(q.value);
     const curUnit = val && typeof val === 'object' ? (val.unit || '') : '';
     const ansUnit = q.code || q.unit || '';
@@ -80,7 +81,7 @@ export function compareValue(val, ew) {
   else if (ew.answerCoding)                 answer = ew.answerCoding.code || ew.answerCoding.display || '';
   else return false;
   // Numeric conditions compare numbers, so 1.0 equals 1
-  if (typeof answer === 'number' && (ew.operator === '=' || ew.operator === '!=')) {
+  if (typeof answer === 'number') {
     const cur = val === undefined || val === null || val === '' ? NaN : Number(val);
     if (Number.isNaN(cur)) return ew.operator === '!=';
     return compareNumbers(cur, answer, ew.operator);

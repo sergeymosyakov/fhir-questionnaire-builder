@@ -533,3 +533,20 @@ describe('compareValue — numeric equality', () => {
     expect(compareValue(val, ew)).toBe(expected);
   });
 });
+
+describe('compareValue — an unanswered number', () => {
+  it.each(['<', '<=', '>', '>='])('is not met by %s', (operator) => {
+    for (const val of [undefined, null, '']) {
+      expect(compareValue(val, { operator, answerInteger: 5 })).toBe(false);
+      expect(compareValue(val, { operator, answerDecimal: 0 })).toBe(false);
+    }
+  });
+});
+
+describe('compareValue — an unanswered quantity', () => {
+  it.each(['<', '<=', '>', '>='])('is not met by %s', (operator) => {
+    for (const val of [undefined, null, '', { value: '', unit: 'kg' }]) {
+      expect(compareValue(val, { operator, answerQuantity: { value: 5 } })).toBe(false);
+    }
+  });
+});

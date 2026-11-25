@@ -186,3 +186,31 @@ describe('topoOrder', () => {
     expect(cycles).toEqual([['a', 'b', 'a']]);
   });
 });
+
+describe('buildDepGraph — items read through a %variable', () => {
+  it('makes a calculation depend on the items its variable reads', () => {
+    const tree = [
+      { id: 'w', type: 'item', children: [] },
+      { id: 'c', type: 'item', _calculatedExpr: '%bmi * 2', children: [] },
+    ];
+    const g = buildDepGraph(tree, [{ name: 'bmi', expression: "%resource.item.where(linkId='w').answer.valueDecimal" }]);
+    expect([...g.edges.get('c')]).toEqual(['w']);
+  });
+  it('follows a variable that uses another variable', () => {
+    const tree = [{ id: 'w', type: 'item', children: [] }, { id: 'c', type: 'item', _calculatedExpr: '%b', children: [] }];
+    const g = buildDepGraph(tree, [{ name: 'a', expression: "item.where(linkId='w').answer.value" }, { name: 'b', expression: '%a + 1' }]);
+    expect([...g.edges.get('c')]).toEqual(['w']);
+  });
+});
+
+describe('buildDepGraph — variables read by several calculations', () => {
+  it('does not make calculations that use the same variable depend on each other', () => {
+    const tree = [
+      { id: 'a', type: 'item', _calculatedExpr: '%v', children: [] },
+      { id: 'b', type: 'item', _calculatedExpr: '%v + 1', children: [] },
+    ];
+    const g = buildDepGraph(tree, [{ name: 'v', expression: "item.where(linkId='a').answer.value | item.where(linkId='b').answer.value" }]);
+    expect([...g.edges.get('a')]).toEqual([]);
+    expect([...g.edges.get('b')]).toEqual([]);
+  });
+});

@@ -28,7 +28,7 @@ function _isAncestor(ancestorId, nodeId) {
 // ── Drop execution ────────────────────────────────────────────────────────────
 function _doDrop(targetId, position) {
   if (!_dragId || _dragId === targetId) return;
-  if ((position === 'inside' || position === 'inside-last') && _isAncestor(_dragId, targetId)) return;
+  if (_isAncestor(_dragId, targetId)) return; // a node cannot move next to or into its own descendant
   if (position === 'inside' || position === 'inside-last') {
     const t = findNode(_tree, targetId);
     if (!t || !(t.node.type === 'group' || t.node.children?.length > 0)) return;
