@@ -5,17 +5,16 @@
  * Deploy: https://dash.cloudflare.com → Workers → Create → paste this file.
  * Usage:  GET https://<your-worker>.workers.dev/?url=<encoded-fhir-url>
  *
- * Only proxies HTTPS requests whose path matches ALLOWED_PATHS (substring
- * match, not a full server allowlist — the target host itself is not
- * restricted, since users point at their own arbitrary FHIR servers).
- * Access-Control-Allow-Origin is only reflected for ALLOWED_ORIGINS, so other
- * sites can't ride this worker as an open relay. Forwards an incoming
+ * Only proxies HTTPS requests whose path ends in one of ALLOWED_PATHS (the
+ * target host itself is not restricted, since users point at their own
+ * arbitrary FHIR servers) and only for browsers on ALLOWED_ORIGINS, so other
+ * sites can't ride this worker through a visitor's browser (the Origin check
+ * is a browser-only guard: a script can send any Origin). Forwards an incoming
  * Authorization header upstream as-is (for OAuth-protected FHIR servers,
  * issue #63) — never logged, never stored.
  */
 
-const ALLOWED_PATHS = ['/ValueSet/$expand', '/metadata', '/ValueSet/', '/Questionnaire/$validate', '/Questionnaire/$populate', '/Patient'];
-const ALLOWED_ORIGINS = [/^https:\/\/fhirbuilder\.com$/, /^https:\/\/sergeymosyakov\.github\.io$/, /^https?:\/\/localhost(:\d+)?$/, /^http:\/\/127\.0\.0\.1(:\d+)?$/];
+import { ALLOWED_PATHS, MAX_BODY_BYTES, isAllowedOrigin } from './cors-proxy-rules.js';
 
 export default {
   async fetch(request) {
@@ -26,6 +25,7 @@ export default {
       return new Response(null, { headers: corsHeaders(origin) });
     }
 
+    if (!isAllowedOrigin(origin)) return new Response('Origin not allowed', { status: 403 });
     const incoming = new URL(request.url);
     const target = incoming.searchParams.get('url');
 
@@ -44,13 +44,17 @@ export default {
     if (targetUrl.protocol !== 'https:') {
       return new Response('Only HTTPS targets allowed', { status: 403, headers: corsHeaders(origin) });
     }
-    const pathOk = ALLOWED_PATHS.some(p => targetUrl.pathname.includes(p));
+    const pathOk = ALLOWED_PATHS.some(re => re.test(targetUrl.pathname));
     if (!pathOk) {
       return new Response('Target path not allowed', { status: 403, headers: corsHeaders(origin) });
     }
 
     try {
       const isBodyMethod = request.method !== 'GET' && request.method !== 'HEAD';
+      const body0 = isBodyMethod ? await request.arrayBuffer() : undefined; // measured, not trusted from Content-Length
+      if (body0 && body0.byteLength > MAX_BODY_BYTES) {
+        return new Response('Request body too large', { status: 413, headers: corsHeaders(origin) });
+      }
       const authHeader = request.headers.get('Authorization');
       const upstream = await fetch(targetUrl.toString(), {
         method:  request.method,
@@ -61,7 +65,7 @@ export default {
             ? { 'Content-Type': request.headers.get('Content-Type') || 'application/fhir+json' }
             : {}),
         },
-        body: isBodyMethod ? request.body : undefined,
+        body: body0,
       });
 
       const body        = await upstream.arrayBuffer();
@@ -79,7 +83,7 @@ export default {
 
 // Only allowlisted origins get Access-Control-Allow-Origin reflected back.
 function corsHeaders(origin) {
-  const allowed = origin && ALLOWED_ORIGINS.some(re => re.test(origin));
+  const allowed = isAllowedOrigin(origin);
   return {
     ...(allowed ? { 'Access-Control-Allow-Origin': origin } : {}),
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
