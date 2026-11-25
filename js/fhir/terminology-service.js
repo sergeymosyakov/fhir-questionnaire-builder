@@ -14,6 +14,7 @@
 
 import { serverConfig, CONFIG_KEYS } from './server-config.js';
 import { flattenExpansion } from './expansion.js';
+import { proxyUrl } from './cors-proxy.js';
 
 // Default terminology server — falls back to HL7 public server.
 const FALLBACK_TERMINOLOGY_SERVER = 'https://tx.fhir.org/r4';
@@ -92,6 +93,17 @@ function _collectUnitVsNodes(nodes, out = []) {
   return out;
 }
 
+const EXPAND_PARALLEL = 4;
+
+// Runs fn over items with at most `limit` in flight; results keep the order of items.
+async function _mapLimit(items, limit, fn) {
+  const out = new Array(items.length);
+  let next = 0;
+  const worker = async () => { while (next < items.length) { const i = next++; out[i] = await fn(items[i]); } };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
+}
+
 export class TerminologyService {
   /** @param {{get(key: string): string|null, ready?(): Promise<any>}} configProvider */
   constructor(configProvider) {
@@ -104,8 +116,7 @@ export class TerminologyService {
 
   /** Wrap a target URL through the CORS proxy if configured. */
   _proxyUrl(url) {
-    const proxy = this._corsProxy();
-    return proxy ? `${proxy}?url=${encodeURIComponent(url)}` : url;
+    return proxyUrl(url, this._corsProxy());
   }
 
   /**
@@ -227,44 +238,41 @@ export class TerminologyService {
    * @returns {Promise<Array<{node, vsUrl, server, error}>>} List of failures (empty = all OK).
    */
   async expandAll(treeNodes, questMeta) {
-    const nodes = _collectExternalVsNodes(treeNodes);
-    const unitNodes = _collectUnitVsNodes(treeNodes);
-    if (!nodes.length && !unitNodes.length) return [];
+    const jobs = [
+      ..._collectExternalVsNodes(treeNodes).map(node => ({ node, url: node._answerValueSet, cache: '_vsCache', answer: true })),
+      ..._collectUnitVsNodes(treeNodes).map(node => ({ node, url: node._unitValueSet, cache: '_unitVsCache', answer: false })),
+    ];
+    if (!jobs.length) return [];
+    const once = new Map(); // one request for all nodes that share a value set and server
+    const expand = (url, server) => {
+      const key = `${server}\n${url}`;
+      if (!once.has(key)) once.set(key, this.expandValueSetDetailed(url, server).then(result => ({ result }), error => ({ error })));
+      return once.get(key);
+    };
+    const outcomes = await _mapLimit(jobs, EXPAND_PARALLEL, async job => {
+      const server = this.getServer(job.node, questMeta);
+      return { job, server, ...await expand(job.url, server) };
+    });
     const failures = [];
-    for (const node of nodes) {
-      const server = this.getServer(node, questMeta);
-      try {
-        const { options, total, truncated } = await this.expandValueSetDetailed(node._answerValueSet, server);
-        node._vsCache = options;
-        delete node._vsExpansionIssue;
-        if (truncated) {
-          const error = `The value set has ${total} entries but only the first ${options.length} were loaded.`;
-          node._vsExpansionIssue = error;
-          failures.push({ node, vsUrl: node._answerValueSet, server, error });
-        }
-      } catch (err) {
-        node._vsCache = [];
-        const isCors = err instanceof TypeError && err.message.includes('fetch');
+    for (const { job, server, result, error } of outcomes) { // applied in tree order, so the failure list is stable
+      const { node, url, cache, answer } = job;
+      if (error) {
+        node[cache] = [];
+        const isCors = error instanceof TypeError && error.message.includes('fetch');
         const msg = isCors
-          ? `Network error (possible CORS restriction — the server may not allow browser requests): ${err.message}`
-          : err.message;
-        node._vsExpansionIssue = `The value set could not be expanded: ${msg}`;
-        failures.push({ node, vsUrl: node._answerValueSet, server, error: msg });
+          ? `Network error (possible CORS restriction — the server may not allow browser requests): ${error.message}`
+          : error.message;
+        if (answer) node._vsExpansionIssue = `The value set could not be expanded: ${msg}`;
+        failures.push({ node, vsUrl: url, server, error: msg });
+        continue;
       }
-    }
-    for (const node of unitNodes) {
-      const server = this.getServer(node, questMeta);
-      try {
-        const { options, total, truncated } = await this.expandValueSetDetailed(node._unitValueSet, server);
-        node._unitVsCache = options;
-        if (truncated) failures.push({ node, vsUrl: node._unitValueSet, server, error: `The value set has ${total} entries but only the first ${options.length} were loaded.` });
-      } catch (err) {
-        node._unitVsCache = [];
-        const isCors = err instanceof TypeError && err.message.includes('fetch');
-        const msg = isCors
-          ? `Network error (possible CORS restriction — the server may not allow browser requests): ${err.message}`
-          : err.message;
-        failures.push({ node, vsUrl: node._unitValueSet, server, error: msg });
+      const { options, total, truncated } = result;
+      node[cache] = options.slice(); // nodes sharing a value set each get their own list
+      if (answer) delete node._vsExpansionIssue;
+      if (truncated) {
+        const msg = `The value set has ${total} entries but only the first ${options.length} were loaded.`;
+        if (answer) node._vsExpansionIssue = msg;
+        failures.push({ node, vsUrl: url, server, error: msg });
       }
     }
     return failures;

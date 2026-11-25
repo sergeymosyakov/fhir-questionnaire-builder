@@ -10,6 +10,8 @@
 // translate() receives ONLY non-empty texts (the caller restores empties/order)
 // and must return a same-length array of translated strings, same order.
 
+import { proxyUrl } from './cors-proxy.js';
+
 const BATCH = 40;
 
 // Record separator on its own line: gtx/Libre preserve it verbatim so multi-line
@@ -27,11 +29,6 @@ function _chunks(arr, n) {
   const out = [];
   for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
   return out;
-}
-
-// Route a request through the configured CORS proxy (`?url=` forwarder).
-function _viaProxy(url, corsProxy) {
-  return corsProxy ? `${corsProxy}?url=${enc(url)}` : url;
 }
 
 // ── Google Translate (unofficial gtx endpoint) ────────────────────────────────
@@ -69,7 +66,7 @@ async function deeplTranslate(texts, target, source, { endpoint, apiKey, corsPro
     params.set('target_lang', _deeplLang(target));
     if (source && source !== 'auto') params.set('source_lang', _deeplLang(source));
     chunk.forEach(t => params.append('text', t));
-    const resp = await fetch(_viaProxy(base, corsProxy), {
+    const resp = await fetch(proxyUrl(base, corsProxy), {
       method: 'POST',
       headers: {
         Authorization: `DeepL-Auth-Key ${apiKey}`,
@@ -94,7 +91,7 @@ async function libreTranslate(texts, target, source, { endpoint, apiKey, corsPro
   for (const chunk of _chunks(texts, BATCH)) {
     const body = { q: chunk, source: _libreLang(source), target: _libreLang(target), format: 'text' };
     if (apiKey) body.api_key = apiKey;
-    const resp = await fetch(_viaProxy(endpoint, corsProxy), {
+    const resp = await fetch(proxyUrl(endpoint, corsProxy), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

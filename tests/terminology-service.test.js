@@ -352,6 +352,51 @@ describe('terminologyService.expandAll', () => {
     expect(node._vsCache[0].code).toBe('A');
   });
 
+  it('sends one request for nodes that share a value set, and fills every node', async () => {
+    mockFetch.mockResolvedValue(makeOk(VS_BODY));
+    const nodes = Array.from({ length: 6 }, (_, i) => ({ id: `q${i}`, _answerValueSet: 'https://shared-vs', children: [] }));
+    const failures = await terminologyService.expandAll(nodes, {});
+    expect(failures).toEqual([]);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(nodes.every((n) => n._vsCache.length === 2)).toBe(true);
+  });
+
+  it('reports each node of a value set that failed, in tree order', async () => {
+    mockFetch.mockResolvedValue(makeErr(404, 'Not Found'));
+    const nodes = ['a', 'b', 'c'].map((id) => ({ id, _answerValueSet: 'https://missing-vs', children: [] }));
+    const failures = await terminologyService.expandAll(nodes, {});
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(failures.map((f) => f.node.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('keeps nodes with different servers apart, even for the same value set', async () => {
+    mockFetch.mockResolvedValue(makeOk(VS_BODY));
+    const a = { id: 'a', _answerValueSet: 'https://vs', _preferredTermServer: 'https://tx-a.example/fhir', children: [] };
+    const b = { id: 'b', _answerValueSet: 'https://vs', _preferredTermServer: 'https://tx-b.example/fhir', children: [] };
+    await terminologyService.expandAll([a, b], {});
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('shares one request between an answer value set and a unit value set, with separate lists', async () => {
+    mockFetch.mockResolvedValue(makeOk(VS_BODY));
+    const answer = { id: 'a', _answerValueSet: 'https://vs', children: [] };
+    const unit = { id: 'u', itemType: 'quantity', _unitValueSet: 'https://vs', children: [] };
+    await terminologyService.expandAll([answer, unit], {});
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(answer._vsCache).toHaveLength(2);
+    expect(unit._unitVsCache).toHaveLength(2);
+    expect(answer._vsCache).not.toBe(unit._unitVsCache);
+    expect(unit._vsExpansionIssue).toBeUndefined();
+  });
+
+  it('marks every node of a truncated shared value set', async () => {
+    mockFetch.mockResolvedValue(makeOk({ resourceType: 'ValueSet', expansion: { total: 900, contains: [{ code: 'A', display: 'A', system: 's' }] } }));
+    const nodes = ['a', 'b'].map((id) => ({ id, _answerValueSet: 'https://big-vs', children: [] }));
+    const failures = await terminologyService.expandAll(nodes, {});
+    expect(failures).toHaveLength(2);
+    expect(nodes.every((n) => /900 entries/.test(n._vsExpansionIssue))).toBe(true);
+  });
+
   it('asks for the defined count parameter', async () => {
     mockFetch.mockResolvedValueOnce(makeOk(VS_BODY));
     await terminologyService.expandAll([{ id: 'q1', _answerValueSet: 'https://vs', children: [] }], {});

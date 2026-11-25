@@ -295,12 +295,25 @@ describe('ExternalValidator — CORS proxy', () => {
     const { serverConfig, DefaultConfigProvider } = await import('../js/fhir/server-config.js');
     serverConfig.register(new DefaultConfigProvider({ corsProxyUrl: 'https://proxy.example/' }));
     const { ExternalValidator: FreshValidator } = await import('../js/fhir/validators/external.js');
-    const v = new FreshValidator({ name: 'HAPI FHIR', url: 'https://hapi.fhir.org/baseR4', getFhirTarget: () => 'R4' });
+    const v = new FreshValidator({ name: 'Own server', url: 'https://fhir.example.org/baseR4', getFhirTarget: () => 'R4' });
     v.enabled = true;
     await v.run({ resourceType: 'Questionnaire', item: [] });
     expect(sent[0]).toBe(
       'https://proxy.example?url=' +
-      encodeURIComponent('https://hapi.fhir.org/baseR4/Questionnaire/$validate'),
+      encodeURIComponent('https://fhir.example.org/baseR4/Questionnaire/$validate'),
     );
+  });
+
+  it('skips the proxy for a public server that already sends CORS headers', async () => {
+    vi.resetModules();
+    const sent = [];
+    vi.stubGlobal('fetch', vi.fn(async (url) => { sent.push(url); return okResp({ resourceType: 'OperationOutcome', issue: [] }); }));
+    const { serverConfig, DefaultConfigProvider } = await import('../js/fhir/server-config.js');
+    serverConfig.register(new DefaultConfigProvider({ corsProxyUrl: 'https://proxy.example/' }));
+    const { ExternalValidator: FreshValidator } = await import('../js/fhir/validators/external.js');
+    const v = new FreshValidator({ name: 'HAPI FHIR', url: 'https://hapi.fhir.org/baseR4', getFhirTarget: () => 'R4' });
+    v.enabled = true;
+    await v.run({ resourceType: 'Questionnaire', item: [] });
+    expect(sent[0]).toBe('https://hapi.fhir.org/baseR4/Questionnaire/$validate');
   });
 });

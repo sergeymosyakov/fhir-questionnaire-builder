@@ -10,16 +10,14 @@ import { Validator } from './base.js';
 import { BUILDER_VERSION_EXTENSION_URL } from '../format-registry.js';
 import { AppEvents, EventState } from '../../events.js';
 import { serverConfig, CONFIG_KEYS } from '../server-config.js';
+import { proxyUrl } from '../cors-proxy.js';
 /** Thrown for non-retryable validation failures (e.g. HTTP 413 / 4xx). */
 class ValidatorFatalError extends Error {}
 
 /** Map a builder version id to the matching HAPI public-server base path. */
-const _HAPI_BASE_BY_VERSION = { R4: 'baseR4', R4B: 'baseR4B', R5: 'baseR5' };
+const _proxied = (url) => proxyUrl(url, serverConfig.get(CONFIG_KEYS.CORS_PROXY));
 
-function _proxied(url) {
-  const proxy = (serverConfig.get(CONFIG_KEYS.CORS_PROXY) || '').replace(/\/$/, '');
-  return proxy ? `${proxy}?url=${encodeURIComponent(url)}` : url;
-}
+const _HAPI_BASE_BY_VERSION = { R4: 'baseR4', R4B: 'baseR4B', R5: 'baseR5' };
 
 /** Turn an error response body into a readable one-line message.
  *  Parses a FHIR OperationOutcome (issue[].diagnostics / details.text) when

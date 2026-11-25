@@ -1,9 +1,9 @@
 // CORS worker: anchored path allow-list, browser origins only, bounded body.
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import worker from '../scripts/cors-proxy.worker.js';
-import { ALLOWED_PATHS, isAllowedOrigin } from '../scripts/cors-proxy-rules.js';
+import { isAllowedTarget, isAllowedOrigin } from '../scripts/cors-proxy-rules.js';
 
-const pathOk = (p) => ALLOWED_PATHS.some((re) => re.test(p));
+const pathOk = (p) => isAllowedTarget(new URL(`https://fhir.example.org${p}`));
 const call = (url, { origin = 'https://fhirbuilder.com', headers = {}, method = 'GET', body } = {}) =>
   worker.fetch(new Request(`https://proxy.example/?url=${encodeURIComponent(url)}`, { method, body, headers: { ...(origin ? { Origin: origin } : {}), ...headers } }));
 
@@ -11,8 +11,17 @@ describe('worker paths', () => {
   it.each(['/fhir/metadata', '/fhir/ValueSet/$expand', '/fhir/ValueSet/abc', '/fhir/Questionnaire/$validate', '/fhir/Questionnaire/q1/$populate', '/fhir/Patient', '/fhir/Patient/p1'])('allows %s', (p) => {
     expect(pathOk(p)).toBe(true);
   });
-  it.each(['/anything/metadata/x', '/PatientSecrets', '/a/ValueSet/b/c', '/admin'])('refuses %s', (p) => {
+  it.each(['/anything/metadata/x', '/PatientSecrets', '/v2/translate', '/translate', '/a/ValueSet/b/c', '/admin'])('refuses %s', (p) => {
     expect(pathOk(p)).toBe(false);
+  });
+});
+
+describe('DeepL', () => {
+  it('may be reached through the proxy, on its own hosts only', () => {
+    expect(isAllowedTarget(new URL('https://api-free.deepl.com/v2/translate'))).toBe(true);
+    expect(isAllowedTarget(new URL('https://api.deepl.com/v2/translate'))).toBe(true);
+    expect(isAllowedTarget(new URL('https://evil.example/v2/translate'))).toBe(false);
+    expect(isAllowedTarget(new URL('https://api.deepl.com/v2/usage'))).toBe(false);
   });
 });
 
