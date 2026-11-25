@@ -1,8 +1,8 @@
 // ── Generic 2-button confirm dialog ──────────────────────────────────────────
 // open(config) returns Promise<'ok'|'cancel'>
-import { Modal } from './modal-base.js';
+import { ChoiceModal } from './choice-modal.js';
 
-class ConfirmModal extends Modal {
+class ConfirmModal extends ChoiceModal {
   getName() { return 'confirmModal'; }
 
   constructor() {
@@ -23,22 +23,10 @@ class ConfirmModal extends Modal {
     if (this.applyBtn)  this.applyBtn.textContent  = okLabel;
     if (this.cancelBtn) this.cancelBtn.textContent = cancelLabel;
 
-    this._resolve?.('cancel'); // a second request must not leave the first one waiting forever
-    return new Promise(resolve => {
-      this._resolve = resolve;
-      super.open();
-    });
-  }
-
-  _done(result) {
-    const resolve = this._resolve;
-    this._resolve = null;
-    this.close();
-    resolve?.(result);
+    return super.open();
   }
 
   _apply()  { this._done('ok');     }
-  _cancel() { this._done('cancel'); }
 }
 
 export const confirmModal = new ConfirmModal();

@@ -42,7 +42,6 @@ import { QRAnswersManager } from './fhir/qr-answers-manager.js';
 import { QuestionnaireLoader } from './fhir/questionnaire-loader.js';
 import './ui/modals/translate-modal.js';
 import './ui/modals/check-form-modal.js';
-import './fhir/translate-api.js'; // sets window._translationModule
 // Register storage adapter before any module that reads storage is initialised.
 storage.register(new SupabaseAdapter(supabase));
 

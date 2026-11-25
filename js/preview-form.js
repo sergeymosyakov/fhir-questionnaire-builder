@@ -342,13 +342,13 @@ export class PreviewForm {
       // Keeps calc badges/controls current even on the fast render path below,
       // which skips rebuilding controls when the visible node set is unchanged.
       this._bus.dispatch(AppEvents.REFRESH_CALC_BADGES);
-      const ctx = { fp: fhirpath, qr, envVars };
+      const ctx = { answerStore: this._answerStore, fp: fhirpath, qr, envVars };
       // Stash so the next _asyncRender (triggered by RESPONSE_CHANGED) can reuse
       // this result instead of running evalCalcNodes a second time.
       this._pendingCtx = ctx;
       return ctx;
     }
-    return { fp: null, qr: null, envVars: {} };
+    return { answerStore: this._answerStore, fp: null, qr: null, envVars: {} };
   }
 
   _buildControl(node, iconEl, onAfterChange) {

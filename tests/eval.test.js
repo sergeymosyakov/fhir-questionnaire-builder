@@ -55,7 +55,7 @@ describe('evaluateNode — _hidden', () => {
   it('marks hidden item as hiddenRoot with hidden=true', () => {
     const node = { id: 'q1', type: 'item', _hidden: true };
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.hidden).toBe(true);
     expect(r.visible).toBe(true);
     expect(r.ok).toBe(true);
@@ -72,7 +72,7 @@ describe('evaluateNode — _hidden', () => {
       ],
     };
     const results = [];
-    evaluateNode(node, {}, results);
+    evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(results).toHaveLength(3);
     expect(results[0].hiddenRoot).toBe(true);
     expect(results[1].hidden).toBe(true);
@@ -84,7 +84,7 @@ describe('evaluateNode — _hidden', () => {
   it('marks nested children as hidden but not hiddenRoot', () => {
     const node = { id: 'q1', type: 'item', _hidden: true };
     const results = [];
-    evaluateNode(node, {}, results, true); // called with _insideHidden = true
+    evaluateNode(node, { answerStore: _mockAnswerStore }, results, true); // called with _insideHidden = true
     expect(results[0].hiddenRoot).toBe(false);
     expect(results[0].hidden).toBe(true);
   });
@@ -92,7 +92,7 @@ describe('evaluateNode — _hidden', () => {
   it('non-hidden item is not marked hidden', () => {
     const node = { id: 'q1', type: 'item' };
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.hidden).toBeUndefined();
     expect(results[0].hidden).toBeUndefined();
   });
@@ -103,7 +103,7 @@ describe('evaluateNode — no conditions', () => {
   it('item with no enableWhen is always visible', () => {
     const node = { id: 'q1', type: 'item', mandatory: false, enableWhen: [], enableWhenExpression: '' };
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.visible).toBe(true);
     expect(r.ok).toBe(true);
     expect(results).toHaveLength(1);
@@ -112,7 +112,7 @@ describe('evaluateNode — no conditions', () => {
   it('group with no enableWhen is always visible', () => {
     const node = { id: 'g1', type: 'group', enableWhen: [], enableWhenExpression: '', mandatory: false, logicWithParent: 'AND', children: [] };
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.visible).toBe(true);
   });
 });
@@ -127,7 +127,7 @@ describe('evaluateNode — enableWhen single condition', () => {
     };
     _values['q0'] = false;
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.visible).toBe(false);
   });
 
@@ -139,7 +139,7 @@ describe('evaluateNode — enableWhen single condition', () => {
     };
     _values['q0'] = true;
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.visible).toBe(true);
   });
 
@@ -151,7 +151,7 @@ describe('evaluateNode — enableWhen single condition', () => {
     };
     _values['q0'] = 'female';
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.visible).toBe(false);
   });
 
@@ -163,7 +163,7 @@ describe('evaluateNode — enableWhen single condition', () => {
     };
     _values['q0'] = 'male';
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.visible).toBe(true);
   });
 
@@ -174,7 +174,7 @@ describe('evaluateNode — enableWhen single condition', () => {
       enableBehavior: 'all', enableWhenExpression: '',
     };
     _values['q0'] = 'yes';
-    const r = evaluateNode(node, {}, []);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, []);
     expect(r.visible).toBe(true);
   });
 
@@ -185,9 +185,9 @@ describe('evaluateNode — enableWhen single condition', () => {
       enableBehavior: 'all', enableWhenExpression: '',
     };
     _values['age'] = '20';
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
     _values['age'] = '15';
-    expect(evaluateNode(node, {}, []).visible).toBe(false);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(false);
   });
 
   it('handles exists:true operator', () => {
@@ -197,9 +197,9 @@ describe('evaluateNode — enableWhen single condition', () => {
       enableBehavior: 'all', enableWhenExpression: '',
     };
     _values['q0'] = 'something';
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
     delete _values['q0'];
-    expect(evaluateNode(node, {}, []).visible).toBe(false);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(false);
   });
 
   it('handles exists:false operator', () => {
@@ -209,9 +209,9 @@ describe('evaluateNode — enableWhen single condition', () => {
       enableBehavior: 'all', enableWhenExpression: '',
     };
     delete _values['q0'];
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
     _values['q0'] = 'something';
-    expect(evaluateNode(node, {}, []).visible).toBe(false);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(false);
   });
 
   it('matches a single checklist selection whose code contains a comma', () => {
@@ -221,7 +221,7 @@ describe('evaluateNode — enableWhen single condition', () => {
       enableBehavior: 'all', enableWhenExpression: '',
     };
     _values['q0'] = 'cough\u001Fdry'; // stored form of the single code "cough,dry"
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
   });
 
   it('a raw single-select code containing a comma still matches exactly', () => {
@@ -231,7 +231,7 @@ describe('evaluateNode — enableWhen single condition', () => {
       enableBehavior: 'all', enableWhenExpression: '',
     };
     _values['q0'] = 'a,b';
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
   });
 
   it('handles answerCoding by code', () => {
@@ -241,9 +241,9 @@ describe('evaluateNode — enableWhen single condition', () => {
       enableBehavior: 'all', enableWhenExpression: '',
     };
     _values['q0'] = 'y';
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
     _values['q0'] = 'n';
-    expect(evaluateNode(node, {}, []).visible).toBe(false);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(false);
   });
 });
 
@@ -260,7 +260,7 @@ describe('evaluateNode — enableBehavior AND / OR', () => {
     };
     _values['q0'] = true;
     _values['q2'] = 'no';
-    expect(evaluateNode(node, {}, []).visible).toBe(false);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(false);
   });
 
   it('ALL (AND): shows when all conditions met', () => {
@@ -274,7 +274,7 @@ describe('evaluateNode — enableBehavior AND / OR', () => {
     };
     _values['q0'] = true;
     _values['q2'] = 'yes';
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
   });
 
   it('ANY (OR): shows when any one condition met', () => {
@@ -288,7 +288,7 @@ describe('evaluateNode — enableBehavior AND / OR', () => {
     };
     _values['q0'] = false;
     _values['q2'] = 'yes';
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
   });
 
   it('ANY (OR): hides when no condition met', () => {
@@ -302,7 +302,7 @@ describe('evaluateNode — enableBehavior AND / OR', () => {
     };
     _values['q0'] = false;
     _values['q2'] = 'no';
-    expect(evaluateNode(node, {}, []).visible).toBe(false);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(false);
   });
 });
 
@@ -317,7 +317,7 @@ describe('evaluateNode — showDimmed', () => {
     };
     _values['q0'] = false;
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.visible).toBe(false);
     expect(r.showDimmed).toBe(true);
     expect(results[0].showDimmed).toBe(true);
@@ -329,7 +329,7 @@ describe('evaluateNode — showDimmed', () => {
       enableWhen: [], enableBehavior: 'all', enableWhenExpression: '',
     };
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.visible).toBe(true);
     expect(r.showDimmed).toBeUndefined();
   });
@@ -347,7 +347,7 @@ describe('evaluateNode — group', () => {
       ],
     };
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.visible).toBe(true);
     expect(results).toHaveLength(3); // group + 2 children
   });
@@ -362,7 +362,7 @@ describe('evaluateNode — group', () => {
     };
     _values['q0'] = false;
     const results = [];
-    const r = evaluateNode(node, {}, results);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, results);
     expect(r.visible).toBe(false);
     expect(r.showDimmed).toBe(true);
     // children also pushed as disabled
@@ -378,7 +378,7 @@ describe('evaluateNode — group', () => {
         { id: 'c2', type: 'item', mandatory: false, enableWhen: [], enableWhenExpression: '' },
       ],
     };
-    const r = evaluateNode(node, {}, []);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, []);
     // c1 is item → ok:true from evaluateNode (form-value checks are separate)
     expect(r.visible).toBe(true);
   });
@@ -392,7 +392,7 @@ describe('evaluateNode — group', () => {
         { id: 'c1', type: 'item', mandatory: false, enableWhen: [], enableWhenExpression: '' },
       ],
     };
-    const r = evaluateNode(node, {}, []);
+    const r = evaluateNode(node, { answerStore: _mockAnswerStore }, []);
     expect(r.visible).toBe(true);
   });
 });
@@ -405,7 +405,7 @@ describe('evaluateNode — enableWhen with repeat values', () => {
       enableWhen: [{ question: 'q1', operator: '=', answerString: 'yes' }],
       enableBehavior: 'all', enableWhenExpression: '',
     };
-    expect(evaluateNode(node, {}, []).visible).toBe(false);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(false);
   });
 
   it('visible when condition met by primary value', () => {
@@ -415,7 +415,7 @@ describe('evaluateNode — enableWhen with repeat values', () => {
       enableBehavior: 'all', enableWhenExpression: '',
     };
     _values['q1'] = 'yes';
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
   });
 
   it('visible when condition met by a repeat row (not primary)', () => {
@@ -427,7 +427,7 @@ describe('evaluateNode — enableWhen with repeat values', () => {
     _values['q1'] = 'no';       // primary does not satisfy
     _values['q1$$n'] = 1;
     _values['q1$$1'] = 'yes';   // repeat row satisfies
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
   });
 
   it('hidden when no repeat row satisfies condition', () => {
@@ -440,7 +440,7 @@ describe('evaluateNode — enableWhen with repeat values', () => {
     _values['q1$$n'] = 2;
     _values['q1$$1'] = 'maybe';
     _values['q1$$2'] = 'no';
-    expect(evaluateNode(node, {}, []).visible).toBe(false);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(false);
   });
 
   it('exists:true satisfied by any repeat row', () => {
@@ -452,7 +452,7 @@ describe('evaluateNode — enableWhen with repeat values', () => {
     // primary not set, but repeat row is
     _values['q1$$n'] = 1;
     _values['q1$$1'] = 'something';
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
   });
 });
 
@@ -506,7 +506,7 @@ describe('evaluateNode — enableWhen answerQuantity', () => {
       enableBehavior: 'all', enableWhenExpression: '',
     };
     _values['weight'] = { value: 120, unit: 'kg' };
-    expect(evaluateNode(node, {}, []).visible).toBe(true);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(true);
   });
 
   it('hides item when quantity answer is below threshold', () => {
@@ -516,7 +516,7 @@ describe('evaluateNode — enableWhen answerQuantity', () => {
       enableBehavior: 'all', enableWhenExpression: '',
     };
     _values['weight'] = { value: 80, unit: 'kg' };
-    expect(evaluateNode(node, {}, []).visible).toBe(false);
+    expect(evaluateNode(node, { answerStore: _mockAnswerStore }, []).visible).toBe(false);
   });
 });
 

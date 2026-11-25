@@ -11,7 +11,7 @@ import { showWarn } from '../ui/toast.js';
 import { versionCompatRegistry } from '../fhir/version-compat-registry.js';
 import { numberingService } from './numbering-service.js';
 import { findAndRemove } from '../utils.js';
-import { ConfirmDialog } from '../ui/confirm-dialog.js';
+import { deleteConfirmModal } from '../ui/modals/delete-confirm-modal.js';
 import * as progress from '../ui/progress.js';
 import { RenumberControl } from '../ui/renumber-control.js';
 import { dropStaleCards } from './builder-helpers.js';
@@ -164,7 +164,7 @@ export class BuilderPanel {
   _subscribeEvents() {
     document.addEventListener(AppEvents.NODE_DELETE_REQUESTED, async e => {
       const { id, label } = e.detail;
-      const ok = await ConfirmDialog.show(label);
+      const ok = (await deleteConfirmModal.ask(label)) === 'delete';
       if (ok) {
         findAndRemove(id, this._tree);
         this._calcCache = null;  // node removed — dep-graph stale
