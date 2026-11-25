@@ -74,7 +74,8 @@ describe('check my form', () => {
     const names = fs.readdirSync(DIR).filter((f) => f.endsWith('.template.json')).map((f) => f.replace('.template.json', ''));
     const lines = [];
     for (const name of names) {
-      const { calcs } = await run(read(name));
+      const { calcs, unshown } = await run(read(name));
+      for (const u of unshown) lines.push(`${name}/${u.id}: never shown`);
       for (const c of calcs) if (c.status === 'unreachable' || c.status === 'no-result') lines.push(`${name}/${c.id}: ${c.status} ${c.missed ?? ''}`);
     }
     expect(lines).toEqual([]);

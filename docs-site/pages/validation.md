@@ -60,6 +60,7 @@ unanswered, and so on) on every calculation in the form. It then lists:
 - **Some results can never appear** — the text results (such as "Moderate depression") that
   the calculation is written to give but that no combination of answers produces. Fix the
   thresholds or conditions of that calculation.
+- **Never shown** — a question whose Show When rule none of the tried answers satisfies, so nobody could answer it. Check the rule.
 - **Never produces a result** — no combination of answers gives the calculation a value.
 - **Not checked** — the calculation reads a question that cannot be tried automatically,
   such as a number with no minimum and maximum, or a date. Setting a minimum and maximum
@@ -68,10 +69,36 @@ unanswered, and so on) on every calculation in the form. It then lists:
 Each row has a ↗ button that jumps to the calculation in the builder. **Open full report** opens a separate page with the questionnaire that was checked (JSON, collapsed), a summary per calculation with its formula, and one table of every answer combination that was tried: a row per combination, the answers given, and a column with the result of each calculated field. Use **Print summary** to keep a short printed report (per calculation: verdict, formula, the results that appeared and the ones that never did); the long table of answer combinations and the questionnaire JSON stay on screen so a large form still prints. **Download answer sets (CSV)** gives every answer of every combination, with a column per calculation, for a spreadsheet. The check runs
 entirely in your browser and changes nothing in the questionnaire.
 
+### Example: the PHQ-9 depression questionnaire
+
+Load the **PHQ-9** template (Add ▾ → templates). It has two calculated fields: *PHQ-9 total score*
+(the sum of the nine answers) and *Depression severity* (a text chosen from the total). Check my form
+reports "All 2 calculations behave as expected". The full report's table of answer combinations
+includes rows such as these (the answers column is shortened here):
+
+| Answers | PHQ-9 total score | Depression severity |
+|---------|-------------------|---------------------|
+| no answers | — | — |
+| every question "Not at all" | 0 | Minimal depression |
+| every question "Nearly every day" | 27 | Severe depression |
+| the first question "Nearly every day", the rest "Not at all" | 3 | Minimal depression |
+| the first two questions "Nearly every day", the rest "Not at all" | 6 | Mild depression |
+| the first question left unanswered, the rest "Not at all" | — | — |
+
+A dash means the calculation gave no result: the total is only worked out when all nine questions are
+answered. The whole table, a few dozen combinations in all, reaches every band up to
+"Moderately severe depression".
+
+Now suppose the threshold for "Moderate depression" is mistyped, so the formula reads `< 10` where it
+should read `< 15`. The report then shows, for *Depression severity*, "Some results can never appear"
+and the line **Never appeared: "Moderate depression" — given when PHQ-9 total score < 10**: every total
+below 10 is already caught by the "Mild depression" condition above it, so that band can never be reached.
+The table of combinations has no row with "Moderate depression".
+
 Treat the list as a pointer to review, not a verdict:
 
 - It only looks at questions outside repeating groups.
-- It ignores Show When rules, so an answer to a hidden question is still tried.
+- It follows Show When rules: an answer to a question that is switched off is left out, as a person could not give it. A rule that reads a question it cannot try (a number without a minimum and maximum, or a date) is not judged.
 - It reads the results a calculation is written to give from its `iif(...)` branches, so a
   result produced another way is not checked.
 - On a very large form not every combination is tried, and the list says so.

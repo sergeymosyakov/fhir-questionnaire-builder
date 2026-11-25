@@ -54,6 +54,15 @@ function renderSource(questionnaire) {
   return box;
 }
 
+function renderUnshown(unshown) {
+  const box = el('section', 'check-report-calc check-report-calc--unreachable', null, 'check-report-unshown');
+  box.append(el('h2', 'check-report-calc-title', 'Questions that are never shown'), el('p', 'check-report-note', 'Their Show When rule is not met by any of the answers tried, so nobody can answer them.'));
+  const list = el('ul', 'check-report-answers');
+  unshown.forEach((u) => list.append(el('li', null, `${u.title} — shown when ${u.when}`)));
+  box.append(list);
+  return box;
+}
+
 function renderTrials(report) {
   const wrap = el('section', 'check-report-trials-wrap');
   wrap.append(el('h2', 'check-report-calc-title', 'All answer sets tried'));
@@ -89,12 +98,13 @@ function renderTrials(report) {
 function render(report) {
   const root = document.getElementById('checkReportRoot');
   root.innerHTML = '';
-  const bad = report.calcs.filter((c) => c.status === 'unreachable' || c.status === 'no-result').length;
+  const bad = report.calcs.filter((c) => c.status === 'unreachable' || c.status === 'no-result').length + (report.unshown?.length ?? 0);
   root.append(
     el('h2', 'check-report-form', report.title),
-    el('p', 'check-report-summary', `${report.calcs.length} calculations, ${report.scenarios} answer combinations tried${report.truncated ? ' (a very large form, so not all were)' : ''}; ${bad ? `${bad} need attention` : 'no problems found'}. ${new Date(report.when).toLocaleString()}`, 'check-report-summary'),
+    el('p', 'check-report-summary', `${report.calcs.length} calculations, ${report.scenarios} answer combinations tried${report.truncated ? ' (a very large form, so not all were)' : ''}; ${bad ? `${bad} need attention (calculations and questions that are never shown)` : 'no problems found'}. ${new Date(report.when).toLocaleString()}`, 'check-report-summary'),
   );
   if (report.questionnaire) root.append(renderSource(report.questionnaire));
+  if (report.unshown?.length) root.append(renderUnshown(report.unshown));
   report.calcs.forEach((c) => root.append(renderCalc(c)));
   root.append(renderTrials(report));
 }

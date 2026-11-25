@@ -29,6 +29,52 @@ describe('collectInputs', () => {
   });
 });
 
+const showWhen = (node, question, code) => ({ ...node, enableWhen: [{ question, operator: '=', answerCoding: { code } }], enableBehavior: 'all' });
+
+describe('Show When', () => {
+  const hit = (q2) => calc('c', `iif(${ref(q2)} = 'x', 'Hit', 'Miss')`);
+
+  it('keeps a result that is reachable through a question that gets enabled', async () => {
+    const tree = [choice('q1', 'a', 'b'), showWhen(choice('q2', 'x', 'y'), 'q1', 'b'), hit('q2')];
+    const { calcs, unshown } = await run(tree);
+    expect(calcs[0].status).toBe('ok');
+    expect(unshown).toEqual([]);
+  });
+
+  it('drops the answer of a question that stays disabled, and reports the result and the question', async () => {
+    const tree = [choice('q1', 'a', 'b'), showWhen(choice('q2', 'x', 'y'), 'q1', 'zz'), hit('q2')];
+    const { calcs, unshown, trials } = await run(tree);
+    expect(calcs[0]).toMatchObject({ status: 'unreachable', missed: ['Hit'] });
+    expect(unshown).toEqual([{ id: 'q2', title: 'q2', when: 'q1 = zz' }]);
+    expect(trials.every((t) => !('q2' in t.answers))).toBe(true);
+  });
+
+  it('does not call a question never shown when the rule reads something the check cannot try', async () => {
+    const tree = [{ id: 'n', type: 'item', itemType: 'integer', children: [] }, showWhen(choice('q2', 'x'), 'n', '5'), hit('q2')];
+    expect((await run(tree)).unshown).toEqual([]);
+  });
+});
+
+describe('Show When edge cases', () => {
+  it('tries the number a rule compares with, not only the bounds and the middle', async () => {
+    const age = { id: 'age', type: 'item', itemType: 'integer', _minValue: 0, _maxValue: 120, children: [] };
+    const adult = { ...choice('q2', 'x'), enableWhen: [{ question: 'age', operator: '=', answerInteger: 18 }], enableBehavior: 'all' };
+    expect((await run([age, adult])).unshown).toEqual([]);
+  });
+
+  it('tries the neighbour of a number a strict rule compares with', async () => {
+    const age = { id: 'age', type: 'item', itemType: 'integer', _minValue: 0, _maxValue: 120, children: [] };
+    const ew = (operator, answerInteger) => ({ question: 'age', operator, answerInteger });
+    const window = { ...choice('q2', 'x'), enableWhen: [ew('>', 10), ew('<', 12)], enableBehavior: 'all' };
+    expect((await run([age, window])).unshown).toEqual([]);
+  });
+
+  it('does not judge a question inside a repeating group', async () => {
+    const group = { id: 'g', type: 'group', repeats: true, children: [showWhen(choice('x', 'p'), 'q1', 'a')] };
+    expect((await run([choice('q1', 'a', 'b'), group])).unshown).toEqual([]);
+  });
+});
+
 describe('buildScenarios', () => {
   it('covers the last questions of a large form, not only the first', () => {
     const many = Array.from({ length: 60 }, (_, i) => collectInputs([choice(`q${i}`, 'x', 'y')])[0]);
