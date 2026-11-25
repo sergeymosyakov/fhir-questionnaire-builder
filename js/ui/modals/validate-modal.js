@@ -31,6 +31,7 @@ class ValidateModal extends Modal {
   close() {
     const dismiss = this._onDismiss;
     this._onDismiss = null;
+    this._run = null;
     super.close();
     dismiss?.();
   }
@@ -43,6 +44,7 @@ class ValidateModal extends Modal {
   show(title, mode, { questJson = null, tree = [], values = {}, onExport = null, extraIssues = [], validatorFilter = null, onDismiss = null } = {}) {
     this._onExport = onExport;
     this._onDismiss = onDismiss;
+    this._run = null;
     // Advisory validators (e.g. audit) only run in the explicit 'validate' mode —
     // composed the same way as validatorFilter, no per-validator special-casing here.
     const _modeFilter = mode === 'validate' ? null : (v => !v.advisory);
@@ -54,11 +56,13 @@ class ValidateModal extends Modal {
       // Run all validators first (disabled ones return [] automatically).
       // Only open the modal if there are actual issues to show.
       const activeValidators = validatorRegistry.getAll().filter(_filter);
+      const exportRun = (this._run = {});
       Promise.all(activeValidators.map(v =>
         v.run(questJson, tree, values)
           .then(issues => ({ validator: v, issues, error: null }))
           .catch(error => ({ validator: v, issues: [], error }))
       )).then(results => {
+        if (this._run !== exportRun) return;
         const allIssues = results.flatMap(r => r.issues);
         if (allIssues.length === 0 && extraIssues.length === 0) {
           this._onDismiss = null;
@@ -99,14 +103,17 @@ class ValidateModal extends Modal {
     let hasErrors = false;
     let hasIssues = false;
     let done = 0;
+    const run = (this._run = {}); // a reopened modal drops the results of the earlier run
     validators.forEach((v, i) => {
       v.run(questJson, tree, values)
         .then(issues => {
+          if (this._run !== run) return;
           if (issues.length > 0) hasIssues = true;
           if (issues.some(iss => iss.severity === 'error')) hasErrors = true;
           this._fillSection(sectionEls[i], issues, null);
         })
         .catch(err => {
+          if (this._run !== run) return;
           // A validator that failed to run is not "All good" — flag it so the
           // title/footer stay honest instead of appending "— All good".
           hasErrors = true;
@@ -114,6 +121,7 @@ class ValidateModal extends Modal {
           this._fillSection(sectionEls[i], [], err);
         })
         .finally(() => {
+          if (this._run !== run) return;
           done++;
           if (done === validators.length) this._updateFooter(mode, hasErrors, hasIssues);
         });

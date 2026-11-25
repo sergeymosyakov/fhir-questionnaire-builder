@@ -112,6 +112,17 @@ describe('refreshAccessToken', () => {
     expect(getStoredToken('FHIR_BASE').refreshToken).toBe('new-refresh');
   });
 
+  it('sends one request when several calls renew at the same time', async () => {
+    localStorage.setItem('fhirqb.oauthToken.FHIR_BASE.accessToken', 'old');
+    localStorage.setItem('fhirqb.oauthToken.FHIR_BASE.expiresAt', String(Date.now() - 1));
+    localStorage.setItem('fhirqb.oauthToken.FHIR_BASE.refreshToken', 'r');
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ access_token: 'a', refresh_token: 'r2', expires_in: 3600 }) });
+    vi.stubGlobal('fetch', fetchMock);
+    const tokens = await Promise.all([refreshAccessToken('FHIR_BASE'), refreshAccessToken('FHIR_BASE'), refreshAccessToken('FHIR_BASE')]);
+    expect(tokens).toEqual(['a', 'a', 'a']);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('keeps the old refresh token if the server does not rotate it', async () => {
     localStorage.setItem('fhirqb.oauthToken.FHIR_BASE.accessToken', 'old-access');
     localStorage.setItem('fhirqb.oauthToken.FHIR_BASE.expiresAt', String(Date.now() - 1));

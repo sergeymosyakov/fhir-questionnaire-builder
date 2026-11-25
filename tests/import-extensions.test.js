@@ -838,3 +838,17 @@ describe('import versionAlgorithm / copyrightLabel', () => {
     expect(_questMeta.copyrightLabel).toBe('');
   });
 });
+
+describe('importFHIR — malformed item lists', () => {
+  it.each([
+    ['a null entry', [null]],
+    ['a non-list item', { linkId: 'x' }],
+    ['a nested null entry', [{ linkId: 'g', type: 'group', item: [42] }]],
+  ])('refuses %s and keeps the open form', (_label, item) => {
+    _tree.push({ id: 'keep', type: 'item', children: [] });
+    try {
+      expect(importFHIR({ resourceType: 'Questionnaire', title: 'Bad', item })).toBe(false);
+      expect(_tree.map((n) => n.id)).toEqual(['keep']);
+    } finally { _tree.length = 0; }
+  });
+});

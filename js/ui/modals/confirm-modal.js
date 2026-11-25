@@ -23,6 +23,7 @@ class ConfirmModal extends Modal {
     if (this.applyBtn)  this.applyBtn.textContent  = okLabel;
     if (this.cancelBtn) this.cancelBtn.textContent = cancelLabel;
 
+    this._resolve?.('cancel'); // a second request must not leave the first one waiting forever
     return new Promise(resolve => {
       this._resolve = resolve;
       super.open();

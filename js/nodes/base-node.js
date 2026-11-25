@@ -106,7 +106,7 @@ export class BaseNode {
   }
 
   /** Abort all document listeners owned by this node. */
-  destroy() { this._ac?.abort(); this._navAbort?.abort(); }
+  destroy() { this._ac?.abort(); this._navAbort?.abort(); this._cardAc?.abort(); this._staleAcs?.forEach(ac => ac.abort()); }
 
   /**
    * Apply a patch object to this node.

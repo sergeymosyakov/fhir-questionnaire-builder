@@ -8,6 +8,20 @@ import { NODE_REGISTRY } from '../nodes/registry.js';
 
 const _notify = () => document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 
+// Each build of a node's card gets a fresh signal; the previous card's listeners stop once its replacement is on screen (dropStaleCards).
+export function cardSignal(node) {
+  if (node._cardAc) (node._staleAcs ||= []).push(node._cardAc);
+  node._cardAc = new AbortController();
+  return node._cardAc.signal;
+}
+
+export function dropStaleCards(nodes) {
+  for (const n of nodes || []) {
+    n._staleAcs?.splice(0).forEach(ac => ac.abort());
+    dropStaleCards(n.children);
+  }
+}
+
 /**
  * Populate a NodeGearMenu with Copy / Paste before / Paste after items.
  * Paste items are shown disabled (greyed) when the clipboard is empty and
@@ -15,8 +29,9 @@ const _notify = () => document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_
  * @param {import('../ui/node-gear-menu.js').NodeGearMenu} gear
  * @param {object} node          node instance (needs .id and ._ac.signal)
  * @param {boolean} hasClip      initial clipboard state (BaseNode._hasClipboard)
+ * @param {AbortSignal} [signal] ends the clipboard listener with the card
  */
-export function addCopyPasteGearItems(gear, node, hasClip) {
+export function addCopyPasteGearItems(gear, node, hasClip, signal = node._ac.signal) {
   gear.addItem('Copy', 'node-copy-btn', () =>
     document.dispatchEvent(new CustomEvent(AppEvents.NODE_COPY_REQUESTED, { detail: { id: node.id } })));
   const pb = gear.addItem('Paste before', 'node-paste-before-btn', () =>
@@ -29,7 +44,7 @@ export function addCopyPasteGearItems(gear, node, hasClip) {
     const dis = !e.detail.hasClip;
     pb.classList.toggle('node-gear-menu-item--disabled', dis);
     pa.classList.toggle('node-gear-menu-item--disabled', dis);
-  }, { signal: node._ac.signal });
+  }, { signal });
 }
 
 /** Returns a <div class="node-title-row"> with a click-to-edit title field. */
@@ -111,7 +126,7 @@ export function applyMetaLabelTips(idLbl, prefixLbl) {  idLbl.dataset.tipTitle =
  * @param {import('../ui/node-gear-menu.js').NodeGearMenu} gear
  * @param {object} node   node instance (needs ._ac.signal for cleanup)
  */
-export function addMetaRowGearItem(gear, node) {
+export function addMetaRowGearItem(gear, node, signal = node._ac.signal) {
   const isVisible = () => EventState.get(AppEvents.BUILDER_META_ROW_CHANGE)?.visible ?? true;
   const mi = gear.addCheckItem('Show properties', 'toggle-node-props', isVisible(), () => {
     document.dispatchEvent(new CustomEvent(AppEvents.BUILDER_META_ROW_CHANGE,
@@ -119,7 +134,7 @@ export function addMetaRowGearItem(gear, node) {
   });
   document.addEventListener(AppEvents.BUILDER_META_ROW_CHANGE, e => {
     mi.classList.toggle('node-gear-menu-item--checked', e.detail?.visible ?? true);
-  }, { signal: node._ac.signal });
+  }, { signal });
 }
 
 /**

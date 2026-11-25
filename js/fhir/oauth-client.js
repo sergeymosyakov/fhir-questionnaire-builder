@@ -186,8 +186,17 @@ export async function startLogin(serverKey) {
   });
 }
 
+const _refreshing = new Map(); // serverKey → the renewal in flight: a rotated refresh token can be used once
+
 /** Silent renewal via refresh_token. Throws if there's no refresh token or the call fails. */
-export async function refreshAccessToken(serverKey) {
+export function refreshAccessToken(serverKey) {
+  if (!_refreshing.has(serverKey)) {
+    _refreshing.set(serverKey, _refresh(serverKey).finally(() => _refreshing.delete(serverKey)));
+  }
+  return _refreshing.get(serverKey);
+}
+
+async function _refresh(serverKey) {
   const cfg    = _oauthConfig(serverKey);
   const stored = getStoredToken(serverKey);
   if (!cfg || !stored?.refreshToken) throw new Error('no-refresh-token');
