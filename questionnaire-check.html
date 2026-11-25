@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Check Report — FHIR Questionnaire Builder</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/page-header.css">
+  <link rel="stylesheet" href="css/questionnaire-docs.css">
+  <link rel="stylesheet" href="css/check-report.css">
+</head>
+<body>
+  <div class="page-header qdoc-no-print">
+    <div class="page-header-bar">
+      <h1 class="page-header-title">Form Check Report</h1>
+      <div class="qdoc-actions">
+        <button type="button" class="qdoc-btn" data-testid="check-report-print-btn">&#x1F5A8;&#xFE0F; Print / Save as PDF</button>
+      </div>
+    </div>
+    <p class="page-header-subtitle">What the check calculated: for every calculation, each result that appeared with sample answers that give it, and the results that never appeared.</p>
+  </div>
+
+  <div id="checkReportRoot" class="qdoc-root" data-testid="check-report-root">
+    <p class="qdoc-empty" data-testid="check-report-empty">No report is available in this tab. Open it from the builder's Settings &#x25BE; &rarr; Check my form&hellip; window.</p>
+  </div>
+
+  <script type="module" src="js/check-report-page.js"></script>
+</body>
+</html>

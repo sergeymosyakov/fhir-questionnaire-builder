@@ -1,0 +1,37 @@
+/* ── Form Check Report ── */
+.check-report-form { margin: 0 0 4px; font-size: 1.2rem; }
+.check-report-summary { margin: 0 0 16px; color: #555; }
+.check-report-calc { margin-bottom: 14px; padding: 10px 12px; border-left: 4px solid #ccc; break-inside: avoid; }
+.check-report-calc--unreachable, .check-report-calc--no-result { border-left-color: #c0392b; }
+.check-report-calc--ok { border-left-color: #2e8b57; }
+.check-report-calc-title { margin: 0; font-size: 1.05rem; }
+.check-report-status, .check-report-note, .check-report-missed { margin: 4px 0; font-size: 0.9rem; overflow-wrap: anywhere; }
+.check-report-missed { color: #c0392b; }
+.check-report-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.check-report-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 0.85rem; }
+.check-report-none { color: #888; }
+.check-report-seen { margin: 4px 0; font-size: 0.9rem; overflow-wrap: anywhere; }
+.check-report-trials-wrap { margin-top: 20px; }
+.check-report-table th, .check-report-table td { border: 1px solid #ddd; padding: 4px 8px; text-align: left; vertical-align: top; }
+.check-report-table th { background: #f5f5f5; }
+
+.check-report-answers { margin: 2px 0 0; padding-left: 18px; }
+.check-report-answers li { margin: 0; }
+.check-report-more { margin-top: 2px; padding: 0; border: 0; background: none; color: var(--c-accent, #2563eb); font: inherit; cursor: pointer; }
+.check-report-more:hover { text-decoration: underline; }
+@media print {
+  .check-report-scroll { overflow: visible; }
+  .check-report-table { font-size: 0.7rem; table-layout: fixed; word-break: break-word; }
+  .check-report-table tr { break-inside: avoid; }
+  .check-report-json { max-height: none; white-space: pre-wrap; }
+  .check-report-extra[hidden] { display: list-item; }
+  .check-report-more { display: none; }
+}
+
+.check-report-source { margin: 0 0 16px; border: 1px solid #ddd; padding: 6px 10px; }
+.check-report-source > summary { cursor: pointer; font-weight: 600; }
+.check-report-json { margin: 8px 0 0; max-height: 420px; overflow: auto; font-size: 0.8rem; white-space: pre; -webkit-overflow-scrolling: touch; }
+
+.check-report-reads { margin: 4px 0; font-size: 0.9rem; }
+.check-report-reads > summary { cursor: pointer; }
+@media print { .check-report-reads:not([open]) > ul { display: block; } }
