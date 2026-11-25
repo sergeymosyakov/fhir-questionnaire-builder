@@ -32,12 +32,12 @@ export function createRenderCtx() {
     isMandatory:    null, // function(node) → bool
     calcFormOk:     null, // function(node) → bool
     hasEnforceableRule: null, // function(node) → bool
+    showsCheckIcon:     null, // function(node) → bool
     evalConstraints: null, // function(node, fp, qr, env) → bool
     getValue:       null, // function(id) → any
     getAll:         null, // function(id) → any[]  (all answers incl. repeat rows)
     set:            null, // function(id, v) — write a single answer (repeat rows)
     remove:         null, // function(id) — delete a single answer (repeat rows)
-    CHECKABLE_TYPES: null, // Set<string>
 
     // Repeating-group instance context (set during render):
     instancePath:   [],   // [{ id, idx }, …] — current repeating-group instance scope

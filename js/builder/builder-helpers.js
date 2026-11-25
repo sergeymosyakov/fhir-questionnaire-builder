@@ -59,9 +59,15 @@ export function buildInlineTitleEditor(node) {
   // name; role=button conveys that activating it opens the editor.
   titleDisplay.setAttribute('role', 'button');
   titleDisplay.textContent = node.title || '(no title)';
+  const tip = (el) => Object.assign(el.dataset, {
+    tipTitle: 'Question text', tipBody: 'The text shown to the person filling in the form. Click to edit.',
+    tipFhir: 'Questionnaire.item.text', tipSpec: 'R4',
+  });
+  tip(titleDisplay);
   const titleTextarea = document.createElement('textarea');
   titleTextarea.className = 'node-title-textarea';
   titleTextarea.dataset.testid = 'node-title-input';
+  tip(titleTextarea);
   titleTextarea.value = node.title;
   titleTextarea.style.display = 'none';
   titleTextarea.oninput = () => { node.title = titleTextarea.value; titleDisplay.textContent = titleTextarea.value || '(no title)'; _notify(); };

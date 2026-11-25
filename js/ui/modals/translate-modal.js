@@ -77,7 +77,7 @@ export class TranslateModal extends Modal {
     });
     sel.el.dataset.tipTitle = 'Target language';
     sel.el.dataset.tipBody  = 'Language to translate the questionnaire into.';
-    sel.el.dataset.tipFhir  = 'item._text.extension[translation].lang';
+    sel.el.dataset.tipFhir  = 'Questionnaire.item._text.extension[translation].lang';
     sel.el.dataset.tipSpec  = 'R4';
     row.appendChild(sel.el);
 

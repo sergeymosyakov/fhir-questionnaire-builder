@@ -108,7 +108,7 @@ class ConstraintModal extends Modal {
       hdr.appendChild(rmBtn);
       sevSel.el.dataset.tipTitle = 'Constraint severity';
       sevSel.el.dataset.tipBody  = '"error" prevents a valid QuestionnaireResponse submission; "warning" allows submission but shows a caution badge.';
-      sevSel.el.dataset.tipFhir  = 'questionnaire-constraint.extension[severity].valueCode';
+      sevSel.el.dataset.tipFhir  = 'Questionnaire.item.extension[questionnaire-constraint].extension[severity].valueCode';
       sevSel.el.dataset.tipSpec  = 'R4';
       card.appendChild(hdr);
 

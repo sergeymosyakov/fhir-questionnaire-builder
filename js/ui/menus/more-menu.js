@@ -76,7 +76,6 @@ export class MoreMenu extends DropdownMenu {
     this._undoItem.dataset.testid = 'undo-btn';
     this._undoItem.dataset.tipTitle = 'Undo';
     this._undoItem.dataset.tipBody  = 'Undo the last change (Ctrl+Z).';
-    this._undoItem.dataset.tipSpec  = 'Ctrl+Z';
     this._undoItem.innerHTML = '&#x21B6; Undo';
     this._undoItem.disabled = true;
     this._undoItem.addEventListener('click', () =>
@@ -90,7 +89,6 @@ export class MoreMenu extends DropdownMenu {
     this._redoItem.dataset.testid = 'redo-btn';
     this._redoItem.dataset.tipTitle = 'Redo';
     this._redoItem.dataset.tipBody  = 'Redo the last undone change (Ctrl+Y).';
-    this._redoItem.dataset.tipSpec  = 'Ctrl+Y';
     this._redoItem.innerHTML = '&#x21B7; Redo';
     this._redoItem.disabled = true;
     this._redoItem.addEventListener('click', () =>

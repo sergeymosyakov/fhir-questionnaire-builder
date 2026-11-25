@@ -225,7 +225,7 @@ export class GTableRenderer {
       ind.textContent  = '⚡';
       ind.dataset.tipTitle = 'Calculated column';
       ind.dataset.tipBody  = 'Values in this column are computed by: ' + ch._calculatedExpr;
-      ind.dataset.tipFhir  = 'sdc-questionnaire-calculatedExpression';
+      ind.dataset.tipFhir  = 'Questionnaire.item.extension[sdc-questionnaire-calculatedExpression].valueExpression';
       ind.dataset.tipSpec  = 'SDC';
       th.appendChild(ind);
     }

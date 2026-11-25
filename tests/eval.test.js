@@ -550,3 +550,11 @@ describe('compareValue — an unanswered quantity', () => {
     }
   });
 });
+
+describe('compareValue — exists on a quantity entered in part', () => {
+  it('is not an answer', () => {
+    expect(compareValue({ incomplete: true }, { operator: 'exists', answerBoolean: true })).toBe(false);
+    expect(compareValue({ incomplete: true }, { operator: 'exists', answerBoolean: false })).toBe(true);
+    expect(compareValue({ value: 5, unit: 'kg' }, { operator: 'exists', answerBoolean: true })).toBe(true);
+  });
+});

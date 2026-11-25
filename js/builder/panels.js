@@ -149,6 +149,10 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
     className: 'vis-behavior-sel sc-trigger--sm',
     onChange: v => { node.enableBehavior = v; },
   });
+  Object.assign(behaviorSel.el.dataset, {
+    tipTitle: 'ALL or ANY', tipBody: 'ALL: every condition must be met to show the question. ANY: one is enough.',
+    tipFhir: 'Questionnaire.item.enableBehavior', tipSpec: 'R4',
+  });
   behaviorRow.appendChild(behaviorSel.el);
   behaviorRow.appendChild(Object.assign(document.createElement('span'), { textContent: ' conditions are met:' }));
   p.appendChild(behaviorRow);
@@ -428,7 +432,7 @@ export function buildVisPanel(node, tree, p, visLink, setActive) {
   exprLblTxt.textContent = 'enableWhenExpression (SDC):';
   exprLblTxt.dataset.tipTitle = 'enableWhenExpression (SDC)';
   exprLblTxt.dataset.tipBody = 'A single FHIRPath expression, evaluated as the visibility condition. Alternative to the enableWhen rows above \u2014 ignored whenever any row exists there.';
-  exprLblTxt.dataset.tipFhir = 'sdc-questionnaire-enableWhenExpression';
+  exprLblTxt.dataset.tipFhir = 'Questionnaire.item.extension[sdc-questionnaire-enableWhenExpression].valueExpression';
   exprLblTxt.dataset.tipSpec = 'SDC';
   const exprIcon = document.createElement('span');
   exprIcon.className = 'expr-live-icon';

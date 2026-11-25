@@ -224,7 +224,7 @@ export class BaseNode {
     if (this.enableWhenExpression) {
       hint.dataset.tipTitle = 'Visibility condition';
       hint.dataset.tipBody  = 'Not met. FHIRPath: ' + this.enableWhenExpression + (rc.showExplain ? '\n\nClick to explain.' : '');
-      hint.dataset.tipFhir  = 'sdc-questionnaire-enableWhenExpression';
+      hint.dataset.tipFhir  = 'Questionnaire.item.extension[sdc-questionnaire-enableWhenExpression].valueExpression';
       hint.dataset.tipSpec  = 'SDC';
       if (rc.showExplain) {
         hint.classList.add('preview-condition-hint--explain');
@@ -328,7 +328,7 @@ export class BaseNode {
       b.textContent = 'HIDDEN';
       b.dataset.tipTitle = 'questionnaire-hidden';
       b.dataset.tipBody  = 'This item is permanently hidden from patients. It still participates in calculatedExpression logic. Controls are disabled in preview.';
-      b.dataset.tipFhir  = 'questionnaire-hidden';
+      b.dataset.tipFhir  = 'Questionnaire.item.extension[questionnaire-hidden].valueBoolean';
       b.dataset.tipSpec  = 'SDC';
       row.appendChild(b);
     }
@@ -529,7 +529,7 @@ export class BaseNode {
       if (this.enableWhenExpression) {
         hint.dataset.tipTitle = 'Visibility condition';
         hint.dataset.tipBody  = 'FHIRPath: ' + this.enableWhenExpression + (rc.showExplain ? '\n\nClick to explain.' : '');
-        hint.dataset.tipFhir  = 'sdc-questionnaire-enableWhenExpression';
+        hint.dataset.tipFhir  = 'Questionnaire.item.extension[sdc-questionnaire-enableWhenExpression].valueExpression';
         hint.dataset.tipSpec  = 'SDC';
         if (rc.showExplain) {
           hint.classList.add('preview-condition-hint--explain');

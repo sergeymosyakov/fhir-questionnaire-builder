@@ -62,18 +62,24 @@ export function refTypeMismatch(value, allowedType) {
   return !!t && t !== allowedType;
 }
 
+// Range, precision, length or pattern limits on the answer value.
+export const hasValueRule = (node) => node._minValue !== undefined || node._maxValue !== undefined ||
+  node._maxDecimalPlaces !== undefined || !!node._minLength || !!node._regex;
+
 // True when the node carries any rule that can make calcFormOk fail — the single
 // source for "does this item count toward a group's aggregate pass/fail".
 export function hasEnforceableRule(node) {
   return (isMandatory(node) && CHECKABLE_TYPES.has(node.itemType)) ||
     !!(node._calculatedExpr && node._readOnly && node.itemType === 'checkbox') ||
     node.constraint?.length > 0 ||
-    node._minValue !== undefined || node._maxValue !== undefined ||
-    node._maxDecimalPlaces !== undefined ||
-    !!node._minLength || !!node._regex ||
+    hasValueRule(node) ||
     (node.itemType === 'attachment' && node._maxFileSizeMB !== undefined) ||
     (node.itemType === 'reference' && !!node.referenceResource);
 }
+
+// Items that show a pass/fail icon of their own: the enforceable ones, plus a url (its format is always checked)
+// and a quantity (a value without a unit is wrong). An empty optional one still passes, so it is not group-relevant.
+export const showsCheckIcon = (node) => hasEnforceableRule(node) || node.itemType === 'url' || node.itemType === 'quantity';
 
 /**
  * Check whether a node's current answer satisfies all validation rules.
@@ -100,6 +106,7 @@ export function calcFormOk(node, store, path) {
     const val = store.get(node.id);
     return val === true || val === false;
   }
+  if (node.itemType === 'quantity' && store.get(node.id)?.incomplete) return false; // a value without a unit (or the reverse) is wrong, required or not
   if (node.itemType === 'url') {
     const val = store.get(node.id);
     if (!val || val === '') return !isMandatory(node);

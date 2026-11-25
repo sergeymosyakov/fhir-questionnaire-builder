@@ -162,8 +162,8 @@ export class GroupNode extends BaseNode {
         lb.dataset.tipBody = isOr
           ? 'Group is satisfied if at least one child item has a valid answer.\nStored in FHIR as a questionnaire-constraint with key e3a8c2f1\u2026:group-or.'
           : 'Group is satisfied only when all child items have valid answers.\nThis is the default FHIR behaviour \u2014 no extra constraint is generated.';
-        lb.dataset.tipFhir = isOr ? 'questionnaire-constraint (key: ITLH_NS:group-or)' : 'item.required (default AND)';
-        lb.dataset.tipSpec = 'R4';
+        lb.dataset.tipFhir = isOr ? 'Questionnaire.item.extension[questionnaire-constraint] (key: ITLH_NS:group-or)' : 'Questionnaire.item.required (default AND)';
+        lb.dataset.tipSpec = isOr ? 'SDC' : 'R4';
         body.appendChild(lb);
       }
     }
