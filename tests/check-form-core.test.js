@@ -25,7 +25,7 @@ describe('collectInputs', () => {
       calc('k', "'x'"),
       { id: 'g', type: 'group', repeats: true, children: [choice('inner', 'a')] },
     ];
-    expect(collectInputs(tree).map((i) => i.id)).toEqual(['c', 'yn', 'n1']);
+    expect(collectInputs(tree).map((i) => i.id)).toEqual(['c', 'yn', 'n1', 'n2']);
   });
 });
 
@@ -49,8 +49,14 @@ describe('Show When', () => {
     expect(trials.every((t) => !('q2' in t.answers))).toBe(true);
   });
 
-  it('does not call a question never shown when the rule reads something the check cannot try', async () => {
-    const tree = [{ id: 'n', type: 'item', itemType: 'integer', children: [] }, showWhen(choice('q2', 'x'), 'n', '5'), hit('q2')];
+  it('does not judge a rule that reads a number without limits', async () => {
+    const w = { id: 'w', type: 'item', itemType: 'integer', children: [] };
+    const more = { ...choice('q2', 'x'), enableWhen: [{ question: 'w', operator: '>', answerInteger: 120 }], enableBehavior: 'all' };
+    expect((await run([w, more])).unshown).toEqual([]);
+  });
+
+  it('does not call a question never shown when the rule reads a date the check cannot try', async () => {
+    const tree = [{ id: 'd', type: 'item', itemType: 'date', children: [] }, showWhen(choice('q2', 'x'), 'd', '2020-01-01'), hit('q2')];
     expect((await run(tree)).unshown).toEqual([]);
   });
 });
@@ -131,10 +137,35 @@ describe('checkForm', () => {
     expect(calcs.find((c) => c.id === 'flag')).toMatchObject({ status: 'ok', reached: ['false'] });
   });
 
-  it('skips a calculation that reads a number without limits', async () => {
-    const tree = [{ id: 'n', type: 'item', itemType: 'integer', children: [] }, calc('c', `iif(${ref('n', 'valueInteger')} > 5, 'High', 'Low')`)];
-    const { calcs } = await run(tree);
-    expect(calcs[0]).toMatchObject({ status: 'skipped' });
+  it('tries numbers 1-100 for a number without limits, and says so when a result is missed', async () => {
+    const n = { id: 'n', type: 'item', itemType: 'integer', title: 'Count', children: [] };
+    const { calcs } = await run([n, calc('c', `iif(${ref('n', 'valueInteger')} > 500, 'Huge', 'Low')`)]);
+    expect(calcs[0]).toMatchObject({ status: 'unreachable', missed: ['Huge'], sampled: ['Count (1–100)'] });
+  });
+
+  it('gives the same trials on every run and tries decimals as fractions', async () => {
+    const d = { id: 'd', type: 'item', itemType: 'decimal', children: [] };
+    const tree = [d, calc('c', `iif(${ref('d', 'valueDecimal')} > 50, 'Over', 'Under')`)];
+    const a = await run(tree);
+    expect((await run(tree)).trials).toEqual(a.trials);
+    expect(a.trials.some((t) => t.answers.d % 1 !== 0)).toBe(true);
+  });
+
+  it('keeps a whole number inside a fractional limit', () => {
+    expect(collectInputs([{ id: 'n', type: 'item', itemType: 'integer', _maxValue: 0.5, children: [] }])).toEqual([]);
+    const [i] = collectInputs([{ id: 'n', type: 'item', itemType: 'integer', _minValue: 0.5, _maxValue: 3.5, children: [] }]);
+    expect([i.lo, i.hi]).toEqual([1, 3]);
+  });
+
+  it('leaves a bounded number untouched', async () => {
+    const n = { id: 'n', type: 'item', itemType: 'integer', _minValue: 0, _maxValue: 10, children: [] };
+    expect((await run([n, calc('c', `iif(${ref('n', 'valueInteger')} > 5, 'High', 'Low')`)])).calcs[0].sampled).toEqual([]);
+  });
+
+  it('reaches a band that needs a matching pair of unbounded numbers', async () => {
+    const num = (id) => ({ id, type: 'item', itemType: 'integer', children: [] });
+    const expr = `iif(${ref('w', 'valueInteger')} > ${ref('h', 'valueInteger')} * 3, 'Heavy', 'Light')`;
+    expect((await run([num('w'), num('h'), calc('c', expr)])).calcs[0].status).toBe('ok');
   });
 
   it('reports progress from 0 up to the number of answer sets tried', async () => {

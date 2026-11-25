@@ -42,6 +42,7 @@ function renderCalc(c) {
     reads.append(sum, list);
     box.append(reads);
   }
+  if (c.sampled?.length) box.append(el('p', 'check-report-note', `Numbers without both limits were tried only in a range: ${c.sampled.join(', ')}.`, 'check-report-sampled'));
   if (c.reason) box.append(el('p', 'check-report-note', `Not checked: ${c.reason}.`));
   if (c.status !== 'skipped') box.append(el('p', 'check-report-seen', `Results seen: ${c.seen.join(', ')}`, 'check-report-seen'));
   for (const m of c.missed) box.append(el('p', 'check-report-missed', `Never appeared: “${m.text}” — given when ${m.when}`, 'check-report-missed'));

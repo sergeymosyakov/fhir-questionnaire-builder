@@ -14,7 +14,7 @@ export function buildReport({ tree, result, title, questionnaire = null }) {
     const seen = new Set(result.trials.map((t) => t.results[c.id] ?? NONE));
     return {
       id: c.id, title: c.title, status: c.status, reason: c.reason ?? null, expression: byId.get(c.id)?._calculatedExpr ?? '',
-      reads: c.reads.map(name), missed: c.details ?? [],
+      reads: c.reads.map(name), missed: c.details ?? [], sampled: c.sampled ?? [],
       seen: [...seen],
     };
   });
