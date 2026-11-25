@@ -47,10 +47,5 @@ export async function translateBatch(texts, targetLang, sourceLang = 'auto') {
 // SUPPORTED_LANGUAGES is the master language list from languages.js
 export const SUPPORTED_LANGUAGES = LANGUAGES_MAP;
 
-// Make accessible to preview-form language switcher (avoids circular import)
-if (typeof window !== 'undefined') {
-  window._translationModule = { SUPPORTED_LANGUAGES: LANGUAGES_MAP };
-}
-
 // UI_STRINGS lives in ui-strings.js (shared with render-ctx.js uiStr helper)
 export { UI_STRINGS } from './ui-strings.js';

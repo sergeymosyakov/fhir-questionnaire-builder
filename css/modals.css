@@ -388,32 +388,6 @@
   align-items: center;
   justify-content: center;
 }
-.clear-confirm-box {
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r);
-  padding: 24px 28px 20px;
-  min-width: 340px;
-  max-width: 440px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-}
-.clear-confirm-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--c-text);
-  margin-bottom: 8px;
-}
-.clear-confirm-msg {
-  font-size: 13px;
-  color: var(--c-text-2);
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-.clear-confirm-btns {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
 .btn-danger {
   background: #c62828;
   color: #fff;

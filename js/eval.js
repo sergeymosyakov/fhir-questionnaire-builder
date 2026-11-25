@@ -1,7 +1,6 @@
 // ── Tree evaluation: enableWhen visibility ───────────────────────────────────────
-// ctx: { fp, qr, envVars } — fhirpath + QuestionnaireResponse + variable env
-// (optional; needed only for enableWhenExpression FHIRPath evaluation)
-import { answerStore } from './answer-store.js';
+// ctx: { answerStore, fp, qr, envVars } — the answers read, fhirpath + QuestionnaireResponse + variable env
+// (fp, qr and envVars are needed only for enableWhenExpression)
 import { fhirModel } from './fhir/fhir-model.js';
 import { splitCodes } from './fhir/checklist-codec.js';
 import { isCoded } from './fhir/open-choice-value.js';
@@ -120,12 +119,12 @@ function checkOneEnableWhen(ew, path, store) {
 // 2. enableWhenExpression (SDC) — evaluate via FHIRPath
 // 3. Neither present → always visible
 function isNodeVisible(node, ctx, path) {
-  const store = ctx?.answerStore || answerStore;
+  const store = ctx.answerStore; // always the caller's store: a widget never reads the app's
   if (node.enableWhen && node.enableWhen.length) {
     const checks = node.enableWhen.map(ew => checkOneEnableWhen(ew, path, store));
     return node.enableBehavior === 'any' ? checks.some(Boolean) : checks.every(Boolean);
   }
-  if (node.enableWhenExpression && ctx && ctx.fp && ctx.qr) {
+  if (node.enableWhenExpression && ctx.fp && ctx.qr) {
     try {
       const env = { resource: ctx.qr, ...(ctx.envVars || {}) };
       const result = ctx.fp.evaluate(ctx.qr, node.enableWhenExpression, env, fhirModel());

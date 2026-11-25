@@ -51,7 +51,7 @@ See [context/file-manifest.md](context/file-manifest.md) for the full per-file r
 - **Playwright** — E2E test suite (Chromium); CI via GitHub Actions (`npx playwright test`)
 - **Dependency injection** — `dnd.js` receives callbacks from `BuilderPanel`; `_shared.js` is pure-function only (no injected state)
 - **Event-driven calc** — nodes/modals dispatch `CALC_RECALC_REQUESTED`; `BuilderPanel` listens and runs `evalCalcNodes` + dispatches `RESPONSE_CHANGED`
-- **Confirm dialog** — `ConfirmDialog.show(label)` in `js/ui/confirm-dialog.js` — no DI, standalone `Promise<boolean>`
+- **Confirm dialogs** — `ChoiceModal` (`js/ui/modals/choice-modal.js`) resolves with the id of the pressed button; `ConfirmModal`, `ClearConfirmModal`, `LoadConfirmModal` and `DeleteConfirmModal` (`deleteConfirmModal.ask(label)`) are instances of it
 - **`ctx` object** — `{ renderTree, renderNode, tree, collapsed }` passed down to renderers and panels
 - **Vitest** — unit test suite for pure-function modules; unit tests (Vitest); CI via GitHub Actions (`npm test`)
 - **GitHub Pages** — https://fhirbuilder.com/

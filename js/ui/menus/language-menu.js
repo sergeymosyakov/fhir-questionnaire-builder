@@ -10,6 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { AppEvents } from '../../events.js';
 import { DropdownMenu } from '../dropdown-menu.js';
+import { LANGUAGES_MAP } from '../../fhir/languages.js';
 
 export class LanguageMenu extends DropdownMenu {
   constructor() {
@@ -62,9 +63,8 @@ export class LanguageMenu extends DropdownMenu {
     this._addItem('', 'Original', 'lang-menu-item-original');
 
     // One item per translated language
-    const { SUPPORTED_LANGUAGES } = window._translationModule || {};
     for (const lang of langs) {
-      const label = SUPPORTED_LANGUAGES?.get(lang) || lang;
+      const label = LANGUAGES_MAP.get(lang) || lang;
       this._addItem(lang, label, `lang-menu-item-${lang}`);
     }
 
@@ -84,9 +84,8 @@ export class LanguageMenu extends DropdownMenu {
 
   _syncButton() {
     if (!this._btn) return;
-    const { SUPPORTED_LANGUAGES } = window._translationModule || {};
     const label = this._activeLang
-      ? (SUPPORTED_LANGUAGES?.get(this._activeLang) || this._activeLang)
+      ? (LANGUAGES_MAP.get(this._activeLang) || this._activeLang)
       : 'Original';
     // textContent, not innerHTML: label can be an attacker-controlled language
     // code from an imported FHIR file's translations object.
