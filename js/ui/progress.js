@@ -6,6 +6,8 @@
 //
 // init() looks up its DOM nodes by data-mount.
 
+import { AppEvents } from '../events.js';
+
 let _el  = null;
 let _op  = '';
 
@@ -47,5 +49,9 @@ export function hide() {
   _op = '';
 }
 
-// Self-initialize on import (DOM is ready; script is deferred)
-if (typeof document !== 'undefined') init();
+// Self-initialize on import (DOM is ready; script is deferred); loaders below the UI use the events
+if (typeof document !== 'undefined') {
+  init();
+  document.addEventListener(AppEvents.PROGRESS_SHOW, e => show(e.detail.label));
+  document.addEventListener(AppEvents.PROGRESS_HIDE, hide);
+}

@@ -1,5 +1,5 @@
 // ── FHIR R4 Questionnaire import ──────────────────────────────────────────────
-import { showError } from '../ui/toast.js';
+import { notifyError } from '../core/ui-requests.js';
 import { AppEvents, EventState } from '../events.js';
 import { defaultBus } from '../core/events/bus.js';
 import { normaliseSTU3, normaliseCodingTypes } from './stu3-shim.js';
@@ -75,18 +75,18 @@ export function importFHIR(fhirJson, opts = {}) {
   const { tree, meta: questMeta, variables: questVariables, contained: questContained } = questDoc;
   let q = fhirJson;
   if (typeof q === 'string') {
-    try { q = JSON.parse(q); } catch (e) { showError('Invalid JSON:\n' + e.message); return false; }
+    try { q = JSON.parse(q); } catch (e) { notifyError('Invalid JSON:\n' + e.message); return false; }
   }
   if (!q || q.resourceType !== 'Questionnaire') {
-    showError('Not a FHIR Questionnaire resource (resourceType must be "Questionnaire").');
+    notifyError('Not a FHIR Questionnaire resource (resourceType must be "Questionnaire").');
     return false;
   }
   if (exceedsItemDepth(q.item, MAX_ITEM_DEPTH)) {
-    showError(`Questionnaire items are nested deeper than ${MAX_ITEM_DEPTH} levels.`);
+    notifyError(`Questionnaire items are nested deeper than ${MAX_ITEM_DEPTH} levels.`);
     return false;
   }
   if (hasMalformedItems(q.item)) {
-    showError('Questionnaire "item" must be a list of objects.');
+    notifyError('Questionnaire "item" must be a list of objects.');
     return false;
   }
   q = normaliseSTU3(q); // no-op for R4; converts STU3 fields to R4 equivalents

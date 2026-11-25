@@ -54,7 +54,7 @@ EventState._set(AppEvents.APP_CONTEXT_READY, { questDoc: _questDoc });
 vi.stubGlobal('alert', vi.fn());
 
 const _showErrorMock = vi.fn();
-vi.mock('../js/ui/toast.js', () => ({ showError: (...a) => _showErrorMock(...a), showWarn: vi.fn() }));
+vi.mock('../js/core/ui-requests.js', () => ({ notifyError: (...a) => _showErrorMock(...a) }));
 
 // ── fhirTypeToItemType ────────────────────────────────────────────────────────────
 describe('fhirTypeToItemType', () => {

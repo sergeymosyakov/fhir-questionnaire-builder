@@ -1,3 +1,5 @@
+import { AppEvents } from '../events.js';
+
 const CONF = {
   error: { title: 'Error',   icon: '!' },
   warn:  { title: 'Warning', icon: '!' },
@@ -90,6 +92,10 @@ export function showToast(message, type = 'error') {
 export const showError = msg => showToast(msg, 'error');
 export const showWarn  = msg => showToast(msg, 'warn');
 export const showInfo  = msg => showToast(msg, 'info');
+
+if (typeof document !== 'undefined') {
+  document.addEventListener(AppEvents.NOTIFY_REQUESTED, e => showToast(e.detail.message, e.detail.type));
+}
 
 /**
  * Show a prompt dialog (replaces window.prompt).

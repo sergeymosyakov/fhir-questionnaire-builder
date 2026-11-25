@@ -2,8 +2,7 @@
 // Orchestrates QuestionnaireResponse import: calls pure import logic, dispatches
 // events, builds validation issues, and triggers UI feedback.
 import { importQRAnswers } from './qr-import.js';
-import { showError } from '../ui/toast.js';
-import * as validateModal from '../ui/modals/validate-modal.js';
+import { notifyError, requestValidationReport } from '../core/ui-requests.js';
 import { AppEvents, EventState } from '../events.js';
 
 export class QRAnswersManager {
@@ -35,7 +34,7 @@ export class QRAnswersManager {
   apply(qr) {
     const values = this._answerStore.toValueMap();
     const result = importQRAnswers(qr, values, this._tree);
-    if (!result.ok) { showError('Cannot load answers: ' + result.error); return; }
+    if (!result.ok) { notifyError('Cannot load answers: ' + result.error); return; }
     this._answerStore.replaceAll(values, result.codings);
 
     document.dispatchEvent(new CustomEvent(AppEvents.QR_LOADED, { detail: {
@@ -75,7 +74,7 @@ export class QRAnswersManager {
     document.dispatchEvent(new CustomEvent(AppEvents.RESPONSE_CHANGED));
 
     if (issues.length > 0 && this._validateEnabled) {
-      validateModal.show('Load Answers — ' + result.loaded + ' loaded', 'import', { tree: this._tree, values: this._answerStore.toValueMap(), extraIssues: issues });
+      requestValidationReport('Load Answers — ' + result.loaded + ' loaded', 'import', { tree: this._tree, values: this._answerStore.toValueMap(), extraIssues: issues });
     }
   }
 }
